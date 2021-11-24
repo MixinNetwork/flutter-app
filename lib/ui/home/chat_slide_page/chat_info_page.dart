@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
-import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
@@ -39,15 +38,8 @@ class ChatInfoPage extends HookWidget {
     )!;
 
     final accountServer = context.accountServer;
-    final userParticipant = useStream<Participant?>(
-      useMemoized(
-        () => accountServer.database.participantDao
-            .participantById(conversationId, accountServer.userId)
-            .watchSingleOrNull(),
-        [conversationId, accountServer.userId],
-      ),
-      initialData: null,
-    ).data;
+
+    final userParticipant = conversation.participant;
 
     useEffect(() {
       if (conversation.isGroup == true) {
@@ -60,7 +52,7 @@ class ChatInfoPage extends HookWidget {
     final announcement = useStream<String?>(
             useMemoized(() => context.database.conversationDao
                 .announcement(conversationId)
-                .watchSingle()),
+                .watchSingleThrottle(kVerySlowThrottleDuration)),
             initialData: null)
         .data;
     if (!conversation.isLoaded) return const SizedBox();
@@ -470,9 +462,11 @@ class ConversationBio extends HookWidget {
       if (isGroup) {
         return database.conversationDao
             .announcement(conversationId)
-            .watchSingle();
+            .watchSingleThrottle(kVerySlowThrottleDuration);
       }
-      return database.userDao.biography(userId!).watchSingle();
+      return database.userDao
+          .biography(userId!)
+          .watchSingleThrottle(kVerySlowThrottleDuration);
     }, [
       conversationId,
       userId,

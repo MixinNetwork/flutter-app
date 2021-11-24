@@ -590,52 +590,64 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
       'conversation_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _ownerIdMeta = const VerificationMeta('ownerId');
   late final GeneratedColumn<String?> ownerId = GeneratedColumn<String?>(
       'owner_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _categoryMeta = const VerificationMeta('category');
   late final GeneratedColumnWithTypeConverter<ConversationCategory, String?>
       category = GeneratedColumn<String?>('category', aliasedName, true,
-              typeName: 'TEXT',
+              type: const StringType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<ConversationCategory>(Conversations.$converter0);
   final VerificationMeta _nameMeta = const VerificationMeta('name');
   late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
       'name', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _iconUrlMeta = const VerificationMeta('iconUrl');
   late final GeneratedColumn<String?> iconUrl = GeneratedColumn<String?>(
       'icon_url', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _announcementMeta =
       const VerificationMeta('announcement');
   late final GeneratedColumn<String?> announcement = GeneratedColumn<String?>(
       'announcement', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _codeUrlMeta = const VerificationMeta('codeUrl');
   late final GeneratedColumn<String?> codeUrl = GeneratedColumn<String?>(
       'code_url', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _payTypeMeta = const VerificationMeta('payType');
   late final GeneratedColumn<String?> payType = GeneratedColumn<String?>(
       'pay_type', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(Conversations.$converter1);
   final VerificationMeta _pinTimeMeta = const VerificationMeta('pinTime');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> pinTime =
       GeneratedColumn<int?>('pin_time', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(Conversations.$converter2);
@@ -643,13 +655,15 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
       const VerificationMeta('lastMessageId');
   late final GeneratedColumn<String?> lastMessageId = GeneratedColumn<String?>(
       'last_message_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _lastMessageCreatedAtMeta =
       const VerificationMeta('lastMessageCreatedAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?>
       lastMessageCreatedAt = GeneratedColumn<int?>(
               'last_message_created_at', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(Conversations.$converter3);
@@ -657,29 +671,33 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
       const VerificationMeta('lastReadMessageId');
   late final GeneratedColumn<String?> lastReadMessageId =
       GeneratedColumn<String?>('last_read_message_id', aliasedName, true,
-          typeName: 'TEXT',
+          type: const StringType(),
           requiredDuringInsert: false,
           $customConstraints: '');
   final VerificationMeta _unseenMessageCountMeta =
       const VerificationMeta('unseenMessageCount');
   late final GeneratedColumn<int?> unseenMessageCount = GeneratedColumn<int?>(
       'unseen_message_count', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _statusMeta = const VerificationMeta('status');
   late final GeneratedColumnWithTypeConverter<ConversationStatus, int?> status =
       GeneratedColumn<int?>('status', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<ConversationStatus>(Conversations.$converter4);
   final VerificationMeta _draftMeta = const VerificationMeta('draft');
   late final GeneratedColumn<String?> draft = GeneratedColumn<String?>(
       'draft', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> muteUntil =
       GeneratedColumn<int?>('mute_until', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(Conversations.$converter5);
@@ -962,19 +980,19 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _dataMeta = const VerificationMeta('data');
   late final GeneratedColumn<String?> data = GeneratedColumn<String?>(
       'data', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(FloodMessages.$converter0);
@@ -1373,57 +1391,65 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
   final VerificationMeta _jobIdMeta = const VerificationMeta('jobId');
   late final GeneratedColumn<String?> jobId = GeneratedColumn<String?>(
       'job_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _actionMeta = const VerificationMeta('action');
   late final GeneratedColumn<String?> action = GeneratedColumn<String?>(
       'action', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(Jobs.$converter0);
   final VerificationMeta _orderIdMeta = const VerificationMeta('orderId');
   late final GeneratedColumn<int?> orderId = GeneratedColumn<int?>(
       'order_id', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _priorityMeta = const VerificationMeta('priority');
   late final GeneratedColumn<int?> priority = GeneratedColumn<int?>(
       'priority', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _blazeMessageMeta =
       const VerificationMeta('blazeMessage');
   late final GeneratedColumn<String?> blazeMessage = GeneratedColumn<String?>(
       'blaze_message', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
       'conversation_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _resendMessageIdMeta =
       const VerificationMeta('resendMessageId');
   late final GeneratedColumn<String?> resendMessageId =
       GeneratedColumn<String?>('resend_message_id', aliasedName, true,
-          typeName: 'TEXT',
+          type: const StringType(),
           requiredDuringInsert: false,
           $customConstraints: '');
   final VerificationMeta _runCountMeta = const VerificationMeta('runCount');
   late final GeneratedColumn<int?> runCount = GeneratedColumn<int?>(
       'run_count', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
@@ -1681,20 +1707,22 @@ class MessageMentions extends Table
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
       'conversation_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _hasReadMeta = const VerificationMeta('hasRead');
   late final GeneratedColumn<bool?> hasRead = GeneratedColumn<bool?>(
       'has_read', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const BoolType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [messageId, conversationId, hasRead];
   @override
@@ -2699,102 +2727,124 @@ class Messages extends Table with TableInfo<Messages, Message> {
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
       'conversation_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _categoryMeta = const VerificationMeta('category');
   late final GeneratedColumn<String?> category = GeneratedColumn<String?>(
       'category', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _contentMeta = const VerificationMeta('content');
   late final GeneratedColumn<String?> content = GeneratedColumn<String?>(
       'content', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaUrlMeta = const VerificationMeta('mediaUrl');
   late final GeneratedColumn<String?> mediaUrl = GeneratedColumn<String?>(
       'media_url', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaMimeTypeMeta =
       const VerificationMeta('mediaMimeType');
   late final GeneratedColumn<String?> mediaMimeType = GeneratedColumn<String?>(
       'media_mime_type', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaSizeMeta = const VerificationMeta('mediaSize');
   late final GeneratedColumn<int?> mediaSize = GeneratedColumn<int?>(
       'media_size', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaDurationMeta =
       const VerificationMeta('mediaDuration');
   late final GeneratedColumn<String?> mediaDuration = GeneratedColumn<String?>(
       'media_duration', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaWidthMeta = const VerificationMeta('mediaWidth');
   late final GeneratedColumn<int?> mediaWidth = GeneratedColumn<int?>(
       'media_width', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaHeightMeta =
       const VerificationMeta('mediaHeight');
   late final GeneratedColumn<int?> mediaHeight = GeneratedColumn<int?>(
       'media_height', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaHashMeta = const VerificationMeta('mediaHash');
   late final GeneratedColumn<String?> mediaHash = GeneratedColumn<String?>(
       'media_hash', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _thumbImageMeta = const VerificationMeta('thumbImage');
   late final GeneratedColumn<String?> thumbImage = GeneratedColumn<String?>(
       'thumb_image', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaKeyMeta = const VerificationMeta('mediaKey');
   late final GeneratedColumn<String?> mediaKey = GeneratedColumn<String?>(
       'media_key', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaDigestMeta =
       const VerificationMeta('mediaDigest');
   late final GeneratedColumn<String?> mediaDigest = GeneratedColumn<String?>(
       'media_digest', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaStatusMeta =
       const VerificationMeta('mediaStatus');
   late final GeneratedColumnWithTypeConverter<MediaStatus, String?>
       mediaStatus = GeneratedColumn<String?>('media_status', aliasedName, true,
-              typeName: 'TEXT',
+              type: const StringType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<MediaStatus>(Messages.$converter0);
   final VerificationMeta _statusMeta = const VerificationMeta('status');
   late final GeneratedColumnWithTypeConverter<MessageStatus, String?> status =
       GeneratedColumn<String?>('status', aliasedName, false,
-              typeName: 'TEXT',
+              type: const StringType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<MessageStatus>(Messages.$converter1);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(Messages.$converter2);
   final VerificationMeta _actionMeta = const VerificationMeta('action');
   late final GeneratedColumnWithTypeConverter<MessageAction, String?> action =
       GeneratedColumn<String?>('action', aliasedName, true,
-              typeName: 'TEXT',
+              type: const StringType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<MessageAction>(Messages.$converter3);
@@ -2802,55 +2852,79 @@ class Messages extends Table with TableInfo<Messages, Message> {
       const VerificationMeta('participantId');
   late final GeneratedColumn<String?> participantId = GeneratedColumn<String?>(
       'participant_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _snapshotIdMeta = const VerificationMeta('snapshotId');
   late final GeneratedColumn<String?> snapshotId = GeneratedColumn<String?>(
       'snapshot_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _hyperlinkMeta = const VerificationMeta('hyperlink');
   late final GeneratedColumn<String?> hyperlink = GeneratedColumn<String?>(
       'hyperlink', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
   late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
       'name', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
   late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
       'album_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _stickerIdMeta = const VerificationMeta('stickerId');
   late final GeneratedColumn<String?> stickerId = GeneratedColumn<String?>(
       'sticker_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _sharedUserIdMeta =
       const VerificationMeta('sharedUserId');
   late final GeneratedColumn<String?> sharedUserId = GeneratedColumn<String?>(
       'shared_user_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaWaveformMeta =
       const VerificationMeta('mediaWaveform');
   late final GeneratedColumn<String?> mediaWaveform = GeneratedColumn<String?>(
       'media_waveform', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _quoteMessageIdMeta =
       const VerificationMeta('quoteMessageId');
   late final GeneratedColumn<String?> quoteMessageId = GeneratedColumn<String?>(
       'quote_message_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _quoteContentMeta =
       const VerificationMeta('quoteContent');
   late final GeneratedColumn<String?> quoteContent = GeneratedColumn<String?>(
       'quote_content', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _thumbUrlMeta = const VerificationMeta('thumbUrl');
   late final GeneratedColumn<String?> thumbUrl = GeneratedColumn<String?>(
       'thumb_url', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _captionMeta = const VerificationMeta('caption');
   late final GeneratedColumn<String?> caption = GeneratedColumn<String?>(
       'caption', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         messageId,
@@ -3261,26 +3335,26 @@ class Participants extends Table with TableInfo<Participants, Participant> {
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
       'conversation_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _roleMeta = const VerificationMeta('role');
   late final GeneratedColumnWithTypeConverter<ParticipantRole, String?> role =
       GeneratedColumn<String?>('role', aliasedName, true,
-              typeName: 'TEXT',
+              type: const StringType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<ParticipantRole>(Participants.$converter0);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(Participants.$converter1);
@@ -3626,52 +3700,52 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
   final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
   late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
       'album_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
   late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
       'name', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _iconUrlMeta = const VerificationMeta('iconUrl');
   late final GeneratedColumn<String?> iconUrl = GeneratedColumn<String?>(
       'icon_url', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(StickerAlbums.$converter0);
   final VerificationMeta _updateAtMeta = const VerificationMeta('updateAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> updateAt =
       GeneratedColumn<int?>('update_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(StickerAlbums.$converter1);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _categoryMeta = const VerificationMeta('category');
   late final GeneratedColumn<String?> category = GeneratedColumn<String?>(
       'category', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
   late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
       'description', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
@@ -3917,20 +3991,20 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
       'conversation_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(PinMessages.$converter0);
@@ -4315,61 +4389,65 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
   final VerificationMeta _addressIdMeta = const VerificationMeta('addressId');
   late final GeneratedColumn<String?> addressId = GeneratedColumn<String?>(
       'address_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _typeMeta = const VerificationMeta('type');
   late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
       'type', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _assetIdMeta = const VerificationMeta('assetId');
   late final GeneratedColumn<String?> assetId = GeneratedColumn<String?>(
       'asset_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _destinationMeta =
       const VerificationMeta('destination');
   late final GeneratedColumn<String?> destination = GeneratedColumn<String?>(
       'destination', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _labelMeta = const VerificationMeta('label');
   late final GeneratedColumn<String?> label = GeneratedColumn<String?>(
       'label', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> updatedAt =
       GeneratedColumn<int?>('updated_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(Addresses.$converter0);
   final VerificationMeta _reserveMeta = const VerificationMeta('reserve');
   late final GeneratedColumn<String?> reserve = GeneratedColumn<String?>(
       'reserve', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _feeMeta = const VerificationMeta('fee');
   late final GeneratedColumn<String?> fee = GeneratedColumn<String?>(
       'fee', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _tagMeta = const VerificationMeta('tag');
   late final GeneratedColumn<String?> tag = GeneratedColumn<String?>(
       'tag', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _dustMeta = const VerificationMeta('dust');
   late final GeneratedColumn<String?> dust = GeneratedColumn<String?>(
       'dust', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         addressId,
@@ -4895,79 +4973,83 @@ class Apps extends Table with TableInfo<Apps, App> {
   final VerificationMeta _appIdMeta = const VerificationMeta('appId');
   late final GeneratedColumn<String?> appId = GeneratedColumn<String?>(
       'app_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _appNumberMeta = const VerificationMeta('appNumber');
   late final GeneratedColumn<String?> appNumber = GeneratedColumn<String?>(
       'app_number', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _homeUriMeta = const VerificationMeta('homeUri');
   late final GeneratedColumn<String?> homeUri = GeneratedColumn<String?>(
       'home_uri', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _redirectUriMeta =
       const VerificationMeta('redirectUri');
   late final GeneratedColumn<String?> redirectUri = GeneratedColumn<String?>(
       'redirect_uri', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
   late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
       'name', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _iconUrlMeta = const VerificationMeta('iconUrl');
   late final GeneratedColumn<String?> iconUrl = GeneratedColumn<String?>(
       'icon_url', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _categoryMeta = const VerificationMeta('category');
   late final GeneratedColumn<String?> category = GeneratedColumn<String?>(
       'category', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
   late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
       'description', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _appSecretMeta = const VerificationMeta('appSecret');
   late final GeneratedColumn<String?> appSecret = GeneratedColumn<String?>(
       'app_secret', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _capabilitiesMeta =
       const VerificationMeta('capabilities');
   late final GeneratedColumn<String?> capabilities = GeneratedColumn<String?>(
       'capabilities', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _creatorIdMeta = const VerificationMeta('creatorId');
   late final GeneratedColumn<String?> creatorId = GeneratedColumn<String?>(
       'creator_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _resourcePatternsMeta =
       const VerificationMeta('resourcePatterns');
   late final GeneratedColumn<String?> resourcePatterns =
       GeneratedColumn<String?>('resource_patterns', aliasedName, true,
-          typeName: 'TEXT',
+          type: const StringType(),
           requiredDuringInsert: false,
           $customConstraints: '');
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> updatedAt =
       GeneratedColumn<int?>('updated_at', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(Apps.$converter0);
@@ -5561,89 +5643,95 @@ class Assets extends Table with TableInfo<Assets, Asset> {
   final VerificationMeta _assetIdMeta = const VerificationMeta('assetId');
   late final GeneratedColumn<String?> assetId = GeneratedColumn<String?>(
       'asset_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _symbolMeta = const VerificationMeta('symbol');
   late final GeneratedColumn<String?> symbol = GeneratedColumn<String?>(
       'symbol', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
   late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
       'name', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _iconUrlMeta = const VerificationMeta('iconUrl');
   late final GeneratedColumn<String?> iconUrl = GeneratedColumn<String?>(
       'icon_url', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _balanceMeta = const VerificationMeta('balance');
   late final GeneratedColumn<String?> balance = GeneratedColumn<String?>(
       'balance', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _destinationMeta =
       const VerificationMeta('destination');
   late final GeneratedColumn<String?> destination = GeneratedColumn<String?>(
       'destination', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _tagMeta = const VerificationMeta('tag');
   late final GeneratedColumn<String?> tag = GeneratedColumn<String?>(
       'tag', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _priceBtcMeta = const VerificationMeta('priceBtc');
   late final GeneratedColumn<String?> priceBtc = GeneratedColumn<String?>(
       'price_btc', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _priceUsdMeta = const VerificationMeta('priceUsd');
   late final GeneratedColumn<String?> priceUsd = GeneratedColumn<String?>(
       'price_usd', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _chainIdMeta = const VerificationMeta('chainId');
   late final GeneratedColumn<String?> chainId = GeneratedColumn<String?>(
       'chain_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _changeUsdMeta = const VerificationMeta('changeUsd');
   late final GeneratedColumn<String?> changeUsd = GeneratedColumn<String?>(
       'change_usd', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _changeBtcMeta = const VerificationMeta('changeBtc');
   late final GeneratedColumn<String?> changeBtc = GeneratedColumn<String?>(
       'change_btc', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _confirmationsMeta =
       const VerificationMeta('confirmations');
   late final GeneratedColumn<int?> confirmations = GeneratedColumn<int?>(
       'confirmations', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _assetKeyMeta = const VerificationMeta('assetKey');
   late final GeneratedColumn<String?> assetKey = GeneratedColumn<String?>(
       'asset_key', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _reserveMeta = const VerificationMeta('reserve');
   late final GeneratedColumn<String?> reserve = GeneratedColumn<String?>(
       'reserve', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         assetId,
@@ -6002,30 +6090,32 @@ class CircleConversations extends Table
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
       'conversation_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _circleIdMeta = const VerificationMeta('circleId');
   late final GeneratedColumn<String?> circleId = GeneratedColumn<String?>(
       'circle_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(CircleConversations.$converter0);
   final VerificationMeta _pinTimeMeta = const VerificationMeta('pinTime');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> pinTime =
       GeneratedColumn<int?>('pin_time', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(CircleConversations.$converter1);
@@ -6276,26 +6366,26 @@ class Circles extends Table with TableInfo<Circles, Circle> {
   final VerificationMeta _circleIdMeta = const VerificationMeta('circleId');
   late final GeneratedColumn<String?> circleId = GeneratedColumn<String?>(
       'circle_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
   late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
       'name', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(Circles.$converter0);
   final VerificationMeta _orderedAtMeta = const VerificationMeta('orderedAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> orderedAt =
       GeneratedColumn<int?>('ordered_at', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(Circles.$converter1);
@@ -6562,32 +6652,34 @@ class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
   final VerificationMeta _hyperlinkMeta = const VerificationMeta('hyperlink');
   late final GeneratedColumn<String?> hyperlink = GeneratedColumn<String?>(
       'hyperlink', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _siteNameMeta = const VerificationMeta('siteName');
   late final GeneratedColumn<String?> siteName = GeneratedColumn<String?>(
       'site_name', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _siteTitleMeta = const VerificationMeta('siteTitle');
   late final GeneratedColumn<String?> siteTitle = GeneratedColumn<String?>(
       'site_title', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _siteDescriptionMeta =
       const VerificationMeta('siteDescription');
   late final GeneratedColumn<String?> siteDescription =
       GeneratedColumn<String?>('site_description', aliasedName, true,
-          typeName: 'TEXT',
+          type: const StringType(),
           requiredDuringInsert: false,
           $customConstraints: '');
   final VerificationMeta _siteImageMeta = const VerificationMeta('siteImage');
   late final GeneratedColumn<String?> siteImage = GeneratedColumn<String?>(
       'site_image', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns =>
       [hyperlink, siteName, siteTitle, siteDescription, siteImage];
@@ -6907,34 +6999,48 @@ class MessagesFts extends Table
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: '');
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
       'conversation_id', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: '');
   final VerificationMeta _contentMeta = const VerificationMeta('content');
   late final GeneratedColumn<String?> content = GeneratedColumn<String?>(
       'content', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumn<String?> createdAt = GeneratedColumn<String?>(
       'created_at', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: '');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: '');
   final VerificationMeta _reservedIntMeta =
       const VerificationMeta('reservedInt');
   late final GeneratedColumn<String?> reservedInt = GeneratedColumn<String?>(
       'reserved_int', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: '');
   final VerificationMeta _reservedTextMeta =
       const VerificationMeta('reservedText');
   late final GeneratedColumn<String?> reservedText = GeneratedColumn<String?>(
       'reserved_text', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         messageId,
@@ -7132,7 +7238,7 @@ class MessagesHistory extends Table
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
@@ -7301,13 +7407,13 @@ class Offsets extends Table with TableInfo<Offsets, Offset> {
   final VerificationMeta _keyMeta = const VerificationMeta('key');
   late final GeneratedColumn<String?> key = GeneratedColumn<String?>(
       'key', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
   late final GeneratedColumn<String?> timestamp = GeneratedColumn<String?>(
       'timestamp', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
@@ -7602,37 +7708,41 @@ class ParticipantSession extends Table
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
       'conversation_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _sessionIdMeta = const VerificationMeta('sessionId');
   late final GeneratedColumn<String?> sessionId = GeneratedColumn<String?>(
       'session_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _sentToServerMeta =
       const VerificationMeta('sentToServer');
   late final GeneratedColumn<int?> sentToServer = GeneratedColumn<int?>(
       'sent_to_server', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(ParticipantSession.$converter0);
   final VerificationMeta _publicKeyMeta = const VerificationMeta('publicKey');
   late final GeneratedColumn<String?> publicKey = GeneratedColumn<String?>(
       'public_key', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns =>
       [conversationId, userId, sessionId, sentToServer, createdAt, publicKey];
@@ -7915,31 +8025,31 @@ class ResendSessionMessages extends Table
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _sessionIdMeta = const VerificationMeta('sessionId');
   late final GeneratedColumn<String?> sessionId = GeneratedColumn<String?>(
       'session_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _statusMeta = const VerificationMeta('status');
   late final GeneratedColumn<int?> status = GeneratedColumn<int?>(
       'status', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(ResendSessionMessages.$converter0);
@@ -8248,37 +8358,39 @@ class SentSessionSenderKeys extends Table
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
       'conversation_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _sessionIdMeta = const VerificationMeta('sessionId');
   late final GeneratedColumn<String?> sessionId = GeneratedColumn<String?>(
       'session_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _sentToServerMeta =
       const VerificationMeta('sentToServer');
   late final GeneratedColumn<int?> sentToServer = GeneratedColumn<int?>(
       'sent_to_server', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _senderKeyIdMeta =
       const VerificationMeta('senderKeyId');
   late final GeneratedColumn<int?> senderKeyId = GeneratedColumn<int?>(
       'sender_key_id', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(SentSessionSenderKeys.$converter0);
@@ -8726,62 +8838,72 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
   final VerificationMeta _snapshotIdMeta = const VerificationMeta('snapshotId');
   late final GeneratedColumn<String?> snapshotId = GeneratedColumn<String?>(
       'snapshot_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _typeMeta = const VerificationMeta('type');
   late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
       'type', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _assetIdMeta = const VerificationMeta('assetId');
   late final GeneratedColumn<String?> assetId = GeneratedColumn<String?>(
       'asset_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _amountMeta = const VerificationMeta('amount');
   late final GeneratedColumn<String?> amount = GeneratedColumn<String?>(
       'amount', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(Snapshots.$converter0);
   final VerificationMeta _opponentIdMeta = const VerificationMeta('opponentId');
   late final GeneratedColumn<String?> opponentId = GeneratedColumn<String?>(
       'opponent_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _transactionHashMeta =
       const VerificationMeta('transactionHash');
   late final GeneratedColumn<String?> transactionHash =
       GeneratedColumn<String?>('transaction_hash', aliasedName, true,
-          typeName: 'TEXT',
+          type: const StringType(),
           requiredDuringInsert: false,
           $customConstraints: '');
   final VerificationMeta _senderMeta = const VerificationMeta('sender');
   late final GeneratedColumn<String?> sender = GeneratedColumn<String?>(
       'sender', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _receiverMeta = const VerificationMeta('receiver');
   late final GeneratedColumn<String?> receiver = GeneratedColumn<String?>(
       'receiver', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _memoMeta = const VerificationMeta('memo');
   late final GeneratedColumn<String?> memo = GeneratedColumn<String?>(
       'memo', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _confirmationsMeta =
       const VerificationMeta('confirmations');
   late final GeneratedColumn<int?> confirmations = GeneratedColumn<int?>(
       'confirmations', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         snapshotId,
@@ -9017,13 +9139,13 @@ class StickerRelationships extends Table
   final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
   late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
       'album_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _stickerIdMeta = const VerificationMeta('stickerId');
   late final GeneratedColumn<String?> stickerId = GeneratedColumn<String?>(
       'sticker_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
@@ -9387,55 +9509,57 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
   final VerificationMeta _stickerIdMeta = const VerificationMeta('stickerId');
   late final GeneratedColumn<String?> stickerId = GeneratedColumn<String?>(
       'sticker_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
   late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
       'album_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
   late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
       'name', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _assetUrlMeta = const VerificationMeta('assetUrl');
   late final GeneratedColumn<String?> assetUrl = GeneratedColumn<String?>(
       'asset_url', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _assetTypeMeta = const VerificationMeta('assetType');
   late final GeneratedColumn<String?> assetType = GeneratedColumn<String?>(
       'asset_type', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _assetWidthMeta = const VerificationMeta('assetWidth');
   late final GeneratedColumn<int?> assetWidth = GeneratedColumn<int?>(
       'asset_width', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _assetHeightMeta =
       const VerificationMeta('assetHeight');
   late final GeneratedColumn<int?> assetHeight = GeneratedColumn<int?>(
       'asset_height', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(Stickers.$converter0);
   final VerificationMeta _lastUseAtMeta = const VerificationMeta('lastUseAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> lastUseAt =
       GeneratedColumn<int?>('last_use_at', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(Stickers.$converter1);
@@ -9978,70 +10102,86 @@ class Users extends Table with TableInfo<Users, User> {
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _identityNumberMeta =
       const VerificationMeta('identityNumber');
   late final GeneratedColumn<String?> identityNumber = GeneratedColumn<String?>(
       'identity_number', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _relationshipMeta =
       const VerificationMeta('relationship');
   late final GeneratedColumnWithTypeConverter<UserRelationship, String?>
       relationship = GeneratedColumn<String?>('relationship', aliasedName, true,
-              typeName: 'TEXT',
+              type: const StringType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<UserRelationship>(Users.$converter0);
   final VerificationMeta _fullNameMeta = const VerificationMeta('fullName');
   late final GeneratedColumn<String?> fullName = GeneratedColumn<String?>(
       'full_name', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _avatarUrlMeta = const VerificationMeta('avatarUrl');
   late final GeneratedColumn<String?> avatarUrl = GeneratedColumn<String?>(
       'avatar_url', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _phoneMeta = const VerificationMeta('phone');
   late final GeneratedColumn<String?> phone = GeneratedColumn<String?>(
       'phone', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _isVerifiedMeta = const VerificationMeta('isVerified');
   late final GeneratedColumn<bool?> isVerified = GeneratedColumn<bool?>(
       'is_verified', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const BoolType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(Users.$converter1);
   final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> muteUntil =
       GeneratedColumn<int?>('mute_until', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(Users.$converter2);
   final VerificationMeta _hasPinMeta = const VerificationMeta('hasPin');
   late final GeneratedColumn<int?> hasPin = GeneratedColumn<int?>(
       'has_pin', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _appIdMeta = const VerificationMeta('appId');
   late final GeneratedColumn<String?> appId = GeneratedColumn<String?>(
       'app_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _biographyMeta = const VerificationMeta('biography');
   late final GeneratedColumn<String?> biography = GeneratedColumn<String?>(
       'biography', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _isScamMeta = const VerificationMeta('isScam');
   late final GeneratedColumn<int?> isScam = GeneratedColumn<int?>(
       'is_scam', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         userId,
@@ -10995,77 +11135,97 @@ class TranscriptMessages extends Table
       const VerificationMeta('transcriptId');
   late final GeneratedColumn<String?> transcriptId = GeneratedColumn<String?>(
       'transcript_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _userFullNameMeta =
       const VerificationMeta('userFullName');
   late final GeneratedColumn<String?> userFullName = GeneratedColumn<String?>(
       'user_full_name', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _categoryMeta = const VerificationMeta('category');
   late final GeneratedColumn<String?> category = GeneratedColumn<String?>(
       'category', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
       GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(TranscriptMessages.$converter0);
   final VerificationMeta _contentMeta = const VerificationMeta('content');
   late final GeneratedColumn<String?> content = GeneratedColumn<String?>(
       'content', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaUrlMeta = const VerificationMeta('mediaUrl');
   late final GeneratedColumn<String?> mediaUrl = GeneratedColumn<String?>(
       'media_url', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaNameMeta = const VerificationMeta('mediaName');
   late final GeneratedColumn<String?> mediaName = GeneratedColumn<String?>(
       'media_name', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaSizeMeta = const VerificationMeta('mediaSize');
   late final GeneratedColumn<int?> mediaSize = GeneratedColumn<int?>(
       'media_size', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaWidthMeta = const VerificationMeta('mediaWidth');
   late final GeneratedColumn<int?> mediaWidth = GeneratedColumn<int?>(
       'media_width', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaHeightMeta =
       const VerificationMeta('mediaHeight');
   late final GeneratedColumn<int?> mediaHeight = GeneratedColumn<int?>(
       'media_height', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaMimeTypeMeta =
       const VerificationMeta('mediaMimeType');
   late final GeneratedColumn<String?> mediaMimeType = GeneratedColumn<String?>(
       'media_mime_type', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaDurationMeta =
       const VerificationMeta('mediaDuration');
   late final GeneratedColumn<String?> mediaDuration = GeneratedColumn<String?>(
       'media_duration', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaStatusMeta =
       const VerificationMeta('mediaStatus');
   late final GeneratedColumnWithTypeConverter<MediaStatus, String?>
       mediaStatus = GeneratedColumn<String?>('media_status', aliasedName, true,
-              typeName: 'TEXT',
+              type: const StringType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<MediaStatus>(TranscriptMessages.$converter1);
@@ -11073,58 +11233,80 @@ class TranscriptMessages extends Table
       const VerificationMeta('mediaWaveform');
   late final GeneratedColumn<String?> mediaWaveform = GeneratedColumn<String?>(
       'media_waveform', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _thumbImageMeta = const VerificationMeta('thumbImage');
   late final GeneratedColumn<String?> thumbImage = GeneratedColumn<String?>(
       'thumb_image', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _thumbUrlMeta = const VerificationMeta('thumbUrl');
   late final GeneratedColumn<String?> thumbUrl = GeneratedColumn<String?>(
       'thumb_url', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaKeyMeta = const VerificationMeta('mediaKey');
   late final GeneratedColumn<String?> mediaKey = GeneratedColumn<String?>(
       'media_key', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaDigestMeta =
       const VerificationMeta('mediaDigest');
   late final GeneratedColumn<String?> mediaDigest = GeneratedColumn<String?>(
       'media_digest', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mediaCreatedAtMeta =
       const VerificationMeta('mediaCreatedAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> mediaCreatedAt =
       GeneratedColumn<int?>('media_created_at', aliasedName, true,
-              typeName: 'INTEGER',
+              type: const IntType(),
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(TranscriptMessages.$converter2);
   final VerificationMeta _stickerIdMeta = const VerificationMeta('stickerId');
   late final GeneratedColumn<String?> stickerId = GeneratedColumn<String?>(
       'sticker_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _sharedUserIdMeta =
       const VerificationMeta('sharedUserId');
   late final GeneratedColumn<String?> sharedUserId = GeneratedColumn<String?>(
       'shared_user_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _mentionsMeta = const VerificationMeta('mentions');
   late final GeneratedColumn<String?> mentions = GeneratedColumn<String?>(
       'mentions', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _quoteIdMeta = const VerificationMeta('quoteId');
   late final GeneratedColumn<String?> quoteId = GeneratedColumn<String?>(
       'quote_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _quoteContentMeta =
       const VerificationMeta('quoteContent');
   late final GeneratedColumn<String?> quoteContent = GeneratedColumn<String?>(
       'quote_content', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _captionMeta = const VerificationMeta('caption');
   late final GeneratedColumn<String?> caption = GeneratedColumn<String?>(
       'caption', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         transcriptId,
@@ -11442,13 +11624,13 @@ class Fiats extends Table with TableInfo<Fiats, Fiat> {
   final VerificationMeta _codeMeta = const VerificationMeta('code');
   late final GeneratedColumn<String?> code = GeneratedColumn<String?>(
       'code', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _rateMeta = const VerificationMeta('rate');
   late final GeneratedColumn<double?> rate = GeneratedColumn<double?>(
       'rate', aliasedName, false,
-      typeName: 'REAL',
+      type: const RealType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
@@ -11621,6 +11803,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Conversations conversation,
               MessageMentions messageMention)
           limit) {
+    var $arrayStartIndex = 2;
     final generatedorder = $write(
         order(
             alias(this.pinMessages, 'pinMessage'),
@@ -11634,7 +11817,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'sharedUser'),
             alias(this.conversations, 'conversation'),
             alias(this.messageMentions, 'messageMention')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedorder.amountOfVariables;
     final generatedlimit = $write(
         limit(
             alias(this.pinMessages, 'pinMessage'),
@@ -11648,7 +11833,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'sharedUser'),
             alias(this.conversations, 'conversation'),
             alias(this.messageMentions, 'messageMention')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
         'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
@@ -12203,6 +12390,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               MessageMentions messageMention,
               PinMessages pinMessage)
           limit) {
+    var $arrayStartIndex = 1;
     final generatedwhere = $write(
         where(
             alias(this.messages, 'message'),
@@ -12216,7 +12404,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.conversations, 'conversation'),
             alias(this.messageMentions, 'messageMention'),
             alias(this.pinMessages, 'pinMessage')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedorder = $write(
         order(
             alias(this.messages, 'message'),
@@ -12230,7 +12420,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.conversations, 'conversation'),
             alias(this.messageMentions, 'messageMention'),
             alias(this.pinMessages, 'pinMessage')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedorder.amountOfVariables;
     final generatedlimit = $write(
         limit(
             alias(this.messages, 'message'),
@@ -12244,7 +12436,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.conversations, 'conversation'),
             alias(this.messageMentions, 'messageMention'),
             alias(this.pinMessages, 'pinMessage')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
         'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
@@ -12340,6 +12534,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       Limit Function(Messages message, Users sender, Stickers sticker,
               Users shareUser, MessageMentions messageMention)
           limit) {
+    var $arrayStartIndex = 1;
     final generatedwhere = $write(
         where(
             alias(this.messages, 'message'),
@@ -12347,7 +12542,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.stickers, 'sticker'),
             alias(this.users, 'shareUser'),
             alias(this.messageMentions, 'messageMention')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedorder = $write(
         order(
             alias(this.messages, 'message'),
@@ -12355,7 +12552,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.stickers, 'sticker'),
             alias(this.users, 'shareUser'),
             alias(this.messageMentions, 'messageMention')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedorder.amountOfVariables;
     final generatedlimit = $write(
         limit(
             alias(this.messages, 'message'),
@@ -12363,7 +12562,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.stickers, 'sticker'),
             alias(this.users, 'shareUser'),
             alias(this.messageMentions, 'messageMention')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
         'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, message.shared_user_id AS sharedUserId, shareUser.full_name AS sharedUserFullName, shareUser.identity_number AS sharedUserIdentityNumber, shareUser.avatar_url AS sharedUserAvatarUrl, shareUser.is_verified AS sharedUserIsVerified, shareUser.app_id AS sharedUserAppId FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN users AS shareUser ON message.shared_user_id = shareUser.user_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
@@ -12499,7 +12700,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final expandedcategories = $expandVar($arrayStartIndex, categories.length);
     $arrayStartIndex += categories.length;
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.message_id = fts.message_id AND m.category IN ($expandedcategories)',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id',
         variables: [
           Variable<String>(query),
           for (var $ in categories) Variable<String>($)
@@ -12520,10 +12721,11 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final generatedlimit = $write(
         limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
             alias(this.users, 'u')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
           for (var $ in categories) Variable<String>($),
@@ -12650,12 +12852,12 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   }
 
   Selectable<int> fuzzySearchMessageCountByConversationIdAndCategories(
-      String conversationId, String query, List<String> categories) {
+      String conversationId, List<String> categories, String query) {
     var $arrayStartIndex = 3;
     final expandedcategories = $expandVar($arrayStartIndex, categories.length);
     $arrayStartIndex += categories.length;
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) AND m.category IN ($expandedcategories)',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2)',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -12685,13 +12887,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<int> fuzzySearchMessageCountByConversationIdAndUserIdAndCategories(
       String conversationId,
       String userId,
-      String query,
-      List<String> categories) {
+      List<String> categories,
+      String query) {
     var $arrayStartIndex = 4;
     final expandedcategories = $expandVar($arrayStartIndex, categories.length);
     $arrayStartIndex += categories.length;
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) AND m.category IN ($expandedcategories)',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3)',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -12707,8 +12909,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem>
       fuzzySearchMessageByConversationIdAndCategories(
           String conversationId,
-          String query,
           List<String> categories,
+          String query,
           Limit Function(Messages m, Conversations c, Users u) limit) {
     var $arrayStartIndex = 3;
     final expandedcategories = $expandVar($arrayStartIndex, categories.length);
@@ -12716,10 +12918,11 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final generatedlimit = $write(
         limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
             alias(this.users, 'u')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -12792,14 +12995,19 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem> searchMessage(
       Expression<bool?> Function(Messages m, Conversations c, Users u) where,
       Limit Function(Messages m, Conversations c, Users u) limit) {
+    var $arrayStartIndex = 1;
     final generatedwhere = $write(
         where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
             alias(this.users, 'u')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedlimit = $write(
         limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
             alias(this.users, 'u')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
         'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
@@ -12837,8 +13045,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       fuzzySearchMessageByConversationIdAndUserIdAndCategories(
           String conversationId,
           String userId,
-          String query,
           List<String> categories,
+          String query,
           Limit Function(Messages m, Conversations c, Users u) limit) {
     var $arrayStartIndex = 4;
     final expandedcategories = $expandVar($arrayStartIndex, categories.length);
@@ -12846,10 +13054,11 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final generatedlimit = $write(
         limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
             alias(this.users, 'u')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -12926,12 +13135,15 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       Expression<bool?> Function(Conversations conversation, Users owner,
               CircleConversations circleConversation)
           where) {
+    var $arrayStartIndex = 1;
     final generatedwhere = $write(
         where(
             alias(this.conversations, 'conversation'),
             alias(this.users, 'owner'),
             alias(this.circleConversations, 'circleConversation')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
     return customSelect(
         'SELECT COUNT(DISTINCT conversation.conversation_id) AS _c0 FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id WHERE ${generatedwhere.sql}',
         variables: [
@@ -12973,6 +13185,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Snapshots snapshot,
               Users participant)
           limit) {
+    var $arrayStartIndex = 1;
     final generatedwhere = $write(
         where(
             alias(this.conversations, 'conversation'),
@@ -12982,7 +13195,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'lastMessageSender'),
             alias(this.snapshots, 'snapshot'),
             alias(this.users, 'participant')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedorder = $write(
         order(
             alias(this.conversations, 'conversation'),
@@ -12992,7 +13207,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'lastMessageSender'),
             alias(this.snapshots, 'snapshot'),
             alias(this.users, 'participant')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedorder.amountOfVariables;
     final generatedlimit = $write(
         limit(
             alias(this.conversations, 'conversation'),
@@ -13002,7 +13219,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'lastMessageSender'),
             alias(this.snapshots, 'snapshot'),
             alias(this.users, 'participant')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
         'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, (SELECT COUNT(1) FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id WHERE ${generatedwhere.sql} GROUP BY conversation.conversation_id ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
@@ -13069,12 +13288,15 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       Expression<bool?> Function(Conversations conversation, Users owner,
               CircleConversations circleConversation)
           where) {
+    var $arrayStartIndex = 1;
     final generatedwhere = $write(
         where(
             alias(this.conversations, 'conversation'),
             alias(this.users, 'owner'),
             alias(this.circleConversations, 'circleConversation')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
     return customSelect(
         'SELECT SUM(unseen_message_count) AS _c0 FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id WHERE ${generatedwhere.sql} LIMIT 1',
         variables: [
@@ -13091,10 +13313,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<BaseUnseenConversationCountResult> baseUnseenConversationCount(
       Expression<bool?> Function(Conversations conversation, Users owner)
           where) {
+    var $arrayStartIndex = 1;
     final generatedwhere = $write(
         where(alias(this.conversations, 'conversation'),
             alias(this.users, 'owner')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
     return customSelect(
         'SELECT COUNT(1) AS unseen_conversation_count, SUM(CASE WHEN(CASE WHEN conversation.category = \'GROUP\' THEN conversation.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(conversation.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_muted_conversation_count FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql} LIMIT 1',
         variables: [

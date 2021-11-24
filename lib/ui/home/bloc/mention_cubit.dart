@@ -11,6 +11,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/user_dao.dart';
 import '../../../db/mixin_database.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../widgets/mention_panel.dart';
 import 'conversation_cubit.dart';
@@ -77,14 +78,14 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
         if (conversationState.isBot ?? false) {
           return userDao
               .friends()
-              .watch()
+              .watchThrottle(kVerySlowThrottleDuration)
               .map((value) => _resultToMentionState(keyword, value));
         }
         if (conversationState.isGroup ?? false) {
           return userDao
               .groupParticipants(
                   conversationId: conversationState.conversationId)
-              .watch()
+              .watchThrottle(kVerySlowThrottleDuration)
               .map((value) => _resultToMentionState(
                   keyword,
                   value
@@ -102,7 +103,7 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
               conversationId: conversationState.conversationId,
               keyword: keyword,
             )
-            .watch()
+            .watchThrottle(kVerySlowThrottleDuration)
             .map((value) => _resultToMentionState(keyword, value));
       }
       if (conversationState.isGroup ?? false) {
@@ -112,7 +113,7 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
               conversationId: conversationState.conversationId,
               keyword: keyword,
             )
-            .watch()
+            .watchThrottle(kVerySlowThrottleDuration)
             .map((value) => _resultToMentionState(keyword, value));
       }
       return Stream.value(MentionState(text: keyword));

@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:cross_file/cross_file.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:decimal/decimal.dart';
 import 'package:decimal/intl.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -47,18 +47,32 @@ export '../datetime_format_utils.dart'
     show DateTimeExtension, StringEpochNanoExtension;
 export 'src/platforms.dart';
 
-part 'src/file.dart';
-part 'src/image.dart';
-part 'src/iterable.dart';
-part 'src/key_event.dart';
-part 'src/markdown.dart';
-part 'src/number.dart';
-part 'src/provider.dart';
-part 'src/regexp.dart';
-part 'src/stream.dart';
-part 'src/string.dart';
-part 'src/ui.dart';
-part 'src/info.dart';
+part 'src/db.dart';
+
 part 'src/duration.dart';
+
+part 'src/file.dart';
+
+part 'src/image.dart';
+
+part 'src/info.dart';
+
+part 'src/iterable.dart';
+
+part 'src/key_event.dart';
+
+part 'src/markdown.dart';
+
+part 'src/number.dart';
+
+part 'src/provider.dart';
+
+part 'src/regexp.dart';
+
+part 'src/stream.dart';
+
+part 'src/string.dart';
+
+part 'src/ui.dart';
 
 void importExtension() {}

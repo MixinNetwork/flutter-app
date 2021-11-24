@@ -26,6 +26,7 @@ class ConversationState extends Equatable {
     this.conversation,
     this.user,
     this.app,
+    this.participant,
     required this.refreshKey,
     this.initialSidePage,
   });
@@ -37,6 +38,7 @@ class ConversationState extends Equatable {
   final ConversationItem? conversation;
   final User? user;
   final App? app;
+  final Participant? participant;
   final Object refreshKey;
 
   final String? initialSidePage;
@@ -66,6 +68,11 @@ class ConversationState extends Equatable {
 
   EncryptCategory get encryptCategory => getEncryptCategory(app);
 
+  ParticipantRole? get role =>
+      conversation?.category == ConversationCategory.contact
+          ? ParticipantRole.owner
+          : participant?.role;
+
   @override
   List<Object?> get props => [
         conversationId,
@@ -76,19 +83,21 @@ class ConversationState extends Equatable {
         lastReadMessageId,
         refreshKey,
         initialSidePage,
+        participant,
       ];
 
   ConversationState copyWith({
-    final String? conversationId,
-    final String? userId,
-    final String? initIndexMessageId,
-    final int? unseenMessageCount,
-    final String? lastReadMessageId,
-    final ConversationItem? conversation,
-    final User? user,
-    final App? app,
-    final Object? refreshKey,
-    final String? initialSidePage,
+    String? conversationId,
+    String? userId,
+    String? initIndexMessageId,
+    int? unseenMessageCount,
+    String? lastReadMessageId,
+    ConversationItem? conversation,
+    User? user,
+    App? app,
+    Participant? participant,
+    Object? refreshKey,
+    String? initialSidePage,
   }) =>
       ConversationState(
         conversationId: conversationId ?? this.conversationId,
@@ -100,6 +109,7 @@ class ConversationState extends Equatable {
         lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
         refreshKey: refreshKey ?? this.refreshKey,
         initialSidePage: initialSidePage ?? this.initialSidePage,
+        participant: participant ?? this.participant,
       );
 }
 
@@ -123,9 +133,9 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           .map((event) => event?.conversationId)
           .where((event) => event != null)
           .distinct()
-          .switchMap((event) => accountServer.database.conversationDao
+          .switchMap((event) => database.conversationDao
               .conversationItem(event!)
-              .watchSingleOrNull())
+              .watchSingleOrNullThrottle(kSlowThrottleDuration))
           .listen((event) {
         String? userId;
         if (event != null && !event.isGroupConversation) {
@@ -142,12 +152,28 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     addSubscription(
       stream.map((event) => event?.userId).distinct().switchMap((userId) {
         if (userId == null) return Stream.value(null);
-        return accountServer.database.userDao
+        return database.userDao
             .userById(userId)
-            .watchSingleOrNull();
+            .watchSingleOrNullThrottle(kSlowThrottleDuration);
       }).listen((event) => emit(
             state?.copyWith(user: event),
           )),
+    );
+    addSubscription(
+      stream
+          .map((event) => event?.conversationId)
+          .where((event) => event != null)
+          .distinct()
+          .switchMap((event) => database.participantDao
+              .participantById(event!, accountServer.userId)
+              .watchSingleOrNullThrottle(kSlowThrottleDuration))
+          .listen((Participant? event) {
+        emit(
+          state?.copyWith(
+            participant: event,
+          ),
+        );
+      }),
     );
 
     appActiveListener.addListener(onListen);
@@ -155,6 +181,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
   final AccountServer accountServer;
   final ResponsiveNavigatorCubit responsiveNavigatorCubit;
+  late final database = accountServer.database;
 
   @override
   Future<void> close() async {
@@ -183,6 +210,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     String? initialChatSidePage,
   }) async {
     final accountServer = context.accountServer;
+    final database = context.database;
     final conversationCubit = context.read<ConversationCubit>();
     final state = conversationCubit.state;
 
@@ -215,9 +243,14 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
         lastReadMessageId ?? (hasUnreadMessage ? _initIndexMessageId : null);
 
     final ownerId = _conversation.ownerId;
-    final app = (!_conversation.isGroupConversation && ownerId != null)
-        ? await accountServer.database.appDao.findAppById(ownerId)
+
+    final appFuture = (!_conversation.isGroupConversation && ownerId != null)
+        ? database.appDao.findAppById(ownerId)
         : null;
+
+    final participantFuture = database.participantDao
+        .participantById(conversationId, accountServer.userId)
+        .getSingleOrNull();
 
     final conversationState = ConversationState(
       conversationId: conversationId,
@@ -225,9 +258,10 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       initIndexMessageId: _initIndexMessageId,
       lastReadMessageId: lastReadMessageId,
       userId: _conversation.isGroupConversation ? null : _conversation.ownerId,
-      app: app,
+      app: await appFuture,
       initialSidePage: initialChatSidePage,
       refreshKey: Object(),
+      participant: await participantFuture,
     );
 
     conversationCubit.emit(conversationState);
@@ -246,31 +280,28 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     String? initialChatSidePage,
   }) async {
     final accountServer = context.accountServer;
+    final database = context.database;
     final conversationCubit = context.read<ConversationCubit>();
 
     final conversationId = generateConversationId(userId, accountServer.userId);
-
-    if (user == null) {
-      final conversation = await _conversationItem(context, conversationId);
-
-      if (conversation != null) {
-        return selectConversation(
-          context,
-          conversationId,
-          conversation: conversation,
-          initialChatSidePage: initialChatSidePage,
-        );
-      }
+    final conversation = await _conversationItem(context, conversationId);
+    if (conversation != null) {
+      return selectConversation(
+        context,
+        conversationId,
+        conversation: conversation,
+        initialChatSidePage: initialChatSidePage,
+      );
     }
 
-    final _user = user ??
-        await accountServer.database.userDao.userById(userId).getSingleOrNull();
+    final _user =
+        user ?? await database.userDao.userById(userId).getSingleOrNull();
 
     if (_user == null) {
       return showToastFailed(context, ToastError(context.l10n.userNotFound));
     }
 
-    final app = await accountServer.database.appDao.findAppById(userId);
+    final app = await database.appDao.findAppById(userId);
 
     conversationCubit.emit(ConversationState(
       conversationId: conversationId,

@@ -382,7 +382,7 @@ class Sender {
 
   Future<void> sendNoKeyMessage(
       String conversationId, String recipientId) async {
-    final plainText = PlainJsonMessage(noKey, null, null, null, null, null)
+    final plainText = PlainJsonMessage(kNoKey, null, null, null, null, null)
         .toJson()
         .toString();
     final encoded = base64Encode(await utf8EncodeWithIsolate(plainText));
@@ -395,7 +395,7 @@ class Sender {
       status: MessageStatus.sending.toString(),
     );
     final bm = BlazeMessage(
-        id: const Uuid().v4(), action: createMessage, params: blazeParam);
+        id: const Uuid().v4(), action: kCreateMessage, params: blazeParam);
     unawaited(deliver(bm));
   }
 

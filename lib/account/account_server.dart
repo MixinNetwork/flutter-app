@@ -212,7 +212,7 @@ class AccountServer {
     if (primarySessionId != null) {
       jobSubscribers.add(database.jobDao
           .watchHasSessionAckJobs()
-          .asyncDropListen((_) => _runSessionAckJob()));
+          .asyncListen((_) => _runSessionAckJob()));
     }
 
     jobSubscribers
@@ -222,22 +222,31 @@ class AccountServer {
         database.mixinDatabase.tableUpdates(
           TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
         )
-      ]).asyncDropListen((_) => _runProcessFloodJob()))
-      ..add(database.jobDao
-          .watchHasAckJobs()
-          .asyncDropListen((_) => _runAckJob()))
-      ..add(database.jobDao
-          .watchHasPinMessageJobs()
-          .asyncDropListen((_) => _runPinJob()))
-      ..add(database.jobDao
-          .watchHasRecallMessageJobs()
-          .asyncDropListen((_) => _runRecallJob()))
-      ..add(database.jobDao
-          .watchHasSendingJobs()
-          .asyncDropListen((_) => _runSendJob()))
+      ]).asyncListen((_) => _runProcessFloodJob()))
+      ..add(database.jobDao.watchHasAckJobs().asyncListen((_) => _runAckJob()))
+      ..add(database.jobDao.watchHasSendingJobs().asyncListen((_) async {
+        while (true) {
+          final jobs = await database.jobDao.sendingJobs().get();
+          if (jobs.isEmpty) break;
+          await Future.forEach(jobs, (db.Job job) async {
+            switch (job.action) {
+              case kSendingMessage:
+                await _runSendJob(jobs);
+                break;
+              case kPinMessage:
+                await _runPinJob(jobs);
+                break;
+              case kRecallMessage:
+                await _runRecallJob(jobs);
+                break;
+            }
+            return null;
+          });
+        }
+      }))
       ..add(database.jobDao
           .watchHasUpdateAssetJobs()
-          .asyncDropListen((_) => _runUpdateAssetJob()));
+          .asyncListen((_) => _runUpdateAssetJob()));
   }
 
   Future<void> _runProcessFloodJob() async {
@@ -312,7 +321,7 @@ class AccountServer {
     );
     final jobIds = jobs.map((e) => e.jobId).toList();
     final plainText = PlainJsonMessage(
-        acknowledgeMessageReceipts, null, null, null, null, ack);
+        kAcknowledgeMessageReceipts, null, null, null, null, ack);
     final encode = await base64EncodeWithIsolate(
         await utf8EncodeWithIsolate(await jsonEncodeWithIsolate(plainText)));
     final primarySessionId = AccountKeyValue.instance.primarySessionId;
@@ -331,10 +340,7 @@ class AccountServer {
     await _runSessionAckJob();
   }
 
-  Future<void> _runRecallJob() async {
-    final jobs = await database.jobDao.recallMessageJobs().get();
-    if (jobs.isEmpty) return;
-
+  Future<void> _runRecallJob(List<db.Job> jobs) async {
     await Future.forEach(jobs, (db.Job e) async {
       final list = await utf8EncodeWithIsolate(e.blazeMessage!);
       final data = await base64EncodeWithIsolate(list);
@@ -346,7 +352,7 @@ class AccountServer {
         data: data,
       );
       final blazeMessage = BlazeMessage(
-          id: const Uuid().v4(), action: createMessage, params: blazeParam);
+          id: const Uuid().v4(), action: kCreateMessage, params: blazeParam);
       try {
         final result = await _sender.deliver(blazeMessage);
         if (result.success) {
@@ -356,14 +362,9 @@ class AccountServer {
         w('Send recall error: $e, stack: $s');
       }
     });
-
-    await _runRecallJob();
   }
 
-  Future<void> _runPinJob() async {
-    final jobs = await database.jobDao.pinMessageJobs().get();
-    if (jobs.isEmpty) return;
-
+  Future<void> _runPinJob(List<db.Job> jobs) async {
     await Future.forEach(jobs, (db.Job e) async {
       final list = await utf8EncodeWithIsolate(e.blazeMessage!);
       final data = await base64EncodeWithIsolate(list);
@@ -375,7 +376,7 @@ class AccountServer {
         data: data,
       );
       final blazeMessage = BlazeMessage(
-          id: const Uuid().v4(), action: createMessage, params: blazeParam);
+          id: const Uuid().v4(), action: kCreateMessage, params: blazeParam);
       try {
         final result = await _sender.deliver(blazeMessage);
         if (result.success) {
@@ -385,14 +386,9 @@ class AccountServer {
         w('Send pin error: $e, stack: $s');
       }
     });
-
-    await _runPinJob();
   }
 
-  Future<void> _runSendJob() async {
-    final jobs = await database.jobDao.sendingJobs().get();
-    if (jobs.isEmpty) return;
-
+  Future<void> _runSendJob(List<db.Job> jobs) async {
     Future<void> send(db.Job job) async {
       assert(job.blazeMessage != null);
       String messageId;
@@ -505,8 +501,6 @@ class AccountServer {
         w('Send job error: $e, stack: $s');
       }
     });
-
-    await _runSendJob();
   }
 
   Future<void> _runUpdateAssetJob() async {
@@ -621,7 +615,7 @@ class AccountServer {
 
     return BlazeMessage(
       id: const Uuid().v4(),
-      action: createMessage,
+      action: kCreateMessage,
       params: blazeParam,
     );
   }
@@ -786,7 +780,7 @@ class AccountServer {
     if (ids.isEmpty) return;
     final jobs = ids
         .map((id) =>
-            createAckJob(acknowledgeMessageReceipts, id, MessageStatus.read))
+            createAckJob(kAcknowledgeMessageReceipts, id, MessageStatus.read))
         .toList();
     await database.jobDao.insertAll(jobs);
     await _createReadSessionMessage(ids);
@@ -798,7 +792,7 @@ class AccountServer {
       return;
     }
     final jobs = messageIds
-        .map((id) => createAckJob(createMessage, id, MessageStatus.read))
+        .map((id) => createAckJob(kCreateMessage, id, MessageStatus.read))
         .toList();
     await database.jobDao.insertAll(jobs);
   }
@@ -1428,7 +1422,7 @@ class AccountServer {
         (() async => database.jobDao.insert(
               db.Job(
                 jobId: const Uuid().v4(),
-                action: createMessage,
+                action: kCreateMessage,
                 createdAt: DateTime.now(),
                 conversationId: conversationId,
                 runCount: 0,

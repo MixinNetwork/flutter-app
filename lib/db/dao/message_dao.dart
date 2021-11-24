@@ -46,9 +46,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   late Stream<List<MessageItem>> insertOrReplaceMessageStream = db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
-      .asyncMap(
+      .asyncBufferMap(
     (event) {
-      final ids = event.toList();
+      final ids =
+          event.reduce((value, element) => [...value, ...element]).toSet();
       return _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________) =>
@@ -57,12 +58,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   __________, ___________) =>
               Limit(ids.length, 0)).get();
     },
-  ).distinct();
+  );
 
   late Stream<NotificationMessage> notificationMessageStream = db.eventBus
       .watch<String>(DatabaseEvent.notification)
-      .bufferTime(kDefaultThrottleDuration)
-      .asyncMap((event) => db.notificationMessage(event).get())
+      .asyncBufferMap((event) => db.notificationMessage(event).get())
       .flatMapIterable((value) => Stream.value(value));
 
   late Stream<String> deleteMessageIdStream =
@@ -903,8 +903,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         return db.fuzzySearchMessageByConversationIdAndUserIdAndCategories(
           conversationId,
           userId,
-          keywordFts5,
           categories,
+          keywordFts5,
           (_, __, ___) => Limit(limit, offset),
         );
       }
@@ -922,8 +922,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       if (categories != null) {
         return db.fuzzySearchMessageByConversationIdAndCategories(
           conversationId,
-          keywordFts5,
           categories,
+          keywordFts5,
           (_, __, ___) => Limit(limit, offset),
         );
       }
@@ -964,8 +964,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         return db.fuzzySearchMessageCountByConversationIdAndUserIdAndCategories(
           conversationId,
           userId,
-          keywordFts5,
           categories,
+          keywordFts5,
         );
       }
 
@@ -981,8 +981,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       if (categories != null) {
         return db.fuzzySearchMessageCountByConversationIdAndCategories(
           conversationId,
-          keywordFts5,
           categories,
+          keywordFts5,
         );
       }
 

@@ -50,6 +50,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
       Limit Function(Snapshots snapshot, Users opponent, Assets asset,
               Assets tempAsset, Fiats fiat)
           limit) {
+    var $arrayStartIndex = 2;
     final generatedwhere = $write(
         where(
             alias(this.snapshots, 'snapshot'),
@@ -57,7 +58,9 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
             alias(this.assets, 'asset'),
             alias(this.assets, 'tempAsset'),
             alias(this.fiats, 'fiat')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedorder = $write(
         order(
             alias(this.snapshots, 'snapshot'),
@@ -65,7 +68,9 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
             alias(this.assets, 'asset'),
             alias(this.assets, 'tempAsset'),
             alias(this.fiats, 'fiat')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedorder.amountOfVariables;
     final generatedlimit = $write(
         limit(
             alias(this.snapshots, 'snapshot'),
@@ -73,7 +78,9 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
             alias(this.assets, 'asset'),
             alias(this.assets, 'tempAsset'),
             alias(this.fiats, 'fiat')),
-        hasMultipleTables: true);
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
         'SELECT snapshot.*, opponent.avatar_url, opponent.full_name AS opponent_ful_name, asset.price_usd, asset.chain_id, asset.symbol, asset.name AS symbolName, asset.tag, asset.confirmations AS asset_confirmations, asset.icon_url AS symbolIconUrl, tempAsset.icon_url AS chainIconUrl, fiat.rate AS fiatRate FROM snapshots AS snapshot LEFT JOIN users AS opponent ON opponent.user_id = snapshot.opponent_id LEFT JOIN assets AS asset ON asset.asset_id = snapshot.asset_id LEFT JOIN assets AS tempAsset ON asset.chain_id = tempAsset.asset_id LEFT JOIN fiats AS fiat ON fiat.code = ?1 WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [

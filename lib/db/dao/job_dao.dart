@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../constants/constants.dart';
@@ -28,7 +27,7 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
       insert(
         Job(
           jobId: const Uuid().v4(),
-          action: sendingMessage,
+          action: kSendingMessage,
           priority: 5,
           blazeMessage: jsonEncode({
             messageIdKey: messageId,
@@ -49,53 +48,41 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   Future<void> deleteJobById(String jobId) => batch(
       (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId))});
 
-  Stream<bool> _watchHasJobs(String action) => db
+  Stream<bool> _watchHasJobs(List<String> actions) => db
       .watchHasData(db.jobs, [],
-          db.jobs.action.equals(action) & db.jobs.blazeMessage.isNotNull())
-      .where((event) => event)
-      .throttleTime(const Duration(milliseconds: 50), trailing: true);
+          db.jobs.action.isIn(actions) & db.jobs.blazeMessage.isNotNull())
+      .where((event) => event);
 
-  Stream<bool> watchHasAckJobs() => _watchHasJobs(acknowledgeMessageReceipts);
+  Stream<bool> watchHasAckJobs() =>
+      _watchHasJobs([kAcknowledgeMessageReceipts]);
 
   SimpleSelectStatement<Jobs, Job> ackJobs() => select(db.jobs)
     ..where((Jobs row) =>
-        row.action.equals(acknowledgeMessageReceipts) &
+        row.action.equals(kAcknowledgeMessageReceipts) &
         row.blazeMessage.isNotNull())
     ..limit(100);
 
-  Stream<bool> watchHasSessionAckJobs() => _watchHasJobs(createMessage);
+  Stream<bool> watchHasSessionAckJobs() => _watchHasJobs([kCreateMessage]);
 
   SimpleSelectStatement<Jobs, Job> sessionAckJobs() => select(db.jobs)
     ..where((Jobs row) =>
-        row.action.equals(createMessage) & row.blazeMessage.isNotNull())
+        row.action.equals(kCreateMessage) & row.blazeMessage.isNotNull())
     ..limit(100);
 
-  Stream<bool> watchHasRecallMessageJobs() => _watchHasJobs(recallMessage);
-
-  SimpleSelectStatement<Jobs, Job> recallMessageJobs() => select(db.jobs)
-    ..where((Jobs row) =>
-        row.action.equals(recallMessage) & row.blazeMessage.isNotNull())
-    ..limit(100);
-
-  Stream<bool> watchHasPinMessageJobs() => _watchHasJobs(pinMessage);
-
-  SimpleSelectStatement<Jobs, Job> pinMessageJobs() => select(db.jobs)
-    ..where((Jobs row) =>
-        row.action.equals(pinMessage) & row.blazeMessage.isNotNull())
-    ..limit(100);
-
-  Stream<bool> watchHasSendingJobs() => _watchHasJobs(sendingMessage);
+  Stream<bool> watchHasSendingJobs() =>
+      _watchHasJobs([kSendingMessage, kPinMessage, kRecallMessage]);
 
   SimpleSelectStatement<Jobs, Job> sendingJobs() => select(db.jobs)
     ..where((Jobs row) =>
-        row.action.equals(sendingMessage) & row.blazeMessage.isNotNull())
+        row.action.isIn([kSendingMessage, kPinMessage, kRecallMessage]) &
+        row.blazeMessage.isNotNull())
     ..limit(100);
 
-  Stream<bool> watchHasUpdateAssetJobs() => _watchHasJobs(updateAsset);
+  Stream<bool> watchHasUpdateAssetJobs() => _watchHasJobs([kUpdateAsset]);
 
   SimpleSelectStatement<Jobs, Job> updateAssetJobs() => select(db.jobs)
     ..where((Jobs row) =>
-        row.action.equals(updateAsset) & row.blazeMessage.isNotNull())
+        row.action.equals(kUpdateAsset) & row.blazeMessage.isNotNull())
     ..limit(100);
 
   Future<Job?> ackJobById(String jobId) =>
@@ -114,12 +101,12 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   }
 
   Future<void> insertUpdateAssetJob(Job job) async {
-    assert(job.action == updateAsset);
+    assert(job.action == kUpdateAsset);
 
     final exists = await db.hasData(
         db.jobs,
         [],
-        db.jobs.action.equals(updateAsset) &
+        db.jobs.action.equals(kUpdateAsset) &
             db.jobs.blazeMessage.equals(job.blazeMessage).not());
     if (!exists) await insert(job);
   }

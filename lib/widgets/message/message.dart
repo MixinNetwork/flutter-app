@@ -17,6 +17,7 @@ import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
+import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../ui/home/bloc/recall_message_bloc.dart';
 import '../../utils/datetime_format_utils.dart';
@@ -420,19 +421,10 @@ class _PinMenu extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final role = useMemoizedStream(
-      () {
-        if (message.conversionCategory == ConversationCategory.contact) {
-          return Stream.value(ParticipantRole.owner);
-        }
-        return context.database.participantDao
-            .participantById(
-                message.conversationId, context.multiAuthState.currentUserId!)
-            .watchSingleOrNull()
-            .map((event) => event?.role);
-      },
-      keys: [message.conversionCategory, message.conversationId],
-    ).data;
+    final role = useBlocStateConverter<ConversationCubit, ConversationState?,
+        ParticipantRole?>(
+      converter: (state) => state?.role,
+    );
 
     if (role == null) return const SizedBox();
 
