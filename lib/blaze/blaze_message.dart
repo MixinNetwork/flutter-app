@@ -45,32 +45,32 @@ class BlazeMessage {
 
   // ignore: prefer_expression_function_bodies
   bool isReceiveMessageAction() {
-    return action == createMessage ||
-        action == acknowledgeMessageReceipt ||
-        action == createCall ||
-        action == createKraken;
+    return action == kCreateMessage ||
+        action == kAcknowledgeMessageReceipt ||
+        action == kCreateCall ||
+        action == kCreateKraken;
   }
 }
 
 BlazeMessage createParamBlazeMessage(BlazeMessageParam param) =>
-    BlazeMessage(id: const Uuid().v4(), action: createMessage, params: param);
+    BlazeMessage(id: const Uuid().v4(), action: kCreateMessage, params: param);
 
 BlazeMessage createPendingBlazeMessage(BlazeMessageParamOffset offset) =>
     BlazeMessage(
-        id: const Uuid().v4(), action: listPendingMessage, params: offset);
+        id: const Uuid().v4(), action: kListPendingMessage, params: offset);
 
 BlazeMessage createConsumeSessionSignalKeys(BlazeMessageParam param) =>
     BlazeMessage(
-        id: const Uuid().v4(), action: consumeSessionSignalKeys, params: param);
+        id: const Uuid().v4(), action: kConsumeSessionSignalKeys, params: param);
 
 BlazeMessage createSignalKeyMessage(BlazeMessageParam param) => BlazeMessage(
-    id: const Uuid().v4(), action: createSignalKeyMessages, params: param);
+    id: const Uuid().v4(), action: kCreateSignalKeyMessages, params: param);
 
 BlazeMessage createCountSignalKeys() =>
-    BlazeMessage(id: const Uuid().v4(), action: countSignalKeys);
+    BlazeMessage(id: const Uuid().v4(), action: kCountSignalKeys);
 
 BlazeMessage createSyncSignalKeys(BlazeMessageParam param) =>
-    BlazeMessage(id: const Uuid().v4(), action: syncSignalKeys, params: param);
+    BlazeMessage(id: const Uuid().v4(), action: kSyncSignalKeys, params: param);
 
 BlazeMessageParam createConsumeSignalKeysParam(
         List<BlazeMessageParamSession> recipients) =>

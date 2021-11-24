@@ -115,7 +115,7 @@ class Blaze {
         localTimeErrorStreamController.add(false);
         d('blazeMessage receive: ${blazeMessage.toJson()}');
 
-        if (blazeMessage.action == errorAction &&
+        if (blazeMessage.action == kErrorAction &&
             blazeMessage.error?.code == authentication) {
           await reconnect();
           return;
@@ -170,11 +170,11 @@ class Blaze {
       d('blazeMessage not a BlazeMessageData');
       return;
     }
-    if (blazeMessage.action == acknowledgeMessageReceipt) {
+    if (blazeMessage.action == kAcknowledgeMessageReceipt) {
       await makeMessageStatus(data.messageId, data.status);
       await database.offsetDao.insert(Offset(
           key: statusOffset, timestamp: data.updatedAt.toIso8601String()));
-    } else if (blazeMessage.action == createMessage) {
+    } else if (blazeMessage.action == kCreateMessage) {
       if (data.userId == userId &&
           (data.category == null || data.conversationId.isEmpty)) {
         await makeMessageStatus(data.messageId, data.status);
@@ -184,13 +184,13 @@ class Blaze {
             data: await jsonEncodeWithIsolate(data),
             createdAt: data.createdAt));
       }
-    } else if (blazeMessage.action == createCall ||
-        blazeMessage.action == createKraken) {
+    } else if (blazeMessage.action == kCreateCall ||
+        blazeMessage.action == kCreateKraken) {
       await database.jobDao.insertNoReplace(createAckJob(
-          acknowledgeMessageReceipts, data.messageId, MessageStatus.read));
+          kAcknowledgeMessageReceipts, data.messageId, MessageStatus.read));
     } else {
       await database.jobDao.insertNoReplace(createAckJob(
-          acknowledgeMessageReceipts, data.messageId, MessageStatus.delivered));
+          kAcknowledgeMessageReceipts, data.messageId, MessageStatus.delivered));
     }
     if (stopwatch != null) {
       d('handle execution time: ${stopwatch.elapsedMilliseconds}');

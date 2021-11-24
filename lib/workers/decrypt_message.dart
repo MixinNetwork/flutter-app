@@ -234,14 +234,14 @@ class DecryptMessage extends Injector {
     if (data.category == MessageCategory.plainJson) {
       final plainJsonMessage = PlainJsonMessage.fromJson(
           await _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
-      if (plainJsonMessage.action == acknowledgeMessageReceipts) {
+      if (plainJsonMessage.action == kAcknowledgeMessageReceipts) {
         if (plainJsonMessage.ackMessages?.isNotEmpty != true) {
           return;
         }
         await _markMessageStatus(plainJsonMessage.ackMessages!);
-      } else if (plainJsonMessage.action == resendMessages) {
+      } else if (plainJsonMessage.action == kResendMessages) {
         await _processResendMessage(data, plainJsonMessage);
-      } else if (plainJsonMessage.action == resendKey) {
+      } else if (plainJsonMessage.action == kResendKey) {
         if (await _signalProtocol.containsUserSession(data.userId)) {
           unawaited(_sender.sendProcessSignalKey(
               data, ProcessSignalKeyAction.resendKey));
@@ -951,7 +951,7 @@ class DecryptMessage extends Injector {
     await database.snapshotDao.insert(snapshot);
     await database.jobDao.insertUpdateAssetJob(Job(
       jobId: const Uuid().v4(),
-      action: updateAsset,
+      action: kUpdateAsset,
       priority: 5,
       runCount: 0,
       createdAt: DateTime.now(),
@@ -979,7 +979,7 @@ class DecryptMessage extends Injector {
       return;
     }
     await database.jobDao.insertNoReplace(
-        createAckJob(acknowledgeMessageReceipts, messageId, status));
+        createAckJob(kAcknowledgeMessageReceipts, messageId, status));
   }
 
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
@@ -1136,7 +1136,7 @@ class DecryptMessage extends Injector {
   Future<void> _requestResendKey(String conversationId, String recipientId,
       String messageId, String? sessionId) async {
     final plainJsonMessage =
-        PlainJsonMessage(resendKey, null, null, messageId, null, null);
+        PlainJsonMessage(kResendKey, null, null, messageId, null, null);
     final encoded = await _jsonEncodeWithIsolate(plainJsonMessage);
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, recipientId, encoded,
@@ -1159,7 +1159,7 @@ class DecryptMessage extends Injector {
       return;
     }
     final plainJsonMessage = PlainJsonMessage(
-        resendMessages, messages.reversed.toList(), null, null, null, null);
+        kResendMessages, messages.reversed.toList(), null, null, null, null);
     final encoded = await _jsonEncodeWithIsolate(plainJsonMessage);
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, userId, encoded,

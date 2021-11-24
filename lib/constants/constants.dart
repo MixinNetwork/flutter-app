@@ -3,26 +3,26 @@ const systemUser = '00000000-0000-0000-0000-000000000000';
 const scp =
     'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE';
 
-const acknowledgeMessageReceipt = 'ACKNOWLEDGE_MESSAGE_RECEIPT';
-const acknowledgeMessageReceipts = 'ACKNOWLEDGE_MESSAGE_RECEIPTS';
-const sendingMessage = 'SENDING_MESSAGE';
-const recallMessage = 'RECALL_MESSAGE';
-const pinMessage = 'PIN_MESSAGE';
-const resendMessages = 'RESEND_MESSAGES';
-const createMessage = 'CREATE_MESSAGE';
-const createCall = 'CREATE_CALL';
-const createKraken = 'CREATE_KRAKEN';
-const listPendingMessage = 'LIST_PENDING_MESSAGES';
-const resendKey = 'RESEND_KEY';
-const noKey = 'NO_KEY';
-const errorAction = 'ERROR';
-const consumeSessionSignalKeys = 'CONSUME_SESSION_SIGNAL_KEYS';
-const createSignalKeyMessages = 'CREATE_SIGNAL_KEY_MESSAGES';
-const countSignalKeys = 'COUNT_SIGNAL_KEYS';
-const syncSignalKeys = 'SYNC_SIGNAL_KEYS';
+const kAcknowledgeMessageReceipt = 'ACKNOWLEDGE_MESSAGE_RECEIPT';
+const kAcknowledgeMessageReceipts = 'ACKNOWLEDGE_MESSAGE_RECEIPTS';
+const kSendingMessage = 'SENDING_MESSAGE';
+const kRecallMessage = 'RECALL_MESSAGE';
+const kPinMessage = 'PIN_MESSAGE';
+const kResendMessages = 'RESEND_MESSAGES';
+const kCreateMessage = 'CREATE_MESSAGE';
+const kCreateCall = 'CREATE_CALL';
+const kCreateKraken = 'CREATE_KRAKEN';
+const kListPendingMessage = 'LIST_PENDING_MESSAGES';
+const kResendKey = 'RESEND_KEY';
+const kNoKey = 'NO_KEY';
+const kErrorAction = 'ERROR';
+const kConsumeSessionSignalKeys = 'CONSUME_SESSION_SIGNAL_KEYS';
+const kCreateSignalKeyMessages = 'CREATE_SIGNAL_KEY_MESSAGES';
+const kCountSignalKeys = 'COUNT_SIGNAL_KEYS';
+const kSyncSignalKeys = 'SYNC_SIGNAL_KEYS';
 
 // Only from local.
-const updateAsset = 'LOCAL_UPDATE_ASSET';
+const kUpdateAsset = 'LOCAL_UPDATE_ASSET';
 
 const mixinScheme = 'mixin';
 const mixinHost = 'mixin.one';

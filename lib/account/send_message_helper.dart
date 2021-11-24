@@ -556,7 +556,7 @@ class SendMessageHelper {
         await _jobDao.insert(Job(
             conversationId: conversationId,
             jobId: const Uuid().v4(),
-            action: recallMessage,
+            action: kRecallMessage,
             priority: 5,
             blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
             createdAt: DateTime.now(),
@@ -1056,7 +1056,7 @@ class SendMessageHelper {
       Job(
         conversationId: conversationId,
         jobId: const Uuid().v4(),
-        action: pinMessage,
+        action: kPinMessage,
         priority: 5,
         blazeMessage: encoded,
         createdAt: DateTime.now(),
