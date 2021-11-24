@@ -171,7 +171,7 @@ class _InputContainer extends HookWidget {
         final focusContext = FocusManager.instance.primaryFocus?.context;
         if (focusContext == null) return;
         final focusWidget = focusContext.widget;
-        if (focusWidget is EditableText || focusWidget is Focus) return;
+        if (focusWidget is Focus) return;
         if (!value.firstInputable) return;
 
         final subtreeContext = ModalRoute.of(focusContext)?.subtreeContext;
