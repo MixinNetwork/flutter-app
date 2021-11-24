@@ -190,7 +190,9 @@ class Blaze {
           kAcknowledgeMessageReceipts, data.messageId, MessageStatus.read));
     } else {
       await database.jobDao.insertNoReplace(createAckJob(
-          kAcknowledgeMessageReceipts, data.messageId, MessageStatus.delivered));
+          kAcknowledgeMessageReceipts,
+          data.messageId,
+          MessageStatus.delivered));
     }
     if (stopwatch != null) {
       d('handle execution time: ${stopwatch.elapsedMilliseconds}');

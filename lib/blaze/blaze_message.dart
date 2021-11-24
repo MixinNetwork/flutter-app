@@ -61,7 +61,9 @@ BlazeMessage createPendingBlazeMessage(BlazeMessageParamOffset offset) =>
 
 BlazeMessage createConsumeSessionSignalKeys(BlazeMessageParam param) =>
     BlazeMessage(
-        id: const Uuid().v4(), action: kConsumeSessionSignalKeys, params: param);
+        id: const Uuid().v4(),
+        action: kConsumeSessionSignalKeys,
+        params: param);
 
 BlazeMessage createSignalKeyMessage(BlazeMessageParam param) => BlazeMessage(
     id: const Uuid().v4(), action: kCreateSignalKeyMessages, params: param);

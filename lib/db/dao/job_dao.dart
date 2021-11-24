@@ -53,7 +53,8 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
           db.jobs.action.isIn(actions) & db.jobs.blazeMessage.isNotNull())
       .where((event) => event);
 
-  Stream<bool> watchHasAckJobs() => _watchHasJobs([kAcknowledgeMessageReceipts]);
+  Stream<bool> watchHasAckJobs() =>
+      _watchHasJobs([kAcknowledgeMessageReceipts]);
 
   SimpleSelectStatement<Jobs, Job> ackJobs() => select(db.jobs)
     ..where((Jobs row) =>
