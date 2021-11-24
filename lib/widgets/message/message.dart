@@ -103,6 +103,8 @@ T useMessageConverter<T>({required T Function(MessageItem) converter}) =>
 
 extension MessageContext on BuildContext {
   MessageItem get message => read<_MessageContextCubit>().state.message;
+
+  bool get isPinnedPage => read<_MessageContextCubit>().state.isPinnedPage;
 }
 
 const _pinArrowWidth = 32.0;

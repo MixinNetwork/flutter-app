@@ -157,22 +157,20 @@ class _InputContainer extends HookWidget {
     useEffect(() {
       void onListen(RawKeyEvent value) {
         if (!isAppActive) return;
-        final focusContext = FocusManager.instance.primaryFocus?.context;
-        if (focusContext == null) return;
-        final focusWidget = focusContext.widget;
-        if (focusWidget is EditableText) return;
         if (!value.firstInputable) return;
 
-        final subtreeContext = ModalRoute.of(focusContext)?.subtreeContext;
-        if (subtreeContext == null) return;
+        final primaryFocus = FocusManager.instance.primaryFocus;
+        final focusContext = primaryFocus?.context;
+        if (focusContext == null) return;
+        final focusWidget = focusContext.widget;
+        final isEditableText = focusWidget is Focus &&
+            focusWidget.child is Scrollable &&
+            (focusWidget.child as Scrollable).restorationId == 'editable';
+        if (isEditableText) return;
 
-        var found = false;
-        context.visitAncestorElements((element) {
-          found = subtreeContext == element;
-          return !found;
-        });
+        if (ModalRoute.of(focusContext) != ModalRoute.of(context)) return;
 
-        if (!found) return;
+        if (primaryFocus == focusNode) return;
 
         focusNode.requestFocus();
       }
