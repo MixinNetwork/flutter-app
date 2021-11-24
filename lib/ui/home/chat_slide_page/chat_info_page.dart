@@ -432,10 +432,12 @@ class ChatInfoPage extends HookWidget {
                       context.l10n.reportWarning,
                     );
                     if (!result) return;
+                    final userId = conversation.userId;
+                    if (userId == null) return;
 
                     await runFutureWithToast(
                       context,
-                      accountServer.report(conversationId),
+                      accountServer.report(userId),
                     );
                   },
                 ),
