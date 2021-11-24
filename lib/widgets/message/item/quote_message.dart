@@ -10,6 +10,7 @@ import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../ui/home/bloc/blink_cubit.dart';
+import '../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
 import '../../../utils/color_utils.dart';
@@ -366,8 +367,20 @@ class _QuoteMessageBase extends StatelessWidget {
             onTap!();
             return;
           }
-          context.read<PendingJumpMessageCubit>().emit(messageId);
           context.read<BlinkCubit>().blinkByMessageId(quoteMessageId);
+
+          try {
+            if (context.isPinnedPage) {
+              ConversationCubit.selectConversation(
+                context,
+                context.message.conversationId,
+                initIndexMessageId: quoteMessageId,
+              );
+              return;
+            }
+          } catch (_) {}
+
+          context.read<PendingJumpMessageCubit>().emit(messageId);
           context.read<MessageBloc>().scrollTo(quoteMessageId);
         },
         behavior: HitTestBehavior.opaque,
