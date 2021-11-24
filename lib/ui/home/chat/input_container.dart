@@ -174,11 +174,10 @@ class _InputContainer extends HookWidget {
         final focusContext = primaryFocus?.context;
         if (focusContext == null) return;
         final focusWidget = focusContext.widget;
-        if (focusWidget is Focus &&
+        final isEditableText = focusWidget is Focus &&
             focusWidget.child is Scrollable &&
-            (focusWidget.child as Scrollable).restorationId == 'editable') {
-          return;
-        }
+            (focusWidget.child as Scrollable).restorationId == 'editable';
+        if (isEditableText) return;
 
         if (ModalRoute.of(focusContext) != ModalRoute.of(context)) return;
 
