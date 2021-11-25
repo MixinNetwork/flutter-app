@@ -180,7 +180,10 @@ class ImageMessageLayout extends StatelessWidget {
                 minWidth)
             .toDouble();
         final aspectRatio = imageWidthInPixel / imageHeightInPixel;
-        final height = width / aspectRatio;
+        final height = min(
+          width / aspectRatio,
+          MediaQuery.of(context).size.height * 2 / 3,
+        );
         return builder(context, width, height);
       });
 }
