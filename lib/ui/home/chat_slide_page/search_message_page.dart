@@ -50,9 +50,6 @@ class SearchMessagePage extends HookWidget {
 
     final selectedCategories = useState<List<String>?>(null);
 
-    final isGroup = useMemoized(
-        () => context.read<ConversationCubit>().state?.isGroup ?? false);
-
     final focusNode = useFocusNode();
     final editingController = useTextEditingController();
     final userMode = useState(false);
@@ -173,7 +170,7 @@ class SearchMessagePage extends HookWidget {
                   alignment: Alignment.centerLeft,
                   child: Builder(
                     builder: (context) {
-                      if (!isGroup || userMode.value) return const SizedBox();
+                      if (userMode.value) return const SizedBox();
                       return SizedBox(
                         height: 36,
                         child: ActionButton(
@@ -390,10 +387,25 @@ class _SearchParticipantList extends HookWidget {
                 .throttleTime(const Duration(milliseconds: 100), trailing: true)
                 .map((event) => event.text)
                 .switchMap((value) {
-              final conversationId =
-                  context.read<ConversationCubit>().state?.conversationId;
+              final state = context.read<ConversationCubit>().state;
+              final conversationId = state?.conversationId;
               if (conversationId == null) return Stream.value(<User>[]);
               final userDao = context.database.userDao;
+
+              if (state?.isBot ?? false) {
+                if (value.isEmpty) {
+                  return userDao.friends().watchThrottle(kSlowThrottleDuration);
+                } else {
+                  return userDao
+                      .fuzzySearchBotGroupUser(
+                        currentUserId:
+                            context.multiAuthCubit.state.currentUserId ?? '',
+                        conversationId: conversationId,
+                        keyword: value,
+                      )
+                      .watchThrottle(kVerySlowThrottleDuration);
+                }
+              }
 
               if (value.isEmpty) {
                 return userDao
