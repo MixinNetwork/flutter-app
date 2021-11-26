@@ -12684,7 +12684,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<int> fuzzySearchMessageCount(String query) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.message_id = fts.message_id',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?1)) AS fts WHERE m.message_id = fts.message_id',
         variables: [
           Variable<String>(query)
         ],
@@ -12700,7 +12700,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final expandedcategories = $expandVar($arrayStartIndex, categories.length);
     $arrayStartIndex += categories.length;
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?1)) AS fts WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id',
         variables: [
           Variable<String>(query),
           for (var $ in categories) Variable<String>($)
@@ -12725,7 +12725,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?1)) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
           for (var $ in categories) Variable<String>($),
@@ -12761,7 +12761,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem> fuzzySearchMessage(
       String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?1)) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
         variables: [
           Variable<String>(query),
           Variable<int>(limit),
@@ -12840,7 +12840,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<int> fuzzySearchMessageCountByConversationId(
       String conversationId, String query) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2)',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?2))',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query)
@@ -12857,7 +12857,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final expandedcategories = $expandVar($arrayStartIndex, categories.length);
     $arrayStartIndex += categories.length;
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2)',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?2))',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -12872,7 +12872,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<int> fuzzySearchMessageCountByConversationIdAndUserId(
       String conversationId, String userId, String query) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3)',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?3))',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -12893,7 +12893,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final expandedcategories = $expandVar($arrayStartIndex, categories.length);
     $arrayStartIndex += categories.length;
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3)',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?3))',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -12922,7 +12922,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?2)) ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -12959,7 +12959,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
       String conversationId, String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) ORDER BY m.created_at DESC LIMIT ?3 OFFSET ?4',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?2)) ORDER BY m.created_at DESC LIMIT ?3 OFFSET ?4',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -13058,7 +13058,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?3)) ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -13097,7 +13097,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       fuzzySearchMessageByConversationIdAndUserId(String conversationId,
           String userId, String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) ORDER BY m.created_at DESC LIMIT ?4 OFFSET ?5',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?3)) ORDER BY m.created_at DESC LIMIT ?4 OFFSET ?5',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),

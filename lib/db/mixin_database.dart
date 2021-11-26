@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/isolate.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart';
+import 'package:fts5_simple/fts5_simple.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 
@@ -193,7 +194,9 @@ class MixinDatabase extends _$MixinDatabase {
 }
 
 LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
-      final vmDatabase = NativeDatabase(dbFile);
+      final vmDatabase = NativeDatabase(dbFile, setup: (database) {
+        database.loadSimpleExtension();
+      });
       if (!kDebugMode) {
         return vmDatabase;
       }

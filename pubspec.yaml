@@ -55,6 +55,11 @@ dependencies:
   flutter_markdown: ^0.6.6
   flutter_portal: ^0.4.0
   flutter_svg: ^0.23.0+1
+  fts5_simple:
+    git:
+      url: https://github.com/MixinNetwork/flutter-plugins.git
+      ref: d105c2431a65c2439517f38db960c90966e47ee2
+      path: packages/fts5_simple
   hive: ^2.0.4
   hive_flutter: ^1.0.0
   http: ^0.13.3
@@ -126,8 +131,8 @@ dependency_overrides:
       path: drift_dev
   sqlparser:
     git:
-      url: https://github.com/simolus3/moor.git
-      ref: 871f1e4198da994060b02a9eaef9a809d5750918
+      url: https://github.com/boyan01/moor.git
+      ref: b5d32ee21a6895a25a49df94ad62ebf85e2f10d9
       path: sqlparser
 
 dev_dependencies:

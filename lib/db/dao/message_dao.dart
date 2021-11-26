@@ -897,7 +897,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String? userId,
     List<String>? categories,
   }) {
-    final keywordFts5 = query.trim().escapeFts5();
+    final keywordFts5 = query.trim();
     if (conversationId != null && userId != null) {
       if (categories != null) {
         return db.fuzzySearchMessageByConversationIdAndUserIdAndCategories(
@@ -957,7 +957,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String? userId,
     List<String>? categories,
   }) {
-    final keywordFts5 = keyword.trim().escapeFts5();
+    final keywordFts5 = keyword.trim();
 
     if (conversationId != null && userId != null) {
       if (categories != null) {
@@ -1006,7 +1006,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     required int limit,
     int offset = 0,
   }) {
-    final keywordFts5 = query.trim().escapeFts5();
+    final keywordFts5 = query.trim();
 
     return db.fuzzySearchMessageByConversationIdAndUserId(
       conversationId,
@@ -1025,7 +1025,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }) =>
       db.fuzzySearchMessageByConversationId(
         conversationId,
-        query.trim().escapeFts5(),
+        query.trim(),
         limit,
         offset,
       );
@@ -1057,7 +1057,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           db.fuzzySearchMessageByConversationIdAndUserId(
             conversationId,
             userId,
-            query.trim().escapeFts5(),
+            query.trim(),
             limit,
             offset,
           );
