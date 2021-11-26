@@ -1225,6 +1225,7 @@ class DecryptMessage extends Injector {
           return TranscriptMessage.fromJson(e as Map<String, dynamic>);
         })
         .where((transcript) => transcript.transcriptId == data.messageId)
+        .whereNotNull()
         .toList();
 
     if (transcripts.isEmpty) {

@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
@@ -118,6 +117,7 @@ class AttachmentUtil extends ChangeNotifier {
       category,
       conversationId,
       messageId,
+      message?.name ?? transcriptMessage?.mediaName,
       mimeType: attachmentMessage?.mimeType ??
           message?.mediaMimeType ??
           transcriptMessage?.mediaMimeType,
@@ -331,7 +331,8 @@ class AttachmentUtil extends ChangeNotifier {
   File getAttachmentFile(
     String category,
     String conversationId,
-    String messageId, {
+    String messageId,
+    String? mediaName, {
     String? mimeType,
     bool isTranscript = false,
   }) {
@@ -354,10 +355,9 @@ class AttachmentUtil extends ChangeNotifier {
     } else if (category.isAudio) {
       suffix = 'ogg';
     } else {
-      assert(mimeType != null);
-      suffix = extensionFromMime(mimeType!);
+      suffix = mediaName?.fileExtension ?? '';
     }
-    return File(p.join(path, '$messageId.$suffix'));
+    return File(p.join(path, '$messageId$suffix'));
   }
 
   bool _equalsIgnoreCase(String? string1, String? string2) =>
