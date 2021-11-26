@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -6,10 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../account/account_server.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
 import '../../bloc/simple_cubit.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
@@ -22,8 +25,10 @@ import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../ui/home/bloc/recall_message_bloc.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/file.dart';
 import '../../utils/hook.dart';
 import '../menu.dart';
+import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
 import 'item/action/action_message.dart';
 import 'item/action_card/action_card_data.dart';
@@ -283,6 +288,16 @@ class MessageItemWidget extends HookWidget {
                         }
                       },
                     ),
+                  if (message.mediaStatus == MediaStatus.done &&
+                      message.mediaUrl?.isNotEmpty == true &&
+                      (message.type.isData ||
+                          message.type.isImage ||
+                          message.type.isVideo))
+                    ContextMenu(
+                      title: context.l10n.saveAs,
+                      onTap: () => saveAs(context, context.accountServer,
+                          message, isTranscriptPage),
+                    ),
                   if (!isTranscriptPage)
                     ContextMenu(
                       title: context.l10n.deleteForMe,
@@ -408,6 +423,26 @@ class MessageItemWidget extends HookWidget {
         child: child,
       ),
     );
+  }
+}
+
+Future<void> saveAs(BuildContext context, AccountServer accountServer,
+    MessageItem message, bool isTranscriptPage) async {
+  final path =
+      accountServer.convertMessageAbsolutePath(message, isTranscriptPage);
+  if (Platform.isAndroid || Platform.isIOS) {
+    await OpenFile.open(path);
+  } else {
+    try {
+      final result = await saveFileToSystem(
+        context,
+        path,
+        suggestName: message.mediaName,
+      );
+      if (result) return showToastSuccessful(context);
+    } catch (error) {
+      return showToastFailed(context, error);
+    }
   }
 }
 

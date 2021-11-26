@@ -13,7 +13,6 @@ import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
-import '../../../../utils/file.dart';
 import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
@@ -400,18 +399,8 @@ class _Bar extends StatelessWidget {
             size: 20,
             onTap: () async {
               if (message.mediaUrl?.isEmpty ?? true) return;
-              await saveFileToSystem(
-                context,
-                context.accountServer
-                    .convertMessageAbsolutePath(message, isTranscriptPage),
-                suggestName: message.mediaName,
-              ).then((succeed) {
-                if (succeed) {
-                  showToastSuccessful(context);
-                }
-              }).onError((error, stackTrace) {
-                showToastFailed(context, error);
-              });
+              await saveAs(
+                  context, context.accountServer, message, isTranscriptPage);
             },
           ),
           const SizedBox(width: 14),

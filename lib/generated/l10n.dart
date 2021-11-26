@@ -2389,6 +2389,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Save as`
+  String get saveAs {
+    return Intl.message(
+      'Save as',
+      name: 'saveAs',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
