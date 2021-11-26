@@ -1,18 +1,14 @@
-import 'dart:io';
-
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../constants/brightness_theme_data.dart';
 import '../../../enum/media_status.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/file.dart';
 import '../../interactive_decorated_box.dart';
 import '../../status.dart';
 import '../message.dart';
@@ -64,15 +60,8 @@ class FileMessage extends HookWidget {
           } else if (message.mediaStatus == MediaStatus.done &&
               message.mediaUrl != null) {
             if (message.mediaUrl?.isEmpty ?? true) return;
-
-            final path = context.accountServer
-                .convertMessageAbsolutePath(message, isTranscriptPage);
-            if (Platform.isAndroid || Platform.isIOS) {
-              await OpenFile.open(path);
-            } else {
-              await saveFileToSystem(context, path,
-                  suggestName: message.mediaName);
-            }
+            await saveAs(
+                context, context.accountServer, message, isTranscriptPage);
           } else if (message.mediaStatus == MediaStatus.pending) {
             await context.accountServer
                 .cancelProgressAttachmentJob(message.messageId);
