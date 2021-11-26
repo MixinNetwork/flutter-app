@@ -118,6 +118,8 @@ class Resources {
 
   static const String assetsImagesIcFileSvg = 'assets/images/ic_file.svg';
 
+  static const String assetsImagesIcForwardSvg = 'assets/images/ic_forward.svg';
+
   static const String assetsImagesIcNotificationSvg =
       'assets/images/ic_notification.svg';
 
@@ -246,6 +248,9 @@ class Resources {
   static const String assetsImagesVideoCallSvg = 'assets/images/video_call.svg';
 
   static const String assetsImagesWarningSvg = 'assets/images/warning.svg';
+
+  static const String assetsImagesWebViewRefreshSvg =
+      'assets/images/web_view_refresh.svg';
 
   static const String assetsImagesZoomInSvg = 'assets/images/zoom_in.svg';
 

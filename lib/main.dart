@@ -19,11 +19,18 @@ import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
 import 'utils/logger.dart';
+import 'utils/webview.dart';
 
 final packageInfoFuture = PackageInfo.fromPlatform();
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // show custom web view navigation bar.
+  if (runWebViewNavigationBar(args)) {
+    return;
+  }
+
   initAppLifecycleObserver();
 
   final result = await Future.wait<dynamic>([

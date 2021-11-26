@@ -11,6 +11,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   flutter_app_icon_badge
   pasteboard
+  quick_breakpad
   system_clock
   system_tray
   url_launcher_windows
