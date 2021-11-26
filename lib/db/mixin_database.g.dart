@@ -6742,7 +6742,8 @@ class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
   bool get dontWriteConstraints => true;
 }
 
-class MessagesFt extends DataClass implements Insertable<MessagesFt> {
+class MessagesFtsV2Data extends DataClass
+    implements Insertable<MessagesFtsV2Data> {
   String messageId;
   String conversationId;
   String content;
@@ -6750,7 +6751,7 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
   String userId;
   String reservedInt;
   String reservedText;
-  MessagesFt(
+  MessagesFtsV2Data(
       {required this.messageId,
       required this.conversationId,
       required this.content,
@@ -6758,9 +6759,10 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
       required this.userId,
       required this.reservedInt,
       required this.reservedText});
-  factory MessagesFt.fromData(Map<String, dynamic> data, {String? prefix}) {
+  factory MessagesFtsV2Data.fromData(Map<String, dynamic> data,
+      {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    return MessagesFt(
+    return MessagesFtsV2Data(
       messageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
       conversationId: const StringType()
@@ -6790,8 +6792,8 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
     return map;
   }
 
-  MessagesFtsCompanion toCompanion(bool nullToAbsent) {
-    return MessagesFtsCompanion(
+  MessagesFtsV2Companion toCompanion(bool nullToAbsent) {
+    return MessagesFtsV2Companion(
       messageId: Value(messageId),
       conversationId: Value(conversationId),
       content: Value(content),
@@ -6802,10 +6804,10 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
     );
   }
 
-  factory MessagesFt.fromJson(Map<String, dynamic> json,
+  factory MessagesFtsV2Data.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return MessagesFt(
+    return MessagesFtsV2Data(
       messageId: serializer.fromJson<String>(json['message_id']),
       conversationId: serializer.fromJson<String>(json['conversation_id']),
       content: serializer.fromJson<String>(json['content']),
@@ -6829,7 +6831,7 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
     };
   }
 
-  MessagesFt copyWith(
+  MessagesFtsV2Data copyWith(
           {String? messageId,
           String? conversationId,
           String? content,
@@ -6837,7 +6839,7 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
           String? userId,
           String? reservedInt,
           String? reservedText}) =>
-      MessagesFt(
+      MessagesFtsV2Data(
         messageId: messageId ?? this.messageId,
         conversationId: conversationId ?? this.conversationId,
         content: content ?? this.content,
@@ -6848,7 +6850,7 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
       );
   @override
   String toString() {
-    return (StringBuffer('MessagesFt(')
+    return (StringBuffer('MessagesFtsV2Data(')
           ..write('messageId: $messageId, ')
           ..write('conversationId: $conversationId, ')
           ..write('content: $content, ')
@@ -6866,7 +6868,7 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is MessagesFt &&
+      (other is MessagesFtsV2Data &&
           other.messageId == this.messageId &&
           other.conversationId == this.conversationId &&
           other.content == this.content &&
@@ -6876,7 +6878,7 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
           other.reservedText == this.reservedText);
 }
 
-class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
+class MessagesFtsV2Companion extends UpdateCompanion<MessagesFtsV2Data> {
   Value<String> messageId;
   Value<String> conversationId;
   Value<String> content;
@@ -6884,7 +6886,7 @@ class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
   Value<String> userId;
   Value<String> reservedInt;
   Value<String> reservedText;
-  MessagesFtsCompanion({
+  MessagesFtsV2Companion({
     this.messageId = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.content = const Value.absent(),
@@ -6893,7 +6895,7 @@ class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
     this.reservedInt = const Value.absent(),
     this.reservedText = const Value.absent(),
   });
-  MessagesFtsCompanion.insert({
+  MessagesFtsV2Companion.insert({
     required String messageId,
     required String conversationId,
     required String content,
@@ -6908,7 +6910,7 @@ class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
         userId = Value(userId),
         reservedInt = Value(reservedInt),
         reservedText = Value(reservedText);
-  static Insertable<MessagesFt> custom({
+  static Insertable<MessagesFtsV2Data> custom({
     Expression<String>? messageId,
     Expression<String>? conversationId,
     Expression<String>? content,
@@ -6928,7 +6930,7 @@ class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
     });
   }
 
-  MessagesFtsCompanion copyWith(
+  MessagesFtsV2Companion copyWith(
       {Value<String>? messageId,
       Value<String>? conversationId,
       Value<String>? content,
@@ -6936,7 +6938,7 @@ class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
       Value<String>? userId,
       Value<String>? reservedInt,
       Value<String>? reservedText}) {
-    return MessagesFtsCompanion(
+    return MessagesFtsV2Companion(
       messageId: messageId ?? this.messageId,
       conversationId: conversationId ?? this.conversationId,
       content: content ?? this.content,
@@ -6976,7 +6978,7 @@ class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
 
   @override
   String toString() {
-    return (StringBuffer('MessagesFtsCompanion(')
+    return (StringBuffer('MessagesFtsV2Companion(')
           ..write('messageId: $messageId, ')
           ..write('conversationId: $conversationId, ')
           ..write('content: $content, ')
@@ -6989,13 +6991,13 @@ class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
   }
 }
 
-class MessagesFts extends Table
+class MessagesFtsV2 extends Table
     with
-        TableInfo<MessagesFts, MessagesFt>,
-        VirtualTableInfo<MessagesFts, MessagesFt> {
+        TableInfo<MessagesFtsV2, MessagesFtsV2Data>,
+        VirtualTableInfo<MessagesFtsV2, MessagesFtsV2Data> {
   final GeneratedDatabase _db;
   final String? _alias;
-  MessagesFts(this._db, [this._alias]);
+  MessagesFtsV2(this._db, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
@@ -7052,11 +7054,11 @@ class MessagesFts extends Table
         reservedText
       ];
   @override
-  String get aliasedName => _alias ?? 'messages_fts';
+  String get aliasedName => _alias ?? 'messages_fts_v2';
   @override
-  String get actualTableName => 'messages_fts';
+  String get actualTableName => 'messages_fts_v2';
   @override
-  VerificationContext validateIntegrity(Insertable<MessagesFt> instance,
+  VerificationContext validateIntegrity(Insertable<MessagesFtsV2Data> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -7114,21 +7116,21 @@ class MessagesFts extends Table
   @override
   Set<GeneratedColumn> get $primaryKey => <GeneratedColumn>{};
   @override
-  MessagesFt map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return MessagesFt.fromData(data,
+  MessagesFtsV2Data map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return MessagesFtsV2Data.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
-  MessagesFts createAlias(String alias) {
-    return MessagesFts(_db, alias);
+  MessagesFtsV2 createAlias(String alias) {
+    return MessagesFtsV2(_db, alias);
   }
 
   @override
   bool get dontWriteConstraints => true;
   @override
   String get moduleAndArgs =>
-      'FTS5(message_id UNINDEXED, conversation_id UNINDEXED, content, created_at UNINDEXED, user_id UNINDEXED, reserved_int UNINDEXED, reserved_text UNINDEXED, tokenize=\'unicode61\')';
+      'FTS5(message_id UNINDEXED, conversation_id UNINDEXED, content, created_at UNINDEXED, user_id UNINDEXED, reserved_int UNINDEXED, reserved_text UNINDEXED, tokenize=\'simple\')';
 }
 
 class MessagesHistoryData extends DataClass
@@ -11725,7 +11727,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       CircleConversations(this);
   late final Circles circles = Circles(this);
   late final Hyperlinks hyperlinks = Hyperlinks(this);
-  late final MessagesFts messagesFts = MessagesFts(this);
+  late final MessagesFtsV2 messagesFtsV2 = MessagesFtsV2(this);
   late final MessagesHistory messagesHistory = MessagesHistory(this);
   late final Offsets offsets = Offsets(this);
   late final ParticipantSession participantSession = ParticipantSession(this);
@@ -12684,13 +12686,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<int> fuzzySearchMessageCount(String query) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?1)) AS fts WHERE m.message_id = fts.message_id',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?1)) AS fts WHERE m.message_id = fts.message_id',
         variables: [
           Variable<String>(query)
         ],
         readsFrom: {
           messages,
-          messagesFts,
+          messagesFtsV2,
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
@@ -12700,14 +12702,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final expandedcategories = $expandVar($arrayStartIndex, categories.length);
     $arrayStartIndex += categories.length;
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?1)) AS fts WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?1)) AS fts WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id',
         variables: [
           Variable<String>(query),
           for (var $ in categories) Variable<String>($)
         ],
         readsFrom: {
           messages,
-          messagesFts,
+          messagesFtsV2,
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
@@ -12725,7 +12727,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?1)) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?1)) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
           for (var $ in categories) Variable<String>($),
@@ -12735,7 +12737,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           conversations,
-          messagesFts,
+          messagesFtsV2,
           ...generatedlimit.watchedTables,
         }).map((QueryRow row) {
       return SearchMessageDetailItem(
@@ -12761,7 +12763,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem> fuzzySearchMessage(
       String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?1)) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?1)) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
         variables: [
           Variable<String>(query),
           Variable<int>(limit),
@@ -12771,7 +12773,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           conversations,
-          messagesFts,
+          messagesFtsV2,
         }).map((QueryRow row) {
       return SearchMessageDetailItem(
         messageId: row.read<String>('messageId'),
@@ -12840,14 +12842,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<int> fuzzySearchMessageCountByConversationId(
       String conversationId, String query) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?2))',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?2))',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query)
         ],
         readsFrom: {
           messages,
-          messagesFts,
+          messagesFtsV2,
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
@@ -12857,7 +12859,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final expandedcategories = $expandVar($arrayStartIndex, categories.length);
     $arrayStartIndex += categories.length;
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?2))',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?2))',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -12865,14 +12867,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
         readsFrom: {
           messages,
-          messagesFts,
+          messagesFtsV2,
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<int> fuzzySearchMessageCountByConversationIdAndUserId(
       String conversationId, String userId, String query) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?3))',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?3))',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -12880,7 +12882,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
         readsFrom: {
           messages,
-          messagesFts,
+          messagesFtsV2,
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
@@ -12893,7 +12895,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final expandedcategories = $expandVar($arrayStartIndex, categories.length);
     $arrayStartIndex += categories.length;
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?3))',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?3))',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -12902,7 +12904,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
         readsFrom: {
           messages,
-          messagesFts,
+          messagesFtsV2,
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
@@ -12922,7 +12924,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?2)) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?2)) ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -12933,7 +12935,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           conversations,
-          messagesFts,
+          messagesFtsV2,
           ...generatedlimit.watchedTables,
         }).map((QueryRow row) {
       return SearchMessageDetailItem(
@@ -12959,7 +12961,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
       String conversationId, String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?2)) ORDER BY m.created_at DESC LIMIT ?3 OFFSET ?4',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?2)) ORDER BY m.created_at DESC LIMIT ?3 OFFSET ?4',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -12970,7 +12972,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           conversations,
-          messagesFts,
+          messagesFtsV2,
         }).map((QueryRow row) {
       return SearchMessageDetailItem(
         messageId: row.read<String>('messageId'),
@@ -13058,7 +13060,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?3)) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?3)) ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -13070,7 +13072,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           conversations,
-          messagesFts,
+          messagesFtsV2,
           ...generatedlimit.watchedTables,
         }).map((QueryRow row) {
       return SearchMessageDetailItem(
@@ -13097,7 +13099,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       fuzzySearchMessageByConversationIdAndUserId(String conversationId,
           String userId, String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(?3)) ORDER BY m.created_at DESC LIMIT ?4 OFFSET ?5',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(?3)) ORDER BY m.created_at DESC LIMIT ?4 OFFSET ?5',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -13109,7 +13111,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           conversations,
-          messagesFts,
+          messagesFtsV2,
         }).map((QueryRow row) {
       return SearchMessageDetailItem(
         messageId: row.read<String>('messageId'),
@@ -13432,7 +13434,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         circleConversations,
         circles,
         hyperlinks,
-        messagesFts,
+        messagesFtsV2,
         messagesHistory,
         offsets,
         participantSession,

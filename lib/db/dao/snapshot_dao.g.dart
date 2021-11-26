@@ -22,7 +22,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
       attachedDatabase.circleConversations;
   Circles get circles => attachedDatabase.circles;
   Hyperlinks get hyperlinks => attachedDatabase.hyperlinks;
-  MessagesFts get messagesFts => attachedDatabase.messagesFts;
+  MessagesFtsV2 get messagesFtsV2 => attachedDatabase.messagesFtsV2;
   MessagesHistory get messagesHistory => attachedDatabase.messagesHistory;
   Offsets get offsets => attachedDatabase.offsets;
   ParticipantSession get participantSession =>

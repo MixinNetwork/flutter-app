@@ -117,19 +117,19 @@ SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.medi
 
 fuzzySearchMessageCount:
 SELECT COUNT(1)
-    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query)) fts
+    FROM messages m, (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query)) fts
     WHERE m.message_id = fts.message_id;
 
 fuzzySearchMessageCountByCategories:
 SELECT COUNT(1)
-    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query)) fts
+    FROM messages m, (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query)) fts
     WHERE m.category IN :categories AND m.message_id = fts.message_id;
 
 fuzzySearchMessageByCategories AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
     m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
     c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
-    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query)) fts
+    FROM messages m, (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query)) fts
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON c.owner_id = u.user_id
     WHERE m.category IN :categories AND m.message_id = fts.message_id
@@ -141,7 +141,7 @@ fuzzySearchMessage AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
     m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
     c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
-    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query)) fts
+    FROM messages m, (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query)) fts
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON c.owner_id = u.user_id
     WHERE m.message_id = fts.message_id
@@ -185,22 +185,22 @@ ORDER  BY m.created_at DESC;
 fuzzySearchMessageCountByConversationId:
 SELECT COUNT(1)
     FROM messages m
-    WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query));
+    WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query));
 
 fuzzySearchMessageCountByConversationIdAndCategories:
 SELECT COUNT(1)
     FROM messages m
-    WHERE m.conversation_id = :conversationId AND m.category IN :categories AND  m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query));
+    WHERE m.conversation_id = :conversationId AND m.category IN :categories AND  m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query));
 
 fuzzySearchMessageCountByConversationIdAndUserId:
 SELECT COUNT(1)
     FROM messages m
-    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query));
+    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query));
 
 fuzzySearchMessageCountByConversationIdAndUserIdAndCategories:
 SELECT COUNT(1)
     FROM messages m
-    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.category IN :categories AND  m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query)) ;
+    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.category IN :categories AND  m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query)) ;
 
 
 fuzzySearchMessageByConversationIdAndCategories AS SearchMessageDetailItem:
@@ -210,7 +210,7 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
-    WHERE m.conversation_id = :conversationId AND m.category IN :categories AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query))
+    WHERE m.conversation_id = :conversationId AND m.category IN :categories AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query))
     ORDER BY m.created_at DESC
     LIMIT $limit;
 
@@ -221,7 +221,7 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
-    WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query))
+    WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query))
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;
 
@@ -243,7 +243,7 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
-    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.category IN :categories AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query))
+    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.category IN :categories AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query))
     ORDER BY m.created_at DESC
     LIMIT $limit;
 
@@ -254,6 +254,6 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
-    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH jieba_query(:query))
+    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.message_id IN (SELECT message_id FROM messages_fts_v2 WHERE messages_fts_v2 MATCH jieba_query(:query))
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;

@@ -39,7 +39,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           db.messages,
           db.users,
           db.conversations,
-          db.messagesFts,
+          db.messagesFtsV2,
         ]),
       )
       .throttleTime(kDefaultThrottleDuration, trailing: true);
@@ -192,7 +192,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       await insertFts(
         message.messageId,
         message.conversationId,
-        ftsContent.joinWhiteSpace(),
+        ftsContent,
         message.createdAt,
         message.userId,
       );
@@ -202,8 +202,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insertFts(String messageId, String conversationId, String content,
           DateTime createdAt, String userId) =>
       db.customInsert(
-        "INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES ('$messageId', '$conversationId','${content.escapeSqliteSingleQuotationMarks()}', '${createdAt.millisecondsSinceEpoch}', '$userId')",
-        updates: {db.messagesFts},
+        'INSERT OR REPLACE INTO messages_fts_v2'
+        ' (message_id, conversation_id, content, created_at, user_id) VALUES'
+        " ('$messageId', '$conversationId','$content', '${createdAt.millisecondsSinceEpoch}', '$userId')",
+        updates: {db.messagesFtsV2},
       );
 
   Future<void> deleteMessage(String messageId) async {
@@ -211,7 +213,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       await Future.wait([
         (delete(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
             .go(),
-        (delete(db.messagesFts)
+        (delete(db.messagesFtsV2)
               ..where((tbl) => tbl.messageId.equals(messageId)))
             .go(),
         (delete(db.transcriptMessages)
@@ -1089,7 +1091,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       .map((row) => row.read(db.messages.rowId));
 
   Future<int> deleteFtsByMessageId(String messageId) =>
-      (db.delete(db.messagesFts)
+      (db.delete(db.messagesFtsV2)
             ..where((tbl) => tbl.messageId.equals(messageId)))
           .go();
 

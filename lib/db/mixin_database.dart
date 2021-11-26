@@ -14,6 +14,7 @@ import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_status.dart';
 import '../utils/file.dart';
+import '../utils/logger.dart';
 import 'converter/conversation_category_type_converter.dart';
 import 'converter/conversation_status_type_converter.dart';
 import 'converter/media_status_type_converter.dart';
@@ -97,7 +98,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   final eventBus = DataBaseEventBus();
 
@@ -162,6 +163,18 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 7) {
             await m.drop(Trigger('', 'conversation_last_message_update'));
+          }
+          if (from <= 8) {
+            await m.createTable(messagesFtsV2);
+            final stopwatch = Stopwatch()..start();
+            await customInsert(
+              '''
+INSERT OR REPLACE INTO messages_fts_v2(message_id, conversation_id, content, created_at, user_id)
+SELECT message_id, conversation_id, content, created_at, user_id FROM messages WHERE category like '%_TEXT'
+''',
+              updates: {messagesFtsV2},
+            );
+            i('import messages took ${stopwatch.elapsed}');
           }
         },
       );

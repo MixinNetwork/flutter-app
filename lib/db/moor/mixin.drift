@@ -34,7 +34,7 @@ CREATE TABLE message_mentions ( message_id TEXT NOT NULL, conversation_id TEXT N
 
 CREATE TABLE messages ( message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, category TEXT NOT NULL, content TEXT, media_url TEXT, media_mime_type TEXT, media_size INTEGER, media_duration TEXT, media_width INTEGER, media_height INTEGER, media_hash TEXT, thumb_image TEXT, media_key TEXT, media_digest TEXT, media_status TEXT MAPPED BY `const MediaStatusTypeConverter()`, status TEXT NOT NULL MAPPED BY `const MessageStatusTypeConverter()`, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, "action" TEXT MAPPED BY `const MessageActionConverter()`, participant_id TEXT, snapshot_id TEXT, hyperlink TEXT, name TEXT, album_id TEXT, sticker_id TEXT, shared_user_id TEXT, media_waveform TEXT, quote_message_id TEXT, quote_content TEXT, thumb_url TEXT, caption TEXT, PRIMARY KEY(message_id), FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE );
 
-CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING FTS5( message_id UNINDEXED , conversation_id UNINDEXED , content, created_at UNINDEXED , user_id UNINDEXED , reserved_int UNINDEXED , reserved_text UNINDEXED , tokenize='unicode61' );
+CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts_v2 USING FTS5( message_id UNINDEXED , conversation_id UNINDEXED , content, created_at UNINDEXED , user_id UNINDEXED , reserved_int UNINDEXED , reserved_text UNINDEXED , tokenize='simple' );
 
 CREATE TABLE messages_history ( message_id TEXT NOT NULL, PRIMARY KEY(message_id) );
 
