@@ -342,18 +342,18 @@ class AttachmentUtil extends ChangeNotifier {
     String suffix;
     if (category.isImage) {
       if (_equalsIgnoreCase(mimeType, 'image/png')) {
-        suffix = 'png';
+        suffix = '.png';
       } else if (_equalsIgnoreCase(mimeType, 'image/gif')) {
-        suffix = 'gif';
+        suffix = '.gif';
       } else if (_equalsIgnoreCase(mimeType, 'image/webp')) {
-        suffix = 'webp';
+        suffix = '.webp';
       } else {
-        suffix = 'jpg';
+        suffix = '.jpg';
       }
     } else if (category.isVideo) {
-      suffix = 'mp4';
+      suffix = '.mp4';
     } else if (category.isAudio) {
-      suffix = 'ogg';
+      suffix = '.ogg';
     } else {
       suffix = mediaName?.fileExtension ?? '';
     }
