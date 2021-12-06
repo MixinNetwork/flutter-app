@@ -81,7 +81,10 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
   final receivePort = ReceivePort();
   options.sendPort.send(receivePort.sendPort);
 
-  receivePort.listen((message) => cancelToken.cancel());
+  receivePort.listen((message) {
+    w('download cancel');
+    cancelToken.cancel();
+  });
 
   try {
     var received = 0;
@@ -108,7 +111,9 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
 
     if (response.statusCode != 200) throw Error();
     options.sendPort.send(_completeMessage);
-  } catch (_) {}
+  } catch (error, s) {
+    e('download error: $e, stack: $s');
+  }
   options.sendPort.send(_killMessage);
 }
 
@@ -250,7 +255,7 @@ extension _AttachmentDownloadExtension on Dio {
           .timeout(Duration(
         milliseconds: response.requestOptions.receiveTimeout,
       ))
-          .catchError((err) async {
+          .catchError((err, s) async {
         await subscription.cancel();
         await _closeAndDelete();
         if (err is TimeoutException) {
@@ -261,6 +266,7 @@ extension _AttachmentDownloadExtension on Dio {
             type: DioErrorType.receiveTimeout,
           );
         } else {
+          w('download error: $err, stack: $s');
           // ignore: throw_of_invalid_type
           throw err;
         }
