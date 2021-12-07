@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 
@@ -272,11 +271,7 @@ class AnonymousPagingBloc<T> extends PagingBloc<T> {
   final Future<List<T>> Function(int limit, int offset) _queryRange;
 
   @override
-  Future<int> queryCount() async {
-    final ret =  await _queryCount();
-    debugPrint('queryCount: $ret');
-    return ret;
-  }
+  Future<int> queryCount() => _queryCount();
 
   @override
   Future<List<T>> queryRange(int limit, int offset) async =>

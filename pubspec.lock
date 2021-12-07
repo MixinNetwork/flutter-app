@@ -632,11 +632,9 @@ packages:
   fts5_simple:
     dependency: "direct main"
     description:
-      path: "packages/fts5_simple"
-      ref: d105c2431a65c2439517f38db960c90966e47ee2
-      resolved-ref: d105c2431a65c2439517f38db960c90966e47ee2
-      url: "https://github.com/MixinNetwork/flutter-plugins.git"
-    source: git
+      name: fts5_simple
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.0.1"
   glob:
     dependency: transitive
@@ -813,6 +811,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.12.11"
+  material_color_utilities:
+    dependency: transitive
+    description:
+      name: material_color_utilities
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   meta:
     dependency: transitive
     description:
@@ -1457,5 +1462,5 @@ packages:
     source: hosted
     version: "3.1.0"
 sdks:
-  dart: ">=2.16.0-42.0.dev <3.0.0"
+  dart: ">=2.14.0 <3.0.0"
   flutter: ">=2.5.0"
