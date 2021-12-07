@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:web_socket_channel/io.dart';
 
 import '../constants/constants.dart';
@@ -24,6 +25,14 @@ import 'vo/blaze_message_data.dart';
 const String _wsHost1 = 'wss://blaze.mixin.one';
 const String _wsHost2 = 'wss://mixin-blaze.zeromesh.net';
 
+enum ConnectedState {
+  connecting,
+  reconnecting,
+  connected,
+  disconnected,
+  hasLocalTimeError,
+}
+
 class Blaze {
   Blaze(
     this.userId,
@@ -40,15 +49,10 @@ class Blaze {
   final Client client; // todo delete
 
   String _host = _wsHost1;
-  bool _reconnecting = false;
-  bool _disposed = false;
   String? _token;
 
-  StreamController<bool> connectedStateStreamController =
-      StreamController<bool>.broadcast();
-
-  StreamController<bool> localTimeErrorStreamController =
-      StreamController<bool>.broadcast();
+  BehaviorSubject<ConnectedState> connectedStateBehaviorSubject =
+      BehaviorSubject<ConnectedState>();
 
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
@@ -57,34 +61,9 @@ class Blaze {
 
   String? _userAgent;
 
-  Future<String> _getUserAgent() async {
-    final version = await packageInfoFuture;
-    String? systemAndVersion;
-    if (Platform.isMacOS) {
-      final result = await Process.run('sw_vers', []);
-      if (result.stdout != null) {
-        final stdout = result.stdout as String;
-        final map = Map.fromEntries(const LineSplitter()
-            .convert(stdout)
-            .map((e) => e.split(':'))
-            .where((element) => element.length >= 2)
-            .map((e) => MapEntry(e[0].trim(), e[1].trim())));
-        // example
-        // ProductName: macOS
-        // ProductVersion: 12.0.1
-        // BuildVersion: 21A559
-        systemAndVersion =
-            '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
-      }
-    }
-    systemAndVersion ??=
-        '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
-    return 'Mixin/${version.version} (Flutter $systemAndVersion; ${Platform.localeName})';
-  }
-
   Future<void> connect() async {
     i('reconnecting set false, ${StackTrace.current}');
-    _reconnecting = false;
+    connectedStateBehaviorSubject.value = ConnectedState.connecting;
 
     i('ws connect');
     _token ??= signAuthTokenWithEdDSA(
@@ -98,7 +77,9 @@ class Blaze {
   }
 
   void _connect(String token) {
-    if (_disposed) return;
+    if (connectedStateBehaviorSubject.value != ConnectedState.connecting) {
+      return;
+    }
     channel = IOWebSocketChannel.connect(
       _host,
       protocols: ['Mixin-Blaze-1'],
@@ -111,12 +92,12 @@ class Blaze {
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
       (blazeMessage) async {
-        connectedStateStreamController.add(true);
-        localTimeErrorStreamController.add(false);
+        connectedStateBehaviorSubject.value = ConnectedState.connected;
         d('blazeMessage receive: ${blazeMessage.toJson()}');
 
         if (blazeMessage.action == kErrorAction &&
             blazeMessage.error?.code == authentication) {
+          connectedStateBehaviorSubject.value = ConnectedState.disconnected;
           await reconnect();
           return;
         }
@@ -144,10 +125,12 @@ class Blaze {
       },
       onError: (error, s) {
         i('ws error: $error, s: $s');
+        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
         reconnect();
       },
       onDone: () {
         i('web socket done');
+        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
         reconnect();
       },
       cancelOnError: true,
@@ -263,7 +246,7 @@ class Blaze {
 
   void _disconnect() {
     i('ws _disconnect');
-    connectedStateStreamController.add(false);
+    connectedStateBehaviorSubject.value = ConnectedState.disconnected;
     transactions.clear();
     subscription?.cancel();
     channel?.sink.close();
@@ -273,7 +256,7 @@ class Blaze {
 
   void waitSyncTime() {
     _disconnect();
-    localTimeErrorStreamController.add(true);
+    connectedStateBehaviorSubject.value = ConnectedState.hasLocalTimeError;
   }
 
   Future<BlazeMessage?> sendMessage(BlazeMessage blazeMessage) async {
@@ -288,9 +271,12 @@ class Blaze {
   }
 
   Future<void> reconnect() async {
-    i('_reconnect reconnecting: $_reconnecting start: ${StackTrace.current}');
-    if (_reconnecting) return;
-    _reconnecting = true;
+    i('_reconnect reconnecting: ${connectedStateBehaviorSubject.value} start: ${StackTrace.current}');
+    if (connectedStateBehaviorSubject.value == ConnectedState.connecting ||
+        connectedStateBehaviorSubject.value == ConnectedState.reconnecting) {
+      return;
+    }
+    connectedStateBehaviorSubject.value = ConnectedState.reconnecting;
     _host = _host == _wsHost1 ? _wsHost2 : _wsHost1;
 
     try {
@@ -302,21 +288,20 @@ class Blaze {
       w('ws ping error: $e');
       if (e is MixinApiError &&
           (e.error as MixinError).code == authentication) {
-        _reconnecting = false;
+        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
         return;
       }
       await Future.delayed(const Duration(seconds: 2));
-      _reconnecting = false;
+      connectedStateBehaviorSubject.value = ConnectedState.disconnected;
       i('reconnecting set false, ${StackTrace.current}');
       return reconnect();
     }
   }
 
   void dispose() {
-    _disposed = true;
+    connectedStateBehaviorSubject.value = ConnectedState.disconnected;
     _disconnect();
-    connectedStateStreamController.close();
-    localTimeErrorStreamController.close();
+    connectedStateBehaviorSubject.close();
   }
 }
 
@@ -352,4 +337,29 @@ class WebSocketTransaction<T> {
   void error(T? data) {
     _completer.complete(data);
   }
+}
+
+Future<String> _getUserAgent() async {
+  final version = await packageInfoFuture;
+  String? systemAndVersion;
+  if (Platform.isMacOS) {
+    final result = await Process.run('sw_vers', []);
+    if (result.stdout != null) {
+      final stdout = result.stdout as String;
+      final map = Map.fromEntries(const LineSplitter()
+          .convert(stdout)
+          .map((e) => e.split(':'))
+          .where((element) => element.length >= 2)
+          .map((e) => MapEntry(e[0].trim(), e[1].trim())));
+      // example
+      // ProductName: macOS
+      // ProductVersion: 12.0.1
+      // BuildVersion: 21A559
+      systemAndVersion =
+          '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
+    }
+  }
+  systemAndVersion ??=
+      '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
+  return 'Mixin/${version.version} (Flutter $systemAndVersion; ${Platform.localeName})';
 }

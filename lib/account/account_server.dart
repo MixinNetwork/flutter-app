@@ -218,7 +218,8 @@ class AccountServer {
     jobSubscribers
       ..add(Rx.merge([
         // runFloodJob when socket connected.
-        blaze.connectedStateStreamController.stream.where((ok) => ok),
+        blaze.connectedStateBehaviorSubject.stream
+            .where((state) => state == ConnectedState.connected),
         database.mixinDatabase.tableUpdates(
           TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
         )
