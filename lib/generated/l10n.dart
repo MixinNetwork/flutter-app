@@ -2390,6 +2390,16 @@ class Localization {
     );
   }
 
+  /// `Save as`
+  String get saveAs {
+    return Intl.message(
+      'Save as',
+      name: 'saveAs',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Upgrading`
   String get databaseUpgrading {
     return Intl.message(

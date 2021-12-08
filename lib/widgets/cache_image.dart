@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
+
 // ignore: implementation_imports
 import 'package:cached_network_image/src/image_provider/_image_loader.dart'
     as cached_network_image;
@@ -142,11 +143,8 @@ class _MultiImageStreamCompleter extends ImageStreamCompleter {
       if (_framesEmitted % _codec!.frameCount == 0 && _nextImageCodec != null) {
         _switchToNewCodec();
       } else {
-        final completedCycles = _framesEmitted ~/ _codec!.frameCount;
-        if (_codec!.repetitionCount == -1 ||
-            completedCycles <= _codec!.repetitionCount) {
-          _decodeNextFrameAndSchedule();
-        }
+        // ignore gif's repetition count
+        _decodeNextFrameAndSchedule();
       }
       return;
     }
@@ -283,7 +281,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   Duration? _frameDuration;
 
   // How many frames have been emitted so far.
-  int _framesEmitted = 0;
+  // int _framesEmitted = 0;
   Timer? _timer;
 
   // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
@@ -315,11 +313,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       }
       _nextFrame!.image.dispose();
       _nextFrame = null;
-      final completedCycles = _framesEmitted ~/ _codec!.frameCount;
-      if (_codec!.repetitionCount == -1 ||
-          completedCycles <= _codec!.repetitionCount) {
-        _decodeNextFrameAndSchedule();
-      }
+      // ignore gif's repetition count
+      _decodeNextFrameAndSchedule();
       return;
     }
     final delay = _frameDuration! - (timestamp - _shownTimestamp);
@@ -379,7 +374,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
   void _emitFrame(ImageInfo imageInfo) {
     setImage(imageInfo);
-    _framesEmitted += 1;
+    // _framesEmitted += 1;
   }
 
   @override

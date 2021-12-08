@@ -115,6 +115,7 @@ class SendMessageHelper {
       category,
       conversationId,
       messageId,
+      file?.name,
       mimeType: mimeType,
     );
 
@@ -214,8 +215,12 @@ class SendMessageHelper {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
     final attachment = _attachmentUtil.getAttachmentFile(
-        category, conversationId, messageId,
-        mimeType: mimeType);
+      category,
+      conversationId,
+      messageId,
+      file.name,
+      mimeType: mimeType,
+    );
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
@@ -303,8 +308,12 @@ class SendMessageHelper {
         lookupMimeType(file.path) ??
         'application/octet-stream';
     final attachment = _attachmentUtil.getAttachmentFile(
-        category, conversationId, messageId,
-        mimeType: mimeType);
+      category,
+      conversationId,
+      messageId,
+      file.name,
+      mimeType: mimeType,
+    );
 
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
@@ -398,8 +407,12 @@ class SendMessageHelper {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'audio/ogg';
     final attachment = _attachmentUtil.getAttachmentFile(
-        category, conversationId, messageId,
-        mimeType: mimeType);
+      category,
+      conversationId,
+      messageId,
+      file.name,
+      mimeType: mimeType,
+    );
 
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);

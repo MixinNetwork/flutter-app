@@ -7,9 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../bloc/setting_cubit.dart';
+import '../constants/brightness_theme_data.dart';
 import '../db/mixin_database.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
+import '../widgets/brightness_observer.dart';
 import '../widgets/dialog.dart';
+import '../widgets/web_view_navigation_bar.dart';
 import 'extension/extension.dart';
 import 'uri_utils.dart';
 
@@ -29,6 +32,16 @@ Future<void> showBotWebViewUnavailableDialog({
     child: const _BotWebViewRuntimeInstallDialog(),
   );
 }
+
+bool runWebViewNavigationBar(List<String> args) => runWebViewTitleBarWidget(
+      args,
+      builder: (context) => const BrightnessData(
+        brightnessThemeData: lightBrightnessThemeData,
+        value: 1,
+        child: WebViewNavigationBar(),
+      ),
+      backgroundColor: const Color(0xFFF0E7EA),
+    );
 
 class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
   const _BotWebViewRuntimeInstallDialog({Key? key}) : super(key: key);
@@ -137,6 +150,7 @@ Future<void> openWebViewWindowWithUrl(
       windowWidth: 380,
       windowHeight: 750,
       title: title ?? '',
+      titleBarTopPadding: 22,
     ),
   );
   final mixinContext = jsonEncode(await _mixinContext(context, conversationId));

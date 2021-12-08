@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
@@ -118,6 +117,7 @@ class AttachmentUtil extends ChangeNotifier {
       category,
       conversationId,
       messageId,
+      message?.name ?? transcriptMessage?.mediaName,
       mimeType: attachmentMessage?.mimeType ??
           message?.mediaMimeType ??
           transcriptMessage?.mediaMimeType,
@@ -331,7 +331,8 @@ class AttachmentUtil extends ChangeNotifier {
   File getAttachmentFile(
     String category,
     String conversationId,
-    String messageId, {
+    String messageId,
+    String? mediaName, {
     String? mimeType,
     bool isTranscript = false,
   }) {
@@ -341,23 +342,22 @@ class AttachmentUtil extends ChangeNotifier {
     String suffix;
     if (category.isImage) {
       if (_equalsIgnoreCase(mimeType, 'image/png')) {
-        suffix = 'png';
+        suffix = '.png';
       } else if (_equalsIgnoreCase(mimeType, 'image/gif')) {
-        suffix = 'gif';
+        suffix = '.gif';
       } else if (_equalsIgnoreCase(mimeType, 'image/webp')) {
-        suffix = 'webp';
+        suffix = '.webp';
       } else {
-        suffix = 'jpg';
+        suffix = '.jpg';
       }
     } else if (category.isVideo) {
-      suffix = 'mp4';
+      suffix = '.mp4';
     } else if (category.isAudio) {
-      suffix = 'ogg';
+      suffix = '.ogg';
     } else {
-      assert(mimeType != null);
-      suffix = extensionFromMime(mimeType!);
+      suffix = mediaName?.fileExtension ?? '';
     }
-    return File(p.join(path, '$messageId.$suffix'));
+    return File(p.join(path, '$messageId$suffix'));
   }
 
   bool _equalsIgnoreCase(String? string1, String? string2) =>
