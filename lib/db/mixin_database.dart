@@ -166,18 +166,22 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 8) {
             await m.createTable(messagesFtsV2);
-            final stopwatch = Stopwatch()..start();
-            await customInsert(
-              '''
-INSERT OR REPLACE INTO messages_fts_v2(message_id, conversation_id, content, created_at, user_id)
-SELECT message_id, conversation_id, content, created_at, user_id FROM messages WHERE category like '%_TEXT'
-''',
-              updates: {messagesFtsV2},
-            );
-            i('import messages took ${stopwatch.elapsed}');
+            unawaited(_migrationMessageFts());
           }
         },
       );
+
+  Future<void> _migrationMessageFts() async {
+    final stopwatch = Stopwatch()..start();
+    await customInsert(
+      '''
+INSERT OR REPLACE INTO messages_fts_v2(message_id, conversation_id, content, created_at, user_id)
+SELECT message_id, conversation_id, content, created_at, user_id FROM messages WHERE category like '%_TEXT'
+''',
+      updates: {messagesFtsV2},
+    );
+    i('import messages took ${stopwatch.elapsed}');
+  }
 
   Stream<bool> watchHasData<T extends HasResultSet, R>(
     ResultSetImplementation<T, R> table, [
