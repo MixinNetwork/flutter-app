@@ -2389,6 +2389,26 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Upgrading`
+  String get databaseUpgrading {
+    return Intl.message(
+      'Upgrading',
+      name: 'databaseUpgrading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The database is being upgraded, it may take several minutes, please do not close this App.`
+  String get databaseUpgradeTips {
+    return Intl.message(
+      'The database is being upgraded, it may take several minutes, please do not close this App.',
+      name: 'databaseUpgradeTips',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

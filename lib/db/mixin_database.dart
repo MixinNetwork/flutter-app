@@ -102,6 +102,10 @@ class MixinDatabase extends _$MixinDatabase {
 
   final eventBus = DataBaseEventBus();
 
+  final _isDbUpdating = ValueNotifier<bool>(false);
+
+  ValueListenable<bool> get isDbUpdating => _isDbUpdating;
+
   @override
   MigrationStrategy get migration => MigrationStrategy(
         beforeOpen: (_) async {
@@ -111,6 +115,7 @@ class MixinDatabase extends _$MixinDatabase {
           }
         },
         onUpgrade: (Migrator m, int from, int to) async {
+          _isDbUpdating.value = true;
           if (from <= 2) {
             await m.drop(Index(
                 'index_conversations_category_status_pin_time_created_at', ''));
@@ -166,8 +171,9 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 8) {
             await m.createTable(messagesFtsV2);
-            unawaited(_migrationMessageFts());
+            await _migrationMessageFts();
           }
+          _isDbUpdating.value = false;
         },
       );
 

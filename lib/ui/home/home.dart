@@ -12,6 +12,7 @@ import 'bloc/conversation_cubit.dart';
 import 'bloc/multi_auth_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
 import 'conversation_page.dart';
+import 'database_upgrade_page.dart';
 import 'route/responsive_navigator.dart';
 import 'route/responsive_navigator_cubit.dart';
 import 'slide_page.dart';
@@ -40,6 +41,9 @@ class HomePage extends HookWidget {
                 .distinct(),
             keys: [context.accountServer]).data ??
         false;
+
+    final isDatabaseUpgrading = useValueListenable(
+        context.accountServer.database.mixinDatabase.isDbUpdating);
 
     return Stack(
       fit: StackFit.expand,
@@ -88,6 +92,7 @@ class HomePage extends HookWidget {
               ),
             );
           }),
+        if (isDatabaseUpgrading) const DatabaseUpgradePage(),
       ],
     );
   }

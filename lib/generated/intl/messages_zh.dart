@@ -138,6 +138,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "currentIdentityNumber": m12,
         "dataAndStorageUsage":
             MessageLookupByLibrary.simpleMessage("数据和存储使用情况"),
+        "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
+            "正在进行数据库升级，可能需要几分钟，请不要强制关闭应用。"),
+        "databaseUpgrading": MessageLookupByLibrary.simpleMessage("升级中..."),
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
         "deleteChat": MessageLookupByLibrary.simpleMessage("删除对话"),
         "deleteChatDescription":

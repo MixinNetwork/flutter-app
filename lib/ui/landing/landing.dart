@@ -32,12 +32,12 @@ class LandingPage extends HookWidget {
 
     final Widget child;
     if (status == LandingStatus.init) {
-      child = _Loading(
+      child = Loading(
         title: context.l10n.initializing,
         message: context.l10n.chatInputHint,
       );
     } else if (status == LandingStatus.provisioning) {
-      child = _Loading(
+      child = Loading(
         title: context.l10n.provisioning,
         message: Localization.current.chatInputHint,
       );
@@ -160,8 +160,8 @@ class _QrCode extends HookWidget {
   }
 }
 
-class _Loading extends StatelessWidget {
-  const _Loading({
+class Loading extends StatelessWidget {
+  const Loading({
     Key? key,
     required this.title,
     required this.message,
