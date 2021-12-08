@@ -299,7 +299,6 @@ class Blaze {
   }
 
   void dispose() {
-    connectedStateBehaviorSubject.value = ConnectedState.disconnected;
     _disconnect();
     connectedStateBehaviorSubject.close();
   }
