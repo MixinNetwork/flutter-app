@@ -99,7 +99,7 @@ class AccountServer {
                 final time =
                     DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
                 final difference = time.difference(DateTime.now());
-                if (difference.inMinutes > 5) {
+                if (difference.inMinutes.abs() > 5) {
                   blaze.waitSyncTime();
                   handler.next(e);
                   return;
