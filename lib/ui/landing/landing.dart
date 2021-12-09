@@ -101,10 +101,6 @@ class _QrCode extends HookWidget {
         data: url,
         foregroundColor: Colors.black,
         backgroundColor: Colors.white,
-        embeddedImage: const AssetImage(Resources.assetsImagesLogoPng),
-        embeddedImageStyle: QrEmbeddedImageStyle(
-          size: const Size(44, 44),
-        ),
       );
     }
 
@@ -122,6 +118,14 @@ class _QrCode extends HookWidget {
                 fit: StackFit.expand,
                 children: [
                   qrCode ?? const SizedBox(),
+                  if (qrCode != null)
+                    Center(
+                      child: Image.asset(
+                        Resources.assetsImagesLogoPng,
+                        width: 44,
+                        height: 44,
+                      ),
+                    ),
                   Visibility(
                     visible: visible,
                     child: _Retry(
