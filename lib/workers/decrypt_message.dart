@@ -204,7 +204,7 @@ class DecryptMessage extends Injector {
         final status = (await SignalDatabase.get.ratchetSenderKeyDao
                 .getRatchetSenderKey(data.conversationId, address.toString()))
             ?.status;
-        if (status == RatchetStatus.requesting.toString()) {
+        if (status == RatchetStatus.requesting.name) {
           await _requestResendMessage(
               data.conversationId, data.senderId, data.sessionId);
         }
@@ -1141,12 +1141,12 @@ class DecryptMessage extends Injector {
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, recipientId, encoded,
         sessionId: sessionId));
-    unawaited(_sender.deliver(bm));
+    await _sender.deliver(bm);
     final address = SignalProtocolAddress(recipientId, sessionId.getDeviceId());
     final ratchet = RatchetSenderKeysCompanion.insert(
         groupId: conversationId,
         senderId: address.toString(),
-        status: RatchetStatus.requesting.toString(),
+        status: RatchetStatus.requesting.name,
         createdAt: DateTime.now().millisecondsSinceEpoch.toString());
     await SignalDatabase.get.ratchetSenderKeyDao.insertSenderKey(ratchet);
   }
