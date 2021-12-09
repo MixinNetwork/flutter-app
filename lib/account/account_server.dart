@@ -58,6 +58,7 @@ class AccountServer {
       client.dio.options.headers['Accept-Language'] = language;
 
   final MultiAuthCubit multiAuthCubit;
+  Timer? checkSignalKeyTimer;
 
   Future<void> initServer(
     String userId,
@@ -116,7 +117,7 @@ class AccountServer {
     );
     await _initDatabase(privateKey, multiAuthCubit);
 
-    Timer.periodic(const Duration(days: 1), (timer) {
+    checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
       i('refreshSignalKeys periodic');
       checkSignalKey(client);
     });
@@ -801,6 +802,7 @@ class AccountServer {
 
   Future<void> stop() async {
     appActiveListener.removeListener(onActive);
+    checkSignalKeyTimer?.cancel();
     blaze.dispose();
     await database.dispose();
   }
