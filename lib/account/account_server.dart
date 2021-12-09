@@ -99,7 +99,7 @@ class AccountServer {
                 final time =
                     DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
                 final difference = time.difference(DateTime.now());
-                if (difference.inMinutes > 5) {
+                if (difference.inMinutes.abs() > 5) {
                   blaze.waitSyncTime();
                   handler.next(e);
                   return;
@@ -218,7 +218,8 @@ class AccountServer {
     jobSubscribers
       ..add(Rx.merge([
         // runFloodJob when socket connected.
-        blaze.connectedStateStreamController.stream.where((ok) => ok),
+        blaze.connectedStateBehaviorSubject.stream
+            .where((state) => state == ConnectedState.connected),
         database.mixinDatabase.tableUpdates(
           TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
         )
