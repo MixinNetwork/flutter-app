@@ -86,8 +86,8 @@
 /* Class = "NSMenuItem"; title = "Stop Speaking"; ObjectID = "Oyz-dy-DGm"; */
 "Oyz-dy-DGm.title" = "Stop Speaking";
 
-/* Class = "NSWindow"; title = "APP_NAME"; ObjectID = "QvC-M9-y7g"; */
-"QvC-M9-y7g.title" = "APP_NAME";
+/* Class = "NSWindow"; title = "Mixin"; ObjectID = "QvC-M9-y7g"; */
+"QvC-M9-y7g.title" = "Mixin";
 
 /* Class = "NSMenuItem"; title = "Zoom"; ObjectID = "R4o-n2-Eq4"; */
 "R4o-n2-Eq4.title" = "Zoom";
