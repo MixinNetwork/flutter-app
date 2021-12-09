@@ -132,10 +132,12 @@ class AccountServer {
 
     start();
 
-    appActiveListener.addListener(() {
-      if (!isAppActive || _activeConversationId == null) return;
-      markRead(_activeConversationId!);
-    });
+    appActiveListener.addListener(onActive);
+  }
+
+  void onActive() {
+    if (!isAppActive || _activeConversationId == null) return;
+    markRead(_activeConversationId!);
   }
 
   Future<void> _initDatabase(
@@ -798,6 +800,7 @@ class AccountServer {
   }
 
   Future<void> stop() async {
+    appActiveListener.removeListener(onActive);
     blaze.dispose();
     await database.dispose();
   }
