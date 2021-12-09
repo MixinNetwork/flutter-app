@@ -231,13 +231,13 @@ class AccountServer {
           await Future.forEach(jobs, (db.Job job) async {
             switch (job.action) {
               case kSendingMessage:
-                await _runSendJob(jobs);
+                await _runSendJob([job]);
                 break;
               case kPinMessage:
-                await _runPinJob(jobs);
+                await _runPinJob([job]);
                 break;
               case kRecallMessage:
-                await _runRecallJob(jobs);
+                await _runRecallJob([job]);
                 break;
             }
             return null;
