@@ -57,12 +57,6 @@ class Resources {
 
   static const String assetsImagesCopySvg = 'assets/images/copy.svg';
 
-  static const String assetsImagesDarkReceiverNipBubblePng =
-      'assets/images/dark_receiver_nip_bubble.png';
-
-  static const String assetsImagesDarkSenderNipBubblePng =
-      'assets/images/dark_sender_nip_bubble.png';
-
   static const String assetsImagesDeleteSvg = 'assets/images/delete.svg';
 
   static const String assetsImagesDeliveredSvg = 'assets/images/delivered.svg';
