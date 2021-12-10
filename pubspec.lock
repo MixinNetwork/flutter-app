@@ -1091,10 +1091,12 @@ packages:
   quick_breakpad:
     dependency: "direct main"
     description:
-      name: quick_breakpad
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.0"
+      path: "."
+      ref: "33e9af863352430b6a9b1dedffb757819a3ff020"
+      resolved-ref: "33e9af863352430b6a9b1dedffb757819a3ff020"
+      url: "https://github.com/boyan01/quick_breakpad"
+    source: git
+    version: "0.2.0"
   quiver:
     dependency: transitive
     description:
