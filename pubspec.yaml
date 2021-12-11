@@ -124,6 +124,11 @@ dependency_overrides:
       url: https://github.com/simolus3/moor.git
       ref: 871f1e4198da994060b02a9eaef9a809d5750918
       path: drift_dev
+  # remove this if https://github.com/woodemi/quick_breakpad/issues/10 fixed
+  quick_breakpad:
+    git:
+      url: https://github.com/boyan01/quick_breakpad
+      ref: 33e9af863352430b6a9b1dedffb757819a3ff020
   sqlparser:
     git:
       url: https://github.com/simolus3/moor.git
