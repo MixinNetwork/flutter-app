@@ -5,6 +5,7 @@ import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as p;
 
 import '../bloc/setting_cubit.dart';
 import '../constants/brightness_theme_data.dart';
@@ -14,6 +15,7 @@ import '../widgets/brightness_observer.dart';
 import '../widgets/dialog.dart';
 import '../widgets/web_view_navigation_bar.dart';
 import 'extension/extension.dart';
+import 'file.dart';
 import 'uri_utils.dart';
 
 final kIsSupportWebView =
@@ -88,8 +90,14 @@ class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
   }
 }
 
+// The folder to store WebView user data.
+// Only works on Windows, to avoid we do not have write permission to the folder
+// of executable file.
+String get _webViewUserDataFolder =>
+    p.join(mixinDocumentsDirectory.path, 'web_view_user_data');
+
 void clearWebViewCacheAndCookies() {
-  WebviewWindow.clearAll();
+  WebviewWindow.clearAll(userDataFolderWindows: _webViewUserDataFolder);
 }
 
 Future<Map<String, dynamic>> _mixinContext(
@@ -151,6 +159,7 @@ Future<void> openWebViewWindowWithUrl(
       windowHeight: 750,
       title: title ?? '',
       titleBarTopPadding: 22,
+      userDataFolderWindows: _webViewUserDataFolder,
     ),
   );
   final mixinContext = jsonEncode(await _mixinContext(context, conversationId));
