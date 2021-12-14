@@ -187,6 +187,13 @@ SELECT message_id, conversation_id, content, created_at, user_id FROM messages W
 ''',
       updates: {messagesFtsV2},
     );
+    await customInsert(
+      '''
+INSERT OR REPLACE INTO messages_fts_v2(message_id, conversation_id, content, created_at, user_id)
+SELECT message_id, conversation_id, name, created_at, user_id FROM messages WHERE category like '%_CONTACT' or category like '%_DATA'
+''',
+      updates: {messagesFtsV2},
+    );
     i('import messages took ${stopwatch.elapsed}');
   }
 
