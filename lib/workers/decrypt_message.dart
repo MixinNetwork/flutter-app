@@ -1143,16 +1143,13 @@ class DecryptMessage extends Injector {
         sessionId: sessionId));
     final result = await _sender.deliver(bm);
     if (result.success) {
-      final address = SignalProtocolAddress(
-          recipientId, sessionId.getDeviceId());
+      final address =
+          SignalProtocolAddress(recipientId, sessionId.getDeviceId());
       final ratchet = RatchetSenderKeysCompanion.insert(
           groupId: conversationId,
           senderId: address.toString(),
           status: RatchetStatus.requesting.name,
-          createdAt: DateTime
-              .now()
-              .millisecondsSinceEpoch
-              .toString());
+          createdAt: DateTime.now().millisecondsSinceEpoch.toString());
       await SignalDatabase.get.ratchetSenderKeyDao.insertSenderKey(ratchet);
     }
   }
