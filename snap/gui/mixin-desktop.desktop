@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Mixin Desktop
+Comment=Mixin Messenger
+GenericName=Internet Messenger
+Categories=InstantMessaging
+Version=1.0
+Exec=mixin-desktop
+Terminal=false
+Icon=${SNAP}/meta/gui/mixin-desktop.png
