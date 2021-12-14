@@ -127,8 +127,8 @@ dependency_overrides:
       path: drift_dev
   sqlparser:
     git:
-      url: https://github.com/boyan01/moor.git
-      ref: b5d32ee21a6895a25a49df94ad62ebf85e2f10d9
+      url: https://github.com/simolus3/moor.git
+      ref: 61c2fff4e2cc2da21284b1a22c4582dc2b543078
       path: sqlparser
 
 dev_dependencies:

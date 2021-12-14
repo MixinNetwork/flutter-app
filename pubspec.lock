@@ -1223,9 +1223,9 @@ packages:
     dependency: "direct overridden"
     description:
       path: sqlparser
-      ref: b5d32ee21a6895a25a49df94ad62ebf85e2f10d9
-      resolved-ref: b5d32ee21a6895a25a49df94ad62ebf85e2f10d9
-      url: "https://github.com/boyan01/moor.git"
+      ref: "61c2fff4e2cc2da21284b1a22c4582dc2b543078"
+      resolved-ref: "61c2fff4e2cc2da21284b1a22c4582dc2b543078"
+      url: "https://github.com/simolus3/moor.git"
     source: git
     version: "0.19.0"
   stack_trace:
