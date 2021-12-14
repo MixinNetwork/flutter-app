@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as p;
+import 'package:quick_breakpad/quick_breakpad.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
 import 'app.dart';
@@ -38,6 +40,18 @@ Future<void> main(List<String> args) async {
     initMixinDocumentsDirectory(),
   ]);
   loadBalancer = result[0] as LoadBalancer?;
+
+  // init crash report dump path.
+  // default to executable directory, but we might haven't write permission to
+  // executable directory, so use documents directory instead.
+  unawaited(QuickBreakpad.setDumpPath(p.join(
+    mixinDocumentsDirectory.path,
+    'crash',
+  )));
+  logFileManager = LogFileManager(p.join(
+    mixinDocumentsDirectory.path,
+    'log',
+  ));
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: mixinDocumentsDirectory,

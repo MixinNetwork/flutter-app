@@ -9,6 +9,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../blaze/blaze.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../bloc/keyword_cubit.dart';
@@ -731,7 +732,8 @@ class _List extends HookWidget {
 
     final connectedState = useMemoizedStream(
             () => context
-                .accountServer.blaze.connectedStateStreamController.stream
+                .accountServer.blaze.connectedStateBehaviorSubject.stream
+                .map((event) => event == ConnectedState.connected)
                 .distinct(),
             initialData: true)
         .requireData;

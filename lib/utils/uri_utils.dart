@@ -75,6 +75,9 @@ Future<bool> openUri(
         return false;
       }
     }
+
+    await showToastFailed(context, ToastError(context.l10n.uriCheckOnPhone));
+    return false;
   }
 
   return fallbackHandler(uri.toString());

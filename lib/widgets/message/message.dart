@@ -461,7 +461,9 @@ class _PinMenu extends HookWidget {
       converter: (state) => state?.role,
     );
 
-    if (role == null) return const SizedBox();
+    if (role == null ||
+        [MessageStatus.failed, MessageStatus.unknown, MessageStatus.sending]
+            .contains(message.status)) return const SizedBox();
 
     return ContextMenu(
       title: message.pinned ? context.l10n.unPin : context.l10n.pin,

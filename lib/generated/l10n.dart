@@ -100,10 +100,10 @@ class Localization {
     );
   }
 
-  /// `Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login.`
+  /// `Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login.`
   String get pageLandingLoginMessage {
     return Intl.message(
-      'Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login.',
+      'Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login.',
       name: 'pageLandingLoginMessage',
       desc: '',
       args: [],

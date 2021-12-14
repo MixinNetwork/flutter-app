@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../blaze/blaze.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -37,7 +38,8 @@ class HomePage extends HookWidget {
   Widget build(BuildContext context) {
     final localTimeError = useMemoizedStream(
             () => context
-                .accountServer.blaze.localTimeErrorStreamController.stream
+                .accountServer.blaze.connectedStateBehaviorSubject.stream
+                .map((event) => event == ConnectedState.hasLocalTimeError)
                 .distinct(),
             keys: [context.accountServer]).data ??
         false;
