@@ -9,6 +9,7 @@ import 'package:flutter_portal/flutter_portal.dart';
 import '../db/mixin_database.dart' hide Offset;
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/mention_cubit.dart';
+import '../ui/home/intent.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import '../utils/platform.dart';
@@ -49,32 +50,32 @@ class MentionPanelPortalEntry extends HookWidget {
       enabled: selectable,
       shortcuts: {
         const SingleActivator(LogicalKeyboardKey.arrowDown):
-            const _ListSelectionNextIntent(),
+            const ListSelectionNextIntent(),
         const SingleActivator(LogicalKeyboardKey.arrowUp):
-            const _ListSelectionPrevIntent(),
+            const ListSelectionPrevIntent(),
         const SingleActivator(LogicalKeyboardKey.tab):
-            const _ListSelectionNextIntent(),
+            const ListSelectionNextIntent(),
         const SingleActivator(LogicalKeyboardKey.enter):
-            const _ListSelectionSelectedIntent(),
+            const ListSelectionSelectedIntent(),
         if (kPlatformIsDarwin) ...{
           const SingleActivator(
             LogicalKeyboardKey.keyN,
             control: true,
-          ): const _ListSelectionNextIntent(),
+          ): const ListSelectionNextIntent(),
           const SingleActivator(
             LogicalKeyboardKey.keyP,
             control: true,
-          ): const _ListSelectionPrevIntent(),
+          ): const ListSelectionPrevIntent(),
         }
       },
       actions: {
-        _ListSelectionNextIntent: CallbackAction<Intent>(
+        ListSelectionNextIntent: CallbackAction<Intent>(
           onInvoke: (Intent intent) => context.read<MentionCubit>().next(),
         ),
-        _ListSelectionPrevIntent: CallbackAction<Intent>(
+        ListSelectionPrevIntent: CallbackAction<Intent>(
           onInvoke: (Intent intent) => context.read<MentionCubit>().prev(),
         ),
-        _ListSelectionSelectedIntent: CallbackAction<Intent>(
+        ListSelectionSelectedIntent: CallbackAction<Intent>(
           onInvoke: (Intent intent) {
             final state = context.read<MentionCubit>().state;
             _select(context, state.users[state.index]);
@@ -240,14 +241,3 @@ class _MentionItem extends StatelessWidget {
       );
 }
 
-class _ListSelectionNextIntent extends Intent {
-  const _ListSelectionNextIntent();
-}
-
-class _ListSelectionPrevIntent extends Intent {
-  const _ListSelectionPrevIntent();
-}
-
-class _ListSelectionSelectedIntent extends Intent {
-  const _ListSelectionSelectedIntent();
-}

@@ -232,7 +232,7 @@ class _Retry extends StatelessWidget {
           onTap: onTap,
           behavior: HitTestBehavior.opaque,
           child: Tooltip(
-            message: errorMessage,
+            message: errorMessage ?? '',
             excludeFromSemantics: true,
             child: Center(
               child: Column(
