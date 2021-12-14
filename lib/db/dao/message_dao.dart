@@ -8,6 +8,7 @@ import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/load_balancer_utils.dart';
+import '../../utils/logger.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../database_event_bus.dart';
 import '../mixin_database.dart';
@@ -200,13 +201,26 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<int> insertFts(String messageId, String conversationId, String content,
-          DateTime createdAt, String userId) =>
-      db.customInsert(
+      DateTime createdAt, String userId) async {
+    try {
+      return await db.customInsert(
         'INSERT OR REPLACE INTO messages_fts_v2'
         ' (message_id, conversation_id, content, created_at, user_id) VALUES'
-        " ('$messageId', '$conversationId','$content', '${createdAt.millisecondsSinceEpoch}', '$userId')",
+        ' (?, ?, ?, ?, ?)',
+        variables: [
+          Variable.withString(messageId),
+          Variable.withString(conversationId),
+          Variable.withString(content),
+          Variable(createdAt),
+          Variable.withString(userId),
+        ],
         updates: {db.messagesFtsV2},
       );
+    } catch (error, stacktrace) {
+      e('insertFts failed: $error $stacktrace');
+      return 0;
+    }
+  }
 
   Future<void> deleteMessage(String messageId) async {
     await db.transaction(() async {
