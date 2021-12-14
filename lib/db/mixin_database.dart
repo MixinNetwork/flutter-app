@@ -183,7 +183,7 @@ class MixinDatabase extends _$MixinDatabase {
     await customInsert(
       '''
 INSERT OR REPLACE INTO messages_fts_v2(message_id, conversation_id, content, created_at, user_id)
-SELECT message_id, conversation_id, content, created_at, user_id FROM messages WHERE category like '%_TEXT'
+SELECT message_id, conversation_id, content, created_at, user_id FROM messages WHERE category like '%_TEXT' or category like '%_POST'
 ''',
       updates: {messagesFtsV2},
     );
