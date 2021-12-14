@@ -171,6 +171,7 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 8) {
             await m.createTable(messagesFtsV2);
+            await m.deleteTable('messages_fts');
             await _migrationMessageFts();
           }
           _isDbUpdating.value = false;
