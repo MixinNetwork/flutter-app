@@ -11951,7 +11951,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationCircleItem> allCircles() {
     return customSelect(
-        'SELECT ci.circle_id, ci.name, ci.created_at, COUNT(c.conversation_id) AS count, SUM(CASE WHEN IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_conversation_count, SUM(CASE WHEN(CASE WHEN c.category = \'GROUP\' THEN c.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_muted_conversation_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id LEFT JOIN users AS owner ON owner.user_id = c.owner_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        'SELECT ci.circle_id, ci.name, ci.created_at, ci.ordered_at, COUNT(c.conversation_id) AS count, SUM(CASE WHEN IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_conversation_count, SUM(CASE WHEN(CASE WHEN c.category = \'GROUP\' THEN c.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_muted_conversation_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id LEFT JOIN users AS owner ON owner.user_id = c.owner_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
         variables: [],
         readsFrom: {
           circles,
@@ -11963,6 +11963,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         circleId: row.read<String>('circle_id'),
         name: row.read<String>('name'),
         createdAt: Circles.$converter0.mapToDart(row.read<int>('created_at'))!,
+        orderedAt: Circles.$converter1.mapToDart(row.read<int?>('ordered_at')),
         count: row.read<int>('count'),
         unseenConversationCount: row.read<int>('unseen_conversation_count'),
         unseenMutedConversationCount:
@@ -13795,6 +13796,7 @@ class ConversationCircleItem {
   String circleId;
   String name;
   DateTime createdAt;
+  DateTime? orderedAt;
   int count;
   int unseenConversationCount;
   int unseenMutedConversationCount;
@@ -13802,12 +13804,13 @@ class ConversationCircleItem {
     required this.circleId,
     required this.name,
     required this.createdAt,
+    this.orderedAt,
     required this.count,
     required this.unseenConversationCount,
     required this.unseenMutedConversationCount,
   });
   @override
-  int get hashCode => Object.hash(circleId, name, createdAt, count,
+  int get hashCode => Object.hash(circleId, name, createdAt, orderedAt, count,
       unseenConversationCount, unseenMutedConversationCount);
   @override
   bool operator ==(Object other) =>
@@ -13816,6 +13819,7 @@ class ConversationCircleItem {
           other.circleId == this.circleId &&
           other.name == this.name &&
           other.createdAt == this.createdAt &&
+          other.orderedAt == this.orderedAt &&
           other.count == this.count &&
           other.unseenConversationCount == this.unseenConversationCount &&
           other.unseenMutedConversationCount ==
@@ -13826,6 +13830,7 @@ class ConversationCircleItem {
           ..write('circleId: $circleId, ')
           ..write('name: $name, ')
           ..write('createdAt: $createdAt, ')
+          ..write('orderedAt: $orderedAt, ')
           ..write('count: $count, ')
           ..write('unseenConversationCount: $unseenConversationCount, ')
           ..write('unseenMutedConversationCount: $unseenMutedConversationCount')
