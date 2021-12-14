@@ -373,8 +373,10 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<SearchConversationItem> fuzzySearchConversation(
           String query, int limit) =>
-      db.fuzzySearchConversation(query.trim().escapeSql(),
-          (Conversations conversation, Users owner, Messages message) => Limit(limit, null));
+      db.fuzzySearchConversation(
+          query.trim().escapeSql(),
+          (Conversations conversation, Users owner, Messages message) =>
+              Limit(limit, null));
 
   Selectable<String?> announcement(String conversationId) =>
       (db.selectOnly(db.conversations)

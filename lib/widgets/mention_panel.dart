@@ -240,4 +240,3 @@ class _MentionItem extends StatelessWidget {
         ),
       );
 }
-

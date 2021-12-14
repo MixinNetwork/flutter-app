@@ -528,7 +528,8 @@ class SearchItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: InteractiveDecoratedBox(
-        decoration: selected == true ? selectedDecoration : const BoxDecoration(),
+        decoration:
+            selected == true ? selectedDecoration : const BoxDecoration(),
         hoveringDecoration: selectedDecoration,
         onTap: onTap,
         child: Container(
