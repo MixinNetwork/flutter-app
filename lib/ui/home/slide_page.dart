@@ -191,7 +191,7 @@ class _CircleList extends HookWidget {
             onReorder: (int oldIndex, int newIndex) {
               final newList = list.value.toList();
 
-              final _newIndex = newIndex - 1;
+              final _newIndex = oldIndex < newIndex ? newIndex - 1 : newIndex;
               final oldItem = newList.removeAt(oldIndex);
               newList.insert(_newIndex, oldItem);
 
