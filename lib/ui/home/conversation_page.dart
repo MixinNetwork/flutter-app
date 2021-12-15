@@ -693,7 +693,7 @@ class _Empty extends StatelessWidget {
     return Center(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         SvgPicture.asset(
-          Resources.assetsImagesConversationEmptySvg,
+          Resources.assetsImagesEmptyFileSvg,
           height: 78,
           width: 58,
           color: dynamicColor,

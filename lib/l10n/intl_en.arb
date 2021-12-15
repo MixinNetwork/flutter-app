@@ -233,5 +233,6 @@
   "deleteChatDescription": "Deleting chat will remove messages form this devices only. They will not be removed from other devices.",
   "deleteChatHint": "Delete chat: {value}",
   "uriCheckOnPhone": "This type of url is not supported, please check on your phone.",
-  "saveAs": "Save as"
+  "saveAs": "Save as",
+  "noResults": "No results"
 }

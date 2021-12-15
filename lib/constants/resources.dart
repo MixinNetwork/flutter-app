@@ -52,9 +52,6 @@ class Resources {
 
   static const String assetsImagesContactSvg = 'assets/images/contact.svg';
 
-  static const String assetsImagesConversationEmptySvg =
-      'assets/images/conversation_empty.svg';
-
   static const String assetsImagesCopySvg = 'assets/images/copy.svg';
 
   static const String assetsImagesDeleteSvg = 'assets/images/delete.svg';
@@ -182,6 +179,8 @@ class Resources {
   static const String assetsImagesMuteSvg = 'assets/images/mute.svg';
 
   static const String assetsImagesNextSvg = 'assets/images/next.svg';
+
+  static const String assetsImagesNoResultSvg = 'assets/images/no_result.svg';
 
   static const String assetsImagesNotifyIconIco =
       'assets/images/notify_icon.ico';

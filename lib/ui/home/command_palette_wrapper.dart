@@ -3,8 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../constants/resources.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
@@ -100,9 +102,7 @@ class CommandPalettePage extends HookWidget {
 
     final users = useMemoizedStream(() {
           if (keyword.trim().isEmpty) {
-            return context.database.userDao
-                .notInFriends([context.accountServer.userId]).watchThrottle(
-                    kSlowThrottleDuration);
+            return Stream.value(<User>[]);
           }
           return context.database.userDao
               .fuzzySearchUser(
@@ -153,7 +153,10 @@ class CommandPalettePage extends HookWidget {
           selectedIndex.value);
     }, [ids]);
 
-    final select = useCallback(() {
+    final select = useCallback(([int? index]) {
+      if (index != null) {
+        selectedIndex.value = index;
+      }
       if (selectedIndex.value < users.length) {
         ConversationCubit.selectUser(context, ids[selectedIndex.value]);
       } else if ((selectedIndex.value - users.length) < conversations.length) {
@@ -223,92 +226,102 @@ class CommandPalettePage extends HookWidget {
                   ],
                 ),
               ),
-              Expanded(
-                child: CustomScrollView(
-                  controller: scrollController,
-                  slivers: [
-                    if (users.isNotEmpty)
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                            final user = users[index];
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 30),
-                              child: SearchItem(
-                                selected: selectedIndex.value == index,
-                                avatar: AvatarWidget(
+              if (users.isEmpty && conversations.isEmpty)
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          Resources.assetsImagesEmptyFileSvg,
+                          height: 80,
+                          width: 80,
+                          color: context.theme.secondaryText,
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          context.l10n.noResults,
+                          style: TextStyle(
+                            color: context.theme.secondaryText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: CustomScrollView(
+                    controller: scrollController,
+                    slivers: [
+                      if (users.isNotEmpty)
+                        SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                              final user = users[index];
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 30),
+                                child: SearchItem(
+                                  selected: selectedIndex.value == index,
+                                  avatar: AvatarWidget(
+                                    name: user.fullName ?? '?',
+                                    userId: user.userId,
+                                    size: ConversationPage
+                                        .conversationItemAvatarSize,
+                                    avatarUrl: user.avatarUrl,
+                                  ),
                                   name: user.fullName ?? '?',
-                                  userId: user.userId,
-                                  size: ConversationPage
-                                      .conversationItemAvatarSize,
-                                  avatarUrl: user.avatarUrl,
+                                  trailing: VerifiedOrBotWidget(
+                                    verified: user.isVerified,
+                                    isBot: user.appId != null,
+                                  ),
+                                  keyword: keyword,
+                                  onTap: () => select(index),
                                 ),
-                                name: user.fullName ?? '?',
-                                trailing: VerifiedOrBotWidget(
-                                  verified: user.isVerified,
-                                  isBot: user.appId != null,
-                                ),
-                                keyword: keyword,
-                                onTap: () async {
-                                  await ConversationCubit.selectUser(
-                                    context,
-                                    user.userId,
-                                    user: user,
-                                  );
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            );
-                          },
-                          childCount: users.length,
+                              );
+                            },
+                            childCount: users.length,
+                          ),
                         ),
-                      ),
-                    if (conversations.isNotEmpty)
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                            final conversation = conversations[index];
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 30),
-                              child: SearchItem(
-                                selected: selectedIndex.value ==
-                                    (users.length + index),
-                                avatar: ConversationAvatarWidget(
-                                  conversationId: conversation.conversationId,
-                                  fullName: conversation.validName,
-                                  groupIconUrl: conversation.groupIconUrl,
-                                  avatarUrl: conversation.avatarUrl,
-                                  category: conversation.category,
-                                  size: ConversationPage
-                                      .conversationItemAvatarSize,
-                                  userId: conversation.ownerId,
+                      if (conversations.isNotEmpty)
+                        SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                              final conversation = conversations[index];
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 30),
+                                child: SearchItem(
+                                  selected: selectedIndex.value ==
+                                      (users.length + index),
+                                  avatar: ConversationAvatarWidget(
+                                    conversationId: conversation.conversationId,
+                                    fullName: conversation.validName,
+                                    groupIconUrl: conversation.groupIconUrl,
+                                    avatarUrl: conversation.avatarUrl,
+                                    category: conversation.category,
+                                    size: ConversationPage
+                                        .conversationItemAvatarSize,
+                                    userId: conversation.ownerId,
+                                  ),
+                                  name: conversation.validName,
+                                  trailing: VerifiedOrBotWidget(
+                                    verified: conversation.isVerified,
+                                    isBot: conversation.appId != null,
+                                  ),
+                                  keyword: keyword,
+                                  onTap: () => select(users.length + index),
                                 ),
-                                name: conversation.validName,
-                                trailing: VerifiedOrBotWidget(
-                                  verified: conversation.isVerified,
-                                  isBot: conversation.appId != null,
-                                ),
-                                keyword: keyword,
-                                onTap: () async {
-                                  await ConversationCubit.selectConversation(
-                                    context,
-                                    conversation.conversationId,
-                                  );
-
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            );
-                          },
-                          childCount: conversations.length,
+                              );
+                            },
+                            childCount: conversations.length,
+                          ),
                         ),
-                      ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 22)),
-                  ],
-                ),
-              )
+                      const SliverToBoxAdapter(child: SizedBox(height: 22)),
+                    ],
+                  ),
+                )
             ],
           ),
         ),
