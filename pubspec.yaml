@@ -78,7 +78,7 @@ dependencies:
       ref: 7909b17640c06e9bf91b68e1e52105c3b16af284
       path: packages/pasteboard
   path: ^1.8.0
-  path_provider: ^2.0.2
+  path_provider: ^2.0.8
   photo_view:
     git:
       url: https://github.com/fireslime/photo_view.git
@@ -125,6 +125,7 @@ dependency_overrides:
       ref: 871f1e4198da994060b02a9eaef9a809d5750918
       path: drift_dev
   # remove this if https://github.com/woodemi/quick_breakpad/issues/10 fixed
+  platform: ^3.1.0
   quick_breakpad:
     git:
       url: https://github.com/boyan01/quick_breakpad
