@@ -88,7 +88,7 @@ dependencies:
   quick_breakpad: ^0.3.0
   recase: ^4.0.0
   rxdart: ^0.27.1
-  scrollable_positioned_list: ^0.2.0-nullsafety.0
+  scrollable_positioned_list: ^0.2.3
   sliver_tools: ^0.2.5
   stream_transform: ^2.0.0
   system_tray: ^0.0.7

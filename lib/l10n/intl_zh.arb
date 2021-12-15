@@ -228,5 +228,6 @@
   "deleteChatDescription": "删除对话只会删除此设备的聊天记录，不会影响其他设备。",
   "deleteChatHint": "删除对话：{value}",
   "uriCheckOnPhone": "不支持此链接，请在手机上查看。",
-  "saveAs": "另存为"
+  "saveAs": "另存为",
+  "noResults": "没有结果"
 }

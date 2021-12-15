@@ -84,7 +84,8 @@ ORDER BY (conversation.category = 'GROUP' AND conversation.name = :query COLLATE
         AND (owner.full_name = :query COLLATE NOCASE
             OR owner.identity_number = :query COLLATE NOCASE)) DESC,
     conversation.pin_time DESC,
-    message.created_at DESC;
+    message.created_at DESC
+    limit $limit;
 
 conversationParticipantsCount:
 SELECT COUNT(1) FROM participants WHERE conversation_id = :conversationId;

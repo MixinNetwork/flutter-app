@@ -227,6 +227,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "noLink": MessageLookupByLibrary.simpleMessage("没有链接"),
         "noMedia": MessageLookupByLibrary.simpleMessage("没有媒体"),
         "noPost": MessageLookupByLibrary.simpleMessage("没有文章"),
+        "noResults": MessageLookupByLibrary.simpleMessage("没有结果"),
         "notification": MessageLookupByLibrary.simpleMessage("通知"),
         "notificationPermissionDescription":
             MessageLookupByLibrary.simpleMessage("不再遗漏好友的消息。"),
