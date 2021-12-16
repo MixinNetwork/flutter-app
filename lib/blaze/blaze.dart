@@ -77,7 +77,7 @@ class Blaze {
       i('ws connect');
       _token ??= signAuthTokenWithEdDSA(
           userId, sessionId, privateKey, scp, 'GET', '/', '');
-      i('ws _token: $_token');
+      i('ws _token?.isNotEmpty == true: ${_token?.isNotEmpty == true}');
       _userAgent ??= await _getUserAgent();
       i('ws _userAgent: $_userAgent');
       _connect(_token!);
