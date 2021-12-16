@@ -72,6 +72,7 @@ class Blaze {
     try {
       _connect(_token!);
     } catch (_) {
+      connectedStateBehaviorSubject.value = ConnectedState.disconnected;
       await reconnect();
     }
   }
