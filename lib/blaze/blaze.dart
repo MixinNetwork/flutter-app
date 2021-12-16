@@ -54,7 +54,7 @@ class Blaze {
   final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
       BehaviorSubject<ConnectedState>();
 
-  ValueStream<ConnectedState> get connectedStateBehaviorSubject =>
+  ValueStream<ConnectedState> get connectedStateStream =>
       _connectedStateBehaviorSubject.stream;
 
   IOWebSocketChannel? channel;
@@ -278,7 +278,7 @@ class Blaze {
   }
 
   Future<void> reconnect() async {
-    i('_reconnect reconnecting: ${_connectedState} start: ${StackTrace.current}');
+    i('_reconnect reconnecting: $_connectedState start: ${StackTrace.current}');
     if (_connectedState == ConnectedState.connecting ||
         _connectedState == ConnectedState.reconnecting) {
       return;

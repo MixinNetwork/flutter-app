@@ -737,8 +737,7 @@ class _List extends HookWidget {
     );
 
     final connectedState = useMemoizedStream(
-            () => context
-                .accountServer.blaze.connectedStateBehaviorSubject.stream
+            () => context.accountServer.blaze.connectedStateStream
                 .map((event) => event == ConnectedState.connected)
                 .distinct(),
             initialData: true)
