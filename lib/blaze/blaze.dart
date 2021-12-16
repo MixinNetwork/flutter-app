@@ -51,8 +51,11 @@ class Blaze {
   String _host = _wsHost1;
   String? _token;
 
-  BehaviorSubject<ConnectedState> connectedStateBehaviorSubject =
+  final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
       BehaviorSubject<ConnectedState>();
+
+  ValueStream<ConnectedState> get connectedStateBehaviorSubject =>
+      _connectedStateBehaviorSubject.stream;
 
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
@@ -61,9 +64,14 @@ class Blaze {
 
   String? _userAgent;
 
+  ConnectedState get _connectedState => _connectedStateBehaviorSubject.value;
+
+  set _connectedState(ConnectedState state) =>
+      _connectedStateBehaviorSubject.value = state;
+
   Future<void> connect() async {
     i('reconnecting set false, ${StackTrace.current}');
-    connectedStateBehaviorSubject.value = ConnectedState.connecting;
+    _connectedState = ConnectedState.connecting;
 
     i('ws connect');
     _token ??= signAuthTokenWithEdDSA(
@@ -72,15 +80,13 @@ class Blaze {
     try {
       _connect(_token!);
     } catch (_) {
-      connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+      _connectedState = ConnectedState.disconnected;
       await reconnect();
     }
   }
 
   void _connect(String token) {
-    if (connectedStateBehaviorSubject.value != ConnectedState.connecting) {
-      return;
-    }
+    if (_connectedState != ConnectedState.connecting) return;
     channel = IOWebSocketChannel.connect(
       _host,
       protocols: ['Mixin-Blaze-1'],
@@ -93,12 +99,12 @@ class Blaze {
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
       (blazeMessage) async {
-        connectedStateBehaviorSubject.value = ConnectedState.connected;
+        _connectedState = ConnectedState.connected;
         d('blazeMessage receive: ${blazeMessage.toJson()}');
 
         if (blazeMessage.action == kErrorAction &&
             blazeMessage.error?.code == authentication) {
-          connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+          _connectedState = ConnectedState.disconnected;
           await reconnect();
           return;
         }
@@ -126,12 +132,12 @@ class Blaze {
       },
       onError: (error, s) {
         i('ws error: $error, s: $s');
-        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+        _connectedState = ConnectedState.disconnected;
         reconnect();
       },
       onDone: () {
         i('web socket done');
-        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+        _connectedState = ConnectedState.disconnected;
         reconnect();
       },
       cancelOnError: true,
@@ -247,7 +253,7 @@ class Blaze {
 
   void _disconnect() {
     i('ws _disconnect');
-    connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+    _connectedState = ConnectedState.disconnected;
     transactions.clear();
     subscription?.cancel();
     channel?.sink.close();
@@ -257,7 +263,7 @@ class Blaze {
 
   void waitSyncTime() {
     _disconnect();
-    connectedStateBehaviorSubject.value = ConnectedState.hasLocalTimeError;
+    _connectedState = ConnectedState.hasLocalTimeError;
   }
 
   Future<BlazeMessage?> sendMessage(BlazeMessage blazeMessage) async {
@@ -272,12 +278,12 @@ class Blaze {
   }
 
   Future<void> reconnect() async {
-    i('_reconnect reconnecting: ${connectedStateBehaviorSubject.value} start: ${StackTrace.current}');
-    if (connectedStateBehaviorSubject.value == ConnectedState.connecting ||
-        connectedStateBehaviorSubject.value == ConnectedState.reconnecting) {
+    i('_reconnect reconnecting: ${_connectedState} start: ${StackTrace.current}');
+    if (_connectedState == ConnectedState.connecting ||
+        _connectedState == ConnectedState.reconnecting) {
       return;
     }
-    connectedStateBehaviorSubject.value = ConnectedState.reconnecting;
+    _connectedState = ConnectedState.reconnecting;
     _host = _host == _wsHost1 ? _wsHost2 : _wsHost1;
 
     try {
@@ -289,11 +295,11 @@ class Blaze {
       w('ws ping error: $e');
       if (e is MixinApiError &&
           (e.error as MixinError).code == authentication) {
-        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+        _connectedState = ConnectedState.disconnected;
         return;
       }
       await Future.delayed(const Duration(seconds: 2));
-      connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+      _connectedState = ConnectedState.disconnected;
       i('reconnecting set false, ${StackTrace.current}');
       return reconnect();
     }
@@ -301,7 +307,7 @@ class Blaze {
 
   void dispose() {
     _disconnect();
-    connectedStateBehaviorSubject.close();
+    _connectedStateBehaviorSubject.close();
   }
 }
 
