@@ -73,11 +73,13 @@ class Blaze {
     i('reconnecting set false, ${StackTrace.current}');
     _connectedState = ConnectedState.connecting;
 
-    i('ws connect');
-    _token ??= signAuthTokenWithEdDSA(
-        userId, sessionId, privateKey, scp, 'GET', '/', '');
-    _userAgent ??= await _getUserAgent();
     try {
+      i('ws connect');
+      _token ??= signAuthTokenWithEdDSA(
+          userId, sessionId, privateKey, scp, 'GET', '/', '');
+      i('ws _token: $_token');
+      _userAgent ??= await _getUserAgent();
+      i('ws _userAgent: $_userAgent');
       _connect(_token!);
     } catch (_) {
       _connectedState = ConnectedState.disconnected;
@@ -86,7 +88,8 @@ class Blaze {
   }
 
   void _connect(String token) {
-    if (_connectedState != ConnectedState.connecting) return;
+    _disconnect(false);
+    _connectedState = ConnectedState.connecting;
     channel = IOWebSocketChannel.connect(
       _host,
       protocols: ['Mixin-Blaze-1'],
@@ -251,9 +254,9 @@ class Blaze {
         Uint8List.fromList((await jsonEncodeWithIsolate(msg)).codeUnits)));
   }
 
-  void _disconnect() {
+  void _disconnect([bool resetConnectedState = true]) {
     i('ws _disconnect');
-    _connectedState = ConnectedState.disconnected;
+    if (resetConnectedState) _connectedState = ConnectedState.disconnected;
     transactions.clear();
     subscription?.cancel();
     channel?.sink.close();
