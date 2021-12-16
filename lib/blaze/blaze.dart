@@ -86,9 +86,8 @@ class Blaze {
       _checkTimeoutTimer = Timer(const Duration(seconds: 10), () {
         i('ws webSocket state: ${channel?.innerWebSocket?.readyState}');
 
-        final connected = channel?.innerWebSocket?.readyState == WebSocket.open;
-        if (connected) return;
-        if (_connectedState != ConnectedState.connecting) return;
+        if (channel?.innerWebSocket?.readyState == WebSocket.open) return;
+        if (_connectedState == ConnectedState.connected) return;
         _connectedState = ConnectedState.disconnected;
 
         reconnect();
