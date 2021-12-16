@@ -37,8 +37,7 @@ class HomePage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final localTimeError = useMemoizedStream(
-            () => context
-                .accountServer.blaze.connectedStateBehaviorSubject.stream
+            () => context.accountServer.blaze.connectedStateStream
                 .map((event) => event == ConnectedState.hasLocalTimeError)
                 .distinct(),
             keys: [context.accountServer]).data ??
