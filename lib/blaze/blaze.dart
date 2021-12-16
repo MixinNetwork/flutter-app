@@ -84,9 +84,10 @@ class Blaze {
       i('ws _userAgent: $_userAgent');
       _connect(_token!);
       _checkTimeoutTimer = Timer(const Duration(seconds: 10), () {
-        final closed = [WebSocket.closing, WebSocket.closed]
-            .contains(channel?.innerWebSocket?.readyState);
-        if (!closed) return;
+        i('ws webSocket state: ${channel?.innerWebSocket?.readyState}');
+
+        final connected = channel?.innerWebSocket?.readyState == WebSocket.open;
+        if (connected) return;
         if (_connectedState != ConnectedState.connecting) return;
         _connectedState = ConnectedState.disconnected;
 
