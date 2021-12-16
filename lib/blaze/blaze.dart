@@ -355,19 +355,19 @@ Future<String> _getUserAgent() async {
     try {
       final result = await Process.run('sw_vers', []);
       if (result.stdout != null) {
-            final stdout = result.stdout as String;
-            final map = Map.fromEntries(const LineSplitter()
-                .convert(stdout)
-                .map((e) => e.split(':'))
-                .where((element) => element.length >= 2)
-                .map((e) => MapEntry(e[0].trim(), e[1].trim())));
-            // example
-            // ProductName: macOS
-            // ProductVersion: 12.0.1
-            // BuildVersion: 21A559
-            systemAndVersion =
-                '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
-          }
+        final stdout = result.stdout as String;
+        final map = Map.fromEntries(const LineSplitter()
+            .convert(stdout)
+            .map((e) => e.split(':'))
+            .where((element) => element.length >= 2)
+            .map((e) => MapEntry(e[0].trim(), e[1].trim())));
+        // example
+        // ProductName: macOS
+        // ProductVersion: 12.0.1
+        // BuildVersion: 21A559
+        systemAndVersion =
+            '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
+      }
     } catch (e) {
       w('ws mac get user agent error: $e');
     }
