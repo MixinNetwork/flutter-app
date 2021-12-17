@@ -1,20 +1,20 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:cached_network_image/cached_network_image.dart';
-
-// ignore: implementation_imports
-import 'package:cached_network_image/src/image_provider/_image_loader.dart'
-    as cached_network_image;
-import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:octo_image/octo_image.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../utils/logger.dart';
+
+typedef PlaceholderWidgetBuilder = Widget Function();
+
+typedef LoadingErrorWidgetBuilder = Widget Function();
 
 class CacheImage extends StatelessWidget {
   const CacheImage(
@@ -23,6 +23,7 @@ class CacheImage extends StatelessWidget {
     this.height,
     this.placeholder,
     this.errorWidget,
+    this.fit = BoxFit.cover,
     Key? key,
   }) : super(key: key);
 
@@ -32,16 +33,24 @@ class CacheImage extends StatelessWidget {
   final PlaceholderWidgetBuilder? placeholder;
   final LoadingErrorWidgetBuilder? errorWidget;
 
+  final BoxFit fit;
+
   @override
-  Widget build(BuildContext context) => _CachedNetworkImage(
-        imageUrl: src,
+  Widget build(BuildContext context) => ExtendedImage(
+        image: MixinExtendedNetworkImageProvider(src),
         width: width,
         height: height,
-        fit: BoxFit.cover,
-        placeholder: placeholder,
-        errorWidget: errorWidget,
-        fadeInDuration: const Duration(milliseconds: 200),
-        fadeOutDuration: const Duration(milliseconds: 400),
+        fit: fit,
+        loadStateChanged: (state) {
+          switch (state.extendedImageLoadState) {
+            case LoadState.loading:
+              return placeholder?.call();
+            case LoadState.completed:
+              return null;
+            case LoadState.failed:
+              return errorWidget?.call();
+          }
+        },
       );
 }
 
@@ -52,170 +61,7 @@ class CacheImage extends StatelessWidget {
 const _defaultFrameDuration = Duration(milliseconds: 100);
 const _minFrameDuration = Duration(milliseconds: 20);
 
-class _MultiImageStreamCompleter extends ImageStreamCompleter {
-  /// The constructor to create an MultiImageStreamCompleter. The [codec]
-  /// should be a stream with the images that should be shown. The
-  /// [chunkEvents] should indicate the [ImageChunkEvent]s of the first image
-  /// to show.
-  _MultiImageStreamCompleter({
-    required Stream<ui.Codec> codec,
-    required double scale,
-    Stream<ImageChunkEvent>? chunkEvents,
-    InformationCollector? informationCollector,
-  })  : _informationCollector = informationCollector,
-        _scale = scale {
-    codec.listen((event) {
-      if (_timer != null) {
-        _nextImageCodec = event;
-      } else {
-        _handleCodecReady(event);
-      }
-    }, onError: (Object error, StackTrace stack) {
-      reportError(
-        context: ErrorDescription('resolving an image codec'),
-        exception: error,
-        stack: stack,
-        informationCollector: informationCollector,
-        silent: true,
-      );
-    });
-    if (chunkEvents != null) {
-      chunkEvents.listen(
-        reportImageChunkEvent,
-        onError: (Object error, StackTrace stack) {
-          reportError(
-            context: ErrorDescription('loading an image'),
-            exception: error,
-            stack: stack,
-            informationCollector: informationCollector,
-            silent: true,
-          );
-        },
-      );
-    }
-  }
-
-  ui.Codec? _codec;
-  ui.Codec? _nextImageCodec;
-  final double _scale;
-  final InformationCollector? _informationCollector;
-  ui.FrameInfo? _nextFrame;
-
-  // When the current was first shown.
-  late Duration? _shownTimestamp;
-
-  // The requested duration for the current frame;
-  Duration? _frameDuration;
-
-  // How many frames have been emitted so far.
-  int _framesEmitted = 0;
-  Timer? _timer;
-
-  // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
-  bool _frameCallbackScheduled = false;
-
-  void _switchToNewCodec() {
-    _framesEmitted = 0;
-    _timer = null;
-    _handleCodecReady(_nextImageCodec!);
-    _nextImageCodec = null;
-  }
-
-  void _handleCodecReady(ui.Codec codec) {
-    _codec = codec;
-
-    if (hasListeners) {
-      _decodeNextFrameAndSchedule();
-    }
-  }
-
-  void _handleAppFrame(Duration timestamp) {
-    _frameCallbackScheduled = false;
-    if (!hasListeners) return;
-    if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
-      _emitFrame(ImageInfo(image: _nextFrame!.image, scale: _scale));
-      _shownTimestamp = timestamp;
-      _frameDuration = _nextFrame!.duration;
-      if (_frameDuration! < _minFrameDuration) {
-        _frameDuration = _defaultFrameDuration;
-      }
-      _nextFrame = null;
-      if (_framesEmitted % _codec!.frameCount == 0 && _nextImageCodec != null) {
-        _switchToNewCodec();
-      } else {
-        // ignore gif's repetition count
-        _decodeNextFrameAndSchedule();
-      }
-      return;
-    }
-    final delay = _frameDuration! - (timestamp - _shownTimestamp!);
-    _timer = Timer(delay, _scheduleAppFrame);
-  }
-
-  bool _isFirstFrame() => _frameDuration == null;
-
-  bool _hasFrameDurationPassed(Duration timestamp) =>
-      timestamp - _shownTimestamp! >= _frameDuration!;
-
-  Future<void> _decodeNextFrameAndSchedule() async {
-    try {
-      _nextFrame = await _codec!.getNextFrame();
-    } catch (exception, stack) {
-      reportError(
-        context: ErrorDescription('resolving an image frame'),
-        exception: exception,
-        stack: stack,
-        informationCollector: _informationCollector,
-        silent: true,
-      );
-      return;
-    }
-    if (_codec!.frameCount == 1) {
-      // ImageStreamCompleter listeners removed while waiting for next frame to
-      // be decoded.
-      // There's no reason to emit the frame without active listeners.
-      if (!hasListeners) {
-        return;
-      }
-
-      // This is not an animated image, just return it and don't schedule more
-      // frames.
-      _emitFrame(ImageInfo(image: _nextFrame!.image, scale: _scale));
-      return;
-    }
-    _scheduleAppFrame();
-  }
-
-  void _scheduleAppFrame() {
-    if (_frameCallbackScheduled) {
-      return;
-    }
-    _frameCallbackScheduled = true;
-    SchedulerBinding.instance?.scheduleFrameCallback(_handleAppFrame);
-  }
-
-  void _emitFrame(ImageInfo imageInfo) {
-    setImage(imageInfo);
-    _framesEmitted += 1;
-  }
-
-  @override
-  void addListener(ImageStreamListener listener) {
-    if (!hasListeners && _codec != null) _decodeNextFrameAndSchedule();
-    super.addListener(listener);
-  }
-
-  @override
-  void removeListener(ImageStreamListener listener) {
-    super.removeListener(listener);
-    if (!hasListeners) {
-      _timer?.cancel();
-      _timer = null;
-    }
-  }
-}
-
-class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
+class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// Creates a image stream completer.
   ///
   /// Immediately starts decoding the first image frame when the codec is ready.
@@ -233,7 +79,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// the loading progress of the image. If this stream is provided, the events
   /// produced by the stream will be delivered to registered [ImageChunkListener]s
   /// (see [addListener]).
-  MultiFrameImageStreamCompleter({
+  _MultiFrameImageStreamCompleter({
     required Future<ui.Codec> codec,
     required double scale,
     String? debugLabel,
@@ -416,7 +262,7 @@ class MixinFileImage extends FileImage {
 
   @override
   ImageStreamCompleter load(FileImage key, DecoderCallback decode) =>
-      MultiFrameImageStreamCompleter(
+      _MultiFrameImageStreamCompleter(
         codec: _loadAsync(key, decode),
         scale: key.scale,
         debugLabel: key.file.path,
@@ -457,323 +303,348 @@ class MixinFileImage extends FileImage {
   int get hashCode => hashValues(super.hashCode, _lastModified);
 }
 
-class _CachedNetworkImageProvider extends CachedNetworkImageProvider {
-  const _CachedNetworkImageProvider(
-    String url, {
-    int? maxHeight,
-    int? maxWidth,
-    double scale = 1.0,
-    ErrorListener? errorListener,
-    Map<String, String>? headers,
-    BaseCacheManager? cacheManager,
-    String? cacheKey,
-    ImageRenderMethodForWeb imageRenderMethodForWeb =
-        ImageRenderMethodForWeb.HtmlImage,
-  }) : super(
-          url,
-          maxHeight: maxHeight,
-          maxWidth: maxWidth,
-          scale: scale,
-          errorListener: errorListener,
-          headers: headers,
-          cacheManager: cacheManager,
-          cacheKey: cacheKey,
-          imageRenderMethodForWeb: imageRenderMethodForWeb,
-        );
+@immutable
+class MixinExtendedNetworkImageProvider
+    extends ImageProvider<ExtendedNetworkImageProvider>
+    with ExtendedImageProvider<ExtendedNetworkImageProvider>
+    implements ExtendedNetworkImageProvider {
+  /// Creates an object that fetches the image at the given URL.
+  ///
+  /// The arguments must not be null.
+  MixinExtendedNetworkImageProvider(
+    this.url, {
+    this.scale = 1.0,
+    this.headers,
+    this.cache = false,
+    this.retries = 3,
+    this.timeLimit,
+    this.timeRetry = const Duration(milliseconds: 100),
+    this.cacheKey,
+    this.printError = true,
+    this.cacheRawData = false,
+    this.cancelToken,
+    this.imageCacheName,
+    this.cacheMaxAge,
+  });
+
+  /// The name of [ImageCache], you can define custom [ImageCache] to store this provider.
+  @override
+  final String? imageCacheName;
+
+  /// Whether cache raw data if you need to get raw data directly.
+  /// For example, we need raw image data to edit,
+  /// but [ui.Image.toByteData()] is very slow. So we cache the image
+  /// data here.
+  @override
+  final bool cacheRawData;
+
+  /// The time limit to request image
+  @override
+  final Duration? timeLimit;
+
+  /// The time to retry to request
+  @override
+  final int retries;
+
+  /// The time duration to retry to request
+  @override
+  final Duration timeRetry;
+
+  /// Whether cache image to local
+  @override
+  final bool cache;
+
+  /// The URL from which the image will be fetched.
+  @override
+  final String url;
+
+  /// The scale to place in the [ImageInfo] object of the image.
+  @override
+  final double scale;
+
+  /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network.
+  @override
+  final Map<String, String>? headers;
+
+  /// The token to cancel network request
+  @override
+  final CancellationToken? cancelToken;
+
+  /// Custom cache key
+  @override
+  final String? cacheKey;
+
+  /// print error
+  @override
+  final bool printError;
+
+  /// The max duration to cahce image.
+  /// After this time the cache is expired and the image is reloaded.
+  @override
+  final Duration? cacheMaxAge;
 
   @override
   ImageStreamCompleter load(
-      CachedNetworkImageProvider key, DecoderCallback decode) {
+      ExtendedNetworkImageProvider key, DecoderCallback decode) {
+    // Ownership of this controller is handed off to [_loadAsync]; it is that
+    // method's responsibility to close the controller's stream when the image
+    // has been loaded or an error is thrown.
     final chunkEvents = StreamController<ImageChunkEvent>();
-    return _MultiImageStreamCompleter(
+
+    return _MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, chunkEvents, decode),
-      chunkEvents: chunkEvents.stream,
       scale: key.scale,
-      informationCollector: () sync* {
-        yield DiagnosticsProperty<ImageProvider>(
-          'Image provider: $this \n Image key: $key',
-          this,
-          style: DiagnosticsTreeStyle.errorProperty,
-        );
-      },
+      chunkEvents: chunkEvents.stream,
+      informationCollector: () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<ExtendedNetworkImageProvider>('Image key', key),
+      ],
     );
   }
-
-  Stream<ui.Codec> _loadAsync(
-    CachedNetworkImageProvider key,
-    StreamController<ImageChunkEvent> chunkEvents,
-    DecoderCallback decode,
-  ) {
-    assert(key == this);
-    return cached_network_image.ImageLoader().loadAsync(
-      url,
-      cacheKey,
-      chunkEvents,
-      decode,
-      cacheManager ?? DefaultCacheManager(),
-      maxHeight,
-      maxWidth,
-      headers,
-      errorListener,
-      imageRenderMethodForWeb,
-      () => PaintingBinding.instance?.imageCache?.evict(key),
-    );
-  }
-}
-
-class _CachedNetworkImage extends StatelessWidget {
-  /// CachedNetworkImage shows a network image using a caching mechanism. It also
-  /// provides support for a placeholder, showing an error and fading into the
-  /// loaded image. Next to that it supports most features of a default Image
-  /// widget.
-  _CachedNetworkImage({
-    Key? key,
-    required this.imageUrl,
-    this.httpHeaders,
-    this.imageBuilder,
-    this.placeholder,
-    this.progressIndicatorBuilder,
-    this.errorWidget,
-    this.fadeOutDuration = const Duration(milliseconds: 1000),
-    this.fadeOutCurve = Curves.easeOut,
-    this.fadeInDuration = const Duration(milliseconds: 500),
-    this.fadeInCurve = Curves.easeIn,
-    this.width,
-    this.height,
-    this.fit,
-    this.alignment = Alignment.center,
-    this.repeat = ImageRepeat.noRepeat,
-    this.matchTextDirection = false,
-    this.cacheManager,
-    this.useOldImageOnUrlChange = false,
-    this.color,
-    this.filterQuality = FilterQuality.low,
-    this.colorBlendMode,
-    this.placeholderFadeInDuration,
-    this.memCacheWidth,
-    this.memCacheHeight,
-    this.cacheKey,
-    this.maxWidthDiskCache,
-    this.maxHeightDiskCache,
-    ImageRenderMethodForWeb imageRenderMethodForWeb =
-        ImageRenderMethodForWeb.HtmlImage,
-  })  : _image = _CachedNetworkImageProvider(
-          imageUrl,
-          headers: httpHeaders,
-          cacheManager: cacheManager,
-          cacheKey: cacheKey,
-          imageRenderMethodForWeb: imageRenderMethodForWeb,
-          maxWidth: maxWidthDiskCache,
-          maxHeight: maxHeightDiskCache,
-        ),
-        super(key: key);
-
-  final CachedNetworkImageProvider _image;
-
-  /// Option to use cachemanager with other settings
-  final BaseCacheManager? cacheManager;
-
-  /// The target image that is displayed.
-  final String imageUrl;
-
-  /// The target image's cache key.
-  final String? cacheKey;
-
-  /// Optional builder to further customize the display of the image.
-  final ImageWidgetBuilder? imageBuilder;
-
-  /// Widget displayed while the target [imageUrl] is loading.
-  final PlaceholderWidgetBuilder? placeholder;
-
-  /// Widget displayed while the target [imageUrl] is loading.
-  final ProgressIndicatorBuilder? progressIndicatorBuilder;
-
-  /// Widget displayed while the target [imageUrl] failed loading.
-  final LoadingErrorWidgetBuilder? errorWidget;
-
-  /// The duration of the fade-in animation for the [placeholder].
-  final Duration? placeholderFadeInDuration;
-
-  /// The duration of the fade-out animation for the [placeholder].
-  final Duration? fadeOutDuration;
-
-  /// The curve of the fade-out animation for the [placeholder].
-  final Curve fadeOutCurve;
-
-  /// The duration of the fade-in animation for the [imageUrl].
-  final Duration fadeInDuration;
-
-  /// The curve of the fade-in animation for the [imageUrl].
-  final Curve fadeInCurve;
-
-  /// If non-null, require the image to have this width.
-  ///
-  /// If null, the image will pick a size that best preserves its intrinsic
-  /// aspect ratio. This may result in a sudden change if the size of the
-  /// placeholder widget does not match that of the target image. The size is
-  /// also affected by the scale factor.
-  final double? width;
-
-  /// If non-null, require the image to have this height.
-  ///
-  /// If null, the image will pick a size that best preserves its intrinsic
-  /// aspect ratio. This may result in a sudden change if the size of the
-  /// placeholder widget does not match that of the target image. The size is
-  /// also affected by the scale factor.
-  final double? height;
-
-  /// How to inscribe the image into the space allocated during layout.
-  ///
-  /// The default varies based on the other fields. See the discussion at
-  /// [paintImage].
-  final BoxFit? fit;
-
-  /// How to align the image within its bounds.
-  ///
-  /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
-  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
-  /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
-  /// image with the bottom right corner of its layout bounds. Similarly, an
-  /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
-  /// middle of the bottom edge of its layout bounds.
-  ///
-  /// If the [alignment] is [TextDirection]-dependent (i.e. if it is a
-  /// [AlignmentDirectional]), then an ambient [Directionality] widget
-  /// must be in scope.
-  ///
-  /// Defaults to [Alignment.center].
-  ///
-  /// See also:
-  ///
-  ///  * [Alignment], a class with convenient constants typically used to
-  ///    specify an [AlignmentGeometry].
-  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
-  ///    relative to text direction.
-  final Alignment alignment;
-
-  /// How to paint any portions of the layout bounds not covered by the image.
-  final ImageRepeat repeat;
-
-  /// Whether to paint the image in the direction of the [TextDirection].
-  ///
-  /// If this is true, then in [TextDirection.ltr] contexts, the image will be
-  /// drawn with its origin in the top left (the "normal" painting direction for
-  /// children); and in [TextDirection.rtl] contexts, the image will be drawn with
-  /// a scaling factor of -1 in the horizontal direction so that the origin is
-  /// in the top right.
-  ///
-  /// This is occasionally used with children in right-to-left environments, for
-  /// children that were designed for left-to-right locales. Be careful, when
-  /// using this, to not flip children with integral shadows, text, or other
-  /// effects that will look incorrect when flipped.
-  ///
-  /// If this is true, there must be an ambient [Directionality] widget in
-  /// scope.
-  final bool matchTextDirection;
-
-  /// Optional headers for the http request of the image url
-  final Map<String, String>? httpHeaders;
-
-  /// When set to true it will animate from the old image to the new image
-  /// if the url changes.
-  final bool useOldImageOnUrlChange;
-
-  /// If non-null, this color is blended with each image pixel using [colorBlendMode].
-  final Color? color;
-
-  /// Used to combine [color] with this image.
-  ///
-  /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
-  /// the source and this image is the destination.
-  ///
-  /// See also:
-  ///
-  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
-  final BlendMode? colorBlendMode;
-
-  /// Target the interpolation quality for image scaling.
-  ///
-  /// If not given a value, defaults to FilterQuality.low.
-  final FilterQuality filterQuality;
-
-  /// Will resize the image in memory to have a certain width using [ResizeImage]
-  final int? memCacheWidth;
-
-  /// Will resize the image in memory to have a certain height using [ResizeImage]
-  final int? memCacheHeight;
-
-  /// Will resize the image and store the resized image in the disk cache.
-  final int? maxWidthDiskCache;
-
-  /// Will resize the image and store the resized image in the disk cache.
-  final int? maxHeightDiskCache;
 
   @override
-  Widget build(BuildContext context) {
-    var octoPlaceholderBuilder =
-        placeholder != null ? _octoPlaceholderBuilder : null;
-    final octoProgressIndicatorBuilder =
-        progressIndicatorBuilder != null ? _octoProgressIndicatorBuilder : null;
+  Future<ExtendedNetworkImageProvider> obtainKey(
+          ImageConfiguration configuration) =>
+      SynchronousFuture<MixinExtendedNetworkImageProvider>(this);
 
-    ///If there is no placeholer OctoImage does not fade, so always set an
-    ///(empty) placeholder as this always used to be the behaviour of
-    ///CachedNetworkImage.
-    if (octoPlaceholderBuilder == null &&
-        octoProgressIndicatorBuilder == null) {
-      octoPlaceholderBuilder = (context) => Container();
+  Future<ui.Codec> _loadAsync(
+    ExtendedNetworkImageProvider key,
+    StreamController<ImageChunkEvent> chunkEvents,
+    DecoderCallback decode,
+  ) async {
+    assert(key == this);
+    final md5Key = cacheKey ?? keyToMd5(key.url);
+    ui.Codec? result;
+    if (cache) {
+      try {
+        final data = await _loadCache(key, chunkEvents, md5Key);
+        if (data != null) {
+          result = await instantiateImageCodec(data, decode);
+        }
+      } catch (e) {
+        if (printError) {
+          i('load cache error $e');
+        }
+      }
     }
 
-    return OctoImage(
-      image: _image,
-      imageBuilder: imageBuilder != null ? _octoImageBuilder : null,
-      placeholderBuilder: octoPlaceholderBuilder,
-      progressIndicatorBuilder: octoProgressIndicatorBuilder,
-      errorBuilder: errorWidget != null ? _octoErrorBuilder : null,
-      fadeOutDuration: fadeOutDuration,
-      fadeOutCurve: fadeOutCurve,
-      fadeInDuration: fadeInDuration,
-      fadeInCurve: fadeInCurve,
-      width: width,
-      height: height,
-      fit: fit,
-      alignment: alignment,
-      repeat: repeat,
-      matchTextDirection: matchTextDirection,
-      color: color,
-      filterQuality: filterQuality,
-      colorBlendMode: colorBlendMode,
-      placeholderFadeInDuration: placeholderFadeInDuration,
-      gaplessPlayback: useOldImageOnUrlChange,
-      memCacheWidth: memCacheWidth,
-      memCacheHeight: memCacheHeight,
+    if (result == null) {
+      try {
+        final data = await _loadNetwork(key, chunkEvents);
+        if (data != null) {
+          result = await instantiateImageCodec(data, decode);
+        }
+      } catch (e) {
+        i('load network error $e');
+      }
+    }
+
+    //Failed to load
+    if (result == null) {
+      //result = await ui.instantiateImageCodec(kTransparentImage);
+      return Future<ui.Codec>.error(StateError('Failed to load $url.'));
+    }
+
+    return result;
+  }
+
+  /// Get the image from cache folder.
+  Future<Uint8List?> _loadCache(
+    ExtendedNetworkImageProvider key,
+    StreamController<ImageChunkEvent>? chunkEvents,
+    String md5Key,
+  ) async {
+    final _cacheImagesDirectory = Directory(
+        join((await getTemporaryDirectory()).path, cacheImageFolderName));
+    Uint8List? data;
+    // exist, try to find cache image file
+    if (_cacheImagesDirectory.existsSync()) {
+      final cacheFlie = File(join(_cacheImagesDirectory.path, md5Key));
+      if (cacheFlie.existsSync()) {
+        if (key.cacheMaxAge != null) {
+          final now = DateTime.now();
+          final fs = cacheFlie.statSync();
+          if (now.subtract(key.cacheMaxAge!).isAfter(fs.changed)) {
+            cacheFlie.deleteSync(recursive: true);
+          } else {
+            data = await cacheFlie.readAsBytes();
+          }
+        } else {
+          data = await cacheFlie.readAsBytes();
+        }
+      }
+    }
+    // create folder
+    else {
+      await _cacheImagesDirectory.create();
+    }
+    // load from network
+    if (data == null) {
+      data = await _loadNetwork(
+        key,
+        chunkEvents,
+      );
+      if (data != null) {
+        // cache image file
+        await File(join(_cacheImagesDirectory.path, md5Key)).writeAsBytes(data);
+      }
+    }
+
+    return data;
+  }
+
+  /// Get the image from network.
+  Future<Uint8List?> _loadNetwork(
+    ExtendedNetworkImageProvider key,
+    StreamController<ImageChunkEvent>? chunkEvents,
+  ) async {
+    try {
+      final resolved = Uri.base.resolve(key.url);
+      final response = await _tryGetResponse(resolved);
+      if (response == null || response.statusCode != HttpStatus.ok) {
+        return null;
+      }
+
+      final bytes = await consolidateHttpClientResponseBytes(
+        response,
+        onBytesReceived: chunkEvents != null
+            ? (int cumulative, int? total) {
+                chunkEvents.add(ImageChunkEvent(
+                  cumulativeBytesLoaded: cumulative,
+                  expectedTotalBytes: total,
+                ));
+              }
+            : null,
+      );
+      if (bytes.lengthInBytes == 0) {
+        return Future<Uint8List>.error(
+            StateError('NetworkImage is an empty file: $resolved'));
+      }
+
+      return bytes;
+      // ignore: avoid_catching_errors
+    } on OperationCanceledError catch (_) {
+      if (printError) {
+        i('User cancel request.');
+      }
+      return Future<Uint8List>.error(StateError('User cancel request $url.'));
+    } catch (e) {
+      if (printError) {
+        i('Failed to load image. $e');
+      }
+    } finally {
+      await chunkEvents?.close();
+    }
+    return null;
+  }
+
+  Future<HttpClientResponse> _getResponse(Uri resolved) async {
+    final request = await httpClient.getUrl(resolved);
+    headers?.forEach((String name, String value) {
+      request.headers.add(name, value);
+    });
+    final response = await request.close();
+    if (timeLimit != null) {
+      response.timeout(
+        timeLimit!,
+      );
+    }
+    return response;
+  }
+
+  // Http get with cancel, delay try again
+  Future<HttpClientResponse?> _tryGetResponse(
+    Uri resolved,
+  ) async {
+    cancelToken?.throwIfCancellationRequested();
+    return RetryHelper.tryRun<HttpClientResponse>(
+      () => CancellationTokenSource.register(
+        cancelToken,
+        _getResponse(resolved),
+      ),
+      cancelToken: cancelToken,
+      timeRetry: timeRetry,
+      retries: retries,
     );
   }
 
-  Widget _octoImageBuilder(BuildContext context, Widget child) =>
-      imageBuilder!(context, _image);
-
-  Widget _octoPlaceholderBuilder(BuildContext context) =>
-      placeholder!(context, imageUrl);
-
-  Widget _octoProgressIndicatorBuilder(
-    BuildContext context,
-    ImageChunkEvent? progress,
-  ) {
-    int? totalSize;
-    var downloaded = 0;
-    if (progress != null) {
-      totalSize = progress.expectedTotalBytes;
-      downloaded = progress.cumulativeBytesLoaded;
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
     }
-    return progressIndicatorBuilder!(
-        context, imageUrl, DownloadProgress(imageUrl, totalSize, downloaded));
+    return other is ExtendedNetworkImageProvider &&
+        url == other.url &&
+        scale == other.scale &&
+        cacheRawData == other.cacheRawData &&
+        timeLimit == other.timeLimit &&
+        cancelToken == other.cancelToken &&
+        timeRetry == other.timeRetry &&
+        cache == other.cache &&
+        cacheKey == other.cacheKey &&
+        headers == other.headers &&
+        retries == other.retries &&
+        imageCacheName == other.imageCacheName &&
+        cacheMaxAge == other.cacheMaxAge;
   }
 
-  Widget _octoErrorBuilder(
-    BuildContext context,
-    Object error,
-    StackTrace? stackTrace,
-  ) =>
-      errorWidget!(context, imageUrl, error);
+  @override
+  int get hashCode => hashValues(
+        url,
+        scale,
+        cacheRawData,
+        timeLimit,
+        cancelToken,
+        timeRetry,
+        cache,
+        cacheKey,
+        headers,
+        retries,
+        imageCacheName,
+        cacheMaxAge,
+      );
+
+  @override
+  String toString() =>
+      'MixinExtendedNetworkImageProvider("$url", scale: $scale)';
+
+  @override
+
+  /// Get network image data from cached
+  Future<Uint8List?> getNetworkImageData({
+    StreamController<ImageChunkEvent>? chunkEvents,
+  }) {
+    final uId = cacheKey ?? keyToMd5(url);
+
+    if (cache) {
+      return _loadCache(
+        this,
+        chunkEvents,
+        uId,
+      );
+    }
+
+    return _loadNetwork(
+      this,
+      chunkEvents,
+    );
+  }
+
+  // Do not access this field directly; use [_httpClient] instead.
+  // We set `autoUncompress` to false to ensure that we can trust the value of
+  // the `Content-Length` HTTP header. We automatically uncompress the content
+  // in our call to [consolidateHttpClientResponseBytes].
+  static final HttpClient _sharedHttpClient = HttpClient()
+    ..autoUncompress = false;
+
+  static HttpClient get httpClient {
+    var client = _sharedHttpClient;
+    assert(() {
+      if (debugNetworkImageHttpClientProvider != null) {
+        client = debugNetworkImageHttpClientProvider!();
+      }
+      return true;
+    }());
+    return client;
+  }
 }

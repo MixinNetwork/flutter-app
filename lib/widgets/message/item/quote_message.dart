@@ -160,8 +160,8 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           image: CacheImage(
             quote.thumbUrl as String,
-            placeholder: (_, __) => placeholder,
-            errorWidget: (_, __, ___) => placeholder,
+            placeholder: () => placeholder,
+            errorWidget: () => placeholder,
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesLiveSvg,
