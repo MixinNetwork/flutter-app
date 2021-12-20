@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../../../ui/home/conversation_page.dart';
 import '../../../utils/extension/extension.dart';
 import '../../avatar_view/avatar_view.dart';
+import '../../conversation/verified_or_bot_widget.dart';
 import '../../interactive_decorated_box.dart';
 import '../../user/user_dialog.dart';
 import '../message.dart';

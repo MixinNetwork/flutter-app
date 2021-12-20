@@ -9,6 +9,7 @@ import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/cell.dart';
+import '../../../widgets/conversation/mute_dialog.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/more_extended_text.dart';
 import '../../../widgets/toast.dart';
@@ -18,7 +19,6 @@ import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
 import '../chat/chat_bar.dart';
 import '../chat/chat_page.dart';
-import '../conversation_page.dart';
 
 class ChatInfoPage extends HookWidget {
   const ChatInfoPage({Key? key}) : super(key: key);

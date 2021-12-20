@@ -14,10 +14,12 @@ import '../../utils/hook.dart';
 import '../../utils/platform.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/buttons.dart';
+import '../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/search_text_field.dart';
 import 'bloc/conversation_cubit.dart';
-import 'conversation_page.dart';
+import 'conversation/conversation_page.dart';
+import 'conversation/search_list.dart';
 import 'intent.dart';
 
 const _kItemHeight = 72.0;
