@@ -13,7 +13,7 @@ import 'bloc/conversation_cubit.dart';
 import 'bloc/multi_auth_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
 import 'command_palette_wrapper.dart';
-import 'conversation_page.dart';
+import 'conversation/conversation_page.dart';
 import 'route/responsive_navigator.dart';
 import 'route/responsive_navigator_cubit.dart';
 import 'slide_page.dart';
