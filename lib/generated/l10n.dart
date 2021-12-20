@@ -2400,6 +2400,16 @@ class Localization {
     );
   }
 
+  /// `No results`
+  String get noResults {
+    return Intl.message(
+      'No results',
+      name: 'noResults',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Upgrading`
   String get databaseUpgrading {
     return Intl.message(

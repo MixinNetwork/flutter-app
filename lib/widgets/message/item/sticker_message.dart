@@ -90,7 +90,7 @@ class StickerMessageWidget extends HookWidget {
               assetUrl,
               height: height,
               width: width,
-              placeholder: (_, __) => placeholder,
+              placeholder: () => placeholder,
             );
           }
         },

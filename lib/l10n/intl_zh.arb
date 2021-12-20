@@ -229,6 +229,7 @@
   "deleteChatHint": "删除对话：{value}",
   "uriCheckOnPhone": "不支持此链接，请在手机上查看。",
   "saveAs": "另存为",
+  "noResults": "没有结果",
   "databaseUpgrading": "升级中...",
   "databaseUpgradeTips": "正在进行数据库升级，可能需要几分钟，请不要强制关闭应用。"
 }

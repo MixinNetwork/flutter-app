@@ -50,6 +50,7 @@ class MessageBubble extends HookWidget {
 
     final quoteMessageId =
         useMessageConverter(converter: (state) => state.quoteId);
+    final isTranscriptPage = useIsTranscriptPage();
 
     final bubbleColor =
         context.messageBubbleColor(forceIsCurrentUserColor ?? isCurrentUser);
@@ -86,6 +87,7 @@ class MessageBubble extends HookWidget {
                   messageId: messageId,
                   quoteMessageId: quoteMessageId,
                   content: quoteContent,
+                  isTranscriptPage: isTranscriptPage,
                 );
               }),
             ),

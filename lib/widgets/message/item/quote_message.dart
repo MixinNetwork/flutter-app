@@ -33,12 +33,14 @@ class QuoteMessage extends HookWidget {
     this.quoteMessageId,
     this.messageId,
     this.message,
+    this.isTranscriptPage = false,
   }) : super(key: key);
 
   final String? content;
   final String? quoteMessageId;
   final String? messageId;
   final MessageItem? message;
+  final bool isTranscriptPage;
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +119,7 @@ class QuoteMessage extends HookWidget {
               type,
               quote.conversationId as String,
               quote.mediaUrl as String?,
+              isTranscriptPage,
             ))),
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) =>
@@ -157,8 +160,8 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           image: CacheImage(
             quote.thumbUrl as String,
-            placeholder: (_, __) => placeholder,
-            errorWidget: (_, __, ___) => placeholder,
+            placeholder: () => placeholder,
+            errorWidget: () => placeholder,
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesLiveSvg,

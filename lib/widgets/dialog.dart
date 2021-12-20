@@ -73,6 +73,7 @@ class AlertDialogLayout extends StatelessWidget {
     this.actions = const [],
     this.minWidth = 400,
     this.minHeight = 210,
+    this.padding = const EdgeInsets.all(30),
   }) : super(key: key);
 
   final Widget? title;
@@ -81,6 +82,7 @@ class AlertDialogLayout extends StatelessWidget {
   final List<Widget> actions;
   final double minWidth;
   final double minHeight;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -91,7 +93,7 @@ class AlertDialogLayout extends StatelessWidget {
             minHeight: minHeight,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(30),
+            padding: padding,
             child: IntrinsicWidth(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

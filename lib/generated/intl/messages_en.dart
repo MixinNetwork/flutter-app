@@ -263,6 +263,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "noLink": MessageLookupByLibrary.simpleMessage("NO LINK"),
         "noMedia": MessageLookupByLibrary.simpleMessage("NO MEDIA"),
         "noPost": MessageLookupByLibrary.simpleMessage("NO POST"),
+        "noResults": MessageLookupByLibrary.simpleMessage("No results"),
         "notification": MessageLookupByLibrary.simpleMessage("Notification"),
         "notificationPermissionDescription":
             MessageLookupByLibrary.simpleMessage(

@@ -51,8 +51,11 @@ class Blaze {
   String _host = _wsHost1;
   String? _token;
 
-  BehaviorSubject<ConnectedState> connectedStateBehaviorSubject =
+  final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
       BehaviorSubject<ConnectedState>();
+
+  ValueStream<ConnectedState> get connectedStateStream =>
+      _connectedStateBehaviorSubject.stream;
 
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
@@ -61,25 +64,32 @@ class Blaze {
 
   String? _userAgent;
 
+  ConnectedState get _connectedState => _connectedStateBehaviorSubject.value;
+
+  set _connectedState(ConnectedState state) =>
+      _connectedStateBehaviorSubject.value = state;
+
   Future<void> connect() async {
     i('reconnecting set false, ${StackTrace.current}');
-    connectedStateBehaviorSubject.value = ConnectedState.connecting;
+    _connectedState = ConnectedState.connecting;
 
-    i('ws connect');
-    _token ??= signAuthTokenWithEdDSA(
-        userId, sessionId, privateKey, scp, 'GET', '/', '');
-    _userAgent ??= await _getUserAgent();
     try {
+      i('ws connect');
+      _token ??= signAuthTokenWithEdDSA(
+          userId, sessionId, privateKey, scp, 'GET', '/', '');
+      i('ws _token?.isNotEmpty == true: ${_token?.isNotEmpty == true}');
+      _userAgent ??= await _getUserAgent();
+      i('ws _userAgent: $_userAgent');
       _connect(_token!);
     } catch (_) {
+      _connectedState = ConnectedState.disconnected;
       await reconnect();
     }
   }
 
   void _connect(String token) {
-    if (connectedStateBehaviorSubject.value != ConnectedState.connecting) {
-      return;
-    }
+    _disconnect(false);
+    _connectedState = ConnectedState.connecting;
     channel = IOWebSocketChannel.connect(
       _host,
       protocols: ['Mixin-Blaze-1'],
@@ -92,12 +102,12 @@ class Blaze {
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
       (blazeMessage) async {
-        connectedStateBehaviorSubject.value = ConnectedState.connected;
+        _connectedState = ConnectedState.connected;
         d('blazeMessage receive: ${blazeMessage.toJson()}');
 
         if (blazeMessage.action == kErrorAction &&
             blazeMessage.error?.code == authentication) {
-          connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+          _connectedState = ConnectedState.disconnected;
           await reconnect();
           return;
         }
@@ -125,12 +135,12 @@ class Blaze {
       },
       onError: (error, s) {
         i('ws error: $error, s: $s');
-        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+        _connectedState = ConnectedState.disconnected;
         reconnect();
       },
       onDone: () {
         i('web socket done');
-        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+        _connectedState = ConnectedState.disconnected;
         reconnect();
       },
       cancelOnError: true,
@@ -244,9 +254,9 @@ class Blaze {
         Uint8List.fromList((await jsonEncodeWithIsolate(msg)).codeUnits)));
   }
 
-  void _disconnect() {
+  void _disconnect([bool resetConnectedState = true]) {
     i('ws _disconnect');
-    connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+    if (resetConnectedState) _connectedState = ConnectedState.disconnected;
     transactions.clear();
     subscription?.cancel();
     channel?.sink.close();
@@ -256,7 +266,7 @@ class Blaze {
 
   void waitSyncTime() {
     _disconnect();
-    connectedStateBehaviorSubject.value = ConnectedState.hasLocalTimeError;
+    _connectedState = ConnectedState.hasLocalTimeError;
   }
 
   Future<BlazeMessage?> sendMessage(BlazeMessage blazeMessage) async {
@@ -271,12 +281,12 @@ class Blaze {
   }
 
   Future<void> reconnect() async {
-    i('_reconnect reconnecting: ${connectedStateBehaviorSubject.value} start: ${StackTrace.current}');
-    if (connectedStateBehaviorSubject.value == ConnectedState.connecting ||
-        connectedStateBehaviorSubject.value == ConnectedState.reconnecting) {
+    i('_reconnect reconnecting: $_connectedState start: ${StackTrace.current}');
+    if (_connectedState == ConnectedState.connecting ||
+        _connectedState == ConnectedState.reconnecting) {
       return;
     }
-    connectedStateBehaviorSubject.value = ConnectedState.reconnecting;
+    _connectedState = ConnectedState.reconnecting;
     _host = _host == _wsHost1 ? _wsHost2 : _wsHost1;
 
     try {
@@ -288,11 +298,11 @@ class Blaze {
       w('ws ping error: $e');
       if (e is MixinApiError &&
           (e.error as MixinError).code == authentication) {
-        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+        _connectedState = ConnectedState.disconnected;
         return;
       }
       await Future.delayed(const Duration(seconds: 2));
-      connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+      _connectedState = ConnectedState.disconnected;
       i('reconnecting set false, ${StackTrace.current}');
       return reconnect();
     }
@@ -300,7 +310,7 @@ class Blaze {
 
   void dispose() {
     _disconnect();
-    connectedStateBehaviorSubject.close();
+    _connectedStateBehaviorSubject.close();
   }
 }
 
@@ -342,20 +352,24 @@ Future<String> _getUserAgent() async {
   final version = await packageInfoFuture;
   String? systemAndVersion;
   if (Platform.isMacOS) {
-    final result = await Process.run('sw_vers', []);
-    if (result.stdout != null) {
-      final stdout = result.stdout as String;
-      final map = Map.fromEntries(const LineSplitter()
-          .convert(stdout)
-          .map((e) => e.split(':'))
-          .where((element) => element.length >= 2)
-          .map((e) => MapEntry(e[0].trim(), e[1].trim())));
-      // example
-      // ProductName: macOS
-      // ProductVersion: 12.0.1
-      // BuildVersion: 21A559
-      systemAndVersion =
-          '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
+    try {
+      final result = await Process.run('sw_vers', []);
+      if (result.stdout != null) {
+        final stdout = result.stdout as String;
+        final map = Map.fromEntries(const LineSplitter()
+            .convert(stdout)
+            .map((e) => e.split(':'))
+            .where((element) => element.length >= 2)
+            .map((e) => MapEntry(e[0].trim(), e[1].trim())));
+        // example
+        // ProductName: macOS
+        // ProductVersion: 12.0.1
+        // BuildVersion: 21A559
+        systemAndVersion =
+            '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
+      }
+    } catch (e) {
+      w('ws mac get user agent error: $e');
     }
   }
   systemAndVersion ??=

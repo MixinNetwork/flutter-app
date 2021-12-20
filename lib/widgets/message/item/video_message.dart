@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -13,6 +12,7 @@ import '../../../constants/resources.dart';
 import '../../../enum/media_status.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
+import '../../cache_image.dart';
 import '../../image.dart';
 import '../../interactive_decorated_box.dart';
 import '../../status.dart';
@@ -97,11 +97,7 @@ class VideoMessageWidget extends HookWidget {
                   children: [
                     if (thumbImage != null)
                       ImageByBlurHashOrBase64(imageData: thumbImage),
-                    if (thumbUrl != null)
-                      CachedNetworkImage(
-                        imageUrl: thumbUrl,
-                        fit: BoxFit.cover,
-                      ),
+                    if (thumbUrl != null) CacheImage(thumbUrl),
                     Center(
                       child: Builder(
                         builder: (BuildContext context) {

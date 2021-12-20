@@ -199,7 +199,7 @@ class AvatarWidget extends StatelessWidget {
         avatarUrl!,
         width: size,
         height: size,
-        placeholder: (_, __) => placeholder,
+        placeholder: () => placeholder,
       );
     } else {
       child = placeholder;

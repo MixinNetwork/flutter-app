@@ -234,6 +234,7 @@
   "deleteChatHint": "Delete chat: {value}",
   "uriCheckOnPhone": "This type of url is not supported, please check on your phone.",
   "saveAs": "Save as",
+  "noResults": "No results",
   "databaseUpgrading": "Upgrading",
   "databaseUpgradeTips": "The database is being upgraded, it may take several minutes, please do not close this App."
 }
