@@ -260,6 +260,16 @@ class MessageItemWidget extends HookWidget {
                       onTap: () => Clipboard.setData(
                           ClipboardData(text: message.content)),
                     ),
+                  if (message.mediaStatus == MediaStatus.done &&
+                      message.mediaUrl?.isNotEmpty == true &&
+                      (message.type.isData ||
+                          message.type.isImage ||
+                          message.type.isVideo))
+                    ContextMenu(
+                      title: context.l10n.saveAs,
+                      onTap: () => saveAs(context, context.accountServer,
+                          message, isTranscriptPage),
+                    ),
                   if ([
                         MessageStatus.sent,
                         MessageStatus.delivered,
@@ -287,16 +297,6 @@ class MessageItemWidget extends HookWidget {
                               .onRecalled(message.messageId, content);
                         }
                       },
-                    ),
-                  if (message.mediaStatus == MediaStatus.done &&
-                      message.mediaUrl?.isNotEmpty == true &&
-                      (message.type.isData ||
-                          message.type.isImage ||
-                          message.type.isVideo))
-                    ContextMenu(
-                      title: context.l10n.saveAs,
-                      onTap: () => saveAs(context, context.accountServer,
-                          message, isTranscriptPage),
                     ),
                   if (!isTranscriptPage)
                     ContextMenu(
