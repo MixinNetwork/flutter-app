@@ -86,17 +86,18 @@ class HomePage extends HookWidget {
                               await context.accountServer.blaze.reconnect();
                             } catch (_) {}
 
-                          loading.value = false;
-                        },
-                        child: Text(context.l10n.continueText),
-                      ),
-                  ],
+                            loading.value = false;
+                          },
+                          child: Text(context.l10n.continueText),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }),
-        if (isDatabaseUpgrading) const DatabaseUpgradePage(),
-      ],),
+              );
+            }),
+          if (isDatabaseUpgrading) const DatabaseUpgradePage(),
+        ],
+      ),
     );
   }
 }
