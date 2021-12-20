@@ -76,22 +76,24 @@ Future<bool> openUri(
       }
     }
 
-    await showToastFailed(context, ToastError(context.l10n.uriCheckOnPhone));
-    return false;
+    if (uri.isMixinScheme) {
+      await showToastFailed(context, ToastError(context.l10n.uriCheckOnPhone));
+      return false;
+    }
   }
 
   return fallbackHandler(uri.toString());
 }
 
 extension _MixinUriExtension on Uri {
-  bool get _isMixinScheme => isScheme(mixinScheme);
+  bool get isMixinScheme => isScheme(mixinScheme);
 
   bool get _isMixinHost => host == mixinHost || host == 'www.$mixinHost';
 
-  bool get isMixin => _isMixinScheme || _isMixinHost;
+  bool get isMixin => isMixinScheme || _isMixinHost;
 
   bool _isTypeScheme(MixinSchemeHost type) =>
-      _isMixinScheme &&
+      isMixinScheme &&
       host == enumConvertToString(type) &&
       pathSegments.length == 1 &&
       pathSegments.single.isNotEmpty;
