@@ -90,6 +90,8 @@ class Blaze {
         if (_connectedState == ConnectedState.connected) return;
         _connectedState = ConnectedState.disconnected;
 
+        i('ws webSocket connect timeout');
+
         reconnect();
       });
     } catch (_) {
