@@ -69,6 +69,8 @@ class Blaze {
   set _connectedState(ConnectedState state) =>
       _connectedStateBehaviorSubject.value = state;
 
+  Timer? _checkTimeoutTimer;
+
   Future<void> connect() async {
     i('reconnecting set false, ${StackTrace.current}');
     _connectedState = ConnectedState.connecting;
@@ -81,6 +83,17 @@ class Blaze {
       _userAgent ??= await _getUserAgent();
       i('ws _userAgent: $_userAgent');
       _connect(_token!);
+      _checkTimeoutTimer = Timer(const Duration(seconds: 10), () {
+        i('ws webSocket state: ${channel?.innerWebSocket?.readyState}');
+
+        if (channel?.innerWebSocket?.readyState == WebSocket.open) return;
+        if (_connectedState == ConnectedState.connected) return;
+        _connectedState = ConnectedState.disconnected;
+
+        i('ws webSocket connect timeout');
+
+        reconnect();
+      });
     } catch (_) {
       _connectedState = ConnectedState.disconnected;
       await reconnect();
@@ -257,11 +270,13 @@ class Blaze {
   void _disconnect([bool resetConnectedState = true]) {
     i('ws _disconnect');
     if (resetConnectedState) _connectedState = ConnectedState.disconnected;
+    _checkTimeoutTimer?.cancel();
     transactions.clear();
     subscription?.cancel();
     channel?.sink.close();
     subscription = null;
     channel = null;
+    _checkTimeoutTimer = null;
   }
 
   void waitSyncTime() {
