@@ -66,7 +66,7 @@ Future<void> _initSystemTray() async {
     path = p.joinAll([
       p.dirname(Platform.resolvedExecutable),
       'data/flutter_assets',
-      Resources.assetsImagesNotifyIconIco
+      Resources.assetsImagesNotifyIconIco,
     ]);
   } else if (Platform.isMacOS) {
     path = p.joinAll(['AppIcon']);
