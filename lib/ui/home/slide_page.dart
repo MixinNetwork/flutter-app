@@ -176,6 +176,7 @@ class _CircleList extends HookWidget {
           .watchThrottle(kDefaultThrottleDuration)),
       initialData: [],
     );
+    final controller = useScrollController();
     final list = useState(circles.data ?? []);
     useEffect(() {
       list.value = circles.data ?? [];
@@ -188,6 +189,7 @@ class _CircleList extends HookWidget {
         const SizedBox(height: 12),
         Expanded(
           child: ReorderableList(
+            controller: controller,
             onReorder: (int oldIndex, int newIndex) {
               final newList = list.value.toList();
 
@@ -369,7 +371,7 @@ class _CircleList extends HookWidget {
   }
 }
 
-class _CategoryList extends StatelessWidget {
+class _CategoryList extends HookWidget {
   const _CategoryList({
     Key? key,
     required this.children,
@@ -378,14 +380,18 @@ class _CategoryList extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) => ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemBuilder: (BuildContext context, int index) => children[index],
-        separatorBuilder: (BuildContext context, int index) =>
-            const SizedBox(height: 8),
-        itemCount: children.length,
-      );
+  Widget build(BuildContext context) {
+    final controller = useScrollController();
+    return ListView.separated(
+      controller: controller,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemBuilder: (BuildContext context, int index) => children[index],
+      separatorBuilder: (BuildContext context, int index) =>
+          const SizedBox(height: 8),
+      itemCount: children.length,
+    );
+  }
 }
 
 class _Item extends HookWidget {
