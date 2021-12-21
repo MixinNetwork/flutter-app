@@ -75,6 +75,9 @@ class ConversationList extends HookWidget {
         itemPositionsListener:
             conversationListBloc.itemPositionsListener(slideCategoryState),
         itemCount: pagingState.count,
+        itemScrollController: conversationListBloc.itemScrollController(
+          slideCategoryState,
+        ),
         itemBuilder: (context, index) {
           final conversation = pagingState.map[index];
           if (conversation == null) return const SizedBox(height: 80);

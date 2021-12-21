@@ -94,7 +94,7 @@ class PagingUpdateEvent extends PagingEvent {
 abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     with SubscribeMixin {
   PagingBloc({
-    this.itemPositionsListener,
+    required this.itemPositionsListener,
     required this.limit,
     this.jumpTo,
     int offset = 0,
@@ -102,7 +102,7 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     double alignment = 0,
     required PagingState<T> initState,
   }) : super(initState) {
-    itemPositionsListener?.itemPositions.addListener(onItemPositions);
+    itemPositionsListener.itemPositions.addListener(onItemPositions);
     add(PagingInitEvent(
       offset: offset,
       index: index,
@@ -110,7 +110,7 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     ));
   }
 
-  final ItemPositionsListener? itemPositionsListener;
+  final ItemPositionsListener itemPositionsListener;
   final void Function({int index, double alignment})? jumpTo;
 
   int limit;
@@ -118,15 +118,15 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
 
   void onItemPositions() {
     final list =
-        itemPositionsListener?.itemPositions.value.map((e) => e.index).toList();
-    if (list?.isEmpty ?? true) return;
+        itemPositionsListener.itemPositions.value.map((e) => e.index).toList();
+    if (list.isEmpty) return;
 
-    add(PagingItemPositionEvent(list!));
+    add(PagingItemPositionEvent(list));
   }
 
   @override
   Future<void> close() async {
-    itemPositionsListener?.itemPositions.removeListener(onItemPositions);
+    itemPositionsListener.itemPositions.removeListener(onItemPositions);
     await super.close();
   }
 
