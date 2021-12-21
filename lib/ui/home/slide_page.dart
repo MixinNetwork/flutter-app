@@ -214,13 +214,21 @@ class _CircleList extends HookWidget {
                   );
                   return MoveWindowBarrier(
                     child: Listener(
-                      onPointerDown: (event) =>
-                          SliverReorderableList.maybeOf(context)
-                              ?.startItemDragReorder(
-                        index: index,
-                        event: event,
-                        recognizer: ImmediateMultiDragGestureRecognizer(),
-                      ),
+                      onPointerDown: (event) {
+                        if (event.buttons != kPrimaryButton) {
+                          // Only accept primary button event, ignore right click event.
+                          return;
+                        }
+                        ReorderableList.maybeOf(context)?.startItemDragReorder(
+                          index: index,
+                          event: event,
+                          recognizer: ImmediateMultiDragGestureRecognizer(
+                              supportedDevices: {
+                                PointerDeviceKind.touch,
+                                PointerDeviceKind.mouse,
+                              }),
+                        );
+                      },
                       child: ContextMenuPortalEntry(
                         buildMenus: () => [
                           ContextMenu(
