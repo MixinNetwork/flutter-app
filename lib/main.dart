@@ -62,7 +62,7 @@ Future<void> main(List<String> args) async {
   if (kDebugMode) Bloc.observer = CustomBlocObserver();
   unawaited(initListener());
 
-  ansiColorDisabled = Platform.isIOS;
+  ansiColorDisabled = false;
   DartVLC.initialize();
   runZonedGuarded(
     () => runApp(const App()),
