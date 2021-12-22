@@ -40,6 +40,7 @@ PODS:
     - Flutter
   - flutter_local_notifications (0.0.1):
     - Flutter
+  - image_picker (0.0.1):
   - gallery_saver (0.0.1):
     - Flutter
   - ogg_opus_player (0.0.1):
@@ -85,6 +86,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_app_icon_badge (from `.symlinks/plugins/flutter_app_icon_badge/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
+  - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - gallery_saver (from `.symlinks/plugins/gallery_saver/ios`)
   - ogg_opus_player (from `.symlinks/plugins/ogg_opus_player/ios`)
   - open_file (from `.symlinks/plugins/open_file/ios`)
@@ -114,6 +116,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_app_icon_badge/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
+  image_picker:
+    :path: ".symlinks/plugins/image_picker/ios"
   gallery_saver:
     :path: ".symlinks/plugins/gallery_saver/ios"
   ogg_opus_player:
@@ -141,6 +145,7 @@ SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   flutter_app_icon_badge: 844847adbd7a1c6f325d6b41b942428981b839cc
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
+  image_picker: 9aa50e1d8cdacdbed739e925b7eea16d014367e6
   gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542
   ogg_opus_player: 0e883df8c4f70995c3e6b8ac3a8ef088f66a8f41
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
