@@ -254,8 +254,7 @@ class MixinFileImage extends FileImage {
   static int _fileLastModified(File file) {
     try {
       return file.lastModifiedSync().millisecondsSinceEpoch;
-    } catch (error, stack) {
-      i('failed to get file lastModified. $error $stack');
+    } catch (_) {
       return 0;
     }
   }

@@ -304,6 +304,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Do you want to report and block this contact?"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveAs": MessageLookupByLibrary.simpleMessage("Save as"),
+        "saveToGallery":
+            MessageLookupByLibrary.simpleMessage("Save to Gallery"),
         "scamWarning": MessageLookupByLibrary.simpleMessage(
             "Warning: Many users reported this account as a scam. Please be careful, especially if it asks you for money"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
