@@ -305,7 +305,7 @@ class SearchItem extends StatelessWidget {
                         Expanded(
                           child: Row(
                             children: [
-                              Expanded(
+                              Flexible(
                                 child: HighlightText(
                                   name,
                                   maxLines: 1,
