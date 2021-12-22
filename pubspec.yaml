@@ -52,6 +52,7 @@ dependencies:
   flutter_markdown: ^0.6.6
   flutter_portal: ^0.4.0
   flutter_svg: ^0.23.0+1
+  gallery_saver: ^2.3.2
   hive: ^2.0.4
   hive_flutter: ^1.0.0
   http: ^0.13.3

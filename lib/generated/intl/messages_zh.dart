@@ -267,6 +267,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportWarning": MessageLookupByLibrary.simpleMessage("确定要举报这个联系人？"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
         "saveAs": MessageLookupByLibrary.simpleMessage("另存为"),
+        "saveToGallery": MessageLookupByLibrary.simpleMessage("保存到图库"),
         "scamWarning": MessageLookupByLibrary.simpleMessage(
             "警告：此账号被大量用户举报，请谨防网络诈骗，注意个人财产安全"),
         "search": MessageLookupByLibrary.simpleMessage("搜索"),

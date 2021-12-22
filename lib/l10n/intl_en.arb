@@ -234,5 +234,6 @@
   "deleteChatHint": "Delete chat: {value}",
   "uriCheckOnPhone": "This type of url is not supported, please check on your phone.",
   "saveAs": "Save as",
-  "noResults": "No results"
+  "noResults": "No results",
+  "saveToGallery": "Save to Gallery"
 }
