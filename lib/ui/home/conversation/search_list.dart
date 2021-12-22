@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -10,16 +11,16 @@ import '../../../bloc/bloc_converter.dart';
 import '../../../bloc/keyword_cubit.dart';
 import '../../../bloc/minute_timer_cubit.dart';
 import '../../../bloc/paging/paging_bloc.dart';
-import '../../../constants/resources.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/mixin_database.dart';
-import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/message_optimize.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
+import '../../../widgets/message/item/text/mention_builder.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
 import 'conversation_page.dart';
@@ -522,7 +523,7 @@ Future Function() _searchMessageItemOnTap(
       _clear(context);
     };
 
-class SearchMessageItem extends StatelessWidget {
+class SearchMessageItem extends HookWidget {
   const SearchMessageItem({
     Key? key,
     required this.message,
@@ -538,20 +539,43 @@ class SearchMessageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String? icon;
-    late String description;
-    if (message.type == MessageCategory.signalData ||
-        message.type == MessageCategory.plainData) {
-      icon = Resources.assetsImagesFileSvg;
-      description = message.mediaName!;
-    } else if (message.type == MessageCategory.signalContact ||
-        message.type == MessageCategory.plainContact) {
-      icon = Resources.assetsImagesContactSvg;
-      description = message.mediaName!;
-    } else {
-      // todo content should not be null.
-      description = message.content ?? '';
-    }
+    final isGroup = useMemoized(
+        () =>
+            message.category == ConversationCategory.group ||
+            message.userId != message.conversationOwnerId,
+        [message.category, message.userId, message.conversationOwnerId]);
+
+    final icon = useMemoized(
+        () => messagePreviewIcon(
+              message.status,
+              message.type,
+            ),
+        [
+          message.status,
+          message.type,
+        ]);
+
+    final description = useMemoizedFuture(() async {
+      final mentionCache = context.read<MentionCache>();
+
+      return messagePreviewOptimize(
+          message.status,
+          message.type,
+          mentionCache.replaceMention(
+            message.content,
+            await mentionCache.checkMentionCache({message.content}),
+          ),
+          message.userId == context.accountServer.userId,
+          isGroup,
+          message.userFullName);
+    }, null, keys: [
+      message.status,
+      message.type,
+      message.content,
+      isGroup,
+      message.userId,
+      message.userFullName
+    ]).data;
 
     final avatar = showSender
         ? AvatarWidget(
