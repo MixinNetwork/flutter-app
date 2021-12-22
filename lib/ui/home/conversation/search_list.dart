@@ -346,9 +346,12 @@ class SearchItem extends StatelessWidget {
                       Row(
                         children: [
                           if (descriptionIcon != null)
-                            SvgPicture.asset(
-                              descriptionIcon!,
-                              color: context.theme.secondaryText,
+                            Padding(
+                              padding: const EdgeInsets.only(right: 2),
+                              child: SvgPicture.asset(
+                                descriptionIcon!,
+                                color: context.theme.secondaryText,
+                              ),
                             ),
                           Expanded(
                             child: HighlightText(
