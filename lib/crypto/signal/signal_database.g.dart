@@ -8,13 +8,13 @@ part of 'signal_database.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
 class Identitie extends DataClass implements Insertable<Identitie> {
-  int id;
-  String address;
-  int? registrationId;
-  Uint8List publicKey;
-  Uint8List? privateKey;
-  int? nextPrekeyId;
-  int timestamp;
+  final int id;
+  final String address;
+  final int? registrationId;
+  final Uint8List publicKey;
+  final Uint8List? privateKey;
+  final int? nextPrekeyId;
+  final int timestamp;
   Identitie(
       {required this.id,
       required this.address,
@@ -156,14 +156,14 @@ class Identitie extends DataClass implements Insertable<Identitie> {
 }
 
 class IdentitiesCompanion extends UpdateCompanion<Identitie> {
-  Value<int> id;
-  Value<String> address;
-  Value<int?> registrationId;
-  Value<Uint8List> publicKey;
-  Value<Uint8List?> privateKey;
-  Value<int?> nextPrekeyId;
-  Value<int> timestamp;
-  IdentitiesCompanion({
+  final Value<int> id;
+  final Value<String> address;
+  final Value<int?> registrationId;
+  final Value<Uint8List> publicKey;
+  final Value<Uint8List?> privateKey;
+  final Value<int?> nextPrekeyId;
+  final Value<int> timestamp;
+  const IdentitiesCompanion({
     this.id = const Value.absent(),
     this.address = const Value.absent(),
     this.registrationId = const Value.absent(),
@@ -391,9 +391,9 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
 }
 
 class Prekey extends DataClass implements Insertable<Prekey> {
-  int id;
-  int prekeyId;
-  Uint8List record;
+  final int id;
+  final int prekeyId;
+  final Uint8List record;
   Prekey({required this.id, required this.prekeyId, required this.record});
   factory Prekey.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
@@ -469,10 +469,10 @@ class Prekey extends DataClass implements Insertable<Prekey> {
 }
 
 class PrekeysCompanion extends UpdateCompanion<Prekey> {
-  Value<int> id;
-  Value<int> prekeyId;
-  Value<Uint8List> record;
-  PrekeysCompanion({
+  final Value<int> id;
+  final Value<int> prekeyId;
+  final Value<Uint8List> record;
+  const PrekeysCompanion({
     this.id = const Value.absent(),
     this.prekeyId = const Value.absent(),
     this.record = const Value.absent(),
@@ -599,10 +599,10 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
 }
 
 class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
-  int id;
-  int prekeyId;
-  Uint8List record;
-  int timestamp;
+  final int id;
+  final int prekeyId;
+  final Uint8List record;
+  final int timestamp;
   SignedPrekey(
       {required this.id,
       required this.prekeyId,
@@ -693,11 +693,11 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
 }
 
 class SignedPrekeysCompanion extends UpdateCompanion<SignedPrekey> {
-  Value<int> id;
-  Value<int> prekeyId;
-  Value<Uint8List> record;
-  Value<int> timestamp;
-  SignedPrekeysCompanion({
+  final Value<int> id;
+  final Value<int> prekeyId;
+  final Value<Uint8List> record;
+  final Value<int> timestamp;
+  const SignedPrekeysCompanion({
     this.id = const Value.absent(),
     this.prekeyId = const Value.absent(),
     this.record = const Value.absent(),
@@ -849,11 +849,11 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
 }
 
 class Session extends DataClass implements Insertable<Session> {
-  int id;
-  String address;
-  int device;
-  Uint8List record;
-  int timestamp;
+  final int id;
+  final String address;
+  final int device;
+  final Uint8List record;
+  final int timestamp;
   Session(
       {required this.id,
       required this.address,
@@ -958,12 +958,12 @@ class Session extends DataClass implements Insertable<Session> {
 }
 
 class SessionsCompanion extends UpdateCompanion<Session> {
-  Value<int> id;
-  Value<String> address;
-  Value<int> device;
-  Value<Uint8List> record;
-  Value<int> timestamp;
-  SessionsCompanion({
+  final Value<int> id;
+  final Value<String> address;
+  final Value<int> device;
+  final Value<Uint8List> record;
+  final Value<int> timestamp;
+  const SessionsCompanion({
     this.id = const Value.absent(),
     this.address = const Value.absent(),
     this.device = const Value.absent(),
@@ -1139,9 +1139,9 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
 }
 
 class SenderKey extends DataClass implements Insertable<SenderKey> {
-  String groupId;
-  String senderId;
-  Uint8List record;
+  final String groupId;
+  final String senderId;
+  final Uint8List record;
   SenderKey(
       {required this.groupId, required this.senderId, required this.record});
   factory SenderKey.fromData(Map<String, dynamic> data, {String? prefix}) {
@@ -1219,10 +1219,10 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
 }
 
 class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
-  Value<String> groupId;
-  Value<String> senderId;
-  Value<Uint8List> record;
-  SenderKeysCompanion({
+  final Value<String> groupId;
+  final Value<String> senderId;
+  final Value<Uint8List> record;
+  const SenderKeysCompanion({
     this.groupId = const Value.absent(),
     this.senderId = const Value.absent(),
     this.record = const Value.absent(),
@@ -1359,11 +1359,11 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
 
 class RatchetSenderKey extends DataClass
     implements Insertable<RatchetSenderKey> {
-  String groupId;
-  String senderId;
-  String status;
-  String? messageId;
-  String createdAt;
+  final String groupId;
+  final String senderId;
+  final String status;
+  final String? messageId;
+  final String createdAt;
   RatchetSenderKey(
       {required this.groupId,
       required this.senderId,
@@ -1474,12 +1474,12 @@ class RatchetSenderKey extends DataClass
 }
 
 class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
-  Value<String> groupId;
-  Value<String> senderId;
-  Value<String> status;
-  Value<String?> messageId;
-  Value<String> createdAt;
-  RatchetSenderKeysCompanion({
+  final Value<String> groupId;
+  final Value<String> senderId;
+  final Value<String> status;
+  final Value<String?> messageId;
+  final Value<String> createdAt;
+  const RatchetSenderKeysCompanion({
     this.groupId = const Value.absent(),
     this.senderId = const Value.absent(),
     this.status = const Value.absent(),

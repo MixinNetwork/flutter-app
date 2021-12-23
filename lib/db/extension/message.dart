@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import '../../enum/media_status.dart';
+import '../../enum/message_action.dart';
+import '../../enum/message_status.dart';
 import '../converter/media_status_type_converter.dart';
 import '../converter/message_status_type_converter.dart';
 import '../converter/millis_date_converter.dart';
@@ -102,4 +105,75 @@ QuoteMessageItem mapToQuoteMessage(Map<String, dynamic> map) {
     sharedUserIsVerified: map['shared_user_is_verified'] as bool?,
     sharedUserAppId: map['shared_user_app_id'] as String?,
   );
+}
+
+extension SendingMessageCopy on SendingMessage {
+  SendingMessage copyWith({
+    String? messageId,
+    String? conversationId,
+    String? userId,
+    String? category,
+    String? content,
+    String? mediaUrl,
+    String? mediaMimeType,
+    int? mediaSize,
+    String? mediaDuration,
+    int? mediaWidth,
+    int? mediaHeight,
+    String? mediaHash,
+    String? thumbImage,
+    String? mediaKey,
+    String? mediaDigest,
+    MediaStatus? mediaStatus,
+    MessageStatus? status,
+    DateTime? createdAt,
+    MessageAction? action,
+    String? participantId,
+    String? snapshotId,
+    String? hyperlink,
+    String? name,
+    String? albumId,
+    String? stickerId,
+    String? sharedUserId,
+    String? mediaWaveform,
+    String? quoteMessageId,
+    String? quoteContent,
+    int? resendStatus,
+    String? resendUserId,
+    String? resendSessionId,
+  }) =>
+      SendingMessage(
+        messageId: messageId ?? this.messageId,
+        conversationId: conversationId ?? this.conversationId,
+        userId: userId ?? this.userId,
+        category: category ?? this.category,
+        content: content ?? this.content,
+        mediaUrl: mediaUrl ?? this.mediaUrl,
+        mediaMimeType: mediaMimeType ?? this.mediaMimeType,
+        mediaSize: mediaSize ?? this.mediaSize,
+        mediaDuration: mediaDuration ?? this.mediaDuration,
+        mediaWidth: mediaWidth ?? this.mediaWidth,
+        mediaHeight: mediaHeight ?? this.mediaHeight,
+        mediaHash: mediaHash ?? this.mediaHash,
+        thumbImage: thumbImage ?? this.thumbImage,
+        mediaKey: mediaKey ?? this.mediaKey,
+        mediaDigest: mediaDigest ?? this.mediaDigest,
+        mediaStatus: mediaStatus ?? this.mediaStatus,
+        status: status ?? this.status,
+        createdAt: createdAt ?? this.createdAt,
+        action: action ?? this.action,
+        participantId: participantId ?? this.participantId,
+        snapshotId: snapshotId ?? this.snapshotId,
+        hyperlink: hyperlink ?? this.hyperlink,
+        name: name ?? this.name,
+        albumId: albumId ?? this.albumId,
+        stickerId: stickerId ?? this.stickerId,
+        sharedUserId: sharedUserId ?? this.sharedUserId,
+        mediaWaveform: mediaWaveform ?? this.mediaWaveform,
+        quoteMessageId: quoteMessageId ?? this.quoteMessageId,
+        quoteContent: quoteContent ?? this.quoteContent,
+        resendStatus: resendStatus ?? this.resendStatus,
+        resendUserId: resendUserId ?? this.resendUserId,
+        resendSessionId: resendSessionId ?? this.resendSessionId,
+      );
 }

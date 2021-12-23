@@ -352,7 +352,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Future<int> unpin(String conversationId) => (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(
-        ConversationsCompanion(pinTime: const Value(null)),
+        const ConversationsCompanion(pinTime: Value(null)),
       );
 
   Future<int> deleteConversation(String conversationId) =>
