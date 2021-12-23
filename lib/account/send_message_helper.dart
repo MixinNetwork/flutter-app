@@ -1030,6 +1030,8 @@ class SendMessageHelper {
     required List<PinMessageMinimal> pinMessageMinimals,
     required bool pin,
   }) async {
+    if (pinMessageMinimals.isEmpty) return;
+
     final pinMessagePayload = PinMessagePayload(
       action: pin ? PinMessagePayloadAction.pin : PinMessagePayloadAction.unpin,
       messageIds: pinMessageMinimals.map((e) => e.messageId).toList(),
@@ -1065,6 +1067,10 @@ class SendMessageHelper {
       await _pinMessageDao
           .deleteByIds(pinMessageMinimals.map((e) => e.messageId).toList());
     }
+
+    _messageDao
+        .insertOrReplaceMessage(pinMessageMinimals.map((e) => e.messageId));
+
     await _jobDao.insert(
       Job(
         conversationId: conversationId,
