@@ -128,28 +128,28 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
 }
 
 class SnapshotItem {
-  String snapshotId;
-  String type;
-  String assetId;
-  String amount;
-  DateTime createdAt;
-  String? opponentId;
-  String? transactionHash;
-  String? sender;
-  String? receiver;
-  String? memo;
-  int? confirmations;
-  String? avatarUrl;
-  String? opponentFulName;
-  String? priceUsd;
-  String? chainId;
-  String? symbol;
-  String? symbolName;
-  String? tag;
-  int? assetConfirmations;
-  String? symbolIconUrl;
-  String? chainIconUrl;
-  double? fiatRate;
+  final String snapshotId;
+  final String type;
+  final String assetId;
+  final String amount;
+  final DateTime createdAt;
+  final String? opponentId;
+  final String? transactionHash;
+  final String? sender;
+  final String? receiver;
+  final String? memo;
+  final int? confirmations;
+  final String? avatarUrl;
+  final String? opponentFulName;
+  final String? priceUsd;
+  final String? chainId;
+  final String? symbol;
+  final String? symbolName;
+  final String? tag;
+  final int? assetConfirmations;
+  final String? symbolIconUrl;
+  final String? chainIconUrl;
+  final double? fiatRate;
   SnapshotItem({
     required this.snapshotId,
     required this.type,
