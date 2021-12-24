@@ -1,8 +1,14 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect opacity="0.01" width="24" height="24" fill="white"/>
-    <path d="M4 6H20V18.5556C20 20.4579 18.4579 22 16.5556 22H7.44444C5.54213 22 4 20.4579 4 18.5556V6Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="1" y="5" width="22" height="2" rx="1" fill="white"/>
-    <path d="M7 6C7 4.34315 8.34315 3 10 3H14C15.6569 3 17 4.34315 17 6V6H7V6Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="14.5" y="10.5" width="1" height="7" rx="0.5" stroke="white"/>
-    <rect x="8.5" y="10.5" width="1" height="7" rx="0.5" stroke="white"/>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect opacity="0.01" width="24" height="24" fill="white"/>
+  <path
+    d="M4 6H20V18.5556C20 20.4579 18.4579 22 16.5556 22H7.44444C5.54213 22 4 20.4579 4 18.5556V6Z"
+    stroke="white" stroke-width="2" stroke-linecap="round"
+    stroke-linejoin="round"/>
+  <rect x="1" y="5" width="22" height="2" rx="1" fill="white"/>
+  <path d="M7 6C7 4.34315 8.34315 3 10 3H14C15.6569 3 17 4.34315 17 6V6H7V6Z"
+        stroke="white" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round"/>
+  <rect x="14.5" y="10.5" width="1" height="7" rx="0.5" stroke="white"/>
+  <rect x="8.5" y="10.5" width="1" height="7" rx="0.5" stroke="white"/>
 </svg>

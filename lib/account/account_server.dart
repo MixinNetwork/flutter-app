@@ -908,7 +908,7 @@ class AccountServer {
     PrivacyKeyValue.instance.hasSyncSession = true;
   }
 
-  Future<void> initSticker() async {
+  Future<void> refreshSticker() async {
     final refreshStickerLastTime =
         AccountKeyValue.instance.refreshStickerLastTime;
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -917,20 +917,59 @@ class AccountServer {
     }
 
     final res = await client.accountApi.getStickerAlbums();
+    final albums = res.data;
+
+    var hasNewAlbum = false;
+
+    final localLatestCreatedAt =
+        await database.stickerAlbumDao.latestCreatedAt().getSingleOrNull();
+    if (localLatestCreatedAt == null && albums.isNotEmpty) {
+      hasNewAlbum = true;
+    }
+
+    if (!hasNewAlbum &&
+        localLatestCreatedAt != null &&
+        albums.any(
+            (element) => element.createdAt.isAfter(localLatestCreatedAt))) {
+      hasNewAlbum = true;
+    }
+
+    final hasAlbums = await database.mixinDatabase
+        .hasData(database.mixinDatabase.stickerAlbums);
+
+    await Future.forEach<StickerAlbum>(albums, (item) async {
+      await database.stickerAlbumDao.insert(db.StickerAlbumsCompanion.insert(
+        albumId: item.albumId,
+        name: item.name,
+        iconUrl: item.iconUrl,
+        createdAt: item.createdAt,
+        updateAt: item.updateAt,
+        userId: item.userId,
+        category: item.category,
+        description: item.description,
+        banner: Value(item.banner),
+        added: hasAlbums
+            ? const Value.absent()
+            : Value(item.banner?.isNotEmpty == true),
+      ));
+      await _updateStickerAlbums(item.albumId);
+    });
     res.data.forEach((item) async {
-      await database.stickerAlbumDao.insert(db.StickerAlbum(
-          albumId: item.albumId,
-          name: item.name,
-          iconUrl: item.iconUrl,
-          createdAt: item.createdAt,
-          updateAt: item.updateAt,
-          userId: item.userId,
-          category: item.category,
-          description: item.description));
+      await database.stickerAlbumDao.insert(db.StickerAlbumsCompanion.insert(
+        albumId: item.albumId,
+        name: item.name,
+        iconUrl: item.iconUrl,
+        createdAt: item.createdAt,
+        updateAt: item.updateAt,
+        userId: item.userId,
+        category: item.category,
+        description: item.description,
+      ));
       await _updateStickerAlbums(item.albumId);
     });
 
     AccountKeyValue.instance.refreshStickerLastTime = now;
+    AccountKeyValue.instance.hasNewAlbum = hasNewAlbum;
   }
 
   final refreshUserIdSet = <dynamic>{};

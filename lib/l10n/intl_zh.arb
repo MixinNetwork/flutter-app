@@ -230,5 +230,12 @@
   "uriCheckOnPhone": "不支持此链接，请在手机上查看。",
   "saveAs": "另存为",
   "noResults": "没有结果",
-  "saveToGallery": "保存到图库"
+  "saveToGallery": "保存到图库",
+  "stickerShop": "表情商店",
+  "add": "添加",
+  "added": "已添加",
+  "stickerAlbumDetail": "表情详情",
+  "addStickers": "添加所有表情",
+  "removeStickers": "移除所有表情",
+  "myStickerAlbums": "我的表情"
 }

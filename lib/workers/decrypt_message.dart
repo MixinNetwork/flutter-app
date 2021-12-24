@@ -690,7 +690,7 @@ class DecryptMessage extends Injector {
       final stickerMessage = StickerMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
       final sticker = await database.stickerDao
-          .getStickerByUnique(stickerMessage.stickerId)
+          .sticker(stickerMessage.stickerId)
           .getSingleOrNull();
       if (sticker == null) {
         await refreshSticker(stickerMessage.stickerId);
@@ -1088,7 +1088,7 @@ class DecryptMessage extends Injector {
       final stickerMessage = StickerMessage.fromJson(
           await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final sticker = await database.stickerDao
-          .getStickerByUnique(stickerMessage.stickerId)
+          .sticker(stickerMessage.stickerId)
           .getSingleOrNull();
       if (sticker == null) {
         await refreshSticker(stickerMessage.stickerId);

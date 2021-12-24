@@ -3,12 +3,12 @@ import '../mixin.drift';
 recentUsedStickers:
 SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20;
 
-personalStickers:
+stickersByCategory:
 SELECT s.*
 FROM   sticker_albums sa
        INNER JOIN sticker_relationships sr
                ON sr.album_id = sa.album_id
        INNER JOIN stickers s
                ON sr.sticker_id = s.sticker_id
-WHERE  sa.category = 'PERSONAL'
+WHERE  sa.category = :category
 ORDER  BY s.created_at DESC;

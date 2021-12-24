@@ -62,7 +62,8 @@ part 'mixin_database.g.dart';
     'moor/dao/user.drift',
     'moor/dao/circle.drift',
     'moor/dao/flood.drift',
-    'moor/dao/pin_message.drift'
+    'moor/dao/pin_message.drift',
+    'moor/dao/sticker_relationship.drift'
   },
   daos: [
     AddressDao,
@@ -96,7 +97,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   final eventBus = DataBaseEventBus();
 
@@ -161,6 +162,11 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 7) {
             await m.drop(Trigger('', 'conversation_last_message_update'));
+          }
+          if (from <= 8) {
+            await m.addColumn(stickerAlbums, stickerAlbums.orderedAt);
+            await m.addColumn(stickerAlbums, stickerAlbums.banner);
+            await m.addColumn(stickerAlbums, stickerAlbums.added);
           }
         },
       );

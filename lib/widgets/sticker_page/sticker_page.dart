@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:lottie/lottie.dart';
 
+import '../../account/account_key_value.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
@@ -11,9 +11,12 @@ import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../cache_image.dart';
+import '../hover_overlay.dart';
 import '../interactive_decorated_box.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
 import 'bloc/cubit/sticker_cubit.dart';
+import 'sticker_item.dart';
+import 'sticker_store.dart';
 
 class StickerPage extends StatelessWidget {
   const StickerPage({
@@ -75,20 +78,23 @@ class _StickerAlbumPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final stickerDao = context.database.stickerDao;
-    if (index == 1) {
+    if (index == 2) {
       // todo can add or delete
     }
-    final updateUsedAt = index != 0;
-    final rightClickDelete = index == 1;
+    final updateUsedAt = index != 1;
+    final rightClickDelete = index == 2;
     final stickerCubit = useBloc(() {
       Stream<List<Sticker>> stream;
       switch (index) {
         case 0:
+          stream = Stream.value([]);
+          break;
+        case 1:
           stream = stickerDao
               .recentUsedStickers()
               .watchThrottle(kVerySlowThrottleDuration);
           break;
-        case 1:
+        case 2:
           stream = stickerDao
               .personalStickers()
               .watchThrottle(kVerySlowThrottleDuration);
@@ -96,7 +102,7 @@ class _StickerAlbumPage extends HookWidget {
         default:
           stream = stickerDao
               .stickerByAlbumId(BlocProvider.of<StickerAlbumsCubit>(context)
-                  .state[index - 2]
+                  .state[index - 3]
                   .albumId)
               .watchThrottle(kVerySlowThrottleDuration);
       }
@@ -169,21 +175,18 @@ class _StickerAlbumPageItem extends HookWidget {
         // todo use native context menu.
       },
       child: RepaintBoundary(
-        child: Builder(builder: (context) {
-          if (sticker.assetType == 'json') {
-            return Lottie.network(
-              sticker.assetUrl,
-              fit: BoxFit.cover,
-            );
-          }
-          return CacheImage(sticker.assetUrl);
-        }),
+        child: Builder(
+          builder: (context) => StickerItem(
+            assetUrl: sticker.assetUrl,
+            assetType: sticker.assetType,
+          ),
+        ),
       ),
     );
   }
 }
 
-class _StickerAlbumBar extends StatelessWidget {
+class _StickerAlbumBar extends HookWidget {
   const _StickerAlbumBar({
     Key? key,
     required this.tabLength,
@@ -194,31 +197,47 @@ class _StickerAlbumBar extends StatelessWidget {
   final TabController? tabController;
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: double.infinity,
-        height: 50,
-        color: context.dynamicColor(
-          const Color.fromRGBO(0, 0, 0, 0.05),
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-        ),
-        child: TabBar(
-          controller: tabController,
-          isScrollable: true,
-          indicator: BoxDecoration(
-            color: context.dynamicColor(
-              const Color.fromRGBO(229, 231, 235, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-            ),
-            borderRadius: BorderRadius.circular(8),
+  Widget build(BuildContext context) {
+    useEffect(() {
+      if (tabController == null) return () {};
+      void onTap() {
+        if (tabController!.index != 0) return;
+        showStickerStorePageDialog(context);
+        tabController!.index = tabController!.previousIndex;
+        HoverOverlay.forceHidden(context);
+      }
+
+      tabController!.addListener(onTap);
+      return () {
+        tabController!.removeListener(onTap);
+      };
+    }, [tabController]);
+    return Container(
+      width: double.infinity,
+      height: 50,
+      color: context.dynamicColor(
+        const Color.fromRGBO(0, 0, 0, 0.05),
+        darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+      ),
+      child: TabBar(
+        controller: tabController,
+        isScrollable: true,
+        indicator: BoxDecoration(
+          color: context.dynamicColor(
+            const Color.fromRGBO(229, 231, 235, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
           ),
-          labelPadding: EdgeInsets.zero,
-          indicatorPadding: const EdgeInsets.all(5),
-          tabs: List.generate(
-            tabLength,
-            (index) => _StickerAlbumBarItem(index: index),
-          ),
+          borderRadius: BorderRadius.circular(8),
         ),
-      );
+        labelPadding: EdgeInsets.zero,
+        indicatorPadding: const EdgeInsets.all(5),
+        tabs: List.generate(
+          tabLength,
+          (index) => _StickerAlbumBarItem(index: index),
+        ),
+      ),
+    );
+  }
 }
 
 class _StickerAlbumBarItem extends StatelessWidget {
@@ -236,15 +255,18 @@ class _StickerAlbumBarItem extends StatelessWidget {
           child: Center(
             child: Builder(
               builder: (context) {
-                if (index < 2) {
+                if (index < 3) {
                   return SvgPicture.asset(
-                    const {
-                      0: Resources.assetsImagesRecentStickerSvg,
-                      1: Resources.assetsImagesPersonalStickerSvg,
+                    {
+                      0: AccountKeyValue.instance.hasNewAlbum
+                          ? Resources.assetsImagesStickerStoreRedDotSvg
+                          : Resources.assetsImagesStickerStoreSvg,
+                      1: Resources.assetsImagesRecentStickerSvg,
+                      2: Resources.assetsImagesPersonalStickerSvg,
                       // todo
                       // 2: Resources.assetsImagesGifStickerSvg
                     }[index]!,
-                    color: context.theme.secondaryText,
+                    color: index != 0 ? context.theme.secondaryText : null,
                     width: 24,
                     height: 24,
                   );
@@ -252,7 +274,7 @@ class _StickerAlbumBarItem extends StatelessWidget {
 
                 return BlocConverter<StickerAlbumsCubit, List<StickerAlbum>,
                     String>(
-                  converter: (state) => state[index - 2].iconUrl,
+                  converter: (state) => state[index - 3].iconUrl,
                   builder: (context, iconUrl) => CacheImage(
                     iconUrl,
                     width: 28,

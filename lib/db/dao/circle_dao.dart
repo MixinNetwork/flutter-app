@@ -44,7 +44,7 @@ class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
   Future<int> deleteCircleById(String circleId) =>
       db.deleteCircleById(circleId);
 
-  Future<void> updateCircleOrders(List<ConversationCircleItem> value) {
+  Future<void> updateOrders(List<ConversationCircleItem> value) {
     final now = DateTime.now();
     final newCircles = value.asMap().entries.map((e) {
       final index = e.key;

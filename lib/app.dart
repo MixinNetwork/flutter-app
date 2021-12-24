@@ -243,7 +243,7 @@ class _Home extends HookWidget {
         accountServer!
           ..refreshSelf()
           ..refreshFriends()
-          ..initSticker()
+          ..refreshSticker()
           ..initCircles();
       }
     }, [signed]);

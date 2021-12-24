@@ -212,6 +212,8 @@ class Resources {
 
   static const String assetsImagesSentSvg = 'assets/images/sent.svg';
 
+  static const String assetsImagesSettingSvg = 'assets/images/setting.svg';
+
   static const String assetsImagesShareSvg = 'assets/images/share.svg';
 
   static const String assetsImagesSlideContactsSvg =
@@ -221,6 +223,12 @@ class Resources {
       'assets/images/small_close.svg';
 
   static const String assetsImagesStickerSvg = 'assets/images/sticker.svg';
+
+  static const String assetsImagesStickerStoreSvg =
+      'assets/images/sticker_store.svg';
+
+  static const String assetsImagesStickerStoreRedDotSvg =
+      'assets/images/sticker_store_red_dot.svg';
 
   static const String assetsImagesStrangersSvg = 'assets/images/strangers.svg';
 
