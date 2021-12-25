@@ -1114,6 +1114,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             messageId: Value(messageId),
           )));
 
-  void insertOrReplaceMessage(Iterable<String> messageIds) =>
+  void notifyMessageInsertOrReplaced(Iterable<String> messageIds) =>
       db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
 }

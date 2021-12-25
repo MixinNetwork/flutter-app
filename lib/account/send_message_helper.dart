@@ -1068,8 +1068,8 @@ class SendMessageHelper {
           .deleteByIds(pinMessageMinimals.map((e) => e.messageId).toList());
     }
 
-    _messageDao
-        .insertOrReplaceMessage(pinMessageMinimals.map((e) => e.messageId));
+    _messageDao.notifyMessageInsertOrReplaced(
+        pinMessageMinimals.map((e) => e.messageId));
 
     await _jobDao.insert(
       Job(
