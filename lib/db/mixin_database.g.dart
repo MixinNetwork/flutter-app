@@ -8,23 +8,23 @@ part of 'mixin_database.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
 class Conversation extends DataClass implements Insertable<Conversation> {
-  String conversationId;
-  String? ownerId;
-  ConversationCategory? category;
-  String? name;
-  String? iconUrl;
-  String? announcement;
-  String? codeUrl;
-  String? payType;
-  DateTime createdAt;
-  DateTime? pinTime;
-  String? lastMessageId;
-  DateTime? lastMessageCreatedAt;
-  String? lastReadMessageId;
-  int? unseenMessageCount;
-  ConversationStatus status;
-  String? draft;
-  DateTime? muteUntil;
+  final String conversationId;
+  final String? ownerId;
+  final ConversationCategory? category;
+  final String? name;
+  final String? iconUrl;
+  final String? announcement;
+  final String? codeUrl;
+  final String? payType;
+  final DateTime createdAt;
+  final DateTime? pinTime;
+  final String? lastMessageId;
+  final DateTime? lastMessageCreatedAt;
+  final String? lastReadMessageId;
+  final int? unseenMessageCount;
+  final ConversationStatus status;
+  final String? draft;
+  final DateTime? muteUntil;
   Conversation(
       {required this.conversationId,
       this.ownerId,
@@ -355,24 +355,24 @@ class Conversation extends DataClass implements Insertable<Conversation> {
 }
 
 class ConversationsCompanion extends UpdateCompanion<Conversation> {
-  Value<String> conversationId;
-  Value<String?> ownerId;
-  Value<ConversationCategory?> category;
-  Value<String?> name;
-  Value<String?> iconUrl;
-  Value<String?> announcement;
-  Value<String?> codeUrl;
-  Value<String?> payType;
-  Value<DateTime> createdAt;
-  Value<DateTime?> pinTime;
-  Value<String?> lastMessageId;
-  Value<DateTime?> lastMessageCreatedAt;
-  Value<String?> lastReadMessageId;
-  Value<int?> unseenMessageCount;
-  Value<ConversationStatus> status;
-  Value<String?> draft;
-  Value<DateTime?> muteUntil;
-  ConversationsCompanion({
+  final Value<String> conversationId;
+  final Value<String?> ownerId;
+  final Value<ConversationCategory?> category;
+  final Value<String?> name;
+  final Value<String?> iconUrl;
+  final Value<String?> announcement;
+  final Value<String?> codeUrl;
+  final Value<String?> payType;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> pinTime;
+  final Value<String?> lastMessageId;
+  final Value<DateTime?> lastMessageCreatedAt;
+  final Value<String?> lastReadMessageId;
+  final Value<int?> unseenMessageCount;
+  final Value<ConversationStatus> status;
+  final Value<String?> draft;
+  final Value<DateTime?> muteUntil;
+  const ConversationsCompanion({
     this.conversationId = const Value.absent(),
     this.ownerId = const Value.absent(),
     this.category = const Value.absent(),
@@ -824,9 +824,9 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
 }
 
 class FloodMessage extends DataClass implements Insertable<FloodMessage> {
-  String messageId;
-  String data;
-  DateTime createdAt;
+  final String messageId;
+  final String data;
+  final DateTime createdAt;
   FloodMessage(
       {required this.messageId, required this.data, required this.createdAt});
   factory FloodMessage.fromData(Map<String, dynamic> data, {String? prefix}) {
@@ -908,10 +908,10 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
 }
 
 class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
-  Value<String> messageId;
-  Value<String> data;
-  Value<DateTime> createdAt;
-  FloodMessagesCompanion({
+  final Value<String> messageId;
+  final Value<String> data;
+  final Value<DateTime> createdAt;
+  const FloodMessagesCompanion({
     this.messageId = const Value.absent(),
     this.data = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1044,16 +1044,16 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
 }
 
 class Job extends DataClass implements Insertable<Job> {
-  String jobId;
-  String action;
-  DateTime createdAt;
-  int? orderId;
-  int priority;
-  String? userId;
-  String? blazeMessage;
-  String? conversationId;
-  String? resendMessageId;
-  int runCount;
+  final String jobId;
+  final String action;
+  final DateTime createdAt;
+  final int? orderId;
+  final int priority;
+  final String? userId;
+  final String? blazeMessage;
+  final String? conversationId;
+  final String? resendMessageId;
+  final int runCount;
   Job(
       {required this.jobId,
       required this.action,
@@ -1240,17 +1240,17 @@ class Job extends DataClass implements Insertable<Job> {
 }
 
 class JobsCompanion extends UpdateCompanion<Job> {
-  Value<String> jobId;
-  Value<String> action;
-  Value<DateTime> createdAt;
-  Value<int?> orderId;
-  Value<int> priority;
-  Value<String?> userId;
-  Value<String?> blazeMessage;
-  Value<String?> conversationId;
-  Value<String?> resendMessageId;
-  Value<int> runCount;
-  JobsCompanion({
+  final Value<String> jobId;
+  final Value<String> action;
+  final Value<DateTime> createdAt;
+  final Value<int?> orderId;
+  final Value<int> priority;
+  final Value<String?> userId;
+  final Value<String?> blazeMessage;
+  final Value<String?> conversationId;
+  final Value<String?> resendMessageId;
+  final Value<int> runCount;
+  const JobsCompanion({
     this.jobId = const Value.absent(),
     this.action = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1549,9 +1549,9 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
 }
 
 class MessageMention extends DataClass implements Insertable<MessageMention> {
-  String messageId;
-  String conversationId;
-  bool? hasRead;
+  final String messageId;
+  final String conversationId;
+  final bool? hasRead;
   MessageMention(
       {required this.messageId, required this.conversationId, this.hasRead});
   factory MessageMention.fromData(Map<String, dynamic> data, {String? prefix}) {
@@ -1636,10 +1636,10 @@ class MessageMention extends DataClass implements Insertable<MessageMention> {
 }
 
 class MessageMentionsCompanion extends UpdateCompanion<MessageMention> {
-  Value<String> messageId;
-  Value<String> conversationId;
-  Value<bool?> hasRead;
-  MessageMentionsCompanion({
+  final Value<String> messageId;
+  final Value<String> conversationId;
+  final Value<bool?> hasRead;
+  const MessageMentionsCompanion({
     this.messageId = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.hasRead = const Value.absent(),
@@ -1775,37 +1775,37 @@ class MessageMentions extends Table
 }
 
 class Message extends DataClass implements Insertable<Message> {
-  String messageId;
-  String conversationId;
-  String userId;
-  String category;
-  String? content;
-  String? mediaUrl;
-  String? mediaMimeType;
-  int? mediaSize;
-  String? mediaDuration;
-  int? mediaWidth;
-  int? mediaHeight;
-  String? mediaHash;
-  String? thumbImage;
-  String? mediaKey;
-  String? mediaDigest;
-  MediaStatus? mediaStatus;
-  MessageStatus status;
-  DateTime createdAt;
-  MessageAction? action;
-  String? participantId;
-  String? snapshotId;
-  String? hyperlink;
-  String? name;
-  String? albumId;
-  String? stickerId;
-  String? sharedUserId;
-  String? mediaWaveform;
-  String? quoteMessageId;
-  String? quoteContent;
-  String? thumbUrl;
-  String? caption;
+  final String messageId;
+  final String conversationId;
+  final String userId;
+  final String category;
+  final String? content;
+  final String? mediaUrl;
+  final String? mediaMimeType;
+  final int? mediaSize;
+  final String? mediaDuration;
+  final int? mediaWidth;
+  final int? mediaHeight;
+  final String? mediaHash;
+  final String? thumbImage;
+  final String? mediaKey;
+  final String? mediaDigest;
+  final MediaStatus? mediaStatus;
+  final MessageStatus status;
+  final DateTime createdAt;
+  final MessageAction? action;
+  final String? participantId;
+  final String? snapshotId;
+  final String? hyperlink;
+  final String? name;
+  final String? albumId;
+  final String? stickerId;
+  final String? sharedUserId;
+  final String? mediaWaveform;
+  final String? quoteMessageId;
+  final String? quoteContent;
+  final String? thumbUrl;
+  final String? caption;
   Message(
       {required this.messageId,
       required this.conversationId,
@@ -2340,38 +2340,38 @@ class Message extends DataClass implements Insertable<Message> {
 }
 
 class MessagesCompanion extends UpdateCompanion<Message> {
-  Value<String> messageId;
-  Value<String> conversationId;
-  Value<String> userId;
-  Value<String> category;
-  Value<String?> content;
-  Value<String?> mediaUrl;
-  Value<String?> mediaMimeType;
-  Value<int?> mediaSize;
-  Value<String?> mediaDuration;
-  Value<int?> mediaWidth;
-  Value<int?> mediaHeight;
-  Value<String?> mediaHash;
-  Value<String?> thumbImage;
-  Value<String?> mediaKey;
-  Value<String?> mediaDigest;
-  Value<MediaStatus?> mediaStatus;
-  Value<MessageStatus> status;
-  Value<DateTime> createdAt;
-  Value<MessageAction?> action;
-  Value<String?> participantId;
-  Value<String?> snapshotId;
-  Value<String?> hyperlink;
-  Value<String?> name;
-  Value<String?> albumId;
-  Value<String?> stickerId;
-  Value<String?> sharedUserId;
-  Value<String?> mediaWaveform;
-  Value<String?> quoteMessageId;
-  Value<String?> quoteContent;
-  Value<String?> thumbUrl;
-  Value<String?> caption;
-  MessagesCompanion({
+  final Value<String> messageId;
+  final Value<String> conversationId;
+  final Value<String> userId;
+  final Value<String> category;
+  final Value<String?> content;
+  final Value<String?> mediaUrl;
+  final Value<String?> mediaMimeType;
+  final Value<int?> mediaSize;
+  final Value<String?> mediaDuration;
+  final Value<int?> mediaWidth;
+  final Value<int?> mediaHeight;
+  final Value<String?> mediaHash;
+  final Value<String?> thumbImage;
+  final Value<String?> mediaKey;
+  final Value<String?> mediaDigest;
+  final Value<MediaStatus?> mediaStatus;
+  final Value<MessageStatus> status;
+  final Value<DateTime> createdAt;
+  final Value<MessageAction?> action;
+  final Value<String?> participantId;
+  final Value<String?> snapshotId;
+  final Value<String?> hyperlink;
+  final Value<String?> name;
+  final Value<String?> albumId;
+  final Value<String?> stickerId;
+  final Value<String?> sharedUserId;
+  final Value<String?> mediaWaveform;
+  final Value<String?> quoteMessageId;
+  final Value<String?> quoteContent;
+  final Value<String?> thumbUrl;
+  final Value<String?> caption;
+  const MessagesCompanion({
     this.messageId = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.userId = const Value.absent(),
@@ -3147,10 +3147,10 @@ class Messages extends Table with TableInfo<Messages, Message> {
 }
 
 class Participant extends DataClass implements Insertable<Participant> {
-  String conversationId;
-  String userId;
-  ParticipantRole? role;
-  DateTime createdAt;
+  final String conversationId;
+  final String userId;
+  final ParticipantRole? role;
+  final DateTime createdAt;
   Participant(
       {required this.conversationId,
       required this.userId,
@@ -3250,11 +3250,11 @@ class Participant extends DataClass implements Insertable<Participant> {
 }
 
 class ParticipantsCompanion extends UpdateCompanion<Participant> {
-  Value<String> conversationId;
-  Value<String> userId;
-  Value<ParticipantRole?> role;
-  Value<DateTime> createdAt;
-  ParticipantsCompanion({
+  final Value<String> conversationId;
+  final Value<String> userId;
+  final Value<ParticipantRole?> role;
+  final Value<DateTime> createdAt;
+  const ParticipantsCompanion({
     this.conversationId = const Value.absent(),
     this.userId = const Value.absent(),
     this.role = const Value.absent(),
@@ -3415,29 +3415,23 @@ class Participants extends Table with TableInfo<Participants, Participant> {
 }
 
 class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
-  String albumId;
-  String name;
-  String iconUrl;
-  DateTime createdAt;
-  DateTime updateAt;
-  DateTime orderedAt;
-  String userId;
-  String category;
-  String description;
-  String? banner;
-  bool? added;
+  final String albumId;
+  final String name;
+  final String iconUrl;
+  final DateTime createdAt;
+  final DateTime updateAt;
+  final String userId;
+  final String category;
+  final String description;
   StickerAlbum(
       {required this.albumId,
       required this.name,
       required this.iconUrl,
       required this.createdAt,
       required this.updateAt,
-      required this.orderedAt,
       required this.userId,
       required this.category,
-      required this.description,
-      this.banner,
-      this.added});
+      required this.description});
   factory StickerAlbum.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return StickerAlbum(
@@ -3451,18 +3445,12 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
       updateAt: StickerAlbums.$converter1.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}update_at']))!,
-      orderedAt: StickerAlbums.$converter2.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}ordered_at']))!,
       userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
       category: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}category'])!,
       description: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}description'])!,
-      banner: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}banner']),
-      added: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}added']),
     );
   }
   @override
@@ -3479,19 +3467,9 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       final converter = StickerAlbums.$converter1;
       map['update_at'] = Variable<int>(converter.mapToSql(updateAt)!);
     }
-    {
-      final converter = StickerAlbums.$converter2;
-      map['ordered_at'] = Variable<int>(converter.mapToSql(orderedAt)!);
-    }
     map['user_id'] = Variable<String>(userId);
     map['category'] = Variable<String>(category);
     map['description'] = Variable<String>(description);
-    if (!nullToAbsent || banner != null) {
-      map['banner'] = Variable<String?>(banner);
-    }
-    if (!nullToAbsent || added != null) {
-      map['added'] = Variable<bool?>(added);
-    }
     return map;
   }
 
@@ -3502,14 +3480,9 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       iconUrl: Value(iconUrl),
       createdAt: Value(createdAt),
       updateAt: Value(updateAt),
-      orderedAt: Value(orderedAt),
       userId: Value(userId),
       category: Value(category),
       description: Value(description),
-      banner:
-          banner == null && nullToAbsent ? const Value.absent() : Value(banner),
-      added:
-          added == null && nullToAbsent ? const Value.absent() : Value(added),
     );
   }
 
@@ -3522,12 +3495,9 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       iconUrl: serializer.fromJson<String>(json['icon_url']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
       updateAt: serializer.fromJson<DateTime>(json['update_at']),
-      orderedAt: serializer.fromJson<DateTime>(json['ordered_at']),
       userId: serializer.fromJson<String>(json['user_id']),
       category: serializer.fromJson<String>(json['category']),
       description: serializer.fromJson<String>(json['description']),
-      banner: serializer.fromJson<String?>(json['banner']),
-      added: serializer.fromJson<bool?>(json['added']),
     );
   }
   @override
@@ -3539,12 +3509,9 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       'icon_url': serializer.toJson<String>(iconUrl),
       'created_at': serializer.toJson<DateTime>(createdAt),
       'update_at': serializer.toJson<DateTime>(updateAt),
-      'ordered_at': serializer.toJson<DateTime>(orderedAt),
       'user_id': serializer.toJson<String>(userId),
       'category': serializer.toJson<String>(category),
       'description': serializer.toJson<String>(description),
-      'banner': serializer.toJson<String?>(banner),
-      'added': serializer.toJson<bool?>(added),
     };
   }
 
@@ -3554,24 +3521,18 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           String? iconUrl,
           DateTime? createdAt,
           DateTime? updateAt,
-          DateTime? orderedAt,
           String? userId,
           String? category,
-          String? description,
-          Value<String?> banner = const Value.absent(),
-          Value<bool?> added = const Value.absent()}) =>
+          String? description}) =>
       StickerAlbum(
         albumId: albumId ?? this.albumId,
         name: name ?? this.name,
         iconUrl: iconUrl ?? this.iconUrl,
         createdAt: createdAt ?? this.createdAt,
         updateAt: updateAt ?? this.updateAt,
-        orderedAt: orderedAt ?? this.orderedAt,
         userId: userId ?? this.userId,
         category: category ?? this.category,
         description: description ?? this.description,
-        banner: banner.present ? banner.value : this.banner,
-        added: added.present ? added.value : this.added,
       );
   @override
   String toString() {
@@ -3581,19 +3542,16 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           ..write('iconUrl: $iconUrl, ')
           ..write('createdAt: $createdAt, ')
           ..write('updateAt: $updateAt, ')
-          ..write('orderedAt: $orderedAt, ')
           ..write('userId: $userId, ')
           ..write('category: $category, ')
-          ..write('description: $description, ')
-          ..write('banner: $banner, ')
-          ..write('added: $added')
+          ..write('description: $description')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(albumId, name, iconUrl, createdAt, updateAt,
-      orderedAt, userId, category, description, banner, added);
+      userId, category, description);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3603,38 +3561,29 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           other.iconUrl == this.iconUrl &&
           other.createdAt == this.createdAt &&
           other.updateAt == this.updateAt &&
-          other.orderedAt == this.orderedAt &&
           other.userId == this.userId &&
           other.category == this.category &&
-          other.description == this.description &&
-          other.banner == this.banner &&
-          other.added == this.added);
+          other.description == this.description);
 }
 
 class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
-  Value<String> albumId;
-  Value<String> name;
-  Value<String> iconUrl;
-  Value<DateTime> createdAt;
-  Value<DateTime> updateAt;
-  Value<DateTime> orderedAt;
-  Value<String> userId;
-  Value<String> category;
-  Value<String> description;
-  Value<String?> banner;
-  Value<bool?> added;
-  StickerAlbumsCompanion({
+  final Value<String> albumId;
+  final Value<String> name;
+  final Value<String> iconUrl;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updateAt;
+  final Value<String> userId;
+  final Value<String> category;
+  final Value<String> description;
+  const StickerAlbumsCompanion({
     this.albumId = const Value.absent(),
     this.name = const Value.absent(),
     this.iconUrl = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updateAt = const Value.absent(),
-    this.orderedAt = const Value.absent(),
     this.userId = const Value.absent(),
     this.category = const Value.absent(),
     this.description = const Value.absent(),
-    this.banner = const Value.absent(),
-    this.added = const Value.absent(),
   });
   StickerAlbumsCompanion.insert({
     required String albumId,
@@ -3642,12 +3591,9 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     required String iconUrl,
     required DateTime createdAt,
     required DateTime updateAt,
-    this.orderedAt = const Value.absent(),
     required String userId,
     required String category,
     required String description,
-    this.banner = const Value.absent(),
-    this.added = const Value.absent(),
   })  : albumId = Value(albumId),
         name = Value(name),
         iconUrl = Value(iconUrl),
@@ -3662,12 +3608,9 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     Expression<String>? iconUrl,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updateAt,
-    Expression<DateTime>? orderedAt,
     Expression<String>? userId,
     Expression<String>? category,
     Expression<String>? description,
-    Expression<String?>? banner,
-    Expression<bool?>? added,
   }) {
     return RawValuesInsertable({
       if (albumId != null) 'album_id': albumId,
@@ -3675,12 +3618,9 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       if (iconUrl != null) 'icon_url': iconUrl,
       if (createdAt != null) 'created_at': createdAt,
       if (updateAt != null) 'update_at': updateAt,
-      if (orderedAt != null) 'ordered_at': orderedAt,
       if (userId != null) 'user_id': userId,
       if (category != null) 'category': category,
       if (description != null) 'description': description,
-      if (banner != null) 'banner': banner,
-      if (added != null) 'added': added,
     });
   }
 
@@ -3690,24 +3630,18 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       Value<String>? iconUrl,
       Value<DateTime>? createdAt,
       Value<DateTime>? updateAt,
-      Value<DateTime>? orderedAt,
       Value<String>? userId,
       Value<String>? category,
-      Value<String>? description,
-      Value<String?>? banner,
-      Value<bool?>? added}) {
+      Value<String>? description}) {
     return StickerAlbumsCompanion(
       albumId: albumId ?? this.albumId,
       name: name ?? this.name,
       iconUrl: iconUrl ?? this.iconUrl,
       createdAt: createdAt ?? this.createdAt,
       updateAt: updateAt ?? this.updateAt,
-      orderedAt: orderedAt ?? this.orderedAt,
       userId: userId ?? this.userId,
       category: category ?? this.category,
       description: description ?? this.description,
-      banner: banner ?? this.banner,
-      added: added ?? this.added,
     );
   }
 
@@ -3731,10 +3665,6 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       final converter = StickerAlbums.$converter1;
       map['update_at'] = Variable<int>(converter.mapToSql(updateAt.value)!);
     }
-    if (orderedAt.present) {
-      final converter = StickerAlbums.$converter2;
-      map['ordered_at'] = Variable<int>(converter.mapToSql(orderedAt.value)!);
-    }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
     }
@@ -3743,12 +3673,6 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
-    }
-    if (banner.present) {
-      map['banner'] = Variable<String?>(banner.value);
-    }
-    if (added.present) {
-      map['added'] = Variable<bool?>(added.value);
     }
     return map;
   }
@@ -3761,12 +3685,9 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
           ..write('iconUrl: $iconUrl, ')
           ..write('createdAt: $createdAt, ')
           ..write('updateAt: $updateAt, ')
-          ..write('orderedAt: $orderedAt, ')
           ..write('userId: $userId, ')
           ..write('category: $category, ')
-          ..write('description: $description, ')
-          ..write('banner: $banner, ')
-          ..write('added: $added')
+          ..write('description: $description')
           ..write(')'))
         .toString();
   }
@@ -3808,14 +3729,6 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(StickerAlbums.$converter1);
-  final VerificationMeta _orderedAtMeta = const VerificationMeta('orderedAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> orderedAt =
-      GeneratedColumn<int?>('ordered_at', aliasedName, false,
-              type: const IntType(),
-              requiredDuringInsert: false,
-              $customConstraints: 'NOT NULL DEFAULT 0',
-              defaultValue: const CustomExpression<int>('0'))
-          .withConverter<DateTime>(StickerAlbums.$converter2);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
@@ -3835,19 +3748,6 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
       type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  final VerificationMeta _bannerMeta = const VerificationMeta('banner');
-  late final GeneratedColumn<String?> banner = GeneratedColumn<String?>(
-      'banner', aliasedName, true,
-      type: const StringType(),
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  final VerificationMeta _addedMeta = const VerificationMeta('added');
-  late final GeneratedColumn<bool?> added = GeneratedColumn<bool?>(
-      'added', aliasedName, true,
-      type: const BoolType(),
-      requiredDuringInsert: false,
-      $customConstraints: 'DEFAULT FALSE',
-      defaultValue: const CustomExpression<bool>('FALSE'));
   @override
   List<GeneratedColumn> get $columns => [
         albumId,
@@ -3855,12 +3755,9 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
         iconUrl,
         createdAt,
         updateAt,
-        orderedAt,
         userId,
         category,
-        description,
-        banner,
-        added
+        description
       ];
   @override
   String get aliasedName => _alias ?? 'sticker_albums';
@@ -3891,7 +3788,6 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
     }
     context.handle(_createdAtMeta, const VerificationResult.success());
     context.handle(_updateAtMeta, const VerificationResult.success());
-    context.handle(_orderedAtMeta, const VerificationResult.success());
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
@@ -3912,14 +3808,6 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
-    if (data.containsKey('banner')) {
-      context.handle(_bannerMeta,
-          banner.isAcceptableOrUnknown(data['banner']!, _bannerMeta));
-    }
-    if (data.containsKey('added')) {
-      context.handle(
-          _addedMeta, added.isAcceptableOrUnknown(data['added']!, _addedMeta));
-    }
     return context;
   }
 
@@ -3938,7 +3826,6 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(album_id)'];
   @override
@@ -3946,9 +3833,9 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
 }
 
 class PinMessage extends DataClass implements Insertable<PinMessage> {
-  String messageId;
-  String conversationId;
-  DateTime createdAt;
+  final String messageId;
+  final String conversationId;
+  final DateTime createdAt;
   PinMessage(
       {required this.messageId,
       required this.conversationId,
@@ -4032,10 +3919,10 @@ class PinMessage extends DataClass implements Insertable<PinMessage> {
 }
 
 class PinMessagesCompanion extends UpdateCompanion<PinMessage> {
-  Value<String> messageId;
-  Value<String> conversationId;
-  Value<DateTime> createdAt;
-  PinMessagesCompanion({
+  final Value<String> messageId;
+  final Value<String> conversationId;
+  final Value<DateTime> createdAt;
+  const PinMessagesCompanion({
     this.messageId = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -4171,16 +4058,16 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
 }
 
 class Addresse extends DataClass implements Insertable<Addresse> {
-  String addressId;
-  String type;
-  String assetId;
-  String destination;
-  String label;
-  DateTime updatedAt;
-  String reserve;
-  String fee;
-  String? tag;
-  String? dust;
+  final String addressId;
+  final String type;
+  final String assetId;
+  final String destination;
+  final String label;
+  final DateTime updatedAt;
+  final String reserve;
+  final String fee;
+  final String? tag;
+  final String? dust;
   Addresse(
       {required this.addressId,
       required this.type,
@@ -4348,17 +4235,17 @@ class Addresse extends DataClass implements Insertable<Addresse> {
 }
 
 class AddressesCompanion extends UpdateCompanion<Addresse> {
-  Value<String> addressId;
-  Value<String> type;
-  Value<String> assetId;
-  Value<String> destination;
-  Value<String> label;
-  Value<DateTime> updatedAt;
-  Value<String> reserve;
-  Value<String> fee;
-  Value<String?> tag;
-  Value<String?> dust;
-  AddressesCompanion({
+  final Value<String> addressId;
+  final Value<String> type;
+  final Value<String> assetId;
+  final Value<String> destination;
+  final Value<String> label;
+  final Value<DateTime> updatedAt;
+  final Value<String> reserve;
+  final Value<String> fee;
+  final Value<String?> tag;
+  final Value<String?> dust;
+  const AddressesCompanion({
     this.addressId = const Value.absent(),
     this.type = const Value.absent(),
     this.assetId = const Value.absent(),
@@ -4660,19 +4547,19 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
 }
 
 class App extends DataClass implements Insertable<App> {
-  String appId;
-  String appNumber;
-  String homeUri;
-  String redirectUri;
-  String name;
-  String iconUrl;
-  String? category;
-  String description;
-  String appSecret;
-  String? capabilities;
-  String creatorId;
-  String? resourcePatterns;
-  DateTime? updatedAt;
+  final String appId;
+  final String appNumber;
+  final String homeUri;
+  final String redirectUri;
+  final String name;
+  final String iconUrl;
+  final String? category;
+  final String description;
+  final String appSecret;
+  final String? capabilities;
+  final String creatorId;
+  final String? resourcePatterns;
+  final DateTime? updatedAt;
   App(
       {required this.appId,
       required this.appNumber,
@@ -4898,20 +4785,20 @@ class App extends DataClass implements Insertable<App> {
 }
 
 class AppsCompanion extends UpdateCompanion<App> {
-  Value<String> appId;
-  Value<String> appNumber;
-  Value<String> homeUri;
-  Value<String> redirectUri;
-  Value<String> name;
-  Value<String> iconUrl;
-  Value<String?> category;
-  Value<String> description;
-  Value<String> appSecret;
-  Value<String?> capabilities;
-  Value<String> creatorId;
-  Value<String?> resourcePatterns;
-  Value<DateTime?> updatedAt;
-  AppsCompanion({
+  final Value<String> appId;
+  final Value<String> appNumber;
+  final Value<String> homeUri;
+  final Value<String> redirectUri;
+  final Value<String> name;
+  final Value<String> iconUrl;
+  final Value<String?> category;
+  final Value<String> description;
+  final Value<String> appSecret;
+  final Value<String?> capabilities;
+  final Value<String> creatorId;
+  final Value<String?> resourcePatterns;
+  final Value<DateTime?> updatedAt;
+  const AppsCompanion({
     this.appId = const Value.absent(),
     this.appNumber = const Value.absent(),
     this.homeUri = const Value.absent(),
@@ -5290,21 +5177,21 @@ class Apps extends Table with TableInfo<Apps, App> {
 }
 
 class Asset extends DataClass implements Insertable<Asset> {
-  String assetId;
-  String symbol;
-  String name;
-  String iconUrl;
-  String balance;
-  String destination;
-  String? tag;
-  String priceBtc;
-  String priceUsd;
-  String chainId;
-  String changeUsd;
-  String changeBtc;
-  int confirmations;
-  String? assetKey;
-  String? reserve;
+  final String assetId;
+  final String symbol;
+  final String name;
+  final String iconUrl;
+  final String balance;
+  final String destination;
+  final String? tag;
+  final String priceBtc;
+  final String priceUsd;
+  final String chainId;
+  final String changeUsd;
+  final String changeBtc;
+  final int confirmations;
+  final String? assetKey;
+  final String? reserve;
   Asset(
       {required this.assetId,
       required this.symbol,
@@ -5544,22 +5431,22 @@ class Asset extends DataClass implements Insertable<Asset> {
 }
 
 class AssetsCompanion extends UpdateCompanion<Asset> {
-  Value<String> assetId;
-  Value<String> symbol;
-  Value<String> name;
-  Value<String> iconUrl;
-  Value<String> balance;
-  Value<String> destination;
-  Value<String?> tag;
-  Value<String> priceBtc;
-  Value<String> priceUsd;
-  Value<String> chainId;
-  Value<String> changeUsd;
-  Value<String> changeBtc;
-  Value<int> confirmations;
-  Value<String?> assetKey;
-  Value<String?> reserve;
-  AssetsCompanion({
+  final Value<String> assetId;
+  final Value<String> symbol;
+  final Value<String> name;
+  final Value<String> iconUrl;
+  final Value<String> balance;
+  final Value<String> destination;
+  final Value<String?> tag;
+  final Value<String> priceBtc;
+  final Value<String> priceUsd;
+  final Value<String> chainId;
+  final Value<String> changeUsd;
+  final Value<String> changeBtc;
+  final Value<int> confirmations;
+  final Value<String?> assetKey;
+  final Value<String?> reserve;
+  const AssetsCompanion({
     this.assetId = const Value.absent(),
     this.symbol = const Value.absent(),
     this.name = const Value.absent(),
@@ -5984,11 +5871,11 @@ class Assets extends Table with TableInfo<Assets, Asset> {
 
 class CircleConversation extends DataClass
     implements Insertable<CircleConversation> {
-  String conversationId;
-  String circleId;
-  String? userId;
-  DateTime createdAt;
-  DateTime? pinTime;
+  final String conversationId;
+  final String circleId;
+  final String? userId;
+  final DateTime createdAt;
+  final DateTime? pinTime;
   CircleConversation(
       {required this.conversationId,
       required this.circleId,
@@ -6106,12 +5993,12 @@ class CircleConversation extends DataClass
 }
 
 class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
-  Value<String> conversationId;
-  Value<String> circleId;
-  Value<String?> userId;
-  Value<DateTime> createdAt;
-  Value<DateTime?> pinTime;
-  CircleConversationsCompanion({
+  final Value<String> conversationId;
+  final Value<String> circleId;
+  final Value<String?> userId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> pinTime;
+  const CircleConversationsCompanion({
     this.conversationId = const Value.absent(),
     this.circleId = const Value.absent(),
     this.userId = const Value.absent(),
@@ -6290,10 +6177,10 @@ class CircleConversations extends Table
 }
 
 class Circle extends DataClass implements Insertable<Circle> {
-  String circleId;
-  String name;
-  DateTime createdAt;
-  DateTime? orderedAt;
+  final String circleId;
+  final String name;
+  final DateTime createdAt;
+  final DateTime? orderedAt;
   Circle(
       {required this.circleId,
       required this.name,
@@ -6395,11 +6282,11 @@ class Circle extends DataClass implements Insertable<Circle> {
 }
 
 class CirclesCompanion extends UpdateCompanion<Circle> {
-  Value<String> circleId;
-  Value<String> name;
-  Value<DateTime> createdAt;
-  Value<DateTime?> orderedAt;
-  CirclesCompanion({
+  final Value<String> circleId;
+  final Value<String> name;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> orderedAt;
+  const CirclesCompanion({
     this.circleId = const Value.absent(),
     this.name = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -6552,11 +6439,11 @@ class Circles extends Table with TableInfo<Circles, Circle> {
 }
 
 class Hyperlink extends DataClass implements Insertable<Hyperlink> {
-  String hyperlink;
-  String siteName;
-  String siteTitle;
-  String? siteDescription;
-  String? siteImage;
+  final String hyperlink;
+  final String siteName;
+  final String siteTitle;
+  final String? siteDescription;
+  final String? siteImage;
   Hyperlink(
       {required this.hyperlink,
       required this.siteName,
@@ -6672,12 +6559,12 @@ class Hyperlink extends DataClass implements Insertable<Hyperlink> {
 }
 
 class HyperlinksCompanion extends UpdateCompanion<Hyperlink> {
-  Value<String> hyperlink;
-  Value<String> siteName;
-  Value<String> siteTitle;
-  Value<String?> siteDescription;
-  Value<String?> siteImage;
-  HyperlinksCompanion({
+  final Value<String> hyperlink;
+  final Value<String> siteName;
+  final Value<String> siteTitle;
+  final Value<String?> siteDescription;
+  final Value<String?> siteImage;
+  const HyperlinksCompanion({
     this.hyperlink = const Value.absent(),
     this.siteName = const Value.absent(),
     this.siteTitle = const Value.absent(),
@@ -6856,13 +6743,13 @@ class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
 }
 
 class MessagesFt extends DataClass implements Insertable<MessagesFt> {
-  String messageId;
-  String conversationId;
-  String content;
-  String createdAt;
-  String userId;
-  String reservedInt;
-  String reservedText;
+  final String messageId;
+  final String conversationId;
+  final String content;
+  final String createdAt;
+  final String userId;
+  final String reservedInt;
+  final String reservedText;
   MessagesFt(
       {required this.messageId,
       required this.conversationId,
@@ -6990,14 +6877,14 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
 }
 
 class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
-  Value<String> messageId;
-  Value<String> conversationId;
-  Value<String> content;
-  Value<String> createdAt;
-  Value<String> userId;
-  Value<String> reservedInt;
-  Value<String> reservedText;
-  MessagesFtsCompanion({
+  final Value<String> messageId;
+  final Value<String> conversationId;
+  final Value<String> content;
+  final Value<String> createdAt;
+  final Value<String> userId;
+  final Value<String> reservedInt;
+  final Value<String> reservedText;
+  const MessagesFtsCompanion({
     this.messageId = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.content = const Value.absent(),
@@ -7246,7 +7133,7 @@ class MessagesFts extends Table
 
 class MessagesHistoryData extends DataClass
     implements Insertable<MessagesHistoryData> {
-  String messageId;
+  final String messageId;
   MessagesHistoryData({required this.messageId});
   factory MessagesHistoryData.fromData(Map<String, dynamic> data,
       {String? prefix}) {
@@ -7304,8 +7191,8 @@ class MessagesHistoryData extends DataClass
 }
 
 class MessagesHistoryCompanion extends UpdateCompanion<MessagesHistoryData> {
-  Value<String> messageId;
-  MessagesHistoryCompanion({
+  final Value<String> messageId;
+  const MessagesHistoryCompanion({
     this.messageId = const Value.absent(),
   });
   MessagesHistoryCompanion.insert({
@@ -7395,8 +7282,8 @@ class MessagesHistory extends Table
 }
 
 class Offset extends DataClass implements Insertable<Offset> {
-  String key;
-  String timestamp;
+  final String key;
+  final String timestamp;
   Offset({required this.key, required this.timestamp});
   factory Offset.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
@@ -7463,9 +7350,9 @@ class Offset extends DataClass implements Insertable<Offset> {
 }
 
 class OffsetsCompanion extends UpdateCompanion<Offset> {
-  Value<String> key;
-  Value<String> timestamp;
-  OffsetsCompanion({
+  final Value<String> key;
+  final Value<String> timestamp;
+  const OffsetsCompanion({
     this.key = const Value.absent(),
     this.timestamp = const Value.absent(),
   });
@@ -7576,12 +7463,12 @@ class Offsets extends Table with TableInfo<Offsets, Offset> {
 
 class ParticipantSessionData extends DataClass
     implements Insertable<ParticipantSessionData> {
-  String conversationId;
-  String userId;
-  String sessionId;
-  int? sentToServer;
-  DateTime? createdAt;
-  String? publicKey;
+  final String conversationId;
+  final String userId;
+  final String sessionId;
+  final int? sentToServer;
+  final DateTime? createdAt;
+  final String? publicKey;
   ParticipantSessionData(
       {required this.conversationId,
       required this.userId,
@@ -7714,13 +7601,13 @@ class ParticipantSessionData extends DataClass
 
 class ParticipantSessionCompanion
     extends UpdateCompanion<ParticipantSessionData> {
-  Value<String> conversationId;
-  Value<String> userId;
-  Value<String> sessionId;
-  Value<int?> sentToServer;
-  Value<DateTime?> createdAt;
-  Value<String?> publicKey;
-  ParticipantSessionCompanion({
+  final Value<String> conversationId;
+  final Value<String> userId;
+  final Value<String> sessionId;
+  final Value<int?> sentToServer;
+  final Value<DateTime?> createdAt;
+  final Value<String?> publicKey;
+  const ParticipantSessionCompanion({
     this.conversationId = const Value.absent(),
     this.userId = const Value.absent(),
     this.sessionId = const Value.absent(),
@@ -7926,11 +7813,11 @@ class ParticipantSession extends Table
 
 class ResendSessionMessage extends DataClass
     implements Insertable<ResendSessionMessage> {
-  String messageId;
-  String userId;
-  String sessionId;
-  int status;
-  DateTime createdAt;
+  final String messageId;
+  final String userId;
+  final String sessionId;
+  final int status;
+  final DateTime createdAt;
   ResendSessionMessage(
       {required this.messageId,
       required this.userId,
@@ -8041,12 +7928,12 @@ class ResendSessionMessage extends DataClass
 
 class ResendSessionMessagesCompanion
     extends UpdateCompanion<ResendSessionMessage> {
-  Value<String> messageId;
-  Value<String> userId;
-  Value<String> sessionId;
-  Value<int> status;
-  Value<DateTime> createdAt;
-  ResendSessionMessagesCompanion({
+  final Value<String> messageId;
+  final Value<String> userId;
+  final Value<String> sessionId;
+  final Value<int> status;
+  final Value<DateTime> createdAt;
+  const ResendSessionMessagesCompanion({
     this.messageId = const Value.absent(),
     this.userId = const Value.absent(),
     this.sessionId = const Value.absent(),
@@ -8230,12 +8117,12 @@ class ResendSessionMessages extends Table
 
 class SentSessionSenderKey extends DataClass
     implements Insertable<SentSessionSenderKey> {
-  String conversationId;
-  String userId;
-  String sessionId;
-  int sentToServer;
-  int? senderKeyId;
-  DateTime? createdAt;
+  final String conversationId;
+  final String userId;
+  final String sessionId;
+  final int sentToServer;
+  final int? senderKeyId;
+  final DateTime? createdAt;
   SentSessionSenderKey(
       {required this.conversationId,
       required this.userId,
@@ -8363,13 +8250,13 @@ class SentSessionSenderKey extends DataClass
 
 class SentSessionSenderKeysCompanion
     extends UpdateCompanion<SentSessionSenderKey> {
-  Value<String> conversationId;
-  Value<String> userId;
-  Value<String> sessionId;
-  Value<int> sentToServer;
-  Value<int?> senderKeyId;
-  Value<DateTime?> createdAt;
-  SentSessionSenderKeysCompanion({
+  final Value<String> conversationId;
+  final Value<String> userId;
+  final Value<String> sessionId;
+  final Value<int> sentToServer;
+  final Value<int?> senderKeyId;
+  final Value<DateTime?> createdAt;
+  const SentSessionSenderKeysCompanion({
     this.conversationId = const Value.absent(),
     this.userId = const Value.absent(),
     this.sessionId = const Value.absent(),
@@ -8580,17 +8467,17 @@ class SentSessionSenderKeys extends Table
 }
 
 class Snapshot extends DataClass implements Insertable<Snapshot> {
-  String snapshotId;
-  String type;
-  String assetId;
-  String amount;
-  DateTime createdAt;
-  String? opponentId;
-  String? transactionHash;
-  String? sender;
-  String? receiver;
-  String? memo;
-  int? confirmations;
+  final String snapshotId;
+  final String type;
+  final String assetId;
+  final String amount;
+  final DateTime createdAt;
+  final String? opponentId;
+  final String? transactionHash;
+  final String? sender;
+  final String? receiver;
+  final String? memo;
+  final int? confirmations;
   Snapshot(
       {required this.snapshotId,
       required this.type,
@@ -8789,18 +8676,18 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
 }
 
 class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
-  Value<String> snapshotId;
-  Value<String> type;
-  Value<String> assetId;
-  Value<String> amount;
-  Value<DateTime> createdAt;
-  Value<String?> opponentId;
-  Value<String?> transactionHash;
-  Value<String?> sender;
-  Value<String?> receiver;
-  Value<String?> memo;
-  Value<int?> confirmations;
-  SnapshotsCompanion({
+  final Value<String> snapshotId;
+  final Value<String> type;
+  final Value<String> assetId;
+  final Value<String> amount;
+  final Value<DateTime> createdAt;
+  final Value<String?> opponentId;
+  final Value<String?> transactionHash;
+  final Value<String?> sender;
+  final Value<String?> receiver;
+  final Value<String?> memo;
+  final Value<int?> confirmations;
+  const SnapshotsCompanion({
     this.snapshotId = const Value.absent(),
     this.type = const Value.absent(),
     this.assetId = const Value.absent(),
@@ -9122,8 +9009,8 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
 
 class StickerRelationship extends DataClass
     implements Insertable<StickerRelationship> {
-  String albumId;
-  String stickerId;
+  final String albumId;
+  final String stickerId;
   StickerRelationship({required this.albumId, required this.stickerId});
   factory StickerRelationship.fromData(Map<String, dynamic> data,
       {String? prefix}) {
@@ -9193,9 +9080,9 @@ class StickerRelationship extends DataClass
 
 class StickerRelationshipsCompanion
     extends UpdateCompanion<StickerRelationship> {
-  Value<String> albumId;
-  Value<String> stickerId;
-  StickerRelationshipsCompanion({
+  final Value<String> albumId;
+  final Value<String> stickerId;
+  const StickerRelationshipsCompanion({
     this.albumId = const Value.absent(),
     this.stickerId = const Value.absent(),
   });
@@ -9309,15 +9196,15 @@ class StickerRelationships extends Table
 }
 
 class Sticker extends DataClass implements Insertable<Sticker> {
-  String stickerId;
-  String? albumId;
-  String name;
-  String assetUrl;
-  String assetType;
-  int assetWidth;
-  int assetHeight;
-  DateTime createdAt;
-  DateTime? lastUseAt;
+  final String stickerId;
+  final String? albumId;
+  final String name;
+  final String assetUrl;
+  final String assetType;
+  final int assetWidth;
+  final int assetHeight;
+  final DateTime createdAt;
+  final DateTime? lastUseAt;
   Sticker(
       {required this.stickerId,
       this.albumId,
@@ -9479,16 +9366,16 @@ class Sticker extends DataClass implements Insertable<Sticker> {
 }
 
 class StickersCompanion extends UpdateCompanion<Sticker> {
-  Value<String> stickerId;
-  Value<String?> albumId;
-  Value<String> name;
-  Value<String> assetUrl;
-  Value<String> assetType;
-  Value<int> assetWidth;
-  Value<int> assetHeight;
-  Value<DateTime> createdAt;
-  Value<DateTime?> lastUseAt;
-  StickersCompanion({
+  final Value<String> stickerId;
+  final Value<String?> albumId;
+  final Value<String> name;
+  final Value<String> assetUrl;
+  final Value<String> assetType;
+  final Value<int> assetWidth;
+  final Value<int> assetHeight;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> lastUseAt;
+  const StickersCompanion({
     this.stickerId = const Value.absent(),
     this.albumId = const Value.absent(),
     this.name = const Value.absent(),
@@ -9768,19 +9655,19 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
 }
 
 class User extends DataClass implements Insertable<User> {
-  String userId;
-  String identityNumber;
-  UserRelationship? relationship;
-  String? fullName;
-  String? avatarUrl;
-  String? phone;
-  bool? isVerified;
-  DateTime? createdAt;
-  DateTime? muteUntil;
-  int? hasPin;
-  String? appId;
-  String? biography;
-  int? isScam;
+  final String userId;
+  final String identityNumber;
+  final UserRelationship? relationship;
+  final String? fullName;
+  final String? avatarUrl;
+  final String? phone;
+  final bool? isVerified;
+  final DateTime? createdAt;
+  final DateTime? muteUntil;
+  final int? hasPin;
+  final String? appId;
+  final String? biography;
+  final int? isScam;
   User(
       {required this.userId,
       required this.identityNumber,
@@ -10031,20 +9918,20 @@ class User extends DataClass implements Insertable<User> {
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
-  Value<String> userId;
-  Value<String> identityNumber;
-  Value<UserRelationship?> relationship;
-  Value<String?> fullName;
-  Value<String?> avatarUrl;
-  Value<String?> phone;
-  Value<bool?> isVerified;
-  Value<DateTime?> createdAt;
-  Value<DateTime?> muteUntil;
-  Value<int?> hasPin;
-  Value<String?> appId;
-  Value<String?> biography;
-  Value<int?> isScam;
-  UsersCompanion({
+  final Value<String> userId;
+  final Value<String> identityNumber;
+  final Value<UserRelationship?> relationship;
+  final Value<String?> fullName;
+  final Value<String?> avatarUrl;
+  final Value<String?> phone;
+  final Value<bool?> isVerified;
+  final Value<DateTime?> createdAt;
+  final Value<DateTime?> muteUntil;
+  final Value<int?> hasPin;
+  final Value<String?> appId;
+  final Value<String?> biography;
+  final Value<int?> isScam;
+  const UsersCompanion({
     this.userId = const Value.absent(),
     this.identityNumber = const Value.absent(),
     this.relationship = const Value.absent(),
@@ -10399,33 +10286,33 @@ class Users extends Table with TableInfo<Users, User> {
 
 class TranscriptMessage extends DataClass
     implements Insertable<TranscriptMessage> {
-  String transcriptId;
-  String messageId;
-  String? userId;
-  String? userFullName;
-  String category;
-  DateTime createdAt;
-  String? content;
-  String? mediaUrl;
-  String? mediaName;
-  int? mediaSize;
-  int? mediaWidth;
-  int? mediaHeight;
-  String? mediaMimeType;
-  String? mediaDuration;
-  MediaStatus? mediaStatus;
-  String? mediaWaveform;
-  String? thumbImage;
-  String? thumbUrl;
-  String? mediaKey;
-  String? mediaDigest;
-  DateTime? mediaCreatedAt;
-  String? stickerId;
-  String? sharedUserId;
-  String? mentions;
-  String? quoteId;
-  String? quoteContent;
-  String? caption;
+  final String transcriptId;
+  final String messageId;
+  final String? userId;
+  final String? userFullName;
+  final String category;
+  final DateTime createdAt;
+  final String? content;
+  final String? mediaUrl;
+  final String? mediaName;
+  final int? mediaSize;
+  final int? mediaWidth;
+  final int? mediaHeight;
+  final String? mediaMimeType;
+  final String? mediaDuration;
+  final MediaStatus? mediaStatus;
+  final String? mediaWaveform;
+  final String? thumbImage;
+  final String? thumbUrl;
+  final String? mediaKey;
+  final String? mediaDigest;
+  final DateTime? mediaCreatedAt;
+  final String? stickerId;
+  final String? sharedUserId;
+  final String? mentions;
+  final String? quoteId;
+  final String? quoteContent;
+  final String? caption;
   TranscriptMessage(
       {required this.transcriptId,
       required this.messageId,
@@ -10905,34 +10792,34 @@ class TranscriptMessage extends DataClass
 }
 
 class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
-  Value<String> transcriptId;
-  Value<String> messageId;
-  Value<String?> userId;
-  Value<String?> userFullName;
-  Value<String> category;
-  Value<DateTime> createdAt;
-  Value<String?> content;
-  Value<String?> mediaUrl;
-  Value<String?> mediaName;
-  Value<int?> mediaSize;
-  Value<int?> mediaWidth;
-  Value<int?> mediaHeight;
-  Value<String?> mediaMimeType;
-  Value<String?> mediaDuration;
-  Value<MediaStatus?> mediaStatus;
-  Value<String?> mediaWaveform;
-  Value<String?> thumbImage;
-  Value<String?> thumbUrl;
-  Value<String?> mediaKey;
-  Value<String?> mediaDigest;
-  Value<DateTime?> mediaCreatedAt;
-  Value<String?> stickerId;
-  Value<String?> sharedUserId;
-  Value<String?> mentions;
-  Value<String?> quoteId;
-  Value<String?> quoteContent;
-  Value<String?> caption;
-  TranscriptMessagesCompanion({
+  final Value<String> transcriptId;
+  final Value<String> messageId;
+  final Value<String?> userId;
+  final Value<String?> userFullName;
+  final Value<String> category;
+  final Value<DateTime> createdAt;
+  final Value<String?> content;
+  final Value<String?> mediaUrl;
+  final Value<String?> mediaName;
+  final Value<int?> mediaSize;
+  final Value<int?> mediaWidth;
+  final Value<int?> mediaHeight;
+  final Value<String?> mediaMimeType;
+  final Value<String?> mediaDuration;
+  final Value<MediaStatus?> mediaStatus;
+  final Value<String?> mediaWaveform;
+  final Value<String?> thumbImage;
+  final Value<String?> thumbUrl;
+  final Value<String?> mediaKey;
+  final Value<String?> mediaDigest;
+  final Value<DateTime?> mediaCreatedAt;
+  final Value<String?> stickerId;
+  final Value<String?> sharedUserId;
+  final Value<String?> mentions;
+  final Value<String?> quoteId;
+  final Value<String?> quoteContent;
+  final Value<String?> caption;
+  const TranscriptMessagesCompanion({
     this.transcriptId = const Value.absent(),
     this.messageId = const Value.absent(),
     this.userId = const Value.absent(),
@@ -11614,8 +11501,8 @@ class TranscriptMessages extends Table
 }
 
 class Fiat extends DataClass implements Insertable<Fiat> {
-  String code;
-  double rate;
+  final String code;
+  final double rate;
   Fiat({required this.code, required this.rate});
   factory Fiat.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
@@ -11680,9 +11567,9 @@ class Fiat extends DataClass implements Insertable<Fiat> {
 }
 
 class FiatsCompanion extends UpdateCompanion<Fiat> {
-  Value<String> code;
-  Value<double> rate;
-  FiatsCompanion({
+  final Value<String> code;
+  final Value<double> rate;
+  const FiatsCompanion({
     this.code = const Value.absent(),
     this.rate = const Value.absent(),
   });
@@ -12297,6 +12184,24 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<StickerAlbum> systemAlbums() {
+    return customSelect(
+        'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',
+        variables: [],
+        readsFrom: {
+          stickerAlbums,
+        }).map(stickerAlbums.mapFromRow);
+  }
+
+  Selectable<StickerAlbum> personalAlbums() {
+    return customSelect(
+        'SELECT * FROM sticker_albums WHERE category = \'PERSONAL\' ORDER BY created_at ASC LIMIT 1',
+        variables: [],
+        readsFrom: {
+          stickerAlbums,
+        }).map(stickerAlbums.mapFromRow);
+  }
+
   Selectable<Sticker> recentUsedStickers() {
     return customSelect(
         'SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20',
@@ -12306,12 +12211,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(stickers.mapFromRow);
   }
 
-  Selectable<Sticker> stickersByCategory(String category) {
+  Selectable<Sticker> personalStickers() {
     return customSelect(
-        'SELECT s.* FROM sticker_albums AS sa INNER JOIN sticker_relationships AS sr ON sr.album_id = sa.album_id INNER JOIN stickers AS s ON sr.sticker_id = s.sticker_id WHERE sa.category = ?1 ORDER BY s.created_at DESC',
-        variables: [
-          Variable<String>(category)
-        ],
+        'SELECT s.* FROM sticker_albums AS sa INNER JOIN sticker_relationships AS sr ON sr.album_id = sa.album_id INNER JOIN stickers AS s ON sr.sticker_id = s.sticker_id WHERE sa.category = \'PERSONAL\' ORDER BY s.created_at DESC',
+        variables: [],
         readsFrom: {
           stickerAlbums,
           stickerRelationships,
@@ -13598,61 +13501,61 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 }
 
 class MessageItem {
-  String messageId;
-  String conversationId;
-  String type;
-  String? content;
-  DateTime createdAt;
-  MessageStatus status;
-  MediaStatus? mediaStatus;
-  String? mediaWaveform;
-  String? mediaName;
-  String? mediaMimeType;
-  int? mediaSize;
-  int? mediaWidth;
-  int? mediaHeight;
-  String? thumbImage;
-  String? thumbUrl;
-  String? mediaUrl;
-  String? mediaDuration;
-  String? quoteId;
-  String? quoteContent;
-  MessageAction? actionName;
-  String? sharedUserId;
-  String userId;
-  String? userFullName;
-  String userIdentityNumber;
-  String? appId;
-  UserRelationship? relationship;
-  String? avatarUrl;
-  String? sharedUserFullName;
-  String? sharedUserIdentityNumber;
-  String? sharedUserAvatarUrl;
-  bool? sharedUserIsVerified;
-  String? sharedUserAppId;
-  String? conversationOwnerId;
-  ConversationCategory? conversionCategory;
-  String? groupName;
-  String? assetUrl;
-  int? assetWidth;
-  int? assetHeight;
-  String? stickerId;
-  String? assetName;
-  String? assetType;
-  String? participantFullName;
-  String? participantUserId;
-  String? snapshotId;
-  String? snapshotType;
-  String? snapshotAmount;
-  String? assetId;
-  String? assetSymbol;
-  String? assetIcon;
-  String? siteName;
-  String? siteTitle;
-  String? siteDescription;
-  String? siteImage;
-  bool? mentionRead;
-  bool pinned;
+  final String messageId;
+  final String conversationId;
+  final String type;
+  final String? content;
+  final DateTime createdAt;
+  final MessageStatus status;
+  final MediaStatus? mediaStatus;
+  final String? mediaWaveform;
+  final String? mediaName;
+  final String? mediaMimeType;
+  final int? mediaSize;
+  final int? mediaWidth;
+  final int? mediaHeight;
+  final String? thumbImage;
+  final String? thumbUrl;
+  final String? mediaUrl;
+  final String? mediaDuration;
+  final String? quoteId;
+  final String? quoteContent;
+  final MessageAction? actionName;
+  final String? sharedUserId;
+  final String userId;
+  final String? userFullName;
+  final String userIdentityNumber;
+  final String? appId;
+  final UserRelationship? relationship;
+  final String? avatarUrl;
+  final String? sharedUserFullName;
+  final String? sharedUserIdentityNumber;
+  final String? sharedUserAvatarUrl;
+  final bool? sharedUserIsVerified;
+  final String? sharedUserAppId;
+  final String? conversationOwnerId;
+  final ConversationCategory? conversionCategory;
+  final String? groupName;
+  final String? assetUrl;
+  final int? assetWidth;
+  final int? assetHeight;
+  final String? stickerId;
+  final String? assetName;
+  final String? assetType;
+  final String? participantFullName;
+  final String? participantUserId;
+  final String? snapshotId;
+  final String? snapshotType;
+  final String? snapshotAmount;
+  final String? assetId;
+  final String? assetSymbol;
+  final String? assetIcon;
+  final String? siteName;
+  final String? siteTitle;
+  final String? siteDescription;
+  final String? siteImage;
+  final bool? mentionRead;
+  final bool pinned;
   MessageItem({
     required this.messageId,
     required this.conversationId,
@@ -13891,8 +13794,8 @@ class MessageItem {
 }
 
 class LastPinMessageItemResult {
-  String? content;
-  String? userFullName;
+  final String? content;
+  final String? userFullName;
   LastPinMessageItemResult({
     this.content,
     this.userFullName,
@@ -13916,13 +13819,13 @@ class LastPinMessageItemResult {
 }
 
 class ConversationCircleItem {
-  String circleId;
-  String name;
-  DateTime createdAt;
-  DateTime? orderedAt;
-  int count;
-  int unseenConversationCount;
-  int unseenMutedConversationCount;
+  final String circleId;
+  final String name;
+  final DateTime createdAt;
+  final DateTime? orderedAt;
+  final int count;
+  final int unseenConversationCount;
+  final int unseenMutedConversationCount;
   ConversationCircleItem({
     required this.circleId,
     required this.name,
@@ -13963,9 +13866,9 @@ class ConversationCircleItem {
 }
 
 class ConversationCircleManagerItem {
-  String circleId;
-  String name;
-  int count;
+  final String circleId;
+  final String name;
+  final int count;
   ConversationCircleManagerItem({
     required this.circleId,
     required this.name,
@@ -13992,9 +13895,9 @@ class ConversationCircleManagerItem {
 }
 
 class MentionUser {
-  String userId;
-  String identityNumber;
-  String? fullName;
+  final String userId;
+  final String identityNumber;
+  final String? fullName;
   MentionUser({
     required this.userId,
     required this.identityNumber,
@@ -14021,10 +13924,10 @@ class MentionUser {
 }
 
 class ParticipantSessionKey {
-  String conversationId;
-  String userId;
-  String sessionId;
-  String? publicKey;
+  final String conversationId;
+  final String userId;
+  final String sessionId;
+  final String? publicKey;
   ParticipantSessionKey({
     required this.conversationId,
     required this.userId,
@@ -14054,22 +13957,22 @@ class ParticipantSessionKey {
 }
 
 class ParticipantUser {
-  String conversationId;
-  ParticipantRole? role;
-  DateTime createdAt;
-  String userId;
-  String identityNumber;
-  UserRelationship? relationship;
-  String? biography;
-  String? fullName;
-  String? avatarUrl;
-  String? phone;
-  bool? isVerified;
-  DateTime? userCreatedAt;
-  DateTime? muteUntil;
-  int? hasPin;
-  String? appId;
-  int? isScam;
+  final String conversationId;
+  final ParticipantRole? role;
+  final DateTime createdAt;
+  final String userId;
+  final String identityNumber;
+  final UserRelationship? relationship;
+  final String? biography;
+  final String? fullName;
+  final String? avatarUrl;
+  final String? phone;
+  final bool? isVerified;
+  final DateTime? userCreatedAt;
+  final DateTime? muteUntil;
+  final int? hasPin;
+  final String? appId;
+  final int? isScam;
   ParticipantUser({
     required this.conversationId,
     this.role,
@@ -14151,41 +14054,41 @@ class ParticipantUser {
 }
 
 class QuoteMessageItem {
-  String messageId;
-  String conversationId;
-  String userId;
-  String? userFullName;
-  String userIdentityNumber;
-  String? appId;
-  String type;
-  String? content;
-  DateTime createdAt;
-  MessageStatus status;
-  MediaStatus? mediaStatus;
-  String? mediaWaveform;
-  String? mediaName;
-  String? mediaMimeType;
-  int? mediaSize;
-  int? mediaWidth;
-  int? mediaHeight;
-  String? thumbImage;
-  String? thumbUrl;
-  String? mediaUrl;
-  String? mediaDuration;
-  String? quoteId;
-  String? quoteContent;
-  String? assetUrl;
-  int? assetWidth;
-  int? assetHeight;
-  String? stickerId;
-  String? assetName;
-  String? assetType;
-  String? sharedUserId;
-  String? sharedUserFullName;
-  String? sharedUserIdentityNumber;
-  String? sharedUserAvatarUrl;
-  bool? sharedUserIsVerified;
-  String? sharedUserAppId;
+  final String messageId;
+  final String conversationId;
+  final String userId;
+  final String? userFullName;
+  final String userIdentityNumber;
+  final String? appId;
+  final String type;
+  final String? content;
+  final DateTime createdAt;
+  final MessageStatus status;
+  final MediaStatus? mediaStatus;
+  final String? mediaWaveform;
+  final String? mediaName;
+  final String? mediaMimeType;
+  final int? mediaSize;
+  final int? mediaWidth;
+  final int? mediaHeight;
+  final String? thumbImage;
+  final String? thumbUrl;
+  final String? mediaUrl;
+  final String? mediaDuration;
+  final String? quoteId;
+  final String? quoteContent;
+  final String? assetUrl;
+  final int? assetWidth;
+  final int? assetHeight;
+  final String? stickerId;
+  final String? assetName;
+  final String? assetType;
+  final String? sharedUserId;
+  final String? sharedUserFullName;
+  final String? sharedUserIdentityNumber;
+  final String? sharedUserAvatarUrl;
+  final bool? sharedUserIsVerified;
+  final String? sharedUserAppId;
   QuoteMessageItem({
     required this.messageId,
     required this.conversationId,
@@ -14344,38 +14247,38 @@ class QuoteMessageItem {
 }
 
 class SendingMessage {
-  String messageId;
-  String conversationId;
-  String userId;
-  String category;
-  String? content;
-  String? mediaUrl;
-  String? mediaMimeType;
-  int? mediaSize;
-  String? mediaDuration;
-  int? mediaWidth;
-  int? mediaHeight;
-  String? mediaHash;
-  String? thumbImage;
-  String? mediaKey;
-  String? mediaDigest;
-  MediaStatus? mediaStatus;
-  MessageStatus status;
-  DateTime createdAt;
-  MessageAction? action;
-  String? participantId;
-  String? snapshotId;
-  String? hyperlink;
-  String? name;
-  String? albumId;
-  String? stickerId;
-  String? sharedUserId;
-  String? mediaWaveform;
-  String? quoteMessageId;
-  String? quoteContent;
-  int? resendStatus;
-  String? resendUserId;
-  String? resendSessionId;
+  final String messageId;
+  final String conversationId;
+  final String userId;
+  final String category;
+  final String? content;
+  final String? mediaUrl;
+  final String? mediaMimeType;
+  final int? mediaSize;
+  final String? mediaDuration;
+  final int? mediaWidth;
+  final int? mediaHeight;
+  final String? mediaHash;
+  final String? thumbImage;
+  final String? mediaKey;
+  final String? mediaDigest;
+  final MediaStatus? mediaStatus;
+  final MessageStatus status;
+  final DateTime createdAt;
+  final MessageAction? action;
+  final String? participantId;
+  final String? snapshotId;
+  final String? hyperlink;
+  final String? name;
+  final String? albumId;
+  final String? stickerId;
+  final String? sharedUserId;
+  final String? mediaWaveform;
+  final String? quoteMessageId;
+  final String? quoteContent;
+  final int? resendStatus;
+  final String? resendUserId;
+  final String? resendSessionId;
   SendingMessage({
     required this.messageId,
     required this.conversationId,
@@ -14522,22 +14425,22 @@ class SendingMessage {
 }
 
 class SearchMessageDetailItem {
-  String messageId;
-  String userId;
-  String? userAvatarUrl;
-  String? userFullName;
-  MessageStatus status;
-  String type;
-  String? content;
-  DateTime createdAt;
-  String? mediaName;
-  String? appId;
-  bool? verified;
-  String? conversationOwnerId;
-  String? groupIconUrl;
-  ConversationCategory? category;
-  String? groupName;
-  String conversationId;
+  final String messageId;
+  final String userId;
+  final String? userAvatarUrl;
+  final String? userFullName;
+  final MessageStatus status;
+  final String type;
+  final String? content;
+  final DateTime createdAt;
+  final String? mediaName;
+  final String? appId;
+  final bool? verified;
+  final String? conversationOwnerId;
+  final String? groupIconUrl;
+  final ConversationCategory? category;
+  final String? groupName;
+  final String conversationId;
   SearchMessageDetailItem({
     required this.messageId,
     required this.userId,
@@ -14619,25 +14522,25 @@ class SearchMessageDetailItem {
 }
 
 class NotificationMessage {
-  String messageId;
-  String conversationId;
-  String senderId;
-  String? senderFullName;
-  String type;
-  String? content;
-  String? quoteContent;
-  MessageStatus status;
-  String? groupName;
-  DateTime? muteUntil;
-  DateTime? ownerMuteUntil;
-  String? ownerUserId;
-  String? ownerFullName;
-  DateTime createdAt;
-  ConversationCategory? category;
-  MessageAction? actionName;
-  UserRelationship? relationship;
-  String? participantFullName;
-  String? participantUserId;
+  final String messageId;
+  final String conversationId;
+  final String senderId;
+  final String? senderFullName;
+  final String type;
+  final String? content;
+  final String? quoteContent;
+  final MessageStatus status;
+  final String? groupName;
+  final DateTime? muteUntil;
+  final DateTime? ownerMuteUntil;
+  final String? ownerUserId;
+  final String? ownerFullName;
+  final DateTime createdAt;
+  final ConversationCategory? category;
+  final MessageAction? actionName;
+  final UserRelationship? relationship;
+  final String? participantFullName;
+  final String? participantUserId;
   NotificationMessage({
     required this.messageId,
     required this.conversationId,
@@ -14731,37 +14634,37 @@ class NotificationMessage {
 }
 
 class ConversationItem {
-  String conversationId;
-  String? groupIconUrl;
-  ConversationCategory? category;
-  String? draft;
-  String? groupName;
-  ConversationStatus status;
-  String? lastReadMessageId;
-  int? unseenMessageCount;
-  String? ownerId;
-  DateTime? pinTime;
-  DateTime? muteUntil;
-  String? avatarUrl;
-  String? name;
-  bool? ownerVerified;
-  String ownerIdentityNumber;
-  DateTime? ownerMuteUntil;
-  String? appId;
-  String? content;
-  String? contentType;
-  DateTime createdAt;
-  DateTime? lastMessageCreatedAt;
-  String? mediaUrl;
-  String? senderId;
-  MessageAction? actionName;
-  MessageStatus? messageStatus;
-  String? senderFullName;
-  String? snapshotType;
-  String? participantFullName;
-  String? participantUserId;
-  int mentionCount;
-  UserRelationship? relationship;
+  final String conversationId;
+  final String? groupIconUrl;
+  final ConversationCategory? category;
+  final String? draft;
+  final String? groupName;
+  final ConversationStatus status;
+  final String? lastReadMessageId;
+  final int? unseenMessageCount;
+  final String? ownerId;
+  final DateTime? pinTime;
+  final DateTime? muteUntil;
+  final String? avatarUrl;
+  final String? name;
+  final bool? ownerVerified;
+  final String ownerIdentityNumber;
+  final DateTime? ownerMuteUntil;
+  final String? appId;
+  final String? content;
+  final String? contentType;
+  final DateTime createdAt;
+  final DateTime? lastMessageCreatedAt;
+  final String? mediaUrl;
+  final String? senderId;
+  final MessageAction? actionName;
+  final MessageStatus? messageStatus;
+  final String? senderFullName;
+  final String? snapshotType;
+  final String? participantFullName;
+  final String? participantUserId;
+  final int mentionCount;
+  final UserRelationship? relationship;
   ConversationItem({
     required this.conversationId,
     this.groupIconUrl,
@@ -14904,8 +14807,8 @@ class ConversationItem {
 }
 
 class BaseUnseenConversationCountResult {
-  int unseenConversationCount;
-  int unseenMutedConversationCount;
+  final int unseenConversationCount;
+  final int unseenMutedConversationCount;
   BaseUnseenConversationCountResult({
     required this.unseenConversationCount,
     required this.unseenMutedConversationCount,
@@ -14931,19 +14834,19 @@ class BaseUnseenConversationCountResult {
 }
 
 class SearchConversationItem {
-  String conversationId;
-  String? groupIconUrl;
-  ConversationCategory? category;
-  String? groupName;
-  DateTime? pinTime;
-  DateTime? muteUntil;
-  String? ownerId;
-  DateTime? ownerMuteUntil;
-  String ownerIdentityNumber;
-  String? fullName;
-  String? avatarUrl;
-  bool? isVerified;
-  String? appId;
+  final String conversationId;
+  final String? groupIconUrl;
+  final ConversationCategory? category;
+  final String? groupName;
+  final DateTime? pinTime;
+  final DateTime? muteUntil;
+  final String? ownerId;
+  final DateTime? ownerMuteUntil;
+  final String ownerIdentityNumber;
+  final String? fullName;
+  final String? avatarUrl;
+  final bool? isVerified;
+  final String? appId;
   SearchConversationItem({
     required this.conversationId,
     this.groupIconUrl,
@@ -15013,15 +14916,15 @@ class SearchConversationItem {
 }
 
 class ConversationStorageUsage {
-  String conversationId;
-  String? ownerId;
-  ConversationCategory? category;
-  String? iconUrl;
-  String? name;
-  String identityNumber;
-  String? fullName;
-  String? avatarUrl;
-  bool? isVerified;
+  final String conversationId;
+  final String? ownerId;
+  final ConversationCategory? category;
+  final String? iconUrl;
+  final String? name;
+  final String identityNumber;
+  final String? fullName;
+  final String? avatarUrl;
+  final bool? isVerified;
   ConversationStorageUsage({
     required this.conversationId,
     this.ownerId,

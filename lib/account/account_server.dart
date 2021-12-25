@@ -30,6 +30,7 @@ import '../db/converter/utc_value_serializer.dart';
 import '../db/dao/job_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
+import '../db/extension/message.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
@@ -408,7 +409,7 @@ class AccountServer {
         messageId = job.blazeMessage!;
       }
 
-      final message = await database.messageDao.sendingMessage(messageId);
+      var message = await database.messageDao.sendingMessage(messageId);
       if (message == null) {
         await database.jobDao.deleteJobById(job.jobId);
         return;
@@ -422,7 +423,7 @@ class AccountServer {
             .map((e) => e.toJson(serializer: const UtcValueSerializer())
               ..remove('media_status'))
             .toList();
-        message.content = await jsonEncodeWithIsolate(json);
+        message = message.copyWith(content: await jsonEncodeWithIsolate(json));
       }
 
       MessageResult? result;
