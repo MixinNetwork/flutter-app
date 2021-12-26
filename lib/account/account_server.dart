@@ -1002,7 +1002,7 @@ class AccountServer {
     }
   }
 
-  Future<String?> downloadAttachment(db.MessageItem message) async {
+  Future<void> downloadAttachment(db.MessageItem message) async {
     AttachmentMessage? attachmentMessage;
     final m =
         await database.messageDao.findMessageByMessageId(message.messageId);
