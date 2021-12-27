@@ -242,7 +242,7 @@ class Blaze {
     }
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);
-      final blazeMessages = (response.data as List<dynamic>)
+      final blazeMessages = (response.data as List<dynamic>? ?? [])
           .map((itemJson) =>
               BlazeMessageData.fromJson(itemJson as Map<String, dynamic>))
           .toList();
