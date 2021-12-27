@@ -72,7 +72,10 @@ class _StickerStorePage extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const _StickerAlbumManagePage(),
+                    builder: (_) => ColoredBox(
+                      color: context.theme.popUp,
+                      child: const _StickerAlbumManagePage(),
+                    ),
                   ),
                 ),
               ),
@@ -158,10 +161,13 @@ class _Item extends HookWidget {
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => _StickerAlbumPage(
-                                  album: album,
-                                  stickers: stickers,
-                                  albumId: album.albumId,
+                                builder: (_) => ColoredBox(
+                                  color: context.theme.popUp,
+                                  child: _StickerAlbumPage(
+                                    album: album,
+                                    stickers: stickers,
+                                    albumId: album.albumId,
+                                  ),
                                 ),
                               ),
                             ),
