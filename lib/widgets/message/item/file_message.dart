@@ -21,6 +21,18 @@ class FileMessage extends HookWidget {
   }) : super(key: key);
 
   @override
+  Widget build(BuildContext context) => const MessageBubble(
+        outerTimeAndStatusWidget: MessageDatetimeAndStatus(),
+        child: MessageFile(),
+      );
+}
+
+class MessageFile extends HookWidget {
+  const MessageFile({
+    Key? key,
+  }) : super(key: key);
+
+  @override
   Widget build(BuildContext context) {
     final isTranscriptPage = useIsTranscriptPage();
     final mediaStatus =
@@ -45,93 +57,90 @@ class FileMessage extends HookWidget {
     final mediaSizeText =
         useMessageConverter(converter: (state) => filesize(state.mediaSize));
 
-    return MessageBubble(
-      outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
-      child: InteractiveDecoratedBox(
-        onTap: () async {
-          final message = context.message;
-          if (message.mediaStatus == MediaStatus.canceled) {
-            if (message.relationship == UserRelationship.me &&
-                message.mediaUrl?.isNotEmpty == true) {
-              await context.accountServer.reUploadAttachment(message);
-            } else {
-              await context.accountServer.downloadAttachment(message);
-            }
-          } else if (message.mediaStatus == MediaStatus.done &&
-              message.mediaUrl != null) {
-            if (message.mediaUrl?.isEmpty ?? true) return;
-            await saveAs(
-                context, context.accountServer, message, isTranscriptPage);
-          } else if (message.mediaStatus == MediaStatus.pending) {
-            await context.accountServer
-                .cancelProgressAttachmentJob(message.messageId);
+    return InteractiveDecoratedBox(
+      onTap: () async {
+        final message = context.message;
+        if (message.mediaStatus == MediaStatus.canceled) {
+          if (message.relationship == UserRelationship.me &&
+              message.mediaUrl?.isNotEmpty == true) {
+            await context.accountServer.reUploadAttachment(message);
+          } else {
+            await context.accountServer.downloadAttachment(message);
           }
-        },
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Builder(builder: (context) {
-              switch (mediaStatus) {
-                case MediaStatus.canceled:
-                  if (relationship == UserRelationship.me &&
-                      mediaUrl?.isNotEmpty == true) {
-                    return const StatusUpload();
-                  } else {
-                    return const StatusDownload();
-                  }
-                case MediaStatus.pending:
-                  return const StatusPending();
-                case MediaStatus.expired:
-                  return const StatusWarning();
-                default:
-                  break;
-              }
+        } else if (message.mediaStatus == MediaStatus.done &&
+            message.mediaUrl != null) {
+          if (message.mediaUrl?.isEmpty ?? true) return;
+          await saveAs(
+              context, context.accountServer, message, isTranscriptPage);
+        } else if (message.mediaStatus == MediaStatus.pending) {
+          await context.accountServer
+              .cancelProgressAttachmentJob(message.messageId);
+        }
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Builder(builder: (context) {
+            switch (mediaStatus) {
+              case MediaStatus.canceled:
+                if (relationship == UserRelationship.me &&
+                    mediaUrl?.isNotEmpty == true) {
+                  return const StatusUpload();
+                } else {
+                  return const StatusDownload();
+                }
+              case MediaStatus.pending:
+                return const StatusPending();
+              case MediaStatus.expired:
+                return const StatusWarning();
+              default:
+                break;
+            }
 
-              return Container(
-                height: 38,
-                width: 38,
-                decoration: BoxDecoration(
-                  color: context.theme.statusBackground,
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  extension,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: lightBrightnessThemeData.secondaryText,
-                  ),
-                ),
-              );
-            }),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    mediaName,
-                    style: TextStyle(
-                      fontSize: MessageItemWidget.secondaryFontSize,
-                      color: context.theme.text,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                  Text(
-                    mediaSizeText,
-                    style: TextStyle(
-                      fontSize: MessageItemWidget.tertiaryFontSize,
-                      color: context.theme.secondaryText,
-                    ),
-                    maxLines: 1,
-                  ),
-                ],
+            return Container(
+              height: 38,
+              width: 38,
+              decoration: BoxDecoration(
+                color: context.theme.statusBackground,
+                shape: BoxShape.circle,
               ),
+              alignment: Alignment.center,
+              child: Text(
+                extension,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: lightBrightnessThemeData.secondaryText,
+                ),
+              ),
+            );
+          }),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  mediaName,
+                  style: TextStyle(
+                    fontSize: MessageItemWidget.secondaryFontSize,
+                    color: context.theme.text,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                Text(
+                  mediaSizeText,
+                  style: TextStyle(
+                    fontSize: MessageItemWidget.tertiaryFontSize,
+                    color: context.theme.secondaryText,
+                  ),
+                  maxLines: 1,
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
