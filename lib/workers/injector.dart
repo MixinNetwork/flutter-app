@@ -229,4 +229,16 @@ class Injector {
       await handleCircle(circle, offset: offset ?? 0 + 500);
     }
   }
+
+
+  Future<List<db.User>?> updateUserByIdentityNumber(
+      String identityNumber) async {
+    try {
+      return await insertUpdateUsers(
+          [(await client.userApi.search(identityNumber)).data]);
+    } catch (e, s) {
+      w('updateUserByIdentityNumber error $e, stack: $s');
+    }
+  }
+
 }

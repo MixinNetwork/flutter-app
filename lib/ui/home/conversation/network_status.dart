@@ -13,7 +13,7 @@ class NetworkStatus extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final connectedState = useMemoizedStream(
-            () => context.accountServer.blaze.connectedStateStream
+            () => context.accountServer.connectedStateStream
                 .map((event) => event == ConnectedState.connected)
                 .distinct(),
             initialData: true)

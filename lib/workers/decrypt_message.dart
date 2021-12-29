@@ -40,7 +40,6 @@ import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../enum/system_circle_action.dart';
 import '../enum/system_user_action.dart';
-import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
@@ -58,7 +57,6 @@ class DecryptMessage extends Injector {
     this._sessionId,
     this._privateKey,
     this._attachmentUtil,
-    this.multiAuthCubit,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
@@ -71,18 +69,15 @@ class DecryptMessage extends Injector {
   late EncryptedProtocol _encryptedProtocol;
 
   final AttachmentUtil _attachmentUtil;
-  final MultiAuthCubit multiAuthCubit;
 
   final refreshKeyMap = <String, int?>{};
 
-  bool get _photoAutoDownload =>
-      multiAuthCubit.state.current?.photoAutoDownload ?? true;
+  // TODO update this when change.
+  bool photoAutoDownload = true;
 
-  bool get _videoAutoDownload =>
-      multiAuthCubit.state.current?.videoAutoDownload ?? true;
+  bool videoAutoDownload = true;
 
-  bool get _fileAutoDownload =>
-      multiAuthCubit.state.current?.fileAutoDownload ?? true;
+  bool fileAutoDownload = true;
 
   set conversationId(String? conversationId) {
     _conversationId = conversationId;
@@ -433,6 +428,7 @@ class DecryptMessage extends Injector {
           accountId,
         );
       });
+      // FIXME background isolate can not access this.
       unawaited(ShowPinMessageKeyValue.instance.show(data.conversationId));
     } else if (pinMessage.action == PinMessagePayloadAction.unpin) {
       await database.pinMessageDao.deleteByIds(pinMessage.messageIds);
@@ -556,7 +552,7 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      if (_photoAutoDownload) {
+      if (photoAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
           messageId: message.messageId,
           conversationId: message.conversationId,
@@ -597,7 +593,7 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      if (_videoAutoDownload) {
+      if (videoAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
           messageId: message.messageId,
           conversationId: message.conversationId,
@@ -634,7 +630,7 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      if (_fileAutoDownload) {
+      if (fileAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
           messageId: message.messageId,
           conversationId: message.conversationId,
@@ -1199,16 +1195,6 @@ class DecryptMessage extends Injector {
 
   void syncSession() {}
 
-  Future<List<db.User>?> updateUserByIdentityNumber(
-      String identityNumber) async {
-    try {
-      return await insertUpdateUsers(
-          [(await client.userApi.search(identityNumber)).data]);
-    } catch (e, s) {
-      w('updateUserByIdentityNumber error $e, stack: $s');
-    }
-  }
-
   Future<Message?>? processTranscriptMessage(
       BlazeMessageData data, List<dynamic> list) async {
     final transcripts = list
@@ -1329,9 +1315,9 @@ class DecryptMessage extends Injector {
 
         needDownload = needDownload || true;
 
-        if (category.isImage && !_photoAutoDownload) return;
-        if (category.isVideo && !_videoAutoDownload) return;
-        if (category.isData && !_fileAutoDownload) return;
+        if (category.isImage && !photoAutoDownload) return;
+        if (category.isVideo && !videoAutoDownload) return;
+        if (category.isData && !fileAutoDownload) return;
 
         await _attachmentUtil.downloadAttachment(
           messageId: transcript.messageId,
