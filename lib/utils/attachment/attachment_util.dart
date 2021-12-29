@@ -255,8 +255,9 @@ class AttachmentUtil extends ChangeNotifier {
     } catch (er) {
       e(er.toString());
       if (file.existsSync()) await file.delete();
+      await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
     } finally {
-      await cancelProgressAttachmentJob(messageId);
+      await _removeAttachmentJob(messageId);
     }
   }
 
@@ -267,12 +268,7 @@ class AttachmentUtil extends ChangeNotifier {
     String? transcriptId,
   }) async {
     assert(_hasAttachmentJob(messageId));
-    if (transcriptId == null) {
-      await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
-    } else {
-      await _transcriptMessageDao.updateMediaStatus(
-          MediaStatus.pending, transcriptId, messageId);
-    }
+    await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
 
     try {
       final response = await _client.attachmentApi.postAttachment();
@@ -298,12 +294,7 @@ class AttachmentUtil extends ChangeNotifier {
 
       final digest = await attachmentUploadJob
           .upload((int count, int total) => notifyListeners());
-      if (transcriptId == null) {
-        await _messageDao.updateMediaStatus(messageId, MediaStatus.done);
-      } else {
-        await _transcriptMessageDao.updateMediaStatus(
-            MediaStatus.pending, transcriptId, messageId);
-      }
+      await _messageDao.updateMediaStatus(messageId, MediaStatus.done);
       return AttachmentResult(
           response.data.attachmentId,
           category.isSignal || category.isEncrypted
@@ -315,9 +306,10 @@ class AttachmentUtil extends ChangeNotifier {
           response.data.createdAt);
     } catch (e, s) {
       w('upload failed error: $e, $s');
+      await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
       return null;
     } finally {
-      await cancelProgressAttachmentJob(messageId);
+      await _removeAttachmentJob(messageId);
     }
   }
 
@@ -435,6 +427,12 @@ class AttachmentUtil extends ChangeNotifier {
     if (job is _AttachmentDownloadJob) {
       DownloadKeyValue.instance.addMessageId(messageId);
     }
+  }
+
+  Future<void> _removeAttachmentJob(String messageId) async {
+    await DownloadKeyValue.instance.removeMessageId(messageId);
+    _attachmentJob[messageId]?.cancel();
+    _attachmentJob.remove(messageId);
   }
 
   Future<bool> cancelProgressAttachmentJob(String messageId) async {
