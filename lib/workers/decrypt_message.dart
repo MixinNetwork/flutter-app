@@ -557,13 +557,9 @@ class DecryptMessage extends Injector {
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
       if (_photoAutoDownload) {
-        unawaited(_attachmentUtil.downloadAttachment(
-          messageId: message.messageId,
-          conversationId: message.conversationId,
-          category: message.category,
-          content: message.content!,
-          attachmentMessage: attachment,
-        ));
+        unawaited(
+          _attachmentUtil.downloadAttachment(messageId: message.messageId),
+        );
       }
     } else if (data.category.isVideo) {
       final String plain;
@@ -598,13 +594,9 @@ class DecryptMessage extends Injector {
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
       if (_videoAutoDownload) {
-        unawaited(_attachmentUtil.downloadAttachment(
-          messageId: message.messageId,
-          conversationId: message.conversationId,
-          category: message.category,
-          content: message.content!,
-          attachmentMessage: attachment,
-        ));
+        unawaited(
+          _attachmentUtil.downloadAttachment(messageId: message.messageId),
+        );
       }
     } else if (data.category.isData) {
       final String plain;
@@ -635,13 +627,9 @@ class DecryptMessage extends Injector {
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
       if (_fileAutoDownload) {
-        unawaited(_attachmentUtil.downloadAttachment(
-          messageId: message.messageId,
-          conversationId: message.conversationId,
-          category: message.category,
-          content: message.content!,
-          attachmentMessage: attachment,
-        ));
+        unawaited(
+          _attachmentUtil.downloadAttachment(messageId: message.messageId),
+        );
       }
     } else if (data.category.isAudio) {
       final String plain;
@@ -673,13 +661,9 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      unawaited(_attachmentUtil.downloadAttachment(
-        messageId: message.messageId,
-        conversationId: message.conversationId,
-        category: message.category,
-        content: message.content!,
-        attachmentMessage: attachment,
-      ));
+      unawaited(
+        _attachmentUtil.downloadAttachment(messageId: message.messageId),
+      );
     } else if (data.category.isSticker) {
       final String plain;
       if (data.category.isEncrypted) {
@@ -1335,9 +1319,6 @@ class DecryptMessage extends Injector {
 
         await _attachmentUtil.downloadAttachment(
           messageId: transcript.messageId,
-          content: transcript.content!,
-          conversationId: data.conversationId,
-          category: transcript.category,
         );
       });
 
