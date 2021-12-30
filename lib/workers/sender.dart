@@ -21,7 +21,6 @@ import '../db/mixin_database.dart' as db;
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../utils/extension/extension.dart';
-import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 
 class Sender {
@@ -385,7 +384,7 @@ class Sender {
     final plainText = PlainJsonMessage(kNoKey, null, null, null, null, null)
         .toJson()
         .toString();
-    final encoded = base64Encode(await utf8EncodeWithIsolate(plainText));
+    final encoded = base64Encode(utf8.encode(plainText));
     final blazeParam = BlazeMessageParam(
       conversationId: conversationId,
       recipientId: recipientId,

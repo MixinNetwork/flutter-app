@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:rxdart/rxdart.dart';
@@ -7,7 +8,6 @@ import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/load_balancer_utils.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../database_event_bus.dart';
 import '../mixin_database.dart';
@@ -184,8 +184,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       ftsContent = message.name;
     } else if (message.category == MessageCategory.appCard) {
       final appCard = AppCardData.fromJson(
-          await jsonDecodeWithIsolate(message.content!)
-              as Map<String, dynamic>);
+          jsonDecode(message.content!) as Map<String, dynamic>);
       ftsContent = '${appCard.title} ${appCard.description}';
     }
     if (ftsContent != null) {

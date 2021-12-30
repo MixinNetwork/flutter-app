@@ -32,7 +32,6 @@ import '../enum/message_status.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
-import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 import '../workers/decrypt_message.dart';
@@ -245,8 +244,7 @@ class FloodMessageProcessRunner {
     final ack = await Future.wait(
       jobs.map(
         (e) async {
-          final map = await jsonDecodeWithIsolate(e.blazeMessage!)
-              as Map<String, dynamic>;
+          final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
           return BlazeAckMessage(
             messageId: map['message_id'] as String,
             status: map['status'] as String,
@@ -290,8 +288,7 @@ class FloodMessageProcessRunner {
       String? recipientId;
       var silent = false;
       try {
-        final json = await jsonDecodeWithIsolate(job.blazeMessage!)
-            as Map<String, dynamic>;
+        final json = jsonDecode(job.blazeMessage!) as Map<String, dynamic>;
         messageId = json[JobDao.messageIdKey] as String;
         recipientId = json[JobDao.recipientIdKey] as String?;
         silent = json[JobDao.silentKey] as bool;
@@ -313,7 +310,7 @@ class FloodMessageProcessRunner {
             .map((e) => e.toJson(serializer: const UtcValueSerializer())
               ..remove('media_status'))
             .toList();
-        message = message.copyWith(content: await jsonEncodeWithIsolate(json));
+        message = message.copyWith(content: jsonEncode(json));
       }
 
       MessageResult? result;
@@ -325,8 +322,8 @@ class FloodMessageProcessRunner {
         if (message.category == MessageCategory.appCard ||
             message.category.isPost ||
             message.category.isText) {
-          final list = await utf8EncodeWithIsolate(content!);
-          content = await base64EncodeWithIsolate(list);
+          final list = utf8.encode(content!);
+          content = base64Encode(list);
         }
         final blazeMessage = _createBlazeMessage(
           message,
@@ -358,23 +355,21 @@ class FloodMessageProcessRunner {
             message.category.isSticker ||
             message.category.isContact ||
             message.category.isLive) {
-          plaintext = await base64DecodeWithIsolate(message.content!);
+          plaintext = base64Decode(message.content!);
         } else {
-          plaintext = await utf8EncodeWithIsolate(message.content!);
+          plaintext = utf8.encode(message.content!);
         }
         final content = _encryptedProtocol.encryptMessage(
             privateKey,
             plaintext,
-            await base64DecodeWithIsolate(
-                base64.normalize(participantSessionKey.publicKey!)),
+            base64Decode(base64.normalize(participantSessionKey.publicKey!)),
             participantSessionKey.sessionId,
-            await base64DecodeWithIsolate(
-                base64.normalize(otherSessionKey.publicKey!)),
+            base64Decode(base64.normalize(otherSessionKey.publicKey!)),
             otherSessionKey.sessionId);
 
         final blazeMessage = _createBlazeMessage(
           message,
-          await base64EncodeWithIsolate(content),
+          base64Encode(content),
           silent: silent,
         );
         result = await _sender.deliver(blazeMessage);
@@ -400,8 +395,8 @@ class FloodMessageProcessRunner {
 
   Future<void> _runRecallJob(List<db.Job> jobs) async {
     await Future.forEach(jobs, (db.Job e) async {
-      final list = await utf8EncodeWithIsolate(e.blazeMessage!);
-      final data = await base64EncodeWithIsolate(list);
+      final list = utf8.encode(e.blazeMessage!);
+      final data = base64Encode(list);
 
       final blazeParam = BlazeMessageParam(
         conversationId: e.conversationId,
@@ -424,8 +419,8 @@ class FloodMessageProcessRunner {
 
   Future<void> _runPinJob(List<db.Job> jobs) async {
     await Future.forEach(jobs, (db.Job e) async {
-      final list = await utf8EncodeWithIsolate(e.blazeMessage!);
-      final data = await base64EncodeWithIsolate(list);
+      final list = utf8.encode(e.blazeMessage!);
+      final data = base64Encode(list);
 
       final blazeParam = BlazeMessageParam(
         conversationId: e.conversationId,
@@ -555,23 +550,19 @@ class FloodMessageProcessRunner {
     if (conversationId == null) {
       return;
     }
-    final ack = await Future.wait(
-      jobs.map(
-        (e) async {
-          final map = await jsonDecodeWithIsolate(e.blazeMessage!)
-              as Map<String, dynamic>;
-          return BlazeAckMessage(
-            messageId: map['message_id'] as String,
-            status: map['status'] as String,
-          );
-        },
-      ),
-    );
+    final ack = jobs.map(
+      (e) {
+        final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
+        return BlazeAckMessage(
+          messageId: map['message_id'] as String,
+          status: map['status'] as String,
+        );
+      },
+    ).toList();
     final jobIds = jobs.map((e) => e.jobId).toList();
     final plainText = PlainJsonMessage(
         kAcknowledgeMessageReceipts, null, null, null, null, ack);
-    final encode = await base64EncodeWithIsolate(
-        await utf8EncodeWithIsolate(await jsonEncodeWithIsolate(plainText)));
+    final encode = base64Encode(utf8.encode(jsonEncode(plainText)));
     // TODO check if safety to use a primary session.
     // final primarySessionId = AccountKeyValue.instance.primarySessionId;
     final bm = createParamBlazeMessage(createPlainJsonParam(
