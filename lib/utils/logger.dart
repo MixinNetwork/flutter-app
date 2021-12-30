@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:flutter/foundation.dart';
@@ -98,14 +99,12 @@ void wtf(String message) {
   _print(message, _LogLevel.wtf);
 }
 
-LogFileManager? logFileManager;
-
 void _print(String message, _LogLevel level) {
   final logToFile = kLogMode || level.index > _LogLevel.debug.index;
   if (logToFile) {
     final now = DateTime.now();
     final date = DateFormat('yyyy-MM-dd HH:mm:ss.SSS').format(now);
-    logFileManager?.write('$date ${level.prefix} $message');
+    LogFileManager.instance?.write('$date ${level.prefix} $message');
   }
   if (!kLogMode) return;
   // ignore: avoid_print
@@ -113,18 +112,33 @@ void _print(String message, _LogLevel level) {
 }
 
 class LogFileManager {
-  LogFileManager(String logDir) {
+  LogFileManager._(this._sendPort);
+
+  static LogFileManager? _instance;
+
+  static LogFileManager? get instance => _instance ??= _fromOtherIsolate();
+
+  static const _logPortName = 'one.mixin.logger.send_port';
+
+  static LogFileManager? _fromOtherIsolate() {
+    final sendPort = IsolateNameServer.lookupPortByName(_logPortName);
+    if (sendPort == null) {
+      return null;
+    }
+    return LogFileManager._(sendPort);
+  }
+
+  static Future<void> init(String logDir) async {
     final receiver = ReceivePort();
-    _isolate.complete(Isolate.spawn(
+    await Isolate.spawn(
       _logIsolate,
       [receiver.sendPort, logDir],
-    ));
-    receiver.listen((message) {
-      if (message is SendPort) {
-        _messageSendPort.complete(message);
-      }
-    });
+    );
+    final sendPort = await receiver.first as SendPort;
+    IsolateNameServer.registerPortWithName(sendPort, _logPortName);
   }
+
+  final SendPort _sendPort;
 
   static Future<void> _logIsolate(List<dynamic> args) async {
     final responsePort = args[0] as SendPort;
@@ -139,19 +153,8 @@ class LogFileManager {
     responsePort.send(messageReceiver.sendPort);
   }
 
-  final _messageSendPort = Completer<SendPort>();
-
-  final _isolate = Completer<Isolate>();
-
   Future<void> write(String message) async {
-    final sendPort = await _messageSendPort.future;
-    sendPort.send(message);
-  }
-
-  void dispose() {
-    _isolate.future.then((isolate) {
-      isolate.kill();
-    });
+    _sendPort.send(message);
   }
 }
 
