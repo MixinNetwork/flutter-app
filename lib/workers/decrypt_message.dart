@@ -74,7 +74,6 @@ class DecryptMessage extends Injector {
 
   final refreshKeyMap = <String, int?>{};
 
-  // TODO update this when change.
   bool photoAutoDownload = true;
 
   bool videoAutoDownload = true;

@@ -59,19 +59,53 @@ class DecryptMessageInitParams {
   final PackageInfo packageInfo;
 }
 
+class IsolateEvent {
+  const IsolateEvent(this.name, [this.argument]);
+
+  static const kChangeMessageAttachmentDownloadConfig =
+      'message_attachment_download_config';
+  static const kMessageIsolateReady = 'message_isolate_ready';
+  static const kReconnectBlaze = 'reconnect_blaze';
+  static const kDisconnectBlazeTime = 'disconnect_blaze_time';
+  static const kNotifyBlazeStateChanged = 'notify_blaze_state_changed';
+  static const kUpdateSelectedConversation = 'update_selected_conversation';
+  static const kOnDbEventBus = 'on_db_event_bus';
+  static const kOnApiRequestError = 'on_api_request_error';
+
+  final String name;
+  final dynamic argument;
+}
+
+class MessageAttachmentDownloadConfig {
+  MessageAttachmentDownloadConfig({
+    required this.photoAutoDownload,
+    required this.videoAutoDownload,
+    required this.fileAutoDownload,
+  });
+
+  final bool photoAutoDownload;
+  final bool videoAutoDownload;
+  final bool fileAutoDownload;
+}
+
 Future<void> startFloodProcessIsolate(DecryptMessageInitParams params) async {
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
-  final isolateChannel = IsolateChannel.connectSend(params.sendPort);
+  final isolateChannel =
+      IsolateChannel<IsolateEvent>.connectSend(params.sendPort);
   final floodProcessRunner = FloodMessageProcessRunner(
     identityNumber: params.identityNumber,
     userId: params.userId,
     sessionId: params.sessionId,
     privateKeyStr: params.privateKey,
     primarySessionId: params.primarySessionId,
+    isolateChannel: isolateChannel,
   );
-  isolateChannel.stream.listen((event) {});
+  isolateChannel.stream.listen(floodProcessRunner.onEvent);
   await floodProcessRunner.init(params);
   floodProcessRunner._start();
+  isolateChannel.sink.add(
+    const IsolateEvent(IsolateEvent.kMessageIsolateReady),
+  );
 }
 
 class FloodMessageProcessRunner {
@@ -81,6 +115,7 @@ class FloodMessageProcessRunner {
     required this.sessionId,
     required this.privateKeyStr,
     required this.primarySessionId,
+    required this.isolateChannel,
   }) : privateKey = PrivateKey(base64Decode(privateKeyStr));
 
   final String identityNumber;
@@ -89,6 +124,8 @@ class FloodMessageProcessRunner {
   final String privateKeyStr;
   final PrivateKey privateKey;
   final String? primarySessionId;
+
+  final IsolateChannel<IsolateEvent> isolateChannel;
 
   late DecryptMessage _decryptMessage;
 
@@ -106,6 +143,13 @@ class FloodMessageProcessRunner {
 
   Future<void> init(DecryptMessageInitParams initParams) async {
     database = Database(await connectToDatabase(identityNumber));
+    jobSubscribers.add(
+      database.mixinDatabase.eventBus.stream.listen((event) {
+        isolateChannel.sink.add(
+          IsolateEvent(IsolateEvent.kOnDbEventBus, event),
+        );
+      }),
+    );
 
     final tenSecond = const Duration(seconds: 10).inMilliseconds;
     client = Client(
@@ -125,7 +169,9 @@ class FloodMessageProcessRunner {
             DioError e,
             ErrorInterceptorHandler handler,
           ) async {
-            // TODO send to main isolate.
+            isolateChannel.sink.add(
+              IsolateEvent(IsolateEvent.kOnApiRequestError, e),
+            );
             handler.next(e);
           },
         ),
@@ -148,6 +194,12 @@ class FloodMessageProcessRunner {
       client,
       initParams.packageInfo,
     );
+
+    blaze.connectedStateStream.listen((event) {
+      isolateChannel.sink.add(
+        IsolateEvent(IsolateEvent.kNotifyBlazeStateChanged, event),
+      );
+    });
 
     signalProtocol = SignalProtocol(userId);
     await signalProtocol.init();
@@ -578,6 +630,31 @@ class FloodMessageProcessRunner {
     }
 
     await _runSessionAckJob();
+  }
+
+  void onEvent(IsolateEvent event) {
+    switch (event.name) {
+      case IsolateEvent.kChangeMessageAttachmentDownloadConfig:
+        final config = event.argument as MessageAttachmentDownloadConfig;
+        _decryptMessage
+          ..fileAutoDownload = config.fileAutoDownload
+          ..photoAutoDownload = config.photoAutoDownload
+          ..videoAutoDownload = config.videoAutoDownload;
+        break;
+      case IsolateEvent.kUpdateSelectedConversation:
+        final conversationId = event.argument as String;
+        _decryptMessage.conversationId = conversationId;
+        break;
+      case IsolateEvent.kDisconnectBlazeTime:
+        blaze.waitSyncTime();
+        break;
+      case IsolateEvent.kReconnectBlaze:
+        blaze.reconnect();
+        break;
+      default:
+        assert(false, 'Unknown event: ${event.name}');
+        return;
+    }
   }
 
   void dispose() {

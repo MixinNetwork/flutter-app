@@ -10,6 +10,7 @@ import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
+import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
@@ -21,6 +22,7 @@ import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
+import '../db/database_event_bus.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
@@ -84,23 +86,7 @@ class AccountServer {
             DioError e,
             ErrorInterceptorHandler handler,
           ) async {
-            if (e is MixinApiError &&
-                (e.error as MixinError).code == authentication) {
-              final serverTime = int.tryParse(
-                  e.response?.headers.value('x-server-time') ?? '');
-              if (serverTime != null) {
-                final time =
-                    DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
-                final difference = time.difference(DateTime.now());
-                if (difference.inMinutes.abs() > 5) {
-                  _notifyBlazeWaitSyncTime();
-                  handler.next(e);
-                  return;
-                }
-              }
-              await signOutAndClear();
-              multiAuthCubit.signOut();
-            }
+            await _onClientRequestError(e);
             handler.next(e);
           },
         ),
@@ -128,6 +114,23 @@ class AccountServer {
     appActiveListener.addListener(onActive);
   }
 
+  Future<void> _onClientRequestError(DioError e) async {
+    if (e is MixinApiError && (e.error as MixinError).code == authentication) {
+      final serverTime =
+          int.tryParse(e.response?.headers.value('x-server-time') ?? '');
+      if (serverTime != null) {
+        final time = DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
+        final difference = time.difference(DateTime.now());
+        if (difference.inMinutes.abs() > 5) {
+          _notifyBlazeWaitSyncTime();
+          return;
+        }
+      }
+      await signOutAndClear();
+      multiAuthCubit.signOut();
+    }
+  }
+
   void onActive() {
     if (!isAppActive || _activeConversationId == null) return;
     markRead(_activeConversationId!);
@@ -135,7 +138,8 @@ class AccountServer {
 
   Future<void> _initDatabase(
       String privateKey, MultiAuthCubit multiAuthCubit) async {
-    database = Database(await db.connectToDatabase(identityNumber, fromMainIsolate: true));
+    database = Database(
+        await db.connectToDatabase(identityNumber, fromMainIsolate: true));
     attachmentUtil = AttachmentUtil.init(
       client,
       database.messageDao,
@@ -160,19 +164,24 @@ class AccountServer {
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil attachmentUtil;
 
+  late IsolateChannel<IsolateEvent> _isolateChannel;
+
   final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
       BehaviorSubject<ConnectedState>();
 
-  // TODO
   ValueStream<ConnectedState> get connectedStateStream =>
       _connectedStateBehaviorSubject;
 
   Future<void> reconnectBlaze() async {
-    // TODO
+    _isolateChannel.sink.add(
+      const IsolateEvent(IsolateEvent.kReconnectBlaze),
+    );
   }
 
   void _notifyBlazeWaitSyncTime() {
-    // TODO
+    _isolateChannel.sink.add(
+      const IsolateEvent(IsolateEvent.kDisconnectBlazeTime),
+    );
   }
 
   String? _activeConversationId;
@@ -181,8 +190,8 @@ class AccountServer {
 
   Future<void> start() async {
     final receivePort = ReceivePort();
-    final channel = IsolateChannel.connectReceive(receivePort);
-    await Isolate.spawn(
+    _isolateChannel = IsolateChannel<IsolateEvent>.connectReceive(receivePort);
+    final isolate = await Isolate.spawn(
         startFloodProcessIsolate,
         DecryptMessageInitParams(
           sendPort: receivePort.sendPort,
@@ -194,6 +203,51 @@ class AccountServer {
           primarySessionId: AccountKeyValue.instance.primarySessionId,
           packageInfo: await packageInfoFuture,
         ));
+    jobSubscribers
+      ..add(isolate.errors.listen((error) {
+        final remoteError = error as RemoteError;
+        e('RemoteError: $remoteError ${remoteError.stackTrace}');
+      }))
+      ..add(_isolateChannel.stream.listen((event) {
+        switch (event.name) {
+          case IsolateEvent.kMessageIsolateReady:
+            _onMessageProcessServiceReady();
+            break;
+          case IsolateEvent.kNotifyBlazeStateChanged:
+            _connectedStateBehaviorSubject
+                .add(event.argument as ConnectedState);
+            break;
+          case IsolateEvent.kOnDbEventBus:
+            final args = event.argument as Tuple2<DatabaseEvent, dynamic>;
+            database.mixinDatabase.eventBus.send(args.item1, args.item2);
+            break;
+          case IsolateEvent.kOnApiRequestError:
+            _onClientRequestError(event.argument as DioError);
+            break;
+          default:
+            assert(false, 'unexpected event: $event');
+            break;
+        }
+      }));
+  }
+
+  void _onMessageProcessServiceReady() {
+    jobSubscribers.add(multiAuthCubit.stream
+        .startWith(multiAuthCubit.state)
+        .distinct((previous, next) =>
+            previous.currentFileAutoDownload == next.currentFileAutoDownload &&
+            previous.currentVideoAutoDownload ==
+                next.currentVideoAutoDownload &&
+            previous.currentPhotoAutoDownload == next.currentPhotoAutoDownload)
+        .listen((event) {
+      _isolateChannel.sink.add(IsolateEvent(
+          IsolateEvent.kChangeMessageAttachmentDownloadConfig,
+          MessageAttachmentDownloadConfig(
+            fileAutoDownload: event.currentFileAutoDownload,
+            videoAutoDownload: event.currentVideoAutoDownload,
+            photoAutoDownload: event.currentPhotoAutoDownload,
+          )));
+    }));
   }
 
   Future<void> signOutAndClear() async {
@@ -346,9 +400,11 @@ class AccountServer {
       );
 
   void selectConversation(String? conversationId) {
-    // TODO : implement selectConversation
-    // _decryptMessage.conversationId = conversationId;
     _activeConversationId = conversationId;
+    _isolateChannel.sink.add(IsolateEvent(
+      IsolateEvent.kUpdateSelectedConversation,
+      conversationId,
+    ));
   }
 
   Future<void> markRead(String conversationId) async {
