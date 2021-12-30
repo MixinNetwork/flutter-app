@@ -164,9 +164,9 @@ class MixinDatabase extends _$MixinDatabase {
             await m.drop(Trigger('', 'conversation_last_message_update'));
           }
           if (from <= 8) {
-            await m.addColumn(stickerAlbums, stickerAlbums.orderedAt);
-            await m.addColumn(stickerAlbums, stickerAlbums.banner);
-            await m.addColumn(stickerAlbums, stickerAlbums.added);
+            // await m.addColumn(stickerAlbums, stickerAlbums.orderedAt);
+            // await m.addColumn(stickerAlbums, stickerAlbums.banner);
+            // await m.addColumn(stickerAlbums, stickerAlbums.added);
           }
         },
       );

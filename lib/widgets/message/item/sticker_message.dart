@@ -82,7 +82,7 @@ class StickerMessageWidget extends HookWidget {
           if (assetUrl == null) return placeholder;
 
           return InteractiveDecoratedBox(
-            onTap: () => showStickerAlbumPageDialog(context, stickerId),
+            onTap: () => showStickerPageDialog(context, stickerId),
             child: StickerItem(
               assetUrl: assetUrl,
               assetType: assetType,

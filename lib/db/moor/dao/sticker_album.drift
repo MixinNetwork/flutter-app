@@ -1,2 +1,11 @@
 import '../mixin.drift';
 
+albumByStickerId:
+SELECT sa.*
+FROM   sticker_albums sa
+       INNER JOIN sticker_relationships sr
+               ON sr.album_id = sa.album_id
+WHERE  sr.sticker_id = :stickerId
+LIMIT 1;
+
+

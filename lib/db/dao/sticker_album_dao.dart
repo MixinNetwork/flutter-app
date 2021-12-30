@@ -61,4 +61,7 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
         ..limit(1))
       .map((row) => db.stickerAlbums.createdAt.converter
           .mapToDart(row.read(db.stickerAlbums.createdAt)));
+
+  Selectable<StickerAlbum> albumByStickerId(String stickerId) =>
+      db.albumByStickerId(stickerId);
 }

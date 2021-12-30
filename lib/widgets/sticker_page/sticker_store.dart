@@ -36,22 +36,31 @@ Future<void> showStickerStorePageDialog(
       ),
     );
 
-Future<void> showStickerAlbumPageDialog(
+Future<void> showStickerPageDialog(
   BuildContext context,
   String? stickerId,
 ) async {
   if (stickerId == null) return;
 
-  final sticker =
-      await context.database.stickerDao.sticker(stickerId).getSingleOrNull();
+  final album = await context.database.stickerAlbumDao
+      .albumByStickerId(stickerId)
+      .getSingleOrNull();
 
-  if (sticker?.albumId == null) return;
+  if (album?.albumId.isNotEmpty == true && album?.category == 'SYSTEM') {
+    return showMixinDialog(
+      context: context,
+      child: ConstrainedBox(
+        constraints: BoxConstraints.loose(const Size(480, 600)),
+        child: _StickerAlbumPage(albumId: album!.albumId),
+      ),
+    );
+  }
 
   return showMixinDialog(
     context: context,
     child: ConstrainedBox(
       constraints: BoxConstraints.loose(const Size(480, 600)),
-      child: _StickerAlbumPage(albumId: sticker!.albumId!),
+      child: _StickerPage(stickerId: stickerId),
     ),
   );
 }
@@ -265,7 +274,7 @@ class _StickerAlbumDetail extends HookWidget {
     final album = useMemoizedStream(
           () => context.database.stickerAlbumDao
               .album(albumId)
-              .watchSingleThrottle(kSlowThrottleDuration),
+              .watchSingleThrottle(kVerySlowThrottleDuration),
           keys: [albumId],
         ).data ??
         this.album;
@@ -467,6 +476,57 @@ class _StickerAlbumManagePage extends HookWidget {
                 ),
               );
             },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StickerPage extends HookWidget {
+  const _StickerPage({
+    Key? key,
+    required this.stickerId,
+  }) : super(key: key);
+
+  final String stickerId;
+
+  @override
+  Widget build(BuildContext context) {
+    final sticker = useMemoizedStream(
+        () => context.database.stickerDao
+            .sticker(stickerId)
+            .watchSingleThrottle(kVerySlowThrottleDuration),
+        keys: [stickerId]).data;
+
+    return Column(
+      children: [
+        MixinAppBar(
+          backgroundColor: Colors.transparent,
+          leading: const SizedBox(),
+          actions: [
+            MixinCloseButton(
+              onTap: () =>
+                  Navigator.maybeOf(context, rootNavigator: true)?.pop(),
+            ),
+          ],
+        ),
+        AspectRatio(
+          aspectRatio: 1,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 70, vertical: 56),
+            color: context.theme.background,
+            alignment: Alignment.center,
+            child: SizedBox(
+              height: 72,
+              width: 72,
+              child: sticker?.assetUrl.isNotEmpty == true
+                  ? StickerItem(
+                      assetUrl: sticker?.assetUrl ?? '',
+                      assetType: sticker?.assetType ?? '',
+                    )
+                  : const SizedBox(),
+            ),
           ),
         ),
       ],

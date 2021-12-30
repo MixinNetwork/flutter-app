@@ -12297,6 +12297,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<StickerAlbum> albumByStickerId(String stickerId) {
+    return customSelect(
+        'SELECT sa.* FROM sticker_albums AS sa INNER JOIN sticker_relationships AS sr ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 LIMIT 1',
+        variables: [
+          Variable<String>(stickerId)
+        ],
+        readsFrom: {
+          stickerAlbums,
+          stickerRelationships,
+        }).map(stickerAlbums.mapFromRow);
+  }
+
   Selectable<Sticker> recentUsedStickers() {
     return customSelect(
         'SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20',
