@@ -56,6 +56,7 @@ class DecryptMessage extends Injector {
     this._sessionId,
     this._privateKey,
     this._attachmentUtil,
+    this.identityNumber,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
@@ -68,6 +69,8 @@ class DecryptMessage extends Injector {
   late EncryptedProtocol _encryptedProtocol;
 
   final AttachmentUtil _attachmentUtil;
+
+  final String identityNumber;
 
   final refreshKeyMap = <String, int?>{};
 
@@ -518,8 +521,9 @@ class DecryptMessage extends Injector {
         message.conversationId,
         data.senderId,
         _quoteContent,
+        accountId,
+        identityNumber,
       );
-
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isImage) {
       final String plain;
@@ -1048,6 +1052,8 @@ class DecryptMessage extends Injector {
         data.conversationId,
         data.senderId,
         null,
+        accountId,
+        identityNumber,
       );
       await database.messageDao
           .updateMessageContentAndStatus(messageId, plaintext, data.status);

@@ -140,32 +140,58 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
+  final Map<String, void Function()> _conversationUnseenTaskRunner = {};
+
+  // TODO maybe more effective?
+  void _updateConversationUnseenCount(
+    Message message,
+    String currentUserId,
+  ) {
+    Future<void> _update(Message message) async {
+      final unseenMessageCount = await _getUnseenMessageCount(
+        userId: currentUserId,
+        conversationId: message.conversationId,
+      );
+      final unseen = message.userId != currentUserId &&
+              [MessageStatus.sent, MessageStatus.delivered]
+                  .contains(message.status)
+          ? 1
+          : 0;
+      await db.conversationDao.updateLastMessageId(
+        message.conversationId,
+        message.messageId,
+        message.createdAt,
+        unseenMessageCount + unseen,
+      );
+    }
+
+    if (_conversationUnseenTaskRunner[message.conversationId] != null) {
+      _conversationUnseenTaskRunner[message.conversationId] =
+          () => _update(message);
+      return;
+    } else {
+      _conversationUnseenTaskRunner[message.conversationId] =
+          () => _update(message);
+      Future.delayed(const Duration(milliseconds: 500)).then((value) {
+        final runner =
+            _conversationUnseenTaskRunner.remove(message.conversationId);
+        runner?.call();
+      });
+    }
+  }
+
   Future<int> insert(Message message, String currentUserId,
       [bool? silent = false]) async {
-    final unseenMessageCount = await _getUnseenMessageCount(
-      userId: currentUserId,
-      conversationId: message.conversationId,
-    );
-
-    final unseen = message.userId != currentUserId &&
-            [MessageStatus.sent, MessageStatus.delivered]
-                .contains(message.status)
-        ? 1
-        : 0;
-
     final result = await db.transaction(() async {
       final futures = <Future>[
         into(db.messages).insertOnConflictUpdate(message),
         _insertMessageFts(message),
-        db.conversationDao.updateLastMessageId(
-          message.conversationId,
-          message.messageId,
-          message.createdAt,
-          unseenMessageCount + unseen,
-        ),
       ];
       return (await Future.wait(futures))[0] as int;
     });
+
+    _updateConversationUnseenCount(message, currentUserId);
+
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [message.messageId]);
     if (!(silent ?? false)) {
       db.eventBus.send(DatabaseEvent.notification, message.messageId);

@@ -170,6 +170,7 @@ class FloodMessageProcessRunner {
       sessionId,
       privateKey,
       attachmentUtil,
+      identityNumber,
     );
   }
 
@@ -218,7 +219,6 @@ class FloodMessageProcessRunner {
   }
 
   Future<void> _runProcessFloodJob() async {
-    i('_runProcessFloodJob');
     final floodMessages =
         await database.floodMessageDao.findFloodMessage().get();
     if (floodMessages.isEmpty) {
@@ -232,7 +232,7 @@ class FloodMessageProcessRunner {
       await _decryptMessage.process(message);
     }
     if (stopwatch != null) {
-      d('process execution time ${floodMessages.length} : ${stopwatch.elapsedMilliseconds}');
+      i('processMessage(${floodMessages.length}): ${stopwatch.elapsedMilliseconds}');
     }
     await _runProcessFloodJob();
   }
