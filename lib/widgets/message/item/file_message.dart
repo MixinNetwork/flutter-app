@@ -65,7 +65,7 @@ class MessageFile extends HookWidget {
               message.mediaUrl?.isNotEmpty == true) {
             await context.accountServer.reUploadAttachment(message);
           } else {
-            await context.accountServer.downloadAttachment(message);
+            await context.accountServer.downloadAttachment(message.messageId);
           }
         } else if (message.mediaStatus == MediaStatus.done &&
             message.mediaUrl != null) {

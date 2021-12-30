@@ -936,21 +936,28 @@ class SendMessageHelper {
 
     try {
       await _messageDao.updateMediaStatus(
-          MediaStatus.pending, message.messageId);
+        message.messageId,
+        MediaStatus.pending,
+      );
       final attachmentTranscripts =
           transcripts.where((element) => element.category.isAttachment);
       if (attachmentTranscripts.isNotEmpty) {
         await Future.wait(attachmentTranscripts.map(uploadAttachment));
       }
 
-      await _messageDao.updateMediaStatus(MediaStatus.done, message.messageId);
+      await _messageDao.updateMediaStatus(
+        message.messageId,
+        MediaStatus.done,
+      );
       await _jobDao.insertSendingJob(
         message.messageId,
         message.conversationId,
       );
     } catch (_) {
       await _messageDao.updateMediaStatus(
-          MediaStatus.canceled, message.messageId);
+        message.messageId,
+        MediaStatus.canceled,
+      );
     }
   }
 

@@ -273,69 +273,67 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         }),
       );
 
-  Future<void> updateMediaStatus(MediaStatus status, String messageId) =>
-      _sendInsertOrReplaceEventWithFuture(
-        [messageId],
-        db.transaction<void>(() async {
-          await Future.wait([
-            (db.update(db.messages)
-                  ..where((tbl) => tbl.messageId.equals(messageId)))
-                .write(MessagesCompanion(mediaStatus: Value(status))),
-            (db.update(db.transcriptMessages)
-                  ..where((tbl) => tbl.messageId.equals(messageId)))
-                .write(TranscriptMessagesCompanion(mediaStatus: Value(status))),
-          ]);
-        }),
-      );
+  Future<void> updateMediaStatus(String messageId, MediaStatus status) async {
+    if (await hasMediaStatus(messageId, status)) return;
 
-  Future<void> updateMediaStatusToCanceled(String messageId) async {
-    final result = await db.transaction<List>(() async {
-      if (await hasMediaStatus(messageId, MediaStatus.canceled)) {
-        return [-1];
-      }
-
-      return Future.wait([
-        (db.update(db.messages)
-              ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(const MessagesCompanion(
-                mediaStatus: Value(MediaStatus.canceled))),
-        (db.update(db.transcriptMessages)
-              ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(const TranscriptMessagesCompanion(
-                mediaStatus: Value(MediaStatus.canceled))),
-      ]);
-    });
+    final result = await db.transaction<List>(() => Future.wait([
+          (db.update(db.messages)
+                ..where((tbl) => tbl.messageId.equals(messageId)))
+              .write(MessagesCompanion(mediaStatus: Value(status))),
+          (db.update(db.transcriptMessages)
+                ..where((tbl) => tbl.messageId.equals(messageId)))
+              .write(TranscriptMessagesCompanion(mediaStatus: Value(status))),
+        ]));
     if (result.cast<int>().any((element) => element > -1)) {
       db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
     }
   }
 
-  Future<bool> messageHasMediaStatus(String messageId, MediaStatus mediaStatus,
-      [bool not = false]) {
-    final equalsId = db.messages.messageId.equals(messageId);
-    final equalsStatus = db.messages.mediaStatus.equalsValue(mediaStatus);
-    final predicate =
-        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
-    return db.hasData(db.messages, [], predicate);
+  Future<bool?> messageHasMediaStatus(String messageId, MediaStatus mediaStatus,
+      [bool not = false]) async {
+    final mediaStatusColumn = db.messages.mediaStatus;
+    final _mediaStatus = await (selectOnly(db.messages)
+          ..addColumns([mediaStatusColumn])
+          ..where(db.messages.messageId.equals(messageId))
+          ..limit(1))
+        .map((row) =>
+            mediaStatusColumn.converter.mapToDart(row.read(mediaStatusColumn)))
+        .getSingleOrNull();
+    if (_mediaStatus == null) return null;
+    if (not) {
+      return _mediaStatus != mediaStatus;
+    }
+    return _mediaStatus == mediaStatus;
   }
 
-  Future<bool> transcriptMessageHasMediaStatus(
+  Future<bool?> transcriptMessageHasMediaStatus(
       String messageId, MediaStatus mediaStatus,
-      [bool not = false]) {
-    final equalsId = db.transcriptMessages.messageId.equals(messageId);
-    final equalsStatus =
-        db.transcriptMessages.mediaStatus.equalsValue(mediaStatus);
-    final predicate =
-        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
-    return db.hasData(db.transcriptMessages, [], predicate);
+      [bool not = false]) async {
+    final mediaStatusColumn = db.transcriptMessages.mediaStatus;
+    final _mediaStatus = await (selectOnly(db.transcriptMessages)
+          ..addColumns([mediaStatusColumn])
+          ..where(db.transcriptMessages.messageId.equals(messageId))
+          ..limit(1))
+        .map((row) =>
+            mediaStatusColumn.converter.mapToDart(row.read(mediaStatusColumn)))
+        .getSingleOrNull();
+    if (_mediaStatus == null) return null;
+    if (not) {
+      return _mediaStatus != mediaStatus;
+    }
+    return _mediaStatus == mediaStatus;
   }
 
   Future<bool> hasMediaStatus(String messageId, MediaStatus mediaStatus,
       [bool not = false]) async {
-    final messageHasData = messageHasMediaStatus(messageId, mediaStatus, not);
+    final messageHasData =
+        await messageHasMediaStatus(messageId, mediaStatus, not);
     final transcriptMessageHasData =
-        transcriptMessageHasMediaStatus(messageId, mediaStatus, not);
-    return await messageHasData || await transcriptMessageHasData;
+        await transcriptMessageHasMediaStatus(messageId, mediaStatus, not);
+    if (messageHasData != null && transcriptMessageHasData != null) {
+      return messageHasData && transcriptMessageHasData;
+    }
+    return (messageHasData ?? false) || (transcriptMessageHasData ?? false);
   }
 
   Future<void> syncMessageMedia(String messageId, [bool force = false]) async {

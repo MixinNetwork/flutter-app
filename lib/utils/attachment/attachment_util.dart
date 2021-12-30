@@ -22,6 +22,7 @@ import '../extension/extension.dart';
 import '../file.dart';
 import '../load_balancer_utils.dart';
 import '../logger.dart';
+import 'download_key_value.dart';
 
 part 'attachment_download_job.dart';
 
@@ -85,25 +86,25 @@ class AttachmentUtil extends ChangeNotifier {
 
   Future<void> downloadAttachment({
     required String messageId,
-    required String content,
-    required String conversationId,
-    required String category,
-    AttachmentMessage? attachmentMessage,
   }) async {
-    if (_attachmentJob[messageId] != null) {
-      return _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
+    if (_hasAttachmentJob(messageId)) {
+      return _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
     } else {
       if (await _messageDao.messageHasMediaStatus(
-              messageId, MediaStatus.done) &&
+                  messageId, MediaStatus.done) ==
+              true &&
           await _messageDao.transcriptMessageHasMediaStatus(
-              messageId, MediaStatus.done, true)) {
+                  messageId, MediaStatus.done, true) ==
+              true) {
         await syncMessageMedia(messageId);
         await _updateTranscriptMessageStatus(messageId);
         return;
       }
 
-      await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
+      await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
     }
+
+    AttachmentMessage? attachmentMessage;
 
     final list = await Future.wait([
       _messageDao.findMessageByMessageId(messageId),
@@ -113,6 +114,52 @@ class AttachmentUtil extends ChangeNotifier {
     ]);
     final message = list[0] as Message?;
     final transcriptMessage = list[1] as TranscriptMessage?;
+
+    if (message != null && attachmentMessage == null) {
+      attachmentMessage = AttachmentMessage(
+        message.mediaKey,
+        message.mediaDigest,
+        message.content!,
+        message.mediaMimeType!,
+        message.mediaSize!,
+        message.name,
+        message.mediaWidth,
+        message.mediaHeight,
+        message.thumbImage,
+        int.tryParse(message.mediaDuration ?? '0'),
+        message.mediaWaveform,
+        null,
+        null,
+      );
+    }
+
+    if (transcriptMessage != null && attachmentMessage == null) {
+      attachmentMessage = AttachmentMessage(
+        transcriptMessage.mediaKey,
+        transcriptMessage.mediaDigest,
+        transcriptMessage.content!,
+        transcriptMessage.mediaMimeType!,
+        transcriptMessage.mediaSize!,
+        transcriptMessage.userFullName,
+        transcriptMessage.mediaWidth,
+        transcriptMessage.mediaHeight,
+        transcriptMessage.thumbImage,
+        int.tryParse(transcriptMessage.mediaDuration ?? '0'),
+        transcriptMessage.mediaWaveform,
+        null,
+        null,
+      );
+    }
+
+    final content = message?.content ?? transcriptMessage?.content;
+    final category = message?.category ?? transcriptMessage?.category;
+    final conversationId = message?.conversationId;
+
+    if (category == null || content == null) {
+      await cancelProgressAttachmentJob(messageId);
+      return;
+    }
+
     final file = getAttachmentFile(
       category,
       conversationId,
@@ -123,6 +170,8 @@ class AttachmentUtil extends ChangeNotifier {
           transcriptMessage?.mediaMimeType,
       isTranscript: message == null,
     );
+    final path = file.absolute.path;
+    if (file.existsSync()) await file.delete();
 
     try {
       final response = await _client.attachmentApi.getAttachment(content);
@@ -161,7 +210,7 @@ class AttachmentUtil extends ChangeNotifier {
         }
 
         final attachmentDownloadJob = _AttachmentDownloadJob(
-          path: file.absolute.path,
+          path: path,
           url: response.data.viewUrl!,
           keys: mediaKey != null
               ? await base64DecodeWithIsolate(mediaKey!)
@@ -171,7 +220,7 @@ class AttachmentUtil extends ChangeNotifier {
               : null,
         );
 
-        _attachmentJob[messageId] = attachmentDownloadJob;
+        _setAttachmentJob(messageId, attachmentDownloadJob);
 
         await attachmentDownloadJob
             .download((int count, int total) => notifyListeners());
@@ -206,10 +255,9 @@ class AttachmentUtil extends ChangeNotifier {
     } catch (er) {
       e(er.toString());
       if (file.existsSync()) await file.delete();
-      await _messageDao.updateMediaStatusToCanceled(messageId);
+      await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
     } finally {
-      _attachmentJob[messageId]?.cancel();
-      _attachmentJob.remove(messageId);
+      await _removeAttachmentJob(messageId);
     }
   }
 
@@ -219,13 +267,8 @@ class AttachmentUtil extends ChangeNotifier {
     String category, {
     String? transcriptId,
   }) async {
-    assert(_attachmentJob[messageId] == null);
-    if (transcriptId == null) {
-      await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
-    } else {
-      await _transcriptMessageDao.updateMediaStatus(
-          MediaStatus.pending, transcriptId, messageId);
-    }
+    assert(_hasAttachmentJob(messageId));
+    await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
 
     try {
       final response = await _client.attachmentApi.postAttachment();
@@ -247,15 +290,11 @@ class AttachmentUtil extends ChangeNotifier {
         iv: iv,
       );
 
-      _attachmentJob[messageId] = attachmentUploadJob;
+      _setAttachmentJob(messageId, attachmentUploadJob);
+
       final digest = await attachmentUploadJob
           .upload((int count, int total) => notifyListeners());
-      if (transcriptId == null) {
-        await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
-      } else {
-        await _transcriptMessageDao.updateMediaStatus(
-            MediaStatus.pending, transcriptId, messageId);
-      }
+      await _messageDao.updateMediaStatus(messageId, MediaStatus.done);
       return AttachmentResult(
           response.data.attachmentId,
           category.isSignal || category.isEncrypted
@@ -267,27 +306,15 @@ class AttachmentUtil extends ChangeNotifier {
           response.data.createdAt);
     } catch (e, s) {
       w('upload failed error: $e, $s');
-      if (transcriptId == null) {
-        await _messageDao.updateMediaStatusToCanceled(messageId);
-      } else {
-        await _transcriptMessageDao.updateMediaStatus(
-            MediaStatus.canceled, transcriptId, messageId);
-      }
+      await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
       return null;
     } finally {
-      _attachmentJob[messageId]?.cancel();
-      _attachmentJob.remove(messageId);
+      await _removeAttachmentJob(messageId);
     }
   }
 
   Future<bool> isNotPending(String messageId) =>
       _messageDao.hasMediaStatus(messageId, MediaStatus.pending, true);
-
-  void deleteCryptoTmpFile(String category, File file) {
-    if (category.isSignal || category.isEncrypted) {
-      file.delete();
-    }
-  }
 
   String getAttachmentDirectoryPath(String category, String conversationId) {
     assert(category.isAttachment);
@@ -330,7 +357,7 @@ class AttachmentUtil extends ChangeNotifier {
 
   File getAttachmentFile(
     String category,
-    String conversationId,
+    String? conversationId,
     String messageId,
     String? mediaName, {
     String? mimeType,
@@ -338,7 +365,7 @@ class AttachmentUtil extends ChangeNotifier {
   }) {
     final path = isTranscript
         ? transcriptPath
-        : getAttachmentDirectoryPath(category, conversationId);
+        : getAttachmentDirectoryPath(category, conversationId!);
     String suffix;
     if (category.isImage) {
       if (_equalsIgnoreCase(mimeType, 'image/png')) {
@@ -392,9 +419,26 @@ class AttachmentUtil extends ChangeNotifier {
     );
   }
 
+  bool _hasAttachmentJob(String messageId) =>
+      _attachmentJob.containsKey(messageId);
+
+  void _setAttachmentJob(String messageId, _AttachmentJobBase job) {
+    _attachmentJob[messageId] = job;
+    if (job is _AttachmentDownloadJob) {
+      DownloadKeyValue.instance.addMessageId(messageId);
+    }
+  }
+
+  Future<void> _removeAttachmentJob(String messageId) async {
+    await DownloadKeyValue.instance.removeMessageId(messageId);
+    _attachmentJob[messageId]?.cancel();
+    _attachmentJob.remove(messageId);
+  }
+
   Future<bool> cancelProgressAttachmentJob(String messageId) async {
-    await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
-    if (_attachmentJob[messageId] == null) return false;
+    await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
+    await DownloadKeyValue.instance.removeMessageId(messageId);
+    if (!_hasAttachmentJob(messageId)) return false;
     _attachmentJob[messageId]?.cancel();
     _attachmentJob.remove(messageId);
     return true;
@@ -406,7 +450,8 @@ class AttachmentUtil extends ChangeNotifier {
   Future<bool> syncMessageMedia(String messageId) async {
     Future<bool> fromMessage() async {
       if (await _messageDao.messageHasMediaStatus(
-          messageId, MediaStatus.done)) {
+              messageId, MediaStatus.done) ==
+          true) {
         final message = await _messageDao.findMessageByMessageId(messageId);
         final path = convertAbsolutePath(
           category: message!.category,
@@ -440,7 +485,7 @@ class AttachmentUtil extends ChangeNotifier {
         MediaStatus.done,
         true,
       );
-      if (await done && !await notDone) {
+      if (await done == true && await notDone == true) {
         await _messageDao.syncMessageMedia(messageId, true);
         return true;
       }
@@ -473,7 +518,7 @@ class AttachmentUtil extends ChangeNotifier {
               .every((element) => element.mediaStatus == MediaStatus.done)
           ? MediaStatus.done
           : MediaStatus.canceled;
-      await _messageDao.updateMediaStatus(status, transcriptId);
+      await _messageDao.updateMediaStatus(transcriptId, status);
     });
   }
 }
