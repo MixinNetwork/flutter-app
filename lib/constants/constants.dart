@@ -23,6 +23,7 @@ const kSyncSignalKeys = 'SYNC_SIGNAL_KEYS';
 
 // Only from local.
 const kUpdateAsset = 'LOCAL_UPDATE_ASSET';
+const kUpdateSticker = 'LOCAL_UPDATE_STICKER';
 
 const mixinScheme = 'mixin';
 const mixinHost = 'mixin.one';

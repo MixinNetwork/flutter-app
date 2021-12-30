@@ -85,6 +85,12 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
         row.action.equals(kUpdateAsset) & row.blazeMessage.isNotNull())
     ..limit(100);
 
+  Stream<bool> watchHasUpdateStickerJobs() => _watchHasJobs([kUpdateSticker]);
+
+  SimpleSelectStatement<Jobs, Job> updateStickerJobs() => select(db.jobs)
+    ..where((Jobs row) => row.action.equals(kUpdateSticker))
+    ..limit(100);
+
   Future<Job?> ackJobById(String jobId) =>
       (select(db.jobs)..where((tbl) => tbl.jobId.equals(jobId)))
           .getSingleOrNull();
@@ -100,14 +106,37 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
     }
   }
 
-  Future<void> insertUpdateAssetJob(Job job) async {
-    assert(job.action == kUpdateAsset);
-
+  Future<void> insertUpdateAssetJob(String assetId) async {
     final exists = await db.hasData(
         db.jobs,
         [],
         db.jobs.action.equals(kUpdateAsset) &
-            db.jobs.blazeMessage.equals(job.blazeMessage).not());
-    if (!exists) await insert(job);
+            db.jobs.blazeMessage.equals(assetId));
+    if (exists) return;
+    await insert(Job(
+      jobId: const Uuid().v4(),
+      action: kUpdateAsset,
+      priority: 5,
+      runCount: 0,
+      createdAt: DateTime.now(),
+      blazeMessage: assetId,
+    ));
+  }
+
+  Future<void> insertUpdateStickerJob(String? stickerId) async {
+    final exists = await db.hasData(
+        db.jobs,
+        [],
+        db.jobs.action.equals(kUpdateAsset) &
+            db.jobs.blazeMessage.equals(stickerId));
+    if (exists) return;
+    await insert(Job(
+      jobId: const Uuid().v4(),
+      action: kUpdateAsset,
+      priority: 5,
+      runCount: 0,
+      createdAt: DateTime.now(),
+      blazeMessage: stickerId,
+    ));
   }
 }

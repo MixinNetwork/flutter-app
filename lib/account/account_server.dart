@@ -251,7 +251,10 @@ class AccountServer {
       }))
       ..add(database.jobDao
           .watchHasUpdateAssetJobs()
-          .asyncListen((_) => _runUpdateAssetJob()));
+          .asyncListen((_) => _runUpdateAssetJob()))
+      ..add(database.jobDao
+          .watchHasUpdateStickerJobs()
+          .asyncListen((_) => _runUpdateStickerJob()));
   }
 
   Future<void> _runProcessFloodJob() async {
@@ -512,7 +515,7 @@ class AccountServer {
     final jobs = await database.jobDao.updateAssetJobs().get();
     if (jobs.isEmpty) return;
 
-    await Future.forEach(jobs, (db.Job job) async {
+    await Future.wait(jobs.map((db.Job job) async {
       try {
         final a = (await client.assetApi.getAssetById(job.blazeMessage!)).data;
         await database.assetDao.insertSdkAsset(a);
@@ -520,9 +523,42 @@ class AccountServer {
       } catch (e, s) {
         w('Update asset job error: $e, stack: $s');
       }
-    });
+    }));
 
     await _runUpdateAssetJob();
+  }
+
+  Future<void> _runUpdateStickerJob() async {
+    final jobs = await database.jobDao.updateStickerJobs().get();
+    if (jobs.isEmpty) return;
+
+    await Future.wait(jobs.map((db.Job job) async {
+      try {
+        final stickerId = job.blazeMessage;
+        if (stickerId == null) {
+          await refreshSticker();
+        } else {
+          // todo update sticker album
+          final sticker =
+              (await client.accountApi.getStickerById(stickerId)).data;
+          await database.stickerDao.insert(db.Sticker(
+            stickerId: sticker.stickerId,
+            albumId: sticker.albumId,
+            name: sticker.name,
+            assetUrl: sticker.assetUrl,
+            assetType: sticker.assetType,
+            assetWidth: sticker.assetWidth,
+            assetHeight: sticker.assetHeight,
+            createdAt: sticker.createdAt,
+          ));
+        }
+        await database.jobDao.deleteJobById(job.jobId);
+      } catch (e, s) {
+        w('Update sticker job error: $e, stack: $s');
+      }
+    }));
+
+    await _runUpdateStickerJob();
   }
 
   Future<MessageResult?> _sendSignalMessage(
