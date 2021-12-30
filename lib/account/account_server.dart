@@ -25,6 +25,7 @@ import '../db/database.dart';
 import '../db/database_event_bus.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
+import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
@@ -32,6 +33,7 @@ import '../main.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
+import '../utils/attachment/download_key_value.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
@@ -111,6 +113,9 @@ class AccountServer {
 
     unawaited(start());
 
+    DownloadKeyValue.instance.messageIds.forEach((messageId) {
+      attachmentUtil.downloadAttachment(messageId: messageId);
+    });
     appActiveListener.addListener(onActive);
   }
 
@@ -630,58 +635,8 @@ class AccountServer {
     }
   }
 
-  Future<void> downloadAttachment(db.MessageItem message) async {
-    AttachmentMessage? attachmentMessage;
-    final m =
-        await database.messageDao.findMessageByMessageId(message.messageId);
-    if (m != null) {
-      attachmentMessage = AttachmentMessage(
-        m.mediaKey,
-        m.mediaDigest,
-        m.content!,
-        m.mediaMimeType!,
-        m.mediaSize!,
-        m.name,
-        m.mediaWidth,
-        m.mediaHeight,
-        m.thumbImage,
-        int.tryParse(m.mediaDuration ?? '0'),
-        m.mediaWaveform,
-        null,
-        null,
-      );
-    }
-    if (attachmentMessage == null) {
-      final m = await database.transcriptMessageDao
-          .transcriptMessageByMessageId(message.messageId)
-          .getSingleOrNull();
-
-      if (m != null) {
-        attachmentMessage = AttachmentMessage(
-          m.mediaKey,
-          m.mediaDigest,
-          m.content!,
-          m.mediaMimeType!,
-          m.mediaSize!,
-          m.userFullName,
-          m.mediaWidth,
-          m.mediaHeight,
-          m.thumbImage,
-          int.tryParse(m.mediaDuration ?? '0'),
-          m.mediaWaveform,
-          null,
-          null,
-        );
-      }
-    }
-    await attachmentUtil.downloadAttachment(
-      content: message.content!,
-      messageId: message.messageId,
-      conversationId: message.conversationId,
-      category: message.type,
-      attachmentMessage: attachmentMessage,
-    );
-  }
+  Future<void> downloadAttachment(String messageId) async =>
+      attachmentUtil.downloadAttachment(messageId: messageId);
 
   Future<void> reUploadAttachment(db.MessageItem message) =>
       _sendMessageHelper.reUploadAttachment(
@@ -1174,10 +1129,15 @@ class AccountServer {
     await database.snapshotDao.insertSdkSnapshot(data.data);
   }
 
-  Future<void> updateAssetById({required String assetId}) async {
-    final data = await client.assetApi.getAssetById(assetId);
-    await database.assetDao.insertSdkAsset(data.data);
-  }
+  Future<void> updateAssetById({required String assetId}) =>
+      database.jobDao.insertUpdateAssetJob(Job(
+        jobId: const Uuid().v4(),
+        action: kUpdateAsset,
+        priority: 5,
+        runCount: 0,
+        createdAt: DateTime.now(),
+        blazeMessage: assetId,
+      ));
 
   Future<void> updateFiats() async {
     final data = await client.accountApi.getFiats();

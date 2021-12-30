@@ -56,16 +56,6 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
             ..where(db.transcriptMessages.messageId.isIn(messageIds)))
           .map((row) => row.read(db.transcriptMessages.messageId));
 
-  Future<void> updateMediaStatus(
-          MediaStatus mediaStatus, String transcriptId, String messageId) =>
-      (db.update(db.transcriptMessages)
-            ..where((tbl) =>
-                tbl.transcriptId.equals(transcriptId) &
-                tbl.messageId.equals(messageId)))
-          .write(TranscriptMessagesCompanion(
-        mediaStatus: Value(mediaStatus),
-      ));
-
   Future<void> updateTranscript({
     required String transcriptId,
     required String messageId,
