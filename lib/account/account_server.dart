@@ -40,10 +40,10 @@ import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/webview.dart';
-import '../workers/decrypt_message.dart';
 import '../workers/injector.dart';
+import '../workers/isolate_event.dart';
+import '../workers/message_woker_isolate.dart';
 import 'account_key_value.dart';
-import 'flood_process_isolate.dart';
 import 'send_message_helper.dart';
 
 class AccountServer {
@@ -179,15 +179,11 @@ class AccountServer {
       _connectedStateBehaviorSubject;
 
   Future<void> reconnectBlaze() async {
-    _isolateChannel.sink.add(
-      const IsolateEvent(IsolateEvent.kReconnectBlaze),
-    );
+    _sendEventToWorkerIsolate(MainIsolateEventType.reconnectBlaze);
   }
 
   void _notifyBlazeWaitSyncTime() {
-    _isolateChannel.sink.add(
-      const IsolateEvent(IsolateEvent.kDisconnectBlazeTime),
-    );
+    _sendEventToWorkerIsolate(MainIsolateEventType.disconnectBlazeWithTime);
   }
 
   String? _activeConversationId;
@@ -198,47 +194,60 @@ class AccountServer {
     final receivePort = ReceivePort();
     _isolateChannel = IsolateChannel<IsolateEvent>.connectReceive(receivePort);
     final isolate = await Isolate.spawn(
-        startFloodProcessIsolate,
-        DecryptMessageInitParams(
-          sendPort: receivePort.sendPort,
-          identityNumber: identityNumber,
-          userId: userId,
-          sessionId: sessionId,
-          privateKey: privateKey,
-          mixinDocumentDirectory: mixinDocumentsDirectory.path,
-          primarySessionId: AccountKeyValue.instance.primarySessionId,
-          packageInfo: await packageInfoFuture,
-        ));
+      startMessageProcessIsolate,
+      IsolateInitParams(
+        sendPort: receivePort.sendPort,
+        identityNumber: identityNumber,
+        userId: userId,
+        sessionId: sessionId,
+        privateKey: privateKey,
+        mixinDocumentDirectory: mixinDocumentsDirectory.path,
+        primarySessionId: AccountKeyValue.instance.primarySessionId,
+        packageInfo: await packageInfoFuture,
+      ),
+    );
     jobSubscribers
       ..add(isolate.errors.listen((error) {
         final remoteError = error as RemoteError;
         e('RemoteError: $remoteError ${remoteError.stackTrace}');
       }))
       ..add(_isolateChannel.stream.listen((event) {
-        switch (event.name) {
-          case IsolateEvent.kMessageIsolateReady:
-            _onMessageProcessServiceReady();
-            break;
-          case IsolateEvent.kNotifyBlazeStateChanged:
-            _connectedStateBehaviorSubject
-                .add(event.argument as ConnectedState);
-            break;
-          case IsolateEvent.kOnDbEventBus:
-            final args = event.argument as Tuple2<DatabaseEvent, dynamic>;
-            database.mixinDatabase.eventBus.send(args.item1, args.item2);
-            break;
-          case IsolateEvent.kOnApiRequestError:
-            _onClientRequestError(event.argument as DioError);
-            break;
-          case IsolateEvent.kOnAttachmentDownloadRequest:
-            final request = event.argument as AttachmentRequest;
-            _onAttachmentDownloadRequest(request);
-            break;
-          default:
-            assert(false, 'unexpected event: $event');
-            break;
+        if (event is! WorkerIsolateEvent) {
+          assert(false);
+          e('unexpected event from worker isolate: $event');
+          return;
+        }
+        try {
+          _handleWorkIsolateEvent(event);
+        } catch (error, stacktrace) {
+          e('handle worker isolate event failed: $error, $stacktrace');
         }
       }));
+  }
+
+  void _handleWorkIsolateEvent(WorkerIsolateEvent event) {
+    switch (event.type) {
+      case WorkerIsolateEventType.onIsolateReady:
+        d('message process service ready');
+        break;
+      case WorkerIsolateEventType.onBlazeConnectStateChanged:
+        _connectedStateBehaviorSubject.add(event.argument as ConnectedState);
+        break;
+      case WorkerIsolateEventType.onDbEvent:
+        final args = event.argument as Tuple2<DatabaseEvent, dynamic>;
+        database.mixinDatabase.eventBus.send(args.item1, args.item2);
+        break;
+      case WorkerIsolateEventType.onApiRequestedError:
+        _onClientRequestError(event.argument as DioError);
+        break;
+      case WorkerIsolateEventType.requestDownloadAttachment:
+        final request = event.argument as AttachmentRequest;
+        _onAttachmentDownloadRequest(request);
+        break;
+      default:
+        assert(false, 'unexpected event: $event');
+        break;
+    }
   }
 
   Future<void> _onAttachmentDownloadRequest(
@@ -275,25 +284,6 @@ class AccountServer {
     } else {
       assert(false, 'unexpected request: $request');
     }
-  }
-
-  void _onMessageProcessServiceReady() {
-    jobSubscribers.add(multiAuthCubit.stream
-        .startWith(multiAuthCubit.state)
-        .distinct((previous, next) =>
-            previous.currentFileAutoDownload == next.currentFileAutoDownload &&
-            previous.currentVideoAutoDownload ==
-                next.currentVideoAutoDownload &&
-            previous.currentPhotoAutoDownload == next.currentPhotoAutoDownload)
-        .listen((event) {
-      _isolateChannel.sink.add(IsolateEvent(
-          IsolateEvent.kChangeMessageAttachmentDownloadConfig,
-          MessageAttachmentDownloadConfig(
-            fileAutoDownload: event.currentFileAutoDownload,
-            videoAutoDownload: event.currentVideoAutoDownload,
-            photoAutoDownload: event.currentPhotoAutoDownload,
-          )));
-    }));
   }
 
   Future<void> signOutAndClear() async {
@@ -447,10 +437,10 @@ class AccountServer {
 
   void selectConversation(String? conversationId) {
     _activeConversationId = conversationId;
-    _isolateChannel.sink.add(IsolateEvent(
-      IsolateEvent.kUpdateSelectedConversation,
+    _sendEventToWorkerIsolate(
+      MainIsolateEventType.updateSelectedConversation,
       conversationId,
-    ));
+    );
   }
 
   Future<void> markRead(String conversationId) async {
@@ -1183,5 +1173,9 @@ class AccountServer {
   Future<void> updateFiats() async {
     final data = await client.accountApi.getFiats();
     await database.fiatDao.insertAllSdkFiat(data.data);
+  }
+
+  void _sendEventToWorkerIsolate(MainIsolateEventType type, [dynamic args]) {
+    _isolateChannel.sink.add(type.toEvent(args));
   }
 }

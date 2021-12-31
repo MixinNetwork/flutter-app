@@ -33,11 +33,12 @@ import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
-import '../workers/decrypt_message.dart';
-import '../workers/sender.dart';
+import 'decrypt_message.dart';
+import 'isolate_event.dart';
+import 'sender.dart';
 
-class DecryptMessageInitParams {
-  DecryptMessageInitParams({
+class IsolateInitParams {
+  IsolateInitParams({
     required this.sendPort,
     required this.identityNumber,
     required this.userId,
@@ -58,64 +59,42 @@ class DecryptMessageInitParams {
   final PackageInfo packageInfo;
 }
 
-class IsolateEvent {
-  const IsolateEvent(this.name, [this.argument]);
-
-  static const kChangeMessageAttachmentDownloadConfig =
-      'message_attachment_download_config';
-  static const kMessageIsolateReady = 'message_isolate_ready';
-  static const kReconnectBlaze = 'reconnect_blaze';
-  static const kDisconnectBlazeTime = 'disconnect_blaze_time';
-  static const kNotifyBlazeStateChanged = 'notify_blaze_state_changed';
-  static const kUpdateSelectedConversation = 'update_selected_conversation';
-  static const kOnDbEventBus = 'on_db_event_bus';
-  static const kOnApiRequestError = 'on_api_request_error';
-  static const kOnAttachmentDownloadRequest = 'on_attachment_download_request';
-
-  final String name;
-  final dynamic argument;
-}
-
-class MessageAttachmentDownloadConfig {
-  MessageAttachmentDownloadConfig({
-    required this.photoAutoDownload,
-    required this.videoAutoDownload,
-    required this.fileAutoDownload,
-  });
-
-  final bool photoAutoDownload;
-  final bool videoAutoDownload;
-  final bool fileAutoDownload;
-}
-
-Future<void> startFloodProcessIsolate(DecryptMessageInitParams params) async {
+Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
   final isolateChannel =
       IsolateChannel<IsolateEvent>.connectSend(params.sendPort);
-  final floodProcessRunner = FloodMessageProcessRunner(
+  final runner = _MessageProcessRunner(
     identityNumber: params.identityNumber,
     userId: params.userId,
     sessionId: params.sessionId,
     privateKeyStr: params.privateKey,
     primarySessionId: params.primarySessionId,
-    isolateChannel: isolateChannel,
+    eventSink: isolateChannel.sink,
   );
-  isolateChannel.stream.listen(floodProcessRunner.onEvent);
-  await floodProcessRunner.init(params);
-  floodProcessRunner._start();
-  isolateChannel.sink.add(
-    const IsolateEvent(IsolateEvent.kMessageIsolateReady),
-  );
+  isolateChannel.stream.listen((event) {
+    assert(event is MainIsolateEvent, 'event is not MainIsolateEvent');
+    if (event is! MainIsolateEvent) {
+      return;
+    }
+    try {
+      runner.onEvent(event);
+    } catch (error, stacktrace) {
+      e('error: $error, stacktrace: $stacktrace');
+    }
+  });
+  await runner.init(params);
+  runner._start();
+  isolateChannel.sink.add(WorkerIsolateEventType.onIsolateReady.toEvent());
 }
 
-class FloodMessageProcessRunner {
-  FloodMessageProcessRunner({
+class _MessageProcessRunner {
+  _MessageProcessRunner({
     required this.identityNumber,
     required this.userId,
     required this.sessionId,
     required this.privateKeyStr,
     required this.primarySessionId,
-    required this.isolateChannel,
+    required this.eventSink,
   }) : privateKey = PrivateKey(base64Decode(privateKeyStr));
 
   final String identityNumber;
@@ -125,7 +104,7 @@ class FloodMessageProcessRunner {
   final PrivateKey privateKey;
   final String? primarySessionId;
 
-  final IsolateChannel<IsolateEvent> isolateChannel;
+  final Sink<IsolateEvent> eventSink;
 
   late DecryptMessage _decryptMessage;
 
@@ -139,13 +118,11 @@ class FloodMessageProcessRunner {
 
   final jobSubscribers = <StreamSubscription>[];
 
-  Future<void> init(DecryptMessageInitParams initParams) async {
+  Future<void> init(IsolateInitParams initParams) async {
     database = Database(await connectToDatabase(identityNumber));
     jobSubscribers.add(
       database.mixinDatabase.eventBus.stream.listen((event) {
-        isolateChannel.sink.add(
-          IsolateEvent(IsolateEvent.kOnDbEventBus, event),
-        );
+        _sendEventToMainIsolate(WorkerIsolateEventType.onDbEvent, event);
       }),
     );
 
@@ -167,9 +144,8 @@ class FloodMessageProcessRunner {
             DioError e,
             ErrorInterceptorHandler handler,
           ) async {
-            isolateChannel.sink.add(
-              IsolateEvent(IsolateEvent.kOnApiRequestError, e),
-            );
+            _sendEventToMainIsolate(
+                WorkerIsolateEventType.onApiRequestedError, e);
             handler.next(e);
           },
         ),
@@ -187,9 +163,8 @@ class FloodMessageProcessRunner {
     );
 
     blaze.connectedStateStream.listen((event) {
-      isolateChannel.sink.add(
-        IsolateEvent(IsolateEvent.kNotifyBlazeStateChanged, event),
-      );
+      _sendEventToMainIsolate(
+          WorkerIsolateEventType.onBlazeConnectStateChanged, event);
     });
 
     signalProtocol = SignalProtocol(userId);
@@ -217,8 +192,9 @@ class FloodMessageProcessRunner {
       identityNumber,
     );
     attachmentRequest.stream.listen((event) {
-      isolateChannel.sink.add(
-        IsolateEvent(IsolateEvent.kOnAttachmentDownloadRequest, event),
+      _sendEventToMainIsolate(
+        WorkerIsolateEventType.requestDownloadAttachment,
+        event,
       );
     });
   }
@@ -265,6 +241,11 @@ class FloodMessageProcessRunner {
       ..add(database.jobDao
           .watchHasUpdateAssetJobs()
           .asyncListen((_) => _runUpdateAssetJob()));
+  }
+
+  void _sendEventToMainIsolate(WorkerIsolateEventType event,
+      [dynamic argument]) {
+    eventSink.add(event.toEvent(argument));
   }
 
   Future<void> _runProcessFloodJob() async {
@@ -629,27 +610,20 @@ class FloodMessageProcessRunner {
     await _runSessionAckJob();
   }
 
-  void onEvent(IsolateEvent event) {
-    switch (event.name) {
-      case IsolateEvent.kChangeMessageAttachmentDownloadConfig:
-        final config = event.argument as MessageAttachmentDownloadConfig;
-        _decryptMessage
-          ..fileAutoDownload = config.fileAutoDownload
-          ..photoAutoDownload = config.photoAutoDownload
-          ..videoAutoDownload = config.videoAutoDownload;
-        break;
-      case IsolateEvent.kUpdateSelectedConversation:
+  void onEvent(MainIsolateEvent event) {
+    switch (event.type) {
+      case MainIsolateEventType.updateSelectedConversation:
         final conversationId = event.argument as String?;
         _decryptMessage.conversationId = conversationId;
         break;
-      case IsolateEvent.kDisconnectBlazeTime:
+      case MainIsolateEventType.disconnectBlazeWithTime:
         blaze.waitSyncTime();
         break;
-      case IsolateEvent.kReconnectBlaze:
+      case MainIsolateEventType.reconnectBlaze:
         blaze.reconnect();
         break;
       default:
-        assert(false, 'Unknown event: ${event.name}');
+        assert(false, 'Unknown event: ${event.type}');
         return;
     }
   }

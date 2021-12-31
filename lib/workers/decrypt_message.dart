@@ -43,27 +43,8 @@ import '../enum/system_user_action.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import 'injector.dart';
+import 'isolate_event.dart';
 import 'sender.dart';
-
-abstract class AttachmentRequest {}
-
-class TranscriptAttachmentDownloadRequest extends AttachmentRequest {
-  TranscriptAttachmentDownloadRequest(this.message);
-
-  final TranscriptMessage message;
-}
-
-class AttachmentDownloadRequest extends AttachmentRequest {
-  AttachmentDownloadRequest(this.message);
-
-  final Message message;
-}
-
-class AttachmentCancelRequest extends AttachmentRequest {
-  AttachmentCancelRequest({required this.messageId});
-
-  final String messageId;
-}
 
 class DecryptMessage extends Injector {
   DecryptMessage(
@@ -92,12 +73,6 @@ class DecryptMessage extends Injector {
   final String identityNumber;
 
   final refreshKeyMap = <String, int?>{};
-
-  bool photoAutoDownload = true;
-
-  bool videoAutoDownload = true;
-
-  bool fileAutoDownload = true;
 
   set conversationId(String? conversationId) {
     _conversationId = conversationId;
