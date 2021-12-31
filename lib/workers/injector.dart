@@ -230,7 +230,6 @@ class Injector {
     }
   }
 
-
   Future<List<db.User>?> updateUserByIdentityNumber(
       String identityNumber) async {
     try {
@@ -240,5 +239,4 @@ class Injector {
       w('updateUserByIdentityNumber error $e, stack: $s');
     }
   }
-
 }
