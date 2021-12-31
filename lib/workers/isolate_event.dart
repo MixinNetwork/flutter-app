@@ -4,6 +4,7 @@ enum MainIsolateEventType {
   reconnectBlaze,
   disconnectBlazeWithTime,
   updateSelectedConversation,
+  exit,
 }
 
 extension MainIsolateEventTypeExtension on MainIsolateEventType {

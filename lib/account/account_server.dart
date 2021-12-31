@@ -170,7 +170,7 @@ class AccountServer {
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil attachmentUtil;
 
-  late IsolateChannel<IsolateEvent> _isolateChannel;
+  IsolateChannel<dynamic>? _isolateChannel;
 
   final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
       BehaviorSubject<ConnectedState>();
@@ -192,8 +192,10 @@ class AccountServer {
 
   Future<void> start() async {
     final receivePort = ReceivePort();
-    _isolateChannel = IsolateChannel<IsolateEvent>.connectReceive(receivePort);
-    final isolate = await Isolate.spawn(
+    _isolateChannel = IsolateChannel<dynamic>.connectReceive(receivePort);
+    final exitReceivePort = ReceivePort();
+    final errorReceivePort = ReceivePort();
+    await Isolate.spawn(
       startMessageProcessIsolate,
       IsolateInitParams(
         sendPort: receivePort.sendPort,
@@ -205,15 +207,20 @@ class AccountServer {
         primarySessionId: AccountKeyValue.instance.primarySessionId,
         packageInfo: await packageInfoFuture,
       ),
+      errorsAreFatal: false,
+      onExit: exitReceivePort.sendPort,
+      onError: errorReceivePort.sendPort,
     );
     jobSubscribers
-      ..add(isolate.errors.listen((error) {
-        final remoteError = error as RemoteError;
-        e('RemoteError: $remoteError ${remoteError.stackTrace}');
+      ..add(exitReceivePort.listen((message) {
+        w('worker isolate service exited. $message');
+        _connectedStateBehaviorSubject.add(ConnectedState.disconnected);
       }))
-      ..add(_isolateChannel.stream.listen((event) {
+      ..add(errorReceivePort.listen((error) {
+        e('work isolate RemoteError: $error');
+      }))
+      ..add(_isolateChannel!.stream.listen((event) {
         if (event is! WorkerIsolateEvent) {
-          assert(false);
           e('unexpected event from worker isolate: $event');
           return;
         }
@@ -250,6 +257,7 @@ class AccountServer {
     }
   }
 
+  // Call when worker isolate process message need download attachment.
   Future<void> _onAttachmentDownloadRequest(
     AttachmentRequest request,
   ) async {
@@ -287,6 +295,7 @@ class AccountServer {
   }
 
   Future<void> signOutAndClear() async {
+    _sendEventToWorkerIsolate(MainIsolateEventType.exit);
     await client.accountApi.logout(LogoutRequest(sessionId));
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
@@ -469,7 +478,7 @@ class AccountServer {
   Future<void> stop() async {
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
-    // TODO shut down isolate.
+    _sendEventToWorkerIsolate(MainIsolateEventType.exit);
     await database.dispose();
   }
 
@@ -1176,6 +1185,10 @@ class AccountServer {
   }
 
   void _sendEventToWorkerIsolate(MainIsolateEventType type, [dynamic args]) {
-    _isolateChannel.sink.add(type.toEvent(args));
+    if (_isolateChannel == null) {
+      d('_sendEventToWorkerIsolate: _isolateChannel is null $type');
+      assert(type == MainIsolateEventType.exit);
+    }
+    _isolateChannel?.sink.add(type.toEvent(args));
   }
 }

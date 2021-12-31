@@ -70,6 +70,7 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
     privateKeyStr: params.privateKey,
     primarySessionId: params.primarySessionId,
     eventSink: isolateChannel.sink,
+    sendPort: params.sendPort,
   );
   isolateChannel.stream.listen((event) {
     assert(event is MainIsolateEvent, 'event is not MainIsolateEvent');
@@ -95,6 +96,7 @@ class _MessageProcessRunner {
     required this.privateKeyStr,
     required this.primarySessionId,
     required this.eventSink,
+    required this.sendPort,
   }) : privateKey = PrivateKey(base64Decode(privateKeyStr));
 
   final String identityNumber;
@@ -103,6 +105,7 @@ class _MessageProcessRunner {
   final String privateKeyStr;
   final PrivateKey privateKey;
   final String? primarySessionId;
+  final SendPort sendPort;
 
   final Sink<IsolateEvent> eventSink;
 
@@ -622,6 +625,9 @@ class _MessageProcessRunner {
       case MainIsolateEventType.reconnectBlaze:
         blaze.reconnect();
         break;
+      case MainIsolateEventType.exit:
+        dispose();
+        Isolate.exit();
       default:
         assert(false, 'Unknown event: ${event.type}');
         return;
@@ -629,6 +635,8 @@ class _MessageProcessRunner {
   }
 
   void dispose() {
+    blaze.dispose();
+    database.dispose();
     jobSubscribers.forEach((subscription) => subscription.cancel());
   }
 }
