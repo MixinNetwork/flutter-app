@@ -29,7 +29,6 @@ import '../db/mixin_database.dart' as db;
 import '../db/mixin_database.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
-import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/logger.dart';
@@ -71,6 +70,7 @@ class IsolateEvent {
   static const kUpdateSelectedConversation = 'update_selected_conversation';
   static const kOnDbEventBus = 'on_db_event_bus';
   static const kOnApiRequestError = 'on_api_request_error';
+  static const kOnAttachmentDownloadRequest = 'on_attachment_download_request';
 
   final String name;
   final dynamic argument;
@@ -135,8 +135,6 @@ class FloodMessageProcessRunner {
   late Sender _sender;
   late SignalProtocol signalProtocol;
 
-  late AttachmentUtil attachmentUtil;
-
   final EncryptedProtocol _encryptedProtocol = EncryptedProtocol();
 
   final jobSubscribers = <StreamSubscription>[];
@@ -179,13 +177,6 @@ class FloodMessageProcessRunner {
       httpLogLevel: HttpLogLevel.none,
     );
 
-    attachmentUtil = AttachmentUtil.init(
-      client,
-      database.messageDao,
-      database.transcriptMessageDao,
-      identityNumber,
-    );
-
     blaze = Blaze(
       userId,
       sessionId,
@@ -213,6 +204,7 @@ class FloodMessageProcessRunner {
       database,
     );
 
+    final attachmentRequest = StreamController<AttachmentRequest>();
     _decryptMessage = DecryptMessage(
       userId,
       database,
@@ -221,9 +213,14 @@ class FloodMessageProcessRunner {
       client,
       sessionId,
       privateKey,
-      attachmentUtil,
+      attachmentRequest.sink,
       identityNumber,
     );
+    attachmentRequest.stream.listen((event) {
+      isolateChannel.sink.add(
+        IsolateEvent(IsolateEvent.kOnAttachmentDownloadRequest, event),
+      );
+    });
   }
 
   void _start() {
@@ -642,7 +639,7 @@ class FloodMessageProcessRunner {
           ..videoAutoDownload = config.videoAutoDownload;
         break;
       case IsolateEvent.kUpdateSelectedConversation:
-        final conversationId = event.argument as String;
+        final conversationId = event.argument as String?;
         _decryptMessage.conversationId = conversationId;
         break;
       case IsolateEvent.kDisconnectBlazeTime:

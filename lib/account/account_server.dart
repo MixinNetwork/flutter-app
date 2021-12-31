@@ -40,6 +40,7 @@ import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/webview.dart';
+import '../workers/decrypt_message.dart';
 import '../workers/injector.dart';
 import 'account_key_value.dart';
 import 'flood_process_isolate.dart';
@@ -229,11 +230,51 @@ class AccountServer {
           case IsolateEvent.kOnApiRequestError:
             _onClientRequestError(event.argument as DioError);
             break;
+          case IsolateEvent.kOnAttachmentDownloadRequest:
+            final request = event.argument as AttachmentRequest;
+            _onAttachmentDownloadRequest(request);
+            break;
           default:
             assert(false, 'unexpected event: $event');
             break;
         }
       }));
+  }
+
+  Future<void> _onAttachmentDownloadRequest(
+    AttachmentRequest request,
+  ) async {
+    bool needDownload(String category) {
+      if (category.isImage) {
+        return multiAuthCubit.state.currentPhotoAutoDownload;
+      } else if (category.isVideo) {
+        return multiAuthCubit.state.currentVideoAutoDownload;
+      } else if (category.isData) {
+        return multiAuthCubit.state.currentFileAutoDownload;
+      }
+      return true;
+    }
+
+    if (request is AttachmentCancelRequest) {
+      d('request cancel download: ${request.messageId}');
+      await attachmentUtil.cancelProgressAttachmentJob(request.messageId);
+    } else if (request is AttachmentDownloadRequest) {
+      d('request download: ${request.message.messageId} ${request.message.category}');
+      if (needDownload(request.message.category)) {
+        await attachmentUtil.downloadAttachment(
+          messageId: request.message.messageId,
+        );
+      }
+    } else if (request is TranscriptAttachmentDownloadRequest) {
+      d('request download transcript: ${request.message.messageId} ${request.message.category}');
+      if (needDownload(request.message.category)) {
+        await attachmentUtil.downloadAttachment(
+          messageId: request.message.messageId,
+        );
+      }
+    } else {
+      assert(false, 'unexpected request: $request');
+    }
   }
 
   void _onMessageProcessServiceReady() {
@@ -321,8 +362,8 @@ class AccountServer {
         quoteMessageId: quoteMessageId,
       );
 
-  // NOTE: Send video as DataMessage, cause we can not retriever video metadata
-  // from video file.
+// NOTE: Send video as DataMessage, cause we can not retriever video metadata
+// from video file.
   Future<void> sendVideoMessage(XFile video, EncryptCategory encryptCategory,
           {String? conversationId,
           String? recipientId,

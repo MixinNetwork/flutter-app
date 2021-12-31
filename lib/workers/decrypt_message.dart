@@ -40,11 +40,30 @@ import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../enum/system_circle_action.dart';
 import '../enum/system_user_action.dart';
-import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import 'injector.dart';
 import 'sender.dart';
+
+abstract class AttachmentRequest {}
+
+class TranscriptAttachmentDownloadRequest extends AttachmentRequest {
+  TranscriptAttachmentDownloadRequest(this.message);
+
+  final TranscriptMessage message;
+}
+
+class AttachmentDownloadRequest extends AttachmentRequest {
+  AttachmentDownloadRequest(this.message);
+
+  final Message message;
+}
+
+class AttachmentCancelRequest extends AttachmentRequest {
+  AttachmentCancelRequest({required this.messageId});
+
+  final String messageId;
+}
 
 class DecryptMessage extends Injector {
   DecryptMessage(
@@ -55,7 +74,7 @@ class DecryptMessage extends Injector {
     Client client,
     this._sessionId,
     this._privateKey,
-    this._attachmentUtil,
+    this._attachmentSink,
     this.identityNumber,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
@@ -68,7 +87,7 @@ class DecryptMessage extends Injector {
   late final PrivateKey _privateKey;
   late EncryptedProtocol _encryptedProtocol;
 
-  final AttachmentUtil _attachmentUtil;
+  final Sink<AttachmentRequest> _attachmentSink;
 
   final String identityNumber;
 
@@ -443,11 +462,12 @@ class DecryptMessage extends Injector {
         _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
     final message = await database.messageDao
         .findMessageByMessageId(recallMessage.messageId);
-    if (message?.category.isAttachment == true) {
-      await _attachmentUtil
-          .cancelProgressAttachmentJob(recallMessage.messageId);
-      if (message?.mediaUrl?.isNotEmpty ?? false) {
-        final file = File(message!.mediaUrl!);
+    if (message != null && message.category.isAttachment) {
+      _attachmentSink.add(AttachmentCancelRequest(
+        messageId: message.messageId,
+      ));
+      if (message.mediaUrl?.isNotEmpty ?? false) {
+        final file = File(message.mediaUrl!);
         final exists = file.existsSync();
         if (exists) {
           await file.delete();
@@ -554,11 +574,7 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      if (photoAutoDownload) {
-        unawaited(
-          _attachmentUtil.downloadAttachment(messageId: message.messageId),
-        );
-      }
+      _attachmentSink.add(AttachmentDownloadRequest(message));
     } else if (data.category.isVideo) {
       final String plain;
       if (data.category.isEncrypted) {
@@ -591,11 +607,7 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      if (videoAutoDownload) {
-        unawaited(
-          _attachmentUtil.downloadAttachment(messageId: message.messageId),
-        );
-      }
+      _attachmentSink.add(AttachmentDownloadRequest(message));
     } else if (data.category.isData) {
       final String plain;
       if (data.category.isEncrypted) {
@@ -624,11 +636,7 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      if (fileAutoDownload) {
-        unawaited(
-          _attachmentUtil.downloadAttachment(messageId: message.messageId),
-        );
-      }
+      _attachmentSink.add(AttachmentDownloadRequest(message));
     } else if (data.category.isAudio) {
       final String plain;
       if (data.category.isEncrypted) {
@@ -659,9 +667,7 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      unawaited(
-        _attachmentUtil.downloadAttachment(messageId: message.messageId),
-      );
+      _attachmentSink.add(AttachmentDownloadRequest(message));
     } else if (data.category.isSticker) {
       final String plain;
       if (data.category.isEncrypted) {
@@ -1292,39 +1298,17 @@ class DecryptMessage extends Injector {
         .map((transcript) => transcript.mediaSize!)
         .fold<int>(0, (a, b) => a + b);
 
-    Future<bool> downloadTranscriptAttachment() async {
-      var needDownload = false;
-
-      final futures = transcripts
-          .where((transcript) =>
-              transcript.category.isAttachment && transcript.content != null)
-          .map((transcript) async {
-        final category = transcript.category;
-
-        if (await _attachmentUtil.syncMessageMedia(transcript.messageId)) {
-          return;
-        }
-
-        needDownload = needDownload || true;
-
-        if (category.isImage && !photoAutoDownload) return;
-        if (category.isVideo && !videoAutoDownload) return;
-        if (category.isData && !fileAutoDownload) return;
-
-        await _attachmentUtil.downloadAttachment(
-          messageId: transcript.messageId,
-        );
-      });
-
-      await Future.wait(futures);
-      return needDownload;
-    }
-
-    final needDownload = await downloadTranscriptAttachment();
+    final needDownload = transcripts.any((e) => e.category.isAttachment);
 
     final mediaStatus = (totalMediaSize == 0 || !needDownload)
         ? MediaStatus.done
         : MediaStatus.canceled;
+
+    transcripts.forEach((message) {
+      if (message.category.isAttachment && message.content != null) {
+        _attachmentSink.add(TranscriptAttachmentDownloadRequest(message));
+      }
+    });
 
     return Message(
       messageId: data.messageId,
