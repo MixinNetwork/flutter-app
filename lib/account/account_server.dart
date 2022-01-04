@@ -239,16 +239,20 @@ class AccountServer {
           final jobs = await database.jobDao.sendingJobs().get();
           if (jobs.isEmpty) break;
           await Future.forEach(jobs, (db.Job job) async {
-            switch (job.action) {
-              case kSendingMessage:
-                await _runSendJob([job]);
-                break;
-              case kPinMessage:
-                await _runPinJob([job]);
-                break;
-              case kRecallMessage:
-                await _runRecallJob([job]);
-                break;
+            try {
+              switch (job.action) {
+                case kSendingMessage:
+                  await _runSendJob([job]);
+                  break;
+                case kPinMessage:
+                  await _runPinJob([job]);
+                  break;
+                case kRecallMessage:
+                  await _runRecallJob([job]);
+                  break;
+              }
+            } catch (error) {
+              e('send job error: $error');
             }
             return null;
           });
