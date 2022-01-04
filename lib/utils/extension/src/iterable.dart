@@ -59,4 +59,18 @@ extension ListExtension<T> on List<T> {
     }
     return null;
   }
+
+  List<List<T>> chunked(int size) {
+    if (size <= 1) {
+      throw ArgumentError('size must be greater than 1');
+    }
+    final result = <List<T>>[];
+    var i = 0;
+    while (i < length) {
+      final end = min(i + size, length);
+      result.add(sublist(i, end));
+      i = end;
+    }
+    return result;
+  }
 }
