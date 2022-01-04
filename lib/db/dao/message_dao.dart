@@ -146,7 +146,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       final futures = <Future>[
         into(db.messages).insertOnConflictUpdate(message),
         _insertMessageFts(message),
-        db.updateUnseenMessageCount(message.conversationId, currentUserId),
+        db.updateUnseenMessageCountAndLastMessageId(
+          message.conversationId,
+          currentUserId,
+          message.messageId,
+          message.createdAt,
+        ),
       ];
       return (await Future.wait(futures))[0] as int;
     });
