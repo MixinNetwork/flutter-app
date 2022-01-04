@@ -783,15 +783,18 @@ class AccountServer {
   }
 
   Future<void> markRead(String conversationId) async {
-    final ids =
-        await database.messageDao.getUnreadMessageIds(conversationId, userId);
-    if (ids.isEmpty) return;
-    final jobs = ids
-        .map((id) =>
-            createAckJob(kAcknowledgeMessageReceipts, id, MessageStatus.read))
-        .toList();
-    await database.jobDao.insertAll(jobs);
-    await _createReadSessionMessage(ids);
+    while (true) {
+      final ids = await database.messageDao
+          .getUnreadMessageIds(conversationId, userId, kMarkLimit);
+      if (ids.isEmpty) return;
+      final jobs = ids
+          .map((id) =>
+              createAckJob(kAcknowledgeMessageReceipts, id, MessageStatus.read))
+          .toList();
+      await database.jobDao.insertAll(jobs);
+      await _createReadSessionMessage(ids);
+      if (ids.length < kMarkLimit) return;
+    }
   }
 
   Future<void> _createReadSessionMessage(List<String> messageIds) async {
