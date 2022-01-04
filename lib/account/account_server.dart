@@ -435,6 +435,7 @@ class AccountServer {
       if (message.category.isPlain ||
           message.category == MessageCategory.appCard ||
           message.category.isPin) {
+        await _sender.checkConversation(message.conversationId);
         if (message.category == MessageCategory.appCard ||
             message.category.isPost ||
             message.category.isText) {
