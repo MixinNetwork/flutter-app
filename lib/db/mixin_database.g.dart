@@ -11715,6 +11715,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexPinMessagesConversationId = Index(
       'index_pin_messages_conversation_id',
       'CREATE INDEX IF NOT EXISTS index_pin_messages_conversation_id ON pin_messages (conversation_id)');
+  late final Index indexMessageConversationIdStatusUserId = Index(
+      'index_message_conversation_id_status_user_id',
+      'CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messages (conversation_id, status, user_id)');
   late final Trigger conversationLastMessageDelete = Trigger(
       'CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (SELECT message_id FROM messages WHERE conversation_id = old.conversation_id ORDER BY created_at DESC LIMIT 1) WHERE conversation_id = old.conversation_id;END',
       'conversation_last_message_delete');
@@ -13146,6 +13149,15 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Future<int> updateUnseenMessageCount(String conversationId, String userId) {
+    return customUpdate(
+      'UPDATE conversations SET unseen_message_count = (SELECT count(1) FROM messages WHERE conversation_id = ?1 AND status IN (\'SENT\', \'DELIVERED\') AND user_id != ?2) WHERE conversation_id = ?1',
+      variables: [Variable<String>(conversationId), Variable<String>(userId)],
+      updates: {conversations},
+      updateKind: UpdateKind.update,
+    );
+  }
+
   Selectable<int> baseConversationItemCount(
       Expression<bool?> Function(Conversations conversation, Users owner,
               CircleConversations circleConversation)
@@ -13452,6 +13464,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         indexStickerAlbumsCategoryCreatedAt,
         pinMessages,
         indexPinMessagesConversationId,
+        indexMessageConversationIdStatusUserId,
         conversationLastMessageDelete,
         addresses,
         apps,

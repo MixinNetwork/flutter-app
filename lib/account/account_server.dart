@@ -265,17 +265,15 @@ class AccountServer {
     if (floodMessages.isEmpty) {
       return;
     }
+    Stopwatch? stopwatch;
+    if (!kReleaseMode) {
+      stopwatch = Stopwatch()..start();
+    }
     for (final message in floodMessages) {
-      Stopwatch? stopwatch;
-      if (!kReleaseMode) {
-        stopwatch = Stopwatch()..start();
-      }
-
       await _decryptMessage.process(message);
-
-      if (stopwatch != null) {
-        d('process execution time: ${stopwatch.elapsedMilliseconds}');
-      }
+    }
+    if (stopwatch != null) {
+      d('processMessage(${floodMessages.length}): ${stopwatch.elapsedMilliseconds}');
     }
     await _runProcessFloodJob();
   }
