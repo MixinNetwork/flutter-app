@@ -433,13 +433,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<List<String>> getUnreadMessageIds(
-          String conversationId, String userId) =>
+          String conversationId, String userId, int limit) =>
       db.transaction(() async {
         final list = await (db.selectOnly(db.messages)
               ..addColumns([db.messages.messageId])
               ..where(db.messages.conversationId.equals(conversationId) &
                   db.messages.userId.equals(userId).not() &
-                  db.messages.status.isIn(['SENT', 'DELIVERED'])))
+                  db.messages.status.isIn(['SENT', 'DELIVERED']))
+              ..limit(limit))
             .map((row) => row.read(db.messages.messageId))
             .get();
         final ids = list.whereNotNull().toList();
