@@ -31,7 +31,5 @@ void main() {
     ]);
 
     expect([].chunked(2), []);
-
-
   });
 }
