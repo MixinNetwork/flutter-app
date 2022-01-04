@@ -259,7 +259,9 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     LIMIT :limit OFFSET :offset;
 
 
-updateUnseenMessageCount:
+updateUnseenMessageCountAndLastMessageId:
 UPDATE conversations SET unseen_message_count
-    = (SELECT count(1) FROM messages WHERE conversation_id = :conversationId AND status IN ('SENT', 'DELIVERED')  AND user_id != :userId)
+    = (SELECT count(1) FROM messages WHERE conversation_id = :conversationId AND status IN ('SENT', 'DELIVERED')  AND user_id != :userId),
+    last_message_id = :lastMessageId,
+    last_message_created_at = :lastMessageCreatedAt
     WHERE conversation_id = :conversationId;
