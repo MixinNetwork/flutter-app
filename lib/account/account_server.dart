@@ -432,10 +432,18 @@ class AccountServer {
       MessageResult? result;
       var content = message.content;
 
+      final conversation = await database.conversationDao
+          .conversationById(message.conversationId)
+          .getSingleOrNull();
+      if (conversation == null) {
+        e('Conversation not found');
+        return;
+      }
+      await _sender.checkConversationExists(conversation);
+
       if (message.category.isPlain ||
           message.category == MessageCategory.appCard ||
           message.category.isPin) {
-        await _sender.checkConversation(message.conversationId);
         if (message.category == MessageCategory.appCard ||
             message.category.isPost ||
             message.category.isText) {
@@ -450,10 +458,6 @@ class AccountServer {
         );
         result = await _sender.deliver(blazeMessage);
       } else if (message.category.isEncrypted) {
-        final conversation = await database.conversationDao
-            .conversationById(message.conversationId)
-            .getSingleOrNull();
-        if (conversation == null) return;
         final participantSessionKey = await database.participantSessionDao
             .getParticipantSessionKeyWithoutSelf(
                 message.conversationId, userId);
