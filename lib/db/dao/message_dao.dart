@@ -148,20 +148,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String currentUserId,
   ) {
     Future<void> _update(Message message) async {
-      final unseenMessageCount = await _getUnseenMessageCount(
-        userId: currentUserId,
-        conversationId: message.conversationId,
-      );
-      final unseen = message.userId != currentUserId &&
-              [MessageStatus.sent, MessageStatus.delivered]
-                  .contains(message.status)
-          ? 1
-          : 0;
-      await db.conversationDao.updateLastMessageId(
+      await db.updateUnseenMessageCountAndLastMessageId(
         message.conversationId,
+        currentUserId,
         message.messageId,
         message.createdAt,
-        unseenMessageCount + unseen,
       );
     }
 
@@ -400,28 +391,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     );
   }
 
-  Future<int> _getUnseenMessageCount({
-    required String conversationId,
-    required String userId,
-  }) async {
-    final count = db.messages.messageId.count();
-    final status = db.messages.status;
-    return (await (db.selectOnly(db.messages)
-              ..addColumns([count])
-              ..where(
-                db.messages.conversationId.equals(conversationId) &
-                    db.messages.userId.equals(userId).not() &
-                    status.isIn(
-                      [MessageStatus.sent, MessageStatus.delivered]
-                          .map(status.converter.mapToSql),
-                    ),
-              )
-              ..limit(1))
-            .map((row) => row.read(count))
-            .getSingleOrNull()) ??
-        0;
-  }
-
   Future<int> takeUnseen(String userId, String conversationId) async {
     final messageId = await (db.selectOnly(db.messages)
           ..addColumns([db.messages.messageId])
@@ -496,13 +465,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<List<String>> getUnreadMessageIds(
-          String conversationId, String userId) =>
+          String conversationId, String userId, int limit) =>
       db.transaction(() async {
         final list = await (db.selectOnly(db.messages)
               ..addColumns([db.messages.messageId])
               ..where(db.messages.conversationId.equals(conversationId) &
                   db.messages.userId.equals(userId).not() &
-                  db.messages.status.isIn(['SENT', 'DELIVERED'])))
+                  db.messages.status.isIn(['SENT', 'DELIVERED']))
+              ..limit(limit))
             .map((row) => row.read(db.messages.messageId))
             .get();
         final ids = list.whereNotNull().toList();

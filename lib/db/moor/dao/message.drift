@@ -257,3 +257,11 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;
+
+
+updateUnseenMessageCountAndLastMessageId:
+UPDATE conversations SET unseen_message_count
+    = (SELECT count(1) FROM messages WHERE conversation_id = :conversationId AND status IN ('SENT', 'DELIVERED')  AND user_id != :userId),
+    last_message_id = :lastMessageId,
+    last_message_created_at = :lastMessageCreatedAt
+    WHERE conversation_id = :conversationId;

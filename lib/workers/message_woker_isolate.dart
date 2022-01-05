@@ -226,16 +226,20 @@ class _MessageProcessRunner {
           final jobs = await database.jobDao.sendingJobs().get();
           if (jobs.isEmpty) break;
           await Future.forEach(jobs, (db.Job job) async {
-            switch (job.action) {
-              case kSendingMessage:
-                await _runSendJob([job]);
-                break;
-              case kPinMessage:
-                await _runPinJob([job]);
-                break;
-              case kRecallMessage:
-                await _runRecallJob([job]);
-                break;
+            try {
+              switch (job.action) {
+                case kSendingMessage:
+                  await _runSendJob([job]);
+                  break;
+                case kPinMessage:
+                  await _runPinJob([job]);
+                  break;
+                case kRecallMessage:
+                  await _runRecallJob([job]);
+                  break;
+              }
+            } catch (error) {
+              e('send job error: $error');
             }
             return null;
           });
@@ -349,6 +353,15 @@ class _MessageProcessRunner {
       MessageResult? result;
       var content = message.content;
 
+      final conversation = await database.conversationDao
+          .conversationById(message.conversationId)
+          .getSingleOrNull();
+      if (conversation == null) {
+        e('Conversation not found');
+        return;
+      }
+      await _sender.checkConversationExists(conversation);
+
       if (message.category.isPlain ||
           message.category == MessageCategory.appCard ||
           message.category.isPin) {
@@ -366,10 +379,6 @@ class _MessageProcessRunner {
         );
         result = await _sender.deliver(blazeMessage);
       } else if (message.category.isEncrypted) {
-        final conversation = await database.conversationDao
-            .conversationById(message.conversationId)
-            .getSingleOrNull();
-        if (conversation == null) return;
         final participantSessionKey = await database.participantSessionDao
             .getParticipantSessionKeyWithoutSelf(
                 message.conversationId, userId);

@@ -232,7 +232,7 @@ class Sender {
     if (conversation.category == ConversationCategory.group) {
       await _syncConversation(conversationId);
     } else {
-      await _checkConversationExists(conversation);
+      await checkConversationExists(conversation);
     }
   }
 
@@ -294,7 +294,7 @@ class Sender {
     }
   }
 
-  Future _checkConversationExists(db.Conversation conversation) async {
+  Future checkConversationExists(db.Conversation conversation) async {
     if (conversation.status != ConversationStatus.success) {
       await _createConversation(conversation);
     }
