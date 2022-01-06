@@ -223,7 +223,7 @@ class DecryptMessage extends Injector {
   Future<void> _processPlainMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.plainJson) {
       final plainJsonMessage = PlainJsonMessage.fromJson(
-          _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
+          _jsonDecode(data.data) as Map<String, dynamic>);
       if (plainJsonMessage.action == kAcknowledgeMessageReceipts) {
         if (plainJsonMessage.ackMessages?.isNotEmpty != true) {
           return;
@@ -323,19 +323,19 @@ class DecryptMessage extends Injector {
   Future<void> _processSystemMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.systemConversation) {
       final systemMessage = SystemConversationMessage.fromJson(
-          _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
+          _jsonDecode(data.data) as Map<String, dynamic>);
       await _processSystemConversationMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemUser) {
       final systemMessage = SystemUserMessage.fromJson(
-          _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
+          _jsonDecode(data.data) as Map<String, dynamic>);
       await _processSystemUserMessage(systemMessage);
     } else if (data.category == MessageCategory.systemCircle) {
       final systemMessage = SystemCircleMessage.fromJson(
-          _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
+          _jsonDecode(data.data) as Map<String, dynamic>);
       await _processSystemCircleMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemAccountSnapshot) {
       final systemSnapshot = SnapshotMessage.fromJson(
-          _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
+          _jsonDecode(data.data) as Map<String, dynamic>);
       await _processSystemSnapshotMessage(data, systemSnapshot);
     }
   }
@@ -350,8 +350,8 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processAppButton(BlazeMessageData data) async {
-    final content = _decodeWithIsolate(data.data);
-    // final apps = (await _decodeWithIsolate(data.data) as List)
+    final content = _decode(data.data);
+    // final apps = (await _decode(data.data) as List)
     //     .map((e) =>
     //         e == null ? null : AppButton.fromJson(e as Map<String, dynamic>))
     //     .toList();
@@ -370,7 +370,7 @@ class DecryptMessage extends Injector {
 
   Future<void> _processAppCard(BlazeMessageData data) async {
     await refreshUsers(<String>[data.userId]);
-    final content = _decodeWithIsolate(data.data);
+    final content = _decode(data.data);
     final appCard =
         AppCard.fromJson(jsonDecode(content) as Map<String, dynamic>);
     final message = Message(
@@ -392,7 +392,7 @@ class DecryptMessage extends Injector {
 
   Future<void> _processPinMessage(BlazeMessageData data) async {
     final pinMessage = PinMessagePayload.fromJson(
-        _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
+        _jsonDecode(data.data) as Map<String, dynamic>);
 
     if (pinMessage.action == PinMessagePayloadAction.pin) {
       await Future.forEach<String>(pinMessage.messageIds, (messageId) async {
@@ -433,8 +433,8 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processRecallMessage(BlazeMessageData data) async {
-    final recallMessage = RecallMessage.fromJson(
-        _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
+    final recallMessage =
+        RecallMessage.fromJson(_jsonDecode(data.data) as Map<String, dynamic>);
     final message = await database.messageDao
         .findMessageByMessageId(recallMessage.messageId);
     if (message != null && message.category.isAttachment) {
@@ -491,7 +491,7 @@ class DecryptMessage extends Injector {
           data.category == MessageCategory.encryptedText) {
         plain = plainText;
       } else {
-        plain = _decodeWithIsolate(plainText);
+        plain = _decode(plainText);
       }
       QuoteMessageItem? _quoteContent;
       final message =
@@ -524,7 +524,7 @@ class DecryptMessage extends Injector {
       if (data.category.isEncrypted) {
         plain = plainText;
       } else {
-        plain = _decodeWithIsolate(plainText);
+        plain = _decode(plainText);
       }
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
@@ -555,7 +555,7 @@ class DecryptMessage extends Injector {
       if (data.category.isEncrypted) {
         plain = plainText;
       } else {
-        plain = _decodeWithIsolate(plainText);
+        plain = _decode(plainText);
       }
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
@@ -588,7 +588,7 @@ class DecryptMessage extends Injector {
       if (data.category.isEncrypted) {
         plain = plainText;
       } else {
-        plain = _decodeWithIsolate(plainText);
+        plain = _decode(plainText);
       }
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
@@ -617,7 +617,7 @@ class DecryptMessage extends Injector {
       if (data.category.isEncrypted) {
         plain = plainText;
       } else {
-        plain = _decodeWithIsolate(plainText);
+        plain = _decode(plainText);
       }
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
@@ -648,7 +648,7 @@ class DecryptMessage extends Injector {
       if (data.category.isEncrypted) {
         plain = plainText;
       } else {
-        plain = _decodeWithIsolate(plainText);
+        plain = _decode(plainText);
       }
       final stickerMessage = StickerMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
@@ -675,7 +675,7 @@ class DecryptMessage extends Injector {
       if (data.category.isEncrypted) {
         plain = plainText;
       } else {
-        plain = _decodeWithIsolate(plainText);
+        plain = _decode(plainText);
       }
       final contactMessage = ContactMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
@@ -700,7 +700,7 @@ class DecryptMessage extends Injector {
       if (data.category.isEncrypted) {
         plain = plainText;
       } else {
-        plain = _decodeWithIsolate(plainText);
+        plain = _decode(plainText);
       }
       final liveMessage =
           LiveMessage.fromJson(await jsonDecode(plain) as Map<String, dynamic>);
@@ -722,7 +722,7 @@ class DecryptMessage extends Injector {
           data.category == MessageCategory.encryptedLocation) {
         plain = plainText;
       } else {
-        plain = _decodeWithIsolate(plainText);
+        plain = _decode(plainText);
       }
       // ignore: unused_local_variable todo check location
       LocationMessage? locationMessage;
@@ -754,7 +754,7 @@ class DecryptMessage extends Injector {
           data.category == MessageCategory.encryptedPost) {
         plain = plainText;
       } else {
-        plain = _decodeWithIsolate(plainText);
+        plain = _decode(plainText);
       }
       final message = Message(
         messageId: data.messageId,
@@ -772,7 +772,7 @@ class DecryptMessage extends Injector {
           data.category == MessageCategory.encryptedTranscript) {
         plain = plainText;
       } else {
-        plain = _decodeWithIsolate(plainText);
+        plain = _decode(plainText);
       }
       final list = jsonDecode(plain) as List<dynamic>;
       final message = await processTranscriptMessage(data, list);
@@ -1032,7 +1032,7 @@ class DecryptMessage extends Injector {
         data.category == MessageCategory.signalData ||
         data.category == MessageCategory.signalAudio) {
       final attachment = AttachmentMessage.fromJson(
-          _jsonDecodeWithIsolate(plaintext) as Map<String, dynamic>);
+          _jsonDecode(plaintext) as Map<String, dynamic>);
       final messagesCompanion = MessagesCompanion(
           status: Value(data.status),
           content: Value(attachment.attachmentId),
@@ -1050,7 +1050,7 @@ class DecryptMessage extends Injector {
       await database.messageDao
           .updateAttachmentMessage(messageId, messagesCompanion);
     } else if (data.category == MessageCategory.signalSticker) {
-      final plain = _decodeWithIsolate(plaintext);
+      final plain = _decode(plaintext);
       final stickerMessage = StickerMessage.fromJson(
         jsonDecode(plain) as Map<String, dynamic>,
       );
@@ -1063,14 +1063,14 @@ class DecryptMessage extends Injector {
       await database.messageDao.updateStickerMessage(
           messageId, data.status, stickerMessage.stickerId);
     } else if (data.category == MessageCategory.signalContact) {
-      final plain = _decodeWithIsolate(plaintext);
+      final plain = _decode(plaintext);
       final contactMessage = ContactMessage.fromJson(
         jsonDecode(plain) as Map<String, dynamic>,
       );
       await database.messageDao
           .updateContactMessage(messageId, data.status, contactMessage.userId);
     } else if (data.category == MessageCategory.signalLive) {
-      final plain = _decodeWithIsolate(plaintext);
+      final plain = _decode(plaintext);
       final liveMessage = LiveMessage.fromJson(
         jsonDecode(plain) as Map<String, dynamic>,
       );
@@ -1082,7 +1082,7 @@ class DecryptMessage extends Injector {
           liveMessage.thumbUrl,
           data.status);
     } else if (data.category == MessageCategory.signalTranscript) {
-      final plain = _decodeWithIsolate(plaintext);
+      final plain = _decode(plaintext);
       final list = jsonDecode(plain) as List<dynamic>;
       final message = await processTranscriptMessage(data, list);
       if (message != null) {
@@ -1106,7 +1106,7 @@ class DecryptMessage extends Injector {
       String messageId, String? sessionId) async {
     final plainJsonMessage =
         PlainJsonMessage(kResendKey, null, null, messageId, null, null);
-    final encoded = _jsonEncodeWithIsolate(plainJsonMessage);
+    final encoded = _jsonEncode(plainJsonMessage);
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, recipientId, encoded,
         sessionId: sessionId));
@@ -1132,7 +1132,7 @@ class DecryptMessage extends Injector {
     }
     final plainJsonMessage = PlainJsonMessage(
         kResendMessages, messages.reversed.toList(), null, null, null, null);
-    final encoded = _jsonEncodeWithIsolate(plainJsonMessage);
+    final encoded = _jsonEncode(plainJsonMessage);
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, userId, encoded,
         sessionId: sessionId));
@@ -1305,11 +1305,5 @@ String _decode(String encoded) => utf8.decode(base64Decode(encoded));
 
 String _jsonEncode(Object object) =>
     base64Encode(utf8.encode(jsonEncode(object)));
-
-dynamic _jsonDecodeWithIsolate(String encoded) => _jsonDecode(encoded);
-
-String _jsonEncodeWithIsolate(Object object) => _jsonEncode(object);
-
-String _decodeWithIsolate(String encoded) => _decode(encoded);
 
 typedef MessageGenerator = Message Function(QuoteMessageItem? quoteMessageItem);
