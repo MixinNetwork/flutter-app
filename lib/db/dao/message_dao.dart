@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:rxdart/rxdart.dart';
@@ -8,7 +9,6 @@ import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/load_balancer_utils.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../database_event_bus.dart';
 import '../mixin_database.dart';
@@ -146,21 +146,49 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
+  final Map<String, void Function()> _conversationUnseenTaskRunner = {};
+
+  // TODO maybe more effective?
+  void _updateConversationUnseenCount(
+    Message message,
+    String currentUserId,
+  ) {
+    Future<void> _update(Message message) async {
+      await db.updateUnseenMessageCountAndLastMessageId(
+        message.conversationId,
+        currentUserId,
+        message.messageId,
+        message.createdAt,
+      );
+    }
+
+    if (_conversationUnseenTaskRunner[message.conversationId] != null) {
+      _conversationUnseenTaskRunner[message.conversationId] =
+          () => _update(message);
+      return;
+    } else {
+      _conversationUnseenTaskRunner[message.conversationId] =
+          () => _update(message);
+      Future.delayed(const Duration(milliseconds: 500)).then((value) {
+        final runner =
+            _conversationUnseenTaskRunner.remove(message.conversationId);
+        runner?.call();
+      });
+    }
+  }
+
   Future<int> insert(Message message, String currentUserId,
       [bool? silent = false]) async {
     final result = await db.transaction(() async {
       final futures = <Future>[
         into(db.messages).insertOnConflictUpdate(message),
         _insertMessageFts(message),
-        db.updateUnseenMessageCountAndLastMessageId(
-          message.conversationId,
-          currentUserId,
-          message.messageId,
-          message.createdAt,
-        ),
       ];
       return (await Future.wait(futures))[0] as int;
     });
+
+    _updateConversationUnseenCount(message, currentUserId);
+
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [message.messageId]);
     if (!(silent ?? false)) {
       db.eventBus.send(DatabaseEvent.notification, message.messageId);
@@ -179,8 +207,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       ftsContent = message.name;
     } else if (message.category == MessageCategory.appCard) {
       final appCard = AppCardData.fromJson(
-          await jsonDecodeWithIsolate(message.content!)
-              as Map<String, dynamic>);
+          jsonDecode(message.content!) as Map<String, dynamic>);
       ftsContent = '${appCard.title} ${appCard.description}';
     }
     if (ftsContent != null) {

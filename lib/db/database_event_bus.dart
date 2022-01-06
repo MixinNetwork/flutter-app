@@ -20,6 +20,8 @@ class DataBaseEventBus {
           .map((e) => e.item2)
           .cast<T>();
 
+  Stream<Tuple2<DatabaseEvent, dynamic>> get stream => _streamController.stream;
+
   void send<T>(DatabaseEvent event, T value) =>
       _streamController.add(Tuple2(event, value));
 

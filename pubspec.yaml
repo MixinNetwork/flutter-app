@@ -117,12 +117,12 @@ dependency_overrides:
   drift:
     git:
       url: https://github.com/simolus3/moor.git
-      ref: 871f1e4198da994060b02a9eaef9a809d5750918
+      ref: 70e83b5a747cb6bf9bf360d6de78e8398d3b6873
       path: drift
   drift_dev:
     git:
       url: https://github.com/simolus3/moor.git
-      ref: 871f1e4198da994060b02a9eaef9a809d5750918
+      ref: 70e83b5a747cb6bf9bf360d6de78e8398d3b6873
       path: drift_dev
   # remove this if https://github.com/woodemi/quick_breakpad/issues/10 fixed
   platform: ^3.1.0
@@ -133,7 +133,7 @@ dependency_overrides:
   sqlparser:
     git:
       url: https://github.com/simolus3/moor.git
-      ref: 871f1e4198da994060b02a9eaef9a809d5750918
+      ref: 70e83b5a747cb6bf9bf360d6de78e8398d3b6873
       path: sqlparser
 
 dev_dependencies:

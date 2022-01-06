@@ -37,7 +37,7 @@ class HomePage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final localTimeError = useMemoizedStream(
-            () => context.accountServer.blaze.connectedStateStream
+            () => context.accountServer.connectedStateStream
                 .map((event) => event == ConnectedState.hasLocalTimeError)
                 .distinct(),
             keys: [context.accountServer]).data ??
@@ -79,7 +79,7 @@ class HomePage extends HookWidget {
                           onTap: () async {
                             loading.value = true;
                             try {
-                              await context.accountServer.blaze.reconnect();
+                              await context.accountServer.reconnectBlaze();
                             } catch (_) {}
 
                             loading.value = false;
