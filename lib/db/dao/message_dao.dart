@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../constants/constants.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
@@ -47,16 +48,21 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   late Stream<List<MessageItem>> insertOrReplaceMessageStream = db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
       .asyncBufferMap(
-    (event) {
-      final ids =
-          event.reduce((value, element) => [...value, ...element]).toSet();
-      return _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
-              message.messageId.isIn(ids),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
-              Limit(ids.length, 0)).get();
+    (event) async {
+      final eventIds =
+          event.reduce((value, element) => [...value, ...element]).toList();
+      final chunkedIds = eventIds.chunked(kMarkLimit);
+      final messages = <MessageItem>[];
+      for (final ids in chunkedIds) {
+        messages.addAll(await _baseMessageItems(
+            (message, _, __, ___, ____, _____, ______, _______, ________,
+                    _________, __________) =>
+                message.messageId.isIn(ids),
+            (_, __, ___, ____, _____, ______, _______, ________, _________,
+                    __________, ___________) =>
+                Limit(ids.length, 0)).get());
+      }
+      return messages;
     },
   );
 
