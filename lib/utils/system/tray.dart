@@ -105,6 +105,7 @@ Future<void> _initSystemTray() async {
             if (placement.ref.showCmd == SW_SHOWMINIMIZED) {
               ShowWindow(handle, SW_RESTORE);
             }
+            calloc.free(placement);
             SetForegroundWindow(handle);
             appWindow.show();
           }
