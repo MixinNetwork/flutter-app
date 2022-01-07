@@ -235,6 +235,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("未允许通知，请到通知设置开启。"),
         "notificationPermissionTitle":
             MessageLookupByLibrary.simpleMessage("打开通知"),
+        "openInExternalApp": MessageLookupByLibrary.simpleMessage("通过外部程序打开"),
         "pageDeleteCircle": m16,
         "pageEditProfileJoin": m17,
         "pageLandingClickToReload":

@@ -230,5 +230,6 @@
   "uriCheckOnPhone": "不支持此链接，请在手机上查看。",
   "saveAs": "另存为",
   "noResults": "没有结果",
-  "saveToGallery": "保存到图库"
+  "saveToGallery": "保存到图库",
+  "openInExternalApp": "通过外部程序打开"
 }
