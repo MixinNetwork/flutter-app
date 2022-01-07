@@ -2419,6 +2419,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Open in External App`
+  String get openInExternalApp {
+    return Intl.message(
+      'Open in External App',
+      name: 'openInExternalApp',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
