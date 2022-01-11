@@ -464,7 +464,7 @@ class _Item extends HookWidget {
             maxScale: math.max(initialScale * 2, 2),
             controller: controller,
             onEmptyAreaTapped: () {
-              Navigator.pop(context);
+              Navigator.maybePop(context);
             },
             image: Image.file(
               File(context.accountServer
