@@ -28,6 +28,11 @@ dependencies:
   decimal: ^1.3.0
   desktop_drop: ^0.1.2
   desktop_lifecycle: ^0.1.0
+  desktop_multi_window:
+    git:
+      url: https://github.com/MixinNetwork/flutter-plugins.git
+      path: packages/desktop_multi_window
+      ref: bfd519892d32aa0e4964cdaa2fabf79528b55957
   desktop_webview_window: ^0.1.4
   device_info_plus: ^3.1.0
   dio: ^4.0.0

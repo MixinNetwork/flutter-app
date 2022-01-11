@@ -297,6 +297,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.0"
+  desktop_multi_window:
+    dependency: "direct main"
+    description:
+      path: "packages/desktop_multi_window"
+      ref: bfd519892d32aa0e4964cdaa2fabf79528b55957
+      resolved-ref: bfd519892d32aa0e4964cdaa2fabf79528b55957
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
+    version: "0.0.1"
   desktop_webview_window:
     dependency: "direct main"
     description:
@@ -1457,5 +1466,5 @@ packages:
     source: hosted
     version: "3.1.0"
 sdks:
-  dart: ">=2.14.0 <3.0.0"
+  dart: ">=2.15.0 <3.0.0"
   flutter: ">=2.5.0"

@@ -17,11 +17,13 @@ import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
 import 'ui/home/home.dart';
 import 'utils/app_lifecycle.dart';
+import 'utils/extension/extension.dart';
 import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
 import 'utils/logger.dart';
 import 'utils/webview.dart';
+import 'widgets/window/app_windows.dart';
 
 final packageInfoFuture = PackageInfo.fromPlatform();
 
@@ -30,6 +32,11 @@ Future<void> main(List<String> args) async {
 
   // show custom web view navigation bar.
   if (runWebViewNavigationBar(args)) {
+    return;
+  }
+  // show another window.
+  if (args.firstOrNull == 'multi_window') {
+    runSubWindow(args);
     return;
   }
 

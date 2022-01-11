@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -10,12 +9,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../constants/resources.dart';
 import '../../../enum/media_status.dart';
+import '../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/uri_utils.dart';
+import '../../../utils/platform.dart';
 import '../../cache_image.dart';
 import '../../image.dart';
 import '../../interactive_decorated_box.dart';
 import '../../status.dart';
+import '../../window/app_windows.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -75,10 +76,12 @@ class VideoMessageWidget extends HookWidget {
                   message.mediaUrl != null) {
                 final path = context.accountServer
                     .convertMessageAbsolutePath(message, isTranscriptPage);
-                if (Platform.isIOS || Platform.isAndroid) {
-                  OpenFile.open(path);
+                if (kPlatformIsDesktop) {
+                  launchVideoPlayerWindow(path,
+                      windowName:
+                          context.read<ConversationCubit>().state?.name ?? '');
                 } else {
-                  openUri(context, Uri.file(path).toString());
+                  OpenFile.open(path);
                 }
               } else if (message.mediaStatus == MediaStatus.pending) {
                 context.accountServer
