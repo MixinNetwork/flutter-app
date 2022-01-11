@@ -6,7 +6,6 @@ import 'dart:isolate';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
-import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
@@ -216,10 +215,22 @@ class _MessageProcessRunner {
         // runFloodJob when socket connected.
         blaze.connectedStateStream
             .where((state) => state == ConnectedState.connected),
-        database.mixinDatabase.tableUpdates(
+        database.mixinDatabase
+            .tableUpdates(
           TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
         )
-      ]).asyncListen((_) => _runProcessFloodJob()))
+            .map((event) {
+          // TODO remove this log after flood job is working well.
+          i('flood message table updated.');
+          return event;
+        })
+      ]).asyncListen((_) async {
+        try {
+          await _runProcessFloodJob();
+        } catch (error, stacktrace) {
+          e('runProcessFloodJob error: $error, stacktrace: $stacktrace');
+        }
+      }))
       ..add(database.jobDao.watchHasAckJobs().asyncListen((_) => _runAckJob()))
       ..add(database.jobDao.watchHasSendingJobs().asyncListen((_) async {
         while (true) {
@@ -259,18 +270,14 @@ class _MessageProcessRunner {
     final floodMessages =
         await database.floodMessageDao.findFloodMessage().get();
     if (floodMessages.isEmpty) {
+      i('_runProcessFloodJob: no flood message');
       return;
     }
-    Stopwatch? stopwatch;
-    if (!kReleaseMode) {
-      stopwatch = Stopwatch()..start();
-    }
+    final stopwatch = Stopwatch()..start();
     for (final message in floodMessages) {
       await _decryptMessage.process(message);
     }
-    if (stopwatch != null) {
-      i('processMessage(${floodMessages.length}): ${stopwatch.elapsedMilliseconds}');
-    }
+    i('processMessage(${floodMessages.length}): ${stopwatch.elapsedMilliseconds}');
     await _runProcessFloodJob();
   }
 
