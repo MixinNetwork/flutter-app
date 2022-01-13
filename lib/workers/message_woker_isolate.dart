@@ -267,62 +267,64 @@ class _MessageProcessRunner {
   }
 
   Future<void> _runProcessFloodJob() async {
-    final floodMessages =
-        await database.floodMessageDao.findFloodMessage().get();
-    if (floodMessages.isEmpty) {
-      i('_runProcessFloodJob: no flood message');
-      return;
+    while (true) {
+      final floodMessages =
+          await database.floodMessageDao.findFloodMessage().get();
+      if (floodMessages.isEmpty) {
+        i('_runProcessFloodJob: no flood message');
+        return;
+      }
+      final stopwatch = Stopwatch()..start();
+      for (final message in floodMessages) {
+        await _decryptMessage.process(message);
+      }
+      i('processMessage(${floodMessages.length}): ${stopwatch.elapsedMilliseconds}');
     }
-    final stopwatch = Stopwatch()..start();
-    for (final message in floodMessages) {
-      await _decryptMessage.process(message);
-    }
-    i('processMessage(${floodMessages.length}): ${stopwatch.elapsedMilliseconds}');
-    await _runProcessFloodJob();
   }
 
   Future<void> _runAckJob() async {
-    final jobs = await database.jobDao.ackJobs().get();
-    if (jobs.isEmpty) return;
+    while (true) {
+      final jobs = await database.jobDao.ackJobs().get();
+      if (jobs.isEmpty) break;
 
-    final ack = await Future.wait(
-      jobs.map(
-        (e) async {
-          final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
-          return BlazeAckMessage(
-            messageId: map['message_id'] as String,
-            status: map['status'] as String,
-          );
-        },
-      ),
-    );
+      final ack = await Future.wait(
+        jobs.map(
+          (e) async {
+            final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
+            return BlazeAckMessage(
+              messageId: map['message_id'] as String,
+              status: map['status'] as String,
+            );
+          },
+        ),
+      );
 
-    final jobIds = jobs.map((e) => e.jobId).toList();
-    try {
-      await client.messageApi.acknowledgements(ack);
-      await database.jobDao.deleteJobs(jobIds);
-    } catch (e, s) {
-      w('Send ack error: $e, stack: $s');
+      final jobIds = jobs.map((e) => e.jobId).toList();
+      try {
+        await client.messageApi.acknowledgements(ack);
+        await database.jobDao.deleteJobs(jobIds);
+      } catch (e, s) {
+        w('Send ack error: $e, stack: $s');
+      }
     }
-
-    await _runAckJob();
   }
 
   Future<void> _runUpdateAssetJob() async {
-    final jobs = await database.jobDao.updateAssetJobs().get();
-    if (jobs.isEmpty) return;
+    while (true) {
+      final jobs = await database.jobDao.updateAssetJobs().get();
+      if (jobs.isEmpty) return;
 
-    await Future.forEach(jobs, (db.Job job) async {
-      try {
-        final a = (await client.assetApi.getAssetById(job.blazeMessage!)).data;
-        await database.assetDao.insertSdkAsset(a);
-        await database.jobDao.deleteJobById(job.jobId);
-      } catch (e, s) {
-        w('Update asset job error: $e, stack: $s');
-      }
-    });
-
-    await _runUpdateAssetJob();
+      await Future.forEach(jobs, (db.Job job) async {
+        try {
+          final a =
+              (await client.assetApi.getAssetById(job.blazeMessage!)).data;
+          await database.assetDao.insertSdkAsset(a);
+          await database.jobDao.deleteJobById(job.jobId);
+        } catch (e, s) {
+          w('Update asset job error: $e, stack: $s');
+        }
+      });
+    }
   }
 
   Future<void> _runSendJob(List<db.Job> jobs) async {
