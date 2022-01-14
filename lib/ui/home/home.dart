@@ -13,6 +13,7 @@ import 'bloc/conversation_cubit.dart';
 import 'bloc/multi_auth_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
 import 'command_palette_wrapper.dart';
+import 'conversation/conversation_hotkey.dart';
 import 'conversation/conversation_page.dart';
 import 'route/responsive_navigator.dart';
 import 'route/responsive_navigator_cubit.dart';
@@ -44,54 +45,56 @@ class HomePage extends HookWidget {
         false;
 
     return CommandPaletteWrapper(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) =>
-                _HomePage(
-              constraints: constraints,
+      child: ConversationHotKey(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) =>
+                  _HomePage(
+                constraints: constraints,
+              ),
             ),
-          ),
-          if (localTimeError)
-            HookBuilder(builder: (context) {
-              final loading = useState(false);
-              return Material(
-                color: context.theme.background,
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        context.l10n.localTimeErrorDescription,
-                        style: TextStyle(
-                          color: context.theme.text,
-                          fontSize: 16,
+            if (localTimeError)
+              HookBuilder(builder: (context) {
+                final loading = useState(false);
+                return Material(
+                  color: context.theme.background,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          context.l10n.localTimeErrorDescription,
+                          style: TextStyle(
+                            color: context.theme.text,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      if (loading.value)
-                        CircularProgressIndicator(
-                          color: context.theme.accent,
-                        ),
-                      if (!loading.value)
-                        MixinButton(
-                          onTap: () async {
-                            loading.value = true;
-                            try {
-                              await context.accountServer.reconnectBlaze();
-                            } catch (_) {}
+                        const SizedBox(height: 24),
+                        if (loading.value)
+                          CircularProgressIndicator(
+                            color: context.theme.accent,
+                          ),
+                        if (!loading.value)
+                          MixinButton(
+                            onTap: () async {
+                              loading.value = true;
+                              try {
+                                await context.accountServer.reconnectBlaze();
+                              } catch (_) {}
 
-                            loading.value = false;
-                          },
-                          child: Text(context.l10n.continueText),
-                        ),
-                    ],
+                              loading.value = false;
+                            },
+                            child: Text(context.l10n.continueText),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }),
-        ],
+                );
+              }),
+          ],
+        ),
       ),
     );
   }

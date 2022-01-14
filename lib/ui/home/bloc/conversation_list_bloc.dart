@@ -32,9 +32,13 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   late int limit;
   StreamSubscription? streamSubscription;
 
-  ItemPositionsListener? itemPositionsListener(
+  ItemPositionsListener itemPositionsListener(
           SlideCategoryState slideCategoryState) =>
       _map[slideCategoryState]!.itemPositionsListener;
+
+  ItemScrollController itemScrollController(
+          SlideCategoryState slideCategoryState) =>
+      _map[slideCategoryState]!.itemScrollController;
 
   void init() => _switchBloc(slideCategoryCubit.state, limit);
 
@@ -175,6 +179,8 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
   final Future<List<ConversationItem>> Function(int limit, int offset)
       _queryRange;
   final Future<bool> Function() _queryHasData;
+
+  final ItemScrollController itemScrollController = ItemScrollController();
 
   @override
   Future<int> queryCount() => _queryCount();
