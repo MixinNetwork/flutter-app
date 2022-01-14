@@ -75,7 +75,7 @@ class AudioMessagePlayService {
 
     if (message.mediaStatus == MediaStatus.done) {
       unawaited(_accountServer.database.messageDao
-          .updateMediaStatus(MediaStatus.read, message.messageId));
+          .updateMediaStatus(message.messageId, MediaStatus.read));
     }
 
     _player.play([

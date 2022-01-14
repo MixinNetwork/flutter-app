@@ -127,11 +127,11 @@ SELECT COUNT(1)
 
 fuzzySearchMessageByCategories AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
-    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
-    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
+    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
+    c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
     FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
-    INNER JOIN users u ON c.owner_id = u.user_id
+    INNER JOIN users u ON m.user_id = u.user_id
     WHERE m.category IN :categories AND m.message_id = fts.message_id
     ORDER BY m.created_at DESC
     LIMIT $limit;
@@ -139,11 +139,11 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
 
 fuzzySearchMessage AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
-    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
-    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
+    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
+    c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
     FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
-    INNER JOIN users u ON c.owner_id = u.user_id
+    INNER JOIN users u ON m.user_id = u.user_id
     WHERE m.message_id = fts.message_id
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;
@@ -205,8 +205,8 @@ SELECT COUNT(1)
 
 fuzzySearchMessageByConversationIdAndCategories AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
-    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
-    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
+    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
+    c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
@@ -216,8 +216,8 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
 
 fuzzySearchMessageByConversationId AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
-    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
-    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
+    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
+    c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
@@ -227,8 +227,8 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
 
 searchMessage AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
-    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
-    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
+    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
+    c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
@@ -238,8 +238,8 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
 
 fuzzySearchMessageByConversationIdAndUserIdAndCategories AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
-    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
-    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
+    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
+    c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
@@ -249,11 +249,19 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
 
 fuzzySearchMessageByConversationIdAndUserId AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
-    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
-    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
+    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
+    c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
     WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;
+
+
+updateUnseenMessageCountAndLastMessageId:
+UPDATE conversations SET unseen_message_count
+    = (SELECT count(1) FROM messages WHERE conversation_id = :conversationId AND status IN ('SENT', 'DELIVERED')  AND user_id != :userId),
+    last_message_id = :lastMessageId,
+    last_message_created_at = :lastMessageCreatedAt
+    WHERE conversation_id = :conversationId;

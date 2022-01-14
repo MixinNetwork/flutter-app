@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 
-import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/reg_exp_utils.dart';
 import '../mixin_database.dart';
@@ -29,15 +28,15 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
     String conversationId,
     String senderId,
     QuoteMessageItem? quoteMessage,
+    String currentUserId,
+    String currentUserIdentityNumber,
   ) async {
     var mentionMe = false;
-    final currentUserId = MultiAuthCubit.currentAccount?.userId;
-
     if (content?.isNotEmpty == true) {
       final numbers =
           mentionNumberRegExp.allMatchesAndSort(content!).map((e) => e[1]!);
       mentionMe = senderId != currentUserId &&
-          numbers.contains(MultiAuthCubit.currentAccount?.identityNumber);
+          numbers.contains(currentUserIdentityNumber);
     }
 
     if (!mentionMe &&
@@ -66,5 +65,5 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
   Future<int> markMentionRead(String messageId) =>
       (db.update(db.messageMentions)
             ..where((tbl) => tbl.messageId.equals(messageId)))
-          .write(MessageMentionsCompanion(hasRead: const Value(true)));
+          .write(const MessageMentionsCompanion(hasRead: Value(true)));
 }

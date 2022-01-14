@@ -69,7 +69,7 @@ class VideoMessageWidget extends HookWidget {
                     message.mediaUrl?.isNotEmpty == true) {
                   context.accountServer.reUploadAttachment(message);
                 } else {
-                  context.accountServer.downloadAttachment(message);
+                  context.accountServer.downloadAttachment(message.messageId);
                 }
               } else if (message.mediaStatus == MediaStatus.done &&
                   message.mediaUrl != null) {

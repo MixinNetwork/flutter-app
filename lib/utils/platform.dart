@@ -4,6 +4,11 @@ import 'package:device_info_plus/device_info_plus.dart';
 
 bool kPlatformIsDarwin = Platform.isMacOS || Platform.isIOS;
 
+bool kPlatformIsDesktop =
+    Platform.isMacOS || Platform.isLinux || Platform.isWindows;
+
+bool kPlatformIsMobile = Platform.isAndroid || Platform.isIOS;
+
 Future<String> getPlatformVersion() async {
   final deviceInfo = DeviceInfoPlugin();
   if (Platform.isMacOS) {

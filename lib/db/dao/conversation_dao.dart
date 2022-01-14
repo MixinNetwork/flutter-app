@@ -327,22 +327,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       ],
       db.circleConversations.circleId.equals(circleId));
 
-  Future<int> updateLastMessageId(
-    String conversationId,
-    String messageId,
-    DateTime lastMessageCreatedAt,
-    int unseenMessageCount,
-  ) =>
-      (update(db.conversations)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .write(
-        ConversationsCompanion(
-          lastMessageId: Value(messageId),
-          lastMessageCreatedAt: Value(lastMessageCreatedAt),
-          unseenMessageCount: Value(unseenMessageCount),
-        ),
-      );
-
   Future<int> pin(String conversationId) => (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(
@@ -352,7 +336,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Future<int> unpin(String conversationId) => (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(
-        ConversationsCompanion(pinTime: const Value(null)),
+        const ConversationsCompanion(pinTime: Value(null)),
       );
 
   Future<int> deleteConversation(String conversationId) =>

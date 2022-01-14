@@ -2409,6 +2409,26 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Save to Gallery`
+  String get saveToGallery {
+    return Intl.message(
+      'Save to Gallery',
+      name: 'saveToGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open in External App`
+  String get openInExternalApp {
+    return Intl.message(
+      'Open in External App',
+      name: 'openInExternalApp',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

@@ -23,6 +23,8 @@ String? messagePreviewOptimize(
     _content = Localization.current.chatNotSupport;
   } else if (messageStatus == MessageStatus.failed) {
     _content = Localization.current.waitingForThisMessage;
+  } else if (messageStatus == MessageStatus.unknown) {
+    _content = Localization.current.chatNotSupport;
   } else if (messageCategory.isText) {
     _content = trimContent;
   } else if (messageCategory == MessageCategory.systemAccountSnapshot) {

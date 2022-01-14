@@ -48,10 +48,11 @@ Future<void> main(List<String> args) async {
     mixinDocumentsDirectory.path,
     'crash',
   )));
-  logFileManager = LogFileManager(p.join(
+
+  unawaited(LogFileManager.init(p.join(
     mixinDocumentsDirectory.path,
     'log',
-  ));
+  )));
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: mixinDocumentsDirectory,
@@ -62,7 +63,7 @@ Future<void> main(List<String> args) async {
   if (kDebugMode) Bloc.observer = CustomBlocObserver();
   unawaited(initListener());
 
-  ansiColorDisabled = false;
+  ansiColorDisabled = Platform.isIOS;
   DartVLC.initialize();
   runZonedGuarded(
     () => runApp(const App()),

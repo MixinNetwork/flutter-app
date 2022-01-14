@@ -1,25 +1,19 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../../../bloc/paging/load_more_paging.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
-import '../../../../enum/media_status.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
-import '../../../../widgets/cache_image.dart';
-import '../../../../widgets/image.dart';
-import '../../../../widgets/interactive_decorated_box.dart';
-import '../../../../widgets/message/item/image/image_preview_page.dart';
+import '../../../../widgets/message/item/image/image_message.dart';
+import '../../../../widgets/message/message.dart';
 import '../../chat/chat_page.dart';
 import '../shared_media_page.dart';
 
@@ -88,6 +82,9 @@ class MediaPage extends HookWidget {
         },
       ),
     );
+
+    final scrollController = useScrollController();
+
     if (map.isEmpty) {
       return Center(
         child: Column(
@@ -126,6 +123,7 @@ class MediaPage extends HookWidget {
         return false;
       },
       child: CustomScrollView(
+        controller: scrollController,
         slivers: map.entries
             .map(
               (e) => MultiSliver(
@@ -181,39 +179,10 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ShareMediaItemMenuWrapper(
         messageId: message.messageId,
-        child: InteractiveDecoratedBox(
-          onTap: () {
-            switch (message.mediaStatus) {
-              case MediaStatus.done:
-                ImagePreviewPage.push(
-                  context,
-                  conversationId: message.conversationId,
-                  messageId: message.messageId,
-                );
-                break;
-              case MediaStatus.canceled:
-                if (message.relationship == UserRelationship.me &&
-                    message.mediaUrl?.isNotEmpty == true) {
-                  context.accountServer.reUploadAttachment(message);
-                } else {
-                  context.accountServer.downloadAttachment(message);
-                }
-                ImagePreviewPage.push(
-                  context,
-                  conversationId: message.conversationId,
-                  messageId: message.messageId,
-                );
-                break;
-              default:
-                break;
-            }
-          },
-          child: Image(
-            image: MixinFileImage(File(
-                context.accountServer.convertMessageAbsolutePath(message))),
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) =>
-                ImageByBlurHashOrBase64(imageData: message.thumbImage!),
+        child: MessageContext.fromMessageItem(
+          message: message,
+          child: const MessageImage(
+            showStatus: false,
           ),
         ),
       );

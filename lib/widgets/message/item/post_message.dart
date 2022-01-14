@@ -15,61 +15,81 @@ import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
+const _decoration = BoxDecoration(
+  borderRadius: BorderRadius.all(Radius.circular(8)),
+  color: Color.fromRGBO(0, 0, 0, 0.2),
+);
+
 class PostMessage extends StatelessWidget {
   const PostMessage({
     Key? key,
   }) : super(key: key);
 
-  static const _decoration = BoxDecoration(
-    borderRadius: BorderRadius.all(Radius.circular(8)),
-    color: Color.fromRGBO(0, 0, 0, 0.2),
-  );
+  @override
+  Widget build(BuildContext context) => const MessageBubble(
+        child: MessagePost(showStatus: true),
+      );
+}
+
+class MessagePost extends StatelessWidget {
+  const MessagePost({
+    Key? key,
+    this.padding,
+    this.decoration,
+    required this.showStatus,
+  }) : super(key: key);
+
+  final EdgeInsetsGeometry? padding;
+  final Decoration? decoration;
+  final bool showStatus;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) => MessageBubble(
-          child: InteractiveDecoratedBox(
-            onTap: () => PostPreview.push(context, message: context.message),
-            child: Stack(
-              children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minHeight: 64,
-                    minWidth: 128,
-                  ),
-                  child: HookBuilder(builder: (context) {
-                    final content = useMessageConverter(
-                        converter: (state) => state.content ?? '');
-                    final postContent =
-                        useMemoized(content.postOptimize, [content]);
-
-                    return MarkdownBody(
-                      data: postContent,
-                      extensionSet: ExtensionSet.gitHubWeb,
-                      styleSheet: context.markdownStyleSheet,
-                      softLineBreak: true,
-                      imageBuilder: (_, __, ___) => const SizedBox(),
-                      onTapLink: (String text, String? href, String title) {
-                        if (href?.isEmpty ?? true) return;
-
-                        openUri(context, href!);
-                      },
-                    );
-                  }),
+  Widget build(BuildContext context) => InteractiveDecoratedBox(
+        onTap: () => PostPreview.push(context, message: context.message),
+        child: Container(
+          padding: padding,
+          decoration: decoration,
+          child: Stack(
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: showStatus ? 48 : 0,
+                  minWidth: 128,
                 ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    decoration: _decoration,
-                    alignment: Alignment.center,
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesPostDetailSvg,
-                      width: 20,
-                      height: 20,
-                    ),
+                child: HookBuilder(builder: (context) {
+                  final content = useMessageConverter(
+                      converter: (state) => state.content ?? '');
+                  final postContent =
+                      useMemoized(content.postOptimize, [content]);
+
+                  return MarkdownBody(
+                    data: postContent,
+                    extensionSet: ExtensionSet.gitHubWeb,
+                    styleSheet: context.markdownStyleSheet,
+                    softLineBreak: true,
+                    imageBuilder: (_, __, ___) => const SizedBox(),
+                    onTapLink: (String text, String? href, String title) {
+                      if (href?.isEmpty ?? true) return;
+
+                      openUri(context, href!);
+                    },
+                  );
+                }),
+              ),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  decoration: _decoration,
+                  alignment: Alignment.center,
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesPostDetailSvg,
+                    width: 20,
+                    height: 20,
                   ),
                 ),
+              ),
+              if (showStatus)
                 Positioned(
                   right: 0,
                   bottom: 0,
@@ -84,8 +104,7 @@ class PostMessage extends StatelessWidget {
                     ),
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       );

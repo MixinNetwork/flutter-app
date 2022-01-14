@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:drift/drift.dart';
 import 'package:drift/isolate.dart';
@@ -96,7 +97,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   final eventBus = DataBaseEventBus();
 
@@ -162,6 +163,9 @@ class MixinDatabase extends _$MixinDatabase {
           if (from <= 7) {
             await m.drop(Trigger('', 'conversation_last_message_update'));
           }
+          if (from <= 8) {
+            await m.createIndex(indexMessageConversationIdStatusUserId);
+          }
         },
       );
 
@@ -200,22 +204,37 @@ LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
       return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
     });
 
-Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
-  final dbFolder = mixinDocumentsDirectory;
-  final dbFile = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
-  final moorIsolate = await _createMoorIsolate(dbFile);
-  final databaseConnection = await moorIsolate.connect();
+/// Connect to the database.
+Future<MixinDatabase> connectToDatabase(
+  String identityNumber, {
+  bool fromMainIsolate = false,
+}) async {
+  final portName = 'one_mixin_drift_$identityNumber';
+
+  if (fromMainIsolate) {
+    // Remove port if it exists. to avoid port leak on hot reload.
+    IsolateNameServer.removePortNameMapping(portName);
+  }
+
+  final existingIsolate = IsolateNameServer.lookupPortByName(portName);
+
+  final DriftIsolate isolate;
+
+  if (existingIsolate == null) {
+    final dbFolder = mixinDocumentsDirectory;
+    final dbFile = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
+    final receivePort = ReceivePort();
+    await Isolate.spawn(
+      _startBackground,
+      _IsolateStartRequest(receivePort.sendPort, dbFile),
+    );
+    isolate = await receivePort.first as DriftIsolate;
+    IsolateNameServer.registerPortWithName(isolate.connectPort, portName);
+  } else {
+    isolate = DriftIsolate.fromConnectPort(existingIsolate, serialize: false);
+  }
+  final databaseConnection = await isolate.connect();
   return MixinDatabase.connect(databaseConnection);
-}
-
-Future<DriftIsolate> _createMoorIsolate(File dbFile) async {
-  final receivePort = ReceivePort();
-  await Isolate.spawn(
-    _startBackground,
-    _IsolateStartRequest(receivePort.sendPort, dbFile),
-  );
-
-  return await receivePort.first as DriftIsolate;
 }
 
 void _startBackground(_IsolateStartRequest request) {

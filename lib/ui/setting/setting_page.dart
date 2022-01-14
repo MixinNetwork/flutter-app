@@ -24,7 +24,7 @@ class SettingPage extends HookWidget {
     final hasNotificationPermission = useMemoizedFuture(
         requestNotificationPermission, null,
         keys: [appActive]).data;
-
+    final controller = useScrollController();
     return Column(
       children: [
         const MixinAppBar(
@@ -32,6 +32,7 @@ class SettingPage extends HookWidget {
         ),
         Expanded(
           child: SingleChildScrollView(
+            controller: controller,
             child: Column(
               children: [
                 const _UserProfile(),
