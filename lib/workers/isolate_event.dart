@@ -26,6 +26,9 @@ enum WorkerIsolateEventType {
 
   /// args: [AttachmentRequest]
   requestDownloadAttachment,
+
+  /// args: [String] pin message conversationId.
+  showPinMessage,
 }
 
 extension WorkerIsolateEventTypeExtension on WorkerIsolateEventType {
