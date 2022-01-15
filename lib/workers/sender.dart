@@ -229,10 +229,10 @@ class Sender {
     if (conversation == null) {
       return;
     }
-    if (conversation.category == ConversationCategory.group) {
-      await _syncConversation(conversationId);
-    } else {
+    if (conversation.status != ConversationStatus.success) {
       await checkConversationExists(conversation);
+    } else {
+      await _syncConversation(conversationId);
     }
   }
 
@@ -258,9 +258,11 @@ class Sender {
     final remote = <db.ParticipantSessionData>[];
     for (final s in data) {
       remote.add(db.ParticipantSessionData(
-          conversationId: conversationId,
-          userId: s.userId,
-          sessionId: s.sessionId));
+        conversationId: conversationId,
+        userId: s.userId,
+        sessionId: s.sessionId,
+        publicKey: s.publicKey,
+      ));
     }
     if (remote.isEmpty) {
       await database.participantSessionDao
