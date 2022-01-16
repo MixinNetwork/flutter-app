@@ -258,9 +258,11 @@ class Sender {
     final remote = <db.ParticipantSessionData>[];
     for (final s in data) {
       remote.add(db.ParticipantSessionData(
-          conversationId: conversationId,
-          userId: s.userId,
-          sessionId: s.sessionId));
+        conversationId: conversationId,
+        userId: s.userId,
+        sessionId: s.sessionId,
+        publicKey: s.publicKey,
+      ));
     }
     if (remote.isEmpty) {
       await database.participantSessionDao
