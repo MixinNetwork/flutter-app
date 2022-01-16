@@ -45,6 +45,7 @@ import '../workers/isolate_event.dart';
 import '../workers/message_woker_isolate.dart';
 import 'account_key_value.dart';
 import 'send_message_helper.dart';
+import 'show_pin_message_key_value.dart';
 
 class AccountServer {
   AccountServer(this.multiAuthCubit);
@@ -250,6 +251,10 @@ class AccountServer {
       case WorkerIsolateEventType.requestDownloadAttachment:
         final request = event.argument as AttachmentRequest;
         _onAttachmentDownloadRequest(request);
+        break;
+      case WorkerIsolateEventType.showPinMessage:
+        final conversationId = event.argument as String;
+        unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
         break;
       default:
         assert(false, 'unexpected event: $event');

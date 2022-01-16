@@ -181,7 +181,6 @@ class _MessageProcessRunner {
       database,
     );
 
-    final attachmentRequest = StreamController<AttachmentRequest>();
     _decryptMessage = DecryptMessage(
       userId,
       database,
@@ -190,15 +189,9 @@ class _MessageProcessRunner {
       client,
       sessionId,
       privateKey,
-      attachmentRequest.sink,
+      _sendEventToMainIsolate,
       identityNumber,
     );
-    attachmentRequest.stream.listen((event) {
-      _sendEventToMainIsolate(
-        WorkerIsolateEventType.requestDownloadAttachment,
-        event,
-      );
-    });
   }
 
   void _start() {

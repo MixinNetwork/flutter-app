@@ -11,7 +11,6 @@ import 'package:mixin_bot_sdk_dart/src/vo/signal_key_count.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
-import '../account/show_pin_message_key_value.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/vo/blaze_message_data.dart';
 import '../blaze/vo/pin_message_minimal.dart';
@@ -55,11 +54,14 @@ class DecryptMessage extends Injector {
     Client client,
     this._sessionId,
     this._privateKey,
-    this._attachmentSink,
+    this._isolateEventSender,
     this.identityNumber,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
+
+  final void Function(WorkerIsolateEventType event, [dynamic argument])
+      _isolateEventSender;
 
   String? _conversationId;
   late final SignalProtocol _signalProtocol;
@@ -67,8 +69,6 @@ class DecryptMessage extends Injector {
   late final String _sessionId;
   late final PrivateKey _privateKey;
   late EncryptedProtocol _encryptedProtocol;
-
-  final Sink<AttachmentRequest> _attachmentSink;
 
   final String identityNumber;
 
@@ -423,8 +423,10 @@ class DecryptMessage extends Injector {
           accountId,
         );
       });
-      // FIXME background isolate can not access this.
-      unawaited(ShowPinMessageKeyValue.instance.show(data.conversationId));
+      _isolateEventSender(
+        WorkerIsolateEventType.showPinMessage,
+        data.conversationId,
+      );
     } else if (pinMessage.action == PinMessagePayloadAction.unpin) {
       await database.pinMessageDao.deleteByIds(pinMessage.messageIds);
     }
@@ -438,9 +440,12 @@ class DecryptMessage extends Injector {
     final message = await database.messageDao
         .findMessageByMessageId(recallMessage.messageId);
     if (message != null && message.category.isAttachment) {
-      _attachmentSink.add(AttachmentCancelRequest(
-        messageId: message.messageId,
-      ));
+      _isolateEventSender(
+        WorkerIsolateEventType.requestDownloadAttachment,
+        AttachmentCancelRequest(
+          messageId: message.messageId,
+        ),
+      );
       if (message.mediaUrl?.isNotEmpty ?? false) {
         final file = File(message.mediaUrl!);
         final exists = file.existsSync();
@@ -549,7 +554,8 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      _attachmentSink.add(AttachmentDownloadRequest(message));
+      _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
+          AttachmentDownloadRequest(message));
     } else if (data.category.isVideo) {
       final String plain;
       if (data.category.isEncrypted) {
@@ -582,7 +588,8 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      _attachmentSink.add(AttachmentDownloadRequest(message));
+      _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
+          AttachmentDownloadRequest(message));
     } else if (data.category.isData) {
       final String plain;
       if (data.category.isEncrypted) {
@@ -611,7 +618,8 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      _attachmentSink.add(AttachmentDownloadRequest(message));
+      _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
+          AttachmentDownloadRequest(message));
     } else if (data.category.isAudio) {
       final String plain;
       if (data.category.isEncrypted) {
@@ -642,7 +650,8 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
-      _attachmentSink.add(AttachmentDownloadRequest(message));
+      _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
+          AttachmentDownloadRequest(message));
     } else if (data.category.isSticker) {
       final String plain;
       if (data.category.isEncrypted) {
@@ -1281,7 +1290,8 @@ class DecryptMessage extends Injector {
 
     transcripts.forEach((message) {
       if (message.category.isAttachment && message.content != null) {
-        _attachmentSink.add(TranscriptAttachmentDownloadRequest(message));
+        _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
+            TranscriptAttachmentDownloadRequest(message));
       }
     });
 
