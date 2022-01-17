@@ -267,7 +267,7 @@ class AttachmentUtil extends ChangeNotifier {
     String category, {
     String? transcriptId,
   }) async {
-    assert(_hasAttachmentJob(messageId));
+    assert(!_hasAttachmentJob(messageId));
     await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
 
     try {
