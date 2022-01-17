@@ -523,69 +523,6 @@ class AccountServer {
     }
   }
 
-  Future<void> syncSession() async {
-    final hasSyncSession = PrivacyKeyValue.instance.hasSyncSession;
-    if (hasSyncSession) {
-      return;
-    }
-    final sessionDao = SignalDatabase.get.sessionDao;
-    final senderKeyDao = SignalDatabase.get.senderKeyDao;
-    final sessions = await sessionDao.getSessionAddress();
-    final userIds = sessions.map((e) => e.address).toList();
-    final response = await client.userApi.getSessions(userIds);
-    final sessionMap = <String, int>{};
-    final userSessionMap = <String, String>{};
-    response.data.forEach((e) {
-      if (e.platform == 'Android' || e.platform == 'iOS') {
-        final deviceId = e.sessionId.getDeviceId();
-        sessionMap[e.userId] = deviceId;
-        userSessionMap[e.userId] = e.sessionId;
-      }
-    });
-    if (sessionMap.isEmpty) {
-      return;
-    }
-    final newSessions = <SessionsCompanion>[];
-    for (final s in sessions) {
-      sessionMap.values.forEach((d) {
-        newSessions.add(SessionsCompanion.insert(
-            address: s.address,
-            device: d,
-            record: s.record,
-            timestamp: s.timestamp));
-      });
-    }
-    await sessionDao.insertList(newSessions);
-    final senderKeys = await senderKeyDao.getSenderKeys();
-    for (final key in senderKeys) {
-      if (!key.senderId.endsWith(':1')) {
-        continue;
-      }
-      final userId = key.senderId.substring(0, key.senderId.length - 2);
-      final d = sessionMap[userId];
-      if (d != null) {
-        await senderKeyDao.insert(SenderKey(
-            groupId: key.groupId, senderId: '$userId$d', record: key.record));
-      }
-    }
-
-    final participants = await database.participantDao.getAllParticipants();
-    final newParticipantSessions = <db.ParticipantSessionData>[];
-    participants.forEach((p) {
-      final sessionId = userSessionMap[p.userId];
-      if (sessionId != null) {
-        final ps = db.ParticipantSessionData(
-          conversationId: p.conversationId,
-          userId: p.userId,
-          sessionId: sessionId,
-        );
-        newParticipantSessions.add(ps);
-      }
-    });
-    await database.participantSessionDao.insertAll(newParticipantSessions);
-    PrivacyKeyValue.instance.hasSyncSession = true;
-  }
-
   Future<void> initSticker() async {
     final refreshStickerLastTime =
         AccountKeyValue.instance.refreshStickerLastTime;
