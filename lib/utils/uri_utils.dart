@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/constants.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/toast.dart';
+import '../widgets/unknown_mixin_url_dialog.dart';
 import '../widgets/user/user_dialog.dart';
 import 'extension/extension.dart';
 import 'logger.dart';
@@ -66,8 +67,8 @@ Future<bool> openUri(
           return true;
         }
 
-        await showToastFailed(
-            context, ToastError(context.l10n.uriCheckOnPhone));
+        Toast.dismiss();
+        await showUnknownMixinUrlDialog(context, uri);
         return false;
       } catch (error) {
         e('open code: $error');
@@ -77,7 +78,8 @@ Future<bool> openUri(
     }
 
     if (uri.isMixinScheme) {
-      await showToastFailed(context, ToastError(context.l10n.uriCheckOnPhone));
+      Toast.dismiss();
+      await showUnknownMixinUrlDialog(context, uri);
       return false;
     }
   }
