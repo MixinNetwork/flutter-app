@@ -575,9 +575,10 @@ class AccountServer {
       final sessionId = userSessionMap[p.userId];
       if (sessionId != null) {
         final ps = db.ParticipantSessionData(
-            conversationId: p.conversationId,
-            userId: p.userId,
-            sessionId: sessionId);
+          conversationId: p.conversationId,
+          userId: p.userId,
+          sessionId: sessionId,
+        );
         newParticipantSessions.add(ps);
       }
     });
