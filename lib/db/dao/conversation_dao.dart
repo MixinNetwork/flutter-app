@@ -374,22 +374,22 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
 
   Future<void> updateConversation(ConversationResponse conversation) =>
       db.transaction(() async {
-        await insert(
-          ConversationsCompanion(
-            conversationId: Value(conversation.conversationId),
-            ownerId: Value(conversation.creatorId),
-            category: Value(conversation.category),
-            name: Value(conversation.name),
-            iconUrl: Value(conversation.iconUrl),
-            announcement: Value(conversation.announcement),
-            codeUrl: Value(conversation.codeUrl),
-            createdAt: Value(conversation.createdAt),
-            status: const Value(ConversationStatus.success),
-            muteUntil: Value(DateTime.tryParse(conversation.muteUntil)),
+        await Future.wait([
+          insert(
+            ConversationsCompanion(
+              conversationId: Value(conversation.conversationId),
+              ownerId: Value(conversation.creatorId),
+              category: Value(conversation.category),
+              name: Value(conversation.name),
+              iconUrl: Value(conversation.iconUrl),
+              announcement: Value(conversation.announcement),
+              codeUrl: Value(conversation.codeUrl),
+              createdAt: Value(conversation.createdAt),
+              status: const Value(ConversationStatus.success),
+              muteUntil: Value(DateTime.tryParse(conversation.muteUntil)),
+            ),
           ),
-        );
-        await Future.wait(
-          conversation.participants.map(
+          ...conversation.participants.map(
             (participant) => db.participantDao.insert(
               Participant(
                 conversationId: conversation.conversationId,
@@ -399,7 +399,16 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
               ),
             ),
           ),
-        );
+          ...(conversation.participantSessions ?? [])
+              .map((p) => db.participantSessionDao.insert(
+                    ParticipantSessionData(
+                      conversationId: conversation.conversationId,
+                      userId: p.userId,
+                      sessionId: p.sessionId,
+                      publicKey: p.publicKey,
+                    ),
+                  ))
+        ]);
       });
 
   Future<int> updateCodeUrl(String conversationId, String codeUrl) =>

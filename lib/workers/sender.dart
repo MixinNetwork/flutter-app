@@ -229,10 +229,10 @@ class Sender {
     if (conversation == null) {
       return;
     }
-    if (conversation.category == ConversationCategory.group) {
-      await _syncConversation(conversationId);
-    } else {
+    if (conversation.status != ConversationStatus.success) {
       await checkConversationExists(conversation);
+    } else {
+      await _syncConversation(conversationId);
     }
   }
 
@@ -320,9 +320,11 @@ class Sender {
       final newParticipantSessions = <db.ParticipantSessionData>[];
       for (final p in sessionParticipants) {
         newParticipantSessions.add(db.ParticipantSessionData(
-            conversationId: conversation.conversationId,
-            userId: p.userId,
-            sessionId: p.sessionId));
+          conversationId: conversation.conversationId,
+          userId: p.userId,
+          sessionId: p.sessionId,
+          publicKey: p.publicKey,
+        ));
       }
       if (newParticipantSessions.isNotEmpty) {
         await database.participantSessionDao
@@ -432,9 +434,11 @@ class Sender {
     final list = <db.ParticipantSessionData>[];
     response.data.forEach((e) {
       list.add(db.ParticipantSessionData(
-          conversationId: conversationId,
-          userId: e.userId,
-          sessionId: e.sessionId));
+        conversationId: conversationId,
+        userId: e.userId,
+        sessionId: e.sessionId,
+        publicKey: e.publicKey,
+      ));
     });
     if (list.isNotEmpty) {
       await database.participantSessionDao.insertAll(list);
