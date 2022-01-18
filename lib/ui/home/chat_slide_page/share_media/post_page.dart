@@ -1,10 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
-import 'package:markdown/markdown.dart' hide Text;
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
@@ -14,8 +12,8 @@ import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
-import '../../../../widgets/interactive_decorated_box.dart';
 import '../../../../widgets/message/item/post_message.dart';
+import '../../../../widgets/message/message.dart';
 import '../shared_media_page.dart';
 
 class PostPage extends HookWidget {
@@ -82,6 +80,8 @@ class PostPage extends HookWidget {
       ),
     );
 
+    final scrollController = useScrollController();
+
     if (map.isEmpty) {
       return Center(
         child: Column(
@@ -120,6 +120,7 @@ class PostPage extends HookWidget {
         return false;
       },
       child: CustomScrollView(
+        controller: scrollController,
         slivers: map.entries
             .map(
               (e) => MultiSliver(
@@ -169,36 +170,15 @@ class _Item extends StatelessWidget {
         padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
         child: ShareMediaItemMenuWrapper(
           messageId: message.messageId,
-          child: InteractiveDecoratedBox(
-            onTap: () => PostPreview.push(context, message: message),
-            child: Container(
+          child: MessageContext.fromMessageItem(
+            message: message,
+            child: MessagePost(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: context.theme.sidebarSelected,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Stack(
-                children: [
-                  MarkdownBody(
-                    data: message.content!
-                        .postOptimize(10)
-                        .postLengthOptimize(256),
-                    extensionSet: ExtensionSet.gitHubWeb,
-                    styleSheet: context.markdownStyleSheet,
-                    softLineBreak: true,
-                    imageBuilder: (_, __, ___) => const SizedBox(),
-                  ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesPostDetailSvg,
-                      width: 20,
-                      height: 20,
-                    ),
-                  ),
-                ],
-              ),
+              showStatus: false,
             ),
           ),
         ),

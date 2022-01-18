@@ -11828,6 +11828,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexPinMessagesConversationId = Index(
       'index_pin_messages_conversation_id',
       'CREATE INDEX IF NOT EXISTS index_pin_messages_conversation_id ON pin_messages (conversation_id)');
+  late final Index indexMessageConversationIdStatusUserId = Index(
+      'index_message_conversation_id_status_user_id',
+      'CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messages (conversation_id, status, user_id)');
   late final Trigger conversationLastMessageDelete = Trigger(
       'CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (SELECT message_id FROM messages WHERE conversation_id = old.conversation_id ORDER BY created_at DESC LIMIT 1) WHERE conversation_id = old.conversation_id;END',
       'conversation_last_message_delete');
@@ -12835,7 +12838,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
           for (var $ in categories) Variable<String>($),
@@ -12873,7 +12876,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem> fuzzySearchMessage(
       String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
         variables: [
           Variable<String>(query),
           Variable<int>(limit),
@@ -13255,6 +13258,21 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Future<int> updateUnseenMessageCountAndLastMessageId(String conversationId,
+      String userId, String? lastMessageId, DateTime? lastMessageCreatedAt) {
+    return customUpdate(
+      'UPDATE conversations SET unseen_message_count = (SELECT count(1) FROM messages WHERE conversation_id = ?1 AND status IN (\'SENT\', \'DELIVERED\') AND user_id != ?2), last_message_id = ?3, last_message_created_at = ?4 WHERE conversation_id = ?1',
+      variables: [
+        Variable<String>(conversationId),
+        Variable<String>(userId),
+        Variable<String?>(lastMessageId),
+        Variable<int?>(Conversations.$converter3.mapToSql(lastMessageCreatedAt))
+      ],
+      updates: {conversations},
+      updateKind: UpdateKind.update,
+    );
+  }
+
   Selectable<int> baseConversationItemCount(
       Expression<bool?> Function(Conversations conversation, Users owner,
               CircleConversations circleConversation)
@@ -13561,6 +13579,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         indexStickerAlbumsCategoryCreatedAt,
         pinMessages,
         indexPinMessagesConversationId,
+        indexMessageConversationIdStatusUserId,
         conversationLastMessageDelete,
         addresses,
         apps,

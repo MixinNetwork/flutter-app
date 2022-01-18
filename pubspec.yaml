@@ -12,7 +12,7 @@ publish_to: none
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.17.9+0
+version: 0.18.1+0
 
 environment:
   sdk: '>=2.14.0 <3.0.0'
@@ -103,7 +103,7 @@ dependencies:
   win_toast: ^0.0.2
   window_size:
     git:
-      url: git://github.com/google/flutter-desktop-embedding.git
+      url: https://github.com/google/flutter-desktop-embedding.git
       path: plugins/window_size
       ref: 57a2cd88486105d3d813583339eb0e23c9bfd6d2
 
@@ -117,12 +117,12 @@ dependency_overrides:
   drift:
     git:
       url: https://github.com/simolus3/moor.git
-      ref: 871f1e4198da994060b02a9eaef9a809d5750918
+      ref: 70e83b5a747cb6bf9bf360d6de78e8398d3b6873
       path: drift
   drift_dev:
     git:
       url: https://github.com/simolus3/moor.git
-      ref: 871f1e4198da994060b02a9eaef9a809d5750918
+      ref: 70e83b5a747cb6bf9bf360d6de78e8398d3b6873
       path: drift_dev
   # remove this if https://github.com/woodemi/quick_breakpad/issues/10 fixed
   platform: ^3.1.0
@@ -133,7 +133,7 @@ dependency_overrides:
   sqlparser:
     git:
       url: https://github.com/simolus3/moor.git
-      ref: 871f1e4198da994060b02a9eaef9a809d5750918
+      ref: 70e83b5a747cb6bf9bf360d6de78e8398d3b6873
       path: sqlparser
 
 dev_dependencies:
@@ -203,7 +203,7 @@ msix_config:
   publisher_display_name: Mixin Ltd
   identity_name: 14801MixinLtd.MixinDesktop
   publisher: CN=272248D5-9A62-44D7-A299-5E1F8B46A9B0
-  msix_version: 0.17.8.0
+  msix_version: 0.18.1.0
   logo_path: ./assets/icons/windows_app_icon.png
   start_menu_icon_path: ./assets/icons/windows_app_icon.png
   tile_icon_path: ./assets/icons/windows_app_icon.png

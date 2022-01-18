@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:flutter_app/utils/logger.dart';
@@ -113,12 +114,29 @@ void main() {
   });
 
   test('test write by log manager', () async {
-    final manger = LogFileManager(dir);
+    await LogFileManager.init(dir);
+    final manger = LogFileManager.instance!;
     await manger.write('test');
     await Future.delayed(const Duration(milliseconds: 2000));
     expect(FileSystemEntity.isFileSync(p.join(dir, 'log_0.log')), isTrue);
     final fileContent = File(p.join(dir, 'log_0.log')).readAsStringSync();
     expect(fileContent, equals('test\n'));
-    manger.dispose();
   });
+
+  test('test write on other isolate', () async {
+    await LogFileManager.init(dir);
+    final manger = LogFileManager.instance!;
+    await manger.write('main');
+    await Isolate.spawn(_writeLog, 'other isolate');
+
+    await Future.delayed(const Duration(milliseconds: 2000));
+    expect(FileSystemEntity.isFileSync(p.join(dir, 'log_0.log')), isTrue);
+    final fileContent = File(p.join(dir, 'log_0.log')).readAsStringSync();
+    expect(fileContent, equals('main\nother isolate\n'));
+  });
+}
+
+void _writeLog(String message) {
+  LogFileManager.instance!.write(message);
+  Isolate.exit();
 }

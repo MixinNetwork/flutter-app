@@ -1,13 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../constants/constants.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/load_balancer_utils.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../database_event_bus.dart';
 import '../mixin_database.dart';
@@ -47,16 +48,21 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   late Stream<List<MessageItem>> insertOrReplaceMessageStream = db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
       .asyncBufferMap(
-    (event) {
-      final ids =
-          event.reduce((value, element) => [...value, ...element]).toSet();
-      return _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
-              message.messageId.isIn(ids),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
-              Limit(ids.length, 0)).get();
+    (event) async {
+      final eventIds =
+          event.reduce((value, element) => [...value, ...element]).toList();
+      final chunkedIds = eventIds.chunked(kMarkLimit);
+      final messages = <MessageItem>[];
+      for (final ids in chunkedIds) {
+        messages.addAll(await _baseMessageItems(
+            (message, _, __, ___, ____, _____, ______, _______, ________,
+                    _________, __________) =>
+                message.messageId.isIn(ids),
+            (_, __, ___, ____, _____, ______, _______, ________, _________,
+                    __________, ___________) =>
+                Limit(ids.length, 0)).get());
+      }
+      return messages;
     },
   );
 
@@ -140,32 +146,49 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
+  final Map<String, void Function()> _conversationUnseenTaskRunner = {};
+
+  // TODO maybe more effective?
+  void _updateConversationUnseenCount(
+    Message message,
+    String currentUserId,
+  ) {
+    Future<void> _update(Message message) async {
+      await db.updateUnseenMessageCountAndLastMessageId(
+        message.conversationId,
+        currentUserId,
+        message.messageId,
+        message.createdAt,
+      );
+    }
+
+    if (_conversationUnseenTaskRunner[message.conversationId] != null) {
+      _conversationUnseenTaskRunner[message.conversationId] =
+          () => _update(message);
+      return;
+    } else {
+      _conversationUnseenTaskRunner[message.conversationId] =
+          () => _update(message);
+      Future.delayed(const Duration(milliseconds: 500)).then((value) {
+        final runner =
+            _conversationUnseenTaskRunner.remove(message.conversationId);
+        runner?.call();
+      });
+    }
+  }
+
   Future<int> insert(Message message, String currentUserId,
       [bool? silent = false]) async {
-    final unseenMessageCount = await _getUnseenMessageCount(
-      userId: currentUserId,
-      conversationId: message.conversationId,
-    );
-
-    final unseen = message.userId != currentUserId &&
-            [MessageStatus.sent, MessageStatus.delivered]
-                .contains(message.status)
-        ? 1
-        : 0;
-
     final result = await db.transaction(() async {
       final futures = <Future>[
         into(db.messages).insertOnConflictUpdate(message),
         _insertMessageFts(message),
-        db.conversationDao.updateLastMessageId(
-          message.conversationId,
-          message.messageId,
-          message.createdAt,
-          unseenMessageCount + unseen,
-        ),
       ];
       return (await Future.wait(futures))[0] as int;
     });
+
+    _updateConversationUnseenCount(message, currentUserId);
+
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [message.messageId]);
     if (!(silent ?? false)) {
       db.eventBus.send(DatabaseEvent.notification, message.messageId);
@@ -184,8 +207,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       ftsContent = message.name;
     } else if (message.category == MessageCategory.appCard) {
       final appCard = AppCardData.fromJson(
-          await jsonDecodeWithIsolate(message.content!)
-              as Map<String, dynamic>);
+          jsonDecode(message.content!) as Map<String, dynamic>);
       ftsContent = '${appCard.title} ${appCard.description}';
     }
     if (ftsContent != null) {
@@ -273,69 +295,67 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         }),
       );
 
-  Future<void> updateMediaStatus(MediaStatus status, String messageId) =>
-      _sendInsertOrReplaceEventWithFuture(
-        [messageId],
-        db.transaction<void>(() async {
-          await Future.wait([
-            (db.update(db.messages)
-                  ..where((tbl) => tbl.messageId.equals(messageId)))
-                .write(MessagesCompanion(mediaStatus: Value(status))),
-            (db.update(db.transcriptMessages)
-                  ..where((tbl) => tbl.messageId.equals(messageId)))
-                .write(TranscriptMessagesCompanion(mediaStatus: Value(status))),
-          ]);
-        }),
-      );
+  Future<void> updateMediaStatus(String messageId, MediaStatus status) async {
+    if (await hasMediaStatus(messageId, status)) return;
 
-  Future<void> updateMediaStatusToCanceled(String messageId) async {
-    final result = await db.transaction<List>(() async {
-      if (await hasMediaStatus(messageId, MediaStatus.canceled)) {
-        return [-1];
-      }
-
-      return Future.wait([
-        (db.update(db.messages)
-              ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(const MessagesCompanion(
-                mediaStatus: Value(MediaStatus.canceled))),
-        (db.update(db.transcriptMessages)
-              ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(const TranscriptMessagesCompanion(
-                mediaStatus: Value(MediaStatus.canceled))),
-      ]);
-    });
+    final result = await db.transaction<List>(() => Future.wait([
+          (db.update(db.messages)
+                ..where((tbl) => tbl.messageId.equals(messageId)))
+              .write(MessagesCompanion(mediaStatus: Value(status))),
+          (db.update(db.transcriptMessages)
+                ..where((tbl) => tbl.messageId.equals(messageId)))
+              .write(TranscriptMessagesCompanion(mediaStatus: Value(status))),
+        ]));
     if (result.cast<int>().any((element) => element > -1)) {
       db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
     }
   }
 
-  Future<bool> messageHasMediaStatus(String messageId, MediaStatus mediaStatus,
-      [bool not = false]) {
-    final equalsId = db.messages.messageId.equals(messageId);
-    final equalsStatus = db.messages.mediaStatus.equalsValue(mediaStatus);
-    final predicate =
-        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
-    return db.hasData(db.messages, [], predicate);
+  Future<bool?> messageHasMediaStatus(String messageId, MediaStatus mediaStatus,
+      [bool not = false]) async {
+    final mediaStatusColumn = db.messages.mediaStatus;
+    final _mediaStatus = await (selectOnly(db.messages)
+          ..addColumns([mediaStatusColumn])
+          ..where(db.messages.messageId.equals(messageId))
+          ..limit(1))
+        .map((row) =>
+            mediaStatusColumn.converter.mapToDart(row.read(mediaStatusColumn)))
+        .getSingleOrNull();
+    if (_mediaStatus == null) return null;
+    if (not) {
+      return _mediaStatus != mediaStatus;
+    }
+    return _mediaStatus == mediaStatus;
   }
 
-  Future<bool> transcriptMessageHasMediaStatus(
+  Future<bool?> transcriptMessageHasMediaStatus(
       String messageId, MediaStatus mediaStatus,
-      [bool not = false]) {
-    final equalsId = db.transcriptMessages.messageId.equals(messageId);
-    final equalsStatus =
-        db.transcriptMessages.mediaStatus.equalsValue(mediaStatus);
-    final predicate =
-        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
-    return db.hasData(db.transcriptMessages, [], predicate);
+      [bool not = false]) async {
+    final mediaStatusColumn = db.transcriptMessages.mediaStatus;
+    final _mediaStatus = await (selectOnly(db.transcriptMessages)
+          ..addColumns([mediaStatusColumn])
+          ..where(db.transcriptMessages.messageId.equals(messageId))
+          ..limit(1))
+        .map((row) =>
+            mediaStatusColumn.converter.mapToDart(row.read(mediaStatusColumn)))
+        .getSingleOrNull();
+    if (_mediaStatus == null) return null;
+    if (not) {
+      return _mediaStatus != mediaStatus;
+    }
+    return _mediaStatus == mediaStatus;
   }
 
   Future<bool> hasMediaStatus(String messageId, MediaStatus mediaStatus,
       [bool not = false]) async {
-    final messageHasData = messageHasMediaStatus(messageId, mediaStatus, not);
+    final messageHasData =
+        await messageHasMediaStatus(messageId, mediaStatus, not);
     final transcriptMessageHasData =
-        transcriptMessageHasMediaStatus(messageId, mediaStatus, not);
-    return await messageHasData || await transcriptMessageHasData;
+        await transcriptMessageHasMediaStatus(messageId, mediaStatus, not);
+    if (messageHasData != null && transcriptMessageHasData != null) {
+      return messageHasData && transcriptMessageHasData;
+    }
+    return (messageHasData ?? false) || (transcriptMessageHasData ?? false);
   }
 
   Future<void> syncMessageMedia(String messageId, [bool force = false]) async {
@@ -375,28 +395,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       mediaStatus: mediaStatus.converter.mapToDart(result.read(mediaStatus))!,
       content: result.read(content),
     );
-  }
-
-  Future<int> _getUnseenMessageCount({
-    required String conversationId,
-    required String userId,
-  }) async {
-    final count = db.messages.messageId.count();
-    final status = db.messages.status;
-    return (await (db.selectOnly(db.messages)
-              ..addColumns([count])
-              ..where(
-                db.messages.conversationId.equals(conversationId) &
-                    db.messages.userId.equals(userId).not() &
-                    status.isIn(
-                      [MessageStatus.sent, MessageStatus.delivered]
-                          .map(status.converter.mapToSql),
-                    ),
-              )
-              ..limit(1))
-            .map((row) => row.read(count))
-            .getSingleOrNull()) ??
-        0;
   }
 
   Future<int> takeUnseen(String userId, String conversationId) async {
@@ -473,13 +471,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<List<String>> getUnreadMessageIds(
-          String conversationId, String userId) =>
+          String conversationId, String userId, int limit) =>
       db.transaction(() async {
         final list = await (db.selectOnly(db.messages)
               ..addColumns([db.messages.messageId])
               ..where(db.messages.conversationId.equals(conversationId) &
                   db.messages.userId.equals(userId).not() &
-                  db.messages.status.isIn(['SENT', 'DELIVERED'])))
+                  db.messages.status.isIn(['SENT', 'DELIVERED']))
+              ..limit(limit))
             .map((row) => row.read(db.messages.messageId))
             .get();
         final ids = list.whereNotNull().toList();
@@ -1113,4 +1112,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             status: Value(status),
             messageId: Value(messageId),
           )));
+
+  void notifyMessageInsertOrReplaced(Iterable<String> messageIds) =>
+      db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
 }

@@ -131,7 +131,7 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
     FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
-    INNER JOIN users u ON c.owner_id = u.user_id
+    INNER JOIN users u ON m.user_id = u.user_id
     WHERE m.category IN :categories AND m.message_id = fts.message_id
     ORDER BY m.created_at DESC
     LIMIT $limit;
@@ -143,7 +143,7 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
     FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
-    INNER JOIN users u ON c.owner_id = u.user_id
+    INNER JOIN users u ON m.user_id = u.user_id
     WHERE m.message_id = fts.message_id
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;
@@ -257,3 +257,11 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;
+
+
+updateUnseenMessageCountAndLastMessageId:
+UPDATE conversations SET unseen_message_count
+    = (SELECT count(1) FROM messages WHERE conversation_id = :conversationId AND status IN ('SENT', 'DELIVERED')  AND user_id != :userId),
+    last_message_id = :lastMessageId,
+    last_message_created_at = :lastMessageCreatedAt
+    WHERE conversation_id = :conversationId;

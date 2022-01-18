@@ -357,20 +357,20 @@ packages:
     dependency: "direct main"
     description:
       path: drift
-      ref: "871f1e4198da994060b02a9eaef9a809d5750918"
-      resolved-ref: "871f1e4198da994060b02a9eaef9a809d5750918"
+      ref: "70e83b5a747cb6bf9bf360d6de78e8398d3b6873"
+      resolved-ref: "70e83b5a747cb6bf9bf360d6de78e8398d3b6873"
       url: "https://github.com/simolus3/moor.git"
     source: git
-    version: "1.1.0-dev"
+    version: "1.2.0-dev"
   drift_dev:
     dependency: "direct dev"
     description:
       path: drift_dev
-      ref: "871f1e4198da994060b02a9eaef9a809d5750918"
-      resolved-ref: "871f1e4198da994060b02a9eaef9a809d5750918"
+      ref: "70e83b5a747cb6bf9bf360d6de78e8398d3b6873"
+      resolved-ref: "70e83b5a747cb6bf9bf360d6de78e8398d3b6873"
       url: "https://github.com/simolus3/moor.git"
     source: git
-    version: "1.0.2"
+    version: "1.2.0-dev"
   ecache:
     dependency: "direct main"
     description:
@@ -740,7 +740,7 @@ packages:
       name: js
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.3"
+    version: "0.6.4"
   json_annotation:
     dependency: "direct main"
     description:
@@ -938,7 +938,7 @@ packages:
       name: path
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.0"
+    version: "1.8.1"
   path_drawing:
     dependency: transitive
     description:
@@ -1218,8 +1218,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: sqlparser
-      ref: "871f1e4198da994060b02a9eaef9a809d5750918"
-      resolved-ref: "871f1e4198da994060b02a9eaef9a809d5750918"
+      ref: "70e83b5a747cb6bf9bf360d6de78e8398d3b6873"
+      resolved-ref: "70e83b5a747cb6bf9bf360d6de78e8398d3b6873"
       url: "https://github.com/simolus3/moor.git"
     source: git
     version: "0.19.0"
@@ -1285,7 +1285,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.8"
+    version: "0.4.9"
   timezone:
     dependency: transitive
     description:
@@ -1425,7 +1425,7 @@ packages:
       path: "plugins/window_size"
       ref: "57a2cd88486105d3d813583339eb0e23c9bfd6d2"
       resolved-ref: "57a2cd88486105d3d813583339eb0e23c9bfd6d2"
-      url: "git://github.com/google/flutter-desktop-embedding.git"
+      url: "https://github.com/google/flutter-desktop-embedding.git"
     source: git
     version: "0.1.0"
   x25519:
@@ -1457,5 +1457,5 @@ packages:
     source: hosted
     version: "3.1.0"
 sdks:
-  dart: ">=2.14.0 <3.0.0"
+  dart: ">=2.16.0-100.0.dev <3.0.0"
   flutter: ">=2.5.0"

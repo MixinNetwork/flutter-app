@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -14,9 +15,7 @@ import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../enum/message_status.dart';
-import '../main.dart';
 import '../utils/extension/extension.dart';
-import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import 'blaze_message.dart';
 import 'blaze_message_param_session.dart';
@@ -40,6 +39,7 @@ class Blaze {
     this.privateKey,
     this.database,
     this.client,
+    this.packageInfo,
   );
 
   final String userId;
@@ -47,6 +47,8 @@ class Blaze {
   final String privateKey;
   final Database database;
   final Client client; // todo delete
+
+  final PackageInfo packageInfo;
 
   String _host = _wsHost1;
   String? _token;
@@ -94,7 +96,8 @@ class Blaze {
 
         reconnect();
       });
-    } catch (_) {
+    } catch (error, stack) {
+      e('ws connect error: $error, $stack');
       _connectedState = ConnectedState.disconnected;
       await reconnect();
     }
@@ -187,7 +190,7 @@ class Blaze {
       } else {
         await database.floodMessageDao.insert(FloodMessage(
             messageId: data.messageId,
-            data: await jsonEncodeWithIsolate(data),
+            data: jsonEncode(data),
             createdAt: data.createdAt));
       }
     } else if (blazeMessage.action == kCreateCall ||
@@ -263,8 +266,8 @@ class Blaze {
   }
 
   Future<void> _sendGZip(BlazeMessage msg) async {
-    channel?.sink.add(GZipEncoder().encode(
-        Uint8List.fromList((await jsonEncodeWithIsolate(msg)).codeUnits)));
+    channel?.sink.add(
+        GZipEncoder().encode(Uint8List.fromList((jsonEncode(msg)).codeUnits)));
   }
 
   void _disconnect([bool resetConnectedState = true]) {
@@ -323,14 +326,42 @@ class Blaze {
     }
   }
 
+  Future<String> _getUserAgent() async {
+    String? systemAndVersion;
+    if (Platform.isMacOS) {
+      try {
+        final result = await Process.run('sw_vers', []);
+        if (result.stdout != null) {
+          final stdout = result.stdout as String;
+          final map = Map.fromEntries(const LineSplitter()
+              .convert(stdout)
+              .map((e) => e.split(':'))
+              .where((element) => element.length >= 2)
+              .map((e) => MapEntry(e[0].trim(), e[1].trim())));
+          // example
+          // ProductName: macOS
+          // ProductVersion: 12.0.1
+          // BuildVersion: 21A559
+          systemAndVersion =
+              '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
+        }
+      } catch (e) {
+        w('ws mac get user agent error: $e');
+      }
+    }
+    systemAndVersion ??=
+        '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
+    return 'Mixin/${packageInfo.version} (Flutter $systemAndVersion; ${Platform.localeName})';
+  }
+
   void dispose() {
     _disconnect();
     _connectedStateBehaviorSubject.close();
   }
 }
 
-Future<BlazeMessage> parseBlazeMessage(List<int> list) =>
-    runLoadBalancer(_parseBlazeMessageInternal, list);
+BlazeMessage parseBlazeMessage(List<int> list) =>
+    _parseBlazeMessageInternal(list);
 
 BlazeMessage _parseBlazeMessageInternal(List<int> message) {
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
@@ -361,33 +392,4 @@ class WebSocketTransaction<T> {
   void error(T? data) {
     _completer.complete(data);
   }
-}
-
-Future<String> _getUserAgent() async {
-  final version = await packageInfoFuture;
-  String? systemAndVersion;
-  if (Platform.isMacOS) {
-    try {
-      final result = await Process.run('sw_vers', []);
-      if (result.stdout != null) {
-        final stdout = result.stdout as String;
-        final map = Map.fromEntries(const LineSplitter()
-            .convert(stdout)
-            .map((e) => e.split(':'))
-            .where((element) => element.length >= 2)
-            .map((e) => MapEntry(e[0].trim(), e[1].trim())));
-        // example
-        // ProductName: macOS
-        // ProductVersion: 12.0.1
-        // BuildVersion: 21A559
-        systemAndVersion =
-            '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
-      }
-    } catch (e) {
-      w('ws mac get user agent error: $e');
-    }
-  }
-  systemAndVersion ??=
-      '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
-  return 'Mixin/${version.version} (Flutter $systemAndVersion; ${Platform.localeName})';
 }

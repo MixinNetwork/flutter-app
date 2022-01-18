@@ -2420,6 +2420,16 @@ class Localization {
     );
   }
 
+  /// `Open in External App`
+  String get openInExternalApp {
+    return Intl.message(
+      'Open in External App',
+      name: 'openInExternalApp',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Sticker shop`
   String get stickerShop {
     return Intl.message(

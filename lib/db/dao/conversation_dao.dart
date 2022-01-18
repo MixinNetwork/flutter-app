@@ -327,22 +327,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       ],
       db.circleConversations.circleId.equals(circleId));
 
-  Future<int> updateLastMessageId(
-    String conversationId,
-    String messageId,
-    DateTime lastMessageCreatedAt,
-    int unseenMessageCount,
-  ) =>
-      (update(db.conversations)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .write(
-        ConversationsCompanion(
-          lastMessageId: Value(messageId),
-          lastMessageCreatedAt: Value(lastMessageCreatedAt),
-          unseenMessageCount: Value(unseenMessageCount),
-        ),
-      );
-
   Future<int> pin(String conversationId) => (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(
@@ -390,22 +374,22 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
 
   Future<void> updateConversation(ConversationResponse conversation) =>
       db.transaction(() async {
-        await insert(
-          ConversationsCompanion(
-            conversationId: Value(conversation.conversationId),
-            ownerId: Value(conversation.creatorId),
-            category: Value(conversation.category),
-            name: Value(conversation.name),
-            iconUrl: Value(conversation.iconUrl),
-            announcement: Value(conversation.announcement),
-            codeUrl: Value(conversation.codeUrl),
-            createdAt: Value(conversation.createdAt),
-            status: const Value(ConversationStatus.success),
-            muteUntil: Value(DateTime.tryParse(conversation.muteUntil)),
+        await Future.wait([
+          insert(
+            ConversationsCompanion(
+              conversationId: Value(conversation.conversationId),
+              ownerId: Value(conversation.creatorId),
+              category: Value(conversation.category),
+              name: Value(conversation.name),
+              iconUrl: Value(conversation.iconUrl),
+              announcement: Value(conversation.announcement),
+              codeUrl: Value(conversation.codeUrl),
+              createdAt: Value(conversation.createdAt),
+              status: const Value(ConversationStatus.success),
+              muteUntil: Value(DateTime.tryParse(conversation.muteUntil)),
+            ),
           ),
-        );
-        await Future.wait(
-          conversation.participants.map(
+          ...conversation.participants.map(
             (participant) => db.participantDao.insert(
               Participant(
                 conversationId: conversation.conversationId,
@@ -415,7 +399,16 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
               ),
             ),
           ),
-        );
+          ...(conversation.participantSessions ?? [])
+              .map((p) => db.participantSessionDao.insert(
+                    ParticipantSessionData(
+                      conversationId: conversation.conversationId,
+                      userId: p.userId,
+                      sessionId: p.sessionId,
+                      publicKey: p.publicKey,
+                    ),
+                  ))
+        ]);
       });
 
   Future<int> updateCodeUrl(String conversationId, String codeUrl) =>
