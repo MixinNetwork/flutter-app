@@ -127,12 +127,12 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
     final exists = await db.hasData(
         db.jobs,
         [],
-        db.jobs.action.equals(kUpdateAsset) &
+        db.jobs.action.equals(kUpdateSticker) &
             db.jobs.blazeMessage.equals(stickerId));
     if (exists) return;
     await insert(Job(
       jobId: const Uuid().v4(),
-      action: kUpdateAsset,
+      action: kUpdateSticker,
       priority: 5,
       runCount: 0,
       createdAt: DateTime.now(),

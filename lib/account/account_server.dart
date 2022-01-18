@@ -528,7 +528,7 @@ class AccountServer {
     }
   }
 
-  Future<void> initSticker() async {
+  Future<void> refreshSticker() async {
     final refreshStickerLastTime =
         AccountKeyValue.instance.refreshStickerLastTime;
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -538,15 +538,16 @@ class AccountServer {
 
     final res = await client.accountApi.getStickerAlbums();
     res.data.forEach((item) async {
-      await database.stickerAlbumDao.insert(db.StickerAlbum(
-          albumId: item.albumId,
-          name: item.name,
-          iconUrl: item.iconUrl,
-          createdAt: item.createdAt,
-          updateAt: item.updateAt,
-          userId: item.userId,
-          category: item.category,
-          description: item.description));
+      await database.stickerAlbumDao.insert(StickerAlbumsCompanion.insert(
+        albumId: item.albumId,
+        name: item.name,
+        iconUrl: item.iconUrl,
+        createdAt: item.createdAt,
+        updateAt: item.updateAt,
+        userId: item.userId,
+        category: item.category,
+        description: item.description,
+      ));
       await _updateStickerAlbums(item.albumId);
     });
 
@@ -1116,14 +1117,7 @@ class AccountServer {
   }
 
   Future<void> updateAssetById({required String assetId}) =>
-      database.jobDao.insertUpdateAssetJob(Job(
-        jobId: const Uuid().v4(),
-        action: kUpdateAsset,
-        priority: 5,
-        runCount: 0,
-        createdAt: DateTime.now(),
-        blazeMessage: assetId,
-      ));
+      database.jobDao.insertUpdateAssetJob(assetId);
 
   Future<void> updateFiats() async {
     final data = await client.accountApi.getFiats();
