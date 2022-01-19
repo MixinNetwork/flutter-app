@@ -123,7 +123,7 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
     ));
   }
 
-  Future<void> insertUpdateStickerJob(String? stickerId) async {
+  Future<void> insertUpdateStickerJob(String stickerId) async {
     final exists = await db.hasData(
         db.jobs,
         [],

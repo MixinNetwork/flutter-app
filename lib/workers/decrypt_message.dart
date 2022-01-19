@@ -661,7 +661,9 @@ class DecryptMessage extends Injector {
       final sticker = await database.stickerDao
           .sticker(stickerMessage.stickerId)
           .getSingleOrNull();
-      if (sticker == null) {
+      if (sticker == null ||
+          (stickerMessage.albumId != null &&
+              (sticker.albumId?.isEmpty ?? true))) {
         await database.jobDao.insertUpdateStickerJob(stickerMessage.stickerId);
       }
       final message = Message(
@@ -1056,7 +1058,9 @@ class DecryptMessage extends Injector {
       final sticker = await database.stickerDao
           .sticker(stickerMessage.stickerId)
           .getSingleOrNull();
-      if (sticker == null) {
+      if (sticker == null ||
+          (stickerMessage.albumId != null &&
+              (sticker.albumId?.isEmpty ?? true))) {
         await database.jobDao.insertUpdateStickerJob(stickerMessage.stickerId);
       }
       await database.messageDao.updateStickerMessage(
@@ -1230,7 +1234,7 @@ class DecryptMessage extends Injector {
           final hasSticker =
               await database.stickerDao.hasSticker(transcript.stickerId!);
           if (hasSticker) return;
-          await database.jobDao.insertUpdateStickerJob(transcript.stickerId);
+          await database.jobDao.insertUpdateStickerJob(transcript.stickerId!);
         }));
 
     Future _refreshUser() => refreshUsers([
