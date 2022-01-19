@@ -1,8 +1,24 @@
 import 'package:drift/drift.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
 import '../mixin_database.dart';
 
 part 'sticker_album_dao.g.dart';
+
+extension StickerAlbumsCompanionExtension on sdk.StickerAlbum {
+  StickerAlbumsCompanion get asStickerAlbumsCompanion =>
+      StickerAlbumsCompanion.insert(
+        albumId: albumId,
+        name: name,
+        iconUrl: iconUrl,
+        updateAt: updateAt,
+        userId: userId,
+        category: category,
+        description: description,
+        createdAt: createdAt,
+        banner: Value(banner),
+      );
+}
 
 @DriftAccessor(tables: [StickerAlbums])
 class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>

@@ -7,6 +7,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../constants/resources.dart';
+import '../../db/dao/sticker_album_dao.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -38,29 +39,47 @@ Future<void> showStickerStorePageDialog(
 
 Future<void> showStickerPageDialog(
   BuildContext context,
-  String? stickerId,
+  String stickerId,
 ) async {
-  if (stickerId == null) return;
-
-  final album = await context.database.stickerAlbumDao
+  final a = await context.database.stickerAlbumDao
       .albumByStickerId(stickerId)
       .getSingleOrNull();
-
-  if (album?.albumId.isNotEmpty == true && album?.category == 'SYSTEM') {
-    return showMixinDialog(
-      context: context,
-      child: ConstrainedBox(
-        constraints: BoxConstraints.loose(const Size(480, 600)),
-        child: _StickerAlbumPage(albumId: album!.albumId),
-      ),
-    );
-  }
 
   return showMixinDialog(
     context: context,
     child: ConstrainedBox(
       constraints: BoxConstraints.loose(const Size(480, 600)),
-      child: _StickerPage(stickerId: stickerId),
+      child: HookBuilder(builder: (context) {
+        final album = useMemoizedStream(() => context.database.stickerAlbumDao
+                .albumByStickerId(stickerId)
+                .watchSingleOrNullThrottle(kSlowThrottleDuration)).data ??
+            a;
+
+        useEffect(() {
+          if (album?.albumId.isEmpty ?? true) return;
+          Future<void> effect() async {
+            final accountServer = context.accountServer;
+            final client = accountServer.client;
+            final database = context.database;
+
+            final albumId = album!.albumId;
+            final stickerAlbum =
+                (await client.accountApi.getStickerAlbum(albumId)).data;
+            await database.stickerAlbumDao
+                .insert(stickerAlbum.asStickerAlbumsCompanion);
+
+            await accountServer.updateStickerAlbums(albumId);
+          }
+
+          effect();
+        }, [album?.albumId]);
+
+        if (album?.albumId.isNotEmpty == true && album?.category == 'SYSTEM') {
+          return _StickerAlbumPage(albumId: album!.albumId);
+        }
+
+        return _StickerPage(stickerId: stickerId);
+      }),
     ),
   );
 }

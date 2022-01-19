@@ -579,7 +579,7 @@ class AccountServer {
         }
       }
 
-      await _updateStickerAlbums(a.albumId);
+      await updateStickerAlbums(a.albumId);
     }
 
     if (hasNewAlbum) {
@@ -632,7 +632,7 @@ class AccountServer {
     }
   }
 
-  Future<void> _updateStickerAlbums(String albumId) async {
+  Future<void> updateStickerAlbums(String albumId) async {
     try {
       final response = await client.accountApi.getStickersByAlbumId(albumId);
       final relationships = <db.StickerRelationship>[];
