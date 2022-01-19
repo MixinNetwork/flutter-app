@@ -1,0 +1,9 @@
+Section: x11
+Priority: optional
+Version: 0.18.2
+Homepage: https://mixin.one/messenger
+Package: mixin-desktop
+Maintainer: Mixin Team
+Architecture: amd64
+Depends: libgtk-3-0 (>= 3.10.0), vlc , libwebkit2gtk-4.0-37
+Description: Mixin messenger desktop
