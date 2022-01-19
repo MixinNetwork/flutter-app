@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 app_name="mixin_desktop"
 current_dir=$(dirname "$0")
@@ -16,8 +16,8 @@ cp "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0" \
   "$package_dir/usr/lib/$app_name/lib/libsqlite3.so"
 
 mkdir -p "$package_dir/usr/bin"
-cd "$package_dir/usr/bin" || exit
+pushd "$package_dir/usr/bin" || exit
 ln -s "../lib/$app_name/$app_name" "$app_name"
-cd "$current_dir" || exit
+popd || exit
 
 dpkg-deb --build --root-owner-group "$package_dir" "$project_dir/build/${app_name}_amd64.deb"
