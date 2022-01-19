@@ -315,6 +315,7 @@ class _SymbolIconWithBorder extends StatelessWidget {
     required this.size,
     required this.chainSize,
     this.chainBorder = const BorderSide(color: Colors.white),
+    // ignore: unused_element
     this.symbolBorder = BorderSide.none,
   }) : super(key: key);
 
