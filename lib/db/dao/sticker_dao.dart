@@ -12,6 +12,9 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insert(Sticker sticker) =>
       into(db.stickers).insertOnConflictUpdate(sticker);
 
+  Future<void> insertAll(List<Sticker> stickers) =>
+      batch((batch) => batch.insertAllOnConflictUpdate(db.stickers, stickers));
+
   Future<int> deleteSticker(Sticker sticker) =>
       delete(db.stickers).delete(sticker);
 
@@ -29,6 +32,7 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
     ]);
 
   Selectable<Sticker> personalStickers() => db.stickersByCategory('PERSONAL');
+
   Selectable<Sticker> systemStickers() => db.stickersByCategory('SYSTEM');
 
   Future<int> updateUsedAt(String stickerId, DateTime dateTime) =>

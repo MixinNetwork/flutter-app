@@ -537,19 +537,53 @@ class AccountServer {
     }
 
     final res = await client.accountApi.getStickerAlbums();
-    res.data.forEach((item) async {
+    final albums = res.data..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+    final localLatestCreatedAt =
+        await database.stickerAlbumDao.latestCreatedAt().getSingle();
+
+    var hasNewAlbum = false;
+    if (localLatestCreatedAt == null && albums.isNotEmpty) {
+      hasNewAlbum = true;
+    }
+
+    var maxOrder =
+        await database.stickerAlbumDao.maxOrder().getSingle() ?? DateTime.now();
+
+    for (final a in albums) {
+      final localAlbum =
+          await database.stickerAlbumDao.album(a.albumId).getSingleOrNull();
+      if (localAlbum == null) {
+        maxOrder = maxOrder.add(const Duration(milliseconds: 1));
+      }
       await database.stickerAlbumDao.insert(StickerAlbumsCompanion.insert(
-        albumId: item.albumId,
-        name: item.name,
-        iconUrl: item.iconUrl,
-        createdAt: item.createdAt,
-        updateAt: item.updateAt,
-        userId: item.userId,
-        category: item.category,
-        description: item.description,
+        albumId: localAlbum?.albumId ?? a.albumId,
+        name: localAlbum?.name ?? a.name,
+        iconUrl: localAlbum?.iconUrl ?? a.iconUrl,
+        updateAt: localAlbum?.updateAt ?? a.updateAt,
+        userId: localAlbum?.userId ?? a.userId,
+        category: localAlbum?.category ?? a.category,
+        description: localAlbum?.description ?? a.description,
+        createdAt: localAlbum?.createdAt ?? a.createdAt,
+        banner: Value(localAlbum?.banner ?? a.banner),
+        orderedAt: Value(localAlbum?.orderedAt ?? maxOrder),
+        added: Value(
+          localAlbum?.added ?? a.banner?.isNotEmpty == true,
+        ),
       ));
-      await _updateStickerAlbums(item.albumId);
-    });
+
+      if (!hasNewAlbum && localLatestCreatedAt != null) {
+        if (a.createdAt.isAfter(localLatestCreatedAt)) {
+          hasNewAlbum = true;
+        }
+      }
+
+      await _updateStickerAlbums(a.albumId);
+    }
+
+    if (hasNewAlbum) {
+      AccountKeyValue.instance.hasNewAlbum = true;
+    }
 
     AccountKeyValue.instance.refreshStickerLastTime = now;
   }
@@ -601,10 +635,11 @@ class AccountServer {
     try {
       final response = await client.accountApi.getStickersByAlbumId(albumId);
       final relationships = <db.StickerRelationship>[];
+      final stickers = <db.Sticker>[];
       response.data.forEach((sticker) {
         relationships.add(db.StickerRelationship(
             albumId: albumId, stickerId: sticker.stickerId));
-        database.stickerDao.insert(db.Sticker(
+        stickers.add(db.Sticker(
           stickerId: sticker.stickerId,
           albumId: albumId,
           name: sticker.name,
@@ -616,7 +651,10 @@ class AccountServer {
         ));
       });
 
-      await database.stickerRelationshipDao.insertAll(relationships);
+      await database.mixinDatabase.transaction(() async {
+        await database.stickerRelationshipDao.insertAll(relationships);
+        await database.stickerDao.insertAll(stickers);
+      });
     } catch (e, s) {
       w('Update sticker albums error: $e, stack: $s');
     }

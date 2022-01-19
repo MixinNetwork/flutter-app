@@ -62,6 +62,12 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
       .map((row) => db.stickerAlbums.createdAt.converter
           .mapToDart(row.read(db.stickerAlbums.createdAt)));
 
+  Selectable<DateTime?> maxOrder() {
+    final max = db.stickerAlbums.orderedAt.max();
+    return (selectOnly(db.stickerAlbums)..addColumns([max])).map(
+        (row) => db.stickerAlbums.orderedAt.converter.mapToDart(row.read(max)));
+  }
+
   Selectable<StickerAlbum> albumByStickerId(String stickerId) =>
       db.albumByStickerId(stickerId);
 }
