@@ -406,6 +406,7 @@ class AccountServer {
 
   Future<void> sendStickerMessage(
     String stickerId,
+    String? albumId,
     EncryptCategory encryptCategory, {
     String? conversationId,
     String? recipientId,
@@ -413,7 +414,7 @@ class AccountServer {
       _sendMessageHelper.sendStickerMessage(
           await _initConversation(conversationId, recipientId),
           userId,
-          StickerMessage(stickerId, null, null),
+          StickerMessage(stickerId, albumId, null),
           encryptCategory.toCategory(MessageCategory.plainSticker,
               MessageCategory.signalSticker, MessageCategory.encryptedSticker));
 

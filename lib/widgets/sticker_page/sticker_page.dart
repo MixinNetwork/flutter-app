@@ -158,12 +158,17 @@ class _StickerAlbumPageItem extends HookWidget {
         final conversationItem = context.read<ConversationCubit>().state;
         if (conversationItem == null) return;
 
+        final albumId = await accountServer.database.stickerRelationshipDao
+            .stickerSystemAlbumId(sticker.stickerId)
+            .getSingleOrNull();
+
         await Future.wait([
           if (updateUsedAt)
             accountServer.database.stickerDao
                 .updateUsedAt(sticker.stickerId, DateTime.now()),
           accountServer.sendStickerMessage(
             sticker.stickerId,
+            albumId,
             conversationItem.encryptCategory,
             conversationId: conversationItem.conversationId,
             recipientId: conversationItem.user?.userId,
