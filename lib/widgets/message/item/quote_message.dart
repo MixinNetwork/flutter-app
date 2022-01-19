@@ -20,6 +20,7 @@ import '../../../utils/logger.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../cache_image.dart';
 import '../../image.dart';
+import '../../sticker_page/sticker_item.dart';
 import '../message.dart';
 import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
@@ -247,7 +248,10 @@ class QuoteMessage extends HookWidget {
           quoteMessageId: quoteMessageId!,
           userId: userId,
           name: userFullName,
-          image: CacheImage(quote.assetUrl as String),
+          image: StickerItem(
+            assetUrl: quote.assetUrl as String,
+            assetType: quote.assetType as String,
+          ),
           icon: SvgPicture.asset(
             Resources.assetsImagesStickerSvg,
             color: iconColor,
