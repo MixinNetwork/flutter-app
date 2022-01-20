@@ -549,7 +549,8 @@ class AccountServer {
     }
 
     var maxOrder =
-        await database.stickerAlbumDao.maxOrder().getSingleOrNull() ?? DateTime.now();
+        await database.stickerAlbumDao.maxOrder().getSingleOrNull() ??
+            DateTime.now();
 
     for (final a in albums) {
       final localAlbum =
