@@ -541,7 +541,7 @@ class AccountServer {
     final albums = res.data..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
     final localLatestCreatedAt =
-        await database.stickerAlbumDao.latestCreatedAt().getSingle();
+        await database.stickerAlbumDao.latestCreatedAt().getSingleOrNull();
 
     var hasNewAlbum = false;
     if (localLatestCreatedAt == null && albums.isNotEmpty) {
@@ -549,7 +549,7 @@ class AccountServer {
     }
 
     var maxOrder =
-        await database.stickerAlbumDao.maxOrder().getSingle() ?? DateTime.now();
+        await database.stickerAlbumDao.maxOrder().getSingleOrNull() ?? DateTime.now();
 
     for (final a in albums) {
       final localAlbum =
@@ -558,15 +558,15 @@ class AccountServer {
         maxOrder = maxOrder.add(const Duration(milliseconds: 1));
       }
       await database.stickerAlbumDao.insert(StickerAlbumsCompanion.insert(
-        albumId: localAlbum?.albumId ?? a.albumId,
-        name: localAlbum?.name ?? a.name,
-        iconUrl: localAlbum?.iconUrl ?? a.iconUrl,
-        updateAt: localAlbum?.updateAt ?? a.updateAt,
-        userId: localAlbum?.userId ?? a.userId,
-        category: localAlbum?.category ?? a.category,
-        description: localAlbum?.description ?? a.description,
-        createdAt: localAlbum?.createdAt ?? a.createdAt,
-        banner: Value(localAlbum?.banner ?? a.banner),
+        albumId: a.albumId,
+        name: a.name,
+        iconUrl: a.iconUrl,
+        updateAt: a.updateAt,
+        userId: a.userId,
+        category: a.category,
+        description: a.description,
+        createdAt: a.createdAt,
+        banner: Value(a.banner),
         orderedAt: Value(localAlbum?.orderedAt ?? maxOrder),
         added: Value(
           localAlbum?.added ?? a.banner?.isNotEmpty == true,
