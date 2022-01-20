@@ -38,7 +38,7 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
   Selectable<StickerAlbum> systemAddedAlbums() => select(db.stickerAlbums)
     ..where((tbl) => tbl.category.equals('SYSTEM') & tbl.added.equals(true))
     ..orderBy([
-      (tbl) => OrderingTerm.desc(tbl.orderedAt),
+      (tbl) => OrderingTerm.asc(tbl.orderedAt),
       (tbl) => OrderingTerm.desc(tbl.createdAt),
     ]);
 
@@ -52,20 +52,15 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
           .write(
         StickerAlbumsCompanion(
           added: Value(added),
-          orderedAt: added == false
-              ? Value(db.stickerAlbums.orderedAt.converter.mapToDart(0)!)
-              : const Value.absent(),
+          orderedAt: added == false ? const Value(0) : const Value.absent(),
         ),
       );
 
   Future<void> updateOrders(List<StickerAlbum> value) {
-    final now = DateTime.now();
     final newList = value.asMap().entries.map((e) {
       final index = e.key;
       final album = e.value;
-      return album.copyWith(
-        orderedAt: now.subtract(Duration(milliseconds: index)),
-      );
+      return album.copyWith(orderedAt: index);
     });
     return batch(
         (batch) => batch.insertAllOnConflictUpdate(db.stickerAlbums, newList));
@@ -78,10 +73,10 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
       .map((row) => db.stickerAlbums.createdAt.converter
           .mapToDart(row.read(db.stickerAlbums.createdAt)));
 
-  Selectable<DateTime?> maxOrder() {
+  Selectable<int?> maxOrder() {
     final max = db.stickerAlbums.orderedAt.max();
-    return (selectOnly(db.stickerAlbums)..addColumns([max])).map(
-        (row) => db.stickerAlbums.orderedAt.converter.mapToDart(row.read(max)));
+    return (selectOnly(db.stickerAlbums)..addColumns([max]))
+        .map((row) => row.read(max));
   }
 
   Selectable<StickerAlbum> albumByStickerId(String stickerId) =>

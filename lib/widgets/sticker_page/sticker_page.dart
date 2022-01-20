@@ -207,6 +207,7 @@ class _StickerAlbumBar extends HookWidget {
       if (tabController == null) return () {};
       void onTap() {
         if (tabController!.index != 0) return;
+        AccountKeyValue.instance.hasNewAlbum = false;
         showStickerStorePageDialog(context);
         tabController!.index = tabController!.previousIndex;
         HoverOverlay.forceHidden(context);

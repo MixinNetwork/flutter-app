@@ -21,11 +21,11 @@ import '../crypto/privacy_key_value.dart';
 import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/uuid/uuid.dart';
+import '../db/dao/sticker_album_dao.dart';
 import '../db/database.dart';
 import '../db/database_event_bus.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
-import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
@@ -549,25 +549,15 @@ class AccountServer {
     }
 
     var maxOrder =
-        await database.stickerAlbumDao.maxOrder().getSingleOrNull() ??
-            DateTime.now();
+        await database.stickerAlbumDao.maxOrder().getSingleOrNull() ?? 0;
 
     for (final a in albums) {
       final localAlbum =
           await database.stickerAlbumDao.album(a.albumId).getSingleOrNull();
       if (localAlbum == null) {
-        maxOrder = maxOrder.add(const Duration(milliseconds: 1));
+        maxOrder++;
       }
-      await database.stickerAlbumDao.insert(StickerAlbumsCompanion.insert(
-        albumId: a.albumId,
-        name: a.name,
-        iconUrl: a.iconUrl,
-        updateAt: a.updateAt,
-        userId: a.userId,
-        category: a.category,
-        description: a.description,
-        createdAt: a.createdAt,
-        banner: Value(a.banner),
+      await database.stickerAlbumDao.insert(a.asStickerAlbumsCompanion.copyWith(
         orderedAt: Value(localAlbum?.orderedAt ?? maxOrder),
         added: Value(
           localAlbum?.added ?? a.banner?.isNotEmpty == true,

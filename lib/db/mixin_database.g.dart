@@ -3420,7 +3420,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
   final String iconUrl;
   final DateTime createdAt;
   final DateTime updateAt;
-  final DateTime orderedAt;
+  final int orderedAt;
   final String userId;
   final String category;
   final String description;
@@ -3451,8 +3451,8 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
       updateAt: StickerAlbums.$converter1.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}update_at']))!,
-      orderedAt: StickerAlbums.$converter2.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}ordered_at']))!,
+      orderedAt: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}ordered_at'])!,
       userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
       category: const StringType()
@@ -3479,10 +3479,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       final converter = StickerAlbums.$converter1;
       map['update_at'] = Variable<int>(converter.mapToSql(updateAt)!);
     }
-    {
-      final converter = StickerAlbums.$converter2;
-      map['ordered_at'] = Variable<int>(converter.mapToSql(orderedAt)!);
-    }
+    map['ordered_at'] = Variable<int>(orderedAt);
     map['user_id'] = Variable<String>(userId);
     map['category'] = Variable<String>(category);
     map['description'] = Variable<String>(description);
@@ -3522,7 +3519,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       iconUrl: serializer.fromJson<String>(json['icon_url']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
       updateAt: serializer.fromJson<DateTime>(json['update_at']),
-      orderedAt: serializer.fromJson<DateTime>(json['ordered_at']),
+      orderedAt: serializer.fromJson<int>(json['ordered_at']),
       userId: serializer.fromJson<String>(json['user_id']),
       category: serializer.fromJson<String>(json['category']),
       description: serializer.fromJson<String>(json['description']),
@@ -3539,7 +3536,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       'icon_url': serializer.toJson<String>(iconUrl),
       'created_at': serializer.toJson<DateTime>(createdAt),
       'update_at': serializer.toJson<DateTime>(updateAt),
-      'ordered_at': serializer.toJson<DateTime>(orderedAt),
+      'ordered_at': serializer.toJson<int>(orderedAt),
       'user_id': serializer.toJson<String>(userId),
       'category': serializer.toJson<String>(category),
       'description': serializer.toJson<String>(description),
@@ -3554,7 +3551,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           String? iconUrl,
           DateTime? createdAt,
           DateTime? updateAt,
-          DateTime? orderedAt,
+          int? orderedAt,
           String? userId,
           String? category,
           String? description,
@@ -3617,7 +3614,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
   final Value<String> iconUrl;
   final Value<DateTime> createdAt;
   final Value<DateTime> updateAt;
-  final Value<DateTime> orderedAt;
+  final Value<int> orderedAt;
   final Value<String> userId;
   final Value<String> category;
   final Value<String> description;
@@ -3662,7 +3659,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     Expression<String>? iconUrl,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updateAt,
-    Expression<DateTime>? orderedAt,
+    Expression<int>? orderedAt,
     Expression<String>? userId,
     Expression<String>? category,
     Expression<String>? description,
@@ -3690,7 +3687,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       Value<String>? iconUrl,
       Value<DateTime>? createdAt,
       Value<DateTime>? updateAt,
-      Value<DateTime>? orderedAt,
+      Value<int>? orderedAt,
       Value<String>? userId,
       Value<String>? category,
       Value<String>? description,
@@ -3732,8 +3729,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       map['update_at'] = Variable<int>(converter.mapToSql(updateAt.value)!);
     }
     if (orderedAt.present) {
-      final converter = StickerAlbums.$converter2;
-      map['ordered_at'] = Variable<int>(converter.mapToSql(orderedAt.value)!);
+      map['ordered_at'] = Variable<int>(orderedAt.value);
     }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
@@ -3809,13 +3805,12 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(StickerAlbums.$converter1);
   final VerificationMeta _orderedAtMeta = const VerificationMeta('orderedAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> orderedAt =
-      GeneratedColumn<int?>('ordered_at', aliasedName, false,
-              type: const IntType(),
-              requiredDuringInsert: false,
-              $customConstraints: 'NOT NULL DEFAULT 0',
-              defaultValue: const CustomExpression<int>('0'))
-          .withConverter<DateTime>(StickerAlbums.$converter2);
+  late final GeneratedColumn<int?> orderedAt = GeneratedColumn<int?>(
+      'ordered_at', aliasedName, false,
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: 'NOT NULL DEFAULT 0',
+      defaultValue: const CustomExpression<int>('0'));
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
@@ -3891,7 +3886,10 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
     }
     context.handle(_createdAtMeta, const VerificationResult.success());
     context.handle(_updateAtMeta, const VerificationResult.success());
-    context.handle(_orderedAtMeta, const VerificationResult.success());
+    if (data.containsKey('ordered_at')) {
+      context.handle(_orderedAtMeta,
+          orderedAt.isAcceptableOrUnknown(data['ordered_at']!, _orderedAtMeta));
+    }
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
@@ -3938,7 +3936,6 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(album_id)'];
   @override
