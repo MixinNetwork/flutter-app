@@ -309,6 +309,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "transactions": MessageLookupByLibrary.simpleMessage("转账记录"),
         "transactionsId": MessageLookupByLibrary.simpleMessage("交易编号"),
         "transfer": MessageLookupByLibrary.simpleMessage("转账"),
+        "typeAMessage": MessageLookupByLibrary.simpleMessage("输入消息"),
         "unMute": MessageLookupByLibrary.simpleMessage("取消静音"),
         "unPin": MessageLookupByLibrary.simpleMessage("取消置顶"),
         "unblock": MessageLookupByLibrary.simpleMessage("解除屏蔽"),

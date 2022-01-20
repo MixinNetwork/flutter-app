@@ -2429,6 +2429,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Type message`
+  String get typeAMessage {
+    return Intl.message(
+      'Type message',
+      name: 'typeAMessage',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
