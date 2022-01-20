@@ -236,5 +236,6 @@
   "saveAs": "Save as",
   "noResults": "No results",
   "saveToGallery": "Save to Gallery",
-  "openInExternalApp": "Open in External App"
+  "openInExternalApp": "Open in External App",
+  "typeAMessage": "Type message"
 }

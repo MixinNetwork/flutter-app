@@ -231,5 +231,6 @@
   "saveAs": "另存为",
   "noResults": "没有结果",
   "saveToGallery": "保存到图库",
-  "openInExternalApp": "通过外部程序打开"
+  "openInExternalApp": "通过外部程序打开",
+  "typeAMessage": "输入消息"
 }

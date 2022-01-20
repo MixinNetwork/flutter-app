@@ -69,4 +69,6 @@ extension EncryptCategoryExtension on EncryptCategory {
 
     throw ArgumentError('Unknown type');
   }
+
+  bool get isEncrypt => this != EncryptCategory.plain;
 }
