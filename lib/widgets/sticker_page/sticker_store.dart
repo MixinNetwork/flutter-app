@@ -540,12 +540,12 @@ class _StickerPage extends HookWidget {
         AspectRatio(
           aspectRatio: 1,
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 70, vertical: 56),
+            margin: const EdgeInsets.all(56),
             color: context.theme.background,
             alignment: Alignment.center,
             child: SizedBox(
-              height: 72,
-              width: 72,
+              height: 256,
+              width: 256,
               child: sticker?.assetUrl.isNotEmpty == true
                   ? StickerItem(
                       assetUrl: sticker?.assetUrl ?? '',
