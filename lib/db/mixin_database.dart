@@ -168,9 +168,11 @@ class MixinDatabase extends _$MixinDatabase {
             await m.createIndex(indexMessageConversationIdStatusUserId);
           }
           if (from <= 9) {
-            await m.addColumn(stickerAlbums, stickerAlbums.orderedAt);
-            await m.addColumn(stickerAlbums, stickerAlbums.banner);
-            await m.addColumn(stickerAlbums, stickerAlbums.added);
+            // await m.addColumn(stickerAlbums, stickerAlbums.orderedAt);
+            // await m.addColumn(stickerAlbums, stickerAlbums.banner);
+            // await m.addColumn(stickerAlbums, stickerAlbums.added);
+            await update(stickerAlbums)
+                .write(const StickerAlbumsCompanion(added: Value(true)));
           }
         },
       );
