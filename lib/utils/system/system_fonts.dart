@@ -11,6 +11,7 @@ bool _fallbackFontsLoaded = false;
 
 String? loadedFallbackFonts;
 
+// TODO(BIN): remove this when https://github.com/flutter/flutter/issues/90951 has been fixed.
 Future<void> loadFallbackFonts() async {
   if (!Platform.isLinux) {
     return;
