@@ -21,12 +21,15 @@ import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
 import 'utils/logger.dart';
+import 'utils/system/system_fonts.dart';
 import 'utils/webview.dart';
 
 final packageInfoFuture = PackageInfo.fromPlatform();
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await loadFallbackFonts();
 
   // show custom web view navigation bar.
   if (runWebViewNavigationBar(args)) {

@@ -4,7 +4,6 @@ import 'package:flutter_svg/svg.dart';
 import '../constants/resources.dart';
 import '../ui/home/route/responsive_navigator_cubit.dart';
 import '../utils/extension/extension.dart';
-
 import 'interactive_decorated_box.dart';
 
 class CellGroup extends StatelessWidget {
@@ -110,7 +109,7 @@ class CellItem extends StatelessWidget {
             if (leading != null) leading!,
             if (leading != null) const SizedBox(width: 8),
             Expanded(
-              child: DefaultTextStyle(
+              child: DefaultTextStyle.merge(
                 style: TextStyle(
                   fontSize: 16,
                   color: dynamicColor,
@@ -120,7 +119,7 @@ class CellItem extends StatelessWidget {
             ),
             if (description != null) const SizedBox(width: 4),
             if (description != null)
-              DefaultTextStyle(
+              DefaultTextStyle.merge(
                 style: TextStyle(
                   color: context.theme.secondaryText,
                   fontSize: 14,

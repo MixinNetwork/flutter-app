@@ -42,7 +42,7 @@ class RadioItem<T> extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 30),
-              DefaultTextStyle(
+              DefaultTextStyle.merge(
                 style: TextStyle(
                   color: context.theme.text,
                   fontSize: 16,

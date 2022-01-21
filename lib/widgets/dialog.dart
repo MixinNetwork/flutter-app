@@ -101,7 +101,7 @@ class AlertDialogLayout extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (title != null)
-                    DefaultTextStyle(
+                    DefaultTextStyle.merge(
                       style: TextStyle(
                         fontSize: 16,
                         color: context.theme.text,
@@ -109,7 +109,7 @@ class AlertDialogLayout extends StatelessWidget {
                       child: title!,
                     ),
                   if (title != null) const SizedBox(height: 48),
-                  DefaultTextStyle(
+                  DefaultTextStyle.merge(
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -229,7 +229,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
       child: InteractiveDecoratedBox.color(
         decoration: boxDecoration,
         onTap: () => onTap != null ? onTap?.call() : handleTap(context),
-        child: DefaultTextStyle(
+        child: DefaultTextStyle.merge(
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 16,
@@ -390,7 +390,7 @@ class DialogAddOrJoinButton extends StatelessWidget {
           ),
         ),
         onPressed: onTap,
-        child: DefaultTextStyle(
+        child: DefaultTextStyle.merge(
           style: TextStyle(fontSize: 12, color: context.theme.accent),
           child: title,
         ),

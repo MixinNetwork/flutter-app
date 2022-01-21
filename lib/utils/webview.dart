@@ -56,7 +56,7 @@ class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
       width: 400,
       child: AlertDialogLayout(
         title: Text(context.l10n.webViewRuntimeNotAvailable),
-        content: DefaultTextStyle(
+        content: DefaultTextStyle.merge(
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.normal,
