@@ -5,9 +5,6 @@ import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-
-// ignore: implementation_imports
-import 'package:mixin_bot_sdk_dart/src/vo/signal_key_count.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
@@ -662,10 +659,12 @@ class DecryptMessage extends Injector {
       final stickerMessage = StickerMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
       final sticker = await database.stickerDao
-          .getStickerByUnique(stickerMessage.stickerId)
+          .sticker(stickerMessage.stickerId)
           .getSingleOrNull();
-      if (sticker == null) {
-        await refreshSticker(stickerMessage.stickerId);
+      if (sticker == null ||
+          (stickerMessage.albumId != null &&
+              (sticker.albumId?.isEmpty ?? true))) {
+        await database.jobDao.insertUpdateStickerJob(stickerMessage.stickerId);
       }
       final message = Message(
           messageId: data.messageId,
@@ -922,14 +921,7 @@ class DecryptMessage extends Injector {
       ),
     );
     await database.snapshotDao.insert(snapshot);
-    await database.jobDao.insertUpdateAssetJob(Job(
-      jobId: const Uuid().v4(),
-      action: kUpdateAsset,
-      priority: 5,
-      runCount: 0,
-      createdAt: DateTime.now(),
-      blazeMessage: snapshotMessage.assetId,
-    ));
+    await database.jobDao.insertUpdateAssetJob(snapshotMessage.assetId);
     var status = data.status;
     if (_conversationId == data.conversationId && data.userId != accountId) {
       status = MessageStatus.read;
@@ -1064,10 +1056,12 @@ class DecryptMessage extends Injector {
         jsonDecode(plain) as Map<String, dynamic>,
       );
       final sticker = await database.stickerDao
-          .getStickerByUnique(stickerMessage.stickerId)
+          .sticker(stickerMessage.stickerId)
           .getSingleOrNull();
-      if (sticker == null) {
-        await refreshSticker(stickerMessage.stickerId);
+      if (sticker == null ||
+          (stickerMessage.albumId != null &&
+              (sticker.albumId?.isEmpty ?? true))) {
+        await database.jobDao.insertUpdateStickerJob(stickerMessage.stickerId);
       }
       await database.messageDao.updateStickerMessage(
           messageId, data.status, stickerMessage.stickerId);
@@ -1240,7 +1234,7 @@ class DecryptMessage extends Injector {
           final hasSticker =
               await database.stickerDao.hasSticker(transcript.stickerId!);
           if (hasSticker) return;
-          await refreshSticker(transcript.stickerId!);
+          await database.jobDao.insertUpdateStickerJob(transcript.stickerId!);
         }));
 
     Future _refreshUser() => refreshUsers([

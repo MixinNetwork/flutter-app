@@ -198,6 +198,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
       horizontal: 16,
     ),
     this.disable = false,
+    this.backgroundColor,
   }) : super(
           key: key,
           value: value,
@@ -208,6 +209,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
   final VoidCallback? onTap;
   final EdgeInsetsGeometry padding;
   final bool disable;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +217,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
         ? const BoxDecoration()
         : BoxDecoration(
             borderRadius: BorderRadius.circular(5),
-            color: context.theme.accent,
+            color: backgroundColor ?? context.theme.accent,
           );
     final textColor = backgroundTransparent
         ? context.theme.accent

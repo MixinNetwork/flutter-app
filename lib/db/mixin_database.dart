@@ -63,7 +63,8 @@ part 'mixin_database.g.dart';
     'moor/dao/user.drift',
     'moor/dao/circle.drift',
     'moor/dao/flood.drift',
-    'moor/dao/pin_message.drift'
+    'moor/dao/pin_message.drift',
+    'moor/dao/sticker_relationship.drift'
   },
   daos: [
     AddressDao,
@@ -165,6 +166,13 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 8) {
             await m.createIndex(indexMessageConversationIdStatusUserId);
+          }
+          if (from <= 9) {
+            await m.addColumn(stickerAlbums, stickerAlbums.orderedAt);
+            await m.addColumn(stickerAlbums, stickerAlbums.banner);
+            await m.addColumn(stickerAlbums, stickerAlbums.added);
+            await update(stickerAlbums)
+                .write(const StickerAlbumsCompanion(added: Value(true)));
           }
         },
       );

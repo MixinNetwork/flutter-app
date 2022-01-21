@@ -12,13 +12,15 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insert(Sticker sticker) =>
       into(db.stickers).insertOnConflictUpdate(sticker);
 
+  Future<void> insertAll(List<Sticker> stickers) =>
+      batch((batch) => batch.insertAllOnConflictUpdate(db.stickers, stickers));
+
   Future<int> deleteSticker(Sticker sticker) =>
       delete(db.stickers).delete(sticker);
 
   Selectable<Sticker> recentUsedStickers() => db.recentUsedStickers();
 
-  SimpleSelectStatement<Stickers, Sticker> getStickerByUnique(
-          String stickerId) =>
+  SimpleSelectStatement<Stickers, Sticker> sticker(String stickerId) =>
       (select(db.stickers)
         ..where((tbl) => tbl.stickerId.equals(stickerId))
         ..limit(1));
@@ -29,7 +31,9 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
       (t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)
     ]);
 
-  Selectable<Sticker> personalStickers() => db.personalStickers();
+  Selectable<Sticker> personalStickers() => db.stickersByCategory('PERSONAL');
+
+  Selectable<Sticker> systemStickers() => db.stickersByCategory('SYSTEM');
 
   Future<int> updateUsedAt(String stickerId, DateTime dateTime) =>
       (update(db.stickers)..where((tbl) => tbl.stickerId.equals(stickerId)))

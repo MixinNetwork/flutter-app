@@ -11,6 +11,7 @@ class AccountKeyValue extends HiveKeyValue {
   static const _hasSyncCircle = 'has_sync_circle';
   static const _refreshStickerLastTime = 'refreshStickerLastTime';
   static const _primarySessionId = 'primarySessionId';
+  static const _hasNewAlbum = 'hasNewAlbum';
 
   bool get hasSyncCircle =>
       box.get(_hasSyncCircle, defaultValue: false) as bool;
@@ -24,4 +25,7 @@ class AccountKeyValue extends HiveKeyValue {
   String? get primarySessionId =>
       box.get(_primarySessionId, defaultValue: null) as String?;
   set primarySessionId(String? value) => box.put(_primarySessionId, value);
+
+  bool get hasNewAlbum => box.get(_hasNewAlbum, defaultValue: false) as bool;
+  set hasNewAlbum(bool value) => box.put(_hasNewAlbum, value);
 }

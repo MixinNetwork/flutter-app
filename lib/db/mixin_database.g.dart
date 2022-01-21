@@ -3420,18 +3420,24 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
   final String iconUrl;
   final DateTime createdAt;
   final DateTime updateAt;
+  final int orderedAt;
   final String userId;
   final String category;
   final String description;
+  final String? banner;
+  final bool? added;
   StickerAlbum(
       {required this.albumId,
       required this.name,
       required this.iconUrl,
       required this.createdAt,
       required this.updateAt,
+      required this.orderedAt,
       required this.userId,
       required this.category,
-      required this.description});
+      required this.description,
+      this.banner,
+      this.added});
   factory StickerAlbum.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return StickerAlbum(
@@ -3445,12 +3451,18 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
       updateAt: StickerAlbums.$converter1.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}update_at']))!,
+      orderedAt: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}ordered_at'])!,
       userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
       category: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}category'])!,
       description: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}description'])!,
+      banner: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}banner']),
+      added: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}added']),
     );
   }
   @override
@@ -3467,9 +3479,16 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       final converter = StickerAlbums.$converter1;
       map['update_at'] = Variable<int>(converter.mapToSql(updateAt)!);
     }
+    map['ordered_at'] = Variable<int>(orderedAt);
     map['user_id'] = Variable<String>(userId);
     map['category'] = Variable<String>(category);
     map['description'] = Variable<String>(description);
+    if (!nullToAbsent || banner != null) {
+      map['banner'] = Variable<String?>(banner);
+    }
+    if (!nullToAbsent || added != null) {
+      map['added'] = Variable<bool?>(added);
+    }
     return map;
   }
 
@@ -3480,9 +3499,14 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       iconUrl: Value(iconUrl),
       createdAt: Value(createdAt),
       updateAt: Value(updateAt),
+      orderedAt: Value(orderedAt),
       userId: Value(userId),
       category: Value(category),
       description: Value(description),
+      banner:
+          banner == null && nullToAbsent ? const Value.absent() : Value(banner),
+      added:
+          added == null && nullToAbsent ? const Value.absent() : Value(added),
     );
   }
 
@@ -3495,9 +3519,12 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       iconUrl: serializer.fromJson<String>(json['icon_url']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
       updateAt: serializer.fromJson<DateTime>(json['update_at']),
+      orderedAt: serializer.fromJson<int>(json['ordered_at']),
       userId: serializer.fromJson<String>(json['user_id']),
       category: serializer.fromJson<String>(json['category']),
       description: serializer.fromJson<String>(json['description']),
+      banner: serializer.fromJson<String?>(json['banner']),
+      added: serializer.fromJson<bool?>(json['added']),
     );
   }
   @override
@@ -3509,9 +3536,12 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       'icon_url': serializer.toJson<String>(iconUrl),
       'created_at': serializer.toJson<DateTime>(createdAt),
       'update_at': serializer.toJson<DateTime>(updateAt),
+      'ordered_at': serializer.toJson<int>(orderedAt),
       'user_id': serializer.toJson<String>(userId),
       'category': serializer.toJson<String>(category),
       'description': serializer.toJson<String>(description),
+      'banner': serializer.toJson<String?>(banner),
+      'added': serializer.toJson<bool?>(added),
     };
   }
 
@@ -3521,18 +3551,24 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           String? iconUrl,
           DateTime? createdAt,
           DateTime? updateAt,
+          int? orderedAt,
           String? userId,
           String? category,
-          String? description}) =>
+          String? description,
+          Value<String?> banner = const Value.absent(),
+          Value<bool?> added = const Value.absent()}) =>
       StickerAlbum(
         albumId: albumId ?? this.albumId,
         name: name ?? this.name,
         iconUrl: iconUrl ?? this.iconUrl,
         createdAt: createdAt ?? this.createdAt,
         updateAt: updateAt ?? this.updateAt,
+        orderedAt: orderedAt ?? this.orderedAt,
         userId: userId ?? this.userId,
         category: category ?? this.category,
         description: description ?? this.description,
+        banner: banner.present ? banner.value : this.banner,
+        added: added.present ? added.value : this.added,
       );
   @override
   String toString() {
@@ -3542,16 +3578,19 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           ..write('iconUrl: $iconUrl, ')
           ..write('createdAt: $createdAt, ')
           ..write('updateAt: $updateAt, ')
+          ..write('orderedAt: $orderedAt, ')
           ..write('userId: $userId, ')
           ..write('category: $category, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('banner: $banner, ')
+          ..write('added: $added')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(albumId, name, iconUrl, createdAt, updateAt,
-      userId, category, description);
+      orderedAt, userId, category, description, banner, added);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3561,9 +3600,12 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           other.iconUrl == this.iconUrl &&
           other.createdAt == this.createdAt &&
           other.updateAt == this.updateAt &&
+          other.orderedAt == this.orderedAt &&
           other.userId == this.userId &&
           other.category == this.category &&
-          other.description == this.description);
+          other.description == this.description &&
+          other.banner == this.banner &&
+          other.added == this.added);
 }
 
 class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
@@ -3572,18 +3614,24 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
   final Value<String> iconUrl;
   final Value<DateTime> createdAt;
   final Value<DateTime> updateAt;
+  final Value<int> orderedAt;
   final Value<String> userId;
   final Value<String> category;
   final Value<String> description;
+  final Value<String?> banner;
+  final Value<bool?> added;
   const StickerAlbumsCompanion({
     this.albumId = const Value.absent(),
     this.name = const Value.absent(),
     this.iconUrl = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updateAt = const Value.absent(),
+    this.orderedAt = const Value.absent(),
     this.userId = const Value.absent(),
     this.category = const Value.absent(),
     this.description = const Value.absent(),
+    this.banner = const Value.absent(),
+    this.added = const Value.absent(),
   });
   StickerAlbumsCompanion.insert({
     required String albumId,
@@ -3591,9 +3639,12 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     required String iconUrl,
     required DateTime createdAt,
     required DateTime updateAt,
+    this.orderedAt = const Value.absent(),
     required String userId,
     required String category,
     required String description,
+    this.banner = const Value.absent(),
+    this.added = const Value.absent(),
   })  : albumId = Value(albumId),
         name = Value(name),
         iconUrl = Value(iconUrl),
@@ -3608,9 +3659,12 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     Expression<String>? iconUrl,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updateAt,
+    Expression<int>? orderedAt,
     Expression<String>? userId,
     Expression<String>? category,
     Expression<String>? description,
+    Expression<String?>? banner,
+    Expression<bool?>? added,
   }) {
     return RawValuesInsertable({
       if (albumId != null) 'album_id': albumId,
@@ -3618,9 +3672,12 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       if (iconUrl != null) 'icon_url': iconUrl,
       if (createdAt != null) 'created_at': createdAt,
       if (updateAt != null) 'update_at': updateAt,
+      if (orderedAt != null) 'ordered_at': orderedAt,
       if (userId != null) 'user_id': userId,
       if (category != null) 'category': category,
       if (description != null) 'description': description,
+      if (banner != null) 'banner': banner,
+      if (added != null) 'added': added,
     });
   }
 
@@ -3630,18 +3687,24 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       Value<String>? iconUrl,
       Value<DateTime>? createdAt,
       Value<DateTime>? updateAt,
+      Value<int>? orderedAt,
       Value<String>? userId,
       Value<String>? category,
-      Value<String>? description}) {
+      Value<String>? description,
+      Value<String?>? banner,
+      Value<bool?>? added}) {
     return StickerAlbumsCompanion(
       albumId: albumId ?? this.albumId,
       name: name ?? this.name,
       iconUrl: iconUrl ?? this.iconUrl,
       createdAt: createdAt ?? this.createdAt,
       updateAt: updateAt ?? this.updateAt,
+      orderedAt: orderedAt ?? this.orderedAt,
       userId: userId ?? this.userId,
       category: category ?? this.category,
       description: description ?? this.description,
+      banner: banner ?? this.banner,
+      added: added ?? this.added,
     );
   }
 
@@ -3665,6 +3728,9 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       final converter = StickerAlbums.$converter1;
       map['update_at'] = Variable<int>(converter.mapToSql(updateAt.value)!);
     }
+    if (orderedAt.present) {
+      map['ordered_at'] = Variable<int>(orderedAt.value);
+    }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
     }
@@ -3673,6 +3739,12 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
+    }
+    if (banner.present) {
+      map['banner'] = Variable<String?>(banner.value);
+    }
+    if (added.present) {
+      map['added'] = Variable<bool?>(added.value);
     }
     return map;
   }
@@ -3685,9 +3757,12 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
           ..write('iconUrl: $iconUrl, ')
           ..write('createdAt: $createdAt, ')
           ..write('updateAt: $updateAt, ')
+          ..write('orderedAt: $orderedAt, ')
           ..write('userId: $userId, ')
           ..write('category: $category, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('banner: $banner, ')
+          ..write('added: $added')
           ..write(')'))
         .toString();
   }
@@ -3729,6 +3804,13 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(StickerAlbums.$converter1);
+  final VerificationMeta _orderedAtMeta = const VerificationMeta('orderedAt');
+  late final GeneratedColumn<int?> orderedAt = GeneratedColumn<int?>(
+      'ordered_at', aliasedName, false,
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: 'NOT NULL DEFAULT 0',
+      defaultValue: const CustomExpression<int>('0'));
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
@@ -3748,6 +3830,19 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
       type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
+  final VerificationMeta _bannerMeta = const VerificationMeta('banner');
+  late final GeneratedColumn<String?> banner = GeneratedColumn<String?>(
+      'banner', aliasedName, true,
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _addedMeta = const VerificationMeta('added');
+  late final GeneratedColumn<bool?> added = GeneratedColumn<bool?>(
+      'added', aliasedName, true,
+      type: const BoolType(),
+      requiredDuringInsert: false,
+      $customConstraints: 'DEFAULT FALSE',
+      defaultValue: const CustomExpression<bool>('FALSE'));
   @override
   List<GeneratedColumn> get $columns => [
         albumId,
@@ -3755,9 +3850,12 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
         iconUrl,
         createdAt,
         updateAt,
+        orderedAt,
         userId,
         category,
-        description
+        description,
+        banner,
+        added
       ];
   @override
   String get aliasedName => _alias ?? 'sticker_albums';
@@ -3788,6 +3886,10 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
     }
     context.handle(_createdAtMeta, const VerificationResult.success());
     context.handle(_updateAtMeta, const VerificationResult.success());
+    if (data.containsKey('ordered_at')) {
+      context.handle(_orderedAtMeta,
+          orderedAt.isAcceptableOrUnknown(data['ordered_at']!, _orderedAtMeta));
+    }
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
@@ -3807,6 +3909,14 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
               data['description']!, _descriptionMeta));
     } else if (isInserting) {
       context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('banner')) {
+      context.handle(_bannerMeta,
+          banner.isAcceptableOrUnknown(data['banner']!, _bannerMeta));
+    }
+    if (data.containsKey('added')) {
+      context.handle(
+          _addedMeta, added.isAcceptableOrUnknown(data['added']!, _addedMeta));
     }
     return context;
   }
@@ -11778,6 +11888,30 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final UserDao userDao = UserDao(this as MixinDatabase);
   late final PinMessageDao pinMessageDao = PinMessageDao(this as MixinDatabase);
   late final FiatDao fiatDao = FiatDao(this as MixinDatabase);
+  Selectable<String> stickerSystemAlbumId(String stickerId) {
+    return customSelect(
+        'SELECT sa.album_id FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
+        variables: [
+          Variable<String>(stickerId)
+        ],
+        readsFrom: {
+          stickerAlbums,
+          stickerRelationships,
+        }).map((QueryRow row) => row.read<String>('album_id'));
+  }
+
+  Selectable<StickerAlbum> stickerSystemAlbum(String stickerId) {
+    return customSelect(
+        'SELECT sa.* FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
+        variables: [
+          Variable<String>(stickerId)
+        ],
+        readsFrom: {
+          stickerRelationships,
+          stickerAlbums,
+        }).map(stickerAlbums.mapFromRow);
+  }
+
   Selectable<MessageItem> basePinMessageItems(
       String conversationId,
       OrderBy Function(
@@ -12187,24 +12321,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<StickerAlbum> systemAlbums() {
-    return customSelect(
-        'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',
-        variables: [],
-        readsFrom: {
-          stickerAlbums,
-        }).map(stickerAlbums.mapFromRow);
-  }
-
-  Selectable<StickerAlbum> personalAlbums() {
-    return customSelect(
-        'SELECT * FROM sticker_albums WHERE category = \'PERSONAL\' ORDER BY created_at ASC LIMIT 1',
-        variables: [],
-        readsFrom: {
-          stickerAlbums,
-        }).map(stickerAlbums.mapFromRow);
-  }
-
   Selectable<Sticker> recentUsedStickers() {
     return customSelect(
         'SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20',
@@ -12214,10 +12330,12 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(stickers.mapFromRow);
   }
 
-  Selectable<Sticker> personalStickers() {
+  Selectable<Sticker> stickersByCategory(String category) {
     return customSelect(
-        'SELECT s.* FROM sticker_albums AS sa INNER JOIN sticker_relationships AS sr ON sr.album_id = sa.album_id INNER JOIN stickers AS s ON sr.sticker_id = s.sticker_id WHERE sa.category = \'PERSONAL\' ORDER BY s.created_at DESC',
-        variables: [],
+        'SELECT s.* FROM sticker_albums AS sa INNER JOIN sticker_relationships AS sr ON sr.album_id = sa.album_id INNER JOIN stickers AS s ON sr.sticker_id = s.sticker_id WHERE sa.category = ?1 ORDER BY s.created_at DESC',
+        variables: [
+          Variable<String>(category)
+        ],
         readsFrom: {
           stickerAlbums,
           stickerRelationships,

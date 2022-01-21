@@ -21,11 +21,11 @@ import '../crypto/privacy_key_value.dart';
 import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/uuid/uuid.dart';
+import '../db/dao/sticker_album_dao.dart';
 import '../db/database.dart';
 import '../db/database_event_bus.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
-import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
@@ -407,6 +407,7 @@ class AccountServer {
 
   Future<void> sendStickerMessage(
     String stickerId,
+    String? albumId,
     EncryptCategory encryptCategory, {
     String? conversationId,
     String? recipientId,
@@ -414,7 +415,7 @@ class AccountServer {
       _sendMessageHelper.sendStickerMessage(
           await _initConversation(conversationId, recipientId),
           userId,
-          StickerMessage(stickerId, null, null),
+          StickerMessage(stickerId, albumId, null),
           encryptCategory.toCategory(MessageCategory.plainSticker,
               MessageCategory.signalSticker, MessageCategory.encryptedSticker));
 
@@ -529,7 +530,7 @@ class AccountServer {
     }
   }
 
-  Future<void> initSticker() async {
+  Future<void> refreshSticker() async {
     final refreshStickerLastTime =
         AccountKeyValue.instance.refreshStickerLastTime;
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -538,18 +539,42 @@ class AccountServer {
     }
 
     final res = await client.accountApi.getStickerAlbums();
-    res.data.forEach((item) async {
-      await database.stickerAlbumDao.insert(db.StickerAlbum(
-          albumId: item.albumId,
-          name: item.name,
-          iconUrl: item.iconUrl,
-          createdAt: item.createdAt,
-          updateAt: item.updateAt,
-          userId: item.userId,
-          category: item.category,
-          description: item.description));
-      await _updateStickerAlbums(item.albumId);
-    });
+    final albums = res.data..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+    final localLatestCreatedAt =
+        await database.stickerAlbumDao.latestCreatedAt().getSingleOrNull();
+
+    var hasNewAlbum = false;
+    if (localLatestCreatedAt == null && albums.isNotEmpty) {
+      hasNewAlbum = true;
+    }
+
+    var maxOrder =
+        await database.stickerAlbumDao.maxOrder().getSingleOrNull() ?? 0;
+
+    for (final a in albums) {
+      final localAlbum =
+          await database.stickerAlbumDao.album(a.albumId).getSingleOrNull();
+      if (localAlbum == null) {
+        maxOrder++;
+      }
+      await database.stickerAlbumDao.insert(a.asStickerAlbumsCompanion.copyWith(
+        orderedAt: Value(localAlbum?.orderedAt ?? maxOrder),
+        added: Value(
+          localAlbum?.added ?? a.banner?.isNotEmpty == true,
+        ),
+      ));
+
+      hasNewAlbum = !hasNewAlbum &&
+          localLatestCreatedAt != null &&
+          a.createdAt.difference(localLatestCreatedAt).inSeconds > 1;
+
+      await updateStickerAlbums(a.albumId);
+    }
+
+    if (hasNewAlbum) {
+      AccountKeyValue.instance.hasNewAlbum = true;
+    }
 
     AccountKeyValue.instance.refreshStickerLastTime = now;
   }
@@ -597,14 +622,15 @@ class AccountServer {
     }
   }
 
-  Future<void> _updateStickerAlbums(String albumId) async {
+  Future<void> updateStickerAlbums(String albumId) async {
     try {
       final response = await client.accountApi.getStickersByAlbumId(albumId);
       final relationships = <db.StickerRelationship>[];
+      final stickers = <db.Sticker>[];
       response.data.forEach((sticker) {
         relationships.add(db.StickerRelationship(
             albumId: albumId, stickerId: sticker.stickerId));
-        database.stickerDao.insert(db.Sticker(
+        stickers.add(db.Sticker(
           stickerId: sticker.stickerId,
           albumId: albumId,
           name: sticker.name,
@@ -616,7 +642,10 @@ class AccountServer {
         ));
       });
 
-      await database.stickerRelationshipDao.insertAll(relationships);
+      await database.mixinDatabase.transaction(() async {
+        await database.stickerRelationshipDao.insertAll(relationships);
+        await database.stickerDao.insertAll(stickers);
+      });
     } catch (e, s) {
       w('Update sticker albums error: $e, stack: $s');
     }
@@ -1117,14 +1146,7 @@ class AccountServer {
   }
 
   Future<void> updateAssetById({required String assetId}) =>
-      database.jobDao.insertUpdateAssetJob(Job(
-        jobId: const Uuid().v4(),
-        action: kUpdateAsset,
-        priority: 5,
-        runCount: 0,
-        createdAt: DateTime.now(),
-        blazeMessage: assetId,
-      ));
+      database.jobDao.insertUpdateAssetJob(assetId);
 
   Future<void> updateFiats() async {
     final data = await client.accountApi.getFiats();

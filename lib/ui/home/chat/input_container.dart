@@ -545,20 +545,21 @@ class _StickerButton extends HookWidget {
 
     final stickerAlbumsCubit = useBloc(
       () => StickerAlbumsCubit(context.database.stickerAlbumDao
-          .systemAlbums()
+          .systemAddedAlbums()
           .watchThrottle(kVerySlowThrottleDuration)),
     );
 
     final tabLength =
         useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
       bloc: stickerAlbumsCubit,
-      converter: (state) => (state.length) + 2,
+      converter: (state) => (state.length) + 3,
     );
 
     return BlocProvider.value(
       value: stickerAlbumsCubit,
       child: DefaultTabController(
         length: tabLength,
+        initialIndex: 1,
         child: HoverOverlay(
           key: key,
           delayDuration: const Duration(milliseconds: 50),
@@ -568,6 +569,8 @@ class _StickerButton extends HookWidget {
           inCurve: Curves.easeOut,
           outCurve: Curves.easeOut,
           portalBuilder: (context, progress, child) {
+            context.accountServer.refreshSticker();
+
             final renderBox =
                 key.currentContext?.findRenderObject() as RenderBox?;
             final offset = renderBox?.localToGlobal(Offset.zero);
@@ -589,9 +592,11 @@ class _StickerButton extends HookWidget {
           },
           portal: Padding(
             padding: const EdgeInsets.all(8),
-            child: StickerPage(
-              tabController: DefaultTabController.of(context),
-              tabLength: tabLength,
+            child: Builder(
+              builder: (context) => StickerPage(
+                tabController: DefaultTabController.of(context),
+                tabLength: tabLength,
+              ),
             ),
           ),
           child: ActionButton(

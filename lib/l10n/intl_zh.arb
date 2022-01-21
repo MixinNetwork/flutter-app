@@ -232,5 +232,12 @@
   "noResults": "没有结果",
   "saveToGallery": "保存到图库",
   "openInExternalApp": "通过外部程序打开",
-  "typeAMessage": "输入消息"
+  "typeAMessage": "输入消息",
+  "stickerShop": "表情商店",
+  "add": "添加",
+  "added": "已添加",
+  "stickerAlbumDetail": "表情详情",
+  "addStickers": "添加所有表情",
+  "removeStickers": "移除所有表情",
+  "myStickerAlbums": "我的表情"
 }
