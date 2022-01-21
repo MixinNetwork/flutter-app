@@ -138,6 +138,7 @@ class _MessageProcessRunner {
         connectTimeout: tenSecond,
         receiveTimeout: tenSecond,
         sendTimeout: tenSecond,
+        followRedirects: false,
       ),
       jsonDecodeCallback: jsonDecode,
       interceptors: [

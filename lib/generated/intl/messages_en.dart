@@ -365,6 +365,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "transactionsId":
             MessageLookupByLibrary.simpleMessage("Transaction Id"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
+        "typeAMessage": MessageLookupByLibrary.simpleMessage("Type message"),
         "unMute": MessageLookupByLibrary.simpleMessage("Unmute"),
         "unPin": MessageLookupByLibrary.simpleMessage("Unpin"),
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),

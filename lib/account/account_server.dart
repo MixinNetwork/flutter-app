@@ -82,6 +82,7 @@ class AccountServer {
         connectTimeout: tenSecond,
         receiveTimeout: tenSecond,
         sendTimeout: tenSecond,
+        followRedirects: false,
       ),
       jsonDecodeCallback: jsonDecode,
       interceptors: [

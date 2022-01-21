@@ -2430,6 +2430,16 @@ class Localization {
     );
   }
 
+  /// `Type message`
+  String get typeAMessage {
+    return Intl.message(
+      'Type message',
+      name: 'typeAMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Sticker shop`
   String get stickerShop {
     return Intl.message(
