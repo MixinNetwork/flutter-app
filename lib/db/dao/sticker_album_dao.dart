@@ -78,7 +78,4 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
     return (selectOnly(db.stickerAlbums)..addColumns([max]))
         .map((row) => row.read(max));
   }
-
-  Selectable<StickerAlbum> albumByStickerId(String stickerId) =>
-      db.albumByStickerId(stickerId);
 }

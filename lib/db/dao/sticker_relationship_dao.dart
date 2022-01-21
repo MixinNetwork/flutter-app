@@ -23,4 +23,7 @@ class StickerRelationshipDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<String> stickerSystemAlbumId(String stickerId) =>
       db.stickerSystemAlbumId(stickerId);
+
+  Selectable<StickerAlbum> stickerSystemAlbum(String stickerId) =>
+      db.stickerSystemAlbum(stickerId);
 }

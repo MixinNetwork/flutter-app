@@ -11900,6 +11900,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.read<String>('album_id'));
   }
 
+  Selectable<StickerAlbum> stickerSystemAlbum(String stickerId) {
+    return customSelect(
+        'SELECT sa.* FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
+        variables: [
+          Variable<String>(stickerId)
+        ],
+        readsFrom: {
+          stickerRelationships,
+          stickerAlbums,
+        }).map(stickerAlbums.mapFromRow);
+  }
+
   Selectable<MessageItem> basePinMessageItems(
       String conversationId,
       OrderBy Function(
@@ -12307,18 +12319,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         fullName: row.read<String?>('full_name'),
       );
     });
-  }
-
-  Selectable<StickerAlbum> albumByStickerId(String stickerId) {
-    return customSelect(
-        'SELECT sa.* FROM sticker_albums AS sa INNER JOIN sticker_relationships AS sr ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 LIMIT 1',
-        variables: [
-          Variable<String>(stickerId)
-        ],
-        readsFrom: {
-          stickerAlbums,
-          stickerRelationships,
-        }).map(stickerAlbums.mapFromRow);
   }
 
   Selectable<Sticker> recentUsedStickers() {

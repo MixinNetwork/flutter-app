@@ -41,8 +41,8 @@ Future<void> showStickerPageDialog(
   BuildContext context,
   String stickerId,
 ) async {
-  final a = await context.database.stickerAlbumDao
-      .albumByStickerId(stickerId)
+  final a = await context.database.stickerRelationshipDao
+      .stickerSystemAlbum(stickerId)
       .getSingleOrNull();
 
   return showMixinDialog(
@@ -50,8 +50,9 @@ Future<void> showStickerPageDialog(
     child: ConstrainedBox(
       constraints: BoxConstraints.loose(const Size(480, 600)),
       child: HookBuilder(builder: (context) {
-        final album = useMemoizedStream(() => context.database.stickerAlbumDao
-                .albumByStickerId(stickerId)
+        final album = useMemoizedStream(() => context
+                .database.stickerRelationshipDao
+                .stickerSystemAlbum(stickerId)
                 .watchSingleOrNullThrottle(kSlowThrottleDuration)).data ??
             a;
 
