@@ -171,7 +171,7 @@ class DecryptMessage extends Injector {
           data.category?.toString() ?? '',
           data.sessionId, (plaintext) async {
         if (data.category != MessageCategory.signalKey) {
-          final plain = utf8.decode(plaintext);
+          final plain = utf8.decode(plaintext, allowMalformed: true);
           if (composeMessageData.resendMessageId != null) {
             await _processReDecryptMessage(
                 data, composeMessageData.resendMessageId!, plain);
@@ -258,7 +258,7 @@ class DecryptMessage extends Injector {
       if (decryptedContent == null) {
         await _insertInvalidMessage(data);
       } else {
-        final plainText = utf8.decode(decryptedContent);
+        final plainText = utf8.decode(decryptedContent, allowMalformed: true);
         try {
           await _processDecryptSuccess(data, plainText);
         } catch (e) {
@@ -1305,7 +1305,8 @@ class DecryptMessage extends Injector {
 
 dynamic _jsonDecode(String encoded) => jsonDecode(_decode(encoded));
 
-String _decode(String encoded) => utf8.decode(base64Decode(encoded));
+String _decode(String encoded) =>
+    utf8.decode(base64Decode(encoded), allowMalformed: true);
 
 String _jsonEncode(Object object) =>
     base64Encode(utf8.encode(jsonEncode(object)));
