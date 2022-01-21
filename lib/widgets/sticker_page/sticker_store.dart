@@ -57,13 +57,19 @@ Future<void> showStickerPageDialog(
             a;
 
         useEffect(() {
-          if (album?.albumId.isEmpty ?? true) return;
           Future<void> effect() async {
-            final accountServer = context.accountServer;
-            final client = accountServer.client;
-            final database = context.database;
+            var albumId = album?.albumId;
 
-            final albumId = album!.albumId;
+            final accountServer = context.accountServer;
+            final database = context.database;
+            final client = accountServer.client;
+
+            albumId ??= (await client.accountApi.getStickerById(stickerId))
+                .data
+                .albumId;
+
+            if (albumId == null || albumId.isEmpty) return;
+
             final stickerAlbum =
                 (await client.accountApi.getStickerAlbum(albumId)).data;
             await database.stickerAlbumDao
