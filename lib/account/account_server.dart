@@ -534,7 +534,7 @@ class AccountServer {
         AccountKeyValue.instance.refreshStickerLastTime;
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - refreshStickerLastTime < hours24) {
-      // return;
+      return;
     }
 
     final res = await client.accountApi.getStickerAlbums();
