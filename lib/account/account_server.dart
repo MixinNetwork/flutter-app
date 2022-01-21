@@ -534,7 +534,7 @@ class AccountServer {
         AccountKeyValue.instance.refreshStickerLastTime;
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - refreshStickerLastTime < hours24) {
-      return;
+      // return;
     }
 
     final res = await client.accountApi.getStickerAlbums();
@@ -564,11 +564,9 @@ class AccountServer {
         ),
       ));
 
-      if (!hasNewAlbum && localLatestCreatedAt != null) {
-        if (a.createdAt.isAfter(localLatestCreatedAt)) {
-          hasNewAlbum = true;
-        }
-      }
+      hasNewAlbum = !hasNewAlbum &&
+          localLatestCreatedAt != null &&
+          a.createdAt.difference(localLatestCreatedAt).inSeconds > 1;
 
       await updateStickerAlbums(a.albumId);
     }
