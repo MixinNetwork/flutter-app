@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
@@ -6,9 +7,9 @@ import 'package:intl/locale.dart';
 
 import '../logger.dart';
 
-const _kFallbackFontName = 'DroidSansFallbackFull';
-
 bool _fallbackFontsLoaded = false;
+
+String? loadedFallbackFonts;
 
 Future<void> loadFallbackFonts() async {
   if (!Platform.isLinux) {
@@ -31,39 +32,60 @@ Future<void> loadFallbackFonts() async {
   // current system language is not en.
   // https://github.com/flutter/flutter/issues/90951
   // We load the DroidSansFallbackFull font from the system and use it as a fallback.
-  final file =
-      File('/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf');
-  if (!file.existsSync()) {
-    w('failed to load DroidSansFallbackFull.ttf');
-    return;
-  }
   try {
-    final bytes = await file.readAsBytes();
-    await loadFontFromList(bytes, fontFamily: _kFallbackFontName);
-  } catch (e, stacktrace) {
-    w('failed to load DroidSansFallbackFull.ttf, $e $stacktrace');
-  }
-}
-
-String? _getFallbackFontFamily() {
-  if (Platform.isLinux) {
-    if (_fallbackFontsLoaded) {
-      return _kFallbackFontName;
+    final matchedResult = Process.runSync('fc-match', ['-f', '%{family}']);
+    if (matchedResult.exitCode != 0) {
+      e('failed to get best match font family. error: ${matchedResult.stderr}');
+      return;
     }
-    w('did not loaded fallback fonts yet.');
+    final result = Process.runSync('fc-list',
+        ['-f', '%{family}:%{file}\n', matchedResult.stdout as String]);
+    final lines = const LineSplitter().convert(result.stdout as String);
+    String? fontFamily;
+    final fontPaths = <String>[];
+    assert(lines.isNotEmpty);
+    for (final line in lines) {
+      // font config "family:file"
+      final fontConfig = line.split(':');
+      assert(fontConfig.length == 2,
+          'font config do not match required format. $fontConfig');
+      if (fontFamily == null) {
+        fontFamily = fontConfig[0];
+        fontPaths.add(fontConfig[1]);
+      } else if (fontFamily == fontConfig[0]) {
+        fontPaths.add(fontConfig[1]);
+      } else {
+        w('font family not match. expect $fontFamily, but ${fontConfig[0]}. line: $line');
+      }
+    }
+    if (fontPaths.isEmpty || fontFamily == null) {
+      w('failed to retriver font config: $lines');
+      return;
+    }
+    loadedFallbackFonts = fontFamily;
+    for (final path in fontPaths) {
+      d('load fallback fonts: $fontFamily $path');
+      try {
+        final file = File(path.trim());
+        final bytes = file.readAsBytesSync();
+        await loadFontFromList(bytes, fontFamily: fontFamily);
+      } catch (e, stacktrace) {
+        w('failed to load font $path, $e $stacktrace');
+      }
+    }
+  } catch (error, stacktrace) {
+    e('failed to load system fonts, error: $error, $stacktrace');
   }
-  return null;
 }
 
 extension ApplyFontsExtension on ThemeData {
   ThemeData withFallbackFonts() {
-    final fallbackFont = _getFallbackFontFamily();
-    if (fallbackFont == null) {
+    if (loadedFallbackFonts == null) {
       return this;
     }
     return copyWith(
-      textTheme: textTheme.applyFonts(fallbackFont, null),
-      primaryTextTheme: primaryTextTheme.applyFonts(fallbackFont, null),
+      textTheme: textTheme.applyFonts(loadedFallbackFonts, null),
+      primaryTextTheme: primaryTextTheme.applyFonts(loadedFallbackFonts, null),
     );
   }
 }
