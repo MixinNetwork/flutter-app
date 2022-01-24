@@ -110,7 +110,6 @@ class _SnapshotDetailHeader extends HookWidget {
             size: 58,
             chainSize: 14,
             chainBorder: const BorderSide(color: Colors.white, width: 2),
-            symbolBorder: BorderSide.none,
           ),
           const SizedBox(height: 16),
           Padding(
@@ -316,7 +315,7 @@ class _SymbolIconWithBorder extends StatelessWidget {
     required this.size,
     required this.chainSize,
     this.chainBorder = const BorderSide(color: Colors.white),
-    required this.symbolBorder,
+    this.symbolBorder = BorderSide.none,
   }) : super(key: key);
 
   final String? symbolUrl;
