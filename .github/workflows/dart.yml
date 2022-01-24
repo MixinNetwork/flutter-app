@@ -55,3 +55,12 @@ jobs:
 
       - name: Build APP
         run: flutter build linux --no-sound-null-safety
+
+      - name: Package APP
+        run: ./dist/linux_deb.sh
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: mixin_desktop_amd64.deb.zip
+          path: build/mixin_desktop_amd64.deb
