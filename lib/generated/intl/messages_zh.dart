@@ -72,8 +72,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "about": MessageLookupByLibrary.simpleMessage("关于"),
         "aboutEncryptedInfo":
             MessageLookupByLibrary.simpleMessage("此对话中的消息使用端对端加密。点击了解更多。"),
+        "add": MessageLookupByLibrary.simpleMessage("添加"),
         "addAnnouncement": MessageLookupByLibrary.simpleMessage("添加群公告"),
         "addContact": MessageLookupByLibrary.simpleMessage("添加联系人"),
+        "addStickers": MessageLookupByLibrary.simpleMessage("添加所有表情"),
+        "added": MessageLookupByLibrary.simpleMessage("已添加"),
         "appCard": MessageLookupByLibrary.simpleMessage("卡片"),
         "appearance": MessageLookupByLibrary.simpleMessage("显示偏好"),
         "archivedFolder": MessageLookupByLibrary.simpleMessage("存档文件夹"),
@@ -217,6 +220,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mute8hours": MessageLookupByLibrary.simpleMessage("8 小时"),
         "muteTitle": MessageLookupByLibrary.simpleMessage("静音通知"),
         "muted": MessageLookupByLibrary.simpleMessage("静音"),
+        "myStickerAlbums": MessageLookupByLibrary.simpleMessage("我的表情"),
         "name": MessageLookupByLibrary.simpleMessage("名字"),
         "networkConnectionFailed":
             MessageLookupByLibrary.simpleMessage("网络连接失败"),
@@ -263,6 +267,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeChatFromCircle":
             MessageLookupByLibrary.simpleMessage("从圈子里移除对话"),
         "removeContact": MessageLookupByLibrary.simpleMessage("删除联系人"),
+        "removeStickers": MessageLookupByLibrary.simpleMessage("移除所有表情"),
         "reply": MessageLookupByLibrary.simpleMessage("回复"),
         "report": MessageLookupByLibrary.simpleMessage("举报"),
         "reportWarning": MessageLookupByLibrary.simpleMessage("确定要举报这个联系人？"),
@@ -294,6 +299,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "show": MessageLookupByLibrary.simpleMessage("显示"),
         "signOut": MessageLookupByLibrary.simpleMessage("登出"),
         "sticker": MessageLookupByLibrary.simpleMessage("贴纸"),
+        "stickerAlbumDetail": MessageLookupByLibrary.simpleMessage("表情详情"),
+        "stickerShop": MessageLookupByLibrary.simpleMessage("表情商店"),
         "storageAutoDownloadDescription":
             MessageLookupByLibrary.simpleMessage("更改媒体的自动下载设置。"),
         "storageUsage": MessageLookupByLibrary.simpleMessage("储存空间"),
@@ -309,6 +316,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "transactions": MessageLookupByLibrary.simpleMessage("转账记录"),
         "transactionsId": MessageLookupByLibrary.simpleMessage("交易编号"),
         "transfer": MessageLookupByLibrary.simpleMessage("转账"),
+        "typeAMessage": MessageLookupByLibrary.simpleMessage("输入消息"),
         "unMute": MessageLookupByLibrary.simpleMessage("取消静音"),
         "unPin": MessageLookupByLibrary.simpleMessage("取消置顶"),
         "unblock": MessageLookupByLibrary.simpleMessage("解除屏蔽"),

@@ -2429,6 +2429,86 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Type message`
+  String get typeAMessage {
+    return Intl.message(
+      'Type message',
+      name: 'typeAMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sticker shop`
+  String get stickerShop {
+    return Intl.message(
+      'Sticker shop',
+      name: 'stickerShop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add`
+  String get add {
+    return Intl.message(
+      'Add',
+      name: 'add',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Added`
+  String get added {
+    return Intl.message(
+      'Added',
+      name: 'added',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sticker album detail`
+  String get stickerAlbumDetail {
+    return Intl.message(
+      'Sticker album detail',
+      name: 'stickerAlbumDetail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Stickers`
+  String get addStickers {
+    return Intl.message(
+      'Add Stickers',
+      name: 'addStickers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove Stickers`
+  String get removeStickers {
+    return Intl.message(
+      'Remove Stickers',
+      name: 'removeStickers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `My Stickers`
+  String get myStickerAlbums {
+    return Intl.message(
+      'My Stickers',
+      name: 'myStickerAlbums',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

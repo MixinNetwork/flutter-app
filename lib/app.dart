@@ -29,6 +29,7 @@ import 'ui/landing/landing.dart';
 import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
+import 'utils/system/system_fonts.dart';
 import 'utils/system/tray.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
@@ -195,7 +196,7 @@ class _App extends StatelessWidget {
                   TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
                 },
               ),
-            ),
+            ).withFallbackFonts(),
             builder: (context, child) {
               try {
                 context.accountServer.language =
@@ -243,7 +244,7 @@ class _Home extends HookWidget {
         accountServer!
           ..refreshSelf()
           ..refreshFriends()
-          ..initSticker()
+          ..refreshSticker()
           ..initCircles();
       }
     }, [signed]);

@@ -13,6 +13,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset;
+import '../../../enum/encrypt_category.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
@@ -351,6 +352,12 @@ class _SendTextField extends HookWidget {
       return subscription.cancel;
     }, [textEditingController]);
 
+    final isEncryptConversation =
+        useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
+      bloc: context.read<ConversationCubit>(),
+      converter: (state) => state?.encryptCategory.isEncrypt == true,
+    );
+
     return Container(
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
@@ -403,7 +410,9 @@ class _SendTextField extends HookWidget {
             ),
             decoration: InputDecoration(
               isDense: true,
-              hintText: context.l10n.chatInputHint,
+              hintText: isEncryptConversation
+                  ? context.l10n.chatInputHint
+                  : context.l10n.typeAMessage,
               hintStyle: TextStyle(
                 color: context.theme.secondaryText,
                 fontSize: 14,
@@ -536,20 +545,21 @@ class _StickerButton extends HookWidget {
 
     final stickerAlbumsCubit = useBloc(
       () => StickerAlbumsCubit(context.database.stickerAlbumDao
-          .systemAlbums()
+          .systemAddedAlbums()
           .watchThrottle(kVerySlowThrottleDuration)),
     );
 
     final tabLength =
         useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
       bloc: stickerAlbumsCubit,
-      converter: (state) => (state.length) + 2,
+      converter: (state) => (state.length) + 3,
     );
 
     return BlocProvider.value(
       value: stickerAlbumsCubit,
       child: DefaultTabController(
         length: tabLength,
+        initialIndex: 1,
         child: HoverOverlay(
           key: key,
           delayDuration: const Duration(milliseconds: 50),
@@ -559,6 +569,8 @@ class _StickerButton extends HookWidget {
           inCurve: Curves.easeOut,
           outCurve: Curves.easeOut,
           portalBuilder: (context, progress, child) {
+            context.accountServer.refreshSticker();
+
             final renderBox =
                 key.currentContext?.findRenderObject() as RenderBox?;
             final offset = renderBox?.localToGlobal(Offset.zero);
@@ -580,9 +592,11 @@ class _StickerButton extends HookWidget {
           },
           portal: Padding(
             padding: const EdgeInsets.all(8),
-            child: StickerPage(
-              tabController: DefaultTabController.of(context),
-              tabLength: tabLength,
+            child: Builder(
+              builder: (context) => StickerPage(
+                tabController: DefaultTabController.of(context),
+                tabLength: tabLength,
+              ),
             ),
           ),
           child: ActionButton(

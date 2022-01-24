@@ -198,7 +198,7 @@ class _CircleList extends HookWidget {
               newList.insert(_newIndex, oldItem);
 
               list.value = newList;
-              context.database.circleDao.updateCircleOrders(list.value);
+              context.database.circleDao.updateOrders(list.value);
             },
             itemCount: list.value.length,
             itemBuilder: (BuildContext context, int index) {

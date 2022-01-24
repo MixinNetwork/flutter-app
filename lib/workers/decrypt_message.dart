@@ -5,9 +5,6 @@ import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-
-// ignore: implementation_imports
-import 'package:mixin_bot_sdk_dart/src/vo/signal_key_count.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
@@ -174,7 +171,7 @@ class DecryptMessage extends Injector {
           data.category?.toString() ?? '',
           data.sessionId, (plaintext) async {
         if (data.category != MessageCategory.signalKey) {
-          final plain = utf8.decode(plaintext);
+          final plain = utf8.decode(plaintext, allowMalformed: true);
           if (composeMessageData.resendMessageId != null) {
             await _processReDecryptMessage(
                 data, composeMessageData.resendMessageId!, plain);
@@ -261,7 +258,7 @@ class DecryptMessage extends Injector {
       if (decryptedContent == null) {
         await _insertInvalidMessage(data);
       } else {
-        final plainText = utf8.decode(decryptedContent);
+        final plainText = utf8.decode(decryptedContent, allowMalformed: true);
         try {
           await _processDecryptSuccess(data, plainText);
         } catch (e) {
@@ -662,10 +659,12 @@ class DecryptMessage extends Injector {
       final stickerMessage = StickerMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
       final sticker = await database.stickerDao
-          .getStickerByUnique(stickerMessage.stickerId)
+          .sticker(stickerMessage.stickerId)
           .getSingleOrNull();
-      if (sticker == null) {
-        await refreshSticker(stickerMessage.stickerId);
+      if (sticker == null ||
+          (stickerMessage.albumId != null &&
+              (sticker.albumId?.isEmpty ?? true))) {
+        await database.jobDao.insertUpdateStickerJob(stickerMessage.stickerId);
       }
       final message = Message(
           messageId: data.messageId,
@@ -922,14 +921,7 @@ class DecryptMessage extends Injector {
       ),
     );
     await database.snapshotDao.insert(snapshot);
-    await database.jobDao.insertUpdateAssetJob(Job(
-      jobId: const Uuid().v4(),
-      action: kUpdateAsset,
-      priority: 5,
-      runCount: 0,
-      createdAt: DateTime.now(),
-      blazeMessage: snapshotMessage.assetId,
-    ));
+    await database.jobDao.insertUpdateAssetJob(snapshotMessage.assetId);
     var status = data.status;
     if (_conversationId == data.conversationId && data.userId != accountId) {
       status = MessageStatus.read;
@@ -1064,10 +1056,12 @@ class DecryptMessage extends Injector {
         jsonDecode(plain) as Map<String, dynamic>,
       );
       final sticker = await database.stickerDao
-          .getStickerByUnique(stickerMessage.stickerId)
+          .sticker(stickerMessage.stickerId)
           .getSingleOrNull();
-      if (sticker == null) {
-        await refreshSticker(stickerMessage.stickerId);
+      if (sticker == null ||
+          (stickerMessage.albumId != null &&
+              (sticker.albumId?.isEmpty ?? true))) {
+        await database.jobDao.insertUpdateStickerJob(stickerMessage.stickerId);
       }
       await database.messageDao.updateStickerMessage(
           messageId, data.status, stickerMessage.stickerId);
@@ -1240,7 +1234,7 @@ class DecryptMessage extends Injector {
           final hasSticker =
               await database.stickerDao.hasSticker(transcript.stickerId!);
           if (hasSticker) return;
-          await refreshSticker(transcript.stickerId!);
+          await database.jobDao.insertUpdateStickerJob(transcript.stickerId!);
         }));
 
     Future _refreshUser() => refreshUsers([
@@ -1311,7 +1305,8 @@ class DecryptMessage extends Injector {
 
 dynamic _jsonDecode(String encoded) => jsonDecode(_decode(encoded));
 
-String _decode(String encoded) => utf8.decode(base64Decode(encoded));
+String _decode(String encoded) =>
+    utf8.decode(base64Decode(encoded), allowMalformed: true);
 
 String _jsonEncode(Object object) =>
     base64Encode(utf8.encode(jsonEncode(object)));

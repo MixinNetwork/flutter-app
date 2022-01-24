@@ -33,16 +33,15 @@ class _ImageByBlurHash extends HookWidget {
     required this.blurHash,
     this.width = _kDefaultBlurHashSize,
     this.height = _kDefaultBlurHashSize,
+    // ignore: unused_element
     this.fit = BoxFit.cover,
   })  : assert(width > 0),
         assert(height > 0),
         super(key: key);
 
   final BlurHash blurHash;
-
   final int width;
   final int height;
-
   final BoxFit? fit;
 
   @override
