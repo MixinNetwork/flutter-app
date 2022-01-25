@@ -148,8 +148,14 @@ class MixinDatabase extends _$MixinDatabase {
           if (from <= 3) {
             await m.drop(addresses);
             await m.createTable(addresses);
-            await m.addColumn(assets, assets.reserve);
-            await m.addColumn(messages, messages.caption);
+            if (!await _checkColumnExists(
+                assets.actualTableName, assets.reserve.name)) {
+              await m.addColumn(assets, assets.reserve);
+            }
+            if (!await _checkColumnExists(
+                messages.actualTableName, messages.caption.name)) {
+              await m.addColumn(messages, messages.caption);
+            }
           }
           if (from <= 4) {
             await m.createTable(transcriptMessages);
@@ -168,14 +174,30 @@ class MixinDatabase extends _$MixinDatabase {
             await m.createIndex(indexMessageConversationIdStatusUserId);
           }
           if (from <= 9) {
-            await m.addColumn(stickerAlbums, stickerAlbums.orderedAt);
-            await m.addColumn(stickerAlbums, stickerAlbums.banner);
-            await m.addColumn(stickerAlbums, stickerAlbums.added);
+            if (!await _checkColumnExists(
+                stickerAlbums.actualTableName, stickerAlbums.orderedAt.name)) {
+              await m.addColumn(stickerAlbums, stickerAlbums.orderedAt);
+            }
+            if (!await _checkColumnExists(
+                stickerAlbums.actualTableName, stickerAlbums.banner.name)) {
+              await m.addColumn(stickerAlbums, stickerAlbums.banner);
+            }
+            if (!await _checkColumnExists(
+                stickerAlbums.actualTableName, stickerAlbums.added.name)) {
+              await m.addColumn(stickerAlbums, stickerAlbums.added);
+            }
             await update(stickerAlbums)
                 .write(const StickerAlbumsCompanion(added: Value(true)));
           }
         },
       );
+
+  Future<bool> _checkColumnExists(String tableName, String columnName) async {
+    final queryRow = await customSelect(
+            "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('$tableName') WHERE name='$columnName'")
+        .getSingle();
+    return queryRow.read<bool>('CNTREC');
+  }
 
   Stream<bool> watchHasData<T extends HasResultSet, R>(
     ResultSetImplementation<T, R> table, [
