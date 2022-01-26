@@ -182,6 +182,7 @@ class ChatInfoPage extends HookWidget {
                             child: EditDialog(
                               title: Text(announcementTitle),
                               editText: announcement ?? '',
+                              maxLines: 10,
                             ),
                           );
                           if (result == null) return;

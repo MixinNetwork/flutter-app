@@ -251,15 +251,19 @@ class DialogTextField extends HookWidget {
     required this.textEditingController,
     required this.hintText,
     this.inputFormatters,
+    this.maxLines,
   }) : super(key: key);
 
   final TextEditingController textEditingController;
   final String hintText;
   final List<TextInputFormatter>? inputFormatters;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 48,
+        constraints: const BoxConstraints(
+          minHeight: 48,
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color: context.theme.background,
@@ -272,9 +276,9 @@ class DialogTextField extends HookWidget {
           style: TextStyle(
             color: context.theme.text,
           ),
-          scrollPadding: EdgeInsets.zero,
+          minLines: 1,
+          maxLines: maxLines,
           decoration: InputDecoration(
-            contentPadding: EdgeInsets.zero,
             isDense: true,
             hintText: hintText,
             hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
@@ -336,11 +340,13 @@ class EditDialog extends HookWidget {
     this.editText = '',
     this.hintText = '',
     this.positiveAction,
+    this.maxLines,
   }) : super(key: key);
 
   final Widget title;
   final String editText;
   final String hintText;
+  final int? maxLines;
 
   /// Positive action text. null to use default "Create"
   final String? positiveAction;
@@ -354,6 +360,7 @@ class EditDialog extends HookWidget {
       content: DialogTextField(
         textEditingController: textEditingController,
         hintText: hintText,
+        maxLines: maxLines,
       ),
       actions: [
         MixinButton(
