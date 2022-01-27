@@ -24,6 +24,7 @@ class CacheImage extends StatelessWidget {
     this.placeholder,
     this.errorWidget,
     this.fit = BoxFit.cover,
+    this.controller,
     Key? key,
   }) : super(key: key);
 
@@ -32,12 +33,13 @@ class CacheImage extends StatelessWidget {
   final double? height;
   final PlaceholderWidgetBuilder? placeholder;
   final LoadingErrorWidgetBuilder? errorWidget;
+  final ValueNotifier<bool>? controller;
 
   final BoxFit fit;
 
   @override
   Widget build(BuildContext context) => ExtendedImage(
-        image: MixinExtendedNetworkImageProvider(src),
+        image: MixinExtendedNetworkImageProvider(src, controller: controller),
         width: width,
         height: height,
         fit: fit,
@@ -85,6 +87,7 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
+    this.controller,
   })  : _informationCollector = informationCollector,
         _scale = scale {
     this.debugLabel = debugLabel;
@@ -114,6 +117,8 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     }
   }
 
+  final ValueNotifier<bool>? controller;
+
   ImageInfo? _currentImage;
   ui.Codec? _codec;
   final double _scale;
@@ -133,11 +138,17 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
   bool _frameCallbackScheduled = false;
 
+  void _controllerListener() {
+    if (controller?.value != true) return;
+    _decodeNextFrameAndSchedule();
+  }
+
   void _handleCodecReady(ui.Codec codec) {
     _codec = codec;
     assert(_codec != null);
 
     if (hasListeners) {
+      controller?.addListener(_controllerListener);
       _decodeNextFrameAndSchedule();
     }
   }
@@ -159,6 +170,7 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       }
       _nextFrame!.image.dispose();
       _nextFrame = null;
+      if (controller?.value != true) return;
       // ignore gif's repetition count
       _decodeNextFrameAndSchedule();
       return;
@@ -244,9 +256,14 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 }
 
 class MixinFileImage extends FileImage {
-  MixinFileImage(File file, {double scale = 1.0})
-      : _lastModified = _fileLastModified(file),
+  MixinFileImage(
+    File file, {
+    double scale = 1.0,
+    this.controller,
+  })  : _lastModified = _fileLastModified(file),
         super(file, scale: scale);
+
+  final ValueNotifier<bool>? controller;
 
   // used to check if the file has been modified.
   final int _lastModified;
@@ -268,6 +285,7 @@ class MixinFileImage extends FileImage {
         informationCollector: () sync* {
           yield ErrorDescription('Path: ${file.path}');
         },
+        controller: controller,
       );
 
   Future<ui.Codec> _loadAsync(FileImage key, DecoderCallback decode) async {
@@ -324,7 +342,10 @@ class MixinExtendedNetworkImageProvider
     this.cancelToken,
     this.imageCacheName,
     this.cacheMaxAge,
+    this.controller,
   });
+
+  final ValueNotifier<bool>? controller;
 
   /// The name of [ImageCache], you can define custom [ImageCache] to store this provider.
   @override
@@ -398,6 +419,7 @@ class MixinExtendedNetworkImageProvider
         DiagnosticsProperty<ImageProvider>('Image provider', this),
         DiagnosticsProperty<ExtendedNetworkImageProvider>('Image key', key),
       ],
+      controller: controller,
     );
   }
 
@@ -572,7 +594,7 @@ class MixinExtendedNetworkImageProvider
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ExtendedNetworkImageProvider &&
+    return other is MixinExtendedNetworkImageProvider &&
         url == other.url &&
         scale == other.scale &&
         cacheRawData == other.cacheRawData &&
@@ -584,11 +606,13 @@ class MixinExtendedNetworkImageProvider
         headers == other.headers &&
         retries == other.retries &&
         imageCacheName == other.imageCacheName &&
-        cacheMaxAge == other.cacheMaxAge;
+        cacheMaxAge == other.cacheMaxAge &&
+        controller == other.controller;
   }
 
   @override
   int get hashCode => hashValues(
+        controller,
         url,
         scale,
         cacheRawData,
