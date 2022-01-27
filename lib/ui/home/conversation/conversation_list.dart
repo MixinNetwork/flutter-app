@@ -427,7 +427,8 @@ class _MessageStatusIcon extends StatelessWidget {
         conversation.contentType != MessageCategory.systemAccountSnapshot &&
         !conversation.contentType.isCallMessage &&
         !conversation.contentType.isRecall &&
-        !conversation.contentType.isGroupCall) {
+        !conversation.contentType.isGroupCall &&
+        !conversation.contentType.isPin) {
       return MessageStatusIcon(
         status: conversation.messageStatus,
       );
