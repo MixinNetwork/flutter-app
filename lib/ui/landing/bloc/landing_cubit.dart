@@ -10,7 +10,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
@@ -21,6 +20,7 @@ import '../../../crypto/signal/signal_protocol.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
+import '../../../utils/system/package_info.dart';
 import '../../home/bloc/multi_auth_cubit.dart';
 
 part 'landing_state.dart';
@@ -131,7 +131,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
     await AccountKeyValue.instance.init();
     final sessionId = msg['session_id'] as String;
     AccountKeyValue.instance.primarySessionId = sessionId;
-    final info = await PackageInfo.fromPlatform();
+    final info = await getPackageInfo();
     final appVersion = '${info.version}(${info.buildNumber})';
     final platformVersion = await getPlatformVersion();
     final rsp = await client.provisioningApi.verifyProvisioning(

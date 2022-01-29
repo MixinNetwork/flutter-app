@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
 
 import '../bloc/setting_cubit.dart';
@@ -16,6 +15,7 @@ import '../widgets/dialog.dart';
 import '../widgets/web_view_navigation_bar.dart';
 import 'extension/extension.dart';
 import 'file.dart';
+import 'system/package_info.dart';
 import 'uri_utils.dart';
 
 final kIsSupportWebView =
@@ -108,7 +108,9 @@ Future<Map<String, dynamic>> _mixinContext(
 
   final mode = context.read<SettingCubit>().brightness ??
       MediaQuery.platformBrightnessOf(context);
-  final info = await PackageInfo.fromPlatform();
+  final info = await getPackageInfo();
+  debugPrint(
+      'info: appName: ${info.appName} packageName: ${info.packageName} version: ${info.version} buildNumber: ${info.buildNumber} buildSignature: ${info.buildSignature} ');
   return {
     'app_version': info.version,
     'immersive': false,
@@ -152,7 +154,7 @@ Future<void> openWebViewWindowWithUrl(
   String? title,
 }) async {
   final brightness = context.read<SettingCubit>().brightness;
-  final packageInfo = await PackageInfo.fromPlatform();
+  final packageInfo = await getPackageInfo();
   final webView = await WebviewWindow.create(
     configuration: CreateConfiguration(
       windowWidth: 380,
