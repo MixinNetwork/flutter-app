@@ -29,7 +29,6 @@ import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
-import '../main.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
@@ -39,6 +38,7 @@ import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
+import '../utils/system/package_info.dart';
 import '../utils/webview.dart';
 import '../workers/injector.dart';
 import '../workers/isolate_event.dart';
@@ -207,7 +207,7 @@ class AccountServer {
         privateKey: privateKey,
         mixinDocumentDirectory: mixinDocumentsDirectory.path,
         primarySessionId: AccountKeyValue.instance.primarySessionId,
-        packageInfo: await packageInfoFuture,
+        packageInfo: await getPackageInfo(),
       ),
       errorsAreFatal: false,
       onExit: exitReceivePort.sendPort,
