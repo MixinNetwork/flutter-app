@@ -109,10 +109,15 @@ dependencies:
 
 dependency_overrides:
   analyzer: ^2.2.0
+  bitsdojo_window_linux:
+    git:
+      url: https://github.com/MixinNetwork/bitsdojo_window.git
+      ref: 78faaa6440c7fee146258bb0ef3336c33ed4555d
+      path: bitsdojo_window_linux
   bitsdojo_window_windows:
     git:
-      url: https://github.com/abutcher-gh/bitsdojo_window.git
-      ref: b823ae5b9f2f82635067add7eadfc32d9054bc2b
+      url: https://github.com/MixinNetwork/bitsdojo_window.git
+      ref: 78faaa6440c7fee146258bb0ef3336c33ed4555d
       path: bitsdojo_window_windows
   drift:
     git:
