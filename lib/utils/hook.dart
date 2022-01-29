@@ -128,3 +128,63 @@ AsyncSnapshot<T> useListenableConverter<L extends Listenable, T>(
   );
   return useStream(stream, initialData: initialData);
 }
+
+class _RouteCallbacks with RouteAware {
+  const _RouteCallbacks({
+    this.handleDidPopNext,
+    this.handleDidPush,
+    this.handleDidPop,
+    this.handleDidPushNext,
+  });
+
+  final VoidCallback? handleDidPopNext;
+  final VoidCallback? handleDidPush;
+  final VoidCallback? handleDidPop;
+  final VoidCallback? handleDidPushNext;
+
+  @override
+  void didPopNext() {
+    handleDidPopNext?.call();
+  }
+
+  @override
+  void didPush() {
+    handleDidPush?.call();
+  }
+
+  @override
+  void didPop() {
+    handleDidPop?.call();
+  }
+
+  @override
+  void didPushNext() {
+    handleDidPushNext?.call();
+  }
+}
+
+void useRouteObserver(
+  RouteObserver<ModalRoute> routeObserver, {
+  BuildContext? context,
+  VoidCallback? didPopNext,
+  VoidCallback? didPush,
+  VoidCallback? didPop,
+  VoidCallback? didPushNext,
+  List<Object?> keys = const [],
+}) {
+  final _context = context ?? useContext();
+  final route = ModalRoute.of(_context);
+
+  useEffect(() {
+    if (route == null) return () {};
+
+    final callbacks = _RouteCallbacks(
+      handleDidPop: didPop,
+      handleDidPopNext: didPopNext,
+      handleDidPush: didPush,
+      handleDidPushNext: didPushNext,
+    );
+    routeObserver.subscribe(callbacks, route);
+    return () => routeObserver.unsubscribe(callbacks);
+  }, [route, routeObserver, ...keys]);
+}

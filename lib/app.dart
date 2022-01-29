@@ -37,6 +37,8 @@ import 'widgets/message/item/text/mention_builder.dart';
 import 'widgets/window/move_window.dart';
 import 'widgets/window/window_shortcuts.dart';
 
+final rootRouteObserver = RouteObserver<ModalRoute>();
+
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
 
@@ -178,6 +180,7 @@ class _App extends StatelessWidget {
         child: GlobalMoveWindow(
           child: MaterialApp(
             title: 'Mixin',
+            navigatorObservers: [rootRouteObserver],
             debugShowCheckedModeBanner: false,
             localizationsDelegates: const [
               Localization.delegate,
