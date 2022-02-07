@@ -139,7 +139,7 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   bool _frameCallbackScheduled = false;
 
   void _controllerListener() {
-    if (controller?.value != true) return;
+    if (controller?.value == false) return;
     _decodeNextFrameAndSchedule();
   }
 
@@ -170,7 +170,7 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       }
       _nextFrame!.image.dispose();
       _nextFrame = null;
-      if (controller?.value != true) return;
+      if (controller?.value == false) return;
       // ignore gif's repetition count
       _decodeNextFrameAndSchedule();
       return;
@@ -227,7 +227,7 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       return;
     }
     _frameCallbackScheduled = true;
-    SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
+    SchedulerBinding.instance?.scheduleFrameCallback(_handleAppFrame);
   }
 
   void _emitFrame(ImageInfo imageInfo) {
@@ -303,7 +303,7 @@ class MixinFileImage extends FileImage {
 
     if (bytes.lengthInBytes == 0) {
       // The file may become available later.
-      PaintingBinding.instance.imageCache.evict(key);
+      PaintingBinding.instance?.imageCache?.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 

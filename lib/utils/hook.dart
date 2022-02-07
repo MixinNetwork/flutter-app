@@ -188,3 +188,19 @@ void useRouteObserver(
     return () => routeObserver.unsubscribe(callbacks);
   }, [route, routeObserver, ...keys]);
 }
+
+BuildContext? useSecondNavigatorContext(BuildContext context) =>
+    useMemoized(() {
+      final rootNavigatorState =
+          Navigator.maybeOf(context, rootNavigator: true);
+      if (rootNavigatorState == null) return null;
+
+      BuildContext? findSecondContext(BuildContext context) {
+        final state = context.findAncestorStateOfType<NavigatorState>();
+        if (state == null) return null;
+        if (state == rootNavigatorState) return context;
+        return findSecondContext(state.context);
+      }
+
+      return findSecondContext(context);
+    }, []);

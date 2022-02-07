@@ -12,7 +12,7 @@ final _desktopPlatform =
 void initAppLifecycleObserver() {
   if (!_desktopPlatform) {
     WidgetsFlutterBinding.ensureInitialized();
-    WidgetsBinding.instance.addObserver(_appObserver);
+    WidgetsBinding.instance?.addObserver(_appObserver);
   }
 }
 
@@ -41,7 +41,7 @@ class _AppLifecycleObserver extends WidgetsBindingObserver {
       return;
     }
     _initialized = true;
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
   }
 
   @override

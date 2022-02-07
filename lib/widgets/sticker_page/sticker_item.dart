@@ -28,24 +28,11 @@ class StickerItem extends HookWidget {
     late Widget child;
     final isJson = useMemoized(() => assetType == 'json', [assetType]);
 
-    final playing = useState(false);
+    final playing = useState(true);
     final controller = useAnimationController();
     final isCurrentRoute = useRef(true);
 
-    final secondContext = useMemoized(() {
-      final rootNavigatorState =
-          Navigator.maybeOf(context, rootNavigator: true);
-      if (rootNavigatorState == null) return null;
-
-      BuildContext? findSecondContext(BuildContext context) {
-        final state = context.findAncestorStateOfType<NavigatorState>();
-        if (state == null) return null;
-        if (state == rootNavigatorState) return context;
-        return findSecondContext(state.context);
-      }
-
-      return findSecondContext(context);
-    }, []);
+    final secondContext = useSecondNavigatorContext(context);
 
     final listener = useCallback(() {
       if (isJson && controller.duration == null) return;
