@@ -227,7 +227,7 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       return;
     }
     _frameCallbackScheduled = true;
-    SchedulerBinding.instance?.scheduleFrameCallback(_handleAppFrame);
+    SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
   }
 
   void _emitFrame(ImageInfo imageInfo) {
@@ -303,7 +303,7 @@ class MixinFileImage extends FileImage {
 
     if (bytes.lengthInBytes == 0) {
       // The file may become available later.
-      PaintingBinding.instance?.imageCache?.evict(key);
+      PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 
