@@ -51,16 +51,7 @@ jobs:
       # package:test for this step to succeed. Note that Flutter projects will
       # want to change this to 'flutter test'.
       - name: Run tests
-        run: flutter test --no-sound-null-safety
+        run: flutter test
 
       - name: Build APP
-        run: flutter build linux --no-sound-null-safety
-
-      - name: Package APP
-        run: ./dist/linux_deb.sh
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: mixin_desktop_amd64.deb.zip
-          path: build/mixin_desktop_amd64.deb
+        run: flutter build linux

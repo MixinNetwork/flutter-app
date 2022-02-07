@@ -1,0 +1,79 @@
+name: Manual Build App
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+   workflow_dispatch
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'master' # 'master', 'beta', 'dev' or 'stable'
+
+      # flutter build need ninja.
+      # https://github.com/subosito/flutter-action/issues/49
+      - name: Patch for linux build
+        run: |
+          flutter doctor
+          sudo apt-get update -y
+          sudo apt-get install -y ninja-build libgtk-3-dev
+          sudo apt-get install vlc
+          sudo apt-get install libvlc-dev
+          sudo apt install libappindicator3-dev gir1.2-appindicator3-0.1
+          sudo apt-get install webkit2gtk-4.0
+          flutter doctor
+
+      - run: flutter config --enable-linux-desktop
+      - name: Run tests
+        run: flutter test
+
+      - name: Build APP
+        run: flutter build linux
+      - name: Package APP
+        run: ./dist/linux_deb.sh
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: mixin_desktop_amd64.deb.zip
+          path: build/mixin_desktop_amd64.deb
+  
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'master'
+      - run: flutter config --enable-windows-desktop
+      
+      - name: Run tests
+        run: flutter test
+        
+      - name: Build APP
+        run: flutter build windows
+      
+      - name: Build Installer
+        run: |
+          "%programfiles(x86)%\Inno Setup 6\iscc.exe" "windows_inno_setup.iss"
+        shell: cmd
+        
+      - name: Upload Installer
+        uses: actions/upload-artifact@v2
+        with:
+          name: mixin_setup.exe.zip
+          path: build\mixin_setup.exe
+        
+      - name: Build msix
+        run: flutter pub run msix:create
+        
+      - name: Upload msix
+        uses: actions/upload-artifact@v2
+        with:
+          name: flutter_app.msix.zip
+          path: build\windows\runner\Release\flutter_app.msix
