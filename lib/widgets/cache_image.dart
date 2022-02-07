@@ -139,7 +139,7 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   bool _frameCallbackScheduled = false;
 
   void _controllerListener() {
-    if (controller?.value != true) return;
+    if (controller?.value == false) return;
     _decodeNextFrameAndSchedule();
   }
 
@@ -170,7 +170,7 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       }
       _nextFrame!.image.dispose();
       _nextFrame = null;
-      if (controller?.value != true) return;
+      if (controller?.value == false) return;
       // ignore gif's repetition count
       _decodeNextFrameAndSchedule();
       return;
