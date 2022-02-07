@@ -1,0 +1,55 @@
+# This is a basic workflow that is manually triggered
+
+name: Manual Build App
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      name:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'Person to greet'
+        # Default value if no value is explicitly provided
+        default: 'World'
+        # Input has to be provided for the workflow to run
+        required: true
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'master' # 'master', 'beta', 'dev' or 'stable'
+
+      # flutter build need ninja.
+      # https://github.com/subosito/flutter-action/issues/49
+      - name: Patch for linux build
+        run: |
+          flutter doctor
+          sudo apt-get update -y
+          sudo apt-get install -y ninja-build libgtk-3-dev
+          sudo apt-get install vlc
+          sudo apt-get install libvlc-dev
+          sudo apt install libappindicator3-dev gir1.2-appindicator3-0.1
+          sudo apt-get install webkit2gtk-4.0
+          flutter doctor
+
+      - run: flutter config --enable-linux-desktop
+      - name: Run tests
+        run: flutter test
+
+      - name: Build APP
+        run: flutter build linux
+      - name: Package APP
+        run: ./dist/linux_deb.sh
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: mixin_desktop_amd64.deb.zip
+          path: build/mixin_desktop_amd64.deb
