@@ -14,10 +14,10 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
   late final String? _accountId;
 
   @override
-  Future<IdentityKey> getIdentity(SignalProtocolAddress address) async =>
+  Future<IdentityKey?> getIdentity(SignalProtocolAddress address) async =>
       identityDao
           .getIdentityByAddress(address.toString())
-          .then((value) => value!.getIdentityKey());
+          .then((value) => value?.getIdentityKey());
 
   @override
   Future<IdentityKeyPair> getIdentityKeyPair() async => identityDao
