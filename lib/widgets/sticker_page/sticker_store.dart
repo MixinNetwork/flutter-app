@@ -100,35 +100,35 @@ class _StickerStorePage extends HookWidget {
       context.accountServer.refreshSticker(force: true);
     }, []);
     return Column(
-        children: [
-          MixinAppBar(
-            backgroundColor: Colors.transparent,
-            title: Text(context.l10n.stickerShop),
-            leading: Center(
-              child: ActionButton(
-                name: Resources.assetsImagesSettingSvg,
-                color: context.theme.icon,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ColoredBox(
-                      color: context.theme.popUp,
-                      child: const _StickerAlbumManagePage(),
-                    ),
+      children: [
+        MixinAppBar(
+          backgroundColor: Colors.transparent,
+          title: Text(context.l10n.stickerShop),
+          leading: Center(
+            child: ActionButton(
+              name: Resources.assetsImagesSettingSvg,
+              color: context.theme.icon,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ColoredBox(
+                    color: context.theme.popUp,
+                    child: const _StickerAlbumManagePage(),
                   ),
                 ),
               ),
             ),
-            actions: [
-              MixinCloseButton(
-                onTap: () =>
-                    Navigator.maybeOf(context, rootNavigator: true)?.pop(),
-              ),
-            ],
           ),
-          const Expanded(child: _List()),
-        ],
-      );
+          actions: [
+            MixinCloseButton(
+              onTap: () =>
+                  Navigator.maybeOf(context, rootNavigator: true)?.pop(),
+            ),
+          ],
+        ),
+        const Expanded(child: _List()),
+      ],
+    );
   }
 }
 
