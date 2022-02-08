@@ -91,11 +91,15 @@ Future<void> showStickerPageDialog(
   );
 }
 
-class _StickerStorePage extends StatelessWidget {
+class _StickerStorePage extends HookWidget {
   const _StickerStorePage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context) {
+    useEffect(() {
+      context.accountServer.refreshSticker(force: true);
+    }, []);
+    return Column(
         children: [
           MixinAppBar(
             backgroundColor: Colors.transparent,
@@ -125,6 +129,7 @@ class _StickerStorePage extends StatelessWidget {
           const Expanded(child: _List()),
         ],
       );
+  }
 }
 
 typedef _StickerAlbumItem = Tuple2<StickerAlbum, List<Sticker>>;
