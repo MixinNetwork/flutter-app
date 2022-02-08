@@ -148,7 +148,9 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     assert(_codec != null);
 
     if (hasListeners) {
-      controller?.addListener(_controllerListener);
+      try {
+        controller?.addListener(_controllerListener);
+      } catch (_) {}
       _decodeNextFrameAndSchedule();
     }
   }
@@ -332,7 +334,7 @@ class MixinExtendedNetworkImageProvider
     this.url, {
     this.scale = 1.0,
     this.headers,
-    this.cache = false,
+    this.cache = true,
     this.retries = 3,
     this.timeLimit,
     this.timeRetry = const Duration(milliseconds: 100),

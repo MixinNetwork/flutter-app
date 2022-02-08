@@ -78,11 +78,7 @@ class MessageImage extends HookWidget {
     final playing = useState(true);
 
     final listener = useCallback(() {
-      if (isAppActive && isCurrentRoute.value) {
-        playing.value = true;
-      } else {
-        playing.value = false;
-      }
+      playing.value = isAppActive && isCurrentRoute.value;
     }, []);
 
     useRouteObserver(
@@ -98,7 +94,11 @@ class MessageImage extends HookWidget {
       },
     );
 
-    useEffect(listener, []);
+    useEffect(() {
+      listener();
+      appActiveListener.addListener(listener);
+      return () => appActiveListener.removeListener(listener);
+    }, []);
 
     return InteractiveDecoratedBox(
       onTap: () {
