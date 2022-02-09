@@ -219,7 +219,6 @@ class _StickerAlbumBar extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Valid values
     final validIndexRef = useRef<int?>(tabController?.index);
 
     final setPreviousIndex = useCallback(() {
