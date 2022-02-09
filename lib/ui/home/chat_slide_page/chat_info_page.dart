@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/ui/home/chat_slide_page/shared_apps_page.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -153,6 +154,8 @@ class ChatInfoPage extends HookWidget {
                         .read<ChatSideCubit>()
                         .pushPage(ChatSideCubit.sharedMedia),
                   ),
+                  if (conversation.userId != null)
+                    _SharedApps(userId: conversation.userId!),
                   CellItem(
                     title: Text(
                       context.l10n.searchMessageHistory,
@@ -487,11 +490,9 @@ class ConversationBio extends HookWidget {
   }
 }
 
-///
 /// Button to add strange to contacts.
 ///
 /// if conversation is not stranger, show nothing.
-///
 class _AddToContactsButton extends StatelessWidget {
   _AddToContactsButton(this.conversation, {Key? key})
       : assert(conversation.isLoaded),
@@ -538,4 +539,38 @@ class _AddToContactsButton extends StatelessWidget {
               )
             : const SizedBox(height: 0),
       );
+}
+
+class _SharedApps extends HookWidget {
+  const _SharedApps({Key? key, required this.userId}) : super(key: key);
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) {
+    useMemoized(() {
+      context.accountServer.loadFavoriteApps(userId);
+    }, [userId]);
+
+    final apps = useMemoizedStream(
+        () => context.database.favoriteAppDao
+            .getFavoriteAppsByUserId(userId)
+            .watch(),
+        keys: [userId]);
+
+    final data = apps.data ?? const [];
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      child: data.isEmpty
+          ? const SizedBox()
+          : CellItem(
+              title: Text(context.l10n.sharedApps),
+              trailing: OverlappedAppIcons(apps: data),
+              onTap: () => context
+                  .read<ChatSideCubit>()
+                  .pushPage(ChatSideCubit.sharedApps),
+            ),
+    );
+  }
 }

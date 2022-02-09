@@ -11788,6 +11788,225 @@ class Fiats extends Table with TableInfo<Fiats, Fiat> {
   bool get dontWriteConstraints => true;
 }
 
+class FavoriteApp extends DataClass implements Insertable<FavoriteApp> {
+  final String appId;
+  final String userId;
+  final DateTime createdAt;
+  FavoriteApp(
+      {required this.appId, required this.userId, required this.createdAt});
+  factory FavoriteApp.fromData(Map<String, dynamic> data, {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return FavoriteApp(
+      appId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}app_id'])!,
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
+      createdAt: FavoriteApps.$converter0.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['app_id'] = Variable<String>(appId);
+    map['user_id'] = Variable<String>(userId);
+    {
+      final converter = FavoriteApps.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
+    }
+    return map;
+  }
+
+  FavoriteAppsCompanion toCompanion(bool nullToAbsent) {
+    return FavoriteAppsCompanion(
+      appId: Value(appId),
+      userId: Value(userId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FavoriteApp.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FavoriteApp(
+      appId: serializer.fromJson<String>(json['app_id']),
+      userId: serializer.fromJson<String>(json['user_id']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'app_id': serializer.toJson<String>(appId),
+      'user_id': serializer.toJson<String>(userId),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  FavoriteApp copyWith({String? appId, String? userId, DateTime? createdAt}) =>
+      FavoriteApp(
+        appId: appId ?? this.appId,
+        userId: userId ?? this.userId,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('FavoriteApp(')
+          ..write('appId: $appId, ')
+          ..write('userId: $userId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(appId, userId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FavoriteApp &&
+          other.appId == this.appId &&
+          other.userId == this.userId &&
+          other.createdAt == this.createdAt);
+}
+
+class FavoriteAppsCompanion extends UpdateCompanion<FavoriteApp> {
+  final Value<String> appId;
+  final Value<String> userId;
+  final Value<DateTime> createdAt;
+  const FavoriteAppsCompanion({
+    this.appId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  FavoriteAppsCompanion.insert({
+    required String appId,
+    required String userId,
+    required DateTime createdAt,
+  })  : appId = Value(appId),
+        userId = Value(userId),
+        createdAt = Value(createdAt);
+  static Insertable<FavoriteApp> custom({
+    Expression<String>? appId,
+    Expression<String>? userId,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (appId != null) 'app_id': appId,
+      if (userId != null) 'user_id': userId,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  FavoriteAppsCompanion copyWith(
+      {Value<String>? appId,
+      Value<String>? userId,
+      Value<DateTime>? createdAt}) {
+    return FavoriteAppsCompanion(
+      appId: appId ?? this.appId,
+      userId: userId ?? this.userId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (appId.present) {
+      map['app_id'] = Variable<String>(appId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (createdAt.present) {
+      final converter = FavoriteApps.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FavoriteAppsCompanion(')
+          ..write('appId: $appId, ')
+          ..write('userId: $userId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class FavoriteApps extends Table with TableInfo<FavoriteApps, FavoriteApp> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  FavoriteApps(this._db, [this._alias]);
+  final VerificationMeta _appIdMeta = const VerificationMeta('appId');
+  late final GeneratedColumn<String?> appId = GeneratedColumn<String?>(
+      'app_id', aliasedName, false,
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              type: const IntType(),
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(FavoriteApps.$converter0);
+  @override
+  List<GeneratedColumn> get $columns => [appId, userId, createdAt];
+  @override
+  String get aliasedName => _alias ?? 'favorite_apps';
+  @override
+  String get actualTableName => 'favorite_apps';
+  @override
+  VerificationContext validateIntegrity(Insertable<FavoriteApp> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('app_id')) {
+      context.handle(
+          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
+    } else if (isInserting) {
+      context.missing(_appIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {appId, userId};
+  @override
+  FavoriteApp map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return FavoriteApp.fromData(data,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  FavoriteApps createAlias(String alias) {
+    return FavoriteApps(_db, alias);
+  }
+
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(app_id, user_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -11853,6 +12072,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Users users = Users(this);
   late final TranscriptMessages transcriptMessages = TranscriptMessages(this);
   late final Fiats fiats = Fiats(this);
+  late final FavoriteApps favoriteApps = FavoriteApps(this);
   late final AddressDao addressDao = AddressDao(this as MixinDatabase);
   late final AppDao appDao = AppDao(this as MixinDatabase);
   late final AssetDao assetDao = AssetDao(this as MixinDatabase);
@@ -11888,6 +12108,38 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final UserDao userDao = UserDao(this as MixinDatabase);
   late final PinMessageDao pinMessageDao = PinMessageDao(this as MixinDatabase);
   late final FiatDao fiatDao = FiatDao(this as MixinDatabase);
+  late final FavoriteAppDao favoriteAppDao =
+      FavoriteAppDao(this as MixinDatabase);
+  Future<int> deleteFavoriteAppByAppIdAndUserId(String appId, String userId) {
+    return customUpdate(
+      'DELETE FROM favorite_apps WHERE app_id = ?1 AND user_id = ?2',
+      variables: [Variable<String>(appId), Variable<String>(userId)],
+      updates: {favoriteApps},
+      updateKind: UpdateKind.delete,
+    );
+  }
+
+  Future<int> deleteFavoriteAppByUserId(String userId) {
+    return customUpdate(
+      'DELETE FROM favorite_apps WHERE user_id = ?1',
+      variables: [Variable<String>(userId)],
+      updates: {favoriteApps},
+      updateKind: UpdateKind.delete,
+    );
+  }
+
+  Selectable<App> getFavoriteAppByUserId(String userId) {
+    return customSelect(
+        'SELECT a.* FROM favorite_apps AS fa INNER JOIN apps AS a ON fa.app_id = a.app_id WHERE fa.user_id = ?1',
+        variables: [
+          Variable<String>(userId)
+        ],
+        readsFrom: {
+          favoriteApps,
+          apps,
+        }).map(apps.mapFromRow);
+  }
+
   Selectable<String> stickerSystemAlbumId(String stickerId) {
     return customSelect(
         'SELECT sa.album_id FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
@@ -13607,7 +13859,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         stickers,
         users,
         transcriptMessages,
-        fiats
+        fiats,
+        favoriteApps
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
