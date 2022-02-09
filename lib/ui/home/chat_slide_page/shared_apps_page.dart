@@ -98,7 +98,10 @@ class OverlappedAppIcons extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(index.toDouble() * 14, 0, 0, 0),
               child: ClipOval(
                 child: Container(
-                  color: context.theme.listSelected,
+                  color: Color.alphaBlend(
+                    context.theme.listSelected,
+                    context.theme.popUp,
+                  ),
                   padding: const EdgeInsets.all(2),
                   child: _AppIcon(size: 24, app: apps[index]),
                 ),
