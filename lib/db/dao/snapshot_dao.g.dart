@@ -39,6 +39,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   TranscriptMessages get transcriptMessages =>
       attachedDatabase.transcriptMessages;
   Fiats get fiats => attachedDatabase.fiats;
+  FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
   Selectable<SnapshotItem> snapshotItems(
       String currentFiat,
       Expression<bool?> Function(Snapshots snapshot, Users opponent,

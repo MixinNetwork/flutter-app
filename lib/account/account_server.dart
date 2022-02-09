@@ -1153,6 +1153,29 @@ class AccountServer {
     await database.fiatDao.insertAllSdkFiat(data.data);
   }
 
+  Future<void> loadFavoriteApps(String userId) async {
+    final result = await client.userApi.getUserFavoriteApps(userId);
+    final apps = result.data;
+    await database.favoriteAppDao.insertFavoriteApps(userId, apps);
+
+    // refresh app not exist.
+    final appIds = apps.map((e) => e.appId).toList();
+
+    final notExits = <String>[];
+    for (final appId in appIds) {
+      final needLoad = await database.appDao.findAppById(appId) == null ||
+          await database.userDao.userById(appId).getSingleOrNull() == null;
+      if (needLoad) {
+        notExits.add(appId);
+      }
+    }
+    if (notExits.isEmpty) {
+      return;
+    }
+    final usersResponse = await client.userApi.getUsers(notExits);
+    await _injector.insertUpdateUsers(usersResponse.data);
+  }
+
   void _sendEventToWorkerIsolate(MainIsolateEventType type, [dynamic args]) {
     if (_isolateChannel == null) {
       d('_sendEventToWorkerIsolate: _isolateChannel is null $type');

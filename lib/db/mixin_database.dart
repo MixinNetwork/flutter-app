@@ -29,6 +29,7 @@ import 'dao/asset_dao.dart';
 import 'dao/circle_conversation_dao.dart';
 import 'dao/circle_dao.dart';
 import 'dao/conversation_dao.dart';
+import 'dao/favorite_app_dao.dart';
 import 'dao/fiat_dao.dart';
 import 'dao/flood_message_dao.dart';
 import 'dao/hyperlink_dao.dart';
@@ -64,7 +65,8 @@ part 'mixin_database.g.dart';
     'moor/dao/circle.drift',
     'moor/dao/flood.drift',
     'moor/dao/pin_message.drift',
-    'moor/dao/sticker_relationship.drift'
+    'moor/dao/sticker_relationship.drift',
+    'moor/dao/favorite_app.drift',
   },
   daos: [
     AddressDao,
@@ -91,6 +93,7 @@ part 'mixin_database.g.dart';
     UserDao,
     PinMessageDao,
     FiatDao,
+    FavoriteAppDao,
   ],
   queries: {},
 )
@@ -98,7 +101,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   final eventBus = DataBaseEventBus();
 
@@ -188,6 +191,9 @@ class MixinDatabase extends _$MixinDatabase {
             }
             await update(stickerAlbums)
                 .write(const StickerAlbumsCompanion(added: Value(true)));
+          }
+          if (from <= 10) {
+            await m.createTable(favoriteApps);
           }
         },
       );

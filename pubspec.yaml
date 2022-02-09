@@ -66,7 +66,7 @@ dependencies:
   map: ^1.0.0
   markdown: ^4.0.0
   mime: ^1.0.0
-  mixin_bot_sdk_dart: ^0.2.8
+  mixin_bot_sdk_dart: ^0.2.9
   octo_image: ^1.0.0+1
   ogg_opus_player: ^0.1.0
   open_file: ^3.2.1
