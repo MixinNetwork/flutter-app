@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/ui/home/chat_slide_page/shared_apps_page.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -20,6 +19,7 @@ import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
 import '../chat/chat_bar.dart';
 import '../chat/chat_page.dart';
+import 'shared_apps_page.dart';
 
 class ChatInfoPage extends HookWidget {
   const ChatInfoPage({Key? key}) : super(key: key);
