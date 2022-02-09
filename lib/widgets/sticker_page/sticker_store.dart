@@ -91,40 +91,45 @@ Future<void> showStickerPageDialog(
   );
 }
 
-class _StickerStorePage extends StatelessWidget {
+class _StickerStorePage extends HookWidget {
   const _StickerStorePage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Column(
-        children: [
-          MixinAppBar(
-            backgroundColor: Colors.transparent,
-            title: Text(context.l10n.stickerShop),
-            leading: Center(
-              child: ActionButton(
-                name: Resources.assetsImagesSettingSvg,
-                color: context.theme.icon,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ColoredBox(
-                      color: context.theme.popUp,
-                      child: const _StickerAlbumManagePage(),
-                    ),
+  Widget build(BuildContext context) {
+    useEffect(() {
+      context.accountServer.refreshSticker(force: true);
+    }, []);
+    return Column(
+      children: [
+        MixinAppBar(
+          backgroundColor: Colors.transparent,
+          title: Text(context.l10n.stickerShop),
+          leading: Center(
+            child: ActionButton(
+              name: Resources.assetsImagesSettingSvg,
+              color: context.theme.icon,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ColoredBox(
+                    color: context.theme.popUp,
+                    child: const _StickerAlbumManagePage(),
                   ),
                 ),
               ),
             ),
-            actions: [
-              MixinCloseButton(
-                onTap: () =>
-                    Navigator.maybeOf(context, rootNavigator: true)?.pop(),
-              ),
-            ],
           ),
-          const Expanded(child: _List()),
-        ],
-      );
+          actions: [
+            MixinCloseButton(
+              onTap: () =>
+                  Navigator.maybeOf(context, rootNavigator: true)?.pop(),
+            ),
+          ],
+        ),
+        const Expanded(child: _List()),
+      ],
+    );
+  }
 }
 
 typedef _StickerAlbumItem = Tuple2<StickerAlbum, List<Sticker>>;

@@ -530,11 +530,11 @@ class AccountServer {
     }
   }
 
-  Future<void> refreshSticker() async {
+  Future<void> refreshSticker({bool force = false}) async {
     final refreshStickerLastTime =
         AccountKeyValue.instance.refreshStickerLastTime;
     final now = DateTime.now().millisecondsSinceEpoch;
-    if (now - refreshStickerLastTime < hours24) {
+    if (!force && now - refreshStickerLastTime < hours24) {
       return;
     }
 
