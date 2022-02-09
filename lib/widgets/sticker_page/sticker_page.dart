@@ -52,7 +52,10 @@ class StickerPage extends StatelessWidget {
                     controller: tabController,
                     children: List.generate(
                       tabLength,
-                      (index) => _StickerAlbumPage(index: index),
+                      (index) {
+                        if (index == 0) return _StickerStoreEmptyPage();
+                        return _StickerAlbumPage(index: index);
+                      },
                     ),
                   ),
                 ),
@@ -133,6 +136,19 @@ class _StickerAlbumPage extends HookWidget {
   }
 }
 
+class _StickerStoreEmptyPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Text(
+          context.l10n.stickerShop,
+          style: TextStyle(
+            color: context.theme.secondaryText,
+            fontSize: 18,
+          ),
+        ),
+      );
+}
+
 class _StickerAlbumPageItem extends HookWidget {
   const _StickerAlbumPageItem({
     Key? key,
@@ -203,14 +219,36 @@ class _StickerAlbumBar extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Valid values
+    final validIndexRef = useRef<int?>(tabController?.index);
+
+    final setPreviousIndex = useCallback(() {
+      if (tabController == null) return;
+      final previousIndex = tabController!.previousIndex;
+      if (previousIndex != 0) {
+        validIndexRef.value = previousIndex;
+      }
+
+      if (validIndexRef.value != 0) {
+        // Sometimes tabController.index is validIndex, but TabBar.currentIndex is 0, they are not synchronized, so we need reset tabController.index to 0, then set to validIndex.
+        tabController!.index = 0;
+        tabController!.index = validIndexRef.value!;
+      }
+    }, []);
+
     useEffect(() {
       if (tabController == null) return () {};
-      void onTap() {
+      Future<void> onTap() async {
+        if (tabController == null) return;
         if (tabController!.index != 0) return;
-        AccountKeyValue.instance.hasNewAlbum = false;
-        showStickerStorePageDialog(context);
-        tabController!.index = tabController!.previousIndex;
+
         HoverOverlay.forceHidden(context);
+        AccountKeyValue.instance.hasNewAlbum = false;
+
+        setPreviousIndex();
+        if (!(await showStickerStorePageDialog(context))) return;
+        // When the dialog is closed, the scroll status is idle most of the time, reset tabController.index to validIndex.
+        setPreviousIndex();
       }
 
       tabController!.addListener(onTap);

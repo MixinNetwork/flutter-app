@@ -19,23 +19,41 @@ import '../interactive_decorated_box.dart';
 import 'sticker_item.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
+const _kStickerStoreName = 'StickerStore';
 
-Future<void> showStickerStorePageDialog(
+bool _checkStickerStorePageDialogMounted(BuildContext context) {
+  if (navigatorKey.currentContext != null) return true;
+
+  var topIsStickerStore = false;
+  // check top route is sticker store
+  Navigator.maybeOf(context, rootNavigator: true)?.popUntil((route) {
+    topIsStickerStore = route.settings.name == _kStickerStoreName;
+    return true;
+  });
+  return topIsStickerStore;
+}
+
+Future<bool> showStickerStorePageDialog(
   BuildContext context,
-) =>
-    showMixinDialog(
-      context: context,
-      child: ConstrainedBox(
-        constraints: BoxConstraints.loose(const Size(480, 600)),
-        child: Navigator(
-          key: navigatorKey,
-          pages: const [
-            MaterialPage(child: _StickerStorePage()),
-          ],
-          onPopPage: (_, __) => true,
-        ),
+) async {
+  if (_checkStickerStorePageDialogMounted(context)) return false;
+
+  await showMixinDialog(
+    context: context,
+    routeSettings: const RouteSettings(name: _kStickerStoreName),
+    child: ConstrainedBox(
+      constraints: BoxConstraints.loose(const Size(480, 600)),
+      child: Navigator(
+        key: navigatorKey,
+        pages: const [
+          MaterialPage(child: _StickerStorePage()),
+        ],
+        onPopPage: (_, __) => true,
       ),
-    );
+    ),
+  );
+  return true;
+}
 
 Future<void> showStickerPageDialog(
   BuildContext context,
