@@ -7,15 +7,15 @@ part 'sticker_dao.g.dart';
 
 extension StickerConverter on sdk.Sticker {
   StickersCompanion get asStickersCompanion => StickersCompanion(
-      stickerId: Value(stickerId),
-      albumId: Value(albumId),
-      name: Value(name),
-      assetUrl: Value(assetUrl),
-      assetType: Value(assetType),
-      assetWidth: Value(assetWidth),
-      assetHeight: Value(assetHeight),
-      createdAt: Value(createdAt),
-  );
+        stickerId: Value(stickerId),
+        albumId: Value(albumId),
+        name: Value(name),
+        assetUrl: Value(assetUrl),
+        assetType: Value(assetType),
+        assetWidth: Value(assetWidth),
+        assetHeight: Value(assetHeight),
+        createdAt: Value(createdAt),
+      );
 }
 
 @DriftAccessor(tables: [Sticker])
