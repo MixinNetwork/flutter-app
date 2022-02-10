@@ -237,7 +237,7 @@ class _StickerAlbumBar extends HookWidget {
 
     useEffect(() {
       if (tabController == null) return () {};
-      Future<void> onTap() async {
+      Future<void> listener() async {
         if (tabController == null) return;
         if (tabController!.index != 0) return;
 
@@ -250,9 +250,9 @@ class _StickerAlbumBar extends HookWidget {
         setPreviousIndex();
       }
 
-      tabController!.addListener(onTap);
+      tabController!.addListener(listener);
       return () {
-        tabController!.removeListener(onTap);
+        tabController!.removeListener(listener);
       };
     }, [tabController]);
     return Container(
