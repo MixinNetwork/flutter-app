@@ -7240,7 +7240,7 @@ class MessagesFtsV2 extends Table
   bool get dontWriteConstraints => true;
   @override
   String get moduleAndArgs =>
-      'FTS5(message_id UNINDEXED, conversation_id UNINDEXED, content, created_at UNINDEXED, user_id UNINDEXED, reserved_int UNINDEXED, reserved_text UNINDEXED, tokenize=\'simple\')';
+      'FTS5(message_id UNINDEXED, conversation_id UNINDEXED, content, created_at UNINDEXED, user_id UNINDEXED, reserved_int UNINDEXED, reserved_text UNINDEXED, tokenize=\'simple 0\')';
 }
 
 class MessagesHistoryData extends DataClass
