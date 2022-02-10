@@ -29,6 +29,9 @@ enum WorkerIsolateEventType {
 
   /// args: [String] pin message conversationId.
   showPinMessage,
+
+  /// args: [bool] database is updating.
+  onDatabaseUpdateEvent,
 }
 
 extension WorkerIsolateEventTypeExtension on WorkerIsolateEventType {

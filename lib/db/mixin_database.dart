@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:fts5_simple/fts5_simple.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
+import 'package:rxdart/rxdart.dart';
 
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
@@ -107,9 +108,7 @@ class MixinDatabase extends _$MixinDatabase {
 
   final eventBus = DataBaseEventBus();
 
-  final _isDbUpdating = ValueNotifier<bool>(false);
-
-  ValueListenable<bool> get isDbUpdating => _isDbUpdating;
+  final isDbUpdating = BehaviorSubject<bool>();
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -120,7 +119,7 @@ class MixinDatabase extends _$MixinDatabase {
           }
         },
         onUpgrade: (Migrator m, int from, int to) async {
-          _isDbUpdating.value = true;
+          isDbUpdating.value = true;
           if (from <= 2) {
             await m.drop(Index(
                 'index_conversations_category_status_pin_time_created_at', ''));
@@ -206,7 +205,7 @@ class MixinDatabase extends _$MixinDatabase {
             await m.createTable(messagesFtsV2);
             await _migrationMessageFts();
           }
-          _isDbUpdating.value = false;
+          isDbUpdating.value = false;
         },
       );
 

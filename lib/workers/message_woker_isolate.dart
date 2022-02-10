@@ -59,6 +59,7 @@ class IsolateInitParams {
 }
 
 Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
+  await Future.delayed(const Duration(milliseconds: 2000));
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
   final isolateChannel =
       IsolateChannel<IsolateEvent>.connectSend(params.sendPort);
@@ -122,6 +123,12 @@ class _MessageProcessRunner {
 
   Future<void> init(IsolateInitParams initParams) async {
     database = Database(await connectToDatabase(identityNumber));
+    database.mixinDatabase.isDbUpdating.listen((value) {
+      _sendEventToMainIsolate(
+        WorkerIsolateEventType.onDatabaseUpdateEvent,
+        value,
+      );
+    });
     jobSubscribers.add(
       database.mixinDatabase.eventBus.stream.listen((event) {
         _sendEventToMainIsolate(WorkerIsolateEventType.onDbEvent, event);

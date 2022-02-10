@@ -6,6 +6,7 @@ import 'dart:isolate';
 import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
@@ -148,6 +149,9 @@ class AccountServer {
       String privateKey, MultiAuthCubit multiAuthCubit) async {
     database = Database(
         await db.connectToDatabase(identityNumber, fromMainIsolate: true));
+    jobSubscribers.add(database.mixinDatabase.isDbUpdating.listen((value) {
+      _isDbUpdating.value = value;
+    }));
     attachmentUtil = AttachmentUtil.init(
       client,
       database.messageDao,
@@ -171,6 +175,10 @@ class AccountServer {
   late Injector _injector;
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil attachmentUtil;
+
+  final _isDbUpdating = ValueNotifier<bool>(false);
+
+  ValueListenable<bool> get isDbUpdating => _isDbUpdating;
 
   IsolateChannel<dynamic>? _isolateChannel;
 
@@ -256,6 +264,10 @@ class AccountServer {
       case WorkerIsolateEventType.showPinMessage:
         final conversationId = event.argument as String;
         unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
+        break;
+      case WorkerIsolateEventType.onDatabaseUpdateEvent:
+        final updating = event.argument as bool;
+        _isDbUpdating.value = updating;
         break;
       default:
         assert(false, 'unexpected event: $event');

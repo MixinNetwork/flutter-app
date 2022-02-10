@@ -45,8 +45,8 @@ class HomePage extends HookWidget {
             keys: [context.accountServer]).data ??
         false;
 
-    final isDatabaseUpgrading = useValueListenable(
-        context.accountServer.database.mixinDatabase.isDbUpdating);
+    final isDatabaseUpgrading =
+        useValueListenable(context.accountServer.isDbUpdating);
 
     return CommandPaletteWrapper(
       child: ConversationHotKey(
