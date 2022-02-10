@@ -470,7 +470,8 @@ class MessageItemWidget extends HookWidget {
         });
       }
       showToastSuccessful(context);
-    } catch (_) {
+    } catch (err, s) {
+      print('fuck $err, $s');
       await showToastFailed(context, ToastError(context.l10n.addStickerFailed));
     }
   }

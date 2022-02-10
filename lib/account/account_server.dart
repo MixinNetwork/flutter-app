@@ -97,7 +97,7 @@ class AccountServer {
           },
         ),
       ],
-      httpLogLevel: HttpLogLevel.none,
+      // httpLogLevel: HttpLogLevel.none,
     );
     await _initDatabase(privateKey, multiAuthCubit);
 
