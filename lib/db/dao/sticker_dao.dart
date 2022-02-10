@@ -1,18 +1,32 @@
 import 'package:drift/drift.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
 import '../mixin_database.dart';
 
 part 'sticker_dao.g.dart';
+
+extension StickerConverter on sdk.Sticker {
+  StickersCompanion get asStickersCompanion => StickersCompanion(
+      stickerId: Value(stickerId),
+      albumId: Value(albumId),
+      name: Value(name),
+      assetUrl: Value(assetUrl),
+      assetType: Value(assetType),
+      assetWidth: Value(assetWidth),
+      assetHeight: Value(assetHeight),
+      createdAt: Value(createdAt),
+  );
+}
 
 @DriftAccessor(tables: [Sticker])
 class StickerDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerDaoMixin {
   StickerDao(MixinDatabase db) : super(db);
 
-  Future<int> insert(Sticker sticker) =>
+  Future<int> insert(StickersCompanion sticker) =>
       into(db.stickers).insertOnConflictUpdate(sticker);
 
-  Future<void> insertAll(List<Sticker> stickers) =>
+  Future<void> insertAll(Iterable<StickersCompanion> stickers) =>
       batch((batch) => batch.insertAllOnConflictUpdate(db.stickers, stickers));
 
   Future<int> deleteSticker(Sticker sticker) =>

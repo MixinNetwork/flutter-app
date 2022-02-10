@@ -31,16 +31,23 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
   Future<int> deleteStickerAlbum(StickerAlbum stickerAlbum) =>
       delete(db.stickerAlbums).delete(stickerAlbum);
 
-  Selectable<StickerAlbum> systemAlbums() => select(db.stickerAlbums)
-    ..where((tbl) => tbl.category.equals('SYSTEM'))
-    ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
+  SimpleSelectStatement<StickerAlbums, StickerAlbum> systemAlbums() =>
+      select(db.stickerAlbums)
+        ..where((tbl) => tbl.category.equals('SYSTEM'))
+        ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
-  Selectable<StickerAlbum> systemAddedAlbums() => select(db.stickerAlbums)
-    ..where((tbl) => tbl.category.equals('SYSTEM') & tbl.added.equals(true))
-    ..orderBy([
-      (tbl) => OrderingTerm.asc(tbl.orderedAt),
-      (tbl) => OrderingTerm.desc(tbl.createdAt),
-    ]);
+  SimpleSelectStatement<StickerAlbums, StickerAlbum> personalAlbum() =>
+      select(db.stickerAlbums)
+        ..where((tbl) => tbl.category.equals('PERSONAL'))
+        ..limit(1);
+
+  SimpleSelectStatement<StickerAlbums, StickerAlbum> systemAddedAlbums() =>
+      select(db.stickerAlbums)
+        ..where((tbl) => tbl.category.equals('SYSTEM') & tbl.added.equals(true))
+        ..orderBy([
+          (tbl) => OrderingTerm.asc(tbl.orderedAt),
+          (tbl) => OrderingTerm.desc(tbl.createdAt),
+        ]);
 
   SimpleSelectStatement<StickerAlbums, StickerAlbum> album(String albumId) =>
       select(db.stickerAlbums)

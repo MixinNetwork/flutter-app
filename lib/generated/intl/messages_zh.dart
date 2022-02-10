@@ -75,6 +75,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "add": MessageLookupByLibrary.simpleMessage("添加"),
         "addAnnouncement": MessageLookupByLibrary.simpleMessage("添加群公告"),
         "addContact": MessageLookupByLibrary.simpleMessage("添加联系人"),
+        "addSticker": MessageLookupByLibrary.simpleMessage("添加表情"),
+        "addStickerFailed": MessageLookupByLibrary.simpleMessage("添加表情失败"),
         "addStickers": MessageLookupByLibrary.simpleMessage("添加所有表情"),
         "added": MessageLookupByLibrary.simpleMessage("已添加"),
         "appCard": MessageLookupByLibrary.simpleMessage("卡片"),

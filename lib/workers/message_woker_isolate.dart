@@ -22,6 +22,7 @@ import '../crypto/encrypted/encrypted_protocol.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../db/converter/utc_value_serializer.dart';
 import '../db/dao/job_dao.dart';
+import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
 import '../db/extension/message.dart';
 import '../db/mixin_database.dart' as db;
@@ -335,16 +336,7 @@ class _MessageProcessRunner {
         } else {
           final sticker =
               (await client.accountApi.getStickerById(stickerId)).data;
-          await database.stickerDao.insert(db.Sticker(
-            stickerId: sticker.stickerId,
-            albumId: sticker.albumId,
-            name: sticker.name,
-            assetUrl: sticker.assetUrl,
-            assetType: sticker.assetType,
-            assetWidth: sticker.assetWidth,
-            assetHeight: sticker.assetHeight,
-            createdAt: sticker.createdAt,
-          ));
+          await database.stickerDao.insert(sticker.asStickersCompanion);
         }
         await database.jobDao.deleteJobById(job.jobId);
       } catch (e, s) {

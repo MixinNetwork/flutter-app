@@ -239,5 +239,7 @@
   "stickerAlbumDetail": "表情详情",
   "addStickers": "添加所有表情",
   "removeStickers": "移除所有表情",
-  "myStickerAlbums": "我的表情"
+  "myStickerAlbums": "我的表情",
+  "addSticker": "添加表情",
+  "addStickerFailed": "添加表情失败"
 }
