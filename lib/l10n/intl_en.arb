@@ -235,6 +235,16 @@
   "uriCheckOnPhone": "This type of url is not supported, please check on your phone.",
   "saveAs": "Save as",
   "noResults": "No results",
+  "saveToGallery": "Save to Gallery",
+  "openInExternalApp": "Open in External App",
+  "typeAMessage": "Type message",
+  "stickerShop": "Sticker shop",
+  "add": "Add",
+  "added": "Added",
+  "stickerAlbumDetail": "Sticker album detail",
+  "addStickers": "Add Stickers",
+  "removeStickers": "Remove Stickers",
+  "myStickerAlbums": "My Stickers",
   "databaseUpgrading": "Upgrading",
   "databaseUpgradeTips": "The database is being upgraded, it may take several minutes, please do not close this App."
 }

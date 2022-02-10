@@ -35,7 +35,7 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   }
 
   @override
-  Future<IdentityKey> getIdentity(SignalProtocolAddress address) async =>
+  Future<IdentityKey?> getIdentity(SignalProtocolAddress address) async =>
       identityKeyStore.getIdentity(address);
 
   @override

@@ -23,6 +23,7 @@ const kSyncSignalKeys = 'SYNC_SIGNAL_KEYS';
 
 // Only from local.
 const kUpdateAsset = 'LOCAL_UPDATE_ASSET';
+const kUpdateSticker = 'LOCAL_UPDATE_STICKER';
 
 const mixinScheme = 'mixin';
 const mixinHost = 'mixin.one';
@@ -53,3 +54,5 @@ const int hour1 = 1000 * 60 * 60;
 const int hours24 = hour1 * 24;
 
 const statusOffset = 'messages_status_offset';
+
+const kMarkLimit = 10000;

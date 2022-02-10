@@ -26,7 +26,7 @@ class PinMessageBubble extends StatelessWidget {
       child: Padding(
         padding: padding.add(const EdgeInsets.only(right: _nipWidth)),
         child: SizedBox.expand(
-          child: DefaultTextStyle(
+          child: DefaultTextStyle.merge(
             style: TextStyle(
               color: context.theme.text,
             ),

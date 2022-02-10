@@ -193,7 +193,7 @@ class _ValuesDescription extends HookWidget {
             .abs()),
       );
     }
-    return DefaultTextStyle(
+    return DefaultTextStyle.merge(
       style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w400,
@@ -285,7 +285,7 @@ class TransactionInfoTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 12),
-          DefaultTextStyle(
+          DefaultTextStyle.merge(
             style: TextStyle(
               fontSize: 16,
               height: 1,
@@ -294,7 +294,7 @@ class TransactionInfoTile extends StatelessWidget {
             child: title,
           ),
           const SizedBox(height: 8),
-          DefaultTextStyle(
+          DefaultTextStyle.merge(
             style: TextStyle(
               fontSize: 16,
               height: 1,
@@ -315,6 +315,7 @@ class _SymbolIconWithBorder extends StatelessWidget {
     required this.size,
     required this.chainSize,
     this.chainBorder = const BorderSide(color: Colors.white),
+    // ignore: unused_element
     this.symbolBorder = BorderSide.none,
   }) : super(key: key);
 

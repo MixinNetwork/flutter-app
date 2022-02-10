@@ -2,7 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:pointycastle/api.dart';
-import 'package:pointycastle/block/aes_fast.dart';
+import 'package:pointycastle/block/aes.dart';
 import 'package:pointycastle/block/modes/cbc.dart';
 import 'package:pointycastle/block/modes/gcm.dart';
 import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
@@ -15,7 +15,7 @@ List<int> aesGcmEncrypt(List<int> key, List<int> plainText) {
   final iv = generateRandomKey(gcmIvLength);
   final params = ParametersWithIV<KeyParameter>(
       KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
-  final gcmCipher = GCMBlockCipher(AESFastEngine())..init(true, params);
+  final gcmCipher = GCMBlockCipher(AESEngine())..init(true, params);
   final encrypted = gcmCipher.process(Uint8List.fromList(plainText));
   final result = [...iv, ...encrypted];
   return result;
@@ -24,12 +24,12 @@ List<int> aesGcmEncrypt(List<int> key, List<int> plainText) {
 Uint8List aesGcmDecrypt(List<int> key, List<int> iv, List<int> cipherText) {
   final params = ParametersWithIV<KeyParameter>(
       KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
-  final gcmCipher = GCMBlockCipher(AESFastEngine())..init(false, params);
+  final gcmCipher = GCMBlockCipher(AESEngine())..init(false, params);
   return gcmCipher.process(Uint8List.fromList(cipherText));
 }
 
 List<int> aesEncrypt(List<int> key, List<int> plainText, [List<int>? iv]) {
-  final cbcCipher = CBCBlockCipher(AESFastEngine());
+  final cbcCipher = CBCBlockCipher(AESEngine());
   final nonce = iv ?? generateRandomKey(16);
   final ivParams = ParametersWithIV<KeyParameter>(
       KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(nonce));
@@ -50,7 +50,7 @@ List<int> aesEncrypt(List<int> key, List<int> plainText, [List<int>? iv]) {
 }
 
 List<int> aesDecrypt(List<int> key, List<int> iv, List<int> cipherText) {
-  final cbcCipher = CBCBlockCipher(AESFastEngine());
+  final cbcCipher = CBCBlockCipher(AESEngine());
   final ivParams = ParametersWithIV<KeyParameter>(
       KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
   final paddingParams =

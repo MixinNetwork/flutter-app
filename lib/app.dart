@@ -22,19 +22,22 @@ import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/bloc/multi_auth_cubit.dart';
 import 'ui/home/bloc/recall_message_bloc.dart';
 import 'ui/home/bloc/slide_category_cubit.dart';
-import 'ui/home/conversation_page.dart';
+import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
 import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
+import 'utils/system/system_fonts.dart';
 import 'utils/system/tray.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
 import 'widgets/message/item/text/mention_builder.dart';
 import 'widgets/window/move_window.dart';
 import 'widgets/window/window_shortcuts.dart';
+
+final rootRouteObserver = RouteObserver<ModalRoute>();
 
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
@@ -177,6 +180,7 @@ class _App extends StatelessWidget {
         child: GlobalMoveWindow(
           child: MaterialApp(
             title: 'Mixin',
+            navigatorObservers: [rootRouteObserver],
             debugShowCheckedModeBanner: false,
             localizationsDelegates: const [
               Localization.delegate,
@@ -195,7 +199,7 @@ class _App extends StatelessWidget {
                   TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
                 },
               ),
-            ),
+            ).withFallbackFonts(),
             builder: (context, child) {
               try {
                 context.accountServer.language =
@@ -243,7 +247,7 @@ class _Home extends HookWidget {
         accountServer!
           ..refreshSelf()
           ..refreshFriends()
-          ..initSticker()
+          ..refreshSticker()
           ..initCircles();
       }
     }, [signed]);

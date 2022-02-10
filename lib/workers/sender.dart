@@ -21,7 +21,6 @@ import '../db/mixin_database.dart' as db;
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../utils/extension/extension.dart';
-import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 
 class Sender {
@@ -230,10 +229,10 @@ class Sender {
     if (conversation == null) {
       return;
     }
-    if (conversation.category == ConversationCategory.group) {
-      await _syncConversation(conversationId);
+    if (conversation.status != ConversationStatus.success) {
+      await checkConversationExists(conversation);
     } else {
-      await _checkConversationExists(conversation);
+      await _syncConversation(conversationId);
     }
   }
 
@@ -259,9 +258,11 @@ class Sender {
     final remote = <db.ParticipantSessionData>[];
     for (final s in data) {
       remote.add(db.ParticipantSessionData(
-          conversationId: conversationId,
-          userId: s.userId,
-          sessionId: s.sessionId));
+        conversationId: conversationId,
+        userId: s.userId,
+        sessionId: s.sessionId,
+        publicKey: s.publicKey,
+      ));
     }
     if (remote.isEmpty) {
       await database.participantSessionDao
@@ -295,7 +296,7 @@ class Sender {
     }
   }
 
-  Future _checkConversationExists(db.Conversation conversation) async {
+  Future checkConversationExists(db.Conversation conversation) async {
     if (conversation.status != ConversationStatus.success) {
       await _createConversation(conversation);
     }
@@ -319,9 +320,11 @@ class Sender {
       final newParticipantSessions = <db.ParticipantSessionData>[];
       for (final p in sessionParticipants) {
         newParticipantSessions.add(db.ParticipantSessionData(
-            conversationId: conversation.conversationId,
-            userId: p.userId,
-            sessionId: p.sessionId));
+          conversationId: conversation.conversationId,
+          userId: p.userId,
+          sessionId: p.sessionId,
+          publicKey: p.publicKey,
+        ));
       }
       if (newParticipantSessions.isNotEmpty) {
         await database.participantSessionDao
@@ -385,7 +388,7 @@ class Sender {
     final plainText = PlainJsonMessage(kNoKey, null, null, null, null, null)
         .toJson()
         .toString();
-    final encoded = base64Encode(await utf8EncodeWithIsolate(plainText));
+    final encoded = base64Encode(utf8.encode(plainText));
     final blazeParam = BlazeMessageParam(
       conversationId: conversationId,
       recipientId: recipientId,
@@ -431,9 +434,11 @@ class Sender {
     final list = <db.ParticipantSessionData>[];
     response.data.forEach((e) {
       list.add(db.ParticipantSessionData(
-          conversationId: conversationId,
-          userId: e.userId,
-          sessionId: e.sessionId));
+        conversationId: conversationId,
+        userId: e.userId,
+        sessionId: e.sessionId,
+        publicKey: e.publicKey,
+      ));
     });
     if (list.isNotEmpty) {
       await database.participantSessionDao.insertAll(list);

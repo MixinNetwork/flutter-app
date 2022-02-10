@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/constants.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/toast.dart';
+import '../widgets/unknown_mixin_url_dialog.dart';
 import '../widgets/user/user_dialog.dart';
 import 'extension/extension.dart';
 import 'logger.dart';
@@ -66,8 +67,8 @@ Future<bool> openUri(
           return true;
         }
 
-        await showToastFailed(
-            context, ToastError(context.l10n.uriCheckOnPhone));
+        Toast.dismiss();
+        await showUnknownMixinUrlDialog(context, uri);
         return false;
       } catch (error) {
         e('open code: $error');
@@ -76,22 +77,25 @@ Future<bool> openUri(
       }
     }
 
-    await showToastFailed(context, ToastError(context.l10n.uriCheckOnPhone));
-    return false;
+    if (uri.isMixinScheme) {
+      Toast.dismiss();
+      await showUnknownMixinUrlDialog(context, uri);
+      return false;
+    }
   }
 
   return fallbackHandler(uri.toString());
 }
 
 extension _MixinUriExtension on Uri {
-  bool get _isMixinScheme => isScheme(mixinScheme);
+  bool get isMixinScheme => isScheme(mixinScheme);
 
   bool get _isMixinHost => host == mixinHost || host == 'www.$mixinHost';
 
-  bool get isMixin => _isMixinScheme || _isMixinHost;
+  bool get isMixin => isMixinScheme || _isMixinHost;
 
   bool _isTypeScheme(MixinSchemeHost type) =>
-      _isMixinScheme &&
+      isMixinScheme &&
       host == enumConvertToString(type) &&
       pathSegments.length == 1 &&
       pathSegments.single.isNotEmpty;

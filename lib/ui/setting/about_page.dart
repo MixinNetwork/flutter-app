@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../constants/resources.dart';
-import '../../main.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/system/package_info.dart';
 import '../../utils/uri_utils.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
@@ -14,7 +14,7 @@ class AboutPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final info = useMemoizedFuture(() => packageInfoFuture, null).data;
+    final info = useMemoizedFuture(getPackageInfo, null).data;
     return Scaffold(
       backgroundColor: context.theme.background,
       appBar: MixinAppBar(

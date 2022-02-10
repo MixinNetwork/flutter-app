@@ -5,11 +5,11 @@ import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/chat/chat_page.dart';
-import '../../ui/home/conversation_page.dart';
 import '../../utils/extension/extension.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';
+import '../conversation/verified_or_bot_widget.dart';
 import '../dialog.dart';
 import '../more_extended_text.dart';
 import '../toast.dart';
@@ -148,59 +148,68 @@ class _UserProfileBody extends StatelessWidget {
   final bool isSelf;
 
   @override
-  Widget build(BuildContext context) => AnimatedSize(
-        duration: const Duration(milliseconds: 150),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AvatarWidget(
-              size: 90,
-              avatarUrl: user.avatarUrl,
-              userId: user.userId,
-              name: user.fullName ?? '',
-            ),
-            const SizedBox(height: 8),
-            Row(
+  Widget build(BuildContext context) {
+    final anonymous = user.identityNumber == '0';
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 150),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AvatarWidget(
+            size: 90,
+            avatarUrl: anonymous ? null : user.avatarUrl,
+            userId: user.userId,
+            name: user.fullName ?? '',
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: SelectableText(
+                  user.fullName ?? '',
+                  style: TextStyle(
+                    color: context.theme.text,
+                    fontSize: 16,
+                    height: 1,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              VerifiedOrBotWidget(
+                verified: user.isVerified,
+                isBot: !anonymous && user.appId != null,
+              )
+            ],
+          ),
+          if (!anonymous)
+            Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Flexible(
-                  child: SelectableText(
-                    user.fullName ?? '',
-                    style: TextStyle(
-                      color: context.theme.text,
-                      fontSize: 16,
-                      height: 1,
-                    ),
-                    textAlign: TextAlign.center,
+                const SizedBox(height: 4),
+                SelectableText(
+                  context.l10n.contactMixinId(user.identityNumber),
+                  style: TextStyle(
+                    color: context.theme.secondaryText,
+                    fontSize: 12,
                   ),
                 ),
-                VerifiedOrBotWidget(
-                  verified: user.isVerified,
-                  isBot: user.appId != null,
-                )
+                if (user.isStranger)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: _AddToContactsButton(user: user),
+                  ),
+                const SizedBox(height: 20),
+                _BioText(biography: user.biography ?? ''),
+                const SizedBox(height: 24),
+                _UserProfileButtonBar(user: user),
               ],
             ),
-            const SizedBox(height: 4),
-            SelectableText(
-              context.l10n.contactMixinId(user.identityNumber),
-              style: TextStyle(
-                color: context.theme.secondaryText,
-                fontSize: 12,
-              ),
-            ),
-            if (user.isStranger)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: _AddToContactsButton(user: user),
-              ),
-            const SizedBox(height: 20),
-            _BioText(biography: user.biography ?? ''),
-            const SizedBox(height: 24),
-            _UserProfileButtonBar(user: user),
-            const SizedBox(height: 56),
-          ],
-        ),
-      );
+          const SizedBox(height: 56),
+        ],
+      ),
+    );
+  }
 }
 
 class _BioText extends StatelessWidget {

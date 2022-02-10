@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../../utils/dp_utils.dart';
 import '../../../utils/extension/extension.dart';
-import '../../cache_image.dart';
+import '../../interactive_decorated_box.dart';
+import '../../sticker_page/sticker_item.dart';
+import '../../sticker_page/sticker_store.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -24,6 +25,8 @@ class StickerMessageWidget extends HookWidget {
     final assetType =
         useMessageConverter(converter: (state) => state.assetType);
     final assetUrl = useMessageConverter(converter: (state) => state.assetUrl);
+    final stickerId =
+        useMessageConverter(converter: (state) => state.stickerId);
 
     double width;
     double height;
@@ -78,21 +81,20 @@ class StickerMessageWidget extends HookWidget {
         builder: (context) {
           if (assetUrl == null) return placeholder;
 
-          if (assetType == 'json') {
-            return Lottie.network(
-              assetUrl,
-              height: height,
+          return InteractiveDecoratedBox(
+            onTap: () {
+              if (stickerId == null) return;
+
+              showStickerPageDialog(context, stickerId);
+            },
+            child: StickerItem(
+              assetUrl: assetUrl,
+              assetType: assetType,
+              placeholder: placeholder,
               width: width,
-              fit: BoxFit.cover,
-            );
-          } else {
-            return CacheImage(
-              assetUrl,
               height: height,
-              width: width,
-              placeholder: () => placeholder,
-            );
-          }
+            ),
+          );
         },
       ),
     );

@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import '../../../../app.dart';
 import '../../../../enum/media_status.dart';
+import '../../../../utils/app_lifecycle.dart';
 import '../../../../utils/extension/extension.dart';
+import '../../../../utils/hook.dart';
 import '../../../cache_image.dart';
 import '../../../image.dart';
 import '../../../interactive_decorated_box.dart';
@@ -28,14 +31,6 @@ class ImageMessageWidget extends HookWidget {
         useMessageConverter(converter: (state) => state.mediaWidth);
     final mediaHeight =
         useMessageConverter(converter: (state) => state.mediaHeight);
-    final isCurrentUser = useIsCurrentUser();
-    final isTranscriptPage = useIsTranscriptPage();
-    final thumbImage =
-        useMessageConverter(converter: (state) => state.thumbImage ?? '');
-    final type = useMessageConverter(converter: (state) => state.type);
-    final conversationId =
-        useMessageConverter(converter: (state) => state.conversationId);
-    final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
     if (mediaWidth == null || mediaHeight == null) {
       return const UnknownMessage();
@@ -48,96 +43,153 @@ class ImageMessageWidget extends HookWidget {
         padding: EdgeInsets.zero,
         includeNip: true,
         clip: true,
-        child: InteractiveDecoratedBox(
-          onTap: () {
-            final message = context.message;
-            switch (message.mediaStatus) {
-              case MediaStatus.done:
-                ImagePreviewPage.push(
-                  context,
-                  conversationId: message.conversationId,
-                  messageId: message.messageId,
-                  isTranscriptPage: isTranscriptPage,
-                );
-                break;
-              case MediaStatus.canceled:
-                if (message.relationship == UserRelationship.me &&
-                    message.mediaUrl?.isNotEmpty == true) {
-                  context.accountServer.reUploadAttachment(message);
-                } else {
-                  context.accountServer.downloadAttachment(message);
-                }
-                break;
-              case MediaStatus.pending:
-                context.accountServer
-                    .cancelProgressAttachmentJob(message.messageId);
-                break;
-              default:
-                break;
-            }
-          },
-          child: SizedBox(
-            height: height,
-            width: width,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image(
-                  image: MixinFileImage(File(context.accountServer
-                      .convertAbsolutePath(
-                          type, conversationId, mediaUrl, isTranscriptPage))),
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      ImageByBlurHashOrBase64(imageData: thumbImage),
-                ),
-                Center(
-                  child: HookBuilder(
-                    builder: (BuildContext context) {
-                      final mediaStatus = useMessageConverter(
-                          converter: (state) => state.mediaStatus);
-                      final relationship = useMessageConverter(
-                          converter: (state) => state.relationship);
+        child: MessageImage(
+          size: Size(width, height),
+          showStatus: true,
+        ),
+      ),
+    );
+  }
+}
 
-                      switch (mediaStatus) {
-                        case MediaStatus.canceled:
-                          if (relationship == UserRelationship.me &&
-                              mediaUrl?.isNotEmpty == true) {
-                            return const StatusUpload();
-                          } else {
-                            return const StatusDownload();
-                          }
-                        case MediaStatus.pending:
-                          return const StatusPending();
-                        case MediaStatus.expired:
-                          return const StatusWarning();
-                        default:
-                          return const SizedBox();
-                      }
-                    },
-                  ),
-                ),
-                Positioned(
-                  bottom: 4,
-                  right: isCurrentUser ? 12 : 4,
-                  child: const DecoratedBox(
-                    decoration: ShapeDecoration(
-                      color: Color.fromRGBO(0, 0, 0, 0.3),
-                      shape: StadiumBorder(),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 3,
-                        horizontal: 5,
-                      ),
-                      child: MessageDatetimeAndStatus(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+class MessageImage extends HookWidget {
+  const MessageImage({
+    Key? key,
+    this.size,
+    required this.showStatus,
+  }) : super(key: key);
+
+  final Size? size;
+  final bool showStatus;
+
+  @override
+  Widget build(BuildContext context) {
+    final isTranscriptPage = useIsTranscriptPage();
+    final type = useMessageConverter(converter: (state) => state.type);
+    final conversationId =
+        useMessageConverter(converter: (state) => state.conversationId);
+    final isCurrentUser = useIsCurrentUser();
+    final thumbImage =
+        useMessageConverter(converter: (state) => state.thumbImage ?? '');
+    final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
+
+    final secondContext = useSecondNavigatorContext(context);
+    final isCurrentRoute = useRef(true);
+    final playing = useState(true);
+
+    final listener = useCallback(() {
+      playing.value = isAppActive && isCurrentRoute.value;
+    }, []);
+
+    useRouteObserver(
+      rootRouteObserver,
+      context: secondContext,
+      didPushNext: () {
+        isCurrentRoute.value = false;
+        listener();
+      },
+      didPopNext: () {
+        isCurrentRoute.value = true;
+        listener();
+      },
+    );
+
+    useEffect(() {
+      listener();
+      appActiveListener.addListener(listener);
+      return () => appActiveListener.removeListener(listener);
+    }, []);
+
+    return InteractiveDecoratedBox(
+      onTap: () {
+        final message = context.message;
+        switch (message.mediaStatus) {
+          case MediaStatus.done:
+            ImagePreviewPage.push(
+              context,
+              conversationId: message.conversationId,
+              messageId: message.messageId,
+              isTranscriptPage: isTranscriptPage,
+            );
+            break;
+          case MediaStatus.canceled:
+            if (message.relationship == UserRelationship.me &&
+                message.mediaUrl?.isNotEmpty == true) {
+              context.accountServer.reUploadAttachment(message);
+            } else {
+              context.accountServer.downloadAttachment(message.messageId);
+            }
+            break;
+          case MediaStatus.pending:
+            context.accountServer
+                .cancelProgressAttachmentJob(message.messageId);
+            break;
+          default:
+            break;
+        }
+      },
+      child: SizedBox.fromSize(
+        size: size,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image(
+              image: MixinFileImage(
+                File(context.accountServer.convertAbsolutePath(
+                    type, conversationId, mediaUrl, isTranscriptPage)),
+                controller: playing,
+              ),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) =>
+                  ImageByBlurHashOrBase64(imageData: thumbImage),
             ),
-          ),
+            Center(
+              child: HookBuilder(
+                builder: (BuildContext context) {
+                  final mediaStatus = useMessageConverter(
+                      converter: (state) => state.mediaStatus);
+                  final relationship = useMessageConverter(
+                      converter: (state) => state.relationship);
+
+                  switch (mediaStatus) {
+                    case MediaStatus.canceled:
+                      if (relationship == UserRelationship.me &&
+                          mediaUrl?.isNotEmpty == true) {
+                        return const StatusUpload();
+                      } else {
+                        return const StatusDownload();
+                      }
+                    case MediaStatus.pending:
+                      return const StatusPending();
+                    case MediaStatus.expired:
+                      return const StatusWarning();
+                    default:
+                      return const SizedBox();
+                  }
+                },
+              ),
+            ),
+            if (showStatus)
+              Positioned(
+                bottom: 4,
+                right: isCurrentUser ? 12 : 4,
+                child: const DecoratedBox(
+                  decoration: ShapeDecoration(
+                    color: Color.fromRGBO(0, 0, 0, 0.3),
+                    shape: StadiumBorder(),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 3,
+                      horizontal: 5,
+                    ),
+                    child: MessageDatetimeAndStatus(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -173,7 +225,7 @@ class ImageMessageLayout extends StatelessWidget {
   Widget build(BuildContext context) =>
       LayoutBuilder(builder: (context, boxConstraints) {
         final maxWidth = min(boxConstraints.maxWidth * 0.6, 300);
-        final minWidth = max(boxConstraints.maxWidth * 0.2, 100);
+        final minWidth = max(boxConstraints.maxWidth * 0.2, 200);
         final width = max(
                 min(imageWidthInPixel / MediaQuery.of(context).devicePixelRatio,
                     maxWidth),

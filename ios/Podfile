@@ -37,5 +37,9 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    # disable bitcode
+    target.build_configurations.each do |build_configuration|
+      build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
+    end
   end
 end

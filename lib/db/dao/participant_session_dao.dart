@@ -49,7 +49,7 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
   Future emptyStatusByConversationId(String conversationId) async =>
       (update(db.participantSession)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .write(ParticipantSessionCompanion(sentToServer: const Value(null)));
+          .write(const ParticipantSessionCompanion(sentToServer: Value(null)));
 
   Future<List<ParticipantSessionData>> getParticipantSessionsByConversationId(
           String conversationId) async =>
@@ -99,6 +99,6 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
 
   Future<void> updateSentToServer() async {
     await update(db.participantSession)
-        .write(ParticipantSessionCompanion(sentToServer: const Value(null)));
+        .write(const ParticipantSessionCompanion(sentToServer: Value(null)));
   }
 }

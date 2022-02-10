@@ -70,7 +70,7 @@ class AudioMessage extends HookWidget {
                   message.mediaUrl?.isNotEmpty == true) {
                 context.accountServer.reUploadAttachment(message);
               } else {
-                context.accountServer.downloadAttachment(message);
+                context.accountServer.downloadAttachment(message.messageId);
               }
               break;
             case MediaStatus.pending:

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:drift/drift.dart';
 import 'package:drift/isolate.dart';
@@ -30,6 +31,7 @@ import 'dao/asset_dao.dart';
 import 'dao/circle_conversation_dao.dart';
 import 'dao/circle_dao.dart';
 import 'dao/conversation_dao.dart';
+import 'dao/favorite_app_dao.dart';
 import 'dao/fiat_dao.dart';
 import 'dao/flood_message_dao.dart';
 import 'dao/hyperlink_dao.dart';
@@ -64,7 +66,9 @@ part 'mixin_database.g.dart';
     'moor/dao/user.drift',
     'moor/dao/circle.drift',
     'moor/dao/flood.drift',
-    'moor/dao/pin_message.drift'
+    'moor/dao/pin_message.drift',
+    'moor/dao/sticker_relationship.drift',
+    'moor/dao/favorite_app.drift',
   },
   daos: [
     AddressDao,
@@ -91,6 +95,7 @@ part 'mixin_database.g.dart';
     UserDao,
     PinMessageDao,
     FiatDao,
+    FavoriteAppDao,
   ],
   queries: {},
 )
@@ -98,7 +103,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 12;
 
   final eventBus = DataBaseEventBus();
 
@@ -153,8 +158,14 @@ class MixinDatabase extends _$MixinDatabase {
           if (from <= 3) {
             await m.drop(addresses);
             await m.createTable(addresses);
-            await m.addColumn(assets, assets.reserve);
-            await m.addColumn(messages, messages.caption);
+            if (!await _checkColumnExists(
+                assets.actualTableName, assets.reserve.name)) {
+              await m.addColumn(assets, assets.reserve);
+            }
+            if (!await _checkColumnExists(
+                messages.actualTableName, messages.caption.name)) {
+              await m.addColumn(messages, messages.caption);
+            }
           }
           if (from <= 4) {
             await m.createTable(transcriptMessages);
@@ -170,13 +181,41 @@ class MixinDatabase extends _$MixinDatabase {
             await m.drop(Trigger('', 'conversation_last_message_update'));
           }
           if (from <= 8) {
+            await m.createIndex(indexMessageConversationIdStatusUserId);
+          }
+          if (from <= 9) {
+            if (!await _checkColumnExists(
+                stickerAlbums.actualTableName, stickerAlbums.orderedAt.name)) {
+              await m.addColumn(stickerAlbums, stickerAlbums.orderedAt);
+            }
+            if (!await _checkColumnExists(
+                stickerAlbums.actualTableName, stickerAlbums.banner.name)) {
+              await m.addColumn(stickerAlbums, stickerAlbums.banner);
+            }
+            if (!await _checkColumnExists(
+                stickerAlbums.actualTableName, stickerAlbums.added.name)) {
+              await m.addColumn(stickerAlbums, stickerAlbums.added);
+            }
+            await update(stickerAlbums)
+                .write(const StickerAlbumsCompanion(added: Value(true)));
+          }
+          if (from <= 10) {
+            await m.createTable(favoriteApps);
+          }
+          if (from <= 11) {
             await m.createTable(messagesFtsV2);
-            await m.deleteTable('messages_fts');
             await _migrationMessageFts();
           }
           _isDbUpdating.value = false;
         },
       );
+
+  Future<bool> _checkColumnExists(String tableName, String columnName) async {
+    final queryRow = await customSelect(
+        "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('$tableName') WHERE name='$columnName'")
+        .getSingle();
+    return queryRow.read<bool>('CNTREC');
+  }
 
   Future<void> _migrationMessageFts() async {
     final stopwatch = Stopwatch()..start();
@@ -234,22 +273,37 @@ LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
       return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
     });
 
-Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
-  final dbFolder = mixinDocumentsDirectory;
-  final dbFile = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
-  final moorIsolate = await _createMoorIsolate(dbFile);
-  final databaseConnection = await moorIsolate.connect();
+/// Connect to the database.
+Future<MixinDatabase> connectToDatabase(
+  String identityNumber, {
+  bool fromMainIsolate = false,
+}) async {
+  final portName = 'one_mixin_drift_$identityNumber';
+
+  if (fromMainIsolate) {
+    // Remove port if it exists. to avoid port leak on hot reload.
+    IsolateNameServer.removePortNameMapping(portName);
+  }
+
+  final existingIsolate = IsolateNameServer.lookupPortByName(portName);
+
+  final DriftIsolate isolate;
+
+  if (existingIsolate == null) {
+    final dbFolder = mixinDocumentsDirectory;
+    final dbFile = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
+    final receivePort = ReceivePort();
+    await Isolate.spawn(
+      _startBackground,
+      _IsolateStartRequest(receivePort.sendPort, dbFile),
+    );
+    isolate = await receivePort.first as DriftIsolate;
+    IsolateNameServer.registerPortWithName(isolate.connectPort, portName);
+  } else {
+    isolate = DriftIsolate.fromConnectPort(existingIsolate, serialize: false);
+  }
+  final databaseConnection = await isolate.connect();
   return MixinDatabase.connect(databaseConnection);
-}
-
-Future<DriftIsolate> _createMoorIsolate(File dbFile) async {
-  final receivePort = ReceivePort();
-  await Isolate.spawn(
-    _startBackground,
-    _IsolateStartRequest(receivePort.sendPort, dbFile),
-  );
-
-  return await receivePort.first as DriftIsolate;
 }
 
 void _startBackground(_IsolateStartRequest request) {

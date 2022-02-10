@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,11 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset;
+import '../../../enum/encrypt_category.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
@@ -102,6 +105,12 @@ class _InputContainer extends HookWidget {
       converter: (state) => state?.messageId,
     );
 
+    final historyRefresher = useState<Object?>(null);
+
+    void clearHistory() {
+      historyRefresher.value = Object();
+    }
+
     final textEditingController = useMemoized(
       () {
         final draft =
@@ -119,7 +128,7 @@ class _InputContainer extends HookWidget {
           );
         return textEditingController;
       },
-      [conversationId],
+      [conversationId, historyRefresher.value],
     );
 
     final textEditingValueStream =
@@ -225,6 +234,7 @@ class _InputContainer extends HookWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       _FileButton(actionColor: context.theme.icon),
+                      const _ImagePickButton(),
                       const SizedBox(width: 6),
                       const _StickerButton(),
                       const SizedBox(width: 16),
@@ -232,6 +242,7 @@ class _InputContainer extends HookWidget {
                         child: _SendTextField(
                           focusNode: focusNode,
                           textEditingController: textEditingController,
+                          clearHistory: clearHistory,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -243,14 +254,18 @@ class _InputContainer extends HookWidget {
                               context,
                               textEditingController,
                               silent: true,
+                              onSend: clearHistory,
                             ),
                           ),
                         ],
                         child: ActionButton(
                           name: Resources.assetsImagesIcSendSvg,
                           color: context.theme.icon,
-                          onTap: () =>
-                              _sendMessage(context, textEditingController),
+                          onTap: () => _sendMessage(
+                            context,
+                            textEditingController,
+                            onSend: clearHistory,
+                          ),
                         ),
                       ),
                     ],
@@ -266,7 +281,10 @@ class _InputContainer extends HookWidget {
 }
 
 void _sendPostMessage(
-    BuildContext context, TextEditingController textEditingController) {
+  BuildContext context,
+  TextEditingController textEditingController,
+  VoidCallback onSend,
+) {
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
 
@@ -278,6 +296,7 @@ void _sendPostMessage(
       recipientId: conversationItem.userId);
 
   textEditingController.text = '';
+  onSend();
   context.read<QuoteMessageCubit>().emit(null);
 }
 
@@ -285,6 +304,7 @@ void _sendMessage(
   BuildContext context,
   TextEditingController textEditingController, {
   bool silent = false,
+  required VoidCallback onSend,
 }) {
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
@@ -302,6 +322,7 @@ void _sendMessage(
   );
 
   textEditingController.text = '';
+  onSend();
   context.read<QuoteMessageCubit>().emit(null);
 }
 
@@ -309,10 +330,12 @@ class _SendTextField extends HookWidget {
   const _SendTextField({
     required this.focusNode,
     required this.textEditingController,
+    required this.clearHistory,
   });
 
   final FocusNode focusNode;
   final TextEditingController textEditingController;
+  final VoidCallback clearHistory;
 
   @override
   Widget build(BuildContext context) {
@@ -348,6 +371,12 @@ class _SendTextField extends HookWidget {
       return subscription.cancel;
     }, [textEditingController]);
 
+    final isEncryptConversation =
+        useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
+      bloc: context.read<ConversationCubit>(),
+      converter: (state) => state?.encryptCategory.isEncrypt == true,
+    );
+
     return Container(
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
@@ -375,12 +404,19 @@ class _SendTextField extends HookWidget {
         },
         actions: {
           _SendMessageIntent: CallbackAction<Intent>(
-            onInvoke: (Intent intent) =>
-                _sendMessage(context, textEditingController),
+            onInvoke: (Intent intent) => _sendMessage(
+              context,
+              textEditingController,
+              onSend: clearHistory,
+            ),
           ),
           PasteTextIntent: _PasteContextAction(context),
           _SendPostMessageIntent: CallbackAction<Intent>(
-            onInvoke: (_) => _sendPostMessage(context, textEditingController),
+            onInvoke: (_) => _sendPostMessage(
+              context,
+              textEditingController,
+              clearHistory,
+            ),
           ),
           _EscapeIntent: CallbackAction<Intent>(
             onInvoke: (_) => context.read<QuoteMessageCubit>().emit(null),
@@ -400,7 +436,9 @@ class _SendTextField extends HookWidget {
             ),
             decoration: InputDecoration(
               isDense: true,
-              hintText: context.l10n.chatInputHint,
+              hintText: isEncryptConversation
+                  ? context.l10n.chatInputHint
+                  : context.l10n.typeAMessage,
               hintStyle: TextStyle(
                 color: context.theme.secondaryText,
                 fontSize: 14,
@@ -475,6 +513,33 @@ class _QuoteMessage extends StatelessWidget {
       );
 }
 
+class _ImagePickButton extends StatelessWidget {
+  const _ImagePickButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
+      return const SizedBox();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(left: 6),
+      child: ActionButton(
+        name: Resources.assetsImagesFilePreviewImagesSvg,
+        color: context.theme.icon,
+        onTap: () async {
+          final file =
+              await ImagePicker().pickImage(source: ImageSource.gallery);
+          if (file != null) {
+            // recreate the XFile to generate mimeType.
+            final xFile = File(file.path).xFile;
+            await showFilesPreviewDialog(context, [xFile]);
+          }
+        },
+      ),
+    );
+  }
+}
+
 class _FileButton extends StatelessWidget {
   const _FileButton({
     Key? key,
@@ -506,20 +571,21 @@ class _StickerButton extends HookWidget {
 
     final stickerAlbumsCubit = useBloc(
       () => StickerAlbumsCubit(context.database.stickerAlbumDao
-          .systemAlbums()
+          .systemAddedAlbums()
           .watchThrottle(kVerySlowThrottleDuration)),
     );
 
     final tabLength =
         useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
       bloc: stickerAlbumsCubit,
-      converter: (state) => (state.length) + 2,
+      converter: (state) => (state.length) + 3,
     );
 
     return BlocProvider.value(
       value: stickerAlbumsCubit,
       child: DefaultTabController(
         length: tabLength,
+        initialIndex: 1,
         child: HoverOverlay(
           key: key,
           delayDuration: const Duration(milliseconds: 50),
@@ -529,6 +595,8 @@ class _StickerButton extends HookWidget {
           inCurve: Curves.easeOut,
           outCurve: Curves.easeOut,
           portalBuilder: (context, progress, child) {
+            context.accountServer.refreshSticker();
+
             final renderBox =
                 key.currentContext?.findRenderObject() as RenderBox?;
             final offset = renderBox?.localToGlobal(Offset.zero);
@@ -550,9 +618,11 @@ class _StickerButton extends HookWidget {
           },
           portal: Padding(
             padding: const EdgeInsets.all(8),
-            child: StickerPage(
-              tabController: DefaultTabController.of(context),
-              tabLength: tabLength,
+            child: Builder(
+              builder: (context) => StickerPage(
+                tabController: DefaultTabController.of(context),
+                tabLength: tabLength,
+              ),
             ),
           ),
           child: ActionButton(

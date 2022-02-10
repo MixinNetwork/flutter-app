@@ -13,6 +13,7 @@
 #include <desktop_webview_window/desktop_webview_window_plugin.h>
 #include <file_selector_windows/file_selector_plugin.h>
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
+#include <fts5_simple/fts5_simple_plugin.h>
 #include <pasteboard/pasteboard_plugin.h>
 #include <quick_breakpad/quick_breakpad_plugin.h>
 #include <system_clock/system_clock_plugin.h>
@@ -36,6 +37,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FileSelectorPlugin"));
   FlutterAppIconBadgePluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterAppIconBadgePlugin"));
+  Fts5SimplePluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("Fts5SimplePlugin"));
   PasteboardPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("PasteboardPlugin"));
   QuickBreakpadPluginRegisterWithRegistrar(

@@ -30,7 +30,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
         toolbarHeight: 64,
         title: title == null
             ? null
-            : DefaultTextStyle(
+            : DefaultTextStyle.merge(
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -41,7 +41,10 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
         actions: [
           ...actions
               .map((e) => MoveWindowBarrier(
-                    child: DefaultTextStyle(style: actionTextStyle, child: e),
+                    child: DefaultTextStyle.merge(
+                      style: actionTextStyle,
+                      child: e,
+                    ),
                   ))
               .toList(),
           const SizedBox(width: 8),

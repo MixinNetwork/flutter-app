@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:quick_breakpad/quick_breakpad.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
@@ -21,12 +20,13 @@ import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
 import 'utils/logger.dart';
+import 'utils/system/system_fonts.dart';
 import 'utils/webview.dart';
-
-final packageInfoFuture = PackageInfo.fromPlatform();
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await loadFallbackFonts();
 
   // show custom web view navigation bar.
   if (runWebViewNavigationBar(args)) {
@@ -48,10 +48,11 @@ Future<void> main(List<String> args) async {
     mixinDocumentsDirectory.path,
     'crash',
   )));
-  logFileManager = LogFileManager(p.join(
+
+  unawaited(LogFileManager.init(p.join(
     mixinDocumentsDirectory.path,
     'log',
-  ));
+  )));
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: mixinDocumentsDirectory,
@@ -62,7 +63,7 @@ Future<void> main(List<String> args) async {
   if (kDebugMode) Bloc.observer = CustomBlocObserver();
   unawaited(initListener());
 
-  ansiColorDisabled = false;
+  ansiColorDisabled = Platform.isIOS;
   DartVLC.initialize();
   runZonedGuarded(
     () => runApp(const App()),

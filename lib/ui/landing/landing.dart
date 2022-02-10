@@ -6,9 +6,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../constants/resources.dart';
 import '../../generated/l10n.dart';
-import '../../main.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/system/package_info.dart';
 import 'bloc/landing_cubit.dart';
 
 class LandingPage extends HookWidget {
@@ -16,7 +16,7 @@ class LandingPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final info = useMemoizedFuture(() => packageInfoFuture, null).data;
+    final info = useMemoizedFuture(getPackageInfo, null).data;
     final locale = useMemoized(() => Localizations.localeOf(context));
 
     final landingCubit = useBloc(() => LandingCubit(

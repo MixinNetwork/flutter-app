@@ -77,9 +77,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Messages to this conversation are encrypted end-to-end, tap for more info."),
         "aboutEncryptedInfoUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAnnouncement":
             MessageLookupByLibrary.simpleMessage("Add group description"),
         "addContact": MessageLookupByLibrary.simpleMessage("Add contact"),
+        "addStickers": MessageLookupByLibrary.simpleMessage("Add Stickers"),
+        "added": MessageLookupByLibrary.simpleMessage("Added"),
         "appCard": MessageLookupByLibrary.simpleMessage("Card"),
         "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
         "archivedFolder":
@@ -253,6 +256,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "muteTitle":
             MessageLookupByLibrary.simpleMessage("Mute notifications for…"),
         "muted": MessageLookupByLibrary.simpleMessage("Mute"),
+        "myStickerAlbums": MessageLookupByLibrary.simpleMessage("My Stickers"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "networkConnectionFailed":
             MessageLookupByLibrary.simpleMessage("Network connection failed"),
@@ -272,6 +276,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Notifications are not allowed, please go to Notification Settings to turn on."),
         "notificationPermissionTitle":
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
+        "openInExternalApp":
+            MessageLookupByLibrary.simpleMessage("Open in External App"),
         "pageDeleteCircle": m16,
         "pageEditProfileJoin": m17,
         "pageLandingClickToReload":
@@ -301,12 +307,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeChatFromCircle":
             MessageLookupByLibrary.simpleMessage("Remove Chat from circle"),
         "removeContact": MessageLookupByLibrary.simpleMessage("Remove Contact"),
+        "removeStickers":
+            MessageLookupByLibrary.simpleMessage("Remove Stickers"),
         "reply": MessageLookupByLibrary.simpleMessage("Reply"),
         "report": MessageLookupByLibrary.simpleMessage("Report"),
         "reportWarning": MessageLookupByLibrary.simpleMessage(
             "Do you want to report and block this contact?"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveAs": MessageLookupByLibrary.simpleMessage("Save as"),
+        "saveToGallery":
+            MessageLookupByLibrary.simpleMessage("Save to Gallery"),
         "scamWarning": MessageLookupByLibrary.simpleMessage(
             "Warning: Many users reported this account as a scam. Please be careful, especially if it asks you for money"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
@@ -338,6 +348,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "show": MessageLookupByLibrary.simpleMessage("Show"),
         "signOut": MessageLookupByLibrary.simpleMessage("Sign Out"),
         "sticker": MessageLookupByLibrary.simpleMessage("Sticker"),
+        "stickerAlbumDetail":
+            MessageLookupByLibrary.simpleMessage("Sticker album detail"),
+        "stickerShop": MessageLookupByLibrary.simpleMessage("Sticker shop"),
         "storageAutoDownloadDescription": MessageLookupByLibrary.simpleMessage(
             "Change auto-download settings for medias. "),
         "storageUsage": MessageLookupByLibrary.simpleMessage("Storage Usage"),
@@ -355,6 +368,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "transactionsId":
             MessageLookupByLibrary.simpleMessage("Transaction Id"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
+        "typeAMessage": MessageLookupByLibrary.simpleMessage("Type message"),
         "unMute": MessageLookupByLibrary.simpleMessage("Unmute"),
         "unPin": MessageLookupByLibrary.simpleMessage("Unpin"),
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),

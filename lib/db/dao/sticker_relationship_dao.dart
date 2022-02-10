@@ -20,4 +20,10 @@ class StickerRelationshipDao extends DatabaseAccessor<MixinDatabase>
         batch.insertAllOnConflictUpdate(
             db.stickerRelationships, stickerRelationships);
       });
+
+  Selectable<String> stickerSystemAlbumId(String stickerId) =>
+      db.stickerSystemAlbumId(stickerId);
+
+  Selectable<StickerAlbum> stickerSystemAlbum(String stickerId) =>
+      db.stickerSystemAlbum(stickerId);
 }

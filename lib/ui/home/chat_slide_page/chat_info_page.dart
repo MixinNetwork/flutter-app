@@ -9,6 +9,7 @@ import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/cell.dart';
+import '../../../widgets/conversation/mute_dialog.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/more_extended_text.dart';
 import '../../../widgets/toast.dart';
@@ -18,7 +19,7 @@ import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
 import '../chat/chat_bar.dart';
 import '../chat/chat_page.dart';
-import '../conversation_page.dart';
+import 'shared_apps_page.dart';
 
 class ChatInfoPage extends HookWidget {
   const ChatInfoPage({Key? key}) : super(key: key);
@@ -153,6 +154,8 @@ class ChatInfoPage extends HookWidget {
                         .read<ChatSideCubit>()
                         .pushPage(ChatSideCubit.sharedMedia),
                   ),
+                  if (conversation.userId != null)
+                    _SharedApps(userId: conversation.userId!),
                   CellItem(
                     title: Text(
                       context.l10n.searchMessageHistory,
@@ -182,6 +185,7 @@ class ChatInfoPage extends HookWidget {
                             child: EditDialog(
                               title: Text(announcementTitle),
                               editText: announcement ?? '',
+                              maxLines: 7,
                             ),
                           );
                           if (result == null) return;
@@ -486,11 +490,9 @@ class ConversationBio extends HookWidget {
   }
 }
 
-///
 /// Button to add strange to contacts.
 ///
 /// if conversation is not stranger, show nothing.
-///
 class _AddToContactsButton extends StatelessWidget {
   _AddToContactsButton(this.conversation, {Key? key})
       : assert(conversation.isLoaded),
@@ -537,4 +539,38 @@ class _AddToContactsButton extends StatelessWidget {
               )
             : const SizedBox(height: 0),
       );
+}
+
+class _SharedApps extends HookWidget {
+  const _SharedApps({Key? key, required this.userId}) : super(key: key);
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) {
+    useMemoized(() {
+      context.accountServer.loadFavoriteApps(userId);
+    }, [userId]);
+
+    final apps = useMemoizedStream(
+        () => context.database.favoriteAppDao
+            .getFavoriteAppsByUserId(userId)
+            .watch(),
+        keys: [userId]);
+
+    final data = apps.data ?? const [];
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      child: data.isEmpty
+          ? const SizedBox()
+          : CellItem(
+              title: Text(context.l10n.sharedApps),
+              trailing: OverlappedAppIcons(apps: data),
+              onTap: () => context
+                  .read<ChatSideCubit>()
+                  .pushPage(ChatSideCubit.sharedApps),
+            ),
+    );
+  }
 }

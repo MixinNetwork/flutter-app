@@ -24,6 +24,7 @@ class CacheImage extends StatelessWidget {
     this.placeholder,
     this.errorWidget,
     this.fit = BoxFit.cover,
+    this.controller,
     Key? key,
   }) : super(key: key);
 
@@ -32,12 +33,13 @@ class CacheImage extends StatelessWidget {
   final double? height;
   final PlaceholderWidgetBuilder? placeholder;
   final LoadingErrorWidgetBuilder? errorWidget;
+  final ValueNotifier<bool>? controller;
 
   final BoxFit fit;
 
   @override
   Widget build(BuildContext context) => ExtendedImage(
-        image: MixinExtendedNetworkImageProvider(src),
+        image: MixinExtendedNetworkImageProvider(src, controller: controller),
         width: width,
         height: height,
         fit: fit,
@@ -85,6 +87,7 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
+    this.controller,
   })  : _informationCollector = informationCollector,
         _scale = scale {
     this.debugLabel = debugLabel;
@@ -114,6 +117,8 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     }
   }
 
+  final ValueNotifier<bool>? controller;
+
   ImageInfo? _currentImage;
   ui.Codec? _codec;
   final double _scale;
@@ -133,11 +138,19 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
   bool _frameCallbackScheduled = false;
 
+  void _controllerListener() {
+    if (controller?.value == false) return;
+    _decodeNextFrameAndSchedule();
+  }
+
   void _handleCodecReady(ui.Codec codec) {
     _codec = codec;
     assert(_codec != null);
 
     if (hasListeners) {
+      try {
+        controller?.addListener(_controllerListener);
+      } catch (_) {}
       _decodeNextFrameAndSchedule();
     }
   }
@@ -159,6 +172,7 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       }
       _nextFrame!.image.dispose();
       _nextFrame = null;
+      if (controller?.value == false) return;
       // ignore gif's repetition count
       _decodeNextFrameAndSchedule();
       return;
@@ -215,7 +229,7 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       return;
     }
     _frameCallbackScheduled = true;
-    SchedulerBinding.instance!.scheduleFrameCallback(_handleAppFrame);
+    SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
   }
 
   void _emitFrame(ImageInfo imageInfo) {
@@ -244,9 +258,14 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 }
 
 class MixinFileImage extends FileImage {
-  MixinFileImage(File file, {double scale = 1.0})
-      : _lastModified = _fileLastModified(file),
+  MixinFileImage(
+    File file, {
+    double scale = 1.0,
+    this.controller,
+  })  : _lastModified = _fileLastModified(file),
         super(file, scale: scale);
+
+  final ValueNotifier<bool>? controller;
 
   // used to check if the file has been modified.
   final int _lastModified;
@@ -254,8 +273,7 @@ class MixinFileImage extends FileImage {
   static int _fileLastModified(File file) {
     try {
       return file.lastModifiedSync().millisecondsSinceEpoch;
-    } catch (error, stack) {
-      i('failed to get file lastModified. $error $stack');
+    } catch (_) {
       return 0;
     }
   }
@@ -269,6 +287,7 @@ class MixinFileImage extends FileImage {
         informationCollector: () sync* {
           yield ErrorDescription('Path: ${file.path}');
         },
+        controller: controller,
       );
 
   Future<ui.Codec> _loadAsync(FileImage key, DecoderCallback decode) async {
@@ -286,7 +305,7 @@ class MixinFileImage extends FileImage {
 
     if (bytes.lengthInBytes == 0) {
       // The file may become available later.
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 
@@ -315,7 +334,7 @@ class MixinExtendedNetworkImageProvider
     this.url, {
     this.scale = 1.0,
     this.headers,
-    this.cache = false,
+    this.cache = true,
     this.retries = 3,
     this.timeLimit,
     this.timeRetry = const Duration(milliseconds: 100),
@@ -325,7 +344,10 @@ class MixinExtendedNetworkImageProvider
     this.cancelToken,
     this.imageCacheName,
     this.cacheMaxAge,
+    this.controller,
   });
+
+  final ValueNotifier<bool>? controller;
 
   /// The name of [ImageCache], you can define custom [ImageCache] to store this provider.
   @override
@@ -399,6 +421,7 @@ class MixinExtendedNetworkImageProvider
         DiagnosticsProperty<ImageProvider>('Image provider', this),
         DiagnosticsProperty<ExtendedNetworkImageProvider>('Image key', key),
       ],
+      controller: controller,
     );
   }
 
@@ -573,7 +596,7 @@ class MixinExtendedNetworkImageProvider
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ExtendedNetworkImageProvider &&
+    return other is MixinExtendedNetworkImageProvider &&
         url == other.url &&
         scale == other.scale &&
         cacheRawData == other.cacheRawData &&
@@ -585,11 +608,13 @@ class MixinExtendedNetworkImageProvider
         headers == other.headers &&
         retries == other.retries &&
         imageCacheName == other.imageCacheName &&
-        cacheMaxAge == other.cacheMaxAge;
+        cacheMaxAge == other.cacheMaxAge &&
+        controller == other.controller;
   }
 
   @override
   int get hashCode => hashValues(
+        controller,
         url,
         scale,
         cacheRawData,

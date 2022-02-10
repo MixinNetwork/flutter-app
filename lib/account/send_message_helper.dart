@@ -936,21 +936,28 @@ class SendMessageHelper {
 
     try {
       await _messageDao.updateMediaStatus(
-          MediaStatus.pending, message.messageId);
+        message.messageId,
+        MediaStatus.pending,
+      );
       final attachmentTranscripts =
           transcripts.where((element) => element.category.isAttachment);
       if (attachmentTranscripts.isNotEmpty) {
         await Future.wait(attachmentTranscripts.map(uploadAttachment));
       }
 
-      await _messageDao.updateMediaStatus(MediaStatus.done, message.messageId);
+      await _messageDao.updateMediaStatus(
+        message.messageId,
+        MediaStatus.done,
+      );
       await _jobDao.insertSendingJob(
         message.messageId,
         message.conversationId,
       );
     } catch (_) {
       await _messageDao.updateMediaStatus(
-          MediaStatus.canceled, message.messageId);
+        message.messageId,
+        MediaStatus.canceled,
+      );
     }
   }
 
@@ -1030,6 +1037,8 @@ class SendMessageHelper {
     required List<PinMessageMinimal> pinMessageMinimals,
     required bool pin,
   }) async {
+    if (pinMessageMinimals.isEmpty) return;
+
     final pinMessagePayload = PinMessagePayload(
       action: pin ? PinMessagePayloadAction.pin : PinMessagePayloadAction.unpin,
       messageIds: pinMessageMinimals.map((e) => e.messageId).toList(),
@@ -1065,6 +1074,10 @@ class SendMessageHelper {
       await _pinMessageDao
           .deleteByIds(pinMessageMinimals.map((e) => e.messageId).toList());
     }
+
+    _messageDao.notifyMessageInsertOrReplaced(
+        pinMessageMinimals.map((e) => e.messageId));
+
     await _jobDao.insert(
       Job(
         conversationId: conversationId,

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
@@ -27,6 +28,8 @@ import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/file.dart';
 import '../../utils/hook.dart';
+import '../../utils/platform.dart';
+import '../../utils/uri_utils.dart';
 import '../menu.dart';
 import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
@@ -106,7 +109,7 @@ T useMessageConverter<T>({required T Function(MessageItem) converter}) =>
     useBlocStateConverter<_MessageContextCubit, _MessageContext, T>(
         converter: (state) => converter(state.message));
 
-extension MessageContext on BuildContext {
+extension MessageContextExtension on BuildContext {
   MessageItem get message => read<_MessageContextCubit>().state.message;
 
   bool get isPinnedPage => read<_MessageContextCubit>().state.isPinnedPage;
@@ -212,6 +215,9 @@ class MessageItemWidget extends HookWidget {
                 return const StrangerMessage();
               }
 
+              final path = context.accountServer
+                  .convertMessageAbsolutePath(message, isTranscriptPage);
+
               return _MessageBubbleMargin(
                 userName: userName,
                 userId: userId,
@@ -260,6 +266,31 @@ class MessageItemWidget extends HookWidget {
                       onTap: () => Clipboard.setData(
                           ClipboardData(text: message.content)),
                     ),
+                  if (kPlatformIsMobile &&
+                      (message.type.isImage || message.type.isVideo))
+                    ContextMenu(
+                      title: context.l10n.saveToGallery,
+                      onTap: () => saveAs(context, context.accountServer,
+                          message, isTranscriptPage),
+                    ),
+                  if (kPlatformIsDesktop &&
+                      message.mediaStatus == MediaStatus.done &&
+                      message.mediaUrl?.isNotEmpty == true &&
+                      (message.type.isData ||
+                          message.type.isImage ||
+                          message.type.isVideo)) ...[
+                    ContextMenu(
+                      title: context.l10n.saveAs,
+                      onTap: () => saveAs(context, context.accountServer,
+                          message, isTranscriptPage),
+                    ),
+                    if (message.type.isData && File(path).xFile.isVideo)
+                      ContextMenu(
+                        title: context.l10n.openInExternalApp,
+                        onTap: () =>
+                            openUri(context, Uri.file(path).toString()),
+                      ),
+                  ],
                   if ([
                         MessageStatus.sent,
                         MessageStatus.delivered,
@@ -287,16 +318,6 @@ class MessageItemWidget extends HookWidget {
                               .onRecalled(message.messageId, content);
                         }
                       },
-                    ),
-                  if (message.mediaStatus == MediaStatus.done &&
-                      message.mediaUrl?.isNotEmpty == true &&
-                      (message.type.isData ||
-                          message.type.isImage ||
-                          message.type.isVideo))
-                    ContextMenu(
-                      title: context.l10n.saveAs,
-                      onTap: () => saveAs(context, context.accountServer,
-                          message, isTranscriptPage),
                     ),
                   if (!isTranscriptPage)
                     ContextMenu(
@@ -401,6 +422,50 @@ class MessageItemWidget extends HookWidget {
       );
     }
 
+    return MessageContext(
+      isTranscriptPage: isTranscriptPage,
+      isPinnedPage: isPinnedPage,
+      showNip: showNip,
+      isCurrentUser: isCurrentUser,
+      message: message,
+      child: Padding(
+        padding: sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
+        child: child,
+      ),
+    );
+  }
+}
+
+class MessageContext extends HookWidget {
+  const MessageContext({
+    Key? key,
+    required this.isTranscriptPage,
+    required this.isPinnedPage,
+    required this.showNip,
+    required this.isCurrentUser,
+    required this.message,
+    required this.child,
+  }) : super(key: key);
+
+  MessageContext.fromMessageItem({
+    Key? key,
+    required this.message,
+    required this.child,
+    this.isTranscriptPage = false,
+    this.isPinnedPage = false,
+    this.showNip = false,
+  })  : isCurrentUser = message.relationship == UserRelationship.me,
+        super(key: key);
+
+  final bool isTranscriptPage;
+  final bool isPinnedPage;
+  final bool showNip;
+  final bool isCurrentUser;
+  final MessageItem message;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     _MessageContext newMessageContext() => _MessageContext(
           isTranscriptPage: isTranscriptPage,
           isPinnedPage: isPinnedPage,
@@ -418,10 +483,7 @@ class MessageItemWidget extends HookWidget {
 
     return Provider.value(
       value: messageContextCubit,
-      child: Padding(
-        padding: sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
-        child: child,
-      ),
+      child: child,
     );
   }
 }
@@ -431,7 +493,22 @@ Future<void> saveAs(BuildContext context, AccountServer accountServer,
   final path =
       accountServer.convertMessageAbsolutePath(message, isTranscriptPage);
   if (Platform.isAndroid || Platform.isIOS) {
-    await OpenFile.open(path);
+    if (message.type.isImage || message.type.isVideo) {
+      final bool? result;
+      if (message.type.isImage) {
+        result = await GallerySaver.saveImage(path);
+      } else {
+        result = await GallerySaver.saveVideo(path);
+      }
+      if (result != true) {
+        return showToastFailed(context, null);
+      } else {
+        showToastSuccessful(context);
+        return;
+      }
+    } else {
+      await OpenFile.open(path);
+    }
   } else {
     try {
       final result = await saveFileToSystem(

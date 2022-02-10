@@ -304,7 +304,8 @@ class SignalProtocol {
     final dataType = header[1].toInt();
     final isResendMessage = header[2].toInt() == 1;
     if (isResendMessage) {
-      final messageId = utf8.decode(cipherText.sublist(8, 44));
+      final messageId =
+          utf8.decode(cipherText.sublist(8, 44), allowMalformed: true);
       final data = cipherText.sublist(44, cipherText.length);
       return ComposeMessageData(dataType, data, resendMessageId: messageId);
     } else {

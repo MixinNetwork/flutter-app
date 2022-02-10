@@ -1,0 +1,8 @@
+import '../mixin.drift';
+
+stickerSystemAlbumId:
+SELECT sa.album_id FROM sticker_relationships sr INNER JOIN sticker_albums sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = :stickerId AND sa.category = 'SYSTEM' LIMIT 1;
+
+stickerSystemAlbum:
+SELECT sa.* FROM sticker_relationships sr INNER JOIN sticker_albums sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = :stickerId AND sa.category = 'SYSTEM' LIMIT 1;
+
