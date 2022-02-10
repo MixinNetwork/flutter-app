@@ -88,17 +88,18 @@ class HomePage extends HookWidget {
                                 await context.accountServer.reconnectBlaze();
                               } catch (_) {}
 
-                            loading.value = false;
-                          },
-                          child: Text(context.l10n.continueText),
-                        ),
-                    ],
+                              loading.value = false;
+                            },
+                            child: Text(context.l10n.continueText),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }),
-          if (isDatabaseUpgrading) const DatabaseUpgradePage(),
-        ],),
+                );
+              }),
+            if (isDatabaseUpgrading) const DatabaseUpgradePage(),
+          ],
+        ),
       ),
     );
   }
