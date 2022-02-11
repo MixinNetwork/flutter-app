@@ -100,6 +100,7 @@ dependencies:
   visibility_detector: ^0.2.2
   watcher: ^1.0.0
   web_socket_channel: ^2.1.0
+  win32: ^2.3.11
   win_toast: ^0.0.2
   window_size:
     git:
