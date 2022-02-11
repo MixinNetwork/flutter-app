@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:intl/locale.dart';
 
 import '../logger.dart';
 
@@ -19,9 +18,7 @@ Future<void> loadFallbackFonts() async {
 
   // Skip load fallback fonts if current system language is en.
   // See more: https://github.com/flutter/flutter/issues/90951
-  final locale = Locale.parse(Platform.localeName);
-  i('platform locale: $locale');
-  if (locale.languageCode == 'en') {
+  if (window.locale.languageCode == 'en') {
     return;
   }
   if (_fallbackFontsLoaded) {
