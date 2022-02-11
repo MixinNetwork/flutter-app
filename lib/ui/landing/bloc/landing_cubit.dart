@@ -14,6 +14,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../account/account_key_value.dart';
+import '../../../account/account_server.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/crypto_key_value.dart';
 import '../../../crypto/signal/signal_protocol.dart';
@@ -31,6 +32,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           status: authCubit.state.current != null
               ? LandingStatus.provisioning
               : LandingStatus.init,
+          errorMessage: lastInitErrorMessage,
         )) {
     client = Client(
       dioOptions: BaseOptions(
