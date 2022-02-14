@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Mixin"
-#define MyAppVersion "0.19.1"
+#define MyAppVersion "0.20.0"
 #define MyAppPublisher "Mixin, Inc."
 #define MyAppURL "https://mixin.one/"
 #define MyAppExeName "mixin_desktop.exe"
