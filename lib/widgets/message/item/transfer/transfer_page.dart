@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    hide Snapshot, Asset;
+    hide Snapshot, Asset, User;
+import 'package:rxdart/rxdart.dart';
 
 import '../../../../db/dao/snapshot_dao.dart';
+import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../buttons.dart';
@@ -35,18 +37,19 @@ class _TransferPage extends HookWidget {
             snapshotId, context.multiAuthState.currentUser!.fiatCurrency)
         .watchSingleOrNullThrottle(kDefaultThrottleDuration)).data;
 
-    final opponentFullName = useMemoizedFuture(() async {
+    final opponentFullName = useMemoizedStream<User?>(() {
       final opponentId = snapshotItem?.opponentId;
       if (opponentId != null && opponentId.trim().isNotEmpty) {
-        final user = await context.database.userDao
+        final stream = context.database.userDao
             .userById(opponentId)
-            .getSingleOrNull();
-        if (user != null) {
-          return user;
-        }
-        await context.accountServer.refreshUsers([opponentId]);
+            .watchSingleOrNullThrottle(kSlowThrottleDuration);
+        return stream.doOnData((event) {
+          if (event != null) return;
+          context.accountServer.refreshUsers([opponentId]);
+        });
       }
-    }, null, keys: [snapshotItem?.opponentId]).data?.fullName;
+      return Stream.value(null);
+    }, keys: [snapshotItem?.opponentId]).data?.fullName;
 
     useEffect(() {
       context.accountServer.updateSnapshotById(snapshotId: snapshotId);
