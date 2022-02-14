@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:dart_vlc/dart_vlc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -24,6 +25,8 @@ import 'utils/system/system_fonts.dart';
 import 'utils/webview.dart';
 
 Future<void> main(List<String> args) async {
+  EquatableConfig.stringify = true;
+
   WidgetsFlutterBinding.ensureInitialized();
 
   await loadFallbackFonts();

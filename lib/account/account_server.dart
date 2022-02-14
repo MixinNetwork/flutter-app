@@ -6,7 +6,6 @@ import 'dart:isolate';
 import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
-import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -46,6 +45,8 @@ import '../workers/message_woker_isolate.dart';
 import 'account_key_value.dart';
 import 'send_message_helper.dart';
 import 'show_pin_message_key_value.dart';
+
+String? lastInitErrorMessage;
 
 class AccountServer {
   AccountServer(this.multiAuthCubit);
@@ -107,7 +108,8 @@ class AccountServer {
 
     try {
       await checkSignalKeys();
-    } on InvalidKeyException catch (e, s) {
+    } catch (e, s) {
+      lastInitErrorMessage = e.toString();
       w('$e, $s');
       await signOutAndClear();
       multiAuthCubit.signOut();
