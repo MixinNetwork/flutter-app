@@ -1147,6 +1147,13 @@ class AccountServer {
     await database.snapshotDao.insertSdkSnapshot(data.data);
   }
 
+  Future<Snapshot> updateSnapshotByTraceId({required String traceId}) async {
+    final data = await client.snapshotApi.getSnapshotByTraceId(traceId);
+    final snapshot = data.data;
+    await database.snapshotDao.insertSdkSnapshot(snapshot);
+    return snapshot;
+  }
+
   Future<void> updateAssetById({required String assetId}) =>
       database.jobDao.insertUpdateAssetJob(assetId);
 

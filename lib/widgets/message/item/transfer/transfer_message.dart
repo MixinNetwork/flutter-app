@@ -29,7 +29,7 @@ class TransferMessage extends HookWidget {
         onTap: () {
           final snapshotId = context.message.snapshotId;
           if (snapshotId == null) return;
-          showTransferDialog(context, snapshotId, context.message.userFullName);
+          showTransferDialog(context, snapshotId);
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,

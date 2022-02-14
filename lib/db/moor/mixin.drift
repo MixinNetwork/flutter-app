@@ -48,7 +48,7 @@ CREATE TABLE resend_session_messages ( message_id TEXT NOT NULL, user_id TEXT NO
 
 CREATE TABLE sent_session_sender_keys ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, session_id TEXT NOT NULL, sent_to_server INTEGER NOT NULL, sender_key_id INTEGER, created_at INTEGER MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(conversation_id,user_id, session_id) );
 
-CREATE TABLE snapshots (snapshot_id TEXT NOT NULL,type TEXT NOT NULL,asset_id TEXT NOT NULL,amount TEXT NOT NULL,created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,opponent_id TEXT,transaction_hash TEXT,sender TEXT,receiver TEXT,memo TEXT,confirmations INTEGER,PRIMARY KEY(snapshot_id));
+CREATE TABLE snapshots (snapshot_id TEXT NOT NULL,trace_id TEXT, type TEXT NOT NULL,asset_id TEXT NOT NULL,amount TEXT NOT NULL,created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,opponent_id TEXT,transaction_hash TEXT,sender TEXT,receiver TEXT,memo TEXT,confirmations INTEGER,PRIMARY KEY(snapshot_id));
 
 CREATE TABLE sticker_albums ( album_id TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, update_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, ordered_at INTEGER NOT NULL DEFAULT 0, user_id TEXT NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL, banner TEXT, added BOOLEAN DEFAULT FALSE , PRIMARY KEY(album_id));
 

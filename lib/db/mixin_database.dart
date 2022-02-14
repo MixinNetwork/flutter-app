@@ -101,7 +101,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   final eventBus = DataBaseEventBus();
 
@@ -194,6 +194,12 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 10) {
             await m.createTable(favoriteApps);
+          }
+          if (from <= 11) {
+            if (!await _checkColumnExists(
+                snapshots.actualTableName, snapshots.traceId.name)) {
+              await m.addColumn(snapshots, snapshots.traceId);
+            }
           }
         },
       );
