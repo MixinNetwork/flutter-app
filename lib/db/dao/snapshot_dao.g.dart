@@ -101,6 +101,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         }).map((QueryRow row) {
       return SnapshotItem(
         snapshotId: row.read<String>('snapshot_id'),
+        traceId: row.read<String?>('trace_id'),
         type: row.read<String>('type'),
         assetId: row.read<String>('asset_id'),
         amount: row.read<String>('amount'),
@@ -130,6 +131,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
 
 class SnapshotItem {
   final String snapshotId;
+  final String? traceId;
   final String type;
   final String assetId;
   final String amount;
@@ -153,6 +155,7 @@ class SnapshotItem {
   final double? fiatRate;
   SnapshotItem({
     required this.snapshotId,
+    this.traceId,
     required this.type,
     required this.assetId,
     required this.amount,
@@ -178,6 +181,7 @@ class SnapshotItem {
   @override
   int get hashCode => Object.hashAll([
         snapshotId,
+        traceId,
         type,
         assetId,
         amount,
@@ -205,6 +209,7 @@ class SnapshotItem {
       identical(this, other) ||
       (other is SnapshotItem &&
           other.snapshotId == this.snapshotId &&
+          other.traceId == this.traceId &&
           other.type == this.type &&
           other.assetId == this.assetId &&
           other.amount == this.amount &&
@@ -230,6 +235,7 @@ class SnapshotItem {
   String toString() {
     return (StringBuffer('SnapshotItem(')
           ..write('snapshotId: $snapshotId, ')
+          ..write('traceId: $traceId, ')
           ..write('type: $type, ')
           ..write('assetId: $assetId, ')
           ..write('amount: $amount, ')

@@ -82,6 +82,17 @@ Future<bool> openUri(
     if (snapshotTraceId != null && snapshotTraceId.trim().isNotEmpty) {
       try {
         showToastLoading(context);
+
+        final snapshotId = await context.database.snapshotDao
+            .snapshotIdByTraceId(snapshotTraceId)
+            .getSingleOrNull();
+
+        if (snapshotId != null && snapshotId.trim().isNotEmpty) {
+          Toast.dismiss();
+          await showTransferDialog(context, snapshotId);
+          return true;
+        }
+
         final snapshot = await context.accountServer
             .updateSnapshotByTraceId(traceId: snapshotTraceId);
 

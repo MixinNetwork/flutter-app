@@ -8578,6 +8578,7 @@ class SentSessionSenderKeys extends Table
 
 class Snapshot extends DataClass implements Insertable<Snapshot> {
   final String snapshotId;
+  final String? traceId;
   final String type;
   final String assetId;
   final String amount;
@@ -8590,6 +8591,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
   final int? confirmations;
   Snapshot(
       {required this.snapshotId,
+      this.traceId,
       required this.type,
       required this.assetId,
       required this.amount,
@@ -8605,6 +8607,8 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
     return Snapshot(
       snapshotId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}snapshot_id'])!,
+      traceId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}trace_id']),
       type: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
       assetId: const StringType()
@@ -8631,6 +8635,9 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['snapshot_id'] = Variable<String>(snapshotId);
+    if (!nullToAbsent || traceId != null) {
+      map['trace_id'] = Variable<String?>(traceId);
+    }
     map['type'] = Variable<String>(type);
     map['asset_id'] = Variable<String>(assetId);
     map['amount'] = Variable<String>(amount);
@@ -8662,6 +8669,9 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
   SnapshotsCompanion toCompanion(bool nullToAbsent) {
     return SnapshotsCompanion(
       snapshotId: Value(snapshotId),
+      traceId: traceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(traceId),
       type: Value(type),
       assetId: Value(assetId),
       amount: Value(amount),
@@ -8689,6 +8699,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Snapshot(
       snapshotId: serializer.fromJson<String>(json['snapshot_id']),
+      traceId: serializer.fromJson<String?>(json['trace_id']),
       type: serializer.fromJson<String>(json['type']),
       assetId: serializer.fromJson<String>(json['asset_id']),
       amount: serializer.fromJson<String>(json['amount']),
@@ -8706,6 +8717,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'snapshot_id': serializer.toJson<String>(snapshotId),
+      'trace_id': serializer.toJson<String?>(traceId),
       'type': serializer.toJson<String>(type),
       'asset_id': serializer.toJson<String>(assetId),
       'amount': serializer.toJson<String>(amount),
@@ -8721,6 +8733,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
 
   Snapshot copyWith(
           {String? snapshotId,
+          Value<String?> traceId = const Value.absent(),
           String? type,
           String? assetId,
           String? amount,
@@ -8733,6 +8746,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
           Value<int?> confirmations = const Value.absent()}) =>
       Snapshot(
         snapshotId: snapshotId ?? this.snapshotId,
+        traceId: traceId.present ? traceId.value : this.traceId,
         type: type ?? this.type,
         assetId: assetId ?? this.assetId,
         amount: amount ?? this.amount,
@@ -8751,6 +8765,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
   String toString() {
     return (StringBuffer('Snapshot(')
           ..write('snapshotId: $snapshotId, ')
+          ..write('traceId: $traceId, ')
           ..write('type: $type, ')
           ..write('assetId: $assetId, ')
           ..write('amount: $amount, ')
@@ -8766,13 +8781,25 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
   }
 
   @override
-  int get hashCode => Object.hash(snapshotId, type, assetId, amount, createdAt,
-      opponentId, transactionHash, sender, receiver, memo, confirmations);
+  int get hashCode => Object.hash(
+      snapshotId,
+      traceId,
+      type,
+      assetId,
+      amount,
+      createdAt,
+      opponentId,
+      transactionHash,
+      sender,
+      receiver,
+      memo,
+      confirmations);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Snapshot &&
           other.snapshotId == this.snapshotId &&
+          other.traceId == this.traceId &&
           other.type == this.type &&
           other.assetId == this.assetId &&
           other.amount == this.amount &&
@@ -8787,6 +8814,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
 
 class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
   final Value<String> snapshotId;
+  final Value<String?> traceId;
   final Value<String> type;
   final Value<String> assetId;
   final Value<String> amount;
@@ -8799,6 +8827,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
   final Value<int?> confirmations;
   const SnapshotsCompanion({
     this.snapshotId = const Value.absent(),
+    this.traceId = const Value.absent(),
     this.type = const Value.absent(),
     this.assetId = const Value.absent(),
     this.amount = const Value.absent(),
@@ -8812,6 +8841,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
   });
   SnapshotsCompanion.insert({
     required String snapshotId,
+    this.traceId = const Value.absent(),
     required String type,
     required String assetId,
     required String amount,
@@ -8829,6 +8859,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
         createdAt = Value(createdAt);
   static Insertable<Snapshot> custom({
     Expression<String>? snapshotId,
+    Expression<String?>? traceId,
     Expression<String>? type,
     Expression<String>? assetId,
     Expression<String>? amount,
@@ -8842,6 +8873,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
   }) {
     return RawValuesInsertable({
       if (snapshotId != null) 'snapshot_id': snapshotId,
+      if (traceId != null) 'trace_id': traceId,
       if (type != null) 'type': type,
       if (assetId != null) 'asset_id': assetId,
       if (amount != null) 'amount': amount,
@@ -8857,6 +8889,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
 
   SnapshotsCompanion copyWith(
       {Value<String>? snapshotId,
+      Value<String?>? traceId,
       Value<String>? type,
       Value<String>? assetId,
       Value<String>? amount,
@@ -8869,6 +8902,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
       Value<int?>? confirmations}) {
     return SnapshotsCompanion(
       snapshotId: snapshotId ?? this.snapshotId,
+      traceId: traceId ?? this.traceId,
       type: type ?? this.type,
       assetId: assetId ?? this.assetId,
       amount: amount ?? this.amount,
@@ -8887,6 +8921,9 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
     final map = <String, Expression>{};
     if (snapshotId.present) {
       map['snapshot_id'] = Variable<String>(snapshotId.value);
+    }
+    if (traceId.present) {
+      map['trace_id'] = Variable<String?>(traceId.value);
     }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
@@ -8926,6 +8963,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
   String toString() {
     return (StringBuffer('SnapshotsCompanion(')
           ..write('snapshotId: $snapshotId, ')
+          ..write('traceId: $traceId, ')
           ..write('type: $type, ')
           ..write('assetId: $assetId, ')
           ..write('amount: $amount, ')
@@ -8951,6 +8989,12 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
       type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
+  final VerificationMeta _traceIdMeta = const VerificationMeta('traceId');
+  late final GeneratedColumn<String?> traceId = GeneratedColumn<String?>(
+      'trace_id', aliasedName, true,
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _typeMeta = const VerificationMeta('type');
   late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
       'type', aliasedName, false,
@@ -9017,6 +9061,7 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
   @override
   List<GeneratedColumn> get $columns => [
         snapshotId,
+        traceId,
         type,
         assetId,
         amount,
@@ -9044,6 +9089,10 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
               data['snapshot_id']!, _snapshotIdMeta));
     } else if (isInserting) {
       context.missing(_snapshotIdMeta);
+    }
+    if (data.containsKey('trace_id')) {
+      context.handle(_traceIdMeta,
+          traceId.isAcceptableOrUnknown(data['trace_id']!, _traceIdMeta));
     }
     if (data.containsKey('type')) {
       context.handle(

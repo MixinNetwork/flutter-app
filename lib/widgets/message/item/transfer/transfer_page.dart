@@ -33,7 +33,7 @@ class _TransferPage extends HookWidget {
     });
 
     final snapshotItem = useMemoizedStream(() => context.database.snapshotDao
-        .snapshotById(
+        .snapshotItemById(
             snapshotId, context.multiAuthState.currentUser!.fiatCurrency)
         .watchSingleOrNullThrottle(kDefaultThrottleDuration)).data;
 
