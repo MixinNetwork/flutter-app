@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/constants.dart';
 import '../widgets/conversation/conversation_dialog.dart';
+import '../widgets/message/item/transfer/transfer_page.dart';
 import '../widgets/toast.dart';
 import '../widgets/unknown_mixin_url_dialog.dart';
 import '../widgets/user/user_dialog.dart';
@@ -47,13 +48,13 @@ Future<bool> openUri(
 
   if (uri.isMixin) {
     final userId = uri.userId;
-    if (userId != null) {
+    if (userId != null && userId.trim().isNotEmpty) {
       await showUserDialog(context, userId);
       return true;
     }
 
     final code = uri.code;
-    if (code != null) {
+    if (code != null && code.trim().isNotEmpty) {
       showToastLoading(context);
       try {
         final mixinResponse =
@@ -77,6 +78,23 @@ Future<bool> openUri(
       }
     }
 
+    final snapshotTraceId = uri.snapshotTraceId;
+    if (snapshotTraceId != null && snapshotTraceId.trim().isNotEmpty) {
+      try {
+        showToastLoading(context);
+        final snapshot = await context.accountServer
+            .updateSnapshotByTraceId(traceId: snapshotTraceId);
+
+        Toast.dismiss();
+        await showTransferDialog(context, snapshot.snapshotId);
+        return true;
+      } catch (error) {
+        e('get snapshot by traceId: $error');
+        await showToastFailed(context, error);
+        return false;
+      }
+    }
+
     if (uri.isMixinScheme) {
       Toast.dismiss();
       await showUnknownMixinUrlDialog(context, uri);
@@ -95,24 +113,30 @@ extension _MixinUriExtension on Uri {
   bool get isMixin => isMixinScheme || _isMixinHost;
 
   bool _isTypeScheme(MixinSchemeHost type) =>
-      isMixinScheme &&
-      host == enumConvertToString(type) &&
-      pathSegments.length == 1 &&
-      pathSegments.single.isNotEmpty;
+      isMixinScheme && host == enumConvertToString(type);
 
   bool _isTypeHost(MixinSchemeHost type) =>
       _isMixinHost &&
-      pathSegments.length == 2 &&
-      pathSegments[0] == enumConvertToString(type) &&
-      pathSegments[1].isNotEmpty;
+      pathSegments.isNotEmpty &&
+      pathSegments[0] == enumConvertToString(type);
 
   String? _getValue(MixinSchemeHost type) {
-    if (_isTypeScheme(type)) return pathSegments.single;
-    if (_isTypeHost(type)) return pathSegments[1];
+    if (_isTypeScheme(type)) {
+      return pathSegments.isNotEmpty ? pathSegments.single : null;
+    }
+    if (_isTypeHost(type)) {
+      return pathSegments.isNotEmpty ? pathSegments[1] : null;
+    }
     return null;
   }
 
   String? get userId => _getValue(MixinSchemeHost.users);
 
   String? get code => _getValue(MixinSchemeHost.codes);
+
+  String? get snapshotTraceId {
+    if (_isTypeScheme(MixinSchemeHost.snapshots)) {
+      return queryParameters['trace'];
+    }
+  }
 }

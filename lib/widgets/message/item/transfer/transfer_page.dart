@@ -13,19 +13,16 @@ import '../../../dialog.dart';
 Future<void> showTransferDialog(
   BuildContext context,
   String snapshotId,
-  String? userName,
 ) =>
     showMixinDialog(
       context: context,
-      child: _TransferPage(snapshotId, userName),
+      child: _TransferPage(snapshotId),
     );
 
 class _TransferPage extends HookWidget {
-  const _TransferPage(this.snapshotId, this.userName, {Key? key})
-      : super(key: key);
+  const _TransferPage(this.snapshotId, {Key? key}) : super(key: key);
 
   final String snapshotId;
-  final String? userName;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +34,19 @@ class _TransferPage extends HookWidget {
         .snapshotById(
             snapshotId, context.multiAuthState.currentUser!.fiatCurrency)
         .watchSingleOrNullThrottle(kDefaultThrottleDuration)).data;
+
+    final opponentFullName = useMemoizedFuture(() async {
+      final opponentId = snapshotItem?.opponentId;
+      if (opponentId != null && opponentId.trim().isNotEmpty) {
+        final user = await context.database.userDao
+            .userById(opponentId)
+            .getSingleOrNull();
+        if (user != null) {
+          return user;
+        }
+        await context.accountServer.refreshUsers([opponentId]);
+      }
+    }, null, keys: [snapshotItem?.opponentId]).data?.fullName;
 
     useEffect(() {
       context.accountServer.updateSnapshotById(snapshotId: snapshotId);
@@ -80,7 +90,7 @@ class _TransferPage extends HookWidget {
                 ),
                 _TransactionDetailInfo(
                   snapshot: snapshotItem,
-                  userName: userName,
+                  opponentFullName: opponentFullName,
                 ),
               ],
             ),
@@ -224,11 +234,11 @@ class _TransactionDetailInfo extends StatelessWidget {
   const _TransactionDetailInfo({
     Key? key,
     required this.snapshot,
-    required this.userName,
+    required this.opponentFullName,
   }) : super(key: key);
 
   final SnapshotItem snapshot;
-  final String? userName;
+  final String? opponentFullName;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -245,11 +255,11 @@ class _TransactionDetailInfo extends StatelessWidget {
               title: Text(context.l10n.assetType),
               subtitle: SelectableText(snapshot.symbolName ?? ''),
             ),
-            if (userName?.isNotEmpty ?? false)
+            if (opponentFullName?.isNotEmpty ?? false)
               TransactionInfoTile(
                 title: Text(
                     snapshot.isPositive ? context.l10n.from : context.l10n.to),
-                subtitle: SelectableText(userName ?? ''),
+                subtitle: SelectableText(opponentFullName ?? ''),
               ),
             if (snapshot.memo?.isNotEmpty ?? false)
               TransactionInfoTile(
