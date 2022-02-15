@@ -26,6 +26,7 @@ import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../bloc/conversation_cubit.dart';
+import 'image_editor.dart';
 
 Future<void> showFilesPreviewDialog(
     BuildContext context, List<XFile> files) async {
@@ -529,14 +530,24 @@ class _TileBigImage extends HookWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   )),
-                  child: Align(
-                    alignment: Alignment.bottomRight,
-                    child: ActionButton(
-                      color: Colors.white,
-                      name: Resources.assetsImagesDeleteSvg,
-                      padding: const EdgeInsets.all(10),
-                      onTap: onDelete,
-                    ),
+                  child: Row(
+                    children: [
+                      const Spacer(),
+                      ActionButton(
+                        color: Colors.white,
+                        name: Resources.assetsImagesEditImageSvg,
+                        padding: const EdgeInsets.all(10),
+                        onTap: () async {
+                          await showImageEditor(context, path: file.path);
+                        },
+                      ),
+                      ActionButton(
+                        color: Colors.white,
+                        name: Resources.assetsImagesDeleteSvg,
+                        padding: const EdgeInsets.all(10),
+                        onTap: onDelete,
+                      ),
+                    ],
                   ),
                 ),
                 crossFadeState: !showDelete.value
