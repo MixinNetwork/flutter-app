@@ -246,7 +246,7 @@ class Blaze {
     if (offset != null) {
       status = offset.epochNano;
     } else {
-      status = DateTime.now().toUtc().epochNano;
+      status = DateTime.now().epochNano;
     }
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);
