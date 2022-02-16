@@ -30,7 +30,7 @@ class _TransferPage extends HookWidget {
   Widget build(BuildContext context) {
     useEffect(() {
       context.accountServer.updateFiats();
-    });
+    }, []);
 
     final snapshotItem = useMemoizedStream(() => context.database.snapshotDao
         .snapshotItemById(
