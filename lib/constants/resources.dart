@@ -68,6 +68,9 @@ class Resources {
   static const String assetsImagesEditImageDrawSvg =
       'assets/images/edit_image_draw.svg';
 
+  static const String assetsImagesEditImageEraseSvg =
+      'assets/images/edit_image_erase.svg';
+
   static const String assetsImagesEditImageFlipSvg =
       'assets/images/edit_image_flip.svg';
 

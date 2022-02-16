@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -68,30 +67,33 @@ class _ImageEditorDialog extends HookWidget {
 }
 
 class CustomDrawLine extends Equatable {
-  const CustomDrawLine(this.path, this.color, this.width);
+  const CustomDrawLine(this.path, this.color, this.width, this.eraser);
 
   final Path path;
   final Color color;
   final double width;
+  final bool eraser;
 
   @override
-  List<Object?> get props => [path, color, width];
+  List<Object?> get props => [path, color, width, eraser];
 }
+
+enum DrawMode { none, brush, eraser }
 
 class _ImageEditorState extends Equatable with EquatableMixin {
   const _ImageEditorState({
     required this.rotate,
     required this.flip,
-    required this.customDrawing,
     required this.drawLines,
     required this.drawColor,
+    required this.drawMode,
   });
 
   final _ImageRotate rotate;
 
   final bool flip;
 
-  final bool customDrawing;
+  final DrawMode drawMode;
 
   final List<CustomDrawLine> drawLines;
 
@@ -103,24 +105,24 @@ class _ImageEditorState extends Equatable with EquatableMixin {
   List<Object?> get props => [
         rotate,
         flip,
-        customDrawing,
         drawLines,
         drawColor,
+        drawMode,
       ];
 
   _ImageEditorState copyWith({
     _ImageRotate? rotate,
     bool? flip,
-    bool? customDrawing,
     List<CustomDrawLine>? drawLines,
     Color? drawColor,
+    DrawMode? drawMode,
   }) =>
       _ImageEditorState(
         rotate: rotate ?? this.rotate,
         flip: flip ?? this.flip,
-        customDrawing: customDrawing ?? this.customDrawing,
         drawLines: drawLines ?? this.drawLines,
         drawColor: drawColor ?? this.drawColor,
+        drawMode: drawMode ?? this.drawMode,
       );
 }
 
@@ -130,9 +132,9 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   }) : super(const _ImageEditorState(
           rotate: _ImageRotate.none,
           flip: false,
-          customDrawing: false,
           drawLines: [],
           drawColor: _kDefaultDrawColor,
+          drawMode: DrawMode.none,
         ));
 
   final String path;
@@ -164,20 +166,26 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     emit(state.copyWith(flip: !state.flip));
   }
 
-  void enterDrawMode() {
-    emit(state.copyWith(customDrawing: true));
+  void enterDrawMode(DrawMode mode) {
+    emit(state.copyWith(drawMode: mode));
   }
 
   void exitDrawingMode() {
-    emit(state.copyWith(customDrawing: false));
+    emit(state.copyWith(drawMode: DrawMode.none));
   }
 
-  void startDraw(Offset position) {
+  void startDrawEvent(Offset position) {
+    if (state.drawMode == DrawMode.none) {
+      return;
+    }
     _currentDrawingLine = Path()..moveTo(position.dx, position.dy);
     _notifyCustomDrawUpdated();
   }
 
-  void updateDraw(Offset position) {
+  void updateDrawEvent(Offset position) {
+    if (state.drawMode == DrawMode.none) {
+      return;
+    }
     assert(_currentDrawingLine != null, 'Drawing line is null');
     if (_currentDrawingLine == null) {
       return;
@@ -186,7 +194,10 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     _notifyCustomDrawUpdated();
   }
 
-  void endDraw() {
+  void endDrawEvent() {
+    if (state.drawMode == DrawMode.none) {
+      return;
+    }
     final path = _currentDrawingLine;
     assert(path != null, 'Drawing line is null');
     if (path == null) {
@@ -196,6 +207,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
       path,
       state.drawColor,
       _drawStrokeWidth,
+      state.drawMode == DrawMode.eraser,
     );
     _currentDrawingLine = null;
     _customDrawLines.add(line);
@@ -214,6 +226,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
           Path.from(_currentDrawingLine!),
           state.drawColor,
           _drawStrokeWidth,
+          state.drawMode == DrawMode.eraser,
         )
       ],
     ));
@@ -221,6 +234,10 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
 
   void setCustomDrawColor(Color color) {
     emit(state.copyWith(drawColor: color));
+  }
+
+  void applyCustomDraw() {
+    exitDrawingMode();
   }
 }
 
@@ -247,7 +264,16 @@ class _Preview extends HookWidget {
       return frame.image;
     }, null, keys: [path]);
 
-    final editorState = useBlocState<_ImageEditorBloc, _ImageEditorState>();
+    final isFlip =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
+      converter: (state) => state.flip,
+    );
+
+    final rotate = useBlocStateConverter<_ImageEditorBloc, _ImageEditorState,
+        _ImageRotate>(
+      converter: (state) => state.rotate,
+    );
+
     if (image.connectionState != ConnectionState.done) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -260,29 +286,20 @@ class _Preview extends HookWidget {
       width: viewPortSize.width,
       height: viewPortSize.height,
       child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: viewPortSize.width,
-            maxHeight: viewPortSize.height,
-          ),
+        child: Transform.rotate(
+          angle: rotate.radius,
           child: RepaintBoundary(
             key: boundaryKey,
-            child: AnimatedCrossFade(
-              firstChild: CustomPaint(
-                size: viewPortSize,
-                painter: _PreviewPainter(
+            child: Transform(
+              alignment: Alignment.center,
+              transform:
+                  isFlip ? Matrix4.rotationY(math.pi) : Matrix4.identity(),
+              child: RepaintBoundary(
+                child: _CustomDrawingWidget(
+                  viewPortSize: rotate.apply(viewPortSize),
                   image: imageData,
-                  editorState: editorState,
                 ),
               ),
-              secondChild: _CustomDrawingWidget(
-                viewPortSize: viewPortSize,
-                image: imageData,
-              ),
-              duration: const Duration(milliseconds: 200),
-              crossFadeState: editorState.customDrawing
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
             ),
           ),
         ),
@@ -308,14 +325,8 @@ class _CustomDrawingWidget extends HookWidget {
             viewPortSize.height / image.height),
         1);
 
-    final imageRect = useMemoized(() {
-      final center = viewPortSize.center(Offset.zero);
-      return Rect.fromCenter(
-        center: center,
-        width: image.width * scale,
-        height: image.height * scale,
-      );
-    }, [viewPortSize, image]);
+    final imageSize = useMemoized(
+        () => Size(image.width * scale, image.height * scale), [image, scale]);
 
     final editorBloc = context.read<_ImageEditorBloc>();
 
@@ -327,19 +338,18 @@ class _CustomDrawingWidget extends HookWidget {
 
     return GestureDetector(
       onPanStart: (details) {
-        final relative = (details.localPosition - imageRect.topLeft) * scale;
-        editorBloc.startDraw(relative);
+        final relative = details.localPosition / scale;
+        editorBloc.startDrawEvent(relative);
       },
       onPanUpdate: (details) {
-        final relative = (details.localPosition - imageRect.topLeft) * scale;
-        editorBloc.updateDraw(relative);
+        final relative = details.localPosition / scale;
+        editorBloc.updateDrawEvent(relative);
       },
-      onPanEnd: (details) => editorBloc.endDraw(),
+      onPanEnd: (details) => editorBloc.endDrawEvent(),
       child: CustomPaint(
-        size: viewPortSize,
+        size: imageSize,
         painter: _DrawerPainter(
           image: image,
-          imageRect: imageRect,
           lines: lines,
           scale: scale,
         ),
@@ -355,66 +365,9 @@ enum _ImageRotate {
   threeQuarter,
 }
 
-class _DrawerPainter extends CustomPainter {
-  _DrawerPainter({
-    required this.image,
-    required this.imageRect,
-    required this.lines,
-    required this.scale,
-  });
-
-  final ui.Image image;
-
-  final Rect imageRect;
-
-  final List<CustomDrawLine> lines;
-
-  final double scale;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    paintImage(canvas: canvas, rect: imageRect, image: image);
-
-    canvas
-      ..save()
-      ..clipRect(imageRect)
-      ..translate(imageRect.left, imageRect.top);
-    for (final line in lines) {
-      final paint = Paint()
-        ..color = line.color
-        ..strokeWidth = line.width * scale
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round
-        ..style = PaintingStyle.stroke
-        ..isAntiAlias = true;
-      canvas.drawPath(line.path, paint);
-    }
-    canvas.restore();
-  }
-
-  @override
-  bool? hitTest(ui.Offset position) => imageRect.contains(position);
-
-  @override
-  bool shouldRepaint(covariant _DrawerPainter oldDelegate) =>
-      oldDelegate.image != image ||
-      oldDelegate.imageRect != imageRect ||
-      oldDelegate.lines != lines ||
-      oldDelegate.scale != scale;
-}
-
-class _PreviewPainter extends CustomPainter {
-  _PreviewPainter({
-    required this.image,
-    required this.editorState,
-  });
-
-  final ui.Image image;
-
-  final _ImageEditorState editorState;
-
-  double get _canvasRadians {
-    switch (editorState.rotate) {
+extension _ImageRotateExt on _ImageRotate {
+  double get radius {
+    switch (this) {
       case _ImageRotate.none:
         return 0;
       case _ImageRotate.quarter:
@@ -426,8 +379,15 @@ class _PreviewPainter extends CustomPainter {
     }
   }
 
-  bool get _imageRectRotated {
-    switch (editorState.rotate) {
+  Size apply(Size size) {
+    if (!_boundRotated) {
+      return size;
+    }
+    return Size(size.height, size.width);
+  }
+
+  bool get _boundRotated {
+    switch (this) {
       case _ImageRotate.none:
         return false;
       case _ImageRotate.quarter:
@@ -437,38 +397,52 @@ class _PreviewPainter extends CustomPainter {
         return false;
     }
   }
+}
+
+class _DrawerPainter extends CustomPainter {
+  _DrawerPainter({
+    required this.image,
+    required this.lines,
+    required this.scale,
+  });
+
+  final ui.Image image;
+
+  final List<CustomDrawLine> lines;
+
+  final double scale;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final imageWidth = _imageRectRotated ? image.height : image.width;
-    final imageHeight = _imageRectRotated ? image.width : image.height;
+    paintImage(canvas: canvas, rect: Offset.zero & size, image: image);
 
-    final scale = math.min<double>(
-        math.min(size.width / imageWidth, size.height / imageHeight), 1);
-
-    final imageOffset = Offset(
-      (-image.width) / 2,
-      (-image.height) / 2,
-    );
-
-    final center = size.center(Offset.zero);
     canvas
-      ..save()
-      ..translate(center.dx, center.dy)
-      ..rotate(_canvasRadians)
+      ..saveLayer(Offset.zero & size, Paint())
+      ..clipRect(Offset.zero & size)
+      ..translate(0, 0)
       ..scale(scale);
-    if (editorState.flip) {
-      canvas.scale(-1, 1);
+    for (final line in lines) {
+      final paint = Paint()
+        ..color = line.eraser ? Colors.white : line.color
+        ..strokeWidth = line.width * scale
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..style = PaintingStyle.stroke
+        ..blendMode = line.eraser ? BlendMode.clear : BlendMode.srcOver
+        ..isAntiAlias = true;
+      canvas.drawPath(line.path, paint);
     }
-    canvas
-      ..drawImage(image, imageOffset, Paint())
-      ..translate(-center.dx, -center.dy)
-      ..restore();
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant _PreviewPainter oldDelegate) =>
-      oldDelegate.image != image || oldDelegate.editorState != editorState;
+  bool? hitTest(ui.Offset position) => true;
+
+  @override
+  bool shouldRepaint(covariant _DrawerPainter oldDelegate) =>
+      oldDelegate.image != image ||
+      oldDelegate.lines != lines ||
+      oldDelegate.scale != scale;
 }
 
 class _DrawColorSelector extends StatelessWidget {
@@ -563,69 +537,145 @@ class _OperationButtons extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final editorState = useBlocState<_ImageEditorBloc, _ImageEditorState>();
-    final isDrawing =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
-      converter: (state) => state.customDrawing,
+    final drawMode =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, DrawMode>(
+      converter: (state) => state.drawMode,
     );
     return Column(
       children: [
-        if (isDrawing)
+        if (drawMode != DrawMode.none)
           const _DrawColorSelector()
         else
           const SizedBox(height: 38),
         const SizedBox(height: 8),
-        Material(
-          borderRadius: BorderRadius.circular(8),
-          color: context.theme.chatBackground,
-          child: SizedBox(
-            height: 40,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.maybePop(context);
-                  },
-                  child: Text(context.l10n.cancel),
-                ),
-                ActionButton(
-                  color: editorState.rotate != _ImageRotate.none
-                      ? context.theme.accent
-                      : context.theme.secondaryText,
-                  name: Resources.assetsImagesEditImageRotateSvg,
-                  onTap: () => context.read<_ImageEditorBloc>().rotate(),
-                ),
-                const SizedBox(width: 4),
-                ActionButton(
-                  color: editorState.flip
-                      ? context.theme.accent
-                      : context.theme.secondaryText,
-                  name: Resources.assetsImagesEditImageFlipSvg,
-                  onTap: () => context.read<_ImageEditorBloc>().flip(),
-                ),
-                const SizedBox(width: 4),
-                ActionButton(
-                  color: editorState.flip
-                      ? context.theme.accent
-                      : context.theme.secondaryText,
-                  name: Resources.assetsImagesEditImageClipSvg,
-                  onTap: () {},
-                ),
-                ActionButton(
-                  color: editorState.flip
-                      ? context.theme.accent
-                      : context.theme.secondaryText,
-                  name: Resources.assetsImagesEditImageDrawSvg,
-                  onTap: () {
-                    context.read<_ImageEditorBloc>().enterDrawMode();
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
+        if (drawMode != DrawMode.none)
+          const _DrawOperationBar()
+        else
+          const _NormalOperationBar(),
       ],
+    );
+  }
+}
+
+class _NormalOperationBar extends HookWidget {
+  const _NormalOperationBar({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final editorState = useBlocState<_ImageEditorBloc, _ImageEditorState>();
+    return Material(
+      borderRadius: BorderRadius.circular(8),
+      color: context.theme.chatBackground,
+      child: SizedBox(
+        height: 40,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextButton(
+              onPressed: () {
+                Navigator.maybePop(context);
+              },
+              child: Text(context.l10n.cancel),
+            ),
+            ActionButton(
+              color: editorState.rotate != _ImageRotate.none
+                  ? context.theme.accent
+                  : context.theme.secondaryText,
+              name: Resources.assetsImagesEditImageRotateSvg,
+              onTap: () => context.read<_ImageEditorBloc>().rotate(),
+            ),
+            const SizedBox(width: 4),
+            ActionButton(
+              color: editorState.flip
+                  ? context.theme.accent
+                  : context.theme.secondaryText,
+              name: Resources.assetsImagesEditImageFlipSvg,
+              onTap: () => context.read<_ImageEditorBloc>().flip(),
+            ),
+            const SizedBox(width: 4),
+            ActionButton(
+              color: editorState.flip
+                  ? context.theme.accent
+                  : context.theme.secondaryText,
+              name: Resources.assetsImagesEditImageClipSvg,
+              onTap: () {},
+            ),
+            ActionButton(
+              color: context.theme.secondaryText,
+              name: Resources.assetsImagesEditImageDrawSvg,
+              onTap: () {
+                context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.brush);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DrawOperationBar extends HookWidget {
+  const _DrawOperationBar({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final drawMode =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, DrawMode>(
+      converter: (state) => state.drawMode,
+    );
+    return Material(
+      borderRadius: BorderRadius.circular(8),
+      color: context.theme.chatBackground,
+      child: SizedBox(
+        height: 40,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextButton(
+              onPressed: () {
+                context.read<_ImageEditorBloc>().exitDrawingMode();
+              },
+              child: Text(context.l10n.cancel),
+            ),
+            ActionButton(
+              color: context.theme.secondaryText,
+              name: Resources.assetsImagesEditImageUndoSvg,
+              onTap: () {},
+            ),
+            const SizedBox(width: 4),
+            ActionButton(
+              color: context.theme.secondaryText,
+              name: Resources.assetsImagesEditImageRedoSvg,
+              onTap: () {},
+            ),
+            const SizedBox(width: 4),
+            ActionButton(
+              color: drawMode == DrawMode.brush
+                  ? context.theme.accent
+                  : context.theme.secondaryText,
+              name: Resources.assetsImagesEditImageDrawSvg,
+              onTap: () {
+                context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.brush);
+              },
+            ),
+            ActionButton(
+              color: drawMode == DrawMode.eraser
+                  ? context.theme.accent
+                  : context.theme.secondaryText,
+              name: Resources.assetsImagesEditImageEraseSvg,
+              onTap: () {
+                context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.eraser);
+              },
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<_ImageEditorBloc>().applyCustomDraw();
+              },
+              child: Text(context.l10n.done),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
