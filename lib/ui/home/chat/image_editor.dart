@@ -150,6 +150,10 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
 
   final List<CustomDrawLine> _customDrawLines = [];
 
+  // backup for cancel when clicked "cancel" button instead of "done"
+  final List<CustomDrawLine> _backupDrawLines = [];
+
+  //backup for redo.
   final List<CustomDrawLine> _redoDrawLines = [];
 
   final double _drawStrokeWidth = 11;
@@ -176,10 +180,22 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   }
 
   void enterDrawMode(DrawMode mode) {
+    _backupDrawLines
+      ..clear()
+      ..addAll(_customDrawLines);
     emit(state.copyWith(drawMode: mode));
   }
 
-  void exitDrawingMode() {
+  void exitDrawingMode({bool applyTempDraw = false}) {
+    if (applyTempDraw) {
+      _backupDrawLines.clear();
+    } else {
+      _customDrawLines
+        ..clear()
+        ..addAll(_backupDrawLines);
+      _backupDrawLines.clear();
+      _notifyCustomDrawUpdated();
+    }
     emit(state.copyWith(drawMode: DrawMode.none));
   }
 
@@ -242,10 +258,6 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
 
   void setCustomDrawColor(Color color) {
     emit(state.copyWith(drawColor: color));
-  }
-
-  void applyCustomDraw() {
-    exitDrawingMode();
   }
 
   void redoDraw() {
@@ -719,7 +731,9 @@ class _DrawOperationBar extends HookWidget {
             ),
             TextButton(
               onPressed: () {
-                context.read<_ImageEditorBloc>().applyCustomDraw();
+                context
+                    .read<_ImageEditorBloc>()
+                    .exitDrawingMode(applyTempDraw: true);
               },
               child: Text(context.l10n.done),
             ),
