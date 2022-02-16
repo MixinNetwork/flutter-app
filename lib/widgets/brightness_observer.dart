@@ -61,7 +61,7 @@ class BrightnessObserver extends HookWidget {
       return () {
         appActiveListener.removeListener(onListener);
       };
-    });
+    }, []);
 
     useEffect(() {
       setSystemUiWithAppBrightness(currentBrightness);
