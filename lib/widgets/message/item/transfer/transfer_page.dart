@@ -69,7 +69,7 @@ class _TransferPage extends HookWidget {
 
     if (snapshotItem == null) return const SizedBox();
     return SizedBox(
-      width: 340,
+      width: 400,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
