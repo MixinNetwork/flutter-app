@@ -296,7 +296,7 @@ class _Preview extends HookWidget {
                   isFlip ? Matrix4.rotationY(math.pi) : Matrix4.identity(),
               child: RepaintBoundary(
                 child: _CustomDrawingWidget(
-                  viewPortSize: rotate.apply(viewPortSize),
+                  viewPortSize: viewPortSize,
                   image: imageData,
                 ),
               ),
