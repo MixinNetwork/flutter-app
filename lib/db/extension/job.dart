@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../enum/message_status.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
 import '../mixin_database.dart';

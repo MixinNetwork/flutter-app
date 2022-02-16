@@ -14,12 +14,11 @@ import '../constants/constants.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
-import '../enum/message_status.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
+import '../workers/message_woker_isolate.dart';
 import 'blaze_message.dart';
 import 'blaze_message_param_session.dart';
-import 'vo/blaze_message_data.dart';
 
 const String _wsHost1 = 'wss://blaze.mixin.one';
 const String _wsHost2 = 'wss://mixin-blaze.zeromesh.net';
@@ -68,8 +67,15 @@ class Blaze {
 
   ConnectedState get _connectedState => _connectedStateBehaviorSubject.value;
 
-  set _connectedState(ConnectedState state) =>
-      _connectedStateBehaviorSubject.value = state;
+  set _connectedState(ConnectedState state) {
+    if (_connectedStateBehaviorSubject.valueOrNull == state) return;
+
+    _connectedStateBehaviorSubject.value = state;
+
+    if (state == ConnectedState.connected) {
+      _refreshOffset();
+    }
+  }
 
   Timer? _checkTimeoutTimer;
 
@@ -161,7 +167,6 @@ class Blaze {
       },
       cancelOnError: true,
     );
-    _refreshOffset();
     _sendListPending();
   }
 
@@ -245,14 +250,13 @@ class Blaze {
     }
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);
-      final blazeMessages = (response.data as List<dynamic>? ?? [])
-          .map((itemJson) =>
-              BlazeMessageData.fromJson(itemJson as Map<String, dynamic>))
-          .toList();
+      final blazeMessages = response.data;
       if (blazeMessages.isEmpty) {
         break;
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
+        pendingMessageStatusMap[m.messageId] = m.status;
+
         await makeMessageStatus(m.messageId, m.status);
         await database.offsetDao.insert(Offset(
             key: statusOffset, timestamp: m.updatedAt.toIso8601String()));

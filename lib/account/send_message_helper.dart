@@ -28,7 +28,6 @@ import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
 import '../enum/media_status.dart';
 import '../enum/message_category.dart';
-import '../enum/message_status.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';

@@ -27,7 +27,6 @@ import '../db/extension/message.dart';
 import '../db/mixin_database.dart' as db;
 import '../db/mixin_database.dart';
 import '../enum/message_category.dart';
-import '../enum/message_status.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/logger.dart';
@@ -86,6 +85,8 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
   runner._start();
   isolateChannel.sink.add(WorkerIsolateEventType.onIsolateReady.toEvent());
 }
+
+final Map<String, MessageStatus> pendingMessageStatusMap = {};
 
 class _MessageProcessRunner {
   _MessageProcessRunner({
