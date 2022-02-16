@@ -87,6 +87,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
     required this.drawLines,
     required this.drawColor,
     required this.drawMode,
+    required this.canRedo,
   });
 
   final _ImageRotate rotate;
@@ -99,6 +100,8 @@ class _ImageEditorState extends Equatable with EquatableMixin {
 
   final Color drawColor;
 
+  final bool canRedo;
+
   bool get canReset => rotate != _ImageRotate.none;
 
   @override
@@ -108,6 +111,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
         drawLines,
         drawColor,
         drawMode,
+        canRedo,
       ];
 
   _ImageEditorState copyWith({
@@ -116,6 +120,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
     List<CustomDrawLine>? drawLines,
     Color? drawColor,
     DrawMode? drawMode,
+    bool? canRedo,
   }) =>
       _ImageEditorState(
         rotate: rotate ?? this.rotate,
@@ -123,6 +128,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
         drawLines: drawLines ?? this.drawLines,
         drawColor: drawColor ?? this.drawColor,
         drawMode: drawMode ?? this.drawMode,
+        canRedo: canRedo ?? this.canRedo,
       );
 }
 
@@ -135,6 +141,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
           drawLines: [],
           drawColor: _kDefaultDrawColor,
           drawMode: DrawMode.none,
+          canRedo: false,
         ));
 
   final String path;
@@ -142,6 +149,8 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   Path? _currentDrawingLine;
 
   final List<CustomDrawLine> _customDrawLines = [];
+
+  final List<CustomDrawLine> _redoDrawLines = [];
 
   final double _drawStrokeWidth = 11;
 
@@ -178,6 +187,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     if (state.drawMode == DrawMode.none) {
       return;
     }
+    _redoDrawLines.clear();
     _currentDrawingLine = Path()..moveTo(position.dx, position.dy);
     _notifyCustomDrawUpdated();
   }
@@ -215,20 +225,18 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   }
 
   void _notifyCustomDrawUpdated() {
-    if (_currentDrawingLine == null) {
-      emit(state.copyWith(drawLines: _customDrawLines));
-      return;
-    }
     emit(state.copyWith(
       drawLines: [
         ..._customDrawLines,
-        CustomDrawLine(
-          Path.from(_currentDrawingLine!),
-          state.drawColor,
-          _drawStrokeWidth,
-          state.drawMode == DrawMode.eraser,
-        )
+        if (_currentDrawingLine != null)
+          CustomDrawLine(
+            Path.from(_currentDrawingLine!),
+            state.drawColor,
+            _drawStrokeWidth,
+            state.drawMode == DrawMode.eraser,
+          ),
       ],
+      canRedo: _redoDrawLines.isNotEmpty,
     ));
   }
 
@@ -238,6 +246,30 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
 
   void applyCustomDraw() {
     exitDrawingMode();
+  }
+
+  void redoDraw() {
+    if (state.drawMode == DrawMode.none) {
+      return;
+    }
+    if (_redoDrawLines.isEmpty) {
+      return;
+    }
+    final line = _redoDrawLines.removeLast();
+    _customDrawLines.add(line);
+    _notifyCustomDrawUpdated();
+  }
+
+  void undoDraw() {
+    if (state.drawMode == DrawMode.none) {
+      return;
+    }
+    if (_customDrawLines.isEmpty) {
+      return;
+    }
+    final line = _customDrawLines.removeLast();
+    _redoDrawLines.add(line);
+    _notifyCustomDrawUpdated();
   }
 }
 
@@ -379,6 +411,8 @@ extension _ImageRotateExt on _ImageRotate {
     }
   }
 
+  // TODO(Bin) remove this if unnecessary.
+  // ignore: unused_element
   Size apply(Size size) {
     if (!_boundRotated) {
       return size;
@@ -623,6 +657,14 @@ class _DrawOperationBar extends HookWidget {
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, DrawMode>(
       converter: (state) => state.drawMode,
     );
+    final canRedo =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
+      converter: (state) => state.canRedo,
+    );
+    final canUndo =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
+      converter: (state) => state.drawLines.isNotEmpty,
+    );
     return Material(
       borderRadius: BorderRadius.circular(8),
       color: context.theme.chatBackground,
@@ -638,15 +680,23 @@ class _DrawOperationBar extends HookWidget {
               child: Text(context.l10n.cancel),
             ),
             ActionButton(
-              color: context.theme.secondaryText,
+              color: canUndo
+                  ? context.theme.secondaryText
+                  : context.theme.secondaryText.withOpacity(0.2),
               name: Resources.assetsImagesEditImageUndoSvg,
-              onTap: () {},
+              onTap: () {
+                context.read<_ImageEditorBloc>().undoDraw();
+              },
             ),
             const SizedBox(width: 4),
             ActionButton(
-              color: context.theme.secondaryText,
+              color: canRedo
+                  ? context.theme.secondaryText
+                  : context.theme.secondaryText.withOpacity(0.2),
               name: Resources.assetsImagesEditImageRedoSvg,
-              onTap: () {},
+              onTap: () {
+                context.read<_ImageEditorBloc>().redoDraw();
+              },
             ),
             const SizedBox(width: 4),
             ActionButton(
