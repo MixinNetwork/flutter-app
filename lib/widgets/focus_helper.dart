@@ -38,7 +38,7 @@ void useDesktopLifecycleAutoFocus() {
       appActiveListener.removeListener(onListen);
       ref.value = null;
     };
-  });
+  }, []);
 }
 
 void _cleanSelection(BuildContext? context) {
@@ -77,5 +77,5 @@ void useEditableTextAutoCleanSelection() {
       FocusManager.instance.removeListener(listener);
       previousFocusRef.value = null;
     };
-  });
+  }, []);
 }

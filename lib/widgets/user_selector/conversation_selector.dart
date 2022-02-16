@@ -205,6 +205,7 @@ class _ConversationSelector extends HookWidget {
               context, [ConversationSelector.init(item, context, appMap)]);
         }
       }).cancel,
+      [selector.stream],
     );
     final selected =
         useBlocState<SimpleCubit<List<dynamic>>, List<dynamic>>(bloc: selector);

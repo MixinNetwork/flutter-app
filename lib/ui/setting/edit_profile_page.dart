@@ -21,7 +21,7 @@ class EditProfilePage extends HookWidget {
     final bioTextEditingController = useTextEditingController();
     useEffect(() {
       context.accountServer.refreshSelf();
-    });
+    }, []);
     return BlocConverter<MultiAuthCubit, MultiAuthState,
         Tuple2<String?, String?>>(
       converter: (state) => Tuple2(
