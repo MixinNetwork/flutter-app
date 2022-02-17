@@ -39,12 +39,12 @@ class _ImageEditorDialog extends HookWidget {
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          color: context.theme.background.withOpacity(0.5),
+          color: context.theme.background.withOpacity(0.8),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: 56),
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) => _Preview(
@@ -611,7 +611,7 @@ class _NormalOperationBar extends HookWidget {
     final editorState = useBlocState<_ImageEditorBloc, _ImageEditorState>();
     return Material(
       borderRadius: BorderRadius.circular(8),
-      color: context.theme.chatBackground,
+      color: context.theme.stickerPlaceholderColor,
       child: SizedBox(
         height: 40,
         child: Row(
@@ -621,33 +621,34 @@ class _NormalOperationBar extends HookWidget {
               onPressed: () {
                 Navigator.maybePop(context);
               },
-              child: Text(context.l10n.cancel),
+              child: Text(
+                context.l10n.cancel,
+                style: TextStyle(color: context.theme.text),
+              ),
             ),
             ActionButton(
               color: editorState.rotate != _ImageRotate.none
                   ? context.theme.accent
-                  : context.theme.secondaryText,
+                  : context.theme.icon,
               name: Resources.assetsImagesEditImageRotateSvg,
               onTap: () => context.read<_ImageEditorBloc>().rotate(),
             ),
             const SizedBox(width: 4),
             ActionButton(
-              color: editorState.flip
-                  ? context.theme.accent
-                  : context.theme.secondaryText,
+              color:
+                  editorState.flip ? context.theme.accent : context.theme.icon,
               name: Resources.assetsImagesEditImageFlipSvg,
               onTap: () => context.read<_ImageEditorBloc>().flip(),
             ),
             const SizedBox(width: 4),
             ActionButton(
-              color: editorState.flip
-                  ? context.theme.accent
-                  : context.theme.secondaryText,
+              color:
+                  editorState.flip ? context.theme.accent : context.theme.icon,
               name: Resources.assetsImagesEditImageClipSvg,
               onTap: () {},
             ),
             ActionButton(
-              color: context.theme.secondaryText,
+              color: context.theme.icon,
               name: Resources.assetsImagesEditImageDrawSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.brush);
@@ -679,7 +680,7 @@ class _DrawOperationBar extends HookWidget {
     );
     return Material(
       borderRadius: BorderRadius.circular(8),
-      color: context.theme.chatBackground,
+      color: context.theme.stickerPlaceholderColor,
       child: SizedBox(
         height: 40,
         child: Row(
@@ -689,12 +690,15 @@ class _DrawOperationBar extends HookWidget {
               onPressed: () {
                 context.read<_ImageEditorBloc>().exitDrawingMode();
               },
-              child: Text(context.l10n.cancel),
+              child: Text(
+                context.l10n.cancel,
+                style: TextStyle(color: context.theme.text),
+              ),
             ),
             ActionButton(
               color: canUndo
-                  ? context.theme.secondaryText
-                  : context.theme.secondaryText.withOpacity(0.2),
+                  ? context.theme.icon
+                  : context.theme.icon.withOpacity(0.2),
               name: Resources.assetsImagesEditImageUndoSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().undoDraw();
@@ -703,8 +707,8 @@ class _DrawOperationBar extends HookWidget {
             const SizedBox(width: 4),
             ActionButton(
               color: canRedo
-                  ? context.theme.secondaryText
-                  : context.theme.secondaryText.withOpacity(0.2),
+                  ? context.theme.icon
+                  : context.theme.icon.withOpacity(0.2),
               name: Resources.assetsImagesEditImageRedoSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().redoDraw();
@@ -714,7 +718,7 @@ class _DrawOperationBar extends HookWidget {
             ActionButton(
               color: drawMode == DrawMode.brush
                   ? context.theme.accent
-                  : context.theme.secondaryText,
+                  : context.theme.icon,
               name: Resources.assetsImagesEditImageDrawSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.brush);
@@ -723,7 +727,7 @@ class _DrawOperationBar extends HookWidget {
             ActionButton(
               color: drawMode == DrawMode.eraser
                   ? context.theme.accent
-                  : context.theme.secondaryText,
+                  : context.theme.icon,
               name: Resources.assetsImagesEditImageEraseSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.eraser);
