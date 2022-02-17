@@ -12,6 +12,7 @@ import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
+import '../../../widgets/menu.dart';
 
 Future<void> showImageEditor(
   BuildContext context, {
@@ -34,8 +35,23 @@ class _ImageEditorDialog extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final boundaryKey = useMemoized(() => GlobalKey());
+    final image = useMemoizedFuture<ui.Image?>(() async {
+      final bytes = File(path).readAsBytesSync();
+      final codec = await PaintingBinding.instance.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      return frame.image;
+    }, null, keys: [path]);
+    if (image.connectionState != ConnectionState.done) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final uiImage = image.data;
+    if (uiImage == null) {
+      assert(false, 'image is null');
+      return const SizedBox();
+    }
     return BlocProvider<_ImageEditorBloc>(
-      create: (BuildContext context) => _ImageEditorBloc(path: path),
+      create: (BuildContext context) =>
+          _ImageEditorBloc(path: path, image: uiImage),
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
@@ -51,6 +67,7 @@ class _ImageEditorDialog extends HookWidget {
                       path: path,
                       viewPortSize: constraints.biggest,
                       boundaryKey: boundaryKey,
+                      image: uiImage,
                     ),
                   ),
                 ),
@@ -88,6 +105,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
     required this.drawColor,
     required this.drawMode,
     required this.canRedo,
+    required this.clipRect,
   });
 
   final _ImageRotate rotate;
@@ -97,6 +115,9 @@ class _ImageEditorState extends Equatable with EquatableMixin {
   final DrawMode drawMode;
 
   final List<CustomDrawLine> drawLines;
+
+  /// Clip area of the image. zero means no clip.
+  final Rect clipRect;
 
   final Color drawColor;
 
@@ -112,6 +133,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
         drawColor,
         drawMode,
         canRedo,
+        clipRect,
       ];
 
   _ImageEditorState copyWith({
@@ -121,6 +143,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
     Color? drawColor,
     DrawMode? drawMode,
     bool? canRedo,
+    Rect? clipRect,
   }) =>
       _ImageEditorState(
         rotate: rotate ?? this.rotate,
@@ -129,22 +152,32 @@ class _ImageEditorState extends Equatable with EquatableMixin {
         drawColor: drawColor ?? this.drawColor,
         drawMode: drawMode ?? this.drawMode,
         canRedo: canRedo ?? this.canRedo,
+        clipRect: clipRect ?? this.clipRect,
       );
 }
 
 class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   _ImageEditorBloc({
     required this.path,
-  }) : super(const _ImageEditorState(
+    required this.image,
+  }) : super(_ImageEditorState(
           rotate: _ImageRotate.none,
           flip: false,
           drawLines: [],
           drawColor: _kDefaultDrawColor,
           drawMode: DrawMode.none,
           canRedo: false,
+          clipRect: Rect.fromLTWH(
+            0,
+            0,
+            image.width.toDouble(),
+            image.height.toDouble(),
+          ),
         ));
 
   final String path;
+
+  final ui.Image image;
 
   Path? _currentDrawingLine;
 
@@ -283,6 +316,28 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     _redoDrawLines.add(line);
     _notifyCustomDrawUpdated();
   }
+
+  void setClipRatio(double? ratio) {
+    if (ratio == null) {
+      emit(state.copyWith(
+        clipRect: Rect.fromLTWH(
+          0,
+          0,
+          image.width.toDouble(),
+          image.height.toDouble(),
+        ),
+      ));
+      return;
+    }
+    final width =
+        math.min(image.width.toDouble(), image.height.toDouble() * ratio);
+    final height = width / ratio;
+    final x = (image.width.toDouble() - width) / 2;
+    final y = (image.height.toDouble() - height) / 2;
+    emit(state.copyWith(
+      clipRect: Rect.fromLTWH(x, y, width, height),
+    ));
+  }
 }
 
 class _Preview extends HookWidget {
@@ -291,6 +346,7 @@ class _Preview extends HookWidget {
     required this.path,
     required this.viewPortSize,
     required this.boundaryKey,
+    required this.image,
   }) : super(key: key);
 
   final String path;
@@ -299,15 +355,10 @@ class _Preview extends HookWidget {
 
   final Key boundaryKey;
 
+  final ui.Image image;
+
   @override
   Widget build(BuildContext context) {
-    final image = useMemoizedFuture<ui.Image?>(() async {
-      final bytes = File(path).readAsBytesSync();
-      final codec = await PaintingBinding.instance.instantiateImageCodec(bytes);
-      final frame = await codec.getNextFrame();
-      return frame.image;
-    }, null, keys: [path]);
-
     final isFlip =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
       converter: (state) => state.flip,
@@ -318,42 +369,169 @@ class _Preview extends HookWidget {
       converter: (state) => state.rotate,
     );
 
-    if (image.connectionState != ConnectionState.done) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    final imageData = image.data;
-    if (imageData == null) {
-      assert(false, 'imageData is null');
-      return const SizedBox();
-    }
+    final drawMode =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, DrawMode>(
+      converter: (state) => state.drawMode,
+    );
+
+    final transformedViewPortSize = rotate.apply(viewPortSize);
+    final scale = math.min<double>(
+        math.min(transformedViewPortSize.width / image.width,
+            transformedViewPortSize.height / image.height),
+        1);
+
+    final scaledImageSize = Size(image.width * scale, image.height * scale);
+
     return SizedBox(
       width: viewPortSize.width,
       height: viewPortSize.height,
-      child: Center(
-        child: Transform.rotate(
-          transformHitTests: false,
-          angle: -rotate.radius,
-          child: RepaintBoundary(
-            key: boundaryKey,
-            child: Transform(
-              alignment: Alignment.center,
-              transform:
-                  isFlip ? Matrix4.rotationY(math.pi) : Matrix4.identity(),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Center(
+            child: Transform.rotate(
               transformHitTests: false,
+              angle: -rotate.radius,
               child: RepaintBoundary(
-                child: _CustomDrawingWidget(
-                  viewPortSize: viewPortSize,
-                  image: imageData,
-                  rotate: rotate,
-                  flip: isFlip,
+                key: boundaryKey,
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform:
+                      isFlip ? Matrix4.rotationY(math.pi) : Matrix4.identity(),
+                  transformHitTests: false,
+                  child: RepaintBoundary(
+                    child: _CustomDrawingWidget(
+                      viewPortSize: viewPortSize,
+                      image: image,
+                      rotate: rotate,
+                      flip: isFlip,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+          if (drawMode == DrawMode.none)
+            Center(
+              child: SizedBox.fromSize(
+                size: rotate.apply(scaledImageSize),
+                child: _ClipRectWidget(
+                  scaledImageSize: scaledImageSize,
+                  isFlip: isFlip,
+                  rotate: rotate,
+                  scale: scale,
+                ),
+              ),
+            )
+        ],
       ),
     );
   }
+}
+
+class _ClipRectWidget extends HookWidget {
+  const _ClipRectWidget({
+    Key? key,
+    required this.scaledImageSize,
+    required this.isFlip,
+    required this.rotate,
+    required this.scale,
+  }) : super(key: key);
+
+  final Size scaledImageSize;
+  final bool isFlip;
+  final _ImageRotate rotate;
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    final clipRect =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, Rect>(
+      converter: (state) => state.clipRect,
+    );
+    final transformedRect = useMemoized(() {
+      if (clipRect.isEmpty || clipRect.isInfinite) {
+        return Rect.fromLTRB(
+            0, 0, scaledImageSize.width, scaledImageSize.height);
+      }
+      return rotate.applyRect(
+        clipRect,
+        scale: scale,
+        center: scaledImageSize.center(Offset.zero),
+      );
+    }, [clipRect, scale, scaledImageSize, rotate]);
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        CustomPaint(
+          painter: _ClipShadowOverlayPainter(
+            clipRect: transformedRect,
+            overlayColor: Colors.black.withOpacity(0.4),
+            lineColor: Colors.white,
+          ),
+          child: const SizedBox.expand(),
+        ),
+      ],
+    );
+  }
+}
+
+class _ClipShadowOverlayPainter extends CustomPainter {
+  _ClipShadowOverlayPainter({
+    required this.clipRect,
+    required this.overlayColor,
+    required this.lineColor,
+  });
+
+  final Rect clipRect;
+  final Color overlayColor;
+  final Color lineColor;
+  final double lineWidth = 1;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.saveLayer(Offset.zero & size, Paint());
+    final paint = Paint()
+      ..color = overlayColor
+      ..style = PaintingStyle.fill;
+    canvas
+      ..drawRect(Offset.zero & size, paint)
+      ..drawRect(clipRect, paint..blendMode = BlendMode.clear)
+      ..restore();
+
+    final linePaint = Paint()
+      ..color = lineColor
+      ..strokeWidth = lineWidth
+      ..style = PaintingStyle.stroke;
+    canvas
+      ..drawRect(clipRect, linePaint)
+      ..drawLine(
+        Offset(clipRect.left + clipRect.width / 3, clipRect.top),
+        Offset(clipRect.left + clipRect.width / 3, clipRect.bottom),
+        linePaint,
+      )
+      ..drawLine(
+        Offset(clipRect.left, clipRect.top + clipRect.height / 3),
+        Offset(clipRect.right, clipRect.top + clipRect.height / 3),
+        linePaint,
+      )
+      ..drawLine(
+        Offset(clipRect.left, clipRect.top + clipRect.height * 2 / 3),
+        Offset(clipRect.right, clipRect.top + clipRect.height * 2 / 3),
+        linePaint,
+      )
+      ..drawLine(
+        Offset(clipRect.left + clipRect.width * 2 / 3, clipRect.top),
+        Offset(clipRect.left + clipRect.width * 2 / 3, clipRect.bottom),
+        linePaint,
+      );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ClipShadowOverlayPainter oldDelegate) =>
+      oldDelegate.clipRect != clipRect ||
+      oldDelegate.overlayColor != overlayColor ||
+      oldDelegate.lineColor != lineColor;
 }
 
 class _CustomDrawingWidget extends HookWidget {
@@ -378,8 +556,7 @@ class _CustomDrawingWidget extends HookWidget {
             transformedViewPortSize.height / image.height),
         1);
 
-    final imageSize = useMemoized(
-        () => Size(image.width * scale, image.height * scale), [image, scale]);
+    final scaledImageSize = Size(image.width * scale, image.height * scale);
 
     final editorBloc = context.read<_ImageEditorBloc>();
 
@@ -402,8 +579,8 @@ class _CustomDrawingWidget extends HookWidget {
       if (flip) {
         transformedX = viewPortSize.width - transformedX;
       }
-      final imageTopLeft =
-          center.translate(-imageSize.width / 2, -imageSize.height / 2);
+      final imageTopLeft = center.translate(
+          -scaledImageSize.width / 2, -scaledImageSize.height / 2);
 
       final transformed = Offset(
           transformedX - imageTopLeft.dx, transformedY - imageTopLeft.dy);
@@ -420,10 +597,10 @@ class _CustomDrawingWidget extends HookWidget {
       },
       onPanEnd: (details) => editorBloc.endDrawEvent(),
       child: OverflowBox(
-        maxWidth: imageSize.width,
-        maxHeight: imageSize.height,
+        maxWidth: scaledImageSize.width,
+        maxHeight: scaledImageSize.height,
         child: CustomPaint(
-          size: imageSize,
+          size: scaledImageSize,
           painter: _DrawerPainter(
             image: image,
             lines: lines,
@@ -474,7 +651,23 @@ extension _ImageRotateExt on _ImageRotate {
         return false;
     }
   }
+
+  Rect applyRect(Rect rect, {required double scale, required Offset center}) {
+    final radius = -this.radius;
+    final topLeft = _rotate(rect.topLeft * scale, center, radius);
+    final bottomRight = _rotate(rect.bottomRight * scale, center, radius);
+    return Rect.fromPoints(topLeft, bottomRight);
+  }
 }
+
+Offset _rotate(Offset position, Offset center, double radius) => Offset(
+      (position.dx - center.dx) * math.cos(radius) -
+          (position.dy - center.dy) * math.sin(radius) +
+          center.dx,
+      (position.dx - center.dx) * math.sin(radius) +
+          (position.dy - center.dy) * math.cos(radius) +
+          center.dy,
+    );
 
 class _DrawerPainter extends CustomPainter {
   _DrawerPainter({
@@ -639,7 +832,18 @@ class _NormalOperationBar extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final editorState = useBlocState<_ImageEditorBloc, _ImageEditorState>();
+    final rotated =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
+      converter: (state) => state.rotate != _ImageRotate.none,
+    );
+    final flipped =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
+      converter: (state) => state.flip,
+    );
+    final hasCustomDraw =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
+      converter: (state) => state.drawLines.isNotEmpty,
+    );
     return Material(
       borderRadius: BorderRadius.circular(8),
       color: context.theme.stickerPlaceholderColor,
@@ -658,28 +862,68 @@ class _NormalOperationBar extends HookWidget {
               ),
             ),
             ActionButton(
-              color: editorState.rotate != _ImageRotate.none
-                  ? context.theme.accent
-                  : context.theme.icon,
+              color: rotated ? context.theme.accent : context.theme.icon,
               name: Resources.assetsImagesEditImageRotateSvg,
               onTap: () => context.read<_ImageEditorBloc>().rotate(),
             ),
             const SizedBox(width: 4),
             ActionButton(
-              color:
-                  editorState.flip ? context.theme.accent : context.theme.icon,
+              color: flipped ? context.theme.accent : context.theme.icon,
               name: Resources.assetsImagesEditImageFlipSvg,
               onTap: () => context.read<_ImageEditorBloc>().flip(),
             ),
             const SizedBox(width: 4),
-            ActionButton(
-              color:
-                  editorState.flip ? context.theme.accent : context.theme.icon,
-              name: Resources.assetsImagesEditImageClipSvg,
-              onTap: () {},
+            ContextMenuPortalEntry(
+              interactiveForTap: true,
+              buildMenus: () => [
+                ContextMenu(
+                  title: context.l10n.originalImage,
+                  onTap: () =>
+                      context.read<_ImageEditorBloc>().setClipRatio(null),
+                ),
+                ContextMenu(
+                  title: '1:1',
+                  onTap: () => context.read<_ImageEditorBloc>().setClipRatio(1),
+                ),
+                ContextMenu(
+                  title: '2:3',
+                  onTap: () =>
+                      context.read<_ImageEditorBloc>().setClipRatio(2 / 3),
+                ),
+                ContextMenu(
+                  title: '3:2',
+                  onTap: () =>
+                      context.read<_ImageEditorBloc>().setClipRatio(3 / 2),
+                ),
+                ContextMenu(
+                  title: '3:4',
+                  onTap: () =>
+                      context.read<_ImageEditorBloc>().setClipRatio(3 / 4),
+                ),
+                ContextMenu(
+                  title: '4:3',
+                  onTap: () =>
+                      context.read<_ImageEditorBloc>().setClipRatio(4 / 3),
+                ),
+                ContextMenu(
+                  title: '9:16',
+                  onTap: () =>
+                      context.read<_ImageEditorBloc>().setClipRatio(9 / 16),
+                ),
+                ContextMenu(
+                  title: '16:9',
+                  onTap: () =>
+                      context.read<_ImageEditorBloc>().setClipRatio(16 / 9),
+                ),
+              ],
+              child: ActionButton(
+                interactive: false,
+                color: flipped ? context.theme.accent : context.theme.icon,
+                name: Resources.assetsImagesEditImageClipSvg,
+              ),
             ),
             ActionButton(
-              color: context.theme.icon,
+              color: hasCustomDraw ? context.theme.accent : context.theme.icon,
               name: Resources.assetsImagesEditImageDrawSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.brush);

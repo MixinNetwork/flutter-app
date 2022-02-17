@@ -2509,6 +2509,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Original`
+  String get originalImage {
+    return Intl.message(
+      'Original',
+      name: 'originalImage',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

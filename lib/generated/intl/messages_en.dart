@@ -275,6 +275,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
         "openInExternalApp":
             MessageLookupByLibrary.simpleMessage("Open in External App"),
+        "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
         "pageDeleteCircle": m16,
         "pageEditProfileJoin": m17,
         "pageLandingClickToReload":

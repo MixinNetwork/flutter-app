@@ -244,5 +244,6 @@
   "stickerAlbumDetail": "Sticker album detail",
   "addStickers": "Add Stickers",
   "removeStickers": "Remove Stickers",
-  "myStickerAlbums": "My Stickers"
+  "myStickerAlbums": "My Stickers",
+  "originalImage": "Original"
 }

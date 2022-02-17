@@ -240,6 +240,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "notificationPermissionTitle":
             MessageLookupByLibrary.simpleMessage("打开通知"),
         "openInExternalApp": MessageLookupByLibrary.simpleMessage("通过外部程序打开"),
+        "originalImage": MessageLookupByLibrary.simpleMessage("原图"),
         "pageDeleteCircle": m16,
         "pageEditProfileJoin": m17,
         "pageLandingClickToReload":
