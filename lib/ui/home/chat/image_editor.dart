@@ -10,9 +10,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/logger.dart';
 import '../../../widgets/action_button.dart';
+import '../../../widgets/dialog.dart';
 import '../../../widgets/menu.dart';
+import '../../../widgets/toast.dart';
 
 Future<void> showImageEditor(
   BuildContext context, {
@@ -97,6 +101,24 @@ class CustomDrawLine extends Equatable {
 
 enum DrawMode { none, brush, eraser }
 
+class ImageEditorSnapshot {
+  ImageEditorSnapshot({
+    required this.imageRotate,
+    required this.flip,
+    required this.customDrawLines,
+    required this.cropRect,
+    required this.rawImagePath,
+    required this.imagePath,
+  });
+
+  final _ImageRotate imageRotate;
+  final bool flip;
+  final List<CustomDrawLine> customDrawLines;
+  final Rect cropRect;
+  final String rawImagePath;
+  final String imagePath;
+}
+
 class _ImageEditorState extends Equatable with EquatableMixin {
   const _ImageEditorState({
     required this.rotate,
@@ -163,7 +185,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   }) : super(_ImageEditorState(
           rotate: _ImageRotate.none,
           flip: false,
-          drawLines: [],
+          drawLines: const [],
           drawColor: _kDefaultDrawColor,
           drawMode: DrawMode.none,
           canRedo: false,
@@ -337,6 +359,92 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     emit(state.copyWith(
       clipRect: Rect.fromLTWH(x, y, width, height),
     ));
+  }
+
+  Future<ImageEditorSnapshot?> takeSnapshot() async {
+    final recorder = ui.PictureRecorder();
+
+    final cropRect = !state.clipRect.isEmpty && !state.clipRect.isInfinite
+        ? state.clipRect
+        : null;
+
+    final imageSize = state.rotate.apply(Size(
+      image.width.toDouble(),
+      image.height.toDouble(),
+    ));
+    final center = imageSize.center(Offset.zero);
+
+    final canvas = Canvas(recorder)
+      ..clipRect(Rect.fromLTWH(0, 0, imageSize.width, imageSize.height))
+      ..translate(center.dx, center.dy);
+
+    if (state.rotate != _ImageRotate.none) {
+      canvas.rotate(-state.rotate.radius);
+    }
+    if (state.flip) {
+      canvas.scale(-1, 1);
+    }
+    canvas.translate(-center.dx, -center.dy);
+
+    if (cropRect != null) {
+      canvas.translate(-cropRect.left, -cropRect.top);
+    }
+
+    final imageRect = Rect.fromCenter(
+      center: center,
+      width: image.width.toDouble(),
+      height: image.height.toDouble(),
+    );
+    paintImage(
+      canvas: canvas,
+      rect: Rect.fromCenter(
+        center: center,
+        width: image.width.toDouble(),
+        height: image.height.toDouble(),
+      ),
+      image: image,
+    );
+
+    canvas
+      ..saveLayer(imageRect, Paint())
+      ..translate(imageRect.left, imageRect.top);
+    for (final line in _customDrawLines) {
+      final paint = Paint()
+        ..color = line.eraser ? Colors.white : line.color
+        ..strokeWidth = line.width
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..style = PaintingStyle.stroke
+        ..blendMode = line.eraser ? BlendMode.clear : BlendMode.srcOver
+        ..isAntiAlias = true;
+      canvas.drawPath(line.path, paint);
+    }
+    canvas.restore();
+
+    final picture = recorder.endRecording();
+    final snapshotImage = await picture.toImage(
+      cropRect != null ? cropRect.width.round() : imageSize.width.round(),
+      cropRect != null ? cropRect.height.round() : imageSize.height.round(),
+    );
+    final bytes = await snapshotImage.toBytes(format: ui.ImageByteFormat.png);
+    if (bytes == null) {
+      e('failed to convert image to bytes');
+      return null;
+    }
+    final file = await saveBytesToTempFile(bytes, 'image_edit', '.png');
+    if (file == null) {
+      e('failed to save image to file');
+      return null;
+    }
+    d('save editor snapshot image to file: $file');
+    return ImageEditorSnapshot(
+      customDrawLines: _customDrawLines,
+      imageRotate: state.rotate,
+      flip: state.flip,
+      cropRect: state.clipRect,
+      rawImagePath: path,
+      imagePath: file.path,
+    );
   }
 }
 
@@ -922,12 +1030,34 @@ class _NormalOperationBar extends HookWidget {
                 name: Resources.assetsImagesEditImageClipSvg,
               ),
             ),
+            const SizedBox(width: 4),
             ActionButton(
               color: hasCustomDraw ? context.theme.accent : context.theme.icon,
               name: Resources.assetsImagesEditImageDrawSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.brush);
               },
+            ),
+            TextButton(
+              onPressed: () async {
+                showToastLoading(context);
+                final snapshot =
+                    await context.read<_ImageEditorBloc>().takeSnapshot();
+                if (snapshot == null) {
+                  await showToastFailed(context, null);
+                  return;
+                }
+                showToastSuccessful(context);
+                await showMixinDialog(
+                  context: context,
+                  child: Image.file(
+                    File(snapshot.imagePath),
+                    fit: BoxFit.cover,
+                  ),
+                );
+                // await Navigator.maybePop(context, snapshot);
+              },
+              child: Text(context.l10n.done),
             ),
           ],
         ),
