@@ -331,17 +331,21 @@ class _Preview extends HookWidget {
       height: viewPortSize.height,
       child: Center(
         child: Transform.rotate(
-          angle: rotate.radius,
+          transformHitTests: false,
+          angle: -rotate.radius,
           child: RepaintBoundary(
             key: boundaryKey,
             child: Transform(
               alignment: Alignment.center,
               transform:
                   isFlip ? Matrix4.rotationY(math.pi) : Matrix4.identity(),
+              transformHitTests: false,
               child: RepaintBoundary(
                 child: _CustomDrawingWidget(
                   viewPortSize: viewPortSize,
                   image: imageData,
+                  rotate: rotate,
+                  flip: isFlip,
                 ),
               ),
             ),
@@ -357,16 +361,21 @@ class _CustomDrawingWidget extends HookWidget {
     Key? key,
     required this.viewPortSize,
     required this.image,
+    required this.rotate,
+    required this.flip,
   }) : super(key: key);
 
   final ui.Size viewPortSize;
   final ui.Image image;
+  final _ImageRotate rotate;
+  final bool flip;
 
   @override
   Widget build(BuildContext context) {
+    final transformedViewPortSize = rotate.apply(viewPortSize);
     final scale = math.min<double>(
-        math.min(viewPortSize.width / image.width,
-            viewPortSize.height / image.height),
+        math.min(transformedViewPortSize.width / image.width,
+            transformedViewPortSize.height / image.height),
         1);
 
     final imageSize = useMemoized(
@@ -380,22 +389,46 @@ class _CustomDrawingWidget extends HookWidget {
       converter: (state) => state.drawLines,
     );
 
+    Offset screenToImage(Offset position) {
+      final center = viewPortSize.center(Offset.zero);
+      final radius = rotate.radius;
+      var transformedX = (position.dx - center.dx) * math.cos(radius) -
+          (position.dy - center.dy) * math.sin(radius) +
+          center.dx;
+      final transformedY = (position.dx - center.dx) * math.sin(radius) +
+          (position.dy - center.dy) * math.cos(radius) +
+          center.dy;
+
+      if (flip) {
+        transformedX = viewPortSize.width - transformedX;
+      }
+      final imageTopLeft =
+          center.translate(-imageSize.width / 2, -imageSize.height / 2);
+
+      final transformed = Offset(
+          transformedX - imageTopLeft.dx, transformedY - imageTopLeft.dy);
+      return transformed / scale;
+    }
+
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onPanStart: (details) {
-        final relative = details.localPosition / scale;
-        editorBloc.startDrawEvent(relative);
+        editorBloc.startDrawEvent(screenToImage(details.localPosition));
       },
       onPanUpdate: (details) {
-        final relative = details.localPosition / scale;
-        editorBloc.updateDrawEvent(relative);
+        editorBloc.updateDrawEvent(screenToImage(details.localPosition));
       },
       onPanEnd: (details) => editorBloc.endDrawEvent(),
-      child: CustomPaint(
-        size: imageSize,
-        painter: _DrawerPainter(
-          image: image,
-          lines: lines,
-          scale: scale,
+      child: OverflowBox(
+        maxWidth: imageSize.width,
+        maxHeight: imageSize.height,
+        child: CustomPaint(
+          size: imageSize,
+          painter: _DrawerPainter(
+            image: image,
+            lines: lines,
+            scale: scale,
+          ),
         ),
       ),
     );
@@ -423,8 +456,6 @@ extension _ImageRotateExt on _ImageRotate {
     }
   }
 
-  // TODO(Bin) remove this if unnecessary.
-  // ignore: unused_element
   Size apply(Size size) {
     if (!_boundRotated) {
       return size;
