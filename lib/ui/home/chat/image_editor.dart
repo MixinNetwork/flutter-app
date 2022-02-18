@@ -422,10 +422,19 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     canvas.restore();
 
     final picture = recorder.endRecording();
-    final snapshotImage = await picture.toImage(
-      cropRect != null ? cropRect.width.round() : imageSize.width.round(),
-      cropRect != null ? cropRect.height.round() : imageSize.height.round(),
-    );
+    final ui.Image snapshotImage;
+    if (cropRect != null) {
+      final size = state.rotate.apply(cropRect.size);
+      snapshotImage = await picture.toImage(
+        size.width.round(),
+        size.height.round(),
+      );
+    } else {
+      snapshotImage = await picture.toImage(
+        imageSize.width.round(),
+        imageSize.height.round(),
+      );
+    }
     final bytes = await snapshotImage.toBytes(format: ui.ImageByteFormat.png);
     if (bytes == null) {
       e('failed to convert image to bytes');
@@ -562,11 +571,20 @@ class _ClipRectWidget extends HookWidget {
         return Rect.fromLTRB(
             0, 0, scaledImageSize.width, scaledImageSize.height);
       }
-      return rotate.applyRect(
-        clipRect,
-        scale: scale,
-        center: scaledImageSize.center(Offset.zero),
+      final radius = -rotate.radius;
+
+      final imageRect = Offset.zero & scaledImageSize;
+      final center = scaledImageSize.center(Offset.zero);
+      final rotateImageRect = Rect.fromPoints(
+        _rotate(imageRect.topLeft, center, radius),
+        _rotate(imageRect.bottomRight, center, radius),
       );
+
+      final topLeft = _rotate(clipRect.topLeft * scale, center, radius);
+      final bottomRight = _rotate(clipRect.bottomRight * scale, center, radius);
+      final scaledCropRect = Rect.fromPoints(topLeft, bottomRight);
+      return scaledCropRect.translate(
+          -rotateImageRect.left, -rotateImageRect.top);
     }, [clipRect, scale, scaledImageSize, rotate]);
     return Stack(
       fit: StackFit.expand,
@@ -759,13 +777,6 @@ extension _ImageRotateExt on _ImageRotate {
         return false;
     }
   }
-
-  Rect applyRect(Rect rect, {required double scale, required Offset center}) {
-    final radius = -this.radius;
-    final topLeft = _rotate(rect.topLeft * scale, center, radius);
-    final bottomRight = _rotate(rect.bottomRight * scale, center, radius);
-    return Rect.fromPoints(topLeft, bottomRight);
-  }
 }
 
 Offset _rotate(Offset position, Offset center, double radius) => Offset(
@@ -940,6 +951,8 @@ class _NormalOperationBar extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageEditorBloc = context.read<_ImageEditorBloc>();
+
     final rotated =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
       converter: (state) => state.rotate != _ImageRotate.none,
@@ -952,6 +965,14 @@ class _NormalOperationBar extends HookWidget {
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
       converter: (state) => state.drawLines.isNotEmpty,
     );
+    final hasCrop =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
+            converter: (state) {
+      final width = imageEditorBloc.image.width;
+      final height = imageEditorBloc.image.height;
+      return state.clipRect.width.round() != width ||
+          state.clipRect.height.round() != height;
+    });
     return Material(
       borderRadius: BorderRadius.circular(8),
       color: context.theme.stickerPlaceholderColor,
@@ -972,13 +993,13 @@ class _NormalOperationBar extends HookWidget {
             ActionButton(
               color: rotated ? context.theme.accent : context.theme.icon,
               name: Resources.assetsImagesEditImageRotateSvg,
-              onTap: () => context.read<_ImageEditorBloc>().rotate(),
+              onTap: imageEditorBloc.rotate,
             ),
             const SizedBox(width: 4),
             ActionButton(
               color: flipped ? context.theme.accent : context.theme.icon,
               name: Resources.assetsImagesEditImageFlipSvg,
-              onTap: () => context.read<_ImageEditorBloc>().flip(),
+              onTap: imageEditorBloc.flip,
             ),
             const SizedBox(width: 4),
             ContextMenuPortalEntry(
@@ -986,47 +1007,40 @@ class _NormalOperationBar extends HookWidget {
               buildMenus: () => [
                 ContextMenu(
                   title: context.l10n.originalImage,
-                  onTap: () =>
-                      context.read<_ImageEditorBloc>().setClipRatio(null),
+                  onTap: () => imageEditorBloc.setClipRatio(null),
                 ),
                 ContextMenu(
                   title: '1:1',
-                  onTap: () => context.read<_ImageEditorBloc>().setClipRatio(1),
+                  onTap: () => imageEditorBloc.setClipRatio(1),
                 ),
                 ContextMenu(
                   title: '2:3',
-                  onTap: () =>
-                      context.read<_ImageEditorBloc>().setClipRatio(2 / 3),
+                  onTap: () => imageEditorBloc.setClipRatio(2 / 3),
                 ),
                 ContextMenu(
                   title: '3:2',
-                  onTap: () =>
-                      context.read<_ImageEditorBloc>().setClipRatio(3 / 2),
+                  onTap: () => imageEditorBloc.setClipRatio(3 / 2),
                 ),
                 ContextMenu(
                   title: '3:4',
-                  onTap: () =>
-                      context.read<_ImageEditorBloc>().setClipRatio(3 / 4),
+                  onTap: () => imageEditorBloc.setClipRatio(3 / 4),
                 ),
                 ContextMenu(
                   title: '4:3',
-                  onTap: () =>
-                      context.read<_ImageEditorBloc>().setClipRatio(4 / 3),
+                  onTap: () => imageEditorBloc.setClipRatio(4 / 3),
                 ),
                 ContextMenu(
                   title: '9:16',
-                  onTap: () =>
-                      context.read<_ImageEditorBloc>().setClipRatio(9 / 16),
+                  onTap: () => imageEditorBloc.setClipRatio(9 / 16),
                 ),
                 ContextMenu(
                   title: '16:9',
-                  onTap: () =>
-                      context.read<_ImageEditorBloc>().setClipRatio(16 / 9),
+                  onTap: () => imageEditorBloc.setClipRatio(16 / 9),
                 ),
               ],
               child: ActionButton(
                 interactive: false,
-                color: flipped ? context.theme.accent : context.theme.icon,
+                color: hasCrop ? context.theme.accent : context.theme.icon,
                 name: Resources.assetsImagesEditImageClipSvg,
               ),
             ),
