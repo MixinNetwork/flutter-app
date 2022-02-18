@@ -20,23 +20,29 @@ import '../../../widgets/dialog.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
 
-Future<void> showImageEditor(
+Future<ImageEditorSnapshot?> showImageEditor(
   BuildContext context, {
   required String path,
-}) async {
-  await showDialog(
-    context: context,
-    builder: (context) => _ImageEditorDialog(path: path),
-  );
-}
+  ImageEditorSnapshot? snapshot,
+}) =>
+    showDialog<ImageEditorSnapshot?>(
+      context: context,
+      builder: (context) => _ImageEditorDialog(
+        path: path,
+        snapshot: snapshot,
+      ),
+    );
 
 class _ImageEditorDialog extends HookWidget {
   const _ImageEditorDialog({
     Key? key,
     required this.path,
+    this.snapshot,
   }) : super(key: key);
 
   final String path;
+
+  final ImageEditorSnapshot? snapshot;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +63,7 @@ class _ImageEditorDialog extends HookWidget {
     }
     return BlocProvider<_ImageEditorBloc>(
       create: (BuildContext context) =>
-          _ImageEditorBloc(path: path, image: uiImage),
+          _ImageEditorBloc(path: path, image: uiImage, snapshot: snapshot),
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
@@ -130,6 +136,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
     required this.drawMode,
     required this.canRedo,
     required this.cropRect,
+    required this.image,
   });
 
   final _ImageRotate rotate;
@@ -147,7 +154,14 @@ class _ImageEditorState extends Equatable with EquatableMixin {
 
   final bool canRedo;
 
-  bool get canReset => rotate != _ImageRotate.none;
+  final ui.Image image;
+
+  bool get canReset =>
+      rotate != _ImageRotate.none ||
+      drawLines.isNotEmpty ||
+      flip ||
+      cropRect.width.round() != image.width ||
+      cropRect.height.round() != image.height;
 
   @override
   List<Object?> get props => [
@@ -158,6 +172,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
         drawMode,
         canRedo,
         cropRect,
+        image,
       ];
 
   _ImageEditorState copyWith({
@@ -177,6 +192,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
         drawMode: drawMode ?? this.drawMode,
         canRedo: canRedo ?? this.canRedo,
         cropRect: cropRect ?? this.cropRect,
+        image: image,
       );
 }
 
@@ -184,6 +200,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   _ImageEditorBloc({
     required this.path,
     required this.image,
+    ImageEditorSnapshot? snapshot,
   }) : super(_ImageEditorState(
           rotate: _ImageRotate.none,
           flip: false,
@@ -197,7 +214,17 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
             image.width.toDouble(),
             image.height.toDouble(),
           ),
-        ));
+          image: image,
+        )) {
+    if (snapshot != null) {
+      _customDrawLines.addAll(snapshot.customDrawLines);
+      setCropRect(snapshot.cropRect);
+      emit(state.copyWith(
+        rotate: snapshot.imageRotate,
+        flip: snapshot.flip,
+      ));
+    }
+  }
 
   final String path;
 
@@ -376,7 +403,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     if (state.rotate != _ImageRotate.none) {
       imgImage = img.copyRotate(imgImage, 360 - state.rotate.degree);
     }
-    final data = img.PngEncoder().encodeImage(imgImage);
+    final data = img.encodePng(imgImage);
     return Uint8List.fromList(data);
   }
 
@@ -1205,8 +1232,17 @@ class _NormalOperationBar extends HookWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextButton(
-              onPressed: () {
-                Navigator.maybePop(context);
+              onPressed: () async {
+                if (imageEditorBloc.state.canReset) {
+                  final result = await showConfirmMixinDialog(
+                    context,
+                    context.l10n.editImageClearWarning,
+                  );
+                  if (!result) {
+                    return;
+                  }
+                }
+                await Navigator.maybePop(context);
               },
               child: Text(
                 context.l10n.cancel,
@@ -1284,15 +1320,8 @@ class _NormalOperationBar extends HookWidget {
                   await showToastFailed(context, null);
                   return;
                 }
-                showToastSuccessful(context);
-                await showMixinDialog(
-                  context: context,
-                  child: Image.file(
-                    File(snapshot.imagePath),
-                    fit: BoxFit.cover,
-                  ),
-                );
-                // await Navigator.maybePop(context, snapshot);
+                Toast.dismiss();
+                await Navigator.maybePop(context, snapshot);
               },
               child: Text(context.l10n.done),
             ),

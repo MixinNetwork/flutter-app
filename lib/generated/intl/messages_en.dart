@@ -182,6 +182,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "editCircle": MessageLookupByLibrary.simpleMessage("Manage Circle"),
         "editCircleName":
             MessageLookupByLibrary.simpleMessage("Edit Circle Name"),
+        "editImageClearWarning": MessageLookupByLibrary.simpleMessage(
+            "All changes will be lost. Are you sure you want to exit?"),
         "editName": MessageLookupByLibrary.simpleMessage("Edit Name"),
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
         "exit": MessageLookupByLibrary.simpleMessage("Exit"),

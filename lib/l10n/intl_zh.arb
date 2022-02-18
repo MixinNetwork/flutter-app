@@ -240,5 +240,6 @@
   "addStickers": "添加所有表情",
   "removeStickers": "移除所有表情",
   "myStickerAlbums": "我的表情",
-  "originalImage": "原图"
+  "originalImage": "原图",
+  "editImageClearWarning": "退出将会清除此次所有的改动。"
 }

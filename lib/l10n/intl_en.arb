@@ -245,5 +245,6 @@
   "addStickers": "Add Stickers",
   "removeStickers": "Remove Stickers",
   "myStickerAlbums": "My Stickers",
-  "originalImage": "Original"
+  "originalImage": "Original",
+  "editImageClearWarning": "All changes will be lost. Are you sure you want to exit?"
 }

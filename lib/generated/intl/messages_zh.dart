@@ -156,6 +156,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "editAnnouncement": MessageLookupByLibrary.simpleMessage("编辑群公告"),
         "editCircle": MessageLookupByLibrary.simpleMessage("管理圈子"),
         "editCircleName": MessageLookupByLibrary.simpleMessage("编辑圈子名称"),
+        "editImageClearWarning":
+            MessageLookupByLibrary.simpleMessage("退出将会清除此次所有的改动。"),
         "editName": MessageLookupByLibrary.simpleMessage("编辑名称"),
         "editProfile": MessageLookupByLibrary.simpleMessage("编辑资料"),
         "exit": MessageLookupByLibrary.simpleMessage("退出"),
