@@ -127,7 +127,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
     required this.drawColor,
     required this.drawMode,
     required this.canRedo,
-    required this.clipRect,
+    required this.cropRect,
   });
 
   final _ImageRotate rotate;
@@ -138,8 +138,8 @@ class _ImageEditorState extends Equatable with EquatableMixin {
 
   final List<CustomDrawLine> drawLines;
 
-  /// Clip area of the image. zero means no clip.
-  final Rect clipRect;
+  /// Crop area of the image. zero means no crop.
+  final Rect cropRect;
 
   final Color drawColor;
 
@@ -155,7 +155,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
         drawColor,
         drawMode,
         canRedo,
-        clipRect,
+        cropRect,
       ];
 
   _ImageEditorState copyWith({
@@ -165,7 +165,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
     Color? drawColor,
     DrawMode? drawMode,
     bool? canRedo,
-    Rect? clipRect,
+    Rect? cropRect,
   }) =>
       _ImageEditorState(
         rotate: rotate ?? this.rotate,
@@ -174,7 +174,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
         drawColor: drawColor ?? this.drawColor,
         drawMode: drawMode ?? this.drawMode,
         canRedo: canRedo ?? this.canRedo,
-        clipRect: clipRect ?? this.clipRect,
+        cropRect: cropRect ?? this.cropRect,
       );
 }
 
@@ -189,7 +189,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
           drawColor: _kDefaultDrawColor,
           drawMode: DrawMode.none,
           canRedo: false,
-          clipRect: Rect.fromLTWH(
+          cropRect: Rect.fromLTWH(
             0,
             0,
             image.width.toDouble(),
@@ -339,10 +339,10 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     _notifyCustomDrawUpdated();
   }
 
-  void setClipRatio(double? ratio) {
+  void setCropRatio(double? ratio) {
     if (ratio == null) {
       emit(state.copyWith(
-        clipRect: Rect.fromLTWH(
+        cropRect: Rect.fromLTWH(
           0,
           0,
           image.width.toDouble(),
@@ -357,15 +357,15 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     final x = (image.width.toDouble() - width) / 2;
     final y = (image.height.toDouble() - height) / 2;
     emit(state.copyWith(
-      clipRect: Rect.fromLTWH(x, y, width, height),
+      cropRect: Rect.fromLTWH(x, y, width, height),
     ));
   }
 
   Future<ImageEditorSnapshot?> takeSnapshot() async {
     final recorder = ui.PictureRecorder();
 
-    final cropRect = !state.clipRect.isEmpty && !state.clipRect.isInfinite
-        ? state.clipRect
+    final cropRect = !state.cropRect.isEmpty && !state.cropRect.isInfinite
+        ? state.cropRect
         : null;
 
     final imageSize = state.rotate.apply(Size(
@@ -450,14 +450,14 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
       customDrawLines: _customDrawLines,
       imageRotate: state.rotate,
       flip: state.flip,
-      cropRect: state.clipRect,
+      cropRect: state.cropRect,
       rawImagePath: path,
       imagePath: file.path,
     );
   }
 
   void setCropRect(Rect cropRect) {
-    emit(state.copyWith(clipRect: cropRect));
+    emit(state.copyWith(cropRect: cropRect));
   }
 }
 
@@ -536,7 +536,7 @@ class _Preview extends HookWidget {
             Center(
               child: SizedBox.fromSize(
                 size: rotate.apply(scaledImageSize),
-                child: _ClipRectWidget(
+                child: _CropRectWidget(
                   scaledImageSize: scaledImageSize,
                   isFlip: isFlip,
                   rotate: rotate,
@@ -598,8 +598,8 @@ Rect transformInsideRect(Rect rect, Rect parent, double radius) {
   return transformed.translate(-rotateImageRect.left, -rotateImageRect.top);
 }
 
-class _ClipRectWidget extends HookWidget {
-  const _ClipRectWidget({
+class _CropRectWidget extends HookWidget {
+  const _CropRectWidget({
     Key? key,
     required this.scaledImageSize,
     required this.isFlip,
@@ -616,7 +616,7 @@ class _ClipRectWidget extends HookWidget {
   Widget build(BuildContext context) {
     final cropRect =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, Rect>(
-      converter: (state) => state.clipRect,
+      converter: (state) => state.cropRect,
     );
 
     final transformedRect = useMemoized(() {
@@ -709,8 +709,8 @@ class _ClipRectWidget extends HookWidget {
             trackingRectCorner.value = null;
           },
           child: CustomPaint(
-            painter: _ClipShadowOverlayPainter(
-              clipRect: transformedRect,
+            painter: _CropShadowOverlayPainter(
+              cropRect: transformedRect,
               overlayColor: Colors.black.withOpacity(0.4),
               lineColor: Colors.white,
             ),
@@ -722,14 +722,14 @@ class _ClipRectWidget extends HookWidget {
   }
 }
 
-class _ClipShadowOverlayPainter extends CustomPainter {
-  _ClipShadowOverlayPainter({
-    required this.clipRect,
+class _CropShadowOverlayPainter extends CustomPainter {
+  _CropShadowOverlayPainter({
+    required this.cropRect,
     required this.overlayColor,
     required this.lineColor,
   });
 
-  final Rect clipRect;
+  final Rect cropRect;
   final Color overlayColor;
   final Color lineColor;
   final double lineWidth = 1;
@@ -745,7 +745,7 @@ class _ClipShadowOverlayPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     canvas
       ..drawRect(Offset.zero & size, paint)
-      ..drawRect(clipRect, paint..blendMode = BlendMode.clear)
+      ..drawRect(cropRect, paint..blendMode = BlendMode.clear)
       ..restore();
 
     final linePaint = Paint()
@@ -753,25 +753,25 @@ class _ClipShadowOverlayPainter extends CustomPainter {
       ..strokeWidth = lineWidth
       ..style = PaintingStyle.stroke;
     canvas
-      ..drawRect(clipRect, linePaint)
+      ..drawRect(cropRect, linePaint)
       ..drawLine(
-        Offset(clipRect.left + clipRect.width / 3, clipRect.top),
-        Offset(clipRect.left + clipRect.width / 3, clipRect.bottom),
+        Offset(cropRect.left + cropRect.width / 3, cropRect.top),
+        Offset(cropRect.left + cropRect.width / 3, cropRect.bottom),
         linePaint,
       )
       ..drawLine(
-        Offset(clipRect.left, clipRect.top + clipRect.height / 3),
-        Offset(clipRect.right, clipRect.top + clipRect.height / 3),
+        Offset(cropRect.left, cropRect.top + cropRect.height / 3),
+        Offset(cropRect.right, cropRect.top + cropRect.height / 3),
         linePaint,
       )
       ..drawLine(
-        Offset(clipRect.left, clipRect.top + clipRect.height * 2 / 3),
-        Offset(clipRect.right, clipRect.top + clipRect.height * 2 / 3),
+        Offset(cropRect.left, cropRect.top + cropRect.height * 2 / 3),
+        Offset(cropRect.right, cropRect.top + cropRect.height * 2 / 3),
         linePaint,
       )
       ..drawLine(
-        Offset(clipRect.left + clipRect.width * 2 / 3, clipRect.top),
-        Offset(clipRect.left + clipRect.width * 2 / 3, clipRect.bottom),
+        Offset(cropRect.left + cropRect.width * 2 / 3, cropRect.top),
+        Offset(cropRect.left + cropRect.width * 2 / 3, cropRect.bottom),
         linePaint,
       );
 
@@ -783,53 +783,53 @@ class _ClipShadowOverlayPainter extends CustomPainter {
     canvas
       // left top
       ..drawLine(
-        clipRect.topLeft,
-        clipRect.topLeft.translate(0, cornerHandleSize),
+        cropRect.topLeft,
+        cropRect.topLeft.translate(0, cornerHandleSize),
         cornerHandlePaint,
       )
       ..drawLine(
-        clipRect.topLeft,
-        clipRect.topLeft.translate(cornerHandleSize, 0),
+        cropRect.topLeft,
+        cropRect.topLeft.translate(cornerHandleSize, 0),
         cornerHandlePaint,
       )
       // right top
       ..drawLine(
-        clipRect.topRight,
-        clipRect.topRight.translate(0, cornerHandleSize),
+        cropRect.topRight,
+        cropRect.topRight.translate(0, cornerHandleSize),
         cornerHandlePaint,
       )
       ..drawLine(
-        clipRect.topRight,
-        clipRect.topRight.translate(-cornerHandleSize, 0),
+        cropRect.topRight,
+        cropRect.topRight.translate(-cornerHandleSize, 0),
         cornerHandlePaint,
       )
       // left bottom
       ..drawLine(
-        clipRect.bottomLeft,
-        clipRect.bottomLeft.translate(0, -cornerHandleSize),
+        cropRect.bottomLeft,
+        cropRect.bottomLeft.translate(0, -cornerHandleSize),
         cornerHandlePaint,
       )
       ..drawLine(
-        clipRect.bottomLeft,
-        clipRect.bottomLeft.translate(cornerHandleSize, 0),
+        cropRect.bottomLeft,
+        cropRect.bottomLeft.translate(cornerHandleSize, 0),
         cornerHandlePaint,
       )
       // right bottom
       ..drawLine(
-        clipRect.bottomRight,
-        clipRect.bottomRight.translate(0, -cornerHandleSize),
+        cropRect.bottomRight,
+        cropRect.bottomRight.translate(0, -cornerHandleSize),
         cornerHandlePaint,
       )
       ..drawLine(
-        clipRect.bottomRight,
-        clipRect.bottomRight.translate(-cornerHandleSize, 0),
+        cropRect.bottomRight,
+        cropRect.bottomRight.translate(-cornerHandleSize, 0),
         cornerHandlePaint,
       );
   }
 
   @override
-  bool shouldRepaint(covariant _ClipShadowOverlayPainter oldDelegate) =>
-      oldDelegate.clipRect != clipRect ||
+  bool shouldRepaint(covariant _CropShadowOverlayPainter oldDelegate) =>
+      oldDelegate.cropRect != cropRect ||
       oldDelegate.overlayColor != overlayColor ||
       oldDelegate.lineColor != lineColor;
 }
@@ -1152,8 +1152,8 @@ class _NormalOperationBar extends HookWidget {
             converter: (state) {
       final width = imageEditorBloc.image.width;
       final height = imageEditorBloc.image.height;
-      return state.clipRect.width.round() != width ||
-          state.clipRect.height.round() != height;
+      return state.cropRect.width.round() != width ||
+          state.cropRect.height.round() != height;
     });
     return Material(
       borderRadius: BorderRadius.circular(8),
@@ -1189,35 +1189,35 @@ class _NormalOperationBar extends HookWidget {
               buildMenus: () => [
                 ContextMenu(
                   title: context.l10n.originalImage,
-                  onTap: () => imageEditorBloc.setClipRatio(null),
+                  onTap: () => imageEditorBloc.setCropRatio(null),
                 ),
                 ContextMenu(
                   title: '1:1',
-                  onTap: () => imageEditorBloc.setClipRatio(1),
+                  onTap: () => imageEditorBloc.setCropRatio(1),
                 ),
                 ContextMenu(
                   title: '2:3',
-                  onTap: () => imageEditorBloc.setClipRatio(2 / 3),
+                  onTap: () => imageEditorBloc.setCropRatio(2 / 3),
                 ),
                 ContextMenu(
                   title: '3:2',
-                  onTap: () => imageEditorBloc.setClipRatio(3 / 2),
+                  onTap: () => imageEditorBloc.setCropRatio(3 / 2),
                 ),
                 ContextMenu(
                   title: '3:4',
-                  onTap: () => imageEditorBloc.setClipRatio(3 / 4),
+                  onTap: () => imageEditorBloc.setCropRatio(3 / 4),
                 ),
                 ContextMenu(
                   title: '4:3',
-                  onTap: () => imageEditorBloc.setClipRatio(4 / 3),
+                  onTap: () => imageEditorBloc.setCropRatio(4 / 3),
                 ),
                 ContextMenu(
                   title: '9:16',
-                  onTap: () => imageEditorBloc.setClipRatio(9 / 16),
+                  onTap: () => imageEditorBloc.setCropRatio(9 / 16),
                 ),
                 ContextMenu(
                   title: '16:9',
-                  onTap: () => imageEditorBloc.setClipRatio(16 / 9),
+                  onTap: () => imageEditorBloc.setCropRatio(16 / 9),
                 ),
               ],
               child: ActionButton(
