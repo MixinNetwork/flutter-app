@@ -455,6 +455,10 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
       imagePath: file.path,
     );
   }
+
+  void setCropRect(Rect cropRect) {
+    emit(state.copyWith(clipRect: cropRect));
+  }
 }
 
 class _Preview extends HookWidget {
@@ -546,6 +550,54 @@ class _Preview extends HookWidget {
   }
 }
 
+extension _RectExt on Rect {
+  Rect ensureInside(Rect rect) => Rect.fromLTRB(
+        math.max(rect.left, left),
+        math.max(rect.top, top),
+        math.min(rect.right, right),
+        math.min(rect.bottom, bottom),
+      );
+
+  Rect ensureShiftInside(Rect rect) {
+    assert(width <= rect.width, 'width is greater than rect width');
+    assert(height <= rect.height, 'height is greater than rect height');
+
+    var offsetX = 0.0;
+    if (left < rect.left) {
+      offsetX = rect.left - left;
+    } else if (right > rect.right) {
+      offsetX = rect.right - right;
+    }
+    var offsetY = 0.0;
+    if (top < rect.top) {
+      offsetY = rect.top - top;
+    } else if (bottom > rect.bottom) {
+      offsetY = rect.bottom - bottom;
+    }
+    return translate(offsetX, offsetY);
+  }
+
+  Rect scaled(double scale) => Rect.fromLTRB(
+        left * scale,
+        top * scale,
+        right * scale,
+        bottom * scale,
+      );
+}
+
+Rect transformInsideRect(Rect rect, Rect parent, double radius) {
+  final center = parent.center;
+  final rotateImageRect = Rect.fromPoints(
+    _rotate(parent.topLeft, center, radius),
+    _rotate(parent.bottomRight, center, radius),
+  );
+
+  final topLeft = _rotate(rect.topLeft, center, radius);
+  final bottomRight = _rotate(rect.bottomRight, center, radius);
+  final transformed = Rect.fromPoints(topLeft, bottomRight);
+  return transformed.translate(-rotateImageRect.left, -rotateImageRect.top);
+}
+
 class _ClipRectWidget extends HookWidget {
   const _ClipRectWidget({
     Key? key,
@@ -562,40 +614,108 @@ class _ClipRectWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final clipRect =
+    final cropRect =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, Rect>(
       converter: (state) => state.clipRect,
     );
+
     final transformedRect = useMemoized(() {
-      if (clipRect.isEmpty || clipRect.isInfinite) {
+      if (cropRect.isEmpty || cropRect.isInfinite) {
         return Rect.fromLTRB(
             0, 0, scaledImageSize.width, scaledImageSize.height);
       }
-      final radius = -rotate.radius;
+      return transformInsideRect(
+              cropRect, Offset.zero & (scaledImageSize / scale), -rotate.radius)
+          .scaled(scale);
+    }, [cropRect, scale, scaledImageSize, rotate]);
 
-      final imageRect = Offset.zero & scaledImageSize;
-      final center = scaledImageSize.center(Offset.zero);
-      final rotateImageRect = Rect.fromPoints(
-        _rotate(imageRect.topLeft, center, radius),
-        _rotate(imageRect.bottomRight, center, radius),
-      );
+    final trackingRectCorner = useRef<_ImageDragArea?>(null);
 
-      final topLeft = _rotate(clipRect.topLeft * scale, center, radius);
-      final bottomRight = _rotate(clipRect.bottomRight * scale, center, radius);
-      final scaledCropRect = Rect.fromPoints(topLeft, bottomRight);
-      return scaledCropRect.translate(
-          -rotateImageRect.left, -rotateImageRect.top);
-    }, [clipRect, scale, scaledImageSize, rotate]);
     return Stack(
       fit: StackFit.expand,
       children: [
-        CustomPaint(
-          painter: _ClipShadowOverlayPainter(
-            clipRect: transformedRect,
-            overlayColor: Colors.black.withOpacity(0.4),
-            lineColor: Colors.white,
+        GestureDetector(
+          onPanStart: (details) {
+            final offset = details.localPosition;
+            const cornerSize = 30.0;
+
+            if (!transformedRect.contains(offset)) {
+              trackingRectCorner.value = null;
+              return;
+            }
+            if (offset.dx < transformedRect.left + cornerSize &&
+                offset.dy < transformedRect.top + cornerSize) {
+              trackingRectCorner.value = _ImageDragArea.topLeft;
+            } else if (offset.dx > transformedRect.right - cornerSize &&
+                offset.dy < transformedRect.top + cornerSize) {
+              trackingRectCorner.value = _ImageDragArea.topRight;
+            } else if (offset.dx < transformedRect.left + cornerSize &&
+                offset.dy > transformedRect.bottom - cornerSize) {
+              trackingRectCorner.value = _ImageDragArea.bottomLeft;
+            } else if (offset.dx > transformedRect.right - cornerSize &&
+                offset.dy > transformedRect.bottom - cornerSize) {
+              trackingRectCorner.value = _ImageDragArea.bottomRight;
+            } else {
+              trackingRectCorner.value = _ImageDragArea.center;
+            }
+          },
+          onPanUpdate: (details) {
+            final corner = trackingRectCorner.value;
+            if (corner == null) {
+              return;
+            }
+            final delta = details.delta;
+            final imageRect = Offset.zero & rotate.apply(scaledImageSize);
+            Rect cropRect;
+            switch (corner) {
+              case _ImageDragArea.topLeft:
+                cropRect = Rect.fromPoints(
+                  transformedRect.topLeft + delta,
+                  transformedRect.bottomRight,
+                ).ensureInside(imageRect);
+                break;
+              case _ImageDragArea.topRight:
+                cropRect = Rect.fromPoints(
+                  transformedRect.bottomLeft,
+                  transformedRect.topRight + delta,
+                ).ensureInside(imageRect);
+                break;
+              case _ImageDragArea.bottomLeft:
+                cropRect = Rect.fromPoints(
+                  transformedRect.bottomLeft + delta,
+                  transformedRect.topRight,
+                ).ensureInside(imageRect);
+                break;
+              case _ImageDragArea.bottomRight:
+                cropRect = Rect.fromPoints(
+                  transformedRect.topLeft,
+                  transformedRect.bottomRight + delta,
+                ).ensureInside(imageRect);
+                break;
+              case _ImageDragArea.center:
+                cropRect =
+                    transformedRect.shift(delta).ensureShiftInside(imageRect);
+                break;
+            }
+
+            if (cropRect.isEmpty) {
+              return;
+            }
+            final rect = transformInsideRect(cropRect, imageRect, rotate.radius)
+                .scaled(1 / scale);
+            context.read<_ImageEditorBloc>().setCropRect(rect);
+          },
+          onPanEnd: (details) {
+            trackingRectCorner.value = null;
+          },
+          child: CustomPaint(
+            painter: _ClipShadowOverlayPainter(
+              clipRect: transformedRect,
+              overlayColor: Colors.black.withOpacity(0.4),
+              lineColor: Colors.white,
+            ),
+            child: const SizedBox.expand(),
           ),
-          child: const SizedBox.expand(),
         ),
       ],
     );
@@ -613,6 +733,9 @@ class _ClipShadowOverlayPainter extends CustomPainter {
   final Color overlayColor;
   final Color lineColor;
   final double lineWidth = 1;
+
+  final double cornerHandleWidth = 4;
+  final double cornerHandleSize = 30;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -650,6 +773,57 @@ class _ClipShadowOverlayPainter extends CustomPainter {
         Offset(clipRect.left + clipRect.width * 2 / 3, clipRect.top),
         Offset(clipRect.left + clipRect.width * 2 / 3, clipRect.bottom),
         linePaint,
+      );
+
+    final cornerHandlePaint = Paint()
+      ..color = lineColor
+      ..strokeWidth = cornerHandleWidth
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.fill;
+    canvas
+      // left top
+      ..drawLine(
+        clipRect.topLeft,
+        clipRect.topLeft.translate(0, cornerHandleSize),
+        cornerHandlePaint,
+      )
+      ..drawLine(
+        clipRect.topLeft,
+        clipRect.topLeft.translate(cornerHandleSize, 0),
+        cornerHandlePaint,
+      )
+      // right top
+      ..drawLine(
+        clipRect.topRight,
+        clipRect.topRight.translate(0, cornerHandleSize),
+        cornerHandlePaint,
+      )
+      ..drawLine(
+        clipRect.topRight,
+        clipRect.topRight.translate(-cornerHandleSize, 0),
+        cornerHandlePaint,
+      )
+      // left bottom
+      ..drawLine(
+        clipRect.bottomLeft,
+        clipRect.bottomLeft.translate(0, -cornerHandleSize),
+        cornerHandlePaint,
+      )
+      ..drawLine(
+        clipRect.bottomLeft,
+        clipRect.bottomLeft.translate(cornerHandleSize, 0),
+        cornerHandlePaint,
+      )
+      // right bottom
+      ..drawLine(
+        clipRect.bottomRight,
+        clipRect.bottomRight.translate(0, -cornerHandleSize),
+        cornerHandlePaint,
+      )
+      ..drawLine(
+        clipRect.bottomRight,
+        clipRect.bottomRight.translate(-cornerHandleSize, 0),
+        cornerHandlePaint,
       );
   }
 
@@ -736,6 +910,14 @@ class _CustomDrawingWidget extends HookWidget {
       ),
     );
   }
+}
+
+enum _ImageDragArea {
+  topLeft,
+  topRight,
+  bottomLeft,
+  bottomRight,
+  center,
 }
 
 enum _ImageRotate {
