@@ -583,6 +583,14 @@ extension _RectExt on Rect {
         right * scale,
         bottom * scale,
       );
+
+  Rect flipHorizontalInParent(Rect parent, bool flip) {
+    if (!flip) {
+      return this;
+    }
+    return Rect.fromLTRB(
+        parent.width - right, top, parent.width - left, bottom);
+  }
 }
 
 Rect transformInsideRect(Rect rect, Rect parent, double radius) {
@@ -624,10 +632,13 @@ class _CropRectWidget extends HookWidget {
         return Rect.fromLTRB(
             0, 0, scaledImageSize.width, scaledImageSize.height);
       }
+      final rawImageRect = Offset.zero & (scaledImageSize / scale);
       return transformInsideRect(
-              cropRect, Offset.zero & (scaledImageSize / scale), -rotate.radius)
-          .scaled(scale);
-    }, [cropRect, scale, scaledImageSize, rotate]);
+        cropRect.flipHorizontalInParent(rawImageRect, isFlip),
+        rawImageRect,
+        -rotate.radius,
+      ).scaled(scale);
+    }, [cropRect, scale, scaledImageSize, rotate, isFlip]);
 
     final trackingRectCorner = useRef<_ImageDragArea?>(null);
 
@@ -701,7 +712,10 @@ class _CropRectWidget extends HookWidget {
             if (cropRect.isEmpty) {
               return;
             }
-            final rect = transformInsideRect(cropRect, imageRect, rotate.radius)
+            final rect = transformInsideRect(
+                    cropRect.flipHorizontalInParent(imageRect, isFlip),
+                    imageRect,
+                    rotate.radius)
                 .scaled(1 / scale);
             context.read<_ImageEditorBloc>().setCropRect(rect);
           },
