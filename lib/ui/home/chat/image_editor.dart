@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:image/image.dart' as img;
 
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../constants/resources.dart';
@@ -361,6 +363,23 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     ));
   }
 
+  Future<Uint8List?> _flipAndRotateImage(ui.Image image) async {
+    final bytes = await image.toBytes();
+    if (bytes == null) {
+      return null;
+    }
+    var imgImage = img.Image.fromBytes(image.width, image.height, bytes);
+
+    if (state.flip) {
+      img.flipHorizontal(imgImage);
+    }
+    if (state.rotate != _ImageRotate.none) {
+      imgImage = img.copyRotate(imgImage, 360 - state.rotate.degree);
+    }
+    final data = img.PngEncoder().encodeImage(imgImage);
+    return Uint8List.fromList(data);
+  }
+
   Future<ImageEditorSnapshot?> takeSnapshot() async {
     final recorder = ui.PictureRecorder();
 
@@ -368,23 +387,11 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
         ? state.cropRect
         : null;
 
-    final imageSize = state.rotate.apply(Size(
-      image.width.toDouble(),
-      image.height.toDouble(),
-    ));
+    final imageSize = Size(image.width.toDouble(), image.height.toDouble());
     final center = imageSize.center(Offset.zero);
 
     final canvas = Canvas(recorder)
-      ..clipRect(Rect.fromLTWH(0, 0, imageSize.width, imageSize.height))
-      ..translate(center.dx, center.dy);
-
-    if (state.rotate != _ImageRotate.none) {
-      canvas.rotate(-state.rotate.radius);
-    }
-    if (state.flip) {
-      canvas.scale(-1, 1);
-    }
-    canvas.translate(-center.dx, -center.dy);
+      ..clipRect(Rect.fromLTWH(0, 0, imageSize.width, imageSize.height));
 
     if (cropRect != null) {
       canvas.translate(-cropRect.left, -cropRect.top);
@@ -424,10 +431,9 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     final picture = recorder.endRecording();
     final ui.Image snapshotImage;
     if (cropRect != null) {
-      final size = state.rotate.apply(cropRect.size);
       snapshotImage = await picture.toImage(
-        size.width.round(),
-        size.height.round(),
+        cropRect.width.round(),
+        cropRect.height.round(),
       );
     } else {
       snapshotImage = await picture.toImage(
@@ -435,11 +441,19 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
         imageSize.height.round(),
       );
     }
-    final bytes = await snapshotImage.toBytes(format: ui.ImageByteFormat.png);
+
+    final Uint8List? bytes;
+
+    if (!state.flip && state.rotate == _ImageRotate.none) {
+      bytes = await snapshotImage.toBytes(format: ui.ImageByteFormat.png);
+    } else {
+      bytes = await _flipAndRotateImage(snapshotImage);
+    }
     if (bytes == null) {
       e('failed to convert image to bytes');
       return null;
     }
+    // Save the image to the device's local storage.
     final file = await saveBytesToTempFile(bytes, 'image_edit', '.png');
     if (file == null) {
       e('failed to save image to file');
@@ -952,6 +966,19 @@ extension _ImageRotateExt on _ImageRotate {
         return math.pi;
       case _ImageRotate.threeQuarter:
         return 3 * math.pi / 2;
+    }
+  }
+
+  double get degree {
+    switch (this) {
+      case _ImageRotate.none:
+        return 0;
+      case _ImageRotate.quarter:
+        return 90;
+      case _ImageRotate.half:
+        return 180;
+      case _ImageRotate.threeQuarter:
+        return 270;
     }
   }
 
