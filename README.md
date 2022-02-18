@@ -1,4 +1,4 @@
-# flutter_app
+# Mixin Messenger Flutter version
 
 [![Dart CI](https://github.com/MixinNetwork/flutter-app/workflows/Dart%20CI/badge.svg)](https://github.com/MixinNetwork/flutter-app/actions)
 
