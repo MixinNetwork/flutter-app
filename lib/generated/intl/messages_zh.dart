@@ -274,6 +274,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reply": MessageLookupByLibrary.simpleMessage("回复"),
         "report": MessageLookupByLibrary.simpleMessage("举报"),
         "reportWarning": MessageLookupByLibrary.simpleMessage("确定要举报这个联系人？"),
+        "reset": MessageLookupByLibrary.simpleMessage("重置"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
         "saveAs": MessageLookupByLibrary.simpleMessage("另存为"),
         "saveToGallery": MessageLookupByLibrary.simpleMessage("保存到图库"),

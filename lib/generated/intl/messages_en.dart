@@ -313,6 +313,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "report": MessageLookupByLibrary.simpleMessage("Report"),
         "reportWarning": MessageLookupByLibrary.simpleMessage(
             "Do you want to report and block this contact?"),
+        "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveAs": MessageLookupByLibrary.simpleMessage("Save as"),
         "saveToGallery":

@@ -500,6 +500,24 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   void setCropRect(Rect cropRect) {
     emit(state.copyWith(cropRect: cropRect));
   }
+
+  void reset() {
+    _redoDrawLines.addAll(_customDrawLines);
+    _customDrawLines.clear();
+    _notifyCustomDrawUpdated();
+    emit(
+      state.copyWith(
+        cropRect: Rect.fromLTWH(
+          0,
+          0,
+          image.width.toDouble(),
+          image.height.toDouble(),
+        ),
+        flip: false,
+        rotate: _ImageRotate.none,
+      ),
+    );
+  }
 }
 
 class _Preview extends HookWidget {
@@ -1171,6 +1189,29 @@ class _ColorTile extends HookWidget {
   }
 }
 
+class _ResetButton extends HookWidget {
+  const _ResetButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final canReset =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
+      converter: (state) => state.canReset,
+    );
+    return SizedBox(
+      height: 38,
+      child: canReset
+          ? TextButton(
+              child: Text(context.l10n.reset),
+              onPressed: () {
+                context.read<_ImageEditorBloc>().reset();
+              },
+            )
+          : null,
+    );
+  }
+}
+
 class _OperationButtons extends HookWidget {
   const _OperationButtons({Key? key}) : super(key: key);
 
@@ -1185,7 +1226,7 @@ class _OperationButtons extends HookWidget {
         if (drawMode != DrawMode.none)
           const _DrawColorSelector()
         else
-          const SizedBox(height: 38),
+          const _ResetButton(),
         const SizedBox(height: 8),
         if (drawMode != DrawMode.none)
           const _DrawOperationBar()
