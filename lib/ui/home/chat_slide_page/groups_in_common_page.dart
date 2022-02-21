@@ -1,0 +1,130 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
+import '../../../constants/resources.dart';
+import '../../../db/mixin_database.dart';
+import '../../../utils/extension/extension.dart';
+import '../../../utils/hook.dart';
+import '../../../widgets/app_bar.dart';
+import '../../../widgets/avatar_view/avatar_view.dart';
+import '../bloc/conversation_cubit.dart';
+
+class GroupsInCommonPage extends HookWidget {
+  const GroupsInCommonPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final userId = useMemoized(() {
+      final userId = context.read<ConversationCubit>().state?.userId;
+      assert(userId != null, 'userId is null');
+      return userId ?? '';
+    });
+    return Scaffold(
+      backgroundColor: context.theme.primary,
+      appBar: MixinAppBar(
+        title: Text(context.l10n.groupsInCommon),
+      ),
+      body: _ConversationList(userId: userId),
+    );
+  }
+}
+
+class _ConversationList extends HookWidget {
+  const _ConversationList({
+    Key? key,
+    required this.userId,
+  }) : super(key: key);
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) {
+    final conversationList = useMemoizedStream(() {
+      final selfId = context.accountServer.userId;
+      return context.accountServer.database.conversationDao
+          .findTheSameConversations(selfId, userId)
+          .watch();
+    }, keys: [userId]).data;
+
+    if (conversationList == null) {
+      return const Center(
+        child: SizedBox.square(
+          dimension: 24,
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    if (conversationList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(
+              Resources.assetsImagesEmptyFileSvg,
+              height: 80,
+              width: 80,
+              color: context.theme.secondaryText,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              context.l10n.noResults,
+              style: TextStyle(
+                color: context.theme.secondaryText,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return ListView.builder(
+      itemCount: conversationList.length,
+      itemBuilder: (context, index) {
+        final conversation = conversationList[index];
+        return _GroupConversationItemWidget(group: conversation);
+      },
+    );
+  }
+}
+
+class _GroupConversationItemWidget extends StatelessWidget {
+  const _GroupConversationItemWidget({
+    Key? key,
+    required this.group,
+  }) : super(key: key);
+
+  final GroupMinimal group;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        leading: ConversationAvatarWidget(
+          size: 50,
+          conversationId: group.conversationId,
+          category: ConversationCategory.group,
+          groupIconUrl: group.groupIconUrl,
+        ),
+        title: Text(
+          group.groupName ?? '',
+          style: TextStyle(
+            color: context.theme.text,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: Text(
+          context.l10n.participantsCount(group.memberCount),
+          style: TextStyle(
+            color: context.theme.secondaryText,
+            fontSize: 14,
+          ),
+        ),
+        onTap: () {
+          ConversationCubit.selectConversation(
+            context,
+            group.conversationId,
+          );
+        },
+      );
+}

@@ -239,5 +239,6 @@
   "stickerAlbumDetail": "表情详情",
   "addStickers": "添加所有表情",
   "removeStickers": "移除所有表情",
-  "myStickerAlbums": "我的表情"
+  "myStickerAlbums": "我的表情",
+  "groupsInCommon": "共同所在群组"
 }

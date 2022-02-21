@@ -279,6 +279,15 @@ class ChatInfoPage extends HookWidget {
                 ],
               ),
             ),
+            if (!isGroupConversation)
+              CellGroup(
+                child: CellItem(
+                  title: Text(context.l10n.groupsInCommon),
+                  onTap: () => context
+                      .read<ChatSideCubit>()
+                      .pushPage(ChatSideCubit.groupsInCommon),
+                ),
+              ),
             if (conversation.app?.creatorId != null)
               CellGroup(
                 child: CellItem(
