@@ -219,6 +219,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     if (snapshot != null) {
       _customDrawLines.addAll(snapshot.customDrawLines);
       setCropRect(snapshot.cropRect);
+      _notifyCustomDrawUpdated();
       emit(state.copyWith(
         rotate: snapshot.imageRotate,
         flip: snapshot.flip,
@@ -1102,26 +1103,35 @@ class _DrawerPainter extends CustomPainter {
       oldDelegate.scale != scale;
 }
 
-class _DrawColorSelector extends StatelessWidget {
+class _DrawColorSelector extends HookWidget {
   const _DrawColorSelector({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        height: 38,
-        child: Material(
-          color: context.theme.chatBackground,
-          borderRadius: BorderRadius.circular(62),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(width: 2),
-              // TODO custom color selector
-              for (final color in _kPresetColors) _ColorTile(color: color),
-              const SizedBox(width: 2),
-            ],
-          ),
+  Widget build(BuildContext context) {
+    final isCustomColor = useState(false);
+    return SizedBox(
+      height: 38,
+      child: Material(
+        color: context.theme.chatBackground,
+        borderRadius: BorderRadius.circular(62),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(width: 2),
+            _CustomColorTile(
+              onTap: () => isCustomColor.value = !isCustomColor.value,
+              selected: isCustomColor.value,
+            ),
+            if (!isCustomColor.value)
+              for (final color in _kPresetColors) _NormalColorTile(color: color)
+            else
+              _CustomColorBar(onColorSelected: (Color color) {}),
+            const SizedBox(width: 2),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
 
 const _kPresetColors = [
@@ -1137,8 +1147,8 @@ const _kPresetColors = [
 
 const _kDefaultDrawColor = Color(0xFFE84D3D);
 
-class _ColorTile extends HookWidget {
-  const _ColorTile({Key? key, required this.color}) : super(key: key);
+class _NormalColorTile extends HookWidget {
+  const _NormalColorTile({Key? key, required this.color}) : super(key: key);
 
   final Color color;
 
@@ -1151,7 +1161,7 @@ class _ColorTile extends HookWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: InkResponse(
-        radius: 24,
+        radius: 18,
         onTap: () {
           context.read<_ImageEditorBloc>().setCustomDrawColor(color);
         },
@@ -1184,6 +1194,148 @@ class _ColorTile extends HookWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _CustomColorTile extends StatelessWidget {
+  const _CustomColorTile({
+    Key? key,
+    required this.selected,
+    required this.onTap,
+  }) : super(key: key);
+
+  final bool selected;
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: InkResponse(
+          radius: 18,
+          onTap: onTap,
+          child: SizedBox(
+            width: 28,
+            height: 28,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (selected)
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        border:
+                            Border.all(color: context.theme.accent, width: 2),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                const Center(
+                  child: SizedBox.square(
+                    dimension: 21,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        // background: conic-gradient(from 180deg at 50% 50%, #FF0000 0deg, #FF0000 4.38deg, #FC8700 30.55deg, #FAFF00 60.44deg, #BDFF00 97.21deg, #24FF00 124.99deg, #00F0FF 148.32deg, #00C2FF 176.19deg, #0047FF 216.25deg, #2400FF 254.25deg, #BD00FF 293.63deg, #FF007A 326.08deg, #FF0000 359.12deg, #FF0000 360deg, #FF0000 360deg);
+                        gradient: SweepGradient(
+                          transform: GradientRotation(math.pi / 2),
+                          colors: [
+                            Color(0xFFFF0000),
+                            Color(0xFFFC8700),
+                            Color(0xFFFAFF00),
+                            Color(0xFFBDFF00),
+                            Color(0xFF24FF00),
+                            Color(0xFF00F0FF),
+                            Color(0xFF00C2FF),
+                            Color(0xFF0047FF),
+                            Color(0xFF2400FF),
+                            Color(0xFFBD00FF),
+                            Color(0xFFFF007A),
+                            Color(0xFFFF0000),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
+class _CustomColorBar extends HookWidget {
+  const _CustomColorBar({
+    Key? key,
+    required this.onColorSelected,
+  }) : super(key: key);
+
+  final void Function(Color color) onColorSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final initialHue = useMemoized(() {
+      final color = context.read<_ImageEditorBloc>().state.drawColor;
+      return HSLColor.fromColor(color).hue;
+    });
+    const maxSlideOffset = 256.0 - 12 - 9.0;
+    final sliderOffset = useState<double>(initialHue / 360 * maxSlideOffset);
+
+    Color sliderOffsetToColor(double offset) {
+      final hue = (offset / maxSlideOffset) * 360;
+      return HSLColor.fromAHSL(1, hue, 1, 0.5).toColor();
+    }
+
+    return Container(
+      width: 256,
+      padding: const EdgeInsets.only(left: 4, right: 8),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(
+            top: 8,
+            bottom: 8,
+            child: DecoratedBox(
+                decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  for (var i = 0; i < 360; i++)
+                    HSVColor.fromAHSV(1, i.toDouble(), 1, 1).toColor(),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(22),
+            )),
+          ),
+          Positioned(
+            left: sliderOffset.value,
+            top: 4,
+            width: 9,
+            bottom: 4,
+            child: GestureDetector(
+              onPanUpdate: (details) {
+                sliderOffset.value += details.delta.dx;
+                if (sliderOffset.value < 0) {
+                  sliderOffset.value = 0;
+                } else if (sliderOffset.value > maxSlideOffset) {
+                  sliderOffset.value = maxSlideOffset;
+                }
+                final color = sliderOffsetToColor(sliderOffset.value);
+                onColorSelected(color);
+                context.read<_ImageEditorBloc>().setCustomDrawColor(color);
+              },
+              child: Material(
+                color: Colors.white,
+                shadowColor: Colors.black.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(58),
+                elevation: 4,
+                child: const SizedBox(width: 9, height: 30),
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
