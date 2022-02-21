@@ -101,7 +101,7 @@ class TextMessage extends HookWidget {
         content: content,
         builder: (context, newContent, mentionHighlightTextSpans) =>
             HighlightSelectableText(
-          newContent!,
+          newContent ?? ' ',
           highlightTextSpans: [
             ...keywordHighlightTextSpans,
             HighlightTextSpan(
