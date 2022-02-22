@@ -156,6 +156,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "editAnnouncement": MessageLookupByLibrary.simpleMessage("编辑群公告"),
         "editCircle": MessageLookupByLibrary.simpleMessage("管理圈子"),
         "editCircleName": MessageLookupByLibrary.simpleMessage("编辑圈子名称"),
+        "editImageClearWarning":
+            MessageLookupByLibrary.simpleMessage("退出将会清除此次所有的改动。"),
         "editName": MessageLookupByLibrary.simpleMessage("编辑名称"),
         "editProfile": MessageLookupByLibrary.simpleMessage("编辑资料"),
         "exit": MessageLookupByLibrary.simpleMessage("退出"),
@@ -240,6 +242,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "notificationPermissionTitle":
             MessageLookupByLibrary.simpleMessage("打开通知"),
         "openInExternalApp": MessageLookupByLibrary.simpleMessage("通过外部程序打开"),
+        "originalImage": MessageLookupByLibrary.simpleMessage("原图"),
         "pageDeleteCircle": m16,
         "pageEditProfileJoin": m17,
         "pageLandingClickToReload":
@@ -271,6 +274,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reply": MessageLookupByLibrary.simpleMessage("回复"),
         "report": MessageLookupByLibrary.simpleMessage("举报"),
         "reportWarning": MessageLookupByLibrary.simpleMessage("确定要举报这个联系人？"),
+        "reset": MessageLookupByLibrary.simpleMessage("重置"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
         "saveAs": MessageLookupByLibrary.simpleMessage("另存为"),
         "saveToGallery": MessageLookupByLibrary.simpleMessage("保存到图库"),

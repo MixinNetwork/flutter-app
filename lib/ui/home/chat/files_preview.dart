@@ -18,6 +18,7 @@ import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/load_balancer_utils.dart';
+import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/system/clipboard.dart';
 import '../../../widgets/action_button.dart';
@@ -26,6 +27,7 @@ import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../bloc/conversation_cubit.dart';
+import 'image_editor.dart';
 
 Future<void> showFilesPreviewDialog(
     BuildContext context, List<XFile> files) async {
@@ -33,7 +35,7 @@ Future<void> showFilesPreviewDialog(
     context: context,
     child: _FilesPreviewDialog(
       initialFiles: await Future.wait(files.map(
-        (e) async => _File(e, await e.length()),
+        (e) async => _File(e, await e.length(), null),
       )),
     ),
   );
@@ -41,7 +43,7 @@ Future<void> showFilesPreviewDialog(
 
 /// We need this view object to keep the value of file#length.
 class _File {
-  _File(this.file, this.length);
+  _File(this.file, this.length, this.imageEditorSnapshot);
 
   static Future<_File> createFromPath(String path) {
     final file = File(path);
@@ -49,9 +51,11 @@ class _File {
   }
 
   static Future<_File> createFromFile(File file) async =>
-      _File(file.xFile, await file.length());
+      _File(file.xFile, await file.length(), null);
 
   final XFile file;
+
+  final ImageEditorSnapshot? imageEditorSnapshot;
 
   String get path => file.path;
 
@@ -64,6 +68,7 @@ class _File {
 
 typedef _FileDeleteCallback = void Function(_File);
 typedef _FileAddCallback = void Function(List<_File>);
+typedef _ImageEditedCallback = void Function(_File, ImageEditorSnapshot);
 
 const _kDefaultArchiveName = 'Archive.zip';
 
@@ -193,6 +198,18 @@ class _FilesPreviewDialog extends HookWidget {
                                     animation: animation,
                                     onDelete: removeFile,
                                     showBigImage: showAsBigImage,
+                                    onImageEdited: (file, image) async {
+                                      final index = files.value.indexOf(file);
+                                      if (index == -1) {
+                                        e('failed to found file');
+                                        return;
+                                      }
+                                      final list = files.value.toList();
+                                      final newFile = File(image.imagePath);
+                                      list[index] = _File(newFile.xFile,
+                                          await newFile.length(), image);
+                                      files.value = list;
+                                    },
                                   )),
                           const _PageZip(),
                         ],
@@ -292,12 +309,15 @@ class _AnimatedFileTile extends HookWidget {
     required this.animation,
     this.onDelete,
     required this.showBigImage,
+    this.onImageEdited,
   }) : super(key: key);
 
   final _File file;
   final Animation<double> animation;
 
   final _FileDeleteCallback? onDelete;
+
+  final _ImageEditedCallback? onImageEdited;
 
   final ValueNotifier<bool> showBigImage;
 
@@ -315,6 +335,8 @@ class _AnimatedFileTile extends HookWidget {
                   firstChild: _TileBigImage(
                     file: file,
                     onDelete: () => onDelete?.call(file),
+                    onEdited: (file, snapshot) =>
+                        onImageEdited?.call(file, snapshot),
                   ),
                   secondChild: _TileNormalFile(
                     file: file,
@@ -481,11 +503,14 @@ class _TileBigImage extends HookWidget {
     Key? key,
     required this.file,
     required this.onDelete,
+    required this.onEdited,
   }) : super(key: key);
 
   final _File file;
 
   final VoidCallback onDelete;
+
+  final _ImageEditedCallback onEdited;
 
   @override
   Widget build(BuildContext context) {
@@ -529,14 +554,40 @@ class _TileBigImage extends HookWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   )),
-                  child: Align(
-                    alignment: Alignment.bottomRight,
-                    child: ActionButton(
-                      color: Colors.white,
-                      name: Resources.assetsImagesDeleteSvg,
-                      padding: const EdgeInsets.all(10),
-                      onTap: onDelete,
-                    ),
+                  child: Row(
+                    children: [
+                      const Spacer(),
+                      ActionButton(
+                        color: Colors.white,
+                        name: Resources.assetsImagesEditImageSvg,
+                        padding: const EdgeInsets.all(10),
+                        onTap: () async {
+                          ImageEditorSnapshot? snapshot;
+                          if (file.imageEditorSnapshot != null) {
+                            snapshot = await showImageEditor(
+                              context,
+                              path: file.imageEditorSnapshot!.rawImagePath,
+                              snapshot: file.imageEditorSnapshot,
+                            );
+                          } else {
+                            snapshot = await showImageEditor(
+                              context,
+                              path: file.path,
+                            );
+                          }
+                          if (snapshot == null) {
+                            return;
+                          }
+                          onEdited.call(file, snapshot);
+                        },
+                      ),
+                      ActionButton(
+                        color: Colors.white,
+                        name: Resources.assetsImagesDeleteSvg,
+                        padding: const EdgeInsets.all(10),
+                        onTap: onDelete,
+                      ),
+                    ],
                   ),
                 ),
                 crossFadeState: !showDelete.value
