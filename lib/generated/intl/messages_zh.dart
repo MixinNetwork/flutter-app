@@ -192,7 +192,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupSearchParticipants":
             MessageLookupByLibrary.simpleMessage("Mixin ID, 昵称"),
         "groups": MessageLookupByLibrary.simpleMessage("群组"),
-        "groupsInCommon": MessageLookupByLibrary.simpleMessage("共同所在群组"),
+        "groupsInCommon": MessageLookupByLibrary.simpleMessage("共同群组"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("帮助中心"),
         "image": MessageLookupByLibrary.simpleMessage("照片"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("包含文件"),
