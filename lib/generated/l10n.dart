@@ -2510,6 +2510,36 @@ class Localization {
     );
   }
 
+  /// `Original`
+  String get originalImage {
+    return Intl.message(
+      'Original',
+      name: 'originalImage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All changes will be lost. Are you sure you want to exit?`
+  String get editImageClearWarning {
+    return Intl.message(
+      'All changes will be lost. Are you sure you want to exit?',
+      name: 'editImageClearWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset`
+  String get reset {
+    return Intl.message(
+      'Reset',
+      name: 'reset',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Groups in common`
   String get groupsInCommon {
     return Intl.message(

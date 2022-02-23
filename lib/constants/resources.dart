@@ -60,6 +60,29 @@ class Resources {
 
   static const String assetsImagesDownloadSvg = 'assets/images/download.svg';
 
+  static const String assetsImagesEditImageSvg = 'assets/images/edit_image.svg';
+
+  static const String assetsImagesEditImageClipSvg =
+      'assets/images/edit_image_clip.svg';
+
+  static const String assetsImagesEditImageDrawSvg =
+      'assets/images/edit_image_draw.svg';
+
+  static const String assetsImagesEditImageEraseSvg =
+      'assets/images/edit_image_erase.svg';
+
+  static const String assetsImagesEditImageFlipSvg =
+      'assets/images/edit_image_flip.svg';
+
+  static const String assetsImagesEditImageRedoSvg =
+      'assets/images/edit_image_redo.svg';
+
+  static const String assetsImagesEditImageRotateSvg =
+      'assets/images/edit_image_rotate.svg';
+
+  static const String assetsImagesEditImageUndoSvg =
+      'assets/images/edit_image_undo.svg';
+
   static const String assetsImagesEmptyFileSvg = 'assets/images/empty_file.svg';
 
   static const String assetsImagesEmptyImageSvg =
