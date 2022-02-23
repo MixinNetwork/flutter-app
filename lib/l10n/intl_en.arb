@@ -249,5 +249,6 @@
   "addStickerFailed": "Add sticker failed",
   "originalImage": "Original",
   "editImageClearWarning": "All changes will be lost. Are you sure you want to exit?",
-  "reset": "Reset"
+  "reset": "Reset",
+  "groupsInCommon": "Groups in common"
 }

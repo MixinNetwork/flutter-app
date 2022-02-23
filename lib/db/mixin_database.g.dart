@@ -13905,6 +13905,26 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<GroupMinimal> findSameConversations(String selfId, String userId) {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.name AS groupName, (SELECT count(user_id) FROM participants WHERE conversation_id = c.conversation_id) AS memberCount FROM participants AS p INNER JOIN conversations AS c ON c.conversation_id = p.conversation_id WHERE p.user_id IN (?1, ?2) AND c.status = 2 AND c.category = \'GROUP\' GROUP BY c.conversation_id HAVING count(p.user_id) = 2 ORDER BY c.last_message_created_at DESC',
+        variables: [
+          Variable<String>(selfId),
+          Variable<String>(userId)
+        ],
+        readsFrom: {
+          conversations,
+          participants,
+        }).map((QueryRow row) {
+      return GroupMinimal(
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
+        groupName: row.read<String?>('groupName'),
+        memberCount: row.read<int>('memberCount'),
+      );
+    });
+  }
+
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
@@ -15440,6 +15460,40 @@ class ConversationStorageUsage {
           ..write('fullName: $fullName, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('isVerified: $isVerified')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class GroupMinimal {
+  final String conversationId;
+  final String? groupIconUrl;
+  final String? groupName;
+  final int memberCount;
+  GroupMinimal({
+    required this.conversationId,
+    this.groupIconUrl,
+    this.groupName,
+    required this.memberCount,
+  });
+  @override
+  int get hashCode =>
+      Object.hash(conversationId, groupIconUrl, groupName, memberCount);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GroupMinimal &&
+          other.conversationId == this.conversationId &&
+          other.groupIconUrl == this.groupIconUrl &&
+          other.groupName == this.groupName &&
+          other.memberCount == this.memberCount);
+  @override
+  String toString() {
+    return (StringBuffer('GroupMinimal(')
+          ..write('conversationId: $conversationId, ')
+          ..write('groupIconUrl: $groupIconUrl, ')
+          ..write('groupName: $groupName, ')
+          ..write('memberCount: $memberCount')
           ..write(')'))
         .toString();
   }

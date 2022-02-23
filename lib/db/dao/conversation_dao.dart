@@ -432,4 +432,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         [],
         db.conversations.conversationId.equals(conversationId),
       );
+
+  Selectable<GroupMinimal> findTheSameConversations(
+          String selfId, String userId) =>
+      db.findSameConversations(selfId, userId);
 }

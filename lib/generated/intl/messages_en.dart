@@ -226,6 +226,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupSearchParticipants":
             MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
         "groups": MessageLookupByLibrary.simpleMessage("Groups"),
+        "groupsInCommon":
+            MessageLookupByLibrary.simpleMessage("Groups in common"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("Include Files"),

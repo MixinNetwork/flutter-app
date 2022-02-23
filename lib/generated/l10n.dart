@@ -2559,6 +2559,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Groups in common`
+  String get groupsInCommon {
+    return Intl.message(
+      'Groups in common',
+      name: 'groupsInCommon',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

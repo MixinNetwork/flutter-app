@@ -96,3 +96,15 @@ SELECT c.conversation_id, c.owner_id, c.category, c.icon_url, c.name, u.identity
 FROM conversations c
          INNER JOIN users u ON u.user_id = c.owner_id
 WHERE c.category IS NOT NULL;
+
+
+findSameConversations AS GroupMinimal:
+SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.name AS groupName, (SELECT count(user_id) from participants where conversation_id = c.conversation_id) AS memberCount
+FROM participants p
+INNER JOIN conversations c ON c.conversation_id = p.conversation_id
+WHERE p.user_id IN (:selfId, :userId)
+AND c.status = 2
+AND c.category = 'GROUP'
+group by c.conversation_id
+HAVING count(p.user_id) = 2
+ORDER BY c.last_message_created_at DESC;
