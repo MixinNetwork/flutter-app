@@ -17,6 +17,7 @@ extension StickerAlbumsCompanionExtension on sdk.StickerAlbum {
         description: description,
         createdAt: createdAt,
         banner: Value(banner),
+        isVerified: Value(isVerified),
       );
 }
 
