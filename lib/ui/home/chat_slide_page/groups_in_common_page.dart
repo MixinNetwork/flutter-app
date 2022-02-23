@@ -9,7 +9,9 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
+import '../../../widgets/interactive_decorated_box.dart';
 import '../bloc/conversation_cubit.dart';
+import '../conversation/conversation_page.dart';
 
 class GroupsInCommonPage extends HookWidget {
   const GroupsInCommonPage({Key? key}) : super(key: key);
@@ -97,34 +99,64 @@ class _GroupConversationItemWidget extends StatelessWidget {
   final GroupMinimal group;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-        leading: ConversationAvatarWidget(
-          size: 50,
-          conversationId: group.conversationId,
-          category: ConversationCategory.group,
-          groupIconUrl: group.groupIconUrl,
-        ),
-        title: Text(
-          group.groupName ?? '',
-          style: TextStyle(
-            color: context.theme.text,
-            fontSize: 16,
+  Widget build(BuildContext context) => SizedBox(
+        height: ConversationPage.conversationItemHeight,
+        child: InteractiveDecoratedBox(
+          onTap: () {
+            ConversationCubit.selectConversation(
+              context,
+              group.conversationId,
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  ConversationAvatarWidget(
+                    size: ConversationPage.conversationItemAvatarSize,
+                    conversationId: group.conversationId,
+                    category: ConversationCategory.group,
+                    groupIconUrl: group.groupIconUrl,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            group.groupName ?? '',
+                            style: TextStyle(
+                              color: context.theme.text,
+                              fontSize: 16,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(
+                            height: 20,
+                            child: Text(
+                              context.l10n.participantsCount(group.memberCount),
+                              style: TextStyle(
+                                color: context.theme.secondaryText,
+                                fontSize: 14,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
           ),
         ),
-        subtitle: Text(
-          context.l10n.participantsCount(group.memberCount),
-          style: TextStyle(
-            color: context.theme.secondaryText,
-            fontSize: 14,
-          ),
-        ),
-        onTap: () {
-          ConversationCubit.selectConversation(
-            context,
-            group.conversationId,
-          );
-        },
       );
 }
