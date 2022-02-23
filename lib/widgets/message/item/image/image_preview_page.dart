@@ -360,6 +360,13 @@ class _Bar extends StatelessWidget {
             onTap: controller.zoomOut,
           ),
           const SizedBox(width: 14),
+          ActionButton(
+            name: Resources.assetsImagesRotatoSvg,
+            color: context.theme.icon,
+            size: 20,
+            onTap: controller.rotate,
+          ),
+          const SizedBox(width: 14),
           if (!isTranscriptPage)
             ActionButton(
               name: Resources.assetsImagesShareSvg,

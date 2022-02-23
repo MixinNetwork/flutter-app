@@ -229,6 +229,8 @@ class Resources {
   static const String assetsImagesRecentStickerSvg =
       'assets/images/recent_sticker.svg';
 
+  static const String assetsImagesRotatoSvg = 'assets/images/rotato.svg';
+
   static const String assetsImagesSelectedSvg = 'assets/images/selected.svg';
 
   static const String assetsImagesSendingSvg = 'assets/images/sending.svg';
