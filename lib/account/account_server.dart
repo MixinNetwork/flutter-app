@@ -21,6 +21,7 @@ import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/dao/sticker_album_dao.dart';
+import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
 import '../db/database_event_bus.dart';
 import '../db/extension/job.dart';
@@ -627,19 +628,12 @@ class AccountServer {
     try {
       final response = await client.accountApi.getStickersByAlbumId(albumId);
       final relationships = <db.StickerRelationship>[];
-      final stickers = <db.Sticker>[];
+      final stickers = <db.StickersCompanion>[];
       response.data.forEach((sticker) {
         relationships.add(db.StickerRelationship(
             albumId: albumId, stickerId: sticker.stickerId));
-        stickers.add(db.Sticker(
-          stickerId: sticker.stickerId,
-          albumId: albumId,
-          name: sticker.name,
-          assetUrl: sticker.assetUrl,
-          assetType: sticker.assetType,
-          assetWidth: sticker.assetWidth,
-          assetHeight: sticker.assetHeight,
-          createdAt: sticker.createdAt,
+        stickers.add(sticker.asStickersCompanion.copyWith(
+          albumId: Value(albumId),
         ));
       });
 

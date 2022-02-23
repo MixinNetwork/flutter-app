@@ -3426,6 +3426,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
   final String description;
   final String? banner;
   final bool? added;
+  final bool isVerified;
   StickerAlbum(
       {required this.albumId,
       required this.name,
@@ -3437,7 +3438,8 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       required this.category,
       required this.description,
       this.banner,
-      this.added});
+      this.added,
+      required this.isVerified});
   factory StickerAlbum.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return StickerAlbum(
@@ -3463,6 +3465,8 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           .mapFromDatabaseResponse(data['${effectivePrefix}banner']),
       added: const BoolType()
           .mapFromDatabaseResponse(data['${effectivePrefix}added']),
+      isVerified: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}is_verified'])!,
     );
   }
   @override
@@ -3489,6 +3493,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
     if (!nullToAbsent || added != null) {
       map['added'] = Variable<bool?>(added);
     }
+    map['is_verified'] = Variable<bool>(isVerified);
     return map;
   }
 
@@ -3507,6 +3512,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           banner == null && nullToAbsent ? const Value.absent() : Value(banner),
       added:
           added == null && nullToAbsent ? const Value.absent() : Value(added),
+      isVerified: Value(isVerified),
     );
   }
 
@@ -3525,6 +3531,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       description: serializer.fromJson<String>(json['description']),
       banner: serializer.fromJson<String?>(json['banner']),
       added: serializer.fromJson<bool?>(json['added']),
+      isVerified: serializer.fromJson<bool>(json['is_verified']),
     );
   }
   @override
@@ -3542,6 +3549,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       'description': serializer.toJson<String>(description),
       'banner': serializer.toJson<String?>(banner),
       'added': serializer.toJson<bool?>(added),
+      'is_verified': serializer.toJson<bool>(isVerified),
     };
   }
 
@@ -3556,7 +3564,8 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           String? category,
           String? description,
           Value<String?> banner = const Value.absent(),
-          Value<bool?> added = const Value.absent()}) =>
+          Value<bool?> added = const Value.absent(),
+          bool? isVerified}) =>
       StickerAlbum(
         albumId: albumId ?? this.albumId,
         name: name ?? this.name,
@@ -3569,6 +3578,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
         description: description ?? this.description,
         banner: banner.present ? banner.value : this.banner,
         added: added.present ? added.value : this.added,
+        isVerified: isVerified ?? this.isVerified,
       );
   @override
   String toString() {
@@ -3583,14 +3593,15 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           ..write('category: $category, ')
           ..write('description: $description, ')
           ..write('banner: $banner, ')
-          ..write('added: $added')
+          ..write('added: $added, ')
+          ..write('isVerified: $isVerified')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(albumId, name, iconUrl, createdAt, updateAt,
-      orderedAt, userId, category, description, banner, added);
+      orderedAt, userId, category, description, banner, added, isVerified);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3605,7 +3616,8 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           other.category == this.category &&
           other.description == this.description &&
           other.banner == this.banner &&
-          other.added == this.added);
+          other.added == this.added &&
+          other.isVerified == this.isVerified);
 }
 
 class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
@@ -3620,6 +3632,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
   final Value<String> description;
   final Value<String?> banner;
   final Value<bool?> added;
+  final Value<bool> isVerified;
   const StickerAlbumsCompanion({
     this.albumId = const Value.absent(),
     this.name = const Value.absent(),
@@ -3632,6 +3645,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     this.description = const Value.absent(),
     this.banner = const Value.absent(),
     this.added = const Value.absent(),
+    this.isVerified = const Value.absent(),
   });
   StickerAlbumsCompanion.insert({
     required String albumId,
@@ -3645,6 +3659,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     required String description,
     this.banner = const Value.absent(),
     this.added = const Value.absent(),
+    this.isVerified = const Value.absent(),
   })  : albumId = Value(albumId),
         name = Value(name),
         iconUrl = Value(iconUrl),
@@ -3665,6 +3680,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     Expression<String>? description,
     Expression<String?>? banner,
     Expression<bool?>? added,
+    Expression<bool>? isVerified,
   }) {
     return RawValuesInsertable({
       if (albumId != null) 'album_id': albumId,
@@ -3678,6 +3694,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       if (description != null) 'description': description,
       if (banner != null) 'banner': banner,
       if (added != null) 'added': added,
+      if (isVerified != null) 'is_verified': isVerified,
     });
   }
 
@@ -3692,7 +3709,8 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       Value<String>? category,
       Value<String>? description,
       Value<String?>? banner,
-      Value<bool?>? added}) {
+      Value<bool?>? added,
+      Value<bool>? isVerified}) {
     return StickerAlbumsCompanion(
       albumId: albumId ?? this.albumId,
       name: name ?? this.name,
@@ -3705,6 +3723,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       description: description ?? this.description,
       banner: banner ?? this.banner,
       added: added ?? this.added,
+      isVerified: isVerified ?? this.isVerified,
     );
   }
 
@@ -3746,6 +3765,9 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     if (added.present) {
       map['added'] = Variable<bool?>(added.value);
     }
+    if (isVerified.present) {
+      map['is_verified'] = Variable<bool>(isVerified.value);
+    }
     return map;
   }
 
@@ -3762,7 +3784,8 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
           ..write('category: $category, ')
           ..write('description: $description, ')
           ..write('banner: $banner, ')
-          ..write('added: $added')
+          ..write('added: $added, ')
+          ..write('isVerified: $isVerified')
           ..write(')'))
         .toString();
   }
@@ -3843,6 +3866,13 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
       requiredDuringInsert: false,
       $customConstraints: 'DEFAULT FALSE',
       defaultValue: const CustomExpression<bool>('FALSE'));
+  final VerificationMeta _isVerifiedMeta = const VerificationMeta('isVerified');
+  late final GeneratedColumn<bool?> isVerified = GeneratedColumn<bool?>(
+      'is_verified', aliasedName, false,
+      type: const BoolType(),
+      requiredDuringInsert: false,
+      $customConstraints: 'NOT NULL DEFAULT FALSE',
+      defaultValue: const CustomExpression<bool>('FALSE'));
   @override
   List<GeneratedColumn> get $columns => [
         albumId,
@@ -3855,7 +3885,8 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
         category,
         description,
         banner,
-        added
+        added,
+        isVerified
       ];
   @override
   String get aliasedName => _alias ?? 'sticker_albums';
@@ -3917,6 +3948,12 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
     if (data.containsKey('added')) {
       context.handle(
           _addedMeta, added.isAcceptableOrUnknown(data['added']!, _addedMeta));
+    }
+    if (data.containsKey('is_verified')) {
+      context.handle(
+          _isVerifiedMeta,
+          isVerified.isAcceptableOrUnknown(
+              data['is_verified']!, _isVerifiedMeta));
     }
     return context;
   }

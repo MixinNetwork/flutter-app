@@ -2510,6 +2510,26 @@ class Localization {
     );
   }
 
+  /// `Add sticker`
+  String get addSticker {
+    return Intl.message(
+      'Add sticker',
+      name: 'addSticker',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add sticker failed`
+  String get addStickerFailed {
+    return Intl.message(
+      'Add sticker failed',
+      name: 'addStickerFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Original`
   String get originalImage {
     return Intl.message(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -16,6 +17,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../account/account_server.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
 import '../../bloc/simple_cubit.dart';
+import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
@@ -224,6 +226,11 @@ class MessageItemWidget extends HookWidget {
                 pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
                 showedMenu: showedMenuCubit.emit,
                 buildMenus: () => [
+                  if (message.type.isSticker)
+                    ContextMenu(
+                      title: context.l10n.addSticker,
+                      onTap: () => _onAddSticker(context),
+                    ),
                   if (!isTranscriptPage &&
                       message.type.canReply &&
                       !isPinnedPage)
@@ -432,6 +439,39 @@ class MessageItemWidget extends HookWidget {
         child: child,
       ),
     );
+  }
+
+  Future<void> _onAddSticker(BuildContext context) async {
+    showToastLoading(context);
+    try {
+      final accountServer = context.accountServer;
+
+      final mixinResponse = await accountServer.client.accountApi.addSticker(
+        StickerRequest(
+          stickerId: message.stickerId,
+        ),
+      );
+
+      final database = context.database;
+
+      final personalAlbum =
+          await database.stickerAlbumDao.personalAlbum().getSingleOrNull();
+      if (personalAlbum == null) {
+        unawaited(accountServer.refreshSticker(force: true));
+      } else {
+        final data = mixinResponse.data;
+        await database.mixinDatabase.transaction(() async {
+          await database.stickerDao.insert(data.asStickersCompanion);
+          await database.stickerRelationshipDao.insert(StickerRelationship(
+            albumId: personalAlbum.albumId,
+            stickerId: data.stickerId,
+          ));
+        });
+      }
+      showToastSuccessful(context);
+    } catch (_) {
+      await showToastFailed(context, ToastError(context.l10n.addStickerFailed));
+    }
   }
 }
 
