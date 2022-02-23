@@ -185,6 +185,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "editCircle": MessageLookupByLibrary.simpleMessage("Manage Circle"),
         "editCircleName":
             MessageLookupByLibrary.simpleMessage("Edit Circle Name"),
+        "editImageClearWarning": MessageLookupByLibrary.simpleMessage(
+            "All changes will be lost. Are you sure you want to exit?"),
         "editName": MessageLookupByLibrary.simpleMessage("Edit Name"),
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
         "exit": MessageLookupByLibrary.simpleMessage("Exit"),
@@ -278,6 +280,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
         "openInExternalApp":
             MessageLookupByLibrary.simpleMessage("Open in External App"),
+        "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
         "pageDeleteCircle": m16,
         "pageEditProfileJoin": m17,
         "pageLandingClickToReload":
@@ -313,6 +316,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "report": MessageLookupByLibrary.simpleMessage("Report"),
         "reportWarning": MessageLookupByLibrary.simpleMessage(
             "Do you want to report and block this contact?"),
+        "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveAs": MessageLookupByLibrary.simpleMessage("Save as"),
         "saveToGallery":

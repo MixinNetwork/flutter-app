@@ -9,7 +9,6 @@ import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze_message.dart';
-import '../blaze/vo/blaze_message_data.dart';
 import '../blaze/vo/pin_message_minimal.dart';
 import '../blaze/vo/pin_message_payload.dart';
 import '../blaze/vo/plain_json_message.dart';
@@ -33,13 +32,13 @@ import '../db/mixin_database.dart' as db;
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
-import '../enum/message_status.dart';
 import '../enum/system_circle_action.dart';
 import '../enum/system_user_action.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import 'injector.dart';
 import 'isolate_event.dart';
+import 'message_woker_isolate.dart';
 import 'sender.dart';
 
 class DecryptMessage extends Injector {
@@ -151,8 +150,14 @@ class DecryptMessage extends Injector {
       _remoteStatus = MessageStatus.delivered;
     }
 
+    final messageId = floodMessage.messageId;
+    final pendingMessageStatus = pendingMessageStatusMap.remove(messageId);
+    if (pendingMessageStatus != null) {
+      _remoteStatus = pendingMessageStatus;
+    }
+
     await _updateRemoteMessageStatus(
-      floodMessage.messageId,
+      messageId,
       _remoteStatus,
     );
 

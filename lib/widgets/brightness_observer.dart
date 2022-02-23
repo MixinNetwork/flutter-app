@@ -1,10 +1,10 @@
 import 'dart:ui';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../utils/app_lifecycle.dart';
+import '../utils/system/system_utils.dart';
 
 class BrightnessObserver extends HookWidget {
   const BrightnessObserver({
@@ -61,14 +61,10 @@ class BrightnessObserver extends HookWidget {
       return () {
         appActiveListener.removeListener(onListener);
       };
-    });
+    }, []);
 
     useEffect(() {
-      if (currentBrightness == Brightness.light) {
-        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-      } else {
-        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
-      }
+      setSystemUiWithAppBrightness(currentBrightness);
     }, [currentBrightness]);
 
     return TweenAnimationBuilder<double>(

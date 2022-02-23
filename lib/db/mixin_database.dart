@@ -12,7 +12,6 @@ import 'package:path/path.dart' as p;
 
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
-import '../enum/message_status.dart';
 import '../utils/file.dart';
 import 'converter/conversation_category_type_converter.dart';
 import 'converter/conversation_status_type_converter.dart';
@@ -101,7 +100,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   final eventBus = DataBaseEventBus();
 
@@ -194,6 +193,12 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 10) {
             await m.createTable(favoriteApps);
+          }
+          if (from <= 11) {
+            if (!await _checkColumnExists(
+                snapshots.actualTableName, snapshots.traceId.name)) {
+              await m.addColumn(snapshots, snapshots.traceId);
+            }
           }
         },
       );

@@ -27,11 +27,13 @@ class ContextMenuPortalEntry extends HookWidget {
     required this.child,
     required this.buildMenus,
     this.showedMenu,
+    this.interactiveForTap = false,
   }) : super(key: key);
 
   final Widget child;
   final List<Widget> Function() buildMenus;
   final ValueChanged<bool>? showedMenu;
+  final bool interactiveForTap;
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +89,9 @@ class ContextMenuPortalEntry extends HookWidget {
                 offsetCubit.emit(details.globalPosition);
               }
             },
+            onTapUp: interactiveForTap
+                ? (details) => offsetCubit.emit(details.globalPosition)
+                : null,
             child: child,
           ),
         ),

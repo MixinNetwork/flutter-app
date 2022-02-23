@@ -188,7 +188,7 @@ class _InputContainer extends HookWidget {
       return () {
         RawKeyboard.instance.removeListener(onListen);
       };
-    });
+    }, []);
 
     final chatSidePageSize =
         useBlocStateConverter<ChatSideCubit, ResponsiveNavigatorState, int>(

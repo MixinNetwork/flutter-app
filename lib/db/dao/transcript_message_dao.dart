@@ -2,7 +2,6 @@ import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../enum/media_status.dart';
-import '../../enum/message_status.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 

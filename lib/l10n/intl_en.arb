@@ -246,5 +246,8 @@
   "removeStickers": "Remove Stickers",
   "myStickerAlbums": "My Stickers",
   "addSticker": "Add sticker",
-  "addStickerFailed": "Add sticker failed"
+  "addStickerFailed": "Add sticker failed",
+  "originalImage": "Original",
+  "editImageClearWarning": "All changes will be lost. Are you sure you want to exit?",
+  "reset": "Reset"
 }

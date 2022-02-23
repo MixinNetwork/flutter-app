@@ -9,6 +9,7 @@ part 'snapshot_dao.g.dart';
 extension SnapshotConverter on sdk.Snapshot {
   SnapshotsCompanion get asDbSnapshotObject => SnapshotsCompanion.insert(
         snapshotId: snapshotId,
+        traceId: Value(traceId),
         type: type,
         assetId: assetId,
         amount: amount,
@@ -36,7 +37,7 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
   Future deleteSnapshot(Snapshot snapshot) =>
       delete(db.snapshots).delete(snapshot);
 
-  Selectable<SnapshotItem> snapshotById(
+  Selectable<SnapshotItem> snapshotItemById(
           String snapshotId, String currentFiat) =>
       snapshotItems(
         currentFiat,
@@ -45,4 +46,11 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
         (snapshot, opponent, asset, tempAsset, fiats) => ignoreOrderBy,
         (snapshot, opponent, asset, tempAsset, fiats) => Limit(1, 0),
       );
+
+  Selectable<String?> snapshotIdByTraceId(String traceId) =>
+      (selectOnly(db.snapshots)
+            ..addColumns([db.snapshots.snapshotId])
+            ..where(db.snapshots.traceId.equals(traceId))
+            ..limit(1))
+          .map((row) => row.read(db.snapshots.snapshotId));
 }
