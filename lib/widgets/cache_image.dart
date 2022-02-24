@@ -23,7 +23,7 @@ class CacheImage extends StatelessWidget {
     this.height,
     this.placeholder,
     this.errorWidget,
-    this.fit = BoxFit.contain,
+    this.fit = BoxFit.cover,
     this.controller,
     Key? key,
   }) : super(key: key);
