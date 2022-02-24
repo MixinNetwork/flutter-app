@@ -174,7 +174,7 @@ class SearchMessagePage extends HookWidget {
                       return SizedBox(
                         height: 36,
                         child: ActionButton(
-                          name: Resources.assetsImagesContactSvg,
+                          name: Resources.assetsImagesUserSearchSvg,
                           color: context.theme.icon,
                           onTap: () {
                             editingController.text = '';
