@@ -70,7 +70,7 @@ class StickerItem extends HookWidget {
         controller: controller,
         height: height,
         width: width,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         onLoaded: (composition) {
           controller.duration = composition.duration;
           listener();
