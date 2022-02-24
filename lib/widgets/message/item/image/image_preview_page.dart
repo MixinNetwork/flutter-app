@@ -187,6 +187,11 @@ class ImagePreviewPage extends HookWidget {
         ): const _ImageZoomOutIntent(),
         const SingleActivator(LogicalKeyboardKey.zoomOut):
             const _ImageZoomOutIntent(),
+        SingleActivator(
+          LogicalKeyboardKey.keyR,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const _ImageRotateIntent(),
       },
       actions: {
         _CopyIntent: CallbackAction<Intent>(
@@ -218,6 +223,9 @@ class ImagePreviewPage extends HookWidget {
         ),
         _ImageZoomOutIntent: CallbackAction<Intent>(
           onInvoke: (intent) => controller.zoomOut(),
+        ),
+        _ImageRotateIntent: CallbackAction<Intent>(
+          onInvoke: (intent) => controller.rotate(),
         ),
       },
       autofocus: true,
@@ -358,6 +366,13 @@ class _Bar extends StatelessWidget {
             size: 20,
             color: context.theme.icon,
             onTap: controller.zoomOut,
+          ),
+          const SizedBox(width: 14),
+          ActionButton(
+            name: Resources.assetsImagesRotatoSvg,
+            color: context.theme.icon,
+            size: 20,
+            onTap: controller.rotate,
           ),
           const SizedBox(width: 14),
           if (!isTranscriptPage)
@@ -513,4 +528,8 @@ class _ImageZoomInIntent extends Intent {
 
 class _ImageZoomOutIntent extends Intent {
   const _ImageZoomOutIntent();
+}
+
+class _ImageRotateIntent extends Intent {
+  const _ImageRotateIntent();
 }

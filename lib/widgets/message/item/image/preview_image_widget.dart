@@ -5,6 +5,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
+enum _ImageRotate {
+  rotate0,
+  rotate90,
+  rotate180,
+  rotate270,
+}
+
+extension _ImageRotateExt on _ImageRotate {
+  Size applyToSize(Size size) {
+    switch (this) {
+      case _ImageRotate.rotate0:
+      case _ImageRotate.rotate180:
+        return size;
+      case _ImageRotate.rotate90:
+      case _ImageRotate.rotate270:
+        return Size(size.height, size.width);
+    }
+  }
+}
+
 class TransformImageController extends ChangeNotifier {
   _ImagPreviewWidgetState? _state;
 
@@ -23,6 +43,21 @@ class TransformImageController extends ChangeNotifier {
   Offset _translate = Offset.zero;
 
   Offset get translate => _translate;
+
+  _ImageRotate _imageRotate = _ImageRotate.rotate0;
+
+  double get rotateRadius {
+    switch (_imageRotate) {
+      case _ImageRotate.rotate0:
+        return 0;
+      case _ImageRotate.rotate90:
+        return math.pi / 2;
+      case _ImageRotate.rotate180:
+        return math.pi;
+      case _ImageRotate.rotate270:
+        return math.pi * 3 / 2;
+    }
+  }
 
   set translate(Offset translate) {
     if (_translate == translate) {
@@ -43,6 +78,26 @@ class TransformImageController extends ChangeNotifier {
   void animatedToScale(double scale) {
     assert(scale > 0);
     _state?._animateScale(scale / this.scale);
+  }
+
+  void rotate() {
+    switch (_imageRotate) {
+      case _ImageRotate.rotate0:
+        _imageRotate = _ImageRotate.rotate90;
+        break;
+      case _ImageRotate.rotate90:
+        _imageRotate = _ImageRotate.rotate180;
+        break;
+      case _ImageRotate.rotate180:
+        _imageRotate = _ImageRotate.rotate270;
+        break;
+      case _ImageRotate.rotate270:
+        _imageRotate = _ImageRotate.rotate0;
+        break;
+    }
+    // Reset translate when rotate.
+    _translate = Offset.zero;
+    notifyListeners();
   }
 }
 
@@ -157,7 +212,8 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     assert(_childKey.currentContext != null);
     final childRenderBox =
         _childKey.currentContext!.findRenderObject()! as RenderBox;
-    return Offset.zero & childRenderBox.size;
+    return Offset.zero &
+        _transformationController._imageRotate.applyToSize(childRenderBox.size);
   }
 
   Rect get _transformedChildRect => _calculateTransformedChildRect(
@@ -449,6 +505,7 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
         _transformationController.translate.dx,
         _transformationController.translate.dy,
       )
+      ..rotateZ(_transformationController.rotateRadius)
       ..scale(_transformationController.scale);
 
     return RepaintBoundary(
