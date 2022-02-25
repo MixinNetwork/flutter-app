@@ -4,13 +4,16 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../constants/brightness_theme_data.dart';
 import '../../../enum/media_status.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/logger.dart';
 import '../../interactive_decorated_box.dart';
 import '../../status.dart';
+import '../../toast.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -70,8 +73,14 @@ class MessageFile extends HookWidget {
         } else if (message.mediaStatus == MediaStatus.done &&
             message.mediaUrl != null) {
           if (message.mediaUrl?.isEmpty ?? true) return;
-          await saveAs(
-              context, context.accountServer, message, isTranscriptPage);
+          final path = context.accountServer
+              .convertMessageAbsolutePath(message, isTranscriptPage);
+          final openResult = await OpenFile.open(path);
+          if (openResult.type != ResultType.done) {
+            i('open file result: $mediaName ${openResult.type} ${openResult.message}');
+            await showToastFailed(
+                context, ToastError(context.l10n.failedToOpenFile(mediaName)));
+          }
         } else if (message.mediaStatus == MediaStatus.pending) {
           await context.accountServer
               .cancelProgressAttachmentJob(message.messageId);

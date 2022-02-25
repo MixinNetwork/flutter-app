@@ -236,7 +236,6 @@
   "saveAs": "Save as",
   "noResults": "No results",
   "saveToGallery": "Save to Gallery",
-  "openInExternalApp": "Open in External App",
   "typeAMessage": "Type message",
   "stickerShop": "Sticker shop",
   "add": "Add",
@@ -250,5 +249,6 @@
   "originalImage": "Original",
   "editImageClearWarning": "All changes will be lost. Are you sure you want to exit?",
   "reset": "Reset",
-  "groupsInCommon": "Groups in common"
+  "groupsInCommon": "Groups in common",
+  "failedToOpenFile": "Failed to open file {name}"
 }
