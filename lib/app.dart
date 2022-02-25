@@ -30,6 +30,7 @@ import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
 import 'utils/system/system_fonts.dart';
+import 'utils/system/text_input.dart';
 import 'utils/system/tray.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
@@ -226,7 +227,11 @@ class _App extends StatelessWidget {
                         ? textScaleFactor
                         : mediaQueryData.textScaleFactor,
                   ),
-                  child: SystemTrayWidget(child: child!),
+                  child: SystemTrayWidget(
+                    child: TextInputActionHandler(
+                      child: child!,
+                    ),
+                  ),
                 ),
               );
             },
