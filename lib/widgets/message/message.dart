@@ -30,7 +30,6 @@ import '../../utils/extension/extension.dart';
 import '../../utils/file.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
-import '../../utils/uri_utils.dart';
 import '../menu.dart';
 import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
@@ -216,9 +215,6 @@ class MessageItemWidget extends HookWidget {
                 return const StrangerMessage();
               }
 
-              final path = context.accountServer
-                  .convertMessageAbsolutePath(message, isTranscriptPage);
-
               return _MessageBubbleMargin(
                 userName: userName,
                 userId: userId,
@@ -290,12 +286,6 @@ class MessageItemWidget extends HookWidget {
                       onTap: () => saveAs(context, context.accountServer,
                           message, isTranscriptPage),
                     ),
-                    if (message.type.isData && File(path).xFile.isVideo)
-                      ContextMenu(
-                        title: context.l10n.openInExternalApp,
-                        onTap: () =>
-                            openUri(context, Uri.file(path).toString()),
-                      ),
                   ],
                   if ([
                         MessageStatus.sent,

@@ -2420,16 +2420,6 @@ class Localization {
     );
   }
 
-  /// `Open in External App`
-  String get openInExternalApp {
-    return Intl.message(
-      'Open in External App',
-      name: 'openInExternalApp',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Type message`
   String get typeAMessage {
     return Intl.message(
@@ -2567,6 +2557,16 @@ class Localization {
       name: 'groupsInCommon',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Failed to open file {name}`
+  String failedToOpenFile(Object name) {
+    return Intl.message(
+      'Failed to open file $name',
+      name: 'failedToOpenFile',
+      desc: '',
+      args: [name],
     );
   }
 }
