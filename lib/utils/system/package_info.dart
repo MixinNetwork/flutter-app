@@ -4,7 +4,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../logger.dart';
 
-const kMixinVersion = '0.20.0';
+const kMixinVersion = '0.21.0';
 
 final _packageInfo = PackageInfo(
   appName: 'mixin',
