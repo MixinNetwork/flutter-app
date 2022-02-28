@@ -105,12 +105,6 @@ class _InputContainer extends HookWidget {
       converter: (state) => state?.messageId,
     );
 
-    final historyRefresher = useState<Object?>(null);
-
-    void clearHistory() {
-      historyRefresher.value = Object();
-    }
-
     final textEditingController = useMemoized(
       () {
         final draft =
@@ -128,7 +122,7 @@ class _InputContainer extends HookWidget {
           );
         return textEditingController;
       },
-      [conversationId, historyRefresher.value],
+      [conversationId],
     );
 
     final textEditingValueStream =
@@ -242,7 +236,6 @@ class _InputContainer extends HookWidget {
                         child: _SendTextField(
                           focusNode: focusNode,
                           textEditingController: textEditingController,
-                          clearHistory: clearHistory,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -254,18 +247,14 @@ class _InputContainer extends HookWidget {
                               context,
                               textEditingController,
                               silent: true,
-                              onSend: clearHistory,
                             ),
                           ),
                         ],
                         child: ActionButton(
                           name: Resources.assetsImagesIcSendSvg,
                           color: context.theme.icon,
-                          onTap: () => _sendMessage(
-                            context,
-                            textEditingController,
-                            onSend: clearHistory,
-                          ),
+                          onTap: () =>
+                              _sendMessage(context, textEditingController),
                         ),
                       ),
                     ],
@@ -281,10 +270,7 @@ class _InputContainer extends HookWidget {
 }
 
 void _sendPostMessage(
-  BuildContext context,
-  TextEditingController textEditingController,
-  VoidCallback onSend,
-) {
+    BuildContext context, TextEditingController textEditingController) {
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
 
@@ -296,7 +282,6 @@ void _sendPostMessage(
       recipientId: conversationItem.userId);
 
   textEditingController.text = '';
-  onSend();
   context.read<QuoteMessageCubit>().emit(null);
 }
 
@@ -304,7 +289,6 @@ void _sendMessage(
   BuildContext context,
   TextEditingController textEditingController, {
   bool silent = false,
-  required VoidCallback onSend,
 }) {
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
@@ -322,7 +306,6 @@ void _sendMessage(
   );
 
   textEditingController.text = '';
-  onSend();
   context.read<QuoteMessageCubit>().emit(null);
 }
 
@@ -330,12 +313,10 @@ class _SendTextField extends HookWidget {
   const _SendTextField({
     required this.focusNode,
     required this.textEditingController,
-    required this.clearHistory,
   });
 
   final FocusNode focusNode;
   final TextEditingController textEditingController;
-  final VoidCallback clearHistory;
 
   @override
   Widget build(BuildContext context) {
@@ -404,19 +385,12 @@ class _SendTextField extends HookWidget {
         },
         actions: {
           _SendMessageIntent: CallbackAction<Intent>(
-            onInvoke: (Intent intent) => _sendMessage(
-              context,
-              textEditingController,
-              onSend: clearHistory,
-            ),
+            onInvoke: (Intent intent) =>
+                _sendMessage(context, textEditingController),
           ),
           PasteTextIntent: _PasteContextAction(context),
           _SendPostMessageIntent: CallbackAction<Intent>(
-            onInvoke: (_) => _sendPostMessage(
-              context,
-              textEditingController,
-              clearHistory,
-            ),
+            onInvoke: (_) => _sendPostMessage(context, textEditingController),
           ),
           _EscapeIntent: CallbackAction<Intent>(
             onInvoke: (_) => context.read<QuoteMessageCubit>().emit(null),
