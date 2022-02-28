@@ -702,6 +702,11 @@ class _CropRectWidget extends HookWidget {
 
     final trackingRectCorner = useRef<_ImageDragArea?>(null);
 
+    final cacheTransformedRect = useState(transformedRect);
+    useEffect(() {
+      cacheTransformedRect.value = transformedRect;
+    }, [transformedRect]);
+
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -737,41 +742,46 @@ class _CropRectWidget extends HookWidget {
             }
             final delta = details.delta;
             final imageRect = Offset.zero & rotate.apply(scaledImageSize);
+            // Use cacheTransformedRect to track mouse/gesture change.
+            // Cannot use transformedRect because transformedRect update by build method
+            // which may slow than gesture update.
+            final currentCropRect = cacheTransformedRect.value;
             Rect cropRect;
             switch (corner) {
               case _ImageDragArea.topLeft:
                 cropRect = Rect.fromPoints(
-                  transformedRect.topLeft + delta,
-                  transformedRect.bottomRight,
+                  currentCropRect.topLeft + delta,
+                  currentCropRect.bottomRight,
                 ).ensureInside(imageRect);
                 break;
               case _ImageDragArea.topRight:
                 cropRect = Rect.fromPoints(
-                  transformedRect.bottomLeft,
-                  transformedRect.topRight + delta,
+                  currentCropRect.bottomLeft,
+                  currentCropRect.topRight + delta,
                 ).ensureInside(imageRect);
                 break;
               case _ImageDragArea.bottomLeft:
                 cropRect = Rect.fromPoints(
-                  transformedRect.bottomLeft + delta,
-                  transformedRect.topRight,
+                  currentCropRect.bottomLeft + delta,
+                  currentCropRect.topRight,
                 ).ensureInside(imageRect);
                 break;
               case _ImageDragArea.bottomRight:
                 cropRect = Rect.fromPoints(
-                  transformedRect.topLeft,
-                  transformedRect.bottomRight + delta,
+                  currentCropRect.topLeft,
+                  currentCropRect.bottomRight + delta,
                 ).ensureInside(imageRect);
                 break;
               case _ImageDragArea.center:
                 cropRect =
-                    transformedRect.shift(delta).ensureShiftInside(imageRect);
+                    currentCropRect.shift(delta).ensureShiftInside(imageRect);
                 break;
             }
 
             if (cropRect.isEmpty) {
               return;
             }
+            cacheTransformedRect.value = cropRect;
             final rect = transformInsideRect(
                     cropRect.flipHorizontalInParent(imageRect, isFlip),
                     imageRect,
@@ -784,7 +794,7 @@ class _CropRectWidget extends HookWidget {
           },
           child: CustomPaint(
             painter: _CropShadowOverlayPainter(
-              cropRect: transformedRect,
+              cropRect: cacheTransformedRect.value,
               overlayColor: Colors.black.withOpacity(0.4),
               lineColor: Colors.white,
             ),
