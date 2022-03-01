@@ -82,6 +82,7 @@ class StickerItem extends HookWidget {
         height: height,
         width: width,
         controller: playing,
+        fit: BoxFit.contain,
         placeholder: () => placeholder ?? const SizedBox(),
       );
     }
