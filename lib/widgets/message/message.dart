@@ -280,7 +280,8 @@ class MessageItemWidget extends HookWidget {
                       message.mediaUrl?.isNotEmpty == true &&
                       (message.type.isData ||
                           message.type.isImage ||
-                          message.type.isVideo)) ...[
+                          message.type.isVideo ||
+                          message.type.isAudio)) ...[
                     ContextMenu(
                       title: context.l10n.saveAs,
                       onTap: () => saveAs(context, context.accountServer,
