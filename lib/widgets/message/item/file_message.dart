@@ -43,8 +43,8 @@ class MessageFile extends HookWidget {
     final relationship =
         useMessageConverter(converter: (state) => state.relationship);
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
-    final mediaName = useMessageConverter(
-        converter: (state) => state.mediaName?.overflow ?? '');
+    final mediaName =
+        useMessageConverter(converter: (state) => state.mediaName ?? '');
     final extension = useMessageConverter(converter: (state) {
       var extension = '';
       if (state.mediaName != null) {
@@ -73,13 +73,18 @@ class MessageFile extends HookWidget {
         } else if (message.mediaStatus == MediaStatus.done &&
             message.mediaUrl != null) {
           if (message.mediaUrl?.isEmpty ?? true) return;
-          final path = context.accountServer
-              .convertMessageAbsolutePath(message, isTranscriptPage);
-          final openResult = await OpenFile.open(path);
-          if (openResult.type != ResultType.done) {
-            i('open file result: $mediaName ${openResult.type} ${openResult.message}');
-            await showToastFailed(
-                context, ToastError(context.l10n.failedToOpenFile(mediaName)));
+          if (_shouldOpenDirectly(mediaName)) {
+            final path = context.accountServer
+                .convertMessageAbsolutePath(message, isTranscriptPage);
+            final openResult = await OpenFile.open(path);
+            if (openResult.type != ResultType.done) {
+              i('open file result: $mediaName ${openResult.type} ${openResult.message}');
+              await showToastFailed(context,
+                  ToastError(context.l10n.failedToOpenFile(mediaName)));
+            }
+          } else {
+            await saveAs(
+                context, context.accountServer, message, isTranscriptPage);
           }
         } else if (message.mediaStatus == MediaStatus.pending) {
           await context.accountServer
@@ -131,7 +136,7 @@ class MessageFile extends HookWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  mediaName,
+                  mediaName.overflow,
                   style: TextStyle(
                     fontSize: MessageItemWidget.secondaryFontSize,
                     color: context.theme.text,
@@ -154,4 +159,48 @@ class MessageFile extends HookWidget {
       ),
     );
   }
+}
+
+bool _shouldOpenDirectly(String mediaName) {
+  final extension = p.extension(mediaName).toLowerCase();
+  const allowList = {
+    // image
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.gif',
+    '.bmp',
+    '.webp',
+    // audio,video
+    '.mp4',
+    '.mp3',
+    '.wav',
+    '.m4a',
+    '.m4v',
+    '.mov',
+    '.avi',
+    '.mkv',
+    '.flv',
+    '.wmv',
+    '.3gp',
+    '.mpg',
+    '.mpeg',
+    '.ogv',
+    '.ogm',
+    '.ogg',
+    '.webm',
+    '.m3u8',
+    '.ts',
+    // document
+    '.pdf',
+    '.doc',
+    '.docx',
+    '.xls',
+    '.xlsx',
+    '.ppt',
+    '.pptx',
+    '.txt',
+    '.rtf',
+  };
+  return allowList.contains(extension);
 }
