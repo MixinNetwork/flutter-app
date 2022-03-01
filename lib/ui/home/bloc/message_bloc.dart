@@ -463,8 +463,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         continue;
       }
 
-      // if don't have messages or older message after then item
-      if (state.topMessage?.createdAt.isAfter(item.createdAt) ?? false) {
+      // if don't have messages or older message after then valid item
+      if (state.topMessage?.type != MessageCategory.secret &&
+          (state.topMessage?.createdAt.isAfter(item.createdAt) ?? false)) {
         continue;
       }
 
