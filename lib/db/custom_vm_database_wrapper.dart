@@ -30,12 +30,20 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
       );
 
   @override
-  Future<int> runDelete(String statement, List<Object?> args) =>
-      queryExecutor.runDelete(statement, args);
+  Future<int> runDelete(String statement, List<Object?> args) => logWrapper(
+        () => queryExecutor.runDelete(statement, args),
+        statement,
+        args,
+        logStatements,
+      );
 
   @override
-  Future<int> runInsert(String statement, List<Object?> args) =>
-      queryExecutor.runInsert(statement, args);
+  Future<int> runInsert(String statement, List<Object?> args) => logWrapper(
+        () => queryExecutor.runInsert(statement, args),
+        statement,
+        args,
+        logStatements,
+      );
 
   @override
   Future<List<Map<String, Object?>>> runSelect(
@@ -48,8 +56,12 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
       );
 
   @override
-  Future<int> runUpdate(String statement, List<Object?> args) =>
-      queryExecutor.runUpdate(statement, args);
+  Future<int> runUpdate(String statement, List<Object?> args) => logWrapper(
+        () => queryExecutor.runUpdate(statement, args),
+        statement,
+        args,
+        logStatements,
+      );
 
   @override
   Future<void> close() => queryExecutor.close();
@@ -80,14 +92,13 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
           .where((String detail) =>
               detail.startsWith('SCAN') || detail.startsWith('USE TEMP B-TREE'))
           .isNotEmpty;
-      if (needPrint) {
-        w('''
+      // if (needPrint) {
+      w('''
 execution time: ${stopwatch.elapsed.inMilliseconds} MS, args: $args, sql:
 $statement
-EXPLAIN QUERY PLAN RESULT: 
-${details.join('\n')}
+${needPrint ? 'details:\n${details.join('\n')}' : ''}
 ''');
-      }
+      // }
     }
 
     return result;
