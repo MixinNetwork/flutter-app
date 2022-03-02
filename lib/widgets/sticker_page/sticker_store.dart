@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -208,42 +206,34 @@ class _Item extends HookWidget {
               Expanded(
                 child: Row(
                   children: [
-                    Expanded(
-                      child: ListView.separated(
-                        padding: const EdgeInsets.only(top: 8, bottom: 16),
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (_, index) {
-                          final sticker = stickers[index];
-
-                          return InteractiveDecoratedBox(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ColoredBox(
-                                  color: context.theme.popUp,
-                                  child: _StickerAlbumPage(
-                                    album: album,
-                                    stickers: stickers,
-                                    albumId: album.albumId,
-                                  ),
+                    for (final sticker in stickers.take(4))
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: InteractiveDecoratedBox(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ColoredBox(
+                                color: context.theme.popUp,
+                                child: _StickerAlbumPage(
+                                  album: album,
+                                  stickers: stickers,
+                                  albumId: album.albumId,
                                 ),
                               ),
                             ),
-                            child: SizedBox(
-                              width: 72,
-                              height: 72,
-                              child: StickerItem(
-                                assetUrl: sticker.assetUrl,
-                                assetType: sticker.assetType,
-                              ),
+                          ),
+                          child: SizedBox(
+                            width: 72,
+                            height: 72,
+                            child: StickerItem(
+                              assetUrl: sticker.assetUrl,
+                              assetType: sticker.assetType,
                             ),
-                          );
-                        },
-                        separatorBuilder: (_, __) => const SizedBox(width: 8),
-                        itemCount: min(4, stickers.length),
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 56),
+                    const Spacer(),
                     AnimatedOpacity(
                       opacity: album.added == true ? 0.4 : 1,
                       duration: const Duration(milliseconds: 200),
