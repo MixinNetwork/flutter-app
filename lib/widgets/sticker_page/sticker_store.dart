@@ -14,6 +14,7 @@ import '../app_bar.dart';
 import '../buttons.dart';
 import '../dialog.dart';
 import '../interactive_decorated_box.dart';
+import 'sticker_album_page.dart';
 import 'sticker_item.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -98,7 +99,7 @@ Future<void> showStickerPageDialog(
         }, [album?.albumId]);
 
         if (album?.albumId.isNotEmpty == true && album?.category == 'SYSTEM') {
-          return _StickerAlbumPage(albumId: album!.albumId);
+          return StickerAlbumPage(albumId: album!.albumId);
         }
 
         return _StickerPage(stickerId: stickerId);
@@ -215,7 +216,7 @@ class _Item extends HookWidget {
                             MaterialPageRoute(
                               builder: (_) => ColoredBox(
                                 color: context.theme.popUp,
-                                child: _StickerAlbumPage(
+                                child: StickerAlbumPage(
                                   album: album,
                                   stickers: stickers,
                                   albumId: album.albumId,
@@ -252,171 +253,6 @@ class _Item extends HookWidget {
                 ),
               ),
             ],
-          ),
-        ),
-      );
-}
-
-class _StickerAlbumPage extends StatelessWidget {
-  const _StickerAlbumPage({
-    Key? key,
-    required this.albumId,
-    this.album,
-    this.stickers,
-  }) : super(key: key);
-
-  final StickerAlbum? album;
-  final List<Sticker>? stickers;
-  final String albumId;
-
-  @override
-  Widget build(BuildContext context) => Column(
-        children: [
-          MixinAppBar(
-            backgroundColor: Colors.transparent,
-            title: Text(context.l10n.stickerAlbumDetail),
-            leading: navigatorKey.currentState?.canPop() == true
-                ? null
-                : const SizedBox(),
-            actions: [
-              MixinCloseButton(
-                onTap: () =>
-                    Navigator.maybeOf(context, rootNavigator: true)?.pop(),
-              ),
-            ],
-          ),
-          Expanded(
-            child: _StickerAlbumDetail(
-              album: album,
-              stickers: stickers,
-              albumId: albumId,
-            ),
-          ),
-        ],
-      );
-}
-
-class _StickerAlbumDetail extends HookWidget {
-  const _StickerAlbumDetail({
-    Key? key,
-    required this.albumId,
-    this.album,
-    this.stickers,
-  }) : super(key: key);
-
-  final StickerAlbum? album;
-  final List<Sticker>? stickers;
-  final String albumId;
-
-  @override
-  Widget build(BuildContext context) {
-    final album = useMemoizedStream(
-          () => context.database.stickerAlbumDao
-              .album(albumId)
-              .watchSingleThrottle(kVerySlowThrottleDuration),
-          keys: [albumId],
-        ).data ??
-        this.album;
-
-    final stickers = useMemoizedFuture(() async {
-          if (this.stickers != null) return this.stickers;
-          return context.database.stickerDao.stickerByAlbumId(albumId).get();
-        }, <Sticker>[], keys: [albumId]).data ??
-        [];
-
-    if (album == null) return const SizedBox();
-    return CustomScrollView(
-      slivers: [
-        _StickerAlbumDetailHeader(album: album, stickers: stickers),
-        _StickerAlbumDetailBody(stickers: stickers),
-      ],
-    );
-  }
-}
-
-class _StickerAlbumDetailBody extends StatelessWidget {
-  const _StickerAlbumDetailBody({
-    Key? key,
-    required this.stickers,
-  }) : super(key: key);
-
-  final List<Sticker> stickers;
-
-  @override
-  Widget build(BuildContext context) => SliverPadding(
-        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 24),
-        sliver: SliverGrid(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) => StickerItem(
-              assetType: stickers[index].assetType,
-              assetUrl: stickers[index].assetUrl,
-            ),
-            childCount: stickers.length,
-          ),
-        ),
-      );
-}
-
-class _StickerAlbumDetailHeader extends StatelessWidget {
-  const _StickerAlbumDetailHeader({
-    Key? key,
-    required this.album,
-    required this.stickers,
-  }) : super(key: key);
-
-  final StickerAlbum album;
-  final List stickers;
-
-  @override
-  Widget build(BuildContext context) => SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: SizedBox(
-            height: 100,
-            child: Row(
-              children: [
-                Container(
-                  width: 140,
-                  height: 100,
-                  alignment: Alignment.center,
-                  child: StickerItem(
-                    assetUrl: album.iconUrl,
-                    assetType: '',
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      album.name,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: context.theme.text,
-                      ),
-                    ),
-                    MixinButton(
-                      backgroundColor: album.added == true
-                          ? context.theme.red
-                          : context.theme.accent,
-                      child: Text(
-                        album.added == true
-                            ? context.l10n.removeStickers
-                            : context.l10n.addStickers,
-                      ),
-                      onTap: () => context.database.stickerAlbumDao
-                          .updateAdded(album.albumId, !(album.added == true)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ),
         ),
       );
