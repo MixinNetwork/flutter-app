@@ -2569,6 +2569,16 @@ class Localization {
       args: [name],
     );
   }
+
+  /// `open log directory`
+  String get openLogDirectory {
+    return Intl.message(
+      'open log directory',
+      name: 'openLogDirectory',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

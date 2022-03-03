@@ -247,6 +247,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("未允许通知，请到通知设置开启。"),
         "notificationPermissionTitle":
             MessageLookupByLibrary.simpleMessage("打开通知"),
+        "openLogDirectory": MessageLookupByLibrary.simpleMessage("打开日志文件夹"),
         "originalImage": MessageLookupByLibrary.simpleMessage("原图"),
         "pageDeleteCircle": m17,
         "pageEditProfileJoin": m18,

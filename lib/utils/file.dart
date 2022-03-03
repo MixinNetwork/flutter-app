@@ -77,6 +77,11 @@ Future<int> getTotalSizeOfFile(String path) async {
 
 late Directory mixinDocumentsDirectory;
 
+Directory get mixinLogDirectory => Directory(p.join(
+      mixinDocumentsDirectory.path,
+      'log',
+    ));
+
 Future<void> initMixinDocumentsDirectory() async {
   if (Platform.isLinux) {
     // https://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap08.html

@@ -5,7 +5,10 @@ import 'package:flutter_svg/svg.dart';
 import '../../../blaze/blaze.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/uri_utils.dart';
+import '../../../widgets/menu.dart';
 
 class NetworkStatus extends HookWidget {
   const NetworkStatus({Key? key}) : super(key: key);
@@ -18,7 +21,15 @@ class NetworkStatus extends HookWidget {
                 .distinct(),
             initialData: true)
         .requireData;
-    return _NetworkNotConnect(visible: !connectedState);
+    return ContextMenuPortalEntry(
+      buildMenus: () => [
+        ContextMenu(
+          title: context.l10n.openLogDirectory,
+          onTap: () => openUri(context, mixinLogDirectory.uri.toString()),
+        ),
+      ],
+      child: _NetworkNotConnect(visible: !connectedState),
+    );
   }
 }
 
