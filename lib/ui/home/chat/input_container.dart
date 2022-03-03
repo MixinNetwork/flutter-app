@@ -29,6 +29,7 @@ import '../../../widgets/message/item/quote_message.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
+import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/mention_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
@@ -36,6 +37,8 @@ import '../bloc/recall_message_bloc.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'chat_page.dart';
 import 'files_preview.dart';
+
+const maxTextLength = 64 * 1024;
 
 class InputContainer extends HookWidget {
   const InputContainer({
@@ -269,6 +272,9 @@ class _InputContainer extends HookWidget {
   }
 }
 
+void showMaxLengthReachedToast(BuildContext context) =>
+    showToastFailed(context, ToastError(context.l10n.messageTooLong));
+
 void _sendPostMessage(
     BuildContext context, TextEditingController textEditingController) {
   final text = textEditingController.value.text.trim();
@@ -276,6 +282,10 @@ void _sendPostMessage(
 
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
+  if (text.length > maxTextLength) {
+    showMaxLengthReachedToast(context);
+    return;
+  }
 
   context.accountServer.sendPostMessage(text, conversationItem.encryptCategory,
       conversationId: conversationItem.conversationId,
@@ -295,6 +305,10 @@ void _sendMessage(
 
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
+  if (text.length > maxTextLength) {
+    showMaxLengthReachedToast(context);
+    return;
+  }
 
   context.accountServer.sendTextMessage(
     text,

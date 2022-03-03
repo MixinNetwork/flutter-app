@@ -250,5 +250,6 @@
   "editImageClearWarning": "All changes will be lost. Are you sure you want to exit?",
   "reset": "Reset",
   "groupsInCommon": "Groups in common",
-  "failedToOpenFile": "Failed to open file {name}"
+  "failedToOpenFile": "Failed to open file {name}",
+  "messageTooLong": "Message content is too long"
 }

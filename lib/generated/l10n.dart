@@ -2569,6 +2569,16 @@ class Localization {
       args: [name],
     );
   }
+
+  /// `Message content is too long`
+  String get messageTooLong {
+    return Intl.message(
+      'Message content is too long',
+      name: 'messageTooLong',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
