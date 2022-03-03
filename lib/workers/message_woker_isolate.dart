@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
@@ -382,6 +383,9 @@ class _MessageProcessRunner {
 
       MessageResult? result;
       var content = message.content;
+      if (message.category.isPost || message.category.isText) {
+        content = content?.substring(0, min(content.length, kMaxTextLength));
+      }
 
       final conversation = await database.conversationDao
           .conversationById(message.conversationId)
@@ -450,8 +454,8 @@ class _MessageProcessRunner {
       } else {}
 
       if (result?.success ?? false) {
-        await database.messageDao
-            .updateMessageStatusById(message.messageId, MessageStatus.sent);
+        await database.messageDao.updateMessageContentAndStatus(
+            message.messageId, content, MessageStatus.sent);
         await database.jobDao.deleteJobById(job.jobId);
       }
     }

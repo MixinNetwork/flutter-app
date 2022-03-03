@@ -56,3 +56,5 @@ const int hours24 = hour1 * 24;
 const statusOffset = 'messages_status_offset';
 
 const kMarkLimit = 10000;
+
+const kMaxTextLength = 64 * 1024;

@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../../constants/constants.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../enum/encrypt_category.dart';
@@ -37,8 +38,6 @@ import '../bloc/recall_message_bloc.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'chat_page.dart';
 import 'files_preview.dart';
-
-const maxTextLength = 64 * 1024;
 
 class InputContainer extends HookWidget {
   const InputContainer({
@@ -282,7 +281,7 @@ void _sendPostMessage(
 
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
-  if (text.length > maxTextLength) {
+  if (text.length > kMaxTextLength) {
     showMaxLengthReachedToast(context);
     return;
   }
@@ -305,7 +304,7 @@ void _sendMessage(
 
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
-  if (text.length > maxTextLength) {
+  if (text.length > kMaxTextLength) {
     showMaxLengthReachedToast(context);
     return;
   }

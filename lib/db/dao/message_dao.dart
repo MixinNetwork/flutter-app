@@ -613,7 +613,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       );
 
   Future<int> updateMessageContentAndStatus(
-          String messageId, String content, MessageStatus status) =>
+          String messageId, String? content, MessageStatus status) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
         (db.update(db.messages)
@@ -621,7 +621,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   tbl.messageId.equals(messageId) &
                   tbl.category.equals(MessageCategory.messageRecall).not()))
             .write(MessagesCompanion(
-          content: Value(content),
+          content: content != null ? Value(content) : const Value.absent(),
           status: Value(status),
         )),
       );
