@@ -25,9 +25,7 @@ class NetworkStatus extends HookWidget {
       buildMenus: () => [
         ContextMenu(
           title: context.l10n.openLogDirectory,
-          onTap: () {
-            openUri(context, mixinLogDirectory.uri.toString());
-          },
+          onTap: () => openUri(context, mixinLogDirectory.uri.toString()),
         ),
       ],
       child: _NetworkNotConnect(visible: !connectedState),
