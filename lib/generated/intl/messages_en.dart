@@ -283,6 +283,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Notifications are not allowed, please go to Notification Settings to turn on."),
         "notificationPermissionTitle":
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
+        "openLogDirectory":
+            MessageLookupByLibrary.simpleMessage("open log directory"),
         "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
         "pageDeleteCircle": m17,
         "pageEditProfileJoin": m18,
