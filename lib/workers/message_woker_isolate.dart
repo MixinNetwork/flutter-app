@@ -386,6 +386,7 @@ class _MessageProcessRunner {
       if (message.category.isPost || message.category.isText) {
         content = content?.substring(0, min(content.length, kMaxTextLength));
       }
+      final newContent = content;
 
       final conversation = await database.conversationDao
           .conversationById(message.conversationId)
@@ -455,7 +456,10 @@ class _MessageProcessRunner {
 
       if (result?.success ?? false) {
         await database.messageDao.updateMessageContentAndStatus(
-            message.messageId, content, MessageStatus.sent);
+          message.messageId,
+          newContent,
+          MessageStatus.sent,
+        );
         await database.jobDao.deleteJobById(job.jobId);
       }
     }
