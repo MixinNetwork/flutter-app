@@ -265,9 +265,10 @@ class IdentitiesCompanion extends UpdateCompanion<Identitie> {
 }
 
 class Identities extends Table with TableInfo<Identities, Identitie> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Identities(this._db, [this._alias]);
+  Identities(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
       'id', aliasedName, false,
@@ -383,7 +384,7 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
 
   @override
   Identities createAlias(String alias) {
-    return Identities(_db, alias);
+    return Identities(attachedDatabase, alias);
   }
 
   @override
@@ -531,9 +532,10 @@ class PrekeysCompanion extends UpdateCompanion<Prekey> {
 }
 
 class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Prekeys(this._db, [this._alias]);
+  Prekeys(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
       'id', aliasedName, false,
@@ -591,7 +593,7 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
 
   @override
   Prekeys createAlias(String alias) {
-    return Prekeys(_db, alias);
+    return Prekeys(attachedDatabase, alias);
   }
 
   @override
@@ -769,9 +771,10 @@ class SignedPrekeysCompanion extends UpdateCompanion<SignedPrekey> {
 }
 
 class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  SignedPrekeys(this._db, [this._alias]);
+  SignedPrekeys(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
       'id', aliasedName, false,
@@ -841,7 +844,7 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
 
   @override
   SignedPrekeys createAlias(String alias) {
-    return SignedPrekeys(_db, alias);
+    return SignedPrekeys(attachedDatabase, alias);
   }
 
   @override
@@ -1046,9 +1049,10 @@ class SessionsCompanion extends UpdateCompanion<Session> {
 }
 
 class Sessions extends Table with TableInfo<Sessions, Session> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Sessions(this._db, [this._alias]);
+  Sessions(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
       'id', aliasedName, false,
@@ -1131,7 +1135,7 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
 
   @override
   Sessions createAlias(String alias) {
-    return Sessions(_db, alias);
+    return Sessions(attachedDatabase, alias);
   }
 
   @override
@@ -1284,9 +1288,10 @@ class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
 }
 
 class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  SenderKeys(this._db, [this._alias]);
+  SenderKeys(this.attachedDatabase, [this._alias]);
   final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
   late final GeneratedColumn<String?> groupId = GeneratedColumn<String?>(
       'group_id', aliasedName, false,
@@ -1347,7 +1352,7 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
 
   @override
   SenderKeys createAlias(String alias) {
-    return SenderKeys(_db, alias);
+    return SenderKeys(attachedDatabase, alias);
   }
 
   @override
@@ -1563,9 +1568,10 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
 
 class RatchetSenderKeys extends Table
     with TableInfo<RatchetSenderKeys, RatchetSenderKey> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  RatchetSenderKeys(this._db, [this._alias]);
+  RatchetSenderKeys(this.attachedDatabase, [this._alias]);
   final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
   late final GeneratedColumn<String?> groupId = GeneratedColumn<String?>(
       'group_id', aliasedName, false,
@@ -1649,7 +1655,7 @@ class RatchetSenderKeys extends Table
 
   @override
   RatchetSenderKeys createAlias(String alias) {
-    return RatchetSenderKeys(_db, alias);
+    return RatchetSenderKeys(attachedDatabase, alias);
   }
 
   @override

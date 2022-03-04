@@ -583,9 +583,10 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
 }
 
 class Conversations extends Table with TableInfo<Conversations, Conversation> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Conversations(this._db, [this._alias]);
+  Conversations(this.attachedDatabase, [this._alias]);
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
@@ -806,7 +807,7 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
 
   @override
   Conversations createAlias(String alias) {
-    return Conversations(_db, alias);
+    return Conversations(attachedDatabase, alias);
   }
 
   static TypeConverter<ConversationCategory, String> $converter0 =
@@ -974,9 +975,10 @@ class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
 }
 
 class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  FloodMessages(this._db, [this._alias]);
+  FloodMessages(this.attachedDatabase, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
@@ -1033,7 +1035,7 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
 
   @override
   FloodMessages createAlias(String alias) {
-    return FloodMessages(_db, alias);
+    return FloodMessages(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -1385,9 +1387,10 @@ class JobsCompanion extends UpdateCompanion<Job> {
 }
 
 class Jobs extends Table with TableInfo<Jobs, Job> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Jobs(this._db, [this._alias]);
+  Jobs(this.attachedDatabase, [this._alias]);
   final VerificationMeta _jobIdMeta = const VerificationMeta('jobId');
   late final GeneratedColumn<String?> jobId = GeneratedColumn<String?>(
       'job_id', aliasedName, false,
@@ -1538,7 +1541,7 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
 
   @override
   Jobs createAlias(String alias) {
-    return Jobs(_db, alias);
+    return Jobs(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -1701,9 +1704,10 @@ class MessageMentionsCompanion extends UpdateCompanion<MessageMention> {
 
 class MessageMentions extends Table
     with TableInfo<MessageMentions, MessageMention> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  MessageMentions(this._db, [this._alias]);
+  MessageMentions(this.attachedDatabase, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
@@ -1765,7 +1769,7 @@ class MessageMentions extends Table
 
   @override
   MessageMentions createAlias(String alias) {
-    return MessageMentions(_db, alias);
+    return MessageMentions(attachedDatabase, alias);
   }
 
   @override
@@ -2721,9 +2725,10 @@ class MessagesCompanion extends UpdateCompanion<Message> {
 }
 
 class Messages extends Table with TableInfo<Messages, Message> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Messages(this._db, [this._alias]);
+  Messages(this.attachedDatabase, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
@@ -3127,7 +3132,7 @@ class Messages extends Table with TableInfo<Messages, Message> {
 
   @override
   Messages createAlias(String alias) {
-    return Messages(_db, alias);
+    return Messages(attachedDatabase, alias);
   }
 
   static TypeConverter<MediaStatus, String> $converter0 =
@@ -3328,9 +3333,10 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
 }
 
 class Participants extends Table with TableInfo<Participants, Participant> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Participants(this._db, [this._alias]);
+  Participants(this.attachedDatabase, [this._alias]);
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
@@ -3399,7 +3405,7 @@ class Participants extends Table with TableInfo<Participants, Participant> {
 
   @override
   Participants createAlias(String alias) {
-    return Participants(_db, alias);
+    return Participants(attachedDatabase, alias);
   }
 
   static TypeConverter<ParticipantRole, String> $converter0 =
@@ -3792,9 +3798,10 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
 }
 
 class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  StickerAlbums(this._db, [this._alias]);
+  StickerAlbums(this.attachedDatabase, [this._alias]);
   final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
   late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
       'album_id', aliasedName, false,
@@ -3968,7 +3975,7 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
 
   @override
   StickerAlbums createAlias(String alias) {
-    return StickerAlbums(_db, alias);
+    return StickerAlbums(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -4132,9 +4139,10 @@ class PinMessagesCompanion extends UpdateCompanion<PinMessage> {
 }
 
 class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  PinMessages(this._db, [this._alias]);
+  PinMessages(this.attachedDatabase, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
@@ -4194,7 +4202,7 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
 
   @override
   PinMessages createAlias(String alias) {
-    return PinMessages(_db, alias);
+    return PinMessages(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -4530,9 +4538,10 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
 }
 
 class Addresses extends Table with TableInfo<Addresses, Addresse> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Addresses(this._db, [this._alias]);
+  Addresses(this.attachedDatabase, [this._alias]);
   final VerificationMeta _addressIdMeta = const VerificationMeta('addressId');
   late final GeneratedColumn<String?> addressId = GeneratedColumn<String?>(
       'address_id', aliasedName, false,
@@ -4683,7 +4692,7 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
 
   @override
   Addresses createAlias(String alias) {
-    return Addresses(_db, alias);
+    return Addresses(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -5114,9 +5123,10 @@ class AppsCompanion extends UpdateCompanion<App> {
 }
 
 class Apps extends Table with TableInfo<Apps, App> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Apps(this._db, [this._alias]);
+  Apps(this.attachedDatabase, [this._alias]);
   final VerificationMeta _appIdMeta = const VerificationMeta('appId');
   late final GeneratedColumn<String?> appId = GeneratedColumn<String?>(
       'app_id', aliasedName, false,
@@ -5313,7 +5323,7 @@ class Apps extends Table with TableInfo<Apps, App> {
 
   @override
   Apps createAlias(String alias) {
-    return Apps(_db, alias);
+    return Apps(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -5784,9 +5794,10 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
 }
 
 class Assets extends Table with TableInfo<Assets, Asset> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Assets(this._db, [this._alias]);
+  Assets(this.attachedDatabase, [this._alias]);
   final VerificationMeta _assetIdMeta = const VerificationMeta('assetId');
   late final GeneratedColumn<String?> assetId = GeneratedColumn<String?>(
       'asset_id', aliasedName, false,
@@ -6007,7 +6018,7 @@ class Assets extends Table with TableInfo<Assets, Asset> {
 
   @override
   Assets createAlias(String alias) {
-    return Assets(_db, alias);
+    return Assets(attachedDatabase, alias);
   }
 
   @override
@@ -6230,9 +6241,10 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
 
 class CircleConversations extends Table
     with TableInfo<CircleConversations, CircleConversation> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  CircleConversations(this._db, [this._alias]);
+  CircleConversations(this.attachedDatabase, [this._alias]);
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
@@ -6311,7 +6323,7 @@ class CircleConversations extends Table
 
   @override
   CircleConversations createAlias(String alias) {
-    return CircleConversations(_db, alias);
+    return CircleConversations(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -6507,9 +6519,10 @@ class CirclesCompanion extends UpdateCompanion<Circle> {
 }
 
 class Circles extends Table with TableInfo<Circles, Circle> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Circles(this._db, [this._alias]);
+  Circles(this.attachedDatabase, [this._alias]);
   final VerificationMeta _circleIdMeta = const VerificationMeta('circleId');
   late final GeneratedColumn<String?> circleId = GeneratedColumn<String?>(
       'circle_id', aliasedName, false,
@@ -6574,7 +6587,7 @@ class Circles extends Table with TableInfo<Circles, Circle> {
 
   @override
   Circles createAlias(String alias) {
-    return Circles(_db, alias);
+    return Circles(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -6793,9 +6806,10 @@ class HyperlinksCompanion extends UpdateCompanion<Hyperlink> {
 }
 
 class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Hyperlinks(this._db, [this._alias]);
+  Hyperlinks(this.attachedDatabase, [this._alias]);
   final VerificationMeta _hyperlinkMeta = const VerificationMeta('hyperlink');
   late final GeneratedColumn<String?> hyperlink = GeneratedColumn<String?>(
       'hyperlink', aliasedName, false,
@@ -6880,7 +6894,7 @@ class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
 
   @override
   Hyperlinks createAlias(String alias) {
-    return Hyperlinks(_db, alias);
+    return Hyperlinks(attachedDatabase, alias);
   }
 
   @override
@@ -7140,9 +7154,10 @@ class MessagesFts extends Table
     with
         TableInfo<MessagesFts, MessagesFt>,
         VirtualTableInfo<MessagesFts, MessagesFt> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  MessagesFts(this._db, [this._alias]);
+  MessagesFts(this.attachedDatabase, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
@@ -7268,7 +7283,7 @@ class MessagesFts extends Table
 
   @override
   MessagesFts createAlias(String alias) {
-    return MessagesFts(_db, alias);
+    return MessagesFts(attachedDatabase, alias);
   }
 
   @override
@@ -7379,9 +7394,10 @@ class MessagesHistoryCompanion extends UpdateCompanion<MessagesHistoryData> {
 
 class MessagesHistory extends Table
     with TableInfo<MessagesHistory, MessagesHistoryData> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  MessagesHistory(this._db, [this._alias]);
+  MessagesHistory(this.attachedDatabase, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
@@ -7419,7 +7435,7 @@ class MessagesHistory extends Table
 
   @override
   MessagesHistory createAlias(String alias) {
-    return MessagesHistory(_db, alias);
+    return MessagesHistory(attachedDatabase, alias);
   }
 
   @override
@@ -7548,9 +7564,10 @@ class OffsetsCompanion extends UpdateCompanion<Offset> {
 }
 
 class Offsets extends Table with TableInfo<Offsets, Offset> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Offsets(this._db, [this._alias]);
+  Offsets(this.attachedDatabase, [this._alias]);
   final VerificationMeta _keyMeta = const VerificationMeta('key');
   late final GeneratedColumn<String?> key = GeneratedColumn<String?>(
       'key', aliasedName, false,
@@ -7599,7 +7616,7 @@ class Offsets extends Table with TableInfo<Offsets, Offset> {
 
   @override
   Offsets createAlias(String alias) {
-    return Offsets(_db, alias);
+    return Offsets(attachedDatabase, alias);
   }
 
   @override
@@ -7848,9 +7865,10 @@ class ParticipantSessionCompanion
 
 class ParticipantSession extends Table
     with TableInfo<ParticipantSession, ParticipantSessionData> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  ParticipantSession(this._db, [this._alias]);
+  ParticipantSession(this.attachedDatabase, [this._alias]);
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
@@ -7947,7 +7965,7 @@ class ParticipantSession extends Table
 
   @override
   ParticipantSession createAlias(String alias) {
-    return ParticipantSession(_db, alias);
+    return ParticipantSession(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -8166,9 +8184,10 @@ class ResendSessionMessagesCompanion
 
 class ResendSessionMessages extends Table
     with TableInfo<ResendSessionMessages, ResendSessionMessage> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  ResendSessionMessages(this._db, [this._alias]);
+  ResendSessionMessages(this.attachedDatabase, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, false,
@@ -8251,7 +8270,7 @@ class ResendSessionMessages extends Table
 
   @override
   ResendSessionMessages createAlias(String alias) {
-    return ResendSessionMessages(_db, alias);
+    return ResendSessionMessages(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -8498,9 +8517,10 @@ class SentSessionSenderKeysCompanion
 
 class SentSessionSenderKeys extends Table
     with TableInfo<SentSessionSenderKeys, SentSessionSenderKey> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  SentSessionSenderKeys(this._db, [this._alias]);
+  SentSessionSenderKeys(this.attachedDatabase, [this._alias]);
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
@@ -8602,7 +8622,7 @@ class SentSessionSenderKeys extends Table
 
   @override
   SentSessionSenderKeys createAlias(String alias) {
-    return SentSessionSenderKeys(_db, alias);
+    return SentSessionSenderKeys(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -9017,9 +9037,10 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
 }
 
 class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Snapshots(this._db, [this._alias]);
+  Snapshots(this.attachedDatabase, [this._alias]);
   final VerificationMeta _snapshotIdMeta = const VerificationMeta('snapshotId');
   late final GeneratedColumn<String?> snapshotId = GeneratedColumn<String?>(
       'snapshot_id', aliasedName, false,
@@ -9193,7 +9214,7 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
 
   @override
   Snapshots createAlias(String alias) {
-    return Snapshots(_db, alias);
+    return Snapshots(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -9329,9 +9350,10 @@ class StickerRelationshipsCompanion
 
 class StickerRelationships extends Table
     with TableInfo<StickerRelationships, StickerRelationship> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  StickerRelationships(this._db, [this._alias]);
+  StickerRelationships(this.attachedDatabase, [this._alias]);
   final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
   late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
       'album_id', aliasedName, false,
@@ -9381,7 +9403,7 @@ class StickerRelationships extends Table
 
   @override
   StickerRelationships createAlias(String alias) {
-    return StickerRelationships(_db, alias);
+    return StickerRelationships(attachedDatabase, alias);
   }
 
   @override
@@ -9699,9 +9721,10 @@ class StickersCompanion extends UpdateCompanion<Sticker> {
 }
 
 class Stickers extends Table with TableInfo<Stickers, Sticker> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Stickers(this._db, [this._alias]);
+  Stickers(this.attachedDatabase, [this._alias]);
   final VerificationMeta _stickerIdMeta = const VerificationMeta('stickerId');
   late final GeneratedColumn<String?> stickerId = GeneratedColumn<String?>(
       'sticker_id', aliasedName, false,
@@ -9839,7 +9862,7 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
 
   @override
   Stickers createAlias(String alias) {
-    return Stickers(_db, alias);
+    return Stickers(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -10292,9 +10315,10 @@ class UsersCompanion extends UpdateCompanion<User> {
 }
 
 class Users extends Table with TableInfo<Users, User> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Users(this._db, [this._alias]);
+  Users(this.attachedDatabase, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
@@ -10467,7 +10491,7 @@ class Users extends Table with TableInfo<Users, User> {
 
   @override
   Users createAlias(String alias) {
-    return Users(_db, alias);
+    return Users(attachedDatabase, alias);
   }
 
   static TypeConverter<UserRelationship, String> $converter0 =
@@ -11324,9 +11348,10 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
 
 class TranscriptMessages extends Table
     with TableInfo<TranscriptMessages, TranscriptMessage> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  TranscriptMessages(this._db, [this._alias]);
+  TranscriptMessages(this.attachedDatabase, [this._alias]);
   final VerificationMeta _transcriptIdMeta =
       const VerificationMeta('transcriptId');
   late final GeneratedColumn<String?> transcriptId = GeneratedColumn<String?>(
@@ -11682,7 +11707,7 @@ class TranscriptMessages extends Table
 
   @override
   TranscriptMessages createAlias(String alias) {
-    return TranscriptMessages(_db, alias);
+    return TranscriptMessages(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
@@ -11814,9 +11839,10 @@ class FiatsCompanion extends UpdateCompanion<Fiat> {
 }
 
 class Fiats extends Table with TableInfo<Fiats, Fiat> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Fiats(this._db, [this._alias]);
+  Fiats(this.attachedDatabase, [this._alias]);
   final VerificationMeta _codeMeta = const VerificationMeta('code');
   late final GeneratedColumn<String?> code = GeneratedColumn<String?>(
       'code', aliasedName, false,
@@ -11865,7 +11891,7 @@ class Fiats extends Table with TableInfo<Fiats, Fiat> {
 
   @override
   Fiats createAlias(String alias) {
-    return Fiats(_db, alias);
+    return Fiats(attachedDatabase, alias);
   }
 
   @override
@@ -12024,9 +12050,10 @@ class FavoriteAppsCompanion extends UpdateCompanion<FavoriteApp> {
 }
 
 class FavoriteApps extends Table with TableInfo<FavoriteApps, FavoriteApp> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  FavoriteApps(this._db, [this._alias]);
+  FavoriteApps(this.attachedDatabase, [this._alias]);
   final VerificationMeta _appIdMeta = const VerificationMeta('appId');
   late final GeneratedColumn<String?> appId = GeneratedColumn<String?>(
       'app_id', aliasedName, false,
@@ -12083,7 +12110,7 @@ class FavoriteApps extends Table with TableInfo<FavoriteApps, FavoriteApp> {
 
   @override
   FavoriteApps createAlias(String alias) {
-    return FavoriteApps(_db, alias);
+    return FavoriteApps(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
