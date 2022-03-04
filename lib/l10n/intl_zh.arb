@@ -246,5 +246,6 @@
   "reset": "重置",
   "groupsInCommon": "共同群组",
   "failedToOpenFile": "无法打开文件：{name}",
+  "openLogDirectory": "打开日志文件夹",
   "messageTooLong": "消息内容过长"
 }

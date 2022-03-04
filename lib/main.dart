@@ -52,10 +52,7 @@ Future<void> main(List<String> args) async {
     'crash',
   )));
 
-  unawaited(LogFileManager.init(p.join(
-    mixinDocumentsDirectory.path,
-    'log',
-  )));
+  unawaited(LogFileManager.init(mixinLogDirectory.path));
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: mixinDocumentsDirectory,

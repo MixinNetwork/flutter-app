@@ -2570,6 +2570,16 @@ class Localization {
     );
   }
 
+  /// `open log directory`
+  String get openLogDirectory {
+    return Intl.message(
+      'open log directory',
+      name: 'openLogDirectory',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Message content is too long`
   String get messageTooLong {
     return Intl.message(
