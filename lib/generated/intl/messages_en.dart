@@ -251,6 +251,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Message Preview"),
         "messagePreviewDescription": MessageLookupByLibrary.simpleMessage(
             "Preview message text inside new message notifications."),
+        "messageTooLong":
+            MessageLookupByLibrary.simpleMessage("Message content is too long"),
         "messages": MessageLookupByLibrary.simpleMessage("Messages"),
         "mixinMessenger":
             MessageLookupByLibrary.simpleMessage("Mixin Messenger"),

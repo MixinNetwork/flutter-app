@@ -251,5 +251,6 @@
   "reset": "Reset",
   "groupsInCommon": "Groups in common",
   "failedToOpenFile": "Failed to open file {name}",
-  "openLogDirectory": "open log directory"
+  "openLogDirectory": "open log directory",
+  "messageTooLong": "Message content is too long"
 }

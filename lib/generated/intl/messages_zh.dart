@@ -219,6 +219,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messagePreview": MessageLookupByLibrary.simpleMessage("消息预览"),
         "messagePreviewDescription":
             MessageLookupByLibrary.simpleMessage("预览新消息通知中的消息文本。"),
+        "messageTooLong": MessageLookupByLibrary.simpleMessage("消息内容过长"),
         "messages": MessageLookupByLibrary.simpleMessage("消息"),
         "more": MessageLookupByLibrary.simpleMessage("更多"),
         "mute": MessageLookupByLibrary.simpleMessage("静音"),
