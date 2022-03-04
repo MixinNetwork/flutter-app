@@ -284,7 +284,7 @@ packages:
       name: dart_vlc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.8"
+    version: "0.1.7"
   dart_vlc_ffi:
     dependency: transitive
     description:
