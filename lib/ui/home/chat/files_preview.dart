@@ -66,8 +66,6 @@ class _File {
   bool get isImage => file.isImage;
 }
 
-typedef _FileDeleteCallback = void Function(_File);
-typedef _FileAddCallback = void Function(List<_File>);
 typedef _ImageEditedCallback = void Function(_File, ImageEditorSnapshot);
 
 const _kDefaultArchiveName = 'Archive.zip';
@@ -315,7 +313,7 @@ class _AnimatedFileTile extends HookWidget {
   final _File file;
   final Animation<double> animation;
 
-  final _FileDeleteCallback? onDelete;
+  final void Function(_File)? onDelete;
 
   final _ImageEditedCallback? onImageEdited;
 
@@ -451,9 +449,6 @@ class _PageZip extends StatelessWidget {
       );
 }
 
-typedef FileItemBuilder = Widget Function(
-    BuildContext, _File, Animation<double>);
-
 class _AnimatedListBuilder extends HookWidget {
   const _AnimatedListBuilder({
     Key? key,
@@ -467,7 +462,7 @@ class _AnimatedListBuilder extends HookWidget {
   final Stream<int> onFileAdded;
   final Stream<Tuple2<int, _File>> onFileDeleted;
 
-  final FileItemBuilder builder;
+  final Widget Function(BuildContext, _File, Animation<double>) builder;
 
   @override
   Widget build(BuildContext context) {
@@ -711,7 +706,7 @@ class _FileInputOverlay extends HookWidget {
 
   final Widget child;
 
-  final _FileAddCallback onFileAdded;
+  final void Function(List<_File>) onFileAdded;
 
   @override
   Widget build(BuildContext context) {
@@ -735,18 +730,18 @@ class _FileInputOverlay extends HookWidget {
         onDragEntered: (_) => dragging.value = true,
         onDragExited: (_) => dragging.value = false,
         onDragDone: (details) async {
-          final files = <_File>[];
-          for (final uri in details.urls) {
-            final file = File(uri.toFilePath(windows: Platform.isWindows));
-            if (!file.existsSync()) {
-              continue;
-            }
-            files.add(await _File.createFromFile(file));
-          }
+          final files = details.files.where((xFile) {
+            final file = File(xFile.path);
+            return file.existsSync();
+          });
           if (files.isEmpty) {
             return;
           }
-          onFileAdded(files);
+          onFileAdded(await Future.wait(
+            files.map(
+              (file) async => _File(file, await file.length(), null),
+            ),
+          ));
         },
         child: Stack(
           children: [

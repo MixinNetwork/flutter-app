@@ -85,7 +85,7 @@ Future<void> _initSystemTray() async {
 
   // We first init the systray menu and then add the menu entries
   unawaited(_systemTray.initSystemTray(
-    'Mixin',
+    title: 'Mixin',
     iconPath: path,
     toolTip: 'Mixin',
   ));

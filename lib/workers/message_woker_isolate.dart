@@ -671,9 +671,6 @@ class _MessageProcessRunner {
       case MainIsolateEventType.exit:
         dispose();
         Isolate.exit();
-      default:
-        assert(false, 'Unknown event: ${event.type}');
-        return;
     }
   }
 

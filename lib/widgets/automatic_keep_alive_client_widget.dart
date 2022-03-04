@@ -9,7 +9,7 @@ class AutomaticKeepAliveClientWidget extends StatefulWidget {
   final Widget child;
 
   @override
-  _AutomaticKeepAliveClientWidgetState createState() =>
+  State<AutomaticKeepAliveClientWidget> createState() =>
       _AutomaticKeepAliveClientWidgetState();
 }
 

@@ -113,7 +113,9 @@ class VideoMessageWidget extends HookWidget {
                               return const StatusPending();
                             case MediaStatus.expired:
                               return const StatusWarning();
-                            default:
+                            case MediaStatus.done:
+                            case MediaStatus.read:
+                            case null:
                               return SvgPicture.asset(
                                 Resources.assetsImagesPlaySvg,
                                 width: 38,

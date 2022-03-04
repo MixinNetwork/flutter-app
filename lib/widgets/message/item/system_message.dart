@@ -123,7 +123,8 @@ String generateSystemText({
     case MessageAction.role:
       text = Localization.current.chatGroupRole;
       break;
-    default:
+    case MessageAction.update:
+    case null:
       text = Localization.current.chatNotSupport;
       break;
   }

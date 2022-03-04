@@ -274,7 +274,7 @@ class _RoleWidget extends StatelessWidget {
         return _RoleLabel(context.l10n.groupOwner);
       case ParticipantRole.admin:
         return _RoleLabel(context.l10n.groupAdmin);
-      default:
+      case null:
         return Container(width: 0);
     }
   }

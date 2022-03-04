@@ -107,7 +107,9 @@ class MessageFile extends HookWidget {
                 return const StatusPending();
               case MediaStatus.expired:
                 return const StatusWarning();
-              default:
+              case null:
+              case MediaStatus.done:
+              case MediaStatus.read:
                 break;
             }
 

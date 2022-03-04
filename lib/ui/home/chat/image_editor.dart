@@ -119,7 +119,7 @@ class ImageEditorSnapshot {
     required this.imagePath,
   });
 
-  final _ImageRotate imageRotate;
+  final ImageRotate imageRotate;
   final bool flip;
   final List<CustomDrawLine> customDrawLines;
   final Rect cropRect;
@@ -139,7 +139,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
     required this.image,
   });
 
-  final _ImageRotate rotate;
+  final ImageRotate rotate;
 
   final bool flip;
 
@@ -157,7 +157,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
   final ui.Image image;
 
   bool get canReset =>
-      rotate != _ImageRotate.none ||
+      rotate != ImageRotate.none ||
       drawLines.isNotEmpty ||
       flip ||
       cropRect.width.round() != image.width ||
@@ -176,7 +176,7 @@ class _ImageEditorState extends Equatable with EquatableMixin {
       ];
 
   _ImageEditorState copyWith({
-    _ImageRotate? rotate,
+    ImageRotate? rotate,
     bool? flip,
     List<CustomDrawLine>? drawLines,
     Color? drawColor,
@@ -202,7 +202,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     required this.image,
     ImageEditorSnapshot? snapshot,
   }) : super(_ImageEditorState(
-          rotate: _ImageRotate.none,
+          rotate: ImageRotate.none,
           flip: false,
           drawLines: const [],
           drawColor: _kDefaultDrawColor,
@@ -244,16 +244,16 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   final double _drawStrokeWidth = 11;
 
   void rotate() {
-    _ImageRotate next() {
+    ImageRotate next() {
       switch (state.rotate) {
-        case _ImageRotate.none:
-          return _ImageRotate.quarter;
-        case _ImageRotate.quarter:
-          return _ImageRotate.half;
-        case _ImageRotate.half:
-          return _ImageRotate.threeQuarter;
-        case _ImageRotate.threeQuarter:
-          return _ImageRotate.none;
+        case ImageRotate.none:
+          return ImageRotate.quarter;
+        case ImageRotate.quarter:
+          return ImageRotate.half;
+        case ImageRotate.half:
+          return ImageRotate.threeQuarter;
+        case ImageRotate.threeQuarter:
+          return ImageRotate.none;
       }
     }
 
@@ -401,7 +401,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     if (state.flip) {
       img.flipHorizontal(imgImage);
     }
-    if (state.rotate != _ImageRotate.none) {
+    if (state.rotate != ImageRotate.none) {
       imgImage = img.copyRotate(imgImage, 360 - state.rotate.degree);
     }
     final data = img.encodePng(imgImage);
@@ -472,7 +472,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
 
     final Uint8List? bytes;
 
-    if (!state.flip && state.rotate == _ImageRotate.none) {
+    if (!state.flip && state.rotate == ImageRotate.none) {
       bytes = await snapshotImage.toBytes(format: ui.ImageByteFormat.png);
     } else {
       bytes = await _flipAndRotateImage(snapshotImage);
@@ -515,7 +515,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
           image.height.toDouble(),
         ),
         flip: false,
-        rotate: _ImageRotate.none,
+        rotate: ImageRotate.none,
       ),
     );
   }
@@ -545,8 +545,8 @@ class _Preview extends HookWidget {
       converter: (state) => state.flip,
     );
 
-    final rotate = useBlocStateConverter<_ImageEditorBloc, _ImageEditorState,
-        _ImageRotate>(
+    final rotate =
+        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, ImageRotate>(
       converter: (state) => state.rotate,
     );
 
@@ -677,7 +677,7 @@ class _CropRectWidget extends HookWidget {
 
   final Size scaledImageSize;
   final bool isFlip;
-  final _ImageRotate rotate;
+  final ImageRotate rotate;
   final double scale;
 
   @override
@@ -929,7 +929,7 @@ class _CustomDrawingWidget extends HookWidget {
 
   final ui.Size viewPortSize;
   final ui.Image image;
-  final _ImageRotate rotate;
+  final ImageRotate rotate;
   final bool flip;
 
   @override
@@ -1004,36 +1004,36 @@ enum _ImageDragArea {
   center,
 }
 
-enum _ImageRotate {
+enum ImageRotate {
   none,
   quarter,
   half,
   threeQuarter,
 }
 
-extension _ImageRotateExt on _ImageRotate {
+extension _ImageRotateExt on ImageRotate {
   double get radius {
     switch (this) {
-      case _ImageRotate.none:
+      case ImageRotate.none:
         return 0;
-      case _ImageRotate.quarter:
+      case ImageRotate.quarter:
         return math.pi / 2;
-      case _ImageRotate.half:
+      case ImageRotate.half:
         return math.pi;
-      case _ImageRotate.threeQuarter:
+      case ImageRotate.threeQuarter:
         return 3 * math.pi / 2;
     }
   }
 
   double get degree {
     switch (this) {
-      case _ImageRotate.none:
+      case ImageRotate.none:
         return 0;
-      case _ImageRotate.quarter:
+      case ImageRotate.quarter:
         return 90;
-      case _ImageRotate.half:
+      case ImageRotate.half:
         return 180;
-      case _ImageRotate.threeQuarter:
+      case ImageRotate.threeQuarter:
         return 270;
     }
   }
@@ -1047,12 +1047,12 @@ extension _ImageRotateExt on _ImageRotate {
 
   bool get _boundRotated {
     switch (this) {
-      case _ImageRotate.none:
+      case ImageRotate.none:
         return false;
-      case _ImageRotate.quarter:
-      case _ImageRotate.threeQuarter:
+      case ImageRotate.quarter:
+      case ImageRotate.threeQuarter:
         return true;
-      case _ImageRotate.half:
+      case ImageRotate.half:
         return false;
     }
   }
@@ -1408,7 +1408,7 @@ class _NormalOperationBar extends HookWidget {
 
     final rotated =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
-      converter: (state) => state.rotate != _ImageRotate.none,
+      converter: (state) => state.rotate != ImageRotate.none,
     );
     final flipped =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(

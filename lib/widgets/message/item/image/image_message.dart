@@ -124,7 +124,9 @@ class MessageImage extends HookWidget {
             context.accountServer
                 .cancelProgressAttachmentJob(message.messageId);
             break;
-          default:
+          case null:
+          case MediaStatus.expired:
+          case MediaStatus.read:
             break;
         }
       },
@@ -163,7 +165,9 @@ class MessageImage extends HookWidget {
                       return const StatusPending();
                     case MediaStatus.expired:
                       return const StatusWarning();
-                    default:
+                    case MediaStatus.done:
+                    case MediaStatus.read:
+                    case null:
                       return const SizedBox();
                   }
                 },

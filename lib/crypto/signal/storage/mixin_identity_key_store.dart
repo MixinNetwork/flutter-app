@@ -49,8 +49,6 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
             identityKey!, await identityDao.getIdentityByAddress(theirAddress));
       case Direction.receiving:
         return true;
-      default:
-        throw AssertionError('Unknown direction: $direction');
     }
   }
 

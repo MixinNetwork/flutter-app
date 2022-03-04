@@ -111,7 +111,7 @@ class SignalProtocol {
     final sessionCipher =
         SessionCipher.fromStore(mixinSignalProtocolStore, address);
     d('decrypt category: $category, dataType: $dataType');
-    if (category == MessageCategory.signalKey.toString()) {
+    if (category == MessageCategory.signalKey) {
       if (dataType == CiphertextMessage.prekeyType) {
         await sessionCipher.decryptWithCallback(PreKeySignalMessage(cipherText),
             (plainText) {
@@ -297,12 +297,12 @@ class SignalProtocol {
   ComposeMessageData decodeMessageData(String encoded) {
     final cipherText = base64.decode(encoded);
     final header = cipherText.sublist(0, 8);
-    final version = header[0].toInt();
+    final version = header[0];
     if (version != CiphertextMessage.currentVersion) {
       throw InvalidMessageException('Unknown version: $version');
     }
-    final dataType = header[1].toInt();
-    final isResendMessage = header[2].toInt() == 1;
+    final dataType = header[1];
+    final isResendMessage = header[2] == 1;
     if (isResendMessage) {
       final messageId =
           utf8.decode(cipherText.sublist(8, 44), allowMalformed: true);

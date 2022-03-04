@@ -29,7 +29,9 @@ class MessageStatusIcon extends StatelessWidget {
         color = context.theme.accent;
         break;
       case MessageStatus.sending:
-      default:
+      case MessageStatus.failed:
+      case MessageStatus.unknown:
+      case null:
         icon = Resources.assetsImagesSendingSvg;
         break;
     }

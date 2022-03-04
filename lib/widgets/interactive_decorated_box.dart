@@ -41,7 +41,7 @@ class InteractiveBuilder extends StatefulWidget {
   final HitTestBehavior? behavior;
 
   @override
-  _InteractiveBuilderState createState() => _InteractiveBuilderState();
+  State<InteractiveBuilder> createState() => _InteractiveBuilderState();
 }
 
 class _InteractiveBuilderState extends State<InteractiveBuilder> {

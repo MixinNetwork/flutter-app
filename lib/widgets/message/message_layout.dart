@@ -16,15 +16,17 @@ class MessageLayout extends MultiChildRenderObjectWidget {
   final Clip clipBehavior;
 
   @override
-  _RenderMessageLayout createRenderObject(BuildContext context) =>
-      _RenderMessageLayout(
+  RenderObject createRenderObject(BuildContext context) => _RenderMessageLayout(
         spacing: spacing,
         clipBehavior: clipBehavior,
       );
 
   @override
   void updateRenderObject(
-      BuildContext context, _RenderMessageLayout renderObject) {
+    BuildContext context,
+    // ignore: library_private_types_in_public_api
+    _RenderMessageLayout renderObject,
+  ) {
     renderObject
       ..spacing = spacing
       ..clipBehavior = clipBehavior;

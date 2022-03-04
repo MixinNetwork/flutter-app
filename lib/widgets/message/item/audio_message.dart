@@ -77,7 +77,8 @@ class AudioMessage extends HookWidget {
               context.accountServer
                   .cancelProgressAttachmentJob(message.messageId);
               break;
-            default:
+            case MediaStatus.expired:
+            case null:
               break;
           }
         },
@@ -98,7 +99,9 @@ class AudioMessage extends HookWidget {
                     return const StatusPending();
                   case MediaStatus.expired:
                     return const StatusWarning();
-                  default:
+                  case MediaStatus.done:
+                  case MediaStatus.read:
+                  case null:
                     return playing
                         ? const StatusAudioStop()
                         : const StatusAudioPlay();
