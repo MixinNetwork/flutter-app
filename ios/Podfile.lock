@@ -54,31 +54,31 @@ PODS:
     - Flutter
   - quick_breakpad (0.0.1):
     - Flutter
-  - SDWebImage (5.12.1):
-    - SDWebImage/Core (= 5.12.1)
-  - SDWebImage/Core (5.12.1)
-  - sqlite3 (3.37.0):
-    - sqlite3/common (= 3.37.0)
-  - sqlite3/common (3.37.0)
-  - sqlite3/fts5 (3.37.0):
+  - SDWebImage (5.12.3):
+    - SDWebImage/Core (= 5.12.3)
+  - SDWebImage/Core (5.12.3)
+  - sqlite3 (3.38.0):
+    - sqlite3/common (= 3.38.0)
+  - sqlite3/common (3.38.0)
+  - sqlite3/fts5 (3.38.0):
     - sqlite3/common
-  - sqlite3/json1 (3.37.0):
+  - sqlite3/json1 (3.38.0):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.37.0):
+  - sqlite3/perf-threadsafe (3.38.0):
     - sqlite3/common
-  - sqlite3/rtree (3.37.0):
+  - sqlite3/rtree (3.38.0):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
-    - sqlite3 (~> 3.37.0)
+    - sqlite3 (~> 3.38.0)
     - sqlite3/fts5
     - sqlite3/json1
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
-  - SwiftyGif (5.4.2)
+  - SwiftyGif (5.4.3)
   - system_clock (0.0.1):
     - Flutter
-  - url_launcher (0.0.1):
+  - url_launcher_ios (0.0.1):
     - Flutter
 
 DEPENDENCIES:
@@ -96,7 +96,7 @@ DEPENDENCIES:
   - quick_breakpad (from `.symlinks/plugins/quick_breakpad/ios`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
   - system_clock (from `.symlinks/plugins/system_clock/ios`)
-  - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
   trunk:
@@ -135,8 +135,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
   system_clock:
     :path: ".symlinks/plugins/system_clock/ios"
-  url_launcher:
-    :path: ".symlinks/plugins/url_launcher/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
   device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
@@ -147,19 +147,19 @@ SPEC CHECKSUMS:
   flutter_app_icon_badge: 844847adbd7a1c6f325d6b41b942428981b839cc
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542
-  image_picker: 9aa50e1d8cdacdbed739e925b7eea16d014367e6
+  image_picker: 541dcbb3b9cf32d87eacbd957845d8651d6c62c3
   ogg_opus_player: 0e883df8c4f70995c3e6b8ac3a8ef088f66a8f41
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
-  path_provider_ios: 7d7ce634493af4477d156294792024ec3485acd5
+  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
   quick_breakpad: d77246a2c0062345fa9058716f198a67d3aad9f3
-  SDWebImage: 4dc3e42d9ec0c1028b960a33ac6b637bb432207b
-  sqlite3: b56b05777c433a55d852a3405c1903e2b57be2ce
-  sqlite3_flutter_libs: 83a1fbbabdcee09e4e34511bb246136a8a97c9d6
-  SwiftyGif: dec758a9dd3d278e5a855dbf279bf062c923c387
+  SDWebImage: 53179a2dba77246efa8a9b85f5c5b21f8f43e38f
+  sqlite3: 2c78798a817aa040981e2b0cfb4eb94523c0f55f
+  sqlite3_flutter_libs: 14a93fdcff62c6a346356df0b8e1b3f35fbab8f2
+  SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
   system_clock: 3efb51d18e565092e2a97bc605c6255f328bd13a
-  url_launcher: b6e016d912f04be9f5bf6e8e82dc599b7ba59649
+  url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
 
-PODFILE CHECKSUM: 3c25a7d95fc93817605574b61df9abc1adce4027
+PODFILE CHECKSUM: c7cf6cd0af5391000f485bb7f6561b845e054d60
 
 COCOAPODS: 1.11.2
