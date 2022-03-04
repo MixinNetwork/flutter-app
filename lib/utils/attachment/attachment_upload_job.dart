@@ -7,7 +7,7 @@ Map<String, dynamic> _uploadHeaders = {
 };
 
 extension _CiphertextLengthExtension on int {
-  int get ciphertextLength => (16 + (((this ~/ 16) + 1) * 16) + 32).toInt();
+  int get ciphertextLength => 16 + (((this ~/ 16) + 1) * 16) + 32;
 }
 
 class _AttachmentUploadJobOption {

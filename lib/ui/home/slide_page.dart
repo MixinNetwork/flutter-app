@@ -433,7 +433,9 @@ class _Item extends HookWidget {
             return dao
                 .strangerUnseenConversationCount()
                 .watchSingleThrottle(kDefaultThrottleDuration);
-          default:
+          case SlideCategoryType.chats:
+          case SlideCategoryType.circle:
+          case SlideCategoryType.setting:
             return const Stream.empty();
         }
       },

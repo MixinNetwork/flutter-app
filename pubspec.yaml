@@ -22,11 +22,11 @@ dependencies:
   archive: ^3.1.2
   async: ^2.8.1
   bitsdojo_window: ^0.1.1+1
-  bloc: ^7.2.0
+  bloc: ^8.0.3
   blurhash_dart: ^1.0.2
-  dart_vlc: 0.1.7
+  dart_vlc: ^0.1.8
   decimal: ^2.1.0
-  desktop_drop: ^0.1.2
+  desktop_drop: ^0.3.2
   desktop_lifecycle: ^0.1.0
   desktop_webview_window: ^0.1.6
   device_info_plus: ^3.1.0
@@ -36,27 +36,27 @@ dependencies:
   equatable: ^2.0.3
   extended_image: ^4.1.0
   file_picker: ^4.0.0
-  file_selector: ^0.8.2
-  file_selector_linux: ^0.0.2
+  file_selector: ^0.8.3
+  file_selector_linux: ^0.0.2+1
   file_selector_macos: ^0.0.4
-  file_selector_windows: ^0.0.2
+  file_selector_windows: ^0.8.2
   filesize: ^2.0.1
   flutter:
     sdk: flutter
   flutter_app_icon_badge: ^2.0.0
-  flutter_bloc: ^7.3.0
+  flutter_bloc: ^8.0.1
   flutter_hooks: ^0.18.0
   flutter_local_notifications: ^9.0.2
   flutter_localizations:
     sdk: flutter
   flutter_markdown: ^0.6.6
   flutter_portal: ^0.4.0
-  flutter_svg: ^0.23.0+1
+  flutter_svg: ^1.0.3
   gallery_saver: ^2.3.2
   hive: ^2.0.4
   hive_flutter: ^1.0.0
   http: ^0.13.3
-  hydrated_bloc: ^7.1.0
+  hydrated_bloc: ^8.0.0
   image_picker: ^0.8.4+4
   intl: ^0.17.0
   isolate: ^2.1.0
@@ -89,9 +89,9 @@ dependencies:
   rxdart: ^0.27.1
   scrollable_positioned_list: ^0.2.3
   sliver_tools: ^0.2.5
-  sqlite3_flutter_libs: 0.5.3
+  sqlite3_flutter_libs: 0.5.4
   stream_transform: ^2.0.0
-  system_tray: ^0.0.7
+  system_tray: ^0.1.0
   tuple: ^2.0.0
   ulid: ^2.0.0
   url_launcher: ^6.0.1
@@ -132,7 +132,7 @@ dev_dependencies:
     sdk: flutter
   hive_generator: ^1.1.0
   json_serializable: ^6.0.0
-  msix: ^2.8.13
+  msix: ^3.3.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

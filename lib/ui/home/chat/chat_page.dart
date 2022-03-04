@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cross_file/cross_file.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -964,14 +963,10 @@ class _ChatDropOverlay extends HookWidget {
       onDragEntered: (_) => dragging.value = true,
       onDragExited: (_) => dragging.value = false,
       onDragDone: (details) async {
-        final files = <XFile>[];
-        for (final uri in details.urls) {
-          final file = File(uri.toFilePath(windows: Platform.isWindows));
-          if (!file.existsSync()) {
-            continue;
-          }
-          files.add(file.xFile);
-        }
+        final files = details.files.where((xFile) {
+          final file = File(xFile.path);
+          return file.existsSync();
+        }).toList();
         if (files.isEmpty) {
           return;
         }

@@ -162,7 +162,7 @@ extension _AttachmentDownloadExtension on Dio {
 
     response.headers = Headers.fromMap(response.data!.headers);
 
-    final file = File(savePath.toString())..createSync(recursive: true);
+    final file = File(savePath)..createSync(recursive: true);
 
     // Shouldn't call file.writeAsBytesSync(list, flush: flush),
     // because it can write all bytes by once. Consider that the

@@ -259,9 +259,6 @@ class AccountServer {
         final conversationId = event.argument as String;
         unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
         break;
-      default:
-        assert(false, 'unexpected event: $event');
-        break;
     }
   }
 

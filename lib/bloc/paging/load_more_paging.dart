@@ -44,6 +44,7 @@ class LoadMorePagingBloc<T>
     required this.loadMoreData,
     required this.isSameKey,
   }) : super(LoadMorePagingState<T>()) {
+    on<_LoadMorePagingEvent>(_onEvent);
     add(_LoadMorePagingInitEvent());
   }
 
@@ -51,17 +52,14 @@ class LoadMorePagingBloc<T>
   final Future<List<T>> Function(List<T>) loadMoreData;
   final bool Function(T, T) isSameKey;
 
-  @override
-  Stream<LoadMorePagingState<T>> mapEventToState(
-      _LoadMorePagingEvent event) async* {
+  Future<void> _onEvent(
+    _LoadMorePagingEvent event,
+    Emitter<LoadMorePagingState<T>> emit,
+  ) async {
     if (event is _LoadMorePagingInitEvent) {
-      yield LoadMorePagingState<T>(
-        list: await reloadData(),
-      );
+      emit(LoadMorePagingState<T>(list: await reloadData()));
     } else if (event is _LoadMorePagingLoadMoreEvent) {
-      yield state.copyWith(
-        list: await loadMoreData(state.list),
-      );
+      emit(state.copyWith(list: await loadMoreData(state.list)));
     } else if (event is _LoadMorePagingInsertOrReplaceEvent<T>) {
       if (state.list.isEmpty) return;
       final index =
@@ -73,9 +71,7 @@ class LoadMorePagingBloc<T>
         list = state.list.toList();
         list[index] = event.item;
       }
-      yield state.copyWith(
-        list: list,
-      );
+      emit(state.copyWith(list: list));
     }
   }
 

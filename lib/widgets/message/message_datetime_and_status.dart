@@ -166,7 +166,9 @@ class _MessageStatusWidget extends StatelessWidget {
         assetName = Resources.assetsImagesReadSvg;
         color = context.theme.accent;
         break;
-      default:
+      case MessageStatus.failed:
+      case MessageStatus.unknown:
+      case MessageStatus.sending:
         break;
     }
     return Padding(

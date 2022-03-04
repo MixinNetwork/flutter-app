@@ -102,6 +102,7 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     double alignment = 0,
     required PagingState<T> initState,
   }) : super(initState) {
+    on<PagingEvent>(_onEvent);
     itemPositionsListener.itemPositions.addListener(onItemPositions);
     add(PagingInitEvent(
       offset: offset,
@@ -130,25 +131,27 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     await super.close();
   }
 
-  @override
-  Stream<PagingState<T>> mapEventToState(PagingEvent event) async* {
+  Future<void> _onEvent(
+    PagingEvent event,
+    Emitter<PagingState<T>> emit,
+  ) async {
     final prefetchDistance = limit ~/ 2;
 
     if (event is PagingUpdateEvent) {
       final count = await queryCount();
-      yield state.copyWith(
+      emit(state.copyWith(
         count: count,
         hasData: count != 0,
         map: count == 0 ? {} : state.map,
-      );
+      ));
 
       if (count != 0) {
-        yield state.copyWith(
+        emit(state.copyWith(
           map: await queryMap(
             max(state.map.length, limit),
             state.map.isNotEmpty ? state.map.keys.reduce(min) : 0,
           ),
-        );
+        ));
       }
     } else if (event is PagingItemPositionEvent) {
       lastItemPositions = event.itemPositions;
@@ -181,25 +184,25 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
         }
       }
 
-      yield state.copyWith(
+      emit(state.copyWith(
         map: map,
-      );
+      ));
     } else if (event is PagingInitEvent) {
-      yield state.copyWith(
+      emit(state.copyWith(
         hasData: await queryHasData(),
-      );
+      ));
 
       final offset = event.offset;
 
       final count = await queryCount();
 
-      yield state.copyWith(
+      emit(state.copyWith(
         map: await queryMap(limit, offset),
         count: count,
         initialized: true,
         index: event.index,
         alignment: event.alignment,
-      );
+      ));
 
       jumpTo?.call(
         index: event.index,

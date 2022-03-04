@@ -54,33 +54,36 @@ Future<void> main(List<String> args) async {
 
   unawaited(LogFileManager.init(mixinLogDirectory.path));
 
-  HydratedBloc.storage = await HydratedStorage.build(
+  final storage = await HydratedStorage.build(
     storageDirectory: mixinDocumentsDirectory,
   );
 
   debugHighlightDeprecatedWidgets = true;
 
-  if (kDebugMode) Bloc.observer = CustomBlocObserver();
   unawaited(initListener());
 
   ansiColorDisabled = Platform.isIOS;
   DartVLC.initialize();
-  runZonedGuarded(
-    () => runApp(const App()),
-    (Object error, StackTrace stack) {
-      if (!kLogMode) return;
-      e('$error, $stack');
-    },
-    zoneSpecification: ZoneSpecification(
-      handleUncaughtError: (_, __, ___, Object error, StackTrace stack) {
+  HydratedBlocOverrides.runZoned(
+    () => runZonedGuarded(
+      () => runApp(const App()),
+      (Object error, StackTrace stack) {
         if (!kLogMode) return;
-        wtf('$error, $stack');
+        e('$error, $stack');
       },
-      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-        if (!kLogMode) return;
-        parent.print(zone, colorizeNonAnsi(line));
-      },
+      zoneSpecification: ZoneSpecification(
+        handleUncaughtError: (_, __, ___, Object error, StackTrace stack) {
+          if (!kLogMode) return;
+          wtf('$error, $stack');
+        },
+        print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+          if (!kLogMode) return;
+          parent.print(zone, colorizeNonAnsi(line));
+        },
+      ),
     ),
+    blocObserver: kDebugMode ? CustomBlocObserver() : null,
+    storage: storage,
   );
 
   doWhenWindowReady(() {

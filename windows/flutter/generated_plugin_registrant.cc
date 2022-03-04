@@ -11,7 +11,7 @@
 #include <desktop_drop/desktop_drop_plugin.h>
 #include <desktop_lifecycle/desktop_lifecycle_plugin.h>
 #include <desktop_webview_window/desktop_webview_window_plugin.h>
-#include <file_selector_windows/file_selector_plugin.h>
+#include <file_selector_windows/file_selector_windows.h>
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
 #include <pasteboard/pasteboard_plugin.h>
 #include <quick_breakpad/quick_breakpad_plugin.h>
@@ -32,8 +32,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("DesktopLifecyclePlugin"));
   DesktopWebviewWindowPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("DesktopWebviewWindowPlugin"));
-  FileSelectorPluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("FileSelectorPlugin"));
+  FileSelectorWindowsRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FileSelectorWindows"));
   FlutterAppIconBadgePluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterAppIconBadgePlugin"));
   PasteboardPluginRegisterWithRegistrar(

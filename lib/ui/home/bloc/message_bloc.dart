@@ -188,6 +188,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.mentionCache,
     required this.accountServer,
   }) : super(const MessageState()) {
+    on<_MessageEvent>(_onEvent);
     add(_MessageInitEvent(
       centerMessageId: conversationCubit.state?.initIndexMessageId,
       lastReadMessageId: conversationCubit.state?.lastReadMessageId,
@@ -238,8 +239,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
   }
 
-  @override
-  Stream<MessageState> mapEventToState(_MessageEvent event) async* {
+  Future<void> _onEvent(_MessageEvent event, Emitter<MessageState> emit) async {
     // Avoid value change
     final finalLimit = limit;
 
@@ -257,31 +257,31 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         event.centerMessageId,
       );
       await _preCacheMention(messageState);
-      yield _pretreatment(messageState.copyWith(
+      emit(_pretreatment(messageState.copyWith(
         refreshKey: Object(),
         lastReadMessageId: event.lastReadMessageId,
-      ));
+      )));
     } else if (event is _MessageDeleteEvent) {
       final messageState = state.removeMessage(event.messageId);
-      yield _pretreatment(messageState);
+      emit(_pretreatment(messageState));
     } else {
       if (event is _MessageLoadMoreEvent) {
         if (event is _MessageLoadAfterEvent) {
           if (state.isLatest) return;
           final messageState = await _after(conversationId);
           await _preCacheMention(messageState);
-          yield _pretreatment(messageState);
+          emit(_pretreatment(messageState));
         } else if (event is _MessageLoadBeforeEvent) {
           if (state.isOldest) return;
           final messageState = await _before(conversationId);
           await _preCacheMention(messageState);
-          yield _pretreatment(messageState);
+          emit(_pretreatment(messageState));
         }
       } else if (event is _MessageInsertOrReplaceEvent) {
         final result = _insertOrReplace(conversationId, event.data);
         if (result != null) {
           await _preCacheMention(result);
-          yield _pretreatment(result);
+          emit(_pretreatment(result));
         }
       } else if (event is _MessageScrollEvent) {
         add(_MessageInitEvent(
@@ -289,7 +289,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           lastReadMessageId: state.lastReadMessageId,
         ));
       } else if (event is _MessageJumpCurrentEvent) {
-        yield _pretreatment(state._copyWithJumpCurrentState());
+        emit(_pretreatment(state._copyWithJumpCurrentState()));
       }
     }
   }

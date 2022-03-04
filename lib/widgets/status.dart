@@ -23,7 +23,7 @@ class StatusPending extends HookWidget {
       converter: (AttachmentUtil attachmentUtil) =>
           attachmentUtil.getAttachmentProgress(messageId),
       keys: [messageId],
-    ).requireData.toDouble();
+    ).requireData;
 
     return _StatusPending(value: value);
   }

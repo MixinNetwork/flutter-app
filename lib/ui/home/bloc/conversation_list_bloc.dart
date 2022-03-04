@@ -120,7 +120,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               database.conversationDao.conversationHasDataByCircleId(state.id!),
         );
         break;
-      default:
+      case SlideCategoryType.setting:
         return;
     }
     final bloc = _map[state];
