@@ -26,6 +26,8 @@ import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
+import 'utils/app_lifecycle.dart';
+import 'utils/auto_update_checker.dart';
 import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
@@ -257,6 +259,20 @@ class _Home extends HookWidget {
           ..initCircles();
       }
     }, [signed]);
+
+    useEffect(() {
+      void onAppStateChanged() {
+        if (isAppActive) {
+          checkUpdate(context: context);
+        }
+      }
+
+      onAppStateChanged();
+      appActiveListener.addListener(onAppStateChanged);
+      return () {
+        appActiveListener.removeListener(onAppStateChanged);
+      };
+    }, []);
 
     if (signed) {
       BlocProvider.of<ConversationListBloc>(context)

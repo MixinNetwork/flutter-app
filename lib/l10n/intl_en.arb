@@ -252,5 +252,10 @@
   "groupsInCommon": "Groups in common",
   "failedToOpenFile": "Failed to open file {name}",
   "openLogDirectory": "open log directory",
-  "messageTooLong": "Message content is too long"
+  "messageTooLong": "Message content is too long",
+  "checkUpdate": "Check for updates",
+  "newVersionAvailable": "New version available",
+  "ignoreThisUpdate": "Ignore this update",
+  "newVersionDescription": "Mixin Messenger {newVersion} is now available, you have {current}. Would you like to download it now?",
+  "download": "Download"
 }
