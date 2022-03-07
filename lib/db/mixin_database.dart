@@ -256,32 +256,58 @@ Future<MixinDatabase> connectToDatabase(
   String identityNumber, {
   bool fromMainIsolate = false,
 }) async {
-  final portName = 'one_mixin_drift_$identityNumber';
+  final backgroundPortName = 'one_mixin_drift_background_$identityNumber';
+  final foregroundPortName = 'one_mixin_drift_foreground_$identityNumber';
 
+  final connects = await Future.wait([
+    _crateIsolate(
+      identityNumber,
+      backgroundPortName,
+      fromMainIsolate: fromMainIsolate,
+    ),
+    _crateIsolate(
+      identityNumber,
+      foregroundPortName,
+      fromMainIsolate: fromMainIsolate,
+    ),
+  ].map((e) => e.then((e) => e.connect())));
+
+  final background = connects[0];
+  final foreground = connects[1];
+
+  final connect = background.withExecutor(MultiExecutor(
+    read: foreground.executor,
+    write: background.executor,
+  ));
+  return MixinDatabase.connect(connect);
+}
+
+Future<DriftIsolate> _crateIsolate(
+  String identityNumber,
+  String name, {
+  bool fromMainIsolate = false,
+}) async {
   if (fromMainIsolate) {
     // Remove port if it exists. to avoid port leak on hot reload.
-    IsolateNameServer.removePortNameMapping(portName);
+    IsolateNameServer.removePortNameMapping(name);
   }
 
-  final existingIsolate = IsolateNameServer.lookupPortByName(portName);
-
-  final DriftIsolate isolate;
+  final existingIsolate = IsolateNameServer.lookupPortByName(name);
 
   if (existingIsolate == null) {
-    final dbFolder = mixinDocumentsDirectory;
-    final dbFile = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
+    final dbFile =
+        File(p.join(mixinDocumentsDirectory.path, identityNumber, 'mixin.db'));
     final receivePort = ReceivePort();
     await Isolate.spawn(
       _startBackground,
       _IsolateStartRequest(receivePort.sendPort, dbFile),
     );
-    isolate = await receivePort.first as DriftIsolate;
-    IsolateNameServer.registerPortWithName(isolate.connectPort, portName);
+    final isolate = await receivePort.first as DriftIsolate;
+    IsolateNameServer.registerPortWithName(isolate.connectPort, name);
+    return isolate;
   } else {
-    isolate = DriftIsolate.fromConnectPort(existingIsolate, serialize: false);
+    return DriftIsolate.fromConnectPort(existingIsolate, serialize: false);
   }
-  final databaseConnection = await isolate.connect();
-  return MixinDatabase.connect(databaseConnection);
 }
 
 void _startBackground(_IsolateStartRequest request) {
