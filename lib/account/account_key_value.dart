@@ -1,5 +1,4 @@
 import '../utils/hive_key_values.dart';
-import '../utils/logger.dart';
 
 class AccountKeyValue extends HiveKeyValue {
   AccountKeyValue._() : super(_hiveAccount);
