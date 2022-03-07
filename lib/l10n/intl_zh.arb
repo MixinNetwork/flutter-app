@@ -247,5 +247,10 @@
   "groupsInCommon": "共同群组",
   "failedToOpenFile": "无法打开文件：{name}",
   "openLogDirectory": "打开日志文件夹",
-  "messageTooLong": "消息内容过长"
+  "messageTooLong": "消息内容过长",
+  "checkUpdate": "检查更新",
+  "newVersionAvailable": "发现新版本",
+  "ignoreThisUpdate": "忽略这次更新",
+  "newVersionDescription": "发现新版本 Mixin Messenger {newVersion}，当前版本为 {current}。是否要下载最新的版本？",
+  "download": "下载"
 }

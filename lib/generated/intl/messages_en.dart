@@ -55,21 +55,24 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m16(name) => "Remove ${name}";
 
-  static String m17(name) => "Do you want to delete ${name} circle?";
+  static String m17(newVersion, current) =>
+      "Mixin Messenger ${newVersion} is now available, you have ${current}. Would you like to download it now?";
 
-  static String m18(date) => "${date} join";
+  static String m18(name) => "Do you want to delete ${name} circle?";
 
-  static String m19(count) => "${count} Participants";
+  static String m19(date) => "${date} join";
 
-  static String m20(count) => "${count} Pinned Messages";
+  static String m20(count) => "${count} Participants";
 
-  static String m21(user, preview) => "${user} pinned ${preview}";
+  static String m21(count) => "${count} Pinned Messages";
 
-  static String m22(count) => "${count} related messages";
+  static String m22(user, preview) => "${user} pinned ${preview}";
 
-  static String m23(value) => "value now ${value}";
+  static String m23(count) => "${count} related messages";
 
-  static String m24(value) => "value then ${value}";
+  static String m24(value) => "value now ${value}";
+
+  static String m25(value) => "value then ${value}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -138,6 +141,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "chatWaiting": m5,
         "chatWaitingDesktop": MessageLookupByLibrary.simpleMessage("desktop"),
         "chats": MessageLookupByLibrary.simpleMessage("Chats"),
+        "checkUpdate":
+            MessageLookupByLibrary.simpleMessage("Check for updates"),
         "circleTitle": m6,
         "circles": MessageLookupByLibrary.simpleMessage("Circles"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
@@ -181,6 +186,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteGroup": MessageLookupByLibrary.simpleMessage("Delete Group"),
         "developer": MessageLookupByLibrary.simpleMessage("Developer"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
+        "download": MessageLookupByLibrary.simpleMessage("Download"),
         "downloadLink": MessageLookupByLibrary.simpleMessage("Download Link: "),
         "editAnnouncement":
             MessageLookupByLibrary.simpleMessage("Edit group description"),
@@ -232,6 +238,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupsInCommon":
             MessageLookupByLibrary.simpleMessage("Groups in common"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
+        "ignoreThisUpdate":
+            MessageLookupByLibrary.simpleMessage("Ignore this update"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("Include Files"),
         "includeVideos": MessageLookupByLibrary.simpleMessage("Include Videos"),
@@ -269,6 +277,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "networkConnectionFailed":
             MessageLookupByLibrary.simpleMessage("Network connection failed"),
+        "newVersionAvailable":
+            MessageLookupByLibrary.simpleMessage("New version available"),
+        "newVersionDescription": m17,
         "next": MessageLookupByLibrary.simpleMessage("Next"),
         "noAudio": MessageLookupByLibrary.simpleMessage("NO AUDIO"),
         "noData": MessageLookupByLibrary.simpleMessage("NO DATA"),
@@ -288,8 +299,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "openLogDirectory":
             MessageLookupByLibrary.simpleMessage("open log directory"),
         "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
-        "pageDeleteCircle": m17,
-        "pageEditProfileJoin": m18,
+        "pageDeleteCircle": m18,
+        "pageEditProfileJoin": m19,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -298,12 +309,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Login to Mixin Messenger by QR Code"),
         "pageRightEmptyMessage": MessageLookupByLibrary.simpleMessage(
             "Select a conversation to start messaging"),
-        "participantsCount": m19,
+        "participantsCount": m20,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "pin": MessageLookupByLibrary.simpleMessage("Pin"),
-        "pinMessageCount": m20,
-        "pinned": m21,
+        "pinMessageCount": m21,
+        "pinned": m22,
         "pleaseWait":
             MessageLookupByLibrary.simpleMessage("Please wait a moment"),
         "post": MessageLookupByLibrary.simpleMessage("Post"),
@@ -334,7 +345,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
             "No chats, \ncontacts or messages found."),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
-        "searchRelatedMessage": m22,
+        "searchRelatedMessage": m23,
         "searchUser": MessageLookupByLibrary.simpleMessage("Search contact"),
         "searchUserHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID or Phone number"),
@@ -396,10 +407,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("Waiting for this message."),
-        "walletTransactionCurrentValue": m23,
+        "walletTransactionCurrentValue": m24,
         "walletTransactionThatTimeNoValue":
             MessageLookupByLibrary.simpleMessage("value then N/A"),
-        "walletTransactionThatTimeValue": m24,
+        "walletTransactionThatTimeValue": m25,
         "webView2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
             "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
         "webViewRuntimeNotAvailable": MessageLookupByLibrary.simpleMessage(

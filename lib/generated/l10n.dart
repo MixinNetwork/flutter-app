@@ -2589,6 +2589,56 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Check for updates`
+  String get checkUpdate {
+    return Intl.message(
+      'Check for updates',
+      name: 'checkUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New version available`
+  String get newVersionAvailable {
+    return Intl.message(
+      'New version available',
+      name: 'newVersionAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ignore this update`
+  String get ignoreThisUpdate {
+    return Intl.message(
+      'Ignore this update',
+      name: 'ignoreThisUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mixin Messenger {newVersion} is now available, you have {current}. Would you like to download it now?`
+  String newVersionDescription(Object newVersion, Object current) {
+    return Intl.message(
+      'Mixin Messenger $newVersion is now available, you have $current. Would you like to download it now?',
+      name: 'newVersionDescription',
+      desc: '',
+      args: [newVersion, current],
+    );
+  }
+
+  /// `Download`
+  String get download {
+    return Intl.message(
+      'Download',
+      name: 'download',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

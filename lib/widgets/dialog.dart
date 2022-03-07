@@ -108,7 +108,7 @@ class AlertDialogLayout extends StatelessWidget {
                       ),
                       child: title!,
                     ),
-                  if (title != null) const SizedBox(height: 48),
+                  if (title != null) SizedBox(height: titleMarginBottom),
                   DefaultTextStyle.merge(
                     style: TextStyle(
                       fontSize: 18,
