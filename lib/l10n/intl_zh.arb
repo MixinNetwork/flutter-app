@@ -252,5 +252,7 @@
   "newVersionAvailable": "发现新版本",
   "ignoreThisUpdate": "忽略这次更新",
   "newVersionDescription": "发现新版本 Mixin Messenger {newVersion}，当前版本为 {current}。是否要下载最新的版本？",
-  "download": "下载"
+  "download": "下载",
+  "avatar": "头像",
+  "showAvatar": "显示头像"
 }

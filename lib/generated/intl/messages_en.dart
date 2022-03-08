@@ -99,6 +99,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "audio": MessageLookupByLibrary.simpleMessage("Audio"),
         "audios": MessageLookupByLibrary.simpleMessage("Audios"),
         "autoBackup": MessageLookupByLibrary.simpleMessage("Auto Backup"),
+        "avatar": MessageLookupByLibrary.simpleMessage("Avatar"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
         "block": MessageLookupByLibrary.simpleMessage("Block"),
         "botInteractHi": MessageLookupByLibrary.simpleMessage("Say hi"),
@@ -368,6 +369,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedApps": MessageLookupByLibrary.simpleMessage("Shared Apps"),
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
         "show": MessageLookupByLibrary.simpleMessage("Show"),
+        "showAvatar": MessageLookupByLibrary.simpleMessage("Show avatar"),
         "signOut": MessageLookupByLibrary.simpleMessage("Sign Out"),
         "sticker": MessageLookupByLibrary.simpleMessage("Sticker"),
         "stickerAlbumDetail":

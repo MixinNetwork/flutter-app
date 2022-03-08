@@ -30,8 +30,11 @@ import '../../utils/extension/extension.dart';
 import '../../utils/file.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
+import '../avatar_view/avatar_view.dart';
+import '../interactive_decorated_box.dart';
 import '../menu.dart';
 import '../toast.dart';
+import '../user/user_dialog.dart';
 import '../user_selector/conversation_selector.dart';
 import 'item/action/action_message.dart';
 import 'item/action_card/action_card_data.dart';
@@ -56,6 +59,7 @@ import 'item/video_message.dart';
 import 'item/waiting_message.dart';
 import 'message_day_time.dart';
 import 'message_name.dart';
+import 'message_style.dart';
 
 class _MessageContextCubit extends SimpleCubit<_MessageContext> {
   _MessageContextCubit(_MessageContext initialState) : super(initialState);
@@ -156,17 +160,29 @@ class MessageItemWidget extends HookWidget {
     final sameDayNext = isSameDay(next?.createdAt, message.createdAt);
     final sameUserNext = next?.userId == message.userId;
 
-    final showNip = !(sameUserNext && sameDayNext);
+    final isGroupOrBotGroupConversation =
+        message.conversionCategory == ConversationCategory.group ||
+            message.userId != message.conversationOwnerId;
+
+    final enableShowAvatar =
+        useBlocStateConverter<MessageStyleCubit, MessageStyle, bool>(
+      converter: (style) => style.showAvatar,
+    );
+    final showAvatar = isGroupOrBotGroupConversation && enableShowAvatar;
+
+    final showNip =
+        !(sameUserNext && sameDayNext) && (!showAvatar || isCurrentUser);
     final datetime = sameDayPrev ? null : message.createdAt;
     String? userName;
     String? userId;
+    String? userAvatarUrl;
 
-    if ((message.conversionCategory == ConversationCategory.group ||
-            message.userId != message.conversationOwnerId) &&
+    if (isGroupOrBotGroupConversation &&
         !isCurrentUser &&
         (!sameUserPrev || !sameDayPrev)) {
       userName = message.userFullName;
       userId = message.userId;
+      userAvatarUrl = message.avatarUrl;
     }
 
     final showedMenuCubit = useBloc(() => SimpleCubit(false));
@@ -218,6 +234,8 @@ class MessageItemWidget extends HookWidget {
               return _MessageBubbleMargin(
                 userName: userName,
                 userId: userId,
+                userAvatarUrl: userAvatarUrl,
+                showAvatar: showAvatar,
                 isCurrentUser: isCurrentUser,
                 pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
                 showedMenu: showedMenuCubit.emit,
@@ -596,7 +614,7 @@ class _PinMenu extends HookWidget {
   }
 }
 
-class _MessageBubbleMargin extends StatelessWidget {
+class _MessageBubbleMargin extends HookWidget {
   const _MessageBubbleMargin({
     Key? key,
     required this.isCurrentUser,
@@ -606,6 +624,8 @@ class _MessageBubbleMargin extends StatelessWidget {
     required this.buildMenus,
     required this.pinArrowWidth,
     this.showedMenu,
+    required this.userAvatarUrl,
+    required this.showAvatar,
   }) : super(key: key);
 
   final bool isCurrentUser;
@@ -615,31 +635,65 @@ class _MessageBubbleMargin extends StatelessWidget {
   final List<Widget> Function() buildMenus;
   final double pinArrowWidth;
   final ValueChanged<bool>? showedMenu;
+  final String? userAvatarUrl;
+  final bool showAvatar;
 
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context) {
+    final messageColumn = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (userName != null && userId != null)
+          MessageName(
+            userName: userName!,
+            userId: userId!,
+          ),
+        ContextMenuPortalEntry(
+          buildMenus: buildMenus,
+          showedMenu: showedMenu,
+          child: Builder(builder: builder),
+        ),
+      ],
+    );
+
+    final needShowAvatar = !isCurrentUser && userName != null;
+    if (!showAvatar || !needShowAvatar) {
+      return Padding(
         padding: EdgeInsets.only(
-          left: isCurrentUser ? 65 - pinArrowWidth : 16,
+          left: isCurrentUser ? 65 - pinArrowWidth : (showAvatar ? 40 : 16),
           right: !isCurrentUser ? 65 - pinArrowWidth : 16,
           top: 2,
           bottom: 2,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (userName != null && userId != null)
-              MessageName(
-                userName: userName!,
-                userId: userId!,
-              ),
-            ContextMenuPortalEntry(
-              buildMenus: buildMenus,
-              showedMenu: showedMenu,
-              child: Builder(builder: builder),
-            ),
-          ],
-        ),
+        child: messageColumn,
       );
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(width: 8),
+        InteractiveDecoratedBox(
+          onTap: () => showUserDialog(context, userId),
+          cursor: SystemMouseCursors.click,
+          child: AvatarWidget(
+            userId: userId,
+            name: userName ?? '?',
+            avatarUrl: userAvatarUrl,
+            size: 32,
+          ),
+        ),
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 2, bottom: 2),
+            child: messageColumn,
+          ),
+        ),
+        SizedBox(width: 65 - pinArrowWidth),
+      ],
+    );
+  }
 }
 
 class _UnreadMessageBar extends StatelessWidget {

@@ -2639,6 +2639,26 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Avatar`
+  String get avatar {
+    return Intl.message(
+      'Avatar',
+      name: 'avatar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show avatar`
+  String get showAvatar {
+    return Intl.message(
+      'Show avatar',
+      name: 'showAvatar',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
