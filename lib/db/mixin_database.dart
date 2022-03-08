@@ -48,6 +48,7 @@ import 'dao/sticker_dao.dart';
 import 'dao/sticker_relationship_dao.dart';
 import 'dao/user_dao.dart';
 import 'database_event_bus.dart';
+import 'multi_executor.dart';
 import 'util/util.dart';
 
 part 'mixin_database.g.dart';
@@ -254,10 +255,12 @@ LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
 /// Connect to the database.
 Future<MixinDatabase> connectToDatabase(
   String identityNumber, {
+  int readCount = 2,
   bool fromMainIsolate = false,
 }) async {
   final backgroundPortName = 'one_mixin_drift_background_$identityNumber';
-  final foregroundPortName = 'one_mixin_drift_foreground_$identityNumber';
+  final foregroundPortName =
+      'one_mixin_drift_foreground_${identityNumber}_$readCount';
 
   final connects = await Future.wait([
     _crateIsolate(
@@ -265,19 +268,20 @@ Future<MixinDatabase> connectToDatabase(
       backgroundPortName,
       fromMainIsolate: fromMainIsolate,
     ),
-    _crateIsolate(
-      identityNumber,
-      foregroundPortName,
-      fromMainIsolate: fromMainIsolate,
-    ),
+    ...List.generate(
+        readCount,
+        (index) async => _crateIsolate(
+              identityNumber,
+              '${foregroundPortName}_$index',
+              fromMainIsolate: fromMainIsolate,
+            )),
   ].map((e) => e.then((e) => e.connect())));
 
-  final background = connects[0];
-  final foreground = connects[1];
+  final write = connects.removeAt(0);
 
-  final connect = background.withExecutor(MultiExecutor(
-    read: foreground.executor,
-    write: background.executor,
+  final connect = write.withExecutor(MultiReadExecutor(
+    reads: connects.map((e) => e.executor).toList(),
+    write: write.executor,
   ));
   return MixinDatabase.connect(connect);
 }

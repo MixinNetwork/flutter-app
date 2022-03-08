@@ -124,7 +124,7 @@ class _MessageProcessRunner {
   final jobSubscribers = <StreamSubscription>[];
 
   Future<void> init(IsolateInitParams initParams) async {
-    database = Database(await connectToDatabase(identityNumber));
+    database = Database(await connectToDatabase(identityNumber, readCount: 1));
     jobSubscribers.add(
       database.mixinDatabase.eventBus.stream.listen((event) {
         _sendEventToMainIsolate(WorkerIsolateEventType.onDbEvent, event);
