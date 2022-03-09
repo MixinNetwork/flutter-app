@@ -7,7 +7,6 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
-import '../../widgets/message/message_style.dart';
 import '../../widgets/radio.dart';
 
 class AppearancePage extends StatelessWidget {
@@ -97,9 +96,8 @@ class _MessageAvatarSetting extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showAvatar =
-        useBlocStateConverter<MessageStyleCubit, MessageStyle, bool>(
-      converter: (style) => style.showAvatar,
+    final showAvatar = useBlocStateConverter<SettingCubit, SettingState, bool>(
+      converter: (style) => style.messageShowAvatar,
     );
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -127,8 +125,9 @@ class _MessageAvatarSetting extends HookWidget {
                 child: CupertinoSwitch(
                   activeColor: context.theme.accent,
                   value: showAvatar,
-                  onChanged: (bool value) =>
-                      context.read<MessageStyleCubit>().showAvatar(value),
+                  onChanged: (bool value) {
+                    context.read<SettingCubit>().enableMessageAvatar(value);
+                  },
                 )),
           ),
         )
