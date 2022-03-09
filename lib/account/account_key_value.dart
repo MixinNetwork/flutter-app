@@ -44,5 +44,4 @@ class AccountKeyValue extends HiveKeyValue {
       box.get(_ignoredVersion, defaultValue: '0.0.0') as String?;
 
   set ignoredVersion(String? value) => box.put(_ignoredVersion, value);
-
 }
