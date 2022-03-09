@@ -4,10 +4,14 @@ import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 class SettingState extends Equatable {
-  const SettingState({this.brightness = 0});
+  const SettingState({
+    this.brightness = 0,
+    this.messageShowAvatar = false,
+  });
 
   factory SettingState.fromMap(Map<String, dynamic> map) => SettingState(
         brightness: map['brightness'] as int,
+        messageShowAvatar: (map['messageShowAvatar'] as bool?) ?? false,
       );
 
   /// The brightness of theme.
@@ -22,18 +26,23 @@ class SettingState extends Equatable {
   /// https://github.com/hivedb/hive/issues/518
   final int brightness;
 
+  final bool messageShowAvatar;
+
   @override
   List<Object?> get props => [brightness];
 
   Map<String, dynamic> toMap() => {
         'brightness': brightness,
+        'messageShowAvatar': messageShowAvatar,
       };
 
   SettingState copyWith({
     int? brightness,
+    bool? messageShowAvatar,
   }) =>
       SettingState(
         brightness: brightness ?? this.brightness,
+        messageShowAvatar: messageShowAvatar ?? this.messageShowAvatar,
       );
 }
 
@@ -67,6 +76,10 @@ class SettingCubit extends HydratedCubit<SettingState> {
         assert(false, 'invalid value for brightness. $state');
         return null;
     }
+  }
+
+  void enableMessageAvatar(bool value) {
+    emit(state.copyWith(messageShowAvatar: value));
   }
 
   @override
