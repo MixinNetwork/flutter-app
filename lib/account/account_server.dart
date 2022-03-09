@@ -150,8 +150,6 @@ class AccountServer {
       String privateKey, MultiAuthCubit multiAuthCubit) async {
     database = Database(
         await db.connectToDatabase(identityNumber, fromMainIsolate: true));
-    // Cache reads for message worker
-    await db.connectToDatabase(identityNumber, readCount: 2);
 
     attachmentUtil = AttachmentUtil.init(
       client,
