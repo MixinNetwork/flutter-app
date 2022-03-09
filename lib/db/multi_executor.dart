@@ -31,7 +31,8 @@ class _QueryExecutorPool {
   final List<_ExecutorCompleter> _running = [];
 
   Future<bool> ensureOpen(QueryExecutorUser user) async {
-    await Future.forEach(_executors, (QueryExecutor executor) => executor.ensureOpen(user));
+    await Future.forEach(
+        _executors, (QueryExecutor executor) => executor.ensureOpen(user));
     return true;
   }
 

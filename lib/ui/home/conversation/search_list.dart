@@ -63,14 +63,14 @@ class SearchList extends HookWidget {
         [];
 
     final messages = useMemoizedStream(() {
-      if (keyword.trim().isEmpty) {
-        return Stream.value(<SearchMessageDetailItem>[]);
-      } else {
-        return accountServer.database.messageDao
-            .fuzzySearchMessage(query: keyword, limit: 4)
-            .watchThrottle(kSlowThrottleDuration);
-      }
-    }, keys: [keyword]).data ??
+          if (keyword.trim().isEmpty) {
+            return Stream.value(<SearchMessageDetailItem>[]);
+          } else {
+            return accountServer.database.messageDao
+                .fuzzySearchMessage(query: keyword, limit: 4)
+                .watchThrottle(kSlowThrottleDuration);
+          }
+        }, keys: [keyword]).data ??
         [];
 
     final conversations = useMemoizedStream(() {
