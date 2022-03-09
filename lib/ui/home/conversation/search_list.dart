@@ -62,6 +62,17 @@ class SearchList extends HookWidget {
         }, keys: [keyword]).data ??
         [];
 
+    final messages = useMemoizedStream(() {
+      if (keyword.trim().isEmpty) {
+        return Stream.value(<SearchMessageDetailItem>[]);
+      } else {
+        return accountServer.database.messageDao
+            .fuzzySearchMessage(query: keyword, limit: 4)
+            .watchThrottle(kSlowThrottleDuration);
+      }
+    }, keys: [keyword]).data ??
+        [];
+
     final conversations = useMemoizedStream(() {
           if (keyword.trim().isEmpty) {
             return Stream.value(<SearchConversationItem>[]);
@@ -69,17 +80,6 @@ class SearchList extends HookWidget {
           return accountServer.database.conversationDao
               .fuzzySearchConversation(keyword, 32)
               .watchThrottle(kSlowThrottleDuration);
-        }, keys: [keyword]).data ??
-        [];
-
-    final messages = useMemoizedStream(() {
-          if (keyword.trim().isEmpty) {
-            return Stream.value(<SearchMessageDetailItem>[]);
-          } else {
-            return accountServer.database.messageDao
-                .fuzzySearchMessage(query: keyword, limit: 4)
-                .watchThrottle(kSlowThrottleDuration);
-          }
         }, keys: [keyword]).data ??
         [];
 

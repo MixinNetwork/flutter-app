@@ -244,43 +244,46 @@ class MixinDatabase extends _$MixinDatabase {
           .isNotEmpty;
 }
 
-LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
-      final vmDatabase = NativeDatabase(dbFile);
-      if (!kDebugMode) {
-        return vmDatabase;
-      }
-      return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
-    });
+QueryExecutor _openConnection(File dbFile) {
+  final vmDatabase = NativeDatabase(dbFile);
+  if (!kDebugMode) {
+    return vmDatabase;
+  }
+  return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
+}
 
 /// Connect to the database.
 Future<MixinDatabase> connectToDatabase(
   String identityNumber, {
-  int readCount = 2,
+  int readCount = 4,
   bool fromMainIsolate = false,
 }) async {
   final backgroundPortName = 'one_mixin_drift_background_$identityNumber';
   final foregroundPortName =
       'one_mixin_drift_foreground_${identityNumber}_$readCount';
 
-  final connects = await Future.wait([
-    _crateIsolate(
-      identityNumber,
-      backgroundPortName,
-      fromMainIsolate: fromMainIsolate,
-    ),
-    ...List.generate(
-        readCount,
-        (index) async => _crateIsolate(
-              identityNumber,
-              '${foregroundPortName}_$index',
-              fromMainIsolate: fromMainIsolate,
-            )),
-  ].map((e) => e.then((e) => e.connect())));
+  final writeIsolate = await _crateIsolate(
+    identityNumber,
+    backgroundPortName,
+    fromMainIsolate: fromMainIsolate,
+  );
 
-  final write = connects.removeAt(0);
+  final write = await writeIsolate.connect();
+
+  final reads = <DatabaseConnection>[];
+
+  await Future.forEach(List.generate(readCount, (i) => i), (i) async {
+    final isolate = await _crateIsolate(
+      identityNumber,
+      '${foregroundPortName}_$i',
+      fromMainIsolate: fromMainIsolate,
+    );
+    final read = await isolate.connect();
+    reads.add(read);
+  });
 
   final connect = write.withExecutor(MultiReadExecutor(
-    reads: connects.map((e) => e.executor).toList(),
+    reads: reads.map((e) => e.executor).toList(),
     write: write.executor,
   ));
   return MixinDatabase.connect(connect);
@@ -316,10 +319,10 @@ Future<DriftIsolate> _crateIsolate(
 
 void _startBackground(_IsolateStartRequest request) {
   final executor = _openConnection(request.dbFile);
-  final moorIsolate = DriftIsolate.inCurrent(
+  final isolate = DriftIsolate.inCurrent(
     () => DatabaseConnection.fromExecutor(executor),
   );
-  request.sendMoorIsolate.send(moorIsolate);
+  request.sendMoorIsolate.send(isolate);
 }
 
 class _IsolateStartRequest {
