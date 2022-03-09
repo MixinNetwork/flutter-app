@@ -257,5 +257,7 @@
   "newVersionAvailable": "New version available",
   "ignoreThisUpdate": "Ignore this update",
   "newVersionDescription": "Mixin Messenger {newVersion} is now available, you have {current}. Would you like to download it now?",
-  "download": "Download"
+  "download": "Download",
+  "avatar": "Avatar",
+  "showAvatar": "Show avatar"
 }

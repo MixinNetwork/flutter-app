@@ -14,6 +14,7 @@ class AccountKeyValue extends HiveKeyValue {
   static const _hasNewAlbum = 'hasNewAlbum';
   static const _checkUpdateLastTime = 'checkUpdateLastTime';
   static const _ignoredVersion = '_ignoredVersion';
+  static const _messageShowAvatar = 'messageShowAvatar';
 
   bool get hasSyncCircle =>
       box.get(_hasSyncCircle, defaultValue: false) as bool;
@@ -44,4 +45,9 @@ class AccountKeyValue extends HiveKeyValue {
       box.get(_ignoredVersion, defaultValue: '0.0.0') as String?;
 
   set ignoredVersion(String? value) => box.put(_ignoredVersion, value);
+
+  bool get messageShowAvatar =>
+      box.get(_messageShowAvatar, defaultValue: false) as bool;
+
+  set messageShowAvatar(bool value) => box.put(_messageShowAvatar, value);
 }

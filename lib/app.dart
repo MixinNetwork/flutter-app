@@ -37,6 +37,7 @@ import 'utils/system/tray.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
 import 'widgets/message/item/text/mention_builder.dart';
+import 'widgets/message/message_style.dart';
 import 'widgets/window/move_window.dart';
 import 'widgets/window/window_shortcuts.dart';
 
@@ -161,6 +162,9 @@ class _Providers extends StatelessWidget {
                 ),
               ),
               BlocProvider(create: (context) => RecallMessageReeditCubit()),
+              BlocProvider(
+                create: (context) => MessageStyleCubit.fromAccountKeyValue(),
+              ),
             ],
             child: Provider<NotificationService>(
               create: (BuildContext context) =>
