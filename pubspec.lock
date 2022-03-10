@@ -379,10 +379,12 @@ packages:
   drift:
     dependency: "direct main"
     description:
-      name: drift
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.4.0"
+      path: drift
+      ref: "79aedea60eb160f0b6f3958209acf24eb0f9b758"
+      resolved-ref: "79aedea60eb160f0b6f3958209acf24eb0f9b758"
+      url: "https://github.com/simolus3/drift.git"
+    source: git
+    version: "1.5.0-dev"
   drift_dev:
     dependency: "direct dev"
     description:

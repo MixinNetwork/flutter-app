@@ -270,17 +270,14 @@ Future<MixinDatabase> connectToDatabase(
 
   final write = await writeIsolate.connect();
 
-  final reads = <DatabaseConnection>[];
-
-  await Future.forEach(List.generate(readCount, (i) => i), (i) async {
+  final reads = await Future.wait(List.generate(readCount, (i) async {
     final isolate = await _crateIsolate(
       identityNumber,
       '${foregroundPortName}_$i',
       fromMainIsolate: fromMainIsolate,
     );
-    final read = await isolate.connect();
-    reads.add(read);
-  });
+    return isolate.connect();
+  }));
 
   final connect = write.withExecutor(MultiReadExecutor(
     reads: reads.map((e) => e.executor).toList(),

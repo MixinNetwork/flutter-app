@@ -120,6 +120,11 @@ dependency_overrides:
       url: https://github.com/MixinNetwork/bitsdojo_window.git
       ref: 78faaa6440c7fee146258bb0ef3336c33ed4555d
       path: bitsdojo_window_windows
+  drift:
+    git:
+      url: https://github.com/simolus3/drift.git
+      ref: 79aedea60eb160f0b6f3958209acf24eb0f9b758
+      path: drift
   # remove this if https://github.com/woodemi/quick_breakpad/issues/10 fixed
   quick_breakpad:
     git:
