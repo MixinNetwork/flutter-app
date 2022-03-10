@@ -254,5 +254,12 @@
   "newVersionDescription": "发现新版本 Mixin Messenger {newVersion}，当前版本为 {current}。是否要下载最新的版本？",
   "download": "下载",
   "avatar": "头像",
-  "showAvatar": "显示头像"
+  "showAvatar": "显示头像",
+  "loginWithMobile": "手机号登录",
+  "loginWithQRCode": "二维码登录",
+  "loginMobileInputHint": "请填写手机号码",
+  "captcha": "验证码",
+  "captchaHint": "请输入验证码",
+  "getCaptcha": "获取验证码",
+  "login": "登录"
 }

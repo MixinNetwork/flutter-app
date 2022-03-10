@@ -2659,6 +2659,76 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Login with mobile number`
+  String get loginWithMobile {
+    return Intl.message(
+      'Login with mobile number',
+      name: 'loginWithMobile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Login with QR code`
+  String get loginWithQRCode {
+    return Intl.message(
+      'Login with QR code',
+      name: 'loginWithQRCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter your mobile number`
+  String get loginMobileInputHint {
+    return Intl.message(
+      'Enter your mobile number',
+      name: 'loginMobileInputHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Captcha`
+  String get captcha {
+    return Intl.message(
+      'Captcha',
+      name: 'captcha',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the code`
+  String get captchaHint {
+    return Intl.message(
+      'Enter the code',
+      name: 'captchaHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Get Captcha`
+  String get getCaptcha {
+    return Intl.message(
+      'Get Captcha',
+      name: 'getCaptcha',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Login`
+  String get login {
+    return Intl.message(
+      'Login',
+      name: 'login',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

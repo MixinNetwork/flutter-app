@@ -6,7 +6,6 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -23,11 +22,10 @@ import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/system/package_info.dart';
 import '../../home/bloc/multi_auth_cubit.dart';
+import 'landing_state.dart';
 
-part 'landing_state.dart';
-
-class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
-  LandingCubit(this.authCubit, Locale locale)
+class LandingQrCodeCubit extends Cubit<LandingState> with SubscribeMixin {
+  LandingQrCodeCubit(this.authCubit, Locale locale)
       : super(LandingState(
           status: authCubit.state.current != null
               ? LandingStatus.provisioning

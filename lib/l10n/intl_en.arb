@@ -259,5 +259,12 @@
   "newVersionDescription": "Mixin Messenger {newVersion} is now available, you have {current}. Would you like to download it now?",
   "download": "Download",
   "avatar": "Avatar",
-  "showAvatar": "Show avatar"
+  "showAvatar": "Show avatar",
+  "loginWithMobile": "Login with mobile number",
+  "loginWithQRCode": "Login with QR code",
+  "loginMobileInputHint": "Enter your mobile number",
+  "captcha": "Captcha",
+  "captchaHint": "Enter the code",
+  "getCaptcha": "Get Captcha",
+  "login": "Login"
 }

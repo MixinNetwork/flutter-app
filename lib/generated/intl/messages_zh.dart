@@ -99,6 +99,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "botInteractOpen": MessageLookupByLibrary.simpleMessage("打开主页"),
         "bots": MessageLookupByLibrary.simpleMessage("机器人"),
         "cancel": MessageLookupByLibrary.simpleMessage("取消"),
+        "captcha": MessageLookupByLibrary.simpleMessage("验证码"),
+        "captchaHint": MessageLookupByLibrary.simpleMessage("请输入验证码"),
         "change": MessageLookupByLibrary.simpleMessage("更改"),
         "chatBackup": MessageLookupByLibrary.simpleMessage("聊天记录备份"),
         "chatCheckOnPhone":
@@ -183,6 +185,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("转发"),
         "from": MessageLookupByLibrary.simpleMessage("来自"),
         "fromWithColon": MessageLookupByLibrary.simpleMessage("来自: "),
+        "getCaptcha": MessageLookupByLibrary.simpleMessage("获取验证码"),
         "goToChat": MessageLookupByLibrary.simpleMessage("定位到聊天"),
         "groupAdd": MessageLookupByLibrary.simpleMessage("添加成员"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("管理员"),
@@ -221,6 +224,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "localTimeErrorDescription":
             MessageLookupByLibrary.simpleMessage("检测到系统时间异常，请校正后再继续使用"),
         "location": MessageLookupByLibrary.simpleMessage("位置"),
+        "login": MessageLookupByLibrary.simpleMessage("登录"),
+        "loginMobileInputHint": MessageLookupByLibrary.simpleMessage("请填写手机号码"),
+        "loginWithMobile": MessageLookupByLibrary.simpleMessage("手机号登录"),
+        "loginWithQRCode": MessageLookupByLibrary.simpleMessage("二维码登录"),
         "media": MessageLookupByLibrary.simpleMessage("媒体"),
         "memo": MessageLookupByLibrary.simpleMessage("备注"),
         "messagePreview": MessageLookupByLibrary.simpleMessage("消息预览"),

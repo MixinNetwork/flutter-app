@@ -109,6 +109,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Open Home page"),
         "bots": MessageLookupByLibrary.simpleMessage("Bots"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "captcha": MessageLookupByLibrary.simpleMessage("Captcha"),
+        "captchaHint": MessageLookupByLibrary.simpleMessage("Enter the code"),
         "change": MessageLookupByLibrary.simpleMessage("Change"),
         "chatBackup": MessageLookupByLibrary.simpleMessage("Chat Backup"),
         "chatBackupDescription": MessageLookupByLibrary.simpleMessage(
@@ -212,6 +214,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "from": MessageLookupByLibrary.simpleMessage("From"),
         "fromWithColon": MessageLookupByLibrary.simpleMessage("From: "),
+        "getCaptcha": MessageLookupByLibrary.simpleMessage("Get Captcha"),
         "goToChat": MessageLookupByLibrary.simpleMessage("Go to chat"),
         "groupAdd": MessageLookupByLibrary.simpleMessage("Add Participants"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
@@ -254,6 +257,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "localTimeErrorDescription": MessageLookupByLibrary.simpleMessage(
             "System time is unusual, please continue to use again after correction"),
         "location": MessageLookupByLibrary.simpleMessage("Location"),
+        "login": MessageLookupByLibrary.simpleMessage("Login"),
+        "loginMobileInputHint":
+            MessageLookupByLibrary.simpleMessage("Enter your mobile number"),
+        "loginWithMobile":
+            MessageLookupByLibrary.simpleMessage("Login with mobile number"),
+        "loginWithQRCode":
+            MessageLookupByLibrary.simpleMessage("Login with QR code"),
         "media": MessageLookupByLibrary.simpleMessage("Media"),
         "memo": MessageLookupByLibrary.simpleMessage("Memo"),
         "messagePreview":
