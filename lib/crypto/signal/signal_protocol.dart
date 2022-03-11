@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart'
     hide generateIdentityKeyPair;
-
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
 import 'package:uuid/uuid.dart';
@@ -35,8 +34,8 @@ class SignalProtocol {
   late MixinSignalProtocolStore mixinSignalProtocolStore;
   late MixinSenderKeyStore senderKeyStore;
 
-  static Future<void> initSignal(List<int> private) async {
-    await generateIdentityKeyPair(SignalDatabase.get, private);
+  static Future<void> initSignal(List<int>? private) async {
+    await generateSignalDatabaseIdentityKeyPair(SignalDatabase.get, private);
   }
 
   Future<void> init() async {

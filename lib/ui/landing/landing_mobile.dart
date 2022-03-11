@@ -10,6 +10,8 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl_phone_number_input/src/models/country_model.dart';
 import 'package:intl_phone_number_input/src/providers/country_provider.dart';
+import 'package:intl_phone_number_input/src/utils/phone_number/phone_number_util.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
@@ -17,28 +19,31 @@ import '../../utils/hook.dart';
 import '../../utils/logger.dart';
 import '../../widgets/az_selection.dart';
 import '../../widgets/dialog.dart';
-import 'bloc/landing_mobile_cubit.dart';
+import 'bloc/landing_cubit.dart';
 import 'landing.dart';
 
 class LoginWithMobileWidget extends HookWidget {
   const LoginWithMobileWidget({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocProvider<LandingMobileCubit>(
-        create: (_) => LandingMobileCubit(),
-        child: HookBuilder(builder: (context) {
-          final counties =
-              useMemoizedFuture(() => compute(_getCountries, null), null).data;
-          if (counties == null || counties.isEmpty) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: context.theme.accent,
-              ),
-            );
-          }
-          return _LoginWithMobileWidget(countries: counties);
-        }),
-      );
+  Widget build(BuildContext context) {
+    final locale = useMemoized(() => Localizations.localeOf(context));
+    return BlocProvider<LandingMobileCubit>(
+      create: (_) => LandingMobileCubit(context.multiAuthCubit, locale),
+      child: HookBuilder(builder: (context) {
+        final counties =
+            useMemoizedFuture(() => compute(_getCountries, null), null).data;
+        if (counties == null || counties.isEmpty) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: context.theme.accent,
+            ),
+          );
+        }
+        return _LoginWithMobileWidget(countries: counties);
+      }),
+    );
+  }
 }
 
 class _LoginWithMobileWidget extends HookWidget {
@@ -94,6 +99,7 @@ class _LoginWithMobileWidget extends HookWidget {
             child: _MobileInput(
               controller: phoneInputController,
               country: selectedCountry.value,
+              countryPortalExpand: portalVisibility.value,
               onCountryDiaClick: () {
                 portalVisibility.value = !portalVisibility.value;
               },
@@ -170,17 +176,19 @@ class _CaptchaInput extends StatelessWidget {
       );
 }
 
-class _MobileInput extends StatelessWidget {
+class _MobileInput extends HookWidget {
   const _MobileInput({
     Key? key,
     required this.controller,
     required this.country,
     required this.onCountryDiaClick,
+    required this.countryPortalExpand,
   }) : super(key: key);
 
   final TextEditingController controller;
   final Country country;
   final VoidCallback onCountryDiaClick;
+  final bool countryPortalExpand;
 
   @override
   Widget build(BuildContext context) => TextField(
@@ -215,8 +223,9 @@ class _MobileInput extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    Transform.rotate(
-                      angle: math.pi / 2,
+                    AnimatedRotation(
+                      turns: countryPortalExpand ? -math.pi / 2 : math.pi / 2,
+                      duration: const Duration(milliseconds: 200),
                       child: SvgPicture.asset(
                         Resources.assetsImagesIcArrowRightSvg,
                         width: 30,
@@ -229,23 +238,82 @@ class _MobileInput extends StatelessWidget {
               ),
             ),
           ),
-          suffixIcon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(width: 8),
-              Text(
-                context.l10n.getCaptcha,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.theme.secondaryText,
-                ),
-              ),
-              const SizedBox(width: 20),
-            ],
-          ),
+          suffixIcon: _GetVerificationCodeButton(
+              controller: controller, country: country),
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(vertical: 20),
         ),
+      );
+}
+
+class _GetVerificationCodeButton extends StatelessWidget {
+  const _GetVerificationCodeButton({
+    Key? key,
+    required this.controller,
+    required this.country,
+  }) : super(key: key);
+
+  final TextEditingController controller;
+  final Country country;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(width: 8),
+          InkWell(
+            onTap: () async {
+              final mobileNumberStr = controller.text;
+              if (mobileNumberStr.isEmpty) {
+                return;
+              }
+              try {
+                final valid = await PhoneNumberUtil.isValidNumber(
+                    phoneNumber: mobileNumberStr,
+                    isoCode: country.alpha2Code ?? '');
+                if (valid != true) {
+                  return;
+                }
+              } catch (error) {
+                e('Phone number validation error: $error');
+                return;
+              }
+              final dialCode = country.dialCode;
+              assert(dialCode != null, 'dialCode is null. $country');
+              if (dialCode == null) {
+                e('Invalid dial code: $country');
+                return;
+              }
+              final request = VerificationRequest(
+                phone: dialCode + mobileNumberStr,
+                purpose: VerificationPurpose.phone,
+              );
+              try {
+                final cubit = context.read<LandingMobileCubit>();
+                final response =
+                    await cubit.client.accountApi.verification(request);
+                cubit.onVerified(mobileNumberStr, response.data);
+              } on MixinApiError catch (error) {
+                e('Verification api error: $error');
+                final mixinError = error.error as MixinError;
+                if (mixinError.code == needCaptcha) {
+                  // TODO: show captcha
+                }
+              } catch (error) {
+                e('Verification error: $error');
+                return;
+              }
+            },
+            child: Text(
+              context.l10n.getCaptcha,
+              style: TextStyle(
+                fontSize: 14,
+                color: context.theme.secondaryText,
+              ),
+            ),
+          ),
+          const SizedBox(width: 20),
+        ],
       );
 }
 
@@ -284,7 +352,7 @@ class _CountryPickPortal extends HookWidget {
               color: context.theme.secondaryText,
             ),
             onSelection: (char) {
-              debugPrint('$char');
+              debugPrint(char);
             },
           ),
         )

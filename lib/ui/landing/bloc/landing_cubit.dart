@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -24,30 +25,38 @@ import '../../../utils/system/package_info.dart';
 import '../../home/bloc/multi_auth_cubit.dart';
 import 'landing_state.dart';
 
-class LandingQrCodeCubit extends Cubit<LandingState> with SubscribeMixin {
-  LandingQrCodeCubit(this.authCubit, Locale locale)
-      : super(LandingState(
-          status: authCubit.state.current != null
-              ? LandingStatus.provisioning
-              : LandingStatus.init,
-          errorMessage: lastInitErrorMessage,
-        )) {
-    client = Client(
-      dioOptions: BaseOptions(
-        headers: {
-          'Accept-Language': locale.languageCode,
-        },
-      ),
-    );
+class LandingCubit<T> extends Cubit<T> {
+  LandingCubit(this.authCubit, Locale locale, T initialState)
+      : client = Client(
+          dioOptions: BaseOptions(
+            headers: {'Accept-Language': locale.languageCode},
+          ),
+        ),
+        super(initialState);
+  final Client client;
+  final MultiAuthCubit authCubit;
+}
+
+class LandingQrCodeCubit extends LandingCubit<LandingState>
+    with SubscribeMixin {
+  LandingQrCodeCubit(MultiAuthCubit authCubit, Locale locale)
+      : super(
+          authCubit,
+          locale,
+          LandingState(
+            status: authCubit.state.current != null
+                ? LandingStatus.provisioning
+                : LandingStatus.init,
+            errorMessage: lastInitErrorMessage,
+          ),
+        ) {
     _initLandingListen();
     if (authCubit.state.current != null) return;
     requestAuthUrl();
   }
 
-  final MultiAuthCubit authCubit;
   final StreamController<int> periodicStreamController =
       StreamController<int>();
-  late Client client;
   StreamSubscription<int>? streamSubscription;
   late signal.ECKeyPair keyPair;
   String? deviceId;
@@ -161,5 +170,105 @@ class LandingQrCodeCubit extends Cubit<LandingState> with SubscribeMixin {
     await streamSubscription?.cancel();
     await periodicStreamController.close();
     await super.close();
+  }
+}
+
+enum MobileLoginStatus {
+  initial,
+  error,
+}
+
+class MobileLoginState extends Equatable {
+  const MobileLoginState({
+    this.status = MobileLoginStatus.initial,
+    this.hasVerificationCode = false,
+    this.errorMessage = '',
+  });
+
+  final MobileLoginStatus status;
+
+  final String errorMessage;
+
+  final bool hasVerificationCode;
+
+  MobileLoginState copyWith({
+    MobileLoginStatus? status,
+    String? errorMessage,
+    bool? hasVerificationCode,
+  }) =>
+      MobileLoginState(
+        status: status ?? this.status,
+        errorMessage: errorMessage ?? this.errorMessage,
+        hasVerificationCode: hasVerificationCode ?? this.hasVerificationCode,
+      );
+
+  @override
+  List<Object?> get props => [
+        status,
+        errorMessage,
+        hasVerificationCode,
+      ];
+}
+
+class LandingMobileCubit extends LandingCubit<MobileLoginState> {
+  LandingMobileCubit(MultiAuthCubit authCubit, Locale locale)
+      : super(
+          authCubit,
+          locale,
+          const MobileLoginState(),
+        );
+
+  VerificationResponse? verificationResponse;
+
+  void onVerified(String phoneNumber, VerificationResponse response) {
+    verificationResponse = response;
+    emit(state.copyWith(
+      hasVerificationCode: true,
+    ));
+  }
+
+  Future<void> login(String code) async {
+    final id = verificationResponse?.id;
+    if (id == null) {
+      return;
+    }
+    await SignalProtocol.initSignal(null);
+
+    await CryptoKeyValue.instance.init();
+    await AccountKeyValue.instance.init();
+
+    final registrationId = CryptoKeyValue.instance.localRegistrationId;
+    final sessionKey = ed.generateKey();
+    final sessionSecret = base64Encode(sessionKey.publicKey.bytes);
+
+    final packageInfo = await getPackageInfo();
+    final platformVersion = await getPlatformVersion();
+
+    final accountRequest = AccountRequest(
+      code: code,
+      registrationId: registrationId,
+      purpose: VerificationPurpose.session,
+      platform: 'Desktop',
+      platformVersion: platformVersion,
+      appVersion: packageInfo.version,
+      packageName: 'one.mixin.messenger.desktop',
+      sessionSecret: sessionSecret,
+      // TODO pin
+      pin: '',
+    );
+    try {
+      final response = await client.accountApi.create(id, accountRequest);
+      final privateKey = base64Encode(sessionKey.privateKey.bytes);
+      authCubit.signIn(
+        AuthState(account: response.data, privateKey: privateKey),
+      );
+    } catch (error) {
+      e('login account error: $error');
+      emit(state.copyWith(
+        status: MobileLoginStatus.error,
+        errorMessage: e.toString(),
+      ));
+      return;
+    }
   }
 }

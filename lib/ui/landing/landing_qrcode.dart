@@ -9,7 +9,7 @@ import '../../generated/l10n.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
-import 'bloc/landing_qrcode_cubit.dart';
+import 'bloc/landing_cubit.dart';
 import 'bloc/landing_state.dart';
 import 'landing.dart';
 
