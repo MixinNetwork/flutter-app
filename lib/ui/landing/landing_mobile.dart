@@ -151,6 +151,10 @@ class _CaptchaInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) => TextField(
         controller: controller,
+        style: TextStyle(
+          fontSize: 16,
+          color: context.theme.text,
+        ),
         decoration: InputDecoration(
           fillColor: context.theme.sidebarSelected,
           filled: true,
@@ -202,6 +206,10 @@ class _MobileInput extends HookWidget {
   @override
   Widget build(BuildContext context) => TextField(
         controller: controller,
+        style: TextStyle(
+          fontSize: 16,
+          color: context.theme.text,
+        ),
         decoration: InputDecoration(
           fillColor: context.theme.sidebarSelected,
           filled: true,
@@ -295,7 +303,7 @@ class _GetVerificationCodeButton extends StatelessWidget {
               }
               final request = VerificationRequest(
                 phone: dialCode + mobileNumberStr,
-                purpose: VerificationPurpose.phone,
+                purpose: VerificationPurpose.session,
               );
               try {
                 final cubit = context.read<LandingMobileCubit>();
