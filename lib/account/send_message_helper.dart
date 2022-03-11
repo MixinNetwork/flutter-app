@@ -68,7 +68,7 @@ class SendMessageHelper {
         await _messageDao.findMessageItemByMessageId(quoteMessageId);
 
     String? recipientId;
-    final botNumber = botNumberStartRegExp.firstMatch(content)?[1];
+    final botNumber = botNumberStartRegExp.firstMatch(content)?[0];
     if (botNumber?.isNotEmpty == true) {
       recipientId = await _participantDao
           .userIdByIdentityNumber(conversationId, botNumber!)
