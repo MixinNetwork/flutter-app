@@ -93,10 +93,10 @@ class AZRender extends RenderBox {
     }
 
     final position = event.localPosition;
-    final num index = ((position.dy / constraints.maxHeight) * _chars.length)
+    final index = ((position.dy / constraints.maxHeight) * _chars.length)
         .round()
         .clamp(0, _chars.length - 1);
-    onSelection?.call(_chars[index as int]);
+    onSelection?.call(_chars[index]);
   }
 
   @override
