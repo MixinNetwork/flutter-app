@@ -1,12 +1,21 @@
+// ignore_for_file: implementation_imports
+
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl_phone_number_input/src/models/country_model.dart';
+import 'package:intl_phone_number_input/src/providers/country_provider.dart';
 
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/hook.dart';
+import '../../utils/logger.dart';
+import '../../widgets/az_selection.dart';
 import '../../widgets/dialog.dart';
 import 'bloc/landing_mobile_cubit.dart';
 import 'landing.dart';
@@ -17,23 +26,79 @@ class LoginWithMobileWidget extends HookWidget {
   @override
   Widget build(BuildContext context) => BlocProvider<LandingMobileCubit>(
         create: (_) => LandingMobileCubit(),
-        child: const _LoginWithMobileWidget(),
+        child: HookBuilder(builder: (context) {
+          final counties =
+              useMemoizedFuture(() => compute(_getCountries, null), null).data;
+          if (counties == null || counties.isEmpty) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: context.theme.accent,
+              ),
+            );
+          }
+          return _LoginWithMobileWidget(countries: counties);
+        }),
       );
 }
 
 class _LoginWithMobileWidget extends HookWidget {
-  const _LoginWithMobileWidget({Key? key}) : super(key: key);
+  _LoginWithMobileWidget({
+    Key? key,
+    required this.countries,
+  })  : assert(countries.isNotEmpty),
+        super(key: key);
+
+  final List<Country> countries;
 
   @override
   Widget build(BuildContext context) {
     final phoneInputController = useTextEditingController();
     final captchaInputController = useTextEditingController();
+    final countryMap = useMemoized(
+        () => Map.fromEntries(countries.map((e) => MapEntry(e.alpha2Code, e))),
+        [countries]);
+    final defaultCountry = useMemoized(
+      () {
+        i('locale: ${WidgetsBinding.instance.window.locale.countryCode}');
+        return countryMap[WidgetsBinding.instance.window.locale.countryCode] ??
+            countries.first;
+      },
+    );
+    final selectedCountry = useState<Country>(defaultCountry);
+    final portalVisibility = useState<bool>(false);
     return Column(
       children: [
         const SizedBox(height: 70),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 80),
-          child: _MobileInput(controller: phoneInputController),
+        PortalEntry(
+          visible: portalVisibility.value,
+          portal: Material(
+            color: context.theme.chatBackground,
+            elevation: 2,
+            borderRadius: BorderRadius.circular(10),
+            child: SizedBox(
+              width: 360,
+              height: 400,
+              child: _CountryPickPortal(
+                countries: countries,
+                selected: selectedCountry.value,
+                onSelected: (country) {
+                  selectedCountry.value = country;
+                },
+              ),
+            ),
+          ),
+          portalAnchor: Alignment.topCenter,
+          childAnchor: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 80),
+            child: _MobileInput(
+              controller: phoneInputController,
+              country: selectedCountry.value,
+              onCountryDiaClick: () {
+                portalVisibility.value = !portalVisibility.value;
+              },
+            ),
+          ),
         ),
         const SizedBox(height: 10),
         Padding(
@@ -109,9 +174,13 @@ class _MobileInput extends StatelessWidget {
   const _MobileInput({
     Key? key,
     required this.controller,
+    required this.country,
+    required this.onCountryDiaClick,
   }) : super(key: key);
 
   final TextEditingController controller;
+  final Country country;
+  final VoidCallback onCountryDiaClick;
 
   @override
   Widget build(BuildContext context) => TextField(
@@ -128,29 +197,37 @@ class _MobileInput extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
           ),
-          prefixIcon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(width: 20),
-              Text(
-                '+91',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: context.theme.text,
+          prefixIcon: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: onCountryDiaClick,
+              child: SizedBox(
+                width: 78,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      country.dialCode ?? '',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: context.theme.text,
+                      ),
+                    ),
+                    const Spacer(),
+                    Transform.rotate(
+                      angle: math.pi / 2,
+                      child: SvgPicture.asset(
+                        Resources.assetsImagesIcArrowRightSvg,
+                        width: 30,
+                        height: 30,
+                        color: context.theme.secondaryText,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Transform.rotate(
-                angle: math.pi / 2,
-                child: SvgPicture.asset(
-                  Resources.assetsImagesIcArrowRightSvg,
-                  width: 30,
-                  height: 30,
-                  color: context.theme.secondaryText,
-                ),
-              ),
-              const SizedBox(width: 20),
-            ],
+            ),
           ),
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
@@ -168,6 +245,82 @@ class _MobileInput extends StatelessWidget {
           ),
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(vertical: 20),
+        ),
+      );
+}
+
+List<Country> _getCountries(dynamic any) =>
+    CountryProvider.getCountriesData(countries: null);
+
+class _CountryPickPortal extends HookWidget {
+  const _CountryPickPortal({
+    Key? key,
+    required this.onSelected,
+    required this.countries,
+    required this.selected,
+  }) : super(key: key);
+
+  final void Function(Country country) onSelected;
+  final List<Country> countries;
+  final Country selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final groupedCountries = useMemoized(() => countries);
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ListView.builder(
+            itemBuilder: (context, index) => _CountryItem(
+                  country: groupedCountries[index],
+                  onTap: () => onSelected(groupedCountries[index]),
+                  isSelected: groupedCountries[index] == selected,
+                )),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: AZSelection(
+            textStyle: TextStyle(
+              fontSize: 10,
+              color: context.theme.secondaryText,
+            ),
+            onSelection: (char) {
+              debugPrint('$char');
+            },
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class _CountryItem extends StatelessWidget {
+  const _CountryItem({
+    Key? key,
+    required this.country,
+    required this.onTap,
+    required this.isSelected,
+  }) : super(key: key);
+
+  final Country country;
+  final VoidCallback onTap;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 40,
+          child: Row(
+            children: [
+              const SizedBox(width: 20),
+              SizedBox(
+                width: 80,
+                child: Text(country.dialCode ?? ''),
+              ),
+              Text(country.name ?? ''),
+              const SizedBox(width: 20),
+            ],
+          ),
         ),
       );
 }

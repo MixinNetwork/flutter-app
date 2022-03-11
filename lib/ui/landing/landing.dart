@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -53,38 +54,40 @@ class _LandingScaffold extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final info = useMemoizedFuture(getPackageInfo, null).data;
-    return Scaffold(
-      backgroundColor: context.dynamicColor(
-        const Color(0xFFE5E5E5),
-        darkColor: const Color.fromRGBO(35, 39, 43, 1),
-      ),
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          Center(
-            child: SizedBox(
-              width: 520,
-              height: 418,
-              child: Material(
-                color: context.theme.popUp,
-                borderRadius: BorderRadius.circular(13),
-                elevation: 10,
-                child: child,
+    return Portal(
+      child: Scaffold(
+        backgroundColor: context.dynamicColor(
+          const Color(0xFFE5E5E5),
+          darkColor: const Color.fromRGBO(35, 39, 43, 1),
+        ),
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          children: [
+            Center(
+              child: SizedBox(
+                width: 520,
+                height: 418,
+                child: Material(
+                  color: context.theme.popUp,
+                  borderRadius: BorderRadius.circular(13),
+                  elevation: 10,
+                  child: child,
+                ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: Text(
-              info?.versionAndBuildNumber ?? '',
-              style: TextStyle(
-                fontSize: 14,
-                color: context.theme.secondaryText,
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: Text(
+                info?.versionAndBuildNumber ?? '',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: context.theme.secondaryText,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

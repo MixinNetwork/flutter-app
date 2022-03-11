@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 
 enum MobileLoginStatus {
   initial,
-  loading,
   error,
 }
 
@@ -26,4 +25,7 @@ class MobileLoginState extends Equatable {
 
 class LandingMobileCubit extends Cubit<MobileLoginState> {
   LandingMobileCubit() : super(const MobileLoginState());
+
+
+
 }

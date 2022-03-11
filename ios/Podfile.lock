@@ -44,6 +44,14 @@ PODS:
     - Flutter
   - image_picker (0.0.1):
     - Flutter
+  - libphonenumber (0.0.1):
+    - Flutter
+    - libPhoneNumber-iOS
+  - libPhoneNumber-iOS (0.9.15)
+  - libphonenumber_plugin (0.0.1):
+    - Flutter
+    - libphonenumber
+    - libPhoneNumber-iOS
   - ogg_opus_player (0.0.1):
     - Flutter
   - open_file (0.0.1):
@@ -89,6 +97,8 @@ DEPENDENCIES:
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - gallery_saver (from `.symlinks/plugins/gallery_saver/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
+  - libphonenumber (from `.symlinks/plugins/libphonenumber/ios`)
+  - libphonenumber_plugin (from `.symlinks/plugins/libphonenumber_plugin/ios`)
   - ogg_opus_player (from `.symlinks/plugins/ogg_opus_player/ios`)
   - open_file (from `.symlinks/plugins/open_file/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
@@ -102,6 +112,7 @@ SPEC REPOS:
   trunk:
     - DKImagePickerController
     - DKPhotoGallery
+    - libPhoneNumber-iOS
     - SDWebImage
     - sqlite3
     - SwiftyGif
@@ -121,6 +132,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/gallery_saver/ios"
   image_picker:
     :path: ".symlinks/plugins/image_picker/ios"
+  libphonenumber:
+    :path: ".symlinks/plugins/libphonenumber/ios"
+  libphonenumber_plugin:
+    :path: ".symlinks/plugins/libphonenumber_plugin/ios"
   ogg_opus_player:
     :path: ".symlinks/plugins/ogg_opus_player/ios"
   open_file:
@@ -148,6 +163,9 @@ SPEC CHECKSUMS:
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542
   image_picker: 541dcbb3b9cf32d87eacbd957845d8651d6c62c3
+  libphonenumber: bd14d5abfc5939ab0b0767234e2d8e2593af258e
+  libPhoneNumber-iOS: 0a32a9525cf8744fe02c5206eb30d571e38f7d75
+  libphonenumber_plugin: 7cf755ad1656145935d6c208173a476bd3f12898
   ogg_opus_player: 0e883df8c4f70995c3e6b8ac3a8ef088f66a8f41
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
