@@ -53,7 +53,7 @@ class TextMessage extends HookWidget {
     final botNumberHighlightTextSpans = useMemoized(
       () => botNumberRegExp.allMatchesAndSort(content).map(
             (e) => HighlightTextSpan(
-              e[0]!,
+              e[2]!,
               style: TextStyle(
                 color: context.theme.accent,
               ),
