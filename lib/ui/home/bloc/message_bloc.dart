@@ -14,6 +14,7 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/synchronized.dart';
 import '../../../widgets/clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import 'conversation_cubit.dart';
@@ -188,7 +189,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.mentionCache,
     required this.accountServer,
   }) : super(const MessageState()) {
-    on<_MessageEvent>(_onEvent);
+    on<_MessageEvent>((event, emit) => _lock.synchronized(
+          () => _onEvent(event, emit),
+        ));
+
     add(_MessageInitEvent(
       centerMessageId: conversationCubit.state?.initIndexMessageId,
       lastReadMessageId: conversationCubit.state?.lastReadMessageId,
@@ -227,6 +231,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   final MentionCache mentionCache;
   final AccountServer accountServer;
   int limit;
+
+  final _lock = Lock();
 
   MessageDao get messageDao => database.messageDao;
 
