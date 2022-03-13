@@ -123,7 +123,7 @@ dependency_overrides:
   drift:
     git:
       url: https://github.com/simolus3/drift.git
-      ref: 79aedea60eb160f0b6f3958209acf24eb0f9b758
+      ref: 7199e6bca66a290acc90b2e99bb94f045dfae4d0
       path: drift
   # remove this if https://github.com/woodemi/quick_breakpad/issues/10 fixed
   quick_breakpad:

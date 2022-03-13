@@ -48,7 +48,6 @@ import 'dao/sticker_dao.dart';
 import 'dao/sticker_relationship_dao.dart';
 import 'dao/user_dao.dart';
 import 'database_event_bus.dart';
-import 'multi_executor.dart';
 import 'util/util.dart';
 
 part 'mixin_database.g.dart';
@@ -279,7 +278,7 @@ Future<MixinDatabase> connectToDatabase(
     return isolate.connect();
   }));
 
-  final connect = write.withExecutor(MultiReadExecutor(
+  final connect = write.withExecutor(MultiExecutor.withReadPool(
     reads: reads.map((e) => e.executor).toList(),
     write: write.executor,
   ));

@@ -380,8 +380,8 @@ packages:
     dependency: "direct main"
     description:
       path: drift
-      ref: "79aedea60eb160f0b6f3958209acf24eb0f9b758"
-      resolved-ref: "79aedea60eb160f0b6f3958209acf24eb0f9b758"
+      ref: "7199e6bca66a290acc90b2e99bb94f045dfae4d0"
+      resolved-ref: "7199e6bca66a290acc90b2e99bb94f045dfae4d0"
       url: "https://github.com/simolus3/drift.git"
     source: git
     version: "1.5.0-dev"
