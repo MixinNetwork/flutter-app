@@ -379,19 +379,17 @@ packages:
   drift:
     dependency: "direct main"
     description:
-      path: drift
-      ref: "7199e6bca66a290acc90b2e99bb94f045dfae4d0"
-      resolved-ref: "7199e6bca66a290acc90b2e99bb94f045dfae4d0"
-      url: "https://github.com/simolus3/drift.git"
-    source: git
-    version: "1.5.0-dev"
+      name: drift
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.5.0"
   drift_dev:
     dependency: "direct dev"
     description:
       name: drift_dev
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.0"
+    version: "1.5.0"
   ecache:
     dependency: "direct main"
     description:
@@ -1234,7 +1232,7 @@ packages:
       name: sqlparser
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.20.1"
+    version: "0.21.0"
   stack_trace:
     dependency: transitive
     description:
