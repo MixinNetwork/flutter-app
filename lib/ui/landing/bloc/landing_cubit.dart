@@ -26,10 +26,19 @@ import '../../home/bloc/multi_auth_cubit.dart';
 import 'landing_state.dart';
 
 class LandingCubit<T> extends Cubit<T> {
-  LandingCubit(this.authCubit, Locale locale, T initialState)
-      : client = Client(
+  LandingCubit(
+    this.authCubit,
+    Locale locale,
+    T initialState, {
+    String? userAgent,
+    String? deviceId,
+  })  : client = Client(
           dioOptions: BaseOptions(
-            headers: {'Accept-Language': locale.languageCode},
+            headers: {
+              'Accept-Language': locale.languageCode,
+              if (userAgent != null) 'User-Agent': userAgent,
+              if (deviceId != null) 'Mixin-Device-Id': deviceId,
+            },
           ),
         ),
         super(initialState);
@@ -211,11 +220,17 @@ class MobileLoginState extends Equatable {
 }
 
 class LandingMobileCubit extends LandingCubit<MobileLoginState> {
-  LandingMobileCubit(MultiAuthCubit authCubit, Locale locale)
-      : super(
+  LandingMobileCubit(
+    MultiAuthCubit authCubit,
+    Locale locale, {
+    required String deviceId,
+    required String userAgent,
+  }) : super(
           authCubit,
           locale,
           const MobileLoginState(),
+          deviceId: deviceId,
+          userAgent: userAgent,
         );
 
   VerificationResponse? verificationResponse;
@@ -232,10 +247,10 @@ class LandingMobileCubit extends LandingCubit<MobileLoginState> {
     if (id == null) {
       return;
     }
-    await SignalProtocol.initSignal(null);
-
     await CryptoKeyValue.instance.init();
     await AccountKeyValue.instance.init();
+
+    await SignalProtocol.initSignal(null);
 
     final registrationId = CryptoKeyValue.instance.localRegistrationId;
     final sessionKey = ed.generateKey();
@@ -248,10 +263,12 @@ class LandingMobileCubit extends LandingCubit<MobileLoginState> {
       code: code,
       registrationId: registrationId,
       purpose: VerificationPurpose.session,
-      platform: 'Desktop',
+      // FIXME platform name
+      platform: 'Android',
       platformVersion: platformVersion,
       appVersion: packageInfo.version,
-      packageName: 'one.mixin.messenger.desktop',
+      // FIXME package name
+      packageName: 'one.mixin.messenger',
       sessionSecret: sessionSecret,
       // TODO pin
       pin: '',

@@ -21,6 +21,7 @@ import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
 import 'utils/logger.dart';
+import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/webview.dart';
 
@@ -86,16 +87,18 @@ Future<void> main(List<String> args) async {
     storage: storage,
   );
 
-  doWhenWindowReady(() {
-    appWindow.minSize =
-        const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480);
-    // The macOS handle content size in native.
-    if (!Platform.isMacOS) {
-      appWindow.size = const Size(1280, 750);
-      // FIXME remove this when the issues fixed.
-      // https://github.com/bitsdojo/bitsdojo_window/issues/72
-      // appWindow.alignment = Alignment.center;
-    }
-    appWindow.show();
-  });
+  if (kPlatformIsDesktop) {
+    doWhenWindowReady(() {
+      appWindow.minSize =
+          const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480);
+      // The macOS handle content size in native.
+      if (!Platform.isMacOS) {
+        appWindow.size = const Size(1280, 750);
+        // FIXME remove this when the issues fixed.
+        // https://github.com/bitsdojo/bitsdojo_window/issues/72
+        // appWindow.alignment = Alignment.center;
+      }
+      appWindow.show();
+    });
+  }
 }

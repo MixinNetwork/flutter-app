@@ -19,6 +19,8 @@ import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
+import '../../utils/platform.dart';
+import '../../utils/system/package_info.dart';
 import '../../widgets/az_selection.dart';
 import '../../widgets/dialog.dart';
 import 'bloc/landing_cubit.dart';
@@ -30,8 +32,21 @@ class LoginWithMobileWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final locale = useMemoized(() => Localizations.localeOf(context));
+    final userAgent = useMemoizedFuture(
+      () async => generateUserAgent(await getPackageInfo()),
+      null,
+    ).data;
+    final deviceId = useMemoizedFuture(
+      getDeviceId,
+      null,
+    ).data;
+
+    if (userAgent == null || deviceId == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return BlocProvider<LandingMobileCubit>(
-      create: (_) => LandingMobileCubit(context.multiAuthCubit, locale),
+      create: (_) => LandingMobileCubit(context.multiAuthCubit, locale,
+          userAgent: userAgent, deviceId: deviceId),
       child: HookBuilder(builder: (context) {
         final counties =
             useMemoizedFuture(() => compute(_getCountries, null), null).data;
@@ -126,7 +141,11 @@ class _LoginWithMobileWidget extends HookWidget {
             horizontal: 60,
             vertical: 14,
           ),
-          onTap: () {},
+          onTap: () {
+            context
+                .read<LandingMobileCubit>()
+                .login(captchaInputController.text);
+          },
           child: Text(
             context.l10n.login,
             style: const TextStyle(fontWeight: FontWeight.normal),
@@ -304,6 +323,8 @@ class _GetVerificationCodeButton extends StatelessWidget {
               final request = VerificationRequest(
                 phone: dialCode + mobileNumberStr,
                 purpose: VerificationPurpose.session,
+                // FIXME package name
+                packageName: 'one.mixin.messenger',
               );
               try {
                 final cubit = context.read<LandingMobileCubit>();
