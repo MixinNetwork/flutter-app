@@ -2690,31 +2690,31 @@ class Localization {
     );
   }
 
-  /// `Captcha`
-  String get captcha {
+  /// `Code`
+  String get verificationCode {
     return Intl.message(
-      'Captcha',
-      name: 'captcha',
+      'Code',
+      name: 'verificationCode',
       desc: '',
       args: [],
     );
   }
 
   /// `Enter the code`
-  String get captchaHint {
+  String get verificationCodeHint {
     return Intl.message(
       'Enter the code',
-      name: 'captchaHint',
+      name: 'verificationCodeHint',
       desc: '',
       args: [],
     );
   }
 
-  /// `Get Captcha`
-  String get getCaptcha {
+  /// `Get Code`
+  String get getVerificationCode {
     return Intl.message(
-      'Get Captcha',
-      name: 'getCaptcha',
+      'Get Code',
+      name: 'getVerificationCode',
       desc: '',
       args: [],
     );
@@ -2725,6 +2725,606 @@ class Localization {
     return Intl.message(
       'Login',
       name: 'login',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resend code ({second})`
+  String verificationCodeResend(Object second) {
+    return Intl.message(
+      'Resend code ($second)',
+      name: 'verificationCodeResend',
+      desc: '',
+      args: [second],
+    );
+  }
+
+  /// `Can not recognize the QR code`
+  String get canNotRecognize {
+    return Intl.message(
+      'Can not recognize the QR code',
+      name: 'canNotRecognize',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No connection`
+  String get errorNoConnection {
+    return Intl.message(
+      'No connection',
+      name: 'errorNoConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection timeout`
+  String get errorConnectionTimeout {
+    return Intl.message(
+      'Connection timeout',
+      name: 'errorConnectionTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network error`
+  String get errorNetworkError {
+    return Intl.message(
+      'Network error',
+      name: 'errorNetworkError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server is under maintenance: {code}`
+  String errorServer5xx(Object code) {
+    return Intl.message(
+      'Server is under maintenance: $code',
+      name: 'errorServer5xx',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `Data error`
+  String get errorData {
+    return Intl.message(
+      'Data error',
+      name: 'errorData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR: {code}`
+  String errorUnknownWithCode(Object code) {
+    return Intl.message(
+      'ERROR: $code',
+      name: 'errorUnknownWithCode',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR: {message}`
+  String errorUnknownWithMessage(Object message) {
+    return Intl.message(
+      'ERROR: $message',
+      name: 'errorUnknownWithMessage',
+      desc: '',
+      args: [message],
+    );
+  }
+
+  /// `Forbidden`
+  String get errorForbidden {
+    return Intl.message(
+      'Forbidden',
+      name: 'errorForbidden',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR {code}: Not found`
+  String errorNotFound(Object code) {
+    return Intl.message(
+      'ERROR $code: Not found',
+      name: 'errorNotFound',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `Not found`
+  String get errorNotFoundMessage {
+    return Intl.message(
+      'Not found',
+      name: 'errorNotFoundMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR {code}: Rate limit exceeded`
+  String errorTooManyRequests(Object code) {
+    return Intl.message(
+      'ERROR $code: Rate limit exceeded',
+      name: 'errorTooManyRequests',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Sign in to continue`
+  String errorAuthentication(Object code) {
+    return Intl.message(
+      'ERROR $code: Sign in to continue',
+      name: 'errorAuthentication',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `No camera`
+  String get errorNoCamera {
+    return Intl.message(
+      'No camera',
+      name: 'errorNoCamera',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `File error`
+  String get errorImage {
+    return Intl.message(
+      'File error',
+      name: 'errorImage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Format not supported`
+  String get errorFormat {
+    return Intl.message(
+      'Format not supported',
+      name: 'errorFormat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR {code}: The group chat is full.`
+  String errorFullGroup(Object code) {
+    return Intl.message(
+      'ERROR $code: The group chat is full.',
+      name: 'errorFullGroup',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Insufficient balance`
+  String errorInsufficientBalance(Object code) {
+    return Intl.message(
+      'ERROR $code: Insufficient balance',
+      name: 'errorInsufficientBalance',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Invalid PIN format`
+  String errorInvalidPinFormat(Object code) {
+    return Intl.message(
+      'ERROR $code: Invalid PIN format',
+      name: 'errorInvalidPinFormat',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: PIN incorrect`
+  String errorPinIncorrect(Object code) {
+    return Intl.message(
+      'ERROR $code: PIN incorrect',
+      name: 'errorPinIncorrect',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `{code}: PIN incorrect. You still have {times} chances. Please wait for 24 hours to retry later.`
+  String errorPinIncorrectWithTimes(Object code, Object times) {
+    return Intl.message(
+      '$code: PIN incorrect. You still have $times chances. Please wait for 24 hours to retry later.',
+      name: 'errorPinIncorrectWithTimes',
+      desc: '',
+      args: [code, times],
+    );
+  }
+
+  /// `ERROR {code}: The amount is too small`
+  String errorTooSmall(Object code) {
+    return Intl.message(
+      'ERROR $code: The amount is too small',
+      name: 'errorTooSmall',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `User not found`
+  String get errorUserNotFound {
+    return Intl.message(
+      'User not found',
+      name: 'errorUserNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Conversation not found`
+  String get errorConversationNotFound {
+    return Intl.message(
+      'Conversation not found',
+      name: 'errorConversationNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `App not found`
+  String get errorAppNotFound {
+    return Intl.message(
+      'App not found',
+      name: 'errorAppNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Can't find an app able to open this media.`
+  String get errorUnableToOpenMedia {
+    return Intl.message(
+      'Can\'t find an app able to open this media.',
+      name: 'errorUnableToOpenMedia',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Can't find an map app`
+  String get errorOpenLocation {
+    return Intl.message(
+      'Can\'t find an map app',
+      name: 'errorOpenLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `File does not exist`
+  String get errorFileExists {
+    return Intl.message(
+      'File does not exist',
+      name: 'errorFileExists',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The address does not exist, please make sure that the address is added successfully`
+  String get errorAddressExists {
+    return Intl.message(
+      'The address does not exist, please make sure that the address is added successfully',
+      name: 'errorAddressExists',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Address refresh failed, please try again`
+  String get errorAddressNotSync {
+    return Intl.message(
+      'Address refresh failed, please try again',
+      name: 'errorAddressNotSync',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Asset does not exist`
+  String get errorAssetExists {
+    return Intl.message(
+      'Asset does not exist',
+      name: 'errorAssetExists',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You have tried more than 5 times, please wait at least 24 hours to try again.`
+  String get errorPinCheckTooManyRequest {
+    return Intl.message(
+      'You have tried more than 5 times, please wait at least 24 hours to try again.',
+      name: 'errorPinCheckTooManyRequest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR {code}: Phone is used by someone else.`
+  String errorUsedPhone(Object code) {
+    return Intl.message(
+      'ERROR $code: Phone is used by someone else.',
+      name: 'errorUsedPhone',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Insufficient transaction fee. Please make sure your wallet has {fee} as fee`
+  String errorInsufficientTransactionFeeWithAmount(Object code, Object fee) {
+    return Intl.message(
+      'ERROR $code: Insufficient transaction fee. Please make sure your wallet has $fee as fee',
+      name: 'errorInsufficientTransactionFeeWithAmount',
+      desc: '',
+      args: [code, fee],
+    );
+  }
+
+  /// `ERROR {code}: Blockchain not in sync, please try again later.`
+  String errorBlockchain(Object code) {
+    return Intl.message(
+      'ERROR $code: Blockchain not in sync, please try again later.',
+      name: 'errorBlockchain',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Invalid address format.`
+  String errorInvalidAddressPlain(Object code) {
+    return Intl.message(
+      'ERROR $code: Invalid address format.',
+      name: 'errorInvalidAddressPlain',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Invalid address format. Please enter the correct {type} {address} address!`
+  String errorInvalidAddress(Object code, Object type, Object address) {
+    return Intl.message(
+      'ERROR $code: Invalid address format. Please enter the correct $type $address address!',
+      name: 'errorInvalidAddress',
+      desc: '',
+      args: [code, type, address],
+    );
+  }
+
+  /// `ERROR {code}: Expired phone verification code`
+  String errorPhoneVerificationCodeExpired(Object code) {
+    return Intl.message(
+      'ERROR $code: Expired phone verification code',
+      name: 'errorPhoneVerificationCodeExpired',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Invalid phone verification code`
+  String errorPhoneVerificationCodeInvalid(Object code) {
+    return Intl.message(
+      'ERROR $code: Invalid phone verification code',
+      name: 'errorPhoneVerificationCodeInvalid',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Invalid phone number`
+  String errorPhoneInvalidFormat(Object code) {
+    return Intl.message(
+      'ERROR $code: Invalid phone number',
+      name: 'errorPhoneInvalidFormat',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Failed to deliver SMS`
+  String errorPhoneSmsDelivery(Object code) {
+    return Intl.message(
+      'ERROR $code: Failed to deliver SMS',
+      name: 'errorPhoneSmsDelivery',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: The request data has invalid field`
+  String errorBadData(Object code) {
+    return Intl.message(
+      'ERROR $code: The request data has invalid field',
+      name: 'errorBadData',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `Please open the necessary permissions`
+  String get errorPermission {
+    return Intl.message(
+      'Please open the necessary permissions',
+      name: 'errorPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid user id`
+  String get errorUserInvalidFormat {
+    return Intl.message(
+      'Invalid user id',
+      name: 'errorUserInvalidFormat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share error.`
+  String get errorShare {
+    return Intl.message(
+      'Share error.',
+      name: 'errorShare',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR {code}: Recaptcha is invalid`
+  String errorRecaptchaIsInvalid(Object code) {
+    return Intl.message(
+      'ERROR $code: Recaptcha is invalid',
+      name: 'errorRecaptchaIsInvalid',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `Recaptcha timeout`
+  String get errorRecaptchaTimeout {
+    return Intl.message(
+      'Recaptcha timeout',
+      name: 'errorRecaptchaTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR {code}: Please update Mixin({version}) to continue use the service.`
+  String errorOldVersion(Object code, Object version) {
+    return Intl.message(
+      'ERROR $code: Please update Mixin($version) to continue use the service.',
+      name: 'errorOldVersion',
+      desc: '',
+      args: [code, version],
+    );
+  }
+
+  /// `File chooser error`
+  String get errorFileChooser {
+    return Intl.message(
+      'File chooser error',
+      name: 'errorFileChooser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Duration is too short`
+  String get errorDurationShort {
+    return Intl.message(
+      'Duration is too short',
+      name: 'errorDurationShort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR {code}: Too many stickers`
+  String errorTooManyStickers(Object code) {
+    return Intl.message(
+      'ERROR $code: Too many stickers',
+      name: 'errorTooManyStickers',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Withdraw amount too small`
+  String errorTooSmallWithdrawAmount(Object code) {
+    return Intl.message(
+      'ERROR $code: Withdraw amount too small',
+      name: 'errorTooSmallWithdrawAmount',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Send verification code too frequent, please try again later.`
+  String errorInvalidCodeTooFrequent(Object code) {
+    return Intl.message(
+      'ERROR $code: Send verification code too frequent, please try again later.',
+      name: 'errorInvalidCodeTooFrequent',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Invalid emergency contact`
+  String errorInvalidEmergencyContact(Object code) {
+    return Intl.message(
+      'ERROR $code: Invalid emergency contact',
+      name: 'errorInvalidEmergencyContact',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: Withdrawal memo format incorrect.`
+  String errorWithdrawalMemoFormatIncorrect(Object code) {
+    return Intl.message(
+      'ERROR $code: Withdrawal memo format incorrect.',
+      name: 'errorWithdrawalMemoFormatIncorrect',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `ERROR {code}: The number has reached the limit.`
+  String errorFavoriteLimit(Object code) {
+    return Intl.message(
+      'ERROR $code: The number has reached the limit.',
+      name: 'errorFavoriteLimit',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `Retry upload failed.`
+  String get errorRetryUpload {
+    return Intl.message(
+      'Retry upload failed.',
+      name: 'errorRetryUpload',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not supported audio format, please open by other app.`
+  String get errorNotSupportedAudioFormat {
+    return Intl.message(
+      'Not supported audio format, please open by other app.',
+      name: 'errorNotSupportedAudioFormat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please forward all attachments after they have been downloaded`
+  String get errorTranscriptForward {
+    return Intl.message(
+      'Please forward all attachments after they have been downloaded',
+      name: 'errorTranscriptForward',
       desc: '',
       args: [],
     );

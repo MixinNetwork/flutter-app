@@ -45,34 +45,22 @@ export '../../db/extension/user.dart' show UserExtension;
 export '../action_utils.dart' show OpenUriExtension;
 export '../datetime_format_utils.dart'
     show DateTimeExtension, StringEpochNanoExtension;
+export 'src/errors.dart';
 export 'src/platforms.dart';
 
 part 'src/db.dart';
-
 part 'src/duration.dart';
-
 part 'src/file.dart';
-
 part 'src/image.dart';
-
 part 'src/info.dart';
-
 part 'src/iterable.dart';
-
 part 'src/key_event.dart';
-
 part 'src/markdown.dart';
-
 part 'src/number.dart';
-
 part 'src/provider.dart';
-
 part 'src/regexp.dart';
-
 part 'src/stream.dart';
-
 part 'src/string.dart';
-
 part 'src/ui.dart';
 
 void importExtension() {}

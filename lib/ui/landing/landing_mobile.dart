@@ -1,5 +1,6 @@
 // ignore_for_file: implementation_imports
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
@@ -23,6 +24,7 @@ import '../../utils/platform.dart';
 import '../../utils/system/package_info.dart';
 import '../../widgets/az_selection.dart';
 import '../../widgets/dialog.dart';
+import '../../widgets/toast.dart';
 import 'bloc/landing_cubit.dart';
 import 'landing.dart';
 
@@ -177,7 +179,7 @@ class _CaptchaInput extends StatelessWidget {
         decoration: InputDecoration(
           fillColor: context.theme.sidebarSelected,
           filled: true,
-          hintText: context.l10n.captchaHint,
+          hintText: context.l10n.verificationCodeHint,
           hintStyle: TextStyle(
             fontSize: 16,
             color: context.theme.secondaryText,
@@ -193,7 +195,7 @@ class _CaptchaInput extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(left: 20),
                 child: Text(
-                  context.l10n.captcha,
+                  context.l10n.verificationCode,
                   style: TextStyle(
                     fontSize: 16,
                     color: context.theme.text,
@@ -282,7 +284,7 @@ class _MobileInput extends HookWidget {
       );
 }
 
-class _GetVerificationCodeButton extends StatelessWidget {
+class _GetVerificationCodeButton extends HookWidget {
   const _GetVerificationCodeButton({
     Key? key,
     required this.controller,
@@ -293,10 +295,32 @@ class _GetVerificationCodeButton extends StatelessWidget {
   final Country country;
 
   @override
-  Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(width: 8),
+  Widget build(BuildContext context) {
+    final nextDuration = useState(0);
+    useEffect(() {
+      final timer = Timer.periodic(
+        const Duration(seconds: 1),
+        (timer) {
+          if (nextDuration.value > 0) {
+            nextDuration.value = math.max(0, nextDuration.value - 1);
+          }
+        },
+      );
+      return timer.cancel;
+    }, [nextDuration]);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(width: 8),
+        if (nextDuration.value > 0)
+          Text(
+            context.l10n.verificationCodeResend(nextDuration.value),
+            style: TextStyle(
+              fontSize: 14,
+              color: context.theme.secondaryText,
+            ),
+          )
+        else
           InkWell(
             onTap: () async {
               final mobileNumberStr = controller.text;
@@ -323,7 +347,6 @@ class _GetVerificationCodeButton extends StatelessWidget {
               final request = VerificationRequest(
                 phone: dialCode + mobileNumberStr,
                 purpose: VerificationPurpose.session,
-                // FIXME package name
                 packageName: 'one.mixin.messenger',
               );
               try {
@@ -331,11 +354,19 @@ class _GetVerificationCodeButton extends StatelessWidget {
                 final response =
                     await cubit.client.accountApi.verification(request);
                 cubit.onVerified(mobileNumberStr, response.data);
+
+                // Need wait 60 seconds to send verification code again.
+                nextDuration.value = 60;
               } on MixinApiError catch (error) {
                 e('Verification api error: $error');
                 final mixinError = error.error as MixinError;
                 if (mixinError.code == needCaptcha) {
                   // TODO: show captcha
+                } else {
+                  await showToastFailed(
+                    context,
+                    mixinError.toDisplayString(context),
+                  );
                 }
               } catch (error) {
                 e('Verification error: $error');
@@ -343,16 +374,17 @@ class _GetVerificationCodeButton extends StatelessWidget {
               }
             },
             child: Text(
-              context.l10n.getCaptcha,
+              context.l10n.getVerificationCode,
               style: TextStyle(
                 fontSize: 14,
-                color: context.theme.secondaryText,
+                color: context.theme.accent,
               ),
             ),
           ),
-          const SizedBox(width: 20),
-        ],
-      );
+        const SizedBox(width: 20),
+      ],
+    );
+  }
 }
 
 List<Country> _getCountries(dynamic any) =>
