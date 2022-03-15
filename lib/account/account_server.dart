@@ -41,7 +41,7 @@ import '../utils/system/package_info.dart';
 import '../utils/webview.dart';
 import '../workers/injector.dart';
 import '../workers/isolate_event.dart';
-import '../workers/message_woker_isolate.dart';
+import '../workers/message_worker_isolate.dart';
 import 'account_key_value.dart';
 import 'send_message_helper.dart';
 import 'show_pin_message_key_value.dart';
@@ -150,6 +150,7 @@ class AccountServer {
       String privateKey, MultiAuthCubit multiAuthCubit) async {
     database = Database(
         await db.connectToDatabase(identityNumber, fromMainIsolate: true));
+
     attachmentUtil = AttachmentUtil.init(
       client,
       database.messageDao,

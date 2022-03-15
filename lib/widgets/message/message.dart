@@ -16,6 +16,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../account/account_server.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
+import '../../bloc/setting_cubit.dart';
 import '../../bloc/simple_cubit.dart';
 import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
@@ -59,7 +60,6 @@ import 'item/video_message.dart';
 import 'item/waiting_message.dart';
 import 'message_day_time.dart';
 import 'message_name.dart';
-import 'message_style.dart';
 
 class _MessageContextCubit extends SimpleCubit<_MessageContext> {
   _MessageContextCubit(_MessageContext initialState) : super(initialState);
@@ -165,8 +165,8 @@ class MessageItemWidget extends HookWidget {
             message.userId != message.conversationOwnerId;
 
     final enableShowAvatar =
-        useBlocStateConverter<MessageStyleCubit, MessageStyle, bool>(
-      converter: (style) => style.showAvatar,
+        useBlocStateConverter<SettingCubit, SettingState, bool>(
+      converter: (style) => style.messageShowAvatar,
     );
     final showAvatar = isGroupOrBotGroupConversation && enableShowAvatar;
 

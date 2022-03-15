@@ -38,7 +38,7 @@ import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import 'injector.dart';
 import 'isolate_event.dart';
-import 'message_woker_isolate.dart';
+import 'message_worker_isolate.dart';
 import 'sender.dart';
 
 class DecryptMessage extends Injector {
