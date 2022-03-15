@@ -18,6 +18,8 @@ import 'package:intl_phone_number_input/src/providers/country_provider.dart';
 import 'package:intl_phone_number_input/src/utils/phone_number/phone_number_util.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tuple/tuple.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
@@ -86,7 +88,7 @@ class _LoginWithMobileWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final phoneInputController = useTextEditingController();
-    final captchaInputController = useTextEditingController();
+    final codeInputController = useTextEditingController();
     final countryMap = useMemoized(
         () => Map.fromEntries(countries.map((e) => MapEntry(e.alpha2Code, e))),
         [countries]);
@@ -101,7 +103,7 @@ class _LoginWithMobileWidget extends HookWidget {
     final portalVisibility = useState<bool>(false);
 
     Future<void> performLogin() async {
-      final code = captchaInputController.text;
+      final code = codeInputController.text;
       if (code.isEmpty) {
         return;
       }
@@ -172,7 +174,7 @@ class _LoginWithMobileWidget extends HookWidget {
             e('Phone number validation error: $error');
             return;
           }
-          if (captchaInputController.text.length !=
+          if (codeInputController.text.length !=
               _kDefaultVerificationCodeLength) {
             return;
           }
@@ -180,13 +182,13 @@ class _LoginWithMobileWidget extends HookWidget {
         }
 
         phoneInputController.addListener(onChange);
-        captchaInputController.addListener(onChange);
+        codeInputController.addListener(onChange);
         return () {
           phoneInputController.removeListener(onChange);
-          captchaInputController.removeListener(onChange);
+          codeInputController.removeListener(onChange);
         };
       },
-      [phoneInputController, captchaInputController, selectedCountry.value],
+      [phoneInputController, codeInputController, selectedCountry.value],
     );
 
     return Column(
@@ -235,7 +237,7 @@ class _LoginWithMobileWidget extends HookWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 80),
           child: _CodeInput(
-            controller: captchaInputController,
+            controller: codeInputController,
             onSubmitted: performLogin,
           ),
         ),
@@ -417,6 +419,58 @@ class _GetVerificationCodeButton extends HookWidget {
       );
       return timer.cancel;
     }, [nextDuration]);
+
+    Future<void> requestVerificationCode(
+      String phone, {
+      Tuple2<_CaptchaType, String>? captcha,
+    }) async {
+      final request = VerificationRequest(
+        phone: phone,
+        purpose: VerificationPurpose.session,
+        packageName: 'one.mixin.messenger',
+        gRecaptchaResponse:
+            captcha?.item1 == _CaptchaType.gCaptcha ? captcha?.item2 : null,
+        hCaptchaResponse:
+            captcha?.item1 == _CaptchaType.hCaptcha ? captcha?.item2 : null,
+      );
+      try {
+        final cubit = context.read<LandingMobileCubit>();
+        final response = await cubit.client.accountApi.verification(request);
+        cubit.onVerified(response.data);
+
+        // Need wait 60 seconds to send verification code again.
+        nextDuration.value = 60;
+      } on MixinApiError catch (error) {
+        e('Verification api error: $error');
+        final mixinError = error.error as MixinError;
+        if (mixinError.code == needCaptcha) {
+          final result = await showMixinDialog<List<dynamic>>(
+            context: context,
+            child: const _CaptchaWebViewDialog(),
+          );
+          if (result != null) {
+            assert(result.length == 2, 'Invalid result length');
+            final type = result[0] as _CaptchaType;
+            final token = result[1] as String;
+            d('Captcha type: $type, token: $token');
+            unawaited(requestVerificationCode(
+              phone,
+              captcha: Tuple2(type, token),
+            ));
+          }
+          return;
+        } else {
+          await showToastFailed(
+            context,
+            mixinError.toDisplayString(context),
+          );
+        }
+      } catch (error) {
+        e('Verification error: $error');
+        return;
+      }
+    }
+
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: nextDuration.value > 0
@@ -449,34 +503,7 @@ class _GetVerificationCodeButton extends HookWidget {
                 e('Invalid dial code: $country');
                 return;
               }
-              final request = VerificationRequest(
-                phone: dialCode + mobileNumberStr,
-                purpose: VerificationPurpose.session,
-                packageName: 'one.mixin.messenger',
-              );
-              try {
-                final cubit = context.read<LandingMobileCubit>();
-                final response =
-                    await cubit.client.accountApi.verification(request);
-                cubit.onVerified(response.data);
-
-                // Need wait 60 seconds to send verification code again.
-                nextDuration.value = 60;
-              } on MixinApiError catch (error) {
-                e('Verification api error: $error');
-                final mixinError = error.error as MixinError;
-                if (mixinError.code == needCaptcha) {
-                  // TODO: show captcha
-                } else {
-                  await showToastFailed(
-                    context,
-                    mixinError.toDisplayString(context),
-                  );
-                }
-              } catch (error) {
-                e('Verification error: $error');
-                return;
-              }
+              await requestVerificationCode(dialCode + mobileNumberStr);
             },
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -669,4 +696,112 @@ class _CountryItem extends StatelessWidget {
           ),
         ),
       );
+}
+
+class _CaptchaWebViewDialog extends HookWidget {
+  const _CaptchaWebViewDialog({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final timer = useRef<Timer?>(null);
+    final controllerRef = useRef<WebViewController?>(null);
+    final captcha = useRef<_CaptchaType>(_CaptchaType.gCaptcha);
+    useEffect(
+      () => () {
+        timer.value?.cancel();
+      },
+      [],
+    );
+
+    void loadFallback() {
+      if (captcha.value == _CaptchaType.gCaptcha) {
+        captcha.value = _CaptchaType.hCaptcha;
+        _loadCaptcha(controllerRef.value!, _CaptchaType.hCaptcha);
+      } else {
+        controllerRef.value!.loadUrl('about:blank');
+        showToastFailed(
+          context,
+          ToastError(context.l10n.errorRecaptchaTimeout),
+        );
+        Navigator.pop(context);
+      }
+    }
+
+    return SizedBox(
+      width: 400,
+      height: 520,
+      child: WebView(
+        javascriptMode: JavascriptMode.unrestricted,
+        onWebViewCreated: (controller) {
+          controllerRef.value = controller;
+          _loadCaptcha(controller, captcha.value);
+        },
+        onPageStarted: (url) {
+          timer.value = Timer(const Duration(seconds: 15), loadFallback);
+        },
+        onPageFinished: (url) {
+          timer.value?.cancel();
+          timer.value = null;
+        },
+        javascriptChannels: {
+          JavascriptChannel(
+            name: 'MixinContextTokenCallback',
+            onMessageReceived: (message) {
+              timer.value?.cancel();
+              timer.value = null;
+              final token = message.message;
+              Navigator.pop(context, [captcha.value, token]);
+            },
+          ),
+          JavascriptChannel(
+            name: 'MixinContextErrorCallback',
+            onMessageReceived: (message) {
+              e('on captcha error: ${message.message}');
+              timer.value?.cancel();
+              timer.value = null;
+              loadFallback();
+            },
+          ),
+        },
+      ),
+    );
+  }
+}
+
+enum _CaptchaType {
+  gCaptcha,
+  hCaptcha,
+}
+
+const _kRecaptchaKey = '';
+const _hCaptchaKey = '';
+
+Future<void> _loadCaptcha(
+  WebViewController controller,
+  _CaptchaType type,
+) async {
+  i('load captcha: $type');
+  final html = await rootBundle.loadString(Resources.assetsCaptchaHtml);
+  final String apiKey;
+  final String src;
+  switch (type) {
+    case _CaptchaType.gCaptcha:
+      apiKey = _kRecaptchaKey;
+      src = 'https://www.recaptcha.net/recaptcha/api.js'
+          '?onload=onGCaptchaLoad&render=explicit';
+      break;
+    case _CaptchaType.hCaptcha:
+      apiKey = _hCaptchaKey;
+      src = 'https://hcaptcha.com/1/api.js'
+          '?onload=onHCaptchaLoad&render=explicit';
+      break;
+  }
+  final htmlWithCaptcha =
+      html.replaceAll('#src', src).replaceAll('#apiKey', apiKey);
+
+  await controller.clearCache();
+  await controller.loadHtmlString(
+    htmlWithCaptcha,
+    baseUrl: 'https://mixin.one',
+  );
 }

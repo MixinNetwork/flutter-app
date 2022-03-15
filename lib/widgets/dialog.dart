@@ -44,8 +44,10 @@ Future<T?> showMixinDialog<T>({
   required Widget child,
   EdgeInsetsGeometry? padding,
   Color? backgroundColor,
+  bool barrierDismissible = true,
 }) =>
     _showDialog(
+      barrierDismissible: barrierDismissible,
       context: context,
       routeSettings: routeSettings,
       pageBuilder: (BuildContext buildContext, Animation<double> animation,
