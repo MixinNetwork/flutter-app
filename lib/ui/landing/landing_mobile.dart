@@ -1,11 +1,14 @@
 // ignore_for_file: implementation_imports
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
@@ -16,7 +19,10 @@ import 'package:intl_phone_number_input/src/utils/phone_number/phone_number_util
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
+import '../../crypto/crypto_key_value.dart';
+import '../../crypto/signal/signal_protocol.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
@@ -25,6 +31,7 @@ import '../../utils/system/package_info.dart';
 import '../../widgets/az_selection.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
+import '../home/bloc/multi_auth_cubit.dart';
 import 'bloc/landing_cubit.dart';
 import 'landing.dart';
 
@@ -65,6 +72,8 @@ class LoginWithMobileWidget extends HookWidget {
   }
 }
 
+const _kDefaultVerificationCodeLength = 4;
+
 class _LoginWithMobileWidget extends HookWidget {
   _LoginWithMobileWidget({
     Key? key,
@@ -90,6 +99,96 @@ class _LoginWithMobileWidget extends HookWidget {
     );
     final selectedCountry = useState<Country>(defaultCountry);
     final portalVisibility = useState<bool>(false);
+
+    Future<void> performLogin() async {
+      final code = captchaInputController.text;
+      if (code.isEmpty) {
+        return;
+      }
+
+      final id = context.read<LandingMobileCubit>().state?.id;
+      if (id == null) {
+        await showToastFailed(
+          context,
+          ToastError(context.l10n
+              .errorPhoneVerificationCodeInvalid(phoneVerificationCodeInvalid)),
+        );
+        return;
+      }
+
+      await CryptoKeyValue.instance.init();
+      await AccountKeyValue.instance.init();
+
+      await SignalProtocol.initSignal(null);
+
+      final registrationId = CryptoKeyValue.instance.localRegistrationId;
+      final sessionKey = ed.generateKey();
+      final sessionSecret = base64Encode(sessionKey.publicKey.bytes);
+
+      final packageInfo = await getPackageInfo();
+      final platformVersion = await getPlatformVersion();
+
+      final accountRequest = AccountRequest(
+        code: code,
+        registrationId: registrationId,
+        purpose: VerificationPurpose.session,
+        platform: 'Android',
+        platformVersion: platformVersion,
+        appVersion: packageInfo.version,
+        packageName: 'one.mixin.messenger',
+        sessionSecret: sessionSecret,
+        pin: '',
+      );
+      try {
+        final client = context.read<LandingMobileCubit>().client;
+        final response = await client.accountApi.create(id, accountRequest);
+        final privateKey = base64Encode(sessionKey.privateKey.bytes);
+        context.multiAuthCubit.signIn(
+          AuthState(account: response.data, privateKey: privateKey),
+        );
+      } catch (error) {
+        e('login account error: $error');
+        if (error is MixinApiError) {
+          final mixinError = error.error as MixinError;
+          await showToastFailed(context, mixinError.toDisplayString(context));
+        }
+        return;
+      }
+    }
+
+    final isLoginButtonEnable = useState(false);
+    useEffect(
+      () {
+        Future<void> onChange() async {
+          isLoginButtonEnable.value = false;
+          try {
+            final valid = await PhoneNumberUtil.isValidNumber(
+                phoneNumber: phoneInputController.text,
+                isoCode: selectedCountry.value.alpha2Code ?? '');
+            if (valid != true) {
+              return;
+            }
+          } catch (error) {
+            e('Phone number validation error: $error');
+            return;
+          }
+          if (captchaInputController.text.length !=
+              _kDefaultVerificationCodeLength) {
+            return;
+          }
+          isLoginButtonEnable.value = true;
+        }
+
+        phoneInputController.addListener(onChange);
+        captchaInputController.addListener(onChange);
+        return () {
+          phoneInputController.removeListener(onChange);
+          captchaInputController.removeListener(onChange);
+        };
+      },
+      [phoneInputController, captchaInputController, selectedCountry.value],
+    );
+
     return Column(
       children: [
         const SizedBox(height: 70),
@@ -135,19 +234,19 @@ class _LoginWithMobileWidget extends HookWidget {
         const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 80),
-          child: _CaptchaInput(controller: captchaInputController),
+          child: _CodeInput(
+            controller: captchaInputController,
+            onSubmitted: performLogin,
+          ),
         ),
         const SizedBox(height: 48),
         MixinButton(
+          disable: !isLoginButtonEnable.value,
           padding: const EdgeInsets.symmetric(
             horizontal: 60,
             vertical: 14,
           ),
-          onTap: () {
-            context
-                .read<LandingMobileCubit>()
-                .login(captchaInputController.text);
-          },
+          onTap: performLogin,
           child: Text(
             context.l10n.login,
             style: const TextStyle(fontWeight: FontWeight.normal),
@@ -161,13 +260,15 @@ class _LoginWithMobileWidget extends HookWidget {
   }
 }
 
-class _CaptchaInput extends StatelessWidget {
-  const _CaptchaInput({
+class _CodeInput extends StatelessWidget {
+  const _CodeInput({
     Key? key,
     required this.controller,
+    required this.onSubmitted,
   }) : super(key: key);
 
   final TextEditingController controller;
+  final VoidCallback onSubmitted;
 
   @override
   Widget build(BuildContext context) => TextField(
@@ -176,6 +277,10 @@ class _CaptchaInput extends StatelessWidget {
           fontSize: 16,
           color: context.theme.text,
         ),
+        keyboardType: TextInputType.number,
+        autofillHints: const [AutofillHints.oneTimeCode],
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) => onSubmitted(),
         decoration: InputDecoration(
           fillColor: context.theme.sidebarSelected,
           filled: true,
@@ -231,6 +336,14 @@ class _MobileInput extends HookWidget {
           fontSize: 16,
           color: context.theme.text,
         ),
+        textInputAction: TextInputAction.next,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+        ],
+        autofillHints: const [
+          AutofillHints.telephoneNumber,
+        ],
+        keyboardType: TextInputType.phone,
         decoration: InputDecoration(
           fillColor: context.theme.sidebarSelected,
           filled: true,
@@ -243,37 +356,33 @@ class _MobileInput extends HookWidget {
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
           ),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(8),
-              onTap: onCountryDiaClick,
-              child: SizedBox(
-                width: 78,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      country.dialCode ?? '',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: context.theme.text,
-                      ),
-                    ),
-                    const Spacer(),
-                    AnimatedRotation(
-                      turns: countryPortalExpand ? -0.25 : 0.25,
-                      duration: const Duration(milliseconds: 200),
-                      child: SvgPicture.asset(
-                        Resources.assetsImagesIcArrowRightSvg,
-                        width: 30,
-                        height: 30,
-                        color: context.theme.secondaryText,
-                      ),
-                    ),
-                  ],
+          prefixIcon: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: onCountryDiaClick,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(width: 20),
+                Text(
+                  country.dialCode ?? '',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: context.theme.text,
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                AnimatedRotation(
+                  turns: countryPortalExpand ? -0.25 : 0.25,
+                  duration: const Duration(milliseconds: 200),
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesIcArrowRightSvg,
+                    width: 30,
+                    height: 30,
+                    color: context.theme.secondaryText,
+                  ),
+                ),
+                const SizedBox(width: 20),
+              ],
             ),
           ),
           suffixIcon: _GetVerificationCodeButton(
@@ -332,6 +441,12 @@ class _GetVerificationCodeButton extends HookWidget {
                     phoneNumber: mobileNumberStr,
                     isoCode: country.alpha2Code ?? '');
                 if (valid != true) {
+                  await showToastFailed(
+                    context,
+                    ToastError(
+                      context.l10n.errorPhoneInvalidFormat(phoneInvalidFormat),
+                    ),
+                  );
                   return;
                 }
               } catch (error) {
@@ -353,7 +468,7 @@ class _GetVerificationCodeButton extends HookWidget {
                 final cubit = context.read<LandingMobileCubit>();
                 final response =
                     await cubit.client.accountApi.verification(request);
-                cubit.onVerified(mobileNumberStr, response.data);
+                cubit.onVerified(response.data);
 
                 // Need wait 60 seconds to send verification code again.
                 nextDuration.value = 60;

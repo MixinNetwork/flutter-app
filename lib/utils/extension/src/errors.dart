@@ -15,7 +15,7 @@ extension GetErrorStringByCode on BuildContext {
       case recaptchaIsInvalid:
         return l10n.errorRecaptchaIsInvalid(code);
       case oldVersion:
-        return l10n.errorOldVersion(code, '0.0.1');
+        return l10n.errorOldVersion(code, '');
       case phoneInvalidFormat:
         return l10n.errorPhoneInvalidFormat(code);
       case insufficientIdentityNumber:

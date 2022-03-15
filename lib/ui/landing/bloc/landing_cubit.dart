@@ -6,7 +6,6 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -182,44 +181,8 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
   }
 }
 
-enum MobileLoginStatus {
-  initial,
-  error,
-}
 
-class MobileLoginState extends Equatable {
-  const MobileLoginState({
-    this.status = MobileLoginStatus.initial,
-    this.hasVerificationCode = false,
-    this.errorMessage = '',
-  });
-
-  final MobileLoginStatus status;
-
-  final String errorMessage;
-
-  final bool hasVerificationCode;
-
-  MobileLoginState copyWith({
-    MobileLoginStatus? status,
-    String? errorMessage,
-    bool? hasVerificationCode,
-  }) =>
-      MobileLoginState(
-        status: status ?? this.status,
-        errorMessage: errorMessage ?? this.errorMessage,
-        hasVerificationCode: hasVerificationCode ?? this.hasVerificationCode,
-      );
-
-  @override
-  List<Object?> get props => [
-        status,
-        errorMessage,
-        hasVerificationCode,
-      ];
-}
-
-class LandingMobileCubit extends LandingCubit<MobileLoginState> {
+class LandingMobileCubit extends LandingCubit<VerificationResponse?> {
   LandingMobileCubit(
     MultiAuthCubit authCubit,
     Locale locale, {
@@ -228,64 +191,12 @@ class LandingMobileCubit extends LandingCubit<MobileLoginState> {
   }) : super(
           authCubit,
           locale,
-          const MobileLoginState(),
+          null,
           deviceId: deviceId,
           userAgent: userAgent,
         );
 
-  VerificationResponse? verificationResponse;
-
-  void onVerified(String phoneNumber, VerificationResponse response) {
-    verificationResponse = response;
-    emit(state.copyWith(
-      hasVerificationCode: true,
-    ));
-  }
-
-  Future<void> login(String code) async {
-    final id = verificationResponse?.id;
-    if (id == null) {
-      return;
-    }
-    await CryptoKeyValue.instance.init();
-    await AccountKeyValue.instance.init();
-
-    await SignalProtocol.initSignal(null);
-
-    final registrationId = CryptoKeyValue.instance.localRegistrationId;
-    final sessionKey = ed.generateKey();
-    final sessionSecret = base64Encode(sessionKey.publicKey.bytes);
-
-    final packageInfo = await getPackageInfo();
-    final platformVersion = await getPlatformVersion();
-
-    final accountRequest = AccountRequest(
-      code: code,
-      registrationId: registrationId,
-      purpose: VerificationPurpose.session,
-      // FIXME platform name
-      platform: 'Android',
-      platformVersion: platformVersion,
-      appVersion: packageInfo.version,
-      // FIXME package name
-      packageName: 'one.mixin.messenger',
-      sessionSecret: sessionSecret,
-      // TODO pin
-      pin: '',
-    );
-    try {
-      final response = await client.accountApi.create(id, accountRequest);
-      final privateKey = base64Encode(sessionKey.privateKey.bytes);
-      authCubit.signIn(
-        AuthState(account: response.data, privateKey: privateKey),
-      );
-    } catch (error) {
-      e('login account error: $error');
-      emit(state.copyWith(
-        status: MobileLoginStatus.error,
-        errorMessage: e.toString(),
-      ));
-      return;
-    }
+  void onVerified(VerificationResponse? response) {
+    emit(response);
   }
 }
