@@ -181,7 +181,6 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
   }
 }
 
-
 class LandingMobileCubit extends LandingCubit<VerificationResponse?> {
   LandingMobileCubit(
     MultiAuthCubit authCubit,
