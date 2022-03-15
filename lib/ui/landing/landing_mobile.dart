@@ -417,21 +417,11 @@ class _GetVerificationCodeButton extends HookWidget {
       );
       return timer.cancel;
     }, [nextDuration]);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(width: 8),
-        if (nextDuration.value > 0)
-          Text(
-            context.l10n.verificationCodeResend(nextDuration.value),
-            style: TextStyle(
-              fontSize: 14,
-              color: context.theme.secondaryText,
-            ),
-          )
-        else
-          InkWell(
-            onTap: () async {
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: nextDuration.value > 0
+          ? null
+          : () async {
               final mobileNumberStr = controller.text;
               if (mobileNumberStr.isEmpty) {
                 return;
@@ -488,16 +478,29 @@ class _GetVerificationCodeButton extends HookWidget {
                 return;
               }
             },
-            child: Text(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(width: 8),
+          if (nextDuration.value > 0)
+            Text(
+              context.l10n.verificationCodeResend(nextDuration.value),
+              style: TextStyle(
+                fontSize: 14,
+                color: context.theme.secondaryText,
+              ),
+            )
+          else
+            Text(
               context.l10n.getVerificationCode,
               style: TextStyle(
                 fontSize: 14,
                 color: context.theme.accent,
               ),
             ),
-          ),
-        const SizedBox(width: 20),
-      ],
+          const SizedBox(width: 20),
+        ],
+      ),
     );
   }
 }
