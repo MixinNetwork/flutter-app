@@ -37,7 +37,7 @@ Future<void> checkUpdate({
       // ignore this version
       return;
     }
-    if (release.tagName == currentVersion) {
+    if (currentVersionIsLatest(currentVersion, release.tagName!)) {
       // current version is the latest
       return;
     }
@@ -52,6 +52,34 @@ Future<void> checkUpdate({
   } catch (error, stackTrace) {
     e('check update failed: $error, $stackTrace');
   }
+}
+
+@visibleForTesting
+bool currentVersionIsLatest(String currentVersion, String tagName) {
+  assert(currentVersion.isNotEmpty);
+  assert(tagName.isNotEmpty);
+  assert(currentVersion.startsWith('v'));
+  assert(tagName.startsWith('v'));
+
+  final currentVersionNumber = currentVersion.substring(1);
+  final tagNameNumber = tagName.substring(1);
+
+  final currentVersionParts =
+      currentVersionNumber.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+  final tagNameParts =
+      tagNameNumber.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+  for (var i = 0; i < currentVersionParts.length; i++) {
+    if (tagNameParts.length <= i) {
+      return false;
+    }
+    if (currentVersionParts[i] > tagNameParts[i]) {
+      return true;
+    }
+    if (currentVersionParts[i] < tagNameParts[i]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 class _UpdateDialog extends HookWidget {
