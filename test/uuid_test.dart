@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_app/crypto/uuid/uuid.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -9,5 +11,10 @@ void main() {
     final otherResult = generateConversationId(b, a);
     expect(result, 'a59c170e-02e6-3aa6-8ff1-6cb9350fa8fc');
     expect(result, otherResult);
+  });
+
+  test('test generate uuid with same bytes', () {
+    final value = nameUuidFromBytes(utf8.encode('test'));
+    expect(value.toString(), '098f6bcd-4621-3373-8ade-4e832627b4f6');
   });
 }

@@ -16,6 +16,7 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
+import '../utils/system/package_info.dart';
 import '../workers/message_worker_isolate.dart';
 import 'blaze_message.dart';
 import 'blaze_message_param_session.dart';
@@ -89,7 +90,7 @@ class Blaze {
       _token ??= signAuthTokenWithEdDSA(
           userId, sessionId, privateKey, scp, 'GET', '/', '');
       i('ws _token?.isNotEmpty == true: ${_token?.isNotEmpty == true}');
-      _userAgent ??= await _getUserAgent();
+      _userAgent ??= await generateUserAgent(packageInfo);
       i('ws _userAgent: $_userAgent');
       _connect(_token!);
       _checkTimeoutTimer = Timer(const Duration(seconds: 10), () {
@@ -329,34 +330,6 @@ class Blaze {
       i('reconnecting set false, ${StackTrace.current}');
       return reconnect();
     }
-  }
-
-  Future<String> _getUserAgent() async {
-    String? systemAndVersion;
-    if (Platform.isMacOS) {
-      try {
-        final result = await Process.run('sw_vers', []);
-        if (result.stdout != null) {
-          final stdout = result.stdout as String;
-          final map = Map.fromEntries(const LineSplitter()
-              .convert(stdout)
-              .map((e) => e.split(':'))
-              .where((element) => element.length >= 2)
-              .map((e) => MapEntry(e[0].trim(), e[1].trim())));
-          // example
-          // ProductName: macOS
-          // ProductVersion: 12.0.1
-          // BuildVersion: 21A559
-          systemAndVersion =
-              '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
-        }
-      } catch (e) {
-        w('ws mac get user agent error: $e');
-      }
-    }
-    systemAndVersion ??=
-        '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
-    return 'Mixin/${packageInfo.version} (Flutter $systemAndVersion; ${Platform.localeName})';
   }
 
   void dispose() {

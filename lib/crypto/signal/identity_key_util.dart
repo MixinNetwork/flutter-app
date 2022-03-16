@@ -5,13 +5,15 @@ import '../crypto_key_value.dart';
 import 'signal_database.dart';
 import 'signal_vo_extension.dart';
 
-Future<void> generateIdentityKeyPair(
+Future<void> generateSignalDatabaseIdentityKeyPair(
   SignalDatabase db,
-  List<int> privateKey,
+  List<int>? privateKey,
 ) async {
   final registrationId = generateRegistrationId(false);
   CryptoKeyValue.instance.localRegistrationId = registrationId;
-  final identityKeyPair = generateIdentityKeyPairFromPrivate(privateKey);
+  final identityKeyPair = privateKey == null
+      ? generateIdentityKeyPair()
+      : generateIdentityKeyPairFromPrivate(privateKey);
   final identity = IdentitiesCompanion.insert(
       address: '-1',
       registrationId: Value(registrationId),

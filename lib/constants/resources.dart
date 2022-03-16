@@ -4,6 +4,8 @@
 // **************************************************************************
 class Resources {
   const Resources._();
+  static const String assetsCaptchaHtml = 'assets/captcha.html';
+
   static const String assetsIconsMacosAppIconPng =
       'assets/icons/macos_app_icon.png';
 

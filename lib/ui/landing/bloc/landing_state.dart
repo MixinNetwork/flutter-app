@@ -1,4 +1,4 @@
-part of 'landing_cubit.dart';
+import 'package:equatable/equatable.dart';
 
 enum LandingStatus {
   needReload,
