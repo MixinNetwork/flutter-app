@@ -26,7 +26,7 @@ dependencies:
   blurhash_dart: ^1.0.2
   dart_vlc: 0.1.7
   decimal: ^2.1.0
-  desktop_drop: ^0.3.2
+  desktop_drop: ^0.3.3
   desktop_lifecycle: ^0.1.0
   desktop_webview_window: ^0.1.6
   device_info_plus: ^3.1.0
