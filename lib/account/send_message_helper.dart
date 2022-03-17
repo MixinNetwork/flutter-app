@@ -556,25 +556,31 @@ class SendMessageHelper {
           await file.delete();
         }
       }
-      await _database.mixinDatabase.transaction(() async {
-        await _messageDao.recallMessage(messageId);
-        await _messageMentionDao.deleteMessageMentionByMessageId(messageId);
-        final quoteMessage =
-            await _messageDao.findMessageItemById(conversationId, messageId);
-        if (quoteMessage != null) {
-          await _messageDao.updateQuoteContentByQuoteId(
-              conversationId, messageId, quoteMessage.toJson());
-        }
-        await _jobDao.insert(Job(
-            conversationId: conversationId,
-            jobId: const Uuid().v4(),
-            action: kRecallMessage,
-            priority: 5,
-            blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
-            createdAt: DateTime.now(),
-            runCount: 0));
-        await _messageDao.deleteFtsByMessageId(messageId);
-      });
+
+      final quoteMessage =
+          await _messageDao.findMessageItemById(conversationId, messageId);
+
+      final futures = [
+        _messageDao.recallMessage(messageId),
+        _messageDao.deleteFtsByMessageId(messageId),
+        _messageMentionDao.deleteMessageMentionByMessageId(messageId),
+        _jobDao.insert(Job(
+          conversationId: conversationId,
+          jobId: const Uuid().v4(),
+          action: kRecallMessage,
+          priority: 5,
+          blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
+          createdAt: DateTime.now(),
+          runCount: 0,
+        )),
+      ];
+
+      if (quoteMessage != null) {
+        futures.add(_messageDao.updateQuoteContentByQuoteId(
+            conversationId, messageId, quoteMessage.toJson()));
+      }
+
+      await Future.wait(futures);
     });
   }
 
