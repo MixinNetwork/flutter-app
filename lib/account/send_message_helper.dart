@@ -557,9 +557,6 @@ class SendMessageHelper {
         }
       }
 
-      final quoteMessage =
-          await _messageDao.findMessageItemById(conversationId, messageId);
-
       final futures = [
         _messageDao.recallMessage(messageId),
         _messageDao.deleteFtsByMessageId(messageId),
@@ -574,6 +571,9 @@ class SendMessageHelper {
           runCount: 0,
         )),
       ];
+
+      final quoteMessage =
+          await _messageDao.findMessageItemById(conversationId, messageId);
 
       if (quoteMessage != null) {
         futures.add(_messageDao.updateQuoteContentByQuoteId(
