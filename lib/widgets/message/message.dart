@@ -325,8 +325,9 @@ class MessageItemWidget extends HookWidget {
                           content = message.content;
                         }
                         await context.accountServer.sendRecallMessage(
-                            [message.messageId],
-                            conversationId: message.conversationId);
+                          [message.messageId],
+                          conversationId: message.conversationId,
+                        );
                         if (content != null) {
                           context
                               .read<RecallMessageReeditCubit>()
