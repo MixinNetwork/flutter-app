@@ -56,7 +56,7 @@ class SystemTrayWidget extends HookWidget {
           ),
         ],
       );
-    }, [show, exit]);
+    }, [show, exitStr]);
 
     return child;
   }
@@ -112,6 +112,9 @@ Future<void> _initSystemTray() async {
         } else {
           appWindow.show();
         }
+        break;
+      case 'rightMouseUp':
+        _systemTray.popUpContextMenu();
         break;
       default:
         break;
