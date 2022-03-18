@@ -2680,46 +2680,6 @@ class Localization {
     );
   }
 
-  /// `Enter your mobile number`
-  String get loginMobileInputHint {
-    return Intl.message(
-      'Enter your mobile number',
-      name: 'loginMobileInputHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Code`
-  String get verificationCode {
-    return Intl.message(
-      'Code',
-      name: 'verificationCode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter the code`
-  String get verificationCodeHint {
-    return Intl.message(
-      'Enter the code',
-      name: 'verificationCodeHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Get Code`
-  String get getVerificationCode {
-    return Intl.message(
-      'Get Code',
-      name: 'getVerificationCode',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Login`
   String get login {
     return Intl.message(
@@ -2727,16 +2687,6 @@ class Localization {
       name: 'login',
       desc: '',
       args: [],
-    );
-  }
-
-  /// `Resend code ({second})`
-  String verificationCodeResend(Object second) {
-    return Intl.message(
-      'Resend code ($second)',
-      name: 'verificationCodeResend',
-      desc: '',
-      args: [second],
     );
   }
 
@@ -3327,6 +3277,46 @@ class Localization {
       name: 'errorTranscriptForward',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Enter your phone number`
+  String get enterYourPhoneNumber {
+    return Intl.message(
+      'Enter your phone number',
+      name: 'enterYourPhoneNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the 4-digit code sent to you at {phone}`
+  String enterVerificationCode(Object phone) {
+    return Intl.message(
+      'Enter the 4-digit code sent to you at $phone',
+      name: 'enterVerificationCode',
+      desc: '',
+      args: [phone],
+    );
+  }
+
+  /// `Resend code`
+  String get resendCode {
+    return Intl.message(
+      'Resend code',
+      name: 'resendCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resend code in {time}s`
+  String resendCodeIn(Object time) {
+    return Intl.message(
+      'Resend code in ${time}s',
+      name: 'resendCodeIn',
+      desc: '',
+      args: [time],
     );
   }
 }

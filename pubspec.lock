@@ -1072,6 +1072,13 @@ packages:
       url: "https://github.com/fireslime/photo_view.git"
     source: git
     version: "0.11.1"
+  pin_code_fields:
+    dependency: "direct main"
+    description:
+      name: pin_code_fields
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "7.3.0"
   platform:
     dependency: transitive
     description:

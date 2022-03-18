@@ -17,6 +17,7 @@ import 'package:intl_phone_number_input/src/models/country_model.dart';
 import 'package:intl_phone_number_input/src/providers/country_provider.dart';
 import 'package:intl_phone_number_input/src/utils/phone_number/phone_number_util.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -30,8 +31,10 @@ import '../../utils/hook.dart';
 import '../../utils/logger.dart';
 import '../../utils/platform.dart';
 import '../../utils/system/package_info.dart';
+import '../../widgets/action_button.dart';
 import '../../widgets/az_selection.dart';
 import '../../widgets/dialog.dart';
+import '../../widgets/interactive_decorated_box.dart';
 import '../../widgets/toast.dart';
 import '../home/bloc/multi_auth_cubit.dart';
 import 'bloc/landing_cubit.dart';
@@ -58,37 +61,40 @@ class LoginWithMobileWidget extends HookWidget {
     return BlocProvider<LandingMobileCubit>(
       create: (_) => LandingMobileCubit(context.multiAuthCubit, locale,
           userAgent: userAgent, deviceId: deviceId),
-      child: HookBuilder(builder: (context) {
-        final counties =
-            useMemoizedFuture(() => compute(_getCountries, null), null).data;
-        if (counties == null || counties.isEmpty) {
-          return Center(
-            child: CircularProgressIndicator(
-              color: context.theme.accent,
-            ),
-          );
-        }
-        return _LoginWithMobileWidget(countries: counties);
-      }),
+      child: Navigator(
+        onPopPage: (_, __) => true,
+        pages: [
+          MaterialPage(
+            child: HookBuilder(builder: (context) {
+              final counties =
+                  useMemoizedFuture(() => compute(_getCountries, null), null)
+                      .data;
+              if (counties == null || counties.isEmpty) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: context.theme.accent,
+                  ),
+                );
+              }
+              return _PhoneNumberInputScene(countries: counties);
+            }),
+          ),
+        ],
+      ),
     );
   }
 }
 
-const _kDefaultVerificationCodeLength = 4;
-
-class _LoginWithMobileWidget extends HookWidget {
-  _LoginWithMobileWidget({
+class _PhoneNumberInputScene extends HookWidget {
+  const _PhoneNumberInputScene({
     Key? key,
     required this.countries,
-  })  : assert(countries.isNotEmpty),
-        super(key: key);
-
+  }) : super(key: key);
   final List<Country> countries;
 
   @override
   Widget build(BuildContext context) {
     final phoneInputController = useTextEditingController();
-    final codeInputController = useTextEditingController();
     final countryMap = useMemoized(
         () => Map.fromEntries(countries.map((e) => MapEntry(e.alpha2Code, e))),
         [countries]);
@@ -102,127 +108,71 @@ class _LoginWithMobileWidget extends HookWidget {
     final selectedCountry = useState<Country>(defaultCountry);
     final portalVisibility = useState<bool>(false);
 
-    Future<void> performLogin() async {
-      final code = codeInputController.text;
-      if (code.isEmpty) {
-        return;
-      }
-
-      final id = context.read<LandingMobileCubit>().state?.id;
-      if (id == null) {
-        await showToastFailed(
-          context,
-          ToastError(context.l10n
-              .errorPhoneVerificationCodeInvalid(phoneVerificationCodeInvalid)),
-        );
-        return;
-      }
-
-      await CryptoKeyValue.instance.init();
-      await AccountKeyValue.instance.init();
-
-      await SignalProtocol.initSignal(null);
-
-      final registrationId = CryptoKeyValue.instance.localRegistrationId;
-      final sessionKey = ed.generateKey();
-      final sessionSecret = base64Encode(sessionKey.publicKey.bytes);
-
-      final packageInfo = await getPackageInfo();
-      final platformVersion = await getPlatformVersion();
-
-      final accountRequest = AccountRequest(
-        code: code,
-        registrationId: registrationId,
-        purpose: VerificationPurpose.session,
-        platform: 'Android',
-        platformVersion: platformVersion,
-        appVersion: packageInfo.version,
-        packageName: 'one.mixin.messenger',
-        sessionSecret: sessionSecret,
-        pin: '',
-      );
-      try {
-        final client = context.read<LandingMobileCubit>().client;
-        final response = await client.accountApi.create(id, accountRequest);
-        final privateKey = base64Encode(sessionKey.privateKey.bytes);
-        context.multiAuthCubit.signIn(
-          AuthState(account: response.data, privateKey: privateKey),
-        );
-      } catch (error) {
-        e('login account error: $error');
-        if (error is MixinApiError) {
-          final mixinError = error.error as MixinError;
-          await showToastFailed(context, mixinError.toDisplayString(context));
-        }
-        return;
-      }
-    }
-
-    final isLoginButtonEnable = useState(false);
-    useEffect(
-      () {
-        Future<void> onChange() async {
-          isLoginButtonEnable.value = false;
-          try {
-            final valid = await PhoneNumberUtil.isValidNumber(
-                phoneNumber: phoneInputController.text,
-                isoCode: selectedCountry.value.alpha2Code ?? '');
-            if (valid != true) {
-              return;
-            }
-          } catch (error) {
-            e('Phone number validation error: $error');
+    final nextButtonEnable = useState<bool>(false);
+    useEffect(() {
+      Future<void> onChange() async {
+        nextButtonEnable.value = false;
+        try {
+          final valid = await PhoneNumberUtil.isValidNumber(
+              phoneNumber: phoneInputController.text,
+              isoCode: selectedCountry.value.alpha2Code ?? '');
+          if (valid != true) {
             return;
           }
-          if (codeInputController.text.length !=
-              _kDefaultVerificationCodeLength) {
-            return;
-          }
-          isLoginButtonEnable.value = true;
+        } catch (error) {
+          e('Phone number validation error: $error');
+          return;
         }
+        nextButtonEnable.value = true;
+      }
 
-        phoneInputController.addListener(onChange);
-        codeInputController.addListener(onChange);
-        return () {
-          phoneInputController.removeListener(onChange);
-          codeInputController.removeListener(onChange);
-        };
-      },
-      [phoneInputController, codeInputController, selectedCountry.value],
-    );
+      phoneInputController.addListener(onChange);
+      return () {
+        phoneInputController.removeListener(onChange);
+      };
+    }, [phoneInputController, selectedCountry.value]);
 
-    return Column(
-      children: [
-        const SizedBox(height: 70),
-        PortalEntry(
-          visible: portalVisibility.value,
-          portal: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Material(
-              color: context.theme.chatBackground,
-              elevation: 2,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 80),
+      child: Column(
+        children: [
+          const SizedBox(height: 56),
+          Text(
+            context.l10n.enterYourPhoneNumber,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: context.theme.text,
+            ),
+          ),
+          const SizedBox(height: 24),
+          PortalEntry(
+            visible: portalVisibility.value,
+            portal: ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: SizedBox(
-                width: 360,
-                height: 400,
-                child: SizedBox.fromSize(
-                  size: const Size(360, 400),
-                  child: _CountryPickPortal(
-                    countries: countries,
-                    selected: selectedCountry.value,
-                    onSelected: (country) {
-                      selectedCountry.value = country;
-                      portalVisibility.value = false;
-                    },
+              child: Material(
+                color: context.theme.chatBackground,
+                elevation: 2,
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(
+                  width: 360,
+                  height: 400,
+                  child: SizedBox.fromSize(
+                    size: const Size(360, 400),
+                    child: _CountryPickPortal(
+                      countries: countries,
+                      selected: selectedCountry.value,
+                      onSelected: (country) {
+                        selectedCountry.value = country;
+                        portalVisibility.value = false;
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          portalAnchor: Alignment.topCenter,
-          childAnchor: Alignment.bottomCenter,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 80),
+            portalAnchor: Alignment.topCenter,
+            childAnchor: Alignment.bottomCenter,
             child: _MobileInput(
               controller: phoneInputController,
               country: selectedCountry.value,
@@ -232,89 +182,297 @@ class _LoginWithMobileWidget extends HookWidget {
               },
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 80),
-          child: _CodeInput(
-            controller: codeInputController,
-            onSubmitted: performLogin,
+          const Spacer(),
+          MixinButton(
+            disable: !nextButtonEnable.value,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 60,
+              vertical: 14,
+            ),
+            onTap: () async {
+              final dialCode = selectedCountry.value.dialCode;
+              assert(dialCode != null,
+                  'dialCode is null. ${selectedCountry.value}');
+              if (dialCode == null) {
+                e('Invalid dial code: ${selectedCountry.value}');
+                return;
+              }
+              final mobileNumberStr = phoneInputController.text;
+              if (mobileNumberStr.isEmpty) {
+                return;
+              }
+              showToastLoading(context);
+              try {
+                final phoneNumber = dialCode + mobileNumberStr;
+                final response = await _requestVerificationCode(
+                  phone: phoneNumber,
+                  context: context,
+                );
+                Toast.dismiss();
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => _CodeInputScene(
+                      phoneNumber: phoneNumber,
+                      initialVerificationResponse: response,
+                    ),
+                  ),
+                );
+              } on MixinApiError catch (error) {
+                e('Error requesting verification code: $error');
+                final mixinError = error.error as MixinError;
+                await showToastFailed(
+                  context,
+                  ToastError(mixinError.toDisplayString(context)),
+                );
+                return;
+              } catch (error) {
+                e('Error requesting verification code: $error');
+                await showToastFailed(context, null);
+                return;
+              }
+            },
+            child: Text(
+              context.l10n.next,
+              style: const TextStyle(fontWeight: FontWeight.normal),
+            ),
           ),
-        ),
-        const SizedBox(height: 48),
-        MixinButton(
-          disable: !isLoginButtonEnable.value,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 60,
-            vertical: 14,
-          ),
-          onTap: performLogin,
-          child: Text(
-            context.l10n.login,
-            style: const TextStyle(fontWeight: FontWeight.normal),
-          ),
-        ),
-        const Spacer(),
-        const LandingModeSwitchButton(),
-        const SizedBox(height: 20),
-      ],
+          const SizedBox(height: 20),
+          const LandingModeSwitchButton(),
+          const SizedBox(height: 30),
+        ],
+      ),
     );
   }
 }
 
-class _CodeInput extends StatelessWidget {
-  const _CodeInput({
+class _CodeInputScene extends HookWidget {
+  const _CodeInputScene({
     Key? key,
-    required this.controller,
-    required this.onSubmitted,
+    required this.phoneNumber,
+    required this.initialVerificationResponse,
   }) : super(key: key);
 
-  final TextEditingController controller;
-  final VoidCallback onSubmitted;
+  final String phoneNumber;
+  final VerificationResponse initialVerificationResponse;
 
   @override
-  Widget build(BuildContext context) => TextField(
-        controller: controller,
-        style: TextStyle(
-          fontSize: 16,
-          color: context.theme.text,
-        ),
-        keyboardType: TextInputType.number,
-        autofillHints: const [AutofillHints.oneTimeCode],
-        textInputAction: TextInputAction.done,
-        onSubmitted: (_) => onSubmitted(),
-        decoration: InputDecoration(
-          fillColor: context.theme.sidebarSelected,
-          filled: true,
-          hintText: context.l10n.verificationCodeHint,
-          hintStyle: TextStyle(
-            fontSize: 16,
-            color: context.theme.secondaryText,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide.none,
-          ),
-          prefixIcon: SizedBox(
-            width: 108,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20),
-                child: Text(
-                  context.l10n.verificationCode,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: context.theme.text,
-                  ),
+  Widget build(BuildContext context) {
+    final codeInputController = useTextEditingController();
+
+    final verification =
+        useRef<VerificationResponse>(initialVerificationResponse);
+
+    Future<void> performLogin(String code) async {
+      d('Code input complete: $code');
+      assert(code.length == 4, 'Invalid code length: $code');
+      showToastLoading(context);
+      try {
+        await CryptoKeyValue.instance.init();
+        await AccountKeyValue.instance.init();
+
+        await SignalProtocol.initSignal(null);
+
+        final registrationId = CryptoKeyValue.instance.localRegistrationId;
+        final sessionKey = ed.generateKey();
+        final sessionSecret = base64Encode(sessionKey.publicKey.bytes);
+
+        final packageInfo = await getPackageInfo();
+        final platformVersion = await getPlatformVersion();
+
+        final accountRequest = AccountRequest(
+          code: code,
+          registrationId: registrationId,
+          purpose: VerificationPurpose.session,
+          platform: 'Android',
+          platformVersion: platformVersion,
+          appVersion: packageInfo.version,
+          packageName: 'one.mixin.messenger',
+          sessionSecret: sessionSecret,
+          pin: '',
+        );
+        final client = context.read<LandingMobileCubit>().client;
+        final response = await client.accountApi.create(
+          verification.value.id,
+          accountRequest,
+        );
+        final privateKey = base64Encode(sessionKey.privateKey.bytes);
+        context.multiAuthCubit.signIn(
+          AuthState(account: response.data, privateKey: privateKey),
+        );
+        Toast.dismiss();
+      } catch (error) {
+        e('login account error: $error');
+        if (error is MixinApiError) {
+          final mixinError = error.error as MixinError;
+          await showToastFailed(
+            context,
+            ToastError(mixinError.toDisplayString(context)),
+          );
+        } else {
+          await showToastFailed(context, null);
+        }
+        return;
+      }
+    }
+
+    useListenable(codeInputController);
+    return Material(
+      color: context.theme.popUp,
+      child: Column(
+        children: [
+          SizedBox(
+            height: 56,
+            child: Row(
+              children: [
+                const SizedBox(width: 12),
+                ActionButton(
+                  name: Resources.assetsImagesIcBackSvg,
+                  color: context.theme.icon,
+                  onTap: () => Navigator.maybePop(context),
                 ),
+                const Spacer(),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 125),
+            child: Text(
+              context.l10n.enterVerificationCode(phoneNumber),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: context.theme.text,
               ),
             ),
           ),
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 20),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: 135,
+            child: PinCodeTextField(
+              autoFocus: true,
+              length: 4,
+              autoDisposeControllers: false,
+              controller: codeInputController,
+              appContext: context,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              keyboardType: TextInputType.number,
+              onCompleted: performLogin,
+              useHapticFeedback: true,
+              pinTheme: PinTheme(
+                activeColor: context.theme.accent,
+                inactiveColor: context.theme.secondaryText,
+                fieldWidth: 15,
+                borderWidth: 2,
+              ),
+              textStyle: TextStyle(
+                fontSize: 18,
+                color: context.theme.text,
+              ),
+              onChanged: (String value) {},
+            ),
+          ),
+          const SizedBox(height: 0),
+          _ResendCodeWidget(
+            onResend: () async {
+              showToastLoading(context);
+              try {
+                final response = await _requestVerificationCode(
+                  phone: phoneNumber,
+                  context: context,
+                );
+                Toast.dismiss();
+                verification.value = response;
+                return true;
+              } on MixinApiError catch (error) {
+                e('Error requesting verification code: $error');
+                final mixinError = error.error as MixinError;
+                await showToastFailed(
+                  context,
+                  ToastError(mixinError.toDisplayString(context)),
+                );
+                return false;
+              } catch (error) {
+                e('Error requesting verification code: $error');
+                await showToastFailed(context, null);
+                return false;
+              }
+            },
+          ),
+          const Spacer(),
+          MixinButton(
+            disable: codeInputController.text.length < 4,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 60,
+              vertical: 14,
+            ),
+            onTap: () => performLogin(codeInputController.text),
+            child: Text(context.l10n.login),
+          ),
+          const SizedBox(height: 90),
+        ],
+      ),
+    );
+  }
+}
+
+class _ResendCodeWidget extends HookWidget {
+  const _ResendCodeWidget({
+    Key? key,
+    required this.onResend,
+  }) : super(key: key);
+
+  final Future<bool> Function() onResend;
+
+  @override
+  Widget build(BuildContext context) {
+    final nextDuration = useState(60);
+    useEffect(() {
+      final timer = Timer.periodic(
+        const Duration(seconds: 1),
+        (timer) {
+          if (nextDuration.value > 0) {
+            nextDuration.value = math.max(0, nextDuration.value - 1);
+          }
+        },
+      );
+      return timer.cancel;
+    }, [nextDuration]);
+
+    if (nextDuration.value > 0) {
+      return Padding(
+        padding: const EdgeInsets.all(8),
+        child: Text(
+          context.l10n.resendCodeIn(nextDuration.value),
+          style: TextStyle(
+            fontSize: 14,
+            color: context.theme.secondaryText,
+          ),
         ),
       );
+    } else {
+      return InteractiveDecoratedBox(
+        onTap: () async {
+          if (await onResend()) {
+            nextDuration.value = 60;
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Text(
+            context.l10n.resendCode,
+            style: TextStyle(
+              fontSize: 14,
+              color: context.theme.accent,
+            ),
+          ),
+        ),
+      );
+    }
+  }
 }
 
 class _MobileInput extends HookWidget {
@@ -349,7 +507,6 @@ class _MobileInput extends HookWidget {
         decoration: InputDecoration(
           fillColor: context.theme.sidebarSelected,
           filled: true,
-          hintText: context.l10n.loginMobileInputHint,
           hintStyle: TextStyle(
             fontSize: 16,
             color: context.theme.secondaryText,
@@ -387,148 +544,52 @@ class _MobileInput extends HookWidget {
               ],
             ),
           ),
-          suffixIcon: _GetVerificationCodeButton(
-              controller: controller, country: country),
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(vertical: 20),
         ),
       );
 }
 
-class _GetVerificationCodeButton extends HookWidget {
-  const _GetVerificationCodeButton({
-    Key? key,
-    required this.controller,
-    required this.country,
-  }) : super(key: key);
-
-  final TextEditingController controller;
-  final Country country;
-
-  @override
-  Widget build(BuildContext context) {
-    final nextDuration = useState(0);
-    useEffect(() {
-      final timer = Timer.periodic(
-        const Duration(seconds: 1),
-        (timer) {
-          if (nextDuration.value > 0) {
-            nextDuration.value = math.max(0, nextDuration.value - 1);
-          }
-        },
+Future<VerificationResponse> _requestVerificationCode({
+  required String phone,
+  required BuildContext context,
+  Tuple2<_CaptchaType, String>? captcha,
+}) async {
+  final request = VerificationRequest(
+    phone: phone,
+    purpose: VerificationPurpose.session,
+    packageName: 'one.mixin.messenger',
+    gRecaptchaResponse:
+        captcha?.item1 == _CaptchaType.gCaptcha ? captcha?.item2 : null,
+    hCaptchaResponse:
+        captcha?.item1 == _CaptchaType.hCaptcha ? captcha?.item2 : null,
+  );
+  try {
+    final cubit = context.read<LandingMobileCubit>();
+    final response = await cubit.client.accountApi.verification(request);
+    return response.data;
+  } on MixinApiError catch (error) {
+    final mixinError = error.error as MixinError;
+    if (mixinError.code == needCaptcha) {
+      final result = await showMixinDialog<List<dynamic>>(
+        context: context,
+        child: const _CaptchaWebViewDialog(),
       );
-      return timer.cancel;
-    }, [nextDuration]);
-
-    Future<void> requestVerificationCode(
-      String phone, {
-      Tuple2<_CaptchaType, String>? captcha,
-    }) async {
-      final request = VerificationRequest(
-        phone: phone,
-        purpose: VerificationPurpose.session,
-        packageName: 'one.mixin.messenger',
-        gRecaptchaResponse:
-            captcha?.item1 == _CaptchaType.gCaptcha ? captcha?.item2 : null,
-        hCaptchaResponse:
-            captcha?.item1 == _CaptchaType.hCaptcha ? captcha?.item2 : null,
-      );
-      try {
-        final cubit = context.read<LandingMobileCubit>();
-        final response = await cubit.client.accountApi.verification(request);
-        cubit.onVerified(response.data);
-
-        // Need wait 60 seconds to send verification code again.
-        nextDuration.value = 60;
-      } on MixinApiError catch (error) {
-        e('Verification api error: $error');
-        final mixinError = error.error as MixinError;
-        if (mixinError.code == needCaptcha) {
-          final result = await showMixinDialog<List<dynamic>>(
-            context: context,
-            child: const _CaptchaWebViewDialog(),
-          );
-          if (result != null) {
-            assert(result.length == 2, 'Invalid result length');
-            final type = result[0] as _CaptchaType;
-            final token = result[1] as String;
-            d('Captcha type: $type, token: $token');
-            unawaited(requestVerificationCode(
-              phone,
-              captcha: Tuple2(type, token),
-            ));
-          }
-          return;
-        } else {
-          await showToastFailed(
-            context,
-            mixinError.toDisplayString(context),
-          );
-        }
-      } catch (error) {
-        e('Verification error: $error');
-        return;
+      if (result != null) {
+        assert(result.length == 2, 'Invalid result length');
+        final type = result[0] as _CaptchaType;
+        final token = result[1] as String;
+        d('Captcha type: $type, token: $token');
+        return _requestVerificationCode(
+          phone: phone,
+          context: context,
+          captcha: Tuple2(type, token),
+        );
       }
     }
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: nextDuration.value > 0
-          ? null
-          : () async {
-              final mobileNumberStr = controller.text;
-              if (mobileNumberStr.isEmpty) {
-                return;
-              }
-              try {
-                final valid = await PhoneNumberUtil.isValidNumber(
-                    phoneNumber: mobileNumberStr,
-                    isoCode: country.alpha2Code ?? '');
-                if (valid != true) {
-                  await showToastFailed(
-                    context,
-                    ToastError(
-                      context.l10n.errorPhoneInvalidFormat(phoneInvalidFormat),
-                    ),
-                  );
-                  return;
-                }
-              } catch (error) {
-                e('Phone number validation error: $error');
-                return;
-              }
-              final dialCode = country.dialCode;
-              assert(dialCode != null, 'dialCode is null. $country');
-              if (dialCode == null) {
-                e('Invalid dial code: $country');
-                return;
-              }
-              await requestVerificationCode(dialCode + mobileNumberStr);
-            },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(width: 8),
-          if (nextDuration.value > 0)
-            Text(
-              context.l10n.verificationCodeResend(nextDuration.value),
-              style: TextStyle(
-                fontSize: 14,
-                color: context.theme.secondaryText,
-              ),
-            )
-          else
-            Text(
-              context.l10n.getVerificationCode,
-              style: TextStyle(
-                fontSize: 14,
-                color: context.theme.accent,
-              ),
-            ),
-          const SizedBox(width: 20),
-        ],
-      ),
-    );
+    rethrow;
+  } catch (error) {
+    rethrow;
   }
 }
 

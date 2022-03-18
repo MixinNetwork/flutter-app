@@ -181,7 +181,7 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
   }
 }
 
-class LandingMobileCubit extends LandingCubit<VerificationResponse?> {
+class LandingMobileCubit extends LandingCubit<void> {
   LandingMobileCubit(
     MultiAuthCubit authCubit,
     Locale locale, {
@@ -194,8 +194,4 @@ class LandingMobileCubit extends LandingCubit<VerificationResponse?> {
           deviceId: deviceId,
           userAgent: userAgent,
         );
-
-  void onVerified(VerificationResponse? response) {
-    emit(response);
-  }
 }
