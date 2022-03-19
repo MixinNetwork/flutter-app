@@ -150,7 +150,7 @@ class _ParticipantTile extends StatelessWidget {
             size: 50,
             avatarUrl: participant.avatarUrl,
             userId: participant.userId,
-            name: participant.fullName ?? '?',
+            name: participant.fullName,
           ),
           title: Row(
             children: [

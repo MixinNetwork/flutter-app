@@ -62,7 +62,7 @@ class EditProfilePage extends HookWidget {
                 final account = context.multiAuthState.currentUser!;
                 return AvatarWidget(
                   userId: account.userId,
-                  name: account.fullName!,
+                  name: account.fullName,
                   avatarUrl: account.avatarUrl,
                   size: 100,
                 );

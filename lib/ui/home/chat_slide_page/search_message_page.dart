@@ -141,9 +141,9 @@ class SearchMessagePage extends HookWidget {
                                     padding: const EdgeInsets.only(right: 8),
                                     child: AvatarWidget(
                                       size: 20,
-                                      name: selectedUser.value!.fullName ?? '',
-                                      avatarUrl: selectedUser.value!.avatarUrl,
-                                      userId: selectedUser.value!.userId,
+                                      name: selectedUser.value?.fullName,
+                                      avatarUrl: selectedUser.value?.avatarUrl,
+                                      userId: selectedUser.value?.userId,
                                     ),
                                   ),
                               ],
@@ -434,7 +434,7 @@ class _SearchParticipantList extends HookWidget {
               children: [
                 AvatarWidget(
                   userId: user.userId,
-                  name: user.fullName ?? '',
+                  name: user.fullName,
                   avatarUrl: user.avatarUrl,
                   size: 38,
                 ),
