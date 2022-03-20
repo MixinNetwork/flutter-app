@@ -141,12 +141,12 @@ class _CurrentUser extends StatelessWidget {
                 assert(account != null);
                 return SelectItem(
                   icon: AvatarWidget(
-                    avatarUrl: account!.avatarUrl,
+                    avatarUrl: account?.avatarUrl,
                     size: 24,
-                    name: account.fullName!,
-                    userId: account.userId,
+                    name: account?.fullName,
+                    userId: account?.userId,
                   ),
-                  title: account.fullName!,
+                  title: account?.fullName ?? '',
                   selected: selected,
                   onTap: () {
                     BlocProvider.of<SlideCategoryCubit>(context)

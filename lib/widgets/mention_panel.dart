@@ -190,7 +190,7 @@ class _MentionItem extends StatelessWidget {
             children: [
               AvatarWidget(
                 userId: user.userId,
-                name: user.fullName!,
+                name: user.fullName,
                 avatarUrl: user.avatarUrl,
                 size: 32,
               ),

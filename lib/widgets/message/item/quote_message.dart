@@ -269,8 +269,8 @@ class QuoteMessage extends HookWidget {
           image: Padding(
             padding: const EdgeInsets.all(6),
             child: AvatarWidget(
-              name: quote.sharedUserFullName as String,
-              userId: quote.sharedUserId as String,
+              name: quote.sharedUserFullName as String?,
+              userId: quote.sharedUserId as String?,
               size: 48,
               avatarUrl: quote.sharedUserAvatarUrl as String?,
             ),

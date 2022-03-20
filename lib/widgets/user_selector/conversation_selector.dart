@@ -72,7 +72,7 @@ extension _AvatarUser on User {
   Widget get avatarWidget => AvatarWidget(
         size: 50,
         avatarUrl: avatarUrl,
-        name: fullName ?? '?',
+        name: fullName,
         userId: userId,
       );
 }

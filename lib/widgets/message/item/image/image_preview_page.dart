@@ -327,7 +327,7 @@ class _Bar extends StatelessWidget {
   Widget build(BuildContext context) => Row(
         children: [
           AvatarWidget(
-            name: message.userFullName!,
+            name: message.userFullName,
             size: 36,
             avatarUrl: message.avatarUrl,
             userId: message.userId,
