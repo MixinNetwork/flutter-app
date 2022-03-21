@@ -70,7 +70,9 @@ Future<void> main(List<String> args) async {
   ansiColorDisabled = Platform.isIOS;
   DartVLC.initialize();
 
-  await protocolHandler.register('mixin');
+  if (Platform.isWindows || Platform.isMacOS) {
+    await protocolHandler.register('mixin');
+  }
 
   HydratedBlocOverrides.runZoned(
     () => runZonedGuarded(
