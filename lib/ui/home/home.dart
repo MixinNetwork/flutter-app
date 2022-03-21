@@ -5,6 +5,7 @@ import '../../blaze/blaze.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/uri_utils.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
@@ -37,6 +38,8 @@ class HomePage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    useProtocol((String url) => openUri(context, url));
+
     final localTimeError = useMemoizedStream(
             () => context.accountServer.connectedStateStream
                 .map((event) => event == ConnectedState.hasLocalTimeError)
