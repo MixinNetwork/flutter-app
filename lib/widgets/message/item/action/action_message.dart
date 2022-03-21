@@ -75,6 +75,7 @@ class ActionMessage extends HookWidget {
                           fontSize: MessageItemWidget.primaryFontSize,
                           // ignore: avoid_dynamic_calls
                           color: colorHex(e.color) ?? Colors.black,
+                          height: 1,
                         ),
                       ),
                     ),
