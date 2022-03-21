@@ -145,14 +145,17 @@ class _QrCode extends HookWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Text(
-          context.l10n.pageLandingLoginMessage,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            color: context.dynamicColor(
-              const Color.fromRGBO(187, 190, 195, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            context.l10n.pageLandingLoginMessage,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: context.dynamicColor(
+                const Color.fromRGBO(187, 190, 195, 1),
+                darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+              ),
             ),
           ),
         ),

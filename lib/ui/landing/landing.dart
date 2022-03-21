@@ -71,7 +71,10 @@ class _LandingScaffold extends HookWidget {
                   color: context.theme.popUp,
                   borderRadius: BorderRadius.circular(13),
                   elevation: 10,
-                  child: child,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(13),
+                    child: child,
+                  ),
                 ),
               ),
             ),

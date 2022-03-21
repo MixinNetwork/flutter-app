@@ -262,12 +262,7 @@
   "showAvatar": "Show avatar",
   "loginWithMobile": "Login with mobile number",
   "loginWithQRCode": "Login with QR code",
-  "loginMobileInputHint": "Enter your mobile number",
-  "verificationCode": "Code",
-  "verificationCodeHint": "Enter the code",
-  "getVerificationCode": "Get Code",
   "login": "Login",
-  "verificationCodeResend": "Resend code ({second})",
   "canNotRecognize": "Can not recognize the QR code",
   "errorNoConnection": "No connection",
   "errorConnectionTimeout": "Connection timeout",
@@ -326,5 +321,9 @@
   "errorFavoriteLimit": "ERROR {code}: The number has reached the limit.",
   "errorRetryUpload": "Retry upload failed.",
   "errorNotSupportedAudioFormat": "Not supported audio format, please open by other app.",
-  "errorTranscriptForward": "Please forward all attachments after they have been downloaded"
+  "errorTranscriptForward": "Please forward all attachments after they have been downloaded",
+  "enterYourPhoneNumber": "Enter your phone number",
+  "enterVerificationCode": "Enter the 4-digit code sent to you at {phone}",
+  "resendCode": "Resend code",
+  "resendCodeIn": "Resend code in {time}s"
 }
