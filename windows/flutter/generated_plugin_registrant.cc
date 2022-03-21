@@ -14,6 +14,7 @@
 #include <file_selector_windows/file_selector_windows.h>
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
 #include <pasteboard/pasteboard_plugin.h>
+#include <protocol_handler/protocol_handler_plugin.h>
 #include <quick_breakpad/quick_breakpad_plugin.h>
 #include <system_clock/system_clock_plugin.h>
 #include <system_tray/system_tray_plugin.h>
@@ -38,6 +39,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FlutterAppIconBadgePlugin"));
   PasteboardPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("PasteboardPlugin"));
+  ProtocolHandlerPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("ProtocolHandlerPlugin"));
   QuickBreakpadPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("QuickBreakpadPlugin"));
   SystemClockPluginRegisterWithRegistrar(

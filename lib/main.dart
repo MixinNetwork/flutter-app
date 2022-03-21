@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
 import 'package:path/path.dart' as p;
+import 'package:protocol_handler/protocol_handler.dart';
 import 'package:quick_breakpad/quick_breakpad.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
@@ -68,6 +69,11 @@ Future<void> main(List<String> args) async {
 
   ansiColorDisabled = Platform.isIOS;
   DartVLC.initialize();
+
+  if (Platform.isWindows || Platform.isMacOS) {
+    await protocolHandler.register('mixin');
+  }
+
   HydratedBlocOverrides.runZoned(
     () => runZonedGuarded(
       () => runApp(const App()),
