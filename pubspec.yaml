@@ -70,7 +70,7 @@ dependencies:
   mime: ^1.0.0
   mixin_bot_sdk_dart: ^0.2.13
   octo_image: ^1.0.0+1
-  ogg_opus_player: ^0.1.0
+  ogg_opus_player: ^0.2.0
   open_file: ^3.2.1
   package_info_plus: ^1.0.6
   pasteboard:
@@ -85,6 +85,7 @@ dependencies:
       url: https://github.com/fireslime/photo_view.git
       ref: 52685ab7beaf8a9107904bdb8a1590924015d016
   pin_code_fields: ^7.3.0
+  protocol_handler: ^0.1.1
   provider: ^6.0.1
   qr_flutter: ^4.0.0
   quick_breakpad: ^0.3.0

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:protocol_handler/protocol_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
@@ -204,3 +207,23 @@ BuildContext? useSecondNavigatorContext(BuildContext context) =>
 
       return findSecondContext(context);
     }, []);
+
+class _ProtocolListener with ProtocolListener {
+  _ProtocolListener(this.callback);
+
+  final ValueChanged<String> callback;
+
+  @override
+  void onProtocolUrlReceived(String url) => callback(url);
+}
+
+void useProtocol(ValueChanged<String> callback) {
+  useEffect(() {
+    final listener = _ProtocolListener(callback);
+    protocolHandler.addListener(listener);
+
+    return () {
+      protocolHandler.removeListener(listener);
+    };
+  }, [callback]);
+}

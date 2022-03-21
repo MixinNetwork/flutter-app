@@ -69,7 +69,7 @@ class ConversationAvatarWidget extends HookWidget {
     if (_category == ConversationCategory.contact) {
       child = AvatarWidget(
         userId: _userId,
-        name: _name ?? '',
+        name: _name,
         avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
         size: size,
       );
@@ -102,7 +102,7 @@ class AvatarPuzzlesWidget extends HookWidget {
           size: size,
           clipOval: false,
           userId: users.single.userId,
-          name: users.single.fullName!,
+          name: users.single.fullName,
           avatarUrl: users.single.avatarUrl,
         );
       case 2:
@@ -115,7 +115,7 @@ class AvatarPuzzlesWidget extends HookWidget {
             Expanded(
                 child: AvatarWidget(
               userId: users[0].userId,
-              name: users[0].fullName!,
+              name: users[0].fullName,
               avatarUrl: users[0].avatarUrl,
               size: size,
               clipOval: false,
@@ -146,7 +146,7 @@ class AvatarPuzzlesWidget extends HookWidget {
   Widget _buildAvatarImage(User user) => Expanded(
         child: AvatarWidget(
           userId: user.userId,
-          name: user.fullName ?? '?',
+          name: user.fullName,
           avatarUrl: user.avatarUrl,
           size: size,
           clipOval: false,
@@ -166,7 +166,7 @@ class AvatarWidget extends StatelessWidget {
 
   final String? avatarUrl;
   final String? userId;
-  final String name;
+  final String? name;
   final double size;
   final bool clipOval;
 
@@ -182,7 +182,7 @@ class AvatarWidget extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            name.isEmpty ? '' : name[0].toUpperCase(),
+            (name?.isNotEmpty == true) ? name![0].toUpperCase() : '',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,

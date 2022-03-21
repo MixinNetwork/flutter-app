@@ -267,7 +267,7 @@ class CommandPalettePage extends HookWidget {
                                 child: SearchItem(
                                   selected: selectedIndex.value == index,
                                   avatar: AvatarWidget(
-                                    name: user.fullName ?? '?',
+                                    name: user.fullName,
                                     userId: user.userId,
                                     size: ConversationPage
                                         .conversationItemAvatarSize,

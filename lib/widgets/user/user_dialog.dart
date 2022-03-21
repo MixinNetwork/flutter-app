@@ -159,7 +159,7 @@ class _UserProfileBody extends StatelessWidget {
             size: 90,
             avatarUrl: anonymous ? null : user.avatarUrl,
             userId: user.userId,
-            name: user.fullName ?? '',
+            name: user.fullName,
           ),
           const SizedBox(height: 8),
           Row(

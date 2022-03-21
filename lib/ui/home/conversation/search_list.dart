@@ -119,7 +119,7 @@ class SearchList extends HookWidget {
                 final user = users[index];
                 return SearchItem(
                   avatar: AvatarWidget(
-                    name: user.fullName ?? '?',
+                    name: user.fullName,
                     userId: user.userId,
                     size: ConversationPage.conversationItemAvatarSize,
                     avatarUrl: user.avatarUrl,
@@ -585,7 +585,7 @@ class SearchMessageItem extends HookWidget {
             userId: message.userId,
             avatarUrl: message.userAvatarUrl,
             size: ConversationPage.conversationItemAvatarSize,
-            name: message.userFullName ?? '',
+            name: message.userFullName,
           )
         : ConversationAvatarWidget(
             conversationId: message.conversationId,

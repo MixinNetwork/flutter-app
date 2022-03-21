@@ -90,7 +90,7 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "one.mixin" "\0"
-            VALUE "FileDescription", "A new Flutter project for Mixin Messenger." "\0"
+            VALUE "FileDescription", "Mixin Messenger" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "mixin_desktop" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2021 Mixin. All rights reserved." "\0"

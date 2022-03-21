@@ -680,7 +680,7 @@ class _MessageBubbleMargin extends HookWidget {
           cursor: SystemMouseCursors.click,
           child: AvatarWidget(
             userId: userId,
-            name: userName ?? '?',
+            name: userName,
             avatarUrl: userAvatarUrl,
             size: 32,
           ),

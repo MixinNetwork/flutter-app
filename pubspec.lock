@@ -913,7 +913,7 @@ packages:
       name: ogg_opus_player
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0"
+    version: "0.2.0"
   open_file:
     dependency: "direct main"
     description:
@@ -1121,6 +1121,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.1"
+  protocol_handler:
+    dependency: "direct main"
+    description:
+      name: protocol_handler
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.1"
   provider:
     dependency: "direct main"
     description:
@@ -1506,6 +1513,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.4.1"
+  win32_registry:
+    dependency: transitive
+    description:
+      name: win32_registry
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   win_toast:
     dependency: "direct main"
     description:
