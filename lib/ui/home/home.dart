@@ -38,8 +38,6 @@ class HomePage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    useProtocol((String url) => openUri(context, url));
-
     final localTimeError = useMemoizedStream(
             () => context.accountServer.connectedStateStream
                 .map((event) => event == ConnectedState.hasLocalTimeError)
@@ -128,47 +126,50 @@ class _HomePage extends HookWidget {
     return Scaffold(
       backgroundColor: context.theme.primary,
       body: SafeArea(
-        child: Row(
-          children: [
-            TweenAnimationBuilder(
-              tween: Tween<double>(
-                end: collapse ? kSlidePageMinWidth : kSlidePageMaxWidth,
-              ),
-              duration: const Duration(milliseconds: 200),
-              builder: (BuildContext context, double? value, Widget? child) =>
-                  SizedBox(
-                width: value,
-                child: child,
-              ),
-              child: SlidePage(showCollapse: !autoCollapse),
-            ),
-            Expanded(
-              child: ResponsiveNavigator(
-                switchWidth:
-                    kResponsiveNavigationMinWidth + kConversationListWidth,
-                leftPage: MaterialPage(
-                  key: const ValueKey('center'),
-                  name: 'center',
-                  child: SizedBox(
-                    key: _conversationPageKey,
-                    width: kConversationListWidth,
-                    child: const _CenterPage(),
-                  ),
+        child: HookBuilder(builder: (context) {
+          useProtocol((String url) => openUri(context, url));
+          return Row(
+            children: [
+              TweenAnimationBuilder(
+                tween: Tween<double>(
+                  end: collapse ? kSlidePageMinWidth : kSlidePageMaxWidth,
                 ),
-                rightEmptyPage: MaterialPage(
-                  key: const ValueKey('empty'),
-                  name: 'empty',
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: context.theme.chatBackground,
+                duration: const Duration(milliseconds: 200),
+                builder: (BuildContext context, double? value, Widget? child) =>
+                    SizedBox(
+                  width: value,
+                  child: child,
+                ),
+                child: SlidePage(showCollapse: !autoCollapse),
+              ),
+              Expanded(
+                child: ResponsiveNavigator(
+                  switchWidth:
+                      kResponsiveNavigationMinWidth + kConversationListWidth,
+                  leftPage: MaterialPage(
+                    key: const ValueKey('center'),
+                    name: 'center',
+                    child: SizedBox(
+                      key: _conversationPageKey,
+                      width: kConversationListWidth,
+                      child: const _CenterPage(),
                     ),
-                    child: Empty(text: context.l10n.pageRightEmptyMessage),
+                  ),
+                  rightEmptyPage: MaterialPage(
+                    key: const ValueKey('empty'),
+                    name: 'empty',
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: context.theme.chatBackground,
+                      ),
+                      child: Empty(text: context.l10n.pageRightEmptyMessage),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
       ),
     );
   }
