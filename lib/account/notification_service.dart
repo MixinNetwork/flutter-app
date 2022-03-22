@@ -113,7 +113,7 @@ class NotificationService {
               final mentionCache = context.read<MentionCache>();
               body = mentionCache.replaceMention(
                 event.content,
-                await mentionCache.checkMentionCache({event.content!}),
+                await mentionCache.checkMentionCache({event.content}),
               );
             }
             body = messagePreviewOptimize(
