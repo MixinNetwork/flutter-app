@@ -27,7 +27,6 @@ there are some addition library needed.
 ### debian
 
 ```shell
-sudo apt install libappindicator3-dev gir1.2-appindicator3-0.1
 sudo apt-get install vlc
 sudo apt-get install libvlc-dev
 sudo apt-get install libsqlite3-dev
