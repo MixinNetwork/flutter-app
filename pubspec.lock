@@ -1166,11 +1166,9 @@ packages:
   quick_breakpad:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "33e9af863352430b6a9b1dedffb757819a3ff020"
-      resolved-ref: "33e9af863352430b6a9b1dedffb757819a3ff020"
-      url: "https://github.com/boyan01/quick_breakpad"
-    source: git
+      path: "third_party/quick_breakpad"
+      relative: true
+    source: path
     version: "0.2.0"
   quiver:
     dependency: transitive
@@ -1327,9 +1325,9 @@ packages:
   system_tray:
     dependency: "direct main"
     description:
-      name: system_tray
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "third_party/system_tray"
+      relative: true
+    source: path
     version: "0.1.0"
   term_glyph:
     dependency: transitive
