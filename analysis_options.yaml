@@ -27,6 +27,7 @@ analyzer:
     - 'lib/generated/**'
     - '**.g.dart'
 #    - 'editable/**'
+    - 'third_party/**'
 
 linter:
   rules:
