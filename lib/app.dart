@@ -256,6 +256,9 @@ class _Home extends HookWidget {
     }, [signed]);
 
     useEffect(() {
+      if (Platform.isIOS || Platform.isAndroid || Platform.isWindows) {
+        return null;
+      }
       void onAppStateChanged() {
         if (isAppActive) {
           checkUpdate(context: context);
