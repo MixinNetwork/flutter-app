@@ -49,11 +49,9 @@ PODS:
     - sqlite3/rtree
   - system_clock (0.0.1):
     - FlutterMacOS
-  - system_tray (0.0.1):
-    - FlutterMacOS
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
-  - VLCKit (3.3.17)
+  - VLCKit (3.4.0)
   - window_size (0.0.2):
     - FlutterMacOS
 
@@ -75,7 +73,6 @@ DEPENDENCIES:
   - protocol_handler (from `Flutter/ephemeral/.symlinks/plugins/protocol_handler/macos`)
   - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos`)
   - system_clock (from `Flutter/ephemeral/.symlinks/plugins/system_clock/macos`)
-  - system_tray (from `Flutter/ephemeral/.symlinks/plugins/system_tray/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
   - window_size (from `Flutter/ephemeral/.symlinks/plugins/window_size/macos`)
 
@@ -119,8 +116,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos
   system_clock:
     :path: Flutter/ephemeral/.symlinks/plugins/system_clock/macos
-  system_tray:
-    :path: Flutter/ephemeral/.symlinks/plugins/system_tray/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
   window_size:
@@ -145,9 +140,8 @@ SPEC CHECKSUMS:
   sqlite3: cd8b3380fcf65663ed84d17aab294db7626a314e
   sqlite3_flutter_libs: b1616736450363a4257c184b8774ab54298c0b8e
   system_clock: d5fdc00655b062d3b748b612ba32549ee8cb4ddb
-  system_tray: e53c972838c69589ff2e77d6d3abfd71332f9e5d
   url_launcher_macos: 597e05b8e514239626bcf4a850fcf9ef5c856ec3
-  VLCKit: 21651e881f19774ecf9a86ca2c2010859fe68a08
+  VLCKit: 961554c1befd749326a5b44e39db83a12276c2fc
   window_size: 339dafa0b27a95a62a843042038fa6c3c48de195
 
 PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7
