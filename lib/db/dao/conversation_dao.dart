@@ -293,11 +293,19 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         ConversationsCompanion(pinTime: Value(DateTime.now())),
       );
 
-  Future<int> unpin(String conversationId) => (update(db.conversations)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .write(
-        const ConversationsCompanion(pinTime: Value(null)),
-      );
+  Future<int> unpin(String conversationId) async {
+    final already = await db.hasData(
+        db.conversations,
+        [],
+        db.conversations.conversationId.equals(conversationId) &
+            db.conversations.pinTime.isNotNull());
+    if (already) return -1;
+    return (update(db.conversations)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .write(
+      const ConversationsCompanion(pinTime: Value(null)),
+    );
+  }
 
   Future<int> deleteConversation(String conversationId) =>
       (delete(db.conversations)
@@ -305,15 +313,25 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           .go();
 
   Future<int> updateConversationStatusById(
-          String conversationId, ConversationStatus status) =>
-      (db.update(db.conversations)
-            ..where((tbl) =>
-                tbl.conversationId.equals(conversationId) &
-                tbl.status
-                    .equals(const ConversationStatusTypeConverter()
-                        .mapToSql(status))
-                    .not()))
-          .write(ConversationsCompanion(status: Value(status)));
+      String conversationId, ConversationStatus status) async {
+    final already = await db.hasData(
+        db.conversations,
+        [],
+        db.conversations.conversationId.equals(conversationId) &
+            db.conversations.status
+                .equals(
+                    const ConversationStatusTypeConverter().mapToSql(status))
+                .not());
+    if (already) return -1;
+    return (db.update(db.conversations)
+          ..where((tbl) =>
+              tbl.conversationId.equals(conversationId) &
+              tbl.status
+                  .equals(
+                      const ConversationStatusTypeConverter().mapToSql(status))
+                  .not()))
+        .write(ConversationsCompanion(status: Value(status)));
+  }
 
   Selectable<SearchConversationItem> fuzzySearchConversation(
           String query, int limit) =>
@@ -371,10 +389,17 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         ]);
       });
 
-  Future<int> updateCodeUrl(String conversationId, String codeUrl) =>
-      (update(db.conversations)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .write(ConversationsCompanion(codeUrl: Value(codeUrl)));
+  Future<int> updateCodeUrl(String conversationId, String codeUrl) async {
+    final already = await db.hasData(
+        db.conversations,
+        [],
+        db.conversations.conversationId.equals(conversationId) &
+            db.conversations.codeUrl.equals(codeUrl));
+    if (already) return -1;
+    return (update(db.conversations)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .write(ConversationsCompanion(codeUrl: Value(codeUrl)));
+  }
 
   Future<int> updateMuteUntil(String conversationId, String muteUntil) =>
       (update(db.conversations)
@@ -382,10 +407,19 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           .write(ConversationsCompanion(
               muteUntil: Value(DateTime.tryParse(muteUntil))));
 
-  Future<int> updateDraft(String conversationId, String draft) =>
-      (update(db.conversations)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .write(ConversationsCompanion(draft: Value(draft)));
+  Future<int> updateDraft(String conversationId, String draft) async {
+    final already = await db.hasData(
+        db.conversations,
+        [],
+        db.conversations.conversationId.equals(conversationId) &
+            db.conversations.draft.equals(draft));
+
+    if (already) return -1;
+
+    return (update(db.conversations)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .write(ConversationsCompanion(draft: Value(draft)));
+  }
 
   Future<bool> hasConversation(String conversationId) => db.hasData(
         db.conversations,

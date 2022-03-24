@@ -888,7 +888,7 @@ class SendMessageHelper {
                 AttachmentMessage.fromJson(map as Map<String, dynamic>);
             return attachmentMessage.attachmentId;
           } catch (_) {
-            return content!;
+            return content;
           }
         }
 
