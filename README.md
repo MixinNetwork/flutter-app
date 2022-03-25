@@ -29,7 +29,7 @@ there are some addition library needed.
 ```shell
 sudo apt-get install libsqlite3-dev
 sudo apt-get install webkit2gtk-4.0
-sudo apt-get install libsdl2-2.0
+sudo apt-get install libsdl2-dev
 ```
 
 
