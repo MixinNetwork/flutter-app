@@ -182,7 +182,7 @@ class _CenterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => RepaintBoundary(
-    child: DecoratedBox(
+        child: DecoratedBox(
           decoration: BoxDecoration(
             color: context.theme.primary,
             border: Border(
@@ -206,8 +206,8 @@ class _CenterPage extends StatelessWidget {
 
               if (isSetting && !responsiveNavigatorCubit.state.routeMode) {
                 context.read<ConversationCubit>().unselected();
-                responsiveNavigatorCubit
-                    .pushPage(ResponsiveNavigatorCubit.settingPageNameSet.first);
+                responsiveNavigatorCubit.pushPage(
+                    ResponsiveNavigatorCubit.settingPageNameSet.first);
               }
             },
             child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
@@ -228,5 +228,5 @@ class _CenterPage extends StatelessWidget {
             ),
           ),
         ),
-  );
+      );
 }
