@@ -4,7 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_windows
-  dart_vlc
   desktop_drop
   desktop_lifecycle
   desktop_webview_window
@@ -21,6 +20,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  ogg_opus_player
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

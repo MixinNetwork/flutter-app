@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:dart_vlc/dart_vlc.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -68,7 +67,6 @@ Future<void> main(List<String> args) async {
   unawaited(initListener());
 
   ansiColorDisabled = Platform.isIOS;
-  DartVLC.initialize();
 
   if (Platform.isWindows || Platform.isMacOS) {
     await protocolHandler.register('mixin');
