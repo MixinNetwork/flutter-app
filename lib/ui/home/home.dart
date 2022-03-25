@@ -181,48 +181,50 @@ class _CenterPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.theme.primary,
-          border: Border(
-            right: BorderSide(
-              color: context.theme.divider,
+  Widget build(BuildContext context) => RepaintBoundary(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: context.theme.primary,
+            border: Border(
+              right: BorderSide(
+                color: context.theme.divider,
+              ),
             ),
           ),
-        ),
-        child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-          converter: (state) => state.type == SlideCategoryType.setting,
-          listener: (context, isSetting) {
-            final responsiveNavigatorCubit =
-                context.read<ResponsiveNavigatorCubit>();
-
-            responsiveNavigatorCubit.popWhere((page) {
-              if (responsiveNavigatorCubit.state.routeMode) return true;
-
-              return ResponsiveNavigatorCubit.settingPageNameSet
-                  .contains(page.name);
-            });
-
-            if (isSetting && !responsiveNavigatorCubit.state.routeMode) {
-              context.read<ConversationCubit>().unselected();
-              responsiveNavigatorCubit
-                  .pushPage(ResponsiveNavigatorCubit.settingPageNameSet.first);
-            }
-          },
           child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
             converter: (state) => state.type == SlideCategoryType.setting,
-            builder: (context, isSetting) => IndexedStack(
-              index: isSetting ? 1 : 0,
-              children: const [
-                Positioned.fill(
-                  child: AutomaticKeepAliveClientWidget(
-                    child: ConversationPage(),
+            listener: (context, isSetting) {
+              final responsiveNavigatorCubit =
+                  context.read<ResponsiveNavigatorCubit>();
+
+              responsiveNavigatorCubit.popWhere((page) {
+                if (responsiveNavigatorCubit.state.routeMode) return true;
+
+                return ResponsiveNavigatorCubit.settingPageNameSet
+                    .contains(page.name);
+              });
+
+              if (isSetting && !responsiveNavigatorCubit.state.routeMode) {
+                context.read<ConversationCubit>().unselected();
+                responsiveNavigatorCubit.pushPage(
+                    ResponsiveNavigatorCubit.settingPageNameSet.first);
+              }
+            },
+            child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+              converter: (state) => state.type == SlideCategoryType.setting,
+              builder: (context, isSetting) => IndexedStack(
+                index: isSetting ? 1 : 0,
+                children: const [
+                  Positioned.fill(
+                    child: AutomaticKeepAliveClientWidget(
+                      child: ConversationPage(),
+                    ),
                   ),
-                ),
-                Positioned.fill(
-                    child:
-                        AutomaticKeepAliveClientWidget(child: SettingPage())),
-              ],
+                  Positioned.fill(
+                      child:
+                          AutomaticKeepAliveClientWidget(child: SettingPage())),
+                ],
+              ),
             ),
           ),
         ),

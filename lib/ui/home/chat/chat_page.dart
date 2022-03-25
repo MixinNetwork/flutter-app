@@ -373,95 +373,99 @@ class ChatContainer extends HookWidget {
 
     final pendingJumpMessageCubit = useBloc(() => PendingJumpMessageCubit());
 
-    return MultiProvider(
-      providers: [
-        BlocProvider.value(value: quoteMessageCubit),
-        BlocProvider.value(value: pendingJumpMessageCubit),
-      ],
-      child: Column(
-        children: [
-          Container(
-            height: 64,
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: context.theme.divider,
-                ),
-              ),
-            ),
-            child: const ChatBar(),
-          ),
-          Expanded(
-            child: DecoratedBox(
+    return RepaintBoundary(
+      child: MultiProvider(
+        providers: [
+          BlocProvider.value(value: quoteMessageCubit),
+          BlocProvider.value(value: pendingJumpMessageCubit),
+        ],
+        child: Column(
+          children: [
+            Container(
+              height: 64,
               decoration: BoxDecoration(
-                color: context.theme.chatBackground,
-                image: DecorationImage(
-                  image: const ExactAssetImage(
-                    Resources.assetsImagesChatBackgroundPng,
-                  ),
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    context.brightnessValue == 1.0
-                        ? Colors.white.withOpacity(0.02)
-                        : Colors.black.withOpacity(0.03),
-                    BlendMode.srcIn,
+                border: Border(
+                  bottom: BorderSide(
+                    color: context.theme.divider,
                   ),
                 ),
               ),
-              child: Navigator(
-                onPopPage: (Route<dynamic> route, dynamic result) =>
-                    route.didPop(result),
-                pages: [
-                  MaterialPage(
-                    child: _ChatDropOverlay(
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: context.theme.divider,
-                                  ),
-                                ),
-                              ),
-                              child: Stack(
-                                children: [
-                                  const _NotificationListener(
-                                    child: _List(),
-                                  ),
-                                  const Positioned(
-                                    left: 6,
-                                    right: 6,
-                                    bottom: 6,
-                                    child: _BottomBanner(),
-                                  ),
-                                  Positioned(
-                                    bottom: 16,
-                                    right: 16,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: const [
-                                        _JumpMentionButton(),
-                                        _JumpCurrentButton(),
-                                      ],
-                                    ),
-                                  ),
-                                  const _PinMessagesBanner(),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const InputContainer(),
-                        ],
-                      ),
+              child: const ChatBar(),
+            ),
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: context.theme.chatBackground,
+                  image: DecorationImage(
+                    image: const ExactAssetImage(
+                      Resources.assetsImagesChatBackgroundPng,
+                    ),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      context.brightnessValue == 1.0
+                          ? Colors.white.withOpacity(0.02)
+                          : Colors.black.withOpacity(0.03),
+                      BlendMode.srcIn,
                     ),
                   ),
-                ],
+                ),
+                child: Navigator(
+                  onPopPage: (Route<dynamic> route, dynamic result) =>
+                      route.didPop(result),
+                  pages: [
+                    MaterialPage(
+                      child: _ChatDropOverlay(
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: context.theme.divider,
+                                    ),
+                                  ),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    const RepaintBoundary(
+                                      child: _NotificationListener(
+                                        child: _List(),
+                                      ),
+                                    ),
+                                    const Positioned(
+                                      left: 6,
+                                      right: 6,
+                                      bottom: 6,
+                                      child: _BottomBanner(),
+                                    ),
+                                    Positioned(
+                                      bottom: 16,
+                                      right: 16,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: const [
+                                          _JumpMentionButton(),
+                                          _JumpCurrentButton(),
+                                        ],
+                                      ),
+                                    ),
+                                    const _PinMessagesBanner(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const InputContainer(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

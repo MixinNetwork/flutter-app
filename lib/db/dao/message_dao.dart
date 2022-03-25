@@ -179,13 +179,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> insert(Message message, String currentUserId,
       [bool? silent = false]) async {
-    final result = await db.transaction(() async {
-      final futures = <Future>[
-        into(db.messages).insertOnConflictUpdate(message),
-        _insertMessageFts(message),
-      ];
-      return (await Future.wait(futures))[0] as int;
-    });
+    final futures = <Future>[
+      into(db.messages).insertOnConflictUpdate(message),
+      _insertMessageFts(message),
+    ];
+    final result = (await Future.wait(futures))[0] as int;
 
     _updateConversationUnseenCount(message, currentUserId);
 
@@ -254,13 +252,20 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Future<SendingMessage?> sendingMessage(String messageId) async =>
       db.sendingMessage(messageId).getSingleOrNull();
 
-  Future<int> updateMessageStatusById(String messageId, MessageStatus status) =>
-      _sendInsertOrReplaceEventWithFuture(
-        [messageId],
-        (db.update(db.messages)
-              ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(MessagesCompanion(status: Value(status))),
-      );
+  Future<int> updateMessageStatusById(
+      String messageId, MessageStatus status) async {
+    final already = await db.hasData(
+        db.messages,
+        [],
+        db.messages.messageId.equals(messageId) &
+            db.messages.status.equalsValue(status));
+    if (already) return -1;
+    return _sendInsertOrReplaceEventWithFuture(
+      [messageId],
+      (db.update(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
+          .write(MessagesCompanion(status: Value(status))),
+    );
+  }
 
   Future<MessageStatus?> findMessageStatusById(String messageId) =>
       db.findMessageStatusById(messageId).getSingleOrNull();
@@ -410,17 +415,34 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         .map((row) => row.read(db.messages.messageId))
         .getSingleOrNull();
 
-    return db.customUpdate(
-      "UPDATE conversations SET last_read_message_id = ?, unseen_message_count = (SELECT count(1) FROM messages m WHERE m.conversation_id = ? AND m.user_id != ? AND m.status IN ('SENT', 'DELIVERED')) WHERE conversation_id = ?",
-      variables: [
-        Variable(messageId),
-        Variable.withString(conversationId),
-        Variable.withString(userId),
-        Variable.withString(conversationId)
-      ],
-      updates: {db.conversations},
-      updateKind: UpdateKind.update,
-    );
+    final countColumn = db.messages.messageId.count();
+    final count = await (selectOnly(db.messages)
+          ..addColumns([countColumn])
+          ..where(db.messages.conversationId.equals(conversationId) &
+              db.messages.userId.equals(userId).not() &
+              db.messages.status.isIn([
+                MessageStatus.sent,
+                MessageStatus.delivered
+              ].map((e) => db.messages.status.converter.mapToSql(e)))))
+        .map((row) => row.read(countColumn))
+        .getSingleOrNull();
+
+    final already = await db.hasData(
+        db.conversations,
+        [],
+        db.conversations.conversationId.equals(conversationId) &
+            db.conversations.lastMessageId.equals(messageId) &
+            db.conversations.unseenMessageCount.equals(count));
+
+    // For reduce update event
+    if (already) return -1;
+
+    return (update(db.conversations)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .write(ConversationsCompanion(
+      lastReadMessageId: Value(messageId),
+      unseenMessageCount: Value(count),
+    ));
   }
 
   Future<int> markMessageRead(
@@ -471,23 +493,22 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<List<String>> getUnreadMessageIds(
-          String conversationId, String userId, int limit) =>
-      db.transaction(() async {
-        final list = await (db.selectOnly(db.messages)
-              ..addColumns([db.messages.messageId])
-              ..where(db.messages.conversationId.equals(conversationId) &
-                  db.messages.userId.equals(userId).not() &
-                  db.messages.status.isIn(['SENT', 'DELIVERED']))
-              ..limit(limit))
-            .map((row) => row.read(db.messages.messageId))
-            .get();
-        final ids = list.whereNotNull().toList();
-        if (ids.isNotEmpty) {
-          await markMessageRead(userId, ids);
-        }
-        await takeUnseen(userId, conversationId);
-        return ids;
-      });
+      String conversationId, String userId, int limit) async {
+    final list = await (db.selectOnly(db.messages)
+          ..addColumns([db.messages.messageId])
+          ..where(db.messages.conversationId.equals(conversationId) &
+              db.messages.userId.equals(userId).not() &
+              db.messages.status.isIn(['SENT', 'DELIVERED']))
+          ..limit(limit))
+        .map((row) => row.read(db.messages.messageId))
+        .get();
+    final ids = list.whereNotNull().toList();
+    if (ids.isNotEmpty) {
+      await markMessageRead(userId, ids);
+    }
+    await takeUnseen(userId, conversationId);
+    return ids;
+  }
 
   Future<QuoteMessageItem?> findMessageItemById(
           String conversationId, String messageId) =>
@@ -613,18 +634,30 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       );
 
   Future<int> updateMessageContentAndStatus(
-          String messageId, String? content, MessageStatus status) =>
-      _sendInsertOrReplaceEventWithFuture(
-        [messageId],
-        (db.update(db.messages)
-              ..where((tbl) =>
-                  tbl.messageId.equals(messageId) &
-                  tbl.category.equals(MessageCategory.messageRecall).not()))
-            .write(MessagesCompanion(
-          content: content != null ? Value(content) : const Value.absent(),
-          status: Value(status),
-        )),
-      );
+      String messageId, String? content, MessageStatus status) async {
+    final already = await db.hasData(
+        db.messages,
+        [],
+        db.messages.messageId.equals(messageId) &
+            db.messages.status.equalsValue(status) &
+            db.messages.category.equals(MessageCategory.messageRecall).not() &
+            (content != null
+                ? db.messages.content.equals(content)
+                : ignoreWhere));
+    if (already) return -1;
+
+    return _sendInsertOrReplaceEventWithFuture(
+      [messageId],
+      (db.update(db.messages)
+            ..where((tbl) =>
+                tbl.messageId.equals(messageId) &
+                tbl.category.equals(MessageCategory.messageRecall).not()))
+          .write(MessagesCompanion(
+        content: content != null ? Value(content) : const Value.absent(),
+        status: Value(status),
+      )),
+    );
+  }
 
   Future<int> updateAttachmentMessage(
           String messageId, MessagesCompanion messagesCompanion) async =>

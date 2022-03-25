@@ -62,8 +62,17 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
                 tbl.conversationId.equals(conversationId) &
                 tbl.hasRead.equals(false)));
 
-  Future<int> markMentionRead(String messageId) =>
-      (db.update(db.messageMentions)
-            ..where((tbl) => tbl.messageId.equals(messageId)))
-          .write(const MessageMentionsCompanion(hasRead: Value(true)));
+  Future<void> markMentionRead(String messageId) async {
+    final already = await db.hasData(
+        db.messageMentions,
+        [],
+        db.messageMentions.messageId.equals(messageId) &
+            db.messageMentions.hasRead.equals(true));
+
+    if (already) return;
+
+    await (db.update(db.messageMentions)
+          ..where((tbl) => tbl.messageId.equals(messageId)))
+        .write(const MessageMentionsCompanion(hasRead: Value(true)));
+  }
 }
