@@ -19,7 +19,7 @@ class AudioMessagePlayService {
     this._accountServer,
     Stream<String?> conversationIdStream,
   ) {
-    _player = AudioMessagePlayer.platform();
+    _player = AudioMessagePlayer.oggOpus();
     initListen();
     conversationIdSubscription =
         conversationIdStream.distinct().listen((event) => _player.stop());
