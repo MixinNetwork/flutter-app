@@ -25,7 +25,6 @@ Future<PackageInfo> getPackageInfo() async {
   } catch (error, stack) {
     e('get package info failed. $error $stack');
   }
-  assert(false, 'get package info failed');
   // fallback if we can not get packageInfo dynamic.
   return _packageInfo;
 }

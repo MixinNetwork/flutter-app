@@ -74,10 +74,10 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
     _disposeCurrentPlayer();
     final media = _medias[_index];
     final player = OggOpusPlayer(media.mediaPath);
-    player.state.addListener(_handlePlayerState);
-    player.play();
     assert(_player == null);
     _player = player;
+    player.state.addListener(_handlePlayerState);
+    player.play();
     _currentPlaying.value = current;
   }
 
