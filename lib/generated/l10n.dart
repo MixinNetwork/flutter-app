@@ -3319,6 +3319,16 @@ class Localization {
       args: [time],
     );
   }
+
+  /// `We will send a 4-digit code to your phone number {phone}, please enter the code in next screen.`
+  String sendCodeConfirm(Object phone) {
+    return Intl.message(
+      'We will send a 4-digit code to your phone number $phone, please enter the code in next screen.',
+      name: 'sendCodeConfirm',
+      desc: '',
+      args: [phone],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

@@ -141,9 +141,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m55(count) => "${count} related messages";
 
-  static String m56(value) => "value now ${value}";
+  static String m56(phone) =>
+      "We will send a 4-digit code to your phone number ${phone}, please enter the code in next screen.";
 
-  static String m57(value) => "value then ${value}";
+  static String m57(value) => "value now ${value}";
+
+  static String m58(value) => "value then ${value}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -517,6 +520,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "send": MessageLookupByLibrary.simpleMessage("send"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Archived all files in one zip file"),
+        "sendCodeConfirm": m56,
         "sendQuick": MessageLookupByLibrary.simpleMessage("Send quickly"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("Send without compression"),
@@ -573,10 +577,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("Waiting for this message."),
-        "walletTransactionCurrentValue": m56,
+        "walletTransactionCurrentValue": m57,
         "walletTransactionThatTimeNoValue":
             MessageLookupByLibrary.simpleMessage("value then N/A"),
-        "walletTransactionThatTimeValue": m57,
+        "walletTransactionThatTimeValue": m58,
         "webView2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
             "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
         "webViewRuntimeNotAvailable": MessageLookupByLibrary.simpleMessage(

@@ -133,9 +133,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m55(count) => "${count} 条相关的消息";
 
-  static String m56(value) => "价值 ${value}";
+  static String m56(phone) => "我们将发送4位验证码到手机 ${phone}, 请在下一个页面输入";
 
-  static String m57(value) => "当时价值 ${value}";
+  static String m57(value) => "价值 ${value}";
+
+  static String m58(value) => "当时价值 ${value}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -442,6 +444,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchUserHint": MessageLookupByLibrary.simpleMessage("Mixin ID 或手机号"),
         "send": MessageLookupByLibrary.simpleMessage("发送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),
+        "sendCodeConfirm": m56,
         "sendQuick": MessageLookupByLibrary.simpleMessage("快速发送"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("发送原始文件"),
@@ -491,10 +494,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("视频"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("正在等待这个消息。"),
-        "walletTransactionCurrentValue": m56,
+        "walletTransactionCurrentValue": m57,
         "walletTransactionThatTimeNoValue":
             MessageLookupByLibrary.simpleMessage("当时价值 暂无"),
-        "walletTransactionThatTimeValue": m57,
+        "walletTransactionThatTimeValue": m58,
         "webView2RuntimeInstallDescription":
             MessageLookupByLibrary.simpleMessage(
                 "该设备暂未安装 WebView2 组件，请先下载并安装 WebView2 Runtime。"),
