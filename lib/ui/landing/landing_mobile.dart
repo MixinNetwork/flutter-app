@@ -13,6 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:intl_phone_number_input/src/models/country_model.dart';
 import 'package:intl_phone_number_input/src/providers/country_provider.dart';
 import 'package:intl_phone_number_input/src/utils/phone_number/phone_number_util.dart';
@@ -218,6 +219,25 @@ class _PhoneNumberInputScene extends HookWidget {
                   context: context,
                 );
                 Toast.dismiss();
+                if (response.deactivatedAt?.isNotEmpty ?? false) {
+                  final date =
+                      DateTime.parse(response.deactivatedAt!).toLocal();
+                  final continueLogin = await showConfirmMixinDialog(
+                    context,
+                    context.l10n.landingDeletionWarningTitle,
+                    description: context.l10n.landingDeletionWarningContent(
+                      DateFormat().format(date),
+                    ),
+                    maxWidth: 440,
+                    positiveText: context.l10n.continueText,
+                    negativeText: context.l10n.cancel,
+                    barrierDismissible: false,
+                  );
+                  if (!continueLogin) {
+                    i('User canceled login and deactivatedAt is not empty');
+                    return;
+                  }
+                }
                 await Navigator.push(
                   context,
                   MaterialPageRoute(

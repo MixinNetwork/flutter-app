@@ -116,28 +116,30 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(name) => "移除 ${name}";
 
-  static String m48(newVersion, current) =>
+  static String m48(date) => "您的账户将于 ${date} 被删除，如果您继续登录，删除您账户的请求将被取消。";
+
+  static String m49(newVersion, current) =>
       "发现新版本 Mixin Messenger ${newVersion}，当前版本为 ${current}。是否要下载最新的版本？";
 
-  static String m49(name) => "确定删除${name}圈子吗？";
+  static String m50(name) => "确定删除${name}圈子吗？";
 
-  static String m50(date) => "${date}加入";
+  static String m51(date) => "${date}加入";
 
-  static String m51(count) => "共 ${count} 人";
+  static String m52(count) => "共 ${count} 人";
 
-  static String m52(count) => "${count}条置顶消息";
+  static String m53(count) => "${count}条置顶消息";
 
-  static String m53(user, preview) => "${user}置顶了${preview}";
+  static String m54(user, preview) => "${user}置顶了${preview}";
 
-  static String m54(time) => "${time} 秒后重新发送验证码";
+  static String m55(time) => "${time} 秒后重新发送验证码";
 
-  static String m55(count) => "${count} 条相关的消息";
+  static String m56(count) => "${count} 条相关的消息";
 
-  static String m56(phone) => "我们将发送4位验证码到手机 ${phone}, 请在下一个页面输入";
+  static String m57(phone) => "我们将发送4位验证码到手机 ${phone}, 请在下一个页面输入";
 
-  static String m57(value) => "价值 ${value}";
+  static String m58(value) => "价值 ${value}";
 
-  static String m58(value) => "当时价值 ${value}";
+  static String m59(value) => "当时价值 ${value}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -350,6 +352,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "initializing": MessageLookupByLibrary.simpleMessage("初始化"),
         "introduction": MessageLookupByLibrary.simpleMessage("介绍"),
         "joinGroup": MessageLookupByLibrary.simpleMessage("+ 加入群组"),
+        "landingDeletionWarningContent": m48,
+        "landingDeletionWarningTitle":
+            MessageLookupByLibrary.simpleMessage("继续登录并放弃删除账户"),
         "less": MessageLookupByLibrary.simpleMessage("更少"),
         "links": MessageLookupByLibrary.simpleMessage("链接"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
@@ -380,7 +385,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "networkConnectionFailed":
             MessageLookupByLibrary.simpleMessage("网络连接失败"),
         "newVersionAvailable": MessageLookupByLibrary.simpleMessage("发现新版本"),
-        "newVersionDescription": m48,
+        "newVersionDescription": m49,
         "next": MessageLookupByLibrary.simpleMessage("下一步"),
         "noAudio": MessageLookupByLibrary.simpleMessage("没有音频"),
         "noData": MessageLookupByLibrary.simpleMessage("没有数据"),
@@ -398,8 +403,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("打开通知"),
         "openLogDirectory": MessageLookupByLibrary.simpleMessage("打开日志文件夹"),
         "originalImage": MessageLookupByLibrary.simpleMessage("原图"),
-        "pageDeleteCircle": m49,
-        "pageEditProfileJoin": m50,
+        "pageDeleteCircle": m50,
+        "pageEditProfileJoin": m51,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("点击重新加载二维码"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -408,12 +413,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("通过二维码登录 Mixin Messenger"),
         "pageRightEmptyMessage":
             MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
-        "participantsCount": m51,
+        "participantsCount": m52,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("手机号"),
         "photos": MessageLookupByLibrary.simpleMessage("照片"),
         "pin": MessageLookupByLibrary.simpleMessage("置顶"),
-        "pinMessageCount": m52,
-        "pinned": m53,
+        "pinMessageCount": m53,
+        "pinned": m54,
         "pleaseWait": MessageLookupByLibrary.simpleMessage("请稍等一下"),
         "post": MessageLookupByLibrary.simpleMessage("文章"),
         "preview": MessageLookupByLibrary.simpleMessage("预览"),
@@ -430,7 +435,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "report": MessageLookupByLibrary.simpleMessage("举报"),
         "reportWarning": MessageLookupByLibrary.simpleMessage("确定要举报这个联系人？"),
         "resendCode": MessageLookupByLibrary.simpleMessage("重发验证码"),
-        "resendCodeIn": m54,
+        "resendCodeIn": m55,
         "reset": MessageLookupByLibrary.simpleMessage("重置"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
         "saveAs": MessageLookupByLibrary.simpleMessage("另存为"),
@@ -440,12 +445,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "search": MessageLookupByLibrary.simpleMessage("搜索"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
-        "searchRelatedMessage": m55,
+        "searchRelatedMessage": m56,
         "searchUser": MessageLookupByLibrary.simpleMessage("搜索用户"),
         "searchUserHint": MessageLookupByLibrary.simpleMessage("Mixin ID 或手机号"),
         "send": MessageLookupByLibrary.simpleMessage("发送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),
-        "sendCodeConfirm": m56,
+        "sendCodeConfirm": m57,
         "sendQuick": MessageLookupByLibrary.simpleMessage("快速发送"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("发送原始文件"),
@@ -495,10 +500,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("视频"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("正在等待这个消息。"),
-        "walletTransactionCurrentValue": m57,
+        "walletTransactionCurrentValue": m58,
         "walletTransactionThatTimeNoValue":
             MessageLookupByLibrary.simpleMessage("当时价值 暂无"),
-        "walletTransactionThatTimeValue": m58,
+        "walletTransactionThatTimeValue": m59,
         "webView2RuntimeInstallDescription":
             MessageLookupByLibrary.simpleMessage(
                 "该设备暂未安装 WebView2 组件，请先下载并安装 WebView2 Runtime。"),

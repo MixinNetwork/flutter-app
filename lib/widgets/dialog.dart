@@ -301,9 +301,13 @@ Future<bool> showConfirmMixinDialog(
   String content, {
   String? description,
   double? maxWidth,
+  bool barrierDismissible = true,
+  String? positiveText,
+  String? negativeText,
 }) async =>
     await showMixinDialog<bool>(
       context: context,
+      barrierDismissible: barrierDismissible,
       child: Builder(
         builder: (context) => AlertDialogLayout(
           maxWidth: maxWidth,
@@ -328,12 +332,13 @@ Future<bool> showConfirmMixinDialog(
           ),
           actions: [
             MixinButton(
-                backgroundTransparent: true,
-                onTap: () => Navigator.pop(context, false),
-                child: Text(context.l10n.cancel)),
+              backgroundTransparent: true,
+              onTap: () => Navigator.pop(context, false),
+              child: Text(negativeText ?? context.l10n.cancel),
+            ),
             MixinButton(
               onTap: () => Navigator.pop(context, true),
-              child: Text(context.l10n.confirm),
+              child: Text(positiveText ?? context.l10n.confirm),
             ),
           ],
         ),
