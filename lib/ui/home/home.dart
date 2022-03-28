@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../blaze/blaze.dart';
 import '../../bloc/bloc_converter.dart';
@@ -9,6 +10,7 @@ import '../../utils/uri_utils.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
+import '../../widgets/toast.dart';
 import '../setting/setting_page.dart';
 import 'bloc/conversation_cubit.dart';
 import 'bloc/multi_auth_cubit.dart';
@@ -45,6 +47,11 @@ class HomePage extends HookWidget {
             keys: [context.accountServer]).data ??
         false;
 
+    final isEmptyUserName =
+        useBlocStateConverter<MultiAuthCubit, MultiAuthState, bool>(
+            converter: (state) =>
+                state.current?.account.fullName?.isEmpty ?? true);
+
     return CommandPaletteWrapper(
       child: ConversationHotKey(
         child: Stack(
@@ -56,6 +63,7 @@ class HomePage extends HookWidget {
                 constraints: constraints,
               ),
             ),
+            if (isEmptyUserName) const _SetupNameWidget(),
             if (localTimeError)
               HookBuilder(builder: (context) {
                 final loading = useState(false);
@@ -94,6 +102,55 @@ class HomePage extends HookWidget {
                   ),
                 );
               }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SetupNameWidget extends HookWidget {
+  const _SetupNameWidget({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textEditingController = useTextEditingController();
+    final textEditingValue = useValueListenable(textEditingController);
+    return Scaffold(
+      backgroundColor: context.theme.background,
+      body: Center(
+        child: AlertDialogLayout(
+          title: Text(context.l10n.enterNameTitle),
+          content: DialogTextField(
+            textEditingController: textEditingController,
+            hintText: context.l10n.name,
+          ),
+          actions: [
+            MixinButton(
+              disable: textEditingValue.text.trim().isEmpty,
+              onTap: () async {
+                showToastLoading(context);
+                try {
+                  await context.accountServer.updateAccount(
+                    fullName: textEditingController.text.trim(),
+                  );
+                } on MixinApiError catch (error) {
+                  final mixinError = error.error as MixinError;
+                  await showToastFailed(
+                    context,
+                    ToastError(mixinError.toDisplayString(context)),
+                  );
+                  return;
+                } catch (error) {
+                  await showToastFailed(context, null);
+                  return;
+                }
+                showToastSuccessful(context);
+              },
+              child: Text(context.l10n.confirm),
+            ),
           ],
         ),
       ),

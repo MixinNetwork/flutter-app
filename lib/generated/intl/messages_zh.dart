@@ -239,6 +239,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("退出将会清除此次所有的改动。"),
         "editName": MessageLookupByLibrary.simpleMessage("编辑名称"),
         "editProfile": MessageLookupByLibrary.simpleMessage("编辑资料"),
+        "enterNameTitle": MessageLookupByLibrary.simpleMessage("你的名字?"),
         "enterVerificationCode": m14,
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("请输入你的手机号码"),
