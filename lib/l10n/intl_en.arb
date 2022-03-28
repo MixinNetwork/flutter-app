@@ -325,5 +325,6 @@
   "enterYourPhoneNumber": "Enter your phone number",
   "enterVerificationCode": "Enter the 4-digit code sent to you at {phone}",
   "resendCode": "Resend code",
-  "resendCodeIn": "Resend code in {time}s"
+  "resendCodeIn": "Resend code in {time}s",
+  "sendCodeConfirm": "We will send a 4-digit code to your phone number {phone}, please enter the code in next screen."
 }

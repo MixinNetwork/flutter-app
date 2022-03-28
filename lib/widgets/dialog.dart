@@ -76,6 +76,7 @@ class AlertDialogLayout extends StatelessWidget {
     this.minWidth = 400,
     this.minHeight = 210,
     this.padding = const EdgeInsets.all(30),
+    this.maxWidth,
   }) : super(key: key);
 
   final Widget? title;
@@ -85,6 +86,7 @@ class AlertDialogLayout extends StatelessWidget {
   final double minWidth;
   final double minHeight;
   final EdgeInsetsGeometry padding;
+  final double? maxWidth;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -93,6 +95,7 @@ class AlertDialogLayout extends StatelessWidget {
           constraints: BoxConstraints(
             minWidth: minWidth,
             minHeight: minHeight,
+            maxWidth: maxWidth ?? double.infinity,
           ),
           child: Padding(
             padding: padding,
@@ -297,11 +300,13 @@ Future<bool> showConfirmMixinDialog(
   BuildContext context,
   String content, {
   String? description,
+  double? maxWidth,
 }) async =>
     await showMixinDialog<bool>(
       context: context,
       child: Builder(
         builder: (context) => AlertDialogLayout(
+          maxWidth: maxWidth,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

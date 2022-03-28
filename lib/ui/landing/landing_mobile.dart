@@ -201,9 +201,18 @@ class _PhoneNumberInputScene extends HookWidget {
               if (mobileNumberStr.isEmpty) {
                 return;
               }
+              final phoneNumber = dialCode + mobileNumberStr;
+              final ret = await showConfirmMixinDialog(
+                context,
+                context.l10n.sendCodeConfirm(phoneNumber),
+                maxWidth: 440,
+              );
+              if (!ret) {
+                return;
+              }
+
               showToastLoading(context);
               try {
-                final phoneNumber = dialCode + mobileNumberStr;
                 final response = await _requestVerificationCode(
                   phone: phoneNumber,
                   context: context,
