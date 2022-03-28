@@ -318,6 +318,6 @@
   "enterVerificationCode": "请输入发送至以下号码的 4 位验证码： {phone}",
   "resendCode": "重发验证码",
   "resendCodeIn": "{time} 秒后重新发送验证码",
-  "sendCodeConfirm": "我们将发送4位验证码到手机 {phone}, 请在下一个页面输入"
-
+  "sendCodeConfirm": "我们将发送4位验证码到手机 {phone}, 请在下一个页面输入",
+  "enterNameTitle": "你的名字?"
 }

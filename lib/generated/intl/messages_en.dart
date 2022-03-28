@@ -274,6 +274,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "All changes will be lost. Are you sure you want to exit?"),
         "editName": MessageLookupByLibrary.simpleMessage("Edit Name"),
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
+        "enterNameTitle":
+            MessageLookupByLibrary.simpleMessage("What\'s your name?"),
         "enterVerificationCode": m14,
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("Enter your phone number"),

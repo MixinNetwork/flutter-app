@@ -3329,6 +3329,16 @@ class Localization {
       args: [phone],
     );
   }
+
+  /// `What's your name?`
+  String get enterNameTitle {
+    return Intl.message(
+      'What\'s your name?',
+      name: 'enterNameTitle',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
