@@ -10,7 +10,7 @@ import '../widgets/unknown_mixin_url_dialog.dart';
 import '../widgets/user/user_dialog.dart';
 import 'extension/extension.dart';
 import 'logger.dart';
-import 'webview.dart';
+import 'web_view/web_view_interface.dart';
 
 // Try open url in app webview.
 // fallback to launch system browser if WebView is not available.
@@ -19,11 +19,10 @@ Future<bool> openUriWithWebView(
   String text, {
   String? title,
   String? conversationId,
-}) async {
-  if (kIsSupportWebView) {
-    return openUri(context, text, fallbackHandler: (url) async {
-      if (await isWebViewRuntimeAvailable()) {
-        await openWebViewWindowWithUrl(
+}) async =>
+    openUri(context, text, fallbackHandler: (url) async {
+      if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
+        await MixinWebView.instance.openWebViewWindowWithUrl(
           context,
           url,
           conversationId: conversationId,
@@ -33,10 +32,6 @@ Future<bool> openUriWithWebView(
       }
       return launch(url);
     });
-  } else {
-    return openUri(context, text);
-  }
-}
 
 Future<bool> openUri(
   BuildContext context,

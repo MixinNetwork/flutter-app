@@ -38,7 +38,7 @@ import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/system/package_info.dart';
-import '../utils/webview.dart';
+import '../utils/web_view/web_view_interface.dart';
 import '../workers/injector.dart';
 import '../workers/isolate_event.dart';
 import '../workers/message_worker_isolate.dart';
@@ -312,7 +312,7 @@ class AccountServer {
     await database.participantSessionDao.deleteBySessionId(sessionId);
     await database.participantSessionDao.updateSentToServer();
 
-    clearWebViewCacheAndCookies();
+    MixinWebView.instance.clearWebViewCacheAndCookies();
   }
 
   Future<void> sendTextMessage(
