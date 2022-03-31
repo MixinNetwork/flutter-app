@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 
 import '../../bloc/setting_cubit.dart';
 import '../../constants/brightness_theme_data.dart';
+import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/dialog.dart';
@@ -71,6 +72,7 @@ class DesktopMixinWebView extends MixinWebView {
     String url, {
     String? conversationId,
     String? title,
+    App? app,
   }) async {
     final brightness = context.read<SettingCubit>().brightness;
     final packageInfo = await getPackageInfo();

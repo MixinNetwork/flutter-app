@@ -39,6 +39,7 @@ import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/system/package_info.dart';
 import '../utils/web_view/web_view_interface.dart';
+import '../widgets/message/item/action_card/action_card_data.dart';
 import '../workers/injector.dart';
 import '../workers/isolate_event.dart';
 import '../workers/message_worker_isolate.dart';
@@ -437,6 +438,17 @@ class AccountServer {
           {String? conversationId, String? recipientId}) async =>
       _sendMessageHelper.sendRecallMessage(
           await _initConversation(conversationId, recipientId), messageIds);
+
+  Future<void> sendAppCardMessage({
+    String? conversationId,
+    String? recipientId,
+    required AppCardData data,
+  }) async =>
+      _sendMessageHelper.sendAppCardMessage(
+        await _initConversation(conversationId, recipientId),
+        userId,
+        json.encode(data.toJson()),
+      );
 
   Future<void> forwardMessage(
     String forwardMessageId,

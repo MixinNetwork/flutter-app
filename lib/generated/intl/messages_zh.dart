@@ -421,6 +421,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "provisioning": MessageLookupByLibrary.simpleMessage("加载中"),
         "recentConversations": MessageLookupByLibrary.simpleMessage("最近聊天"),
         "reedit": MessageLookupByLibrary.simpleMessage("重新编辑"),
+        "refresh": MessageLookupByLibrary.simpleMessage("刷新"),
         "removeBot": MessageLookupByLibrary.simpleMessage("删除机器人"),
         "removeChatFromCircle":
             MessageLookupByLibrary.simpleMessage("从圈子里移除对话"),
@@ -455,6 +456,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "settingThemeAuto": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "settingThemeLight": MessageLookupByLibrary.simpleMessage("浅色"),
         "settingThemeNight": MessageLookupByLibrary.simpleMessage("暗黑"),
+        "share": MessageLookupByLibrary.simpleMessage("分享"),
         "shareContact": MessageLookupByLibrary.simpleMessage("发送名片"),
         "sharedApps": MessageLookupByLibrary.simpleMessage("分享的应用"),
         "sharedMedia": MessageLookupByLibrary.simpleMessage("媒体内容"),

@@ -33,6 +33,7 @@ abstract class MixinWebView {
     String url, {
     String? conversationId,
     String? title,
+    App? app,
   });
 
   Future<void> openBotWebViewWindow(
@@ -49,6 +50,7 @@ abstract class MixinWebView {
       app.homeUri,
       conversationId: conversationId,
       title: app.name,
+      app: app,
     );
   }
 }

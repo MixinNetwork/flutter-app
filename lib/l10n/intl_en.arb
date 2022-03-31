@@ -327,5 +327,7 @@
   "resendCode": "Resend code",
   "resendCodeIn": "Resend code in {time}s",
   "sendCodeConfirm": "We will send a 4-digit code to your phone number {phone}, please enter the code in next screen.",
-  "enterNameTitle": "What's your name?"
+  "enterNameTitle": "What's your name?",
+  "refresh": "Refresh",
+  "share": "Share"
 }
