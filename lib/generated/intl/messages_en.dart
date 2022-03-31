@@ -124,29 +124,32 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(name) => "Remove ${name}";
 
-  static String m48(newVersion, current) =>
+  static String m48(date) =>
+      "Your account will be deleted on ${date}, if you continue to log in, the request to delete your account will be cancelled.";
+
+  static String m49(newVersion, current) =>
       "Mixin Messenger ${newVersion} is now available, you have ${current}. Would you like to download it now?";
 
-  static String m49(name) => "Do you want to delete ${name} circle?";
+  static String m50(name) => "Do you want to delete ${name} circle?";
 
-  static String m50(date) => "${date} join";
+  static String m51(date) => "${date} join";
 
-  static String m51(count) => "${count} Participants";
+  static String m52(count) => "${count} Participants";
 
-  static String m52(count) => "${count} Pinned Messages";
+  static String m53(count) => "${count} Pinned Messages";
 
-  static String m53(user, preview) => "${user} pinned ${preview}";
+  static String m54(user, preview) => "${user} pinned ${preview}";
 
-  static String m54(time) => "Resend code in ${time}s";
+  static String m55(time) => "Resend code in ${time}s";
 
-  static String m55(count) => "${count} related messages";
+  static String m56(count) => "${count} related messages";
 
-  static String m56(phone) =>
+  static String m57(phone) =>
       "We will send a 4-digit code to your phone number ${phone}, please enter the code in next screen.";
 
-  static String m57(value) => "value now ${value}";
+  static String m58(value) => "value now ${value}";
 
-  static String m58(value) => "value then ${value}";
+  static String m59(value) => "value then ${value}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -409,6 +412,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "initializing": MessageLookupByLibrary.simpleMessage("Initializing"),
         "introduction": MessageLookupByLibrary.simpleMessage("Introduction"),
         "joinGroup": MessageLookupByLibrary.simpleMessage("+ Join the group"),
+        "landingDeletionWarningContent": m48,
+        "landingDeletionWarningTitle": MessageLookupByLibrary.simpleMessage(
+            "Continue to log in and abort account deletion"),
         "less": MessageLookupByLibrary.simpleMessage("less"),
         "links": MessageLookupByLibrary.simpleMessage("Links"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
@@ -447,7 +453,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Network connection failed"),
         "newVersionAvailable":
             MessageLookupByLibrary.simpleMessage("New version available"),
-        "newVersionDescription": m48,
+        "newVersionDescription": m49,
         "next": MessageLookupByLibrary.simpleMessage("Next"),
         "noAudio": MessageLookupByLibrary.simpleMessage("NO AUDIO"),
         "noData": MessageLookupByLibrary.simpleMessage("NO DATA"),
@@ -467,8 +473,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "openLogDirectory":
             MessageLookupByLibrary.simpleMessage("open log directory"),
         "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
-        "pageDeleteCircle": m49,
-        "pageEditProfileJoin": m50,
+        "pageDeleteCircle": m50,
+        "pageEditProfileJoin": m51,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -477,12 +483,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Login to Mixin Messenger by QR Code"),
         "pageRightEmptyMessage": MessageLookupByLibrary.simpleMessage(
             "Select a conversation to start messaging"),
-        "participantsCount": m51,
+        "participantsCount": m52,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "pin": MessageLookupByLibrary.simpleMessage("Pin"),
-        "pinMessageCount": m52,
-        "pinned": m53,
+        "pinMessageCount": m53,
+        "pinned": m54,
         "pleaseWait":
             MessageLookupByLibrary.simpleMessage("Please wait a moment"),
         "post": MessageLookupByLibrary.simpleMessage("Post"),
@@ -504,7 +510,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportWarning": MessageLookupByLibrary.simpleMessage(
             "Do you want to report and block this contact?"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Resend code"),
-        "resendCodeIn": m54,
+        "resendCodeIn": m55,
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveAs": MessageLookupByLibrary.simpleMessage("Save as"),
@@ -516,14 +522,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
             "No chats, \ncontacts or messages found."),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
-        "searchRelatedMessage": m55,
+        "searchRelatedMessage": m56,
         "searchUser": MessageLookupByLibrary.simpleMessage("Search contact"),
         "searchUserHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID or Phone number"),
         "send": MessageLookupByLibrary.simpleMessage("send"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Archived all files in one zip file"),
-        "sendCodeConfirm": m56,
+        "sendCodeConfirm": m57,
         "sendQuick": MessageLookupByLibrary.simpleMessage("Send quickly"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("Send without compression"),
@@ -581,10 +587,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("Waiting for this message."),
-        "walletTransactionCurrentValue": m57,
+        "walletTransactionCurrentValue": m58,
         "walletTransactionThatTimeNoValue":
             MessageLookupByLibrary.simpleMessage("value then N/A"),
-        "walletTransactionThatTimeValue": m58,
+        "walletTransactionThatTimeValue": m59,
         "webView2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
             "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
         "webViewRuntimeNotAvailable": MessageLookupByLibrary.simpleMessage(

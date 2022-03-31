@@ -3340,6 +3340,26 @@ class Localization {
     );
   }
 
+  /// `Continue to log in and abort account deletion`
+  String get landingDeletionWarningTitle {
+    return Intl.message(
+      'Continue to log in and abort account deletion',
+      name: 'landingDeletionWarningTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your account will be deleted on {date}, if you continue to log in, the request to delete your account will be cancelled.`
+  String landingDeletionWarningContent(Object date) {
+    return Intl.message(
+      'Your account will be deleted on $date, if you continue to log in, the request to delete your account will be cancelled.',
+      name: 'landingDeletionWarningContent',
+      desc: '',
+      args: [date],
+    );
+  }
+
   /// `Refresh`
   String get refresh {
     return Intl.message(
