@@ -24,7 +24,7 @@ import 'utils/local_notification_center.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
-import 'utils/webview.dart';
+import 'utils/web_view/web_view_desktop.dart';
 
 Future<void> main(List<String> args) async {
   EquatableConfig.stringify = true;

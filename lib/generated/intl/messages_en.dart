@@ -492,6 +492,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "recentConversations":
             MessageLookupByLibrary.simpleMessage("Recent conversations"),
         "reedit": MessageLookupByLibrary.simpleMessage("Re-edit"),
+        "refresh": MessageLookupByLibrary.simpleMessage("Refresh"),
         "removeBot": MessageLookupByLibrary.simpleMessage("Remove Bot"),
         "removeChatFromCircle":
             MessageLookupByLibrary.simpleMessage("Remove Chat from circle"),
@@ -535,6 +536,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Follow system"),
         "settingThemeLight": MessageLookupByLibrary.simpleMessage("Light"),
         "settingThemeNight": MessageLookupByLibrary.simpleMessage("Dark"),
+        "share": MessageLookupByLibrary.simpleMessage("Share"),
         "shareContact": MessageLookupByLibrary.simpleMessage("Share Contact"),
         "sharedApps": MessageLookupByLibrary.simpleMessage("Shared Apps"),
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
