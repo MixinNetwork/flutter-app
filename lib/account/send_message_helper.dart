@@ -528,8 +528,9 @@ class SendMessageHelper {
     await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  Future<void> _sendAppCardMessage(
+  Future<void> sendAppCardMessage(
       String conversationId, String senderId, String content) async {
+    d('sendAppCardMessage: $content');
     const category = MessageCategory.appCard;
     final message = Message(
       messageId: const Uuid().v4(),
@@ -728,7 +729,7 @@ class SendMessageHelper {
       await _sendLocationMessage(
           conversationId, senderId, message.content!, encryptCategory);
     } else if (message.category == MessageCategory.appCard) {
-      await _sendAppCardMessage(conversationId, senderId, message.content!);
+      await sendAppCardMessage(conversationId, senderId, message.content!);
     } else if (message.category.isTranscript) {
       final transcripts = await _transcriptMessageDao
           .transcriptMessageByTranscriptId(message.messageId)

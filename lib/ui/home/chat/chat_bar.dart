@@ -4,7 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
-import '../../../utils/webview.dart';
+import '../../../utils/web_view/web_view_interface.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/buttons.dart';
@@ -287,24 +287,16 @@ class _BotIcon extends HookWidget {
       return const SizedBox();
     }
 
-    final child = ActionButton(
+    return ActionButton(
       name: Resources.assetsImagesBotSvg,
       color: context.theme.icon,
       onTap: () {
-        if (!kIsSupportWebView) {
-          return;
-        }
-        openBotWebViewWindow(
+        MixinWebView.instance.openBotWebViewWindow(
           context,
           conversation.app!,
           conversationId: conversation.conversationId,
         );
       },
     );
-
-    if (kIsSupportWebView) {
-      return child;
-    }
-    return Tooltip(message: context.l10n.comingSoon, child: child);
   }
 }

@@ -3,8 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/uri_utils.dart';
-import '../../../utils/webview.dart';
+import '../../../utils/web_view/web_view_interface.dart';
 import '../../interactive_decorated_box.dart';
 import '../../toast.dart';
 import '../message.dart';
@@ -44,12 +43,8 @@ class StrangerMessage extends StatelessWidget {
                   final app =
                       await context.database.appDao.findAppById(message.appId!);
                   if (app == null) return;
-                  if (kIsSupportWebView) {
-                    await openBotWebViewWindow(context, app,
-                        conversationId: message.conversationId);
-                  } else {
-                    await openUri(context, app.homeUri);
-                  }
+                  await MixinWebView.instance.openBotWebViewWindow(context, app,
+                      conversationId: message.conversationId);
                 } else {
                   await runFutureWithToast(
                     context,
