@@ -155,6 +155,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addStickers": MessageLookupByLibrary.simpleMessage("添加所有表情"),
         "added": MessageLookupByLibrary.simpleMessage("已添加"),
         "appCard": MessageLookupByLibrary.simpleMessage("卡片"),
+        "appCardShareDisallow":
+            MessageLookupByLibrary.simpleMessage("该链接已被设置为不允许分享"),
         "appearance": MessageLookupByLibrary.simpleMessage("显示偏好"),
         "archivedFolder": MessageLookupByLibrary.simpleMessage("存档文件夹"),
         "assetType": MessageLookupByLibrary.simpleMessage("资产类型"),

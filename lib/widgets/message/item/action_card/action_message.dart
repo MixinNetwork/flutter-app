@@ -48,6 +48,7 @@ class ActionCardMessage extends HookWidget {
             context,
             appCardData.action,
             title: appCardData.title,
+            appCardData: appCardData,
             conversationId:
                 context.read<ConversationCubit>().state?.conversationId,
           );

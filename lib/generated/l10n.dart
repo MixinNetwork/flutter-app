@@ -3379,6 +3379,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Disallow sharing of this URL`
+  String get appCardShareDisallow {
+    return Intl.message(
+      'Disallow sharing of this URL',
+      name: 'appCardShareDisallow',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
