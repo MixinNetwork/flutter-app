@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../db/mixin_database.dart';
+import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../platform.dart';
 import 'web_view_desktop.dart';
 import 'web_view_mobile.dart';
@@ -34,6 +35,7 @@ abstract class MixinWebView {
     String? conversationId,
     String? title,
     App? app,
+    AppCardData? appCardData,
   });
 
   Future<void> openBotWebViewWindow(

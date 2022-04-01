@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/constants.dart';
 import '../widgets/conversation/conversation_dialog.dart';
+import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/item/transfer/transfer_page.dart';
 import '../widgets/toast.dart';
 import '../widgets/unknown_mixin_url_dialog.dart';
@@ -19,6 +20,7 @@ Future<bool> openUriWithWebView(
   String text, {
   String? title,
   String? conversationId,
+  AppCardData? appCardData,
 }) async =>
     openUri(context, text, fallbackHandler: (url) async {
       if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
@@ -27,6 +29,7 @@ Future<bool> openUriWithWebView(
           url,
           conversationId: conversationId,
           title: title,
+          appCardData: appCardData,
         );
         return true;
       }

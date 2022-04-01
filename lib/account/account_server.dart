@@ -1165,6 +1165,21 @@ class AccountServer {
     await database.fiatDao.insertAllSdkFiat(data.data);
   }
 
+  Future<db.App?> getAppAndCheckUser(String id, DateTime? updatedAt) async {
+    final app = await database.appDao.findAppById(id);
+    if (app?.updatedAt != null && app?.updatedAt == updatedAt) {
+      return app;
+    }
+    try {
+      final user = await client.userApi.getUserById(id);
+      await _injector.insertUpdateUsers([user.data]);
+      return database.appDao.findAppById(id);
+    } catch (error, stackTrace) {
+      d('get app and check user error: $error, $stackTrace');
+      return null;
+    }
+  }
+
   Future<void> loadFavoriteApps(String userId) async {
     final result = await client.userApi.getUserFavoriteApps(userId);
     final apps = result.data;

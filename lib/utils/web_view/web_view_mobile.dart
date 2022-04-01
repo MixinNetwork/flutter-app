@@ -9,8 +9,10 @@ import '../../widgets/action_button.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
+import '../../widgets/toast.dart';
 import '../../widgets/user_selector/conversation_selector.dart';
 import '../extension/extension.dart';
+import '../logger.dart';
 import 'web_view_interface.dart';
 
 class MobileMixinWebView extends MixinWebView {
@@ -32,6 +34,7 @@ class MobileMixinWebView extends MixinWebView {
     String? conversationId,
     String? title,
     App? app,
+    AppCardData? appCardData,
   }) async {
     await showGeneralDialog(
       context: context,
@@ -39,6 +42,7 @@ class MobileMixinWebView extends MixinWebView {
           _FullWindowInAppWebViewPage(
         initialUrl: url,
         app: app,
+        appCardData: appCardData,
       ),
     );
   }
@@ -56,10 +60,12 @@ class _FullWindowInAppWebViewPage extends HookWidget {
     Key? key,
     required this.initialUrl,
     required this.app,
+    required this.appCardData,
   }) : super(key: key);
 
   final String initialUrl;
   final App? app;
+  final AppCardData? appCardData;
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +93,7 @@ class _FullWindowInAppWebViewPage extends HookWidget {
               child: _WebControl(
                 webViewController: webViewController.value,
                 app: app,
+                appCardData: appCardData,
               ),
             ),
           ],
@@ -101,10 +108,12 @@ class _WebControl extends StatelessWidget {
     Key? key,
     required this.webViewController,
     required this.app,
+    required this.appCardData,
   }) : super(key: key);
 
   final WebViewController? webViewController;
   final App? app;
+  final AppCardData? appCardData;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -132,6 +141,7 @@ class _WebControl extends StatelessWidget {
                     child: _WebViewActionDialog(
                       webViewController: controller,
                       app: app,
+                      appCardData: appCardData,
                     ),
                   );
                 },
@@ -164,11 +174,14 @@ class _WebViewActionDialog extends StatelessWidget {
     Key? key,
     required this.webViewController,
     required this.app,
+    required this.appCardData,
   }) : super(key: key);
 
   final WebViewController webViewController;
 
   final App? app;
+
+  final AppCardData? appCardData;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -194,46 +207,11 @@ class _WebViewActionDialog extends StatelessWidget {
             CellGroup(
               child: Column(
                 children: [
-                  if (app != null)
-                    CellItem(
-                      title: Text(context.l10n.share),
-                      leading: SvgPicture.asset(
-                        Resources.assetsImagesShareSvg,
-                        width: 24,
-                        height: 24,
-                        color: context.theme.text,
-                      ),
-                      trailing: null,
-                      onTap: () async {
-                        Navigator.pop(context);
-                        final title = await webViewController.getTitle();
-                        final url = await webViewController.currentUrl();
-                        final accountServer = context.accountServer;
-                        final result = await showConversationSelector(
-                          context: context,
-                          singleSelect: true,
-                          title: context.l10n.forward,
-                          onlyContact: false,
-                        );
-                        if (result == null || result.isEmpty) return;
-
-                        final app = this.app!;
-
-                        await accountServer.sendAppCardMessage(
-                          conversationId: result.first.conversationId,
-                          recipientId: result.first.userId,
-                          data: AppCardData(
-                            app.appId,
-                            app.iconUrl,
-                            app.name,
-                            title ?? app.name,
-                            url ?? app.homeUri,
-                            app.updatedAt?.toIso8601String() ?? '',
-                            true,
-                          ),
-                        );
-                      },
-                    ),
+                  _ShareMenuItem(
+                    appCardData: appCardData,
+                    app: app,
+                    webViewController: webViewController,
+                  ),
                   CellItem(
                     title: Text(context.l10n.refresh),
                     leading: SvgPicture.asset(
@@ -255,4 +233,121 @@ class _WebViewActionDialog extends StatelessWidget {
           ],
         ),
       );
+}
+
+class _ShareMenuItem extends StatelessWidget {
+  const _ShareMenuItem({
+    Key? key,
+    required this.appCardData,
+    required this.app,
+    required this.webViewController,
+  }) : super(key: key);
+
+  final AppCardData? appCardData;
+  final App? app;
+  final WebViewController webViewController;
+
+  @override
+  Widget build(BuildContext context) => CellItem(
+        title: Text(context.l10n.share),
+        leading: SvgPicture.asset(
+          Resources.assetsImagesShareSvg,
+          width: 24,
+          height: 24,
+          color: context.theme.text,
+        ),
+        trailing: null,
+        onTap: () async {
+          // can not share app
+          if (appCardData?.shareable == false) {
+            await showToastFailed(
+              context,
+              ToastError(context.l10n.appCardShareDisallow),
+            );
+          } else {
+            var title = await webViewController.getTitle();
+            final url = await webViewController.currentUrl();
+
+            final selectedConversation = await showConversationSelector(
+              context: context,
+              singleSelect: true,
+              title: context.l10n.forward,
+              onlyContact: false,
+            );
+            if (selectedConversation == null || selectedConversation.isEmpty) {
+              return;
+            }
+
+            var app = this.app;
+            if (appCardData?.appId != null) {
+              app = await context.accountServer.getAppAndCheckUser(
+                appCardData!.appId!,
+                DateTime.parse(appCardData!.updatedAt),
+              );
+            }
+
+            if (app != null && url != null && _matchResourcePattern(url, app)) {
+              if (title?.trim().isNotEmpty != true) {
+                title = app.name;
+              }
+              final appCardData = AppCardData(
+                app.appId,
+                app.iconUrl,
+                app.name,
+                title ?? app.name,
+                url,
+                app.updatedAt?.toIso8601String() ?? '',
+                true,
+              );
+
+              await context.accountServer.sendAppCardMessage(
+                conversationId: selectedConversation.first.conversationId,
+                recipientId: selectedConversation.first.userId,
+                data: appCardData,
+              );
+            } else {
+              final category = selectedConversation.first.encryptCategory;
+              assert(category != null, 'category must not be null');
+              if (category == null) {
+                e('selected conversation encrypt category is null');
+                return;
+              }
+              await context.accountServer.sendTextMessage(
+                url ?? '',
+                category,
+                conversationId: selectedConversation.first.conversationId,
+                recipientId: selectedConversation.first.userId,
+              );
+            }
+            Navigator.pop(context);
+          }
+        },
+      );
+}
+
+bool _matchResourcePattern(String url, App app) {
+  String? toSchemeHostOrNull(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return null;
+    return '${uri.scheme.toLowerCase()}://${uri.host.toLowerCase()}';
+  }
+
+  final uri = toSchemeHostOrNull(url);
+
+  var patterns = app.resourcePatterns;
+  if (patterns == null) return false;
+
+  try {
+    if (patterns.startsWith('[')) {
+      patterns = patterns.substring(1);
+    }
+    if (patterns.endsWith(']')) {
+      patterns = patterns.substring(0, patterns.length - 1);
+    }
+    final list = patterns.trim().split(',');
+    return list.any((element) => toSchemeHostOrNull(element.trim()) == uri);
+  } catch (error, stacktrace) {
+    e('decode resource patterns error: $error, $stacktrace');
+    return false;
+  }
 }

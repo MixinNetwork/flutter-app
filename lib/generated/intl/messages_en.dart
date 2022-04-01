@@ -169,6 +169,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addStickers": MessageLookupByLibrary.simpleMessage("Add Stickers"),
         "added": MessageLookupByLibrary.simpleMessage("Added"),
         "appCard": MessageLookupByLibrary.simpleMessage("Card"),
+        "appCardShareDisallow": MessageLookupByLibrary.simpleMessage(
+            "Disallow sharing of this URL"),
         "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
         "archivedFolder":
             MessageLookupByLibrary.simpleMessage("archived folder"),
