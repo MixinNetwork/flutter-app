@@ -29,7 +29,10 @@ class SettingState extends Equatable {
   final bool messageShowAvatar;
 
   @override
-  List<Object?> get props => [brightness];
+  List<Object?> get props => [
+        brightness,
+        messageShowAvatar,
+      ];
 
   Map<String, dynamic> toMap() => {
         'brightness': brightness,
