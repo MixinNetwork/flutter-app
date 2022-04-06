@@ -267,7 +267,7 @@ Future<String> _archiveFiles(List<String> paths) async {
   final encoder = ZipFileEncoder()..create(outPath);
   paths.removeAt(0);
   for (final filePath in paths) {
-    encoder.addFile(File(filePath), path.basename(filePath));
+    await encoder.addFile(File(filePath), path.basename(filePath));
   }
   encoder.close();
   return outPath;
