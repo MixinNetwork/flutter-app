@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:tuple/tuple.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../ui/home/chat/chat_page.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
+import '../../../../utils/logger.dart';
 import '../../../../utils/reg_exp_utils.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../high_light_text.dart';
@@ -49,6 +51,22 @@ class TextMessage extends HookWidget {
           ),
       [content],
     );
+    final mailHighlightTextSpans = useMemoized(
+      () => mailRegExp.allMatchesAndSort(content).map(
+            (e) => HighlightTextSpan(
+              e[0]!,
+              style: TextStyle(
+                color: context.theme.accent,
+              ),
+              onTap: () {
+                final uri = 'mailto:${e[0]!}';
+                d('open mail uri: $uri');
+                launch(uri);
+              },
+            ),
+          ),
+      [content],
+    );
 
     final botNumberHighlightTextSpans = useMemoized(
       () => botNumberRegExp.allMatchesAndSort(content).map(
@@ -65,9 +83,16 @@ class TextMessage extends HookWidget {
 
     final keywordHighlightTextSpans = useMemoized(
         () => keyword.trim().isEmpty
-            ? [...urlHighlightTextSpans, ...botNumberHighlightTextSpans]
-            : [...urlHighlightTextSpans, ...botNumberHighlightTextSpans]
-                .fold<Set<HighlightTextSpan>>({}, (previousValue, element) {
+            ? [
+                ...urlHighlightTextSpans,
+                ...mailHighlightTextSpans,
+                ...botNumberHighlightTextSpans
+              ]
+            : [
+                ...urlHighlightTextSpans,
+                ...mailHighlightTextSpans,
+                ...botNumberHighlightTextSpans
+              ].fold<Set<HighlightTextSpan>>({}, (previousValue, element) {
                 element.text.splitMapJoin(
                   RegExp(keyword, caseSensitive: false),
                   onMatch: (match) {
