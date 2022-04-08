@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart'
     hide generateIdentityKeyPair;
+
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
 import 'package:uuid/uuid.dart';
@@ -217,6 +218,7 @@ class SignalProtocol {
     SendingMessage message,
     List<String>? mentionData, {
     bool silent = false,
+    int expireIn = 0,
   }) async {
     final address = SignalProtocolAddress(message.userId, defaultDeviceId);
     final senderKeyName = SenderKeyName(message.conversationId, address);

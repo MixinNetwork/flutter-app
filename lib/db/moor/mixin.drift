@@ -21,7 +21,7 @@ CREATE TABLE circle_conversations ( conversation_id TEXT NOT NULL, circle_id TEX
 
 CREATE TABLE circles ( circle_id TEXT NOT NULL, name TEXT NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, ordered_at INTEGER MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(circle_id) );
 
-CREATE TABLE conversations ( conversation_id TEXT NOT NULL, owner_id TEXT, category TEXT MAPPED BY `const ConversationCategoryTypeConverter()`, name TEXT, icon_url TEXT, announcement TEXT, code_url TEXT, pay_type TEXT, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, pin_time INTEGER MAPPED BY `const MillisDateConverter()`, last_message_id TEXT, last_message_created_at INTEGER MAPPED BY `const MillisDateConverter()`, last_read_message_id TEXT, unseen_message_count INTEGER, status INTEGER NOT NULL MAPPED BY `const ConversationStatusTypeConverter()`, draft TEXT, mute_until INTEGER MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(conversation_id) );
+CREATE TABLE conversations ( conversation_id TEXT NOT NULL, owner_id TEXT, category TEXT MAPPED BY `const ConversationCategoryTypeConverter()`, name TEXT, icon_url TEXT, announcement TEXT, code_url TEXT, pay_type TEXT, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, pin_time INTEGER MAPPED BY `const MillisDateConverter()`, last_message_id TEXT, last_message_created_at INTEGER MAPPED BY `const MillisDateConverter()`, last_read_message_id TEXT, unseen_message_count INTEGER, status INTEGER NOT NULL MAPPED BY `const ConversationStatusTypeConverter()`, draft TEXT, mute_until INTEGER MAPPED BY `const MillisDateConverter()`, expire_in INTEGER, PRIMARY KEY(conversation_id) );
 
 CREATE TABLE flood_messages ( message_id TEXT NOT NULL, data TEXT NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(message_id) );
 
@@ -65,6 +65,10 @@ CREATE TABLE fiats (code TEXT NOT NULL, rate DOUBLE NOT NULL, PRIMARY KEY(code))
 
 CREATE TABLE favorite_apps (app_id TEXT NOT NULL, user_id TEXT NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(app_id, user_id));
 
+CREATE TABLE remote_messages_status (message_id TEXT NOT NULL, conversation_id TEXT NOT NULL ,status TEXT NOT NULL, PRIMARY KEY(message_id));
+
+CREATE TABLE expired_messages (message_id TEXT NOT NULL, expire_in INTEGER NOT NULL, expire_at INTEGER, PRIMARY KEY(message_id));
+
 CREATE INDEX IF NOT EXISTS index_conversations_category_status ON conversations(category, status);
 CREATE INDEX IF NOT EXISTS index_conversations_mute_until ON conversations(mute_until);
 CREATE INDEX IF NOT EXISTS index_flood_messages_created_at ON flood_messages(created_at);
@@ -75,5 +79,6 @@ CREATE INDEX IF NOT EXISTS index_participants_conversation_id_created_at ON part
 CREATE INDEX IF NOT EXISTS index_sticker_albums_category_created_at ON sticker_albums(category, created_at DESC);
 CREATE INDEX IF NOT EXISTS index_pin_messages_conversation_id ON pin_messages(conversation_id);
 CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messages(conversation_id, status, user_id);
+CREATE INDEX IF NOT EXISTS index_remote_messages_status_conversation_id_status ON remote_messages_status(conversation_id, status);
 
 CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (select message_id from messages where conversation_id = old.conversation_id order by created_at DESC limit 1) WHERE conversation_id = old.conversation_id; END;

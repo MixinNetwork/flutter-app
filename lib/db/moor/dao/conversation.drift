@@ -24,6 +24,7 @@ SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS 
     lastMessage.status AS messageStatus,
     lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType,
     participant.full_name AS participantFullName, participant.user_id AS participantUserId,
+    em.expire_in AS expireIn,
     (SELECT COUNT(1)
      FROM message_mentions messageMention
      WHERE messageMention.conversation_id = conversation.conversation_id AND
@@ -35,6 +36,7 @@ FROM conversations conversation
          LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id
          LEFT JOIN snapshots snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id
          LEFT JOIN users participant ON participant.user_id = lastMessage.participant_id
+         LEFT JOIN expired_messages em ON lastMessage.message_id = em.message_id
 WHERE $where
 ORDER BY $order
 LIMIT $limit;
@@ -56,6 +58,7 @@ SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS 
     lastMessage.status AS messageStatus,
     lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType,
     participant.full_name AS participantFullName, participant.user_id AS participantUserId,
+    em.expire_in AS expireIn,
     (SELECT COUNT(1)
      FROM message_mentions messageMention
      WHERE messageMention.conversation_id = conversation.conversation_id AND
@@ -68,6 +71,7 @@ FROM conversations conversation
          LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id
          LEFT JOIN snapshots snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id
          LEFT JOIN users participant ON participant.user_id = lastMessage.participant_id
+         LEFT JOIN expired_messages em ON lastMessage.message_id = em.message_id
 WHERE circleConversation.circle_id = :circleId
 ORDER BY $order
 LIMIT $limit;

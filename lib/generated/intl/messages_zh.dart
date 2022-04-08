@@ -223,6 +223,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "currentIdentityNumber": m12,
         "dataAndStorageUsage":
             MessageLookupByLibrary.simpleMessage("数据和存储使用情况"),
+        "day": MessageLookupByLibrary.simpleMessage("天"),
+        "days": MessageLookupByLibrary.simpleMessage("天"),
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
         "deleteChat": MessageLookupByLibrary.simpleMessage("删除对话"),
         "deleteChatDescription":
@@ -233,6 +235,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteForMe": MessageLookupByLibrary.simpleMessage("删除"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("删除群组"),
         "developer": MessageLookupByLibrary.simpleMessage("开发者"),
+        "disappearingCustomTime": MessageLookupByLibrary.simpleMessage("自定义时间"),
+        "disappearingMessages": MessageLookupByLibrary.simpleMessage("限时消息"),
+        "disappearingMessagesDescription": MessageLookupByLibrary.simpleMessage(
+            "启用后，在此聊天中发送和接收的新消息将在看到消失，请阅读文档以了解更多。"),
         "done": MessageLookupByLibrary.simpleMessage("完成"),
         "download": MessageLookupByLibrary.simpleMessage("下载"),
         "downloadLink": MessageLookupByLibrary.simpleMessage("下载链接："),
@@ -347,6 +353,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "groups": MessageLookupByLibrary.simpleMessage("群组"),
         "groupsInCommon": MessageLookupByLibrary.simpleMessage("共同群组"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("帮助中心"),
+        "hour": MessageLookupByLibrary.simpleMessage("小时"),
+        "hours": MessageLookupByLibrary.simpleMessage("小时"),
         "ignoreThisUpdate": MessageLookupByLibrary.simpleMessage("忽略这次更新"),
         "image": MessageLookupByLibrary.simpleMessage("照片"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("包含文件"),
@@ -357,6 +365,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "landingDeletionWarningContent": m48,
         "landingDeletionWarningTitle":
             MessageLookupByLibrary.simpleMessage("继续登录并放弃删除账户"),
+        "learnMore": MessageLookupByLibrary.simpleMessage("了解更多"),
         "less": MessageLookupByLibrary.simpleMessage("更少"),
         "links": MessageLookupByLibrary.simpleMessage("链接"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
@@ -374,6 +383,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("预览新消息通知中的消息文本。"),
         "messageTooLong": MessageLookupByLibrary.simpleMessage("消息内容过长"),
         "messages": MessageLookupByLibrary.simpleMessage("消息"),
+        "minute": MessageLookupByLibrary.simpleMessage("分钟"),
+        "minutes": MessageLookupByLibrary.simpleMessage("分钟"),
         "more": MessageLookupByLibrary.simpleMessage("更多"),
         "mute": MessageLookupByLibrary.simpleMessage("静音"),
         "mute1hour": MessageLookupByLibrary.simpleMessage("1 小时"),
@@ -403,6 +414,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("未允许通知，请到通知设置开启。"),
         "notificationPermissionTitle":
             MessageLookupByLibrary.simpleMessage("打开通知"),
+        "off": MessageLookupByLibrary.simpleMessage("关闭"),
         "openLogDirectory": MessageLookupByLibrary.simpleMessage("打开日志文件夹"),
         "originalImage": MessageLookupByLibrary.simpleMessage("原图"),
         "pageDeleteCircle": m50,
@@ -451,6 +463,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchRelatedMessage": m56,
         "searchUser": MessageLookupByLibrary.simpleMessage("搜索用户"),
         "searchUserHint": MessageLookupByLibrary.simpleMessage("Mixin ID 或手机号"),
+        "second": MessageLookupByLibrary.simpleMessage("秒"),
+        "seconds": MessageLookupByLibrary.simpleMessage("秒"),
         "send": MessageLookupByLibrary.simpleMessage("发送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),
         "sendCodeConfirm": m57,
@@ -459,6 +473,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("发送原始文件"),
         "sendWithoutSound": MessageLookupByLibrary.simpleMessage("静音发送"),
         "sentYouAMessage": MessageLookupByLibrary.simpleMessage("发来一条信息"),
+        "set": MessageLookupByLibrary.simpleMessage("设置"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("主题"),
         "settingThemeAuto": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "settingThemeLight": MessageLookupByLibrary.simpleMessage("浅色"),
@@ -513,6 +528,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "该设备暂未安装 WebView2 组件，请先下载并安装 WebView2 Runtime。"),
         "webViewRuntimeNotAvailable":
             MessageLookupByLibrary.simpleMessage("WebView2 组件不可用"),
+        "week": MessageLookupByLibrary.simpleMessage("周"),
+        "weeks": MessageLookupByLibrary.simpleMessage("周"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youStart": MessageLookupByLibrary.simpleMessage("您")
       };

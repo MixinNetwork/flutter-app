@@ -861,9 +861,9 @@ packages:
   mixin_bot_sdk_dart:
     dependency: "direct main"
     description:
-      name: mixin_bot_sdk_dart
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../mixin_bot_sdk_dart"
+      relative: true
+    source: path
     version: "0.2.14"
   msix:
     dependency: "direct dev"

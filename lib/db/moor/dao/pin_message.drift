@@ -55,6 +55,7 @@ SELECT message.message_id AS messageId,
     hyperlink.site_description AS siteDescription,
     hyperlink.site_image AS siteImage,
     messageMention.has_read AS mentionRead,
+    em.expire_in AS expireIn,
     CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned
 FROM pin_messages pinMessage
          INNER JOIN messages message ON message.message_id = pinMessage.message_id
@@ -68,6 +69,7 @@ FROM pin_messages pinMessage
          LEFT JOIN conversations conversation
 ON message.conversation_id = conversation.conversation_id
          LEFT JOIN message_mentions messageMention ON message.message_id = messageMention.message_id
+         LEFT JOIN expired_messages em ON message.message_id = em.message_id
 WHERE pinMessage.conversation_id = :conversationId
 ORDER BY $order
 LIMIT $limit;

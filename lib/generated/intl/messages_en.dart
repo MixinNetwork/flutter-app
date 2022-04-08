@@ -256,6 +256,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "currentIdentityNumber": m12,
         "dataAndStorageUsage":
             MessageLookupByLibrary.simpleMessage("Data and Storage Usage"),
+        "day": MessageLookupByLibrary.simpleMessage("day"),
+        "days": MessageLookupByLibrary.simpleMessage("days"),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deleteChat": MessageLookupByLibrary.simpleMessage("Delete Chat"),
         "deleteChatDescription": MessageLookupByLibrary.simpleMessage(
@@ -267,6 +269,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteForMe": MessageLookupByLibrary.simpleMessage("Delete for me"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("Delete Group"),
         "developer": MessageLookupByLibrary.simpleMessage("Developer"),
+        "disappearingCustomTime":
+            MessageLookupByLibrary.simpleMessage("Custom time"),
+        "disappearingMessages":
+            MessageLookupByLibrary.simpleMessage("Disappearing messages"),
+        "disappearingMessagesDescription": MessageLookupByLibrary.simpleMessage(
+            "When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to learn more."),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
         "download": MessageLookupByLibrary.simpleMessage("Download"),
         "downloadLink": MessageLookupByLibrary.simpleMessage("Download Link: "),
@@ -406,6 +414,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupsInCommon":
             MessageLookupByLibrary.simpleMessage("Groups in common"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
+        "hour": MessageLookupByLibrary.simpleMessage("hour"),
+        "hours": MessageLookupByLibrary.simpleMessage("hours"),
         "ignoreThisUpdate":
             MessageLookupByLibrary.simpleMessage("Ignore this update"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
@@ -417,6 +427,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "landingDeletionWarningContent": m48,
         "landingDeletionWarningTitle": MessageLookupByLibrary.simpleMessage(
             "Continue to log in and abort account deletion"),
+        "learnMore": MessageLookupByLibrary.simpleMessage("Learn more"),
         "less": MessageLookupByLibrary.simpleMessage("less"),
         "links": MessageLookupByLibrary.simpleMessage("Links"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
@@ -438,6 +449,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageTooLong":
             MessageLookupByLibrary.simpleMessage("Message content is too long"),
         "messages": MessageLookupByLibrary.simpleMessage("Messages"),
+        "minute": MessageLookupByLibrary.simpleMessage("minute"),
+        "minutes": MessageLookupByLibrary.simpleMessage("minutes"),
         "mixinMessenger":
             MessageLookupByLibrary.simpleMessage("Mixin Messenger"),
         "more": MessageLookupByLibrary.simpleMessage("more"),
@@ -472,6 +485,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Notifications are not allowed, please go to Notification Settings to turn on."),
         "notificationPermissionTitle":
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
+        "off": MessageLookupByLibrary.simpleMessage("Off"),
         "openLogDirectory":
             MessageLookupByLibrary.simpleMessage("open log directory"),
         "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
@@ -528,6 +542,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchUser": MessageLookupByLibrary.simpleMessage("Search contact"),
         "searchUserHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID or Phone number"),
+        "second": MessageLookupByLibrary.simpleMessage("second"),
+        "seconds": MessageLookupByLibrary.simpleMessage("seconds"),
         "send": MessageLookupByLibrary.simpleMessage("send"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Archived all files in one zip file"),
@@ -539,6 +555,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Send Without Sound"),
         "sentYouAMessage":
             MessageLookupByLibrary.simpleMessage("Sent you a message"),
+        "set": MessageLookupByLibrary.simpleMessage("Set"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("Theme"),
         "settingThemeAuto":
             MessageLookupByLibrary.simpleMessage("Follow system"),
@@ -597,6 +614,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
         "webViewRuntimeNotAvailable": MessageLookupByLibrary.simpleMessage(
             "WebView2 Runtime is not available"),
+        "week": MessageLookupByLibrary.simpleMessage("week"),
+        "weeks": MessageLookupByLibrary.simpleMessage("weeks"),
         "you": MessageLookupByLibrary.simpleMessage("you"),
         "youStart": MessageLookupByLibrary.simpleMessage("You")
       };

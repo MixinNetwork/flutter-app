@@ -332,5 +332,21 @@
   "landingDeletionWarningContent": "Your account will be deleted on {date}, if you continue to log in, the request to delete your account will be cancelled.",
   "refresh": "Refresh",
   "share": "Share",
-  "appCardShareDisallow": "Disallow sharing of this URL"
+  "appCardShareDisallow": "Disallow sharing of this URL",
+  "disappearingMessages": "Disappearing messages",
+  "disappearingMessagesDescription": "When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to learn more.",
+  "learnMore": "Learn more",
+  "off": "Off",
+  "disappearingCustomTime": "Custom time",
+  "seconds": "seconds",
+  "minutes": "minutes",
+  "hours": "hours",
+  "days": "days",
+  "weeks": "weeks",
+  "second": "second",
+  "minute": "minute",
+  "hour": "hour",
+  "day": "day",
+  "week": "week",
+  "set": "Set"
 }

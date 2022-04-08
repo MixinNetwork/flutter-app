@@ -1,0 +1,28 @@
+import '../mixin.drift';
+
+findRemoteMessageStatus:
+SELECT * FROM remote_messages_status rm
+  LEFT JOIN expired_messages em
+  WHERE rm.status = 'READ'
+  LIMIT 1000;
+
+markRemoteMessageReadByConversationId:
+UPDATE remote_messages_status rm
+  LEFT JOIN expired_messages em
+  SET rm.status = 'READ'
+  WHERE rm.conversation_id = :conversationId;
+
+updateConversationUnseen:
+UPDATE conversations
+  SET unseen_message_count =
+    (SELECT count(1) FROM remote_messages_status WHERE conversation_id = :conversationId AND status == 'DELIVERED')
+  WHERE conversation_id = :conversationId;
+
+countRemoteMessageUnread:
+SELECT count(1) FROM remote_messages_status WHERE conversation_id = :conversationId AND status == 'DELIVERED';
+
+deleteRemoteMessageByMessageId:
+DELETE FROM remote_messages_status WHERE message_id = :messageId;
+
+deleteRemoteMessageByMessageIds:
+DELETE FROM remote_messages_status WHERE message_id IN (:messageIds);

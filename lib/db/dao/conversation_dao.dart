@@ -93,15 +93,19 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     Users lastMessageSender,
     Snapshots snapshot,
     Users participant,
+    ExpiredMessages em,
   )
               limit) =>
       db.baseConversationItems(
-          (Conversations conversation,
-                  Users owner,
-                  Messages message,
-                  Users lastMessageSender,
-                  Snapshots snapshot,
-                  Users participant) =>
+          (
+            Conversations conversation,
+            Users owner,
+            Messages message,
+            Users lastMessageSender,
+            Snapshots snapshot,
+            Users participant,
+            ExpiredMessages em,
+          ) =>
               where(
                 conversation,
                 owner,
@@ -110,7 +114,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
                 snapshot,
                 participant,
               ),
-          (conversation, _, __, ___, ____, _____) =>
+          (conversation, _, __, ___, ____, _____, em) =>
               _baseConversationItemOrder(conversation),
           limit);
 
@@ -136,7 +140,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, owner, message, lastMessageSender, snapshot,
                 participant) =>
             _chatWhere(conversation),
-        (_, __, ___, ____, ______, _______) => Limit(limit, offset),
+        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
       );
 
   Future<bool> chatConversationHasData() =>
@@ -169,7 +173,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, owner, message, lastMessageSender, snapshot,
                 participant) =>
             _contactWhere(conversation, owner),
-        (_, __, ___, ____, ______, _______) => Limit(limit, offset),
+        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
       );
 
   Future<bool> contactConversationHasData() =>
@@ -195,7 +199,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, owner, message, lastMessageSender, snapshot,
                 participant) =>
             _strangerWhere(conversation, owner),
-        (_, __, ___, ____, ______, _______) => Limit(limit, offset),
+        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
       );
 
   Future<bool> strangerConversationHasData() =>
@@ -222,7 +226,16 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, owner, message, lastMessageSender, snapshot,
                 participant) =>
             _groupWhere(conversation),
-        (_, __, ___, ____, ______, _______) => Limit(limit, offset),
+        (
+          _,
+          __,
+          ___,
+          ____,
+          ______,
+          _______,
+          ExpiredMessages em,
+        ) =>
+            Limit(limit, offset),
       );
 
   Expression<bool?> _botWhere(Conversations conversation, Users owner) =>
@@ -243,7 +256,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, owner, message, lastMessageSender, snapshot,
                 participant) =>
             _botWhere(conversation, owner),
-        (_, __, ___, ____, ______, _______) => Limit(limit, offset),
+        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
       );
 
   Future<bool> botConversationHasData() =>
@@ -253,13 +266,13 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       _baseConversationItems(
         (conversation, _, __, ___, ____, ______) =>
             conversation.conversationId.equals(conversationId),
-        (_, __, ___, ____, ______, _______) => Limit(1, null),
+        (_, __, ___, ____, ______, _______, em) => Limit(1, null),
       );
 
   Selectable<ConversationItem> conversationItems() => _baseConversationItems(
         (conversation, _, __, ___, ____, ______) =>
             conversation.category.isIn(['CONTACT', 'GROUP']),
-        (_, __, ___, ____, ______, _______) => maxLimit,
+        (_, __, ___, ____, ______, _______, em) => maxLimit,
       );
 
   Selectable<int> conversationsCountByCircleId(String circleId) =>
@@ -270,9 +283,10 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           String circleId, int limit, int offset) =>
       db.baseConversationItemsByCircleId(
         circleId,
-        (conversation, _, __, ___, ____, _____, _____i) =>
+        (conversation, _, __, ___, ____, _____, _____i, em) =>
             _baseConversationItemOrder(conversation),
-        (_, __, ___, ____, ______, _______, ________) => Limit(limit, offset),
+        (_, __, ___, ____, ______, _______, ________, em) =>
+            Limit(limit, offset),
       );
 
   Future<bool> conversationHasDataByCircleId(String circleId) => db.hasData(

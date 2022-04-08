@@ -569,11 +569,13 @@ class _MessageProcessRunner {
   Future<BlazeMessage> encryptNormalMessage(
     db.SendingMessage message, {
     bool silent = false,
+    int expireIn = 0,
   }) async =>
       signalProtocol.encryptGroupMessage(
         message,
         await getMentionData(message.messageId),
         silent: silent,
+        expireIn: expireIn,
       );
 
   BlazeMessage _createBlazeMessage(
