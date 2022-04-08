@@ -63,6 +63,8 @@ class ChatInfoPage extends HookWidget {
     final isOwnerOrAdmin = userParticipant?.role == ParticipantRole.owner ||
         userParticipant?.role == ParticipantRole.admin;
 
+    final expireIn = conversation.conversation?.expireDuration ?? Duration.zero;
+
     return Scaffold(
       appBar: MixinAppBar(
         actions: [
@@ -168,6 +170,22 @@ class ChatInfoPage extends HookWidget {
                 ],
               ),
             ),
+            if (isGroupConversation && isOwnerOrAdmin)
+              CellGroup(
+                child: CellItem(
+                  title: Text(context.l10n.disappearingMessages),
+                  description: Text(
+                    expireIn.formatAsConversationExpireIn(context),
+                    style: TextStyle(
+                      color: context.theme.secondaryText,
+                      fontSize: 14,
+                    ),
+                  ),
+                  onTap: () => context
+                      .read<ChatSideCubit>()
+                      .pushPage(ChatSideCubit.disappearMessages),
+                ),
+              ),
             if (isGroupConversation && isOwnerOrAdmin)
               CellGroup(
                 child: Column(
