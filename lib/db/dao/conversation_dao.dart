@@ -379,6 +379,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
               createdAt: Value(conversation.createdAt),
               status: const Value(ConversationStatus.success),
               muteUntil: Value(DateTime.tryParse(conversation.muteUntil)),
+              expireIn: Value(conversation.expireIn),
             ),
           ),
           ...conversation.participants.map(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
@@ -121,6 +122,8 @@ Future<void> showToastFailed(BuildContext context, Object? error) {
   String? message;
   if (error is ToastError) {
     message = error.message;
+  } else if (error is MixinApiError) {
+    message = (error.error as MixinError).description;
   } else {
     message = ToastError.fromError(error)?.message;
   }

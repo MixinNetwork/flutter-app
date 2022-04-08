@@ -14364,7 +14364,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, em.expire_in AS expireIn, (SELECT COUNT(1) FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id LEFT JOIN expired_messages AS em ON lastMessage.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.expire_in AS expireIn, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, em.expire_in AS messageExpireIn, (SELECT COUNT(1) FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id LEFT JOIN expired_messages AS em ON lastMessage.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
@@ -14395,6 +14395,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        expireIn: row.read<int?>('expireIn'),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
         ownerVerified: row.read<bool?>('ownerVerified'),
@@ -14418,7 +14419,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         snapshotType: row.read<String?>('SnapshotType'),
         participantFullName: row.read<String?>('participantFullName'),
         participantUserId: row.read<String?>('participantUserId'),
-        expireIn: row.read<int?>('expireIn'),
+        messageExpireIn: row.read<int?>('messageExpireIn'),
         mentionCount: row.read<int>('mentionCount'),
         relationship:
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
@@ -14476,7 +14477,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, em.expire_in AS expireIn, (SELECT COUNT(1) FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id LEFT JOIN expired_messages AS em ON lastMessage.message_id = em.message_id WHERE circleConversation.circle_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.expire_in AS expireIn, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, em.expire_in AS messageExpireIn, (SELECT COUNT(1) FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id LEFT JOIN expired_messages AS em ON lastMessage.message_id = em.message_id WHERE circleConversation.circle_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           Variable<String?>(circleId),
           ...generatedorder.introducedVariables,
@@ -14507,6 +14508,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        expireIn: row.read<int?>('expireIn'),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
         ownerVerified: row.read<bool?>('ownerVerified'),
@@ -14530,7 +14532,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         snapshotType: row.read<String?>('SnapshotType'),
         participantFullName: row.read<String?>('participantFullName'),
         participantUserId: row.read<String?>('participantUserId'),
-        expireIn: row.read<int?>('expireIn'),
+        messageExpireIn: row.read<int?>('messageExpireIn'),
         mentionCount: row.read<int>('mentionCount'),
         relationship:
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
@@ -15956,6 +15958,7 @@ class ConversationItem {
   final String? ownerId;
   final DateTime? pinTime;
   final DateTime? muteUntil;
+  final int? expireIn;
   final String? avatarUrl;
   final String? name;
   final bool? ownerVerified;
@@ -15974,7 +15977,7 @@ class ConversationItem {
   final String? snapshotType;
   final String? participantFullName;
   final String? participantUserId;
-  final int? expireIn;
+  final int? messageExpireIn;
   final int mentionCount;
   final UserRelationship? relationship;
   ConversationItem({
@@ -15989,6 +15992,7 @@ class ConversationItem {
     this.ownerId,
     this.pinTime,
     this.muteUntil,
+    this.expireIn,
     this.avatarUrl,
     this.name,
     this.ownerVerified,
@@ -16007,7 +16011,7 @@ class ConversationItem {
     this.snapshotType,
     this.participantFullName,
     this.participantUserId,
-    this.expireIn,
+    this.messageExpireIn,
     required this.mentionCount,
     this.relationship,
   });
@@ -16024,6 +16028,7 @@ class ConversationItem {
         ownerId,
         pinTime,
         muteUntil,
+        expireIn,
         avatarUrl,
         name,
         ownerVerified,
@@ -16042,7 +16047,7 @@ class ConversationItem {
         snapshotType,
         participantFullName,
         participantUserId,
-        expireIn,
+        messageExpireIn,
         mentionCount,
         relationship
       ]);
@@ -16061,6 +16066,7 @@ class ConversationItem {
           other.ownerId == this.ownerId &&
           other.pinTime == this.pinTime &&
           other.muteUntil == this.muteUntil &&
+          other.expireIn == this.expireIn &&
           other.avatarUrl == this.avatarUrl &&
           other.name == this.name &&
           other.ownerVerified == this.ownerVerified &&
@@ -16079,7 +16085,7 @@ class ConversationItem {
           other.snapshotType == this.snapshotType &&
           other.participantFullName == this.participantFullName &&
           other.participantUserId == this.participantUserId &&
-          other.expireIn == this.expireIn &&
+          other.messageExpireIn == this.messageExpireIn &&
           other.mentionCount == this.mentionCount &&
           other.relationship == this.relationship);
   @override
@@ -16096,6 +16102,7 @@ class ConversationItem {
           ..write('ownerId: $ownerId, ')
           ..write('pinTime: $pinTime, ')
           ..write('muteUntil: $muteUntil, ')
+          ..write('expireIn: $expireIn, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('name: $name, ')
           ..write('ownerVerified: $ownerVerified, ')
@@ -16114,7 +16121,7 @@ class ConversationItem {
           ..write('snapshotType: $snapshotType, ')
           ..write('participantFullName: $participantFullName, ')
           ..write('participantUserId: $participantUserId, ')
-          ..write('expireIn: $expireIn, ')
+          ..write('messageExpireIn: $messageExpireIn, ')
           ..write('mentionCount: $mentionCount, ')
           ..write('relationship: $relationship')
           ..write(')'))
