@@ -868,6 +868,11 @@ class DecryptMessage extends Injector {
           systemMessage.role == null) {
         return;
       }
+    } else if (systemMessage.action == MessageAction.expire) {
+      await database.conversationDao.updateConversationExpireIn(
+        data.conversationId,
+        systemMessage.expireIn,
+      );
     }
     await database.messageDao.insert(message, accountId, data.silent);
   }

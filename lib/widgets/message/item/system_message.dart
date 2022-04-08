@@ -123,6 +123,10 @@ String generateSystemText({
     case MessageAction.role:
       text = Localization.current.chatGroupRole;
       break;
+    case MessageAction.expire:
+      // TODO: implement
+      text = 'someone changed conversation expire time';
+      break;
     case MessageAction.update:
     case null:
       text = Localization.current.chatNotSupport;

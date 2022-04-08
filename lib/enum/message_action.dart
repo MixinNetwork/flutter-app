@@ -8,6 +8,7 @@ enum MessageAction {
   create,
   update,
   role,
+  expire,
 }
 
 class MessageActionJsonConverter extends EnumJsonConverter<MessageAction> {

@@ -445,4 +445,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Selectable<GroupMinimal> findTheSameConversations(
           String selfId, String userId) =>
       db.findSameConversations(selfId, userId);
+
+  Future<int> updateConversationExpireIn(String conversationId, int expireIn) =>
+      (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ConversationsCompanion(expireIn: Value(expireIn)));
 }
