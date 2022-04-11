@@ -24,6 +24,7 @@ class SystemMessage extends HookWidget {
         useMessageConverter(converter: (state) => state.userFullName);
     final groupName =
         useMessageConverter(converter: (state) => state.groupName);
+    final content = useMessageConverter(converter: (state) => state.content);
 
     return Center(
       child: Padding(
@@ -54,6 +55,7 @@ class SystemMessage extends HookWidget {
                   participantFullName: participantFullName,
                   senderFullName: userFullName,
                   groupName: groupName,
+                  expireIn: int.tryParse(content ?? '0'),
                 ),
                 style: TextStyle(
                   fontSize: MessageItemWidget.secondaryFontSize,
@@ -78,6 +80,7 @@ String generateSystemText({
   required String? participantFullName,
   required String? senderFullName,
   required String? groupName,
+  required int? expireIn,
 }) {
   final participantIsCurrentUser = participantUserId == currentUserId;
   final senderIsCurrentUser = senderId == currentUserId;
@@ -124,8 +127,18 @@ String generateSystemText({
       text = Localization.current.chatGroupRole;
       break;
     case MessageAction.expire:
-      // TODO: implement
-      text = 'someone changed conversation expire time';
+      if (expireIn == null || expireIn <= 0) {
+        text = Localization.current.chatExpiredDisabled(senderIsCurrentUser
+            ? Localization.current.youStart
+            : senderFullName!);
+      } else if (expireIn > 0) {
+        text = Localization.current.chatExpiredSet(
+          senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
+          Duration(seconds: expireIn).formatAsConversationExpireIn(),
+        );
+      } else {
+        text = Localization.current.chatNotSupport;
+      }
       break;
     case MessageAction.update:
     case null:

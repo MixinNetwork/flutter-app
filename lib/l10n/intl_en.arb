@@ -348,5 +348,7 @@
   "hour": "hour",
   "day": "day",
   "week": "week",
-  "set": "Set"
+  "set": "Set",
+  "chatExpiredSet": "{name} set disappearing message time to {duration}.",
+  "chatExpiredDisabled": "{name} disabled disappearing message."
 }

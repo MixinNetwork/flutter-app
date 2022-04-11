@@ -175,7 +175,9 @@ class ChatInfoPage extends HookWidget {
                 child: CellItem(
                   title: Text(context.l10n.disappearingMessages),
                   description: Text(
-                    expireIn.formatAsConversationExpireIn(context),
+                    expireIn.formatAsConversationExpireIn(
+                      localization: context.l10n,
+                    ),
                     style: TextStyle(
                       color: context.theme.secondaryText,
                       fontSize: 14,

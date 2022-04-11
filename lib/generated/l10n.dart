@@ -3549,6 +3549,26 @@ class Localization {
       args: [],
     );
   }
+
+  /// `{name} set disappearing message time to {duration}.`
+  String chatExpiredSet(Object name, Object duration) {
+    return Intl.message(
+      '$name set disappearing message time to $duration.',
+      name: 'chatExpiredSet',
+      desc: '',
+      args: [name, duration],
+    );
+  }
+
+  /// `{name} disabled disappearing message.`
+  String chatExpiredDisabled(Object name) {
+    return Intl.message(
+      '$name disabled disappearing message.',
+      name: 'chatExpiredDisabled',
+      desc: '',
+      args: [name],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

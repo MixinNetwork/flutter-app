@@ -808,7 +808,7 @@ class DecryptMessage extends Injector {
         identityNumber: '0',
       ));
     }
-    final message = db.Message(
+    var message = db.Message(
         messageId: data.messageId,
         userId: userId,
         conversationId: data.conversationId,
@@ -869,6 +869,9 @@ class DecryptMessage extends Injector {
         return;
       }
     } else if (systemMessage.action == MessageAction.expire) {
+      message = message.copyWith(
+        content: Value(systemMessage.expireIn.toString()),
+      );
       await database.conversationDao.updateConversationExpireIn(
         data.conversationId,
         systemMessage.expireIn,
