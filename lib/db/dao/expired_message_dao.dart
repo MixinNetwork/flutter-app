@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+import '../../constants/constants.dart';
+import '../../utils/extension/extension.dart';
 import '../mixin_database.dart';
 
 part 'expired_message_dao.g.dart';
@@ -31,4 +33,17 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
       (delete(db.expiredMessages)
             ..where((tbl) => tbl.messageId.isIn(messageIds)))
           .go();
+
+  Future<List<ExpiredMessage>> getCurrentExpiredMessages() => db
+      .getExpiredMessages(DateTime.now().millisecondsSinceEpoch ~/ 1000, 20)
+      .get();
+
+  Future<void> onMessageRead(Iterable<String> messageIds) async {
+    final chunkedMessageIds =
+        messageIds.toList(growable: false).chunked(kMarkLimit);
+    final now = DateTime.now().millisecondsSinceEpoch / 1000;
+    for (final ids in chunkedMessageIds) {
+      await db.markExpiredMessageRead(now, (em) => em.messageId.isIn(ids));
+    }
+  }
 }

@@ -12809,10 +12809,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     );
   }
 
-  Future<int> markExpiredMessageRead(double currentTime, String messageId) {
+  Future<int> markExpiredMessageRead(double currentTime,
+      Expression<bool?> Function(ExpiredMessages expired_messages) where) {
+    var $arrayStartIndex = 2;
+    final generatedwhere =
+        $write(where(this.expiredMessages), startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
     return customUpdate(
-      'UPDATE expired_messages SET expire_at =(?1 + expire_in)WHERE(expire_at >(?1 + expire_in)OR expire_at IS NULL)AND message_id = ?2',
-      variables: [Variable<double>(currentTime), Variable<String>(messageId)],
+      'UPDATE expired_messages SET expire_at =(?1 + expire_in)WHERE(expire_at >(?1 + expire_in)OR expire_at IS NULL)AND ${generatedwhere.sql}',
+      variables: [
+        Variable<double>(currentTime),
+        ...generatedwhere.introducedVariables
+      ],
       updates: {expiredMessages},
       updateKind: UpdateKind.update,
     );

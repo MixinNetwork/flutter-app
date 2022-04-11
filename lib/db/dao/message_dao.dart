@@ -461,6 +461,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               tbl.status.equalsValue(MessageStatus.unknown).not()))
         .write(const MessagesCompanion(status: Value(MessageStatus.read)));
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+    await db.expiredMessageDao.onMessageRead(messageIds);
     return result;
   }
 

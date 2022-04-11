@@ -123,6 +123,8 @@ class _MessageProcessRunner {
 
   final jobSubscribers = <StreamSubscription>[];
 
+  Timer? _nextExpiredMessageRunner;
+
   Future<void> init(IsolateInitParams initParams) async {
     database = Database(await connectToDatabase(identityNumber, readCount: 2));
     jobSubscribers.add(
@@ -259,12 +261,47 @@ class _MessageProcessRunner {
           .asyncListen((_) => _runUpdateAssetJob()))
       ..add(database.jobDao
           .watchHasUpdateStickerJobs()
-          .asyncListen((_) => _runUpdateStickerJob()));
+          .asyncListen((_) => _runUpdateStickerJob()))
+      ..add(database.mixinDatabase
+          .tableUpdates(
+            TableUpdateQuery.onTable(database.mixinDatabase.expiredMessages),
+          )
+          .asyncListen((event) => _scheduleExpiredJob()));
   }
 
   void _sendEventToMainIsolate(WorkerIsolateEventType event,
       [dynamic argument]) {
     eventSink.add(event.toEvent(argument));
+  }
+
+  Future<void> _scheduleExpiredJob() async {
+    d('_scheduleExpiredJob');
+    while (true) {
+      final messages =
+          await database.expiredMessageDao.getCurrentExpiredMessages();
+      if (messages.isEmpty) {
+        break;
+      }
+      for (final message in messages) {
+        // TODO delete attachment.
+        await database.messageDao.deleteMessage(message.messageId);
+      }
+    }
+
+    final firstExpiredMessage =
+        await database.mixinDatabase.getFirstExpiredMessage().getSingleOrNull();
+    if (firstExpiredMessage == null) {
+      _nextExpiredMessageRunner?.cancel();
+      _nextExpiredMessageRunner = null;
+      return;
+    }
+    _nextExpiredMessageRunner?.cancel();
+    _nextExpiredMessageRunner = Timer(
+      Duration(
+          seconds: firstExpiredMessage.expireAt! -
+              DateTime.now().millisecondsSinceEpoch ~/ 1000),
+      _scheduleExpiredJob,
+    );
   }
 
   Future<void> _runProcessFloodJob() async {
