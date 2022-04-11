@@ -284,6 +284,7 @@ class _MessageProcessRunner {
       }
       for (final message in messages) {
         // TODO delete attachment.
+        d('delete ${message.messageId} ${message.expireIn} ${message.expireAt}');
         await database.messageDao.deleteMessage(message.messageId);
       }
     }
@@ -500,7 +501,7 @@ class _MessageProcessRunner {
         );
         await database.jobDao.deleteJobById(job.jobId);
 
-        if (conversation.expireIn != null) {
+        if (conversation.expireIn != null && conversation.expireIn! > 0) {
           await database.expiredMessageDao.insert(
             messageId: messageId,
             expireIn: conversation.expireIn!,
