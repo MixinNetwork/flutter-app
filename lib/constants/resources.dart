@@ -100,6 +100,8 @@ class Resources {
 
   static const String assetsImagesExpandedSvg = 'assets/images/expanded.svg';
 
+  static const String assetsImagesExpiringSvg = 'assets/images/expiring.svg';
+
   static const String assetsImagesFailedSvg = 'assets/images/failed.svg';
 
   static const String assetsImagesFileSvg = 'assets/images/file.svg';

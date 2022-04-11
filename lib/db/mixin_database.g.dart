@@ -12720,6 +12720,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final FiatDao fiatDao = FiatDao(this as MixinDatabase);
   late final FavoriteAppDao favoriteAppDao =
       FavoriteAppDao(this as MixinDatabase);
+  late final ExpiredMessageDao expiredMessageDao =
+      ExpiredMessageDao(this as MixinDatabase);
   Selectable<FindRemoteMessageStatusResult> findRemoteMessageStatus() {
     return customSelect(
         'SELECT * FROM remote_messages_status AS rm LEFT JOIN expired_messages AS em WHERE rm.status = \'READ\' LIMIT 1000',
@@ -12796,24 +12798,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {
           expiredMessages,
         }).map(expiredMessages.mapFromRow);
-  }
-
-  Future<int> deleteExpiredMessageByMessageIds(String messageIds) {
-    return customUpdate(
-      'DELETE FROM expired_messages WHERE message_id IN (?1)',
-      variables: [Variable<String>(messageIds)],
-      updates: {expiredMessages},
-      updateKind: UpdateKind.delete,
-    );
-  }
-
-  Future<int> deleteExpiredMessageByMessageId(String messageId) {
-    return customUpdate(
-      'DELETE FROM expired_messages WHERE message_id = ?1',
-      variables: [Variable<String>(messageId)],
-      updates: {expiredMessages},
-      updateKind: UpdateKind.delete,
-    );
   }
 
   Future<int> updateExpiredMessage(int? expireAt, String messageId) {

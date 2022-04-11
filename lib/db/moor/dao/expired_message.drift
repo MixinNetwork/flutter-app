@@ -6,12 +6,6 @@ SELECT * FROM expired_messages WHERE expire_at <= :currentTime ORDER BY expire_a
 getFirstExpiredMessage:
 SELECT * FROM expired_messages WHERE expire_at IS NOT NULL ORDER BY expire_at ASC LIMIT 1;
 
-deleteExpiredMessageByMessageIds:
-DELETE FROM expired_messages WHERE message_id IN (:messageIds);
-
-deleteExpiredMessageByMessageId:
-DELETE FROM expired_messages WHERE message_id = :messageId;
-
 updateExpiredMessage:
 UPDATE expired_messages SET expire_at = :expireAt WHERE expire_at > :expireAt AND message_id = :messageId;
 

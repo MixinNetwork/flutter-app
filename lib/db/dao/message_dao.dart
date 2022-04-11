@@ -243,6 +243,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             .go(),
         _recallPinMessage(messageId),
         db.pinMessageDao.deleteByIds([messageId]),
+        db.expiredMessageDao.deleteByMessageId(messageId),
       ]);
     });
     db.eventBus.send(DatabaseEvent.delete, messageId);
@@ -920,6 +921,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     await _recallPinMessage(messageId);
 
     await db.pinMessageDao.deleteByIds([messageId]);
+    await db.expiredMessageDao.deleteByMessageId(messageId);
     // Maybe use another event
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
     db.eventBus.send(DatabaseEvent.notification, messageId);

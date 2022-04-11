@@ -28,7 +28,7 @@ class SystemConversationMessage {
   String? userId;
   @JsonKey(name: 'role')
   ParticipantRole? role;
-  @JsonKey(name: 'expire_in')
+  @JsonKey(name: 'expire_in', defaultValue: 0)
   int expireIn;
 
   Map<String, dynamic> toJson() => _$SystemConversationMessageToJson(this);

@@ -136,6 +136,7 @@ class _MessageProcessRunner {
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKeyStr,
+      baseUrl: 'https://api.mixin.zone',
       scp: scp,
       dioOptions: BaseOptions(
         connectTimeout: tenSecond,
@@ -461,6 +462,15 @@ class _MessageProcessRunner {
           MessageStatus.sent,
         );
         await database.jobDao.deleteJobById(job.jobId);
+
+        if (conversation.expireIn != null) {
+          await database.expiredMessageDao.insert(
+            messageId: messageId,
+            expireIn: conversation.expireIn!,
+            expireAt: DateTime.now().millisecondsSinceEpoch ~/ 1000 +
+                conversation.expireIn!,
+          );
+        }
       }
     }
 

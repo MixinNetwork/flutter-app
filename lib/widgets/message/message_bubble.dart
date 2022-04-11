@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../constants/resources.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
@@ -47,6 +48,9 @@ class MessageBubble extends HookWidget {
     final showNip = useShowNip();
     final isCurrentUser = useIsCurrentUser();
     final isPinnedPage = useIsPinnedPage();
+    final isDisappearingMessage = useMessageConverter<bool>(
+      converter: (message) => message.expireIn != null && message.expireIn! > 0,
+    );
 
     final quoteMessageId =
         useMessageConverter(converter: (state) => state.quoteId);
@@ -142,6 +146,23 @@ class MessageBubble extends HookWidget {
           if (isCurrentUser) pinArrow,
           Flexible(child: _child),
           if (!isCurrentUser) pinArrow,
+        ],
+      );
+    }
+
+    if (isDisappearingMessage) {
+      _child = Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment:
+            isCurrentUser ? MainAxisAlignment.start : MainAxisAlignment.end,
+        children: [
+          SvgPicture.asset(
+            Resources.assetsImagesExpiringSvg,
+            width: 16,
+            height: 16,
+          ),
+          const SizedBox(width: 10),
+          Flexible(child: _child),
         ],
       );
     }
