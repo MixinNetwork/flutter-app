@@ -394,11 +394,13 @@ class _MessageProcessRunner {
       String messageId;
       String? recipientId;
       var silent = false;
+      int? expireIn;
       try {
         final json = jsonDecode(job.blazeMessage!) as Map<String, dynamic>;
         messageId = json[JobDao.messageIdKey] as String;
         recipientId = json[JobDao.recipientIdKey] as String?;
         silent = json[JobDao.silentKey] as bool;
+        expireIn = json[JobDao.expireInKey] as int?;
       } catch (_) {
         messageId = job.blazeMessage!;
       }
@@ -450,6 +452,7 @@ class _MessageProcessRunner {
           content!,
           recipientId: recipientId,
           silent: silent,
+          expireIn: expireIn ?? 0,
         );
         result = await _sender.deliver(blazeMessage);
       } else if (message.category.isEncrypted) {
@@ -487,10 +490,15 @@ class _MessageProcessRunner {
           message,
           base64Encode(content),
           silent: silent,
+          expireIn: expireIn ?? 0,
         );
         result = await _sender.deliver(blazeMessage);
       } else if (message.category.isSignal) {
-        result = await _sendSignalMessage(message, silent: silent);
+        result = await _sendSignalMessage(
+          message,
+          silent: silent,
+          expireIn: expireIn ?? 0,
+        );
       } else {}
 
       if (result?.success ?? false) {
@@ -572,6 +580,7 @@ class _MessageProcessRunner {
   Future<MessageResult?> _sendSignalMessage(
     db.SendingMessage message, {
     bool silent = false,
+    required int expireIn,
   }) async {
     MessageResult? result;
     if (message.resendStatus != null) {
@@ -586,6 +595,7 @@ class _MessageProcessRunner {
             sessionId: message.resendSessionId,
             mentionData: await getMentionData(message.messageId),
             silent: silent,
+            expireIn: expireIn,
           );
           result = await _sender.deliver(encrypted);
           if (result.success) {
@@ -604,11 +614,13 @@ class _MessageProcessRunner {
     result = await _sender.deliver(await encryptNormalMessage(
       message,
       silent: silent,
+      expireIn: expireIn,
     ));
     if (result.success == false && result.retry == true) {
       return _sendSignalMessage(
         message,
         silent: silent,
+        expireIn: expireIn,
       );
     }
     return result;
@@ -631,6 +643,7 @@ class _MessageProcessRunner {
     String data, {
     String? recipientId,
     bool silent = false,
+    required int expireIn,
   }) {
     final blazeParam = BlazeMessageParam(
       conversationId: message.conversationId,
@@ -640,6 +653,7 @@ class _MessageProcessRunner {
       data: data,
       quoteMessageId: message.quoteMessageId,
       silent: silent,
+      expireIn: expireIn,
     );
 
     return BlazeMessage(

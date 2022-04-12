@@ -28,6 +28,7 @@ import 'dao/asset_dao.dart';
 import 'dao/circle_conversation_dao.dart';
 import 'dao/circle_dao.dart';
 import 'dao/conversation_dao.dart';
+import 'dao/expired_message_dao.dart';
 import 'dao/favorite_app_dao.dart';
 import 'dao/fiat_dao.dart';
 import 'dao/flood_message_dao.dart';
@@ -47,7 +48,6 @@ import 'dao/sticker_album_dao.dart';
 import 'dao/sticker_dao.dart';
 import 'dao/sticker_relationship_dao.dart';
 import 'dao/user_dao.dart';
-import 'dao/expired_message_dao.dart';
 import 'database_event_bus.dart';
 import 'util/util.dart';
 

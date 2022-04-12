@@ -10,4 +10,4 @@ updateExpiredMessage:
 UPDATE expired_messages SET expire_at = :expireAt WHERE expire_at > :expireAt AND message_id = :messageId;
 
 markExpiredMessageRead:
-UPDATE expired_messages SET expire_at = (:currentTime + expire_in) WHERE (expire_at > (:currentTime + expire_in) OR expire_at IS NULL) AND $where;
+UPDATE expired_messages SET expire_at = CAST((:currentTime + expire_in) AS INTEGER) WHERE (expire_at > (:currentTime + expire_in) OR expire_at IS NULL) AND $where;

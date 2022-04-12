@@ -864,7 +864,7 @@ packages:
       path: "../mixin_bot_sdk_dart"
       relative: true
     source: path
-    version: "0.2.14"
+    version: "0.2.15"
   msix:
     dependency: "direct dev"
     description:

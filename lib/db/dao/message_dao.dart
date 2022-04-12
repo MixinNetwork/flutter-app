@@ -181,11 +181,18 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     }
   }
 
-  Future<int> insert(Message message, String currentUserId,
-      [bool? silent = false]) async {
+  Future<int> insert(
+    Message message,
+    String currentUserId, {
+    bool? silent = false,
+    int expireIn = 0,
+  }) async {
     final futures = <Future>[
       into(db.messages).insertOnConflictUpdate(message),
       _insertMessageFts(message),
+      if (expireIn > 0)
+        db.expiredMessageDao
+            .insert(messageId: message.messageId, expireIn: expireIn)
     ];
     final result = (await Future.wait(futures))[0] as int;
 

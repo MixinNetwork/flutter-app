@@ -192,6 +192,7 @@ class SignalProtocol {
     String? sessionId,
     List<String>? mentionData,
     bool silent = false,
+    int expireIn = 0,
   }) async {
     final cipher = await encryptSession(
         Uint8List.fromList(utf8.encode(message.content!)),
@@ -210,6 +211,7 @@ class SignalProtocol {
       sessionId: sessionId,
       mentions: mentionData,
       silent: silent,
+      expireIn: expireIn,
     );
     return createParamBlazeMessage(blazeParam);
   }
@@ -241,6 +243,7 @@ class SignalProtocol {
       quoteMessageId: message.quoteMessageId,
       mentions: mentionData,
       silent: silent,
+      expireIn: expireIn,
     );
     return createParamBlazeMessage(blazeParam);
   }

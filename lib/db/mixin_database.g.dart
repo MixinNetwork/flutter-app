@@ -12816,7 +12816,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         $write(where(this.expiredMessages), startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
     return customUpdate(
-      'UPDATE expired_messages SET expire_at =(?1 + expire_in)WHERE(expire_at >(?1 + expire_in)OR expire_at IS NULL)AND ${generatedwhere.sql}',
+      'UPDATE expired_messages SET expire_at = CAST((?1 + expire_in)AS INTEGER) WHERE(expire_at >(?1 + expire_in)OR expire_at IS NULL)AND ${generatedwhere.sql}',
       variables: [
         Variable<double>(currentTime),
         ...generatedwhere.introducedVariables
