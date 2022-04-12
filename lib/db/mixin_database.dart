@@ -68,7 +68,6 @@ part 'mixin_database.g.dart';
     'moor/dao/sticker_relationship.drift',
     'moor/dao/favorite_app.drift',
     'moor/dao/expired_message.drift',
-    'moor/dao/remote_message_status.drift',
   },
   daos: [
     AddressDao,
@@ -211,8 +210,6 @@ class MixinDatabase extends _$MixinDatabase {
             }
           }
           if (from <= 13) {
-            await m.create(remoteMessagesStatus);
-            await m.createIndex(indexRemoteMessagesStatusConversationIdStatus);
             if (!await _checkColumnExists(
                 conversations.actualTableName, conversations.expireIn.name)) {
               await m.addColumn(conversations, conversations.expireIn);

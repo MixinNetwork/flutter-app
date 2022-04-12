@@ -15,8 +15,6 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   Participants get participants => attachedDatabase.participants;
   StickerAlbums get stickerAlbums => attachedDatabase.stickerAlbums;
   PinMessages get pinMessages => attachedDatabase.pinMessages;
-  RemoteMessagesStatus get remoteMessagesStatus =>
-      attachedDatabase.remoteMessagesStatus;
   Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
