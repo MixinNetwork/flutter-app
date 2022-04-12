@@ -151,18 +151,20 @@ class MessageBubble extends HookWidget {
     }
 
     if (isDisappearingMessage) {
+      final icon = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: SvgPicture.asset(
+          Resources.assetsImagesExpiringSvg,
+          width: 16,
+          height: 16,
+        ),
+      );
       _child = Row(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment:
-            isCurrentUser ? MainAxisAlignment.start : MainAxisAlignment.end,
         children: [
-          SvgPicture.asset(
-            Resources.assetsImagesExpiringSvg,
-            width: 16,
-            height: 16,
-          ),
-          const SizedBox(width: 10),
+          if (isCurrentUser) icon,
           Flexible(child: _child),
+          if (!isCurrentUser) icon,
         ],
       );
     }
