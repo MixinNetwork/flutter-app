@@ -252,7 +252,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "createConversation":
             MessageLookupByLibrary.simpleMessage("New Conversation"),
         "createGroupConversation":
-            MessageLookupByLibrary.simpleMessage("New Group Conversation"),
+            MessageLookupByLibrary.simpleMessage("New Group"),
         "currentIdentityNumber": m12,
         "dataAndStorageUsage":
             MessageLookupByLibrary.simpleMessage("Data and Storage Usage"),
