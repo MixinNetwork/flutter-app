@@ -19,7 +19,7 @@ Job createAckJob(
   );
   final jobId =
       '${blazeMessage.messageId}${blazeMessage.status}$action'.nameUuid();
-  d('createAckJob jobId: $jobId, status: $status expireAt: $expireAt');
+  d('createAckJob messageId: ${blazeMessage.messageId} action: $action jobId: $jobId, status: $status expireAt: $expireAt');
   return Job(
       jobId: jobId,
       action: action,

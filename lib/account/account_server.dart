@@ -488,18 +488,26 @@ class AccountServer {
           )
           .toList();
       await database.jobDao.insertAll(jobs);
-      await _createReadSessionMessage(ids);
+      await _createReadSessionMessage(ids, expireAt);
       if (ids.length < kMarkLimit) return;
     }
   }
 
-  Future<void> _createReadSessionMessage(List<String> messageIds) async {
+  Future<void> _createReadSessionMessage(
+    List<String> messageIds,
+    Map<String, int?> messageExpireAt,
+  ) async {
     final primarySessionId = AccountKeyValue.instance.primarySessionId;
     if (primarySessionId == null) {
       return;
     }
     final jobs = messageIds
-        .map((id) => createAckJob(kCreateMessage, id, MessageStatus.read))
+        .map((id) => createAckJob(
+              kCreateMessage,
+              id,
+              MessageStatus.read,
+              expireAt: messageExpireAt[id],
+            ))
         .toList();
     await database.jobDao.insertAll(jobs);
   }
