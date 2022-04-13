@@ -47,6 +47,13 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
     }
   }
 
+  Future<int> updateMessageExpireAt(String messageId, int expiredAt) =>
+      (update(db.expiredMessages)
+            ..where((tbl) => tbl.messageId.equals(messageId)))
+          .write(
+        ExpiredMessagesCompanion(expireAt: Value(expiredAt)),
+      );
+
   Future<Map<String, int?>> getMessageExpireAt(List<String> messageIds) async {
     final messages = await (select(db.expiredMessages)
           ..where((tbl) => tbl.messageId.isIn(messageIds)))
