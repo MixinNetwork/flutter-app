@@ -170,7 +170,7 @@ class ChatInfoPage extends HookWidget {
                 ],
               ),
             ),
-            if (isGroupConversation && isOwnerOrAdmin)
+            if (!isGroupConversation || (isGroupConversation && isOwnerOrAdmin))
               CellGroup(
                 child: CellItem(
                   title: Text(context.l10n.disappearingMessages),
