@@ -71,7 +71,7 @@ dependencies:
 #    path: ../mixin_bot_sdk_dart
     git:
       url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
-      ref: 7c97a47094e62bfb572ff958b5108329c94283fe
+      ref: affda4b278b978efe4bcbce40c2276cc1496e5fb
   octo_image: ^1.0.0+1
   ogg_opus_player: ^0.3.1
   open_file: ^3.2.1

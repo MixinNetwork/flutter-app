@@ -476,9 +476,16 @@ class AccountServer {
       final ids = await database.messageDao
           .getUnreadMessageIds(conversationId, userId, kMarkLimit);
       if (ids.isEmpty) return;
+      final expireAt = await database.expiredMessageDao.getMessageExpireAt(ids);
       final jobs = ids
-          .map((id) =>
-              createAckJob(kAcknowledgeMessageReceipts, id, MessageStatus.read))
+          .map(
+            (id) => createAckJob(
+              kAcknowledgeMessageReceipts,
+              id,
+              MessageStatus.read,
+              expireAt: expireAt[id],
+            ),
+          )
           .toList();
       await database.jobDao.insertAll(jobs);
       await _createReadSessionMessage(ids);
@@ -1039,7 +1046,10 @@ class AccountServer {
                 runCount: 0,
                 priority: 5,
                 blazeMessage: await jsonEncodeWithIsolate(BlazeAckMessage(
-                    messageId: messageId, status: 'MENTION_READ')),
+                  messageId: messageId,
+                  status: 'MENTION_READ',
+                  expireAt: null,
+                )),
               ),
             ))()
       ]);

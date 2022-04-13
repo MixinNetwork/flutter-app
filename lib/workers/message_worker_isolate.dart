@@ -330,10 +330,7 @@ class _MessageProcessRunner {
         jobs.map(
           (e) async {
             final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
-            return BlazeAckMessage(
-              messageId: map['message_id'] as String,
-              status: map['status'] as String,
-            );
+            return BlazeAckMessage.fromJson(map);
           },
         ),
       );
@@ -697,10 +694,7 @@ class _MessageProcessRunner {
     final ack = jobs.map(
       (e) {
         final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
-        return BlazeAckMessage(
-          messageId: map['message_id'] as String,
-          status: map['status'] as String,
-        );
+        return BlazeAckMessage.fromJson(map);
       },
     ).toList();
     final jobIds = jobs.map((e) => e.jobId).toList();

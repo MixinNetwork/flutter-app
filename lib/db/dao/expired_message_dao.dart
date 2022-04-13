@@ -46,4 +46,13 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
       await db.markExpiredMessageRead(now, (em) => em.messageId.isIn(ids));
     }
   }
+
+  Future<Map<String, int?>> getMessageExpireAt(List<String> messageIds) async {
+    final messages = await (select(db.expiredMessages)
+          ..where((tbl) => tbl.messageId.isIn(messageIds)))
+        .get();
+    return Map.fromEntries(messages.map(
+      (e) => MapEntry(e.messageId, e.expireAt),
+    ));
+  }
 }
