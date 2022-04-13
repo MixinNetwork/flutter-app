@@ -18,13 +18,7 @@ Future<List<XFile>> selectFiles() async {
     // because file_selector has better localizations.
     final files = await file_selector.openFiles();
     if (files.isEmpty) return const [];
-    return files
-        .map((xFile) => file_selector.XFile(
-              xFile.path,
-              mimeType: xFile.mimeType ?? lookupMimeType(xFile.path),
-              name: xFile.name,
-            ))
-        .toList();
+    return files.map((xFile) => xFile.withMineType()).toList();
   } else {
     final result = await FilePicker.platform.pickFiles(allowMultiple: true);
     if (result == null) {
