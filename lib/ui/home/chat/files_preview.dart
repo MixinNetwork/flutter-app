@@ -738,9 +738,8 @@ class _FileInputOverlay extends HookWidget {
             return;
           }
           onFileAdded(await Future.wait(
-            files.map(
-              (file) async => _File(file, await file.length(), null),
-            ),
+            files.map((file) async =>
+                _File(file.withMineType(), await file.length(), null)),
           ));
         },
         child: Stack(
