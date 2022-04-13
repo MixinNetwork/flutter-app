@@ -203,6 +203,7 @@ bool _shouldOpenDirectly(String mediaName) {
     '.pptx',
     '.txt',
     '.rtf',
+    '.csv',
   };
   return allowList.contains(extension);
 }
