@@ -275,6 +275,11 @@ class _TransactionDetailInfo extends StatelessWidget {
                   '${DateFormat.yMMMMd().format(snapshot.createdAt)} '
                   '${DateFormat.Hms().format(snapshot.createdAt)}'),
             ),
+            if (snapshot.traceId != null && snapshot.traceId!.isNotEmpty)
+              TransactionInfoTile(
+                title: const Text('Trace Id'),
+                subtitle: SelectableText(snapshot.traceId ?? ''),
+              ),
           ],
         ),
       );
