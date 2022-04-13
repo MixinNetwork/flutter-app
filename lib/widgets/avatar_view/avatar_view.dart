@@ -182,7 +182,9 @@ class AvatarWidget extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            (name?.isNotEmpty == true) ? name![0].toUpperCase() : '',
+            (name?.isNotEmpty == true)
+                ? name!.characters.first.toUpperCase()
+                : '',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
