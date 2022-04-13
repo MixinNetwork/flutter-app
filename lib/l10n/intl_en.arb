@@ -83,7 +83,7 @@
   "recentConversations": "Recent conversations",
   "next": "Next",
   "createConversation": "New Conversation",
-  "createGroupConversation": "New Group Conversation",
+  "createGroupConversation": "New Group",
   "participantsCount": "{count} Participants",
   "conversationName": "Conversation Name",
   "chatInputHint": "End to end encrypted",

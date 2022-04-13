@@ -890,10 +890,10 @@ class Localization {
     );
   }
 
-  /// `New Group Conversation`
+  /// `New Group`
   String get createGroupConversation {
     return Intl.message(
-      'New Group Conversation',
+      'New Group',
       name: 'createGroupConversation',
       desc: '',
       args: [],
