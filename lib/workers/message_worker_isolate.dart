@@ -282,10 +282,21 @@ class _MessageProcessRunner {
       if (messages.isEmpty) {
         break;
       }
-      for (final message in messages) {
-        // TODO delete attachment.
-        d('delete ${message.messageId} ${message.expireIn} ${message.expireAt}');
-        await database.messageDao.deleteMessage(message.messageId);
+      for (final em in messages) {
+        // cancel attachment download.
+        final message =
+            await database.messageDao.findMessageByMessageId(em.messageId);
+        if (message == null) {
+          e('message is null, messageId: ${em.messageId} ${em.expireAt}');
+          continue;
+        }
+        await database.messageDao.deleteMessage(em.messageId);
+        if (message.category.isAttachment || message.category.isTranscript) {
+          _sendEventToMainIsolate(
+            WorkerIsolateEventType.requestDownloadAttachment,
+            AttachmentDeleteRequest(message: message),
+          );
+        }
       }
     }
 

@@ -257,7 +257,7 @@ class AttachmentUtil extends ChangeNotifier {
       if (file.existsSync()) await file.delete();
       await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
     } finally {
-      await _removeAttachmentJob(messageId);
+      await removeAttachmentJob(messageId);
     }
   }
 
@@ -309,7 +309,7 @@ class AttachmentUtil extends ChangeNotifier {
       await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
       return null;
     } finally {
-      await _removeAttachmentJob(messageId);
+      await removeAttachmentJob(messageId);
     }
   }
 
@@ -429,7 +429,7 @@ class AttachmentUtil extends ChangeNotifier {
     }
   }
 
-  Future<void> _removeAttachmentJob(String messageId) async {
+  Future<void> removeAttachmentJob(String messageId) async {
     await DownloadKeyValue.instance.removeMessageId(messageId);
     _attachmentJob[messageId]?.cancel();
     _attachmentJob.remove(messageId);
