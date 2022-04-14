@@ -823,7 +823,8 @@ class AccountServer {
     if (recipientId != null) {
       final conversationId = generateConversationId(recipientId, userId);
       if (cid != null) {
-        assert(cid == conversationId);
+        assert(cid == conversationId,
+            'cid: $cid != conversationId: $conversationId');
       }
       final conversation = await database.conversationDao
           .conversationById(conversationId)

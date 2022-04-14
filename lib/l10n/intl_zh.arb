@@ -342,5 +342,6 @@
   "week": "周",
   "set": "设置",
   "chatExpiredSet": "{name} 将限时消息时间设置为 {duration}.",
-  "chatExpiredDisabled": "{name} 已禁用限时消息"
+  "chatExpiredDisabled": "{name} 已禁用限时消息",
+  "disappearingCustomTimeMaxWarning": "最高设置 {max}"
 }

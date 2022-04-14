@@ -3569,6 +3569,16 @@ class Localization {
       args: [name],
     );
   }
+
+  /// `The maximum time is {max}.`
+  String disappearingCustomTimeMaxWarning(Object max) {
+    return Intl.message(
+      'The maximum time is $max.',
+      name: 'disappearingCustomTimeMaxWarning',
+      desc: '',
+      args: [max],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

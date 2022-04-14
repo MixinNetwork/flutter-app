@@ -54,107 +54,109 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m15(value) => "Delete chat: ${value}";
 
-  static String m16(phone) => "Enter the 4-digit code sent to you at ${phone}";
+  static String m16(max) => "The maximum time is ${max}.";
 
-  static String m17(code) => "ERROR ${code}: Sign in to continue";
+  static String m17(phone) => "Enter the 4-digit code sent to you at ${phone}";
 
-  static String m18(code) =>
-      "ERROR ${code}: The request data has invalid field";
+  static String m18(code) => "ERROR ${code}: Sign in to continue";
 
   static String m19(code) =>
+      "ERROR ${code}: The request data has invalid field";
+
+  static String m20(code) =>
       "ERROR ${code}: Blockchain not in sync, please try again later.";
 
-  static String m20(code) => "ERROR ${code}: The number has reached the limit.";
+  static String m21(code) => "ERROR ${code}: The number has reached the limit.";
 
-  static String m21(code) => "ERROR ${code}: The group chat is full.";
+  static String m22(code) => "ERROR ${code}: The group chat is full.";
 
-  static String m22(code) => "ERROR ${code}: Insufficient balance";
+  static String m23(code) => "ERROR ${code}: Insufficient balance";
 
-  static String m23(code, fee) =>
+  static String m24(code, fee) =>
       "ERROR ${code}: Insufficient transaction fee. Please make sure your wallet has ${fee} as fee";
 
-  static String m24(code, type, address) =>
+  static String m25(code, type, address) =>
       "ERROR ${code}: Invalid address format. Please enter the correct ${type} ${address} address!";
 
-  static String m25(code) => "ERROR ${code}: Invalid address format.";
+  static String m26(code) => "ERROR ${code}: Invalid address format.";
 
-  static String m26(code) =>
+  static String m27(code) =>
       "ERROR ${code}: Send verification code too frequent, please try again later.";
 
-  static String m27(code) => "ERROR ${code}: Invalid emergency contact";
+  static String m28(code) => "ERROR ${code}: Invalid emergency contact";
 
-  static String m28(code) => "ERROR ${code}: Invalid PIN format";
+  static String m29(code) => "ERROR ${code}: Invalid PIN format";
 
-  static String m29(code) => "ERROR ${code}: Not found";
+  static String m30(code) => "ERROR ${code}: Not found";
 
-  static String m30(code, version) =>
+  static String m31(code, version) =>
       "ERROR ${code}: Please update Mixin(${version}) to continue use the service.";
 
-  static String m31(code) => "ERROR ${code}: Invalid phone number";
+  static String m32(code) => "ERROR ${code}: Invalid phone number";
 
-  static String m32(code) => "ERROR ${code}: Failed to deliver SMS";
+  static String m33(code) => "ERROR ${code}: Failed to deliver SMS";
 
-  static String m33(code) => "ERROR ${code}: Expired phone verification code";
+  static String m34(code) => "ERROR ${code}: Expired phone verification code";
 
-  static String m34(code) => "ERROR ${code}: Invalid phone verification code";
+  static String m35(code) => "ERROR ${code}: Invalid phone verification code";
 
-  static String m35(code) => "ERROR ${code}: PIN incorrect";
+  static String m36(code) => "ERROR ${code}: PIN incorrect";
 
-  static String m36(code, times) =>
+  static String m37(code, times) =>
       "${code}: PIN incorrect. You still have ${times} chances. Please wait for 24 hours to retry later.";
 
-  static String m37(code) => "ERROR ${code}: Recaptcha is invalid";
+  static String m38(code) => "ERROR ${code}: Recaptcha is invalid";
 
-  static String m38(code) => "Server is under maintenance: ${code}";
+  static String m39(code) => "Server is under maintenance: ${code}";
 
-  static String m39(code) => "ERROR ${code}: Rate limit exceeded";
+  static String m40(code) => "ERROR ${code}: Rate limit exceeded";
 
-  static String m40(code) => "ERROR ${code}: Too many stickers";
+  static String m41(code) => "ERROR ${code}: Too many stickers";
 
-  static String m41(code) => "ERROR ${code}: The amount is too small";
+  static String m42(code) => "ERROR ${code}: The amount is too small";
 
-  static String m42(code) => "ERROR ${code}: Withdraw amount too small";
+  static String m43(code) => "ERROR ${code}: Withdraw amount too small";
 
-  static String m43(code) => "ERROR: ${code}";
+  static String m44(code) => "ERROR: ${code}";
 
-  static String m44(message) => "ERROR: ${message}";
+  static String m45(message) => "ERROR: ${message}";
 
-  static String m45(code) => "ERROR ${code}: Phone is used by someone else.";
+  static String m46(code) => "ERROR ${code}: Phone is used by someone else.";
 
-  static String m46(code) => "ERROR ${code}: Withdrawal memo format incorrect.";
+  static String m47(code) => "ERROR ${code}: Withdrawal memo format incorrect.";
 
-  static String m47(name) => "Failed to open file ${name}";
+  static String m48(name) => "Failed to open file ${name}";
 
-  static String m48(name) => "Message ${name}";
+  static String m49(name) => "Message ${name}";
 
-  static String m49(name) => "Remove ${name}";
+  static String m50(name) => "Remove ${name}";
 
-  static String m50(date) =>
+  static String m51(date) =>
       "Your account will be deleted on ${date}, if you continue to log in, the request to delete your account will be cancelled.";
 
-  static String m51(newVersion, current) =>
+  static String m52(newVersion, current) =>
       "Mixin Messenger ${newVersion} is now available, you have ${current}. Would you like to download it now?";
 
-  static String m52(name) => "Do you want to delete ${name} circle?";
+  static String m53(name) => "Do you want to delete ${name} circle?";
 
-  static String m53(date) => "${date} join";
+  static String m54(date) => "${date} join";
 
-  static String m54(count) => "${count} Participants";
+  static String m55(count) => "${count} Participants";
 
-  static String m55(count) => "${count} Pinned Messages";
+  static String m56(count) => "${count} Pinned Messages";
 
-  static String m56(user, preview) => "${user} pinned ${preview}";
+  static String m57(user, preview) => "${user} pinned ${preview}";
 
-  static String m57(time) => "Resend code in ${time}s";
+  static String m58(time) => "Resend code in ${time}s";
 
-  static String m58(count) => "${count} related messages";
+  static String m59(count) => "${count} related messages";
 
-  static String m59(phone) =>
+  static String m60(phone) =>
       "We will send a 4-digit code to your phone number ${phone}, please enter the code in next screen.";
 
-  static String m60(value) => "value now ${value}";
+  static String m61(value) => "value now ${value}";
 
-  static String m61(value) => "value then ${value}";
+  static String m62(value) => "value then ${value}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -278,6 +280,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "developer": MessageLookupByLibrary.simpleMessage("Developer"),
         "disappearingCustomTime":
             MessageLookupByLibrary.simpleMessage("Custom time"),
+        "disappearingCustomTimeMaxWarning": m16,
         "disappearingMessages":
             MessageLookupByLibrary.simpleMessage("Disappearing messages"),
         "disappearingMessagesDescription": MessageLookupByLibrary.simpleMessage(
@@ -296,7 +299,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
         "enterNameTitle":
             MessageLookupByLibrary.simpleMessage("What\'s your name?"),
-        "enterVerificationCode": m16,
+        "enterVerificationCode": m17,
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("Enter your phone number"),
         "errorAddressExists": MessageLookupByLibrary.simpleMessage(
@@ -307,9 +310,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("App not found"),
         "errorAssetExists":
             MessageLookupByLibrary.simpleMessage("Asset does not exist"),
-        "errorAuthentication": m17,
-        "errorBadData": m18,
-        "errorBlockchain": m19,
+        "errorAuthentication": m18,
+        "errorBadData": m19,
+        "errorBlockchain": m20,
         "errorConnectionTimeout":
             MessageLookupByLibrary.simpleMessage("Connection timeout"),
         "errorConversationNotFound":
@@ -317,7 +320,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "errorData": MessageLookupByLibrary.simpleMessage("Data error"),
         "errorDurationShort":
             MessageLookupByLibrary.simpleMessage("Duration is too short"),
-        "errorFavoriteLimit": m20,
+        "errorFavoriteLimit": m21,
         "errorFileChooser":
             MessageLookupByLibrary.simpleMessage("File chooser error"),
         "errorFileExists":
@@ -325,66 +328,66 @@ class MessageLookup extends MessageLookupByLibrary {
         "errorForbidden": MessageLookupByLibrary.simpleMessage("Forbidden"),
         "errorFormat":
             MessageLookupByLibrary.simpleMessage("Format not supported"),
-        "errorFullGroup": m21,
+        "errorFullGroup": m22,
         "errorImage": MessageLookupByLibrary.simpleMessage("File error"),
-        "errorInsufficientBalance": m22,
-        "errorInsufficientTransactionFeeWithAmount": m23,
-        "errorInvalidAddress": m24,
-        "errorInvalidAddressPlain": m25,
-        "errorInvalidCodeTooFrequent": m26,
-        "errorInvalidEmergencyContact": m27,
-        "errorInvalidPinFormat": m28,
+        "errorInsufficientBalance": m23,
+        "errorInsufficientTransactionFeeWithAmount": m24,
+        "errorInvalidAddress": m25,
+        "errorInvalidAddressPlain": m26,
+        "errorInvalidCodeTooFrequent": m27,
+        "errorInvalidEmergencyContact": m28,
+        "errorInvalidPinFormat": m29,
         "errorNetworkError":
             MessageLookupByLibrary.simpleMessage("Network error"),
         "errorNoCamera": MessageLookupByLibrary.simpleMessage("No camera"),
         "errorNoConnection":
             MessageLookupByLibrary.simpleMessage("No connection"),
-        "errorNotFound": m29,
+        "errorNotFound": m30,
         "errorNotFoundMessage":
             MessageLookupByLibrary.simpleMessage("Not found"),
         "errorNotSupportedAudioFormat": MessageLookupByLibrary.simpleMessage(
             "Not supported audio format, please open by other app."),
-        "errorOldVersion": m30,
+        "errorOldVersion": m31,
         "errorOpenLocation":
             MessageLookupByLibrary.simpleMessage("Can\'t find an map app"),
         "errorPermission": MessageLookupByLibrary.simpleMessage(
             "Please open the necessary permissions"),
-        "errorPhoneInvalidFormat": m31,
-        "errorPhoneSmsDelivery": m32,
-        "errorPhoneVerificationCodeExpired": m33,
-        "errorPhoneVerificationCodeInvalid": m34,
+        "errorPhoneInvalidFormat": m32,
+        "errorPhoneSmsDelivery": m33,
+        "errorPhoneVerificationCodeExpired": m34,
+        "errorPhoneVerificationCodeInvalid": m35,
         "errorPinCheckTooManyRequest": MessageLookupByLibrary.simpleMessage(
             "You have tried more than 5 times, please wait at least 24 hours to try again."),
-        "errorPinIncorrect": m35,
-        "errorPinIncorrectWithTimes": m36,
-        "errorRecaptchaIsInvalid": m37,
+        "errorPinIncorrect": m36,
+        "errorPinIncorrectWithTimes": m37,
+        "errorRecaptchaIsInvalid": m38,
         "errorRecaptchaTimeout":
             MessageLookupByLibrary.simpleMessage("Recaptcha timeout"),
         "errorRetryUpload":
             MessageLookupByLibrary.simpleMessage("Retry upload failed."),
-        "errorServer5xx": m38,
+        "errorServer5xx": m39,
         "errorShare": MessageLookupByLibrary.simpleMessage("Share error."),
-        "errorTooManyRequests": m39,
-        "errorTooManyStickers": m40,
-        "errorTooSmall": m41,
-        "errorTooSmallWithdrawAmount": m42,
+        "errorTooManyRequests": m40,
+        "errorTooManyStickers": m41,
+        "errorTooSmall": m42,
+        "errorTooSmallWithdrawAmount": m43,
         "errorTranscriptForward": MessageLookupByLibrary.simpleMessage(
             "Please forward all attachments after they have been downloaded"),
         "errorUnableToOpenMedia": MessageLookupByLibrary.simpleMessage(
             "Can\'t find an app able to open this media."),
-        "errorUnknownWithCode": m43,
-        "errorUnknownWithMessage": m44,
-        "errorUsedPhone": m45,
+        "errorUnknownWithCode": m44,
+        "errorUnknownWithMessage": m45,
+        "errorUsedPhone": m46,
         "errorUserInvalidFormat":
             MessageLookupByLibrary.simpleMessage("Invalid user id"),
         "errorUserNotFound":
             MessageLookupByLibrary.simpleMessage("User not found"),
-        "errorWithdrawalMemoFormatIncorrect": m46,
+        "errorWithdrawalMemoFormatIncorrect": m47,
         "exit": MessageLookupByLibrary.simpleMessage("Exit"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("Delete and Exit"),
         "extensions": MessageLookupByLibrary.simpleMessage("Extensions"),
         "failed": MessageLookupByLibrary.simpleMessage("Failed"),
-        "failedToOpenFile": m47,
+        "failedToOpenFile": m48,
         "file": MessageLookupByLibrary.simpleMessage("File"),
         "files": MessageLookupByLibrary.simpleMessage("Files"),
         "followFacebook":
@@ -413,8 +416,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dismiss admin"),
         "groupPopMenuMakeAdmin":
             MessageLookupByLibrary.simpleMessage("Make group admin"),
-        "groupPopMenuMessage": m48,
-        "groupPopMenuRemoveParticipants": m49,
+        "groupPopMenuMessage": m49,
+        "groupPopMenuRemoveParticipants": m50,
         "groupSearchParticipants":
             MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
         "groups": MessageLookupByLibrary.simpleMessage("Groups"),
@@ -431,7 +434,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "initializing": MessageLookupByLibrary.simpleMessage("Initializing"),
         "introduction": MessageLookupByLibrary.simpleMessage("Introduction"),
         "joinGroup": MessageLookupByLibrary.simpleMessage("+ Join the group"),
-        "landingDeletionWarningContent": m50,
+        "landingDeletionWarningContent": m51,
         "landingDeletionWarningTitle": MessageLookupByLibrary.simpleMessage(
             "Continue to log in and abort account deletion"),
         "learnMore": MessageLookupByLibrary.simpleMessage("Learn more"),
@@ -475,7 +478,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Network connection failed"),
         "newVersionAvailable":
             MessageLookupByLibrary.simpleMessage("New version available"),
-        "newVersionDescription": m51,
+        "newVersionDescription": m52,
         "next": MessageLookupByLibrary.simpleMessage("Next"),
         "noAudio": MessageLookupByLibrary.simpleMessage("NO AUDIO"),
         "noData": MessageLookupByLibrary.simpleMessage("NO DATA"),
@@ -496,8 +499,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "openLogDirectory":
             MessageLookupByLibrary.simpleMessage("open log directory"),
         "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
-        "pageDeleteCircle": m52,
-        "pageEditProfileJoin": m53,
+        "pageDeleteCircle": m53,
+        "pageEditProfileJoin": m54,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -506,12 +509,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Login to Mixin Messenger by QR Code"),
         "pageRightEmptyMessage": MessageLookupByLibrary.simpleMessage(
             "Select a conversation to start messaging"),
-        "participantsCount": m54,
+        "participantsCount": m55,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "pin": MessageLookupByLibrary.simpleMessage("Pin"),
-        "pinMessageCount": m55,
-        "pinned": m56,
+        "pinMessageCount": m56,
+        "pinned": m57,
         "pleaseWait":
             MessageLookupByLibrary.simpleMessage("Please wait a moment"),
         "post": MessageLookupByLibrary.simpleMessage("Post"),
@@ -533,7 +536,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportWarning": MessageLookupByLibrary.simpleMessage(
             "Do you want to report and block this contact?"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Resend code"),
-        "resendCodeIn": m57,
+        "resendCodeIn": m58,
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveAs": MessageLookupByLibrary.simpleMessage("Save as"),
@@ -545,7 +548,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
             "No chats, \ncontacts or messages found."),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
-        "searchRelatedMessage": m58,
+        "searchRelatedMessage": m59,
         "searchUser": MessageLookupByLibrary.simpleMessage("Search contact"),
         "searchUserHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID or Phone number"),
@@ -554,7 +557,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "send": MessageLookupByLibrary.simpleMessage("send"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Archived all files in one zip file"),
-        "sendCodeConfirm": m59,
+        "sendCodeConfirm": m60,
         "sendQuick": MessageLookupByLibrary.simpleMessage("Send quickly"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("Send without compression"),
@@ -613,10 +616,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("Waiting for this message."),
-        "walletTransactionCurrentValue": m60,
+        "walletTransactionCurrentValue": m61,
         "walletTransactionThatTimeNoValue":
             MessageLookupByLibrary.simpleMessage("value then N/A"),
-        "walletTransactionThatTimeValue": m61,
+        "walletTransactionThatTimeValue": m62,
         "webView2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
             "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
         "webViewRuntimeNotAvailable": MessageLookupByLibrary.simpleMessage(
