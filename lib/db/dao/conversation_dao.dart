@@ -364,45 +364,53 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Selectable<ConversationStorageUsage> conversationStorageUsage() =>
       db.conversationStorageUsage();
 
-  Future<void> updateConversation(ConversationResponse conversation) =>
-      db.transaction(() async {
-        await Future.wait([
-          insert(
-            ConversationsCompanion(
-              conversationId: Value(conversation.conversationId),
-              ownerId: Value(conversation.creatorId),
-              category: Value(conversation.category),
-              name: Value(conversation.name),
-              iconUrl: Value(conversation.iconUrl),
-              announcement: Value(conversation.announcement),
-              codeUrl: Value(conversation.codeUrl),
-              createdAt: Value(conversation.createdAt),
-              status: const Value(ConversationStatus.success),
-              muteUntil: Value(DateTime.tryParse(conversation.muteUntil)),
-              expireIn: Value(conversation.expireIn),
+  Future<void> updateConversation(
+      ConversationResponse conversation, String currentUserId) {
+    var ownerId = conversation.creatorId;
+    if (conversation.category == ConversationCategory.contact) {
+      ownerId = conversation.participants
+          .firstWhere((e) => e.userId != currentUserId)
+          .userId;
+    }
+    return db.transaction(() async {
+      await Future.wait([
+        insert(
+          ConversationsCompanion(
+            conversationId: Value(conversation.conversationId),
+            ownerId: Value(ownerId),
+            category: Value(conversation.category),
+            name: Value(conversation.name),
+            iconUrl: Value(conversation.iconUrl),
+            announcement: Value(conversation.announcement),
+            codeUrl: Value(conversation.codeUrl),
+            createdAt: Value(conversation.createdAt),
+            status: const Value(ConversationStatus.success),
+            muteUntil: Value(DateTime.tryParse(conversation.muteUntil)),
+            expireIn: Value(conversation.expireIn),
+          ),
+        ),
+        ...conversation.participants.map(
+          (participant) => db.participantDao.insert(
+            Participant(
+              conversationId: conversation.conversationId,
+              userId: participant.userId,
+              createdAt: participant.createdAt ?? DateTime.now(),
+              role: participant.role,
             ),
           ),
-          ...conversation.participants.map(
-            (participant) => db.participantDao.insert(
-              Participant(
-                conversationId: conversation.conversationId,
-                userId: participant.userId,
-                createdAt: participant.createdAt ?? DateTime.now(),
-                role: participant.role,
-              ),
-            ),
-          ),
-          ...(conversation.participantSessions ?? [])
-              .map((p) => db.participantSessionDao.insert(
-                    ParticipantSessionData(
-                      conversationId: conversation.conversationId,
-                      userId: p.userId,
-                      sessionId: p.sessionId,
-                      publicKey: p.publicKey,
-                    ),
-                  ))
-        ]);
-      });
+        ),
+        ...(conversation.participantSessions ?? [])
+            .map((p) => db.participantSessionDao.insert(
+                  ParticipantSessionData(
+                    conversationId: conversation.conversationId,
+                    userId: p.userId,
+                    sessionId: p.sessionId,
+                    publicKey: p.publicKey,
+                  ),
+                ))
+      ]);
+    });
+  }
 
   Future<int> updateCodeUrl(String conversationId, String codeUrl) async {
     final already = await db.hasData(

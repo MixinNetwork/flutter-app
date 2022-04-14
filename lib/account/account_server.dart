@@ -731,7 +731,7 @@ class AccountServer {
             userIds.map((e) => ParticipantRequest(userId: e)).toList(),
       ),
     );
-    await database.conversationDao.updateConversation(response.data);
+    await database.conversationDao.updateConversation(response.data, userId);
     await addParticipant(conversationId, userIds);
   }
 
@@ -740,7 +740,7 @@ class AccountServer {
 
   Future<void> joinGroup(String code) async {
     final response = await client.conversationApi.join(code);
-    await database.conversationDao.updateConversation(response.data);
+    await database.conversationDao.updateConversation(response.data, userId);
   }
 
   Future<void> addParticipant(
@@ -754,7 +754,7 @@ class AccountServer {
         userIds.map((e) => ParticipantRequest(userId: e)).toList(),
       );
 
-      await database.conversationDao.updateConversation(response.data);
+      await database.conversationDao.updateConversation(response.data, userId);
     } catch (e) {
       w('addParticipant error $e');
       // throw error??
@@ -1002,13 +1002,13 @@ class AccountServer {
       ),
     );
 
-    await database.conversationDao.updateConversation(response.data);
+    await database.conversationDao.updateConversation(response.data, userId);
   }
 
   Future<void> refreshGroup(String conversationId) async {
     final response =
         await client.conversationApi.getConversation(conversationId);
-    await database.conversationDao.updateConversation(response.data);
+    await database.conversationDao.updateConversation(response.data, userId);
   }
 
   Future<void> rotate(String conversationId) async {

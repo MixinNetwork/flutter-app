@@ -163,7 +163,10 @@ Future<void> _updateConversationExpireDuration(
       conversationId,
       DisappearRequest(duration: duration.inSeconds),
     );
-    await context.database.conversationDao.updateConversation(response.data);
+    await context.database.conversationDao.updateConversation(
+      response.data,
+      context.accountServer.userId,
+    );
   } catch (error, stackTrace) {
     e('update conversation expire duration failed $error $stackTrace');
     await showToastFailed(context, error);
