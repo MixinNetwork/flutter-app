@@ -139,6 +139,10 @@ class MessageBubble extends HookWidget {
             message.conversationId,
             initIndexMessageId: message.messageId,
           );
+          // pop to chat page if current pin page is modal.
+          if (ModalRoute.of(context)?.canPop == true) {
+            Navigator.maybePop(context);
+          }
         },
       );
 

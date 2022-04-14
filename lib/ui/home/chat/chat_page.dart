@@ -983,7 +983,10 @@ class _ChatDropOverlay extends HookWidget {
           return;
         }
         enable.value = false;
-        await showFilesPreviewDialog(context, files);
+        await showFilesPreviewDialog(
+          context,
+          files.map((e) => e.withMineType()).toList(),
+        );
         enable.value = true;
       },
       enable: enable.value,
