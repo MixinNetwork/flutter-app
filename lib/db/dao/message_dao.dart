@@ -712,13 +712,20 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         )),
       );
 
+  static const _mediaMessageTypes = [
+    MessageCategory.signalImage,
+    MessageCategory.plainImage,
+    MessageCategory.signalVideo,
+    MessageCategory.plainVideo,
+  ];
+
   Selectable<MessageItem> mediaMessages(
           String conversationId, int limit, int offset) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________) =>
               message.conversationId.equals(conversationId) &
-              message.category.isIn(['SIGNAL_IMAGE', 'PLAIN_IMAGE']),
+              message.category.isIn(_mediaMessageTypes),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
                   __________, ___________) =>
               Limit(limit, offset));
@@ -730,7 +737,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   _________, __________) =>
               CustomExpression<bool>('${message.aliasedName}.rowid < $rowId') &
               message.conversationId.equals(conversationId) &
-              message.category.isIn(['SIGNAL_IMAGE', 'PLAIN_IMAGE']),
+              message.category.isIn(_mediaMessageTypes),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
                   __________, ___________) =>
               Limit(limit, 0));
@@ -742,7 +749,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   _________, __________) =>
               message.conversationId.equals(conversationId) &
               CustomExpression<bool>('${message.aliasedName}.rowid > $rowId') &
-              message.category.isIn(['SIGNAL_IMAGE', 'PLAIN_IMAGE']),
+              message.category.isIn(_mediaMessageTypes),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
                   __________, ___________) =>
               Limit(limit, 0),

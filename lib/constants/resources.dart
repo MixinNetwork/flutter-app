@@ -278,6 +278,9 @@ class Resources {
 
   static const String assetsImagesVideoCallSvg = 'assets/images/video_call.svg';
 
+  static const String assetsImagesVideoMessageSvg =
+      'assets/images/video_message.svg';
+
   static const String assetsImagesWarningSvg = 'assets/images/warning.svg';
 
   static const String assetsImagesWebViewRefreshSvg =
