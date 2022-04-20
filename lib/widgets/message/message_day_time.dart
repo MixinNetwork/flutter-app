@@ -22,7 +22,7 @@ class MessageDayTime extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final hide =
-        useBlocStateConverter<HiddenMessageDayTimeBloc, DateTime?, bool>(
+        useBlocStateConverter<_HiddenMessageDayTimeBloc, DateTime?, bool>(
             converter: (state) => isSameDay(state, dateTime));
     return Center(
       child: Opacity(
@@ -71,8 +71,8 @@ class _MessageDayTimeWidget extends HookWidget {
   }
 }
 
-class HiddenMessageDayTimeBloc extends Cubit<DateTime?> {
-  HiddenMessageDayTimeBloc() : super(null);
+class _HiddenMessageDayTimeBloc extends Cubit<DateTime?> {
+  _HiddenMessageDayTimeBloc() : super(null);
 
   void update(DateTime? dateTime) => emit(dateTime);
 }
@@ -104,163 +104,166 @@ class MessageDayTimeViewportWidget extends HookWidget {
     final dateTimeTopOffset = useState<double>(0);
 
     final bloc =
-        useBloc<HiddenMessageDayTimeBloc>(() => HiddenMessageDayTimeBloc());
+        useBloc<_HiddenMessageDayTimeBloc>(() => _HiddenMessageDayTimeBloc());
 
-    useEffect(() {
-      void listener() {
-        final stopwatch = Stopwatch()..start();
+    void doTraversal() {
+      final items = <db.MessageItem>[];
+      final elements = <Element>[];
+      final dayTimeElements = <Element?>[];
 
-        final items = <db.MessageItem>[];
-        final elements = <Element>[];
-        final dayTimeElements = <Element?>[];
+      void findMessageItem() {
+        void dumpKeyedSubtree(Element element, {bool reverse = false}) {
+          final item =
+              element.descendantFirstOf((e) => e.widget is MessageItemWidget);
+          final widget = item.widget as MessageItemWidget;
 
-        void findMessageItem() {
-          void dumpKeyedSubtree(Element element, {bool reverse = false}) {
-            final item =
-                element.descendantFirstOf((e) => e.widget is MessageItemWidget);
-            final widget = item.widget as MessageItemWidget;
-
-            final Element? dayTimeElement;
-            if (!isSameDay(widget.message.createdAt, widget.prev?.createdAt)) {
-              dayTimeElement = element
-                  .descendantFirstOf((e) => e.widget is _MessageDayTimeWidget);
-            } else {
-              dayTimeElement = null;
-            }
-            if (!reverse) {
-              items.add(widget.message);
-              elements.add(item);
-              dayTimeElements.add(dayTimeElement);
-            } else {
-              items.insert(0, widget.message);
-              elements.insert(0, item);
-              dayTimeElements.insert(0, dayTimeElement);
-            }
+          final Element? dayTimeElement;
+          if (!isSameDay(widget.message.createdAt, widget.prev?.createdAt)) {
+            dayTimeElement = element
+                .descendantFirstOf((e) => e.widget is _MessageDayTimeWidget);
+          } else {
+            dayTimeElement = null;
           }
-
-          topKey.currentContext!
-              .visitChildElements((e) => dumpKeyedSubtree(e, reverse: true));
-
-          if (center != null) {
-            final item = (centerKey!.currentContext! as Element)
-                .descendantFirstOf((e) => e.widget is MessageItemWidget);
-            items.add(center!);
+          if (!reverse) {
+            items.add(widget.message);
             elements.add(item);
+            dayTimeElements.add(dayTimeElement);
+          } else {
+            items.insert(0, widget.message);
+            elements.insert(0, item);
+            dayTimeElements.insert(0, dayTimeElement);
           }
-
-          bottomKey.currentContext!.visitChildElements(dumpKeyedSubtree);
         }
 
-        findMessageItem();
+        topKey.currentContext!
+            .visitChildElements((e) => dumpKeyedSubtree(e, reverse: true));
 
-        assert(
-          items.length == elements.length,
-          'items.length != elements.length',
+        if (center != null) {
+          final item = (centerKey!.currentContext! as Element)
+              .descendantFirstOf((e) => e.widget is MessageItemWidget);
+          items.add(center!);
+          elements.add(item);
+        }
+
+        bottomKey.currentContext!.visitChildElements(dumpKeyedSubtree);
+      }
+
+      findMessageItem();
+
+      assert(
+        items.length == elements.length,
+        'items.length != elements.length',
+      );
+      if (items.isEmpty) {
+        return;
+      }
+      final currentRender = context.findRenderObject()! as RenderBox;
+
+      // find first item which in screen
+      var firstInScreenIndex = -1;
+      for (var i = 0; i < elements.length; i++) {
+        final render = elements[i].renderObject as RenderBox?;
+        if (render == null) {
+          continue;
+        }
+        final offset = render.localToGlobal(
+          Offset(0, render.size.height),
+          ancestor: currentRender,
         );
-        if (items.isEmpty) {
-          return;
-        }
-        final currentRender = context.findRenderObject()! as RenderBox;
 
-        // find first item which in screen
-        var firstInScreenIndex = -1;
-        for (var i = 0; i < elements.length; i++) {
-          final render = elements[i].renderObject as RenderBox?;
+        if (offset.dy > 0) {
+          firstInScreenIndex = i;
+          break;
+        }
+      }
+
+      if (firstInScreenIndex == -1) {
+        d('no item in screen');
+        dateTime.value = null;
+        return;
+      }
+
+      var closestToTopDayTimeIndex = -1;
+      var closestToTopDayTimeOffset = double.infinity;
+      for (var i = -1; i <= 1; i++) {
+        final index = firstInScreenIndex + i;
+        if (index < 0 || index >= dayTimeElements.length) {
+          continue;
+        }
+        final element = dayTimeElements[firstInScreenIndex + i];
+        if (element != null) {
+          final render = element.renderObject as RenderBox?;
           if (render == null) {
             continue;
           }
           final offset = render.localToGlobal(
-            Offset(0, render.size.height),
-            ancestor: currentRender,
-          );
-
-          if (offset.dy > 0) {
-            firstInScreenIndex = i;
-            break;
-          }
-        }
-
-        if (firstInScreenIndex == -1) {
-          d('no item in screen');
-          dateTime.value = null;
-          return;
-        }
-
-        var closestToTopDayTimeIndex = -1;
-        var closestToTopDayTimeOffset = double.infinity;
-        for (var i = -1; i <= 1; i++) {
-          final index = firstInScreenIndex + i;
-          if (index < 0 || index >= dayTimeElements.length) {
-            continue;
-          }
-          final element = dayTimeElements[firstInScreenIndex + i];
-          if (element != null) {
-            final render = element.renderObject as RenderBox?;
-            if (render == null) {
-              continue;
-            }
-            final offset = render.localToGlobal(
-              Offset(0, render.size.height / 2),
-              ancestor: currentRender,
-            );
-            final distance = (offset.dy - render.size.height / 2).abs();
-            if (distance < closestToTopDayTimeOffset) {
-              closestToTopDayTimeIndex = index;
-              closestToTopDayTimeOffset = distance;
-            }
-          }
-        }
-
-        if (closestToTopDayTimeIndex != -1) {
-          final render = dayTimeElements[closestToTopDayTimeIndex]!.renderObject
-              as RenderBox?;
-          assert(render != null, '$closestToTopDayTimeIndex render is null');
-          final offset = render!.localToGlobal(
             Offset(0, render.size.height / 2),
             ancestor: currentRender,
           );
-
-          if (offset.dy < render.size.height / 2) {
-            // up
-            firstInScreenIndex = closestToTopDayTimeIndex;
-            bloc.update(items[closestToTopDayTimeIndex].createdAt);
-            dateTimeTopOffset.value = 0;
-          } else {
-            // down
-            if (firstInScreenIndex != closestToTopDayTimeIndex) {
-              assert(() {
-                if (firstInScreenIndex > closestToTopDayTimeIndex) {
-                  e('firstInScreenIndex > closestToTopDayTimeIndex');
-                }
-                if (isSameDay(items[firstInScreenIndex].createdAt,
-                    items[closestToTopDayTimeIndex].createdAt)) {
-                  e('there is a day time item but is the same day.'
-                      ' $firstInScreenIndex $closestToTopDayTimeIndex');
-                }
-                return true;
-              }());
-              bloc.update(null);
-              dateTimeTopOffset.value = offset.dy - render.size.height * 1.5;
-            } else {
-              firstInScreenIndex = -1;
-              dateTimeTopOffset.value = 0;
-              bloc.update(null);
-            }
+          final distance = (offset.dy - render.size.height / 2).abs();
+          if (distance < closestToTopDayTimeOffset) {
+            closestToTopDayTimeIndex = index;
+            closestToTopDayTimeOffset = distance;
           }
-        } else {
-          dateTimeTopOffset.value = 0;
         }
-
-        dateTime.value = items.getOrNull(firstInScreenIndex)?.createdAt;
-
-        d('stopwatch: ${stopwatch.elapsedMilliseconds}');
       }
 
-      scrollController.addListener(listener);
+      if (closestToTopDayTimeIndex != -1) {
+        final render = dayTimeElements[closestToTopDayTimeIndex]!.renderObject
+            as RenderBox?;
+        assert(render != null, '$closestToTopDayTimeIndex render is null');
+        final offset = render!.localToGlobal(
+          Offset(0, render.size.height / 2),
+          ancestor: currentRender,
+        );
+
+        if (offset.dy < render.size.height / 2) {
+          // up
+          firstInScreenIndex = closestToTopDayTimeIndex;
+          bloc.update(items[closestToTopDayTimeIndex].createdAt);
+          dateTimeTopOffset.value = 0;
+        } else {
+          // down
+          if (firstInScreenIndex != closestToTopDayTimeIndex) {
+            assert(() {
+              if (firstInScreenIndex > closestToTopDayTimeIndex) {
+                e('firstInScreenIndex > closestToTopDayTimeIndex');
+              }
+              if (isSameDay(items[firstInScreenIndex].createdAt,
+                  items[closestToTopDayTimeIndex].createdAt)) {
+                e('there is a day time item but is the same day.'
+                    ' $firstInScreenIndex $closestToTopDayTimeIndex');
+              }
+              return true;
+            }());
+            bloc.update(null);
+            dateTimeTopOffset.value = offset.dy - render.size.height * 1.5;
+          } else {
+            firstInScreenIndex = -1;
+            dateTimeTopOffset.value = 0;
+            bloc.update(null);
+          }
+        }
+      } else {
+        bloc.update(null);
+        dateTimeTopOffset.value = 0;
+      }
+
+      dateTime.value = items.getOrNull(firstInScreenIndex)?.createdAt;
+    }
+
+    useEffect(() {
+      scrollController.addListener(doTraversal);
       return () {
-        scrollController.removeListener(listener);
+        scrollController.removeListener(doTraversal);
       };
     }, [scrollController]);
+
+    useEffect(() {
+      WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+        doTraversal();
+      });
+    }, [centerKey]);
 
     return BlocProvider.value(
       value: bloc,

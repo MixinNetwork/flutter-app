@@ -553,6 +553,7 @@ class _List extends HookWidget {
         BlocProvider.of<MessageBloc>(context).scrollController;
 
     return MessageDayTimeViewportWidget(
+      key: key,
       bottomKey: bottomKey,
       center: center,
       topKey: topKey,
