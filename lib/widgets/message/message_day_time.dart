@@ -303,13 +303,6 @@ extension _ElementExt on Element {
       return child;
     }
 
-    Element? result;
-    visitChildren((element) {
-      if (result != null) {
-        return;
-      }
-      result = dump(element);
-    });
-    return result!;
+    return dump(this)!;
   }
 }
