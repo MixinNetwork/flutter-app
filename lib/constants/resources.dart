@@ -235,8 +235,6 @@ class Resources {
 
   static const String assetsImagesSelectedSvg = 'assets/images/selected.svg';
 
-  static const String assetsImagesSendingSvg = 'assets/images/sending.svg';
-
   static const String assetsImagesSentSvg = 'assets/images/sent.svg';
 
   static const String assetsImagesSettingSvg = 'assets/images/setting.svg';

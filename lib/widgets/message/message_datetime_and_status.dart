@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../bloc/minute_timer_cubit.dart';
 import '../../constants/resources.dart';
@@ -11,6 +10,7 @@ import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../message_status_icon.dart';
 import 'message.dart';
 
 bool _isRepresentative(
@@ -82,9 +82,12 @@ class MessageDatetimeAndStatus extends HookWidget {
           HookBuilder(builder: (context) {
             final status =
                 useMessageConverter(converter: (state) => state.status);
-            return _MessageStatusWidget(
-              status: status,
-              color: color,
+            return Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: MessageStatusIcon(
+                status: status,
+                color: color,
+              ),
             );
           }),
       ],
@@ -139,43 +142,6 @@ class _MessageDatetime extends HookWidget {
               const Color.fromRGBO(131, 145, 158, 1),
               darkColor: const Color.fromRGBO(128, 131, 134, 1),
             ),
-      ),
-    );
-  }
-}
-
-class _MessageStatusWidget extends StatelessWidget {
-  const _MessageStatusWidget({Key? key, required this.status, this.color})
-      : super(key: key);
-
-  final MessageStatus status;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    var assetName = Resources.assetsImagesSendingSvg;
-    var color = this.color ?? context.theme.secondaryText;
-    switch (status) {
-      case MessageStatus.sent:
-        assetName = Resources.assetsImagesSentSvg;
-        break;
-      case MessageStatus.delivered:
-        assetName = Resources.assetsImagesDeliveredSvg;
-        break;
-      case MessageStatus.read:
-        assetName = Resources.assetsImagesReadSvg;
-        color = context.theme.accent;
-        break;
-      case MessageStatus.failed:
-      case MessageStatus.unknown:
-      case MessageStatus.sending:
-        break;
-    }
-    return Padding(
-      padding: const EdgeInsets.only(left: 8),
-      child: SvgPicture.asset(
-        assetName,
-        color: color,
       ),
     );
   }
