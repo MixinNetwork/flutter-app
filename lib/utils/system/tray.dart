@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:ffi/ffi.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide MenuItem;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:path/path.dart' as p;
 import 'package:system_tray/system_tray.dart';
