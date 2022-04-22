@@ -10,8 +10,6 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../message.dart';
 import '../message_bubble.dart';
-import '../message_datetime_and_status.dart';
-import '../message_layout.dart';
 
 class RecallMessage extends HookWidget {
   const RecallMessage({
@@ -67,13 +65,8 @@ class RecallMessage extends HookWidget {
         ),
       ],
     );
-    const dateAndStatus = MessageDatetimeAndStatus();
     return MessageBubble(
-      child: MessageLayout(
-        spacing: 6,
-        content: content,
-        dateAndStatus: dateAndStatus,
-      ),
+      child: content,
     );
   }
 }
