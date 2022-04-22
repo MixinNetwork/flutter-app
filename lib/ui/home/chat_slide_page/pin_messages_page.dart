@@ -12,10 +12,12 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
+import '../../../widgets/clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/audio_message.dart';
 import '../../../widgets/message/message.dart';
+import '../../../widgets/message/message_day_time.dart';
 import '../bloc/conversation_cubit.dart';
 import '../chat/chat_page.dart';
 
@@ -48,6 +50,11 @@ class PinMessagesPage extends HookWidget {
 
     final list = (rawList ?? []).reversed.toList();
 
+    final scrollController = useMemoized(
+      () => ScrollerScrollController(),
+    );
+    final listKey = useMemoized(() => GlobalKey(debugLabel: 'PinMessagesPage'));
+
     return MultiProvider(
       providers: [
         BlocProvider.value(
@@ -75,20 +82,28 @@ class PinMessagesPage extends HookWidget {
         body: Column(
           children: [
             Expanded(
-              child: ListView.builder(
+              child: MessageDayTimeViewportWidget.singleList(
+                scrollController: scrollController,
+                listKey: listKey,
+                reTraversalKey: list,
                 reverse: true,
-                padding: const EdgeInsets.only(bottom: 16),
-                itemBuilder: (BuildContext context, int index) {
-                  final messageItem = list[index];
-                  return MessageItemWidget(
-                    prev: list.getOrNull(index + 1),
-                    message: messageItem,
-                    next: list.getOrNull(index - 1),
-                    blink: false,
-                    isPinnedPage: true,
-                  );
-                },
-                itemCount: list.length,
+                child: ListView.builder(
+                  key: listKey,
+                  reverse: true,
+                  padding: const EdgeInsets.only(bottom: 16),
+                  controller: scrollController,
+                  itemBuilder: (BuildContext context, int index) {
+                    final messageItem = list[index];
+                    return MessageItemWidget(
+                      prev: list.getOrNull(index + 1),
+                      message: messageItem,
+                      next: list.getOrNull(index - 1),
+                      blink: false,
+                      isPinnedPage: true,
+                    );
+                  },
+                  itemCount: list.length,
+                ),
               ),
             ),
             InteractiveDecoratedBox(
