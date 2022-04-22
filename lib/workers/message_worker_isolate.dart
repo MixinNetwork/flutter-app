@@ -138,7 +138,6 @@ class _MessageProcessRunner {
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKeyStr,
-      baseUrl: 'https://api.mixin.zone',
       scp: scp,
       dioOptions: BaseOptions(
         connectTimeout: tenSecond,
