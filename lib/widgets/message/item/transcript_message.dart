@@ -17,11 +17,13 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
 import '../../action_button.dart';
+import '../../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../../dialog.dart';
 import '../../interactive_decorated_box.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import '../message_day_time.dart';
 import 'audio_message.dart';
 import 'unknown_message.dart';
 
@@ -236,6 +238,10 @@ class TranscriptPage extends HookWidget {
       ),
     );
 
+    final scrollController = useMemoized(() => ScrollerScrollController());
+    final listKey =
+        useMemoized(() => GlobalKey(debugLabel: 'transcript_list_key'));
+
     return ColoredBox(
       color: context.theme.chatBackground,
       child: ConstrainedBox(
@@ -290,16 +296,22 @@ class TranscriptPage extends HookWidget {
                 ),
               ),
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  itemBuilder: (BuildContext context, int index) =>
-                      MessageItemWidget(
-                    prev: list.getOrNull(index - 1),
-                    message: list[index],
-                    next: list.getOrNull(index + 1),
-                    isTranscriptPage: true,
+                child: MessageDayTimeViewportWidget.singleList(
+                  listKey: listKey,
+                  scrollController: scrollController,
+                  child: ListView.builder(
+                    controller: scrollController,
+                    key: listKey,
+                    padding: const EdgeInsets.only(bottom: 16),
+                    itemBuilder: (BuildContext context, int index) =>
+                        MessageItemWidget(
+                      prev: list.getOrNull(index - 1),
+                      message: list[index],
+                      next: list.getOrNull(index + 1),
+                      isTranscriptPage: true,
+                    ),
+                    itemCount: list.length,
                   ),
-                  itemCount: list.length,
                 ),
               ),
             ],

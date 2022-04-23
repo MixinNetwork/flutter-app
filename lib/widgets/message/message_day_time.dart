@@ -77,26 +77,108 @@ class _HiddenMessageDayTimeBloc extends Cubit<DateTime?> {
   void update(DateTime? dateTime) => emit(dateTime);
 }
 
+class _CurrentShowingMessages {
+  _CurrentShowingMessages();
+
+  final List<db.MessageItem> items = [];
+  final List<Element> elements = [];
+  final List<Element?> dayTimeElements = [];
+
+  void dumpKeyedSubtree(Element element, {bool reverse = false}) {
+    final item =
+        element.descendantFirstOf((e) => e.widget is MessageItemWidget);
+    final widget = item.widget as MessageItemWidget;
+
+    final Element? dayTimeElement;
+    if (!isSameDay(widget.message.createdAt, widget.prev?.createdAt)) {
+      dayTimeElement =
+          element.descendantFirstOf((e) => e.widget is _MessageDayTimeWidget);
+    } else {
+      dayTimeElement = null;
+    }
+    if (!reverse) {
+      items.add(widget.message);
+      elements.add(item);
+      dayTimeElements.add(dayTimeElement);
+    } else {
+      items.insert(0, widget.message);
+      elements.insert(0, item);
+      dayTimeElements.insert(0, dayTimeElement);
+    }
+  }
+}
+
 class MessageDayTimeViewportWidget extends HookWidget {
-  const MessageDayTimeViewportWidget({
-    Key? key,
+  const MessageDayTimeViewportWidget._create(
+    this._traversalCurrentShowingMessageElements, {
     required this.child,
     required this.scrollController,
-    required this.topKey,
-    required this.bottomKey,
-    required this.center,
-    required this.centerKey,
-  })  : assert((centerKey == null) == (center == null)),
-        super(key: key);
+    this.reTraversalKey,
+    Key? key,
+  }) : super(key: key);
+
+  factory MessageDayTimeViewportWidget.chatPage({
+    Key? key,
+    required Widget child,
+    required ScrollController scrollController,
+    required GlobalKey topKey,
+    required GlobalKey bottomKey,
+    required db.MessageItem? center,
+    required GlobalKey? centerKey,
+  }) =>
+      MessageDayTimeViewportWidget._create(
+        () {
+          final result = _CurrentShowingMessages();
+
+          topKey.currentContext!.visitChildElements(
+              (e) => result.dumpKeyedSubtree(e, reverse: true));
+
+          if (center != null) {
+            result.dumpKeyedSubtree(centerKey!.currentContext! as Element);
+          }
+
+          bottomKey.currentContext!.visitChildElements(result.dumpKeyedSubtree);
+
+          return result;
+        },
+        key: key,
+        scrollController: scrollController,
+        reTraversalKey: centerKey,
+        child: child,
+      );
+
+  factory MessageDayTimeViewportWidget.singleList({
+    Key? key,
+    required Widget child,
+    required ScrollController scrollController,
+    required GlobalKey listKey,
+    Object? reTraversalKey,
+    bool reverse = false,
+  }) =>
+      MessageDayTimeViewportWidget._create(
+        () {
+          final result = _CurrentShowingMessages();
+          (listKey.currentContext! as Element)
+              .descendantFirstOf((e) => e.widget is SliverList)
+              .visitChildElements((e) {
+            result.dumpKeyedSubtree(e, reverse: reverse);
+          });
+          return result;
+        },
+        key: key,
+        scrollController: scrollController,
+        reTraversalKey: reTraversalKey,
+        child: child,
+      );
 
   final Widget child;
 
   final ScrollController scrollController;
 
-  final GlobalKey topKey;
-  final GlobalKey bottomKey;
-  final db.MessageItem? center;
-  final GlobalKey? centerKey;
+  final Object? reTraversalKey;
+
+  final _CurrentShowingMessages Function()
+      _traversalCurrentShowingMessageElements;
 
   @override
   Widget build(BuildContext context) {
@@ -107,48 +189,11 @@ class MessageDayTimeViewportWidget extends HookWidget {
         useBloc<_HiddenMessageDayTimeBloc>(() => _HiddenMessageDayTimeBloc());
 
     void doTraversal() {
-      final items = <db.MessageItem>[];
-      final elements = <Element>[];
-      final dayTimeElements = <Element?>[];
+      final result = _traversalCurrentShowingMessageElements();
 
-      void findMessageItem() {
-        void dumpKeyedSubtree(Element element, {bool reverse = false}) {
-          final item =
-              element.descendantFirstOf((e) => e.widget is MessageItemWidget);
-          final widget = item.widget as MessageItemWidget;
-
-          final Element? dayTimeElement;
-          if (!isSameDay(widget.message.createdAt, widget.prev?.createdAt)) {
-            dayTimeElement = element
-                .descendantFirstOf((e) => e.widget is _MessageDayTimeWidget);
-          } else {
-            dayTimeElement = null;
-          }
-          if (!reverse) {
-            items.add(widget.message);
-            elements.add(item);
-            dayTimeElements.add(dayTimeElement);
-          } else {
-            items.insert(0, widget.message);
-            elements.insert(0, item);
-            dayTimeElements.insert(0, dayTimeElement);
-          }
-        }
-
-        topKey.currentContext!
-            .visitChildElements((e) => dumpKeyedSubtree(e, reverse: true));
-
-        if (center != null) {
-          final item = (centerKey!.currentContext! as Element)
-              .descendantFirstOf((e) => e.widget is MessageItemWidget);
-          items.add(center!);
-          elements.add(item);
-        }
-
-        bottomKey.currentContext!.visitChildElements(dumpKeyedSubtree);
-      }
-
-      findMessageItem();
+      final items = result.items;
+      final elements = result.elements;
+      final dayTimeElements = result.dayTimeElements;
 
       assert(
         items.length == elements.length,
@@ -263,7 +308,7 @@ class MessageDayTimeViewportWidget extends HookWidget {
       WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
         doTraversal();
       });
-    }, [centerKey]);
+    }, [reTraversalKey]);
 
     return BlocProvider.value(
       value: bloc,

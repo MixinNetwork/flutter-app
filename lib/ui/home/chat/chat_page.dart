@@ -552,7 +552,7 @@ class _List extends HookWidget {
     final scrollController =
         BlocProvider.of<MessageBloc>(context).scrollController;
 
-    return MessageDayTimeViewportWidget(
+    return MessageDayTimeViewportWidget.chatPage(
       key: key,
       bottomKey: bottomKey,
       center: center,
