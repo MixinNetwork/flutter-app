@@ -252,7 +252,7 @@ class _Home extends HookWidget {
         return null;
       }
       void onAppStateChanged() {
-        if (isAppActive) {
+        if (isAppActive && accountServer != null) {
           checkUpdate(context: context);
         }
       }
@@ -262,7 +262,7 @@ class _Home extends HookWidget {
       return () {
         appActiveListener.removeListener(onAppStateChanged);
       };
-    }, []);
+    }, [accountServer]);
 
     if (signed) {
       BlocProvider.of<ConversationListBloc>(context)
