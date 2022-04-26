@@ -16,19 +16,44 @@ class NetworkStatus extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final connectedState = useMemoizedStream(
-            () => context.accountServer.connectedStateStream
-                .map((event) => event == ConnectedState.connected)
-                .distinct(),
-            initialData: true)
+            () => context.accountServer.connectedStateStream.distinct(),
+            initialData: ConnectedState.connecting)
         .requireData;
-    return ContextMenuPortalEntry(
-      buildMenus: () => [
-        ContextMenu(
-          title: context.l10n.openLogDirectory,
-          onTap: () => openUri(context, mixinLogDirectory.uri.toString()),
+
+    final hasDisconnectedBefore = useRef(false);
+
+    useEffect(() {
+      if (connectedState == ConnectedState.disconnected) {
+        hasDisconnectedBefore.value = true;
+      }
+    }, [connectedState]);
+
+    return Column(
+      children: [
+        ContextMenuPortalEntry(
+          buildMenus: () => [
+            ContextMenu(
+              title: context.l10n.openLogDirectory,
+              onTap: () => openUri(context, mixinLogDirectory.uri.toString()),
+            ),
+          ],
+          child: _NetworkNotConnect(
+            visible: connectedState != ConnectedState.connected &&
+                hasDisconnectedBefore.value,
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 150),
+          child: connectedState == ConnectedState.connecting ||
+                  connectedState == ConnectedState.reconnecting
+              ? LinearProgressIndicator(
+                  backgroundColor: Colors.transparent,
+                  color: context.theme.accent,
+                  minHeight: 2,
+                )
+              : const SizedBox(),
         ),
       ],
-      child: _NetworkNotConnect(visible: !connectedState),
     );
   }
 }
