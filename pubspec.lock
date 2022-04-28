@@ -56,7 +56,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.8.2"
+    version: "2.9.0"
   bitsdojo_window:
     dependency: "direct main"
     description:
@@ -278,6 +278,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.7.1"
+  debug_info_collector:
+    dependency: "direct dev"
+    description:
+      path: "packages/debug_info_collector"
+      ref: "6b965d68889e5cffef5e57ac0059fdc5b1597796"
+      resolved-ref: "6b965d68889e5cffef5e57ac0059fdc5b1597796"
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
+    version: "1.0.0"
   decimal:
     dependency: "direct main"
     description:
