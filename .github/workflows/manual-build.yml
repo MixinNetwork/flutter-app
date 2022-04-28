@@ -49,6 +49,8 @@ jobs:
         with:
           channel: 'master'
       - run: flutter config --enable-windows-desktop
+      # fix error when dump debug info: (msdia*.dll unregistered?)
+      - run: regsvr32 "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\Remote Debugger\x64\msdia140.dll"
 
       - name: Run tests
         run: flutter test
