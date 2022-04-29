@@ -45,6 +45,7 @@ class Sender {
       final checksum = await getCheckSum(cid);
       params.conversationChecksum = checksum;
     }
+    i('deliver blazeMessage: ${blazeMessage.id}');
     final bm = await blaze.sendMessage(blazeMessage);
     if (bm == null) {
       await _sleep(1);
