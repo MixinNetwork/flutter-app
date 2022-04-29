@@ -68,12 +68,15 @@ class SendMessageHelper {
         await _messageDao.findMessageItemByMessageId(quoteMessageId);
 
     String? recipientId;
-    final botNumber = botNumberStartRegExp.firstMatch(content)?[0];
-    if (botNumber?.isNotEmpty == true) {
-      recipientId = await _participantDao
-          .userIdByIdentityNumber(conversationId, botNumber!)
-          .getSingleOrNull();
-      category = recipientId != null ? MessageCategory.plainText : category;
+
+    if (content.startsWith('@7000')) {
+      final botNumber = botNumberRegExp.firstMatch(content)?[0];
+      if (botNumber != null && botNumber.isNotEmpty) {
+        recipientId = await _participantDao
+            .userIdByIdentityNumber(conversationId, botNumber)
+            .getSingleOrNull();
+        category = recipientId != null ? MessageCategory.plainText : category;
+      }
     }
 
     final message = Message(
