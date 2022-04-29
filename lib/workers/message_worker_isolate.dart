@@ -403,6 +403,7 @@ class _MessageProcessRunner {
           message.category.isPin) {
         if (message.category == MessageCategory.appCard ||
             message.category.isPost ||
+            message.category.isTranscript ||
             message.category.isText) {
           final list = utf8.encode(content!);
           content = base64Encode(list);
