@@ -404,7 +404,9 @@ class _MessageProcessRunner {
         if (message.category == MessageCategory.appCard ||
             message.category.isPost ||
             message.category.isTranscript ||
-            message.category.isText) {
+            message.category.isText ||
+            message.category.isLive ||
+            message.category.isLocation) {
           final list = utf8.encode(content!);
           content = base64Encode(list);
         }
