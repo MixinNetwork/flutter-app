@@ -791,7 +791,7 @@ class SendMessageHelper {
       content: await jsonEncodeWithIsolate(transcriptMinimals),
       createdAt: DateTime.now(),
       status: MessageStatus.sending,
-      mediaStatus: hasAttachments ? MediaStatus.canceled : null,
+      mediaStatus: hasAttachments ? MediaStatus.canceled : MediaStatus.done,
     );
 
     Future<void> insertFts() async {
