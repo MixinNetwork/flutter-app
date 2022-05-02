@@ -24,7 +24,7 @@ dependencies:
   bitsdojo_window: ^0.1.1+1
   bloc: ^8.0.3
   blurhash_dart: ^1.0.2
-  decimal: ^2.1.0
+  decimal: ^2.2.0
   desktop_drop: ^0.3.3
   desktop_lifecycle: ^0.1.0
   desktop_webview_window: ^0.1.6
