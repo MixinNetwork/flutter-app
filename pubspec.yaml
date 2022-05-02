@@ -92,7 +92,7 @@ dependencies:
   recase: ^4.0.0
   rxdart: ^0.27.1
   scrollable_positioned_list: ^0.2.3
-  sliver_tools: ^0.2.5
+  sliver_tools: ^0.2.6
   sqlite3_flutter_libs: 0.5.4
   stream_transform: ^2.0.0
   system_tray:
