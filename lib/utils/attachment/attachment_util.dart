@@ -228,6 +228,7 @@ class AttachmentUtil extends ChangeNotifier {
         final fileSize = await file.length();
 
         if (attachmentMessage != null) {
+          attachmentMessage.createdAt = response.data.createdAt;
           final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
           await _messageDao.updateMessageContent(messageId, encoded);
         }

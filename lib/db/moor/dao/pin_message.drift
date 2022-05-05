@@ -74,14 +74,12 @@ WHERE pinMessage.conversation_id = :conversationId
 ORDER BY $order
 LIMIT $limit;
 
-lastPinMessageItem:
+pinMessageItem:
 SELECT
     message.content AS content,
     sender.full_name AS userFullName
 FROM messages message
          INNER JOIN users sender ON message.user_id = sender.user_id
-         INNER JOIN pin_messages pinMessage ON message.quote_message_id = pinMessage.message_id
-         INNER JOIN messages quoteMessage ON quoteMessage.message_id = message.quote_message_id AND quoteMessage.category != 'MESSAGE_RECALL'
-WHERE message.conversation_id = :conversationId AND message.category = 'MESSAGE_PIN'
+WHERE message.conversation_id = :conversationId AND message.quote_message_id = :messageId AND message.category = 'MESSAGE_PIN'
 ORDER BY message.created_at DESC
 LIMIT 1;

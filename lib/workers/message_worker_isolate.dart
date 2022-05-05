@@ -431,10 +431,11 @@ class _MessageProcessRunner {
 
       MessageResult? result;
       var content = message.content;
+      String? lengthLimitedContent;
       if (message.category.isPost || message.category.isText) {
         content = content?.substring(0, min(content.length, kMaxTextLength));
+        lengthLimitedContent = content;
       }
-      final newContent = content;
 
       final conversation = await database.conversationDao
           .conversationById(message.conversationId)
@@ -450,7 +451,10 @@ class _MessageProcessRunner {
           message.category.isPin) {
         if (message.category == MessageCategory.appCard ||
             message.category.isPost ||
-            message.category.isText) {
+            message.category.isTranscript ||
+            message.category.isText ||
+            message.category.isLive ||
+            message.category.isLocation) {
           final list = utf8.encode(content!);
           content = base64Encode(list);
         }
@@ -511,7 +515,7 @@ class _MessageProcessRunner {
       if (result?.success ?? false) {
         await database.messageDao.updateMessageContentAndStatus(
           message.messageId,
-          newContent,
+          lengthLimitedContent,
           MessageStatus.sent,
         );
         await database.jobDao.deleteJobById(job.jobId);

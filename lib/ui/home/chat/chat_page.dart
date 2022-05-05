@@ -24,6 +24,7 @@ import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_bubble.dart';
+import '../../../widgets/message/message_day_time.dart';
 import '../../../widgets/pin_bubble.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
@@ -552,61 +553,79 @@ class _List extends HookWidget {
       });
     }, [ids]);
 
-    return ClampingCustomScrollView(
+    final topKey = useMemoized(() => GlobalKey(debugLabel: 'chat list top'));
+    final bottomKey =
+        useMemoized(() => GlobalKey(debugLabel: 'chat list bottom'));
+
+    final scrollController =
+        BlocProvider.of<MessageBloc>(context).scrollController;
+
+    return MessageDayTimeViewportWidget.chatPage(
       key: key,
-      center: key,
-      controller: BlocProvider.of<MessageBloc>(context).scrollController,
-      anchor: 0.3,
-      physics: const ClampingScrollPhysics(),
-      slivers: [
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
-              final actualIndex = top.length - index - 1;
-              final messageItem = top[actualIndex];
+      bottomKey: bottomKey,
+      center: center,
+      topKey: topKey,
+      scrollController: scrollController,
+      centerKey:
+          center == null ? null : ref.value[center.messageId] as GlobalKey?,
+      child: ClampingCustomScrollView(
+        key: key,
+        center: key,
+        controller: scrollController,
+        anchor: 0.3,
+        physics: const ClampingScrollPhysics(),
+        slivers: [
+          SliverList(
+            key: topKey,
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                final actualIndex = top.length - index - 1;
+                final messageItem = top[actualIndex];
+                return MessageItemWidget(
+                  key: ref.value[messageItem.messageId],
+                  prev: top.getOrNull(actualIndex - 1),
+                  message: messageItem,
+                  next: top.getOrNull(actualIndex + 1) ??
+                      center ??
+                      bottom.lastOrNull,
+                  lastReadMessageId: state.lastReadMessageId,
+                );
+              },
+              childCount: top.length,
+            ),
+          ),
+          SliverToBoxAdapter(
+            key: key,
+            child: Builder(builder: (context) {
+              if (center == null) return const SizedBox();
               return MessageItemWidget(
-                key: ref.value[messageItem.messageId],
-                prev: top.getOrNull(actualIndex - 1),
-                message: messageItem,
-                next: top.getOrNull(actualIndex + 1) ??
-                    center ??
-                    bottom.lastOrNull,
+                key: ref.value[center.messageId],
+                prev: top.lastOrNull,
+                message: center,
+                next: bottom.firstOrNull,
                 lastReadMessageId: state.lastReadMessageId,
               );
-            },
-            childCount: top.length,
+            }),
           ),
-        ),
-        SliverToBoxAdapter(
-          key: key,
-          child: Builder(builder: (context) {
-            if (center == null) return const SizedBox();
-            return MessageItemWidget(
-              key: ref.value[center.messageId],
-              prev: top.lastOrNull,
-              message: center,
-              next: bottom.firstOrNull,
-              lastReadMessageId: state.lastReadMessageId,
-            );
-          }),
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
-              final messageItem = bottom[index];
-              return MessageItemWidget(
-                key: ref.value[messageItem.messageId],
-                prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
-                message: messageItem,
-                next: bottom.getOrNull(index + 1),
-                lastReadMessageId: state.lastReadMessageId,
-              );
-            },
-            childCount: bottom.length,
+          SliverList(
+            key: bottomKey,
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                final messageItem = bottom[index];
+                return MessageItemWidget(
+                  key: ref.value[messageItem.messageId],
+                  prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
+                  message: messageItem,
+                  next: bottom.getOrNull(index + 1),
+                  lastReadMessageId: state.lastReadMessageId,
+                );
+              },
+              childCount: bottom.length,
+            ),
           ),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 10)),
-      ],
+          const SliverToBoxAdapter(child: SizedBox(height: 10)),
+        ],
+      ),
     );
   }
 }

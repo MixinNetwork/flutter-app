@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,13 +15,16 @@ import '../../../ui/home/chat/chat_page.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/logger.dart';
 import '../../../utils/message_optimize.dart';
 import '../../action_button.dart';
+import '../../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../../dialog.dart';
 import '../../interactive_decorated_box.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import '../message_day_time.dart';
 import 'audio_message.dart';
 import 'unknown_message.dart';
 
@@ -47,7 +50,9 @@ class TranscriptMessageWidget extends HookWidget {
             .map((json) =>
                 TranscriptMinimal.fromJson(json as Map<String, dynamic>))
             .toList();
-      } catch (_) {
+      } catch (error) {
+        e('TranscriptMessageWidget.build $error');
+        e('parse json failed: $content');
         return null;
       }
     }, [content]);
@@ -55,6 +60,7 @@ class TranscriptMessageWidget extends HookWidget {
     final isCurrentUser = useIsCurrentUser();
 
     if (transcriptMinimals == null) {
+      e('TranscriptMessageWidget: transcriptMinimals is null');
       return const UnknownMessage();
     }
 
@@ -75,7 +81,7 @@ class TranscriptMessageWidget extends HookWidget {
 
       final transcriptTexts = useMemoized(
           () => List.generate(
-              min(transcriptMinimals.length, 4),
+              math.min(transcriptMinimals.length, 4),
               (index) =>
                   index).map((i) =>
               '${transcriptMinimals[i].name}: ${previews.isEmpty ? '' : previews[i]}'
@@ -236,6 +242,10 @@ class TranscriptPage extends HookWidget {
       ),
     );
 
+    final scrollController = useMemoized(() => ScrollerScrollController());
+    final listKey =
+        useMemoized(() => GlobalKey(debugLabel: 'transcript_list_key'));
+
     return ColoredBox(
       color: context.theme.chatBackground,
       child: ConstrainedBox(
@@ -290,16 +300,22 @@ class TranscriptPage extends HookWidget {
                 ),
               ),
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  itemBuilder: (BuildContext context, int index) =>
-                      MessageItemWidget(
-                    prev: list.getOrNull(index - 1),
-                    message: list[index],
-                    next: list.getOrNull(index + 1),
-                    isTranscriptPage: true,
+                child: MessageDayTimeViewportWidget.singleList(
+                  listKey: listKey,
+                  scrollController: scrollController,
+                  child: ListView.builder(
+                    controller: scrollController,
+                    key: listKey,
+                    padding: const EdgeInsets.only(bottom: 16),
+                    itemBuilder: (BuildContext context, int index) =>
+                        MessageItemWidget(
+                      prev: list.getOrNull(index - 1),
+                      message: list[index],
+                      next: list.getOrNull(index + 1),
+                      isTranscriptPage: true,
+                    ),
+                    itemCount: list.length,
                   ),
-                  itemCount: list.length,
                 ),
               ),
             ],

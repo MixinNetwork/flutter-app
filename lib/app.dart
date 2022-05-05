@@ -194,15 +194,7 @@ class _App extends StatelessWidget {
             supportedLocales: [
               ...Localization.delegate.supportedLocales,
             ],
-            theme: ThemeData(
-              pageTransitionsTheme: const PageTransitionsTheme(
-                builders: <TargetPlatform, PageTransitionsBuilder>{
-                  TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
-                  TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-                  TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
-                },
-              ),
-            ).withFallbackFonts(),
+            theme: ThemeData().withFallbackFonts(),
             builder: (context, child) {
               try {
                 context.accountServer.language =
@@ -260,7 +252,7 @@ class _Home extends HookWidget {
         return null;
       }
       void onAppStateChanged() {
-        if (isAppActive) {
+        if (isAppActive && accountServer != null) {
           checkUpdate(context: context);
         }
       }
@@ -270,7 +262,7 @@ class _Home extends HookWidget {
       return () {
         appActiveListener.removeListener(onAppStateChanged);
       };
-    }, []);
+    }, [accountServer]);
 
     if (signed) {
       BlocProvider.of<ConversationListBloc>(context)

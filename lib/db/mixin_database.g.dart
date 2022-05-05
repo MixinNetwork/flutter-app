@@ -12739,19 +12739,19 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<LastPinMessageItemResult> lastPinMessageItem(
-      String conversationId) {
+  Selectable<PinMessageItemResult> pinMessageItem(
+      String conversationId, String? messageId) {
     return customSelect(
-        'SELECT message.content AS content, sender.full_name AS userFullName FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id INNER JOIN pin_messages AS pinMessage ON message.quote_message_id = pinMessage.message_id INNER JOIN messages AS quoteMessage ON quoteMessage.message_id = message.quote_message_id AND quoteMessage.category != \'MESSAGE_RECALL\' WHERE message.conversation_id = ?1 AND message.category = \'MESSAGE_PIN\' ORDER BY message.created_at DESC LIMIT 1',
+        'SELECT message.content AS content, sender.full_name AS userFullName FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id WHERE message.conversation_id = ?1 AND message.quote_message_id = ?2 AND message.category = \'MESSAGE_PIN\' ORDER BY message.created_at DESC LIMIT 1',
         variables: [
-          Variable<String>(conversationId)
+          Variable<String>(conversationId),
+          Variable<String?>(messageId)
         ],
         readsFrom: {
           messages,
           users,
-          pinMessages,
         }).map((QueryRow row) {
-      return LastPinMessageItemResult(
+      return PinMessageItemResult(
         content: row.read<String?>('content'),
         userFullName: row.read<String?>('userFullName'),
       );
@@ -14762,10 +14762,10 @@ class MessageItem {
   }
 }
 
-class LastPinMessageItemResult {
+class PinMessageItemResult {
   final String? content;
   final String? userFullName;
-  LastPinMessageItemResult({
+  PinMessageItemResult({
     this.content,
     this.userFullName,
   });
@@ -14774,12 +14774,12 @@ class LastPinMessageItemResult {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is LastPinMessageItemResult &&
+      (other is PinMessageItemResult &&
           other.content == this.content &&
           other.userFullName == this.userFullName);
   @override
   String toString() {
-    return (StringBuffer('LastPinMessageItemResult(')
+    return (StringBuffer('PinMessageItemResult(')
           ..write('content: $content, ')
           ..write('userFullName: $userFullName')
           ..write(')'))
