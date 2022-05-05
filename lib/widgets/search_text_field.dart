@@ -46,6 +46,7 @@ class SearchTextField extends HookWidget {
 
     useEffect(() {
       void notifyChanged() {
+        if (!controller.value.composing.composed) return;
         onChanged?.call(controller.text);
       }
 
