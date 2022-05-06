@@ -8,6 +8,9 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
+import '../app.dart';
+import 'app_lifecycle.dart';
+
 AsyncSnapshot<T> useMemoizedFuture<T>(
   Future<T> Function() futureBuilder,
   T initialData, {
@@ -226,4 +229,34 @@ void useProtocol(ValueChanged<String> callback) {
       protocolHandler.removeListener(listener);
     };
   }, [callback]);
+}
+
+ValueNotifier<bool> useImagePlaying(BuildContext context) {
+  final secondContext = useSecondNavigatorContext(context);
+  final isCurrentRoute = useRef(true);
+  final playing = useState(true);
+
+  final listener = useCallback(() {
+    playing.value = isAppActive && isCurrentRoute.value;
+  }, []);
+
+  useRouteObserver(
+    rootRouteObserver,
+    context: secondContext,
+    didPushNext: () {
+      isCurrentRoute.value = false;
+      listener();
+    },
+    didPopNext: () {
+      isCurrentRoute.value = true;
+      listener();
+    },
+  );
+
+  useEffect(() {
+    listener();
+    appActiveListener.addListener(listener);
+    return () => appActiveListener.removeListener(listener);
+  }, []);
+  return playing;
 }

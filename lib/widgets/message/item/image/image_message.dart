@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../../../app.dart';
 import '../../../../enum/media_status.dart';
-import '../../../../utils/app_lifecycle.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../cache_image.dart';
@@ -73,32 +71,7 @@ class MessageImage extends HookWidget {
         useMessageConverter(converter: (state) => state.thumbImage ?? '');
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
-    final secondContext = useSecondNavigatorContext(context);
-    final isCurrentRoute = useRef(true);
-    final playing = useState(true);
-
-    final listener = useCallback(() {
-      playing.value = isAppActive && isCurrentRoute.value;
-    }, []);
-
-    useRouteObserver(
-      rootRouteObserver,
-      context: secondContext,
-      didPushNext: () {
-        isCurrentRoute.value = false;
-        listener();
-      },
-      didPopNext: () {
-        isCurrentRoute.value = true;
-        listener();
-      },
-    );
-
-    useEffect(() {
-      listener();
-      appActiveListener.addListener(listener);
-      return () => appActiveListener.removeListener(listener);
-    }, []);
+    final playing = useImagePlaying(context);
 
     return InteractiveDecoratedBox(
       onTap: () {
