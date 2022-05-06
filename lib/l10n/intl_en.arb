@@ -350,6 +350,7 @@
   "week": "week",
   "set": "Set",
   "chatExpiredSet": "{name} set disappearing message time to {duration}.",
+  "chatExpiredSetWithoutDuration": "{name} changed disappearing message settings.",
   "chatExpiredDisabled": "{name} disabled disappearing message.",
   "disappearingCustomTimeMaxWarning": "The maximum time is {max}."
 }

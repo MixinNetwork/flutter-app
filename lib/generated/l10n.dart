@@ -3560,6 +3560,16 @@ class Localization {
     );
   }
 
+  /// `{name} changed disappearing message settings.`
+  String chatExpiredSetWithoutDuration(Object name) {
+    return Intl.message(
+      '$name changed disappearing message settings.',
+      name: 'chatExpiredSetWithoutDuration',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `{name} disabled disappearing message.`
   String chatExpiredDisabled(Object name) {
     return Intl.message(

@@ -127,17 +127,17 @@ String generateSystemText({
       text = Localization.current.chatGroupRole;
       break;
     case MessageAction.expire:
-      if (expireIn == null || expireIn <= 0) {
-        text = Localization.current.chatExpiredDisabled(senderIsCurrentUser
-            ? Localization.current.youStart
-            : senderFullName!);
-      } else if (expireIn > 0) {
+      final senderName =
+          senderIsCurrentUser ? Localization.current.youStart : senderFullName!;
+      if (expireIn == null) {
+        text = Localization.current.chatExpiredSetWithoutDuration(senderName);
+      } else if (expireIn <= 0) {
+        text = Localization.current.chatExpiredDisabled(senderName);
+      } else {
         text = Localization.current.chatExpiredSet(
-          senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
+          senderName,
           Duration(seconds: expireIn).formatAsConversationExpireIn(),
         );
-      } else {
-        text = Localization.current.chatNotSupport;
       }
       break;
     case MessageAction.update:
