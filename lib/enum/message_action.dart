@@ -1,5 +1,3 @@
-
-
 class MessageAction {
   static const String join = 'JOIN';
   static const String exit = 'EXIT';
