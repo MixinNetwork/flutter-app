@@ -494,6 +494,9 @@ class _MessageProcessRunner {
         final result = await _sender.deliver(blazeMessage);
         if (result.success) {
           await database.jobDao.deleteJobById(e.jobId);
+        } else if (result.errorCode == badData) {
+          w('recall data is not valid');
+          await database.jobDao.deleteJobById(e.jobId);
         }
       } catch (e, s) {
         w('Send recall error: $e, stack: $s');

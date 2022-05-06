@@ -313,7 +313,7 @@ class MessageItemWidget extends HookWidget {
                       ].contains(message.status) &&
                       !isTranscriptPage &&
                       isCurrentUser &&
-                      !message.type.isRecall &&
+                      message.type.canRecall &&
                       DateTime.now().isBefore(
                           message.createdAt.add(const Duration(minutes: 30))))
                     ContextMenu(

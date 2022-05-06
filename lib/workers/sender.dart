@@ -51,21 +51,24 @@ class Sender {
       await _sleep(1);
       return deliver(blazeMessage);
     } else if (bm.error != null) {
+      w('deliver error code: ${bm.error?.code}, description: ${bm.error?.description}');
       if (bm.error?.code == conversationChecksumInvalidError) {
         final cid = (blazeMessage.params as BlazeMessageParam).conversationId;
         i('checksum error: ${bm.error?.code}  cid:$cid');
         if (cid != null) {
           await _syncConversation(cid);
         }
-        return MessageResult(false, true);
+        return MessageResult(false, true, bm.error?.code);
       } else if (bm.error?.code == forbidden) {
-        return MessageResult(true, false);
+        return MessageResult(true, false, bm.error?.code);
+      } else if (bm.error?.code == badData) {
+        return MessageResult(true, false, bm.error?.code);
       } else {
         await _sleep(1);
         return deliver(blazeMessage);
       }
     } else {
-      return MessageResult(true, false);
+      return MessageResult(true, false, bm.error?.code);
     }
   }
 
