@@ -1,12 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../enum/message_action.dart';
-
 part 'system_conversation_message.g.dart';
 
 @JsonSerializable()
-@MessageActionJsonConverter()
 @ParticipantRoleJsonConverter()
 class SystemConversationMessage {
   SystemConversationMessage(
@@ -21,7 +18,7 @@ class SystemConversationMessage {
       _$SystemConversationMessageFromJson(json);
 
   @JsonKey(name: 'action')
-  MessageAction? action;
+  String? action;
   @JsonKey(name: 'participant_id')
   String? participantId;
   @JsonKey(name: 'user_id')
