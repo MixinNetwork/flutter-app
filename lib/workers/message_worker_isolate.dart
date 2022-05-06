@@ -459,7 +459,7 @@ class _MessageProcessRunner {
       } else {}
 
       if (result?.success ?? false || result?.errorCode == badData) {
-        if(result?.errorCode == null){
+        if (result?.errorCode == null) {
           await database.messageDao.updateMessageContentAndStatus(
             message.messageId,
             lengthLimitedContent,
