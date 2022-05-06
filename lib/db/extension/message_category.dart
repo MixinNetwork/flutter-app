@@ -70,6 +70,17 @@ extension MessageCategoryExtension on String? {
       }.any((element) => element == this);
 
   bool get canRecall => {
+        MessageCategory.encryptedText,
+        MessageCategory.encryptedImage,
+        MessageCategory.encryptedVideo,
+        MessageCategory.encryptedSticker,
+        MessageCategory.encryptedData,
+        MessageCategory.encryptedContact,
+        MessageCategory.encryptedAudio,
+        MessageCategory.encryptedLive,
+        MessageCategory.encryptedPost,
+        MessageCategory.encryptedLocation,
+        MessageCategory.encryptedTranscript,
         MessageCategory.signalText,
         MessageCategory.signalImage,
         MessageCategory.signalVideo,
