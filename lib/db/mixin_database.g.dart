@@ -1797,7 +1797,7 @@ class Message extends DataClass implements Insertable<Message> {
   final MediaStatus? mediaStatus;
   final MessageStatus status;
   final DateTime createdAt;
-  final MessageAction? action;
+  final String? action;
   final String? participantId;
   final String? snapshotId;
   final String? hyperlink;
@@ -1881,8 +1881,8 @@ class Message extends DataClass implements Insertable<Message> {
           .mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
       createdAt: Messages.$converter2.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      action: Messages.$converter3.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}action'])),
+      action: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}action']),
       participantId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}participant_id']),
       snapshotId: const StringType()
@@ -1962,8 +1962,7 @@ class Message extends DataClass implements Insertable<Message> {
       map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
     }
     if (!nullToAbsent || action != null) {
-      final converter = Messages.$converter3;
-      map['action'] = Variable<String?>(converter.mapToSql(action));
+      map['action'] = Variable<String?>(action);
     }
     if (!nullToAbsent || participantId != null) {
       map['participant_id'] = Variable<String?>(participantId);
@@ -2109,7 +2108,7 @@ class Message extends DataClass implements Insertable<Message> {
       mediaStatus: serializer.fromJson<MediaStatus?>(json['media_status']),
       status: serializer.fromJson<MessageStatus>(json['status']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      action: serializer.fromJson<MessageAction?>(json['action']),
+      action: serializer.fromJson<String?>(json['action']),
       participantId: serializer.fromJson<String?>(json['participant_id']),
       snapshotId: serializer.fromJson<String?>(json['snapshot_id']),
       hyperlink: serializer.fromJson<String?>(json['hyperlink']),
@@ -2146,7 +2145,7 @@ class Message extends DataClass implements Insertable<Message> {
       'media_status': serializer.toJson<MediaStatus?>(mediaStatus),
       'status': serializer.toJson<MessageStatus>(status),
       'created_at': serializer.toJson<DateTime>(createdAt),
-      'action': serializer.toJson<MessageAction?>(action),
+      'action': serializer.toJson<String?>(action),
       'participant_id': serializer.toJson<String?>(participantId),
       'snapshot_id': serializer.toJson<String?>(snapshotId),
       'hyperlink': serializer.toJson<String?>(hyperlink),
@@ -2181,7 +2180,7 @@ class Message extends DataClass implements Insertable<Message> {
           Value<MediaStatus?> mediaStatus = const Value.absent(),
           MessageStatus? status,
           DateTime? createdAt,
-          Value<MessageAction?> action = const Value.absent(),
+          Value<String?> action = const Value.absent(),
           Value<String?> participantId = const Value.absent(),
           Value<String?> snapshotId = const Value.absent(),
           Value<String?> hyperlink = const Value.absent(),
@@ -2362,7 +2361,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
   final Value<MediaStatus?> mediaStatus;
   final Value<MessageStatus> status;
   final Value<DateTime> createdAt;
-  final Value<MessageAction?> action;
+  final Value<String?> action;
   final Value<String?> participantId;
   final Value<String?> snapshotId;
   final Value<String?> hyperlink;
@@ -2465,7 +2464,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     Expression<MediaStatus?>? mediaStatus,
     Expression<MessageStatus>? status,
     Expression<DateTime>? createdAt,
-    Expression<MessageAction?>? action,
+    Expression<String?>? action,
     Expression<String?>? participantId,
     Expression<String?>? snapshotId,
     Expression<String?>? hyperlink,
@@ -2533,7 +2532,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       Value<MediaStatus?>? mediaStatus,
       Value<MessageStatus>? status,
       Value<DateTime>? createdAt,
-      Value<MessageAction?>? action,
+      Value<String?>? action,
       Value<String?>? participantId,
       Value<String?>? snapshotId,
       Value<String?>? hyperlink,
@@ -2643,8 +2642,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
     }
     if (action.present) {
-      final converter = Messages.$converter3;
-      map['action'] = Variable<String?>(converter.mapToSql(action.value));
+      map['action'] = Variable<String?>(action.value);
     }
     if (participantId.present) {
       map['participant_id'] = Variable<String?>(participantId.value);
@@ -2847,12 +2845,11 @@ class Messages extends Table with TableInfo<Messages, Message> {
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(Messages.$converter2);
   final VerificationMeta _actionMeta = const VerificationMeta('action');
-  late final GeneratedColumnWithTypeConverter<MessageAction, String?> action =
-      GeneratedColumn<String?>('action', aliasedName, true,
-              type: const StringType(),
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<MessageAction>(Messages.$converter3);
+  late final GeneratedColumn<String?> action = GeneratedColumn<String?>(
+      'action', aliasedName, true,
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _participantIdMeta =
       const VerificationMeta('participantId');
   late final GeneratedColumn<String?> participantId = GeneratedColumn<String?>(
@@ -3058,7 +3055,10 @@ class Messages extends Table with TableInfo<Messages, Message> {
     context.handle(_mediaStatusMeta, const VerificationResult.success());
     context.handle(_statusMeta, const VerificationResult.success());
     context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_actionMeta, const VerificationResult.success());
+    if (data.containsKey('action')) {
+      context.handle(_actionMeta,
+          action.isAcceptableOrUnknown(data['action']!, _actionMeta));
+    }
     if (data.containsKey('participant_id')) {
       context.handle(
           _participantIdMeta,
@@ -3140,8 +3140,6 @@ class Messages extends Table with TableInfo<Messages, Message> {
   static TypeConverter<MessageStatus, String> $converter1 =
       const MessageStatusTypeConverter();
   static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
-  static TypeConverter<MessageAction, String> $converter3 =
-      const MessageActionConverter();
   @override
   List<String> get customConstraints => const [
         'PRIMARY KEY(message_id)',
@@ -12379,8 +12377,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaDuration: row.read<String?>('mediaDuration'),
         quoteId: row.read<String?>('quoteId'),
         quoteContent: row.read<String?>('quoteContent'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        actionName: row.read<String?>('actionName'),
         sharedUserId: row.read<String?>('sharedUserId'),
         userId: row.read<String>('userId'),
         userFullName: row.read<String?>('userFullName'),
@@ -12968,8 +12965,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaDuration: row.read<String?>('mediaDuration'),
         quoteId: row.read<String?>('quoteId'),
         quoteContent: row.read<String?>('quoteContent'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        actionName: row.read<String?>('actionName'),
         sharedUserId: row.read<String?>('sharedUserId'),
         userId: row.read<String>('userId'),
         userFullName: row.read<String?>('userFullName'),
@@ -13151,7 +13147,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Messages.$converter0.mapToDart(row.read<String?>('media_status')),
         status: Messages.$converter1.mapToDart(row.read<String>('status'))!,
         createdAt: Messages.$converter2.mapToDart(row.read<int>('created_at'))!,
-        action: Messages.$converter3.mapToDart(row.read<String?>('action')),
+        action: row.read<String?>('action'),
         participantId: row.read<String?>('participant_id'),
         snapshotId: row.read<String?>('snapshot_id'),
         hyperlink: row.read<String?>('hyperlink'),
@@ -13318,8 +13314,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        actionName: row.read<String?>('actionName'),
         relationship:
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
         participantFullName: row.read<String?>('participantFullName'),
@@ -13778,8 +13773,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             .mapToDart(row.read<int?>('lastMessageCreatedAt')),
         mediaUrl: row.read<String?>('mediaUrl'),
         senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        actionName: row.read<String?>('actionName'),
         messageStatus:
             Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
         senderFullName: row.read<String?>('senderFullName'),
@@ -13884,8 +13878,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             .mapToDart(row.read<int?>('lastMessageCreatedAt')),
         mediaUrl: row.read<String?>('mediaUrl'),
         senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        actionName: row.read<String?>('actionName'),
         messageStatus:
             Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
         senderFullName: row.read<String?>('senderFullName'),
@@ -14142,7 +14135,7 @@ class MessageItem {
   final String? mediaDuration;
   final String? quoteId;
   final String? quoteContent;
-  final MessageAction? actionName;
+  final String? actionName;
   final String? sharedUserId;
   final String userId;
   final String? userFullName;
@@ -14887,7 +14880,7 @@ class SendingMessage {
   final MediaStatus? mediaStatus;
   final MessageStatus status;
   final DateTime createdAt;
-  final MessageAction? action;
+  final String? action;
   final String? participantId;
   final String? snapshotId;
   final String? hyperlink;
@@ -15159,7 +15152,7 @@ class NotificationMessage {
   final String? ownerFullName;
   final DateTime createdAt;
   final ConversationCategory? category;
-  final MessageAction? actionName;
+  final String? actionName;
   final UserRelationship? relationship;
   final String? participantFullName;
   final String? participantUserId;
@@ -15279,7 +15272,7 @@ class ConversationItem {
   final DateTime? lastMessageCreatedAt;
   final String? mediaUrl;
   final String? senderId;
-  final MessageAction? actionName;
+  final String? actionName;
   final MessageStatus? messageStatus;
   final String? senderFullName;
   final String? snapshotType;

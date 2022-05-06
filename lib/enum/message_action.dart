@@ -1,18 +1,9 @@
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-
-enum MessageAction {
-  join,
-  exit,
-  add,
-  remove,
-  create,
-  update,
-  role,
-}
-
-class MessageActionJsonConverter extends EnumJsonConverter<MessageAction> {
-  const MessageActionJsonConverter();
-
-  @override
-  List<MessageAction> enumValues() => MessageAction.values;
+class MessageAction {
+  static const String join = 'JOIN';
+  static const String exit = 'EXIT';
+  static const String add = 'ADD';
+  static const String remove = 'REMOVE';
+  static const String create = 'CREATE';
+  static const String update = 'UPDATE';
+  static const String role = 'ROLE';
 }
