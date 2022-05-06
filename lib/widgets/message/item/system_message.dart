@@ -71,7 +71,7 @@ class SystemMessage extends HookWidget {
 }
 
 String generateSystemText({
-  required MessageAction? actionName,
+  required String? actionName,
   required String? participantUserId,
   required String? senderId,
   required String currentUserId,
@@ -124,7 +124,7 @@ String generateSystemText({
       text = Localization.current.chatGroupRole;
       break;
     case MessageAction.update:
-    case null:
+    default:
       text = Localization.current.chatNotSupport;
       break;
   }
