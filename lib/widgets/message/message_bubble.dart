@@ -160,7 +160,9 @@ class MessageBubble extends HookWidget {
       Widget icon = Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: SvgPicture.asset(
-          Resources.assetsImagesExpiringSvg,
+          context.brightness == Brightness.dark
+              ? Resources.assetsImagesExpiringDarkSvg
+              : Resources.assetsImagesExpiringSvg,
           width: 16,
           height: 16,
         ),

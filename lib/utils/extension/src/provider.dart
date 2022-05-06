@@ -18,6 +18,9 @@ extension ProviderExtension on BuildContext {
 
   double get brightnessValue => BrightnessData.of(this);
 
+  Brightness get brightness =>
+      watch<SettingCubit>().brightness ?? MediaQuery.platformBrightnessOf(this);
+
   Color dynamicColor(
     Color color, {
     Color? darkColor,
