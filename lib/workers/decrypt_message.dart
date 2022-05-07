@@ -432,6 +432,9 @@ class DecryptMessage extends Injector {
     } else if (pinMessage.action == PinMessagePayloadAction.unpin) {
       await database.pinMessageDao.deleteByIds(pinMessage.messageIds);
     }
+
+    database.messageDao.notifyMessageInsertOrReplaced(pinMessage.messageIds);
+
     await database.messagesHistoryDao
         .insert(MessagesHistoryData(messageId: data.messageId));
   }
