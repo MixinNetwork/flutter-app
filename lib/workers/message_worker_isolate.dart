@@ -512,12 +512,14 @@ class _MessageProcessRunner {
         );
       } else {}
 
-      if (result?.success ?? false) {
-        await database.messageDao.updateMessageContentAndStatus(
-          message.messageId,
-          lengthLimitedContent,
-          MessageStatus.sent,
-        );
+      if (result?.success ?? false || result?.errorCode == badData) {
+        if (result?.errorCode == null) {
+          await database.messageDao.updateMessageContentAndStatus(
+            message.messageId,
+            lengthLimitedContent,
+            MessageStatus.sent,
+          );
+        }
         await database.jobDao.deleteJobById(job.jobId);
 
         if (conversation.expireIn != null && conversation.expireIn! > 0) {
@@ -555,7 +557,7 @@ class _MessageProcessRunner {
           id: const Uuid().v4(), action: kCreateMessage, params: blazeParam);
       try {
         final result = await _sender.deliver(blazeMessage);
-        if (result.success) {
+        if (result.success || result.errorCode == badData) {
           await database.jobDao.deleteJobById(e.jobId);
         }
       } catch (e, s) {
@@ -579,7 +581,7 @@ class _MessageProcessRunner {
           id: const Uuid().v4(), action: kCreateMessage, params: blazeParam);
       try {
         final result = await _sender.deliver(blazeMessage);
-        if (result.success) {
+        if (result.success || result.errorCode == badData) {
           await database.jobDao.deleteJobById(e.jobId);
         }
       } catch (e, s) {
@@ -609,7 +611,7 @@ class _MessageProcessRunner {
             expireIn: expireIn,
           );
           result = await _sender.deliver(encrypted);
-          if (result.success) {
+          if (result.success || result.errorCode == badData) {
             await database.resendSessionMessageDao
                 .deleteResendSessionMessageById(message.messageId);
           }
@@ -722,7 +724,7 @@ class _MessageProcessRunner {
         sessionId: primarySessionId));
     try {
       final result = await _sender.deliver(bm);
-      if (result.success) {
+      if (result.success || result.errorCode == badData) {
         await database.jobDao.deleteJobs(jobIds);
       }
     } catch (e, s) {

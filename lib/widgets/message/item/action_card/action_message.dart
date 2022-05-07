@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../../utils/extension/extension.dart';
+import '../../../../utils/hook.dart';
 import '../../../../utils/logger.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../cache_image.dart';
@@ -37,6 +38,8 @@ class ActionCardMessage extends HookWidget {
       [content],
     );
 
+    final playing = useImagePlaying(context);
+
     if (appCardData == null) return const UnknownMessage();
 
     return MessageBubble(
@@ -62,6 +65,7 @@ class ActionCardMessage extends HookWidget {
                 appCardData.iconUrl,
                 height: 40,
                 width: 40,
+                controller: playing,
               ),
             ),
             const SizedBox(width: 8),
@@ -81,6 +85,7 @@ class ActionCardMessage extends HookWidget {
                   ),
                   Text(
                     appCardData.description,
+                    maxLines: 1,
                     style: TextStyle(
                       color: context.theme.secondaryText,
                       fontSize: MessageItemWidget.tertiaryFontSize,
