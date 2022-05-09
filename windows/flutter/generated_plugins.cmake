@@ -12,6 +12,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   pasteboard
   protocol_handler
   quick_breakpad
+  sqlite3_flutter_libs
   system_clock
   system_tray
   url_launcher_windows
