@@ -600,6 +600,7 @@ Future<VerificationResponse> _requestVerificationCode({
   } on MixinApiError catch (error) {
     final mixinError = error.error as MixinError;
     if (mixinError.code == needCaptcha) {
+      Toast.dismiss();
       final result = await showMixinDialog<List<dynamic>>(
         context: context,
         child: const _CaptchaWebViewDialog(),
