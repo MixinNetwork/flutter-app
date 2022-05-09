@@ -83,7 +83,7 @@ dependencies:
     git:
       url: https://github.com/fireslime/photo_view.git
       ref: 52685ab7beaf8a9107904bdb8a1590924015d016
-  pin_code_fields: ^7.3.0
+  pin_code_fields: ^7.4.0
   protocol_handler: ^0.1.1
   provider: ^6.0.1
   qr_flutter: ^4.0.0
