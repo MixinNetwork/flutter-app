@@ -137,9 +137,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m57(phone) => "我们将发送4位验证码到手机 ${phone}, 请在下一个页面输入";
 
-  static String m58(value) => "价值 ${value}";
+  static String m58(value, unitValue, symbol) =>
+      "价值 ${value} (${unitValue}/${symbol})";
 
-  static String m59(value) => "当时价值 ${value}";
+  static String m59(value, unitValue, symbol) =>
+      "当时价值 ${value} (${unitValue}/${symbol})";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{

@@ -147,9 +147,11 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m57(phone) =>
       "We will send a 4-digit code to your phone number ${phone}, please enter the code in next screen.";
 
-  static String m58(value) => "value now ${value}";
+  static String m58(value, unitValue, symbol) =>
+      "value now ${value} (${unitValue}/${symbol})";
 
-  static String m59(value) => "value then ${value}";
+  static String m59(value, unitValue, symbol) =>
+      "value then ${value} (${unitValue}/${symbol})";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
