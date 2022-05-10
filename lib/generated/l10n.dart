@@ -2230,23 +2230,25 @@ class Localization {
     );
   }
 
-  /// `value now {value}`
-  String walletTransactionCurrentValue(Object value) {
+  /// `value now {value} ({unitValue}/{symbol})`
+  String walletTransactionCurrentValue(
+      Object value, Object unitValue, Object symbol) {
     return Intl.message(
-      'value now $value',
+      'value now $value ($unitValue/$symbol)',
       name: 'walletTransactionCurrentValue',
       desc: '',
-      args: [value],
+      args: [value, unitValue, symbol],
     );
   }
 
-  /// `value then {value}`
-  String walletTransactionThatTimeValue(Object value) {
+  /// `value then {value} ({unitValue}/{symbol})`
+  String walletTransactionThatTimeValue(
+      Object value, Object unitValue, Object symbol) {
     return Intl.message(
-      'value then $value',
+      'value then $value ($unitValue/$symbol)',
       name: 'walletTransactionThatTimeValue',
       desc: '',
-      args: [value],
+      args: [value, unitValue, symbol],
     );
   }
 
