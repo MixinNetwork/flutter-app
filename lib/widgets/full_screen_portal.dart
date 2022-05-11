@@ -38,10 +38,10 @@ class FullScreenPortal extends HookWidget {
         duration: duration,
         visible: visible,
         onClose: () => visibleBloc.emit(false),
-        child: PortalEntry(
+        child: PortalTarget(
           closeDuration: duration,
           visible: visible,
-          portal: TweenAnimationBuilder<double>(
+          portalFollower: TweenAnimationBuilder<double>(
             duration: duration,
             tween: Tween(begin: 0, end: visible ? 1 : 0),
             curve: curve,

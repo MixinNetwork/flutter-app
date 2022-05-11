@@ -57,10 +57,10 @@ class ContextMenuPortalEntry extends HookWidget {
         duration: const Duration(milliseconds: 100),
         visible: visible,
         onClose: () => offsetCubit.emit(null),
-        child: PortalEntry(
+        child: PortalTarget(
           visible: visible,
           closeDuration: const Duration(milliseconds: 100),
-          portal: TweenAnimationBuilder<double>(
+          portalFollower: TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: visible ? 1 : 0),
             duration: const Duration(milliseconds: 100),
             curve: Curves.easeOut,
@@ -115,10 +115,10 @@ class Barrier extends StatelessWidget {
   final Duration duration;
 
   @override
-  Widget build(BuildContext context) => PortalEntry(
+  Widget build(BuildContext context) => PortalTarget(
         visible: visible,
         closeDuration: duration,
-        portal: GestureDetector(
+        portalFollower: GestureDetector(
           behavior:
               visible ? HitTestBehavior.opaque : HitTestBehavior.deferToChild,
           onTap: onClose,

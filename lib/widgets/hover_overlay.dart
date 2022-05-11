@@ -36,14 +36,10 @@ class HoverOverlay extends HookWidget {
     this.closeWaitDuration = Duration.zero,
     this.inCurve = Curves.linear,
     this.outCurve = Curves.linear,
-    this.childAnchor,
-    this.portalAnchor,
     this.delayDuration,
     this.portalBuilder,
   }) : super(key: key);
 
-  final Alignment? portalAnchor;
-  final Alignment? childAnchor;
   final Widget portal;
   final Widget child;
   final Duration closeDuration;
@@ -113,12 +109,10 @@ class HoverOverlay extends HookWidget {
 
     return Provider.value(
       value: forceHiddenTool,
-      child: PortalEntry(
+      child: PortalTarget(
         visible: visible,
-        childAnchor: childAnchor,
-        portalAnchor: portalAnchor,
         closeDuration: Duration(microseconds: totalClose),
-        portal: GestureDetector(
+        portalFollower: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () => tapped.value = false,
           child: TweenAnimationBuilder<double>(
