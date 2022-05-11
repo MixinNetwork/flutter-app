@@ -61,7 +61,7 @@ dependencies:
   intl: ^0.17.0
   intl_phone_number_input: ^0.7.0+2
   isolate: ^2.1.0
-  json_annotation: ^4.3.0
+  json_annotation: ^4.5.0
   libsignal_protocol_dart: ^0.5.6
   lottie: ^1.0.1
   map: ^1.0.0
@@ -83,7 +83,7 @@ dependencies:
     git:
       url: https://github.com/fireslime/photo_view.git
       ref: 52685ab7beaf8a9107904bdb8a1590924015d016
-  pin_code_fields: ^7.3.0
+  pin_code_fields: ^7.4.0
   protocol_handler: ^0.1.1
   provider: ^6.0.1
   qr_flutter: ^4.0.0
@@ -93,7 +93,7 @@ dependencies:
   rxdart: ^0.27.1
   scrollable_positioned_list: ^0.2.3
   sliver_tools: ^0.2.6
-  sqlite3_flutter_libs: 0.5.4
+  sqlite3_flutter_libs: ^0.5.6
   stream_transform: ^2.0.0
   system_tray:
     path: third_party/system_tray
@@ -133,7 +133,7 @@ dev_dependencies:
     sdk: flutter
   hive_generator: ^1.1.0
   json_serializable: ^6.1.6
-  msix: ^3.3.1
+  msix: ^3.6.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
