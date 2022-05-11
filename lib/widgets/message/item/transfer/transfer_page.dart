@@ -193,7 +193,8 @@ class _ValuesDescription extends HookWidget {
     final current = snapshot.amountOfCurrentCurrency().abs();
     final currentValue = context.l10n.walletTransactionCurrentValue(
       context.currencyFormat(current),
-      context.currencyFormat((current / snapshot.amount.asDecimal.abs()).toDouble()),
+      context.currencyFormat(
+          (current / snapshot.amount.asDecimal.abs()).toDouble()),
       snapshot.symbol?.overflow ?? '',
     );
 
@@ -208,7 +209,8 @@ class _ValuesDescription extends HookWidget {
           .abs();
       thatTimeValue = context.l10n.walletTransactionThatTimeValue(
         context.currencyFormat(past),
-        context.currencyFormat((past / snapshot.amount.asDecimal.abs()).toDouble()),
+        context.currencyFormat(
+            (past / snapshot.amount.asDecimal.abs()).toDouble()),
         snapshot.symbol?.overflow ?? '',
       );
     }
