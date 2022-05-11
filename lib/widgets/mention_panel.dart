@@ -82,12 +82,14 @@ class MentionPanelPortalEntry extends HookWidget {
           },
         ),
       },
-      child: PortalEntry(
+      child: PortalTarget(
         visible: visible && isGroupOrBot,
-        childAnchor: Alignment.topCenter,
-        portalAnchor: Alignment.bottomCenter,
+        anchor: const Aligned(
+          follower: Alignment.bottomCenter,
+          target: Alignment.topCenter,
+        ),
         closeDuration: const Duration(milliseconds: 150),
-        portal: ConstrainedBox(
+        portalFollower: ConstrainedBox(
           constraints: BoxConstraints(
             maxHeight: kMentionItemHeight * 4,
             minWidth: constraints.maxWidth,
