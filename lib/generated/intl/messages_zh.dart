@@ -496,6 +496,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "time": MessageLookupByLibrary.simpleMessage("时间"),
         "to": MessageLookupByLibrary.simpleMessage("至"),
         "today": MessageLookupByLibrary.simpleMessage("今天"),
+        "toggleChatInfo": MessageLookupByLibrary.simpleMessage("展开/关闭会话信息"),
         "transactions": MessageLookupByLibrary.simpleMessage("转账记录"),
         "transactionsId": MessageLookupByLibrary.simpleMessage("交易编号"),
         "transfer": MessageLookupByLibrary.simpleMessage("转账"),

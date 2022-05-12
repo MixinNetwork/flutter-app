@@ -581,6 +581,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "time": MessageLookupByLibrary.simpleMessage("Time"),
         "to": MessageLookupByLibrary.simpleMessage("To"),
         "today": MessageLookupByLibrary.simpleMessage("Today"),
+        "toggleChatInfo":
+            MessageLookupByLibrary.simpleMessage("Toggle chat info"),
         "transactions": MessageLookupByLibrary.simpleMessage("Transactions"),
         "transactionsId":
             MessageLookupByLibrary.simpleMessage("Transaction Id"),

@@ -342,5 +342,6 @@
   "window": "Window",
   "minimize": "Minimize",
   "previousConversation": "Previous conversation",
-  "nextConversation": "Next conversation"
+  "nextConversation": "Next conversation",
+  "toggleChatInfo": "Toggle chat info"
 }

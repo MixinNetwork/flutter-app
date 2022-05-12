@@ -3491,6 +3491,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Toggle chat info`
+  String get toggleChatInfo {
+    return Intl.message(
+      'Toggle chat info',
+      name: 'toggleChatInfo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

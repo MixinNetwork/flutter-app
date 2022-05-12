@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../account/account_server.dart';
@@ -13,6 +15,51 @@ import '../../ui/home/conversation/conversation_hotkey.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
+
+abstract class ConversationMenuHandle {
+  Stream<bool> get isMuted;
+
+  Stream<bool> get isPinned;
+
+  void mute();
+
+  void unmute();
+
+  void showSearch();
+
+  void pin();
+
+  void unPin();
+
+  void toggleSideBar();
+
+  void delete();
+}
+
+class MacMenuBarCubitState with EquatableMixin {
+  const MacMenuBarCubitState({
+    this.conversationMenuHandle,
+  });
+
+  final ConversationMenuHandle? conversationMenuHandle;
+
+  @override
+  List<Object?> get props => [conversationMenuHandle];
+}
+
+class MacMenuBarCubit extends Cubit<MacMenuBarCubitState> {
+  MacMenuBarCubit() : super(const MacMenuBarCubitState());
+
+  void attach(ConversationMenuHandle handle) {
+    emit(MacMenuBarCubitState(conversationMenuHandle: handle));
+  }
+
+  void unAttach(ConversationMenuHandle handle) {
+    if (state.conversationMenuHandle == handle) {
+      emit(const MacMenuBarCubitState());
+    }
+  }
+}
 
 class MacosMenuBar extends StatelessWidget {
   const MacosMenuBar({
@@ -45,8 +92,67 @@ class _Menus extends HookWidget {
       accountServer = context.read<AccountServer?>();
     } catch (_) {}
     final signed = authAvailable && accountServer != null;
+
+    final menuCubit = useBloc<MacMenuBarCubit>(() => MacMenuBarCubit());
+
+    final handle = useBlocStateConverter<MacMenuBarCubit, MacMenuBarCubitState,
+        ConversationMenuHandle?>(
+      converter: (state) => state.conversationMenuHandle,
+      bloc: menuCubit,
+    );
+
+    final muted = useMemoizedStream(
+          () => handle?.isMuted ?? const Stream<bool>.empty(),
+          keys: [handle],
+        ).data ??
+        false;
+
+    final pinned = useMemoizedStream(
+          () => handle?.isPinned ?? const Stream<bool>.empty(),
+          keys: [handle],
+        ).data ??
+        false;
+
+    PlatformMenu buildConversationMenu() => PlatformMenu(
+          label: context.l10n.conversations,
+          menus: [
+            if (muted)
+              PlatformMenuItem(
+                label: context.l10n.unMute,
+                onSelected: handle?.unmute,
+              )
+            else
+              PlatformMenuItem(
+                label: context.l10n.mute,
+                onSelected: handle?.mute,
+              ),
+            PlatformMenuItem(
+              label: context.l10n.search,
+              onSelected: handle?.showSearch,
+            ),
+            PlatformMenuItem(
+              label: context.l10n.deleteChat,
+              onSelected: handle?.delete,
+            ),
+            if (pinned)
+              PlatformMenuItem(
+                label: context.l10n.unPin,
+                onSelected: handle?.unPin,
+              )
+            else
+              PlatformMenuItem(
+                label: context.l10n.pin,
+                onSelected: handle?.pin,
+              ),
+            PlatformMenuItem(
+              label: context.l10n.toggleChatInfo,
+              onSelected: handle?.toggleSideBar,
+            ),
+          ],
+        );
+
     return PlatformMenuBar(
-      body: child,
+      body: BlocProvider.value(value: menuCubit, child: child),
       menus: [
         PlatformMenu(
           label: 'Mixin',
@@ -122,6 +228,7 @@ class _Menus extends HookWidget {
             ),
           ],
         ),
+        buildConversationMenu(),
         PlatformMenu(
           label: context.l10n.window,
           menus: [
