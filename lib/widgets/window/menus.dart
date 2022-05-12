@@ -151,6 +151,8 @@ class _Menus extends HookWidget {
           ],
         );
 
+    const methodChannel = MethodChannel('mixin_desktop/platform_menus');
+
     return PlatformMenuBar(
       body: BlocProvider.value(value: menuCubit, child: child),
       menus: [
@@ -161,8 +163,7 @@ class _Menus extends HookWidget {
               PlatformMenuItem(
                 label: '${context.l10n.about} Mixin',
                 onSelected: () {
-                  appWindow.show();
-                  showAboutDialog(context: context);
+                  methodChannel.invokeMethod('showAbout');
                 },
               ),
             ]),
@@ -191,12 +192,14 @@ class _Menus extends HookWidget {
                     LogicalKeyboardKey.keyK,
                     meta: true,
                   ),
-                  onSelected: () {
-                    Actions.invoke<ToggleCommandPaletteIntent>(
-                      context,
-                      const ToggleCommandPaletteIntent(),
-                    );
-                  },
+                  onSelected: signed
+                      ? () {
+                          Actions.invoke<ToggleCommandPaletteIntent>(
+                            context,
+                            const ToggleCommandPaletteIntent(),
+                          );
+                        }
+                      : null,
                 ),
                 PlatformMenuItem(
                   label: context.l10n.hideMixin,
