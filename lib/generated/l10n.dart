@@ -3451,6 +3451,46 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Window`
+  String get window {
+    return Intl.message(
+      'Window',
+      name: 'window',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Minimize`
+  String get minimize {
+    return Intl.message(
+      'Minimize',
+      name: 'minimize',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Previous conversation`
+  String get previousConversation {
+    return Intl.message(
+      'Previous conversation',
+      name: 'previousConversation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Next conversation`
+  String get nextConversation {
+    return Intl.message(
+      'Next conversation',
+      name: 'nextConversation',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

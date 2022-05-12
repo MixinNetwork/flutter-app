@@ -338,5 +338,9 @@
   "showMixin": "Show Mixin",
   "quitMixin": "Quit Mixin",
   "quickSearch": "Quick search",
-  "help": "Help"
+  "help": "Help",
+  "window": "Window",
+  "minimize": "Minimize",
+  "previousConversation": "Previous conversation",
+  "nextConversation": "Next conversation"
 }

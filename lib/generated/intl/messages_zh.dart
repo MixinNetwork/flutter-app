@@ -378,6 +378,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("预览新消息通知中的消息文本。"),
         "messageTooLong": MessageLookupByLibrary.simpleMessage("消息内容过长"),
         "messages": MessageLookupByLibrary.simpleMessage("消息"),
+        "minimize": MessageLookupByLibrary.simpleMessage("最小化"),
         "more": MessageLookupByLibrary.simpleMessage("更多"),
         "mute": MessageLookupByLibrary.simpleMessage("静音"),
         "mute1hour": MessageLookupByLibrary.simpleMessage("1 小时"),
@@ -393,6 +394,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newVersionAvailable": MessageLookupByLibrary.simpleMessage("发现新版本"),
         "newVersionDescription": m49,
         "next": MessageLookupByLibrary.simpleMessage("下一步"),
+        "nextConversation": MessageLookupByLibrary.simpleMessage("下一个会话"),
         "noAudio": MessageLookupByLibrary.simpleMessage("没有音频"),
         "noData": MessageLookupByLibrary.simpleMessage("没有数据"),
         "noFile": MessageLookupByLibrary.simpleMessage("没有文件"),
@@ -429,6 +431,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "post": MessageLookupByLibrary.simpleMessage("文章"),
         "preferences": MessageLookupByLibrary.simpleMessage("偏好设置"),
         "preview": MessageLookupByLibrary.simpleMessage("预览"),
+        "previousConversation": MessageLookupByLibrary.simpleMessage("上一个会话"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("隐私政策"),
         "provisioning": MessageLookupByLibrary.simpleMessage("加载中"),
         "quickSearch": MessageLookupByLibrary.simpleMessage("快速搜索"),
@@ -521,6 +524,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "该设备暂未安装 WebView2 组件，请先下载并安装 WebView2 Runtime。"),
         "webViewRuntimeNotAvailable":
             MessageLookupByLibrary.simpleMessage("WebView2 组件不可用"),
+        "window": MessageLookupByLibrary.simpleMessage("窗口"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youStart": MessageLookupByLibrary.simpleMessage("您")
       };

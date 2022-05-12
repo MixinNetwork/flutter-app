@@ -330,5 +330,9 @@
   "showMixin": "显示 Mixin",
   "quitMixin": "退出 Mixin",
   "quickSearch": "快速搜索",
-  "help": "帮助"
+  "help": "帮助",
+  "window": "窗口",
+  "minimize": "最小化",
+  "previousConversation": "上一个会话",
+  "nextConversation": "下一个会话"
 }

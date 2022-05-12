@@ -54,8 +54,8 @@ class HomePage extends HookWidget {
                 state.current?.account.fullName?.isEmpty ?? true);
 
     return CommandPaletteWrapper(
-      child: MacosMenuBar(
-        child: ConversationHotKey(
+      child: ConversationHotKey(
+        child: MacosMenuBar(
           child: Stack(
             fit: StackFit.expand,
             children: [

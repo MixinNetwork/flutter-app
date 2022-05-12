@@ -442,6 +442,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageTooLong":
             MessageLookupByLibrary.simpleMessage("Message content is too long"),
         "messages": MessageLookupByLibrary.simpleMessage("Messages"),
+        "minimize": MessageLookupByLibrary.simpleMessage("Minimize"),
         "mixinMessenger":
             MessageLookupByLibrary.simpleMessage("Mixin Messenger"),
         "more": MessageLookupByLibrary.simpleMessage("more"),
@@ -461,6 +462,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("New version available"),
         "newVersionDescription": m49,
         "next": MessageLookupByLibrary.simpleMessage("Next"),
+        "nextConversation":
+            MessageLookupByLibrary.simpleMessage("Next conversation"),
         "noAudio": MessageLookupByLibrary.simpleMessage("NO AUDIO"),
         "noData": MessageLookupByLibrary.simpleMessage("NO DATA"),
         "noFile": MessageLookupByLibrary.simpleMessage("NO FILE"),
@@ -500,6 +503,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "post": MessageLookupByLibrary.simpleMessage("Post"),
         "preferences": MessageLookupByLibrary.simpleMessage("Preferences"),
         "preview": MessageLookupByLibrary.simpleMessage("Preview"),
+        "previousConversation":
+            MessageLookupByLibrary.simpleMessage("Previous conversation"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "provisioning": MessageLookupByLibrary.simpleMessage("Provisioning"),
         "quickSearch": MessageLookupByLibrary.simpleMessage("Quick search"),
@@ -605,6 +610,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
         "webViewRuntimeNotAvailable": MessageLookupByLibrary.simpleMessage(
             "WebView2 Runtime is not available"),
+        "window": MessageLookupByLibrary.simpleMessage("Window"),
         "you": MessageLookupByLibrary.simpleMessage("you"),
         "youStart": MessageLookupByLibrary.simpleMessage("You")
       };

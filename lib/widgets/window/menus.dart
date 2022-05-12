@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -10,6 +9,7 @@ import '../../account/account_server.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/command_palette_wrapper.dart';
+import '../../ui/home/conversation/conversation_hotkey.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
@@ -118,6 +118,57 @@ class _Menus extends HookWidget {
               ),
               onSelected: () {
                 exit(0);
+              },
+            ),
+          ],
+        ),
+        PlatformMenu(
+          label: context.l10n.window,
+          menus: [
+            PlatformMenuItem(
+              label: context.l10n.minimize,
+              shortcut: const SingleActivator(
+                LogicalKeyboardKey.keyM,
+                meta: true,
+              ),
+              onSelected: () {
+                appWindow.minimize();
+              },
+            ),
+            PlatformMenuItemGroup(members: [
+              PlatformMenuItem(
+                label: context.l10n.previousConversation,
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.arrowUp,
+                  meta: true,
+                ),
+                onSelected: signed
+                    ? () {
+                        Actions.maybeInvoke(
+                          context,
+                          const PreviousConversationIntent(),
+                        );
+                      }
+                    : null,
+              ),
+              PlatformMenuItem(
+                label: context.l10n.nextConversation,
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.arrowDown,
+                  meta: true,
+                ),
+                onSelected: signed
+                    ? () {
+                        Actions.maybeInvoke(
+                            context, const NextConversationIntent());
+                      }
+                    : null,
+              ),
+            ]),
+            PlatformMenuItem(
+              label: 'Mixin',
+              onSelected: () {
+                appWindow.show();
               },
             ),
           ],

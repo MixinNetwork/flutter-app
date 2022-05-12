@@ -22,18 +22,19 @@ class ConversationHotKey extends StatelessWidget {
             LogicalKeyboardKey.arrowDown,
             meta: kPlatformIsDarwin,
             control: !kPlatformIsDarwin,
-          ): const _NextConversationIntent(),
+          ): const NextConversationIntent(),
           SingleActivator(
             LogicalKeyboardKey.arrowUp,
             meta: kPlatformIsDarwin,
             control: !kPlatformIsDarwin,
-          ): const _PreviousConversationIntent(),
+          ): const PreviousConversationIntent(),
         },
         actions: {
-          _NextConversationIntent: CallbackAction<Intent>(
+          NextConversationIntent: CallbackAction<NextConversationIntent>(
             onInvoke: (_) => _navigationConversation(context, forward: true),
           ),
-          _PreviousConversationIntent: CallbackAction<Intent>(
+          PreviousConversationIntent:
+              CallbackAction<PreviousConversationIntent>(
             onInvoke: (_) => _navigationConversation(context, forward: false),
           ),
         },
@@ -41,12 +42,12 @@ class ConversationHotKey extends StatelessWidget {
       );
 }
 
-class _NextConversationIntent extends Intent {
-  const _NextConversationIntent();
+class NextConversationIntent extends Intent {
+  const NextConversationIntent();
 }
 
-class _PreviousConversationIntent extends Intent {
-  const _PreviousConversationIntent();
+class PreviousConversationIntent extends Intent {
+  const PreviousConversationIntent();
 }
 
 void _navigationConversation(
