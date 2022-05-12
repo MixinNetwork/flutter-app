@@ -335,5 +335,6 @@
   "minimize": "最小化",
   "previousConversation": "上一个会话",
   "nextConversation": "下一个会话",
-  "toggleChatInfo": "展开/关闭会话信息"
+  "toggleChatInfo": "展开/关闭会话信息",
+  "closeWindow": "关闭窗口"
 }

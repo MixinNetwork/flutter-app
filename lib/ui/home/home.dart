@@ -7,6 +7,7 @@ import '../../bloc/bloc_converter.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
+import '../../widgets/actions/actions.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
@@ -54,57 +55,60 @@ class HomePage extends HookWidget {
                 state.current?.account.fullName?.isEmpty ?? true);
 
     return CommandPaletteWrapper(
-      child: ConversationHotKey(
-        child: MacosMenuBar(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) =>
-                    _HomePage(
-                  constraints: constraints,
+      child: MixinAppActions(
+        child: ConversationHotKey(
+          child: MacosMenuBar(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) =>
+                      _HomePage(
+                    constraints: constraints,
+                  ),
                 ),
-              ),
-              if (isEmptyUserName) const _SetupNameWidget(),
-              if (localTimeError)
-                HookBuilder(builder: (context) {
-                  final loading = useState(false);
-                  return Material(
-                    color: context.theme.background,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            context.l10n.localTimeErrorDescription,
-                            style: TextStyle(
-                              color: context.theme.text,
-                              fontSize: 16,
+                if (isEmptyUserName) const _SetupNameWidget(),
+                if (localTimeError)
+                  HookBuilder(builder: (context) {
+                    final loading = useState(false);
+                    return Material(
+                      color: context.theme.background,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              context.l10n.localTimeErrorDescription,
+                              style: TextStyle(
+                                color: context.theme.text,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 24),
-                          if (loading.value)
-                            CircularProgressIndicator(
-                              color: context.theme.accent,
-                            ),
-                          if (!loading.value)
-                            MixinButton(
-                              onTap: () async {
-                                loading.value = true;
-                                try {
-                                  await context.accountServer.reconnectBlaze();
-                                } catch (_) {}
+                            const SizedBox(height: 24),
+                            if (loading.value)
+                              CircularProgressIndicator(
+                                color: context.theme.accent,
+                              ),
+                            if (!loading.value)
+                              MixinButton(
+                                onTap: () async {
+                                  loading.value = true;
+                                  try {
+                                    await context.accountServer
+                                        .reconnectBlaze();
+                                  } catch (_) {}
 
-                                loading.value = false;
-                              },
-                              child: Text(context.l10n.continueText),
-                            ),
-                        ],
+                                  loading.value = false;
+                                },
+                                child: Text(context.l10n.continueText),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }),
-            ],
+                    );
+                  }),
+              ],
+            ),
           ),
         ),
       ),

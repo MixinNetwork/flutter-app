@@ -3501,6 +3501,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Close window`
+  String get closeWindow {
+    return Intl.message(
+      'Close window',
+      name: 'closeWindow',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

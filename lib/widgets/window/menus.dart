@@ -15,6 +15,7 @@ import '../../ui/home/conversation/conversation_hotkey.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
+import '../actions/actions.dart';
 
 abstract class ConversationMenuHandle {
   Stream<bool> get isMuted;
@@ -226,6 +227,70 @@ class _Menus extends HookWidget {
                 exit(0);
               },
             ),
+          ],
+        ),
+        PlatformMenu(
+          label: context.l10n.file,
+          menus: [
+            PlatformMenuItemGroup(members: [
+              PlatformMenuItem(
+                label: context.l10n.createConversation,
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.keyN,
+                  meta: true,
+                ),
+                onSelected: signed
+                    ? () {
+                        appWindow.show();
+                        Actions.invoke<CreateConversationIntent>(
+                          context,
+                          const CreateConversationIntent(),
+                        );
+                      }
+                    : null,
+              ),
+              PlatformMenuItem(
+                label: context.l10n.createGroupConversation,
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.keyN,
+                  shift: true,
+                  meta: true,
+                ),
+                onSelected: signed
+                    ? () {
+                        appWindow.show();
+                        Actions.invoke<CreateGroupConversationIntent>(
+                          context,
+                          const CreateGroupConversationIntent(),
+                        );
+                      }
+                    : null,
+              ),
+              PlatformMenuItem(
+                label: context.l10n.createCircle,
+                onSelected: signed
+                    ? () {
+                        appWindow.show();
+                        Actions.invoke<CreateCircleIntent>(
+                          context,
+                          const CreateCircleIntent(),
+                        );
+                      }
+                    : null,
+              ),
+              PlatformMenuItemGroup(members: [
+                PlatformMenuItem(
+                  label: context.l10n.closeWindow,
+                  shortcut: const SingleActivator(
+                    LogicalKeyboardKey.keyW,
+                    meta: true,
+                  ),
+                  onSelected: () {
+                    appWindow.close();
+                  },
+                )
+              ]),
+            ]),
           ],
         ),
         buildConversationMenu(),

@@ -343,5 +343,6 @@
   "minimize": "Minimize",
   "previousConversation": "Previous conversation",
   "nextConversation": "Next conversation",
-  "toggleChatInfo": "Toggle chat info"
+  "toggleChatInfo": "Toggle chat info",
+  "closeWindow": "Close window"
 }
