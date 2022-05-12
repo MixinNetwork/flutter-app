@@ -231,6 +231,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("Circles"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "clearChat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
+        "closeWindow": MessageLookupByLibrary.simpleMessage("Close window"),
         "collapse": MessageLookupByLibrary.simpleMessage("Collapse"),
         "comingSoon": MessageLookupByLibrary.simpleMessage("Coming soon..."),
         "confirm": MessageLookupByLibrary.simpleMessage("OK"),
@@ -407,7 +408,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "groups": MessageLookupByLibrary.simpleMessage("Groups"),
         "groupsInCommon":
             MessageLookupByLibrary.simpleMessage("Groups in common"),
+        "help": MessageLookupByLibrary.simpleMessage("Help"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
+        "hideMixin": MessageLookupByLibrary.simpleMessage("Hide Mixin"),
         "ignoreThisUpdate":
             MessageLookupByLibrary.simpleMessage("Ignore this update"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
@@ -440,6 +443,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageTooLong":
             MessageLookupByLibrary.simpleMessage("Message content is too long"),
         "messages": MessageLookupByLibrary.simpleMessage("Messages"),
+        "minimize": MessageLookupByLibrary.simpleMessage("Minimize"),
         "mixinMessenger":
             MessageLookupByLibrary.simpleMessage("Mixin Messenger"),
         "more": MessageLookupByLibrary.simpleMessage("more"),
@@ -459,6 +463,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("New version available"),
         "newVersionDescription": m49,
         "next": MessageLookupByLibrary.simpleMessage("Next"),
+        "nextConversation":
+            MessageLookupByLibrary.simpleMessage("Next conversation"),
         "noAudio": MessageLookupByLibrary.simpleMessage("NO AUDIO"),
         "noData": MessageLookupByLibrary.simpleMessage("NO DATA"),
         "noFile": MessageLookupByLibrary.simpleMessage("NO FILE"),
@@ -496,9 +502,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseWait":
             MessageLookupByLibrary.simpleMessage("Please wait a moment"),
         "post": MessageLookupByLibrary.simpleMessage("Post"),
+        "preferences": MessageLookupByLibrary.simpleMessage("Preferences"),
         "preview": MessageLookupByLibrary.simpleMessage("Preview"),
+        "previousConversation":
+            MessageLookupByLibrary.simpleMessage("Previous conversation"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "provisioning": MessageLookupByLibrary.simpleMessage("Provisioning"),
+        "quickSearch": MessageLookupByLibrary.simpleMessage("Quick search"),
+        "quitMixin": MessageLookupByLibrary.simpleMessage("Quit Mixin"),
         "recentConversations":
             MessageLookupByLibrary.simpleMessage("Recent conversations"),
         "reedit": MessageLookupByLibrary.simpleMessage("Re-edit"),
@@ -552,6 +563,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
         "show": MessageLookupByLibrary.simpleMessage("Show"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("Show avatar"),
+        "showMixin": MessageLookupByLibrary.simpleMessage("Show Mixin"),
         "signOut": MessageLookupByLibrary.simpleMessage("Sign Out"),
         "sticker": MessageLookupByLibrary.simpleMessage("Sticker"),
         "stickerAlbumDetail":
@@ -570,6 +582,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "time": MessageLookupByLibrary.simpleMessage("Time"),
         "to": MessageLookupByLibrary.simpleMessage("To"),
         "today": MessageLookupByLibrary.simpleMessage("Today"),
+        "toggleChatInfo":
+            MessageLookupByLibrary.simpleMessage("Toggle chat info"),
         "transactions": MessageLookupByLibrary.simpleMessage("Transactions"),
         "transactionsId":
             MessageLookupByLibrary.simpleMessage("Transaction Id"),
@@ -599,6 +613,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
         "webViewRuntimeNotAvailable": MessageLookupByLibrary.simpleMessage(
             "WebView2 Runtime is not available"),
+        "window": MessageLookupByLibrary.simpleMessage("Window"),
         "you": MessageLookupByLibrary.simpleMessage("you"),
         "youStart": MessageLookupByLibrary.simpleMessage("You")
       };

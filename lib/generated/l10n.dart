@@ -3391,6 +3391,126 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Preferences`
+  String get preferences {
+    return Intl.message(
+      'Preferences',
+      name: 'preferences',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide Mixin`
+  String get hideMixin {
+    return Intl.message(
+      'Hide Mixin',
+      name: 'hideMixin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show Mixin`
+  String get showMixin {
+    return Intl.message(
+      'Show Mixin',
+      name: 'showMixin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quit Mixin`
+  String get quitMixin {
+    return Intl.message(
+      'Quit Mixin',
+      name: 'quitMixin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quick search`
+  String get quickSearch {
+    return Intl.message(
+      'Quick search',
+      name: 'quickSearch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Help`
+  String get help {
+    return Intl.message(
+      'Help',
+      name: 'help',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Window`
+  String get window {
+    return Intl.message(
+      'Window',
+      name: 'window',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Minimize`
+  String get minimize {
+    return Intl.message(
+      'Minimize',
+      name: 'minimize',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Previous conversation`
+  String get previousConversation {
+    return Intl.message(
+      'Previous conversation',
+      name: 'previousConversation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Next conversation`
+  String get nextConversation {
+    return Intl.message(
+      'Next conversation',
+      name: 'nextConversation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Toggle chat info`
+  String get toggleChatInfo {
+    return Intl.message(
+      'Toggle chat info',
+      name: 'toggleChatInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close window`
+  String get closeWindow {
+    return Intl.message(
+      'Close window',
+      name: 'closeWindow',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

@@ -10,6 +10,7 @@ class MainFlutterWindow: BitsdojoWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
     RegisterGeneratedPlugins(registry: flutterViewController)
+    PlatformMenuPlugin.register(with: flutterViewController.registrar(forPlugin: "PlatformMenuPlugin"))
     self.titleVisibility = .hidden
     self.titlebarAppearsTransparent = true
     self.styleMask = [self.styleMask, NSWindow.StyleMask.fullSizeContentView]
