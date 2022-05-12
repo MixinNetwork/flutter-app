@@ -10,7 +10,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../account/account_server.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../ui/home/bloc/slide_category_cubit.dart';
-import '../../ui/home/command_palette_wrapper.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
