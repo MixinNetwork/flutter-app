@@ -3391,6 +3391,56 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Preferences`
+  String get preferences {
+    return Intl.message(
+      'Preferences',
+      name: 'preferences',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide Mixin`
+  String get hideMixin {
+    return Intl.message(
+      'Hide Mixin',
+      name: 'hideMixin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show Mixin`
+  String get showMixin {
+    return Intl.message(
+      'Show Mixin',
+      name: 'showMixin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quit Mixin`
+  String get quitMixin {
+    return Intl.message(
+      'Quit Mixin',
+      name: 'quitMixin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quick search`
+  String get quickSearch {
+    return Intl.message(
+      'Quick search',
+      name: 'quickSearch',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

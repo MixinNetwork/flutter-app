@@ -408,6 +408,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupsInCommon":
             MessageLookupByLibrary.simpleMessage("Groups in common"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
+        "hideMixin": MessageLookupByLibrary.simpleMessage("Hide Mixin"),
         "ignoreThisUpdate":
             MessageLookupByLibrary.simpleMessage("Ignore this update"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
@@ -496,9 +497,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseWait":
             MessageLookupByLibrary.simpleMessage("Please wait a moment"),
         "post": MessageLookupByLibrary.simpleMessage("Post"),
+        "preferences": MessageLookupByLibrary.simpleMessage("Preferences"),
         "preview": MessageLookupByLibrary.simpleMessage("Preview"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "provisioning": MessageLookupByLibrary.simpleMessage("Provisioning"),
+        "quickSearch": MessageLookupByLibrary.simpleMessage("Quick search"),
+        "quitMixin": MessageLookupByLibrary.simpleMessage("Quit Mixin"),
         "recentConversations":
             MessageLookupByLibrary.simpleMessage("Recent conversations"),
         "reedit": MessageLookupByLibrary.simpleMessage("Re-edit"),
@@ -552,6 +556,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
         "show": MessageLookupByLibrary.simpleMessage("Show"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("Show avatar"),
+        "showMixin": MessageLookupByLibrary.simpleMessage("Show Mixin"),
         "signOut": MessageLookupByLibrary.simpleMessage("Sign Out"),
         "sticker": MessageLookupByLibrary.simpleMessage("Sticker"),
         "stickerAlbumDetail":

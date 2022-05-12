@@ -59,6 +59,8 @@ class CommandPaletteWrapper extends StatelessWidget {
 
   final Widget child;
 
+  static bool _commandPaletteShowing = false;
+
   @override
   Widget build(BuildContext context) => FocusableActionDetector(
         shortcuts: {
@@ -66,22 +68,31 @@ class CommandPaletteWrapper extends StatelessWidget {
             LogicalKeyboardKey.keyK,
             meta: kPlatformIsDarwin,
             control: !kPlatformIsDarwin,
-          ): const _ToggleCommandPaletteIntent(),
+          ): const ToggleCommandPaletteIntent(),
         },
         actions: {
-          _ToggleCommandPaletteIntent: CallbackAction<Intent>(
-            onInvoke: (Intent intent) => showMixinDialog(
-              context: context,
-              child: const CommandPalettePage(),
-            ),
+          ToggleCommandPaletteIntent:
+              CallbackAction<ToggleCommandPaletteIntent>(
+            onInvoke: (Intent intent) {
+              if (_commandPaletteShowing) {
+                return;
+              }
+              _commandPaletteShowing = true;
+              showMixinDialog(
+                context: context,
+                child: const CommandPalettePage(),
+              ).whenComplete(() {
+                _commandPaletteShowing = false;
+              });
+            },
           )
         },
         child: child,
       );
 }
 
-class _ToggleCommandPaletteIntent extends Intent {
-  const _ToggleCommandPaletteIntent();
+class ToggleCommandPaletteIntent extends Intent {
+  const ToggleCommandPaletteIntent();
 }
 
 class CommandPalettePage extends HookWidget {

@@ -332,5 +332,10 @@
   "landingDeletionWarningContent": "Your account will be deleted on {date}, if you continue to log in, the request to delete your account will be cancelled.",
   "refresh": "Refresh",
   "share": "Share",
-  "appCardShareDisallow": "Disallow sharing of this URL"
+  "appCardShareDisallow": "Disallow sharing of this URL",
+  "preferences": "Preferences",
+  "hideMixin": "Hide Mixin",
+  "showMixin": "Show Mixin",
+  "quitMixin": "Quit Mixin",
+  "quickSearch": "Quick search"
 }
