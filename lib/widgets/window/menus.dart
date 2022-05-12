@@ -12,6 +12,7 @@ import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/command_palette_wrapper.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/uri_utils.dart';
 
 class MacosMenuBar extends StatelessWidget {
   const MacosMenuBar({
@@ -120,7 +121,30 @@ class _Menus extends HookWidget {
               },
             ),
           ],
-        )
+        ),
+        PlatformMenu(
+          label: context.l10n.help,
+          menus: [
+            PlatformMenuItem(
+              label: context.l10n.helpCenter,
+              onSelected: () {
+                openUri(context, 'https://mixinmessenger.zendesk.com');
+              },
+            ),
+            PlatformMenuItem(
+              label: context.l10n.termsService,
+              onSelected: () {
+                openUri(context, 'https://mixin.one/pages/terms');
+              },
+            ),
+            PlatformMenuItem(
+              label: context.l10n.privacyPolicy,
+              onSelected: () {
+                openUri(context, 'https://mixin.one/pages/privacy');
+              },
+            ),
+          ],
+        ),
       ],
     );
   }

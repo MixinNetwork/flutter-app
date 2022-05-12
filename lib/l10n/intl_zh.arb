@@ -329,5 +329,6 @@
   "hideMixin": "隐藏 Mixin",
   "showMixin": "显示 Mixin",
   "quitMixin": "退出 Mixin",
-  "quickSearch": "快速搜索"
+  "quickSearch": "快速搜索",
+  "help": "帮助"
 }

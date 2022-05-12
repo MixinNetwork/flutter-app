@@ -348,6 +348,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mixin ID, 昵称"),
         "groups": MessageLookupByLibrary.simpleMessage("群组"),
         "groupsInCommon": MessageLookupByLibrary.simpleMessage("共同群组"),
+        "help": MessageLookupByLibrary.simpleMessage("帮助"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("帮助中心"),
         "hideMixin": MessageLookupByLibrary.simpleMessage("隐藏 Mixin"),
         "ignoreThisUpdate": MessageLookupByLibrary.simpleMessage("忽略这次更新"),

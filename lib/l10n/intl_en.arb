@@ -337,5 +337,6 @@
   "hideMixin": "Hide Mixin",
   "showMixin": "Show Mixin",
   "quitMixin": "Quit Mixin",
-  "quickSearch": "Quick search"
+  "quickSearch": "Quick search",
+  "help": "Help"
 }
