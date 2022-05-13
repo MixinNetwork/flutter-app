@@ -4,6 +4,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../blaze/blaze.dart';
 import '../../bloc/bloc_converter.dart';
+import '../../bloc/setting_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
@@ -180,7 +181,7 @@ class _HomePage extends HookWidget {
         .clamp(kSlidePageMinWidth, kSlidePageMaxWidth);
 
     final userCollapse =
-        useBlocStateConverter<MultiAuthCubit, MultiAuthState, bool>(
+        useBlocStateConverter<SettingCubit, SettingState, bool>(
       converter: (state) => state.collapsedSidebar,
     );
 
