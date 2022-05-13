@@ -61,6 +61,9 @@ class ChatInfoPage extends HookWidget {
 
     final expireIn = conversation.conversation?.expireDuration ?? Duration.zero;
 
+    final canModifyExpireIn =
+        !isGroupConversation || (isGroupConversation && isOwnerOrAdmin);
+
     return Scaffold(
       appBar: MixinAppBar(
         actions: [
@@ -166,24 +169,26 @@ class ChatInfoPage extends HookWidget {
                 ],
               ),
             ),
-            if (!isGroupConversation || (isGroupConversation && isOwnerOrAdmin))
-              CellGroup(
-                child: CellItem(
-                  title: Text(context.l10n.disappearingMessages),
-                  description: Text(
-                    expireIn.formatAsConversationExpireIn(
-                      localization: context.l10n,
-                    ),
-                    style: TextStyle(
-                      color: context.theme.secondaryText,
-                      fontSize: 14,
-                    ),
+            CellGroup(
+              child: CellItem(
+                title: Text(context.l10n.disappearingMessages),
+                description: Text(
+                  expireIn.formatAsConversationExpireIn(
+                    localization: context.l10n,
                   ),
-                  onTap: () => context
-                      .read<ChatSideCubit>()
-                      .pushPage(ChatSideCubit.disappearMessages),
+                  style: TextStyle(
+                    color: context.theme.secondaryText,
+                    fontSize: 14,
+                  ),
                 ),
+                trailing: canModifyExpireIn ? const Arrow() : null,
+                onTap: !canModifyExpireIn
+                    ? null
+                    : () => context
+                        .read<ChatSideCubit>()
+                        .pushPage(ChatSideCubit.disappearMessages),
               ),
+            ),
             if (isGroupConversation && isOwnerOrAdmin)
               CellGroup(
                 child: Column(
