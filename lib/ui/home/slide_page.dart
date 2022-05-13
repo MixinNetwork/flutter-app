@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../bloc/bloc_converter.dart';
+import '../../bloc/setting_cubit.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../generated/l10n.dart';
@@ -95,9 +96,9 @@ class SlidePage extends StatelessWidget {
                     alignment: Alignment.bottomCenter,
                     visible: showCollapse,
                     child: HookBuilder(builder: (context) {
-                      final collapse = useBlocStateConverter<MultiAuthCubit,
-                          MultiAuthState, bool>(
-                        converter: (state) => state.collapsedSidebar,
+                      final collapse = useBlocStateConverter<SettingCubit,
+                          SettingState, bool>(
+                        converter: (style) => style.collapsedSidebar,
                       );
 
                       return SelectItem(
@@ -110,8 +111,9 @@ class SlidePage extends StatelessWidget {
                           color: context.theme.text,
                         ),
                         title: context.l10n.collapse,
-                        onTap: () => context.multiAuthCubit
-                            .setCurrentSetting(collapsedSidebar: !collapse),
+                        onTap: () => context
+                            .settingCubit
+                            .collapsedSidebar = !collapse,
                       );
                     }),
                   ),

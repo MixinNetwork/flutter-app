@@ -2,11 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../bloc/setting_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
-import '../home/bloc/multi_auth_cubit.dart';
 import '../home/route/responsive_navigator_cubit.dart';
 
 class StoragePage extends HookWidget {
@@ -14,7 +14,7 @@ class StoragePage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authState = useBlocState<MultiAuthCubit, MultiAuthState>();
+    final settingState = useBlocState<SettingCubit, SettingState>();
 
     return Scaffold(
       backgroundColor: context.theme.background,
@@ -42,9 +42,10 @@ class StoragePage extends HookWidget {
                           scale: 0.7,
                           child: CupertinoSwitch(
                             activeColor: context.theme.accent,
-                            value: authState.currentPhotoAutoDownload,
-                            onChanged: (bool value) => context.multiAuthCubit
-                                .setCurrentSetting(photoAutoDownload: value),
+                            value: settingState.photoAutoDownload,
+                            onChanged: (bool value) => context
+                                .settingCubit
+                                .photoAutoDownload = value,
                           )),
                     ),
                     CellItem(
@@ -53,9 +54,10 @@ class StoragePage extends HookWidget {
                           scale: 0.7,
                           child: CupertinoSwitch(
                             activeColor: context.theme.accent,
-                            value: authState.currentVideoAutoDownload,
-                            onChanged: (bool value) => context.multiAuthCubit
-                                .setCurrentSetting(videoAutoDownload: value),
+                            value: settingState.videoAutoDownload,
+                            onChanged: (bool value) => context
+                                .settingCubit
+                                .videoAutoDownload = value,
                           )),
                     ),
                     CellItem(
@@ -64,9 +66,10 @@ class StoragePage extends HookWidget {
                           scale: 0.7,
                           child: CupertinoSwitch(
                             activeColor: context.theme.accent,
-                            value: authState.currentFileAutoDownload,
-                            onChanged: (bool value) => context.multiAuthCubit
-                                .setCurrentSetting(fileAutoDownload: value),
+                            value: settingState.fileAutoDownload,
+                            onChanged: (bool value) => context
+                                .settingCubit
+                                .fileAutoDownload = value,
                           )),
                     ),
                   ],
