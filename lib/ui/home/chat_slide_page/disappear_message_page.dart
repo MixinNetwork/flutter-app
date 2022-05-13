@@ -4,14 +4,17 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import '../../../constants/constants.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
+import '../../../utils/uri_utils.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/buttons.dart';
 import '../../../widgets/cell.dart';
 import '../../../widgets/dialog.dart';
+import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
@@ -38,13 +41,23 @@ class DisappearMessagePage extends StatelessWidget {
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
+                child: HighlightText(
                   context.l10n.disappearingMessagesDescription,
                   style: TextStyle(
                     color: context.theme.secondaryText,
                     height: 1.5,
                     fontSize: 14,
                   ),
+                  highlightTextSpans: [
+                    HighlightTextSpan(
+                      context.l10n.learnMore,
+                      style: TextStyle(
+                        color: context.theme.accent,
+                      ),
+                      onTap: () =>
+                          openUri(context, mixinDisappearingMessageHelpUrl),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 40),
