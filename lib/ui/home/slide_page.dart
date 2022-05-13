@@ -111,9 +111,8 @@ class SlidePage extends StatelessWidget {
                           color: context.theme.text,
                         ),
                         title: context.l10n.collapse,
-                        onTap: () => context
-                            .settingCubit
-                            .collapsedSidebar = !collapse,
+                        onTap: () =>
+                            context.settingCubit.collapsedSidebar = !collapse,
                       );
                     }),
                   ),

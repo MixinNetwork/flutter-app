@@ -43,9 +43,8 @@ class StoragePage extends HookWidget {
                           child: CupertinoSwitch(
                             activeColor: context.theme.accent,
                             value: settingState.photoAutoDownload,
-                            onChanged: (bool value) => context
-                                .settingCubit
-                                .photoAutoDownload = value,
+                            onChanged: (bool value) =>
+                                context.settingCubit.photoAutoDownload = value,
                           )),
                     ),
                     CellItem(
@@ -55,9 +54,8 @@ class StoragePage extends HookWidget {
                           child: CupertinoSwitch(
                             activeColor: context.theme.accent,
                             value: settingState.videoAutoDownload,
-                            onChanged: (bool value) => context
-                                .settingCubit
-                                .videoAutoDownload = value,
+                            onChanged: (bool value) =>
+                                context.settingCubit.videoAutoDownload = value,
                           )),
                     ),
                     CellItem(
@@ -67,9 +65,8 @@ class StoragePage extends HookWidget {
                           child: CupertinoSwitch(
                             activeColor: context.theme.accent,
                             value: settingState.fileAutoDownload,
-                            onChanged: (bool value) => context
-                                .settingCubit
-                                .fileAutoDownload = value,
+                            onChanged: (bool value) =>
+                                context.settingCubit.fileAutoDownload = value,
                           )),
                     ),
                   ],
