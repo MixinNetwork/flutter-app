@@ -34,7 +34,7 @@ class _GroupInviteByLinkDialog extends HookWidget {
   Widget build(BuildContext context) {
     final conversation = useStream(
       useMemoized(() {
-        context.accountServer.refreshGroup(conversationId);
+        context.accountServer.refreshConversation(conversationId);
         return context.database.conversationDao
             .conversationById(conversationId)
             .watchSingleOrNullThrottle(kDefaultThrottleDuration);

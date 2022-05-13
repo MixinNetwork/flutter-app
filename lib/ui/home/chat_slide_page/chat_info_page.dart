@@ -43,11 +43,7 @@ class ChatInfoPage extends HookWidget {
     final userParticipant = conversation.participant;
 
     useEffect(() {
-      if (conversation.isGroup == true) {
-        accountServer.refreshGroup(conversationId);
-      } else if (conversation.userId != null) {
-        accountServer.refreshUsers([conversation.userId!], force: true);
-      }
+      accountServer.refreshConversation(conversationId);
     }, [conversationId]);
 
     final announcement = useStream<String?>(
