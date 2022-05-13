@@ -574,7 +574,7 @@ packages:
       name: flutter_portal
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0"
+    version: "1.0.0"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -773,14 +773,14 @@ packages:
       name: json_annotation
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.4.0"
+    version: "4.5.0"
   json_serializable:
     dependency: "direct dev"
     description:
       name: json_serializable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.6"
+    version: "6.2.0"
   latlng:
     dependency: transitive
     description:
@@ -894,7 +894,7 @@ packages:
       name: msix
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.5.1"
+    version: "3.6.1"
   nested:
     dependency: transitive
     description:
@@ -1080,7 +1080,7 @@ packages:
       name: pin_code_fields
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "7.3.0"
+    version: "7.4.0"
   platform:
     dependency: transitive
     description:
@@ -1274,7 +1274,7 @@ packages:
       name: sqlite3_flutter_libs
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.4"
+    version: "0.5.6"
   sqlparser:
     dependency: transitive
     description:

@@ -19,13 +19,17 @@ import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/animated_visibility.dart';
 import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
+import '../../../widgets/conversation/mute_dialog.dart';
 import '../../../widgets/dash_path_border.dart';
+import '../../../widgets/dialog.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_bubble.dart';
 import '../../../widgets/message/message_day_time.dart';
 import '../../../widgets/pin_bubble.dart';
+import '../../../widgets/toast.dart';
+import '../../../widgets/window/menus.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
@@ -239,30 +243,32 @@ class ChatPage extends HookWidget {
                 (kResponsiveNavigationMinWidth + kChatSidePageWidth);
             chatSideCubit.updateRouteMode(routeMode);
 
-            return Row(
-              children: [
-                if (!routeMode)
-                  Expanded(
-                    child: chatContainerPage.child,
+            return _ChatMenuHandler(
+              child: Row(
+                children: [
+                  if (!routeMode)
+                    Expanded(
+                      child: chatContainerPage.child,
+                    ),
+                  if (!routeMode)
+                    Container(
+                      width: 1,
+                      color: context.theme.divider,
+                    ),
+                  _SideRouter(
+                    chatSideCubit: chatSideCubit,
+                    constraints: boxConstraints,
+                    onPopPage: (Route<dynamic> route, dynamic result) {
+                      chatSideCubit.onPopPage();
+                      return route.didPop(result);
+                    },
+                    pages: [
+                      if (routeMode) chatContainerPage,
+                      ...navigatorState.pages,
+                    ],
                   ),
-                if (!routeMode)
-                  Container(
-                    width: 1,
-                    color: context.theme.divider,
-                  ),
-                _SideRouter(
-                  chatSideCubit: chatSideCubit,
-                  constraints: boxConstraints,
-                  onPopPage: (Route<dynamic> route, dynamic result) {
-                    chatSideCubit.onPopPage();
-                    return route.didPop(result);
-                  },
-                  pages: [
-                    if (routeMode) chatContainerPage,
-                    ...navigatorState.pages,
-                  ],
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),
@@ -1047,4 +1053,143 @@ class _ChatDragIndicator extends StatelessWidget {
           ),
         ),
       );
+}
+
+class _ChatMenuHandler extends HookWidget {
+  const _ChatMenuHandler({
+    Key? key,
+    required this.child,
+  }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) => state?.conversationId,
+      when: (conversationId) => conversationId != null,
+    )!;
+
+    useEffect(() {
+      final cubit = context.read<MacMenuBarCubit?>();
+      if (cubit == null) {
+        return null;
+      }
+      final handle = _ConversationHandle(context, conversationId);
+      cubit.attach(handle);
+      return () => cubit.unAttach(handle);
+    }, [conversationId]);
+
+    return child;
+  }
+}
+
+class _ConversationHandle extends ConversationMenuHandle {
+  _ConversationHandle(this.context, this.conversationId);
+
+  final BuildContext context;
+  final String conversationId;
+
+  @override
+  Future<void> delete() async {
+    final name = context.read<ConversationCubit>().state?.name ?? '';
+    assert(name.isNotEmpty, 'name is empty');
+    final ret = await showConfirmMixinDialog(
+      context,
+      context.l10n.deleteChatHint(name),
+      description: context.l10n.deleteChatDescription,
+    );
+    if (!ret) {
+      return;
+    }
+    await context.database.conversationDao.deleteConversation(conversationId);
+    await context.database.pinMessageDao.deleteByConversationId(conversationId);
+    if (context.read<ConversationCubit>().state?.conversationId ==
+        conversationId) {
+      context.read<ConversationCubit>().unselected();
+    }
+  }
+
+  @override
+  Stream<bool> get isMuted => context
+      .read<ConversationCubit>()
+      .stream
+      .map((event) => event?.conversation?.isMute == true);
+
+  @override
+  Stream<bool> get isPinned => context
+      .read<ConversationCubit>()
+      .stream
+      .map((event) => event?.conversation?.pinTime != null);
+
+  @override
+  Future<void> mute() async {
+    final result = await showMixinDialog<int?>(
+        context: context, child: const MuteDialog());
+    if (result == null) return;
+    final conversationState = context.read<ConversationCubit>().state;
+    if (conversationState == null) {
+      return;
+    }
+    final isGroupConversation = conversationState.isGroup == true;
+    await runFutureWithToast(
+      context,
+      context.accountServer.muteConversation(
+        result,
+        conversationId: isGroupConversation ? conversationId : null,
+        userId: isGroupConversation
+            ? null
+            : conversationState.conversation?.ownerId,
+      ),
+    );
+  }
+
+  @override
+  void pin() {
+    runFutureWithToast(
+      context,
+      context.accountServer.pin(conversationId),
+    );
+  }
+
+  @override
+  void showSearch() {
+    final cubit = context.read<ChatSideCubit>();
+    if (cubit.state.pages.lastOrNull?.name ==
+        ChatSideCubit.searchMessageHistory) {
+      return cubit.pop();
+    }
+
+    cubit.replace(ChatSideCubit.searchMessageHistory);
+  }
+
+  @override
+  void toggleSideBar() {
+    context.read<ChatSideCubit>().toggleInfoPage();
+  }
+
+  @override
+  void unPin() {
+    runFutureWithToast(
+      context,
+      context.accountServer.unpin(conversationId),
+    );
+  }
+
+  @override
+  void unmute() {
+    final conversationState = context.read<ConversationCubit>().state;
+    if (conversationState == null) {
+      return;
+    }
+    final isGroup = conversationState.isGroup == true;
+    runFutureWithToast(
+      context,
+      context.accountServer.unMuteConversation(
+        conversationId: isGroup ? conversationId : null,
+        userId: isGroup ? null : conversationState.conversation?.ownerId,
+      ),
+    );
+  }
 }

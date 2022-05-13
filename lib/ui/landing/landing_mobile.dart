@@ -147,9 +147,9 @@ class _PhoneNumberInputScene extends HookWidget {
             ),
           ),
           const SizedBox(height: 24),
-          PortalEntry(
+          PortalTarget(
             visible: portalVisibility.value,
-            portal: ClipRRect(
+            portalFollower: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Material(
                 color: context.theme.chatBackground,
@@ -172,8 +172,10 @@ class _PhoneNumberInputScene extends HookWidget {
                 ),
               ),
             ),
-            portalAnchor: Alignment.topCenter,
-            childAnchor: Alignment.bottomCenter,
+            anchor: const Aligned(
+              follower: Alignment.topCenter,
+              target: Alignment.bottomCenter,
+            ),
             child: _MobileInput(
               controller: phoneInputController,
               country: selectedCountry.value,
@@ -600,6 +602,7 @@ Future<VerificationResponse> _requestVerificationCode({
   } on MixinApiError catch (error) {
     final mixinError = error.error as MixinError;
     if (mixinError.code == needCaptcha) {
+      Toast.dismiss();
       final result = await showMixinDialog<List<dynamic>>(
         context: context,
         child: const _CaptchaWebViewDialog(),

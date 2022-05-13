@@ -190,8 +190,12 @@ class _ValuesDescription extends HookWidget {
 
     final String? thatTimeValue;
 
+    final current = snapshot.amountOfCurrentCurrency().abs();
     final currentValue = context.l10n.walletTransactionCurrentValue(
-      context.currencyFormat(snapshot.amountOfCurrentCurrency().abs()),
+      context.currencyFormat(current),
+      context.currencyFormat(
+          (current / snapshot.amount.asDecimal.abs()).toDouble()),
+      snapshot.symbol?.overflow ?? '',
     );
 
     if (ticker == null) {
@@ -199,11 +203,15 @@ class _ValuesDescription extends HookWidget {
     } else if (ticker.priceUsd == '0') {
       thatTimeValue = context.l10n.walletTransactionThatTimeNoValue;
     } else {
+      final past = (snapshot.amount.asDecimal *
+              ticker.priceUsd.asDecimal *
+              snapshot.fiatRate!.asDecimal)
+          .abs();
       thatTimeValue = context.l10n.walletTransactionThatTimeValue(
-        context.currencyFormat((snapshot.amount.asDecimal *
-                ticker.priceUsd.asDecimal *
-                snapshot.fiatRate!.asDecimal)
-            .abs()),
+        context.currencyFormat(past),
+        context.currencyFormat(
+            (past / snapshot.amount.asDecimal.abs()).toDouble()),
+        snapshot.symbol?.overflow ?? '',
       );
     }
     return DefaultTextStyle.merge(

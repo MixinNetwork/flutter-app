@@ -54,33 +54,22 @@ class ContextMenuPortalEntry extends HookWidget {
     return Provider.value(
       value: offsetCubit,
       child: Barrier(
-        duration: const Duration(milliseconds: 100),
         visible: visible,
         onClose: () => offsetCubit.emit(null),
-        child: PortalEntry(
+        child: PortalTarget(
           visible: visible,
-          closeDuration: const Duration(milliseconds: 100),
-          portal: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: visible ? 1 : 0),
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.easeOut,
-            builder: (context, progress, child) => Opacity(
-              opacity: progress,
-              child: child,
-            ),
-            child: Builder(builder: (context) {
-              if (offset != null) {
-                return CustomSingleChildLayout(
-                  delegate: PositionedLayoutDelegate(
-                    position: offset,
-                  ),
-                  child: ContextMenuPage(menus: buildMenus()),
-                );
-              }
+          portalFollower: Builder(builder: (context) {
+            if (offset != null && visible) {
+              return CustomSingleChildLayout(
+                delegate: PositionedLayoutDelegate(
+                  position: offset,
+                ),
+                child: ContextMenuPage(menus: buildMenus()),
+              );
+            }
 
-              return const SizedBox();
-            }),
-          ),
+            return const SizedBox();
+          }),
           child: InteractiveDecoratedBox(
             onRightClick: (PointerUpEvent pointerUpEvent) =>
                 offsetCubit.emit(pointerUpEvent.position),
@@ -106,19 +95,19 @@ class Barrier extends StatelessWidget {
     required this.onClose,
     required this.visible,
     required this.child,
-    required this.duration,
+    this.duration,
   }) : super(key: key);
 
   final Widget child;
   final VoidCallback onClose;
   final bool visible;
-  final Duration duration;
+  final Duration? duration;
 
   @override
-  Widget build(BuildContext context) => PortalEntry(
+  Widget build(BuildContext context) => PortalTarget(
         visible: visible,
         closeDuration: duration,
-        portal: GestureDetector(
+        portalFollower: GestureDetector(
           behavior:
               visible ? HitTestBehavior.opaque : HitTestBehavior.deferToChild,
           onTap: onClose,

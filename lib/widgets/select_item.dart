@@ -63,14 +63,16 @@ class SelectItem extends HookWidget {
           backgroundColor: dynamicColor,
           textColor: context.theme.text,
         );
-        return PortalEntry(
+        return PortalTarget(
           visible: hideTitle &&
               hideUnreadText &&
               showTooltip &&
               (showed.value || showedTooltip.value),
-          childAnchor: Alignment.centerRight,
-          portalAnchor: Alignment.centerLeft,
-          portal: InteractiveDecoratedBox.color(
+          anchor: const Aligned(
+            follower: Alignment.centerLeft,
+            target: Alignment.centerRight,
+          ),
+          portalFollower: InteractiveDecoratedBox.color(
             onEnter: (_) => showedTooltip.value = true,
             onExit: (_) => showedTooltip.value = false,
             onTap: onTap,

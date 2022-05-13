@@ -36,6 +36,7 @@ import 'utils/system/tray.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
 import 'widgets/message/item/text/mention_builder.dart';
+import 'widgets/window/menus.dart';
 import 'widgets/window/move_window.dart';
 import 'widgets/window/window_shortcuts.dart';
 
@@ -271,6 +272,6 @@ class _Home extends HookWidget {
         ..init();
       return const HomePage();
     }
-    return const LandingPage();
+    return const MacosMenuBar(child: LandingPage());
   }
 }

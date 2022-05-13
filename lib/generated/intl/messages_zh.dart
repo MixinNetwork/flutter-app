@@ -145,9 +145,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m61(phone) => "我们将发送4位验证码到手机 ${phone}, 请在下一个页面输入";
 
-  static String m62(value) => "价值 ${value}";
+  static String m62(value, unitValue, symbol) =>
+      "价值 ${value} (${unitValue}/${symbol})";
 
-  static String m63(value) => "当时价值 ${value}";
+  static String m63(value, unitValue, symbol) =>
+      "当时价值 ${value} (${unitValue}/${symbol})";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -211,6 +213,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("圈子"),
         "clear": MessageLookupByLibrary.simpleMessage("清除"),
         "clearChat": MessageLookupByLibrary.simpleMessage("清空聊天记录"),
+        "closeWindow": MessageLookupByLibrary.simpleMessage("关闭窗口"),
         "collapse": MessageLookupByLibrary.simpleMessage("折叠"),
         "comingSoon": MessageLookupByLibrary.simpleMessage("即将到来..."),
         "confirm": MessageLookupByLibrary.simpleMessage("确定"),
@@ -364,7 +367,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mixin ID, 昵称"),
         "groups": MessageLookupByLibrary.simpleMessage("群组"),
         "groupsInCommon": MessageLookupByLibrary.simpleMessage("共同群组"),
+        "help": MessageLookupByLibrary.simpleMessage("帮助"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("帮助中心"),
+        "hideMixin": MessageLookupByLibrary.simpleMessage("隐藏 Mixin"),
         "hour": MessageLookupByLibrary.simpleMessage("小时"),
         "hours": MessageLookupByLibrary.simpleMessage("小时"),
         "ignoreThisUpdate": MessageLookupByLibrary.simpleMessage("忽略这次更新"),
@@ -395,6 +400,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("预览新消息通知中的消息文本。"),
         "messageTooLong": MessageLookupByLibrary.simpleMessage("消息内容过长"),
         "messages": MessageLookupByLibrary.simpleMessage("消息"),
+        "minimize": MessageLookupByLibrary.simpleMessage("最小化"),
         "minute": MessageLookupByLibrary.simpleMessage("分钟"),
         "minutes": MessageLookupByLibrary.simpleMessage("分钟"),
         "more": MessageLookupByLibrary.simpleMessage("更多"),
@@ -412,6 +418,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newVersionAvailable": MessageLookupByLibrary.simpleMessage("发现新版本"),
         "newVersionDescription": m53,
         "next": MessageLookupByLibrary.simpleMessage("下一步"),
+        "nextConversation": MessageLookupByLibrary.simpleMessage("下一个会话"),
         "noAudio": MessageLookupByLibrary.simpleMessage("没有音频"),
         "noData": MessageLookupByLibrary.simpleMessage("没有数据"),
         "noFile": MessageLookupByLibrary.simpleMessage("没有文件"),
@@ -447,9 +454,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "pinned": m58,
         "pleaseWait": MessageLookupByLibrary.simpleMessage("请稍等一下"),
         "post": MessageLookupByLibrary.simpleMessage("文章"),
+        "preferences": MessageLookupByLibrary.simpleMessage("偏好设置"),
         "preview": MessageLookupByLibrary.simpleMessage("预览"),
+        "previousConversation": MessageLookupByLibrary.simpleMessage("上一个会话"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("隐私政策"),
         "provisioning": MessageLookupByLibrary.simpleMessage("加载中"),
+        "quickSearch": MessageLookupByLibrary.simpleMessage("快速搜索"),
+        "quitMixin": MessageLookupByLibrary.simpleMessage("退出 Mixin"),
         "recentConversations": MessageLookupByLibrary.simpleMessage("最近聊天"),
         "reedit": MessageLookupByLibrary.simpleMessage("重新编辑"),
         "refresh": MessageLookupByLibrary.simpleMessage("刷新"),
@@ -496,6 +507,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedMedia": MessageLookupByLibrary.simpleMessage("媒体内容"),
         "show": MessageLookupByLibrary.simpleMessage("显示"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("显示头像"),
+        "showMixin": MessageLookupByLibrary.simpleMessage("显示 Mixin"),
         "signOut": MessageLookupByLibrary.simpleMessage("登出"),
         "sticker": MessageLookupByLibrary.simpleMessage("贴纸"),
         "stickerAlbumDetail": MessageLookupByLibrary.simpleMessage("表情详情"),
@@ -512,6 +524,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "time": MessageLookupByLibrary.simpleMessage("时间"),
         "to": MessageLookupByLibrary.simpleMessage("至"),
         "today": MessageLookupByLibrary.simpleMessage("今天"),
+        "toggleChatInfo": MessageLookupByLibrary.simpleMessage("展开/关闭会话信息"),
         "transactions": MessageLookupByLibrary.simpleMessage("转账记录"),
         "transactionsId": MessageLookupByLibrary.simpleMessage("交易编号"),
         "transfer": MessageLookupByLibrary.simpleMessage("转账"),
@@ -542,6 +555,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("WebView2 组件不可用"),
         "week": MessageLookupByLibrary.simpleMessage("周"),
         "weeks": MessageLookupByLibrary.simpleMessage("周"),
+        "window": MessageLookupByLibrary.simpleMessage("窗口"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youStart": MessageLookupByLibrary.simpleMessage("您")
       };

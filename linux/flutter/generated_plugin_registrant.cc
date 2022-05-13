@@ -13,6 +13,7 @@
 #include <file_selector_linux/file_selector_plugin.h>
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
 #include <pasteboard/pasteboard_plugin.h>
+#include <sqlite3_flutter_libs/sqlite3_flutter_libs_plugin.h>
 #include <system_clock/system_clock_plugin.h>
 #include <url_launcher_linux/url_launcher_plugin.h>
 #include <window_size/window_size_plugin.h>
@@ -39,6 +40,9 @@ void fl_register_plugins(FlPluginRegistry* registry) {
   g_autoptr(FlPluginRegistrar) pasteboard_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "PasteboardPlugin");
   pasteboard_plugin_register_with_registrar(pasteboard_registrar);
+  g_autoptr(FlPluginRegistrar) sqlite3_flutter_libs_registrar =
+      fl_plugin_registry_get_registrar_for_plugin(registry, "Sqlite3FlutterLibsPlugin");
+  sqlite3_flutter_libs_plugin_register_with_registrar(sqlite3_flutter_libs_registrar);
   g_autoptr(FlPluginRegistrar) system_clock_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "SystemClockPlugin");
   system_clock_plugin_register_with_registrar(system_clock_registrar);
