@@ -245,6 +245,10 @@ class _CustomExpireTimeDialog extends HookWidget {
                     ],
                     textAlign: TextAlign.center,
                     maxLength: 2,
+                    style: TextStyle(
+                      color: context.theme.text,
+                      fontSize: 16,
+                    ),
                     buildCounter: (
                       BuildContext context, {
                       required int currentLength,
