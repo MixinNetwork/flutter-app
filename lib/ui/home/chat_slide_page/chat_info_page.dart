@@ -51,11 +51,10 @@ class ChatInfoPage extends HookWidget {
     }, [conversationId]);
 
     final announcement = useStream<String?>(
-            useMemoized(() => context.database.conversationDao
-                .announcement(conversationId)
-                .watchSingleThrottle(kVerySlowThrottleDuration)),
-            initialData: null)
-        .data;
+      useMemoized(() => context.database.conversationDao
+          .announcement(conversationId)
+          .watchSingleThrottle(kVerySlowThrottleDuration)),
+    ).data;
     if (!conversation.isLoaded) return const SizedBox();
 
     final isGroupConversation = conversation.isGroup!;
