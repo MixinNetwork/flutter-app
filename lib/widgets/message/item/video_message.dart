@@ -6,7 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:open_file/open_file.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../constants/resources.dart';
 import '../../../enum/media_status.dart';
@@ -97,7 +97,7 @@ class MessageVideo extends HookWidget {
         } else if (message.mediaStatus == MediaStatus.pending) {
           context.accountServer.cancelProgressAttachmentJob(message.messageId);
         } else if (message.type.isLive && message.mediaUrl != null) {
-          launch(message.mediaUrl!);
+          launchUrlString(message.mediaUrl!);
         }
       },
       child: ClipRRect(
