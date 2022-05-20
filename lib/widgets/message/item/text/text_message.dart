@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:tuple/tuple.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../ui/home/chat/chat_page.dart';
 import '../../../../utils/extension/extension.dart';
@@ -61,7 +61,7 @@ class TextMessage extends HookWidget {
               onTap: () {
                 final uri = 'mailto:${e[0]!}';
                 d('open mail uri: $uri');
-                launch(uri);
+                launchUrlString(uri);
               },
             ),
           ),

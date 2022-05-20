@@ -22,24 +22,24 @@ Future<bool> openUriWithWebView(
   String? conversationId,
   AppCardData? appCardData,
 }) async =>
-    openUri(context, text, fallbackHandler: (url) async {
+    openUri(context, text, fallbackHandler: (uri) async {
       if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
         await MixinWebView.instance.openWebViewWindowWithUrl(
           context,
-          url,
+          uri.toString(),
           conversationId: conversationId,
           title: title,
           appCardData: appCardData,
         );
         return true;
       }
-      return launch(url);
+      return launchUrl(uri);
     });
 
 Future<bool> openUri(
   BuildContext context,
   String text, {
-  Future<bool> Function(String url) fallbackHandler = launch,
+  Future<bool> Function(Uri uri) fallbackHandler = launchUrl,
 }) async {
   final uri = Uri.parse(text);
   if (uri.scheme.isEmpty) return Future.value(false);
@@ -111,7 +111,7 @@ Future<bool> openUri(
     }
   }
 
-  return fallbackHandler(uri.toString());
+  return fallbackHandler(uri);
 }
 
 extension _MixinUriExtension on Uri {

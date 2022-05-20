@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:github/github.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../account/account_key_value.dart';
 import '../constants/constants.dart';
@@ -148,7 +148,7 @@ class _UpdateDialog extends HookWidget {
             child: Text(context.l10n.cancel),
           ),
           MixinButton(
-            onTap: () => launch('https://mixin.one/messenger'),
+            onTap: () => launchUrlString('https://mixin.one/messenger'),
             child: Text(context.l10n.download),
           ),
         ],
