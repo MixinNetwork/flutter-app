@@ -298,7 +298,7 @@ class Sender {
     }
   }
 
-  Future checkConversationExists(db.Conversation conversation) async {
+  Future<void> checkConversationExists(db.Conversation conversation) async {
     if (conversation.status != ConversationStatus.success) {
       await _createConversation(conversation);
     }

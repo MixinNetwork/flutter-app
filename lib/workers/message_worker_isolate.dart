@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
+import 'package:equatable/equatable.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
@@ -60,6 +61,7 @@ class IsolateInitParams {
 }
 
 Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
+  EquatableConfig.stringify = true;
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
   final isolateChannel =
       IsolateChannel<IsolateEvent>.connectSend(params.sendPort);
@@ -396,7 +398,20 @@ class _MessageProcessRunner {
         e('Conversation not found');
         return;
       }
-      await _sender.checkConversationExists(conversation);
+
+      try {
+        await _sender.checkConversationExists(conversation);
+      } on MixinApiError catch (apiError) {
+        e('Send message error: ${apiError.message} $apiError');
+        final error = apiError.error;
+        // Maybe get a badData response when create conversation with
+        // an invalid user(for example: network user).
+        if (error is MixinError && error.code == badData) {
+          await database.jobDao.deleteJobById(job.jobId);
+          return;
+        }
+        rethrow;
+      }
 
       if (message.category.isPlain ||
           message.category == MessageCategory.appCard ||
