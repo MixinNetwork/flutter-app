@@ -459,7 +459,7 @@ packages:
       name: file_selector_macos
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.4+1"
+    version: "0.8.2+1"
   file_selector_platform_interface:
     dependency: transitive
     description:
