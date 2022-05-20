@@ -491,7 +491,7 @@ class ClampingRenderViewport extends RenderViewport {
     Curve curve = Curves.ease,
   }) {
     if (parent is RenderObject) {
-      parent!.showOnScreen(
+      (parent! as RenderObject).showOnScreen(
         descendant: descendant ?? this,
         rect: rect,
         duration: duration,
