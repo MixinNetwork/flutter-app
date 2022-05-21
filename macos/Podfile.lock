@@ -119,7 +119,7 @@ SPEC CHECKSUMS:
   desktop_lifecycle: a600c10e12fe033c7be9078f2e929b8241f2c1e3
   desktop_webview_window: d4365e71bcd4e1aa0c14cf0377aa24db0c16a7e2
   device_info_plus_macos: 1ad388a1ef433505c4038e7dd9605aadd1e2e9c7
-  file_selector_macos: ff6dc948d4ddd34e8602a1f60b7d0b4cc6051a47
+  file_selector_macos: f1b08a781e66103e3ba279fd5d4024a2478b3af6
   flutter_app_icon_badge: 099b018a4b36109fb73874411fb4e8b5febac20e
   flutter_local_notifications: 3805ca215b2fb7f397d78b66db91f6a747af52e4
   FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
