@@ -104,7 +104,7 @@ class ShareMediaItemMenuWrapper extends StatelessWidget {
   Widget build(BuildContext context) => ContextMenuPortalEntry(
         buildMenus: () => [
           ContextMenu(
-            title: context.l10n.goToChat,
+            title: context.l10n.locateToChat,
             onTap: () {
               context.read<BlinkCubit>().blinkByMessageId(messageId);
               context.read<MessageBloc>().scrollTo(messageId);

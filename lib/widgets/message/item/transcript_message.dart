@@ -128,7 +128,7 @@ class TranscriptMessageWidget extends HookWidget {
                         children: [
                           const SizedBox(width: 4),
                           Text(
-                            context.l10n.chatTranscript,
+                            context.l10n.transcript,
                             style: TextStyle(
                               color: context.theme.text,
                               fontSize: MessageItemWidget.primaryFontSize,
@@ -287,7 +287,7 @@ class TranscriptPage extends HookWidget {
                     Expanded(
                       child: Align(
                         child: Text(
-                          context.l10n.chatTranscript,
+                          context.l10n.transcript,
                           style: TextStyle(
                             color: context.theme.text,
                             fontSize: 16,

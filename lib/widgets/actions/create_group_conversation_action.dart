@@ -23,7 +23,7 @@ class CreateGroupConversationAction
     final result = await showConversationSelector(
       context: context,
       singleSelect: false,
-      title: context.l10n.createGroupConversation,
+      title: context.l10n.createGroup,
       onlyContact: true,
     );
     if (result == null || result.isEmpty) return;

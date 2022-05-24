@@ -71,7 +71,7 @@ class _ConversationList extends HookWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              context.l10n.noResults,
+              context.l10n.noResult,
               style: TextStyle(
                 color: context.theme.secondaryText,
               ),

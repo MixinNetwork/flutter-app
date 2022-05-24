@@ -157,7 +157,7 @@ class ChatInfoPage extends HookWidget {
                     _SharedApps(userId: conversation.userId!),
                   CellItem(
                     title: Text(
-                      context.l10n.searchMessageHistory,
+                      context.l10n.searchConversation,
                       maxLines: 1,
                     ),
                     onTap: () => context
@@ -174,8 +174,8 @@ class ChatInfoPage extends HookWidget {
                   children: [
                     Builder(builder: (context) {
                       final announcementTitle = announcement?.isEmpty ?? true
-                          ? context.l10n.addAnnouncement
-                          : context.l10n.editAnnouncement;
+                          ? context.l10n.addGroupDescription
+                          : context.l10n.editGroupDescription;
                       return CellItem(
                         title: Text(announcementTitle),
                         onTap: () async {
@@ -207,7 +207,7 @@ class ChatInfoPage extends HookWidget {
                 children: [
                   CellItem(
                     title:
-                        Text(muting ? context.l10n.unMute : context.l10n.muted),
+                        Text(muting ? context.l10n.unmute : context.l10n.muted),
                     description: muting
                         ? Text(
                             DateFormat('yyyy/MM/dd, hh:mm a').format(
@@ -257,7 +257,7 @@ class ChatInfoPage extends HookWidget {
                           child: EditDialog(
                             editText: conversation.name ?? '',
                             title: Text(context.l10n.editName),
-                            hintText: context.l10n.conversationName,
+                            hintText: context.l10n.groupName,
                             positiveAction: context.l10n.change,
                           ),
                         );
@@ -433,7 +433,7 @@ class ChatInfoPage extends HookWidget {
                   onTap: () async {
                     final result = await showConfirmMixinDialog(
                       context,
-                      context.l10n.reportWarning,
+                      context.l10n.reportAndBlock,
                     );
                     if (!result) return;
                     final userId = conversation.userId;
@@ -539,8 +539,8 @@ class _AddToContactsButton extends StatelessWidget {
                   },
                   child: Text(
                     conversation.isBot!
-                        ? context.l10n.conversationAddBot
-                        : context.l10n.conversationAddContact,
+                        ? context.l10n.addBotWithPlus
+                        : context.l10n.addContactWithPlus,
                     style: TextStyle(fontSize: 12, color: context.theme.accent),
                   ),
                 ),
@@ -573,7 +573,7 @@ class _SharedApps extends HookWidget {
       child: data.isEmpty
           ? const SizedBox()
           : CellItem(
-              title: Text(context.l10n.sharedApps),
+              title: Text(context.l10n.shareApps),
               trailing: OverlappedAppIcons(apps: data),
               onTap: () => context
                   .read<ChatSideCubit>()

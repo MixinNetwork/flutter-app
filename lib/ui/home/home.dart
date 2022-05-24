@@ -79,7 +79,7 @@ class HomePage extends HookWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              context.l10n.localTimeErrorDescription,
+                              context.l10n.loadingTime,
                               style: TextStyle(
                                 color: context.theme.text,
                                 fontSize: 16,
@@ -130,7 +130,7 @@ class _SetupNameWidget extends HookWidget {
       backgroundColor: context.theme.background,
       body: Center(
         child: AlertDialogLayout(
-          title: Text(context.l10n.enterNameTitle),
+          title: Text(context.l10n.whatsYourName),
           content: DialogTextField(
             textEditingController: textEditingController,
             hintText: context.l10n.name,
@@ -227,7 +227,7 @@ class _HomePage extends HookWidget {
                       decoration: BoxDecoration(
                         color: context.theme.chatBackground,
                       ),
-                      child: Empty(text: context.l10n.pageRightEmptyMessage),
+                      child: Empty(text: context.l10n.pickAConversation),
                     ),
                   ),
                 ),

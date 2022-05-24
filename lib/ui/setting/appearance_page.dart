@@ -38,7 +38,7 @@ class _Body extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 10, bottom: 14),
                 child: Text(
-                  context.l10n.settingTheme,
+                  context.l10n.theme,
                   style: TextStyle(
                     color: context.theme.secondaryText,
                     fontSize: 14,
@@ -55,7 +55,7 @@ class _Body extends StatelessWidget {
                   children: [
                     CellItem(
                       title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.settingThemeAuto),
+                        title: Text(context.l10n.followSystem),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
                             context.settingCubit.brightness = value,
@@ -65,7 +65,7 @@ class _Body extends StatelessWidget {
                     ),
                     CellItem(
                       title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.settingThemeLight),
+                        title: Text(context.l10n.light),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
                             context.settingCubit.brightness = value,
@@ -75,7 +75,7 @@ class _Body extends StatelessWidget {
                     ),
                     CellItem(
                       title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.settingThemeNight),
+                        title: Text(context.l10n.dark),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
                             context.settingCubit.brightness = value,

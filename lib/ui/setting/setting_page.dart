@@ -52,7 +52,7 @@ class SettingPage extends HookWidget {
                           _Item(
                             assetName: Resources.assetsImagesIcNotificationSvg,
                             pageName: ResponsiveNavigatorCubit.notificationPage,
-                            title: context.l10n.notification,
+                            title: context.l10n.notifications,
                             trailing: hasNotificationPermission == false
                                 ? Padding(
                                     padding: const EdgeInsets.all(4),

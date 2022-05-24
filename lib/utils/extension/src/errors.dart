@@ -39,9 +39,9 @@ extension GetErrorStringByCode on BuildContext {
       case pinIncorrect:
         return l10n.errorPinIncorrect(code);
       case tooSmall:
-        return l10n.errorTooSmall(code);
+        return l10n.errorTooSmallTransferAmount(code);
       case tooManyRequest:
-        return l10n.errorTooManyRequests(code);
+        return l10n.errorTooManyRequest(code);
       case usedPhone:
         return l10n.errorUsedPhone(code);
       case tooManyStickers:
@@ -62,10 +62,10 @@ extension GetErrorStringByCode on BuildContext {
       case circleLimit:
         return l10n.errorFavoriteLimit(code);
       case forbidden:
-        return l10n.errorForbidden;
+        return l10n.accessDenied;
       case server:
       case insufficientPool:
-        return l10n.errorServer5xx(code);
+        return l10n.errorServer5xxCode(code);
       case timeInaccurate:
         return '$code TIME_INACCURATE';
       default:

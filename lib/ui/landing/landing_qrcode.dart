@@ -5,7 +5,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../constants/resources.dart';
-import '../../generated/l10n.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
@@ -36,14 +35,14 @@ class LandingQrCodeWidget extends HookWidget {
       child = Center(
         child: _Loading(
           title: context.l10n.initializing,
-          message: context.l10n.chatInputHint,
+          message: context.l10n.chatHintE2e,
         ),
       );
     } else if (status == LandingStatus.provisioning) {
       child = Center(
         child: _Loading(
-          title: context.l10n.provisioning,
-          message: Localization.current.chatInputHint,
+          title: context.l10n.loading,
+          message: context.l10n.chatHintE2e,
         ),
       );
     } else {
@@ -138,7 +137,7 @@ class _QrCode extends HookWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          context.l10n.pageLandingLoginTitle,
+          context.l10n.loginByQrcode,
           style: TextStyle(
             fontSize: 16,
             color: context.theme.text,
@@ -148,7 +147,7 @@ class _QrCode extends HookWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
-            context.l10n.pageLandingLoginMessage,
+            context.l10n.loginByQrcodeTips,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -247,7 +246,7 @@ class _Retry extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
-                      context.l10n.pageLandingClickToReload,
+                      context.l10n.clickToReloadQrcode,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Color.fromRGBO(255, 255, 255, 0.9),

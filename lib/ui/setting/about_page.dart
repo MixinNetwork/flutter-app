@@ -34,7 +34,7 @@ class AboutPage extends HookWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                context.l10n.mixinMessenger,
+                context.l10n.mixinMessengerDesktop,
                 style: TextStyle(
                   color: context.theme.text,
                   fontSize: 18,
@@ -59,12 +59,12 @@ class AboutPage extends HookWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CellItem(
-                      title: Text(context.l10n.followTwitter),
+                      title: Text(context.l10n.followUsOnTwitter),
                       onTap: () => openUri(
                           context, 'https://twitter.com/MixinMessenger'),
                     ),
                     CellItem(
-                      title: Text(context.l10n.followFacebook),
+                      title: Text(context.l10n.followUsOnFacebook),
                       onTap: () =>
                           openUri(context, 'https://fb.com/MixinMessenger'),
                     ),
@@ -74,7 +74,7 @@ class AboutPage extends HookWidget {
                           context, 'https://mixinmessenger.zendesk.com'),
                     ),
                     CellItem(
-                      title: Text(context.l10n.termsService),
+                      title: Text(context.l10n.termsOfService),
                       onTap: () =>
                           openUri(context, 'https://mixin.one/pages/terms'),
                     ),
@@ -84,7 +84,7 @@ class AboutPage extends HookWidget {
                           openUri(context, 'https://mixin.one/pages/privacy'),
                     ),
                     CellItem(
-                      title: Text(context.l10n.checkUpdate),
+                      title: Text(context.l10n.checkNewVersion),
                       onTap: () => checkUpdate(context: context, force: true),
                     ),
                   ],

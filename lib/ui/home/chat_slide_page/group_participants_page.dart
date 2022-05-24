@@ -64,7 +64,7 @@ class GroupParticipantsPage extends HookWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SearchTextField(
-              hintText: context.l10n.groupSearchParticipants,
+              hintText: context.l10n.settingAuthSearchHint,
               autofocus: context.textFieldAutoGainFocus,
               controller: controller,
             ),
@@ -221,7 +221,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
         if (currentUser?.role == ParticipantRole.owner) {
           if (participant.role != ParticipantRole.admin) {
             menus.add(ContextMenu(
-              title: context.l10n.groupPopMenuMakeAdmin,
+              title: context.l10n.makeGroupAdmin,
               onTap: () => runFutureWithToast(
                 context,
                 context.accountServer.updateParticipantRole(
@@ -232,7 +232,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
             ));
           } else {
             menus.add(ContextMenu(
-              title: context.l10n.groupPopMenuDismissAdmin,
+              title: context.l10n.dismissAsAdmin,
               onTap: () => runFutureWithToast(
                   context,
                   context.accountServer.updateParticipantRole(
@@ -247,8 +247,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
             currentUser?.role == ParticipantRole.owner) {
           menus.add(ContextMenu(
             isDestructiveAction: true,
-            title: context.l10n
-                .groupPopMenuRemoveParticipants(participant.fullName ?? '?'),
+            title: context.l10n.groupPopMenuRemove(participant.fullName ?? '?'),
             onTap: () => runFutureWithToast(
                 context,
                 context.accountServer.removeParticipant(
@@ -271,9 +270,9 @@ class _RoleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (role) {
       case ParticipantRole.owner:
-        return _RoleLabel(context.l10n.groupOwner);
+        return _RoleLabel(context.l10n.owner);
       case ParticipantRole.admin:
-        return _RoleLabel(context.l10n.groupAdmin);
+        return _RoleLabel(context.l10n.admin);
       case null:
         return Container(width: 0);
     }
@@ -307,12 +306,12 @@ class _ActionAddParticipants extends StatelessWidget {
   Widget build(BuildContext context) => ContextMenuPortalEntry(
         buildMenus: () => [
           ContextMenu(
-            title: context.l10n.groupAdd,
+            title: context.l10n.addParticipants,
             onTap: () async {
               final result = await showConversationSelector(
                 context: context,
                 singleSelect: false,
-                title: context.l10n.groupAdd,
+                title: context.l10n.addParticipants,
                 onlyContact: true,
               );
               if (result == null || result.isEmpty) return;
@@ -334,7 +333,7 @@ class _ActionAddParticipants extends StatelessWidget {
             },
           ),
           ContextMenu(
-            title: context.l10n.groupInvite,
+            title: context.l10n.inviteToGroupViaLink,
             onTap: () {
               final conversationCubit = context.read<ConversationCubit>().state;
               assert(conversationCubit != null);

@@ -87,14 +87,13 @@ class NotificationService {
               currentUserId: context.accountServer.userId,
               participantFullName: event.participantFullName,
               senderFullName: event.senderFullName,
-              groupName: event.groupName,
             );
           } else if (event.type.isPin) {
             final pinMessageMinimal =
                 PinMessageMinimal.fromJsonString(event.content ?? '');
 
             if (pinMessageMinimal == null) {
-              body = Localization.current.pinned(
+              body = Localization.current.chatPinMessage(
                   event.senderFullName ?? '', Localization.current.aMessage);
             } else {
               final preview = await generatePinPreviewText(
@@ -103,7 +102,7 @@ class NotificationService {
               );
 
               body = Localization.current
-                  .pinned(event.senderFullName ?? '', preview);
+                  .chatPinMessage(event.senderFullName ?? '', preview);
             }
           } else {
             final isGroup = event.category == ConversationCategory.group ||
@@ -125,9 +124,9 @@ class NotificationService {
               event.senderFullName,
             );
           }
-          body ??= Localization.current.chatNotSupport;
+          body ??= Localization.current.conversationNotSupport;
         } else {
-          body = Localization.current.sentYouAMessage;
+          body = Localization.current.aMessage;
         }
 
         await showNotification(

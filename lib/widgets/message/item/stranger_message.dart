@@ -22,8 +22,8 @@ class StrangerMessage extends StatelessWidget {
       children: [
         Text(
           isBotConversation
-              ? context.l10n.botInteractInfo
-              : context.l10n.strangerFromMessage,
+              ? context.l10n.chatAppReceptionTitle
+              : context.l10n.strangerHint,
           style: TextStyle(
             fontSize: MessageItemWidget.primaryFontSize,
             color: context.theme.text,
@@ -35,7 +35,7 @@ class StrangerMessage extends StatelessWidget {
           children: [
             _StrangerButton(
               isBotConversation
-                  ? context.l10n.botInteractOpen
+                  ? context.l10n.openHomePage
                   : context.l10n.block,
               onTap: () async {
                 final message = context.message;
@@ -55,9 +55,7 @@ class StrangerMessage extends StatelessWidget {
             ),
             const SizedBox(width: 16),
             _StrangerButton(
-              isBotConversation
-                  ? context.l10n.botInteractHi
-                  : context.l10n.addContact,
+              isBotConversation ? context.l10n.sayHi : context.l10n.addContact,
               onTap: () {
                 final message = context.message;
                 if (isBotConversation) {

@@ -289,7 +289,7 @@ class MessageItemWidget extends HookWidget {
                   if (kPlatformIsMobile &&
                       (message.type.isImage || message.type.isVideo))
                     ContextMenu(
-                      title: context.l10n.saveToGallery,
+                      title: context.l10n.saveToCameraRoll,
                       onTap: () => saveAs(context, context.accountServer,
                           message, isTranscriptPage),
                     ),
@@ -592,7 +592,7 @@ class _PinMenu extends HookWidget {
             .contains(message.status)) return const SizedBox();
 
     return ContextMenu(
-      title: message.pinned ? context.l10n.unPin : context.l10n.pin,
+      title: message.pinned ? context.l10n.unpin : context.l10n.pinTitle,
       onTap: () async {
         final pinMessageMinimal = PinMessageMinimal(
           messageId: message.messageId,
@@ -707,7 +707,7 @@ class _UnreadMessageBar extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 6),
         alignment: Alignment.center,
         child: Text(
-          context.l10n.unread,
+          context.l10n.unreadMessages,
           style: TextStyle(
             color: context.theme.secondaryText,
             fontSize: MessageItemWidget.secondaryFontSize,

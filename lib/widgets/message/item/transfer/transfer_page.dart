@@ -191,28 +191,27 @@ class _ValuesDescription extends HookWidget {
     final String? thatTimeValue;
 
     final current = snapshot.amountOfCurrentCurrency().abs();
-    final currentValue = context.l10n.walletTransactionCurrentValue(
+    final unitValue = context
+        .currencyFormat((current / snapshot.amount.asDecimal.abs()).toDouble());
+    final symbol = snapshot.symbol?.overflow ?? '';
+    final currentValue = '${context.l10n.valueNow(
       context.currencyFormat(current),
-      context.currencyFormat(
-          (current / snapshot.amount.asDecimal.abs()).toDouble()),
-      snapshot.symbol?.overflow ?? '',
-    );
+    )}($unitValue/$symbol)';
 
     if (ticker == null) {
       thatTimeValue = null;
     } else if (ticker.priceUsd == '0') {
-      thatTimeValue = context.l10n.walletTransactionThatTimeNoValue;
+      thatTimeValue = context.l10n.valueThen(context.l10n.na);
     } else {
       final past = (snapshot.amount.asDecimal *
               ticker.priceUsd.asDecimal *
               snapshot.fiatRate!.asDecimal)
           .abs();
-      thatTimeValue = context.l10n.walletTransactionThatTimeValue(
+      final unitValue = context
+          .currencyFormat((past / snapshot.amount.asDecimal.abs()).toDouble());
+      thatTimeValue = '${context.l10n.valueThen(
         context.currencyFormat(past),
-        context.currencyFormat(
-            (past / snapshot.amount.asDecimal.abs()).toDouble()),
-        snapshot.symbol?.overflow ?? '',
-      );
+      )}($unitValue/$symbol)';
     }
     return DefaultTextStyle.merge(
       style: TextStyle(
@@ -259,7 +258,7 @@ class _TransactionDetailInfo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TransactionInfoTile(
-              title: Text(context.l10n.transactionsId),
+              title: Text(context.l10n.transactionId),
               subtitle: SelectableText(snapshot.snapshotId),
             ),
             TransactionInfoTile(
@@ -268,8 +267,9 @@ class _TransactionDetailInfo extends StatelessWidget {
             ),
             if (opponentFullName?.isNotEmpty ?? false)
               TransactionInfoTile(
-                title: Text(
-                    snapshot.isPositive ? context.l10n.from : context.l10n.to),
+                title: Text(snapshot.isPositive
+                    ? context.l10n.from
+                    : context.l10n.receiver),
                 subtitle: SelectableText(opponentFullName ?? ''),
               ),
             if (snapshot.memo?.isNotEmpty ?? false)

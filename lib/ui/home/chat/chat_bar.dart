@@ -189,9 +189,7 @@ class ConversationIDOrCount extends HookWidget {
       builder: (context, snapshot) {
         final count = snapshot.data;
         return SelectableText(
-          count != null
-              ? context.l10n.conversationParticipantsCount(count)
-              : '',
+          count != null ? context.l10n.participantsCount(count) : '',
           style: textStyle,
         );
       },

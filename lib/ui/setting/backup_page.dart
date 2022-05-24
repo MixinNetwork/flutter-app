@@ -33,7 +33,7 @@ class BackupPage extends HookWidget {
               SizedBox(
                 width: 500,
                 child: Text(
-                  context.l10n.chatBackupDescription,
+                  context.l10n.settingBackupTips,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,

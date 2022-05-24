@@ -114,11 +114,11 @@ class _Menus extends HookWidget {
         false;
 
     PlatformMenu buildConversationMenu() => PlatformMenu(
-          label: context.l10n.conversations,
+          label: context.l10n.conversation,
           menus: [
             if (muted)
               PlatformMenuItem(
-                label: context.l10n.unMute,
+                label: context.l10n.unmute,
                 onSelected: handle?.unmute,
               )
             else
@@ -136,12 +136,12 @@ class _Menus extends HookWidget {
             ),
             if (pinned)
               PlatformMenuItem(
-                label: context.l10n.unPin,
+                label: context.l10n.unpin,
                 onSelected: handle?.unPin,
               )
             else
               PlatformMenuItem(
-                label: context.l10n.pin,
+                label: context.l10n.pinTitle,
                 onSelected: handle?.pin,
               ),
             PlatformMenuItem(
@@ -252,7 +252,7 @@ class _Menus extends HookWidget {
                     : null,
               ),
               PlatformMenuItem(
-                label: context.l10n.createGroupConversation,
+                label: context.l10n.createGroup,
                 shortcut: const SingleActivator(
                   LogicalKeyboardKey.keyN,
                   shift: true,
@@ -357,7 +357,7 @@ class _Menus extends HookWidget {
               },
             ),
             PlatformMenuItem(
-              label: context.l10n.termsService,
+              label: context.l10n.termsOfService,
               onSelected: () {
                 openUri(context, 'https://mixin.one/pages/terms');
               },

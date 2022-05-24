@@ -7,8 +7,7 @@
 // ignore_for_file:unnecessary_brace_in_string_interps, unnecessary_new
 // ignore_for_file:prefer_single_quotes,comment_references, directives_ordering
 // ignore_for_file:annotate_overrides,prefer_generic_function_type_aliases
-// ignore_for_file:unused_import, file_names, avoid_escaping_inner_quotes
-// ignore_for_file:unnecessary_string_interpolations, unnecessary_string_escapes
+// ignore_for_file:unused_import, file_names
 
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
@@ -20,157 +19,165 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m0(name, addedName) => "${name} added ${addedName}";
+  static m0(arg0) =>
+      "Waiting for ${arg0} to get online and establish an encrypted session.";
 
-  static String m1(name, groupName) => "${name} created group ${groupName}";
+  static m1(arg0, arg1) => "${arg0} added ${arg1}";
 
-  static String m2(name) => "${name} left";
+  static m2(arg0) => "${arg0} left";
 
-  static String m3(name) => "${name} joined the group via invite link";
+  static m3(arg0) => "${arg0} joined the group via invite link";
 
-  static String m4(name, removedName) => "${name} removed ${removedName}";
+  static m4(arg0, arg1) => "${arg0} removed ${arg1}";
 
-  static String m5(name) =>
-      "Waiting for ${name} to get online and establish an encrypted session.";
+  static m5(arg0, arg1) => "${arg0} pinned ${arg1}";
 
-  static String m6(name) => "${name}\'s Circles";
+  static m6(count, arg0) =>
+      "${Intl.plural(count, one: '${arg0} Conversation', other: '${arg0} Conversations')}";
 
-  static String m7(mixinId) => "Mixin ID: ${mixinId}";
+  static m7(arg0) => "${arg0}\'s Circles";
 
-  static String m8(count) => "${count} Conversations";
+  static m8(arg0) => "Mixin ID: ${arg0}";
 
-  static String m9(id) => "ID: ${id}";
+  static m9(arg0) => "Delete chat: ${arg0}";
 
-  static String m10(count) => "${count} Participants";
+  static m10(arg0) => "${arg0} created this group";
 
-  static String m11(count) => "${count} Participants";
+  static m11(arg0) => "Do you want to delete ${arg0} circle?";
 
-  static String m12(ID) => "My Mixin ID: ${ID}";
+  static m12(arg0) => "ERROR ${arg0}: Sign in to continue";
 
-  static String m13(value) => "Delete chat: ${value}";
+  static m13(arg0) => "ERROR ${arg0}: The request data has invalid field";
 
-  static String m14(phone) => "Enter the 4-digit code sent to you at ${phone}";
+  static m14(arg0) =>
+      "ERROR ${arg0}: Blockchain not in sync, please try again later.";
 
-  static String m15(code) => "ERROR ${code}: Sign in to continue";
+  static m15(arg0) => "ERROR ${arg0}: The number has reached the limit.";
 
-  static String m16(code) =>
-      "ERROR ${code}: The request data has invalid field";
+  static m16(arg0) => "ERROR ${arg0}: The group chat is full.";
 
-  static String m17(code) =>
-      "ERROR ${code}: Blockchain not in sync, please try again later.";
+  static m17(arg0) => "ERROR ${arg0}: Insufficient balance";
 
-  static String m18(code) => "ERROR ${code}: The number has reached the limit.";
+  static m18(arg0, arg1) =>
+      "ERROR ${arg0}: Insufficient transaction fee. Please make sure your wallet has ${arg1} as fee";
 
-  static String m19(code) => "ERROR ${code}: The group chat is full.";
+  static m19(arg0, arg1, arg2) =>
+      "ERROR ${arg0}: Invalid address format. Please enter the correct ${arg1} ${arg2} address!";
 
-  static String m20(code) => "ERROR ${code}: Insufficient balance";
+  static m20(arg0) => "ERROR ${arg0}: Invalid address format.";
 
-  static String m21(code, fee) =>
-      "ERROR ${code}: Insufficient transaction fee. Please make sure your wallet has ${fee} as fee";
+  static m21(arg0) =>
+      "ERROR ${arg0}: Send verification code too frequent, please try again later.";
 
-  static String m22(code, type, address) =>
-      "ERROR ${code}: Invalid address format. Please enter the correct ${type} ${address} address!";
+  static m22(arg0) => "ERROR ${arg0}: Invalid emergency contact";
 
-  static String m23(code) => "ERROR ${code}: Invalid address format.";
+  static m23(arg0) => "ERROR ${arg0}: Invalid PIN format.";
 
-  static String m24(code) =>
-      "ERROR ${code}: Send verification code too frequent, please try again later.";
+  static m24(arg0) => "ERROR ${arg0}: Not found";
 
-  static String m25(code) => "ERROR ${code}: Invalid emergency contact";
+  static m25(arg0, arg1) =>
+      "ERROR ${arg0}: Please update Mixin(${arg1}) to continue use the service.";
 
-  static String m26(code) => "ERROR ${code}: Invalid PIN format";
+  static m26(arg0) => "ERROR ${arg0}: Invalid phone number";
 
-  static String m27(code) => "ERROR ${code}: Not found";
+  static m27(arg0) => "ERROR ${arg0}: Failed to deliver SMS";
 
-  static String m28(code, version) =>
-      "ERROR ${code}: Please update Mixin(${version}) to continue use the service.";
+  static m28(arg0) => "ERROR ${arg0}: Expired phone verification code";
 
-  static String m29(code) => "ERROR ${code}: Invalid phone number";
+  static m29(arg0) => "ERROR ${arg0}: Invalid phone verification code";
 
-  static String m30(code) => "ERROR ${code}: Failed to deliver SMS";
+  static m30(arg0) => "ERROR ${arg0}: PIN incorrect";
 
-  static String m31(code) => "ERROR ${code}: Expired phone verification code";
+  static m31(count, arg0, arg1) =>
+      "${Intl.plural(count, one: 'ERROR ${arg0}: PIN incorrect. You still have ${arg1} chance. Please wait for 24 hours to retry later.', other: 'ERROR ${arg0}: PIN incorrect. You still have ${arg1} chances. Please wait for 24 hours to retry later.')}";
 
-  static String m32(code) => "ERROR ${code}: Invalid phone verification code";
+  static m32(arg0) => "ERROR ${arg0}: Recaptcha is invalid";
 
-  static String m33(code) => "ERROR ${code}: PIN incorrect";
+  static m33(arg0) => "Server is under maintenance: ${arg0}";
 
-  static String m34(code, times) =>
-      "${code}: PIN incorrect. You still have ${times} chances. Please wait for 24 hours to retry later.";
+  static m34(arg0) => "ERROR ${arg0}: Rate limit exceeded";
 
-  static String m35(code) => "ERROR ${code}: Recaptcha is invalid";
+  static m35(arg0) => "ERROR ${arg0}: Too many stickers";
 
-  static String m36(code) => "Server is under maintenance: ${code}";
+  static m36(arg0) => "ERROR ${arg0}: Transfer amount is too small";
 
-  static String m37(code) => "ERROR ${code}: Rate limit exceeded";
+  static m37(arg0) => "ERROR ${arg0}: Withdraw amount too small";
 
-  static String m38(code) => "ERROR ${code}: Too many stickers";
+  static m38(arg0) => "ERROR: ${arg0}";
 
-  static String m39(code) => "ERROR ${code}: The amount is too small";
+  static m39(arg0) => "ERROR: ${arg0}";
 
-  static String m40(code) => "ERROR ${code}: Withdraw amount too small";
+  static m40(arg0) =>
+      "ERROR ${arg0}: This phone number is already associated with another account.";
 
-  static String m41(code) => "ERROR: ${code}";
+  static m41(arg0) => "ERROR ${arg0}: Withdrawal memo format incorrect.";
 
-  static String m42(message) => "ERROR: ${message}";
+  static m42(arg0) => "Message ${arg0}";
 
-  static String m43(code) => "ERROR ${code}: Phone is used by someone else.";
+  static m43(arg0) => "Remove ${arg0}";
 
-  static String m44(code) => "ERROR ${code}: Withdrawal memo format incorrect.";
+  static m44(count) =>
+      "${Intl.plural(count, one: '%d Hour', other: '%d Hours')}";
 
-  static String m45(name) => "Failed to open file ${name}";
+  static m45(arg0) => "Joined in ${arg0}";
 
-  static String m46(name) => "Message ${name}";
+  static m46(arg0) =>
+      "Your account will be deleted on ${arg0}, if you continue to log in, the request to delete your account will be cancelled.";
 
-  static String m47(name) => "Remove ${name}";
+  static m47(arg0) =>
+      "We will send a 4-digit code to your phone number ${arg0}, please enter the code in next screen.";
 
-  static String m48(date) =>
-      "Your account will be deleted on ${date}, if you continue to log in, the request to delete your account will be cancelled.";
+  static m48(arg0) => "Enter the 4-digit code sent to you at ${arg0}";
 
-  static String m49(newVersion, current) =>
-      "Mixin Messenger ${newVersion} is now available, you have ${current}. Would you like to download it now?";
+  static m49(arg0) => "My Mixin ID: ${arg0}";
 
-  static String m50(name) => "Do you want to delete ${name} circle?";
+  static m50(arg0, arg1) =>
+      "Mixin Messenger ${arg0} is now available, you have ${arg1}. Would you like to download it now?";
 
-  static String m51(date) => "${date} join";
+  static m51(arg0) => "${arg0} now an admin";
 
-  static String m52(count) => "${count} Participants";
+  static m52(arg0) => "${arg0} PARTICIPANTS";
 
-  static String m53(count) => "${count} Pinned Messages";
+  static m53(count, arg0) =>
+      "${Intl.plural(count, one: '${arg0} Pinned Message', other: '${arg0} Pinned Messages')}";
 
-  static String m54(user, preview) => "${user} pinned ${preview}";
+  static m54(arg0) => "Resend code in ${arg0} s";
 
-  static String m55(time) => "Resend code in ${time}s";
+  static m55(count, arg0) =>
+      "${Intl.plural(count, one: '${arg0} related message', other: '${arg0} related messages')}";
 
-  static String m56(count) => "${count} related messages";
+  static m56(arg0) => "Unable to open file: ${arg0}";
 
-  static String m57(phone) =>
-      "We will send a 4-digit code to your phone number ${phone}, please enter the code in next screen.";
+  static m57(arg0) => "value now ${arg0}";
 
-  static String m58(value, unitValue, symbol) =>
-      "value now ${value} (${unitValue}/${symbol})";
-
-  static String m59(value, unitValue, symbol) =>
-      "value then ${value} (${unitValue}/${symbol})";
+  static m58(arg0) => "value then ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+  static _notInlinedMessages(_) => <String, Function>{
         "aMessage": MessageLookupByLibrary.simpleMessage("a message"),
         "about": MessageLookupByLibrary.simpleMessage("About"),
-        "aboutEncryptedInfo": MessageLookupByLibrary.simpleMessage(
-            "Messages to this conversation are encrypted end-to-end, tap for more info."),
-        "aboutEncryptedInfoUrl": MessageLookupByLibrary.simpleMessage(
-            "https://mixin.one/pages/1000007"),
+        "accessDenied": MessageLookupByLibrary.simpleMessage("Access denied"),
         "add": MessageLookupByLibrary.simpleMessage("Add"),
-        "addAnnouncement":
+        "addBotWithPlus": MessageLookupByLibrary.simpleMessage("+ Add Bot"),
+        "addContact": MessageLookupByLibrary.simpleMessage("Add Contact"),
+        "addContactWithPlus":
+            MessageLookupByLibrary.simpleMessage("+ Add Contact"),
+        "addFile": MessageLookupByLibrary.simpleMessage("Add File"),
+        "addGroupDescription":
             MessageLookupByLibrary.simpleMessage("Add group description"),
-        "addContact": MessageLookupByLibrary.simpleMessage("Add contact"),
-        "addSticker": MessageLookupByLibrary.simpleMessage("Add sticker"),
+        "addParticipants":
+            MessageLookupByLibrary.simpleMessage("Add Participants"),
+        "addPeopleSearchHint":
+            MessageLookupByLibrary.simpleMessage("Mixin ID or Phone number"),
+        "addSticker": MessageLookupByLibrary.simpleMessage("Add Sticker"),
         "addStickerFailed":
             MessageLookupByLibrary.simpleMessage("Add sticker failed"),
         "addStickers": MessageLookupByLibrary.simpleMessage("Add Stickers"),
         "added": MessageLookupByLibrary.simpleMessage("Added"),
-        "appCard": MessageLookupByLibrary.simpleMessage("Card"),
+        "admin": MessageLookupByLibrary.simpleMessage("Admin"),
+        "alertKeyContactContactMessage":
+            MessageLookupByLibrary.simpleMessage("sent you a contact"),
+        "allChats": MessageLookupByLibrary.simpleMessage("Chats"),
         "appCardShareDisallow": MessageLookupByLibrary.simpleMessage(
             "Disallow sharing of this URL"),
         "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
@@ -182,336 +189,295 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoBackup": MessageLookupByLibrary.simpleMessage("Auto Backup"),
         "avatar": MessageLookupByLibrary.simpleMessage("Avatar"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
+        "biography": MessageLookupByLibrary.simpleMessage("Biography"),
         "block": MessageLookupByLibrary.simpleMessage("Block"),
-        "botInteractHi": MessageLookupByLibrary.simpleMessage("Say hi"),
-        "botInteractInfo": MessageLookupByLibrary.simpleMessage(
-            "Click the button to interact with the bot"),
-        "botInteractOpen":
-            MessageLookupByLibrary.simpleMessage("Open Home page"),
-        "bots": MessageLookupByLibrary.simpleMessage("Bots"),
-        "canNotRecognize": MessageLookupByLibrary.simpleMessage(
+        "bots": MessageLookupByLibrary.simpleMessage("BOTS"),
+        "canNotRecognizeQrCode": MessageLookupByLibrary.simpleMessage(
             "Can not recognize the QR code"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "card": MessageLookupByLibrary.simpleMessage("Card"),
         "change": MessageLookupByLibrary.simpleMessage("Change"),
+        "chatAppReceptionTitle": MessageLookupByLibrary.simpleMessage(
+            "Tap the button to interact with the bot"),
         "chatBackup": MessageLookupByLibrary.simpleMessage("Chat Backup"),
-        "chatBackupDescription": MessageLookupByLibrary.simpleMessage(
-            "Back up your chat history to iCloud so if you lose your iPhone or switch to a new one, your chat history is safe. You can restore your chat history when you reinstall MixinMessenger. messenger you back up are encryption while in icloud."),
-        "chatCheckOnPhone": MessageLookupByLibrary.simpleMessage(
-            "This type of message is not supported, please check on your phone."),
-        "chatDragHint":
-            MessageLookupByLibrary.simpleMessage("Drag and drop files here"),
-        "chatDragMoreFile": MessageLookupByLibrary.simpleMessage("Add Item"),
-        "chatGroupAdd": m0,
-        "chatGroupCreate": m1,
+        "chatDecryptionFailedHint": m0,
+        "chatGroupAdd": m1,
         "chatGroupExit": m2,
         "chatGroupJoin": m3,
         "chatGroupRemove": m4,
-        "chatGroupRole":
-            MessageLookupByLibrary.simpleMessage("You\'re now an admin"),
-        "chatInputHint":
+        "chatHintE2e":
             MessageLookupByLibrary.simpleMessage("End to end encrypted"),
-        "chatLearn": MessageLookupByLibrary.simpleMessage("Learn more"),
-        "chatNotFound":
-            MessageLookupByLibrary.simpleMessage("Message not found"),
-        "chatNotSupport": MessageLookupByLibrary.simpleMessage(
-            "This type of message is not supported, please upgrade Mixin to the latest version."),
+        "chatNotSupportUriOnPhone": MessageLookupByLibrary.simpleMessage(
+            "This type of url is not supported, please check on your phone."),
         "chatNotSupportUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixinmessenger.zendesk.com/hc/articles/360043776071"),
-        "chatRecallDelete":
-            MessageLookupByLibrary.simpleMessage("This message was deleted"),
-        "chatRecallMe":
-            MessageLookupByLibrary.simpleMessage("You deleted this message"),
-        "chatTranscript": MessageLookupByLibrary.simpleMessage("Transcript"),
-        "chatWaiting": m5,
-        "chatWaitingDesktop": MessageLookupByLibrary.simpleMessage("desktop"),
-        "chats": MessageLookupByLibrary.simpleMessage("Chats"),
-        "checkUpdate":
-            MessageLookupByLibrary.simpleMessage("Check for updates"),
-        "circleTitle": m6,
+        "chatNotSupportViewOnPhone": MessageLookupByLibrary.simpleMessage(
+            "This type of message is not supported, please check on your phone."),
+        "chatPinMessage": m5,
+        "checkNewVersion":
+            MessageLookupByLibrary.simpleMessage("Check new version"),
+        "circleSubtitle": m6,
+        "circleTitle": m7,
         "circles": MessageLookupByLibrary.simpleMessage("Circles"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "clearChat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
+        "clickToReloadQrcode":
+            MessageLookupByLibrary.simpleMessage("Click to reload QR code"),
         "closeWindow": MessageLookupByLibrary.simpleMessage("Close window"),
         "collapse": MessageLookupByLibrary.simpleMessage("Collapse"),
-        "comingSoon": MessageLookupByLibrary.simpleMessage("Coming soon..."),
-        "confirm": MessageLookupByLibrary.simpleMessage("OK"),
+        "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
         "contact": MessageLookupByLibrary.simpleMessage("Contact"),
-        "contactMixinId": m7,
-        "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
+        "contactMixinId": m8,
+        "contactMuteTitle":
+            MessageLookupByLibrary.simpleMessage("Mute notifications for…"),
+        "contacts": MessageLookupByLibrary.simpleMessage("CONTACTS"),
+        "contentTooLong":
+            MessageLookupByLibrary.simpleMessage("Content too long"),
+        "contentVoice": MessageLookupByLibrary.simpleMessage("[Voice call]"),
         "continueText": MessageLookupByLibrary.simpleMessage("Continue"),
-        "conversationAddBot": MessageLookupByLibrary.simpleMessage("+ Add Bot"),
-        "conversationAddContact":
-            MessageLookupByLibrary.simpleMessage("+ Add Contact"),
-        "conversationCount": m8,
-        "conversationID": m9,
-        "conversationName":
-            MessageLookupByLibrary.simpleMessage("Conversation Name"),
-        "conversationParticipantsCount": m10,
-        "conversationParticipantsCountDescription": m11,
-        "conversations": MessageLookupByLibrary.simpleMessage("Conversations"),
+        "conversation": MessageLookupByLibrary.simpleMessage("Conversation"),
+        "conversationDeleteTitle": m9,
+        "conversationNotSupport": MessageLookupByLibrary.simpleMessage(
+            "This type of message is not supported, please upgrade Mixin to the latest version."),
         "copy": MessageLookupByLibrary.simpleMessage("Copy"),
+        "copyInvite": MessageLookupByLibrary.simpleMessage("Copy Invite Link"),
         "create": MessageLookupByLibrary.simpleMessage("Create"),
         "createCircle": MessageLookupByLibrary.simpleMessage("New Circle"),
         "createConversation":
             MessageLookupByLibrary.simpleMessage("New Conversation"),
-        "createGroupConversation":
-            MessageLookupByLibrary.simpleMessage("New Group"),
-        "currentIdentityNumber": m12,
+        "createGroup": MessageLookupByLibrary.simpleMessage("New Group"),
+        "createdThisGroup": m10,
+        "dark": MessageLookupByLibrary.simpleMessage("Dark"),
         "dataAndStorageUsage":
             MessageLookupByLibrary.simpleMessage("Data and Storage Usage"),
+        "dataError": MessageLookupByLibrary.simpleMessage("Data error"),
+        "dataLoading": MessageLookupByLibrary.simpleMessage(
+            "Data loading, please wait..."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deleteChat": MessageLookupByLibrary.simpleMessage("Delete Chat"),
         "deleteChatDescription": MessageLookupByLibrary.simpleMessage(
             "Deleting chat will remove messages form this devices only. They will not be removed from other devices."),
-        "deleteChatHint": m13,
         "deleteCircle": MessageLookupByLibrary.simpleMessage("Delete Circle"),
         "deleteForEveryone":
             MessageLookupByLibrary.simpleMessage("Delete for Everyone"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("Delete for me"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("Delete Group"),
+        "deleteTheCircle": m11,
         "developer": MessageLookupByLibrary.simpleMessage("Developer"),
+        "dismissAsAdmin":
+            MessageLookupByLibrary.simpleMessage("Dismiss as Admin"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
         "download": MessageLookupByLibrary.simpleMessage("Download"),
-        "downloadLink": MessageLookupByLibrary.simpleMessage("Download Link: "),
-        "editAnnouncement":
-            MessageLookupByLibrary.simpleMessage("Edit group description"),
-        "editCircle": MessageLookupByLibrary.simpleMessage("Manage Circle"),
+        "downloadLink": MessageLookupByLibrary.simpleMessage("Download Link:"),
+        "dragAndDropFileHere":
+            MessageLookupByLibrary.simpleMessage("Drag and drop files here"),
+        "durationIsTooShort":
+            MessageLookupByLibrary.simpleMessage("Duration is too short"),
         "editCircleName":
             MessageLookupByLibrary.simpleMessage("Edit Circle Name"),
+        "editGroupDescription":
+            MessageLookupByLibrary.simpleMessage("Edit Group Description"),
+        "editGroupName":
+            MessageLookupByLibrary.simpleMessage("Edit Group Name"),
         "editImageClearWarning": MessageLookupByLibrary.simpleMessage(
             "All changes will be lost. Are you sure you want to exit?"),
         "editName": MessageLookupByLibrary.simpleMessage("Edit Name"),
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
-        "enterNameTitle":
-            MessageLookupByLibrary.simpleMessage("What\'s your name?"),
-        "enterVerificationCode": m14,
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("Enter your phone number"),
         "errorAddressExists": MessageLookupByLibrary.simpleMessage(
             "The address does not exist, please make sure that the address is added successfully"),
         "errorAddressNotSync": MessageLookupByLibrary.simpleMessage(
             "Address refresh failed, please try again"),
-        "errorAppNotFound":
-            MessageLookupByLibrary.simpleMessage("App not found"),
         "errorAssetExists":
             MessageLookupByLibrary.simpleMessage("Asset does not exist"),
-        "errorAuthentication": m15,
-        "errorBadData": m16,
-        "errorBlockchain": m17,
-        "errorConnectionTimeout":
-            MessageLookupByLibrary.simpleMessage("Connection timeout"),
-        "errorConversationNotFound":
-            MessageLookupByLibrary.simpleMessage("Conversation not found"),
-        "errorData": MessageLookupByLibrary.simpleMessage("Data error"),
-        "errorDurationShort":
-            MessageLookupByLibrary.simpleMessage("Duration is too short"),
-        "errorFavoriteLimit": m18,
-        "errorFileChooser":
-            MessageLookupByLibrary.simpleMessage("File chooser error"),
-        "errorFileExists":
-            MessageLookupByLibrary.simpleMessage("File does not exist"),
-        "errorForbidden": MessageLookupByLibrary.simpleMessage("Forbidden"),
-        "errorFormat":
-            MessageLookupByLibrary.simpleMessage("Format not supported"),
-        "errorFullGroup": m19,
-        "errorImage": MessageLookupByLibrary.simpleMessage("File error"),
-        "errorInsufficientBalance": m20,
-        "errorInsufficientTransactionFeeWithAmount": m21,
-        "errorInvalidAddress": m22,
-        "errorInvalidAddressPlain": m23,
-        "errorInvalidCodeTooFrequent": m24,
-        "errorInvalidEmergencyContact": m25,
-        "errorInvalidPinFormat": m26,
-        "errorNetworkError":
-            MessageLookupByLibrary.simpleMessage("Network error"),
-        "errorNoCamera": MessageLookupByLibrary.simpleMessage("No camera"),
-        "errorNoConnection":
-            MessageLookupByLibrary.simpleMessage("No connection"),
-        "errorNotFound": m27,
-        "errorNotFoundMessage":
-            MessageLookupByLibrary.simpleMessage("Not found"),
+        "errorAuthentication": m12,
+        "errorBadData": m13,
+        "errorBlockchain": m14,
+        "errorConnectionTimeout": MessageLookupByLibrary.simpleMessage(
+            "Network connection timeout, please try again"),
+        "errorFavoriteLimit": m15,
+        "errorFullGroup": m16,
+        "errorInsufficientBalance": m17,
+        "errorInsufficientTransactionFeeWithAmount": m18,
+        "errorInvalidAddress": m19,
+        "errorInvalidAddressPlain": m20,
+        "errorInvalidCodeTooFrequent": m21,
+        "errorInvalidEmergencyContact": m22,
+        "errorInvalidPinFormat": m23,
+        "errorNetworkTaskFailed": MessageLookupByLibrary.simpleMessage(
+            "Network connection failed. Check or switch your network and try again"),
+        "errorNotFound": m24,
         "errorNotSupportedAudioFormat": MessageLookupByLibrary.simpleMessage(
             "Not supported audio format, please open by other app."),
-        "errorOldVersion": m28,
+        "errorOldVersion": m25,
         "errorOpenLocation":
             MessageLookupByLibrary.simpleMessage("Can\'t find an map app"),
         "errorPermission": MessageLookupByLibrary.simpleMessage(
             "Please open the necessary permissions"),
-        "errorPhoneInvalidFormat": m29,
-        "errorPhoneSmsDelivery": m30,
-        "errorPhoneVerificationCodeExpired": m31,
-        "errorPhoneVerificationCodeInvalid": m32,
+        "errorPhoneInvalidFormat": m26,
+        "errorPhoneSmsDelivery": m27,
+        "errorPhoneVerificationCodeExpired": m28,
+        "errorPhoneVerificationCodeInvalid": m29,
         "errorPinCheckTooManyRequest": MessageLookupByLibrary.simpleMessage(
             "You have tried more than 5 times, please wait at least 24 hours to try again."),
-        "errorPinIncorrect": m33,
-        "errorPinIncorrectWithTimes": m34,
-        "errorRecaptchaIsInvalid": m35,
-        "errorRecaptchaTimeout":
-            MessageLookupByLibrary.simpleMessage("Recaptcha timeout"),
-        "errorRetryUpload":
-            MessageLookupByLibrary.simpleMessage("Retry upload failed."),
-        "errorServer5xx": m36,
-        "errorShare": MessageLookupByLibrary.simpleMessage("Share error."),
-        "errorTooManyRequests": m37,
-        "errorTooManyStickers": m38,
-        "errorTooSmall": m39,
-        "errorTooSmallWithdrawAmount": m40,
+        "errorPinIncorrect": m30,
+        "errorPinIncorrectWithTimes": m31,
+        "errorRecaptchaIsInvalid": m32,
+        "errorServer5xxCode": m33,
+        "errorTooManyRequest": m34,
+        "errorTooManyStickers": m35,
+        "errorTooSmallTransferAmount": m36,
+        "errorTooSmallWithdrawAmount": m37,
         "errorTranscriptForward": MessageLookupByLibrary.simpleMessage(
             "Please forward all attachments after they have been downloaded"),
         "errorUnableToOpenMedia": MessageLookupByLibrary.simpleMessage(
             "Can\'t find an app able to open this media."),
-        "errorUnknownWithCode": m41,
-        "errorUnknownWithMessage": m42,
-        "errorUsedPhone": m43,
+        "errorUnknownWithCode": m38,
+        "errorUnknownWithMessage": m39,
+        "errorUsedPhone": m40,
         "errorUserInvalidFormat":
             MessageLookupByLibrary.simpleMessage("Invalid user id"),
-        "errorUserNotFound":
-            MessageLookupByLibrary.simpleMessage("User not found"),
-        "errorWithdrawalMemoFormatIncorrect": m44,
+        "errorWithdrawalMemoFormatIncorrect": m41,
         "exit": MessageLookupByLibrary.simpleMessage("Exit"),
-        "exitGroup": MessageLookupByLibrary.simpleMessage("Delete and Exit"),
-        "extensions": MessageLookupByLibrary.simpleMessage("Extensions"),
+        "exitGroup": MessageLookupByLibrary.simpleMessage("Exit Group"),
         "failed": MessageLookupByLibrary.simpleMessage("Failed"),
-        "failedToOpenFile": m45,
         "file": MessageLookupByLibrary.simpleMessage("File"),
+        "fileChooserError":
+            MessageLookupByLibrary.simpleMessage("File chooser error"),
+        "fileDoesNotExist":
+            MessageLookupByLibrary.simpleMessage("File does not exist"),
+        "fileError": MessageLookupByLibrary.simpleMessage("File error"),
         "files": MessageLookupByLibrary.simpleMessage("Files"),
-        "followFacebook":
+        "followSystem": MessageLookupByLibrary.simpleMessage("Follow System"),
+        "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("Follow us on Facebook"),
-        "followTwitter":
+        "followUsOnTwitter":
             MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
+        "formatNotSupported":
+            MessageLookupByLibrary.simpleMessage("Format not supported"),
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "from": MessageLookupByLibrary.simpleMessage("From"),
-        "fromWithColon": MessageLookupByLibrary.simpleMessage("From: "),
-        "goToChat": MessageLookupByLibrary.simpleMessage("Go to chat"),
-        "groupAdd": MessageLookupByLibrary.simpleMessage("Add Participants"),
-        "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
-        "groupCantSendDes": MessageLookupByLibrary.simpleMessage(
+        "fromWithColon": MessageLookupByLibrary.simpleMessage("From:"),
+        "groupCantSend": MessageLookupByLibrary.simpleMessage(
             "You can\'t send messages to this group because you\'re no longer a participant."),
-        "groupInvite":
-            MessageLookupByLibrary.simpleMessage("Invite to Group via Link"),
-        "groupInviteCopy": MessageLookupByLibrary.simpleMessage("Copy Link"),
-        "groupInviteInfo": MessageLookupByLibrary.simpleMessage(
-            "Anyone with Mixin can follow this link to join this group. Only share it with people you trust."),
-        "groupInviteReset": MessageLookupByLibrary.simpleMessage("Reset Link"),
-        "groupInviteShare": MessageLookupByLibrary.simpleMessage("Share Link"),
-        "groupOwner": MessageLookupByLibrary.simpleMessage("owner"),
+        "groupName": MessageLookupByLibrary.simpleMessage("Group Name"),
         "groupParticipants":
             MessageLookupByLibrary.simpleMessage("Participants"),
-        "groupPopMenuDismissAdmin":
-            MessageLookupByLibrary.simpleMessage("Dismiss admin"),
-        "groupPopMenuMakeAdmin":
-            MessageLookupByLibrary.simpleMessage("Make group admin"),
-        "groupPopMenuMessage": m46,
-        "groupPopMenuRemoveParticipants": m47,
-        "groupSearchParticipants":
-            MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
+        "groupPopMenuMessage": m42,
+        "groupPopMenuRemove": m43,
         "groups": MessageLookupByLibrary.simpleMessage("Groups"),
         "groupsInCommon":
-            MessageLookupByLibrary.simpleMessage("Groups in common"),
+            MessageLookupByLibrary.simpleMessage("Groups In Common"),
         "help": MessageLookupByLibrary.simpleMessage("Help"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
         "hideMixin": MessageLookupByLibrary.simpleMessage("Hide Mixin"),
-        "ignoreThisUpdate":
-            MessageLookupByLibrary.simpleMessage("Ignore this update"),
-        "image": MessageLookupByLibrary.simpleMessage("Image"),
+        "hour": m44,
+        "ignoreThisVersion":
+            MessageLookupByLibrary.simpleMessage("Ignore the new version"),
+        "image": MessageLookupByLibrary.simpleMessage("image"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("Include Files"),
         "includeVideos": MessageLookupByLibrary.simpleMessage("Include Videos"),
         "initializing": MessageLookupByLibrary.simpleMessage("Initializing"),
-        "introduction": MessageLookupByLibrary.simpleMessage("Introduction"),
-        "joinGroup": MessageLookupByLibrary.simpleMessage("+ Join the group"),
-        "landingDeletionWarningContent": m48,
-        "landingDeletionWarningTitle": MessageLookupByLibrary.simpleMessage(
-            "Continue to log in and abort account deletion"),
+        "inviteInfo": MessageLookupByLibrary.simpleMessage(
+            "Anyone with Mixin can follow this link to join this group. Only share it with people you trust."),
+        "inviteToGroupViaLink":
+            MessageLookupByLibrary.simpleMessage("Invite to Group via Link"),
+        "joinGroupWithPlus":
+            MessageLookupByLibrary.simpleMessage("+ Join group"),
+        "joinedIn": m45,
+        "landingDeleteContent": m46,
+        "landingInvitationDialogContent": m47,
+        "landingValidationTitle": m48,
+        "learnMore": MessageLookupByLibrary.simpleMessage("Learn More"),
         "less": MessageLookupByLibrary.simpleMessage("less"),
-        "links": MessageLookupByLibrary.simpleMessage("Links"),
+        "light": MessageLookupByLibrary.simpleMessage("Light"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
-        "loading": MessageLookupByLibrary.simpleMessage("Loading"),
-        "localTimeErrorDescription": MessageLookupByLibrary.simpleMessage(
+        "loading": MessageLookupByLibrary.simpleMessage("Loading..."),
+        "loadingTime": MessageLookupByLibrary.simpleMessage(
             "System time is unusual, please continue to use again after correction"),
+        "locateToChat": MessageLookupByLibrary.simpleMessage("locate to chat"),
         "location": MessageLookupByLibrary.simpleMessage("Location"),
-        "login": MessageLookupByLibrary.simpleMessage("Login"),
-        "loginWithMobile":
-            MessageLookupByLibrary.simpleMessage("Login with mobile number"),
-        "loginWithQRCode":
-            MessageLookupByLibrary.simpleMessage("Login with QR code"),
+        "logIn": MessageLookupByLibrary.simpleMessage("Log in"),
+        "loginAndAbortAccountDeletion": MessageLookupByLibrary.simpleMessage(
+            "Continue to log in and abort account deletion"),
+        "loginByQrcode": MessageLookupByLibrary.simpleMessage(
+            "Login to Mixin Messenger by QR Code"),
+        "loginByQrcodeTips": MessageLookupByLibrary.simpleMessage(
+            "Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login."),
+        "makeGroupAdmin":
+            MessageLookupByLibrary.simpleMessage("Make group admin"),
         "media": MessageLookupByLibrary.simpleMessage("Media"),
         "memo": MessageLookupByLibrary.simpleMessage("Memo"),
+        "messageE2ee": MessageLookupByLibrary.simpleMessage(
+            "Messages to this conversation are encrypted end-to-end, tap for more info."),
+        "messageNotFound":
+            MessageLookupByLibrary.simpleMessage("Message not found"),
         "messagePreview":
             MessageLookupByLibrary.simpleMessage("Message Preview"),
         "messagePreviewDescription": MessageLookupByLibrary.simpleMessage(
             "Preview message text inside new message notifications."),
-        "messageTooLong":
-            MessageLookupByLibrary.simpleMessage("Message content is too long"),
         "messages": MessageLookupByLibrary.simpleMessage("Messages"),
         "minimize": MessageLookupByLibrary.simpleMessage("Minimize"),
-        "mixinMessenger":
-            MessageLookupByLibrary.simpleMessage("Mixin Messenger"),
-        "more": MessageLookupByLibrary.simpleMessage("more"),
+        "mixinMessengerDesktop":
+            MessageLookupByLibrary.simpleMessage("Mixin Messenger Desktop"),
+        "more": MessageLookupByLibrary.simpleMessage("More"),
         "mute": MessageLookupByLibrary.simpleMessage("Mute"),
-        "mute1hour": MessageLookupByLibrary.simpleMessage("1 Hour"),
-        "mute1week": MessageLookupByLibrary.simpleMessage("1 Week"),
-        "mute1year": MessageLookupByLibrary.simpleMessage("1 Year"),
-        "mute8hours": MessageLookupByLibrary.simpleMessage("8 Hours"),
-        "muteTitle":
-            MessageLookupByLibrary.simpleMessage("Mute notifications for…"),
-        "muted": MessageLookupByLibrary.simpleMessage("Mute"),
-        "myStickerAlbums": MessageLookupByLibrary.simpleMessage("My Stickers"),
+        "muted": MessageLookupByLibrary.simpleMessage("Muted"),
+        "myMixinId": m49,
+        "myStickers": MessageLookupByLibrary.simpleMessage("My Stickers"),
+        "na": MessageLookupByLibrary.simpleMessage("N/A"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
-        "networkConnectionFailed":
-            MessageLookupByLibrary.simpleMessage("Network connection failed"),
+        "networkError": MessageLookupByLibrary.simpleMessage("Network error"),
         "newVersionAvailable":
             MessageLookupByLibrary.simpleMessage("New version available"),
-        "newVersionDescription": m49,
+        "newVersionDescription": m50,
         "next": MessageLookupByLibrary.simpleMessage("Next"),
         "nextConversation":
             MessageLookupByLibrary.simpleMessage("Next conversation"),
         "noAudio": MessageLookupByLibrary.simpleMessage("NO AUDIO"),
-        "noData": MessageLookupByLibrary.simpleMessage("NO DATA"),
+        "noCamera": MessageLookupByLibrary.simpleMessage("No camera"),
+        "noData": MessageLookupByLibrary.simpleMessage("No Data"),
         "noFile": MessageLookupByLibrary.simpleMessage("NO FILE"),
         "noLink": MessageLookupByLibrary.simpleMessage("NO LINK"),
         "noMedia": MessageLookupByLibrary.simpleMessage("NO MEDIA"),
+        "noNetworkConnection":
+            MessageLookupByLibrary.simpleMessage("No network connection"),
         "noPost": MessageLookupByLibrary.simpleMessage("NO POST"),
-        "noResults": MessageLookupByLibrary.simpleMessage("No results"),
-        "notification": MessageLookupByLibrary.simpleMessage("Notification"),
-        "notificationPermissionDescription":
-            MessageLookupByLibrary.simpleMessage(
-                "Don\'t miss messages from you friends."),
+        "noResult": MessageLookupByLibrary.simpleMessage("No result"),
+        "notFound": MessageLookupByLibrary.simpleMessage("Not found"),
+        "notificationContent": MessageLookupByLibrary.simpleMessage(
+            "Don\'t miss messages from your friends."),
         "notificationPermissionManually": MessageLookupByLibrary.simpleMessage(
             "Notifications are not allowed, please go to Notification Settings to turn on."),
-        "notificationPermissionTitle":
-            MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
+        "notifications": MessageLookupByLibrary.simpleMessage("Notifications"),
+        "nowAnAddmin": m51,
+        "oneHour": MessageLookupByLibrary.simpleMessage("1 Hour"),
+        "oneWeek": MessageLookupByLibrary.simpleMessage("1 Week"),
+        "oneYear": MessageLookupByLibrary.simpleMessage("1 Year"),
+        "openHomePage": MessageLookupByLibrary.simpleMessage("Open Home page"),
         "openLogDirectory":
             MessageLookupByLibrary.simpleMessage("open log directory"),
         "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
-        "pageDeleteCircle": m50,
-        "pageEditProfileJoin": m51,
-        "pageLandingClickToReload":
-            MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
-        "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
-            "Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login."),
-        "pageLandingLoginTitle": MessageLookupByLibrary.simpleMessage(
-            "Login to Mixin Messenger by QR Code"),
-        "pageRightEmptyMessage": MessageLookupByLibrary.simpleMessage(
-            "Select a conversation to start messaging"),
+        "owner": MessageLookupByLibrary.simpleMessage("Owner"),
         "participantsCount": m52,
-        "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone number"),
+        "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone Number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
-        "pin": MessageLookupByLibrary.simpleMessage("Pin"),
-        "pinMessageCount": m53,
-        "pinned": m54,
-        "pleaseWait":
-            MessageLookupByLibrary.simpleMessage("Please wait a moment"),
+        "pickAConversation": MessageLookupByLibrary.simpleMessage(
+            "Select a conversation and start sending a message"),
+        "pinTitle": MessageLookupByLibrary.simpleMessage("Pin"),
+        "pinnedMessageTitle": m53,
         "post": MessageLookupByLibrary.simpleMessage("Post"),
         "preferences": MessageLookupByLibrary.simpleMessage("Preferences"),
-        "preview": MessageLookupByLibrary.simpleMessage("Preview"),
         "previousConversation":
             MessageLookupByLibrary.simpleMessage("Previous conversation"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("Privacy Policy"),
-        "provisioning": MessageLookupByLibrary.simpleMessage("Provisioning"),
         "quickSearch": MessageLookupByLibrary.simpleMessage("Quick search"),
         "quitMixin": MessageLookupByLibrary.simpleMessage("Quit Mixin"),
-        "recentConversations":
-            MessageLookupByLibrary.simpleMessage("Recent conversations"),
+        "recaptchaTimeout":
+            MessageLookupByLibrary.simpleMessage("Recaptcha timeout"),
+        "receiver": MessageLookupByLibrary.simpleMessage("Receiver"),
+        "recentChats": MessageLookupByLibrary.simpleMessage("CHATS"),
         "reedit": MessageLookupByLibrary.simpleMessage("Re-edit"),
         "refresh": MessageLookupByLibrary.simpleMessage("Refresh"),
         "removeBot": MessageLookupByLibrary.simpleMessage("Remove Bot"),
@@ -522,99 +488,112 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Remove Stickers"),
         "reply": MessageLookupByLibrary.simpleMessage("Reply"),
         "report": MessageLookupByLibrary.simpleMessage("Report"),
-        "reportWarning": MessageLookupByLibrary.simpleMessage(
-            "Do you want to report and block this contact?"),
+        "reportAndBlock":
+            MessageLookupByLibrary.simpleMessage("Report and block?"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Resend code"),
-        "resendCodeIn": m55,
+        "resendCodeIn": m54,
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
+        "resetLink": MessageLookupByLibrary.simpleMessage("Reset Link"),
+        "retryUploadFailed":
+            MessageLookupByLibrary.simpleMessage("Retry upload failed."),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveAs": MessageLookupByLibrary.simpleMessage("Save as"),
-        "saveToGallery":
-            MessageLookupByLibrary.simpleMessage("Save to Gallery"),
+        "saveToCameraRoll":
+            MessageLookupByLibrary.simpleMessage("Save to Camera Roll"),
+        "sayHi": MessageLookupByLibrary.simpleMessage("Say Hi"),
         "scamWarning": MessageLookupByLibrary.simpleMessage(
             "Warning: Many users reported this account as a scam. Please be careful, especially if it asks you for money"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
+        "searchContact": MessageLookupByLibrary.simpleMessage("Search contact"),
+        "searchConversation":
+            MessageLookupByLibrary.simpleMessage("Search Conversation"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
-            "No chats, \ncontacts or messages found."),
-        "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
-        "searchRelatedMessage": m56,
-        "searchUser": MessageLookupByLibrary.simpleMessage("Search contact"),
-        "searchUserHint":
-            MessageLookupByLibrary.simpleMessage("Mixin ID or Phone number"),
-        "send": MessageLookupByLibrary.simpleMessage("send"),
+            "No chats, contacts or messages found."),
+        "searchRelatedMessage": m55,
+        "secretUrl": MessageLookupByLibrary.simpleMessage(
+            "https://mixin.one/pages/1000007"),
+        "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Archived all files in one zip file"),
-        "sendCodeConfirm": m57,
-        "sendQuick": MessageLookupByLibrary.simpleMessage("Send quickly"),
+        "sendQuickly": MessageLookupByLibrary.simpleMessage("Send quickly"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("Send without compression"),
         "sendWithoutSound":
             MessageLookupByLibrary.simpleMessage("Send Without Sound"),
-        "sentYouAMessage":
-            MessageLookupByLibrary.simpleMessage("Sent you a message"),
-        "settingTheme": MessageLookupByLibrary.simpleMessage("Theme"),
-        "settingThemeAuto":
-            MessageLookupByLibrary.simpleMessage("Follow system"),
-        "settingThemeLight": MessageLookupByLibrary.simpleMessage("Light"),
-        "settingThemeNight": MessageLookupByLibrary.simpleMessage("Dark"),
+        "settingAuthSearchHint":
+            MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
+        "settingBackupTips": MessageLookupByLibrary.simpleMessage(
+            "Back up your chat history to iCloud. if you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin Messenger. Messages you back up are not protected by Mixin Messenger end-to-end encryption while in iCloud."),
         "share": MessageLookupByLibrary.simpleMessage("Share"),
+        "shareApps": MessageLookupByLibrary.simpleMessage("Shared Apps"),
         "shareContact": MessageLookupByLibrary.simpleMessage("Share Contact"),
-        "sharedApps": MessageLookupByLibrary.simpleMessage("Shared Apps"),
+        "shareError": MessageLookupByLibrary.simpleMessage("Share error."),
+        "shareLink": MessageLookupByLibrary.simpleMessage("Share Link"),
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
         "show": MessageLookupByLibrary.simpleMessage("Show"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("Show avatar"),
         "showMixin": MessageLookupByLibrary.simpleMessage("Show Mixin"),
+        "signIn": MessageLookupByLibrary.simpleMessage("Sign in"),
         "signOut": MessageLookupByLibrary.simpleMessage("Sign Out"),
+        "signWithPhoneNumber":
+            MessageLookupByLibrary.simpleMessage("Sign in with phone number"),
+        "signWithQrcode":
+            MessageLookupByLibrary.simpleMessage("Sign in with QrCode"),
         "sticker": MessageLookupByLibrary.simpleMessage("Sticker"),
         "stickerAlbumDetail":
             MessageLookupByLibrary.simpleMessage("Sticker album detail"),
-        "stickerShop": MessageLookupByLibrary.simpleMessage("Sticker shop"),
+        "stickerStore": MessageLookupByLibrary.simpleMessage("Sticker Store"),
         "storageAutoDownloadDescription": MessageLookupByLibrary.simpleMessage(
-            "Change auto-download settings for medias. "),
+            "Change auto-download settings for medias."),
         "storageUsage": MessageLookupByLibrary.simpleMessage("Storage Usage"),
-        "strangerFromMessage": MessageLookupByLibrary.simpleMessage(
+        "strangerHint": MessageLookupByLibrary.simpleMessage(
             "This sender is not in your contacts"),
         "strangers": MessageLookupByLibrary.simpleMessage("Strangers"),
         "successful": MessageLookupByLibrary.simpleMessage("Successful"),
-        "termsService":
+        "termsOfService":
             MessageLookupByLibrary.simpleMessage("Terms of Service"),
         "text": MessageLookupByLibrary.simpleMessage("Text"),
+        "theme": MessageLookupByLibrary.simpleMessage("Theme"),
+        "thisMessageWasDeleted":
+            MessageLookupByLibrary.simpleMessage("This message was deleted"),
         "time": MessageLookupByLibrary.simpleMessage("Time"),
-        "to": MessageLookupByLibrary.simpleMessage("To"),
         "today": MessageLookupByLibrary.simpleMessage("Today"),
         "toggleChatInfo":
             MessageLookupByLibrary.simpleMessage("Toggle chat info"),
+        "transactionId": MessageLookupByLibrary.simpleMessage("Transaction Id"),
         "transactions": MessageLookupByLibrary.simpleMessage("Transactions"),
-        "transactionsId":
-            MessageLookupByLibrary.simpleMessage("Transaction Id"),
+        "transcript": MessageLookupByLibrary.simpleMessage("Transcript"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
-        "typeAMessage": MessageLookupByLibrary.simpleMessage("Type message"),
-        "unMute": MessageLookupByLibrary.simpleMessage("Unmute"),
-        "unPin": MessageLookupByLibrary.simpleMessage("Unpin"),
+        "turnOnNotifications":
+            MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
+        "typeMessage": MessageLookupByLibrary.simpleMessage("Type message"),
+        "unableToOpenFile": m56,
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),
+        "unmute": MessageLookupByLibrary.simpleMessage("Unmute"),
+        "unpin": MessageLookupByLibrary.simpleMessage("Unpin"),
         "unpinAllMessages":
             MessageLookupByLibrary.simpleMessage("Unpin All Messages"),
-        "unpinAllMessagesDescription": MessageLookupByLibrary.simpleMessage(
+        "unpinAllMessagesConfirmation": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to unpin all messages?"),
-        "unread": MessageLookupByLibrary.simpleMessage("New Messages"),
-        "uriCheckOnPhone": MessageLookupByLibrary.simpleMessage(
-            "This type of url is not supported, please check on your phone."),
+        "unreadMessages":
+            MessageLookupByLibrary.simpleMessage("Unread messages"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
+        "valueNow": m57,
+        "valueThen": m58,
         "video": MessageLookupByLibrary.simpleMessage("Video"),
-        "videoCall": MessageLookupByLibrary.simpleMessage("Video call"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("Waiting for this message."),
-        "walletTransactionCurrentValue": m58,
-        "walletTransactionThatTimeNoValue":
-            MessageLookupByLibrary.simpleMessage("value then N/A"),
-        "walletTransactionThatTimeValue": m59,
-        "webView2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
+        "webview2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
             "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
-        "webViewRuntimeNotAvailable": MessageLookupByLibrary.simpleMessage(
-            "WebView2 Runtime is not available"),
+        "webviewRuntimeUnavailable": MessageLookupByLibrary.simpleMessage(
+            "WebView runtime is unavailable"),
+        "whatsYourName":
+            MessageLookupByLibrary.simpleMessage("What\'s your name?"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),
-        "you": MessageLookupByLibrary.simpleMessage("you"),
-        "youStart": MessageLookupByLibrary.simpleMessage("You")
+        "writeCircles": MessageLookupByLibrary.simpleMessage("Write Circles"),
+        "you": MessageLookupByLibrary.simpleMessage("You"),
+        "youDeletedThisMessage":
+            MessageLookupByLibrary.simpleMessage("You deleted this message")
       };
 }

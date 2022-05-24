@@ -150,7 +150,7 @@ class SearchList extends HookWidget {
         if (conversations.isNotEmpty)
           SliverToBoxAdapter(
             child: _SearchHeader(
-              title: context.l10n.conversations,
+              title: context.l10n.conversation,
               showMore: conversations.length > _defaultLimit,
               more: type.value != _ShowMoreType.conversation,
               onTap: () {

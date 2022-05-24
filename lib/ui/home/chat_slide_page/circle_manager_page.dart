@@ -206,7 +206,7 @@ class _CircleManagerItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  context.l10n.conversationCount(count),
+                  context.l10n.circleSubtitle(count, count),
                   style: TextStyle(
                     color: context.theme.secondaryText,
                     fontSize: 14,

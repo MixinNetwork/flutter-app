@@ -43,8 +43,8 @@ class RecallMessage extends HookWidget {
             TextSpan(children: [
               TextSpan(
                 text: isCurrentUser
-                    ? context.l10n.chatRecallMe
-                    : context.l10n.chatRecallDelete,
+                    ? context.l10n.youDeletedThisMessage
+                    : context.l10n.thisMessageWasDeleted,
               ),
               if (recalledText != null)
                 TextSpan(

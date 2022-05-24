@@ -379,7 +379,7 @@ class _ConversationSelector extends HookWidget {
                   slivers: [
                     if (conversationFilterState.recentConversations.isNotEmpty)
                       _Section(
-                        title: context.l10n.recentConversations,
+                        title: context.l10n.recentChats,
                         count:
                             conversationFilterState.recentConversations.length,
                         builder: (BuildContext context, int index) {

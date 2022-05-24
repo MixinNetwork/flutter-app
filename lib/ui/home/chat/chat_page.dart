@@ -1036,7 +1036,7 @@ class _ChatDragIndicator extends StatelessWidget {
               )),
           child: Center(
             child: Text(
-              context.l10n.chatDragHint,
+              context.l10n.dragAndDropFileHere,
               style: TextStyle(
                 fontSize: 14,
                 color: context.theme.text,
@@ -1089,7 +1089,7 @@ class _ConversationHandle extends ConversationMenuHandle {
     assert(name.isNotEmpty, 'name is empty');
     final ret = await showConfirmMixinDialog(
       context,
-      context.l10n.deleteChatHint(name),
+      context.l10n.conversationDeleteTitle(name),
       description: context.l10n.deleteChatDescription,
     );
     if (!ret) {

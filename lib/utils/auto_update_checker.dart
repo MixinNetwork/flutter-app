@@ -129,7 +129,7 @@ class _UpdateDialog extends HookWidget {
                         },
                       ),
                       Text(
-                        context.l10n.ignoreThisUpdate,
+                        context.l10n.ignoreThisVersion,
                         style: TextStyle(
                           color: context.theme.secondaryText,
                           fontSize: 12,

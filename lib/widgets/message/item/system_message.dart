@@ -22,8 +22,6 @@ class SystemMessage extends HookWidget {
         useMessageConverter(converter: (state) => state.participantFullName);
     final userFullName =
         useMessageConverter(converter: (state) => state.userFullName);
-    final groupName =
-        useMessageConverter(converter: (state) => state.groupName);
 
     return Center(
       child: Padding(
@@ -53,7 +51,6 @@ class SystemMessage extends HookWidget {
                   currentUserId: context.accountServer.userId,
                   participantFullName: participantFullName,
                   senderFullName: userFullName,
-                  groupName: groupName,
                 ),
                 style: TextStyle(
                   fontSize: MessageItemWidget.secondaryFontSize,
@@ -77,7 +74,6 @@ String generateSystemText({
   required String currentUserId,
   required String? participantFullName,
   required String? senderFullName,
-  required String? groupName,
 }) {
   final participantIsCurrentUser = participantUserId == currentUserId;
   final senderIsCurrentUser = senderId == currentUserId;
@@ -87,20 +83,20 @@ String generateSystemText({
     case MessageAction.join:
       text = Localization.current.chatGroupJoin(
         participantIsCurrentUser
-            ? Localization.current.youStart
+            ? Localization.current.you
             : participantFullName ?? '',
       );
       break;
     case MessageAction.exit:
       text = Localization.current.chatGroupExit(
         participantIsCurrentUser
-            ? Localization.current.youStart
+            ? Localization.current.you
             : participantFullName ?? '',
       );
       break;
     case MessageAction.add:
       text = Localization.current.chatGroupAdd(
-        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
+        senderIsCurrentUser ? Localization.current.you : senderFullName!,
         participantIsCurrentUser
             ? Localization.current.you
             : participantFullName ?? '',
@@ -108,24 +104,24 @@ String generateSystemText({
       break;
     case MessageAction.remove:
       text = Localization.current.chatGroupRemove(
-        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
+        senderIsCurrentUser ? Localization.current.you : senderFullName!,
         participantIsCurrentUser
             ? Localization.current.you
             : participantFullName ?? '',
       );
       break;
     case MessageAction.create:
-      text = Localization.current.chatGroupCreate(
-        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
-        groupName!,
+      text = Localization.current.createdThisGroup(
+        senderIsCurrentUser ? Localization.current.you : senderFullName!,
       );
       break;
     case MessageAction.role:
-      text = Localization.current.chatGroupRole;
+      text = Localization.current.nowAnAddmin(
+          senderIsCurrentUser ? Localization.current.you : senderFullName!);
       break;
     case MessageAction.update:
     default:
-      text = Localization.current.chatNotSupport;
+      text = Localization.current.conversationNotSupport;
       break;
   }
   return text;

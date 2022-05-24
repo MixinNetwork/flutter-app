@@ -55,7 +55,7 @@ class _GroupInviteByLinkDialog extends HookWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 30),
                       child: Text(
-                        context.l10n.groupInvite,
+                        context.l10n.inviteToGroupViaLink,
                         style: TextStyle(
                           fontSize: 18,
                           color: context.theme.text,
@@ -121,7 +121,7 @@ class _GroupInviteBody extends StatelessWidget {
           SizedBox(
             width: 338,
             child: Text(
-              context.l10n.groupInviteInfo,
+              context.l10n.inviteInfo,
               style: TextStyle(
                 fontSize: 12,
                 color: context.theme.secondaryText,
@@ -149,7 +149,7 @@ class _ActionButtons extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _IconButton(
-            label: context.l10n.groupInviteShare,
+            label: context.l10n.shareLink,
             iconAssetName: Resources.assetsImagesInviteShareSvg,
             onTap: () async {
               assert(conversation.codeUrl != null);
@@ -171,7 +171,7 @@ class _ActionButtons extends StatelessWidget {
             },
           ),
           _IconButton(
-            label: context.l10n.groupInviteCopy,
+            label: context.l10n.copyInvite,
             iconAssetName: Resources.assetsImagesInviteCopySvg,
             onTap: () async {
               await Clipboard.setData(
@@ -180,7 +180,7 @@ class _ActionButtons extends StatelessWidget {
             },
           ),
           _IconButton(
-            label: context.l10n.groupInviteReset,
+            label: context.l10n.resetLink,
             iconAssetName: Resources.assetsImagesInviteRefreshSvg,
             onTap: () {
               runFutureWithToast(context,

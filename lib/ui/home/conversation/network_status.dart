@@ -95,7 +95,7 @@ class _NetworkNotConnect extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              context.l10n.networkConnectionFailed,
+              context.l10n.errorNetworkTaskFailed,
               style: TextStyle(
                 color: context.theme.text,
                 fontSize: 14,

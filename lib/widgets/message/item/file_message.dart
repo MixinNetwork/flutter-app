@@ -80,7 +80,7 @@ class MessageFile extends HookWidget {
             if (openResult.type != ResultType.done) {
               i('open file result: $mediaName ${openResult.type} ${openResult.message}');
               await showToastFailed(context,
-                  ToastError(context.l10n.failedToOpenFile(mediaName)));
+                  ToastError(context.l10n.unableToOpenFile(mediaName)));
             }
           } else {
             await saveAs(

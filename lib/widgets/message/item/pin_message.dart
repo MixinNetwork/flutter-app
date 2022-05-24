@@ -31,7 +31,7 @@ class PinMessageWidget extends HookWidget {
 
     final cachePreview = useMemoized(() {
       if (pinMessageMinimal == null) {
-        return context.l10n.pinned(userFullName, context.l10n.aMessage);
+        return context.l10n.chatPinMessage(userFullName, context.l10n.aMessage);
       }
       final preview = cachePinPreviewText(
         pinMessageMinimal: pinMessageMinimal,
@@ -42,7 +42,7 @@ class PinMessageWidget extends HookWidget {
       final singleLinePreview =
           lines.length > 1 ? '${lines.first}...' : lines.firstOrNull ?? '';
 
-      return context.l10n.pinned(userFullName, singleLinePreview);
+      return context.l10n.chatPinMessage(userFullName, singleLinePreview);
     }, [userFullName, content]);
 
     final text = useMemoizedFuture(
@@ -57,7 +57,9 @@ class PinMessageWidget extends HookWidget {
         final lines = const LineSplitter().convert(preview);
         final singleLinePreview =
             lines.length > 1 ? '${lines.first}...' : lines.firstOrNull ?? '';
-        return context.l10n.pinned(userFullName, singleLinePreview).overflow;
+        return context.l10n
+            .chatPinMessage(userFullName, singleLinePreview)
+            .overflow;
       },
       cachePreview,
       keys: [userFullName, content],

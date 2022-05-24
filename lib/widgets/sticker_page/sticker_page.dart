@@ -140,7 +140,7 @@ class _StickerStoreEmptyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
         child: Text(
-          context.l10n.stickerShop,
+          context.l10n.stickerStore,
           style: TextStyle(
             color: context.theme.secondaryText,
             fontSize: 18,

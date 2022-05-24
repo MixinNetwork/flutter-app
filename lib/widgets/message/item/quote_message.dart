@@ -71,7 +71,7 @@ class QuoteMessage extends HookWidget {
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
           userId: null,
-          description: context.l10n.chatNotSupport,
+          description: context.l10n.conversationNotSupport,
           icon: SvgPicture.asset(
             Resources.assetsImagesRecallSvg,
             color: iconColor,
@@ -196,7 +196,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesFileSvg,
             color: iconColor,
           ),
-          description: context.l10n.chatTranscript,
+          description: context.l10n.transcript,
           inputMode: inputMode,
         );
       }
@@ -311,7 +311,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesAppButtonSvg,
             color: iconColor,
           ),
-          description: description ?? context.l10n.extensions,
+          description: description ?? context.l10n.bots,
           inputMode: inputMode,
         );
       }
@@ -323,7 +323,7 @@ class QuoteMessage extends HookWidget {
       messageId: messageId,
       quoteMessageId: quoteMessageId!,
       userId: null,
-      description: context.l10n.chatNotFound,
+      description: context.l10n.messageNotFound,
       icon: SvgPicture.asset(
         Resources.assetsImagesRecallSvg,
         color: iconColor,

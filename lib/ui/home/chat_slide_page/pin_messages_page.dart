@@ -68,7 +68,8 @@ class PinMessagesPage extends HookWidget {
       child: Scaffold(
         backgroundColor: context.theme.popUp,
         appBar: MixinAppBar(
-          title: Text(context.l10n.pinMessageCount(list.length)),
+          title:
+              Text(context.l10n.pinnedMessageTitle(list.length, list.length)),
           backgroundColor: context.theme.popUp,
           actions: [
             if (!Navigator.of(context).canPop())
@@ -114,7 +115,7 @@ class PinMessagesPage extends HookWidget {
                   child: Builder(
                       builder: (context) => AlertDialogLayout(
                             title:
-                                Text(context.l10n.unpinAllMessagesDescription),
+                                Text(context.l10n.unpinAllMessagesConfirmation),
                             content: const SizedBox(),
                             actions: [
                               MixinButton(
