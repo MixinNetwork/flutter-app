@@ -31,7 +31,7 @@ MessageLookupByLibrary _findExact(String localeName) {
     case 'zh':
       return messages_zh.messages;
     default:
-      return null;
+      throw ArgumentError("Invalid locale '$localeName'");
   }
 }
 
@@ -61,6 +61,6 @@ bool _messagesExistFor(String locale) {
 MessageLookupByLibrary _findGeneratedMessagesFor(String locale) {
   var actualLocale =
       Intl.verifiedLocale(locale, _messagesExistFor, onFailure: (_) => null);
-  if (actualLocale == null) return null;
+  if (actualLocale == null) throw new ArgumentError("Locale $locale not found");
   return _findExact(actualLocale);
 }
