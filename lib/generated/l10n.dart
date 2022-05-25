@@ -14,24 +14,39 @@ import 'intl/messages_all.dart';
 
 class Localization {
   Localization();
-  
-  static Localization current;
-  
-  static const AppLocalizationDelegate delegate =
-    AppLocalizationDelegate();
+
+  static Localization? _current;
+
+  static Localization get current {
+    assert(_current != null,
+        'No instance of Localization was loaded. Try to initialize the Localization delegate before accessing Localization.current.');
+    return _current!;
+  }
+
+  static const AppLocalizationDelegate delegate = AppLocalizationDelegate();
 
   static Future<Localization> load(Locale locale) {
-    final name = (locale.countryCode?.isEmpty ?? false) ? locale.languageCode : locale.toString();
-    final localeName = Intl.canonicalizedLocale(name); 
+    final name = (locale.countryCode?.isEmpty ?? false)
+        ? locale.languageCode
+        : locale.toString();
+    final localeName = Intl.canonicalizedLocale(name);
     return initializeMessages(localeName).then((_) {
       Intl.defaultLocale = localeName;
-      Localization.current = Localization();
-      
-      return Localization.current;
+      final instance = Localization();
+      Localization._current = instance;
+
+      return instance;
     });
-  } 
+  }
 
   static Localization of(BuildContext context) {
+    final instance = Localization.maybeOf(context);
+    assert(instance != null,
+        'No instance of Localization present in the widget tree. Did you add Localization.delegate in localizationsDelegates?');
+    return instance!;
+  }
+
+  static Localization? maybeOf(BuildContext context) {
     return Localizations.of<Localization>(context, Localization);
   }
 
@@ -1301,8 +1316,10 @@ class Localization {
   String errorPinIncorrectWithTimes(num count, Object arg0, Object arg1) {
     return Intl.plural(
       count,
-      one: 'ERROR $arg0: PIN incorrect. You still have $arg1 chance. Please wait for 24 hours to retry later.',
-      other: 'ERROR $arg0: PIN incorrect. You still have $arg1 chances. Please wait for 24 hours to retry later.',
+      one:
+          'ERROR $arg0: PIN incorrect. You still have $arg1 chance. Please wait for 24 hours to retry later.',
+      other:
+          'ERROR $arg0: PIN incorrect. You still have $arg1 chances. Please wait for 24 hours to retry later.',
       name: 'errorPinIncorrectWithTimes',
       desc: '',
       args: [count, arg0, arg1],
@@ -3408,8 +3425,10 @@ class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
 
   @override
   bool isSupported(Locale locale) => _isSupported(locale);
+
   @override
   Future<Localization> load(Locale locale) => Localization.load(locale);
+
   @override
   bool shouldReload(AppLocalizationDelegate old) => false;
 
