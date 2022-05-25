@@ -60,7 +60,7 @@ extension GetErrorStringByCode on BuildContext {
         return l10n.errorWithdrawalMemoFormatIncorrect(code);
       case favoriteLimit:
       case circleLimit:
-        return l10n.errorFavoriteLimit(code);
+        return l10n.errorNumberReachedLimit(code);
       case forbidden:
         return l10n.accessDenied;
       case server:

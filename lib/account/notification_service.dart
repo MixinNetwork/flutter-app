@@ -124,7 +124,7 @@ class NotificationService {
               event.senderFullName,
             );
           }
-          body ??= Localization.current.conversationNotSupport;
+          body ??= Localization.current.messageNotSupport;
         } else {
           body = Localization.current.aMessage;
         }

@@ -71,7 +71,7 @@ class QuoteMessage extends HookWidget {
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
           userId: null,
-          description: context.l10n.conversationNotSupport,
+          description: context.l10n.messageNotSupport,
           icon: SvgPicture.asset(
             Resources.assetsImagesRecallSvg,
             color: iconColor,

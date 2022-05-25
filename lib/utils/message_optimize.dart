@@ -21,11 +21,11 @@ String? messagePreviewOptimize(
 
   final trimContent = content?.trim();
   if (messageCategory.isIllegalMessageCategory) {
-    _content = Localization.current.conversationNotSupport;
+    _content = Localization.current.messageNotSupport;
   } else if (messageStatus == MessageStatus.failed) {
     _content = Localization.current.waitingForThisMessage;
   } else if (messageStatus == MessageStatus.unknown) {
-    _content = Localization.current.conversationNotSupport;
+    _content = Localization.current.messageNotSupport;
   } else if (messageCategory.isText) {
     _content = trimContent;
   } else if (messageCategory == MessageCategory.systemAccountSnapshot) {
@@ -73,7 +73,7 @@ String? messagePreviewOptimize(
   } else if (messageCategory.isTranscript) {
     _content = '[${Localization.current.transcript}]';
   } else {
-    _content = Localization.current.conversationNotSupport;
+    _content = Localization.current.messageNotSupport;
   }
 
   if ((_content?.isNotEmpty ?? false) && isGroup) {

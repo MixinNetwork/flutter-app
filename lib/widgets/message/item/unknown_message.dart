@@ -18,7 +18,7 @@ class UnknownMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final content = RichText(
       text: TextSpan(
-        text: context.l10n.conversationNotSupport,
+        text: context.l10n.messageNotSupport,
         style: TextStyle(
           fontSize: MessageItemWidget.primaryFontSize,
           color: context.theme.text,
