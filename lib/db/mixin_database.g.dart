@@ -6,7 +6,7 @@ part of 'mixin_database.dart';
 // MoorGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
+// ignore_for_file: type=lint
 class Conversation extends DataClass implements Insertable<Conversation> {
   final String conversationId;
   final String? ownerId;
@@ -12653,10 +12653,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(users.mapFromRow);
   }
 
-  Selectable<String?> biographyByIdentityNumber(String user_id) {
+  Selectable<String?> biographyByIdentityNumber(String userId) {
     return customSelect('SELECT biography FROM users WHERE user_id = ?1',
         variables: [
-          Variable<String>(user_id)
+          Variable<String>(userId)
         ],
         readsFrom: {
           users,
@@ -13117,11 +13117,11 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         Messages.$converter1.mapToDart(row.read<String>('status'))!);
   }
 
-  Selectable<SendingMessage> sendingMessage(String message_id) {
+  Selectable<SendingMessage> sendingMessage(String messageId) {
     return customSelect(
         'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type, m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key, m.media_digest, m.media_status, m.status, m.created_at, m."action", m.participant_id, m.snapshot_id, m.hyperlink, m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.quote_message_id, m.quote_content, rm.status AS resend_status, rm.user_id AS resend_user_id, rm.session_id AS resend_session_id FROM messages AS m LEFT JOIN resend_session_messages AS rm ON m.message_id = rm.message_id WHERE m.message_id = ?1 AND(m.status = \'SENDING\' OR rm.status = 1)AND m.content IS NOT NULL LIMIT 1',
         variables: [
-          Variable<String>(message_id)
+          Variable<String>(messageId)
         ],
         readsFrom: {
           messages,
