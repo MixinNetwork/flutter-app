@@ -23,8 +23,8 @@ extension StreamExtension<T> on Stream<T> {
         while (true) {
           final e = lastEvent;
           if (e == null) break;
-          await convert(e);
           lastEvent = null;
+          await convert(e);
         }
         running = false;
       });
