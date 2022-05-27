@@ -214,15 +214,9 @@ class _MessageProcessRunner {
         // runFloodJob when socket connected.
         blaze.connectedStateStream
             .where((state) => state == ConnectedState.connected),
-        database.mixinDatabase
-            .tableUpdates(
+        database.mixinDatabase.tableUpdates(
           TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
         )
-            .map((event) {
-          // TODO remove this log after flood job is working well.
-          i('flood message table updated.');
-          return event;
-        })
       ]).asyncDropListen((_) async {
         try {
           await _runProcessFloodJob();
