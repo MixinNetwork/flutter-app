@@ -102,9 +102,9 @@ class AttachmentUtil extends ChangeNotifier {
   Future<void> downloadAttachment({
     required String messageId,
   }) async {
-    if (!await checkSyncMessageMedia(messageId)) {
-      await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
-    }
+    if (await checkSyncMessageMedia(messageId)) return;
+
+    await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
 
     AttachmentMessage? attachmentMessage;
 
