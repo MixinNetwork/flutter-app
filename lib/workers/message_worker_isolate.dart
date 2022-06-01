@@ -374,10 +374,14 @@ class _MessageProcessRunner {
         final list = await database.transcriptMessageDao
             .transcriptMessageByTranscriptId(messageId)
             .get();
-        final json = list
-            .map((e) => e.toJson(serializer: const UtcValueSerializer())
-              ..remove('media_status'))
-            .toList();
+        final json = list.map((e) {
+          final map = e.toJson(serializer: const UtcValueSerializer());
+          map['media_duration'] =
+              int.tryParse(map['media_duration'] as String? ?? '');
+          map.remove('media_status');
+
+          return map;
+        }).toList();
         message = message.copyWith(content: jsonEncode(json));
       }
 

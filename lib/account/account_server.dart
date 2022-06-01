@@ -286,17 +286,23 @@ class AccountServer {
       await attachmentUtil.cancelProgressAttachmentJob(request.messageId);
     } else if (request is AttachmentDownloadRequest) {
       d('request download: ${request.message.messageId} ${request.message.category}');
+      final messageId = request.message.messageId;
       if (needDownload(request.message.category)) {
         await attachmentUtil.downloadAttachment(
-          messageId: request.message.messageId,
+          messageId: messageId,
         );
+      } else {
+        await attachmentUtil.checkSyncMessageMedia(messageId);
       }
     } else if (request is TranscriptAttachmentDownloadRequest) {
       d('request download transcript: ${request.message.messageId} ${request.message.category}');
+      final messageId = request.message.messageId;
       if (needDownload(request.message.category)) {
         await attachmentUtil.downloadAttachment(
           messageId: request.message.messageId,
         );
+      } else {
+        await attachmentUtil.checkSyncMessageMedia(messageId);
       }
     } else {
       assert(false, 'unexpected request: $request');
