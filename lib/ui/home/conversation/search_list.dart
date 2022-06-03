@@ -55,6 +55,17 @@ class SearchList extends HookWidget {
         ).data ??
         '';
 
+    final messageKeyword = useMemoizedStream(
+          () {
+            final keywordCubit = context.read<KeywordCubit>();
+            return Stream.value(keywordCubit.state)
+                .merge(keywordCubit.stream)
+                .debounceTime(const Duration(milliseconds: 150));
+          },
+          initialData: null,
+        ).data ??
+        '';
+
     final accountServer = context.accountServer;
 
     final users = useMemoizedStream(() {
@@ -79,14 +90,14 @@ class SearchList extends HookWidget {
         [];
 
     final messages = useMemoizedStream(() {
-          if (keyword.trim().isEmpty) {
+          if (messageKeyword.trim().isEmpty) {
             return Stream.value(<SearchMessageDetailItem>[]);
           } else {
             return accountServer.database.messageDao
-                .fuzzySearchMessage(query: keyword, limit: 4)
+                .fuzzySearchMessage(query: messageKeyword, limit: 4)
                 .watchThrottle(kSlowThrottleDuration);
           }
-        }, keys: [keyword]).data ??
+        }, keys: [messageKeyword]).data ??
         [];
 
     final type = useState<_ShowMoreType?>(null);
