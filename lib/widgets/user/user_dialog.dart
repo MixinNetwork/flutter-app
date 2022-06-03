@@ -39,7 +39,7 @@ Future<void> showUserDialog(BuildContext context, String? userId,
         ?.firstOrNull;
   }
 
-  if (identityNumber != null) {
+  if (user == null && identityNumber != null) {
     user =
         (await context.accountServer.updateUserByIdentityNumber(identityNumber))
             ?.firstOrNull;
