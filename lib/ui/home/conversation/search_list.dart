@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../../bloc/bloc_converter.dart';
 import '../../../bloc/keyword_cubit.dart';
@@ -40,12 +41,17 @@ class SearchList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final keyword = useMemoizedStream(
-          () => context.read<KeywordCubit>().stream.throttleTime(
-                const Duration(milliseconds: 150),
-                trailing: true,
-                leading: false,
-              ),
-          initialData: context.read<KeywordCubit>().state,
+          () {
+            final keywordCubit = context.read<KeywordCubit>();
+            return Stream.value(keywordCubit.state)
+                .merge(keywordCubit.stream)
+                .throttleTime(
+                  const Duration(milliseconds: 150),
+                  trailing: true,
+                  leading: false,
+                );
+          },
+          initialData: null,
         ).data ??
         '';
 
