@@ -157,7 +157,7 @@ class _UserProfileBody extends StatelessWidget {
         children: [
           AvatarWidget(
             size: 90,
-            avatarUrl: anonymous ? null : user.avatarUrl,
+            avatarUrl: user.avatarUrl,
             userId: user.userId,
             name: user.fullName,
           ),
