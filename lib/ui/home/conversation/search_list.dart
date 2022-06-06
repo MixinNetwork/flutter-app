@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../../bloc/bloc_converter.dart';
 import '../../../bloc/keyword_cubit.dart';
@@ -40,12 +41,28 @@ class SearchList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final keyword = useMemoizedStream(
-          () => context.read<KeywordCubit>().stream.throttleTime(
-                const Duration(milliseconds: 150),
-                trailing: true,
-                leading: false,
-              ),
-          initialData: context.read<KeywordCubit>().state,
+          () {
+            final keywordCubit = context.read<KeywordCubit>();
+            return Stream.value(keywordCubit.state)
+                .merge(keywordCubit.stream)
+                .throttleTime(
+                  const Duration(milliseconds: 150),
+                  trailing: true,
+                  leading: false,
+                );
+          },
+          initialData: null,
+        ).data ??
+        '';
+
+    final messageKeyword = useMemoizedStream(
+          () {
+            final keywordCubit = context.read<KeywordCubit>();
+            return Stream.value(keywordCubit.state)
+                .merge(keywordCubit.stream)
+                .debounceTime(const Duration(milliseconds: 150));
+          },
+          initialData: null,
         ).data ??
         '';
 
@@ -73,14 +90,14 @@ class SearchList extends HookWidget {
         [];
 
     final messages = useMemoizedStream(() {
-          if (keyword.trim().isEmpty) {
+          if (messageKeyword.trim().isEmpty) {
             return Stream.value(<SearchMessageDetailItem>[]);
           } else {
             return accountServer.database.messageDao
-                .fuzzySearchMessage(query: keyword, limit: 4)
+                .fuzzySearchMessage(query: messageKeyword, limit: 4)
                 .watchThrottle(kSlowThrottleDuration);
           }
-        }, keys: [keyword]).data ??
+        }, keys: [messageKeyword]).data ??
         [];
 
     final type = useState<_ShowMoreType?>(null);
