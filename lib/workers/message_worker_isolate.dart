@@ -261,8 +261,8 @@ class _MessageProcessRunner {
           .asyncDropListen((_) => _runUpdateStickerJob()))
       ..add(database.mixinDatabase
           .tableUpdates(
-        TableUpdateQuery.onTable(database.mixinDatabase.expiredMessages),
-      )
+            TableUpdateQuery.onTable(database.mixinDatabase.expiredMessages),
+          )
           .asyncDropListen((event) => _scheduleExpiredJob()));
   }
 
