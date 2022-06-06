@@ -78,7 +78,7 @@ class NotificationService {
         );
 
         String? body;
-        if (context.multiAuthState.currentMessagePreview) {
+        if (context.settingCubit.state.messagePreview) {
           if (event.type == MessageCategory.systemConversation) {
             body = generateSystemText(
               actionName: event.actionName,

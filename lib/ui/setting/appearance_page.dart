@@ -58,7 +58,7 @@ class _Body extends StatelessWidget {
                         title: Text(context.l10n.settingThemeAuto),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
-                            context.read<SettingCubit>().brightness = value,
+                            context.settingCubit.brightness = value,
                         value: null,
                       ),
                       trailing: null,
@@ -68,7 +68,7 @@ class _Body extends StatelessWidget {
                         title: Text(context.l10n.settingThemeLight),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
-                            context.read<SettingCubit>().brightness = value,
+                            context.settingCubit.brightness = value,
                         value: Brightness.light,
                       ),
                       trailing: null,
@@ -78,7 +78,7 @@ class _Body extends StatelessWidget {
                         title: Text(context.l10n.settingThemeNight),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
-                            context.read<SettingCubit>().brightness = value,
+                            context.settingCubit.brightness = value,
                         value: Brightness.dark,
                       ),
                       trailing: null,
@@ -125,9 +125,8 @@ class _MessageAvatarSetting extends HookWidget {
                 child: CupertinoSwitch(
                   activeColor: context.theme.accent,
                   value: showAvatar,
-                  onChanged: (bool value) {
-                    context.read<SettingCubit>().enableMessageAvatar(value);
-                  },
+                  onChanged: (bool value) =>
+                      context.settingCubit.messageShowAvatar = value,
                 )),
           ),
         )

@@ -307,19 +307,11 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         ConversationsCompanion(pinTime: Value(DateTime.now())),
       );
 
-  Future<int> unpin(String conversationId) async {
-    final already = await db.hasData(
-        db.conversations,
-        [],
-        db.conversations.conversationId.equals(conversationId) &
-            db.conversations.pinTime.isNotNull());
-    if (already) return -1;
-    return (update(db.conversations)
-          ..where((tbl) => tbl.conversationId.equals(conversationId)))
-        .write(
-      const ConversationsCompanion(pinTime: Value(null)),
-    );
-  }
+  Future<int> unpin(String conversationId) async => (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(
+        const ConversationsCompanion(pinTime: Value(null)),
+      );
 
   Future<int> deleteConversation(String conversationId) =>
       (delete(db.conversations)

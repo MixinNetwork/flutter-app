@@ -55,7 +55,21 @@ class App extends StatelessWidget {
           BlocProvider(
             create: (context) => MultiAuthCubit(),
           ),
-          BlocProvider(create: (context) => SettingCubit()),
+          BlocProvider(create: (context) {
+            final authState = context.multiAuthState.current;
+            final settingCubit = SettingCubit()
+              ..migrate(
+                messagePreview: authState?.messagePreview,
+                photoAutoDownload: authState?.photoAutoDownload,
+                videoAutoDownload: authState?.videoAutoDownload,
+                fileAutoDownload: authState?.fileAutoDownload,
+                collapsedSidebar: authState?.collapsedSidebar,
+              );
+
+            context.multiAuthCubit.cleanCurrentSetting();
+
+            return settingCubit;
+          }),
         ],
         child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
           converter: (state) => state.current,
@@ -70,7 +84,8 @@ class App extends StatelessWidget {
                 authState.privateKey,
               )),
               create: (BuildContext context) async {
-                final accountServer = AccountServer(context.multiAuthCubit);
+                final accountServer =
+                    AccountServer(context.multiAuthCubit, context.settingCubit);
                 try {
                   await accountServer.initServer(
                     authState.account.userId,

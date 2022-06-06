@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
+import 'package:equatable/equatable.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
@@ -60,6 +61,7 @@ class IsolateInitParams {
 }
 
 Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
+  EquatableConfig.stringify = true;
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
   final isolateChannel =
       IsolateChannel<IsolateEvent>.connectSend(params.sendPort);
@@ -206,7 +208,7 @@ class _MessageProcessRunner {
     if (primarySessionId != null) {
       jobSubscribers.add(database.jobDao
           .watchHasSessionAckJobs()
-          .asyncListen((_) => _runSessionAckJob()));
+          .asyncDropListen((_) => _runSessionAckJob()));
     }
 
     jobSubscribers
@@ -214,24 +216,20 @@ class _MessageProcessRunner {
         // runFloodJob when socket connected.
         blaze.connectedStateStream
             .where((state) => state == ConnectedState.connected),
-        database.mixinDatabase
-            .tableUpdates(
+        database.mixinDatabase.tableUpdates(
           TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
         )
-            .map((event) {
-          // TODO remove this log after flood job is working well.
-          i('flood message table updated.');
-          return event;
-        })
-      ]).asyncListen((_) async {
+      ]).asyncDropListen((_) async {
         try {
           await _runProcessFloodJob();
         } catch (error, stacktrace) {
           e('runProcessFloodJob error: $error, stacktrace: $stacktrace');
         }
       }))
-      ..add(database.jobDao.watchHasAckJobs().asyncListen((_) => _runAckJob()))
-      ..add(database.jobDao.watchHasSendingJobs().asyncListen((_) async {
+      ..add(database.jobDao
+          .watchHasAckJobs()
+          .asyncDropListen((_) => _runAckJob()))
+      ..add(database.jobDao.watchHasSendingJobs().asyncDropListen((_) async {
         while (true) {
           final jobs = await database.jobDao.sendingJobs().get();
           if (jobs.isEmpty) break;
@@ -257,15 +255,15 @@ class _MessageProcessRunner {
       }))
       ..add(database.jobDao
           .watchHasUpdateAssetJobs()
-          .asyncListen((_) => _runUpdateAssetJob()))
+          .asyncDropListen((_) => _runUpdateAssetJob()))
       ..add(database.jobDao
           .watchHasUpdateStickerJobs()
-          .asyncListen((_) => _runUpdateStickerJob()))
+          .asyncDropListen((_) => _runUpdateStickerJob()))
       ..add(database.mixinDatabase
           .tableUpdates(
-            TableUpdateQuery.onTable(database.mixinDatabase.expiredMessages),
-          )
-          .asyncListen((event) => _scheduleExpiredJob()));
+        TableUpdateQuery.onTable(database.mixinDatabase.expiredMessages),
+      )
+          .asyncDropListen((event) => _scheduleExpiredJob()));
   }
 
   void _sendEventToMainIsolate(WorkerIsolateEventType event,
@@ -316,13 +314,15 @@ class _MessageProcessRunner {
   }
 
   Future<void> _runProcessFloodJob() async {
+    var first = true;
     while (true) {
       final floodMessages =
           await database.floodMessageDao.findFloodMessage().get();
       if (floodMessages.isEmpty) {
-        i('_runProcessFloodJob: no flood message');
+        i('_runProcessFloodJob: no flood message: $first');
         return;
       }
+      first = false;
       final stopwatch = Stopwatch()..start();
       for (final message in floodMessages) {
         await _decryptMessage.process(message);
@@ -374,25 +374,25 @@ class _MessageProcessRunner {
   }
 
   Future<void> _runUpdateStickerJob() async {
-    final jobs = await database.jobDao.updateStickerJobs().get();
-    if (jobs.isEmpty) return;
+    while (true) {
+      final jobs = await database.jobDao.updateStickerJobs().get();
+      if (jobs.isEmpty) return;
 
-    await Future.wait(jobs.map((db.Job job) async {
-      try {
-        final stickerId = job.blazeMessage;
-        if (stickerId == null) {
-        } else {
-          final sticker =
-              (await client.accountApi.getStickerById(stickerId)).data;
-          await database.stickerDao.insert(sticker.asStickersCompanion);
+      await Future.wait(jobs.map((db.Job job) async {
+        try {
+          final stickerId = job.blazeMessage;
+          if (stickerId == null) {
+          } else {
+            final sticker =
+                (await client.accountApi.getStickerById(stickerId)).data;
+            await database.stickerDao.insert(sticker.asStickersCompanion);
+          }
+          await database.jobDao.deleteJobById(job.jobId);
+        } catch (e, s) {
+          w('Update sticker job error: $e, stack: $s');
         }
-        await database.jobDao.deleteJobById(job.jobId);
-      } catch (e, s) {
-        w('Update sticker job error: $e, stack: $s');
-      }
-    }));
-
-    await _runUpdateStickerJob();
+      }));
+    }
   }
 
   Future<void> _runSendJob(List<db.Job> jobs) async {
@@ -422,10 +422,14 @@ class _MessageProcessRunner {
         final list = await database.transcriptMessageDao
             .transcriptMessageByTranscriptId(messageId)
             .get();
-        final json = list
-            .map((e) => e.toJson(serializer: const UtcValueSerializer())
-              ..remove('media_status'))
-            .toList();
+        final json = list.map((e) {
+          final map = e.toJson(serializer: const UtcValueSerializer());
+          map['media_duration'] =
+              int.tryParse(map['media_duration'] as String? ?? '');
+          map.remove('media_status');
+
+          return map;
+        }).toList();
         message = message.copyWith(content: jsonEncode(json));
       }
 
@@ -444,7 +448,20 @@ class _MessageProcessRunner {
         e('Conversation not found');
         return;
       }
-      await _sender.checkConversationExists(conversation);
+
+      try {
+        await _sender.checkConversationExists(conversation);
+      } on MixinApiError catch (apiError) {
+        e('Send message error: ${apiError.message} $apiError');
+        final error = apiError.error;
+        // Maybe get a badData response when create conversation with
+        // an invalid user(for example: network user).
+        if (error is MixinError && error.code == badData) {
+          await database.jobDao.deleteJobById(job.jobId);
+          return;
+        }
+        rethrow;
+      }
 
       if (message.category.isPlain ||
           message.category == MessageCategory.appCard ||
@@ -699,39 +716,38 @@ class _MessageProcessRunner {
   }
 
   Future<void> _runSessionAckJob() async {
-    final jobs = await database.jobDao.sessionAckJobs().get();
-    if (jobs.isEmpty) return;
+    while (true) {
+      final jobs = await database.jobDao.sessionAckJobs().get();
+      if (jobs.isEmpty) return;
 
-    final conversationId =
-        await database.participantDao.findJoinedConversationId(userId);
-    if (conversationId == null) {
-      return;
-    }
-    final ack = jobs.map(
-      (e) {
-        final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
-        return BlazeAckMessage.fromJson(map);
-      },
-    ).toList();
-    final jobIds = jobs.map((e) => e.jobId).toList();
-    final plainText = PlainJsonMessage(
-        kAcknowledgeMessageReceipts, null, null, null, null, ack);
-    final encode = base64Encode(utf8.encode(jsonEncode(plainText)));
-    // TODO check if safety to use a primary session.
-    // final primarySessionId = AccountKeyValue.instance.primarySessionId;
-    final bm = createParamBlazeMessage(createPlainJsonParam(
-        conversationId, userId, encode,
-        sessionId: primarySessionId));
-    try {
-      final result = await _sender.deliver(bm);
-      if (result.success || result.errorCode == badData) {
-        await database.jobDao.deleteJobs(jobIds);
+      final conversationId =
+          await database.participantDao.findJoinedConversationId(userId);
+      if (conversationId == null) return;
+
+      final ack = jobs.map(
+        (e) {
+          final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
+          return BlazeAckMessage.fromJson(map);
+        },
+      ).toList();
+      final jobIds = jobs.map((e) => e.jobId).toList();
+      final plainText = PlainJsonMessage(
+          kAcknowledgeMessageReceipts, null, null, null, null, ack);
+      final encode = base64Encode(utf8.encode(jsonEncode(plainText)));
+      // TODO check if safety to use a primary session.
+      // final primarySessionId = AccountKeyValue.instance.primarySessionId;
+      final bm = createParamBlazeMessage(createPlainJsonParam(
+          conversationId, userId, encode,
+          sessionId: primarySessionId));
+      try {
+        final result = await _sender.deliver(bm);
+        if (result.success || result.errorCode == badData) {
+          await database.jobDao.deleteJobs(jobIds);
+        }
+      } catch (e, s) {
+        w('Send session ack error: $e, stack: $s');
       }
-    } catch (e, s) {
-      w('Send session ack error: $e, stack: $s');
     }
-
-    await _runSessionAckJob();
   }
 
   void onEvent(MainIsolateEvent event) {

@@ -313,7 +313,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       );
 
   Future<void> updateMediaStatus(String messageId, MediaStatus status) async {
-    if (await hasMediaStatus(messageId, status)) return;
+    if (!await hasMediaStatus(messageId, status, true)) return;
 
     final result = await db.transaction<List>(() => Future.wait([
           (db.update(db.messages)
@@ -328,58 +328,36 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     }
   }
 
-  Future<bool?> messageHasMediaStatus(String messageId, MediaStatus mediaStatus,
+  Future<bool> messageHasMediaStatus(String messageId, MediaStatus mediaStatus,
       [bool not = false]) async {
-    final mediaStatusColumn = db.messages.mediaStatus;
-    final _mediaStatus = await (selectOnly(db.messages)
-          ..addColumns([mediaStatusColumn])
-          ..where(db.messages.messageId.equals(messageId))
-          ..limit(1))
-        .map((row) =>
-            mediaStatusColumn.converter.mapToDart(row.read(mediaStatusColumn)))
-        .getSingleOrNull();
-    if (_mediaStatus == null) return null;
-    if (not) {
-      return _mediaStatus != mediaStatus;
-    }
-    return _mediaStatus == mediaStatus;
+    final equalsId = db.messages.messageId.equals(messageId);
+    final equalsStatus = db.messages.mediaStatus.equalsValue(mediaStatus);
+    final predicate =
+        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
+    return db.hasData(db.messages, [], predicate);
   }
 
-  Future<bool?> transcriptMessageHasMediaStatus(
+  Future<bool> transcriptMessageHasMediaStatus(
       String messageId, MediaStatus mediaStatus,
       [bool not = false]) async {
-    final mediaStatusColumn = db.transcriptMessages.mediaStatus;
-    final _mediaStatus = await (selectOnly(db.transcriptMessages)
-          ..addColumns([mediaStatusColumn])
-          ..where(db.transcriptMessages.messageId.equals(messageId))
-          ..limit(1))
-        .map((row) =>
-            mediaStatusColumn.converter.mapToDart(row.read(mediaStatusColumn)))
-        .getSingleOrNull();
-    if (_mediaStatus == null) return null;
-    if (not) {
-      return _mediaStatus != mediaStatus;
-    }
-    return _mediaStatus == mediaStatus;
+    final equalsId = db.transcriptMessages.messageId.equals(messageId);
+    final equalsStatus =
+        db.transcriptMessages.mediaStatus.equalsValue(mediaStatus);
+    final predicate =
+        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
+    return db.hasData(db.transcriptMessages, [], predicate);
   }
 
   Future<bool> hasMediaStatus(String messageId, MediaStatus mediaStatus,
       [bool not = false]) async {
-    final messageHasData =
-        await messageHasMediaStatus(messageId, mediaStatus, not);
-    final transcriptMessageHasData =
-        await transcriptMessageHasMediaStatus(messageId, mediaStatus, not);
-    if (messageHasData != null && transcriptMessageHasData != null) {
-      return messageHasData && transcriptMessageHasData;
-    }
-    return (messageHasData ?? false) || (transcriptMessageHasData ?? false);
+    final result = await Future.wait([
+      messageHasMediaStatus(messageId, mediaStatus, not),
+      transcriptMessageHasMediaStatus(messageId, mediaStatus, not)
+    ]);
+    return result.any((element) => element);
   }
 
-  Future<void> syncMessageMedia(String messageId, [bool force = false]) async {
-    if (!force && !await hasMediaStatus(messageId, MediaStatus.done)) {
-      return;
-    }
-
+  Future<void> syncMessageMedia(String messageId) async {
     var content = db.messages.content;
     var mediaUrl = db.messages.mediaUrl;
     var mediaSize = db.messages.mediaSize;
@@ -387,7 +365,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     var result = await (db.selectOnly(db.messages)
           ..addColumns([content, mediaUrl, mediaSize, mediaStatus])
-          ..where(db.messages.messageId.equals(messageId))
+          ..where(db.messages.messageId.equals(messageId) &
+              db.messages.mediaStatus.equalsValue(MediaStatus.done))
           ..limit(1))
         .getSingleOrNull();
     if (result == null) {
@@ -398,7 +377,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
       result = await (db.selectOnly(db.transcriptMessages)
             ..addColumns([content, mediaUrl, mediaSize, mediaStatus])
-            ..where(db.transcriptMessages.messageId.equals(messageId))
+            ..where(db.transcriptMessages.messageId.equals(messageId) &
+                db.transcriptMessages.mediaStatus.equalsValue(MediaStatus.done))
             ..limit(1))
           .getSingleOrNull();
     }

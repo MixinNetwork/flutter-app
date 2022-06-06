@@ -5,6 +5,8 @@ extension ProviderExtension on BuildContext {
 
   MultiAuthState get multiAuthState => multiAuthCubit.state;
 
+  SettingCubit get settingCubit => read<SettingCubit>();
+
   AccountServer get accountServer => read<AccountServer>();
 
   AudioMessagePlayService get audioMessageService =>

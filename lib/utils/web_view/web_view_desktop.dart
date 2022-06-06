@@ -6,7 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
-import '../../bloc/setting_cubit.dart';
 import '../../constants/brightness_theme_data.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
@@ -43,7 +42,7 @@ class DesktopMixinWebView extends MixinWebView {
   ) async {
     assert(MultiAuthCubit.currentAccount != null);
 
-    final mode = context.read<SettingCubit>().brightness ??
+    final mode = context.settingCubit.brightness ??
         MediaQuery.platformBrightnessOf(context);
     final info = await getPackageInfo();
     debugPrint(
@@ -76,7 +75,7 @@ class DesktopMixinWebView extends MixinWebView {
     App? app,
     AppCardData? appCardData,
   }) async {
-    final brightness = context.read<SettingCubit>().brightness;
+    final brightness = context.settingCubit.brightness;
     final packageInfo = await getPackageInfo();
     final webView = await WebviewWindow.create(
       configuration: CreateConfiguration(

@@ -15,6 +15,7 @@ import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/vo/pin_message_minimal.dart';
+import '../bloc/setting_cubit.dart';
 import '../constants/constants.dart';
 import '../crypto/privacy_key_value.dart';
 import '../crypto/signal/signal_database.dart';
@@ -50,7 +51,7 @@ import 'show_pin_message_key_value.dart';
 String? lastInitErrorMessage;
 
 class AccountServer {
-  AccountServer(this.multiAuthCubit);
+  AccountServer(this.multiAuthCubit, this.settingCubit);
 
   static String? sid;
 
@@ -58,6 +59,7 @@ class AccountServer {
       client.dio.options.headers['Accept-Language'] = language;
 
   final MultiAuthCubit multiAuthCubit;
+  final SettingCubit settingCubit;
   Timer? checkSignalKeyTimer;
 
   Future<void> initServer(
@@ -270,11 +272,11 @@ class AccountServer {
   ) async {
     bool needDownload(String category) {
       if (category.isImage) {
-        return multiAuthCubit.state.currentPhotoAutoDownload;
+        return settingCubit.state.photoAutoDownload;
       } else if (category.isVideo) {
-        return multiAuthCubit.state.currentVideoAutoDownload;
+        return settingCubit.state.videoAutoDownload;
       } else if (category.isData) {
-        return multiAuthCubit.state.currentFileAutoDownload;
+        return settingCubit.state.fileAutoDownload;
       }
       return true;
     }
@@ -284,17 +286,23 @@ class AccountServer {
       await attachmentUtil.cancelProgressAttachmentJob(request.messageId);
     } else if (request is AttachmentDownloadRequest) {
       d('request download: ${request.message.messageId} ${request.message.category}');
+      final messageId = request.message.messageId;
       if (needDownload(request.message.category)) {
         await attachmentUtil.downloadAttachment(
-          messageId: request.message.messageId,
+          messageId: messageId,
         );
+      } else {
+        await attachmentUtil.checkSyncMessageMedia(messageId);
       }
     } else if (request is TranscriptAttachmentDownloadRequest) {
       d('request download transcript: ${request.message.messageId} ${request.message.category}');
+      final messageId = request.message.messageId;
       if (needDownload(request.message.category)) {
         await attachmentUtil.downloadAttachment(
           messageId: request.message.messageId,
         );
+      } else {
+        await attachmentUtil.checkSyncMessageMedia(messageId);
       }
     } else if (request is AttachmentDeleteRequest) {
       await attachmentUtil.removeAttachmentJob(request.message.messageId);

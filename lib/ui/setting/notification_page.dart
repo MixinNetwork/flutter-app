@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../bloc/setting_cubit.dart';
 import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -12,7 +13,6 @@ import '../../utils/uri_utils.dart';
 import '../../widgets/animated_visibility.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
-import '../home/bloc/multi_auth_cubit.dart';
 
 class NotificationPage extends HookWidget {
   const NotificationPage({Key? key}) : super(key: key);
@@ -20,8 +20,8 @@ class NotificationPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final currentMessagePreview =
-        useBlocStateConverter<MultiAuthCubit, MultiAuthState, bool>(
-      converter: (state) => state.currentMessagePreview,
+        useBlocStateConverter<SettingCubit, SettingState, bool>(
+      converter: (style) => style.messagePreview,
     );
 
     final appActive = useValueListenable(appActiveListener);
@@ -53,8 +53,8 @@ class NotificationPage extends HookWidget {
                   child: CupertinoSwitch(
                     activeColor: context.theme.accent,
                     value: currentMessagePreview,
-                    onChanged: (bool value) => context.multiAuthCubit
-                        .setCurrentSetting(messagePreview: value),
+                    onChanged: (bool value) =>
+                        context.settingCubit.messagePreview = value,
                   ),
                 ),
               ),

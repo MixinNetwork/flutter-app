@@ -84,25 +84,27 @@ class AttachmentUtil extends ChangeNotifier {
 
   final _attachmentJob = <String, _AttachmentJobBase>{};
 
+  /// check if the attachment is downloaded, if not, return false, otherwise sync it and  return true
+  Future<bool> checkSyncMessageMedia(String messageId) async {
+    Future<bool> checkDownloaded() async =>
+        await _messageDao.messageHasMediaStatus(messageId, MediaStatus.done) ||
+        await _messageDao.transcriptMessageHasMediaStatus(
+            messageId, MediaStatus.done);
+
+    if (!_hasAttachmentJob(messageId) && await checkDownloaded()) {
+      await syncMessageMedia(messageId);
+      await _updateTranscriptMessageStatus(messageId);
+      return true;
+    }
+    return false;
+  }
+
   Future<void> downloadAttachment({
     required String messageId,
   }) async {
-    if (_hasAttachmentJob(messageId)) {
-      return _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
-    } else {
-      if (await _messageDao.messageHasMediaStatus(
-                  messageId, MediaStatus.done) ==
-              true &&
-          await _messageDao.transcriptMessageHasMediaStatus(
-                  messageId, MediaStatus.done, true) ==
-              true) {
-        await syncMessageMedia(messageId);
-        await _updateTranscriptMessageStatus(messageId);
-        return;
-      }
+    if (await checkSyncMessageMedia(messageId)) return;
 
-      await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
-    }
+    await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
 
     AttachmentMessage? attachmentMessage;
 
@@ -451,8 +453,7 @@ class AttachmentUtil extends ChangeNotifier {
   Future<bool> syncMessageMedia(String messageId) async {
     Future<bool> fromMessage() async {
       if (await _messageDao.messageHasMediaStatus(
-              messageId, MediaStatus.done) ==
-          true) {
+          messageId, MediaStatus.done)) {
         final message = await _messageDao.findMessageByMessageId(messageId);
         final path = convertAbsolutePath(
           category: message!.category,
@@ -469,7 +470,7 @@ class AttachmentUtil extends ChangeNotifier {
 
         await File(path).copy(transcriptPath);
 
-        await _messageDao.syncMessageMedia(messageId, true);
+        await _messageDao.syncMessageMedia(messageId);
         return true;
       }
 
@@ -487,7 +488,7 @@ class AttachmentUtil extends ChangeNotifier {
         true,
       );
       if (await done == true && await notDone == true) {
-        await _messageDao.syncMessageMedia(messageId, true);
+        await _messageDao.syncMessageMedia(messageId);
         return true;
       }
 
