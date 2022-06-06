@@ -67,11 +67,7 @@ dependencies:
   map: ^1.0.0
   markdown: ^5.0.0
   mime: ^1.0.0
-  mixin_bot_sdk_dart:
-#    path: ../mixin_bot_sdk_dart
-    git:
-      url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
-      ref: affda4b278b978efe4bcbce40c2276cc1496e5fb
+  mixin_bot_sdk_dart: ^0.2.15
   octo_image: ^1.0.0+1
   ogg_opus_player: ^0.3.1
   open_file: ^3.2.1

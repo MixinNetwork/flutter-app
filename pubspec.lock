@@ -56,7 +56,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.9.0"
+    version: "2.8.2"
   bitsdojo_window:
     dependency: "direct main"
     description:
@@ -882,11 +882,9 @@ packages:
   mixin_bot_sdk_dart:
     dependency: "direct main"
     description:
-      path: "."
-      ref: affda4b278b978efe4bcbce40c2276cc1496e5fb
-      resolved-ref: affda4b278b978efe4bcbce40c2276cc1496e5fb
-      url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
-    source: git
+      name: mixin_bot_sdk_dart
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.2.15"
   msix:
     dependency: "direct dev"
