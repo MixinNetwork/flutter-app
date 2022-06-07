@@ -37,6 +37,7 @@ import '../bloc/pending_jump_message_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import '../chat_slide_page/chat_info_page.dart';
 import '../chat_slide_page/circle_manager_page.dart';
+import '../chat_slide_page/disappear_message_page.dart';
 import '../chat_slide_page/group_participants_page.dart';
 import '../chat_slide_page/groups_in_common_page.dart';
 import '../chat_slide_page/pin_messages_page.dart';
@@ -62,6 +63,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   static const pinMessages = 'pinMessages';
   static const sharedApps = 'sharedApps';
   static const groupsInCommon = 'groupsInCommon';
+  static const disappearMessages = 'disappearMessages';
 
   @override
   MaterialPage route(String name, Object? arguments) {
@@ -113,6 +115,12 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
           key: ValueKey(groupsInCommon),
           name: groupsInCommon,
           child: GroupsInCommonPage(),
+        );
+      case disappearMessages:
+        return const MaterialPage(
+          key: ValueKey(disappearMessages),
+          name: disappearMessages,
+          child: DisappearMessagePage(),
         );
       default:
         throw ArgumentError('Invalid route');

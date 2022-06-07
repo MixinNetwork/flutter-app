@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../constants/constants.dart';
+import '../../utils/logger.dart';
 import '../mixin_database.dart';
 
 part 'job_dao.g.dart';
@@ -15,6 +16,7 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   static const messageIdKey = 'message_id';
   static const recipientIdKey = 'recipient_id';
   static const silentKey = 'silent';
+  static const expireInKey = 'expireIn';
 
   Future<int> insert(Job job) => into(db.jobs).insertOnConflictUpdate(job);
 
@@ -23,22 +25,34 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
     String conversationId, {
     String? recipientId,
     bool silent = false,
-  }) =>
-      insert(
-        Job(
-          jobId: const Uuid().v4(),
-          action: kSendingMessage,
-          priority: 5,
-          blazeMessage: jsonEncode({
-            messageIdKey: messageId,
-            recipientIdKey: recipientId,
-            silentKey: silent,
-          }),
-          conversationId: conversationId,
-          createdAt: DateTime.now(),
-          runCount: 0,
-        ),
-      );
+    int? expireIn,
+  }) async {
+    Future<int> getConversationExpireIn() async {
+      final conversation = await db.conversationDao
+          .conversationItem(conversationId)
+          .getSingleOrNull();
+      return conversation?.expireIn ?? 0;
+    }
+
+    d('insertSendingJob: ${expireIn ?? (await getConversationExpireIn())}');
+
+    return insert(
+      Job(
+        jobId: const Uuid().v4(),
+        action: kSendingMessage,
+        priority: 5,
+        blazeMessage: jsonEncode({
+          messageIdKey: messageId,
+          recipientIdKey: recipientId,
+          silentKey: silent,
+          expireInKey: expireIn ?? (await getConversationExpireIn()),
+        }),
+        conversationId: conversationId,
+        createdAt: DateTime.now(),
+        runCount: 0,
+      ),
+    );
+  }
 
   Future deleteJob(Job job) => delete(db.jobs).delete(job);
 

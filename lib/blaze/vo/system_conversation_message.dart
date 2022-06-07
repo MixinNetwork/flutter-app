@@ -11,6 +11,7 @@ class SystemConversationMessage {
     this.participantId,
     this.userId,
     this.role,
+    this.expireIn,
   );
 
   factory SystemConversationMessage.fromJson(Map<String, dynamic> json) =>
@@ -24,6 +25,8 @@ class SystemConversationMessage {
   String? userId;
   @JsonKey(name: 'role')
   ParticipantRole? role;
+  @JsonKey(name: 'expire_in', defaultValue: 0)
+  int expireIn;
 
   Map<String, dynamic> toJson() => _$SystemConversationMessageToJson(this);
 }

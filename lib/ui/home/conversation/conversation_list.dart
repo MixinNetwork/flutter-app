@@ -329,6 +329,7 @@ class _MessageContent extends HookWidget {
             participantFullName: conversation.participantFullName,
             senderFullName: conversation.senderFullName,
             groupName: conversation.groupName,
+            expireIn: int.tryParse(conversation.content ?? '0'),
           );
         } else if (conversation.contentType.isPin) {
           final pinMessageMinimal =

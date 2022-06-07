@@ -1,12 +1,15 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../constants/resources.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../action_button.dart';
+import '../toast.dart';
 import 'item/quote_message.dart';
 import 'message.dart';
 
@@ -47,6 +50,9 @@ class MessageBubble extends HookWidget {
     final showNip = useShowNip();
     final isCurrentUser = useIsCurrentUser();
     final isPinnedPage = useIsPinnedPage();
+    final isDisappearingMessage = useMessageConverter<bool>(
+      converter: (message) => message.expireIn != null && message.expireIn! > 0,
+    );
 
     final quoteMessageId =
         useMessageConverter(converter: (state) => state.quoteId);
@@ -146,6 +152,49 @@ class MessageBubble extends HookWidget {
           if (isCurrentUser) pinArrow,
           Flexible(child: _child),
           if (!isCurrentUser) pinArrow,
+        ],
+      );
+    }
+
+    if (isDisappearingMessage) {
+      Widget icon = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: SvgPicture.asset(
+          context.brightness == Brightness.dark
+              ? Resources.assetsImagesExpiringDarkSvg
+              : Resources.assetsImagesExpiringSvg,
+          width: 16,
+          height: 16,
+        ),
+      );
+
+      if (!kReleaseMode) {
+        icon = GestureDetector(
+          child: icon,
+          onTap: () async {
+            final message = context.message;
+            final expireAt = await context
+                .accountServer.database.expiredMessageDao
+                .getMessageExpireAt([message.messageId]);
+            final time = (expireAt[message.messageId] ?? 0) -
+                DateTime.now().millisecondsSinceEpoch ~/ 1000;
+            await Toast.createView(
+              context: context,
+              child: ToastWidget(
+                  barrierColor: Colors.transparent,
+                  text: 'expire in: ${message.expireIn}. '
+                      'will delete after: ${time < 0 ? 0 : time} seconds'),
+            );
+          },
+        );
+      }
+
+      _child = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isCurrentUser) icon,
+          Flexible(child: _child),
+          if (!isCurrentUser) icon,
         ],
       );
     }

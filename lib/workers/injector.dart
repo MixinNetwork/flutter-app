@@ -58,6 +58,7 @@ class Injector {
           status: ConversationStatus.success,
           muteUntil: DateTime.parse(response.data.muteUntil),
           codeUrl: response.data.codeUrl,
+          expireIn: response.data.expireIn,
         ),
       );
 

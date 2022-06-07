@@ -41,6 +41,8 @@ class Resources {
 
   static const String assetsImagesChatSmallSvg = 'assets/images/chat_small.svg';
 
+  static const String assetsImagesCheckedSvg = 'assets/images/checked.svg';
+
   static const String assetsImagesCircleSvg = 'assets/images/circle.svg';
 
   static const String assetsImagesCircleAddSvg = 'assets/images/circle_add.svg';
@@ -59,6 +61,9 @@ class Resources {
   static const String assetsImagesDeleteSvg = 'assets/images/delete.svg';
 
   static const String assetsImagesDeliveredSvg = 'assets/images/delivered.svg';
+
+  static const String assetsImagesDisappearingMessageSvg =
+      'assets/images/disappearing_message.svg';
 
   static const String assetsImagesDownloadSvg = 'assets/images/download.svg';
 
@@ -94,6 +99,11 @@ class Resources {
       'assets/images/exclamation_mark.svg';
 
   static const String assetsImagesExpandedSvg = 'assets/images/expanded.svg';
+
+  static const String assetsImagesExpiringSvg = 'assets/images/expiring.svg';
+
+  static const String assetsImagesExpiringDarkSvg =
+      'assets/images/expiring_dark.svg';
 
   static const String assetsImagesFailedSvg = 'assets/images/failed.svg';
 

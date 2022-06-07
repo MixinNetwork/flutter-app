@@ -26,6 +26,7 @@ import 'dao/asset_dao.dart';
 import 'dao/circle_conversation_dao.dart';
 import 'dao/circle_dao.dart';
 import 'dao/conversation_dao.dart';
+import 'dao/expired_message_dao.dart';
 import 'dao/favorite_app_dao.dart';
 import 'dao/fiat_dao.dart';
 import 'dao/flood_message_dao.dart';
@@ -64,6 +65,7 @@ part 'mixin_database.g.dart';
     'moor/dao/pin_message.drift',
     'moor/dao/sticker_relationship.drift',
     'moor/dao/favorite_app.drift',
+    'moor/dao/expired_message.drift',
   },
   daos: [
     AddressDao,
@@ -91,6 +93,7 @@ part 'mixin_database.g.dart';
     PinMessageDao,
     FiatDao,
     FavoriteAppDao,
+    ExpiredMessageDao,
   ],
   queries: {},
 )
@@ -98,7 +101,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   final eventBus = DataBaseEventBus();
 
@@ -203,6 +206,13 @@ class MixinDatabase extends _$MixinDatabase {
                 stickerAlbums.actualTableName, stickerAlbums.isVerified.name)) {
               await m.addColumn(stickerAlbums, stickerAlbums.isVerified);
             }
+          }
+          if (from <= 13) {
+            if (!await _checkColumnExists(
+                conversations.actualTableName, conversations.expireIn.name)) {
+              await m.addColumn(conversations, conversations.expireIn);
+            }
+            await m.createTable(expiredMessages);
           }
         },
       );

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart'
     hide generateIdentityKeyPair;
+
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
 import 'package:uuid/uuid.dart';
@@ -191,6 +192,7 @@ class SignalProtocol {
     String? sessionId,
     List<String>? mentionData,
     bool silent = false,
+    int expireIn = 0,
   }) async {
     final cipher = await encryptSession(
         Uint8List.fromList(utf8.encode(message.content!)),
@@ -209,6 +211,7 @@ class SignalProtocol {
       sessionId: sessionId,
       mentions: mentionData,
       silent: silent,
+      expireIn: expireIn,
     );
     return createParamBlazeMessage(blazeParam);
   }
@@ -217,6 +220,7 @@ class SignalProtocol {
     SendingMessage message,
     List<String>? mentionData, {
     bool silent = false,
+    int expireIn = 0,
   }) async {
     final address = SignalProtocolAddress(message.userId, defaultDeviceId);
     final senderKeyName = SenderKeyName(message.conversationId, address);
@@ -239,6 +243,7 @@ class SignalProtocol {
       quoteMessageId: message.quoteMessageId,
       mentions: mentionData,
       silent: silent,
+      expireIn: expireIn,
     );
     return createParamBlazeMessage(blazeParam);
   }

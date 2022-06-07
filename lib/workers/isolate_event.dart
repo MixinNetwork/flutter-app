@@ -67,3 +67,9 @@ class AttachmentCancelRequest extends AttachmentRequest {
 
   final String messageId;
 }
+
+class AttachmentDeleteRequest extends AttachmentRequest {
+  AttachmentDeleteRequest({required this.message});
+
+  final Message message;
+}

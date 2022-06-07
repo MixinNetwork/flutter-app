@@ -43,11 +43,7 @@ class ChatInfoPage extends HookWidget {
     final userParticipant = conversation.participant;
 
     useEffect(() {
-      if (conversation.isGroup == true) {
-        accountServer.refreshGroup(conversationId);
-      } else if (conversation.userId != null) {
-        accountServer.refreshUsers([conversation.userId!], force: true);
-      }
+      accountServer.refreshConversation(conversationId);
     }, [conversationId]);
 
     final announcement = useStream<String?>(
@@ -61,6 +57,11 @@ class ChatInfoPage extends HookWidget {
     final muting = conversation.conversation?.isMute == true;
     final isOwnerOrAdmin = userParticipant?.role == ParticipantRole.owner ||
         userParticipant?.role == ParticipantRole.admin;
+
+    final expireIn = conversation.conversation?.expireDuration ?? Duration.zero;
+
+    final canModifyExpireIn =
+        !isGroupConversation || (isGroupConversation && isOwnerOrAdmin);
 
     return Scaffold(
       appBar: MixinAppBar(
@@ -165,6 +166,26 @@ class ChatInfoPage extends HookWidget {
                         .pushPage(ChatSideCubit.searchMessageHistory),
                   ),
                 ],
+              ),
+            ),
+            CellGroup(
+              child: CellItem(
+                title: Text(context.l10n.disappearingMessages),
+                description: Text(
+                  expireIn.formatAsConversationExpireIn(
+                    localization: context.l10n,
+                  ),
+                  style: TextStyle(
+                    color: context.theme.secondaryText,
+                    fontSize: 14,
+                  ),
+                ),
+                trailing: canModifyExpireIn ? const Arrow() : null,
+                onTap: !canModifyExpireIn
+                    ? null
+                    : () => context
+                        .read<ChatSideCubit>()
+                        .pushPage(ChatSideCubit.disappearMessages),
               ),
             ),
             if (isGroupConversation && isOwnerOrAdmin)

@@ -54,6 +54,16 @@ class SendMessageHelper {
       _database.transcriptMessageDao;
   final AttachmentUtil _attachmentUtil;
 
+  Future<void> _insertSendMessageToDb(Message message) async {
+    final conversationId = message.conversationId;
+    final conversation = await _database.conversationDao
+        .conversationItem(conversationId)
+        .getSingleOrNull();
+    assert(conversation != null, 'no conversation');
+    final expireIn = conversation?.expireIn ?? 0;
+    await _messageDao.insert(message, message.userId, expireIn: expireIn);
+  }
+
   Future<void> sendTextMessage(
     String conversationId,
     String senderId,
@@ -91,7 +101,7 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
     );
 
-    await _messageDao.insert(message, senderId);
+    await _insertSendMessageToDb(message);
     await _jobDao.insertSendingJob(
       message.messageId,
       conversationId,
@@ -156,7 +166,7 @@ class SendMessageHelper {
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
     );
-    await _messageDao.insert(message, senderId);
+    await _insertSendMessageToDb(message);
 
     String? thumbImage;
     final stopwatch = Stopwatch()..start();
@@ -248,7 +258,7 @@ class SendMessageHelper {
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
     );
-    await _messageDao.insert(message, senderId);
+    await _insertSendMessageToDb(message);
     // ignore: parameter_assignments
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
@@ -292,7 +302,7 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
     );
 
-    await _messageDao.insert(message, senderId);
+    await _insertSendMessageToDb(message);
     await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
@@ -338,7 +348,7 @@ class SendMessageHelper {
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
     );
-    await _messageDao.insert(message, senderId);
+    await _insertSendMessageToDb(message);
     // ignore: parameter_assignments
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
@@ -392,7 +402,7 @@ class SendMessageHelper {
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
     );
-    await _messageDao.insert(message, senderId);
+    await _insertSendMessageToDb(message);
     await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
@@ -439,7 +449,7 @@ class SendMessageHelper {
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
     );
-    await _messageDao.insert(message, senderId);
+    await _insertSendMessageToDb(message);
     // ignore: parameter_assignments
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
@@ -491,7 +501,7 @@ class SendMessageHelper {
       mediaHeight: mediaHeight,
     );
 
-    await _messageDao.insert(message, senderId);
+    await _insertSendMessageToDb(message);
     await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
@@ -509,7 +519,7 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
     );
 
-    await _messageDao.insert(message, senderId);
+    await _insertSendMessageToDb(message);
     await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
@@ -527,7 +537,7 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
     );
 
-    await _messageDao.insert(message, senderId);
+    await _insertSendMessageToDb(message);
     await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
@@ -545,7 +555,7 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
     );
 
-    await _messageDao.insert(message, senderId);
+    await _insertSendMessageToDb(message);
     await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
@@ -833,7 +843,7 @@ class SendMessageHelper {
     await Future.wait([
       _transcriptMessageDao.insertAll(transcriptMessages),
       insertFts(),
-      _messageDao.insert(message, senderId),
+      _insertSendMessageToDb(message),
     ]);
 
     if (hasAttachments) {

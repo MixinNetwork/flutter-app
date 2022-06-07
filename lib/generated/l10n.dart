@@ -3511,6 +3511,206 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Disappearing messages`
+  String get disappearingMessages {
+    return Intl.message(
+      'Disappearing messages',
+      name: 'disappearingMessages',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to learn more.`
+  String get disappearingMessagesDescription {
+    return Intl.message(
+      'When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to learn more.',
+      name: 'disappearingMessagesDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Learn more`
+  String get learnMore {
+    return Intl.message(
+      'Learn more',
+      name: 'learnMore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Off`
+  String get off {
+    return Intl.message(
+      'Off',
+      name: 'off',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom time`
+  String get disappearingCustomTime {
+    return Intl.message(
+      'Custom time',
+      name: 'disappearingCustomTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `seconds`
+  String get seconds {
+    return Intl.message(
+      'seconds',
+      name: 'seconds',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `minutes`
+  String get minutes {
+    return Intl.message(
+      'minutes',
+      name: 'minutes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `hours`
+  String get hours {
+    return Intl.message(
+      'hours',
+      name: 'hours',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `days`
+  String get days {
+    return Intl.message(
+      'days',
+      name: 'days',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `weeks`
+  String get weeks {
+    return Intl.message(
+      'weeks',
+      name: 'weeks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `second`
+  String get second {
+    return Intl.message(
+      'second',
+      name: 'second',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `minute`
+  String get minute {
+    return Intl.message(
+      'minute',
+      name: 'minute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `hour`
+  String get hour {
+    return Intl.message(
+      'hour',
+      name: 'hour',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `day`
+  String get day {
+    return Intl.message(
+      'day',
+      name: 'day',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `week`
+  String get week {
+    return Intl.message(
+      'week',
+      name: 'week',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set`
+  String get set {
+    return Intl.message(
+      'Set',
+      name: 'set',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{name} set disappearing message time to {duration}.`
+  String chatExpiredSet(Object name, Object duration) {
+    return Intl.message(
+      '$name set disappearing message time to $duration.',
+      name: 'chatExpiredSet',
+      desc: '',
+      args: [name, duration],
+    );
+  }
+
+  /// `{name} changed disappearing message settings.`
+  String chatExpiredSetWithoutDuration(Object name) {
+    return Intl.message(
+      '$name changed disappearing message settings.',
+      name: 'chatExpiredSetWithoutDuration',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `{name} disabled disappearing message.`
+  String chatExpiredDisabled(Object name) {
+    return Intl.message(
+      '$name disabled disappearing message.',
+      name: 'chatExpiredDisabled',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `The maximum time is {max}.`
+  String disappearingCustomTimeMaxWarning(Object max) {
+    return Intl.message(
+      'The maximum time is $max.',
+      name: 'disappearingCustomTimeMaxWarning',
+      desc: '',
+      args: [max],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

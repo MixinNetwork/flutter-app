@@ -125,6 +125,8 @@ class _MessageProcessRunner {
 
   final jobSubscribers = <StreamSubscription>[];
 
+  Timer? _nextExpiredMessageRunner;
+
   Future<void> init(IsolateInitParams initParams) async {
     database = Database(await connectToDatabase(identityNumber, readCount: 2));
     jobSubscribers.add(
@@ -256,12 +258,59 @@ class _MessageProcessRunner {
           .asyncDropListen((_) => _runUpdateAssetJob()))
       ..add(database.jobDao
           .watchHasUpdateStickerJobs()
-          .asyncDropListen((_) => _runUpdateStickerJob()));
+          .asyncDropListen((_) => _runUpdateStickerJob()))
+      ..add(database.mixinDatabase
+          .tableUpdates(
+            TableUpdateQuery.onTable(database.mixinDatabase.expiredMessages),
+          )
+          .asyncDropListen((event) => _scheduleExpiredJob()));
   }
 
   void _sendEventToMainIsolate(WorkerIsolateEventType event,
       [dynamic argument]) {
     eventSink.add(event.toEvent(argument));
+  }
+
+  Future<void> _scheduleExpiredJob() async {
+    d('_scheduleExpiredJob');
+    while (true) {
+      final messages =
+          await database.expiredMessageDao.getCurrentExpiredMessages();
+      if (messages.isEmpty) {
+        break;
+      }
+      for (final em in messages) {
+        // cancel attachment download.
+        final message =
+            await database.messageDao.findMessageByMessageId(em.messageId);
+        if (message == null) {
+          e('message is null, messageId: ${em.messageId} ${em.expireAt}');
+          continue;
+        }
+        await database.messageDao.deleteMessage(em.messageId);
+        if (message.category.isAttachment || message.category.isTranscript) {
+          _sendEventToMainIsolate(
+            WorkerIsolateEventType.requestDownloadAttachment,
+            AttachmentDeleteRequest(message: message),
+          );
+        }
+      }
+    }
+
+    final firstExpiredMessage =
+        await database.mixinDatabase.getFirstExpiredMessage().getSingleOrNull();
+    if (firstExpiredMessage == null) {
+      _nextExpiredMessageRunner?.cancel();
+      _nextExpiredMessageRunner = null;
+      return;
+    }
+    _nextExpiredMessageRunner?.cancel();
+    _nextExpiredMessageRunner = Timer(
+      Duration(
+          seconds: firstExpiredMessage.expireAt! -
+              DateTime.now().millisecondsSinceEpoch ~/ 1000),
+      _scheduleExpiredJob,
+    );
   }
 
   Future<void> _runProcessFloodJob() async {
@@ -291,10 +340,7 @@ class _MessageProcessRunner {
         jobs.map(
           (e) async {
             final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
-            return BlazeAckMessage(
-              messageId: map['message_id'] as String,
-              status: map['status'] as String,
-            );
+            return BlazeAckMessage.fromJson(map);
           },
         ),
       );
@@ -355,11 +401,13 @@ class _MessageProcessRunner {
       String messageId;
       String? recipientId;
       var silent = false;
+      int? expireIn;
       try {
         final json = jsonDecode(job.blazeMessage!) as Map<String, dynamic>;
         messageId = json[JobDao.messageIdKey] as String;
         recipientId = json[JobDao.recipientIdKey] as String?;
         silent = json[JobDao.silentKey] as bool;
+        expireIn = json[JobDao.expireInKey] as int?;
       } catch (_) {
         messageId = job.blazeMessage!;
       }
@@ -432,6 +480,7 @@ class _MessageProcessRunner {
           content!,
           recipientId: recipientId,
           silent: silent,
+          expireIn: expireIn ?? 0,
         );
         result = await _sender.deliver(blazeMessage);
       } else if (message.category.isEncrypted) {
@@ -469,10 +518,15 @@ class _MessageProcessRunner {
           message,
           base64Encode(content),
           silent: silent,
+          expireIn: expireIn ?? 0,
         );
         result = await _sender.deliver(blazeMessage);
       } else if (message.category.isSignal) {
-        result = await _sendSignalMessage(message, silent: silent);
+        result = await _sendSignalMessage(
+          message,
+          silent: silent,
+          expireIn: expireIn ?? 0,
+        );
       } else {}
 
       if (result?.success ?? false || result?.errorCode == badData) {
@@ -484,6 +538,15 @@ class _MessageProcessRunner {
           );
         }
         await database.jobDao.deleteJobById(job.jobId);
+
+        if (conversation.expireIn != null && conversation.expireIn! > 0) {
+          await database.expiredMessageDao.insert(
+            messageId: messageId,
+            expireIn: conversation.expireIn!,
+            expireAt: DateTime.now().millisecondsSinceEpoch ~/ 1000 +
+                conversation.expireIn!,
+          );
+        }
       }
     }
 
@@ -547,6 +610,7 @@ class _MessageProcessRunner {
   Future<MessageResult?> _sendSignalMessage(
     db.SendingMessage message, {
     bool silent = false,
+    required int expireIn,
   }) async {
     MessageResult? result;
     if (message.resendStatus != null) {
@@ -561,6 +625,7 @@ class _MessageProcessRunner {
             sessionId: message.resendSessionId,
             mentionData: await getMentionData(message.messageId),
             silent: silent,
+            expireIn: expireIn,
           );
           result = await _sender.deliver(encrypted);
           if (result.success || result.errorCode == badData) {
@@ -579,11 +644,13 @@ class _MessageProcessRunner {
     result = await _sender.deliver(await encryptNormalMessage(
       message,
       silent: silent,
+      expireIn: expireIn,
     ));
     if (result.success == false && result.retry == true) {
       return _sendSignalMessage(
         message,
         silent: silent,
+        expireIn: expireIn,
       );
     }
     return result;
@@ -592,11 +659,13 @@ class _MessageProcessRunner {
   Future<BlazeMessage> encryptNormalMessage(
     db.SendingMessage message, {
     bool silent = false,
+    int expireIn = 0,
   }) async =>
       signalProtocol.encryptGroupMessage(
         message,
         await getMentionData(message.messageId),
         silent: silent,
+        expireIn: expireIn,
       );
 
   BlazeMessage _createBlazeMessage(
@@ -604,6 +673,7 @@ class _MessageProcessRunner {
     String data, {
     String? recipientId,
     bool silent = false,
+    required int expireIn,
   }) {
     final blazeParam = BlazeMessageParam(
       conversationId: message.conversationId,
@@ -613,6 +683,7 @@ class _MessageProcessRunner {
       data: data,
       quoteMessageId: message.quoteMessageId,
       silent: silent,
+      expireIn: expireIn,
     );
 
     return BlazeMessage(
@@ -656,10 +727,7 @@ class _MessageProcessRunner {
       final ack = jobs.map(
         (e) {
           final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
-          return BlazeAckMessage(
-            messageId: map['message_id'] as String,
-            status: map['status'] as String,
-          );
+          return BlazeAckMessage.fromJson(map);
         },
       ).toList();
       final jobIds = jobs.map((e) => e.jobId).toList();
