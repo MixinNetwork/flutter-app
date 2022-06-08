@@ -103,4 +103,7 @@ ${needPrint ? 'details:\n${details.join('\n')}' : ''}
 
     return result;
   }
+
+  @override
+  SqlDialect get dialect => queryExecutor.dialect;
 }
