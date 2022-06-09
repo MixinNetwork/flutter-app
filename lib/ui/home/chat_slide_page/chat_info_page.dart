@@ -46,6 +46,15 @@ class ChatInfoPage extends HookWidget {
       accountServer.refreshConversation(conversationId);
     }, [conversationId]);
 
+    final userId = conversation.userId;
+
+    useEffect(() {
+      if (conversation.isGroup == true) return;
+      if (userId == null) return;
+
+      accountServer.refreshUsers([userId], force: true);
+    }, [userId]);
+
     final announcement = useStream<String?>(
       useMemoized(() => context.database.conversationDao
           .announcement(conversationId)
