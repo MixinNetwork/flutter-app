@@ -180,6 +180,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "botInteractInfo": MessageLookupByLibrary.simpleMessage("点击下列按钮与机器人互动"),
         "botInteractOpen": MessageLookupByLibrary.simpleMessage("打开主页"),
         "bots": MessageLookupByLibrary.simpleMessage("机器人"),
+        "bringAllToFront": MessageLookupByLibrary.simpleMessage("前置所有窗口"),
         "canNotRecognize": MessageLookupByLibrary.simpleMessage("无法识别二维码"),
         "cancel": MessageLookupByLibrary.simpleMessage("取消"),
         "change": MessageLookupByLibrary.simpleMessage("更改"),
@@ -557,6 +558,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "weeks": MessageLookupByLibrary.simpleMessage("周"),
         "window": MessageLookupByLibrary.simpleMessage("窗口"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
-        "youStart": MessageLookupByLibrary.simpleMessage("您")
+        "youStart": MessageLookupByLibrary.simpleMessage("您"),
+        "zoom": MessageLookupByLibrary.simpleMessage("缩放")
       };
 }

@@ -3711,6 +3711,26 @@ class Localization {
       args: [max],
     );
   }
+
+  /// `Zoom`
+  String get zoom {
+    return Intl.message(
+      'Zoom',
+      name: 'zoom',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bring All To Front`
+  String get bringAllToFront {
+    return Intl.message(
+      'Bring All To Front',
+      name: 'bringAllToFront',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

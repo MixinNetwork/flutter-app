@@ -309,6 +309,16 @@ class _Menus extends HookWidget {
                 appWindow.minimize();
               },
             ),
+            PlatformMenuItem(
+              label: context.l10n.zoom,
+              onSelected: () {
+                if (!appWindow.isMaximized) {
+                  appWindow.maximize();
+                } else {
+                  appWindow.restore();
+                }
+              },
+            ),
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
                 label: context.l10n.previousConversation,
@@ -337,6 +347,14 @@ class _Menus extends HookWidget {
                             context, const NextConversationIntent());
                       }
                     : null,
+              ),
+            ]),
+            PlatformMenuItemGroup(members: [
+              PlatformMenuItem(
+                label: context.l10n.bringAllToFront,
+                onSelected: () {
+                  appWindow.show();
+                },
               ),
             ]),
             PlatformMenuItem(

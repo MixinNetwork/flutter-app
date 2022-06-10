@@ -356,5 +356,7 @@
   "chatExpiredSet": "{name} 将限时消息时间设置为 {duration}.",
   "chatExpiredSetWithoutDuration": "{name} 修改了限时消息设置",
   "chatExpiredDisabled": "{name} 已禁用限时消息",
-  "disappearingCustomTimeMaxWarning": "最高设置 {max}"
+  "disappearingCustomTimeMaxWarning": "最高设置 {max}",
+  "zoom": "缩放",
+  "bringAllToFront": "前置所有窗口"
 }

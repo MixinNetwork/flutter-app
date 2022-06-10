@@ -364,5 +364,7 @@
   "chatExpiredSet": "{name} set disappearing message time to {duration}.",
   "chatExpiredSetWithoutDuration": "{name} changed disappearing message settings.",
   "chatExpiredDisabled": "{name} disabled disappearing message.",
-  "disappearingCustomTimeMaxWarning": "The maximum time is {max}."
+  "disappearingCustomTimeMaxWarning": "The maximum time is {max}.",
+  "zoom": "Zoom",
+  "bringAllToFront": "Bring All To Front"
 }
