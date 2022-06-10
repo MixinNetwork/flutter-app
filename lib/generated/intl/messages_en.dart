@@ -198,6 +198,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "botInteractOpen":
             MessageLookupByLibrary.simpleMessage("Open Home page"),
         "bots": MessageLookupByLibrary.simpleMessage("Bots"),
+        "bringAllToFront":
+            MessageLookupByLibrary.simpleMessage("Bring All To Front"),
         "canNotRecognize": MessageLookupByLibrary.simpleMessage(
             "Can not recognize the QR code"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
@@ -647,6 +649,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "weeks": MessageLookupByLibrary.simpleMessage("weeks"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),
         "you": MessageLookupByLibrary.simpleMessage("you"),
-        "youStart": MessageLookupByLibrary.simpleMessage("You")
+        "youStart": MessageLookupByLibrary.simpleMessage("You"),
+        "zoom": MessageLookupByLibrary.simpleMessage("Zoom")
       };
 }
