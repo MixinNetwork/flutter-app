@@ -131,10 +131,7 @@ class _UserProfileLoader extends HookWidget {
     }, [userId, refreshUser]);
 
     if (user == null) return const SizedBox();
-    return _UserProfileBody(
-      user: user,
-      isSelf: accountServer.userId == user.userId,
-    );
+    return _UserProfileBody(user: user);
   }
 }
 
@@ -142,10 +139,8 @@ class _UserProfileBody extends StatelessWidget {
   const _UserProfileBody({
     Key? key,
     required this.user,
-    required this.isSelf,
   }) : super(key: key);
   final User user;
-  final bool isSelf;
 
   @override
   Widget build(BuildContext context) {
@@ -204,6 +199,11 @@ class _UserProfileBody extends StatelessWidget {
                 const SizedBox(height: 24),
                 _UserProfileButtonBar(user: user),
               ],
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: _BioText(biography: user.biography ?? ''),
             ),
           const SizedBox(height: 56),
         ],
