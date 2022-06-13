@@ -24,6 +24,7 @@ class UnknownMessage extends StatelessWidget {
           color: context.theme.text,
         ),
         children: [
+          const TextSpan(text: ' '),
           TextSpan(
             mouseCursor: SystemMouseCursors.click,
             text: context.l10n.chatLearn,
