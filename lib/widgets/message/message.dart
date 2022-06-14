@@ -280,7 +280,7 @@ class MessageItemWidget extends HookWidget {
                         );
                       },
                     ),
-                  if (message.type.isText)
+                  if (message.type.isText || message.type.isPost)
                     ContextMenu(
                       title: context.l10n.copy,
                       onTap: () => Clipboard.setData(
