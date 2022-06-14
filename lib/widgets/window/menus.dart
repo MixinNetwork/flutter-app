@@ -351,6 +351,18 @@ class _Menus extends HookWidget {
             ]),
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
+                label: 'Mixin',
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.keyO,
+                  meta: true,
+                ),
+                onSelected: () {
+                  appWindow.show();
+                },
+              ),
+            ]),
+            PlatformMenuItemGroup(members: [
+              PlatformMenuItem(
                 label: context.l10n.bringAllToFront,
                 onSelected: () {
                   appWindow.show();
