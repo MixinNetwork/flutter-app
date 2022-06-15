@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -83,10 +84,11 @@ class AboutPage extends HookWidget {
                       onTap: () =>
                           openUri(context, 'https://mixin.one/pages/privacy'),
                     ),
-                    CellItem(
-                      title: Text(context.l10n.checkUpdate),
-                      onTap: () => checkUpdate(context: context, force: true),
-                    ),
+                    if (defaultTargetPlatform != TargetPlatform.macOS)
+                      CellItem(
+                        title: Text(context.l10n.checkUpdate),
+                        onTap: () => checkUpdate(context: context, force: true),
+                      ),
                   ],
                 ),
               ),
