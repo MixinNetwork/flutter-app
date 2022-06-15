@@ -264,7 +264,10 @@ class _Home extends HookWidget {
     }, [signed]);
 
     useEffect(() {
-      if (Platform.isIOS || Platform.isAndroid || Platform.isWindows) {
+      if (Platform.isIOS ||
+          Platform.isMacOS ||
+          Platform.isAndroid ||
+          Platform.isWindows) {
         return null;
       }
       void onAppStateChanged() {
