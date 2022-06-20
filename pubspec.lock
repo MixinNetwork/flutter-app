@@ -1510,7 +1510,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.5.2"
+    version: "2.6.1"
   win32_registry:
     dependency: transitive
     description:
