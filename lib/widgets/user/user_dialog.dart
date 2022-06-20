@@ -145,6 +145,7 @@ class _UserProfileBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final anonymous = user.identityNumber == '0';
+    final biographyIsNotEmpty = !(user.biography?.isEmpty ?? true);
     return AnimatedSize(
       duration: const Duration(milliseconds: 150),
       child: Column(
@@ -177,34 +178,37 @@ class _UserProfileBody extends StatelessWidget {
               )
             ],
           ),
-          if (!anonymous)
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 4),
-                SelectableText(
-                  context.l10n.contactMixinId(user.identityNumber),
-                  style: TextStyle(
-                    color: context.theme.secondaryText,
-                    fontSize: 12,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!anonymous)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: SelectableText(
+                    context.l10n.contactMixinId(user.identityNumber),
+                    style: TextStyle(
+                      color: context.theme.secondaryText,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-                if (user.isStranger)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: _AddToContactsButton(user: user),
-                  ),
-                const SizedBox(height: 20),
-                _BioText(biography: user.biography ?? ''),
-                const SizedBox(height: 24),
-                _UserProfileButtonBar(user: user),
-              ],
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: _BioText(biography: user.biography ?? ''),
-            ),
+              if (!anonymous && user.isStranger)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: _AddToContactsButton(user: user),
+                ),
+              if (biographyIsNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: _BioText(biography: user.biography ?? ''),
+                ),
+              if (!anonymous)
+                Padding(
+                  padding: const EdgeInsets.only(top: 24),
+                  child: _UserProfileButtonBar(user: user),
+                ),
+            ],
+          ),
           const SizedBox(height: 56),
         ],
       ),
