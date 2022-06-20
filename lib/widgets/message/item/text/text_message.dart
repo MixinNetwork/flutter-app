@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import '../../../../bloc/keyword_cubit.dart';
 import '../../../../ui/home/chat/chat_page.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
@@ -33,11 +34,18 @@ class TextMessage extends HookWidget {
       backgroundColor: context.theme.highlight,
     );
 
-    final keyword = useBlocStateConverter<SearchConversationKeywordCubit,
+    var keyword = useBlocStateConverter<SearchConversationKeywordCubit,
         Tuple2<String?, String>, String>(
-      converter: (state) => state.item1 != userId ? '' : state.item2,
+      converter: (state) {
+        if (state.item1 == null || state.item1 == userId) return state.item2;
+        return '';
+      },
       keys: [userId],
     );
+
+    final globalKeyword = useBlocState<KeywordCubit, String>();
+
+    if (keyword.isEmpty && globalKeyword.isNotEmpty) keyword = globalKeyword;
 
     final urlHighlightTextSpans = useMemoized(
       () => uriRegExp.allMatchesAndSort(content).map(
