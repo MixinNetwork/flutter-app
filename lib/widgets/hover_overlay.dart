@@ -26,7 +26,8 @@ class _HoverOverlayForceHiddenTool {
   }
 }
 
-typedef PortalBuilder<T> = Widget Function(BuildContext context, T value, Widget Function(Widget? child) portalHoverWrapper, Widget? child);
+typedef PortalBuilder<T> = Widget Function(BuildContext context, T value,
+    Widget Function(Widget? child) portalHoverWrapper, Widget? child);
 
 class HoverOverlay extends HookWidget {
   const HoverOverlay({
@@ -114,22 +115,22 @@ class HoverOverlay extends HookWidget {
     }
 
     Widget portalHoverWrapper(Widget? child) => MouseRegionIgnoreTouch(
-        onEnter: onChildHovering,
-        onHover: onChildHovering,
-        onExit: (_) async {
-          await cancelableRef.value?.cancel();
-          childHovering.value = false;
-        },
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapUp: (detail) {
-            if (detail.kind == PointerDeviceKind.touch) {
-              tapped.value = true;
-            }
+          onEnter: onChildHovering,
+          onHover: onChildHovering,
+          onExit: (_) async {
+            await cancelableRef.value?.cancel();
+            childHovering.value = false;
           },
-          child: child,
-        ),
-      );
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapUp: (detail) {
+              if (detail.kind == PointerDeviceKind.touch) {
+                tapped.value = true;
+              }
+            },
+            child: child,
+          ),
+        );
 
     return Provider.value(
       value: forceHiddenTool,
@@ -150,7 +151,9 @@ class HoverOverlay extends HookWidget {
             ),
             duration: visible ? duration : Duration(microseconds: totalClose),
             builder: (context, progress, child) =>
-                portalBuilder?.call(context, progress, portalHoverWrapper, child) ?? child!,
+                portalBuilder?.call(
+                    context, progress, portalHoverWrapper, child) ??
+                child!,
             child: MouseRegionIgnoreTouch(
               onEnter: (_) => portalHovering.value = true,
               onHover: (_) => portalHovering.value = true,
