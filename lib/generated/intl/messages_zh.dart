@@ -163,6 +163,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addSticker": MessageLookupByLibrary.simpleMessage("添加表情"),
         "addStickerFailed": MessageLookupByLibrary.simpleMessage("添加表情失败"),
         "addStickers": MessageLookupByLibrary.simpleMessage("添加所有表情"),
+        "addToCircle": MessageLookupByLibrary.simpleMessage("添加到圈子"),
         "added": MessageLookupByLibrary.simpleMessage("已添加"),
         "appCard": MessageLookupByLibrary.simpleMessage("卡片"),
         "appCardShareDisallow":

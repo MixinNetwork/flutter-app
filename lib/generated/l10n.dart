@@ -3731,6 +3731,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Add to Circle`
+  String get addToCircle {
+    return Intl.message(
+      'Add to Circle',
+      name: 'addToCircle',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

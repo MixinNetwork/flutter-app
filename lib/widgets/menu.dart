@@ -4,12 +4,16 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 import '../bloc/simple_cubit.dart';
+import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
+import 'hover_overlay.dart';
 import 'interactive_decorated_box.dart';
+import 'portal_providers.dart';
 
 class _OffsetCubit extends SimpleCubit<Offset?> {
   _OffsetCubit(Offset? state) : super(state);
@@ -61,9 +65,7 @@ class ContextMenuPortalEntry extends HookWidget {
           portalFollower: Builder(builder: (context) {
             if (offset != null && visible) {
               return CustomSingleChildLayout(
-                delegate: PositionedLayoutDelegate(
-                  position: offset,
-                ),
+                delegate: PositionedLayoutDelegate(position: offset),
                 child: ContextMenuPage(menus: buildMenus()),
               );
             }
@@ -117,9 +119,7 @@ class Barrier extends StatelessWidget {
 }
 
 class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
-  PositionedLayoutDelegate({
-    required this.position,
-  });
+  PositionedLayoutDelegate({required this.position});
 
   final Offset position;
 
@@ -207,12 +207,20 @@ class ContextMenu extends StatelessWidget {
     required this.title,
     this.isDestructiveAction = false,
     this.onTap,
-  }) : super(
-          key: key,
-        );
+  })  : _subMenuMode = false,
+        super(key: key);
+
+  const ContextMenu._sub({
+    Key? key,
+    required this.title,
+    this.isDestructiveAction = false,
+  })  : _subMenuMode = true,
+        onTap = null,
+        super(key: key);
 
   final String title;
   final bool isDestructiveAction;
+  final bool _subMenuMode;
   final VoidCallback? onTap;
 
   @override
@@ -233,24 +241,67 @@ class ContextMenu extends StatelessWidget {
         ),
         onTap: () {
           onTap?.call();
-          context.closeMenu();
+          if (!_subMenuMode) context.closeMenu();
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 16,
-              color: isDestructiveAction
-                  ? context.theme.red
-                  : context.dynamicColor(
-                      const Color.fromRGBO(0, 0, 0, 1),
-                      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                    ),
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isDestructiveAction
+                        ? context.theme.red
+                        : context.dynamicColor(
+                            const Color.fromRGBO(0, 0, 0, 1),
+                            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+                          ),
+                  ),
+                ),
+              ),
+              if (_subMenuMode)
+                SvgPicture.asset(
+                  Resources.assetsImagesIcArrowRightSvg,
+                  width: 30,
+                  height: 30,
+                  color: context.theme.secondaryText,
+                ),
+            ],
           ),
         ),
       ),
     );
   }
+}
+
+class SubContextMenu extends StatelessWidget {
+  const SubContextMenu({
+    Key? key,
+    required this.title,
+    required this.menus,
+    this.isDestructiveAction = false,
+  }) : super(key: key);
+
+  final String title;
+  final bool isDestructiveAction;
+  final List<Widget> menus;
+
+  @override
+  Widget build(BuildContext context) => HoverOverlay(
+        closeDuration: Duration.zero,
+        duration: Duration.zero,
+        portalCandidateLabels: const [secondPortal],
+        anchor: const Aligned(
+          follower: Alignment.centerLeft,
+          target: Alignment.centerRight,
+          offset: Offset(-8, 0),
+        ),
+        portal: ContextMenuPage(menus: menus),
+        child: ContextMenu._sub(
+          title: title,
+          isDestructiveAction: isDestructiveAction,
+        ),
+      );
 }

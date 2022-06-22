@@ -358,5 +358,6 @@
   "chatExpiredDisabled": "{name} 已禁用限时消息",
   "disappearingCustomTimeMaxWarning": "最高设置 {max}",
   "zoom": "缩放",
-  "bringAllToFront": "前置所有窗口"
+  "bringAllToFront": "前置所有窗口",
+  "addToCircle": "添加到圈子"
 }

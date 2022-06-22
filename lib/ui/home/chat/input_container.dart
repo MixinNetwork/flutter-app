@@ -581,7 +581,7 @@ class _StickerButton extends HookWidget {
           closeWaitDuration: const Duration(milliseconds: 300),
           inCurve: Curves.easeOut,
           outCurve: Curves.easeOut,
-          portalBuilder: (context, progress, child) {
+          portalBuilder: (context, progress, _, child) {
             context.accountServer.refreshSticker();
 
             final renderBox =

@@ -26,6 +26,8 @@ class _HoverOverlayForceHiddenTool {
   }
 }
 
+typedef PortalBuilder<T> = Widget Function(BuildContext context, T value, Widget Function(Widget? child) portalHoverWrapper, Widget? child);
+
 class HoverOverlay extends HookWidget {
   const HoverOverlay({
     Key? key,
@@ -33,6 +35,8 @@ class HoverOverlay extends HookWidget {
     required this.child,
     required this.portal,
     required this.duration,
+    this.anchor = const Filled(),
+    this.portalCandidateLabels = const [PortalLabel.main],
     this.closeWaitDuration = Duration.zero,
     this.inCurve = Curves.linear,
     this.outCurve = Curves.linear,
@@ -48,7 +52,9 @@ class HoverOverlay extends HookWidget {
   final Duration closeWaitDuration;
   final Curve inCurve;
   final Curve outCurve;
-  final ValueWidgetBuilder<double>? portalBuilder;
+  final PortalBuilder<double>? portalBuilder;
+  final List<PortalLabel<dynamic>> portalCandidateLabels;
+  final Anchor anchor;
 
   static void forceHidden(BuildContext context) {
     context.read<_HoverOverlayForceHiddenTool>().invoke();
@@ -107,10 +113,30 @@ class HoverOverlay extends HookWidget {
       }
     }
 
+    Widget portalHoverWrapper(Widget? child) => MouseRegionIgnoreTouch(
+        onEnter: onChildHovering,
+        onHover: onChildHovering,
+        onExit: (_) async {
+          await cancelableRef.value?.cancel();
+          childHovering.value = false;
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapUp: (detail) {
+            if (detail.kind == PointerDeviceKind.touch) {
+              tapped.value = true;
+            }
+          },
+          child: child,
+        ),
+      );
+
     return Provider.value(
       value: forceHiddenTool,
       child: PortalTarget(
         visible: visible,
+        portalCandidateLabels: portalCandidateLabels,
+        anchor: anchor,
         closeDuration: Duration(microseconds: totalClose),
         portalFollower: GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -124,7 +150,7 @@ class HoverOverlay extends HookWidget {
             ),
             duration: visible ? duration : Duration(microseconds: totalClose),
             builder: (context, progress, child) =>
-                portalBuilder?.call(context, progress, child) ?? child!,
+                portalBuilder?.call(context, progress, portalHoverWrapper, child) ?? child!,
             child: MouseRegionIgnoreTouch(
               onEnter: (_) => portalHovering.value = true,
               onHover: (_) => portalHovering.value = true,
@@ -133,23 +159,7 @@ class HoverOverlay extends HookWidget {
             ),
           ),
         ),
-        child: MouseRegionIgnoreTouch(
-          onEnter: onChildHovering,
-          onHover: onChildHovering,
-          onExit: (_) async {
-            await cancelableRef.value?.cancel();
-            childHovering.value = false;
-          },
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTapUp: (detail) {
-              if (detail.kind == PointerDeviceKind.touch) {
-                tapped.value = true;
-              }
-            },
-            child: child,
-          ),
-        ),
+        child: portalHoverWrapper(child),
       ),
     );
   }
