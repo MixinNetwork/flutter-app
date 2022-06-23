@@ -178,6 +178,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addStickerFailed":
             MessageLookupByLibrary.simpleMessage("Add sticker failed"),
         "addStickers": MessageLookupByLibrary.simpleMessage("Add Stickers"),
+        "addToCircle": MessageLookupByLibrary.simpleMessage("Add to Circle"),
         "added": MessageLookupByLibrary.simpleMessage("Added"),
         "appCard": MessageLookupByLibrary.simpleMessage("Card"),
         "appCardShareDisallow": MessageLookupByLibrary.simpleMessage(

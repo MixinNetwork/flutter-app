@@ -26,6 +26,9 @@ class _HoverOverlayForceHiddenTool {
   }
 }
 
+typedef PortalBuilder<T> = Widget Function(BuildContext context, T value,
+    Widget Function(Widget? child) portalHoverWrapper, Widget? child);
+
 class HoverOverlay extends HookWidget {
   const HoverOverlay({
     Key? key,
@@ -33,6 +36,8 @@ class HoverOverlay extends HookWidget {
     required this.child,
     required this.portal,
     required this.duration,
+    this.anchor = const Filled(),
+    this.portalCandidateLabels = const [PortalLabel.main],
     this.closeWaitDuration = Duration.zero,
     this.inCurve = Curves.linear,
     this.outCurve = Curves.linear,
@@ -48,7 +53,9 @@ class HoverOverlay extends HookWidget {
   final Duration closeWaitDuration;
   final Curve inCurve;
   final Curve outCurve;
-  final ValueWidgetBuilder<double>? portalBuilder;
+  final PortalBuilder<double>? portalBuilder;
+  final List<PortalLabel<dynamic>> portalCandidateLabels;
+  final Anchor anchor;
 
   static void forceHidden(BuildContext context) {
     context.read<_HoverOverlayForceHiddenTool>().invoke();
@@ -107,33 +114,7 @@ class HoverOverlay extends HookWidget {
       }
     }
 
-    return Provider.value(
-      value: forceHiddenTool,
-      child: PortalTarget(
-        visible: visible,
-        closeDuration: Duration(microseconds: totalClose),
-        portalFollower: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () => tapped.value = false,
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: visible ? 1 : 0),
-            curve: Interval(
-              visible ? 0 : (wait / totalClose),
-              1,
-              curve: visible ? inCurve : outCurve,
-            ),
-            duration: visible ? duration : Duration(microseconds: totalClose),
-            builder: (context, progress, child) =>
-                portalBuilder?.call(context, progress, child) ?? child!,
-            child: MouseRegionIgnoreTouch(
-              onEnter: (_) => portalHovering.value = true,
-              onHover: (_) => portalHovering.value = true,
-              onExit: (_) => portalHovering.value = false,
-              child: portal,
-            ),
-          ),
-        ),
-        child: MouseRegionIgnoreTouch(
+    Widget portalHoverWrapper(Widget? child) => MouseRegionIgnoreTouch(
           onEnter: onChildHovering,
           onHover: onChildHovering,
           onExit: (_) async {
@@ -149,7 +130,39 @@ class HoverOverlay extends HookWidget {
             },
             child: child,
           ),
+        );
+
+    return Provider.value(
+      value: forceHiddenTool,
+      child: PortalTarget(
+        visible: visible,
+        portalCandidateLabels: portalCandidateLabels,
+        anchor: anchor,
+        closeDuration: Duration(microseconds: totalClose),
+        portalFollower: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () => tapped.value = false,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: visible ? 1 : 0),
+            curve: Interval(
+              visible ? 0 : (wait / totalClose),
+              1,
+              curve: visible ? inCurve : outCurve,
+            ),
+            duration: visible ? duration : Duration(microseconds: totalClose),
+            builder: (context, progress, child) =>
+                portalBuilder?.call(
+                    context, progress, portalHoverWrapper, child) ??
+                child!,
+            child: MouseRegionIgnoreTouch(
+              onEnter: (_) => portalHovering.value = true,
+              onHover: (_) => portalHovering.value = true,
+              onExit: (_) => portalHovering.value = false,
+              child: portal,
+            ),
+          ),
         ),
+        child: portalHoverWrapper(child),
       ),
     );
   }

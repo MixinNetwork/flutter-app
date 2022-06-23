@@ -89,6 +89,41 @@ class ConversationMenuWrapper extends StatelessWidget {
               return;
             },
           ),
+        HookBuilder(builder: (_) {
+          final menus = useMemoizedFuture(
+                  () => context.database.circleDao
+                      .otherCircleByConversationId(conversationId)
+                      .get(),
+                  null,
+                  keys: []).data ??
+              [];
+          return SubContextMenu(
+              title: context.l10n.addToCircle,
+              menus: menus
+                  .map((e) => ContextMenu(
+                        title: e.name,
+                        onTap: () async {
+                          await runFutureWithToast(
+                            context,
+                            () async {
+                              await context.accountServer
+                                  .editCircleConversation(
+                                e.circleId,
+                                [
+                                  CircleConversationRequest(
+                                    action: CircleConversationAction.add,
+                                    conversationId: conversationId,
+                                    userId:
+                                        isGroupConversation ? null : ownerId,
+                                  ),
+                                ],
+                              );
+                            }(),
+                          );
+                        },
+                      ))
+                  .toList());
+        }),
         ContextMenu(
           title: context.l10n.deleteChat,
           isDestructiveAction: true,

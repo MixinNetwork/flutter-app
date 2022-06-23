@@ -4,7 +4,6 @@ import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -36,6 +35,7 @@ import 'utils/system/tray.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
 import 'widgets/message/item/text/mention_builder.dart';
+import 'widgets/portal_providers.dart';
 import 'widgets/window/menus.dart';
 import 'widgets/window/move_window.dart';
 import 'widgets/window/window_shortcuts.dart';
@@ -105,9 +105,7 @@ class App extends StatelessWidget {
                 builder: (context, accountServer, child) {
                   if (accountServer != null) {
                     return _Providers(
-                      app: Portal(
-                        child: child!,
-                      ),
+                      app: child!,
                       accountServer: accountServer,
                     );
                   }
@@ -182,7 +180,7 @@ class _Providers extends StatelessWidget {
                   NotificationService(context: context),
               lazy: false,
               dispose: (_, notificationService) => notificationService.close(),
-              child: app,
+              child: PortalProviders(child: app),
             ),
           ),
         ),
