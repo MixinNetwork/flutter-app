@@ -102,7 +102,7 @@ dependencies:
   url_launcher: ^6.1.2
   uuid: ^3.0.4
   very_good_analysis: ^2.1.1
-  visibility_detector: ^0.2.2
+  visibility_detector: ^0.3.3
   watcher: ^1.0.0
   web_socket_channel: ^2.2.0
   webview_flutter: ^3.0.4
