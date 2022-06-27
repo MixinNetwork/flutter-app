@@ -105,7 +105,7 @@ dependencies:
   visibility_detector: ^0.2.2
   watcher: ^1.0.0
   web_socket_channel: ^2.2.0
-  webview_flutter: ^3.0.1
+  webview_flutter: ^3.0.4
   win32: ^2.6.1
   win_toast: ^0.0.2
   window_size:
