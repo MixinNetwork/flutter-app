@@ -41,6 +41,8 @@ import 'isolate_event.dart';
 import 'message_worker_isolate.dart';
 import 'sender.dart';
 
+final List<String> pendingQuoteMessageIds = [];
+
 class DecryptMessage extends Injector {
   DecryptMessage(
     String userId,
@@ -171,6 +173,8 @@ class DecryptMessage extends Injector {
       messageId,
       _remoteStatus,
     );
+
+    await _updateQuoteMessage(data.conversationId, messageId);
 
     await database.floodMessageDao.deleteFloodMessage(floodMessage);
   }
@@ -477,15 +481,27 @@ class DecryptMessage extends Injector {
     await database.messageDao.recallMessage(recallMessage.messageId);
     await database.messageMentionDao
         .deleteMessageMentionByMessageId(recallMessage.messageId);
-    final quoteMessage = await database.messageDao
-        .findMessageItemById(data.conversationId, recallMessage.messageId);
-    if (quoteMessage != null) {
-      await database.messageDao.updateQuoteContentByQuoteId(
-          data.conversationId, recallMessage.messageId, quoteMessage.toJson());
-    }
+    await _updateQuoteMessage(
+        data.conversationId, recallMessage.messageId, true);
     await database.messageDao.deleteFtsByMessageId(recallMessage.messageId);
     await database.messagesHistoryDao
         .insert(MessagesHistoryData(messageId: data.messageId));
+  }
+
+  Future<void> _updateQuoteMessage(String conversationId, String messageId,
+      [bool force = false]) async {
+    if (pendingQuoteMessageIds.remove(messageId) || force) {
+      if (!force) {
+        i('_updateQuoteMessage conversationId: $conversationId, messageId: $messageId');
+      }
+
+      final quoteMessage = await database.messageDao
+          .findMessageItemById(conversationId, messageId);
+      if (quoteMessage != null) {
+        await database.messageDao.updateQuoteContentByQuoteId(
+            conversationId, messageId, quoteMessage.toJson());
+      }
+    }
   }
 
   Future<Message> _generateMessage(
@@ -500,6 +516,7 @@ class DecryptMessage extends Injector {
     if (quoteMessage != null) {
       return generator(quoteMessage);
     } else {
+      pendingQuoteMessageIds.add(data.quoteMessageId!);
       return generator(null);
     }
   }
@@ -1127,12 +1144,7 @@ class DecryptMessage extends Injector {
     if (await database.messageDao
             .countMessageByQuoteId(data.conversationId, messageId) >
         0) {
-      final messageItem = await database.messageDao
-          .findMessageItemById(data.conversationId, messageId);
-      if (messageItem != null) {
-        await database.messageDao.updateQuoteContentByQuoteId(
-            data.conversationId, messageId, messageItem.toJson());
-      }
+      await _updateQuoteMessage(data.conversationId, messageId, true);
     }
   }
 

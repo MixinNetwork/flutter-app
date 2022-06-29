@@ -578,7 +578,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> updateQuoteContentByQuoteId(
       String conversationId, String quoteMessageId, String content) async {
-    final messageIds = await _findMessageIdByQuoteMessageId(quoteMessageId);
+    final messageIds = await _findMessageIdsByQuoteMessageId(quoteMessageId);
     return _sendInsertOrReplaceEventWithFuture(
         messageIds,
         (db.update(db.messages)
@@ -588,14 +588,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             .write(MessagesCompanion(quoteContent: Value(content))));
   }
 
-  Future<List<String>> _findMessageIdByQuoteMessageId(
+  Future<List<String>> _findMessageIdsByQuoteMessageId(
       String quoteMessageId) async {
-    final future = await (db.selectOnly(db.messages, distinct: true)
+    final ids = await (db.selectOnly(db.messages, distinct: true)
           ..addColumns([db.messages.messageId])
           ..where(db.messages.quoteMessageId.equals(quoteMessageId)))
         .map((row) => row.read(db.messages.messageId))
         .get();
-    return future.whereNotNull().toList();
+    return ids.whereNotNull().toList();
   }
 
   Future<int> updateAttachmentMessageContentAndStatus(
