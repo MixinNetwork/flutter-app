@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../constants/resources.dart';
-import '../../utils/auto_update_checker.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/system/package_info.dart';
@@ -84,10 +83,11 @@ class AboutPage extends HookWidget {
                       onTap: () =>
                           openUri(context, 'https://mixin.one/pages/privacy'),
                     ),
-                    if (defaultTargetPlatform != TargetPlatform.macOS)
+                    if (defaultTargetPlatform == TargetPlatform.linux)
                       CellItem(
                         title: Text(context.l10n.checkUpdate),
-                        onTap: () => checkUpdate(context: context, force: true),
+                        onTap: () =>
+                            openUri(context, 'https://mixin.one/messenger'),
                       ),
                   ],
                 ),

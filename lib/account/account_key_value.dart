@@ -12,8 +12,6 @@ class AccountKeyValue extends HiveKeyValue {
   static const _refreshStickerLastTime = 'refreshStickerLastTime';
   static const _primarySessionId = 'primarySessionId';
   static const _hasNewAlbum = 'hasNewAlbum';
-  static const _checkUpdateLastTime = 'checkUpdateLastTime';
-  static const _ignoredVersion = '_ignoredVersion';
 
   bool get hasSyncCircle =>
       box.get(_hasSyncCircle, defaultValue: false) as bool;
@@ -35,13 +33,4 @@ class AccountKeyValue extends HiveKeyValue {
 
   set hasNewAlbum(bool value) => box.put(_hasNewAlbum, value);
 
-  int get checkUpdateLastTime =>
-      box.get(_checkUpdateLastTime, defaultValue: 0) as int;
-
-  set checkUpdateLastTime(int value) => box.put(_checkUpdateLastTime, value);
-
-  String? get ignoredVersion =>
-      box.get(_ignoredVersion, defaultValue: '0.0.0') as String?;
-
-  set ignoredVersion(String? value) => box.put(_ignoredVersion, value);
 }
