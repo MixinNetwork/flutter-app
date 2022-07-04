@@ -32,5 +32,4 @@ class AccountKeyValue extends HiveKeyValue {
   bool get hasNewAlbum => box.get(_hasNewAlbum, defaultValue: false) as bool;
 
   set hasNewAlbum(bool value) => box.put(_hasNewAlbum, value);
-
 }
