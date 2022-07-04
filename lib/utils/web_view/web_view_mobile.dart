@@ -116,7 +116,7 @@ class _WebControl extends StatelessWidget {
   final AppCardData? appCardData;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
           color: context.theme.background,
           border: Border.all(color: context.theme.sidebarSelected),

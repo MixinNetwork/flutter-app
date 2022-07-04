@@ -1,6 +1,9 @@
-include: package:very_good_analysis/analysis_options.yaml
+include: package:very_good_analysis/analysis_options.3.0.1.yaml
 
 analyzer:
+  language:
+    strict-inference: false
+    strict-raw-types: false
   errors:
     always_use_package_imports: ignore
     public_member_api_docs: ignore

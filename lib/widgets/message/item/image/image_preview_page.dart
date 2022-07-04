@@ -468,7 +468,7 @@ class _Item extends HookWidget {
       onDoubleTap: () {
         controller.animatedToScale(initialScale);
       },
-      child: Container(
+      child: DecoratedBox(
         decoration: const BoxDecoration(
           color: Color.fromRGBO(62, 65, 72, 0.9),
         ),
