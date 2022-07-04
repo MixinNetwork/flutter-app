@@ -66,7 +66,7 @@ class _ImageEditorDialog extends HookWidget {
           _ImageEditorBloc(path: path, image: uiImage, snapshot: snapshot),
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
+        child: ColoredBox(
           color: context.theme.background.withOpacity(0.8),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
