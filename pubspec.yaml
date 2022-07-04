@@ -91,7 +91,7 @@ dependencies:
     path: third_party/quick_breakpad
   recase: ^4.0.0
   rxdart: ^0.27.4
-  scrollable_positioned_list: ^0.2.3
+  scrollable_positioned_list: ^0.3.2
   sliver_tools: ^0.2.6
   sqlite3_flutter_libs: ^0.5.7
   stream_transform: ^2.0.0
