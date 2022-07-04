@@ -83,12 +83,10 @@ class AboutPage extends HookWidget {
                       onTap: () =>
                           openUri(context, 'https://mixin.one/pages/privacy'),
                     ),
-                    if (defaultTargetPlatform == TargetPlatform.linux)
-                      CellItem(
-                        title: Text(context.l10n.checkUpdate),
-                        onTap: () =>
-                            openUri(context, 'https://mixin.one/messenger'),
-                      ),
+                    CellItem(
+                      title: Text(context.l10n.checkUpdate),
+                      onTap: () => openCheckUpdate(context),
+                    ),
                   ],
                 ),
               ),
@@ -97,5 +95,18 @@ class AboutPage extends HookWidget {
         ),
       ),
     );
+  }
+
+  void openCheckUpdate(BuildContext context) {
+    if (defaultTargetPlatform == TargetPlatform.linux) {
+      openUri(context, 'https://mixin.one/messenger');
+    } else if (defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      openUri(
+          context, 'https://apps.apple.com/app/mixin-messenger/id1571128582');
+    } else if (defaultTargetPlatform == TargetPlatform.windows) {
+      openUri(context,
+          'https://apps.microsoft.com/store/detail/mixin-desktop/9NQ6HF99B8NJ');
+    }
   }
 }
