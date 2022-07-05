@@ -218,7 +218,7 @@ class Blaze {
   Future<void> updateRemoteMessageStatus(
       String messageId, MessageStatus status) async {}
 
-  Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
+  Future<bool> makeMessageStatus(String messageId, MessageStatus status) async {
     final currentStatus =
         await database.messageDao.findMessageStatusById(messageId);
     if (currentStatus == MessageStatus.sending) {
@@ -230,6 +230,8 @@ class Blaze {
         status == MessageStatus.read) {
       await database.messageDao.updateMessageStatusById(messageId, status);
     }
+
+    return currentStatus != null;
   }
 
   Future<void> _sendListPending() async {
@@ -257,9 +259,10 @@ class Blaze {
         break;
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
-        pendingMessageStatusMap[m.messageId] = m.status;
+        if (!(await makeMessageStatus(m.messageId, m.status))) {
+          pendingMessageStatusMap[m.messageId] = m.status;
+        }
 
-        await makeMessageStatus(m.messageId, m.status);
         await database.offsetDao.insert(Offset(
             key: statusOffset, timestamp: m.updatedAt.toIso8601String()));
       });
