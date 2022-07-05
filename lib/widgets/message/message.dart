@@ -18,6 +18,7 @@ import '../../account/account_server.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
 import '../../bloc/setting_cubit.dart';
 import '../../bloc/simple_cubit.dart';
+import '../../constants/resources.dart';
 import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/media_status.dart';
@@ -242,6 +243,7 @@ class MessageItemWidget extends HookWidget {
                 buildMenus: () => [
                   if (message.type.isSticker)
                     ContextMenu(
+                      icon: Resources.assetsImagesContextMenuStickerSvg,
                       title: context.l10n.addSticker,
                       onTap: () => _onAddSticker(context),
                     ),
@@ -249,6 +251,7 @@ class MessageItemWidget extends HookWidget {
                       message.type.canReply &&
                       !isPinnedPage)
                     ContextMenu(
+                      icon: Resources.assetsImagesContextMenuReplySvg,
                       title: context.l10n.reply,
                       onTap: () =>
                           context.read<QuoteMessageCubit>().emit(message),
@@ -263,6 +266,7 @@ class MessageItemWidget extends HookWidget {
                     _PinMenu(message: message),
                   if (!isTranscriptPage && message.canForward)
                     ContextMenu(
+                      icon: Resources.assetsImagesContextMenuForwardSvg,
                       title: context.l10n.forward,
                       onTap: () async {
                         final result = await showConversationSelector(
@@ -282,6 +286,7 @@ class MessageItemWidget extends HookWidget {
                     ),
                   if (message.type.isText || message.type.isPost)
                     ContextMenu(
+                      icon: Resources.assetsImagesContextMenuCopySvg,
                       title: context.l10n.copy,
                       onTap: () => Clipboard.setData(
                           ClipboardData(text: message.content)),
@@ -289,6 +294,7 @@ class MessageItemWidget extends HookWidget {
                   if (kPlatformIsMobile &&
                       (message.type.isImage || message.type.isVideo))
                     ContextMenu(
+                      icon: Resources.assetsImagesContextMenuDownloadSvg,
                       title: context.l10n.saveToGallery,
                       onTap: () => saveAs(context, context.accountServer,
                           message, isTranscriptPage),
@@ -301,6 +307,7 @@ class MessageItemWidget extends HookWidget {
                           message.type.isVideo ||
                           message.type.isAudio)) ...[
                     ContextMenu(
+                      icon: Resources.assetsImagesContextMenuDownloadSvg,
                       title: context.l10n.saveAs,
                       onTap: () => saveAs(context, context.accountServer,
                           message, isTranscriptPage),
@@ -317,6 +324,7 @@ class MessageItemWidget extends HookWidget {
                       DateTime.now().isBefore(
                           message.createdAt.add(const Duration(minutes: 30))))
                     ContextMenu(
+                      icon: Resources.assetsImagesContextMenuRecallSvg,
                       title: context.l10n.deleteForEveryone,
                       isDestructiveAction: true,
                       onTap: () async {
@@ -337,6 +345,7 @@ class MessageItemWidget extends HookWidget {
                     ),
                   if (!isTranscriptPage)
                     ContextMenu(
+                      icon: Resources.assetsImagesContextMenuDeleteSvg,
                       title: context.l10n.deleteForMe,
                       isDestructiveAction: true,
                       onTap: () => context.accountServer
@@ -344,6 +353,7 @@ class MessageItemWidget extends HookWidget {
                     ),
                   if (!kReleaseMode)
                     ContextMenu(
+                      icon: Resources.assetsImagesContextMenuCopySvg,
                       title: 'Copy message',
                       onTap: () => Clipboard.setData(
                           ClipboardData(text: message.toString())),
@@ -592,6 +602,9 @@ class _PinMenu extends HookWidget {
             .contains(message.status)) return const SizedBox();
 
     return ContextMenu(
+      icon: message.pinned
+          ? Resources.assetsImagesContextMenuUnpinSvg
+          : Resources.assetsImagesContextMenuPinSvg,
       title: message.pinned ? context.l10n.unPin : context.l10n.pin,
       onTap: () async {
         final pinMessageMinimal = PinMessageMinimal(

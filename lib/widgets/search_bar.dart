@@ -44,6 +44,7 @@ class SearchBar extends HookWidget {
               ContextMenuPortalEntry(
                 buildMenus: () => [
                   ContextMenu(
+                    icon: Resources.assetsImagesContextMenuSearchUserSvg,
                     title: context.l10n.searchUser,
                     onTap: () => showMixinDialog<String>(
                       context: context,
@@ -51,6 +52,8 @@ class SearchBar extends HookWidget {
                     ),
                   ),
                   ContextMenu(
+                    icon:
+                        Resources.assetsImagesContextMenuCreateConversationSvg,
                     title: context.l10n.createConversation,
                     onTap: () {
                       Actions.maybeInvoke(
@@ -60,6 +63,7 @@ class SearchBar extends HookWidget {
                     },
                   ),
                   ContextMenu(
+                    icon: Resources.assetsImagesContextMenuCreateGroupSvg,
                     title: context.l10n.createGroupConversation,
                     onTap: () async {
                       Actions.maybeInvoke(
@@ -69,6 +73,7 @@ class SearchBar extends HookWidget {
                     },
                   ),
                   ContextMenu(
+                    icon: Resources.assetsImagesCircleSvg,
                     title: context.l10n.createCircle,
                     onTap: () async {
                       Actions.maybeInvoke(
