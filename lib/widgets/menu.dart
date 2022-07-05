@@ -253,20 +253,20 @@ class ContextMenu extends StatelessWidget {
           if (!_subMenuMode) context.closeMenu();
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
               if (icon != null)
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: SvgPicture.asset(icon!,
-                      color: color, width: 24, height: 24),
+                      color: color, width: 20, height: 20),
                 ),
               Expanded(
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     color: color,
                   ),
                 ),
@@ -274,8 +274,8 @@ class ContextMenu extends StatelessWidget {
               if (_subMenuMode)
                 SvgPicture.asset(
                   Resources.assetsImagesIcArrowRightSvg,
-                  width: 30,
-                  height: 30,
+                  width: 20,
+                  height: 20,
                   color: context.theme.secondaryText,
                 ),
             ],
