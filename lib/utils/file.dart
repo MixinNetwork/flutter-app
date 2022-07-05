@@ -38,14 +38,31 @@ Future<bool> saveFileToSystem(
   String file, {
   String? suggestName,
 }) async {
-  final path = await file_selector.getSavePath(
+  final targetName = suggestName ?? p.basename(file);
+  final mineType = lookupMimeType(file);
+  final extension = p.extension(targetName);
+
+  d('saveFileToSystem: $file, $targetName, $mineType, $extension');
+
+  var path = await file_selector.getSavePath(
     confirmButtonText: context.l10n.save,
-    suggestedName: suggestName ?? p.basename(file),
+    suggestedName: targetName,
+    acceptedTypeGroups: [
+      file_selector.XTypeGroup(
+        label: mineType,
+        extensions: [extension],
+        mimeTypes: [if (mineType != null) mineType],
+      ),
+    ],
   );
-  if (path?.isEmpty ?? true) {
+  if (path == null || path.isEmpty) {
     return false;
   }
-  await File(file).copy(path!);
+
+  if (p.extension(path) != extension) {
+    path = path + extension;
+  }
+  await File(file).copy(path);
   return true;
 }
 
