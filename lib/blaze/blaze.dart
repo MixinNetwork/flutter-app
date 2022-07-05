@@ -210,7 +210,7 @@ class Blaze {
           data.messageId,
           MessageStatus.delivered));
     }
-    if (stopwatch != null && stopwatch.elapsedMicroseconds > 5) {
+    if (stopwatch != null && stopwatch.elapsedMilliseconds > 5) {
       d('handle execution time: ${stopwatch.elapsedMilliseconds}');
     }
   }
