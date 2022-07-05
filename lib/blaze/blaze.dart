@@ -259,7 +259,7 @@ class Blaze {
         break;
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
-        if (!await makeMessageStatus(m.messageId, m.status)) {
+        if (!(await makeMessageStatus(m.messageId, m.status))) {
           pendingMessageStatusMap[m.messageId] = m.status;
         }
 
