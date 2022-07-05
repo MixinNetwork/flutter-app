@@ -259,7 +259,8 @@ class ContextMenu extends StatelessWidget {
               if (icon != null)
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: SvgPicture.asset(icon!, color: color),
+                  child: SvgPicture.asset(icon!,
+                      color: color, width: 24, height: 24),
                 ),
               Expanded(
                 child: Text(

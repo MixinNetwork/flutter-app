@@ -307,6 +307,7 @@ class _ActionAddParticipants extends StatelessWidget {
   Widget build(BuildContext context) => ContextMenuPortalEntry(
         buildMenus: () => [
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuSearchUserSvg,
             title: context.l10n.groupAdd,
             onTap: () async {
               final result = await showConversationSelector(
