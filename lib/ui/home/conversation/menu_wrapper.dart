@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import '../../../constants/resources.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
@@ -43,6 +44,7 @@ class ConversationMenuWrapper extends StatelessWidget {
       buildMenus: () => [
         if (pinTime != null)
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuUnpinSvg,
             title: context.l10n.unPin,
             onTap: () => runFutureWithToast(
               context,
@@ -51,6 +53,7 @@ class ConversationMenuWrapper extends StatelessWidget {
           ),
         if (pinTime == null)
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuPinSvg,
             title: context.l10n.pin,
             onTap: () => runFutureWithToast(
               context,
@@ -59,6 +62,7 @@ class ConversationMenuWrapper extends StatelessWidget {
           ),
         if (isMute)
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuMuteSvg,
             title: context.l10n.unMute,
             onTap: () async {
               await runFutureWithToast(
@@ -73,6 +77,7 @@ class ConversationMenuWrapper extends StatelessWidget {
           )
         else
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuUnmuteSvg,
             title: context.l10n.muted,
             onTap: () async {
               final result = await showMixinDialog<int?>(
@@ -98,6 +103,7 @@ class ConversationMenuWrapper extends StatelessWidget {
                   keys: []).data ??
               [];
           return SubContextMenu(
+              icon: Resources.assetsImagesCircleSvg,
               title: context.l10n.addToCircle,
               menus: menus
                   .map((e) => ContextMenu(
@@ -125,6 +131,7 @@ class ConversationMenuWrapper extends StatelessWidget {
                   .toList());
         }),
         ContextMenu(
+          icon: Resources.assetsImagesContextMenuDeleteSvg,
           title: context.l10n.deleteChat,
           isDestructiveAction: true,
           onTap: () async {
@@ -159,6 +166,7 @@ class ConversationMenuWrapper extends StatelessWidget {
             if (circleId?.isEmpty ?? true) return const SizedBox();
 
             return ContextMenu(
+              icon: Resources.assetsImagesContextMenuDeleteSvg,
               title: context.l10n.removeChatFromCircle,
               isDestructiveAction: true,
               onTap: () async {

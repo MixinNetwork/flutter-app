@@ -207,6 +207,7 @@ class ContextMenu extends StatelessWidget {
     required this.title,
     this.isDestructiveAction = false,
     this.onTap,
+    this.icon,
   })  : _subMenuMode = false,
         super(key: key);
 
@@ -214,10 +215,12 @@ class ContextMenu extends StatelessWidget {
     Key? key,
     required this.title,
     this.isDestructiveAction = false,
+    this.icon,
   })  : _subMenuMode = true,
         onTap = null,
         super(key: key);
 
+  final String? icon;
   final String title;
   final bool isDestructiveAction;
   final bool _subMenuMode;
@@ -229,6 +232,12 @@ class ContextMenu extends StatelessWidget {
       const Color.fromRGBO(255, 255, 255, 1),
       darkColor: const Color.fromRGBO(62, 65, 72, 1),
     );
+    final color = isDestructiveAction
+        ? context.theme.red
+        : context.dynamicColor(
+            const Color.fromRGBO(0, 0, 0, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+          );
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 160),
       child: InteractiveDecoratedBox.color(
@@ -247,17 +256,18 @@ class ContextMenu extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           child: Row(
             children: [
+              if (icon != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: SvgPicture.asset(icon!,
+                      color: color, width: 24, height: 24),
+                ),
               Expanded(
                 child: Text(
                   title,
                   style: TextStyle(
                     fontSize: 16,
-                    color: isDestructiveAction
-                        ? context.theme.red
-                        : context.dynamicColor(
-                            const Color.fromRGBO(0, 0, 0, 1),
-                            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                          ),
+                    color: color,
                   ),
                 ),
               ),
@@ -281,9 +291,11 @@ class SubContextMenu extends StatelessWidget {
     Key? key,
     required this.title,
     required this.menus,
+    this.icon,
     this.isDestructiveAction = false,
   }) : super(key: key);
 
+  final String? icon;
   final String title;
   final bool isDestructiveAction;
   final List<Widget> menus;
@@ -300,6 +312,7 @@ class SubContextMenu extends StatelessWidget {
         ),
         portal: ContextMenuPage(menus: menus),
         child: ContextMenu._sub(
+          icon: icon,
           title: title,
           isDestructiveAction: isDestructiveAction,
         ),
