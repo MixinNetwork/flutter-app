@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/menu.dart';
@@ -104,6 +105,7 @@ class ShareMediaItemMenuWrapper extends StatelessWidget {
   Widget build(BuildContext context) => ContextMenuPortalEntry(
         buildMenus: () => [
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuGotoSvg,
             title: context.l10n.goToChat,
             onTap: () {
               context.read<BlinkCubit>().blinkByMessageId(messageId);

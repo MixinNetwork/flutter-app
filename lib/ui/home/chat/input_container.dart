@@ -244,6 +244,7 @@ class _InputContainer extends HookWidget {
                       ContextMenuPortalEntry(
                         buildMenus: () => [
                           ContextMenu(
+                            icon: Resources.assetsImagesContextMenuMuteSvg,
                             title: context.l10n.sendWithoutSound,
                             onTap: () => _sendMessage(
                               context,

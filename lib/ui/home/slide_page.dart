@@ -237,6 +237,7 @@ class _CircleList extends HookWidget {
                       child: ContextMenuPortalEntry(
                         buildMenus: () => [
                           ContextMenu(
+                              icon: Resources.assetsImagesContextMenuEditSvg,
                               title: context.l10n.editCircleName,
                               onTap: () async {
                                 final name = await showMixinDialog<String>(
@@ -256,6 +257,8 @@ class _CircleList extends HookWidget {
                                 );
                               }),
                           ContextMenu(
+                            icon:
+                                Resources.assetsImagesContextMenuEditCircleSvg,
                             title: context.l10n.editCircle,
                             onTap: () async {
                               final initSelected = (await context
@@ -316,6 +319,7 @@ class _CircleList extends HookWidget {
                             },
                           ),
                           ContextMenu(
+                            icon: Resources.assetsImagesContextMenuDeleteSvg,
                             title: context.l10n.deleteCircle,
                             isDestructiveAction: true,
                             onTap: () async {
