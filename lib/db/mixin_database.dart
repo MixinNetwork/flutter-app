@@ -215,7 +215,7 @@ class MixinDatabase extends _$MixinDatabase {
             }
             await m.createTable(expiredMessages);
           }
-          if(from <= 14) {
+          if (from <= 14) {
             await m.createIndex(indexMessagesConversationIdCategoryCreatedAt);
           }
         },
