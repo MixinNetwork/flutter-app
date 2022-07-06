@@ -86,68 +86,53 @@ class _Options extends HookWidget {
 
     final expireIn = conversation.conversation?.expireDuration ?? Duration.zero;
 
-    final checkedIcon = SvgPicture.asset(
-      Resources.assetsImagesCheckedSvg,
-      width: 24,
-      height: 24,
-    );
-
     return CellGroup(
       child: Column(
         children: [
           CellItem(
             title: Text(context.l10n.off),
-            trailing: expireIn.inSeconds < 1 ? checkedIcon : null,
-            onTap: () => _updateConversationExpireDuration(
-              context,
-              duration: Duration.zero,
-              conversationId: conversationId,
-            ),
+            trailing: expireIn < const Duration(seconds: 1)
+                ? SvgPicture.asset(
+                    Resources.assetsImagesCheckedSvg,
+                    width: 24,
+                    height: 24,
+                  )
+                : null,
+            onTap: () {
+              if (expireIn < const Duration(seconds: 1)) {
+                return;
+              }
+              _updateConversationExpireDuration(
+                context,
+                duration: Duration.zero,
+                conversationId: conversationId,
+              );
+            },
           ),
-          CellItem(
-            title: Text('30 ${context.l10n.seconds}'),
-            trailing: expireIn.inSeconds == 30 ? checkedIcon : null,
-            onTap: () => _updateConversationExpireDuration(
-              context,
-              duration: const Duration(seconds: 30),
-              conversationId: conversationId,
-            ),
+          _DurationOptionItem(
+            label: '30 ${context.l10n.seconds}',
+            duration: const Duration(seconds: 30),
+            current: expireIn,
           ),
-          CellItem(
-            title: Text('10 ${context.l10n.minutes}'),
-            trailing: expireIn.inMinutes == 10 ? checkedIcon : null,
-            onTap: () => _updateConversationExpireDuration(
-              context,
-              duration: const Duration(minutes: 10),
-              conversationId: conversationId,
-            ),
+          _DurationOptionItem(
+            label: '10 ${context.l10n.minutes}',
+            duration: const Duration(minutes: 10),
+            current: expireIn,
           ),
-          CellItem(
-            title: Text('2 ${context.l10n.hours}'),
-            trailing: expireIn.inHours == 2 ? checkedIcon : null,
-            onTap: () => _updateConversationExpireDuration(
-              context,
-              duration: const Duration(hours: 2),
-              conversationId: conversationId,
-            ),
+          _DurationOptionItem(
+            label: '2 ${context.l10n.hours}',
+            duration: const Duration(hours: 2),
+            current: expireIn,
           ),
-          CellItem(
-            title: Text('1 ${context.l10n.day}'),
-            trailing: expireIn.inDays == 1 ? checkedIcon : null,
-            onTap: () => _updateConversationExpireDuration(
-              context,
-              duration: const Duration(days: 1),
-              conversationId: conversationId,
-            ),
+          _DurationOptionItem(
+            label: '1 ${context.l10n.day}',
+            duration: const Duration(days: 1),
+            current: expireIn,
           ),
-          CellItem(
-            title: Text('1 ${context.l10n.week}'),
-            trailing: expireIn.inDays == 7 ? checkedIcon : null,
-            onTap: () => _updateConversationExpireDuration(
-              context,
-              duration: const Duration(days: 7),
-              conversationId: conversationId,
-            ),
+          _DurationOptionItem(
+            label: '1 ${context.l10n.week}',
+            duration: const Duration(days: 7),
+            current: expireIn,
           ),
           CellItem(
             title: Text(context.l10n.disappearingCustomTime),
@@ -160,6 +145,49 @@ class _Options extends HookWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DurationOptionItem extends HookWidget {
+  const _DurationOptionItem({
+    Key? key,
+    required this.duration,
+    required this.current,
+    required this.label,
+  }) : super(key: key);
+
+  final Duration duration;
+  final Duration current;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final conversationId = useMemoized(() {
+      final conversationId =
+          context.read<ConversationCubit>().state?.conversationId;
+      assert(conversationId != null);
+      return conversationId!;
+    });
+    return CellItem(
+      title: Text(label),
+      trailing: duration == current
+          ? SvgPicture.asset(
+              Resources.assetsImagesCheckedSvg,
+              width: 24,
+              height: 24,
+            )
+          : null,
+      onTap: () {
+        if (current == duration) {
+          return;
+        }
+        _updateConversationExpireDuration(
+          context,
+          duration: duration,
+          conversationId: conversationId,
+        );
+      },
     );
   }
 }
