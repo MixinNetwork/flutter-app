@@ -12404,6 +12404,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexMessagesConversationIdCreatedAt = Index(
       'index_messages_conversation_id_created_at',
       'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at DESC)');
+  late final Index indexMessagesConversationIdCategoryCreatedAt = Index(
+      'index_messages_conversation_id_category_created_at',
+      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category_created_at ON messages (conversation_id, category, created_at DESC)');
   late final Participants participants = Participants(this);
   late final Index indexParticipantsConversationIdCreatedAt = Index(
       'index_participants_conversation_id_created_at',
@@ -14399,6 +14402,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         indexMessageMentionsConversationIdHasRead,
         messages,
         indexMessagesConversationIdCreatedAt,
+        indexMessagesConversationIdCategoryCreatedAt,
         participants,
         indexParticipantsConversationIdCreatedAt,
         stickerAlbums,
