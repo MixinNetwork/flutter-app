@@ -31,37 +31,37 @@ class StickerMessageWidget extends HookWidget {
     double width;
     double height;
     if (assetWidth == null || assetHeight == null) {
-      height = 120;
-      width = 120;
+      height = 140;
+      width = 140;
     } else if (assetWidth * 2 < dpToPx(context, 48) ||
         assetHeight * 2 < dpToPx(context, 48)) {
       if (assetWidth < assetHeight) {
         if (dpToPx(context, 48) * assetHeight / assetWidth >
-            dpToPx(context, 120)) {
-          height = 120;
-          width = 120 * assetWidth / assetHeight;
+            dpToPx(context, 140)) {
+          height = 140;
+          width = 140 * assetWidth / assetHeight;
         } else {
           width = 48;
           height = 48 * assetHeight / assetWidth;
         }
       } else {
         if (dpToPx(context, 48) * assetWidth / assetHeight >
-            dpToPx(context, 120)) {
-          width = 120;
-          height = 120 * assetHeight / assetWidth;
+            dpToPx(context, 140)) {
+          width = 140;
+          height = 140 * assetHeight / assetWidth;
         } else {
           height = 48;
           width = 48 * assetWidth / assetHeight;
         }
       }
-    } else if (assetWidth * 2 < dpToPx(context, 120) ||
-        assetHeight * 2 > dpToPx(context, 120)) {
+    } else if (assetWidth * 2 < dpToPx(context, 140) ||
+        assetHeight * 2 > dpToPx(context, 140)) {
       if (assetWidth > assetHeight) {
-        width = 120;
-        height = 120 * assetHeight / assetWidth;
+        width = 140;
+        height = 140 * assetHeight / assetWidth;
       } else {
-        height = 120;
-        width = 120 * assetWidth / assetHeight;
+        height = 140;
+        width = 140 * assetWidth / assetHeight;
       }
     } else {
       width = pxToDp(context, assetWidth * 2);
