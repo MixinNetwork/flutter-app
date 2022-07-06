@@ -12736,19 +12736,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<PinMessageItemResult> pinMessageItem(
-      String conversationId, String? messageId) {
+  Selectable<LastPinMessageItemResult> lastPinMessageItem(
+      String conversationId) {
     return customSelect(
-        'SELECT message.content AS content, sender.full_name AS userFullName FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id WHERE message.conversation_id = ?1 AND message.quote_message_id = ?2 AND message.category = \'MESSAGE_PIN\' ORDER BY message.created_at DESC LIMIT 1',
+        'SELECT message.content AS content, sender.full_name AS userFullName FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id WHERE message.conversation_id = ?1 AND message.category = \'MESSAGE_PIN\' ORDER BY message.created_at DESC LIMIT 1',
         variables: [
-          Variable<String>(conversationId),
-          Variable<String?>(messageId)
+          Variable<String>(conversationId)
         ],
         readsFrom: {
           messages,
           users,
         }).map((QueryRow row) {
-      return PinMessageItemResult(
+      return LastPinMessageItemResult(
         content: row.read<String?>('content'),
         userFullName: row.read<String?>('userFullName'),
       );
@@ -14755,10 +14754,10 @@ class MessageItem {
   }
 }
 
-class PinMessageItemResult {
+class LastPinMessageItemResult {
   final String? content;
   final String? userFullName;
-  PinMessageItemResult({
+  LastPinMessageItemResult({
     this.content,
     this.userFullName,
   });
@@ -14767,12 +14766,12 @@ class PinMessageItemResult {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is PinMessageItemResult &&
+      (other is LastPinMessageItemResult &&
           other.content == this.content &&
           other.userFullName == this.userFullName);
   @override
   String toString() {
-    return (StringBuffer('PinMessageItemResult(')
+    return (StringBuffer('LastPinMessageItemResult(')
           ..write('content: $content, ')
           ..write('userFullName: $userFullName')
           ..write(')'))
