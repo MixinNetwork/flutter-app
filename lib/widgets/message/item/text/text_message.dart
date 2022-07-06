@@ -48,15 +48,11 @@ class TextMessage extends HookWidget {
     final conversationKeyword =
         useBlocState<ConversationCubit, ConversationState?>()?.keyword;
 
-    print('fuck globalKeyword: $globalKeyword, conversationKeyword: $conversationKeyword, keyword: $keyword');
-
     if (globalKeyword.isNotEmpty) {
       keyword = globalKeyword;
     } else if (conversationKeyword?.isNotEmpty ?? false) {
       keyword = conversationKeyword!;
     }
-
-    print('fuck 2 globalKeyword: $globalKeyword, conversationKeyword: $conversationKeyword, keyword: $keyword');
 
     final urlHighlightTextSpans = useMemoized(
       () => uriRegExp.allMatchesAndSort(content).map(
