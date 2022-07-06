@@ -538,6 +538,7 @@ Future Function() _searchMessageItemOnTap(
         context,
         message.conversationId,
         initIndexMessageId: message.messageId,
+        keyword: context.read<KeywordCubit>().state,
       );
 
       _clear(context);

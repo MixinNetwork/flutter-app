@@ -29,6 +29,7 @@ class ConversationState extends Equatable {
     this.participant,
     required this.refreshKey,
     this.initialSidePage,
+    this.keyword,
   });
 
   final String conversationId;
@@ -42,6 +43,7 @@ class ConversationState extends Equatable {
   final Object refreshKey;
 
   final String? initialSidePage;
+  final String? keyword;
 
   bool get isLoaded => conversation != null || user != null;
 
@@ -84,6 +86,7 @@ class ConversationState extends Equatable {
         refreshKey,
         initialSidePage,
         participant,
+        keyword,
       ];
 
   ConversationState copyWith({
@@ -98,6 +101,7 @@ class ConversationState extends Equatable {
     Participant? participant,
     Object? refreshKey,
     String? initialSidePage,
+    String? keyword,
   }) =>
       ConversationState(
         conversationId: conversationId ?? this.conversationId,
@@ -110,6 +114,7 @@ class ConversationState extends Equatable {
         refreshKey: refreshKey ?? this.refreshKey,
         initialSidePage: initialSidePage ?? this.initialSidePage,
         participant: participant ?? this.participant,
+        keyword: keyword ?? this.keyword,
       );
 }
 
@@ -208,6 +213,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     ConversationItem? conversation,
     String? initIndexMessageId,
     String? initialChatSidePage,
+    String? keyword,
   }) async {
     final accountServer = context.accountServer;
     final database = context.database;
@@ -262,6 +268,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       initialSidePage: initialChatSidePage,
       refreshKey: Object(),
       participant: await participantFuture,
+      keyword: keyword,
     );
 
     conversationCubit.emit(conversationState);
