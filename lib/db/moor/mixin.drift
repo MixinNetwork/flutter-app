@@ -72,6 +72,7 @@ CREATE INDEX IF NOT EXISTS index_flood_messages_created_at ON flood_messages(cre
 CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs("action");
 CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id_has_read ON message_mentions(conversation_id, has_read);
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages(conversation_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category_created_at ON messages(conversation_id, category,created_at DESC);
 CREATE INDEX IF NOT EXISTS index_participants_conversation_id_created_at ON participants(conversation_id, created_at);
 CREATE INDEX IF NOT EXISTS index_sticker_albums_category_created_at ON sticker_albums(category, created_at DESC);
 CREATE INDEX IF NOT EXISTS index_pin_messages_conversation_id ON pin_messages(conversation_id);
