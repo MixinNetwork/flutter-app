@@ -534,8 +534,6 @@ enum _ShowMoreType {
 Future Function() _searchMessageItemOnTap(
         BuildContext context, SearchMessageDetailItem message) =>
     () async {
-      print('fuck????');
-
       await ConversationCubit.selectConversation(
         context,
         message.conversationId,
