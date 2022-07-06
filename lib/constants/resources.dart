@@ -58,6 +58,9 @@ class Resources {
 
   static const String assetsImagesContactSvg = 'assets/images/contact.svg';
 
+  static const String assetsImagesContextMenuChatSvg =
+      'assets/images/context_menu_chat.svg';
+
   static const String assetsImagesContextMenuCopySvg =
       'assets/images/context_menu_copy.svg';
 
@@ -73,8 +76,20 @@ class Resources {
   static const String assetsImagesContextMenuDownloadSvg =
       'assets/images/context_menu_download.svg';
 
+  static const String assetsImagesContextMenuEditSvg =
+      'assets/images/context_menu_edit.svg';
+
+  static const String assetsImagesContextMenuEditCircleSvg =
+      'assets/images/context_menu_edit_circle.svg';
+
   static const String assetsImagesContextMenuForwardSvg =
       'assets/images/context_menu_forward.svg';
+
+  static const String assetsImagesContextMenuGotoSvg =
+      'assets/images/context_menu_goto.svg';
+
+  static const String assetsImagesContextMenuLinkSvg =
+      'assets/images/context_menu_link.svg';
 
   static const String assetsImagesContextMenuMuteSvg =
       'assets/images/context_menu_mute.svg';
@@ -94,11 +109,17 @@ class Resources {
   static const String assetsImagesContextMenuStickerSvg =
       'assets/images/context_menu_sticker.svg';
 
+  static const String assetsImagesContextMenuStopSvg =
+      'assets/images/context_menu_stop.svg';
+
   static const String assetsImagesContextMenuUnmuteSvg =
       'assets/images/context_menu_unmute.svg';
 
   static const String assetsImagesContextMenuUnpinSvg =
       'assets/images/context_menu_unpin.svg';
+
+  static const String assetsImagesContextMenuUserEditSvg =
+      'assets/images/context_menu_user_edit.svg';
 
   static const String assetsImagesCopySvg = 'assets/images/copy.svg';
 

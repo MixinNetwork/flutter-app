@@ -208,6 +208,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
       buildMenus: () {
         final menus = [
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuChatSvg,
             title:
                 context.l10n.groupPopMenuMessage(participant.fullName ?? '?'),
             onTap: () {
@@ -221,6 +222,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
         if (currentUser?.role == ParticipantRole.owner) {
           if (participant.role != ParticipantRole.admin) {
             menus.add(ContextMenu(
+              icon: Resources.assetsImagesContextMenuUserEditSvg,
               title: context.l10n.groupPopMenuMakeAdmin,
               onTap: () => runFutureWithToast(
                 context,
@@ -232,6 +234,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
             ));
           } else {
             menus.add(ContextMenu(
+              icon: Resources.assetsImagesContextMenuStopSvg,
               title: context.l10n.groupPopMenuDismissAdmin,
               onTap: () => runFutureWithToast(
                   context,
@@ -246,6 +249,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
         if (currentUser?.role != null && participant.role == null ||
             currentUser?.role == ParticipantRole.owner) {
           menus.add(ContextMenu(
+            icon: Resources.assetsImagesContextMenuDeleteSvg,
             isDestructiveAction: true,
             title: context.l10n
                 .groupPopMenuRemoveParticipants(participant.fullName ?? '?'),
@@ -335,6 +339,7 @@ class _ActionAddParticipants extends StatelessWidget {
             },
           ),
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuLinkSvg,
             title: context.l10n.groupInvite,
             onTap: () {
               final conversationCubit = context.read<ConversationCubit>().state;
