@@ -534,10 +534,13 @@ enum _ShowMoreType {
 Future Function() _searchMessageItemOnTap(
         BuildContext context, SearchMessageDetailItem message) =>
     () async {
+      print('fuck????');
+
       await ConversationCubit.selectConversation(
         context,
         message.conversationId,
         initIndexMessageId: message.messageId,
+        keyword: context.read<KeywordCubit>().state,
       );
 
       _clear(context);

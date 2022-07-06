@@ -5,6 +5,7 @@ import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../bloc/keyword_cubit.dart';
+import '../../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../../ui/home/chat/chat_page.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
@@ -44,8 +45,18 @@ class TextMessage extends HookWidget {
     );
 
     final globalKeyword = useBlocState<KeywordCubit, String>();
+    final conversationKeyword =
+        useBlocState<ConversationCubit, ConversationState?>()?.keyword;
 
-    if (keyword.isEmpty && globalKeyword.isNotEmpty) keyword = globalKeyword;
+    print('fuck globalKeyword: $globalKeyword, conversationKeyword: $conversationKeyword, keyword: $keyword');
+
+    if (globalKeyword.isNotEmpty) {
+      keyword = globalKeyword;
+    } else if (conversationKeyword?.isNotEmpty ?? false) {
+      keyword = conversationKeyword!;
+    }
+
+    print('fuck 2 globalKeyword: $globalKeyword, conversationKeyword: $conversationKeyword, keyword: $keyword');
 
     final urlHighlightTextSpans = useMemoized(
       () => uriRegExp.allMatchesAndSort(content).map(
