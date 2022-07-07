@@ -101,6 +101,11 @@ Future<void> initMixinDocumentsDirectory() async {
     mixinDocumentsDirectory = Directory(p.join(home!, '.mixin'));
     return;
   }
+  if (Platform.isWindows) {
+    mixinDocumentsDirectory = Directory(
+        p.join((await getApplicationDocumentsDirectory()).path, 'Mixin'));
+    return;
+  }
   mixinDocumentsDirectory = await getApplicationDocumentsDirectory();
 }
 
