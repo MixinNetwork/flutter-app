@@ -585,9 +585,9 @@ class _TileBigImage extends HookWidget {
                     ],
                   ),
                 ),
-                crossFadeState: !showDelete.value
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
+                crossFadeState: kPlatformIsMobile || showDelete.value
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
                 duration: const Duration(milliseconds: 150),
               )
             ],
