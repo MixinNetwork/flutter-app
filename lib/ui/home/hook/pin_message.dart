@@ -65,11 +65,13 @@ PinMessageState usePinMessageState() {
 
   final previewContent = useMemoizedStream<String?>(
     () {
-      if (!showLastPinMessage || conversationId == null) {
+      if (!showLastPinMessage ||
+          conversationId == null ||
+          pinMessageIds.firstOrNull == null) {
         return Stream.value(null);
       }
       return context.database.pinMessageDao
-          .lastPinMessageItem(conversationId)
+          .pinMessageItem(conversationId, pinMessageIds.first)
           .watchSingleOrNullThrottle(kSlowThrottleDuration)
           .asyncMap((message) async {
         if (message == null) return null;
@@ -85,7 +87,7 @@ PinMessageState usePinMessageState() {
         return context.l10n.pinned(message.userFullName ?? '', preview);
       });
     },
-    keys: [showLastPinMessage, conversationId],
+    keys: [showLastPinMessage, conversationId, pinMessageIds.firstOrNull],
   ).data;
 
   return useMemoized(
