@@ -121,9 +121,6 @@ class ImagePreviewPage extends HookWidget {
               .getSingleOrNull()
               .then((value) => next.value = value)
         ]);
-
-        print('prev ${prev.value}');
-        print('next ${next.value}');
       }();
     }, [_messageId.value]);
 
