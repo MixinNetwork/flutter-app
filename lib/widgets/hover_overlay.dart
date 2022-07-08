@@ -8,6 +8,7 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:provider/provider.dart';
 
 import 'interactive_decorated_box.dart';
+import 'menu.dart';
 
 class _HoverOverlayForceHiddenTool {
   _HoverOverlayForceHiddenTool(this.hidden, this.duration);
@@ -27,7 +28,7 @@ class _HoverOverlayForceHiddenTool {
 }
 
 typedef PortalBuilder<T> = Widget Function(BuildContext context, T value,
-    Widget Function(Widget? child) portalHoverWrapper, Widget? child);
+    Widget Function(Widget child) portalHoverWrapper, Widget? child);
 
 class HoverOverlay extends HookWidget {
   const HoverOverlay({
@@ -114,7 +115,7 @@ class HoverOverlay extends HookWidget {
       }
     }
 
-    Widget portalHoverWrapper(Widget? child) => MouseRegionIgnoreTouch(
+    Widget portalHoverWrapper(Widget child) => MouseRegionIgnoreTouch(
           onEnter: onChildHovering,
           onHover: onChildHovering,
           onExit: (_) async {
@@ -128,7 +129,13 @@ class HoverOverlay extends HookWidget {
                 tapped.value = true;
               }
             },
-            child: child,
+            child: NotificationListener<SubMenuClickedByTouchNotification>(
+              child: child,
+              onNotification: (notification) {
+                tapped.value = !tapped.value;
+                return true;
+              },
+            ),
           ),
         );
 
