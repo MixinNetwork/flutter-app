@@ -1092,7 +1092,7 @@ class _DrawerPainter extends CustomPainter {
     for (final line in lines) {
       final paint = Paint()
         ..color = line.eraser ? Colors.white : line.color
-        ..strokeWidth = line.width * scale
+        ..strokeWidth = line.width
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round
         ..style = PaintingStyle.stroke
