@@ -111,12 +111,16 @@ class ImagePreviewPage extends HookWidget {
             await messageDao.messageRowId(_messageId.value).getSingleOrNull();
         if (rowId == null) return;
 
-        prev.value = await messageDao
-            .mediaMessagesBefore(rowId, conversationId, 1)
-            .getSingleOrNull();
-        next.value = await messageDao
-            .mediaMessagesAfter(rowId, conversationId, 1)
-            .getSingleOrNull();
+        await Future.wait([
+          messageDao
+              .mediaMessagesBefore(rowId, conversationId, 1)
+              .getSingleOrNull()
+              .then((value) => prev.value = value),
+          messageDao
+              .mediaMessagesAfter(rowId, conversationId, 1)
+              .getSingleOrNull()
+              .then((value) => next.value = value)
+        ]);
       }();
     }, [_messageId.value]);
 

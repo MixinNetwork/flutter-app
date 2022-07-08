@@ -708,8 +708,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   static const _mediaMessageTypes = [
     MessageCategory.signalImage,
     MessageCategory.plainImage,
+    MessageCategory.encryptedImage,
     MessageCategory.signalVideo,
     MessageCategory.plainVideo,
+    MessageCategory.encryptedVideo,
   ];
 
   Selectable<MessageItem> mediaMessages(
@@ -727,13 +729,16 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           int rowId, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
-              CustomExpression<bool>('${message.aliasedName}.rowid < $rowId') &
+                  _________, __________, ___________) =>
               message.conversationId.equals(conversationId) &
-              message.category.isIn(_mediaMessageTypes),
+              message.category.isIn(_mediaMessageTypes) &
+              message.rowId.isSmallerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, em) =>
-              Limit(limit, 0));
+                  __________, ___________, ____________) =>
+              Limit(limit, 0),
+          order: (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________, __________, ___________) =>
+              OrderBy([OrderingTerm.desc(message.createdAt)]));
 
   Selectable<MessageItem> mediaMessagesAfter(
           int rowId, String conversationId, int limit) =>
@@ -741,14 +746,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________, em) =>
               message.conversationId.equals(conversationId) &
-              CustomExpression<bool>('${message.aliasedName}.rowid > $rowId') &
-              message.category.isIn(_mediaMessageTypes),
+              message.category.isIn(_mediaMessageTypes) &
+              message.rowId.isBiggerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, em) =>
+                  __________, ___________, ____________) =>
               Limit(limit, 0),
           order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
-              OrderBy([OrderingTerm.asc(message.createdAt)]));
+                  _________, __________, ___________) =>
+              OrderBy([OrderingTerm.desc(message.createdAt)]));
 
   Selectable<MessageItem> postMessages(
           String conversationId, int limit, int offset) =>
