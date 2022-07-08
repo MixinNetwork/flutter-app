@@ -736,16 +736,18 @@ class DecryptMessage extends Injector {
       final liveMessage =
           LiveMessage.fromJson(await jsonDecode(plain) as Map<String, dynamic>);
       final message = Message(
-          messageId: data.messageId,
-          conversationId: data.conversationId,
-          userId: data.senderId,
-          category: data.category!,
-          mediaWidth: liveMessage.width,
-          mediaHeight: liveMessage.height,
-          mediaUrl: liveMessage.url,
-          thumbUrl: liveMessage.thumbUrl,
-          status: data.status,
-          createdAt: data.createdAt);
+        messageId: data.messageId,
+        conversationId: data.conversationId,
+        userId: data.senderId,
+        category: data.category!,
+        mediaWidth: liveMessage.width,
+        mediaHeight: liveMessage.height,
+        mediaUrl: liveMessage.url,
+        thumbUrl: liveMessage.thumbUrl,
+        status: data.status,
+        createdAt: data.createdAt,
+        content: plain,
+      );
       await _insertMessage(message, data);
     } else if (data.category.isLocation) {
       String plain;
