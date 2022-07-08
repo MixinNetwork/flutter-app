@@ -660,13 +660,19 @@ class _MessageProcessRunner {
     db.SendingMessage message, {
     bool silent = false,
     int expireIn = 0,
-  }) async =>
-      signalProtocol.encryptGroupMessage(
-        message,
-        await getMentionData(message.messageId),
-        silent: silent,
-        expireIn: expireIn,
-      );
+  }) async {
+    var m = message;
+    if (message.category.isLive && message.content != null) {
+      final list = utf8.encode(message.content!);
+      m = message.copyWith(content: base64Encode(list));
+    }
+    return signalProtocol.encryptGroupMessage(
+      m,
+      await getMentionData(m.messageId),
+      silent: silent,
+      expireIn: expireIn,
+    );
+  }
 
   BlazeMessage _createBlazeMessage(
     db.SendingMessage message,

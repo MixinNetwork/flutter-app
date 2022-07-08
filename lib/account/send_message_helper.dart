@@ -730,8 +730,13 @@ class SendMessageHelper {
           // ignore
         }
       }
-      final liveMessage = LiveMessage(message.mediaWidth!, message.mediaHeight!,
-          message.thumbUrl ?? '', message.mediaUrl!, shareable);
+      final liveMessage = LiveMessage(
+        message.mediaWidth!,
+        message.mediaHeight!,
+        message.thumbUrl ?? '',
+        message.mediaUrl!,
+        shareable,
+      );
       final encoded = await jsonEncodeWithIsolate(liveMessage);
       await _sendLiveMessage(
           conversationId,
