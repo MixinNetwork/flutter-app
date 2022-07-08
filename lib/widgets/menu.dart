@@ -252,6 +252,11 @@ class ContextMenu extends StatelessWidget {
           onTap?.call();
           if (!_subMenuMode) context.closeMenu();
         },
+        onTapUp: (details) {
+          if (_subMenuMode && details.kind == PointerDeviceKind.touch) {
+            const SubMenuClickedByTouchNotification().dispatch(context);
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
@@ -317,4 +322,8 @@ class SubContextMenu extends StatelessWidget {
           isDestructiveAction: isDestructiveAction,
         ),
       );
+}
+
+class SubMenuClickedByTouchNotification extends Notification {
+  const SubMenuClickedByTouchNotification();
 }
