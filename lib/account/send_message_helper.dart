@@ -720,14 +720,24 @@ class SendMessageHelper {
         encryptCategory: encryptCategory,
       );
     } else if (message.category.isLive) {
+      var shareable = true;
+      if (message.content != null) {
+        try {
+          final map = await jsonDecodeWithIsolate(message.content!);
+          shareable =
+              LiveMessage.fromJson(map as Map<String, dynamic>).shareable;
+        } catch (_) {
+          // ignore
+        }
+      }
       final liveMessage = LiveMessage(
-          message.mediaWidth!,
-          message.mediaHeight!,
-          // TODO shareable?
-          message.thumbUrl ?? '',
-          message.mediaUrl!,
-          true);
-      final encoded = await jsonBase64EncodeWithIsolate(liveMessage);
+        message.mediaWidth!,
+        message.mediaHeight!,
+        message.thumbUrl ?? '',
+        message.mediaUrl!,
+        shareable,
+      );
+      final encoded = await jsonEncodeWithIsolate(liveMessage);
       await _sendLiveMessage(
           conversationId,
           senderId,
