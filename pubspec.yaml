@@ -112,18 +112,18 @@ dependencies:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
       path: plugins/window_size
-      ref: 57a2cd88486105d3d813583339eb0e23c9bfd6d2
+      ref: 12decbe0f592e14e03223f6f2c0c7e0e2dbd70a1
 
 dependency_overrides:
   bitsdojo_window_linux:
     git:
       url: https://github.com/MixinNetwork/bitsdojo_window.git
-      ref: 78faaa6440c7fee146258bb0ef3336c33ed4555d
+      ref: 30467f95c06317c67a841b4ce1853d18e95ee3f9
       path: bitsdojo_window_linux
   bitsdojo_window_windows:
     git:
       url: https://github.com/MixinNetwork/bitsdojo_window.git
-      ref: 78faaa6440c7fee146258bb0ef3336c33ed4555d
+      ref: 30467f95c06317c67a841b4ce1853d18e95ee3f9
       path: bitsdojo_window_windows
 
 dev_dependencies:
