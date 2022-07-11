@@ -14,7 +14,7 @@ extension MessageStatusOrdinal on MessageStatus {
       case MessageStatus.failed:
         return 4;
       case MessageStatus.unknown:
-        return 6;
+        return 5;
     }
   }
 }
