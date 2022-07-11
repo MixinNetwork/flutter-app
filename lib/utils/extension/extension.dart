@@ -48,6 +48,7 @@ export '../action_utils.dart' show OpenUriExtension;
 export '../datetime_format_utils.dart'
     show DateTimeExtension, StringEpochNanoExtension;
 export 'src/errors.dart';
+export 'src/message_status.dart';
 export 'src/platforms.dart';
 
 part 'src/db.dart';

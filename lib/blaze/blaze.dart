@@ -219,19 +219,18 @@ class Blaze {
       String messageId, MessageStatus status) async {}
 
   Future<bool> makeMessageStatus(String messageId, MessageStatus status) async {
-    final currentStatus =
-        await database.messageDao.findMessageStatusById(messageId);
-    if (currentStatus == MessageStatus.sending) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
-    } else if (currentStatus == MessageStatus.sent &&
-        (status == MessageStatus.delivered || status == MessageStatus.read)) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
-    } else if (currentStatus == MessageStatus.delivered &&
+    if (status == MessageStatus.sent ||
+        status == MessageStatus.delivered ||
         status == MessageStatus.read) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
+      final currentStatus =
+          await database.messageDao.findMessageStatusById(messageId);
+      if (currentStatus == null || status.ordinal > currentStatus.ordinal) {
+        await database.messageDao.updateMessageStatusById(messageId, status);
+        return true;
+      }
     }
 
-    return currentStatus != null;
+    return false;
   }
 
   Future<void> _sendListPending() async {
@@ -260,7 +259,11 @@ class Blaze {
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
         if (!(await makeMessageStatus(m.messageId, m.status))) {
-          pendingMessageStatusMap[m.messageId] = m.status;
+          final pendingMessageStatus = pendingMessageStatusMap[m.messageId];
+          if (pendingMessageStatus == null ||
+              m.status.ordinal > pendingMessageStatus.ordinal) {
+            pendingMessageStatusMap[m.messageId] = m.status;
+          }
         }
 
         await database.offsetDao.insert(Offset(

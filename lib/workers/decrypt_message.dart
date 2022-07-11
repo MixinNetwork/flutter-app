@@ -163,7 +163,8 @@ class DecryptMessage extends Injector {
 
     final messageId = floodMessage.messageId;
     final pendingMessageStatus = pendingMessageStatusMap.remove(messageId);
-    if (pendingMessageStatus != null) {
+    if (pendingMessageStatus != null &&
+        _remoteStatus.ordinal > pendingMessageStatus.ordinal) {
       _remoteStatus = pendingMessageStatus;
     }
 
