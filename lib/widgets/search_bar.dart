@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../bloc/keyword_cubit.dart';
 import '../constants/resources.dart';
+import '../ui/home/home.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import 'action_button.dart';
@@ -23,82 +24,103 @@ class SearchBar extends HookWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => MoveWindow(
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            children: [
-              const SizedBox(width: 16),
-              Expanded(
-                child: MoveWindowBarrier(
-                  child: SearchTextField(
-                    focusNode: context.read<FocusNode>(),
-                    controller: context.read<TextEditingController>(),
-                    onChanged: (keyword) =>
-                        context.read<KeywordCubit>().emit(keyword),
-                    hintText: context.l10n.search,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              ContextMenuPortalEntry(
-                buildMenus: () => [
-                  ContextMenu(
-                    icon: Resources.assetsImagesContextMenuSearchUserSvg,
-                    title: context.l10n.searchUser,
-                    onTap: () => showMixinDialog<String>(
-                      context: context,
-                      child: const _SearchUserDialog(),
-                    ),
-                  ),
-                  ContextMenu(
-                    icon:
-                        Resources.assetsImagesContextMenuCreateConversationSvg,
-                    title: context.l10n.createConversation,
-                    onTap: () {
-                      Actions.maybeInvoke(
-                        context,
-                        const CreateConversationIntent(),
-                      );
-                    },
-                  ),
-                  ContextMenu(
-                    icon: Resources.assetsImagesContextMenuCreateGroupSvg,
-                    title: context.l10n.createGroupConversation,
-                    onTap: () async {
-                      Actions.maybeInvoke(
-                        context,
-                        const CreateGroupConversationIntent(),
-                      );
-                    },
-                  ),
-                  ContextMenu(
-                    icon: Resources.assetsImagesCircleSvg,
-                    title: context.l10n.createCircle,
-                    onTap: () async {
-                      Actions.maybeInvoke(
-                        context,
-                        const CreateCircleIntent(),
-                      );
-                    },
-                  ),
-                ],
-                child: Builder(
-                  builder: (context) => MoveWindowBarrier(
-                    child: ActionButton(
-                      name: Resources.assetsImagesIcAddSvg,
-                      onTapUp: (event) =>
-                          context.sendMenuPosition(event.globalPosition),
-                      color: context.theme.icon,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-            ],
-          ),
+  Widget build(BuildContext context) {
+    final hasDrawer = context.watch<HasDrawerValueNotifier>();
+
+    Widget? leading;
+    if (hasDrawer.value) {
+      leading = ActionButton(
+        onTapUp: (event) => Scaffold.of(context).openDrawer(),
+        child: Icon(
+          Icons.menu,
+          size: 20,
+          color: context.theme.icon,
         ),
       );
+    }
+
+    return MoveWindow(
+      child: SizedBox(
+        height: 64,
+        child: Row(
+          children: [
+            AnimatedSize(
+              duration: const Duration(milliseconds: 150),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 150),
+                child: leading ?? const SizedBox(width: 16),
+              ),
+            ),
+            Expanded(
+              child: MoveWindowBarrier(
+                child: SearchTextField(
+                  focusNode: context.read<FocusNode>(),
+                  controller: context.read<TextEditingController>(),
+                  onChanged: (keyword) =>
+                      context.read<KeywordCubit>().emit(keyword),
+                  hintText: context.l10n.search,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ContextMenuPortalEntry(
+              buildMenus: () => [
+                ContextMenu(
+                  icon: Resources.assetsImagesContextMenuSearchUserSvg,
+                  title: context.l10n.searchUser,
+                  onTap: () => showMixinDialog<String>(
+                    context: context,
+                    child: const _SearchUserDialog(),
+                  ),
+                ),
+                ContextMenu(
+                  icon: Resources.assetsImagesContextMenuCreateConversationSvg,
+                  title: context.l10n.createConversation,
+                  onTap: () {
+                    Actions.maybeInvoke(
+                      context,
+                      const CreateConversationIntent(),
+                    );
+                  },
+                ),
+                ContextMenu(
+                  icon: Resources.assetsImagesContextMenuCreateGroupSvg,
+                  title: context.l10n.createGroupConversation,
+                  onTap: () async {
+                    Actions.maybeInvoke(
+                      context,
+                      const CreateGroupConversationIntent(),
+                    );
+                  },
+                ),
+                ContextMenu(
+                  icon: Resources.assetsImagesCircleSvg,
+                  title: context.l10n.createCircle,
+                  onTap: () async {
+                    Actions.maybeInvoke(
+                      context,
+                      const CreateCircleIntent(),
+                    );
+                  },
+                ),
+              ],
+              child: Builder(
+                builder: (context) => MoveWindowBarrier(
+                  child: ActionButton(
+                    name: Resources.assetsImagesIcAddSvg,
+                    onTapUp: (event) =>
+                        context.sendMenuPosition(event.globalPosition),
+                    color: context.theme.icon,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _SearchIntent extends Intent {
