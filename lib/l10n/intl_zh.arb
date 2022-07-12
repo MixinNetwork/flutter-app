@@ -359,5 +359,9 @@
   "disappearingCustomTimeMaxWarning": "最高设置 {max}",
   "zoom": "缩放",
   "bringAllToFront": "前置所有窗口",
-  "addToCircle": "添加到圈子"
+  "addToCircle": "添加到圈子",
+  "select": "选择",
+  "combineAndForward": "合并转发",
+  "forwardOneByOne": "逐条转发",
+  "deleteSelectedMessageWarning": "是否要删除选中的消息？"
 }

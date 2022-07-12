@@ -188,3 +188,15 @@ Future<bool> runFutureWithToast(
 
   return true;
 }
+
+Future<void> runWithLoading(
+    BuildContext context, Future<void> Function() function) async {
+  showToastLoading(context);
+  try {
+    await function();
+    Toast.dismiss();
+  } catch (error, s) {
+    e("runWithLoading's error: $error, $s");
+    await showToastFailed(context, error);
+  }
+}

@@ -367,5 +367,9 @@
   "disappearingCustomTimeMaxWarning": "The maximum time is {max}.",
   "zoom": "Zoom",
   "bringAllToFront": "Bring All To Front",
-  "addToCircle": "Add to Circle"
+  "addToCircle": "Add to Circle",
+  "select": "Select",
+  "combineAndForward": "Combine and Forward",
+  "forwardOneByOne": "Forward One By One",
+  "deleteSelectedMessageWarning": "Are you sure you want to delete the selected message?"
 }

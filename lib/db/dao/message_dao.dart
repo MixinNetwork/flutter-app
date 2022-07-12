@@ -838,6 +838,18 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   __________, ___________, em) =>
               Limit(1, 0));
 
+  Selectable<MessageItem> messageItemByMessageIds(List<String> messageIds) =>
+      _baseMessageItems(
+            (message, _, __, ___, ____, _____, ______, _______, ________,
+            _________, __________, em) =>
+            message.messageId.isIn(messageIds),
+            (_, __, ___, ____, _____, ______, _______, ________, _________,
+            __________, ___________, em) =>
+        maxLimit,
+        order: (message, _, __, ___, ____, _____, ______, _______, ________,
+            _________, __________, em) =>
+            OrderBy([OrderingTerm.asc(message.createdAt)]),);
+
   Future<MessageItem?> findNextAudioMessageItem({
     required String conversationId,
     required String messageId,

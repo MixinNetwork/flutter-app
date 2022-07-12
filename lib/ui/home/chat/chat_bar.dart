@@ -12,6 +12,7 @@ import '../../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
 import '../bloc/conversation_cubit.dart';
+import '../bloc/message_selection_cubit.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'chat_page.dart';
 
@@ -40,13 +41,23 @@ class ChatBar extends HookWidget {
       when: (state) => state?.isLoaded == true,
     )!;
 
+    final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
+        MessageSelectionState, bool>(
+      converter: (state) => state.hasSelectedMessage,
+    );
+
     MoveWindowBarrier toggleInfoPageWrapper({
       required Widget child,
       behavior = HitTestBehavior.opaque,
     }) =>
         MoveWindowBarrier(
           child: InteractiveDecoratedBox(
-            onTap: chatSideCubit.toggleInfoPage,
+            onTap: () {
+              if (inMultiSelectMode) {
+                return;
+              }
+              chatSideCubit.toggleInfoPage();
+            },
             child: child,
           ),
         );
@@ -107,34 +118,44 @@ class ChatBar extends HookWidget {
               child: _BotIcon(conversation: conversation),
             ),
           ),
-          MoveWindowBarrier(
-            child: ActionButton(
-              name: Resources.assetsImagesIcSearchSvg,
-              color: actionColor,
-              onTap: () {
-                final cubit = context.read<ChatSideCubit>();
-                if (cubit.state.pages.lastOrNull?.name ==
-                    ChatSideCubit.searchMessageHistory) {
-                  return cubit.pop();
-                }
-
-                cubit.replace(ChatSideCubit.searchMessageHistory);
-              },
+          if (inMultiSelectMode)
+            MoveWindowBarrier(
+              child: TextButton(
+                onPressed: () {
+                  context.read<MessageSelectionCubit>().clearSelection();
+                },
+                child: Text(context.l10n.cancel),
+              ),
+            )
+          else ...[
+            MoveWindowBarrier(
+              child: ActionButton(
+                name: Resources.assetsImagesIcSearchSvg,
+                color: actionColor,
+                onTap: () {
+                  final cubit = context.read<ChatSideCubit>();
+                  if (cubit.state.pages.lastOrNull?.name ==
+                      ChatSideCubit.searchMessageHistory) {
+                    return cubit.pop();
+                  }
+                  cubit.replace(ChatSideCubit.searchMessageHistory);
+                },
+              ),
             ),
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            alignment: Alignment.centerLeft,
-            child: MoveWindowBarrier(
-              child: chatSideRouteMode
-                  ? const SizedBox()
-                  : ActionButton(
-                      name: Resources.assetsImagesIcScreenSvg,
-                      color: actionColor,
-                      onTap: chatSideCubit.toggleInfoPage,
-                    ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 200),
+              alignment: Alignment.centerLeft,
+              child: MoveWindowBarrier(
+                child: chatSideRouteMode
+                    ? const SizedBox()
+                    : ActionButton(
+                        name: Resources.assetsImagesIcScreenSvg,
+                        color: actionColor,
+                        onTap: chatSideCubit.toggleInfoPage,
+                      ),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

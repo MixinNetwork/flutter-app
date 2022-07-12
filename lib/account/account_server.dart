@@ -452,6 +452,91 @@ class AccountServer {
         json.encode(data.toJson()),
       );
 
+  Future<void> sendTranscriptMessage(
+    List<String> messageIds,
+    EncryptCategory encryptCategory, {
+    String? conversationId,
+    String? recipientId,
+  }) async {
+    final transcriptId = const Uuid().v4();
+    db.TranscriptMessage toTranscript(db.MessageItem item) =>
+        db.TranscriptMessage(
+          transcriptId: transcriptId,
+          messageId: item.messageId,
+          userId: item.userId,
+          userFullName: item.userFullName,
+          category: item.type,
+          createdAt: item.createdAt,
+          content: item.content,
+          mediaUrl: item.mediaUrl,
+          mediaName: item.mediaName,
+          mediaSize: item.mediaSize,
+          mediaWidth: item.mediaWidth,
+          mediaHeight: item.mediaHeight,
+          mediaMimeType: item.mediaMimeType,
+          mediaDuration: item.mediaDuration,
+          mediaStatus: item.mediaStatus,
+          mediaWaveform: item.mediaWaveform,
+          thumbImage: item.thumbImage,
+          thumbUrl: item.thumbUrl,
+          stickerId: item.stickerId,
+          sharedUserId: item.sharedUserId,
+          quoteId: item.quoteId,
+          quoteContent: item.quoteContent,
+        );
+
+    assert(messageIds.isNotEmpty);
+    final messages =
+        await database.messageDao.messageItemByMessageIds(messageIds).get();
+    final transcripts =
+        messages.where((e) => e.canForward).map(toTranscript).toList();
+    if (transcripts.isEmpty) {
+      e('sendTranscriptMessage: transcripts is empty');
+      return;
+    }
+
+    final nonExistent =
+        messages.where((e) => e.type.isAttachment).any((message) {
+      final path = attachmentUtil.convertAbsolutePath(
+        fileName: message.mediaUrl,
+        conversationId: message.conversationId,
+        category: message.type,
+      );
+      final exist = path.isNotEmpty && File(path).existsSync();
+      if (!exist) {
+        e('sendTranscriptMessage: file not exist: $path');
+      }
+      return !exist;
+    });
+
+    if (nonExistent) {
+      e('sendTranscriptMessage: some file[s] not exist');
+      return;
+    }
+
+    await Future.wait(messages.where((e) => e.type.isAttachment).map((message) {
+      final path = attachmentUtil.convertAbsolutePath(
+        category: message.type,
+        conversationId: message.conversationId,
+        fileName: message.mediaUrl,
+      );
+
+      final transcriptPath = attachmentUtil.convertAbsolutePath(
+        fileName: message.mediaUrl,
+        messageId: message.messageId,
+        isTranscript: true,
+      );
+      return File(path).copy(transcriptPath);
+    }));
+
+    await _sendMessageHelper.sendTranscriptMessage(
+      conversationId: await _initConversation(conversationId, recipientId),
+      senderId: userId,
+      transcripts: transcripts,
+      encryptCategory: encryptCategory,
+    );
+  }
+
   Future<void> forwardMessage(
     String forwardMessageId,
     EncryptCategory encryptCategory, {

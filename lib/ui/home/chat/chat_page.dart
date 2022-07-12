@@ -33,6 +33,7 @@ import '../../../widgets/window/menus.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
+import '../bloc/message_selection_cubit.dart';
 import '../bloc/pending_jump_message_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import '../chat_slide_page/chat_info_page.dart';
@@ -51,6 +52,7 @@ import '../route/responsive_navigator_cubit.dart';
 import 'chat_bar.dart';
 import 'files_preview.dart';
 import 'input_container.dart';
+import 'selection_bottom_bar.dart';
 
 class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   ChatSideCubit() : super(const ResponsiveNavigatorState());
@@ -177,6 +179,11 @@ class ChatPage extends HookWidget {
         () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
         keys: [conversationId]);
 
+    final messageSelectionCubit = useBloc(
+      () => MessageSelectionCubit(),
+      keys: [conversationId],
+    );
+
     useEffect(() {
       if (initialSidePage != null) {
         chatSideCubit.pushPage(initialSidePage);
@@ -186,6 +193,17 @@ class ChatPage extends HookWidget {
     final navigatorState =
         useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
             bloc: chatSideCubit);
+
+    useEffect(
+        () => messageSelectionCubit.stream
+                .map((event) => event.hasSelectedMessage)
+                .distinct()
+                .listen((hasSelectedMessage) {
+              if (hasSelectedMessage) {
+                chatSideCubit.clear();
+              }
+            }).cancel,
+        [messageSelectionCubit, chatSideCubit]);
 
     final chatContainerPage = MaterialPage(
       key: const ValueKey('chatContainer'),
@@ -232,6 +250,7 @@ class ChatPage extends HookWidget {
               vlcService.dispose(),
         ),
         Provider.value(value: pinMessageState),
+        BlocProvider.value(value: messageSelectionCubit),
       ],
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -388,6 +407,11 @@ class ChatContainer extends HookWidget {
 
     final pendingJumpMessageCubit = useBloc(() => PendingJumpMessageCubit());
 
+    final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
+        MessageSelectionState, bool>(
+      converter: (state) => state.hasSelectedMessage,
+    );
+
     return RepaintBoundary(
       child: MultiProvider(
         providers: [
@@ -430,6 +454,7 @@ class ChatContainer extends HookWidget {
                   pages: [
                     MaterialPage(
                       child: _ChatDropOverlay(
+                        enable: !inMultiSelectMode,
                         child: Column(
                           children: [
                             Expanded(
@@ -470,7 +495,10 @@ class ChatContainer extends HookWidget {
                                 ),
                               ),
                             ),
-                            const InputContainer(),
+                            if (inMultiSelectMode)
+                              const SelectionBottomBar()
+                            else
+                              const InputContainer(),
                           ],
                         ),
                       ),
@@ -988,9 +1016,12 @@ class _ChatDropOverlay extends HookWidget {
   const _ChatDropOverlay({
     Key? key,
     required this.child,
+    required this.enable,
   }) : super(key: key);
 
   final Widget child;
+
+  final bool enable;
 
   @override
   Widget build(BuildContext context) {
@@ -1014,7 +1045,7 @@ class _ChatDropOverlay extends HookWidget {
         );
         enable.value = true;
       },
-      enable: enable.value,
+      enable: this.enable && enable.value,
       child: Stack(
         children: [
           child,
