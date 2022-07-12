@@ -38,6 +38,7 @@ import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
+import '../utils/mixin_api_client.dart';
 import '../utils/system/package_info.dart';
 import '../utils/web_view/web_view_interface.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
@@ -76,19 +77,10 @@ class AccountServer {
     this.identityNumber = identityNumber;
     this.privateKey = privateKey;
 
-    final tenSecond = const Duration(seconds: 10).inMilliseconds;
-    client = Client(
+    client = createClient(
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKey,
-      scp: scp,
-      dioOptions: BaseOptions(
-        connectTimeout: tenSecond,
-        receiveTimeout: tenSecond,
-        sendTimeout: tenSecond,
-        followRedirects: false,
-      ),
-      jsonDecodeCallback: jsonDecode,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -100,7 +92,6 @@ class AccountServer {
           },
         ),
       ],
-      httpLogLevel: HttpLogLevel.none,
     );
     await _initDatabase(privateKey, multiAuthCubit);
 

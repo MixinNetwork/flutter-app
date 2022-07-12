@@ -33,6 +33,7 @@ import '../enum/message_category.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/logger.dart';
+import '../utils/mixin_api_client.dart';
 import '../utils/reg_exp_utils.dart';
 import 'decrypt_message.dart';
 import 'isolate_event.dart';
@@ -135,19 +136,10 @@ class _MessageProcessRunner {
       }),
     );
 
-    final tenSecond = const Duration(seconds: 10).inMilliseconds;
-    client = Client(
+    client = createClient(
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKeyStr,
-      scp: scp,
-      dioOptions: BaseOptions(
-        connectTimeout: tenSecond,
-        receiveTimeout: tenSecond,
-        sendTimeout: tenSecond,
-        followRedirects: false,
-      ),
-      jsonDecodeCallback: jsonDecode,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -160,7 +152,6 @@ class _MessageProcessRunner {
           },
         ),
       ],
-      httpLogLevel: HttpLogLevel.none,
     );
 
     blaze = Blaze(
