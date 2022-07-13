@@ -759,7 +759,7 @@ class SendMessageHelper {
       final transcripts = await _transcriptMessageDao
           .transcriptMessageByTranscriptId(message.messageId)
           .get();
-      await _sendTranscriptMessage(
+      await sendTranscriptMessage(
         conversationId: conversationId,
         senderId: senderId,
         transcripts: transcripts,
@@ -768,7 +768,7 @@ class SendMessageHelper {
     }
   }
 
-  Future<void> _sendTranscriptMessage({
+  Future<void> sendTranscriptMessage({
     required String conversationId,
     required String senderId,
     required List<TranscriptMessage> transcripts,

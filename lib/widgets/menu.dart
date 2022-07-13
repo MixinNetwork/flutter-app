@@ -32,12 +32,14 @@ class ContextMenuPortalEntry extends HookWidget {
     required this.buildMenus,
     this.showedMenu,
     this.interactiveForTap = false,
+    this.enable = true,
   }) : super(key: key);
 
   final Widget child;
   final List<Widget> Function() buildMenus;
   final ValueChanged<bool>? showedMenu;
   final bool interactiveForTap;
+  final bool enable;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +57,15 @@ class ContextMenuPortalEntry extends HookWidget {
       showedMenu?.call(visible);
     }, [visible]);
 
+    useEffect(() {
+      if (!enable) {
+        offsetCubit.emit(null);
+      }
+    }, [enable]);
+
+    if (!enable) {
+      return child;
+    }
     return Provider.value(
       value: offsetCubit,
       child: Barrier(

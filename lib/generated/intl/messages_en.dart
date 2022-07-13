@@ -248,6 +248,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "clearChat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
         "closeWindow": MessageLookupByLibrary.simpleMessage("Close window"),
         "collapse": MessageLookupByLibrary.simpleMessage("Collapse"),
+        "combineAndForward":
+            MessageLookupByLibrary.simpleMessage("Combine and Forward"),
         "comingSoon": MessageLookupByLibrary.simpleMessage("Coming soon..."),
         "confirm": MessageLookupByLibrary.simpleMessage("OK"),
         "contact": MessageLookupByLibrary.simpleMessage("Contact"),
@@ -286,6 +288,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete for Everyone"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("Delete for me"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("Delete Group"),
+        "deleteSelectedMessageWarning": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to delete the selected message?"),
         "developer": MessageLookupByLibrary.simpleMessage("Developer"),
         "disappearingCustomTime":
             MessageLookupByLibrary.simpleMessage("Custom time"),
@@ -404,6 +408,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "followTwitter":
             MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
+        "forwardOneByOne":
+            MessageLookupByLibrary.simpleMessage("Forward One By One"),
         "from": MessageLookupByLibrary.simpleMessage("From"),
         "fromWithColon": MessageLookupByLibrary.simpleMessage("From: "),
         "goToChat": MessageLookupByLibrary.simpleMessage("Go to chat"),
@@ -573,6 +579,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mixin ID or Phone number"),
         "second": MessageLookupByLibrary.simpleMessage("second"),
         "seconds": MessageLookupByLibrary.simpleMessage("seconds"),
+        "select": MessageLookupByLibrary.simpleMessage("Select"),
         "send": MessageLookupByLibrary.simpleMessage("send"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Archived all files in one zip file"),

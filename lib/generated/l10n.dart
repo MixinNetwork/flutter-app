@@ -3741,6 +3741,46 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Select`
+  String get select {
+    return Intl.message(
+      'Select',
+      name: 'select',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Combine and Forward`
+  String get combineAndForward {
+    return Intl.message(
+      'Combine and Forward',
+      name: 'combineAndForward',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Forward One By One`
+  String get forwardOneByOne {
+    return Intl.message(
+      'Forward One By One',
+      name: 'forwardOneByOne',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to delete the selected message?`
+  String get deleteSelectedMessageWarning {
+    return Intl.message(
+      'Are you sure you want to delete the selected message?',
+      name: 'deleteSelectedMessageWarning',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

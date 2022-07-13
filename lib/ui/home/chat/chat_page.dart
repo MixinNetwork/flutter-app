@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -33,6 +34,7 @@ import '../../../widgets/window/menus.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
+import '../bloc/message_selection_cubit.dart';
 import '../bloc/pending_jump_message_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import '../chat_slide_page/chat_info_page.dart';
@@ -51,6 +53,7 @@ import '../route/responsive_navigator_cubit.dart';
 import 'chat_bar.dart';
 import 'files_preview.dart';
 import 'input_container.dart';
+import 'selection_bottom_bar.dart';
 
 class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   ChatSideCubit() : super(const ResponsiveNavigatorState());
@@ -177,6 +180,11 @@ class ChatPage extends HookWidget {
         () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
         keys: [conversationId]);
 
+    final messageSelectionCubit = useBloc(
+      () => MessageSelectionCubit(),
+      keys: [conversationId],
+    );
+
     useEffect(() {
       if (initialSidePage != null) {
         chatSideCubit.pushPage(initialSidePage);
@@ -186,6 +194,17 @@ class ChatPage extends HookWidget {
     final navigatorState =
         useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
             bloc: chatSideCubit);
+
+    useEffect(
+        () => messageSelectionCubit.stream
+                .map((event) => event.hasSelectedMessage)
+                .distinct()
+                .listen((hasSelectedMessage) {
+              if (hasSelectedMessage) {
+                chatSideCubit.clear();
+              }
+            }).cancel,
+        [messageSelectionCubit, chatSideCubit]);
 
     final chatContainerPage = MaterialPage(
       key: const ValueKey('chatContainer'),
@@ -232,6 +251,7 @@ class ChatPage extends HookWidget {
               vlcService.dispose(),
         ),
         Provider.value(value: pinMessageState),
+        BlocProvider.value(value: messageSelectionCubit),
       ],
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -388,102 +408,134 @@ class ChatContainer extends HookWidget {
 
     final pendingJumpMessageCubit = useBloc(() => PendingJumpMessageCubit());
 
+    final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
+        MessageSelectionState, bool>(
+      converter: (state) => state.hasSelectedMessage,
+    );
+
     return RepaintBoundary(
       child: MultiProvider(
         providers: [
           BlocProvider.value(value: quoteMessageCubit),
           BlocProvider.value(value: pendingJumpMessageCubit),
         ],
-        child: Column(
-          children: [
-            Container(
-              height: 64,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: context.theme.divider,
-                  ),
-                ),
-              ),
-              child: const ChatBar(),
-            ),
-            Expanded(
-              child: DecoratedBox(
+        child: FocusableActionDetector(
+          autofocus: true,
+          shortcuts: {
+            if (inMultiSelectMode)
+              const SingleActivator(LogicalKeyboardKey.escape):
+                  const _ExitSelectionModeIntent(),
+          },
+          actions: {
+            _ExitSelectionModeIntent: CallbackAction<_ExitSelectionModeIntent>(
+              onInvoke: (intent) {
+                context.read<MessageSelectionCubit>().clearSelection();
+              },
+            )
+          },
+          child: Column(
+            children: [
+              Container(
+                height: 64,
                 decoration: BoxDecoration(
-                  color: context.theme.chatBackground,
-                  image: DecorationImage(
-                    image: const ExactAssetImage(
-                      Resources.assetsImagesChatBackgroundPng,
-                    ),
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      context.brightnessValue == 1.0
-                          ? Colors.white.withOpacity(0.02)
-                          : Colors.black.withOpacity(0.03),
-                      BlendMode.srcIn,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: context.theme.divider,
                     ),
                   ),
                 ),
-                child: Navigator(
-                  onPopPage: (Route<dynamic> route, dynamic result) =>
-                      route.didPop(result),
-                  pages: [
-                    MaterialPage(
-                      child: _ChatDropOverlay(
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: context.theme.divider,
-                                    ),
-                                  ),
-                                ),
-                                child: Stack(
-                                  children: [
-                                    const RepaintBoundary(
-                                      child: _NotificationListener(
-                                        child: _List(),
-                                      ),
-                                    ),
-                                    const Positioned(
-                                      left: 6,
-                                      right: 6,
-                                      bottom: 6,
-                                      child: _BottomBanner(),
-                                    ),
-                                    Positioned(
-                                      bottom: 16,
-                                      right: 16,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: const [
-                                          _JumpMentionButton(),
-                                          _JumpCurrentButton(),
-                                        ],
-                                      ),
-                                    ),
-                                    const _PinMessagesBanner(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const InputContainer(),
-                          ],
-                        ),
+                child: const ChatBar(),
+              ),
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: context.theme.chatBackground,
+                    image: DecorationImage(
+                      image: const ExactAssetImage(
+                        Resources.assetsImagesChatBackgroundPng,
+                      ),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        context.brightnessValue == 1.0
+                            ? Colors.white.withOpacity(0.02)
+                            : Colors.black.withOpacity(0.03),
+                        BlendMode.srcIn,
                       ),
                     ),
-                  ],
+                  ),
+                  child: Navigator(
+                    onPopPage: (Route<dynamic> route, dynamic result) =>
+                        route.didPop(result),
+                    pages: [
+                      MaterialPage(
+                        child: _ChatDropOverlay(
+                          enable: !inMultiSelectMode,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: context.theme.divider,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      const RepaintBoundary(
+                                        child: _NotificationListener(
+                                          child: _List(),
+                                        ),
+                                      ),
+                                      const Positioned(
+                                        left: 6,
+                                        right: 6,
+                                        bottom: 6,
+                                        child: _BottomBanner(),
+                                      ),
+                                      Positioned(
+                                        bottom: 16,
+                                        right: 16,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: const [
+                                            _JumpMentionButton(),
+                                            _JumpCurrentButton(),
+                                          ],
+                                        ),
+                                      ),
+                                      const _PinMessagesBanner(),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              AnimatedCrossFade(
+                                firstChild: const InputContainer(),
+                                secondChild: const SelectionBottomBar(),
+                                crossFadeState: inMultiSelectMode
+                                    ? CrossFadeState.showSecond
+                                    : CrossFadeState.showFirst,
+                                duration: const Duration(milliseconds: 300),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+class _ExitSelectionModeIntent extends Intent {
+  const _ExitSelectionModeIntent();
 }
 
 class _NotificationListener extends StatelessWidget {
@@ -988,9 +1040,12 @@ class _ChatDropOverlay extends HookWidget {
   const _ChatDropOverlay({
     Key? key,
     required this.child,
+    required this.enable,
   }) : super(key: key);
 
   final Widget child;
+
+  final bool enable;
 
   @override
   Widget build(BuildContext context) {
@@ -1014,7 +1069,7 @@ class _ChatDropOverlay extends HookWidget {
         );
         enable.value = true;
       },
-      enable: enable.value,
+      enable: this.enable && enable.value,
       child: Stack(
         children: [
           child,
