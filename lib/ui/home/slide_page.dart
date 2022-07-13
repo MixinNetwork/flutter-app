@@ -152,18 +152,20 @@ class _CurrentUser extends StatelessWidget {
                       userId: account?.userId,
                     ),
                   ),
-                  title: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(account?.fullName ?? ''),
-                      const SizedBox(height: 4),
-                      Text(
-                        account?.identityNumber ?? '',
-                        style: TextStyle(
-                            color: context.theme.secondaryText, fontSize: 12),
-                      )
-                    ],
+                  title: DefaultTextStyle(
+                    style: const TextStyle(fontSize: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(account?.fullName ?? ''),
+                        const SizedBox(height: 2),
+                        Text(
+                          account?.identityNumber ?? '',
+                          style: TextStyle(color: context.theme.secondaryText),
+                        )
+                      ],
+                    ),
                   ),
                   selected: selected,
                   onTap: () {
