@@ -110,7 +110,7 @@ class SlidePage extends StatelessWidget {
                           height: 24,
                           color: context.theme.text,
                         ),
-                        title: context.l10n.collapse,
+                        title: Text(context.l10n.collapse),
                         onTap: () =>
                             context.settingCubit.collapsedSidebar = !collapse,
                       );
@@ -143,13 +143,31 @@ class _CurrentUser extends StatelessWidget {
               builder: (context, selected) {
                 assert(account != null);
                 return SelectItem(
-                  icon: AvatarWidget(
-                    avatarUrl: account?.avatarUrl,
-                    size: 24,
-                    name: account?.fullName,
-                    userId: account?.userId,
+                  icon: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: AvatarWidget(
+                      avatarUrl: account?.avatarUrl,
+                      size: 24,
+                      name: account?.fullName,
+                      userId: account?.userId,
+                    ),
                   ),
-                  title: account?.fullName ?? '',
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        account?.fullName ?? '',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${account?.identityNumber}',
+                        style: TextStyle(
+                            color: context.theme.secondaryText, fontSize: 12),
+                      )
+                    ],
+                  ),
                   selected: selected,
                   onTap: () {
                     BlocProvider.of<SlideCategoryCubit>(context)
@@ -349,7 +367,7 @@ class _CircleList extends HookWidget {
                               height: 24,
                               color: getCircleColorById(circle.circleId),
                             ),
-                            title: circle.name,
+                            title: Text(circle.name),
                             onTap: () {
                               BlocProvider.of<SlideCategoryCubit>(context)
                                   .select(
@@ -457,7 +475,7 @@ class _Item extends HookWidget {
           height: 24,
           color: context.theme.text,
         ),
-        title: title,
+        title: Text(title),
         onTap: () {
           BlocProvider.of<SlideCategoryCubit>(context).select(
             type,

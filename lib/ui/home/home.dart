@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:provider/provider.dart';
 
 import '../../blaze/blaze.dart';
 import '../../bloc/bloc_converter.dart';
@@ -166,6 +167,10 @@ class _SetupNameWidget extends HookWidget {
   }
 }
 
+class HasDrawerValueNotifier extends ValueNotifier<bool> {
+  HasDrawerValueNotifier(bool value) : super(value);
+}
+
 class _HomePage extends HookWidget {
   const _HomePage({
     Key? key,
@@ -188,53 +193,81 @@ class _HomePage extends HookWidget {
     final autoCollapse = clampSlideWidth < kSlidePageMaxWidth;
     final collapse = userCollapse || autoCollapse;
 
-    return Scaffold(
-      backgroundColor: context.theme.primary,
-      body: SafeArea(
-        child: HookBuilder(builder: (context) {
-          useProtocol((String url) => openUri(context, url));
-          return Row(
-            children: [
-              TweenAnimationBuilder(
-                tween: Tween<double>(
-                  end: collapse ? kSlidePageMinWidth : kSlidePageMaxWidth,
+    var targetWidth = collapse ? kSlidePageMinWidth : kSlidePageMaxWidth;
+    if (clampSlideWidth <= kSlidePageMinWidth) {
+      targetWidth = 0;
+    }
+
+    final hasDrawerValueNotifier =
+        useMemoized(() => HasDrawerValueNotifier(false));
+
+    final hasDrawer = useListenable(hasDrawerValueNotifier);
+
+    return ChangeNotifierProvider.value(
+      value: hasDrawerValueNotifier,
+      child: Scaffold(
+        backgroundColor: context.theme.primary,
+        drawerEnableOpenDragGesture: false,
+        drawer: hasDrawer.value && targetWidth == 0
+            ? Drawer(
+                child: Container(
+                  width: kSlidePageMaxWidth,
+                  color: context.theme.primary,
+                  child: const SlidePage(showCollapse: false),
                 ),
-                duration: const Duration(milliseconds: 200),
-                builder: (BuildContext context, double? value, Widget? child) =>
-                    SizedBox(
-                  width: value,
-                  child: child,
-                ),
-                child: SlidePage(showCollapse: !autoCollapse),
-              ),
-              Expanded(
-                child: ResponsiveNavigator(
-                  switchWidth:
-                      kResponsiveNavigationMinWidth + kConversationListWidth,
-                  leftPage: MaterialPage(
-                    key: const ValueKey('center'),
-                    name: 'center',
-                    child: SizedBox(
-                      key: _conversationPageKey,
-                      width: kConversationListWidth,
-                      child: const _CenterPage(),
-                    ),
+              )
+            : null,
+        body: SafeArea(
+          child: HookBuilder(builder: (context) {
+            useProtocol((String url) => openUri(context, url));
+            return Row(
+              children: [
+                TweenAnimationBuilder(
+                  tween: Tween<double>(end: targetWidth),
+                  duration: const Duration(milliseconds: 200),
+                  onEnd: () => hasDrawerValueNotifier.value = targetWidth == 0,
+                  builder:
+                      (BuildContext context, double? value, Widget? child) =>
+                          SizedBox(
+                    width: value,
+                    child: value == 0 ? null : child,
                   ),
-                  rightEmptyPage: MaterialPage(
-                    key: const ValueKey('empty'),
-                    name: 'empty',
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: context.theme.chatBackground,
+                  child: OverflowBox(
+                    alignment: Alignment.centerLeft,
+                    minWidth: kSlidePageMinWidth,
+                    maxWidth: collapse ? kSlidePageMinWidth : clampSlideWidth,
+                    child: SlidePage(showCollapse: !autoCollapse),
+                  ),
+                ),
+                Expanded(
+                  child: ResponsiveNavigator(
+                    switchWidth:
+                        kResponsiveNavigationMinWidth + kConversationListWidth,
+                    leftPage: MaterialPage(
+                      key: const ValueKey('center'),
+                      name: 'center',
+                      child: SizedBox(
+                        key: _conversationPageKey,
+                        width: kConversationListWidth,
+                        child: const _CenterPage(),
                       ),
-                      child: Empty(text: context.l10n.pageRightEmptyMessage),
+                    ),
+                    rightEmptyPage: MaterialPage(
+                      key: const ValueKey('empty'),
+                      name: 'empty',
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: context.theme.chatBackground,
+                        ),
+                        child: Empty(text: context.l10n.pageRightEmptyMessage),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          );
-        }),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }

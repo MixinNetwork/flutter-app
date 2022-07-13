@@ -19,7 +19,7 @@ class SelectItem extends HookWidget {
   }) : super(key: key);
 
   final Widget icon;
-  final String title;
+  final Widget title;
   final bool selected;
   final int count;
   final int mutedCount;
@@ -46,13 +46,13 @@ class SelectItem extends HookWidget {
       child: LayoutBuilder(builder: (context, boxConstraints) {
         final hideTitle = boxConstraints.maxWidth < 75;
         final hideUnreadText = boxConstraints.maxWidth < 100;
-        final titleWidget = Text(
-          title,
+        final titleWidget = DefaultTextStyle.merge(
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: context.theme.text,
             fontSize: 14,
           ),
+          child: title,
         );
         final dynamicColor = context.dynamicColor(
           const Color.fromRGBO(51, 51, 51, 0.16),
