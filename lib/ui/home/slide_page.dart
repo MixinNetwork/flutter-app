@@ -152,20 +152,19 @@ class _CurrentUser extends StatelessWidget {
                       userId: account?.userId,
                     ),
                   ),
-                  title: DefaultTextStyle.merge(
-                    style: const TextStyle(fontSize: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(account?.fullName ?? ''),
-                        const SizedBox(height: 2),
-                        Text(
-                          account?.identityNumber ?? '',
-                          style: TextStyle(color: context.theme.secondaryText),
-                        )
-                      ],
-                    ),
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(account?.fullName ?? ''),
+                      const SizedBox(height: 2),
+                      Text(
+                        context.l10n
+                            .contactMixinId(account?.identityNumber ?? ''),
+                        style: TextStyle(
+                            color: context.theme.secondaryText, fontSize: 10),
+                      )
+                    ],
                   ),
                   selected: selected,
                   onTap: () {
