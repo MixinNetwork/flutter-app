@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -418,104 +419,123 @@ class ChatContainer extends HookWidget {
           BlocProvider.value(value: quoteMessageCubit),
           BlocProvider.value(value: pendingJumpMessageCubit),
         ],
-        child: Column(
-          children: [
-            Container(
-              height: 64,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: context.theme.divider,
-                  ),
-                ),
-              ),
-              child: const ChatBar(),
-            ),
-            Expanded(
-              child: DecoratedBox(
+        child: FocusableActionDetector(
+          autofocus: true,
+          shortcuts: {
+            if (inMultiSelectMode)
+              const SingleActivator(LogicalKeyboardKey.escape):
+                  const _ExitSelectionModeIntent(),
+          },
+          actions: {
+            _ExitSelectionModeIntent: CallbackAction<_ExitSelectionModeIntent>(
+              onInvoke: (intent) {
+                context.read<MessageSelectionCubit>().clearSelection();
+              },
+            )
+          },
+          child: Column(
+            children: [
+              Container(
+                height: 64,
                 decoration: BoxDecoration(
-                  color: context.theme.chatBackground,
-                  image: DecorationImage(
-                    image: const ExactAssetImage(
-                      Resources.assetsImagesChatBackgroundPng,
-                    ),
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      context.brightnessValue == 1.0
-                          ? Colors.white.withOpacity(0.02)
-                          : Colors.black.withOpacity(0.03),
-                      BlendMode.srcIn,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: context.theme.divider,
                     ),
                   ),
                 ),
-                child: Navigator(
-                  onPopPage: (Route<dynamic> route, dynamic result) =>
-                      route.didPop(result),
-                  pages: [
-                    MaterialPage(
-                      child: _ChatDropOverlay(
-                        enable: !inMultiSelectMode,
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: context.theme.divider,
-                                    ),
-                                  ),
-                                ),
-                                child: Stack(
-                                  children: [
-                                    const RepaintBoundary(
-                                      child: _NotificationListener(
-                                        child: _List(),
-                                      ),
-                                    ),
-                                    const Positioned(
-                                      left: 6,
-                                      right: 6,
-                                      bottom: 6,
-                                      child: _BottomBanner(),
-                                    ),
-                                    Positioned(
-                                      bottom: 16,
-                                      right: 16,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: const [
-                                          _JumpMentionButton(),
-                                          _JumpCurrentButton(),
-                                        ],
-                                      ),
-                                    ),
-                                    const _PinMessagesBanner(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            AnimatedCrossFade(
-                              firstChild: const InputContainer(),
-                              secondChild: const SelectionBottomBar(),
-                              crossFadeState: inMultiSelectMode
-                                  ? CrossFadeState.showSecond
-                                  : CrossFadeState.showFirst,
-                              duration: const Duration(milliseconds: 300),
-                            ),
-                          ],
-                        ),
+                child: const ChatBar(),
+              ),
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: context.theme.chatBackground,
+                    image: DecorationImage(
+                      image: const ExactAssetImage(
+                        Resources.assetsImagesChatBackgroundPng,
+                      ),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        context.brightnessValue == 1.0
+                            ? Colors.white.withOpacity(0.02)
+                            : Colors.black.withOpacity(0.03),
+                        BlendMode.srcIn,
                       ),
                     ),
-                  ],
+                  ),
+                  child: Navigator(
+                    onPopPage: (Route<dynamic> route, dynamic result) =>
+                        route.didPop(result),
+                    pages: [
+                      MaterialPage(
+                        child: _ChatDropOverlay(
+                          enable: !inMultiSelectMode,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: context.theme.divider,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      const RepaintBoundary(
+                                        child: _NotificationListener(
+                                          child: _List(),
+                                        ),
+                                      ),
+                                      const Positioned(
+                                        left: 6,
+                                        right: 6,
+                                        bottom: 6,
+                                        child: _BottomBanner(),
+                                      ),
+                                      Positioned(
+                                        bottom: 16,
+                                        right: 16,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: const [
+                                            _JumpMentionButton(),
+                                            _JumpCurrentButton(),
+                                          ],
+                                        ),
+                                      ),
+                                      const _PinMessagesBanner(),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              AnimatedCrossFade(
+                                firstChild: const InputContainer(),
+                                secondChild: const SelectionBottomBar(),
+                                crossFadeState: inMultiSelectMode
+                                    ? CrossFadeState.showSecond
+                                    : CrossFadeState.showFirst,
+                                duration: const Duration(milliseconds: 300),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+class _ExitSelectionModeIntent extends Intent {
+  const _ExitSelectionModeIntent();
 }
 
 class _NotificationListener extends StatelessWidget {
