@@ -154,6 +154,7 @@ class _CurrentUser extends StatelessWidget {
                   ),
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(account?.fullName ?? ''),
                       const SizedBox(height: 4),
