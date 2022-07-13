@@ -152,7 +152,7 @@ class _CurrentUser extends StatelessWidget {
                       userId: account?.userId,
                     ),
                   ),
-                  title: DefaultTextStyle(
+                  title: DefaultTextStyle.merge(
                     style: const TextStyle(fontSize: 12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
