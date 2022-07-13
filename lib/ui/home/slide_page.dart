@@ -156,13 +156,15 @@ class _CurrentUser extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(account?.fullName ?? ''),
+                      Text(
+                        account?.fullName ?? '',
+                        style: const TextStyle(fontSize: 14),
+                      ),
                       const SizedBox(height: 2),
                       Text(
-                        context.l10n
-                            .contactMixinId(account?.identityNumber ?? ''),
+                        '${account?.identityNumber}',
                         style: TextStyle(
-                            color: context.theme.secondaryText, fontSize: 10),
+                            color: context.theme.secondaryText, fontSize: 12),
                       )
                     ],
                   ),
