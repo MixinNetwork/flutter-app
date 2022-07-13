@@ -159,8 +159,7 @@ class _CurrentUser extends StatelessWidget {
                       Text(account?.fullName ?? ''),
                       const SizedBox(height: 4),
                       Text(
-                        context.l10n
-                            .contactMixinId(account?.identityNumber ?? ''),
+                        account?.identityNumber ?? '',
                         style: TextStyle(
                             color: context.theme.secondaryText, fontSize: 12),
                       )
