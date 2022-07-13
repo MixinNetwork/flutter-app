@@ -116,37 +116,36 @@ class _Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: InteractiveDecoratedBox.color(
-            onTap: onTap,
-            decoration: const BoxDecoration(),
-            hoveringColor: context.dynamicColor(
-              const Color.fromRGBO(0, 0, 0, 0.03),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
-            ),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SvgPicture.asset(
-                      iconAssetName,
-                      width: 24,
-                      height: 24,
-                      color: context.theme.icon,
+        child: InteractiveDecoratedBox.color(
+          onTap: onTap,
+          decoration: const BoxDecoration(),
+          hoveringColor: context.dynamicColor(
+            const Color.fromRGBO(0, 0, 0, 0.03),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
+          ),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SvgPicture.asset(
+                    iconAssetName,
+                    width: 24,
+                    height: 24,
+                    color: context.theme.icon,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: context.theme.text,
+                      fontSize: 14,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      label,
-                      style: TextStyle(
-                        color: context.theme.text,
-                        fontSize: 14,
-                      ),
-                    )
-                  ],
-                ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  )
+                ],
               ),
             ),
           ),
