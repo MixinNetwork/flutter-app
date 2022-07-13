@@ -775,33 +775,10 @@ class _MessageSelectionWrapper extends HookWidget {
       },
       child: Row(
         children: [
-          if (inMultiSelectMode)
-            AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ClipOval(
-                  child: Container(
-                    color: selected
-                        ? context.theme.accent
-                        : context.theme.secondaryText,
-                    height: 16,
-                    width: 16,
-                    alignment: const Alignment(0, -0.2),
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesSelectedSvg,
-                      height: 10,
-                      width: 10,
-                    ),
-                  ),
-                ),
-              ),
-            )
-          else
-            const AnimatedSize(
-              duration: Duration(milliseconds: 300),
-              child: SizedBox(),
-            ),
+          _AnimatedSelectionIcon(
+            selected: selected,
+            inSelectedMode: inMultiSelectMode,
+          ),
           Expanded(
             child: IgnorePointer(
               ignoring: inMultiSelectMode,
@@ -809,6 +786,72 @@ class _MessageSelectionWrapper extends HookWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AnimatedSelectionIcon extends HookWidget {
+  const _AnimatedSelectionIcon({
+    Key? key,
+    required this.selected,
+    required this.inSelectedMode,
+  }) : super(key: key);
+
+  final bool selected;
+
+  final bool inSelectedMode;
+
+  @override
+  Widget build(BuildContext context) {
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 300),
+    );
+
+    final animation = useMemoized(
+        () => animationController.drive(
+              Tween<double>(
+                begin: 0,
+                end: 48,
+              ).chain(
+                CurveTween(
+                  curve: Curves.easeInOut,
+                ),
+              ),
+            ),
+        [animationController]);
+
+    useEffect(() {
+      if (inSelectedMode) {
+        animationController.forward();
+      } else {
+        animationController.reverse();
+      }
+    }, [inSelectedMode]);
+
+    useListenable(animation);
+
+    if (animation.isDismissed) {
+      return const SizedBox();
+    }
+    return SizedBox(
+      width: animation.value,
+      height: 20,
+      child: Center(
+        child: ClipOval(
+          child: Container(
+            color:
+                selected ? context.theme.accent : context.theme.secondaryText,
+            height: 16,
+            width: 16,
+            alignment: const Alignment(0, -0.2),
+            child: SvgPicture.asset(
+              Resources.assetsImagesSelectedSvg,
+              height: 10,
+              width: 10,
+            ),
+          ),
+        ),
       ),
     );
   }

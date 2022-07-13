@@ -495,10 +495,14 @@ class ChatContainer extends HookWidget {
                                 ),
                               ),
                             ),
-                            if (inMultiSelectMode)
-                              const SelectionBottomBar()
-                            else
-                              const InputContainer(),
+                            AnimatedCrossFade(
+                              firstChild: const InputContainer(),
+                              secondChild: const SelectionBottomBar(),
+                              crossFadeState: inMultiSelectMode
+                                  ? CrossFadeState.showSecond
+                                  : CrossFadeState.showFirst,
+                              duration: const Duration(milliseconds: 300),
+                            ),
                           ],
                         ),
                       ),
