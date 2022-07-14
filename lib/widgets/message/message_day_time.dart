@@ -310,25 +310,35 @@ class MessageDayTimeViewportWidget extends HookWidget {
       });
     }, [reTraversalKey]);
 
-    return BlocProvider.value(
-      value: bloc,
-      child: ClipRect(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            child,
-            if (dateTime.value != null)
-              Transform.translate(
-                offset: Offset(0, dateTimeTopOffset.value.clamp(-60.0, 0.0)),
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: _MessageDayTimeWidget(dateTime: dateTime.value!),
+    return LayoutBuilder(
+        builder: (context, constraints) => HookBuilder(builder: (context) {
+              useEffect(() {
+                WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+                  doTraversal();
+                });
+              }, [constraints]);
+              return BlocProvider.value(
+                value: bloc,
+                child: ClipRect(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      child,
+                      if (dateTime.value != null)
+                        Transform.translate(
+                          offset: Offset(
+                              0, dateTimeTopOffset.value.clamp(-60.0, 0.0)),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: _MessageDayTimeWidget(
+                                dateTime: dateTime.value!),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-          ],
-        ),
-      ),
-    );
+              );
+            }));
   }
 }
 
