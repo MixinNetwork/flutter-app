@@ -31,7 +31,7 @@ const kSlidePageMinWidth = 64.0;
 // chat category and chat list max width
 const kSlidePageMaxWidth = 176.0;
 // chat page min width, message list, setting page etc.
-const kResponsiveNavigationMinWidth = 300.0;
+const kResponsiveNavigationMinWidth = 320.0;
 // conversation list fixed width, conversation list, setting list etc.
 const kConversationListWidth = 300.0;
 // chat side page fixed width, chat info page etc.
@@ -199,7 +199,7 @@ class _HomePage extends HookWidget {
     }
 
     final hasDrawerValueNotifier =
-        useMemoized(() => HasDrawerValueNotifier(false));
+        useMemoized(() => HasDrawerValueNotifier(targetWidth == 0));
 
     final hasDrawer = useListenable(hasDrawerValueNotifier);
 
