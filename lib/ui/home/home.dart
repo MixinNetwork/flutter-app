@@ -199,7 +199,7 @@ class _HomePage extends HookWidget {
     }
 
     final hasDrawerValueNotifier =
-        useMemoized(() => HasDrawerValueNotifier(false));
+        useMemoized(() => HasDrawerValueNotifier(targetWidth == 0));
 
     final hasDrawer = useListenable(hasDrawerValueNotifier);
 
