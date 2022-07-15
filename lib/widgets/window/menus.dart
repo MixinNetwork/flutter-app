@@ -162,9 +162,7 @@ class _Menus extends HookWidget {
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
                 label: '${context.l10n.about} Mixin',
-                onSelected: () {
-                  methodChannel.invokeMethod('showAbout');
-                },
+                onSelected: () => methodChannel.invokeMethod('showAbout'),
               ),
             ]),
             PlatformMenuItemGroup(members: [
@@ -207,15 +205,11 @@ class _Menus extends HookWidget {
                     LogicalKeyboardKey.keyH,
                     meta: true,
                   ),
-                  onSelected: () {
-                    appWindow.hide();
-                  },
+                  onSelected: appWindow.hide,
                 ),
                 PlatformMenuItem(
                   label: context.l10n.showMixin,
-                  onSelected: () {
-                    appWindow.show();
-                  },
+                  onSelected: appWindow.show,
                 ),
               ],
             ),
@@ -225,9 +219,7 @@ class _Menus extends HookWidget {
                 LogicalKeyboardKey.keyQ,
                 meta: true,
               ),
-              onSelected: () {
-                exit(0);
-              },
+              onSelected: () => exit(0),
             ),
           ],
         ),
@@ -287,9 +279,7 @@ class _Menus extends HookWidget {
                     LogicalKeyboardKey.keyW,
                     meta: true,
                   ),
-                  onSelected: () {
-                    appWindow.close();
-                  },
+                  onSelected: appWindow.close,
                 )
               ]),
             ]),
@@ -305,19 +295,13 @@ class _Menus extends HookWidget {
                 LogicalKeyboardKey.keyM,
                 meta: true,
               ),
-              onSelected: () {
-                appWindow.minimize();
-              },
+              onSelected: appWindow.minimize,
             ),
             PlatformMenuItem(
               label: context.l10n.zoom,
-              onSelected: () {
-                if (!appWindow.isMaximized) {
-                  appWindow.maximize();
-                } else {
-                  appWindow.restore();
-                }
-              },
+              onSelected: () => !appWindow.isMaximized
+                  ? appWindow.maximize()
+                  : appWindow.restore(),
             ),
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
@@ -356,24 +340,18 @@ class _Menus extends HookWidget {
                   LogicalKeyboardKey.keyO,
                   meta: true,
                 ),
-                onSelected: () {
-                  appWindow.show();
-                },
+                onSelected: appWindow.show,
               ),
             ]),
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
                 label: context.l10n.bringAllToFront,
-                onSelected: () {
-                  appWindow.show();
-                },
+                onSelected: appWindow.show,
               ),
             ]),
             PlatformMenuItem(
               label: 'Mixin',
-              onSelected: () {
-                appWindow.show();
-              },
+              onSelected: appWindow.show,
             ),
           ],
         ),
@@ -382,21 +360,18 @@ class _Menus extends HookWidget {
           menus: [
             PlatformMenuItem(
               label: context.l10n.helpCenter,
-              onSelected: () {
-                openUri(context, 'https://mixinmessenger.zendesk.com');
-              },
+              onSelected: () =>
+                  openUri(context, 'https://mixinmessenger.zendesk.com'),
             ),
             PlatformMenuItem(
               label: context.l10n.termsService,
-              onSelected: () {
-                openUri(context, 'https://mixin.one/pages/terms');
-              },
+              onSelected: () =>
+                  openUri(context, 'https://mixin.one/pages/terms'),
             ),
             PlatformMenuItem(
               label: context.l10n.privacyPolicy,
-              onSelected: () {
-                openUri(context, 'https://mixin.one/pages/privacy');
-              },
+              onSelected: () =>
+                  openUri(context, 'https://mixin.one/pages/privacy'),
             ),
           ],
         ),

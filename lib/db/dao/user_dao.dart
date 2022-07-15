@@ -6,6 +6,7 @@ import '../mixin_database.dart';
 
 part 'user_dao.g.dart';
 
+
 extension UserExtension on sdk.User {
   User get asDbUser => User(
         userId: userId,

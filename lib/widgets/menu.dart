@@ -173,7 +173,7 @@ class ContextMenuPage extends StatelessWidget {
     final brightnessData = context.brightnessValue;
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: const BorderRadius.all(Radius.circular(11)),
         border: Border.all(
           color: Color.lerp(
             Colors.transparent,
@@ -199,7 +199,7 @@ class ContextMenuPage extends StatelessWidget {
         ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: const BorderRadius.all(Radius.circular(11)),
         child: IntrinsicWidth(
           child: Column(
             mainAxisSize: MainAxisSize.min,

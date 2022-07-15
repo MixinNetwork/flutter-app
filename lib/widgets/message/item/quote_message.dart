@@ -367,7 +367,7 @@ class _QuoteMessageBase extends StatelessWidget {
         ? getNameColorById(userId!)
         : context.theme.accent;
     return ClipRRect(
-      borderRadius: inputMode ? BorderRadius.zero : BorderRadius.circular(8),
+      borderRadius: inputMode ? BorderRadius.zero : const BorderRadius.all(Radius.circular(8)),
       child: GestureDetector(
         onTap: () {
           if (onTap != null) {
@@ -469,7 +469,7 @@ class _QuoteMessageBase extends StatelessWidget {
                   height: 48,
                   child: RepaintBoundary(
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: const BorderRadius.all(Radius.circular(6)),
                       child: image,
                     ),
                   ),

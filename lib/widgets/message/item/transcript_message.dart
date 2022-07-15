@@ -153,9 +153,9 @@ class TranscriptMessageWidget extends HookWidget {
                       ),
                     ),
                     Container(
-                      decoration: BoxDecoration(
-                        color: const Color.fromRGBO(0, 0, 0, 0.04),
-                        borderRadius: BorderRadius.circular(6),
+                      decoration: const BoxDecoration(
+                        color: Color.fromRGBO(0, 0, 0, 0.04),
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
                       ),
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(

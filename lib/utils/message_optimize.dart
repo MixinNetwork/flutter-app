@@ -77,12 +77,8 @@ String? messagePreviewOptimize(
   }
 
   if ((_content?.isNotEmpty ?? false) && isGroup) {
-    late String sender;
-    if (isCurrentUser) {
-      sender = Localization.current.youStart;
-    } else {
-      sender = senderFullName ?? '';
-    }
+    final sender =
+        isCurrentUser ? Localization.current.youStart : senderFullName ?? '';
     _content = '$sender: $_content';
   }
 

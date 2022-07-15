@@ -564,12 +564,9 @@ Future<void> saveAs(BuildContext context, AccountServer accountServer,
       accountServer.convertMessageAbsolutePath(message, isTranscriptPage);
   if (Platform.isAndroid || Platform.isIOS) {
     if (message.type.isImage || message.type.isVideo) {
-      final bool? result;
-      if (message.type.isImage) {
-        result = await GallerySaver.saveImage(path);
-      } else {
-        result = await GallerySaver.saveVideo(path);
-      }
+      final result = message.type.isImage
+          ? await GallerySaver.saveImage(path)
+          : await GallerySaver.saveVideo(path);
       if (result != true) {
         return showToastFailed(context, null);
       } else {

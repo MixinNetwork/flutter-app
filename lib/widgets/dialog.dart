@@ -152,7 +152,7 @@ class _DialogPage extends StatelessWidget {
         padding: padding ?? EdgeInsets.zero,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             border: Border.all(
               color: const Color.fromRGBO(255, 255, 255, 0.08),
             ),
@@ -171,7 +171,7 @@ class _DialogPage extends StatelessWidget {
             color: backgroundColor ?? context.theme.popUp,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             child: child,
           ),
         ),
@@ -221,7 +221,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
     final boxDecoration = backgroundTransparent
         ? const BoxDecoration()
         : BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
             color: backgroundColor ?? context.theme.accent,
           );
     final textColor = backgroundTransparent
@@ -271,7 +271,7 @@ class DialogTextField extends HookWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: context.theme.background,
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
         ),
         alignment: Alignment.center,
         child: TextField(
@@ -406,8 +406,8 @@ class DialogAddOrJoinButton extends StatelessWidget {
         style: TextButton.styleFrom(
           backgroundColor: context.theme.statusBackground,
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(15)),
           ),
         ),
         onPressed: onTap,

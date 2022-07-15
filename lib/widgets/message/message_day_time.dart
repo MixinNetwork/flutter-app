@@ -50,7 +50,7 @@ class _MessageDayTimeWidget extends HookWidget {
       padding: const EdgeInsets.only(top: 16, bottom: 10),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
           color: context.theme.dateTime,
         ),
         padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
@@ -89,13 +89,10 @@ class _CurrentShowingMessages {
         element.descendantFirstOf((e) => e.widget is MessageItemWidget);
     final widget = item.widget as MessageItemWidget;
 
-    final Element? dayTimeElement;
-    if (!isSameDay(widget.message.createdAt, widget.prev?.createdAt)) {
-      dayTimeElement =
-          element.descendantFirstOf((e) => e.widget is _MessageDayTimeWidget);
-    } else {
-      dayTimeElement = null;
-    }
+    final dayTimeElement = !isSameDay(
+            widget.message.createdAt, widget.prev?.createdAt)
+        ? element.descendantFirstOf((e) => e.widget is _MessageDayTimeWidget)
+        : null;
     if (!reverse) {
       items.add(widget.message);
       elements.add(item);

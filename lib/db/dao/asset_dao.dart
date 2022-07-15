@@ -5,6 +5,7 @@ import '../mixin_database.dart';
 
 part 'asset_dao.g.dart';
 
+
 extension AssetConverter on sdk.Asset {
   AssetsCompanion get asAssetsCompanion => AssetsCompanion.insert(
         assetId: assetId,

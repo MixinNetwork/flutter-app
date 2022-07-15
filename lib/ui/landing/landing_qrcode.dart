@@ -108,7 +108,7 @@ class _QrCode extends HookWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: const BorderRadius.all(Radius.circular(11)),
           clipBehavior: Clip.antiAliasWithSaveLayer,
           child: SizedBox.fromSize(
             size: const Size.square(160),

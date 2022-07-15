@@ -31,14 +31,14 @@ class SelectItem extends HookWidget {
     final showed = useState(false);
     final showedTooltip = useState(false);
 
-    final boxDecoration = BoxDecoration(
-      borderRadius: BorderRadius.circular(8),
+    const boxDecoration = BoxDecoration(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
     );
     return InteractiveDecoratedBox.color(
       onEnter: (_) => showed.value = true,
       onExit: (_) => showed.value = false,
       onTap: onTap,
-      decoration: selected == true
+      decoration: selected
           ? boxDecoration.copyWith(color: context.theme.sidebarSelected)
           : boxDecoration,
       hoveringColor: context.theme.sidebarSelected

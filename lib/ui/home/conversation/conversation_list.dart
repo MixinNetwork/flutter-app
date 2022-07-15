@@ -56,52 +56,42 @@ class ConversationList extends HookWidget {
     );
 
     Widget child;
-    if (pagingState.count == 0) {
-      if (pagingState.hasData) {
-        child = Center(
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation(
-              context.theme.accent,
-            ),
-          ),
-        );
-      } else {
-        child = const _Empty();
-      }
-    } else {
-      child = ScrollablePositionedList.builder(
-        key: PageStorageKey(slideCategoryState),
-        itemPositionsListener:
-            conversationListBloc.itemPositionsListener(slideCategoryState),
-        itemCount: pagingState.count,
-        itemScrollController: conversationListBloc.itemScrollController(
-          slideCategoryState,
-        ),
-        itemBuilder: (context, index) {
-          final conversation = pagingState.map[index];
-          if (conversation == null) return const SizedBox(height: 80);
-          final selected =
-              conversation.conversationId == conversationId && !routeMode;
-
-          return ConversationMenuWrapper(
-            conversation: conversation,
-            removeChatFromCircle: true,
-            child: _Item(
-              selected: selected,
-              conversation: conversation,
-              onTap: () {
-                ConversationCubit.selectConversation(
-                  context,
-                  conversation.conversationId,
+    child = pagingState.count == 0
+        ? pagingState.hasData
+            ? Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(context.theme.accent),
+                ),
+              )
+            : const _Empty()
+        : ScrollablePositionedList.builder(
+            key: PageStorageKey(slideCategoryState),
+            itemPositionsListener:
+                conversationListBloc.itemPositionsListener(slideCategoryState),
+            itemCount: pagingState.count,
+            itemScrollController:
+                conversationListBloc.itemScrollController(slideCategoryState),
+            itemBuilder: (context, index) {
+              final conversation = pagingState.map[index];
+              if (conversation == null) return const SizedBox(height: 80);
+              final selected =
+                  conversation.conversationId == conversationId && !routeMode;
+              return ConversationMenuWrapper(
+                conversation: conversation,
+                removeChatFromCircle: true,
+                child: _Item(
+                  selected: selected,
                   conversation: conversation,
-                );
-              },
-            ),
+                  onTap: () {
+                    ConversationCubit.selectConversation(
+                        context, conversation.conversationId,
+                        conversation: conversation);
+                  },
+                ),
+              );
+            },
           );
-        },
-      );
-    }
 
     return Column(
       children: [
@@ -167,7 +157,7 @@ class _Item extends StatelessWidget {
           child: DecoratedBox(
             decoration: selected
                 ? BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
                     color: context.theme.listSelected,
                   )
                 : const BoxDecoration(),

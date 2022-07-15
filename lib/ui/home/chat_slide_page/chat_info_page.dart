@@ -139,16 +139,16 @@ class ChatInfoPage extends HookWidget {
                     );
 
                     if (result == null || result.isEmpty) return;
-                    final conversationId = result[0].conversationId;
+                    final conversationId = result.first.conversationId;
 
                     await runFutureWithToast(
                         context,
                         accountServer.sendContactMessage(
                           conversation.userId!,
                           conversation.name!,
-                          result[0].encryptCategory!,
+                          result.first.encryptCategory!,
                           conversationId: conversationId,
-                          recipientId: result[0].userId,
+                          recipientId: result.first.userId,
                         ));
                   },
                 ),
@@ -549,8 +549,8 @@ class _AddToContactsButton extends StatelessWidget {
                     backgroundColor: context.theme.statusBackground,
                     padding:
                         const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
                   ),
                   onPressed: () {

@@ -48,7 +48,7 @@ class ChatBar extends HookWidget {
 
     MoveWindowBarrier toggleInfoPageWrapper({
       required Widget child,
-      behavior = HitTestBehavior.opaque,
+      HitTestBehavior behavior = HitTestBehavior.opaque,
     }) =>
         MoveWindowBarrier(
           child: InteractiveDecoratedBox(
@@ -58,6 +58,7 @@ class ChatBar extends HookWidget {
               }
               chatSideCubit.toggleInfoPage();
             },
+            behavior: behavior,
             child: child,
           ),
         );

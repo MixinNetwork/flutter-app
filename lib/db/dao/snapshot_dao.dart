@@ -6,6 +6,7 @@ import '../util/util.dart';
 
 part 'snapshot_dao.g.dart';
 
+
 extension SnapshotConverter on sdk.Snapshot {
   SnapshotsCompanion get asDbSnapshotObject => SnapshotsCompanion.insert(
         snapshotId: snapshotId,

@@ -304,8 +304,8 @@ class _CustomExpireTimeDialog extends HookWidget {
                         fontSize: 16,
                         color: context.theme.secondaryText,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                         borderSide: BorderSide.none,
                       ),
                       isDense: true,
@@ -416,7 +416,7 @@ class _CustomExpireUnitSelection extends StatelessWidget {
       child: Builder(
           builder: (context) => Material(
                 color: context.theme.sidebarSelected,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
                 child: InteractiveDecoratedBox.color(
                   onTapUp: (details) =>
                       context.sendMenuPosition(details.globalPosition),

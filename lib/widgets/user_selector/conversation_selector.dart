@@ -44,13 +44,16 @@ String? _getUserId(dynamic item) {
 }
 
 EncryptCategory _getEncryptedCategory(dynamic item, Map<String, App> map) {
-  bool isEncrypted(appId) {
+  bool isEncrypted(String appId) {
     final app = map[appId];
     return app != null && app.capabilities?.contains('ENCRYPTED') == true;
   }
 
   if (item is ConversationItem) {
-    if (isEncrypted(item.ownerId)) return EncryptCategory.encrypted;
+    // ignore: cast_nullable_to_non_nullable
+    if (item.ownerId != null && isEncrypted(item.ownerId as String)) {
+      return EncryptCategory.encrypted;
+    }
     return item.isBotConversation
         ? EncryptCategory.plain
         : EncryptCategory.signal;
@@ -210,8 +213,8 @@ class _ConversationSelector extends HookWidget {
     final selected =
         useBlocState<SimpleCubit<List<dynamic>>, List<dynamic>>(bloc: selector);
 
-    final boxDecoration = BoxDecoration(
-      borderRadius: BorderRadius.circular(8),
+    const boxDecoration = BoxDecoration(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
     );
 
     return Material(
@@ -297,7 +300,7 @@ class _ConversationSelector extends HookWidget {
               margin: const EdgeInsets.only(top: 8, right: 24, left: 24),
               decoration: BoxDecoration(
                 color: context.theme.background,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
               ),
               alignment: Alignment.center,
               child: TextField(

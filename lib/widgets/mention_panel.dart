@@ -78,7 +78,7 @@ class MentionPanelPortalEntry extends HookWidget {
         ListSelectionSelectedIntent: CallbackAction<Intent>(
           onInvoke: (Intent intent) {
             final state = context.read<MentionCubit>().state;
-            _select(context, state.users[state.index]);
+            _select(state.users[state.index]);
           },
         ),
       },
@@ -106,7 +106,7 @@ class MentionPanelPortalEntry extends HookWidget {
               ),
               child: _MentionPanel(
                 mentionState: mentionState,
-                onSelect: (User user) => _select(context, user),
+                onSelect: _select,
               ),
             ),
           ),
@@ -116,7 +116,7 @@ class MentionPanelPortalEntry extends HookWidget {
     );
   }
 
-  void _select(BuildContext context, User user) {
+  void _select(User user) {
     final selectionOffset = max(textEditingController.selection.baseOffset, 0);
     final text = textEditingController.text;
 

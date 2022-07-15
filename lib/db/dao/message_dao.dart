@@ -194,7 +194,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         db.expiredMessageDao
             .insert(messageId: message.messageId, expireIn: expireIn)
     ];
-    final result = (await Future.wait(futures))[0] as int;
+    final result = (await Future.wait(futures)).first as int;
 
     _updateConversationUnseenCount(message, currentUserId);
 
@@ -438,7 +438,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<int> markMessageRead(
-    String userId,
     Iterable<String> messageIds,
   ) async {
     final result = await (db.update(db.messages)
@@ -497,7 +496,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         .get();
     final ids = list.whereNotNull().toList();
     if (ids.isNotEmpty) {
-      await markMessageRead(userId, ids);
+      await markMessageRead(ids);
     }
     await takeUnseen(userId, conversationId);
     return ids;
@@ -1053,7 +1052,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     required String conversationId,
     required String userId,
     required String query,
-    List<String>? categories,
     required int limit,
     int offset = 0,
   }) {

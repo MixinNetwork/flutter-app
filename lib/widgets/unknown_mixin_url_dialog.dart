@@ -38,7 +38,7 @@ class _UnknownMixinUri extends StatelessWidget {
                 ),
                 const SizedBox(height: 36),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
                   child: SizedBox.square(
                     dimension: 240,
                     child: QrImage(

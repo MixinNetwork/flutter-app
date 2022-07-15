@@ -81,8 +81,7 @@ class _MoreExtendedText extends HookWidget {
             textSize.width - overflowTextSpanSize.width,
             textSize.height,
           ));
-          final endIndex = textPainter.getOffsetBefore(pos.offset);
-          return endIndex;
+          return textPainter.getOffsetBefore(pos.offset);
         }
       }
 

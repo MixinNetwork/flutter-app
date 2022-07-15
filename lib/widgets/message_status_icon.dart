@@ -115,7 +115,7 @@ class _MessageSendingIconPainter extends CustomPainter {
 
     // draw hour hand
     const hourHandLength = 3;
-    final hourAngle = 2 * math.pi * (1 - hour / 12);
+    final hourAngle = math.pi * 2 * (1 - hour / 12);
     final hourHand = Path()
       ..moveTo(center.dx, center.dy)
       ..lineTo(
@@ -126,7 +126,7 @@ class _MessageSendingIconPainter extends CustomPainter {
 
     // draw minute hand
     const minuteHandLength = 4;
-    final minuteAngle = 2 * math.pi * (1 - minute / 60);
+    final minuteAngle = math.pi * 2 * (1 - minute / 60);
     final minuteHand = Path()
       ..moveTo(center.dx, center.dy)
       ..lineTo(

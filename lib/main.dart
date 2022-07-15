@@ -46,7 +46,7 @@ Future<void> main(List<String> args) async {
     LoadBalancer.create(Platform.numberOfProcessors, IsolateRunner.spawn),
     initMixinDocumentsDirectory(),
   ]);
-  loadBalancer = result[0] as LoadBalancer?;
+  loadBalancer = result.first as LoadBalancer?;
 
   // init crash report dump path.
   // default to executable directory, but we might haven't write permission to

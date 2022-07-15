@@ -9,7 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../account/scam_warning.dart';
+import '../../../account/scam_warning_key_value.dart';
 import '../../../account/show_pin_message_key_value.dart';
 import '../../../bloc/simple_cubit.dart';
 import '../../../bloc/subscribe_mixin.dart';
@@ -317,21 +317,12 @@ class _SideRouter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final routeMode = chatSideCubit.state.routeMode;
-    if (routeMode) {
-      return SizedBox(
-        width: constraints.maxWidth,
-        child: Navigator(
-          pages: pages,
-          onPopPage: onPopPage,
-        ),
-      );
-    } else {
-      return _AnimatedChatSlide(
-        constraints: constraints,
-        pages: pages,
-        onPopPage: onPopPage,
-      );
-    }
+    return routeMode
+        ? SizedBox(
+            width: constraints.maxWidth,
+            child: Navigator(pages: pages, onPopPage: onPopPage))
+        : _AnimatedChatSlide(
+            constraints: constraints, pages: pages, onPopPage: onPopPage);
   }
 }
 
@@ -800,7 +791,7 @@ class _BottomBanner extends HookWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
           color: context.messageBubbleColor(false),
           boxShadow: const [
             BoxShadow(

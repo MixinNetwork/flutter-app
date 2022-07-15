@@ -275,6 +275,7 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
 
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final scale = _transformationController.scale;
+    // ignore: prefer-conditional-expressions
     if (_gestureType == _GestureType.pan) {
       _gestureType = _getGestureType(details);
     } else {

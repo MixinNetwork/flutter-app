@@ -93,7 +93,6 @@ class ConversationState extends Equatable {
     String? conversationId,
     String? userId,
     String? initIndexMessageId,
-    int? unseenMessageCount,
     String? lastReadMessageId,
     ConversationItem? conversation,
     User? user,

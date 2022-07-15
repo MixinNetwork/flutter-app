@@ -70,9 +70,9 @@ class ToastWidget extends StatelessWidget {
               minWidth: 130,
             ),
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: const Color.fromRGBO(62, 65, 72, 0.7),
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+                color: Color.fromRGBO(62, 65, 72, 0.7),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -115,6 +115,7 @@ class ToastError extends Error {
 
   final String message;
 
+  // ignore: avoid-unused-parameters
   static ToastError? fromError(Object? error) => null;
 }
 

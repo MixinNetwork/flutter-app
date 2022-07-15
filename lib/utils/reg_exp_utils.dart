@@ -1,5 +1,6 @@
 final mentionRegExp = RegExp(r'@(\S*)$');
 final mentionNumberRegExp = RegExp(r'@(\d{4,})');
+// ignore: avoid-non-ascii-symbols
 final uriRegExp = RegExp(r'[a-zA-z]+://\S.*?((?=["\s，）)(（。：])|$)');
 final botNumberRegExp = RegExp(r'(?<=^|\D)7000\d{6}(?=$|\D)');
 final mailRegExp = RegExp(

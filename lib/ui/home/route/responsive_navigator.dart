@@ -17,7 +17,7 @@ abstract class AbstractResponsiveNavigatorCubit
       emit(state.copyWith(routeMode: routeMode));
 
   void onPopPage() {
-    final bool = state.pages.isNotEmpty == true;
+    final bool = state.pages.isNotEmpty;
     if (bool) {
       emit(state.copyWith(
         pages: state.pages.toList()..removeLast(),
@@ -46,11 +46,8 @@ abstract class AbstractResponsiveNavigatorCubit
     if (index == -1) return;
 
     List<MaterialPage>? list;
-    if (index == 0) {
-      list = [];
-    } else {
-      list = state.pages.toList()..sublist(0, index);
-    }
+    list = index == 0 ? [] : state.pages.toList()
+      ..sublist(0, index);
     emit(state.copyWith(
       pages: list,
     ));

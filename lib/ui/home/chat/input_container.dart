@@ -111,18 +111,12 @@ class _InputContainer extends HookWidget {
       () {
         final draft =
             context.read<ConversationCubit>().state?.conversation?.draft;
-        final textEditingController = HighlightTextEditingController(
-          initialText: draft,
-          highlightTextStyle: TextStyle(
-            color: context.theme.accent,
-          ),
-          mentionCache: context.read<MentionCache>(),
-        )..selection = TextSelection.fromPosition(
-            TextPosition(
-              offset: draft?.length ?? 0,
-            ),
-          );
-        return textEditingController;
+        return HighlightTextEditingController(
+            initialText: draft,
+            highlightTextStyle: TextStyle(color: context.theme.accent),
+            mentionCache: context.read<MentionCache>())
+          ..selection = TextSelection.fromPosition(
+              TextPosition(offset: draft?.length ?? 0));
       },
       [conversationId],
     );

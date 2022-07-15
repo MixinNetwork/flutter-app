@@ -2,6 +2,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../mixin_database.dart';
 
+
 extension SearchConversationItemExtension on SearchConversationItem {
   bool get isGroupConversation => category == ConversationCategory.group;
 

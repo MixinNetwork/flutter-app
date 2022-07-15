@@ -285,17 +285,12 @@ class _SearchMessageList extends HookWidget {
         limit: context.read<ConversationListBloc>().limit,
         queryCount: () async {
           if (keyword.trim().isEmpty) {
-            if (selectedUserId != null) {
-              return context.database.messageDao
-                  .messageCountByConversationAndUser(
-                    conversationId,
-                    selectedUserId!,
-                    categories,
-                  )
-                  .getSingle();
-            } else {
-              return 0;
-            }
+            return selectedUserId != null
+                ? context.database.messageDao
+                    .messageCountByConversationAndUser(
+                        conversationId, selectedUserId!, categories)
+                    .getSingle()
+                : Future.value(0);
           }
 
           return context.database.messageDao
@@ -309,18 +304,15 @@ class _SearchMessageList extends HookWidget {
         },
         queryRange: (int limit, int offset) async {
           if (keyword.trim().isEmpty) {
-            if (selectedUserId != null) {
-              return context.database.messageDao
-                  .messageByConversationAndUser(
-                    conversationId: conversationId,
-                    userId: selectedUserId!,
-                    limit: limit,
-                    offset: offset,
-                  )
-                  .get();
-            } else {
-              return [];
-            }
+            return selectedUserId != null
+                ? context.database.messageDao
+                    .messageByConversationAndUser(
+                        conversationId: conversationId,
+                        userId: selectedUserId!,
+                        limit: limit,
+                        offset: offset)
+                    .get()
+                : Future.value([]);
           }
 
           return context.database.messageDao
@@ -393,18 +385,16 @@ class _SearchParticipantList extends HookWidget {
               final userDao = context.database.userDao;
 
               if (state?.isBot ?? false) {
-                if (value.isEmpty) {
-                  return userDao.friends().watchThrottle(kSlowThrottleDuration);
-                } else {
-                  return userDao
-                      .fuzzySearchBotGroupUser(
-                        currentUserId:
-                            context.multiAuthCubit.state.currentUserId ?? '',
-                        conversationId: conversationId,
-                        keyword: value,
-                      )
-                      .watchThrottle(kVerySlowThrottleDuration);
-                }
+                return value.isEmpty
+                    ? userDao.friends().watchThrottle(kSlowThrottleDuration)
+                    : userDao
+                        .fuzzySearchBotGroupUser(
+                            currentUserId:
+                                context.multiAuthCubit.state.currentUserId ??
+                                    '',
+                            conversationId: conversationId,
+                            keyword: value)
+                        .watchThrottle(kVerySlowThrottleDuration);
               }
 
               if (value.isEmpty) {

@@ -37,14 +37,14 @@ class StickerPage extends StatelessWidget {
           width: 464,
           height: 407,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             color: context.dynamicColor(
               const Color.fromRGBO(255, 255, 255, 1),
               darkColor: const Color.fromRGBO(62, 65, 72, 1),
             ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             child: Column(
               children: [
                 Expanded(
@@ -270,7 +270,7 @@ class _StickerAlbumBar extends HookWidget {
             const Color.fromRGBO(229, 231, 235, 1),
             darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
         ),
         labelPadding: EdgeInsets.zero,
         indicatorPadding: const EdgeInsets.all(5),

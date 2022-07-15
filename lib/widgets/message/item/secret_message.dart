@@ -19,7 +19,7 @@ class SecretMessage extends StatelessWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: context.theme.encrypt,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(10),

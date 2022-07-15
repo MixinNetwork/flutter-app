@@ -101,7 +101,7 @@ class MessageVideo extends HookWidget {
         }
       },
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -133,12 +133,10 @@ class VideoMessageMediaStatusWidget extends HookWidget {
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
     switch (mediaStatus) {
       case MediaStatus.canceled:
-        if (relationship == UserRelationship.me &&
-            mediaUrl?.isNotEmpty == true) {
-          return const StatusUpload();
-        } else {
-          return const StatusDownload();
-        }
+        return relationship == UserRelationship.me &&
+                mediaUrl?.isNotEmpty == true
+            ? const StatusUpload()
+            : const StatusDownload();
       case MediaStatus.pending:
         return const StatusPending();
       case MediaStatus.expired:
@@ -186,9 +184,9 @@ class _VideoMessageOverlayInfo extends HookWidget {
               top: 6,
               left: isCurrentUser ? 6 : 14,
               child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(0, 0, 0, 0.3),
-                  borderRadius: BorderRadius.circular(5),
+                decoration: const BoxDecoration(
+                  color: Color.fromRGBO(0, 0, 0, 0.3),
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(4),

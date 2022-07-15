@@ -1,6 +1,7 @@
 import '../../enum/encrypt_category.dart';
 import '../../enum/message_category.dart';
 
+
 extension MessageCategoryExtension on String? {
   EncryptCategory? get encryptCategory {
     if (isPlain) return EncryptCategory.plain;

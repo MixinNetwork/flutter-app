@@ -457,26 +457,14 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     canvas.restore();
 
     final picture = recorder.endRecording();
-    final ui.Image snapshotImage;
-    if (cropRect != null) {
-      snapshotImage = await picture.toImage(
-        cropRect.width.round(),
-        cropRect.height.round(),
-      );
-    } else {
-      snapshotImage = await picture.toImage(
-        imageSize.width.round(),
-        imageSize.height.round(),
-      );
-    }
+    final snapshotImage = cropRect != null
+        ? await picture.toImage(cropRect.width.round(), cropRect.height.round())
+        : await picture.toImage(
+            imageSize.width.round(), imageSize.height.round());
 
-    final Uint8List? bytes;
-
-    if (!state.flip && state.rotate == ImageRotate.none) {
-      bytes = await snapshotImage.toBytes(format: ui.ImageByteFormat.png);
-    } else {
-      bytes = await _flipAndRotateImage(snapshotImage);
-    }
+    final bytes = !state.flip && state.rotate == ImageRotate.none
+        ? await snapshotImage.toBytes(format: ui.ImageByteFormat.png)
+        : await _flipAndRotateImage(snapshotImage);
     if (bytes == null) {
       e('failed to convert image to bytes');
       return null;
@@ -1021,7 +1009,7 @@ extension _ImageRotateExt on ImageRotate {
       case ImageRotate.half:
         return math.pi;
       case ImageRotate.threeQuarter:
-        return 3 * math.pi / 2;
+        return math.pi * 3 / 2;
     }
   }
 
@@ -1123,7 +1111,7 @@ class _DrawColorSelector extends HookWidget {
       height: 38,
       child: Material(
         color: context.theme.chatBackground,
-        borderRadius: BorderRadius.circular(62),
+        borderRadius: const BorderRadius.all(Radius.circular(62)),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1316,7 +1304,7 @@ class _CustomColorBar extends HookWidget {
                     HSVColor.fromAHSV(1, i.toDouble(), 1, 1).toColor(),
                 ],
               ),
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: const BorderRadius.all(Radius.circular(22)),
             )),
           ),
           Positioned(
@@ -1339,7 +1327,7 @@ class _CustomColorBar extends HookWidget {
               child: Material(
                 color: Colors.white,
                 shadowColor: Colors.black.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(58),
+                borderRadius: const BorderRadius.all(Radius.circular(58)),
                 elevation: 4,
                 child: const SizedBox(width: 9, height: 30),
               ),
@@ -1427,7 +1415,7 @@ class _NormalOperationBar extends HookWidget {
           state.cropRect.height.round() != height;
     });
     return Material(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
       color: context.theme.stickerPlaceholderColor,
       child: SizedBox(
         height: 40,
@@ -1553,7 +1541,7 @@ class _DrawOperationBar extends HookWidget {
       converter: (state) => state.drawLines.isNotEmpty,
     );
     return Material(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
       color: context.theme.stickerPlaceholderColor,
       child: SizedBox(
         height: 40,

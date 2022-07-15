@@ -44,7 +44,7 @@ class StickerMessageWidget extends HookWidget {
           width = kMaxWidth * assetWidth / assetHeight;
         } else {
           width = 48;
-          height = 48 * assetHeight / assetWidth;
+          height = assetHeight * 48 / assetWidth;
         }
       } else {
         if (dpToPx(context, 48) * assetWidth / assetHeight >
@@ -53,7 +53,7 @@ class StickerMessageWidget extends HookWidget {
           height = kMaxWidth * assetHeight / assetWidth;
         } else {
           height = 48;
-          width = 48 * assetWidth / assetHeight;
+          width = assetWidth * 48 / assetHeight;
         }
       }
     } else if (assetWidth * 2 < dpToPx(context, kMaxWidth) ||

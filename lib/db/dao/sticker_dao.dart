@@ -5,6 +5,7 @@ import '../mixin_database.dart';
 
 part 'sticker_dao.g.dart';
 
+
 extension StickerConverter on sdk.Sticker {
   StickersCompanion get asStickersCompanion => StickersCompanion(
         stickerId: Value(stickerId),

@@ -266,7 +266,7 @@ class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
   }
 
   Path _bubblePath(Size size) =>
-      Path()..addRRect(BorderRadius.circular(8).toRRect(Offset.zero & size));
+      Path()..addRRect(const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size));
 
   Path _leftNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 12);

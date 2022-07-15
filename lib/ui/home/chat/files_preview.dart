@@ -122,11 +122,7 @@ class _FilesPreviewDialog extends HookWidget {
     final showAsBigImage = useState(hasImage);
 
     useEffect(() {
-      if (hasImage && currentTab.value == _TabType.image) {
-        showAsBigImage.value = true;
-      } else {
-        showAsBigImage.value = false;
-      }
+      showAsBigImage.value = hasImage && currentTab.value == _TabType.image;
     }, [hasImage, currentTab.value]);
 
     return Material(
@@ -263,7 +259,7 @@ class _FilesPreviewDialog extends HookWidget {
 Future<String> _archiveFiles(List<String> paths) async {
   assert(paths.length > 1, 'paths[0] should be temp file dir');
   final outPath = path.join(
-      paths[0], 'mixin_archive_${DateTime.now().millisecondsSinceEpoch}.zip');
+      paths.first, 'mixin_archive_${DateTime.now().millisecondsSinceEpoch}.zip');
   final encoder = ZipFileEncoder()..create(outPath);
   paths.removeAt(0);
   for (final filePath in paths) {
@@ -519,7 +515,7 @@ class _TileBigImage extends HookWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: const BorderRadius.all(Radius.circular(6)),
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
@@ -557,19 +553,11 @@ class _TileBigImage extends HookWidget {
                         name: Resources.assetsImagesEditImageSvg,
                         padding: const EdgeInsets.all(10),
                         onTap: () async {
-                          ImageEditorSnapshot? snapshot;
-                          if (file.imageEditorSnapshot != null) {
-                            snapshot = await showImageEditor(
-                              context,
-                              path: file.imageEditorSnapshot!.rawImagePath,
-                              snapshot: file.imageEditorSnapshot,
-                            );
-                          } else {
-                            snapshot = await showImageEditor(
-                              context,
-                              path: file.path,
-                            );
-                          }
+                          final snapshot = file.imageEditorSnapshot != null
+                              ? await showImageEditor(context,
+                                  path: file.imageEditorSnapshot!.rawImagePath,
+                                  snapshot: file.imageEditorSnapshot)
+                              : await showImageEditor(context, path: file.path);
                           if (snapshot == null) {
                             return;
                           }

@@ -214,11 +214,9 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
   Future<Map<int, T>> queryMap(int limit, int _offset) async {
     final offset = max(_offset, 0);
     final list = await queryRange(limit, max(offset, 0));
-    final map = Map.fromIterables(
-      List.generate(min(limit, list.length), (index) => offset + index),
-      list,
-    );
-    return map;
+    return Map.fromIterables(
+        List.generate(min(limit, list.length), (index) => offset + index),
+        list);
   }
 
   bool expectMinListRange(int _start, int _end) {

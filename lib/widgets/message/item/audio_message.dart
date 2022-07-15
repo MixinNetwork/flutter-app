@@ -89,12 +89,10 @@ class AudioMessage extends HookWidget {
               builder: (BuildContext context) {
                 switch (mediaStatus) {
                   case MediaStatus.canceled:
-                    if (relationship == UserRelationship.me &&
-                        mediaUrl?.isNotEmpty == true) {
-                      return const StatusUpload();
-                    } else {
-                      return const StatusDownload();
-                    }
+                    return relationship == UserRelationship.me &&
+                            mediaUrl?.isNotEmpty == true
+                        ? const StatusUpload()
+                        : const StatusDownload();
                   case MediaStatus.pending:
                     return const StatusPending();
                   case MediaStatus.expired:

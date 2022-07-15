@@ -92,7 +92,7 @@ class _StrangerButton extends StatelessWidget {
         onTap: onTap,
         decoration: BoxDecoration(
           color: context.theme.primary,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
         ),
         child: ConstrainedBox(
           constraints: const BoxConstraints(

@@ -39,7 +39,7 @@ class SystemMessage extends HookWidget {
               color: context.dynamicColor(
                 const Color.fromRGBO(202, 234, 201, 1),
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(

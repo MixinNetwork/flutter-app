@@ -5,6 +5,7 @@ import '../mixin_database.dart';
 
 part 'sticker_album_dao.g.dart';
 
+
 extension StickerAlbumsCompanionExtension on sdk.StickerAlbum {
   StickerAlbumsCompanion get asStickerAlbumsCompanion =>
       StickerAlbumsCompanion.insert(
@@ -60,7 +61,7 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
           .write(
         StickerAlbumsCompanion(
           added: Value(added),
-          orderedAt: added == false ? const Value(0) : const Value.absent(),
+          orderedAt: !added ? const Value(0) : const Value.absent(),
         ),
       );
 

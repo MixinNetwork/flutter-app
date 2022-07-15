@@ -49,7 +49,7 @@ class _PinBubbleClipper extends CustomClipper<Path> {
   }
 
   Path _bubblePath(Size size) =>
-      Path()..addRRect(BorderRadius.circular(8).toRRect(Offset.zero & size));
+      Path()..addRRect(const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size));
 
   Path _rightNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 10);

@@ -93,7 +93,7 @@ class AccountServer {
         ),
       ],
     );
-    await _initDatabase(privateKey, multiAuthCubit);
+    await _initDatabase();
 
     checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
       i('refreshSignalKeys periodic');
@@ -140,8 +140,7 @@ class AccountServer {
     markRead(_activeConversationId!);
   }
 
-  Future<void> _initDatabase(
-      String privateKey, MultiAuthCubit multiAuthCubit) async {
+  Future<void> _initDatabase() async {
     database = Database(
         await db.connectToDatabase(identityNumber, fromMainIsolate: true));
 

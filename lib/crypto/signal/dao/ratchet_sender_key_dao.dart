@@ -5,7 +5,8 @@ import '../signal_database.dart';
 part 'ratchet_sender_key_dao.g.dart';
 
 @DriftAccessor(tables: [RatchetSenderKeys])
-class RatchetSenderKeyDao extends DatabaseAccessor<SignalDatabase> {
+class RatchetSenderKeyDao extends DatabaseAccessor<SignalDatabase>
+    with _$RatchetSenderKeyDaoMixin {
   RatchetSenderKeyDao(SignalDatabase db) : super(db);
 
   Future<RatchetSenderKey?> getRatchetSenderKey(

@@ -52,11 +52,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         },
       );
 
-  Future<int> insert(Insertable<Conversation> conversation) async {
-    final result =
-        await into(db.conversations).insertOnConflictUpdate(conversation);
-    return result;
-  }
+  Future<int> insert(Insertable<Conversation> conversation) =>
+      into(db.conversations).insertOnConflictUpdate(conversation);
 
   Selectable<Conversation?> conversationById(String conversationId) =>
       (select(db.conversations)

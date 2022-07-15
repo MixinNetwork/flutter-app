@@ -215,9 +215,6 @@ class Blaze {
     }
   }
 
-  Future<void> updateRemoteMessageStatus(
-      String messageId, MessageStatus status) async {}
-
   Future<bool> makeMessageStatus(String messageId, MessageStatus status) async {
     final currentStatus =
         await database.messageDao.findMessageStatusById(messageId);
@@ -246,12 +243,7 @@ class Blaze {
   Future<void> _refreshOffset() async {
     final offset =
         await database.offsetDao.findStatusOffset().getSingleOrNull();
-    var status = 0;
-    if (offset != null) {
-      status = offset.epochNano;
-    } else {
-      status = DateTime.now().epochNano;
-    }
+    var status = offset != null ? offset.epochNano : DateTime.now().epochNano;
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);
       final blazeMessages = response.data;
@@ -346,9 +338,7 @@ BlazeMessage parseBlazeMessage(List<int> list) =>
 
 BlazeMessage _parseBlazeMessageInternal(List<int> message) {
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
-  final blazeMessage =
-      BlazeMessage.fromJson(jsonDecode(content) as Map<String, dynamic>);
-  return blazeMessage;
+  return BlazeMessage.fromJson(jsonDecode(content) as Map<String, dynamic>);
 }
 
 class WebSocketTransaction<T> {

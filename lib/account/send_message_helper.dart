@@ -617,11 +617,9 @@ class SendMessageHelper {
       final category = encryptCategory.toCategory(MessageCategory.plainImage,
           MessageCategory.signalImage, MessageCategory.encryptedImage);
       AttachmentResult? attachmentResult;
-      if (message.category == category && message.content != null) {
-        attachmentResult = await _checkAttachment(message.content!);
-      } else {
-        attachmentResult = null;
-      }
+      attachmentResult = message.category == category && message.content != null
+          ? await _checkAttachment(message.content!)
+          : null;
       await sendImageMessage(
         conversationId: conversationId,
         senderId: senderId,
@@ -637,11 +635,9 @@ class SendMessageHelper {
       final category = encryptCategory.toCategory(MessageCategory.plainVideo,
           MessageCategory.signalVideo, MessageCategory.encryptedVideo);
       AttachmentResult? attachmentResult;
-      if (message.category == category && message.content != null) {
-        attachmentResult = await _checkAttachment(message.content!);
-      } else {
-        attachmentResult = null;
-      }
+      attachmentResult = message.category == category && message.content != null
+          ? await _checkAttachment(message.content!)
+          : null;
       await sendVideoMessage(
         conversationId,
         senderId,
@@ -662,11 +658,9 @@ class SendMessageHelper {
       final category = encryptCategory.toCategory(MessageCategory.plainAudio,
           MessageCategory.signalAudio, MessageCategory.encryptedAudio);
       AttachmentResult? attachmentResult;
-      if (message.category == category && message.content != null) {
-        attachmentResult = await _checkAttachment(message.content!);
-      } else {
-        attachmentResult = null;
-      }
+      attachmentResult = message.category == category && message.content != null
+          ? await _checkAttachment(message.content!)
+          : null;
       await sendAudioMessage(
         conversationId,
         senderId,
@@ -685,11 +679,9 @@ class SendMessageHelper {
       final category = encryptCategory.toCategory(MessageCategory.plainData,
           MessageCategory.signalData, MessageCategory.encryptedData);
       AttachmentResult? attachmentResult;
-      if (message.category == category && message.content != null) {
-        attachmentResult = await _checkAttachment(message.content!);
-      } else {
-        attachmentResult = null;
-      }
+      attachmentResult = message.category == category && message.content != null
+          ? await _checkAttachment(message.content!)
+          : null;
 
       await sendDataMessage(
         conversationId,
@@ -709,7 +701,7 @@ class SendMessageHelper {
           conversationId,
           senderId,
           StickerMessage(message.stickerId!, null, null),
-          encryptCategory.toCategory(MessageCategory.encryptedSticker,
+          encryptCategory.toCategory(MessageCategory.plainSticker,
               MessageCategory.signalSticker, MessageCategory.encryptedSticker));
     } else if (message.category.isContact) {
       await sendContactMessage(
@@ -1131,12 +1123,7 @@ Future<Image> _getSmallImage(String path) async {
   return Image.fromBytes(image.width, image.height, (await image.toBytes())!);
 }
 
-Future<String?> _getImageThumbnailString(Image image) async {
-  String? thumbImage;
-  if (_kEnableImageBlurHashThumb) {
-    thumbImage = BlurHash.encode(image).hash;
-  } else {
-    thumbImage = base64Encode(encodeJpg(image, quality: 50));
-  }
-  return thumbImage;
-}
+Future<String?> _getImageThumbnailString(Image image) async =>
+    _kEnableImageBlurHashThumb
+        ? BlurHash.encode(image).hash
+        : base64Encode(encodeJpg(image, quality: 50));

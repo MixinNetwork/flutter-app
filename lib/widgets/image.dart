@@ -93,10 +93,8 @@ class ImageByBlurHashOrBase64 extends HookWidget {
       }
     }, [imageData]);
 
-    if (blurHash != null) {
-      return _ImageByBlurHash(blurHash: blurHash);
-    } else {
-      return _ImageByBase64(imageData, fit: fit);
-    }
+    return blurHash != null
+        ? _ImageByBlurHash(blurHash: blurHash)
+        : _ImageByBase64(imageData, fit: fit);
   }
 }

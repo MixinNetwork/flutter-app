@@ -28,6 +28,7 @@ const kUpdateSticker = 'LOCAL_UPDATE_STICKER';
 const mixinScheme = 'mixin';
 const mixinHost = 'mixin.one';
 
+
 enum MixinSchemeHost {
   codes,
   pay,
@@ -40,15 +41,6 @@ enum MixinSchemeHost {
   apps,
   snapshots,
 }
-
-const mixinProtocolUrls = {
-  MixinSchemeHost.codes: 'https://mixin.one/codes',
-  MixinSchemeHost.transfer: 'https://mixin.one/transfer',
-  MixinSchemeHost.address: 'https://mixin.one/address',
-  MixinSchemeHost.withdrawal: 'https://mixin.one/withdrawal',
-  MixinSchemeHost.apps: 'https://mixin.one/apps',
-  MixinSchemeHost.snapshots: 'https://mixin.one/snapshots'
-};
 
 const int hour1 = 1000 * 60 * 60;
 const int hours24 = hour1 * 24;

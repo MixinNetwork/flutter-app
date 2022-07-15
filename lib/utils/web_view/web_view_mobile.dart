@@ -120,7 +120,7 @@ class _WebControl extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.theme.background,
           border: Border.all(color: context.theme.sidebarSelected),
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: const BorderRadius.all(Radius.circular(32)),
         ),
         child: Row(
           children: [

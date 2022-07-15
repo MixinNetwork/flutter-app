@@ -150,11 +150,11 @@ class _PhoneNumberInputScene extends HookWidget {
           PortalTarget(
             visible: portalVisibility.value,
             portalFollower: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
               child: Material(
                 color: context.theme.chatBackground,
                 elevation: 2,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
                 child: SizedBox(
                   width: 360,
                   height: 400,
@@ -473,36 +473,23 @@ class _ResendCodeWidget extends HookWidget {
       return timer.cancel;
     }, [nextDuration]);
 
-    if (nextDuration.value > 0) {
-      return Padding(
-        padding: const EdgeInsets.all(8),
-        child: Text(
-          context.l10n.resendCodeIn(nextDuration.value),
-          style: TextStyle(
-            fontSize: 14,
-            color: context.theme.secondaryText,
-          ),
-        ),
-      );
-    } else {
-      return InteractiveDecoratedBox(
-        onTap: () async {
-          if (await onResend()) {
-            nextDuration.value = 60;
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Text(
-            context.l10n.resendCode,
-            style: TextStyle(
-              fontSize: 14,
-              color: context.theme.accent,
-            ),
-          ),
-        ),
-      );
-    }
+    return nextDuration.value > 0
+        ? Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(context.l10n.resendCodeIn(nextDuration.value),
+                style: TextStyle(
+                    fontSize: 14, color: context.theme.secondaryText)))
+        : InteractiveDecoratedBox(
+            onTap: () async {
+              if (await onResend()) {
+                nextDuration.value = 60;
+              }
+            },
+            child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(context.l10n.resendCode,
+                    style:
+                        TextStyle(fontSize: 14, color: context.theme.accent))));
   }
 }
 
@@ -542,12 +529,12 @@ class _MobileInput extends HookWidget {
             fontSize: 16,
             color: context.theme.secondaryText,
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
             borderSide: BorderSide.none,
           ),
           prefixIcon: InkWell(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
             onTap: onCountryDiaClick,
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -609,7 +596,7 @@ Future<VerificationResponse> _requestVerificationCode({
       );
       if (result != null) {
         assert(result.length == 2, 'Invalid result length');
-        final type = result[0] as _CaptchaType;
+        final type = result.first as _CaptchaType;
         final token = result[1] as String;
         d('Captcha type: $type, token: $token');
         return _requestVerificationCode(
@@ -625,6 +612,8 @@ Future<VerificationResponse> _requestVerificationCode({
   }
 }
 
+// for compute
+// ignore: avoid-unused-parameters
 List<Country> _getCountries(dynamic any) =>
     CountryProvider.getCountriesData(countries: null);
 

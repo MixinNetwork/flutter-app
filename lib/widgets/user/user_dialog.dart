@@ -296,7 +296,7 @@ class _UserProfileButtonBar extends StatelessWidget {
           );
 
           if (result == null || result.isEmpty) return;
-          final conversationId = result[0].conversationId;
+          final conversationId = result.first.conversationId;
 
           await runFutureWithToast(
             context,
@@ -305,7 +305,7 @@ class _UserProfileButtonBar extends StatelessWidget {
               user.fullName!,
               result.first.encryptCategory!,
               conversationId: conversationId,
-              recipientId: result[0].userId,
+              recipientId: result.first.userId,
             ),
           );
         },

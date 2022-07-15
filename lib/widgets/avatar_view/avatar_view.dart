@@ -65,17 +65,13 @@ class ConversationAvatarWidget extends HookWidget {
         ).data ??
         <User>[];
 
-    Widget child;
-    if (_category == ConversationCategory.contact) {
-      child = AvatarWidget(
-        userId: _userId,
-        name: _name,
-        avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
-        size: size,
-      );
-    } else {
-      child = AvatarPuzzlesWidget(list, size);
-    }
+    final child = _category == ConversationCategory.contact
+        ? AvatarWidget(
+            userId: _userId,
+            name: _name,
+            avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
+            size: size)
+        : AvatarPuzzlesWidget(list, size);
 
     return SizedBox.fromSize(
       size: Size.square(size),
@@ -114,9 +110,9 @@ class AvatarPuzzlesWidget extends HookWidget {
           children: [
             Expanded(
                 child: AvatarWidget(
-              userId: users[0].userId,
-              name: users[0].fullName,
-              avatarUrl: users[0].avatarUrl,
+              userId: users.first.userId,
+              name: users.first.fullName,
+              avatarUrl: users.first.avatarUrl,
               size: size,
               clipOval: false,
             )),
@@ -195,17 +191,10 @@ class AvatarWidget extends StatelessWidget {
       ),
     );
 
-    Widget child;
-    if (avatarUrl?.isNotEmpty == true) {
-      child = CacheImage(
-        avatarUrl!,
-        width: size,
-        height: size,
-        placeholder: () => placeholder,
-      );
-    } else {
-      child = placeholder;
-    }
+    final child = avatarUrl?.isNotEmpty == true
+        ? CacheImage(avatarUrl!,
+            width: size, height: size, placeholder: () => placeholder)
+        : placeholder;
 
     if (clipOval) return ClipOval(child: child);
     return child;
