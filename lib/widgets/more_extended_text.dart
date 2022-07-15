@@ -10,9 +10,9 @@ import 'high_light_text.dart';
 class MoreExtendedText extends HookWidget {
   const MoreExtendedText(
     this.text, {
-    Key? key,
+    super.key,
     this.style,
-  }) : super(key: key);
+  });
 
   final String text;
   final TextStyle? style;
@@ -31,9 +31,8 @@ class _MoreExtendedText extends HookWidget {
   const _MoreExtendedText(
     this.text, {
     required this.constraints,
-    Key? key,
     this.style,
-  }) : super(key: key);
+  });
 
   final String text;
   final TextStyle? style;

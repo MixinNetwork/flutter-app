@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../../bloc/subscribe_mixin.dart';
 
-
 class BlinkState extends Equatable {
   const BlinkState({
     this.color = Colors.transparent,

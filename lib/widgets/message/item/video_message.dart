@@ -23,9 +23,7 @@ import '../message_datetime_and_status.dart';
 const _kDefaultVideoSize = 200;
 
 class VideoMessageWidget extends HookWidget {
-  const VideoMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const VideoMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +58,9 @@ class VideoMessageWidget extends HookWidget {
 
 class MessageVideo extends HookWidget {
   const MessageVideo({
-    Key? key,
+    super.key,
     this.overlay,
-  }) : super(key: key);
+  });
 
   final Widget? overlay;
 
@@ -118,9 +116,9 @@ class MessageVideo extends HookWidget {
 
 class VideoMessageMediaStatusWidget extends HookWidget {
   const VideoMessageMediaStatusWidget({
-    Key? key,
+    super.key,
     this.done,
-  }) : super(key: key);
+  });
 
   final Widget? done;
 
@@ -156,9 +154,8 @@ class VideoMessageMediaStatusWidget extends HookWidget {
 
 class _VideoMessageOverlayInfo extends HookWidget {
   const _VideoMessageOverlayInfo({
-    Key? key,
     required this.isCurrentUser,
-  }) : super(key: key);
+  });
 
   final bool isCurrentUser;
 

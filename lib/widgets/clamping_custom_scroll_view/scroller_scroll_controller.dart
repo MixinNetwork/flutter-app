@@ -20,20 +20,13 @@ class ScrollerScrollController extends ScrollController {
 
 class _ScrollerScrollPosition extends ScrollPositionWithSingleContext {
   _ScrollerScrollPosition({
-    required ScrollPhysics physics,
-    required ScrollContext context,
-    double? initialPixels = 0.0,
-    bool keepScrollOffset = true,
-    ScrollPosition? oldPosition,
-    String? debugLabel,
-  }) : super(
-          physics: physics,
-          context: context,
-          initialPixels: initialPixels,
-          keepScrollOffset: keepScrollOffset,
-          oldPosition: oldPosition,
-          debugLabel: debugLabel,
-        );
+    required super.physics,
+    required super.context,
+    super.initialPixels,
+    super.keepScrollOffset,
+    super.oldPosition,
+    super.debugLabel,
+  });
 
   @override
   void pointerScroll(double delta) {

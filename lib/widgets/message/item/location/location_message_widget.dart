@@ -17,9 +17,7 @@ import '../../message_datetime_and_status.dart';
 import 'location_payload.dart';
 
 class LocationMessageWidget extends HookWidget {
-  const LocationMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const LocationMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -18,7 +18,7 @@ import '../home/home.dart';
 import '../home/route/responsive_navigator_cubit.dart';
 
 class SettingPage extends HookWidget {
-  const SettingPage({Key? key}) : super(key: key);
+  const SettingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -135,14 +135,13 @@ class SettingPage extends HookWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key? key,
     required this.assetName,
     required this.title,
     this.pageName,
     this.color,
     this.onTap,
     this.trailing = const Arrow(),
-  }) : super(key: key);
+  });
 
   final String assetName;
   final String title;
@@ -184,9 +183,7 @@ class _Item extends StatelessWidget {
 }
 
 class _UserProfile extends StatelessWidget {
-  const _UserProfile({
-    Key? key,
-  }) : super(key: key);
+  const _UserProfile();
 
   @override
   Widget build(BuildContext context) => Column(

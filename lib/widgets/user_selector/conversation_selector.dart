@@ -461,9 +461,8 @@ class _ConversationSelector extends HookWidget {
 
 class _AvatarSmallCloseIcon extends StatelessWidget {
   const _AvatarSmallCloseIcon({
-    Key? key,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final VoidCallback onTap;
 
@@ -509,8 +508,7 @@ class _Section extends StatelessWidget {
     required this.builder,
     required this.title,
     required this.count,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final IndexedWidgetBuilder builder;
   final String title;
@@ -548,13 +546,12 @@ class _Section extends StatelessWidget {
 
 class _BaseItem extends StatelessWidget {
   const _BaseItem({
-    Key? key,
     required this.keyword,
     required this.title,
     required this.avatar,
     this.showSelector = false,
     this.selected = false,
-  }) : super(key: key);
+  });
 
   final String title;
   final Widget avatar;

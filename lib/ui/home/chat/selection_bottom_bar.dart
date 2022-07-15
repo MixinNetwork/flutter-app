@@ -11,7 +11,7 @@ import '../../../widgets/user_selector/conversation_selector.dart';
 import '../bloc/message_selection_cubit.dart';
 
 class SelectionBottomBar extends StatelessWidget {
-  const SelectionBottomBar({Key? key}) : super(key: key);
+  const SelectionBottomBar({super.key});
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -104,11 +104,10 @@ class SelectionBottomBar extends StatelessWidget {
 
 class _Button extends StatelessWidget {
   const _Button({
-    Key? key,
     required this.label,
     required this.iconAssetName,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final String label;
   final String iconAssetName;

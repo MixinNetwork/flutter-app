@@ -63,9 +63,9 @@ class MacMenuBarCubit extends Cubit<MacMenuBarCubitState> {
 
 class MacosMenuBar extends StatelessWidget {
   const MacosMenuBar({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -79,7 +79,7 @@ class MacosMenuBar extends StatelessWidget {
 }
 
 class _Menus extends HookWidget {
-  const _Menus({Key? key, required this.child}) : super(key: key);
+  const _Menus({required this.child});
 
   final Widget child;
 
@@ -93,7 +93,7 @@ class _Menus extends HookWidget {
     } catch (_) {}
     final signed = authAvailable && accountServer != null;
 
-    final menuCubit = useBloc<MacMenuBarCubit>(() => MacMenuBarCubit());
+    final menuCubit = useBloc<MacMenuBarCubit>(MacMenuBarCubit.new);
 
     final handle = useBlocStateConverter<MacMenuBarCubit, MacMenuBarCubitState,
         ConversationMenuHandle?>(

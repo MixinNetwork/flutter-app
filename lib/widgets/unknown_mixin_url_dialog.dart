@@ -15,9 +15,8 @@ Future<void> showUnknownMixinUrlDialog(
 
 class _UnknownMixinUri extends StatelessWidget {
   const _UnknownMixinUri({
-    Key? key,
     required this.uri,
-  }) : super(key: key);
+  });
 
   final Uri uri;
 

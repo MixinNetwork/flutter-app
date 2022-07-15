@@ -10,10 +10,10 @@ import '../utils/extension/extension.dart';
 
 class MessageStatusIcon extends StatelessWidget {
   const MessageStatusIcon({
-    Key? key,
+    super.key,
     required this.status,
     this.color,
-  }) : super(key: key);
+  });
 
   final MessageStatus? status;
 
@@ -49,9 +49,8 @@ class MessageStatusIcon extends StatelessWidget {
 
 class _AnimatedMessageSendingIcon extends HookWidget {
   const _AnimatedMessageSendingIcon({
-    Key? key,
     required this.color,
-  }) : super(key: key);
+  });
 
   final Color color;
 

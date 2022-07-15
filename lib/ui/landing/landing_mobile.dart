@@ -42,7 +42,7 @@ import 'bloc/landing_cubit.dart';
 import 'landing.dart';
 
 class LoginWithMobileWidget extends HookWidget {
-  const LoginWithMobileWidget({Key? key}) : super(key: key);
+  const LoginWithMobileWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +88,8 @@ class LoginWithMobileWidget extends HookWidget {
 
 class _PhoneNumberInputScene extends HookWidget {
   const _PhoneNumberInputScene({
-    Key? key,
     required this.countries,
-  }) : super(key: key);
+  });
   final List<Country> countries;
 
   @override
@@ -279,10 +278,9 @@ class _PhoneNumberInputScene extends HookWidget {
 
 class _CodeInputScene extends HookWidget {
   const _CodeInputScene({
-    Key? key,
     required this.phoneNumber,
     required this.initialVerificationResponse,
-  }) : super(key: key);
+  });
 
   final String phoneNumber;
   final VerificationResponse initialVerificationResponse;
@@ -452,9 +450,8 @@ class _CodeInputScene extends HookWidget {
 
 class _ResendCodeWidget extends HookWidget {
   const _ResendCodeWidget({
-    Key? key,
     required this.onResend,
-  }) : super(key: key);
+  });
 
   final Future<bool> Function() onResend;
 
@@ -495,12 +492,11 @@ class _ResendCodeWidget extends HookWidget {
 
 class _MobileInput extends HookWidget {
   const _MobileInput({
-    Key? key,
     required this.controller,
     required this.country,
     required this.onCountryDiaClick,
     required this.countryPortalExpand,
-  }) : super(key: key);
+  });
 
   final TextEditingController controller;
   final Country country;
@@ -619,11 +615,10 @@ List<Country> _getCountries(dynamic any) =>
 
 class _CountryPickPortal extends HookWidget {
   const _CountryPickPortal({
-    Key? key,
     required this.onSelected,
     required this.countries,
     required this.selected,
-  }) : super(key: key);
+  });
 
   final void Function(Country country) onSelected;
   final List<Country> countries;
@@ -715,9 +710,8 @@ class _CountryPickPortal extends HookWidget {
 
 class _CharIndexItem extends StatelessWidget {
   const _CharIndexItem({
-    Key? key,
     required this.char,
-  }) : super(key: key);
+  });
 
   final String char;
 
@@ -741,11 +735,10 @@ class _CharIndexItem extends StatelessWidget {
 
 class _CountryItem extends StatelessWidget {
   const _CountryItem({
-    Key? key,
     required this.country,
     required this.onTap,
     required this.isSelected,
-  }) : super(key: key);
+  });
 
   final Country country;
   final VoidCallback onTap;
@@ -781,7 +774,7 @@ class _CountryItem extends StatelessWidget {
 }
 
 class _CaptchaWebViewDialog extends HookWidget {
-  const _CaptchaWebViewDialog({Key? key}) : super(key: key);
+  const _CaptchaWebViewDialog();
 
   @override
   Widget build(BuildContext context) {

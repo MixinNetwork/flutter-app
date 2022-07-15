@@ -18,9 +18,8 @@ class ActionButton extends StatelessWidget {
     this.onExit,
     this.onHover,
     this.interactive = true,
-    Key? key,
-  })  : assert(name != null || child != null),
-        super(key: key);
+    super.key,
+  }) : assert(name != null || child != null);
 
   final String? name;
   final Widget? child;

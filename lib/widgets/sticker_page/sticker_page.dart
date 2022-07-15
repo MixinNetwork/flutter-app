@@ -21,9 +21,9 @@ import 'sticker_store.dart';
 class StickerPage extends StatelessWidget {
   const StickerPage({
     required this.tabLength,
-    Key? key,
+    super.key,
     this.tabController,
-  }) : super(key: key);
+  });
 
   final TabController? tabController;
   final int tabLength;
@@ -72,9 +72,8 @@ class StickerPage extends StatelessWidget {
 
 class _StickerAlbumPage extends HookWidget {
   const _StickerAlbumPage({
-    Key? key,
     required this.index,
-  }) : super(key: key);
+  });
 
   final int index;
 
@@ -151,11 +150,10 @@ class _StickerStoreEmptyPage extends StatelessWidget {
 
 class _StickerAlbumPageItem extends HookWidget {
   const _StickerAlbumPageItem({
-    Key? key,
     required this.index,
     required this.updateUsedAt,
     this.rightClickDelete = false,
-  }) : super(key: key);
+  });
 
   final int index;
   final bool updateUsedAt;
@@ -209,10 +207,9 @@ class _StickerAlbumPageItem extends HookWidget {
 
 class _StickerAlbumBar extends HookWidget {
   const _StickerAlbumBar({
-    Key? key,
     required this.tabLength,
     this.tabController,
-  }) : super(key: key);
+  });
 
   final int tabLength;
   final TabController? tabController;
@@ -285,9 +282,8 @@ class _StickerAlbumBar extends HookWidget {
 
 class _StickerAlbumBarItem extends StatelessWidget {
   const _StickerAlbumBarItem({
-    Key? key,
     required this.index,
-  }) : super(key: key);
+  });
 
   final int index;
 

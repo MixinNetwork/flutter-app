@@ -50,9 +50,8 @@ class CreateGroupConversationAction
 
 class _NewConversationConfirm extends HookWidget {
   const _NewConversationConfirm(
-    this.userIds, {
-    Key? key,
-  }) : super(key: key);
+    this.userIds,
+  );
 
   final List<String> userIds;
 

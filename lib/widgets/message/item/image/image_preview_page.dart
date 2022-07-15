@@ -26,11 +26,11 @@ import 'preview_image_widget.dart';
 
 class ImagePreviewPage extends HookWidget {
   const ImagePreviewPage({
-    Key? key,
+    super.key,
     required this.conversationId,
     required this.messageId,
     required this.isTranscriptPage,
-  }) : super(key: key);
+  });
 
   final String conversationId;
   final String messageId;
@@ -75,7 +75,7 @@ class ImagePreviewPage extends HookWidget {
     final next = useState<MessageItem?>(null);
 
     final controller = useMemoized(
-      () => TransformImageController(),
+      TransformImageController.new,
       [current.value?.messageId],
     );
 
@@ -317,11 +317,10 @@ class ImagePreviewPage extends HookWidget {
 
 class _Bar extends StatelessWidget {
   const _Bar({
-    Key? key,
     required this.message,
     required this.controller,
     required this.isTranscriptPage,
-  }) : super(key: key);
+  });
 
   final MessageItem message;
   final TransformImageController controller;
@@ -436,12 +435,11 @@ class _Bar extends StatelessWidget {
 
 class _Item extends HookWidget {
   const _Item({
-    Key? key,
     required this.message,
     required this.controller,
     required this.isTranscriptPage,
     required this.constraints,
-  }) : super(key: key);
+  });
   final MessageItem message;
   final bool isTranscriptPage;
   final TransformImageController controller;

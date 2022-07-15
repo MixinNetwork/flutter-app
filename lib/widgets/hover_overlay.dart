@@ -32,7 +32,7 @@ typedef PortalBuilder<T> = Widget Function(BuildContext context, T value,
 
 class HoverOverlay extends HookWidget {
   const HoverOverlay({
-    Key? key,
+    super.key,
     required this.closeDuration,
     required this.child,
     required this.portal,
@@ -44,7 +44,7 @@ class HoverOverlay extends HookWidget {
     this.outCurve = Curves.linear,
     this.delayDuration,
     this.portalBuilder,
-  }) : super(key: key);
+  });
 
   final Widget portal;
   final Widget child;

@@ -13,9 +13,9 @@ import 'message.dart';
 
 class MessageDayTime extends HookWidget {
   const MessageDayTime({
-    Key? key,
+    super.key,
     required this.dateTime,
-  }) : super(key: key);
+  });
 
   final DateTime dateTime;
 
@@ -34,8 +34,7 @@ class MessageDayTime extends HookWidget {
 }
 
 class _MessageDayTimeWidget extends HookWidget {
-  const _MessageDayTimeWidget({Key? key, required this.dateTime})
-      : super(key: key);
+  const _MessageDayTimeWidget({required this.dateTime});
 
   final DateTime dateTime;
 
@@ -111,8 +110,8 @@ class MessageDayTimeViewportWidget extends HookWidget {
     required this.child,
     required this.scrollController,
     this.reTraversalKey,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   factory MessageDayTimeViewportWidget.chatPage({
     Key? key,
@@ -183,7 +182,7 @@ class MessageDayTimeViewportWidget extends HookWidget {
     final dateTimeTopOffset = useState<double>(0);
 
     final bloc =
-        useBloc<_HiddenMessageDayTimeBloc>(() => _HiddenMessageDayTimeBloc());
+        useBloc<_HiddenMessageDayTimeBloc>(_HiddenMessageDayTimeBloc.new);
 
     void doTraversal() {
       final result = _traversalCurrentShowingMessageElements();

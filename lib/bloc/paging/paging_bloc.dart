@@ -256,16 +256,14 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
 
 class AnonymousPagingBloc<T> extends PagingBloc<T> {
   AnonymousPagingBloc({
-    required int limit,
-    required PagingState<T> initState,
+    required super.limit,
+    required super.initState,
     required Future<int> Function() queryCount,
     required Future<List<T>> Function(int limit, int offset) queryRange,
   })  : _queryCount = queryCount,
         _queryRange = queryRange,
         super(
-          initState: initState,
           itemPositionsListener: ItemPositionsListener.create(),
-          limit: limit,
         );
 
   final Future<int> Function() _queryCount;

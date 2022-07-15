@@ -9,13 +9,13 @@ import '../cache_image.dart';
 
 class StickerItem extends HookWidget {
   const StickerItem({
-    Key? key,
+    super.key,
     required this.assetUrl,
     required this.assetType,
     this.placeholder,
     this.width,
     this.height,
-  }) : super(key: key);
+  });
 
   final String assetUrl;
   final String? assetType;

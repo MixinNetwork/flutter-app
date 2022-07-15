@@ -11,7 +11,7 @@ import '../../../utils/uri_utils.dart';
 import '../../../widgets/menu.dart';
 
 class NetworkStatus extends HookWidget {
-  const NetworkStatus({Key? key}) : super(key: key);
+  const NetworkStatus({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +60,8 @@ class NetworkStatus extends HookWidget {
 
 class _NetworkNotConnect extends StatelessWidget {
   const _NetworkNotConnect({
-    Key? key,
     required this.visible,
-  }) : super(key: key);
+  });
 
   final bool visible;
 

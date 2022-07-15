@@ -19,9 +19,7 @@ import '../unknown_message.dart';
 import 'image_preview_page.dart';
 
 class ImageMessageWidget extends HookWidget {
-  const ImageMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const ImageMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +50,10 @@ class ImageMessageWidget extends HookWidget {
 
 class MessageImage extends HookWidget {
   const MessageImage({
-    Key? key,
+    super.key,
     this.size,
     required this.showStatus,
-  }) : super(key: key);
+  });
 
   final Size? size;
   final bool showStatus;
@@ -183,13 +181,12 @@ typedef ImageLayoutBuilder = Widget Function(
 /// or too short.
 class ImageMessageLayout extends StatelessWidget {
   const ImageMessageLayout({
-    Key? key,
+    super.key,
     required this.builder,
     required this.imageWidthInPixel,
     required this.imageHeightInPixel,
   })  : assert(imageHeightInPixel > 0),
-        assert(imageWidthInPixel > 0),
-        super(key: key);
+        assert(imageWidthInPixel > 0);
 
   final ImageLayoutBuilder builder;
 

@@ -161,11 +161,11 @@ class SearchConversationKeywordCubit
 }
 
 class ChatPage extends HookWidget {
-  const ChatPage({Key? key}) : super(key: key);
+  const ChatPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final chatContainerPageKey = useMemoized(() => GlobalKey());
+    final chatContainerPageKey = useMemoized(GlobalKey.new);
     final conversationId =
         useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
             converter: (state) => state?.conversationId);
@@ -173,15 +173,14 @@ class ChatPage extends HookWidget {
         useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
             converter: (state) => state?.initialSidePage);
 
-    final chatSideCubit =
-        useBloc(() => ChatSideCubit(), keys: [conversationId]);
+    final chatSideCubit = useBloc(ChatSideCubit.new, keys: [conversationId]);
 
     final searchConversationKeywordCubit = useBloc(
         () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
         keys: [conversationId]);
 
     final messageSelectionCubit = useBloc(
-      () => MessageSelectionCubit(),
+      MessageSelectionCubit.new,
       keys: [conversationId],
     );
 
@@ -299,12 +298,11 @@ class ChatPage extends HookWidget {
 
 class _SideRouter extends StatelessWidget {
   const _SideRouter({
-    Key? key,
     required this.chatSideCubit,
     required this.pages,
     this.onPopPage,
     required this.constraints,
-  }) : super(key: key);
+  });
 
   final ChatSideCubit chatSideCubit;
 
@@ -328,11 +326,10 @@ class _SideRouter extends StatelessWidget {
 
 class _AnimatedChatSlide extends HookWidget {
   const _AnimatedChatSlide({
-    Key? key,
     required this.pages,
     required this.constraints,
     required this.onPopPage,
-  }) : super(key: key);
+  });
 
   final List<Page<dynamic>> pages;
 
@@ -387,17 +384,15 @@ class _AnimatedChatSlide extends HookWidget {
 }
 
 class ChatContainer extends HookWidget {
-  const ChatContainer({
-    Key? key,
-  }) : super(key: key);
+  const ChatContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final quoteMessageCubit = useBloc(() => QuoteMessageCubit());
+    final quoteMessageCubit = useBloc(QuoteMessageCubit.new);
     BlocProvider.of<MessageBloc>(context).limit =
         MediaQuery.of(context).size.height ~/ 20;
 
-    final pendingJumpMessageCubit = useBloc(() => PendingJumpMessageCubit());
+    final pendingJumpMessageCubit = useBloc(PendingJumpMessageCubit.new);
 
     final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
         MessageSelectionState, bool>(
@@ -532,8 +527,7 @@ class _ExitSelectionModeIntent extends Intent {
 class _NotificationListener extends StatelessWidget {
   const _NotificationListener({
     required this.child,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -571,9 +565,7 @@ class _NotificationListener extends StatelessWidget {
 }
 
 class _List extends HookWidget {
-  const _List({
-    Key? key,
-  }) : super(key: key);
+  const _List();
 
   @override
   Widget build(BuildContext context) {
@@ -680,9 +672,7 @@ class _List extends HookWidget {
 }
 
 class _JumpCurrentButton extends HookWidget {
-  const _JumpCurrentButton({
-    Key? key,
-  }) : super(key: key);
+  const _JumpCurrentButton();
 
   @override
   Widget build(BuildContext context) {
@@ -765,7 +755,7 @@ class _JumpCurrentButton extends HookWidget {
 }
 
 class _BottomBanner extends HookWidget {
-  const _BottomBanner({Key? key}) : super(key: key);
+  const _BottomBanner();
 
   @override
   Widget build(BuildContext context) {
@@ -844,7 +834,7 @@ class _BottomBanner extends HookWidget {
 }
 
 class _PinMessagesBanner extends HookWidget {
-  const _PinMessagesBanner({Key? key}) : super(key: key);
+  const _PinMessagesBanner();
 
   @override
   Widget build(BuildContext context) {
@@ -940,7 +930,7 @@ class _PinMessagesBanner extends HookWidget {
 }
 
 class _JumpMentionButton extends HookWidget {
-  const _JumpMentionButton({Key? key}) : super(key: key);
+  const _JumpMentionButton();
 
   @override
   Widget build(BuildContext context) {
@@ -1029,10 +1019,9 @@ class _JumpMentionButton extends HookWidget {
 
 class _ChatDropOverlay extends HookWidget {
   const _ChatDropOverlay({
-    Key? key,
     required this.child,
     required this.enable,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -1072,7 +1061,7 @@ class _ChatDropOverlay extends HookWidget {
 }
 
 class _ChatDragIndicator extends StatelessWidget {
-  const _ChatDragIndicator({Key? key}) : super(key: key);
+  const _ChatDragIndicator();
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -1103,9 +1092,8 @@ class _ChatDragIndicator extends StatelessWidget {
 
 class _ChatMenuHandler extends HookWidget {
   const _ChatMenuHandler({
-    Key? key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 

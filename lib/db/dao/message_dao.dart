@@ -19,7 +19,7 @@ part 'message_dao.g.dart';
 @DriftAccessor(tables: [Messages])
 class MessageDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageDaoMixin {
-  MessageDao(MixinDatabase db) : super(db);
+  MessageDao(super.db);
 
   late Stream<void> updateEvent = db.tableUpdates(
     TableUpdateQuery.onAllTables([
@@ -69,7 +69,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   late Stream<NotificationMessage> notificationMessageStream = db.eventBus
       .watch<String>(DatabaseEvent.notification)
       .asyncBufferMap((event) => db.notificationMessage(event).get())
-      .flatMapIterable((value) => Stream.value(value));
+      .flatMapIterable(Stream.value);
 
   late Stream<String> deleteMessageIdStream =
       db.eventBus.watch<String>(DatabaseEvent.delete);

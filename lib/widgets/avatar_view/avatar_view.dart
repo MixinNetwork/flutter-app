@@ -11,7 +11,7 @@ import '../cache_image.dart';
 
 class ConversationAvatarWidget extends HookWidget {
   const ConversationAvatarWidget({
-    Key? key,
+    super.key,
     this.conversation,
     required this.size,
     this.conversationId,
@@ -20,7 +20,7 @@ class ConversationAvatarWidget extends HookWidget {
     this.groupIconUrl,
     this.avatarUrl,
     this.category,
-  }) : super(key: key);
+  });
 
   final ConversationItem? conversation;
   final String? userId;
@@ -83,8 +83,7 @@ class ConversationAvatarWidget extends HookWidget {
 }
 
 class AvatarPuzzlesWidget extends HookWidget {
-  const AvatarPuzzlesWidget(this.users, this.size, {Key? key})
-      : super(key: key);
+  const AvatarPuzzlesWidget(this.users, this.size, {super.key});
 
   final List<User> users;
   final double size;
@@ -152,13 +151,13 @@ class AvatarPuzzlesWidget extends HookWidget {
 
 class AvatarWidget extends StatelessWidget {
   const AvatarWidget({
-    Key? key,
+    super.key,
     required this.size,
     this.clipOval = true,
     required this.avatarUrl,
     required this.userId,
     required this.name,
-  }) : super(key: key);
+  });
 
   final String? avatarUrl;
   final String? userId;

@@ -10,9 +10,7 @@ import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
 
 class UnknownMessage extends StatelessWidget {
-  const UnknownMessage({
-    Key? key,
-  }) : super(key: key);
+  const UnknownMessage({super.key});
 
   @override
   Widget build(BuildContext context) {

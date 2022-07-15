@@ -27,7 +27,7 @@ extension BubbleColor on BuildContext {
 
 class MessageBubble extends HookWidget {
   const MessageBubble({
-    Key? key,
+    super.key,
     required this.child,
     this.showBubble = true,
     this.includeNip = false,
@@ -35,7 +35,7 @@ class MessageBubble extends HookWidget {
     this.padding = const EdgeInsets.all(8),
     this.outerTimeAndStatusWidget,
     this.forceIsCurrentUserColor,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final bool showBubble;
@@ -223,10 +223,9 @@ class MessageBubble extends HookWidget {
 
 class _MessageBubbleNipPadding extends StatelessWidget {
   const _MessageBubbleNipPadding({
-    Key? key,
     required this.currentUser,
     required this.child,
-  }) : super(key: key);
+  });
 
   final bool currentUser;
   final Widget child;
@@ -265,8 +264,9 @@ class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
     return Path.combine(PathOperation.union, bubblePath, nipPath);
   }
 
-  Path _bubblePath(Size size) =>
-      Path()..addRRect(const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size));
+  Path _bubblePath(Size size) => Path()
+    ..addRRect(
+        const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size));
 
   Path _leftNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 12);

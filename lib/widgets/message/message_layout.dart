@@ -5,12 +5,12 @@ import 'package:flutter/widgets.dart';
 
 class MessageLayout extends MultiChildRenderObjectWidget {
   MessageLayout({
-    Key? key,
+    super.key,
     this.spacing = 0.0,
     this.clipBehavior = Clip.none,
     required Widget content,
     required Widget dateAndStatus,
-  }) : super(key: key, children: [content, dateAndStatus]);
+  }) : super(children: [content, dateAndStatus]);
 
   final double spacing;
   final Clip clipBehavior;

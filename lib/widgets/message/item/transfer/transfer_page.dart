@@ -22,7 +22,9 @@ Future<void> showTransferDialog(
     );
 
 class _TransferPage extends HookWidget {
-  const _TransferPage(this.snapshotId, {Key? key}) : super(key: key);
+  const _TransferPage(
+    this.snapshotId,
+  );
 
   final String snapshotId;
 
@@ -106,9 +108,8 @@ class _TransferPage extends HookWidget {
 
 class _SnapshotDetailHeader extends HookWidget {
   const _SnapshotDetailHeader({
-    Key? key,
     required this.snapshot,
-  }) : super(key: key);
+  });
 
   final SnapshotItem snapshot;
 
@@ -171,9 +172,8 @@ class _SnapshotDetailHeader extends HookWidget {
 
 class _ValuesDescription extends HookWidget {
   const _ValuesDescription({
-    Key? key,
     required this.snapshot,
-  }) : super(key: key);
+  });
 
   final SnapshotItem snapshot;
 
@@ -243,10 +243,9 @@ class _ValuesDescription extends HookWidget {
 
 class _TransactionDetailInfo extends StatelessWidget {
   const _TransactionDetailInfo({
-    Key? key,
     required this.snapshot,
     required this.opponentFullName,
-  }) : super(key: key);
+  });
 
   final SnapshotItem snapshot;
   final String? opponentFullName;
@@ -295,11 +294,11 @@ class _TransactionDetailInfo extends StatelessWidget {
 
 class TransactionInfoTile extends StatelessWidget {
   const TransactionInfoTile({
-    Key? key,
+    super.key,
     required this.title,
     required this.subtitle,
     this.subtitleColor,
-  }) : super(key: key);
+  });
 
   final Widget title;
   final Widget subtitle;
@@ -335,7 +334,6 @@ class TransactionInfoTile extends StatelessWidget {
 
 class _SymbolIconWithBorder extends StatelessWidget {
   const _SymbolIconWithBorder({
-    Key? key,
     required this.symbolUrl,
     this.chainUrl,
     required this.size,
@@ -343,7 +341,7 @@ class _SymbolIconWithBorder extends StatelessWidget {
     this.chainBorder = const BorderSide(color: Colors.white),
     // ignore: unused_element
     this.symbolBorder = BorderSide.none,
-  }) : super(key: key);
+  });
 
   final String? symbolUrl;
   final String? chainUrl;

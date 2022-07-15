@@ -5,7 +5,6 @@ import '../mixin_database.dart';
 
 part 'sticker_album_dao.g.dart';
 
-
 extension StickerAlbumsCompanionExtension on sdk.StickerAlbum {
   StickerAlbumsCompanion get asStickerAlbumsCompanion =>
       StickerAlbumsCompanion.insert(
@@ -25,7 +24,7 @@ extension StickerAlbumsCompanionExtension on sdk.StickerAlbum {
 @DriftAccessor(tables: [StickerAlbums])
 class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerAlbumDaoMixin {
-  StickerAlbumDao(MixinDatabase db) : super(db);
+  StickerAlbumDao(super.db);
 
   Future<int> insert(StickerAlbumsCompanion stickerAlbum) =>
       into(db.stickerAlbums).insertOnConflictUpdate(stickerAlbum);

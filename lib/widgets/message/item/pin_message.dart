@@ -13,9 +13,7 @@ import '../message.dart';
 import 'text/mention_builder.dart';
 
 class PinMessageWidget extends HookWidget {
-  const PinMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const PinMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

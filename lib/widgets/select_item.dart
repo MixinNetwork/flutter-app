@@ -15,8 +15,8 @@ class SelectItem extends HookWidget {
     required this.onTap,
     this.selected = false,
     this.showTooltip = true,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Widget icon;
   final Widget title;

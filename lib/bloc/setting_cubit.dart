@@ -5,7 +5,6 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 import '../utils/logger.dart';
 
-
 class SettingState extends Equatable {
   const SettingState({
     int? brightness,

@@ -8,9 +8,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 class _ImageByBase64 extends HookWidget {
   const _ImageByBase64(
     this.base64String, {
-    Key? key,
     this.fit = BoxFit.cover,
-  }) : super(key: key);
+  });
 
   final String base64String;
   final BoxFit? fit;
@@ -29,15 +28,13 @@ const _kDefaultBlurHashSize = 20;
 
 class _ImageByBlurHash extends HookWidget {
   const _ImageByBlurHash({
-    Key? key,
     required this.blurHash,
     this.width = _kDefaultBlurHashSize,
     this.height = _kDefaultBlurHashSize,
     // ignore: unused_element
     this.fit = BoxFit.cover,
   })  : assert(width > 0),
-        assert(height > 0),
-        super(key: key);
+        assert(height > 0);
 
   final BlurHash blurHash;
   final int width;
@@ -73,10 +70,10 @@ class _ImageByBlurHash extends HookWidget {
 ///
 class ImageByBlurHashOrBase64 extends HookWidget {
   const ImageByBlurHashOrBase64({
-    Key? key,
+    super.key,
     required this.imageData,
     this.fit = BoxFit.cover,
-  }) : super(key: key);
+  });
 
   /// could be image
   final String imageData;

@@ -5,7 +5,6 @@ import '../mixin_database.dart';
 
 part 'asset_dao.g.dart';
 
-
 extension AssetConverter on sdk.Asset {
   AssetsCompanion get asAssetsCompanion => AssetsCompanion.insert(
         assetId: assetId,
@@ -28,7 +27,7 @@ extension AssetConverter on sdk.Asset {
 
 @DriftAccessor(tables: [Assets])
 class AssetDao extends DatabaseAccessor<MixinDatabase> with _$AssetDaoMixin {
-  AssetDao(MixinDatabase db) : super(db);
+  AssetDao(super.db);
 
   Future<int> insertSdkAsset(sdk.Asset asset) =>
       into(db.assets).insertOnConflictUpdate(asset.asAssetsCompanion);

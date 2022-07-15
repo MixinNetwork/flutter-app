@@ -36,7 +36,7 @@ void _clear(BuildContext context) {
 }
 
 class SearchList extends HookWidget {
-  const SearchList({Key? key}) : super(key: key);
+  const SearchList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -252,7 +252,7 @@ class SearchList extends HookWidget {
 
 class SearchItem extends StatelessWidget {
   const SearchItem({
-    Key? key,
+    super.key,
     required this.avatar,
     required this.name,
     required this.keyword,
@@ -263,7 +263,7 @@ class SearchItem extends StatelessWidget {
     this.date,
     this.trailing,
     this.selected,
-  }) : super(key: key);
+  });
 
   final Widget avatar;
   final Widget? trailing;
@@ -396,10 +396,9 @@ class SearchItem extends StatelessWidget {
 
 class _SearchMessageList extends HookWidget {
   const _SearchMessageList({
-    Key? key,
     required this.keyword,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final String keyword;
   final VoidCallback onTap;
@@ -465,12 +464,11 @@ class _SearchMessageList extends HookWidget {
 
 class _SearchHeader extends StatelessWidget {
   const _SearchHeader({
-    Key? key,
     required this.title,
     required this.showMore,
     required this.onTap,
     required this.more,
-  }) : super(key: key);
+  });
 
   final String title;
   final bool showMore;
@@ -532,12 +530,12 @@ Future Function() _searchMessageItemOnTap(
 
 class SearchMessageItem extends HookWidget {
   const SearchMessageItem({
-    Key? key,
+    super.key,
     required this.message,
     required this.keyword,
     required this.onTap,
     this.showSender = false,
-  }) : super(key: key);
+  });
 
   final SearchMessageDetailItem message;
   final bool showSender;
@@ -626,9 +624,7 @@ class SearchMessageItem extends HookWidget {
 }
 
 class SearchEmpty extends StatelessWidget {
-  const SearchEmpty({
-    Key? key,
-  }) : super(key: key);
+  const SearchEmpty({super.key});
 
   @override
   Widget build(BuildContext context) => Container(

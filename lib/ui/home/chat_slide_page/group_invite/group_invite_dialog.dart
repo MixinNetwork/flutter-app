@@ -24,9 +24,8 @@ Future<void> showGroupInviteByLinkDialog(BuildContext context,
 
 class _GroupInviteByLinkDialog extends HookWidget {
   const _GroupInviteByLinkDialog({
-    Key? key,
     required this.conversationId,
-  }) : super(key: key);
+  });
 
   final String conversationId;
 
@@ -75,8 +74,7 @@ class _GroupInviteByLinkDialog extends HookWidget {
 }
 
 class _GroupInviteBody extends StatelessWidget {
-  const _GroupInviteBody({Key? key, required this.conversation})
-      : super(key: key);
+  const _GroupInviteBody({required this.conversation});
 
   final Conversation conversation;
 
@@ -138,9 +136,8 @@ class _GroupInviteBody extends StatelessWidget {
 
 class _ActionButtons extends StatelessWidget {
   const _ActionButtons({
-    Key? key,
     required this.conversation,
-  }) : super(key: key);
+  });
 
   final Conversation conversation;
 
@@ -193,11 +190,10 @@ class _ActionButtons extends StatelessWidget {
 
 class _IconButton extends StatelessWidget {
   const _IconButton({
-    Key? key,
     required this.label,
     required this.iconAssetName,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final String label;
   final String iconAssetName;

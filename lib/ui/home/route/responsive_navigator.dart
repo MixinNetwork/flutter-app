@@ -10,8 +10,7 @@ import 'responsive_navigator_cubit.dart';
 
 abstract class AbstractResponsiveNavigatorCubit
     extends Cubit<ResponsiveNavigatorState> {
-  AbstractResponsiveNavigatorCubit(ResponsiveNavigatorState initialState)
-      : super(initialState);
+  AbstractResponsiveNavigatorCubit(super.initialState);
 
   void updateRouteMode(bool routeMode) =>
       emit(state.copyWith(routeMode: routeMode));
@@ -71,11 +70,11 @@ abstract class AbstractResponsiveNavigatorCubit
 
 class ResponsiveNavigator extends HookWidget {
   const ResponsiveNavigator({
-    Key? key,
+    super.key,
     required this.leftPage,
     required this.rightEmptyPage,
     required this.switchWidth,
-  }) : super(key: key);
+  });
 
   final MaterialPage leftPage;
   final MaterialPage rightEmptyPage;

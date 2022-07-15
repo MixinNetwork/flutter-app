@@ -19,9 +19,7 @@ import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
 class FileMessage extends HookWidget {
-  const FileMessage({
-    Key? key,
-  }) : super(key: key);
+  const FileMessage({super.key});
 
   @override
   Widget build(BuildContext context) => const MessageBubble(
@@ -31,9 +29,7 @@ class FileMessage extends HookWidget {
 }
 
 class MessageFile extends HookWidget {
-  const MessageFile({
-    Key? key,
-  }) : super(key: key);
+  const MessageFile({super.key});
 
   @override
   Widget build(BuildContext context) {

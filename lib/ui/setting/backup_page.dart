@@ -10,7 +10,7 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 
 class BackupPage extends HookWidget {
-  const BackupPage({Key? key}) : super(key: key);
+  const BackupPage({super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(

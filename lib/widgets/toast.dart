@@ -49,11 +49,11 @@ class Toast {
 
 class ToastWidget extends StatelessWidget {
   const ToastWidget({
-    Key? key,
+    super.key,
     this.barrierColor = const Color(0x80000000),
     this.icon,
     required this.text,
-  }) : super(key: key);
+  });
 
   final Color barrierColor;
   final Widget? icon;
@@ -148,7 +148,7 @@ void showToastLoading(BuildContext context) => Toast.createView(
     );
 
 class _Loading extends StatelessWidget {
-  const _Loading({Key? key}) : super(key: key);
+  const _Loading();
 
   @override
   Widget build(BuildContext context) => const CircularProgressIndicator(
@@ -158,7 +158,7 @@ class _Loading extends StatelessWidget {
 }
 
 class _Failed extends StatelessWidget {
-  const _Failed({Key? key}) : super(key: key);
+  const _Failed();
 
   @override
   Widget build(BuildContext context) =>
@@ -166,7 +166,7 @@ class _Failed extends StatelessWidget {
 }
 
 class _Successful extends StatelessWidget {
-  const _Successful({Key? key}) : super(key: key);
+  const _Successful();
 
   @override
   Widget build(BuildContext context) =>

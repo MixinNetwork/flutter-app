@@ -35,10 +35,9 @@ Future<ImageEditorSnapshot?> showImageEditor(
 
 class _ImageEditorDialog extends HookWidget {
   const _ImageEditorDialog({
-    Key? key,
     required this.path,
     this.snapshot,
-  }) : super(key: key);
+  });
 
   final String path;
 
@@ -46,7 +45,7 @@ class _ImageEditorDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final boundaryKey = useMemoized(() => GlobalKey());
+    final boundaryKey = useMemoized(GlobalKey.new);
     final image = useMemoizedFuture<ui.Image?>(() async {
       final bytes = File(path).readAsBytesSync();
       final codec = await PaintingBinding.instance.instantiateImageCodec(bytes);
@@ -511,12 +510,11 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
 
 class _Preview extends HookWidget {
   const _Preview({
-    Key? key,
     required this.path,
     required this.viewPortSize,
     required this.boundaryKey,
     required this.image,
-  }) : super(key: key);
+  });
 
   final String path;
 
@@ -656,12 +654,11 @@ Rect transformInsideRect(Rect rect, Rect parent, double radius) {
 
 class _CropRectWidget extends HookWidget {
   const _CropRectWidget({
-    Key? key,
     required this.scaledImageSize,
     required this.isFlip,
     required this.rotate,
     required this.scale,
-  }) : super(key: key);
+  });
 
   final Size scaledImageSize;
   final bool isFlip;
@@ -908,12 +905,11 @@ class _CropShadowOverlayPainter extends CustomPainter {
 
 class _CustomDrawingWidget extends HookWidget {
   const _CustomDrawingWidget({
-    Key? key,
     required this.viewPortSize,
     required this.image,
     required this.rotate,
     required this.flip,
-  }) : super(key: key);
+  });
 
   final ui.Size viewPortSize;
   final ui.Image image;
@@ -1102,7 +1098,7 @@ class _DrawerPainter extends CustomPainter {
 }
 
 class _DrawColorSelector extends HookWidget {
-  const _DrawColorSelector({Key? key}) : super(key: key);
+  const _DrawColorSelector();
 
   @override
   Widget build(BuildContext context) {
@@ -1146,7 +1142,7 @@ const _kPresetColors = [
 const _kDefaultDrawColor = Color(0xFFE84D3D);
 
 class _NormalColorTile extends HookWidget {
-  const _NormalColorTile({Key? key, required this.color}) : super(key: key);
+  const _NormalColorTile({required this.color});
 
   final Color color;
 
@@ -1199,10 +1195,9 @@ class _NormalColorTile extends HookWidget {
 
 class _CustomColorTile extends StatelessWidget {
   const _CustomColorTile({
-    Key? key,
     required this.selected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final bool selected;
 
@@ -1267,9 +1262,8 @@ class _CustomColorTile extends StatelessWidget {
 
 class _CustomColorBar extends HookWidget {
   const _CustomColorBar({
-    Key? key,
     required this.onColorSelected,
-  }) : super(key: key);
+  });
 
   final void Function(Color color) onColorSelected;
 
@@ -1340,7 +1334,7 @@ class _CustomColorBar extends HookWidget {
 }
 
 class _ResetButton extends HookWidget {
-  const _ResetButton({Key? key}) : super(key: key);
+  const _ResetButton();
 
   @override
   Widget build(BuildContext context) {
@@ -1363,7 +1357,7 @@ class _ResetButton extends HookWidget {
 }
 
 class _OperationButtons extends HookWidget {
-  const _OperationButtons({Key? key}) : super(key: key);
+  const _OperationButtons();
 
   @override
   Widget build(BuildContext context) {
@@ -1388,7 +1382,7 @@ class _OperationButtons extends HookWidget {
 }
 
 class _NormalOperationBar extends HookWidget {
-  const _NormalOperationBar({Key? key}) : super(key: key);
+  const _NormalOperationBar();
 
   @override
   Widget build(BuildContext context) {
@@ -1524,7 +1518,7 @@ class _NormalOperationBar extends HookWidget {
 }
 
 class _DrawOperationBar extends HookWidget {
-  const _DrawOperationBar({Key? key}) : super(key: key);
+  const _DrawOperationBar();
 
   @override
   Widget build(BuildContext context) {

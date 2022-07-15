@@ -7,9 +7,7 @@ import '../../../utils/extension/extension.dart';
 import '../message.dart';
 
 class SystemMessage extends HookWidget {
-  const SystemMessage({
-    Key? key,
-  }) : super(key: key);
+  const SystemMessage({super.key});
 
   @override
   Widget build(BuildContext context) {

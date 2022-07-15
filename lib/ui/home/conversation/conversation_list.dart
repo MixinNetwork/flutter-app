@@ -105,7 +105,7 @@ class ConversationList extends HookWidget {
 }
 
 class _Empty extends StatelessWidget {
-  const _Empty({Key? key}) : super(key: key);
+  const _Empty();
 
   @override
   Widget build(BuildContext context) {
@@ -135,11 +135,10 @@ class _Empty extends StatelessWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key? key,
     this.selected = false,
     required this.conversation,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final bool selected;
   final ConversationItem conversation;
@@ -231,9 +230,8 @@ class _Item extends StatelessWidget {
 
 class _ItemConversationSubtitle extends StatelessWidget {
   const _ItemConversationSubtitle({
-    Key? key,
     required this.conversation,
-  }) : super(key: key);
+  });
 
   final ConversationItem conversation;
 
@@ -276,10 +274,9 @@ class _ItemConversationSubtitle extends StatelessWidget {
 
 class _MessagePreview extends StatelessWidget {
   const _MessagePreview({
-    Key? key,
     required this.messageColor,
     required this.conversation,
-  }) : super(key: key);
+  });
 
   final Color messageColor;
   final ConversationItem conversation;
@@ -299,9 +296,8 @@ class _MessagePreview extends StatelessWidget {
 
 class _MessageContent extends HookWidget {
   const _MessageContent({
-    Key? key,
     required this.conversation,
-  }) : super(key: key);
+  });
   final ConversationItem conversation;
 
   @override
@@ -405,9 +401,8 @@ class _MessageContent extends HookWidget {
 
 class _MessageStatusIcon extends StatelessWidget {
   const _MessageStatusIcon({
-    Key? key,
     required this.conversation,
-  }) : super(key: key);
+  });
 
   final ConversationItem conversation;
 
@@ -430,9 +425,8 @@ class _MessageStatusIcon extends StatelessWidget {
 
 class _StatusRow extends StatelessWidget {
   const _StatusRow({
-    Key? key,
     required this.conversation,
-  }) : super(key: key);
+  });
   final ConversationItem conversation;
 
   @override

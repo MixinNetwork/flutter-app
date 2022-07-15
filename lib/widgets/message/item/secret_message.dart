@@ -6,7 +6,7 @@ import '../../../utils/uri_utils.dart';
 import '../message.dart';
 
 class SecretMessage extends StatelessWidget {
-  const SecretMessage({Key? key}) : super(key: key);
+  const SecretMessage({super.key});
 
   @override
   Widget build(BuildContext context) => Center(

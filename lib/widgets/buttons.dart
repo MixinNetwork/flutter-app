@@ -6,10 +6,10 @@ import 'action_button.dart';
 
 class MixinBackButton extends StatelessWidget {
   const MixinBackButton({
-    Key? key,
+    super.key,
     this.color,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final Color? color;
   final VoidCallback? onTap;
@@ -30,9 +30,9 @@ class MixinBackButton extends StatelessWidget {
 
 class MixinCloseButton extends StatelessWidget {
   const MixinCloseButton({
-    Key? key,
+    super.key,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final VoidCallback? onTap;
 

@@ -9,7 +9,7 @@ part 'expired_message_dao.g.dart';
 @DriftAccessor(tables: [ExpiredMessages])
 class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$ExpiredMessageDaoMixin {
-  ExpiredMessageDao(MixinDatabase attachedDatabase) : super(attachedDatabase);
+  ExpiredMessageDao(super.attachedDatabase);
 
   Future<int> insert({
     required String messageId,

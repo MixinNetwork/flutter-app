@@ -103,7 +103,7 @@ class TransformImageController extends ChangeNotifier {
 
 class ImagPreviewWidget extends StatefulWidget {
   const ImagPreviewWidget({
-    Key? key,
+    super.key,
     required this.image,
     this.scale = 1,
     this.maxScale = 2.0,
@@ -112,8 +112,7 @@ class ImagPreviewWidget extends StatefulWidget {
     this.onEmptyAreaTapped,
   })  : assert(maxScale > scale),
         assert(minScale < scale),
-        assert(maxScale > minScale),
-        super(key: key);
+        assert(maxScale > minScale);
 
   final Widget image;
 

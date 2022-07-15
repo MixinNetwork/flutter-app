@@ -22,7 +22,7 @@ import '../chat/chat_page.dart';
 import 'shared_apps_page.dart';
 
 class ChatInfoPage extends HookWidget {
-  const ChatInfoPage({Key? key}) : super(key: key);
+  const ChatInfoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -485,12 +485,12 @@ class ChatInfoPage extends HookWidget {
 
 class ConversationBio extends HookWidget {
   const ConversationBio({
-    Key? key,
+    super.key,
     this.fontSize = 14,
     required this.conversationId,
     required this.userId,
     required this.isGroup,
-  }) : super(key: key);
+  });
 
   final double fontSize;
   final String conversationId;
@@ -532,9 +532,9 @@ class ConversationBio extends HookWidget {
 ///
 /// if conversation is not stranger, show nothing.
 class _AddToContactsButton extends StatelessWidget {
-  _AddToContactsButton(this.conversation, {Key? key})
-      : assert(conversation.isLoaded),
-        super(key: key);
+  _AddToContactsButton(
+    this.conversation,
+  ) : assert(conversation.isLoaded);
   final ConversationState conversation;
 
   @override
@@ -580,7 +580,7 @@ class _AddToContactsButton extends StatelessWidget {
 }
 
 class _SharedApps extends HookWidget {
-  const _SharedApps({Key? key, required this.userId}) : super(key: key);
+  const _SharedApps({required this.userId});
 
   final String userId;
 

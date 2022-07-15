@@ -14,9 +14,7 @@ import '../message_datetime_and_status.dart';
 const kMaxWidth = 140.0;
 
 class StickerMessageWidget extends HookWidget {
-  const StickerMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const StickerMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

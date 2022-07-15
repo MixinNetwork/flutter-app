@@ -11,7 +11,7 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 
 class AboutPage extends HookWidget {
-  const AboutPage({Key? key}) : super(key: key);
+  const AboutPage({super.key});
 
   @override
   Widget build(BuildContext context) {

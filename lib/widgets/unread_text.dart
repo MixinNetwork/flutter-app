@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 class UnreadText extends StatelessWidget {
   const UnreadText({
-    Key? key,
+    super.key,
     required this.data,
     this.backgroundColor,
     this.textColor,
     this.fontWeight,
-  }) : super(key: key);
+  });
 
   final Color? backgroundColor;
   final Color? textColor;

@@ -18,10 +18,10 @@ import '../shared_media_page.dart';
 
 class PostPage extends HookWidget {
   const PostPage({
-    Key? key,
+    super.key,
     required this.maxHeight,
     required this.conversationId,
-  }) : super(key: key);
+  });
 
   final double maxHeight;
   final String conversationId;
@@ -159,9 +159,8 @@ class PostPage extends HookWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key? key,
     required this.message,
-  }) : super(key: key);
+  });
 
   final MessageItem message;
 

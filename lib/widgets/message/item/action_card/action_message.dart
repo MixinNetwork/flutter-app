@@ -18,9 +18,7 @@ import '../unknown_message.dart';
 import 'action_card_data.dart';
 
 class ActionCardMessage extends HookWidget {
-  const ActionCardMessage({
-    Key? key,
-  }) : super(key: key);
+  const ActionCardMessage({super.key});
 
   @override
   Widget build(BuildContext context) {

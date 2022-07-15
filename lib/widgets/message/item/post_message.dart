@@ -21,9 +21,7 @@ const _decoration = BoxDecoration(
 );
 
 class PostMessage extends StatelessWidget {
-  const PostMessage({
-    Key? key,
-  }) : super(key: key);
+  const PostMessage({super.key});
 
   @override
   Widget build(BuildContext context) => const MessageBubble(
@@ -33,11 +31,11 @@ class PostMessage extends StatelessWidget {
 
 class MessagePost extends StatelessWidget {
   const MessagePost({
-    Key? key,
+    super.key,
     this.padding,
     this.decoration,
     required this.showStatus,
-  }) : super(key: key);
+  });
 
   final EdgeInsetsGeometry? padding;
   final Decoration? decoration;
@@ -112,9 +110,9 @@ class MessagePost extends StatelessWidget {
 
 class PostPreview extends StatelessWidget {
   const PostPreview({
-    Key? key,
+    super.key,
     required this.message,
-  }) : super(key: key);
+  });
 
   static Future<void> push(
     BuildContext context, {

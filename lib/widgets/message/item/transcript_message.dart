@@ -36,9 +36,7 @@ class TranscriptMessagesWatcher {
 }
 
 class TranscriptMessageWidget extends HookWidget {
-  const TranscriptMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const TranscriptMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -209,11 +207,11 @@ class TranscriptMessageWidget extends HookWidget {
 
 class TranscriptPage extends HookWidget {
   const TranscriptPage({
-    Key? key,
+    super.key,
     required this.messageId,
     required this.conversationId,
     required this.vlcService,
-  }) : super(key: key);
+  });
   final String messageId;
   final String conversationId;
   final AudioMessagePlayService vlcService;
@@ -230,7 +228,7 @@ class TranscriptPage extends HookWidget {
 
     final list = useMemoizedStream(watchMessages).data ?? <MessageItem>[];
 
-    final chatSideCubit = useBloc(() => ChatSideCubit());
+    final chatSideCubit = useBloc(ChatSideCubit.new);
     final searchConversationKeywordCubit = useBloc(
       () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
     );
@@ -243,7 +241,7 @@ class TranscriptPage extends HookWidget {
       ),
     );
 
-    final scrollController = useMemoized(() => ScrollerScrollController());
+    final scrollController = useMemoized(ScrollerScrollController.new);
     final listKey =
         useMemoized(() => GlobalKey(debugLabel: 'transcript_list_key'));
 

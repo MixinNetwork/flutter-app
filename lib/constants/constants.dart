@@ -28,7 +28,6 @@ const kUpdateSticker = 'LOCAL_UPDATE_STICKER';
 const mixinScheme = 'mixin';
 const mixinHost = 'mixin.one';
 
-
 enum MixinSchemeHost {
   codes,
   pay,

@@ -23,9 +23,7 @@ import '../chat/chat_page.dart';
 import '../conversation/search_list.dart';
 
 class SearchMessagePage extends HookWidget {
-  const SearchMessagePage({
-    Key? key,
-  }) : super(key: key);
+  const SearchMessagePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -250,10 +248,9 @@ class SearchMessagePage extends HookWidget {
 
 class _SearchMessageList extends HookWidget {
   const _SearchMessageList({
-    Key? key,
     this.selectedUserId,
     this.categories,
-  }) : super(key: key);
+  });
 
   final String? selectedUserId;
   final List<String>? categories;
@@ -363,10 +360,9 @@ class _SearchMessageList extends HookWidget {
 
 class _SearchParticipantList extends HookWidget {
   const _SearchParticipantList({
-    Key? key,
     required this.onSelected,
     required this.editingController,
-  }) : super(key: key);
+  });
 
   final ValueChanged<User> onSelected;
   final TextEditingController editingController;
@@ -447,12 +443,11 @@ class _SearchParticipantList extends HookWidget {
 
 class _CategoryItem extends StatelessWidget {
   const _CategoryItem({
-    Key? key,
     required this.name,
     required this.categories,
     required this.selectedCategories,
     required this.onSelected,
-  }) : super(key: key);
+  });
 
   final String name;
   final List<String> categories;

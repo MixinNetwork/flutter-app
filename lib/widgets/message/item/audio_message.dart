@@ -17,9 +17,7 @@ import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
 class AudioMessage extends HookWidget {
-  const AudioMessage({
-    Key? key,
-  }) : super(key: key);
+  const AudioMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -135,9 +133,8 @@ class AudioMessage extends HookWidget {
 
 class _AnimatedWave extends HookWidget {
   const _AnimatedWave({
-    Key? key,
     required this.duration,
-  }) : super(key: key);
+  });
 
   final Duration duration;
 

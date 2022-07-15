@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:tuple/tuple.dart';
 
-
 enum DatabaseEvent {
   notification,
   insertOrReplaceMessage,
