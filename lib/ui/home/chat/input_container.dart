@@ -29,6 +29,7 @@ import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
+import '../../../widgets/sticker_page/emoji_page.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
@@ -574,8 +575,11 @@ class _StickerButton extends HookWidget {
       converter: (state) => (state.length) + 4,
     );
 
-    return BlocProvider.value(
-      value: stickerAlbumsCubit,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: stickerAlbumsCubit),
+        BlocProvider(create: (context) => EmojiSelectedGroupIndexCubit(0))
+      ],
       child: DefaultTabController(
         length: tabLength,
         initialIndex: 1,

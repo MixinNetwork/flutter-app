@@ -4,11 +4,18 @@ import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
 import '../interactive_decorated_box.dart';
+
+class EmojiSelectedGroupIndexCubit extends Cubit<int> {
+  EmojiSelectedGroupIndexCubit(int initialState) : super(initialState);
+
+  void setIndex(int index) => emit(index);
+}
 
 class EmojiPage extends HookWidget {
   const EmojiPage({Key? key}) : super(key: key);
@@ -27,24 +34,24 @@ class EmojiPage extends HookWidget {
       Resources.assetsImagesEmojiFlagsSvg,
     ];
 
-    final selectedIndex = useState<int>(0);
+    var selectedIndex = context.watch<EmojiSelectedGroupIndexCubit>().state;
+
     useEffect(() {
-      assert(
-          selectedIndex.value >= 0 &&
-              selectedIndex.value < emojiGroupIcon.length,
-          'selectedIndex.value must be in range [0, ${emojiGroupIcon.length - 1}]');
-      if (selectedIndex.value < 0 ||
-          selectedIndex.value >= emojiGroupIcon.length) {
-        selectedIndex.value = 0;
+      assert(selectedIndex >= 0 && selectedIndex < emojiGroupIcon.length,
+          'selectedIndex must be in range [0, ${emojiGroupIcon.length - 1}]');
+      if (selectedIndex < 0 || selectedIndex >= emojiGroupIcon.length) {
+        selectedIndex = 0;
       }
-    }, [selectedIndex.value]);
+    }, [selectedIndex]);
 
     return Column(
       children: [
         _EmojiGroupHeader(
-          selectedIndex: selectedIndex.value,
+          selectedIndex: selectedIndex,
           icons: emojiGroupIcon,
-          onTap: (index) => selectedIndex.value = index,
+          onTap: (index) {
+            context.read<EmojiSelectedGroupIndexCubit>().setIndex(index);
+          },
         ),
         Divider(
           color: context.theme.divider,
@@ -52,7 +59,7 @@ class EmojiPage extends HookWidget {
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: selectedIndex.value == 0
+          child: selectedIndex == 0
               ? const _RecentEmojiGroupPage()
               : _EmojiGroupPage(
                   groups: const [
@@ -64,7 +71,7 @@ class EmojiPage extends HookWidget {
                     [EmojiGroup.objects],
                     [EmojiGroup.symbols],
                     [EmojiGroup.flags],
-                  ][selectedIndex.value - 1],
+                  ][selectedIndex - 1],
                 ),
         )
       ],
