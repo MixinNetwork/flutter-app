@@ -113,7 +113,7 @@ dart_code_metrics:
 #    - prefer-async-await
 # todo use
 #    - prefer-commenting-analyzer-ignores
-    - prefer-conditional-expressions
+#    - prefer-conditional-expressions
 # todo use
 #    - prefer-correct-identifier-length
     - prefer-correct-type-name
