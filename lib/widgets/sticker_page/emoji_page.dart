@@ -223,9 +223,15 @@ class _EmojiItem extends StatelessWidget {
           }
           AccountKeyValue.instance.onEmojiUsed(emoji);
         },
-        child: Text(
-          emoji,
-          style: const TextStyle(fontSize: 24),
+        child: Center(
+          child: SizedBox.square(
+            dimension: 24,
+            child: Text(
+              emoji,
+              style: const TextStyle(fontSize: 20, height: 1),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       );
 }
