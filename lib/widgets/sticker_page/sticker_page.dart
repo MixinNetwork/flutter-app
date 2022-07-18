@@ -315,7 +315,7 @@ class _StickerAlbumBarItem extends StatelessWidget {
                     Resources.assetsImagesStickerStoreRedDotSvg
                   else
                     Resources.assetsImagesStickerStoreSvg,
-                  Resources.assetsImagesEmojiStickerSvg,
+                  if (!Platform.isLinux) Resources.assetsImagesEmojiStickerSvg,
                   Resources.assetsImagesRecentStickerSvg,
                   Resources.assetsImagesPersonalStickerSvg,
                 ];
