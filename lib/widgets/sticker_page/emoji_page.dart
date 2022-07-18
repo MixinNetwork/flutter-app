@@ -19,7 +19,7 @@ class EmojiSelectedGroupIndexCubit extends Cubit<int> {
 }
 
 class EmojiPage extends HookWidget {
-  const EmojiPage({Key? key}) : super(key: key);
+  const EmojiPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -82,11 +82,10 @@ class EmojiPage extends HookWidget {
 
 class _EmojiGroupHeader extends StatelessWidget {
   const _EmojiGroupHeader({
-    Key? key,
     required this.icons,
     required this.onTap,
     required this.selectedIndex,
-  }) : super(key: key);
+  });
 
   final List<String> icons;
   final void Function(int index) onTap;
@@ -114,12 +113,11 @@ class _EmojiGroupHeader extends StatelessWidget {
 
 class _EmojiGroupIcon extends StatelessWidget {
   const _EmojiGroupIcon({
-    Key? key,
     required this.index,
     required this.onTap,
     required this.icon,
     required this.selectedIndex,
-  }) : super(key: key);
+  });
 
   final int index;
   final VoidCallback onTap;
@@ -131,7 +129,7 @@ class _EmojiGroupIcon extends StatelessWidget {
         onTap: onTap,
         hoveringDecoration: BoxDecoration(
           color: context.theme.sidebarSelected,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(4),
@@ -148,7 +146,7 @@ class _EmojiGroupIcon extends StatelessWidget {
 }
 
 class _RecentEmojiGroupPage extends HookWidget {
-  const _RecentEmojiGroupPage({Key? key}) : super(key: key);
+  const _RecentEmojiGroupPage();
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +156,7 @@ class _RecentEmojiGroupPage extends HookWidget {
 }
 
 class _EmojiGroupPage extends HookWidget {
-  const _EmojiGroupPage({Key? key, required this.groups}) : super(key: key);
+  const _EmojiGroupPage({required this.groups});
 
   final List<EmojiGroup> groups;
 
@@ -173,16 +171,13 @@ class _EmojiGroupPage extends HookWidget {
 }
 
 class _EmojiGridView extends HookWidget {
-  const _EmojiGridView({
-    Key? key,
-    required this.emojis,
-  }) : super(key: key);
+  const _EmojiGridView({required this.emojis});
 
   final List<String> emojis;
 
   @override
   Widget build(BuildContext context) {
-    final controller = useMemoized(() => ScrollerScrollController());
+    final controller = useMemoized(ScrollerScrollController.new);
     return GridView.builder(
       controller: controller,
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
@@ -200,7 +195,7 @@ class _EmojiGridView extends HookWidget {
 }
 
 class _EmojiItem extends StatelessWidget {
-  const _EmojiItem({Key? key, required this.emoji}) : super(key: key);
+  const _EmojiItem({required this.emoji});
 
   final String emoji;
 

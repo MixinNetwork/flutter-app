@@ -123,7 +123,7 @@ class _StickerAlbumPage extends HookWidget {
       bloc: stickerCubit,
       converter: (state) => state.length,
     );
-    final controller = useMemoized(() => ScrollerScrollController());
+    final controller = useMemoized(ScrollerScrollController.new);
     return BlocProvider.value(
       value: stickerCubit,
       child: GridView.builder(
