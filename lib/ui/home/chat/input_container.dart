@@ -575,10 +575,11 @@ class _StickerButton extends HookWidget {
       converter: (state) => (state.length) + 4,
     );
 
-    return MultiBlocProvider(
+    return MultiProvider(
       providers: [
         BlocProvider.value(value: stickerAlbumsCubit),
-        BlocProvider(create: (context) => EmojiSelectedGroupIndexCubit(0))
+        BlocProvider(create: (context) => EmojiSelectedGroupIndexCubit(0)),
+        ChangeNotifierProvider.value(value: textEditingController),
       ],
       child: DefaultTabController(
         length: tabLength,
@@ -613,15 +614,12 @@ class _StickerButton extends HookWidget {
               ),
             );
           },
-          portal: ChangeNotifierProvider<TextEditingController>.value(
-            value: textEditingController,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Builder(
-                builder: (context) => StickerPage(
-                  tabController: DefaultTabController.of(context)!,
-                  tabLength: tabLength,
-                ),
+          portal: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Builder(
+              builder: (context) => StickerPage(
+                tabController: DefaultTabController.of(context)!,
+                tabLength: tabLength,
               ),
             ),
           ),
