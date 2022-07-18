@@ -1,6 +1,8 @@
 name: Dart Code Metrics
 
 on: [push]
+env:
+  FLUTTER_SDK_VERSION: 2.17.1
 
 jobs:
   check:
@@ -10,7 +12,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
+      - uses: subosito/flutter-action@v2.3.0
+        with:
+          flutter-version: ${{ env.FLUTTER_SDK_VERSION }}
+          cache: true
       - name: dart-code-metrics
         uses: dart-code-checker/dart-code-metrics-action@v1
         with:
