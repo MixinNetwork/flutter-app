@@ -49,7 +49,7 @@ class LocationMessageWidget extends HookWidget {
           },
           child: Stack(
             children: [
-              map.MapLayoutBuilder(
+              map.MapLayout(
                 builder: (context, transformer) => map.TileLayer(
                   builder: (BuildContext context, int x, int y, int z) {
                     final url =
