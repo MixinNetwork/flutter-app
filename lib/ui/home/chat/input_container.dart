@@ -29,6 +29,7 @@ import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
+import '../../../widgets/sticker_page/emoji_page.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
@@ -222,7 +223,9 @@ class _InputContainer extends HookWidget {
                       _FileButton(actionColor: context.theme.icon),
                       const _ImagePickButton(),
                       const SizedBox(width: 6),
-                      const _StickerButton(),
+                      _StickerButton(
+                        textEditingController: textEditingController,
+                      ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _SendTextField(
@@ -538,7 +541,11 @@ class _FileButton extends StatelessWidget {
 }
 
 class _StickerButton extends HookWidget {
-  const _StickerButton();
+  const _StickerButton({
+    required this.textEditingController,
+  });
+
+  final TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
@@ -553,11 +560,18 @@ class _StickerButton extends HookWidget {
     final tabLength =
         useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
       bloc: stickerAlbumsCubit,
-      converter: (state) => (state.length) + 3,
+      converter: (state) =>
+          (state.length) +
+          // no emoji page on Linux.
+          (Platform.isLinux ? 3 : 4),
     );
 
-    return BlocProvider.value(
-      value: stickerAlbumsCubit,
+    return MultiProvider(
+      providers: [
+        BlocProvider.value(value: stickerAlbumsCubit),
+        BlocProvider(create: (context) => EmojiSelectedGroupIndexCubit()),
+        ChangeNotifierProvider.value(value: textEditingController),
+      ],
       child: DefaultTabController(
         length: tabLength,
         initialIndex: 1,
@@ -595,7 +609,7 @@ class _StickerButton extends HookWidget {
             padding: const EdgeInsets.all(8),
             child: Builder(
               builder: (context) => StickerPage(
-                tabController: DefaultTabController.of(context),
+                tabController: DefaultTabController.of(context)!,
                 tabLength: tabLength,
               ),
             ),

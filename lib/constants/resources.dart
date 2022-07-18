@@ -153,6 +153,34 @@ class Resources {
   static const String assetsImagesEditImageUndoSvg =
       'assets/images/edit_image_undo.svg';
 
+  static const String assetsImagesEmojiAnimalSvg =
+      'assets/images/emoji_animal.svg';
+
+  static const String assetsImagesEmojiFaceSvg = 'assets/images/emoji_face.svg';
+
+  static const String assetsImagesEmojiFlagsSvg =
+      'assets/images/emoji_flags.svg';
+
+  static const String assetsImagesEmojiFoodSvg = 'assets/images/emoji_food.svg';
+
+  static const String assetsImagesEmojiObjectsSvg =
+      'assets/images/emoji_objects.svg';
+
+  static const String assetsImagesEmojiRecentSvg =
+      'assets/images/emoji_recent.svg';
+
+  static const String assetsImagesEmojiSportsSvg =
+      'assets/images/emoji_sports.svg';
+
+  static const String assetsImagesEmojiStickerSvg =
+      'assets/images/emoji_sticker.svg';
+
+  static const String assetsImagesEmojiSymbolSvg =
+      'assets/images/emoji_symbol.svg';
+
+  static const String assetsImagesEmojiTravelSvg =
+      'assets/images/emoji_travel.svg';
+
   static const String assetsImagesEmptyFileSvg = 'assets/images/empty_file.svg';
 
   static const String assetsImagesEmptyImageSvg =
