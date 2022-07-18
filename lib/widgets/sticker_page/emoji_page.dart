@@ -9,6 +9,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
+import '../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../interactive_decorated_box.dart';
 
 class EmojiSelectedGroupIndexCubit extends Cubit<int> {
@@ -181,7 +182,7 @@ class _EmojiGridView extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = useScrollController();
+    final controller = useMemoized(() => ScrollerScrollController());
     return GridView.builder(
       controller: controller,
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
