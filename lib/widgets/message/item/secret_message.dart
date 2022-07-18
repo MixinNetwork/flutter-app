@@ -6,7 +6,7 @@ import '../../../utils/uri_utils.dart';
 import '../message.dart';
 
 class SecretMessage extends StatelessWidget {
-  const SecretMessage({Key? key}) : super(key: key);
+  const SecretMessage({super.key});
 
   @override
   Widget build(BuildContext context) => Center(
@@ -19,7 +19,7 @@ class SecretMessage extends StatelessWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: context.theme.encrypt,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(10),

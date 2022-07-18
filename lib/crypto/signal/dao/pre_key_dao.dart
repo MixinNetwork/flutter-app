@@ -6,7 +6,7 @@ part 'pre_key_dao.g.dart';
 
 @DriftAccessor(tables: [Prekeys])
 class PreKeyDao extends DatabaseAccessor<SignalDatabase> with _$PreKeyDaoMixin {
-  PreKeyDao(SignalDatabase db) : super(db);
+  PreKeyDao(super.db);
 
   Future<Prekey?> getPreKeyById(int preKeyId) async =>
       (select(db.prekeys)..where((tbl) => tbl.prekeyId.equals(preKeyId)))

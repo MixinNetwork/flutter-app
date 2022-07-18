@@ -89,16 +89,11 @@ class CircularIntervalList<T> {
 class DashPathBorder extends Border {
   const DashPathBorder({
     required this.dashArray,
-    BorderSide top = BorderSide.none,
-    BorderSide left = BorderSide.none,
-    BorderSide right = BorderSide.none,
-    BorderSide bottom = BorderSide.none,
-  }) : super(
-          top: top,
-          left: left,
-          right: right,
-          bottom: bottom,
-        );
+    super.top,
+    super.left,
+    super.right,
+    super.bottom,
+  });
 
   factory DashPathBorder.all({
     BorderSide borderSide = const BorderSide(),

@@ -6,12 +6,12 @@ import 'window/move_window.dart';
 
 class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
   const MixinAppBar({
-    Key? key,
+    super.key,
     this.title,
     this.actions = const [],
     this.backgroundColor,
     this.leading,
-  }) : super(key: key);
+  });
 
   final Widget? title;
   final List<Widget> actions;

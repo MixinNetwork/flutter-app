@@ -27,9 +27,9 @@ import 'bloc/slide_category_cubit.dart';
 
 class SlidePage extends StatelessWidget {
   const SlidePage({
-    Key? key,
+    super.key,
     required this.showCollapse,
-  }) : super(key: key);
+  });
   final bool showCollapse;
 
   @override
@@ -126,9 +126,7 @@ class SlidePage extends StatelessWidget {
 }
 
 class _CurrentUser extends StatelessWidget {
-  const _CurrentUser({
-    Key? key,
-  }) : super(key: key);
+  const _CurrentUser();
 
   @override
   Widget build(BuildContext context) => MoveWindowBarrier(
@@ -185,9 +183,7 @@ class _CurrentUser extends StatelessWidget {
 }
 
 class _CircleList extends HookWidget {
-  const _CircleList({
-    Key? key,
-  }) : super(key: key);
+  const _CircleList();
 
   @override
   Widget build(BuildContext context) {
@@ -398,9 +394,8 @@ class _CircleList extends HookWidget {
 
 class _CategoryList extends HookWidget {
   const _CategoryList({
-    Key? key,
     required this.children,
-  }) : super(key: key);
+  });
 
   final List<Widget> children;
 
@@ -421,11 +416,10 @@ class _CategoryList extends HookWidget {
 
 class _Item extends HookWidget {
   const _Item({
-    Key? key,
     required this.type,
     required this.title,
     required this.asset,
-  }) : super(key: key);
+  });
 
   final SlideCategoryType type;
   final String title;
@@ -494,7 +488,7 @@ class _Item extends HookWidget {
 }
 
 class _Divider extends StatelessWidget {
-  const _Divider({Key? key}) : super(key: key);
+  const _Divider();
 
   @override
   Widget build(BuildContext context) => Container(

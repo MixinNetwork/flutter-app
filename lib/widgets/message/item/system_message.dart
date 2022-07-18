@@ -7,9 +7,7 @@ import '../../../utils/extension/extension.dart';
 import '../message.dart';
 
 class SystemMessage extends HookWidget {
-  const SystemMessage({
-    Key? key,
-  }) : super(key: key);
+  const SystemMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +37,7 @@ class SystemMessage extends HookWidget {
               color: context.dynamicColor(
                 const Color.fromRGBO(202, 234, 201, 1),
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(

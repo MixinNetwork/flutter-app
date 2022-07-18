@@ -6,9 +6,9 @@ import '../../widgets/actions/actions.dart';
 
 class CommandPaletteWrapper extends StatelessWidget {
   const CommandPaletteWrapper({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 

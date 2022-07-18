@@ -21,9 +21,7 @@ import '../../message_layout.dart';
 import 'mention_builder.dart';
 
 class TextMessage extends HookWidget {
-  const TextMessage({
-    Key? key,
-  }) : super(key: key);
+  const TextMessage({super.key});
 
   @override
   Widget build(BuildContext context) {

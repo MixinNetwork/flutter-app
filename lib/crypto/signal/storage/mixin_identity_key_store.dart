@@ -2,8 +2,8 @@ import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
 import '../../../utils/logger.dart';
 import '../dao/identity_dao.dart';
+import '../identity_extension.dart';
 import '../signal_database.dart';
-import '../signal_vo_extension.dart';
 
 class MixinIdentityKeyStore extends IdentityKeyStore {
   MixinIdentityKeyStore(SignalDatabase db, this._accountId) {

@@ -21,7 +21,7 @@ import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
 
 class DisappearMessagePage extends StatelessWidget {
-  const DisappearMessagePage({Key? key}) : super(key: key);
+  const DisappearMessagePage({super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -69,7 +69,7 @@ class DisappearMessagePage extends StatelessWidget {
 }
 
 class _Options extends HookWidget {
-  const _Options({Key? key}) : super(key: key);
+  const _Options();
 
   @override
   Widget build(BuildContext context) {
@@ -151,11 +151,10 @@ class _Options extends HookWidget {
 
 class _DurationOptionItem extends HookWidget {
   const _DurationOptionItem({
-    Key? key,
     required this.duration,
     required this.current,
     required this.label,
-  }) : super(key: key);
+  });
 
   final Duration duration;
   final Duration current;
@@ -250,9 +249,8 @@ extension _CustomExpireTimeUnitExtension on _CustomExpireTimeUnit {
 
 class _CustomExpireTimeDialog extends HookWidget {
   const _CustomExpireTimeDialog({
-    Key? key,
     required this.conversationId,
-  }) : super(key: key);
+  });
 
   final String conversationId;
 
@@ -304,8 +302,8 @@ class _CustomExpireTimeDialog extends HookWidget {
                         fontSize: 16,
                         color: context.theme.secondaryText,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                         borderSide: BorderSide.none,
                       ),
                       isDense: true,
@@ -364,9 +362,8 @@ class _CustomExpireTimeDialog extends HookWidget {
 
 class _CustomExpireUnitSelection extends StatelessWidget {
   const _CustomExpireUnitSelection({
-    Key? key,
     required this.unit,
-  }) : super(key: key);
+  });
 
   final ValueNotifier<_CustomExpireTimeUnit> unit;
 
@@ -416,7 +413,7 @@ class _CustomExpireUnitSelection extends StatelessWidget {
       child: Builder(
           builder: (context) => Material(
                 color: context.theme.sidebarSelected,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
                 child: InteractiveDecoratedBox.color(
                   onTapUp: (details) =>
                       context.sendMenuPosition(details.globalPosition),

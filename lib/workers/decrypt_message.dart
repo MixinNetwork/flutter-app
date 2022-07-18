@@ -497,11 +497,7 @@ class DecryptMessage extends Injector {
     final quoteMessage = await database.messageDao
         .findMessageItemById(data.conversationId, data.quoteMessageId!);
 
-    if (quoteMessage != null) {
-      return generator(quoteMessage);
-    } else {
-      return generator(null);
-    }
+    return quoteMessage != null ? generator(quoteMessage) : generator(null);
   }
 
   Future<void> _processDecryptSuccess(
@@ -511,13 +507,10 @@ class DecryptMessage extends Injector {
     await refreshUsers(<String>[data.senderId]);
 
     if (data.category.isText) {
-      String plain;
-      if (data.category == MessageCategory.signalText ||
-          data.category == MessageCategory.encryptedText) {
-        plain = plainText;
-      } else {
-        plain = _decode(plainText);
-      }
+      final plain = data.category == MessageCategory.signalText ||
+              data.category == MessageCategory.encryptedText
+          ? plainText
+          : _decode(plainText);
       QuoteMessageItem? _quoteContent;
       final message =
           await _generateMessage(data, (QuoteMessageItem? quoteContent) {
@@ -545,12 +538,7 @@ class DecryptMessage extends Injector {
       );
       await _insertMessage(message, data);
     } else if (data.category.isImage) {
-      final String plain;
-      if (data.category.isEncrypted) {
-        plain = plainText;
-      } else {
-        plain = _decode(plainText);
-      }
+      final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
@@ -577,12 +565,7 @@ class DecryptMessage extends Injector {
       _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
           AttachmentDownloadRequest(message));
     } else if (data.category.isVideo) {
-      final String plain;
-      if (data.category.isEncrypted) {
-        plain = plainText;
-      } else {
-        plain = _decode(plainText);
-      }
+      final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
@@ -611,12 +594,7 @@ class DecryptMessage extends Injector {
       _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
           AttachmentDownloadRequest(message));
     } else if (data.category.isData) {
-      final String plain;
-      if (data.category.isEncrypted) {
-        plain = plainText;
-      } else {
-        plain = _decode(plainText);
-      }
+      final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
@@ -641,12 +619,7 @@ class DecryptMessage extends Injector {
       _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
           AttachmentDownloadRequest(message));
     } else if (data.category.isAudio) {
-      final String plain;
-      if (data.category.isEncrypted) {
-        plain = plainText;
-      } else {
-        plain = _decode(plainText);
-      }
+      final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
@@ -673,12 +646,7 @@ class DecryptMessage extends Injector {
       _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
           AttachmentDownloadRequest(message));
     } else if (data.category.isSticker) {
-      final String plain;
-      if (data.category.isEncrypted) {
-        plain = plainText;
-      } else {
-        plain = _decode(plainText);
-      }
+      final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final stickerMessage = StickerMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
       final sticker = await database.stickerDao
@@ -702,12 +670,7 @@ class DecryptMessage extends Injector {
           createdAt: data.createdAt);
       await _insertMessage(message, data);
     } else if (data.category.isContact) {
-      final String plain;
-      if (data.category.isEncrypted) {
-        plain = plainText;
-      } else {
-        plain = _decode(plainText);
-      }
+      final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final contactMessage = ContactMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
       final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
@@ -727,12 +690,7 @@ class DecryptMessage extends Injector {
               quoteContent: quoteContent?.toJson()));
       await _insertMessage(message, data);
     } else if (data.category.isLive) {
-      final String plain;
-      if (data.category.isEncrypted) {
-        plain = plainText;
-      } else {
-        plain = _decode(plainText);
-      }
+      final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final liveMessage =
           LiveMessage.fromJson(await jsonDecode(plain) as Map<String, dynamic>);
       final message = Message(
@@ -750,13 +708,10 @@ class DecryptMessage extends Injector {
       );
       await _insertMessage(message, data);
     } else if (data.category.isLocation) {
-      String plain;
-      if (data.category == MessageCategory.signalLocation ||
-          data.category == MessageCategory.encryptedLocation) {
-        plain = plainText;
-      } else {
-        plain = _decode(plainText);
-      }
+      final plain = data.category == MessageCategory.signalLocation ||
+              data.category == MessageCategory.encryptedLocation
+          ? plainText
+          : _decode(plainText);
       // ignore: unused_local_variable todo check location
       LocationMessage? locationMessage;
       try {
@@ -782,13 +737,10 @@ class DecryptMessage extends Injector {
           createdAt: data.createdAt);
       await _insertMessage(message, data);
     } else if (data.category.isPost) {
-      String plain;
-      if (data.category == MessageCategory.signalPost ||
-          data.category == MessageCategory.encryptedPost) {
-        plain = plainText;
-      } else {
-        plain = _decode(plainText);
-      }
+      final plain = data.category == MessageCategory.signalPost ||
+              data.category == MessageCategory.encryptedPost
+          ? plainText
+          : _decode(plainText);
       final message = Message(
         messageId: data.messageId,
         conversationId: data.conversationId,
@@ -800,13 +752,10 @@ class DecryptMessage extends Injector {
       );
       await _insertMessage(message, data);
     } else if (data.category.isTranscript) {
-      String plain;
-      if (data.category == MessageCategory.signalTranscript ||
-          data.category == MessageCategory.encryptedTranscript) {
-        plain = plainText;
-      } else {
-        plain = _decode(plainText);
-      }
+      final plain = data.category == MessageCategory.signalTranscript ||
+              data.category == MessageCategory.encryptedTranscript
+          ? plainText
+          : _decode(plainText);
       final list = jsonDecode(plain) as List<dynamic>;
       final message = await processTranscriptMessage(data, list);
       if (message != null) {
@@ -993,7 +942,7 @@ class DecryptMessage extends Injector {
     });
 
     if (messageIds.isNotEmpty) {
-      await database.messageDao.markMessageRead(accountId, messageIds);
+      await database.messageDao.markMessageRead(messageIds);
       final conversationIds =
           await database.messageDao.findConversationIdsByMessages(messageIds);
       for (final cId in conversationIds) {
@@ -1201,8 +1150,6 @@ class DecryptMessage extends Injector {
       i('Registering new pre keys...');
     }
   }
-
-  void syncSession() {}
 
   Future<Message?>? processTranscriptMessage(
       BlazeMessageData data, List<dynamic> list) async {

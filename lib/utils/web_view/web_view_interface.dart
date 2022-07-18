@@ -9,13 +9,8 @@ import 'web_view_mobile.dart';
 abstract class MixinWebView {
   MixinWebView();
 
-  factory MixinWebView._platform() {
-    if (kPlatformIsDesktop) {
-      return DesktopMixinWebView();
-    } else {
-      return MobileMixinWebView();
-    }
-  }
+  factory MixinWebView._platform() =>
+      kPlatformIsDesktop ? DesktopMixinWebView() : MobileMixinWebView();
 
   static MixinWebView? _instance;
 

@@ -127,7 +127,7 @@ extension _MixinUriExtension on Uri {
   bool _isTypeHost(MixinSchemeHost type) =>
       _isMixinHost &&
       pathSegments.isNotEmpty &&
-      pathSegments[0] == enumConvertToString(type);
+      pathSegments.first == enumConvertToString(type);
 
   String? _getValue(MixinSchemeHost type) {
     if (_isTypeScheme(type)) {

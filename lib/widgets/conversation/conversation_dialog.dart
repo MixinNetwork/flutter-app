@@ -51,11 +51,10 @@ Future<void> showConversationDialog(BuildContext context,
 
 class _ConversationDialog extends StatelessWidget {
   const _ConversationDialog({
-    Key? key,
     required this.conversationResponse,
     required this.users,
     required this.code,
-  }) : super(key: key);
+  });
 
   final ConversationResponse conversationResponse;
   final List<User> users;
@@ -92,11 +91,10 @@ class _ConversationDialog extends StatelessWidget {
 
 class _ConversationInfo extends HookWidget {
   const _ConversationInfo({
-    Key? key,
     required this.conversationResponse,
     required this.users,
     required this.code,
-  }) : super(key: key);
+  });
 
   final ConversationResponse conversationResponse;
   final List<User> users;

@@ -5,8 +5,9 @@ import '../signal_database.dart';
 part 'signed_pre_key_dao.g.dart';
 
 @DriftAccessor(tables: [SignedPrekeys])
-class SignedPreKeyDao extends DatabaseAccessor<SignalDatabase> {
-  SignedPreKeyDao(SignalDatabase db) : super(db);
+class SignedPreKeyDao extends DatabaseAccessor<SignalDatabase>
+    with _$SignedPreKeyDaoMixin {
+  SignedPreKeyDao(super.db);
 
   Future<SignedPrekey?> getSignedPreKey(int signedPreKeyId) async =>
       (select(db.signedPrekeys)

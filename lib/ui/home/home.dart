@@ -40,7 +40,7 @@ const kChatSidePageWidth = 300.0;
 final _conversationPageKey = GlobalKey();
 
 class HomePage extends HookWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -119,9 +119,7 @@ class HomePage extends HookWidget {
 }
 
 class _SetupNameWidget extends HookWidget {
-  const _SetupNameWidget({
-    Key? key,
-  }) : super(key: key);
+  const _SetupNameWidget();
 
   @override
   Widget build(BuildContext context) {
@@ -168,14 +166,13 @@ class _SetupNameWidget extends HookWidget {
 }
 
 class HasDrawerValueNotifier extends ValueNotifier<bool> {
-  HasDrawerValueNotifier(bool value) : super(value);
+  HasDrawerValueNotifier(super.value);
 }
 
 class _HomePage extends HookWidget {
   const _HomePage({
-    Key? key,
     required this.constraints,
-  }) : super(key: key);
+  });
 
   final BoxConstraints constraints;
 
@@ -274,9 +271,7 @@ class _HomePage extends HookWidget {
 }
 
 class _CenterPage extends StatelessWidget {
-  const _CenterPage({
-    Key? key,
-  }) : super(key: key);
+  const _CenterPage();
 
   @override
   Widget build(BuildContext context) => RepaintBoundary(

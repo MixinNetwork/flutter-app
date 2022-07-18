@@ -12,7 +12,7 @@ part 'transcript_message_dao.g.dart';
     include: {'../moor/dao/transcript_message.drift'})
 class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$TranscriptMessageDaoMixin {
-  TranscriptMessageDao(MixinDatabase db) : super(db);
+  TranscriptMessageDao(super.db);
 
   Future<void> insertAll(List<TranscriptMessage> transcripts) =>
       batch((batch) => batch.insertAll(db.transcriptMessages, transcripts,

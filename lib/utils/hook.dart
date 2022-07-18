@@ -99,10 +99,9 @@ Stream<T> useValueNotifierConvertSteam<T>(ValueNotifier<T> valueNotifier) {
     };
   }, [valueNotifier]);
 
-  final stream = useMemoized(
+  return useMemoized(
       () => streamController.stream.startWith(valueNotifier.value),
       [valueNotifier]);
-  return stream;
 }
 
 AsyncSnapshot<T> useListenableConverter<L extends Listenable, T>(

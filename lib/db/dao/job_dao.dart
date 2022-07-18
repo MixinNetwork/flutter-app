@@ -11,7 +11,7 @@ part 'job_dao.g.dart';
 
 @DriftAccessor(tables: [MessagesHistory])
 class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
-  JobDao(MixinDatabase db) : super(db);
+  JobDao(super.db);
 
   static const messageIdKey = 'message_id';
   static const recipientIdKey = 'recipient_id';

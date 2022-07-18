@@ -9,9 +9,9 @@ import '../bloc/slide_category_cubit.dart';
 
 class ConversationHotKey extends StatelessWidget {
   const ConversationHotKey({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 

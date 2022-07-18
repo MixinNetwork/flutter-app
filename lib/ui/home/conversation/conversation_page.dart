@@ -10,7 +10,7 @@ import 'conversation_list.dart';
 import 'search_list.dart';
 
 class ConversationPage extends HookWidget {
-  const ConversationPage({Key? key}) : super(key: key);
+  const ConversationPage({super.key});
 
   static const conversationItemHeight = 78.0;
   static const conversationItemAvatarSize = 50.0;

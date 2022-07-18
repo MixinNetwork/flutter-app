@@ -23,9 +23,7 @@ import '../message_datetime_and_status.dart';
 const _kDefaultVideoSize = 200;
 
 class VideoMessageWidget extends HookWidget {
-  const VideoMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const VideoMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +58,9 @@ class VideoMessageWidget extends HookWidget {
 
 class MessageVideo extends HookWidget {
   const MessageVideo({
-    Key? key,
+    super.key,
     this.overlay,
-  }) : super(key: key);
+  });
 
   final Widget? overlay;
 
@@ -101,7 +99,7 @@ class MessageVideo extends HookWidget {
         }
       },
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -118,9 +116,9 @@ class MessageVideo extends HookWidget {
 
 class VideoMessageMediaStatusWidget extends HookWidget {
   const VideoMessageMediaStatusWidget({
-    Key? key,
+    super.key,
     this.done,
-  }) : super(key: key);
+  });
 
   final Widget? done;
 
@@ -133,12 +131,10 @@ class VideoMessageMediaStatusWidget extends HookWidget {
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
     switch (mediaStatus) {
       case MediaStatus.canceled:
-        if (relationship == UserRelationship.me &&
-            mediaUrl?.isNotEmpty == true) {
-          return const StatusUpload();
-        } else {
-          return const StatusDownload();
-        }
+        return relationship == UserRelationship.me &&
+                mediaUrl?.isNotEmpty == true
+            ? const StatusUpload()
+            : const StatusDownload();
       case MediaStatus.pending:
         return const StatusPending();
       case MediaStatus.expired:
@@ -158,9 +154,8 @@ class VideoMessageMediaStatusWidget extends HookWidget {
 
 class _VideoMessageOverlayInfo extends HookWidget {
   const _VideoMessageOverlayInfo({
-    Key? key,
     required this.isCurrentUser,
-  }) : super(key: key);
+  });
 
   final bool isCurrentUser;
 
@@ -186,9 +181,9 @@ class _VideoMessageOverlayInfo extends HookWidget {
               top: 6,
               left: isCurrentUser ? 6 : 14,
               child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(0, 0, 0, 0.3),
-                  borderRadius: BorderRadius.circular(5),
+                decoration: const BoxDecoration(
+                  color: Color.fromRGBO(0, 0, 0, 0.3),
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(4),

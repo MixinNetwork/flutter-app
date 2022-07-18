@@ -10,7 +10,7 @@ import '../../widgets/cell.dart';
 import '../home/route/responsive_navigator_cubit.dart';
 
 class StoragePage extends HookWidget {
-  const StoragePage({Key? key}) : super(key: key);
+  const StoragePage({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -9,7 +9,7 @@ import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../blaze/blaze_message.dart';
-import '../../blaze/blaze_param.dart';
+import '../../blaze/blaze_message_param.dart';
 import '../../db/mixin_database.dart';
 import '../../enum/message_category.dart';
 import '../../utils/extension/extension.dart';
@@ -301,7 +301,7 @@ class SignalProtocol {
   ComposeMessageData decodeMessageData(String encoded) {
     final cipherText = base64.decode(encoded);
     final header = cipherText.sublist(0, 8);
-    final version = header[0];
+    final version = header.first;
     if (version != CiphertextMessage.currentVersion) {
       throw InvalidMessageException('Unknown version: $version');
     }

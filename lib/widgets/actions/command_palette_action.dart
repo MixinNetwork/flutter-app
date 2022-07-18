@@ -74,7 +74,7 @@ class CommandPaletteAction extends Action<ToggleCommandPaletteIntent> {
 }
 
 class CommandPalettePage extends HookWidget {
-  const CommandPalettePage({Key? key}) : super(key: key);
+  const CommandPalettePage({super.key});
 
   @override
   Widget build(BuildContext context) {

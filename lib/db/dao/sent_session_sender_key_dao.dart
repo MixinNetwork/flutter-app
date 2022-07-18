@@ -7,7 +7,7 @@ part 'sent_session_sender_key_dao.g.dart';
 @DriftAccessor(tables: [SentSessionSenderKeys])
 class SentSessionSenderKeyDao extends DatabaseAccessor<MixinDatabase>
     with _$SentSessionSenderKeyDaoMixin {
-  SentSessionSenderKeyDao(MixinDatabase db) : super(db);
+  SentSessionSenderKeyDao(super.db);
 
   Future<int> insert(SentSessionSenderKey key) =>
       into(db.sentSessionSenderKeys).insertOnConflictUpdate(key);

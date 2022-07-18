@@ -4,7 +4,7 @@ import 'package:flutter_portal/flutter_portal.dart';
 const secondPortal = PortalLabel('second');
 
 class PortalProviders extends StatelessWidget {
-  const PortalProviders({Key? key, required this.child}) : super(key: key);
+  const PortalProviders({super.key, required this.child});
 
   final Widget child;
 

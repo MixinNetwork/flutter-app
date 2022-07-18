@@ -8,7 +8,7 @@ part 'pin_message_dao.g.dart';
 @DriftAccessor(tables: [PinMessages])
 class PinMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$PinMessageDaoMixin {
-  PinMessageDao(MixinDatabase attachedDatabase) : super(attachedDatabase);
+  PinMessageDao(super.attachedDatabase);
 
   Future<int> insert(PinMessage pinMessage) =>
       into(db.pinMessages).insertOnConflictUpdate(pinMessage);

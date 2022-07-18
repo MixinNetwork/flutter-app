@@ -7,7 +7,7 @@ part 'hyperlink_dao.g.dart';
 @DriftAccessor(tables: [Hyperlinks])
 class HyperlinkDao extends DatabaseAccessor<MixinDatabase>
     with _$HyperlinkDaoMixin {
-  HyperlinkDao(MixinDatabase db) : super(db);
+  HyperlinkDao(super.db);
 
   Future<int> insert(Hyperlink hyperlink) =>
       into(db.hyperlinks).insertOnConflictUpdate(hyperlink);
