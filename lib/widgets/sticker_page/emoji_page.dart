@@ -12,7 +12,7 @@ import '../../utils/extension/extension.dart';
 import '../interactive_decorated_box.dart';
 
 class EmojiSelectedGroupIndexCubit extends Cubit<int> {
-  EmojiSelectedGroupIndexCubit(int initialState) : super(initialState);
+  EmojiSelectedGroupIndexCubit() : super(1);
 
   void setIndex(int index) => emit(index);
 }
