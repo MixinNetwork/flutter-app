@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -57,12 +59,18 @@ class StickerPage extends StatelessWidget {
                       tabLength,
                       (index) {
                         if (index == 0) return _StickerStoreEmptyPage();
-                        if (index == 1) {
-                          return const AutomaticKeepAliveClientWidget(
-                            child: EmojiPage(),
-                          );
+
+                        if (Platform.isLinux) {
+                          return _StickerAlbumPage(index: index);
+                        } else {
+                          if (index == 1) {
+                            return const AutomaticKeepAliveClientWidget(
+                              child: EmojiPage(),
+                            );
+                          } else {
+                            return _StickerAlbumPage(index: index - 1);
+                          }
                         }
-                        return _StickerAlbumPage(index: index - 1);
                       },
                     ),
                   ),

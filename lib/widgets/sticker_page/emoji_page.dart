@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:emojis/emoji.dart';
@@ -162,8 +163,16 @@ class _EmojiGroupPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: avoid-non-ascii-symbols
+    const macOSIgnoreEmoji = {'☺️', '☹️'};
+
     final emojis = useMemoized(
-      () => groups.expand<Emoji>(Emoji.byGroup).map((e) => e.char).toList(),
+      () => groups
+          .expand<Emoji>(Emoji.byGroup)
+          .map((e) => e.char)
+          .where((element) =>
+              !Platform.isMacOS || !macOSIgnoreEmoji.contains(element))
+          .toList(),
       [groups],
     );
     return _EmojiGridView(emojis: emojis);

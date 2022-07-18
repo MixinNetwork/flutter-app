@@ -560,7 +560,10 @@ class _StickerButton extends HookWidget {
     final tabLength =
         useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
       bloc: stickerAlbumsCubit,
-      converter: (state) => (state.length) + 4,
+      converter: (state) =>
+          (state.length) +
+          // no emoji page on Linux.
+          (Platform.isLinux ? 3 : 4),
     );
 
     return MultiProvider(
