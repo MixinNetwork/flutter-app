@@ -127,9 +127,6 @@ class AccountServer {
         final deviceTime =
             e.requestOptions.extra[kRequestTimeStampKey] as DateTime?;
         final difference = time.difference(deviceTime ?? DateTime.now());
-
-        i('deviceTime: $deviceTime, now: ${DateTime.now()}');
-
         if (difference.inMinutes.abs() > 5) {
           _notifyBlazeWaitSyncTime();
           return;
