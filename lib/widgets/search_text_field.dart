@@ -10,7 +10,7 @@ import 'interactive_decorated_box.dart';
 
 class SearchTextField extends HookWidget {
   const SearchTextField({
-    Key? key,
+    super.key,
     this.focusNode,
     required this.controller,
     this.onChanged,
@@ -20,7 +20,7 @@ class SearchTextField extends HookWidget {
     this.showClear = false,
     this.onTapClear,
     this.leading,
-  }) : super(key: key);
+  });
 
   final FocusNode? focusNode;
   final TextEditingController controller;
@@ -130,7 +130,7 @@ class SearchTextField extends HookWidget {
 }
 
 class _SearchClearIcon extends HookWidget {
-  const _SearchClearIcon({Key? key, required this.onTap}) : super(key: key);
+  const _SearchClearIcon({required this.onTap});
 
   final VoidCallback onTap;
 

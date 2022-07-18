@@ -10,7 +10,7 @@ enum InteractiveStatus {
 
 class InteractiveBuilder extends StatefulWidget {
   const InteractiveBuilder({
-    Key? key,
+    super.key,
     required this.builder,
     this.child,
     this.onTap,
@@ -23,7 +23,7 @@ class InteractiveBuilder extends StatefulWidget {
     this.onHover,
     this.cursor = MouseCursor.defer,
     this.behavior = HitTestBehavior.opaque,
-  }) : super(key: key);
+  });
 
   final Widget Function(BuildContext context, InteractiveStatus status,
       InteractiveStatus lastStatus, Widget? child) builder;
@@ -119,7 +119,7 @@ class _InteractiveBuilderState extends State<InteractiveBuilder> {
 
 class InteractiveDecoratedBox extends StatelessWidget {
   const InteractiveDecoratedBox({
-    Key? key,
+    super.key,
     Decoration? decoration,
     this.hoveringDecoration,
     this.tapDowningDecoration,
@@ -136,11 +136,10 @@ class InteractiveDecoratedBox extends StatelessWidget {
     this.onHover,
     this.cursor = MouseCursor.defer,
     this.behavior = HitTestBehavior.opaque,
-  })  : _decoration = decoration,
-        super(key: key);
+  }) : _decoration = decoration;
 
   InteractiveDecoratedBox.color({
-    Key? key,
+    super.key,
     BoxDecoration? decoration,
     Color? hoveringColor,
     Color? tapDowningColor,
@@ -163,8 +162,7 @@ class InteractiveDecoratedBox extends StatelessWidget {
             : null,
         tapDowningDecoration = tapDowningColor != null
             ? decoration?.copyWith(color: tapDowningColor)
-            : null,
-        super(key: key);
+            : null;
 
   final Decoration? _decoration;
   final Decoration? hoveringDecoration;
@@ -231,14 +229,14 @@ class InteractiveDecoratedBox extends StatelessWidget {
 
 class MouseRegionIgnoreTouch extends StatelessWidget {
   const MouseRegionIgnoreTouch({
-    Key? key,
+    super.key,
     this.onEnter,
     this.onExit,
     this.onHover,
     this.cursor = MouseCursor.defer,
     this.opaque = true,
     this.child,
-  }) : super(key: key);
+  });
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
   final PointerHoverEventListener? onHover;

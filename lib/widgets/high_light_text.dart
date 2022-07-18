@@ -6,12 +6,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 class HighlightText extends HookWidget {
   const HighlightText(
     this.text, {
-    Key? key,
+    super.key,
     this.style,
     this.highlightTextSpans = const [],
     this.maxLines,
     this.overflow,
-  }) : super(key: key);
+  });
 
   final String text;
   final TextStyle? style;
@@ -40,7 +40,7 @@ List<InlineSpan> buildHighlightTextSpan(
     String text, List<HighlightTextSpan> highlightTextSpans,
     [TextStyle? style]) {
   final map = Map<String, HighlightTextSpan>.fromIterable(
-    highlightTextSpans.where((element) => element.text.isNotEmpty == true),
+    highlightTextSpans.where((element) => element.text.isNotEmpty),
     key: (item) => (item as HighlightTextSpan).text.toLowerCase(),
   );
   final pattern = "(${map.keys.map(RegExp.escape).join('|')})";
@@ -78,11 +78,11 @@ List<InlineSpan> buildHighlightTextSpan(
 class HighlightSelectableText extends HookWidget {
   const HighlightSelectableText(
     this.text, {
-    Key? key,
+    super.key,
     this.style,
     this.highlightTextSpans = const [],
     this.maxLines,
-  }) : super(key: key);
+  });
 
   final String text;
   final TextStyle? style;

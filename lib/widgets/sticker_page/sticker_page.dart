@@ -21,9 +21,9 @@ import 'sticker_store.dart';
 class StickerPage extends StatelessWidget {
   const StickerPage({
     required this.tabLength,
-    Key? key,
+    super.key,
     this.tabController,
-  }) : super(key: key);
+  });
 
   final TabController? tabController;
   final int tabLength;
@@ -37,14 +37,14 @@ class StickerPage extends StatelessWidget {
           width: 464,
           height: 407,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             color: context.dynamicColor(
               const Color.fromRGBO(255, 255, 255, 1),
               darkColor: const Color.fromRGBO(62, 65, 72, 1),
             ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             child: Column(
               children: [
                 Expanded(
@@ -72,9 +72,8 @@ class StickerPage extends StatelessWidget {
 
 class _StickerAlbumPage extends HookWidget {
   const _StickerAlbumPage({
-    Key? key,
     required this.index,
-  }) : super(key: key);
+  });
 
   final int index;
 
@@ -151,11 +150,10 @@ class _StickerStoreEmptyPage extends StatelessWidget {
 
 class _StickerAlbumPageItem extends HookWidget {
   const _StickerAlbumPageItem({
-    Key? key,
     required this.index,
     required this.updateUsedAt,
     this.rightClickDelete = false,
-  }) : super(key: key);
+  });
 
   final int index;
   final bool updateUsedAt;
@@ -209,10 +207,9 @@ class _StickerAlbumPageItem extends HookWidget {
 
 class _StickerAlbumBar extends HookWidget {
   const _StickerAlbumBar({
-    Key? key,
     required this.tabLength,
     this.tabController,
-  }) : super(key: key);
+  });
 
   final int tabLength;
   final TabController? tabController;
@@ -270,7 +267,7 @@ class _StickerAlbumBar extends HookWidget {
             const Color.fromRGBO(229, 231, 235, 1),
             darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
         ),
         labelPadding: EdgeInsets.zero,
         indicatorPadding: const EdgeInsets.all(5),
@@ -285,9 +282,8 @@ class _StickerAlbumBar extends HookWidget {
 
 class _StickerAlbumBarItem extends StatelessWidget {
   const _StickerAlbumBarItem({
-    Key? key,
     required this.index,
-  }) : super(key: key);
+  });
 
   final int index;
 

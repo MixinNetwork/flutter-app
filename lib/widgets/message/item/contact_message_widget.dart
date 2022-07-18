@@ -12,9 +12,7 @@ import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
 class ContactMessageWidget extends HookWidget {
-  const ContactMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const ContactMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

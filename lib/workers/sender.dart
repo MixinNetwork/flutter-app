@@ -6,8 +6,8 @@ import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
+import '../blaze/blaze_message_param.dart';
 import '../blaze/blaze_message_param_session.dart';
-import '../blaze/blaze_param.dart';
 import '../blaze/blaze_signal_key_message.dart';
 import '../blaze/vo/message_result.dart';
 import '../blaze/vo/plain_json_message.dart';
@@ -107,7 +107,7 @@ class Sender {
       final keys = List<SignalKey>.from((data as List<dynamic>)
           .map((e) => SignalKey.fromJson(e as Map<String, dynamic>)));
       if (keys.isNotEmpty) {
-        final preKeyBundle = keys[0].createPreKeyBundle();
+        final preKeyBundle = keys.first.createPreKeyBundle();
         await signalProtocol.processSession(recipientId, preKeyBundle);
       } else {
         return false;
@@ -211,11 +211,7 @@ class Sender {
   Future<String> getCheckSum(String conversationId) async {
     final sessions = await database.participantSessionDao
         .getParticipantSessionsByConversationId(conversationId);
-    if (sessions.isEmpty) {
-      return '';
-    } else {
-      return generateConversationChecksum(sessions);
-    }
+    return sessions.isEmpty ? '' : generateConversationChecksum(sessions);
   }
 
   String generateConversationChecksum(List<db.ParticipantSessionData> devices) {
@@ -349,7 +345,7 @@ class Sender {
     final keys = List<SignalKey>.from((data as List<dynamic>)
         .map((e) => SignalKey.fromJson(e as Map<String, dynamic>)));
     if (keys.isNotEmpty) {
-      final preKeyBundle = keys[0].createPreKeyBundle();
+      final preKeyBundle = keys.first.createPreKeyBundle();
       await signalProtocol.processSession(recipientId, preKeyBundle);
     } else {
       await database.participantSessionDao.insert(db.ParticipantSessionData(

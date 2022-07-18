@@ -36,11 +36,8 @@ extension StreamExtension<T> on Stream<T> {
 
   Stream<E> asyncBufferMap<E>(FutureOr<E> Function(List<T> event) convert) {
     StreamController<E> controller;
-    if (isBroadcast) {
-      controller = StreamController<E>.broadcast();
-    } else {
-      controller = StreamController<E>();
-    }
+    controller =
+        isBroadcast ? StreamController<E>.broadcast() : StreamController<E>();
 
     final events = <T>[];
     var querying = false;

@@ -7,10 +7,10 @@ import 'message.dart';
 
 class MessageName extends StatelessWidget {
   const MessageName({
-    Key? key,
+    super.key,
     required this.userName,
     required this.userId,
-  }) : super(key: key);
+  });
 
   final String userName;
   final String userId;

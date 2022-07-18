@@ -57,11 +57,10 @@ class MobileMixinWebView extends MixinWebView {
 
 class _FullWindowInAppWebViewPage extends HookWidget {
   const _FullWindowInAppWebViewPage({
-    Key? key,
     required this.initialUrl,
     required this.app,
     required this.appCardData,
-  }) : super(key: key);
+  });
 
   final String initialUrl;
   final App? app;
@@ -105,11 +104,10 @@ class _FullWindowInAppWebViewPage extends HookWidget {
 
 class _WebControl extends StatelessWidget {
   const _WebControl({
-    Key? key,
     required this.webViewController,
     required this.app,
     required this.appCardData,
-  }) : super(key: key);
+  });
 
   final WebViewController? webViewController;
   final App? app;
@@ -120,7 +118,7 @@ class _WebControl extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.theme.background,
           border: Border.all(color: context.theme.sidebarSelected),
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: const BorderRadius.all(Radius.circular(32)),
         ),
         child: Row(
           children: [
@@ -171,11 +169,10 @@ class _WebControl extends StatelessWidget {
 
 class _WebViewActionDialog extends StatelessWidget {
   const _WebViewActionDialog({
-    Key? key,
     required this.webViewController,
     required this.app,
     required this.appCardData,
-  }) : super(key: key);
+  });
 
   final WebViewController webViewController;
 
@@ -237,11 +234,10 @@ class _WebViewActionDialog extends StatelessWidget {
 
 class _ShareMenuItem extends StatelessWidget {
   const _ShareMenuItem({
-    Key? key,
     required this.appCardData,
     required this.app,
     required this.webViewController,
-  }) : super(key: key);
+  });
 
   final AppCardData? appCardData;
   final App? app;

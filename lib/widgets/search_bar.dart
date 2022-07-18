@@ -19,9 +19,7 @@ import 'user/user_dialog.dart';
 import 'window/move_window.dart';
 
 class SearchBar extends HookWidget {
-  const SearchBar({
-    Key? key,
-  }) : super(key: key);
+  const SearchBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +126,7 @@ class _SearchIntent extends Intent {
 }
 
 class _SearchUserDialog extends HookWidget {
-  const _SearchUserDialog({Key? key}) : super(key: key);
+  const _SearchUserDialog();
 
   @override
   Widget build(BuildContext context) {

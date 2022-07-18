@@ -6,7 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:path/path.dart' as p;
 
 import '../account/account_key_value.dart';
-import '../account/scam_warning.dart';
+import '../account/scam_warning_key_value.dart';
 import '../account/show_pin_message_key_value.dart';
 import '../crypto/crypto_key_value.dart';
 import '../crypto/privacy_key_value.dart';

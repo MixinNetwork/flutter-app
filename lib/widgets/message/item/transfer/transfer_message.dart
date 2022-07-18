@@ -11,9 +11,7 @@ import '../../message_datetime_and_status.dart';
 import 'transfer_page.dart';
 
 class TransferMessage extends HookWidget {
-  const TransferMessage({
-    Key? key,
-  }) : super(key: key);
+  const TransferMessage({super.key});
 
   @override
   Widget build(BuildContext context) {

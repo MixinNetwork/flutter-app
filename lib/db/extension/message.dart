@@ -79,12 +79,9 @@ extension QuoteMessageItemExtension on QuoteMessageItem {
 
 QuoteMessageItem mapToQuoteMessage(Map<String, dynamic> map) {
   final createdAtJson = map['created_at'] ?? map['createdAt'];
-  DateTime createdAt;
-  if (createdAtJson is String) {
-    createdAt = DateTime.parse(createdAtJson);
-  } else {
-    createdAt = const MillisDateConverter().mapToDart(createdAtJson as int?)!;
-  }
+  final createdAt = createdAtJson is String
+      ? DateTime.parse(createdAtJson)
+      : const MillisDateConverter().mapToDart(createdAtJson as int?)!;
   return QuoteMessageItem(
     userId: map['user_id'] as String,
     status:

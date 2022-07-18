@@ -143,7 +143,7 @@ class LogFileManager {
   final SendPort _sendPort;
 
   static Future<void> _logIsolate(List<dynamic> args) async {
-    final responsePort = args[0] as SendPort;
+    final responsePort = args.first as SendPort;
     final messageReceiver = ReceivePort();
     final dir = args[1] as String;
     final logFileHandler = LogFileHandler(dir);

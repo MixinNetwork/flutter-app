@@ -21,7 +21,7 @@ extension StickerConverter on sdk.Sticker {
 @DriftAccessor(tables: [Sticker])
 class StickerDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerDaoMixin {
-  StickerDao(MixinDatabase db) : super(db);
+  StickerDao(super.db);
 
   Future<int> insert(StickersCompanion sticker) =>
       into(db.stickers).insertOnConflictUpdate(sticker);

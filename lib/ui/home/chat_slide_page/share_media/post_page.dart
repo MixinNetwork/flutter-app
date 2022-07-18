@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
-import '../../../../bloc/paging/load_more_paging.dart';
+import '../../../../bloc/paging/load_more_paging_state.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
@@ -18,10 +18,10 @@ import '../shared_media_page.dart';
 
 class PostPage extends HookWidget {
   const PostPage({
-    Key? key,
+    super.key,
     required this.maxHeight,
     required this.conversationId,
-  }) : super(key: key);
+  });
 
   final double maxHeight;
   final String conversationId;
@@ -159,9 +159,8 @@ class PostPage extends HookWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key? key,
     required this.message,
-  }) : super(key: key);
+  });
 
   final MessageItem message;
 
@@ -176,7 +175,7 @@ class _Item extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: context.theme.sidebarSelected,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
               ),
               showStatus: false,
             ),

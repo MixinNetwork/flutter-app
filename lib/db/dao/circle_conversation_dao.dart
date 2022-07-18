@@ -7,7 +7,7 @@ part 'circle_conversation_dao.g.dart';
 @DriftAccessor(tables: [CircleConversation])
 class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$CircleConversationDaoMixin {
-  CircleConversationDao(MixinDatabase db) : super(db);
+  CircleConversationDao(super.db);
 
   Future<int> insert(CircleConversation circleConversation) =>
       into(db.circleConversations).insertOnConflictUpdate(circleConversation);

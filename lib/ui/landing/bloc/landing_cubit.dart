@@ -105,7 +105,7 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
                 .data
                 .secret)
         .handleError((e) => null)
-        .where((secret) => secret.isNotEmpty == true)
+        .where((secret) => secret.isNotEmpty)
         .doOnData((secret) {
           streamSubscription?.cancel();
           emit(state.copyWith(

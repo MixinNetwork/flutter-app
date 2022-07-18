@@ -17,9 +17,7 @@ import '../route/responsive_navigator_cubit.dart';
 import 'chat_page.dart';
 
 class ChatBar extends HookWidget {
-  const ChatBar({
-    Key? key,
-  }) : super(key: key);
+  const ChatBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +46,7 @@ class ChatBar extends HookWidget {
 
     MoveWindowBarrier toggleInfoPageWrapper({
       required Widget child,
-      behavior = HitTestBehavior.opaque,
+      HitTestBehavior behavior = HitTestBehavior.opaque,
     }) =>
         MoveWindowBarrier(
           child: InteractiveDecoratedBox(
@@ -58,6 +56,7 @@ class ChatBar extends HookWidget {
               }
               chatSideCubit.toggleInfoPage();
             },
+            behavior: behavior,
             child: child,
           ),
         );
@@ -164,10 +163,10 @@ class ChatBar extends HookWidget {
 
 class ConversationIDOrCount extends HookWidget {
   const ConversationIDOrCount({
-    Key? key,
+    super.key,
     this.fontSize = 14,
     required this.conversationState,
-  }) : super(key: key);
+  });
 
   final double fontSize;
   final ConversationState? conversationState;
@@ -222,11 +221,11 @@ class ConversationIDOrCount extends HookWidget {
 
 class ConversationName extends StatelessWidget {
   const ConversationName({
-    Key? key,
+    super.key,
     this.fontSize = 16,
     required this.conversationState,
     this.overflow = true,
-  }) : super(key: key);
+  });
 
   final double fontSize;
   final ConversationState conversationState;
@@ -262,10 +261,10 @@ class ConversationName extends StatelessWidget {
 
 class ConversationAvatar extends StatelessWidget {
   const ConversationAvatar({
-    Key? key,
+    super.key,
     this.size = 36,
     required this.conversationState,
-  }) : super(key: key);
+  });
 
   final double size;
   final ConversationState? conversationState;
@@ -298,7 +297,7 @@ class ConversationAvatar extends StatelessWidget {
 }
 
 class _BotIcon extends HookWidget {
-  const _BotIcon({Key? key, required this.conversation}) : super(key: key);
+  const _BotIcon({required this.conversation});
 
   final ConversationState conversation;
 

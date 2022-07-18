@@ -16,10 +16,8 @@ class Lock {
     Future<T> callBlockAndComplete() =>
         Future.sync(block).whenComplete(blockCompleted.complete);
 
-    if (previous != null) {
-      return previous.then((_) => callBlockAndComplete());
-    } else {
-      return callBlockAndComplete();
-    }
+    return previous != null
+        ? previous.then((_) => callBlockAndComplete())
+        : callBlockAndComplete();
   }
 }

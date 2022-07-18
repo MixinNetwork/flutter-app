@@ -63,7 +63,7 @@ import 'message_day_time.dart';
 import 'message_name.dart';
 
 class _MessageContextCubit extends SimpleCubit<_MessageContext> {
-  _MessageContextCubit(_MessageContext initialState) : super(initialState);
+  _MessageContextCubit(super.initialState);
 }
 
 class _MessageContext with EquatableMixin {
@@ -124,7 +124,7 @@ const _pinArrowWidth = 32.0;
 
 class MessageItemWidget extends HookWidget {
   const MessageItemWidget({
-    Key? key,
+    super.key,
     required this.message,
     this.prev,
     this.next,
@@ -132,7 +132,7 @@ class MessageItemWidget extends HookWidget {
     this.isTranscriptPage = false,
     this.blink = true,
     this.isPinnedPage = false,
-  }) : super(key: key);
+  });
 
   final MessageItem message;
   final MessageItem? prev;
@@ -508,24 +508,23 @@ class MessageItemWidget extends HookWidget {
 
 class MessageContext extends HookWidget {
   const MessageContext({
-    Key? key,
+    super.key,
     required this.isTranscriptPage,
     required this.isPinnedPage,
     required this.showNip,
     required this.isCurrentUser,
     required this.message,
     required this.child,
-  }) : super(key: key);
+  });
 
   MessageContext.fromMessageItem({
-    Key? key,
+    super.key,
     required this.message,
     required this.child,
     this.isTranscriptPage = false,
     this.isPinnedPage = false,
     this.showNip = false,
-  })  : isCurrentUser = message.relationship == UserRelationship.me,
-        super(key: key);
+  }) : isCurrentUser = message.relationship == UserRelationship.me;
 
   final bool isTranscriptPage;
   final bool isPinnedPage;
@@ -564,12 +563,9 @@ Future<void> saveAs(BuildContext context, AccountServer accountServer,
       accountServer.convertMessageAbsolutePath(message, isTranscriptPage);
   if (Platform.isAndroid || Platform.isIOS) {
     if (message.type.isImage || message.type.isVideo) {
-      final bool? result;
-      if (message.type.isImage) {
-        result = await GallerySaver.saveImage(path);
-      } else {
-        result = await GallerySaver.saveVideo(path);
-      }
+      final result = message.type.isImage
+          ? await GallerySaver.saveImage(path)
+          : await GallerySaver.saveVideo(path);
       if (result != true) {
         return showToastFailed(context, null);
       } else {
@@ -595,9 +591,8 @@ Future<void> saveAs(BuildContext context, AccountServer accountServer,
 
 class _PinMenu extends HookWidget {
   const _PinMenu({
-    Key? key,
     required this.message,
-  }) : super(key: key);
+  });
 
   final MessageItem message;
 
@@ -641,7 +636,6 @@ class _PinMenu extends HookWidget {
 
 class _MessageBubbleMargin extends HookWidget {
   const _MessageBubbleMargin({
-    Key? key,
     required this.isCurrentUser,
     required this.userName,
     required this.userId,
@@ -651,7 +645,7 @@ class _MessageBubbleMargin extends HookWidget {
     this.showedMenu,
     required this.userAvatarUrl,
     required this.showAvatar,
-  }) : super(key: key);
+  });
 
   final bool isCurrentUser;
   final String? userName;
@@ -728,7 +722,7 @@ class _MessageBubbleMargin extends HookWidget {
 }
 
 class _UnreadMessageBar extends StatelessWidget {
-  const _UnreadMessageBar({Key? key}) : super(key: key);
+  const _UnreadMessageBar();
 
   @override
   Widget build(BuildContext context) => Container(
@@ -748,10 +742,9 @@ class _UnreadMessageBar extends StatelessWidget {
 
 class _MessageSelectionWrapper extends HookWidget {
   const _MessageSelectionWrapper({
-    Key? key,
     required this.child,
     required this.messageId,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -793,10 +786,9 @@ class _MessageSelectionWrapper extends HookWidget {
 
 class _AnimatedSelectionIcon extends HookWidget {
   const _AnimatedSelectionIcon({
-    Key? key,
     required this.selected,
     required this.inSelectedMode,
-  }) : super(key: key);
+  });
 
   final bool selected;
 

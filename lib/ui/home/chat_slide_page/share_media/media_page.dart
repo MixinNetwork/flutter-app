@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
-import '../../../../bloc/paging/load_more_paging.dart';
+import '../../../../bloc/paging/load_more_paging_state.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
@@ -20,10 +20,10 @@ import '../shared_media_page.dart';
 
 class MediaPage extends HookWidget {
   const MediaPage({
-    Key? key,
+    super.key,
     required this.maxHeight,
     required this.conversationId,
-  }) : super(key: key);
+  });
 
   final double maxHeight;
   final String conversationId;
@@ -173,9 +173,8 @@ class MediaPage extends HookWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key? key,
     required this.message,
-  }) : super(key: key);
+  });
 
   final MessageItem message;
 
@@ -202,7 +201,7 @@ class _Item extends StatelessWidget {
 }
 
 class _ItemVideo extends HookWidget {
-  const _ItemVideo({Key? key}) : super(key: key);
+  const _ItemVideo();
 
   @override
   Widget build(BuildContext context) {

@@ -5,8 +5,9 @@ import '../signal_database.dart';
 part 'sender_key_dao.g.dart';
 
 @DriftAccessor(tables: [SenderKeys])
-class SenderKeyDao extends DatabaseAccessor<SignalDatabase> {
-  SenderKeyDao(SignalDatabase db) : super(db);
+class SenderKeyDao extends DatabaseAccessor<SignalDatabase>
+    with _$SenderKeyDaoMixin {
+  SenderKeyDao(super.db);
 
   Future<SenderKey?> getSenderKey(String groupId, String senderId) async =>
       (select(db.senderKeys)

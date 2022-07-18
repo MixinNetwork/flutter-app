@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'blaze_param.dart';
+part of 'blaze_message_param.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

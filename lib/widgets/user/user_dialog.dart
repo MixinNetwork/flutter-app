@@ -71,10 +71,10 @@ Future<void> showUserDialog(BuildContext context, String? userId,
 
 class UserDialog extends StatelessWidget {
   const UserDialog({
-    Key? key,
+    super.key,
     required this.userId,
     this.refreshUser = true,
-  }) : super(key: key);
+  });
 
   final String userId;
   final bool refreshUser;
@@ -108,9 +108,8 @@ class UserDialog extends StatelessWidget {
 class _UserProfileLoader extends HookWidget {
   const _UserProfileLoader(
     this.userId, {
-    Key? key,
     this.refreshUser = true,
-  }) : super(key: key);
+  });
 
   final String userId;
   final bool refreshUser;
@@ -137,9 +136,8 @@ class _UserProfileLoader extends HookWidget {
 
 class _UserProfileBody extends StatelessWidget {
   const _UserProfileBody({
-    Key? key,
     required this.user,
-  }) : super(key: key);
+  });
   final User user;
 
   @override
@@ -218,9 +216,8 @@ class _UserProfileBody extends StatelessWidget {
 
 class _BioText extends StatelessWidget {
   const _BioText({
-    Key? key,
     required this.biography,
-  }) : super(key: key);
+  });
 
   final String biography;
 
@@ -248,9 +245,8 @@ class _BioText extends StatelessWidget {
 
 class _AddToContactsButton extends StatelessWidget {
   const _AddToContactsButton({
-    Key? key,
     required this.user,
-  }) : super(key: key);
+  });
 
   final User user;
 
@@ -276,7 +272,7 @@ class _AddToContactsButton extends StatelessWidget {
 }
 
 class _UserProfileButtonBar extends StatelessWidget {
-  const _UserProfileButtonBar({Key? key, required this.user}) : super(key: key);
+  const _UserProfileButtonBar({required this.user});
 
   final User user;
 
@@ -296,7 +292,7 @@ class _UserProfileButtonBar extends StatelessWidget {
           );
 
           if (result == null || result.isEmpty) return;
-          final conversationId = result[0].conversationId;
+          final conversationId = result.first.conversationId;
 
           await runFutureWithToast(
             context,
@@ -305,7 +301,7 @@ class _UserProfileButtonBar extends StatelessWidget {
               user.fullName!,
               result.first.encryptCategory!,
               conversationId: conversationId,
-              recipientId: result[0].userId,
+              recipientId: result.first.userId,
             ),
           );
         },

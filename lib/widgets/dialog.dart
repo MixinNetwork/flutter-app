@@ -68,7 +68,7 @@ Future<T?> showMixinDialog<T>({
 
 class AlertDialogLayout extends StatelessWidget {
   const AlertDialogLayout({
-    Key? key,
+    super.key,
     this.title,
     this.titleMarginBottom = 48,
     required this.content,
@@ -77,7 +77,7 @@ class AlertDialogLayout extends StatelessWidget {
     this.minHeight = 210,
     this.padding = const EdgeInsets.all(30),
     this.maxWidth,
-  }) : super(key: key);
+  });
 
   final Widget? title;
   final double titleMarginBottom;
@@ -137,11 +137,10 @@ class AlertDialogLayout extends StatelessWidget {
 
 class _DialogPage extends StatelessWidget {
   const _DialogPage({
-    Key? key,
     required this.child,
     this.padding,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -152,7 +151,7 @@ class _DialogPage extends StatelessWidget {
         padding: padding ?? EdgeInsets.zero,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             border: Border.all(
               color: const Color.fromRGBO(255, 255, 255, 0.08),
             ),
@@ -171,7 +170,7 @@ class _DialogPage extends StatelessWidget {
             color: backgroundColor ?? context.theme.popUp,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             child: child,
           ),
         ),
@@ -181,9 +180,9 @@ class _DialogPage extends StatelessWidget {
 /// default onTap is Navigator.pop
 abstract class DialogInteracterEntry<T> extends StatelessWidget {
   const DialogInteracterEntry({
-    Key? key,
+    super.key,
     this.value,
-  }) : super(key: key);
+  });
 
   final T? value;
 
@@ -193,8 +192,8 @@ abstract class DialogInteracterEntry<T> extends StatelessWidget {
 /// default onTap is Navigator.pop
 class MixinButton<T> extends DialogInteracterEntry<T> {
   const MixinButton({
-    Key? key,
-    T? value,
+    super.key,
+    super.value,
     this.backgroundTransparent = false,
     required this.child,
     this.onTap,
@@ -204,10 +203,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
     ),
     this.disable = false,
     this.backgroundColor,
-  }) : super(
-          key: key,
-          value: value,
-        );
+  });
 
   final bool backgroundTransparent;
   final Widget child;
@@ -221,7 +217,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
     final boxDecoration = backgroundTransparent
         ? const BoxDecoration()
         : BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
             color: backgroundColor ?? context.theme.accent,
           );
     final textColor = backgroundTransparent
@@ -252,12 +248,12 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
 
 class DialogTextField extends HookWidget {
   const DialogTextField({
-    Key? key,
+    super.key,
     required this.textEditingController,
     required this.hintText,
     this.inputFormatters,
     this.maxLines = 1,
-  }) : super(key: key);
+  });
 
   final TextEditingController textEditingController;
   final String hintText;
@@ -271,7 +267,7 @@ class DialogTextField extends HookWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: context.theme.background,
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
         ),
         alignment: Alignment.center,
         child: TextField(
@@ -348,13 +344,13 @@ Future<bool> showConfirmMixinDialog(
 
 class EditDialog extends HookWidget {
   const EditDialog({
-    Key? key,
+    super.key,
     required this.title,
     this.editText = '',
     this.hintText = '',
     this.positiveAction,
     this.maxLines,
-  }) : super(key: key);
+  });
 
   final Widget title;
   final String editText;
@@ -393,10 +389,10 @@ class EditDialog extends HookWidget {
 
 class DialogAddOrJoinButton extends StatelessWidget {
   const DialogAddOrJoinButton({
-    Key? key,
+    super.key,
     required this.onTap,
     required this.title,
-  }) : super(key: key);
+  });
 
   final VoidCallback onTap;
   final Widget title;
@@ -406,8 +402,8 @@ class DialogAddOrJoinButton extends StatelessWidget {
         style: TextButton.styleFrom(
           backgroundColor: context.theme.statusBackground,
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(15)),
           ),
         ),
         onPressed: onTap,

@@ -13,7 +13,7 @@ import '../../widgets/toast.dart';
 import '../home/bloc/multi_auth_cubit.dart';
 
 class EditProfilePage extends HookWidget {
-  const EditProfilePage({Key? key}) : super(key: key);
+  const EditProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -131,11 +131,10 @@ class EditProfilePage extends HookWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key? key,
     required this.title,
     required this.controller,
     this.readOnly = false,
-  }) : super(key: key);
+  });
 
   final String title;
   final TextEditingController controller;

@@ -56,52 +56,42 @@ class ConversationList extends HookWidget {
     );
 
     Widget child;
-    if (pagingState.count == 0) {
-      if (pagingState.hasData) {
-        child = Center(
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation(
-              context.theme.accent,
-            ),
-          ),
-        );
-      } else {
-        child = const _Empty();
-      }
-    } else {
-      child = ScrollablePositionedList.builder(
-        key: PageStorageKey(slideCategoryState),
-        itemPositionsListener:
-            conversationListBloc.itemPositionsListener(slideCategoryState),
-        itemCount: pagingState.count,
-        itemScrollController: conversationListBloc.itemScrollController(
-          slideCategoryState,
-        ),
-        itemBuilder: (context, index) {
-          final conversation = pagingState.map[index];
-          if (conversation == null) return const SizedBox(height: 80);
-          final selected =
-              conversation.conversationId == conversationId && !routeMode;
-
-          return ConversationMenuWrapper(
-            conversation: conversation,
-            removeChatFromCircle: true,
-            child: _Item(
-              selected: selected,
-              conversation: conversation,
-              onTap: () {
-                ConversationCubit.selectConversation(
-                  context,
-                  conversation.conversationId,
+    child = pagingState.count == 0
+        ? pagingState.hasData
+            ? Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(context.theme.accent),
+                ),
+              )
+            : const _Empty()
+        : ScrollablePositionedList.builder(
+            key: PageStorageKey(slideCategoryState),
+            itemPositionsListener:
+                conversationListBloc.itemPositionsListener(slideCategoryState),
+            itemCount: pagingState.count,
+            itemScrollController:
+                conversationListBloc.itemScrollController(slideCategoryState),
+            itemBuilder: (context, index) {
+              final conversation = pagingState.map[index];
+              if (conversation == null) return const SizedBox(height: 80);
+              final selected =
+                  conversation.conversationId == conversationId && !routeMode;
+              return ConversationMenuWrapper(
+                conversation: conversation,
+                removeChatFromCircle: true,
+                child: _Item(
+                  selected: selected,
                   conversation: conversation,
-                );
-              },
-            ),
+                  onTap: () {
+                    ConversationCubit.selectConversation(
+                        context, conversation.conversationId,
+                        conversation: conversation);
+                  },
+                ),
+              );
+            },
           );
-        },
-      );
-    }
 
     return Column(
       children: [
@@ -115,7 +105,7 @@ class ConversationList extends HookWidget {
 }
 
 class _Empty extends StatelessWidget {
-  const _Empty({Key? key}) : super(key: key);
+  const _Empty();
 
   @override
   Widget build(BuildContext context) {
@@ -145,11 +135,10 @@ class _Empty extends StatelessWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key? key,
     this.selected = false,
     required this.conversation,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final bool selected;
   final ConversationItem conversation;
@@ -167,7 +156,7 @@ class _Item extends StatelessWidget {
           child: DecoratedBox(
             decoration: selected
                 ? BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
                     color: context.theme.listSelected,
                   )
                 : const BoxDecoration(),
@@ -241,9 +230,8 @@ class _Item extends StatelessWidget {
 
 class _ItemConversationSubtitle extends StatelessWidget {
   const _ItemConversationSubtitle({
-    Key? key,
     required this.conversation,
-  }) : super(key: key);
+  });
 
   final ConversationItem conversation;
 
@@ -286,10 +274,9 @@ class _ItemConversationSubtitle extends StatelessWidget {
 
 class _MessagePreview extends StatelessWidget {
   const _MessagePreview({
-    Key? key,
     required this.messageColor,
     required this.conversation,
-  }) : super(key: key);
+  });
 
   final Color messageColor;
   final ConversationItem conversation;
@@ -309,9 +296,8 @@ class _MessagePreview extends StatelessWidget {
 
 class _MessageContent extends HookWidget {
   const _MessageContent({
-    Key? key,
     required this.conversation,
-  }) : super(key: key);
+  });
   final ConversationItem conversation;
 
   @override
@@ -415,9 +401,8 @@ class _MessageContent extends HookWidget {
 
 class _MessageStatusIcon extends StatelessWidget {
   const _MessageStatusIcon({
-    Key? key,
     required this.conversation,
-  }) : super(key: key);
+  });
 
   final ConversationItem conversation;
 
@@ -440,9 +425,8 @@ class _MessageStatusIcon extends StatelessWidget {
 
 class _StatusRow extends StatelessWidget {
   const _StatusRow({
-    Key? key,
     required this.conversation,
-  }) : super(key: key);
+  });
   final ConversationItem conversation;
 
   @override

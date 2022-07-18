@@ -9,13 +9,13 @@ import '../cache_image.dart';
 
 class StickerItem extends HookWidget {
   const StickerItem({
-    Key? key,
+    super.key,
     required this.assetUrl,
     required this.assetType,
     this.placeholder,
     this.width,
     this.height,
-  }) : super(key: key);
+  });
 
   final String assetUrl;
   final String? assetType;
@@ -25,7 +25,6 @@ class StickerItem extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    late Widget child;
     final isJson = useMemoized(() => assetType == 'json', [assetType]);
 
     final playing = useState(true);
@@ -64,28 +63,21 @@ class StickerItem extends HookWidget {
       return () => appActiveListener.removeListener(listener);
     }, [controller, appActiveListener]);
 
-    if (isJson) {
-      child = Lottie.network(
-        assetUrl,
-        controller: controller,
-        height: height,
-        width: width,
-        fit: BoxFit.contain,
-        onLoaded: (composition) {
-          controller.duration = composition.duration;
-          listener();
-        },
-      );
-    } else {
-      child = CacheImage(
-        assetUrl,
-        height: height,
-        width: width,
-        controller: playing,
-        fit: BoxFit.contain,
-        placeholder: () => placeholder ?? const SizedBox(),
-      );
-    }
+    final child = isJson
+        ? Lottie.network(assetUrl,
+            controller: controller,
+            height: height,
+            width: width,
+            fit: BoxFit.contain, onLoaded: (composition) {
+            controller.duration = composition.duration;
+            listener();
+          })
+        : CacheImage(assetUrl,
+            height: height,
+            width: width,
+            controller: playing,
+            fit: BoxFit.contain,
+            placeholder: () => placeholder ?? const SizedBox());
 
     if (width == null || height == null) {
       return AspectRatio(aspectRatio: 1, child: child);

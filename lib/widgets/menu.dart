@@ -16,7 +16,7 @@ import 'interactive_decorated_box.dart';
 import 'portal_providers.dart';
 
 class _OffsetCubit extends SimpleCubit<Offset?> {
-  _OffsetCubit(Offset? state) : super(state);
+  _OffsetCubit(super.state);
 }
 
 extension ContextMenuPortalEntrySender on BuildContext {
@@ -27,13 +27,13 @@ extension ContextMenuPortalEntrySender on BuildContext {
 
 class ContextMenuPortalEntry extends HookWidget {
   const ContextMenuPortalEntry({
-    Key? key,
+    super.key,
     required this.child,
     required this.buildMenus,
     this.showedMenu,
     this.interactiveForTap = false,
     this.enable = true,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final List<Widget> Function() buildMenus;
@@ -104,12 +104,12 @@ class ContextMenuPortalEntry extends HookWidget {
 
 class Barrier extends StatelessWidget {
   const Barrier({
-    Key? key,
+    super.key,
     required this.onClose,
     required this.visible,
     required this.child,
     this.duration,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final VoidCallback onClose;
@@ -162,9 +162,9 @@ class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
 
 class ContextMenuPage extends StatelessWidget {
   const ContextMenuPage({
-    Key? key,
+    super.key,
     required this.menus,
-  }) : super(key: key);
+  });
 
   final List<Widget> menus;
 
@@ -173,7 +173,7 @@ class ContextMenuPage extends StatelessWidget {
     final brightnessData = context.brightnessValue;
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: const BorderRadius.all(Radius.circular(11)),
         border: Border.all(
           color: Color.lerp(
             Colors.transparent,
@@ -199,7 +199,7 @@ class ContextMenuPage extends StatelessWidget {
         ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: const BorderRadius.all(Radius.circular(11)),
         child: IntrinsicWidth(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -214,22 +214,19 @@ class ContextMenuPage extends StatelessWidget {
 
 class ContextMenu extends StatelessWidget {
   const ContextMenu({
-    Key? key,
+    super.key,
     required this.title,
     this.isDestructiveAction = false,
     this.onTap,
     this.icon,
-  })  : _subMenuMode = false,
-        super(key: key);
+  }) : _subMenuMode = false;
 
   const ContextMenu._sub({
-    Key? key,
     required this.title,
     this.isDestructiveAction = false,
     this.icon,
   })  : _subMenuMode = true,
-        onTap = null,
-        super(key: key);
+        onTap = null;
 
   final String? icon;
   final String title;
@@ -304,12 +301,12 @@ class ContextMenu extends StatelessWidget {
 
 class SubContextMenu extends StatelessWidget {
   const SubContextMenu({
-    Key? key,
+    super.key,
     required this.title,
     required this.menus,
     this.icon,
     this.isDestructiveAction = false,
-  }) : super(key: key);
+  });
 
   final String? icon;
   final String title;

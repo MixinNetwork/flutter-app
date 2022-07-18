@@ -16,7 +16,7 @@ import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
-import '../blaze/blaze_param.dart';
+import '../blaze/blaze_message_param.dart';
 import '../blaze/vo/message_result.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../constants/constants.dart';
@@ -372,8 +372,7 @@ class _MessageProcessRunner {
       await Future.wait(jobs.map((db.Job job) async {
         try {
           final stickerId = job.blazeMessage;
-          if (stickerId == null) {
-          } else {
+          if (stickerId != null) {
             final sticker =
                 (await client.accountApi.getStickerById(stickerId)).data;
             await database.stickerDao.insert(sticker.asStickersCompanion);
@@ -488,15 +487,12 @@ class _MessageProcessRunner {
           await _sender.checkConversation(message.conversationId);
           return;
         }
-        final List<int> plaintext;
-        if (message.category.isAttachment ||
-            message.category.isSticker ||
-            message.category.isContact ||
-            message.category.isLive) {
-          plaintext = base64Decode(message.content!);
-        } else {
-          plaintext = utf8.encode(message.content!);
-        }
+        final plaintext = message.category.isAttachment ||
+                message.category.isSticker ||
+                message.category.isContact ||
+                message.category.isLive
+            ? base64Decode(message.content!)
+            : utf8.encode(message.content!);
         final content = _encryptedProtocol.encryptMessage(
             privateKey,
             plaintext,
@@ -518,7 +514,7 @@ class _MessageProcessRunner {
           silent: silent,
           expireIn: expireIn ?? 0,
         );
-      } else {}
+      }
 
       if (result?.success ?? false || result?.errorCode == badData) {
         if (result?.errorCode == null) {
@@ -637,7 +633,7 @@ class _MessageProcessRunner {
       silent: silent,
       expireIn: expireIn,
     ));
-    if (result.success == false && result.retry == true) {
+    if (!result.success && result.retry) {
       return _sendSignalMessage(
         message,
         silent: silent,

@@ -17,10 +17,10 @@ import '../../widgets/toast.dart';
 
 class StorageUsageDetailPage extends HookWidget {
   const StorageUsageDetailPage({
-    Key? key,
+    super.key,
     required this.name,
     required this.conversationId,
-  }) : super(key: key);
+  });
 
   final String name;
   final String conversationId;

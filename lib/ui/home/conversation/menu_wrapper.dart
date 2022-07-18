@@ -16,12 +16,12 @@ import '../bloc/slide_category_cubit.dart';
 
 class ConversationMenuWrapper extends StatelessWidget {
   const ConversationMenuWrapper({
-    Key? key,
+    super.key,
     this.conversation,
     this.searchConversation,
     required this.child,
     this.removeChatFromCircle = false,
-  }) : super(key: key);
+  });
 
   final ConversationItem? conversation;
   final SearchConversationItem? searchConversation;

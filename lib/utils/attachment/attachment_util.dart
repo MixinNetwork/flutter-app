@@ -114,7 +114,7 @@ class AttachmentUtil extends ChangeNotifier {
           .transcriptMessageByMessageId(messageId)
           .getSingleOrNull(),
     ]);
-    final message = list[0] as Message?;
+    final message = list.first as Message?;
     final transcriptMessage = list[1] as TranscriptMessage?;
 
     if (message != null && attachmentMessage == null) {
@@ -487,7 +487,7 @@ class AttachmentUtil extends ChangeNotifier {
         MediaStatus.done,
         true,
       );
-      if (await done == true && await notDone == true) {
+      if (await done && await notDone) {
         await _messageDao.syncMessageMedia(messageId);
         return true;
       }

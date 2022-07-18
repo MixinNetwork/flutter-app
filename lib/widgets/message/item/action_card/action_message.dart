@@ -18,9 +18,7 @@ import '../unknown_message.dart';
 import 'action_card_data.dart';
 
 class ActionCardMessage extends HookWidget {
-  const ActionCardMessage({
-    Key? key,
-  }) : super(key: key);
+  const ActionCardMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +58,7 @@ class ActionCardMessage extends HookWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: const BorderRadius.all(Radius.circular(4)),
               child: CacheImage(
                 appCardData.iconUrl,
                 height: 40,

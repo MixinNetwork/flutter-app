@@ -116,10 +116,11 @@ bool useAudioMessagePlaying(String messageId, {bool isMediaList = false}) {
     () {
       final ams = context.audioMessageService;
 
-      return CombineLatestStream.combine2(
+      return CombineLatestStream.combine2<MessageMedia?, bool,
+          Tuple2<MessageMedia?, bool>>(
         ams._player.currentStream,
         ams._player.playbackStream.map((e) => e.isPlaying).distinct(),
-        (MessageMedia? a, bool playing) => Tuple2(a, playing),
+        Tuple2.new,
       ).map((event) {
         if (!event.item2) return false;
 

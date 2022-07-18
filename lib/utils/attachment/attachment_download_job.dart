@@ -147,7 +147,7 @@ extension _AttachmentDownloadExtension on Dio {
       );
     } on DioError catch (e) {
       if (e.type == DioErrorType.response) {
-        if (e.response!.requestOptions.receiveDataWhenStatusError == true) {
+        if (e.response!.requestOptions.receiveDataWhenStatusError) {
           final res = await transformer.transformResponse(
             e.response!.requestOptions..responseType = ResponseType.json,
             e.response!.data as ResponseBody,
@@ -180,11 +180,9 @@ extension _AttachmentDownloadExtension on Dio {
     if (contentEncoding != null) {
       compressed = ['gzip', 'deflate', 'compress'].contains(contentEncoding);
     }
-    if (lengthHeader == Headers.contentLengthHeader && compressed) {
-      total = -1;
-    } else {
-      total = int.parse(response.headers.value(lengthHeader) ?? '-1');
-    }
+    total = lengthHeader == Headers.contentLengthHeader && compressed
+        ? -1
+        : int.parse(response.headers.value(lengthHeader) ?? '-1');
 
     // Stream<Uint8List>
     final stream = transformStream(response.data!.stream, total);

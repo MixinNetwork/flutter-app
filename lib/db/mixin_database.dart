@@ -98,7 +98,7 @@ part 'mixin_database.g.dart';
   queries: {},
 )
 class MixinDatabase extends _$MixinDatabase {
-  MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
+  MixinDatabase.connect(super.c) : super.connect();
 
   @override
   int get schemaVersion => 15;

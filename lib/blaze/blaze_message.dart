@@ -5,8 +5,8 @@ import 'package:uuid/uuid.dart';
 import '../constants/constants.dart';
 import '../crypto/signal/signal_key_request.dart';
 import '../enum/message_category.dart';
+import 'blaze_message_param.dart';
 import 'blaze_message_param_session.dart';
-import 'blaze_param.dart';
 
 part 'blaze_message.g.dart';
 

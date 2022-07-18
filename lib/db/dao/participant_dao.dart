@@ -9,7 +9,7 @@ part 'participant_dao.g.dart';
 @DriftAccessor(tables: [Participants])
 class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantDaoMixin {
-  ParticipantDao(MixinDatabase db) : super(db);
+  ParticipantDao(super.db);
 
   Future<int> insert(Participant participant) =>
       into(db.participants).insertOnConflictUpdate(participant);

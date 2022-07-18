@@ -6,7 +6,7 @@ import '../crypto/signal/signal_key_request.dart';
 import 'blaze_message_param_session.dart';
 import 'blaze_signal_key_message.dart';
 
-part 'blaze_param.g.dart';
+part 'blaze_message_param.g.dart';
 
 @JsonSerializable()
 class BlazeMessageParam {

@@ -40,9 +40,7 @@ import 'chat_page.dart';
 import 'files_preview.dart';
 
 class InputContainer extends HookWidget {
-  const InputContainer({
-    Key? key,
-  }) : super(key: key);
+  const InputContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -83,9 +81,7 @@ class InputContainer extends HookWidget {
 }
 
 class _InputContainer extends HookWidget {
-  const _InputContainer({
-    Key? key,
-  }) : super(key: key);
+  const _InputContainer();
 
   @override
   Widget build(BuildContext context) {
@@ -111,18 +107,12 @@ class _InputContainer extends HookWidget {
       () {
         final draft =
             context.read<ConversationCubit>().state?.conversation?.draft;
-        final textEditingController = HighlightTextEditingController(
-          initialText: draft,
-          highlightTextStyle: TextStyle(
-            color: context.theme.accent,
-          ),
-          mentionCache: context.read<MentionCache>(),
-        )..selection = TextSelection.fromPosition(
-            TextPosition(
-              offset: draft?.length ?? 0,
-            ),
-          );
-        return textEditingController;
+        return HighlightTextEditingController(
+            initialText: draft,
+            highlightTextStyle: TextStyle(color: context.theme.accent),
+            mentionCache: context.read<MentionCache>())
+          ..selection = TextSelection.fromPosition(
+              TextPosition(offset: draft?.length ?? 0));
       },
       [conversationId],
     );
@@ -502,7 +492,7 @@ class _QuoteMessage extends StatelessWidget {
 }
 
 class _ImagePickButton extends StatelessWidget {
-  const _ImagePickButton({Key? key}) : super(key: key);
+  const _ImagePickButton();
 
   @override
   Widget build(BuildContext context) {
@@ -530,9 +520,8 @@ class _ImagePickButton extends StatelessWidget {
 
 class _FileButton extends StatelessWidget {
   const _FileButton({
-    Key? key,
     required this.actionColor,
-  }) : super(key: key);
+  });
 
   final Color actionColor;
 
@@ -549,13 +538,11 @@ class _FileButton extends StatelessWidget {
 }
 
 class _StickerButton extends HookWidget {
-  const _StickerButton({
-    Key? key,
-  }) : super(key: key);
+  const _StickerButton();
 
   @override
   Widget build(BuildContext context) {
-    final key = useMemoized(() => GlobalKey());
+    final key = useMemoized(GlobalKey.new);
 
     final stickerAlbumsCubit = useBloc(
       () => StickerAlbumsCubit(context.database.stickerAlbumDao

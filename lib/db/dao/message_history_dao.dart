@@ -7,7 +7,7 @@ part 'message_history_dao.g.dart';
 @DriftAccessor(tables: [MessagesHistory])
 class MessageHistoryDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageHistoryDaoMixin {
-  MessageHistoryDao(MixinDatabase db) : super(db);
+  MessageHistoryDao(super.db);
 
   Future<int> insert(MessagesHistoryData messagesHistory) =>
       into(db.messagesHistory).insertOnConflictUpdate(messagesHistory);

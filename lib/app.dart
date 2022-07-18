@@ -41,7 +41,7 @@ import 'widgets/window/window_shortcuts.dart';
 final rootRouteObserver = RouteObserver<ModalRoute>();
 
 class App extends StatelessWidget {
-  const App({Key? key}) : super(key: key);
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -121,10 +121,9 @@ class App extends StatelessWidget {
 
 class _Providers extends StatelessWidget {
   const _Providers({
-    Key? key,
     required this.app,
     required this.accountServer,
-  }) : super(key: key);
+  });
 
   final Widget app;
   final AccountServer accountServer;
@@ -186,9 +185,7 @@ class _Providers extends StatelessWidget {
 }
 
 class _App extends StatelessWidget {
-  const _App({
-    Key? key,
-  }) : super(key: key);
+  const _App();
 
   @override
   Widget build(BuildContext context) => WindowShortcuts(
@@ -236,9 +233,7 @@ class _App extends StatelessWidget {
 }
 
 class _Home extends HookWidget {
-  const _Home({
-    Key? key,
-  }) : super(key: key);
+  const _Home();
 
   @override
   Widget build(BuildContext context) {
