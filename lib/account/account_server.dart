@@ -124,7 +124,12 @@ class AccountServer {
           int.tryParse(e.response?.headers.value('x-server-time') ?? '');
       if (serverTime != null) {
         final time = DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
-        final difference = time.difference(DateTime.now());
+        final deviceTime =
+            e.requestOptions.extra[kRequestTimeStampKey] as DateTime?;
+        final difference = time.difference(deviceTime ?? DateTime.now());
+
+        i('deviceTime: $deviceTime, now: ${DateTime.now()}');
+
         if (difference.inMinutes.abs() > 5) {
           _notifyBlazeWaitSyncTime();
           return;

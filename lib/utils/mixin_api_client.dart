@@ -9,7 +9,7 @@ import 'logger.dart';
 
 final tenSecond = const Duration(seconds: 10).inMilliseconds;
 
-const _keyRequestTimeStamp = 'requestTimeStamp';
+const kRequestTimeStampKey = 'requestTimeStamp';
 
 Client createClient({
   required String userId,
@@ -33,12 +33,12 @@ Client createClient({
         ...interceptors,
         InterceptorsWrapper(
           onRequest: (options, handler) {
-            options.extra[_keyRequestTimeStamp] = DateTime.now();
+            options.extra[kRequestTimeStampKey] = DateTime.now();
             handler.next(options);
           },
           onError: (e, handler) {
             final requestTimeStamp =
-                e.requestOptions.extra[_keyRequestTimeStamp] as DateTime?;
+                e.requestOptions.extra[kRequestTimeStampKey] as DateTime?;
             DateTime? serverTimeStamp;
 
             final serverTime =
