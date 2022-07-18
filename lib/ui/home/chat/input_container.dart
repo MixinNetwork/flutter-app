@@ -232,7 +232,9 @@ class _InputContainer extends HookWidget {
                       _FileButton(actionColor: context.theme.icon),
                       const _ImagePickButton(),
                       const SizedBox(width: 6),
-                      const _StickerButton(),
+                      _StickerButton(
+                        textEditingController: textEditingController,
+                      ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _SendTextField(
@@ -551,7 +553,10 @@ class _FileButton extends StatelessWidget {
 class _StickerButton extends HookWidget {
   const _StickerButton({
     Key? key,
+    required this.textEditingController,
   }) : super(key: key);
+
+  final TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
@@ -566,7 +571,7 @@ class _StickerButton extends HookWidget {
     final tabLength =
         useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
       bloc: stickerAlbumsCubit,
-      converter: (state) => (state.length) + 3,
+      converter: (state) => (state.length) + 4,
     );
 
     return BlocProvider.value(
@@ -604,12 +609,15 @@ class _StickerButton extends HookWidget {
               ),
             );
           },
-          portal: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Builder(
-              builder: (context) => StickerPage(
-                tabController: DefaultTabController.of(context),
-                tabLength: tabLength,
+          portal: ChangeNotifierProvider<TextEditingController>.value(
+            value: textEditingController,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Builder(
+                builder: (context) => StickerPage(
+                  tabController: DefaultTabController.of(context)!,
+                  tabLength: tabLength,
+                ),
               ),
             ),
           ),

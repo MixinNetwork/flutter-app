@@ -10,11 +10,13 @@ import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../automatic_keep_alive_client_widget.dart';
 import '../cache_image.dart';
 import '../hover_overlay.dart';
 import '../interactive_decorated_box.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
 import 'bloc/cubit/sticker_cubit.dart';
+import 'emoji_page.dart';
 import 'sticker_item.dart';
 import 'sticker_store.dart';
 
@@ -22,10 +24,10 @@ class StickerPage extends StatelessWidget {
   const StickerPage({
     required this.tabLength,
     Key? key,
-    this.tabController,
+    required this.tabController,
   }) : super(key: key);
 
-  final TabController? tabController;
+  final TabController tabController;
   final int tabLength;
 
   @override
@@ -54,7 +56,12 @@ class StickerPage extends StatelessWidget {
                       tabLength,
                       (index) {
                         if (index == 0) return _StickerStoreEmptyPage();
-                        return _StickerAlbumPage(index: index);
+                        if (index == 1) {
+                          return const AutomaticKeepAliveClientWidget(
+                            child: EmojiPage(),
+                          );
+                        }
+                        return _StickerAlbumPage(index: index - 1);
                       },
                     ),
                   ),
@@ -211,35 +218,33 @@ class _StickerAlbumBar extends HookWidget {
   const _StickerAlbumBar({
     Key? key,
     required this.tabLength,
-    this.tabController,
+    required this.tabController,
   }) : super(key: key);
 
   final int tabLength;
-  final TabController? tabController;
+  final TabController tabController;
 
   @override
   Widget build(BuildContext context) {
-    final validIndexRef = useRef<int?>(tabController?.index);
+    final validIndexRef = useRef<int?>(tabController.index);
 
     final setPreviousIndex = useCallback(() {
-      if (tabController == null) return;
-      final previousIndex = tabController!.previousIndex;
+      final previousIndex = tabController.previousIndex;
       if (previousIndex != 0) {
         validIndexRef.value = previousIndex;
       }
 
       if (validIndexRef.value != 0) {
         // Sometimes tabController.index is validIndex, but TabBar.currentIndex is 0, they are not synchronized, so we need reset tabController.index to 0, then set to validIndex.
-        tabController!.index = 0;
-        tabController!.index = validIndexRef.value!;
+        tabController
+          ..index = 0
+          ..index = validIndexRef.value!;
       }
     }, []);
 
     useEffect(() {
-      if (tabController == null) return () {};
       Future<void> listener() async {
-        if (tabController == null) return;
-        if (tabController!.index != 0) return;
+        if (tabController.index != 0) return;
 
         HoverOverlay.forceHidden(context);
         AccountKeyValue.instance.hasNewAlbum = false;
@@ -250,9 +255,9 @@ class _StickerAlbumBar extends HookWidget {
         setPreviousIndex();
       }
 
-      tabController!.addListener(listener);
+      tabController.addListener(listener);
       return () {
-        tabController!.removeListener(listener);
+        tabController.removeListener(listener);
       };
     }, [tabController]);
     return Container(
@@ -298,17 +303,19 @@ class _StickerAlbumBarItem extends StatelessWidget {
           child: Center(
             child: Builder(
               builder: (context) {
-                if (index < 3) {
+                final presetStickerAlbum = [
+                  if (AccountKeyValue.instance.hasNewAlbum)
+                    Resources.assetsImagesStickerStoreRedDotSvg
+                  else
+                    Resources.assetsImagesStickerStoreSvg,
+                  Resources.assetsImagesEmojiStickerSvg,
+                  Resources.assetsImagesRecentStickerSvg,
+                  Resources.assetsImagesPersonalStickerSvg,
+                ];
+
+                if (index < presetStickerAlbum.length) {
                   return SvgPicture.asset(
-                    {
-                      0: AccountKeyValue.instance.hasNewAlbum
-                          ? Resources.assetsImagesStickerStoreRedDotSvg
-                          : Resources.assetsImagesStickerStoreSvg,
-                      1: Resources.assetsImagesRecentStickerSvg,
-                      2: Resources.assetsImagesPersonalStickerSvg,
-                      // todo
-                      // 2: Resources.assetsImagesGifStickerSvg
-                    }[index]!,
+                    presetStickerAlbum[index],
                     color: index != 0 ? context.theme.secondaryText : null,
                     width: 24,
                     height: 24,
@@ -317,7 +324,8 @@ class _StickerAlbumBarItem extends StatelessWidget {
 
                 return BlocConverter<StickerAlbumsCubit, List<StickerAlbum>,
                     String>(
-                  converter: (state) => state[index - 3].iconUrl,
+                  converter: (state) =>
+                      state[index - presetStickerAlbum.length].iconUrl,
                   builder: (context, iconUrl) => CacheImage(
                     iconUrl,
                     width: 28,

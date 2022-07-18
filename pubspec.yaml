@@ -32,6 +32,7 @@ dependencies:
   dio: ^4.0.0
   drift: ^1.7.0
   ecache: ^2.0.1
+  emojis: ^0.9.9
   equatable: ^2.0.3
   extended_image: ^6.2.1
   file_picker: ^4.0.0
