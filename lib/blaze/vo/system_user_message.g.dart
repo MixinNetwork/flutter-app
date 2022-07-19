@@ -14,7 +14,7 @@ SystemUserMessage _$SystemUserMessageFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$SystemUserMessageToJson(SystemUserMessage instance) =>
     <String, dynamic>{
-      'action': _$SystemUserActionEnumMap[instance.action],
+      'action': _$SystemUserActionEnumMap[instance.action]!,
       'user_id': instance.userId,
     };
 
