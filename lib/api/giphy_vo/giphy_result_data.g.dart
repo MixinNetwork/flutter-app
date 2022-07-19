@@ -9,7 +9,7 @@ part of 'giphy_result_data.dart';
 GiphyResultData _$GiphyResultDataFromJson(Map<String, dynamic> json) =>
     GiphyResultData(
       (json['data'] as List<dynamic>)
-          .map((e) => GiphyImage.fromJson(e as Map<String, dynamic>))
+          .map((e) => GiphyGif.fromJson(e as Map<String, dynamic>))
           .toList(),
       Meta.fromJson(json['meta'] as Map<String, dynamic>),
       Pagination.fromJson(json['pagination'] as Map<String, dynamic>),

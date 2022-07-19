@@ -1,16 +1,18 @@
 import 'package:dio/dio.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import 'giphy_vo/giphy_result_data.dart';
 
 const _giphyUrl = 'https://api.giphy.com/v1/';
-const _giphyApiKey = 'n4E08oEoAWFCipgPMbERwXs4sAMEGaSc';
+const _giphyApiKey = '';
 
 class GiphyApi {
   GiphyApi(this.dio);
 
-  static GiphyApi instance = GiphyApi(Dio(BaseOptions(
-    baseUrl: _giphyUrl,
-  )));
+  static GiphyApi instance = GiphyApi(
+    Dio(BaseOptions(baseUrl: _giphyUrl))
+      ..interceptors.add(MixinLogInterceptor(HttpLogLevel.all)),
+  );
 
   final Dio dio;
 

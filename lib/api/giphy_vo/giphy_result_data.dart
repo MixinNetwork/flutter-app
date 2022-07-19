@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import 'giphy_image.dart';
+import 'giphy_gif.dart';
 
 part 'giphy_result_data.g.dart';
 
@@ -12,7 +12,7 @@ class GiphyResultData {
       _$GiphyResultDataFromJson(json);
 
   @JsonKey(name: 'data')
-  final List<GiphyImage> data;
+  final List<GiphyGif> data;
   final Meta meta;
   final Pagination pagination;
 
@@ -38,7 +38,8 @@ class Meta {
 class Pagination {
   Pagination(this.totalCount, this.count, this.offset);
 
-  factory Pagination.fromJson(Map<String, dynamic> json) => _$PaginationFromJson(json);
+  factory Pagination.fromJson(Map<String, dynamic> json) =>
+      _$PaginationFromJson(json);
 
   @JsonKey(name: 'total_count')
   final int totalCount;
