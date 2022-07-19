@@ -476,7 +476,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
             (position.hasContentDimensions &&
                 position.pixels == position.maxScrollExtent);
       } else {
-        if (currentUserSent) {
+        if (currentUserSent && item.status == MessageStatus.sending) {
           add(_MessageInitEvent());
           return null;
         }
