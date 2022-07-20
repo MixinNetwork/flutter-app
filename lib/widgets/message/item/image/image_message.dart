@@ -68,8 +68,24 @@ class MessageImage extends HookWidget {
     final thumbImage =
         useMessageConverter(converter: (state) => state.thumbImage ?? '');
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
+    final mediaMimeType =
+        useMessageConverter(converter: (state) => state.mediaMimeType);
+    final mediaSize =
+        useMessageConverter(converter: (state) => state.mediaSize);
 
     final playing = useImagePlaying(context);
+
+    final Widget thumbWidget;
+    if (mediaMimeType == 'image/gif' && (mediaSize == null || mediaSize == 0)) {
+      // un-downloaded giphy gif image.
+      thumbWidget = CacheImage(
+        thumbImage,
+        controller: playing,
+        placeholder: () => ColoredBox(color: context.theme.secondaryText),
+      );
+    } else {
+      thumbWidget = ImageByBlurHashOrBase64(imageData: thumbImage);
+    }
 
     return InteractiveDecoratedBox(
       onTap: () {
@@ -113,8 +129,7 @@ class MessageImage extends HookWidget {
                 controller: playing,
               ),
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) =>
-                  ImageByBlurHashOrBase64(imageData: thumbImage),
+              errorBuilder: (_, __, ___) => thumbWidget,
             ),
             Center(
               child: HookBuilder(

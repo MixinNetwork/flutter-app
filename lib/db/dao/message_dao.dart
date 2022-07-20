@@ -1165,4 +1165,15 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   void notifyMessageInsertOrReplaced(Iterable<String> messageIds) =>
       db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+
+  Future<void> updateGiphyMessage(String messageId, String mediaUrl,
+      int mediaSize, String? thumbImage) =>
+      (db.update(db.messages)
+        ..where((tbl) => tbl.messageId.equals(messageId)))
+          .write(MessagesCompanion(
+        mediaUrl: Value(mediaUrl),
+        mediaSize: Value(mediaSize),
+        thumbImage: Value(thumbImage),
+      ));
+
 }

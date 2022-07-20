@@ -1,18 +1,14 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:drift/drift.dart';
-import 'package:extended_image/extended_image.dart';
-import 'package:flutter/painting.dart';
-import 'package:image/image.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
+import '../api/giphy_vo/giphy_image.dart';
 import '../blaze/vo/pin_message_minimal.dart';
 import '../blaze/vo/pin_message_payload.dart';
 import '../blaze/vo/recall_message.dart';
@@ -35,9 +31,8 @@ import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
+import '../widgets/cache_image.dart';
 import 'show_pin_message_key_value.dart';
-
-const _kEnableImageBlurHashThumb = true;
 
 class SendMessageHelper {
   SendMessageHelper(
@@ -170,22 +165,7 @@ class SendMessageHelper {
     );
     await _insertSendMessageToDb(message);
 
-    String? thumbImage;
-    final stopwatch = Stopwatch()..start();
-
-    final image = await _getSmallImage(attachment.path);
-
-    stopwatch.stop();
-    d('_getSmallImage duration: ${stopwatch.elapsedMilliseconds}');
-    stopwatch.start();
-
-    thumbImage = await runLoadBalancer(
-      _getImageThumbnailString,
-      image,
-    );
-    stopwatch.stop();
-    d('thumbImage: $thumbImage');
-    d('_getImageThumbnailString duration: ${stopwatch.elapsedMilliseconds}, _kEnableImageBlurHashThumb: $_kEnableImageBlurHashThumb');
+    final thumbImage = await attachment.encodeBlurHash();
 
     if (await _attachmentUtil.isNotPending(messageId)) return;
 
@@ -1113,17 +1093,91 @@ class SendMessageHelper {
       ),
     );
   }
+
+  Future<void> sendGiphyGifMessage(
+    String conversationId,
+    String senderId,
+    String category,
+    GiphyImage sendImage,
+    String previewUrl,
+  ) async {
+    const gifMineType = 'image/gif';
+
+    final messageId = const Uuid().v4();
+    final message = Message(
+      messageId: messageId,
+      conversationId: conversationId,
+      userId: senderId,
+      content: '',
+      category: category,
+      mediaUrl: sendImage.url,
+      mediaMimeType: gifMineType,
+      mediaSize: 0,
+      mediaWidth: int.tryParse(sendImage.width),
+      mediaHeight: int.tryParse(sendImage.height),
+      mediaStatus: MediaStatus.pending,
+      status: MessageStatus.sending,
+      createdAt: DateTime.now(),
+      thumbImage: previewUrl,
+    );
+    await _insertSendMessageToDb(message);
+
+
+    Uint8List? sendImageBytes;
+    try {
+      sendImageBytes = await downloadImage(sendImage.url);
+    } catch (error, stacktrace) {
+      e('failed to download image: $error $stacktrace');
+    }
+    if (sendImageBytes == null) {
+      e('failed to get send image bytes. ${sendImage.url}');
+      return;
+    }
+
+    var attachment = _attachmentUtil.getAttachmentFile(
+      category,
+      conversationId,
+      messageId,
+      null,
+      mimeType: gifMineType,
+    );
+    attachment = await attachment.create(recursive: true);
+    await attachment.writeAsBytes(sendImageBytes);
+    final thumbImage = await attachment.encodeBlurHash();
+    final mediaSize = await attachment.length();
+    await _messageDao.updateGiphyMessage(
+      messageId,
+      attachment.pathBasename,
+      mediaSize,
+      thumbImage,
+    );
+
+    if (await _attachmentUtil.isNotPending(messageId)) return;
+
+    final attachmentResult = await _attachmentUtil.uploadAttachment(
+      attachment,
+      messageId,
+      category,
+    );
+    if (attachmentResult == null) return;
+    final attachmentMessage = AttachmentMessage(
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      gifMineType,
+      mediaSize,
+      null,
+      int.tryParse(sendImage.width),
+      int.tryParse(sendImage.height),
+      thumbImage,
+      null,
+      null,
+      null,
+      attachmentResult.createdAt,
+    );
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
+    await _messageDao.updateAttachmentMessageContentAndStatus(
+        messageId, encoded);
+    await _jobDao.insertSendingJob(messageId, conversationId);
+  }
 }
-
-Future<Image> _getSmallImage(String path) async {
-  final fileImage = FileImage(File(path));
-  final imageProvider = ExtendedResizeImage(fileImage, maxBytes: 128 << 10);
-  final image = await imageProvider.toImage();
-
-  return Image.fromBytes(image.width, image.height, (await image.toBytes())!);
-}
-
-Future<String?> _getImageThumbnailString(Image image) async =>
-    _kEnableImageBlurHashThumb
-        ? BlurHash.encode(image).hash
-        : base64Encode(encodeJpg(image, quality: 50));

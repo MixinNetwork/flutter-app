@@ -179,9 +179,6 @@ class _GifItem extends HookWidget {
         final accountServer = context.accountServer;
         final conversationItem = context.read<ConversationCubit>().state;
         if (conversationItem == null) return;
-
-        d('_GifItem: send image: $sendImage');
-
         await accountServer.sendGiphyGifMessage(
           conversationItem.encryptCategory,
           sendImage,

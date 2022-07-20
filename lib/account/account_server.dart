@@ -6,7 +6,6 @@ import 'dart:isolate';
 import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
-import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -43,7 +42,6 @@ import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/system/package_info.dart';
 import '../utils/web_view/web_view_interface.dart';
-import '../widgets/cache_image.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../workers/injector.dart';
 import '../workers/isolate_event.dart';
@@ -362,11 +360,15 @@ class AccountServer {
     String previewUrl, {
     String? conversationId,
     String? recipientId,
-  }) async {
-    final imageStream = MixinExtendedNetworkImageProvider(sendImage.url)
-        .resolve(ImageConfiguration.empty);
-    // XFile( mimeType: 'image/gif');
-  }
+  }) async =>
+      _sendMessageHelper.sendGiphyGifMessage(
+        await _initConversation(conversationId, recipientId),
+        userId,
+        encryptCategory.toCategory(MessageCategory.plainImage,
+            MessageCategory.signalImage, MessageCategory.encryptedImage),
+        sendImage,
+        previewUrl,
+      );
 
   Future<void> sendImageMessage(
     EncryptCategory encryptCategory, {

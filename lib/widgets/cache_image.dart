@@ -675,27 +675,7 @@ class MixinExtendedNetworkImageProvider
 
 /// download image from network to cache. return the cache image file.
 /// [url] is the image url.
-Future<File> downloadImage(String url) async {
-  final cacheImagesDirectory = Directory(
-      join((await getTemporaryDirectory()).path, cacheImageFolderName));
-
-  final cacheId = keyToMd5(url);
-
-  if (cacheImagesDirectory.existsSync()) {
-    final cacheFile = File(join(cacheImagesDirectory.path, cacheId));
-    if (cacheFile.existsSync()) {
-      return cacheFile;
-    }
-  } else {
-    await cacheImagesDirectory.create();
-  }
-
-  // load from network
-  try {
-    final resolved = Uri.base.resolve(url);
-    // TODO
-  } catch (error, stacktrace) {
-    e('Failed to load image. $error $stacktrace');
-  } finally {}
-  throw Exception('Failed to download image.');
+Future<Uint8List?> downloadImage(String url) async {
+  final imageProvider = MixinExtendedNetworkImageProvider(url);
+  return imageProvider._loadCache(imageProvider, null, keyToMd5(url));
 }
