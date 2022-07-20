@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:markdown/markdown.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/extension/extension.dart';
-import '../../../utils/uri_utils.dart';
 import '../../app_bar.dart';
 import '../../buttons.dart';
 import '../../interactive_decorated_box.dart';
+import '../../markdown.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -52,6 +50,7 @@ class MessagePost extends StatelessWidget {
               ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: showStatus ? 48 : 0,
+                  maxHeight: 256,
                   minWidth: 128,
                 ),
                 child: HookBuilder(builder: (context) {
@@ -60,17 +59,10 @@ class MessagePost extends StatelessWidget {
                   final postContent =
                       useMemoized(content.postOptimize, [content]);
 
-                  return MarkdownBody(
+                  return Markdown(
                     data: postContent,
-                    extensionSet: ExtensionSet.gitHubWeb,
-                    styleSheet: context.markdownStyleSheet,
-                    softLineBreak: true,
-                    imageBuilder: (_, __, ___) => const SizedBox(),
-                    onTapLink: (String text, String? href, String title) {
-                      if (href?.isEmpty ?? true) return;
-
-                      openUri(context, href!);
-                    },
+                    physics: const NeverScrollableScrollPhysics(),
+                    darkMode: context.brightnessValue != 0,
                   );
                 }),
               ),
@@ -156,12 +148,9 @@ class PostPreview extends StatelessWidget {
             Expanded(
               child: Markdown(
                 data: message.content ?? '',
-                extensionSet: ExtensionSet.gitHubWeb,
-                styleSheet: context.markdownStyleSheet,
-                selectable: true,
-                softLineBreak: true,
-                onTapLink: (String text, String? href, String title) =>
-                    openUri(context, href!),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+                darkMode: context.brightnessValue != 0,
               ),
             ),
           ],
