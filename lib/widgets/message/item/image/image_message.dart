@@ -68,17 +68,13 @@ class MessageImage extends HookWidget {
     final thumbImage =
         useMessageConverter(converter: (state) => state.thumbImage ?? '');
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
-    final mediaMimeType =
-        useMessageConverter(converter: (state) => state.mediaMimeType);
-    final mediaSize =
-        useMessageConverter(converter: (state) => state.mediaSize);
 
     final playing = useImagePlaying(context);
 
     final isUnDownloadGiphyGif = useMessageConverter(
       converter: (message) =>
           message.mediaMimeType == 'image/gif' &&
-          (mediaSize == null || mediaSize == 0),
+          (message.mediaSize == null || message.mediaSize == 0),
     );
 
     final Widget thumbWidget;
