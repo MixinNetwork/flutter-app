@@ -19,10 +19,13 @@ class GiphyImage with EquatableMixin {
   factory GiphyImage.fromJson(Map<String, dynamic> json) =>
       _$GiphyImageFromJson(json);
 
+  @JsonKey(name: 'url', defaultValue: '')
   final String url;
+  @JsonKey(name: 'width', defaultValue: '0')
   final String width;
+  @JsonKey(name: 'height', defaultValue: '0')
   final String height;
-  final String size;
+  final String? size;
   final String? mp4;
 
   @JsonKey(name: 'mp4_size')

@@ -11,7 +11,7 @@ class GiphyApi {
 
   static GiphyApi instance = GiphyApi(
     Dio(BaseOptions(baseUrl: _giphyUrl))
-      ..interceptors.add(MixinLogInterceptor(HttpLogLevel.all)),
+      ..interceptors.add(MixinLogInterceptor(HttpLogLevel.none)),
   );
 
   final Dio dio;

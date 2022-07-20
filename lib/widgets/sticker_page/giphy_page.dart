@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../api/giphy_api.dart';
 import '../../api/giphy_vo/giphy_gif.dart';
@@ -20,6 +23,26 @@ class GiphyPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final textEditingController = useTextEditingController();
+
+    final searchKeywordController = useStreamController<String>();
+
+    useEffect(() {
+      void onTextChanged() {
+        searchKeywordController.add(textEditingController.text.trim());
+      }
+
+      textEditingController.addListener(onTextChanged);
+      return () {
+        textEditingController.removeListener(onTextChanged);
+      };
+    }, [textEditingController]);
+
+    final keyword = useMemoizedStream(
+      () => searchKeywordController.stream.debounceTime(
+        const Duration(seconds: 1),
+      ),
+    ).data;
+
     return Column(
       children: [
         _SearchBar(controller: textEditingController),
@@ -28,7 +51,7 @@ class GiphyPage extends HookWidget {
           height: 1,
         ),
         const SizedBox(height: 12),
-        const Expanded(child: _GiphyGifsLoader())
+        Expanded(child: _GiphyGifsLoader(query: keyword ?? ''))
       ],
     );
   }
@@ -60,6 +83,7 @@ class _GiphyGifsLoader extends HookWidget {
   @override
   Widget build(BuildContext context) => _GifGridView(
         loadGifs: (limit, offset) {
+          d('loadGifs($query): $limit, $offset');
           if (query == null || query!.isEmpty) {
             return GiphyApi.instance
                 .trendingGifs(limit, offset)
