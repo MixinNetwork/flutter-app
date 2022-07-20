@@ -563,7 +563,7 @@ class _StickerButton extends HookWidget {
         if (!Platform.isLinux) PresetStickerGroup.emoji,
         PresetStickerGroup.recent,
         PresetStickerGroup.favorite,
-        PresetStickerGroup.gif,
+        if (giphyApiKey.isNotEmpty) PresetStickerGroup.gif,
       ],
     );
 

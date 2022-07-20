@@ -185,6 +185,7 @@ class _GifItem extends HookWidget {
         await accountServer.sendGiphyGifMessage(
           conversationItem.encryptCategory,
           sendImage,
+          previewImage.url,
           conversationId: conversationItem.conversationId,
           recipientId: conversationItem.user?.userId,
         );

@@ -358,7 +358,8 @@ class AccountServer {
 
   Future<void> sendGiphyGifMessage(
     EncryptCategory encryptCategory,
-    GiphyImage sendImage, {
+    GiphyImage sendImage,
+    String previewUrl, {
     String? conversationId,
     String? recipientId,
   }) async {

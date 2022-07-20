@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import '../constants/constants.dart';
 import 'giphy_vo/giphy_result_data.dart';
 
 const _giphyUrl = 'https://api.giphy.com/v1/';
-const _giphyApiKey = '';
 
 class GiphyApi {
   GiphyApi(this.dio);
@@ -22,7 +22,7 @@ class GiphyApi {
       queryParameters: {
         'limit': limit,
         'offset': offset,
-        'api_key': _giphyApiKey,
+        'api_key': giphyApiKey,
       },
     );
     return GiphyResultData.fromJson(response.data!);
@@ -35,7 +35,7 @@ class GiphyApi {
         'q': query,
         'limit': limit,
         'offset': offset,
-        'api_key': _giphyApiKey,
+        'api_key': giphyApiKey,
       },
     );
     return GiphyResultData.fromJson(response.data!);
