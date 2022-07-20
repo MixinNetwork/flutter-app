@@ -11,7 +11,6 @@ import 'package:decimal/intl.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' hide Table;
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 import 'package:markdown/markdown.dart';
 import 'package:mime/mime.dart';
