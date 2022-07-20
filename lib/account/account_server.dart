@@ -779,6 +779,15 @@ class AccountServer {
   Future<void> downloadAttachment(String messageId) async =>
       attachmentUtil.downloadAttachment(messageId: messageId);
 
+  Future<void> reUploadGiphyGif(db.MessageItem message) {
+    assert(
+        message.type.isImage &&
+            message.mediaMimeType == 'image/gif' &&
+            (message.mediaSize == null || message.mediaSize == 0),
+        'Invalid message');
+    return _sendMessageHelper.reUploadGiphyGif(message);
+  }
+
   Future<void> reUploadAttachment(db.MessageItem message) =>
       _sendMessageHelper.reUploadAttachment(
         message.conversationId,

@@ -1122,7 +1122,6 @@ class SendMessageHelper {
     );
     await _insertSendMessageToDb(message);
 
-
     Uint8List? sendImageBytes;
     try {
       sendImageBytes = await downloadImage(sendImage.url);
@@ -1131,6 +1130,8 @@ class SendMessageHelper {
     }
     if (sendImageBytes == null) {
       e('failed to get send image bytes. ${sendImage.url}');
+      await _messageDao.updateMediaStatus(
+          message.messageId, MediaStatus.canceled);
       return;
     }
 
@@ -1179,5 +1180,73 @@ class SendMessageHelper {
     await _messageDao.updateAttachmentMessageContentAndStatus(
         messageId, encoded);
     await _jobDao.insertSendingJob(messageId, conversationId);
+  }
+
+  Future<void> reUploadGiphyGif(MessageItem message) async {
+    await _messageDao.updateMediaStatus(message.messageId, MediaStatus.pending);
+    final attachment = _attachmentUtil.getAttachmentFile(
+      message.type,
+      message.conversationId,
+      message.messageId,
+      null,
+      mimeType: message.mediaMimeType,
+    );
+    if (!attachment.existsSync()) {
+      await attachment.create(recursive: true);
+    }
+
+    String? thumbImage;
+    var mediaSize = await attachment.length();
+
+    if (attachment.lengthSync() == 0) {
+      Uint8List? sendImageBytes;
+      try {
+        sendImageBytes = await downloadImage(message.mediaUrl!);
+      } catch (error, stacktrace) {
+        e('reUploadGiphyGif: failed to download image: $error $stacktrace');
+      }
+      if (sendImageBytes == null) {
+        e('reUploadGiphyGif: failed to get send image bytes. ${message.mediaUrl}');
+        await _messageDao.updateMediaStatus(
+            message.messageId, MediaStatus.canceled);
+        return;
+      }
+      await attachment.writeAsBytes(sendImageBytes);
+
+      thumbImage = await attachment.encodeBlurHash();
+      mediaSize = await attachment.length();
+
+      await _messageDao.updateGiphyMessage(
+        message.messageId,
+        attachment.pathBasename,
+        mediaSize,
+        thumbImage,
+      );
+    }
+    final attachmentResult = await _attachmentUtil.uploadAttachment(
+      attachment,
+      message.messageId,
+      message.type,
+    );
+    if (attachmentResult == null) return;
+    final attachmentMessage = AttachmentMessage(
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      message.mediaMimeType!,
+      mediaSize,
+      null,
+      message.mediaWidth,
+      message.mediaHeight,
+      thumbImage,
+      null,
+      null,
+      null,
+      attachmentResult.createdAt,
+    );
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
+    await _messageDao.updateAttachmentMessageContentAndStatus(
+        message.messageId, encoded);
+    await _jobDao.insertSendingJob(message.messageId, message.conversationId);
   }
 }
