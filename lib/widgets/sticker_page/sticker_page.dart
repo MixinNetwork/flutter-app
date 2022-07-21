@@ -64,6 +64,7 @@ class StickerPage extends StatelessWidget {
                 Expanded(
                   child: TabBarView(
                     controller: tabController,
+                    physics: const NeverScrollableScrollPhysics(),
                     children: List.generate(
                       tabLength,
                       (index) {
