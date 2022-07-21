@@ -42,7 +42,7 @@ import 'bloc/landing_cubit.dart';
 import 'landing.dart';
 
 class LoginWithMobileWidget extends HookWidget {
-  const LoginWithMobileWidget({Key? key}) : super(key: key);
+  const LoginWithMobileWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +88,8 @@ class LoginWithMobileWidget extends HookWidget {
 
 class _PhoneNumberInputScene extends HookWidget {
   const _PhoneNumberInputScene({
-    Key? key,
     required this.countries,
-  }) : super(key: key);
+  });
   final List<Country> countries;
 
   @override
@@ -150,11 +149,11 @@ class _PhoneNumberInputScene extends HookWidget {
           PortalTarget(
             visible: portalVisibility.value,
             portalFollower: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
               child: Material(
                 color: context.theme.chatBackground,
                 elevation: 2,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
                 child: SizedBox(
                   width: 360,
                   height: 400,
@@ -279,10 +278,9 @@ class _PhoneNumberInputScene extends HookWidget {
 
 class _CodeInputScene extends HookWidget {
   const _CodeInputScene({
-    Key? key,
     required this.phoneNumber,
     required this.initialVerificationResponse,
-  }) : super(key: key);
+  });
 
   final String phoneNumber;
   final VerificationResponse initialVerificationResponse;
@@ -452,9 +450,8 @@ class _CodeInputScene extends HookWidget {
 
 class _ResendCodeWidget extends HookWidget {
   const _ResendCodeWidget({
-    Key? key,
     required this.onResend,
-  }) : super(key: key);
+  });
 
   final Future<bool> Function() onResend;
 
@@ -473,47 +470,33 @@ class _ResendCodeWidget extends HookWidget {
       return timer.cancel;
     }, [nextDuration]);
 
-    if (nextDuration.value > 0) {
-      return Padding(
-        padding: const EdgeInsets.all(8),
-        child: Text(
-          context.l10n.resendCodeIn(nextDuration.value),
-          style: TextStyle(
-            fontSize: 14,
-            color: context.theme.secondaryText,
-          ),
-        ),
-      );
-    } else {
-      return InteractiveDecoratedBox(
-        onTap: () async {
-          if (await onResend()) {
-            nextDuration.value = 60;
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Text(
-            context.l10n.resendCode,
-            style: TextStyle(
-              fontSize: 14,
-              color: context.theme.accent,
-            ),
-          ),
-        ),
-      );
-    }
+    return nextDuration.value > 0
+        ? Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(context.l10n.resendCodeIn(nextDuration.value),
+                style: TextStyle(
+                    fontSize: 14, color: context.theme.secondaryText)))
+        : InteractiveDecoratedBox(
+            onTap: () async {
+              if (await onResend()) {
+                nextDuration.value = 60;
+              }
+            },
+            child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(context.l10n.resendCode,
+                    style:
+                        TextStyle(fontSize: 14, color: context.theme.accent))));
   }
 }
 
 class _MobileInput extends HookWidget {
   const _MobileInput({
-    Key? key,
     required this.controller,
     required this.country,
     required this.onCountryDiaClick,
     required this.countryPortalExpand,
-  }) : super(key: key);
+  });
 
   final TextEditingController controller;
   final Country country;
@@ -542,12 +525,12 @@ class _MobileInput extends HookWidget {
             fontSize: 16,
             color: context.theme.secondaryText,
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
             borderSide: BorderSide.none,
           ),
           prefixIcon: InkWell(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
             onTap: onCountryDiaClick,
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -609,7 +592,7 @@ Future<VerificationResponse> _requestVerificationCode({
       );
       if (result != null) {
         assert(result.length == 2, 'Invalid result length');
-        final type = result[0] as _CaptchaType;
+        final type = result.first as _CaptchaType;
         final token = result[1] as String;
         d('Captcha type: $type, token: $token');
         return _requestVerificationCode(
@@ -625,16 +608,17 @@ Future<VerificationResponse> _requestVerificationCode({
   }
 }
 
+// for compute
+// ignore: avoid-unused-parameters
 List<Country> _getCountries(dynamic any) =>
     CountryProvider.getCountriesData(countries: null);
 
 class _CountryPickPortal extends HookWidget {
   const _CountryPickPortal({
-    Key? key,
     required this.onSelected,
     required this.countries,
     required this.selected,
-  }) : super(key: key);
+  });
 
   final void Function(Country country) onSelected;
   final List<Country> countries;
@@ -726,9 +710,8 @@ class _CountryPickPortal extends HookWidget {
 
 class _CharIndexItem extends StatelessWidget {
   const _CharIndexItem({
-    Key? key,
     required this.char,
-  }) : super(key: key);
+  });
 
   final String char;
 
@@ -752,11 +735,10 @@ class _CharIndexItem extends StatelessWidget {
 
 class _CountryItem extends StatelessWidget {
   const _CountryItem({
-    Key? key,
     required this.country,
     required this.onTap,
     required this.isSelected,
-  }) : super(key: key);
+  });
 
   final Country country;
   final VoidCallback onTap;
@@ -792,7 +774,7 @@ class _CountryItem extends StatelessWidget {
 }
 
 class _CaptchaWebViewDialog extends HookWidget {
-  const _CaptchaWebViewDialog({Key? key}) : super(key: key);
+  const _CaptchaWebViewDialog();
 
   @override
   Widget build(BuildContext context) {

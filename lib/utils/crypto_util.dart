@@ -17,8 +17,7 @@ List<int> aesGcmEncrypt(List<int> key, List<int> plainText) {
       KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
   final gcmCipher = GCMBlockCipher(AESEngine())..init(true, params);
   final encrypted = gcmCipher.process(Uint8List.fromList(plainText));
-  final result = [...iv, ...encrypted];
-  return result;
+  return [...iv, ...encrypted];
 }
 
 Uint8List aesGcmDecrypt(List<int> key, List<int> iv, List<int> cipherText) {
@@ -75,12 +74,12 @@ List<int> calculateAgreement(List<int>? publicKey, List<int>? privateKey) {
 
 Uint8List toLeByteArray(int v) {
   final result = Uint8List(2);
-  result[0] = v;
   result[1] = v >> 8;
+  result.first = v;
   return result;
 }
 
-int leByteArrayToInt(List<int> array) => array[0] + array[1];
+int leByteArrayToInt(List<int> array) => array.first + array[1];
 
 final Random _random = Random.secure();
 

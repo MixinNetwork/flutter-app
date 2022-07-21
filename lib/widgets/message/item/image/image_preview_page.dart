@@ -26,11 +26,11 @@ import 'preview_image_widget.dart';
 
 class ImagePreviewPage extends HookWidget {
   const ImagePreviewPage({
-    Key? key,
+    super.key,
     required this.conversationId,
     required this.messageId,
     required this.isTranscriptPage,
-  }) : super(key: key);
+  });
 
   final String conversationId;
   final String messageId;
@@ -75,7 +75,7 @@ class ImagePreviewPage extends HookWidget {
     final next = useState<MessageItem?>(null);
 
     final controller = useMemoized(
-      () => TransformImageController(),
+      TransformImageController.new,
       [current.value?.messageId],
     );
 
@@ -111,12 +111,16 @@ class ImagePreviewPage extends HookWidget {
             await messageDao.messageRowId(_messageId.value).getSingleOrNull();
         if (rowId == null) return;
 
-        prev.value = await messageDao
-            .mediaMessagesBefore(rowId, conversationId, 1)
-            .getSingleOrNull();
-        next.value = await messageDao
-            .mediaMessagesAfter(rowId, conversationId, 1)
-            .getSingleOrNull();
+        await Future.wait([
+          messageDao
+              .mediaMessagesBefore(rowId, conversationId, 1)
+              .getSingleOrNull()
+              .then((value) => prev.value = value),
+          messageDao
+              .mediaMessagesAfter(rowId, conversationId, 1)
+              .getSingleOrNull()
+              .then((value) => next.value = value)
+        ]);
       }();
     }, [_messageId.value]);
 
@@ -313,11 +317,10 @@ class ImagePreviewPage extends HookWidget {
 
 class _Bar extends StatelessWidget {
   const _Bar({
-    Key? key,
     required this.message,
     required this.controller,
     required this.isTranscriptPage,
-  }) : super(key: key);
+  });
 
   final MessageItem message;
   final TransformImageController controller;
@@ -432,12 +435,11 @@ class _Bar extends StatelessWidget {
 
 class _Item extends HookWidget {
   const _Item({
-    Key? key,
     required this.message,
     required this.controller,
     required this.isTranscriptPage,
     required this.constraints,
-  }) : super(key: key);
+  });
   final MessageItem message;
   final bool isTranscriptPage;
   final TransformImageController controller;
@@ -468,7 +470,7 @@ class _Item extends HookWidget {
       onDoubleTap: () {
         controller.animatedToScale(initialScale);
       },
-      child: Container(
+      child: DecoratedBox(
         decoration: const BoxDecoration(
           color: Color.fromRGBO(62, 65, 72, 0.9),
         ),

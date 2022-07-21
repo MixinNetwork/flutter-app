@@ -48,12 +48,12 @@ Future<void> loadFallbackFonts() async {
       assert(fontConfig.length == 2,
           'font config do not match required format. $fontConfig');
       if (fontFamily == null) {
-        fontFamily = fontConfig[0];
+        fontFamily = fontConfig.first;
         fontPaths.add(fontConfig[1]);
-      } else if (fontFamily == fontConfig[0]) {
+      } else if (fontFamily == fontConfig.first) {
         fontPaths.add(fontConfig[1]);
       } else {
-        w('font family not match. expect $fontFamily, but ${fontConfig[0]}. line: $line');
+        w('font family not match. expect $fontFamily, but ${fontConfig.first}. line: $line');
       }
     }
     if (fontPaths.isEmpty || fontFamily == null) {

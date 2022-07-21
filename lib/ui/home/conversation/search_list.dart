@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../../bloc/bloc_converter.dart';
 import '../../../bloc/keyword_cubit.dart';
@@ -35,17 +36,33 @@ void _clear(BuildContext context) {
 }
 
 class SearchList extends HookWidget {
-  const SearchList({Key? key}) : super(key: key);
+  const SearchList({super.key});
 
   @override
   Widget build(BuildContext context) {
     final keyword = useMemoizedStream(
-          () => context.read<KeywordCubit>().stream.throttleTime(
-                const Duration(milliseconds: 150),
-                trailing: true,
-                leading: false,
-              ),
-          initialData: context.read<KeywordCubit>().state,
+          () {
+            final keywordCubit = context.read<KeywordCubit>();
+            return Stream.value(keywordCubit.state)
+                .merge(keywordCubit.stream)
+                .throttleTime(
+                  const Duration(milliseconds: 150),
+                  trailing: true,
+                  leading: false,
+                );
+          },
+          initialData: null,
+        ).data ??
+        '';
+
+    final messageKeyword = useMemoizedStream(
+          () {
+            final keywordCubit = context.read<KeywordCubit>();
+            return Stream.value(keywordCubit.state)
+                .merge(keywordCubit.stream)
+                .debounceTime(const Duration(milliseconds: 150));
+          },
+          initialData: null,
         ).data ??
         '';
 
@@ -72,15 +89,13 @@ class SearchList extends HookWidget {
         }, keys: [keyword]).data ??
         [];
 
-    final messages = useMemoizedStream(() {
-          if (keyword.trim().isEmpty) {
-            return Stream.value(<SearchMessageDetailItem>[]);
-          } else {
-            return accountServer.database.messageDao
-                .fuzzySearchMessage(query: keyword, limit: 4)
-                .watchThrottle(kSlowThrottleDuration);
-          }
-        }, keys: [keyword]).data ??
+    final messages = useMemoizedStream(
+            () => messageKeyword.trim().isEmpty
+                ? Stream.value(<SearchMessageDetailItem>[])
+                : accountServer.database.messageDao
+                    .fuzzySearchMessage(query: messageKeyword, limit: 4)
+                    .watchThrottle(kSlowThrottleDuration),
+            keys: [messageKeyword]).data ??
         [];
 
     final type = useState<_ShowMoreType?>(null);
@@ -104,11 +119,9 @@ class SearchList extends HookWidget {
               showMore: users.length > _defaultLimit,
               more: type.value != _ShowMoreType.contact,
               onTap: () {
-                if (type.value != _ShowMoreType.contact) {
-                  type.value = _ShowMoreType.contact;
-                } else {
-                  type.value = null;
-                }
+                type.value = type.value != _ShowMoreType.contact
+                    ? _ShowMoreType.contact
+                    : null;
               },
             ),
           ),
@@ -154,11 +167,9 @@ class SearchList extends HookWidget {
               showMore: conversations.length > _defaultLimit,
               more: type.value != _ShowMoreType.conversation,
               onTap: () {
-                if (type.value != _ShowMoreType.conversation) {
-                  type.value = _ShowMoreType.conversation;
-                } else {
-                  type.value = null;
-                }
+                type.value = type.value != _ShowMoreType.conversation
+                    ? _ShowMoreType.conversation
+                    : null;
               },
             ),
           ),
@@ -210,11 +221,9 @@ class SearchList extends HookWidget {
               showMore: messages.length > _defaultLimit,
               more: type.value != _ShowMoreType.message,
               onTap: () {
-                if (type.value != _ShowMoreType.message) {
-                  type.value = _ShowMoreType.message;
-                } else {
-                  type.value = null;
-                }
+                type.value = type.value != _ShowMoreType.message
+                    ? _ShowMoreType.message
+                    : null;
               },
             ),
           ),
@@ -243,7 +252,7 @@ class SearchList extends HookWidget {
 
 class SearchItem extends StatelessWidget {
   const SearchItem({
-    Key? key,
+    super.key,
     required this.avatar,
     required this.name,
     required this.keyword,
@@ -254,7 +263,7 @@ class SearchItem extends StatelessWidget {
     this.date,
     this.trailing,
     this.selected,
-  }) : super(key: key);
+  });
 
   final Widget avatar;
   final Widget? trailing;
@@ -270,7 +279,7 @@ class SearchItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedDecoration = BoxDecoration(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
       color: context.theme.listSelected,
     );
     return Padding(
@@ -387,10 +396,9 @@ class SearchItem extends StatelessWidget {
 
 class _SearchMessageList extends HookWidget {
   const _SearchMessageList({
-    Key? key,
     required this.keyword,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final String keyword;
   final VoidCallback onTap;
@@ -423,28 +431,22 @@ class _SearchMessageList extends HookWidget {
     final pageState = useBlocState<PagingBloc<SearchMessageDetailItem>,
         PagingState<SearchMessageDetailItem>>(bloc: searchMessageBloc);
 
-    late Widget child;
-    if (pageState.count <= 0) {
-      child = const SearchEmpty();
-    } else {
-      child = ScrollablePositionedList.builder(
-        itemPositionsListener: searchMessageBloc.itemPositionsListener,
-        itemCount: pageState.count,
-        itemBuilder: (context, index) {
-          final message = pageState.map[index];
-          if (message == null) {
-            return const SizedBox(
-              height: ConversationPage.conversationItemHeight,
-            );
-          }
-          return SearchMessageItem(
-            message: message,
-            keyword: keyword,
-            onTap: _searchMessageItemOnTap(context, message),
-          );
-        },
-      );
-    }
+    final child = pageState.count <= 0
+        ? const SearchEmpty()
+        : ScrollablePositionedList.builder(
+            itemPositionsListener: searchMessageBloc.itemPositionsListener,
+            itemCount: pageState.count,
+            itemBuilder: (context, index) {
+              final message = pageState.map[index];
+              if (message == null) {
+                return const SizedBox(
+                    height: ConversationPage.conversationItemHeight);
+              }
+              return SearchMessageItem(
+                  message: message,
+                  keyword: keyword,
+                  onTap: _searchMessageItemOnTap(context, message));
+            });
 
     return Column(
       children: [
@@ -462,12 +464,11 @@ class _SearchMessageList extends HookWidget {
 
 class _SearchHeader extends StatelessWidget {
   const _SearchHeader({
-    Key? key,
     required this.title,
     required this.showMore,
     required this.onTap,
     required this.more,
-  }) : super(key: key);
+  });
 
   final String title;
   final bool showMore;
@@ -521,6 +522,7 @@ Future Function() _searchMessageItemOnTap(
         context,
         message.conversationId,
         initIndexMessageId: message.messageId,
+        keyword: context.read<KeywordCubit>().state,
       );
 
       _clear(context);
@@ -528,12 +530,12 @@ Future Function() _searchMessageItemOnTap(
 
 class SearchMessageItem extends HookWidget {
   const SearchMessageItem({
-    Key? key,
+    super.key,
     required this.message,
     required this.keyword,
     required this.onTap,
     this.showSender = false,
-  }) : super(key: key);
+  });
 
   final SearchMessageDetailItem message;
   final bool showSender;
@@ -622,9 +624,7 @@ class SearchMessageItem extends HookWidget {
 }
 
 class SearchEmpty extends StatelessWidget {
-  const SearchEmpty({
-    Key? key,
-  }) : super(key: key);
+  const SearchEmpty({super.key});
 
   @override
   Widget build(BuildContext context) => Container(

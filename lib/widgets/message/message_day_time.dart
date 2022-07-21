@@ -13,9 +13,9 @@ import 'message.dart';
 
 class MessageDayTime extends HookWidget {
   const MessageDayTime({
-    Key? key,
+    super.key,
     required this.dateTime,
-  }) : super(key: key);
+  });
 
   final DateTime dateTime;
 
@@ -34,8 +34,7 @@ class MessageDayTime extends HookWidget {
 }
 
 class _MessageDayTimeWidget extends HookWidget {
-  const _MessageDayTimeWidget({Key? key, required this.dateTime})
-      : super(key: key);
+  const _MessageDayTimeWidget({required this.dateTime});
 
   final DateTime dateTime;
 
@@ -50,7 +49,7 @@ class _MessageDayTimeWidget extends HookWidget {
       padding: const EdgeInsets.only(top: 16, bottom: 10),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
           color: context.theme.dateTime,
         ),
         padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
@@ -89,13 +88,10 @@ class _CurrentShowingMessages {
         element.descendantFirstOf((e) => e.widget is MessageItemWidget);
     final widget = item.widget as MessageItemWidget;
 
-    final Element? dayTimeElement;
-    if (!isSameDay(widget.message.createdAt, widget.prev?.createdAt)) {
-      dayTimeElement =
-          element.descendantFirstOf((e) => e.widget is _MessageDayTimeWidget);
-    } else {
-      dayTimeElement = null;
-    }
+    final dayTimeElement = !isSameDay(
+            widget.message.createdAt, widget.prev?.createdAt)
+        ? element.descendantFirstOf((e) => e.widget is _MessageDayTimeWidget)
+        : null;
     if (!reverse) {
       items.add(widget.message);
       elements.add(item);
@@ -114,8 +110,8 @@ class MessageDayTimeViewportWidget extends HookWidget {
     required this.child,
     required this.scrollController,
     this.reTraversalKey,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   factory MessageDayTimeViewportWidget.chatPage({
     Key? key,
@@ -186,7 +182,7 @@ class MessageDayTimeViewportWidget extends HookWidget {
     final dateTimeTopOffset = useState<double>(0);
 
     final bloc =
-        useBloc<_HiddenMessageDayTimeBloc>(() => _HiddenMessageDayTimeBloc());
+        useBloc<_HiddenMessageDayTimeBloc>(_HiddenMessageDayTimeBloc.new);
 
     void doTraversal() {
       final result = _traversalCurrentShowingMessageElements();
@@ -310,25 +306,35 @@ class MessageDayTimeViewportWidget extends HookWidget {
       });
     }, [reTraversalKey]);
 
-    return BlocProvider.value(
-      value: bloc,
-      child: ClipRect(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            child,
-            if (dateTime.value != null)
-              Transform.translate(
-                offset: Offset(0, dateTimeTopOffset.value.clamp(-60.0, 0.0)),
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: _MessageDayTimeWidget(dateTime: dateTime.value!),
+    return LayoutBuilder(
+        builder: (context, constraints) => HookBuilder(builder: (context) {
+              useEffect(() {
+                WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+                  doTraversal();
+                });
+              }, [constraints]);
+              return BlocProvider.value(
+                value: bloc,
+                child: ClipRect(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      child,
+                      if (dateTime.value != null)
+                        Transform.translate(
+                          offset: Offset(
+                              0, dateTimeTopOffset.value.clamp(-60.0, 0.0)),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: _MessageDayTimeWidget(
+                                dateTime: dateTime.value!),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-          ],
-        ),
-      ),
-    );
+              );
+            }));
   }
 }
 

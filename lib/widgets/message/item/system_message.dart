@@ -7,9 +7,7 @@ import '../../../utils/extension/extension.dart';
 import '../message.dart';
 
 class SystemMessage extends HookWidget {
-  const SystemMessage({
-    Key? key,
-  }) : super(key: key);
+  const SystemMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +20,9 @@ class SystemMessage extends HookWidget {
         useMessageConverter(converter: (state) => state.participantFullName);
     final userFullName =
         useMessageConverter(converter: (state) => state.userFullName);
+    final groupName =
+        useMessageConverter(converter: (state) => state.groupName);
+    final content = useMessageConverter(converter: (state) => state.content);
 
     return Center(
       child: Padding(
@@ -36,7 +37,7 @@ class SystemMessage extends HookWidget {
               color: context.dynamicColor(
                 const Color.fromRGBO(202, 234, 201, 1),
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -51,6 +52,8 @@ class SystemMessage extends HookWidget {
                   currentUserId: context.accountServer.userId,
                   participantFullName: participantFullName,
                   senderFullName: userFullName,
+                  groupName: groupName,
+                  expireIn: int.tryParse(content ?? '0'),
                 ),
                 style: TextStyle(
                   fontSize: MessageItemWidget.secondaryFontSize,
@@ -74,6 +77,8 @@ String generateSystemText({
   required String currentUserId,
   required String? participantFullName,
   required String? senderFullName,
+  required String? groupName,
+  required int? expireIn,
 }) {
   final participantIsCurrentUser = participantUserId == currentUserId;
   final senderIsCurrentUser = senderId == currentUserId;
@@ -118,6 +123,20 @@ String generateSystemText({
     case MessageAction.role:
       text = Localization.current.nowAnAddmin(
           senderIsCurrentUser ? Localization.current.you : senderFullName!);
+      break;
+    case MessageAction.expire:
+      final senderName =
+          senderIsCurrentUser ? Localization.current.youStart : senderFullName!;
+      if (expireIn == null) {
+        text = Localization.current.chatExpiredSetWithoutDuration(senderName);
+      } else if (expireIn <= 0) {
+        text = Localization.current.chatExpiredDisabled(senderName);
+      } else {
+        text = Localization.current.chatExpiredSet(
+          senderName,
+          Duration(seconds: expireIn).formatAsConversationExpireIn(),
+        );
+      }
       break;
     case MessageAction.update:
     default:

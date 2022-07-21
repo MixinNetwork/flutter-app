@@ -12,11 +12,11 @@ import 'sticker_store.dart';
 
 class StickerAlbumPage extends HookWidget {
   const StickerAlbumPage({
-    Key? key,
+    super.key,
     required this.albumId,
     this.album,
     this.stickers,
-  }) : super(key: key);
+  });
 
   final StickerAlbum? album;
   final List<Sticker>? stickers;
@@ -56,7 +56,7 @@ class StickerAlbumPage extends HookWidget {
 }
 
 class _StickerAlbumHeader extends StatelessWidget {
-  const _StickerAlbumHeader({Key? key, this.album}) : super(key: key);
+  const _StickerAlbumHeader({this.album});
 
   final StickerAlbum? album;
 
@@ -79,10 +79,9 @@ class _StickerAlbumHeader extends StatelessWidget {
 
 class _StickerAlbumDetail extends HookWidget {
   const _StickerAlbumDetail({
-    Key? key,
     this.stickers,
     required this.album,
-  }) : super(key: key);
+  });
 
   final StickerAlbum album;
   final List<Sticker>? stickers;
@@ -149,9 +148,8 @@ class _StickerAlbumDetail extends HookWidget {
 
 class _StickerAlbumDetailBody extends StatelessWidget {
   const _StickerAlbumDetailBody({
-    Key? key,
     required this.stickers,
-  }) : super(key: key);
+  });
 
   final List<Sticker> stickers;
 

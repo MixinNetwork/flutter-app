@@ -7,7 +7,7 @@ part 'address_dao.g.dart';
 @DriftAccessor(tables: [Addresses])
 class AddressDao extends DatabaseAccessor<MixinDatabase>
     with _$AddressDaoMixin {
-  AddressDao(MixinDatabase db) : super(db);
+  AddressDao(super.db);
 
   Future<List<Addresse>> getAll() => select(db.addresses).get();
 

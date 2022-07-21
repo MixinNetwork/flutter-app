@@ -99,16 +99,18 @@ void wtf(String message) {
   _print(message, _LogLevel.wtf);
 }
 
+String _currentTimeStamp() =>
+    DateFormat('yyyy-MM-dd HH:mm:ss.SSS').format(DateTime.now());
+
 void _print(String message, _LogLevel level) {
   final logToFile = kLogMode || level.index > _LogLevel.debug.index;
   if (logToFile) {
-    final now = DateTime.now();
-    final date = DateFormat('yyyy-MM-dd HH:mm:ss.SSS').format(now);
-    LogFileManager.instance?.write('$date ${level.prefix} $message');
+    LogFileManager.instance
+        ?.write('${_currentTimeStamp()} ${level.prefix} $message');
   }
   if (!kLogMode) return;
   // ignore: avoid_print
-  print(level.colorize('${level.prefix} $message'));
+  print(level.colorize('${_currentTimeStamp()} ${level.prefix} $message'));
 }
 
 class LogFileManager {
@@ -141,7 +143,7 @@ class LogFileManager {
   final SendPort _sendPort;
 
   static Future<void> _logIsolate(List<dynamic> args) async {
-    final responsePort = args[0] as SendPort;
+    final responsePort = args.first as SendPort;
     final messageReceiver = ReceivePort();
     final dir = args[1] as String;
     final logFileHandler = LogFileHandler(dir);

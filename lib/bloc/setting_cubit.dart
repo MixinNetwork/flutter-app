@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
+import '../utils/logger.dart';
+
 class SettingState extends Equatable {
   const SettingState({
     int? brightness,
@@ -49,11 +51,17 @@ class SettingState extends Equatable {
   final bool? _collapsedSidebar;
 
   int get brightness => _brightness ?? 0;
+
   bool get messageShowAvatar => _messageShowAvatar ?? false;
+
   bool get messagePreview => _messagePreview ?? true;
+
   bool get photoAutoDownload => _photoAutoDownload ?? true;
+
   bool get videoAutoDownload => _videoAutoDownload ?? true;
+
   bool get fileAutoDownload => _fileAutoDownload ?? true;
+
   bool get collapsedSidebar => _collapsedSidebar ?? false;
 
   @override
@@ -118,13 +126,14 @@ class SettingCubit extends HydratedCubit<SettingState> {
   Brightness? get brightness {
     switch (state._brightness) {
       case 0:
+      case null:
         return null;
       case 1:
         return Brightness.dark;
       case 2:
         return Brightness.light;
       default:
-        assert(false, 'invalid value for brightness. $state');
+        w('invalid value for brightness. $state');
         return null;
     }
   }

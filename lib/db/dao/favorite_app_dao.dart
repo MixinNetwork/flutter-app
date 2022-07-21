@@ -8,7 +8,7 @@ part 'favorite_app_dao.g.dart';
 @DriftAccessor(tables: [FavoriteApp])
 class FavoriteAppDao extends DatabaseAccessor<MixinDatabase>
     with _$FavoriteAppDaoMixin {
-  FavoriteAppDao(MixinDatabase db) : super(db);
+  FavoriteAppDao(super.db);
 
   Future<void> deleteByAppIdAndUserId(String appId, String userId) =>
       db.deleteFavoriteAppByAppIdAndUserId(appId, userId);

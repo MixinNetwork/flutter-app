@@ -25,8 +25,8 @@ class CacheImage extends StatelessWidget {
     this.errorWidget,
     this.fit = BoxFit.cover,
     this.controller,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String src;
   final double? width;
@@ -259,11 +259,10 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
 class MixinFileImage extends FileImage {
   MixinFileImage(
-    File file, {
-    double scale = 1.0,
+    super.file, {
+    super.scale,
     this.controller,
-  })  : _lastModified = _fileLastModified(file),
-        super(file, scale: scale);
+  }) : _lastModified = _fileLastModified(file);
 
   final ValueNotifier<bool>? controller;
 

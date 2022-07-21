@@ -38,6 +38,7 @@ import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
+import '../utils/mixin_api_client.dart';
 import '../utils/system/package_info.dart';
 import '../utils/web_view/web_view_interface.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
@@ -76,19 +77,10 @@ class AccountServer {
     this.identityNumber = identityNumber;
     this.privateKey = privateKey;
 
-    final tenSecond = const Duration(seconds: 10).inMilliseconds;
-    client = Client(
+    client = createClient(
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKey,
-      scp: scp,
-      dioOptions: BaseOptions(
-        connectTimeout: tenSecond,
-        receiveTimeout: tenSecond,
-        sendTimeout: tenSecond,
-        followRedirects: false,
-      ),
-      jsonDecodeCallback: jsonDecode,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -100,9 +92,8 @@ class AccountServer {
           },
         ),
       ],
-      httpLogLevel: HttpLogLevel.none,
     );
-    await _initDatabase(privateKey, multiAuthCubit);
+    await _initDatabase();
 
     checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
       i('refreshSignalKeys periodic');
@@ -133,7 +124,9 @@ class AccountServer {
           int.tryParse(e.response?.headers.value('x-server-time') ?? '');
       if (serverTime != null) {
         final time = DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
-        final difference = time.difference(DateTime.now());
+        final deviceTime =
+            e.requestOptions.extra[kRequestTimeStampKey] as DateTime?;
+        final difference = time.difference(deviceTime ?? DateTime.now());
         if (difference.inMinutes.abs() > 5) {
           _notifyBlazeWaitSyncTime();
           return;
@@ -149,8 +142,7 @@ class AccountServer {
     markRead(_activeConversationId!);
   }
 
-  Future<void> _initDatabase(
-      String privateKey, MultiAuthCubit multiAuthCubit) async {
+  Future<void> _initDatabase() async {
     database = Database(
         await db.connectToDatabase(identityNumber, fromMainIsolate: true));
 
@@ -286,18 +278,27 @@ class AccountServer {
       await attachmentUtil.cancelProgressAttachmentJob(request.messageId);
     } else if (request is AttachmentDownloadRequest) {
       d('request download: ${request.message.messageId} ${request.message.category}');
+      final messageId = request.message.messageId;
       if (needDownload(request.message.category)) {
         await attachmentUtil.downloadAttachment(
-          messageId: request.message.messageId,
+          messageId: messageId,
         );
+      } else {
+        await attachmentUtil.checkSyncMessageMedia(messageId);
       }
     } else if (request is TranscriptAttachmentDownloadRequest) {
       d('request download transcript: ${request.message.messageId} ${request.message.category}');
+      final messageId = request.message.messageId;
       if (needDownload(request.message.category)) {
         await attachmentUtil.downloadAttachment(
           messageId: request.message.messageId,
         );
+      } else {
+        await attachmentUtil.checkSyncMessageMedia(messageId);
       }
+    } else if (request is AttachmentDeleteRequest) {
+      await attachmentUtil.removeAttachmentJob(request.message.messageId);
+      await _deleteMessageAttachment(request.message);
     } else {
       assert(false, 'unexpected request: $request');
     }
@@ -452,6 +453,91 @@ class AccountServer {
         json.encode(data.toJson()),
       );
 
+  Future<void> sendTranscriptMessage(
+    List<String> messageIds,
+    EncryptCategory encryptCategory, {
+    String? conversationId,
+    String? recipientId,
+  }) async {
+    final transcriptId = const Uuid().v4();
+    db.TranscriptMessage toTranscript(db.MessageItem item) =>
+        db.TranscriptMessage(
+          transcriptId: transcriptId,
+          messageId: item.messageId,
+          userId: item.userId,
+          userFullName: item.userFullName,
+          category: item.type,
+          createdAt: item.createdAt,
+          content: item.content,
+          mediaUrl: item.mediaUrl,
+          mediaName: item.mediaName,
+          mediaSize: item.mediaSize,
+          mediaWidth: item.mediaWidth,
+          mediaHeight: item.mediaHeight,
+          mediaMimeType: item.mediaMimeType,
+          mediaDuration: item.mediaDuration,
+          mediaStatus: item.mediaStatus,
+          mediaWaveform: item.mediaWaveform,
+          thumbImage: item.thumbImage,
+          thumbUrl: item.thumbUrl,
+          stickerId: item.stickerId,
+          sharedUserId: item.sharedUserId,
+          quoteId: item.quoteId,
+          quoteContent: item.quoteContent,
+        );
+
+    assert(messageIds.isNotEmpty);
+    final messages =
+        await database.messageDao.messageItemByMessageIds(messageIds).get();
+    final transcripts =
+        messages.where((e) => e.canForward).map(toTranscript).toList();
+    if (transcripts.isEmpty) {
+      e('sendTranscriptMessage: transcripts is empty');
+      return;
+    }
+
+    final nonExistent =
+        messages.where((e) => e.type.isAttachment).any((message) {
+      final path = attachmentUtil.convertAbsolutePath(
+        fileName: message.mediaUrl,
+        conversationId: message.conversationId,
+        category: message.type,
+      );
+      final exist = path.isNotEmpty && File(path).existsSync();
+      if (!exist) {
+        e('sendTranscriptMessage: file not exist: $path');
+      }
+      return !exist;
+    });
+
+    if (nonExistent) {
+      e('sendTranscriptMessage: some file[s] not exist');
+      return;
+    }
+
+    await Future.wait(messages.where((e) => e.type.isAttachment).map((message) {
+      final path = attachmentUtil.convertAbsolutePath(
+        category: message.type,
+        conversationId: message.conversationId,
+        fileName: message.mediaUrl,
+      );
+
+      final transcriptPath = attachmentUtil.convertAbsolutePath(
+        fileName: message.mediaUrl,
+        messageId: message.messageId,
+        isTranscript: true,
+      );
+      return File(path).copy(transcriptPath);
+    }));
+
+    await _sendMessageHelper.sendTranscriptMessage(
+      conversationId: await _initConversation(conversationId, recipientId),
+      senderId: userId,
+      transcripts: transcripts,
+      encryptCategory: encryptCategory,
+    );
+  }
+
   Future<void> forwardMessage(
     String forwardMessageId,
     EncryptCategory encryptCategory, {
@@ -478,23 +564,38 @@ class AccountServer {
       final ids = await database.messageDao
           .getUnreadMessageIds(conversationId, userId, kMarkLimit);
       if (ids.isEmpty) return;
+      final expireAt = await database.expiredMessageDao.getMessageExpireAt(ids);
       final jobs = ids
-          .map((id) =>
-              createAckJob(kAcknowledgeMessageReceipts, id, MessageStatus.read))
+          .map(
+            (id) => createAckJob(
+              kAcknowledgeMessageReceipts,
+              id,
+              MessageStatus.read,
+              expireAt: expireAt[id],
+            ),
+          )
           .toList();
       await database.jobDao.insertAll(jobs);
-      await _createReadSessionMessage(ids);
+      await _createReadSessionMessage(ids, expireAt);
       if (ids.length < kMarkLimit) return;
     }
   }
 
-  Future<void> _createReadSessionMessage(List<String> messageIds) async {
+  Future<void> _createReadSessionMessage(
+    List<String> messageIds,
+    Map<String, int?> messageExpireAt,
+  ) async {
     final primarySessionId = AccountKeyValue.instance.primarySessionId;
     if (primarySessionId == null) {
       return;
     }
     final jobs = messageIds
-        .map((id) => createAckJob(kCreateMessage, id, MessageStatus.read))
+        .map((id) => createAckJob(
+              kCreateMessage,
+              id,
+              MessageStatus.read,
+              expireAt: messageExpireAt[id],
+            ))
         .toList();
     await database.jobDao.insertAll(jobs);
   }
@@ -718,7 +819,7 @@ class AccountServer {
             userIds.map((e) => ParticipantRequest(userId: e)).toList(),
       ),
     );
-    await database.conversationDao.updateConversation(response.data);
+    await database.conversationDao.updateConversation(response.data, userId);
     await addParticipant(conversationId, userIds);
   }
 
@@ -727,7 +828,7 @@ class AccountServer {
 
   Future<void> joinGroup(String code) async {
     final response = await client.conversationApi.join(code);
-    await database.conversationDao.updateConversation(response.data);
+    await database.conversationDao.updateConversation(response.data, userId);
   }
 
   Future<void> addParticipant(
@@ -741,7 +842,7 @@ class AccountServer {
         userIds.map((e) => ParticipantRequest(userId: e)).toList(),
       );
 
-      await database.conversationDao.updateConversation(response.data);
+      await database.conversationDao.updateConversation(response.data, userId);
     } catch (e) {
       w('addParticipant error $e');
       // throw error??
@@ -810,7 +911,8 @@ class AccountServer {
     if (recipientId != null) {
       final conversationId = generateConversationId(recipientId, userId);
       if (cid != null) {
-        assert(cid == conversationId);
+        assert(cid == conversationId,
+            'cid: $cid != conversationId: $conversationId');
       }
       final conversation = await database.conversationDao
           .conversationById(conversationId)
@@ -988,13 +1090,7 @@ class AccountServer {
       ),
     );
 
-    await database.conversationDao.updateConversation(response.data);
-  }
-
-  Future<void> refreshGroup(String conversationId) async {
-    final response =
-        await client.conversationApi.getConversation(conversationId);
-    await database.conversationDao.updateConversation(response.data);
+    await database.conversationDao.updateConversation(response.data, userId);
   }
 
   Future<void> rotate(String conversationId) async {
@@ -1041,7 +1137,10 @@ class AccountServer {
                 runCount: 0,
                 priority: 5,
                 blazeMessage: await jsonEncodeWithIsolate(BlazeAckMessage(
-                    messageId: messageId, status: 'MENTION_READ')),
+                  messageId: messageId,
+                  status: 'MENTION_READ',
+                  expireAt: null,
+                )),
               ),
             ))()
       ]);
@@ -1063,46 +1162,44 @@ class AccountServer {
   Future<bool> cancelProgressAttachmentJob(String messageId) =>
       attachmentUtil.cancelProgressAttachmentJob(messageId);
 
-  Future<void> deleteMessage(String messageId) async {
-    final message = await database.messageDao.findMessageByMessageId(messageId);
-    if (message == null) return;
-    Future<void> Function()? delete;
+  Future<void> _deleteMessageAttachment(db.Message message) async {
     if (message.category.isAttachment) {
-      delete = () async {
-        final path = attachmentUtil.convertAbsolutePath(
-          category: message.category,
-          conversationId: message.conversationId,
-          fileName: message.mediaUrl,
-        );
-        final file = File(path);
-        if (file.existsSync()) await file.delete();
-      };
+      final path = attachmentUtil.convertAbsolutePath(
+        category: message.category,
+        conversationId: message.conversationId,
+        fileName: message.mediaUrl,
+      );
+      final file = File(path);
+      if (file.existsSync()) await file.delete();
     } else if (message.category.isTranscript) {
       final iterable = await database.transcriptMessageDao
           .transcriptMessageByTranscriptId(message.messageId)
           .get();
 
-      delete = () async {
-        final list = await database.transcriptMessageDao
-            .messageIdsByMessageIds(iterable.map((e) => e.messageId))
-            .get();
-        iterable
-            .where((element) => !list.contains(element.messageId))
-            .forEach((e) {
-          final path = attachmentUtil.convertAbsolutePath(
-            fileName: e.mediaUrl,
-            messageId: e.messageId,
-            isTranscript: true,
-          );
+      final list = await database.transcriptMessageDao
+          .messageIdsByMessageIds(iterable.map((e) => e.messageId))
+          .get();
+      iterable
+          .where((element) => !list.contains(element.messageId))
+          .forEach((e) {
+        final path = attachmentUtil.convertAbsolutePath(
+          fileName: e.mediaUrl,
+          messageId: e.messageId,
+          isTranscript: true,
+        );
 
-          final file = File(path);
-          if (file.existsSync()) unawaited(file.delete());
-        });
-      };
+        final file = File(path);
+        if (file.existsSync()) unawaited(file.delete());
+      });
     }
+  }
+
+  Future<void> deleteMessage(String messageId) async {
+    final message = await database.messageDao.findMessageByMessageId(messageId);
+    if (message == null) return;
     await database.messageDao.deleteMessage(messageId);
 
-    unawaited(delete?.call());
+    unawaited(_deleteMessageAttachment(message));
   }
 
   String convertAbsolutePath(

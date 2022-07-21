@@ -41,15 +41,6 @@ enum MixinSchemeHost {
   snapshots,
 }
 
-const mixinProtocolUrls = {
-  MixinSchemeHost.codes: 'https://mixin.one/codes',
-  MixinSchemeHost.transfer: 'https://mixin.one/transfer',
-  MixinSchemeHost.address: 'https://mixin.one/address',
-  MixinSchemeHost.withdrawal: 'https://mixin.one/withdrawal',
-  MixinSchemeHost.apps: 'https://mixin.one/apps',
-  MixinSchemeHost.snapshots: 'https://mixin.one/snapshots'
-};
-
 const int hour1 = 1000 * 60 * 60;
 const int hours24 = hour1 * 24;
 
@@ -58,3 +49,6 @@ const statusOffset = 'messages_status_offset';
 const kMarkLimit = 10000;
 
 const kMaxTextLength = 64 * 1024;
+
+const mixinDisappearingMessageHelpUrl =
+    'https://mixinmessenger.zendesk.com/hc/articles/5127869180564';

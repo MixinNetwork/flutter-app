@@ -25,9 +25,9 @@ bool _isRepresentative(
 
 class MessageDatetimeAndStatus extends HookWidget {
   const MessageDatetimeAndStatus({
-    Key? key,
+    super.key,
     this.color,
-  }) : super(key: key);
+  });
 
   final Color? color;
 
@@ -100,10 +100,9 @@ class MessageDatetimeAndStatus extends HookWidget {
 
 class _ChatIcon extends StatelessWidget {
   const _ChatIcon({
-    Key? key,
     this.color,
     required this.assetName,
-  }) : super(key: key);
+  });
 
   final Color? color;
   final String assetName;
@@ -123,10 +122,9 @@ class _ChatIcon extends StatelessWidget {
 
 class _MessageDatetime extends HookWidget {
   const _MessageDatetime({
-    Key? key,
     required this.dateTime,
     this.color,
-  }) : super(key: key);
+  });
 
   final DateTime dateTime;
   final Color? color;

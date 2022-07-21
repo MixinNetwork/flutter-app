@@ -29,6 +29,7 @@ import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
+import '../../../widgets/sticker_page/emoji_page.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
@@ -40,9 +41,7 @@ import 'chat_page.dart';
 import 'files_preview.dart';
 
 class InputContainer extends HookWidget {
-  const InputContainer({
-    Key? key,
-  }) : super(key: key);
+  const InputContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -83,9 +82,7 @@ class InputContainer extends HookWidget {
 }
 
 class _InputContainer extends HookWidget {
-  const _InputContainer({
-    Key? key,
-  }) : super(key: key);
+  const _InputContainer();
 
   @override
   Widget build(BuildContext context) {
@@ -111,18 +108,12 @@ class _InputContainer extends HookWidget {
       () {
         final draft =
             context.read<ConversationCubit>().state?.conversation?.draft;
-        final textEditingController = HighlightTextEditingController(
-          initialText: draft,
-          highlightTextStyle: TextStyle(
-            color: context.theme.accent,
-          ),
-          mentionCache: context.read<MentionCache>(),
-        )..selection = TextSelection.fromPosition(
-            TextPosition(
-              offset: draft?.length ?? 0,
-            ),
-          );
-        return textEditingController;
+        return HighlightTextEditingController(
+            initialText: draft,
+            highlightTextStyle: TextStyle(color: context.theme.accent),
+            mentionCache: context.read<MentionCache>())
+          ..selection = TextSelection.fromPosition(
+              TextPosition(offset: draft?.length ?? 0));
       },
       [conversationId],
     );
@@ -232,7 +223,9 @@ class _InputContainer extends HookWidget {
                       _FileButton(actionColor: context.theme.icon),
                       const _ImagePickButton(),
                       const SizedBox(width: 6),
-                      const _StickerButton(),
+                      _StickerButton(
+                        textEditingController: textEditingController,
+                      ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _SendTextField(
@@ -244,6 +237,7 @@ class _InputContainer extends HookWidget {
                       ContextMenuPortalEntry(
                         buildMenus: () => [
                           ContextMenu(
+                            icon: Resources.assetsImagesContextMenuMuteSvg,
                             title: context.l10n.sendWithoutSound,
                             onTap: () => _sendMessage(
                               context,
@@ -501,7 +495,7 @@ class _QuoteMessage extends StatelessWidget {
 }
 
 class _ImagePickButton extends StatelessWidget {
-  const _ImagePickButton({Key? key}) : super(key: key);
+  const _ImagePickButton();
 
   @override
   Widget build(BuildContext context) {
@@ -529,9 +523,8 @@ class _ImagePickButton extends StatelessWidget {
 
 class _FileButton extends StatelessWidget {
   const _FileButton({
-    Key? key,
     required this.actionColor,
-  }) : super(key: key);
+  });
 
   final Color actionColor;
 
@@ -549,12 +542,14 @@ class _FileButton extends StatelessWidget {
 
 class _StickerButton extends HookWidget {
   const _StickerButton({
-    Key? key,
-  }) : super(key: key);
+    required this.textEditingController,
+  });
+
+  final TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
-    final key = useMemoized(() => GlobalKey());
+    final key = useMemoized(GlobalKey.new);
 
     final stickerAlbumsCubit = useBloc(
       () => StickerAlbumsCubit(context.database.stickerAlbumDao
@@ -565,11 +560,18 @@ class _StickerButton extends HookWidget {
     final tabLength =
         useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
       bloc: stickerAlbumsCubit,
-      converter: (state) => (state.length) + 3,
+      converter: (state) =>
+          (state.length) +
+          // no emoji page on Linux.
+          (Platform.isLinux ? 3 : 4),
     );
 
-    return BlocProvider.value(
-      value: stickerAlbumsCubit,
+    return MultiProvider(
+      providers: [
+        BlocProvider.value(value: stickerAlbumsCubit),
+        BlocProvider(create: (context) => EmojiSelectedGroupIndexCubit()),
+        ChangeNotifierProvider.value(value: textEditingController),
+      ],
       child: DefaultTabController(
         length: tabLength,
         initialIndex: 1,
@@ -581,7 +583,7 @@ class _StickerButton extends HookWidget {
           closeWaitDuration: const Duration(milliseconds: 300),
           inCurve: Curves.easeOut,
           outCurve: Curves.easeOut,
-          portalBuilder: (context, progress, child) {
+          portalBuilder: (context, progress, _, child) {
             context.accountServer.refreshSticker();
 
             final renderBox =
@@ -607,7 +609,7 @@ class _StickerButton extends HookWidget {
             padding: const EdgeInsets.all(8),
             child: Builder(
               builder: (context) => StickerPage(
-                tabController: DefaultTabController.of(context),
+                tabController: DefaultTabController.of(context)!,
                 tabLength: tabLength,
               ),
             ),

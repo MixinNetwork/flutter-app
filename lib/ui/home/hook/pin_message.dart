@@ -67,7 +67,7 @@ PinMessageState usePinMessageState() {
     () {
       if (!showLastPinMessage ||
           conversationId == null ||
-          pinMessageIds.isEmpty) {
+          pinMessageIds.firstOrNull == null) {
         return Stream.value(null);
       }
       return context.database.pinMessageDao
@@ -87,7 +87,7 @@ PinMessageState usePinMessageState() {
         return context.l10n.chatPinMessage(message.userFullName ?? '', preview);
       });
     },
-    keys: [showLastPinMessage, conversationId, pinMessageIds],
+    keys: [showLastPinMessage, conversationId, pinMessageIds.firstOrNull],
   ).data;
 
   return useMemoized(

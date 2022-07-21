@@ -21,7 +21,7 @@ import 'group_invite/group_invite_dialog.dart';
 
 /// The participants of group.
 class GroupParticipantsPage extends HookWidget {
-  const GroupParticipantsPage({Key? key}) : super(key: key);
+  const GroupParticipantsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -84,11 +84,10 @@ class GroupParticipantsPage extends HookWidget {
 
 class _ParticipantList extends HookWidget {
   const _ParticipantList({
-    Key? key,
     required this.filterKeyword,
     required this.participants,
     required this.currentUser,
-  }) : super(key: key);
+  });
 
   /// The keyword to filter participants of group.
   /// Empty indicates non filter.
@@ -128,10 +127,9 @@ class _ParticipantList extends HookWidget {
 class _ParticipantTile extends StatelessWidget {
   const _ParticipantTile({
     required this.participant,
-    Key? key,
     required this.currentUser,
     required this.keyword,
-  }) : super(key: key);
+  });
 
   final ParticipantUser participant;
 
@@ -187,11 +185,10 @@ class _ParticipantTile extends StatelessWidget {
 
 class _ParticipantMenuEntry extends StatelessWidget {
   const _ParticipantMenuEntry({
-    Key? key,
     required this.child,
     required this.participant,
     required this.currentUser,
-  }) : super(key: key);
+  });
 
   final ParticipantUser participant;
   final ParticipantUser? currentUser;
@@ -208,6 +205,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
       buildMenus: () {
         final menus = [
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuChatSvg,
             title:
                 context.l10n.groupPopMenuMessage(participant.fullName ?? '?'),
             onTap: () {
@@ -221,6 +219,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
         if (currentUser?.role == ParticipantRole.owner) {
           if (participant.role != ParticipantRole.admin) {
             menus.add(ContextMenu(
+              icon: Resources.assetsImagesContextMenuUserEditSvg,
               title: context.l10n.makeGroupAdmin,
               onTap: () => runFutureWithToast(
                 context,
@@ -232,6 +231,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
             ));
           } else {
             menus.add(ContextMenu(
+              icon: Resources.assetsImagesContextMenuStopSvg,
               title: context.l10n.dismissAsAdmin,
               onTap: () => runFutureWithToast(
                   context,
@@ -246,6 +246,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
         if (currentUser?.role != null && participant.role == null ||
             currentUser?.role == ParticipantRole.owner) {
           menus.add(ContextMenu(
+            icon: Resources.assetsImagesContextMenuDeleteSvg,
             isDestructiveAction: true,
             title: context.l10n.groupPopMenuRemove(participant.fullName ?? '?'),
             onTap: () => runFutureWithToast(
@@ -263,7 +264,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
 }
 
 class _RoleWidget extends StatelessWidget {
-  const _RoleWidget({Key? key, required this.role}) : super(key: key);
+  const _RoleWidget({required this.role});
   final ParticipantRole? role;
 
   @override
@@ -280,7 +281,9 @@ class _RoleWidget extends StatelessWidget {
 }
 
 class _RoleLabel extends StatelessWidget {
-  const _RoleLabel(this.label, {Key? key}) : super(key: key);
+  const _RoleLabel(
+    this.label,
+  );
 
   final String label;
 
@@ -296,9 +299,8 @@ class _RoleLabel extends StatelessWidget {
 
 class _ActionAddParticipants extends StatelessWidget {
   const _ActionAddParticipants({
-    Key? key,
     required this.participants,
-  }) : super(key: key);
+  });
 
   final List<ParticipantUser> participants;
 
@@ -306,6 +308,7 @@ class _ActionAddParticipants extends StatelessWidget {
   Widget build(BuildContext context) => ContextMenuPortalEntry(
         buildMenus: () => [
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuSearchUserSvg,
             title: context.l10n.addParticipants,
             onTap: () async {
               final result = await showConversationSelector(
@@ -333,6 +336,7 @@ class _ActionAddParticipants extends StatelessWidget {
             },
           ),
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuLinkSvg,
             title: context.l10n.inviteToGroupViaLink,
             onTap: () {
               final conversationCubit = context.read<ConversationCubit>().state;

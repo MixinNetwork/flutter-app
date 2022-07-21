@@ -13,7 +13,7 @@ import 'bloc/landing_state.dart';
 import 'landing.dart';
 
 class LandingQrCodeWidget extends HookWidget {
-  const LandingQrCodeWidget({Key? key}) : super(key: key);
+  const LandingQrCodeWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,9 +75,7 @@ class LandingQrCodeWidget extends HookWidget {
 }
 
 class _QrCode extends HookWidget {
-  const _QrCode({
-    Key? key,
-  }) : super(key: key);
+  const _QrCode();
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +105,7 @@ class _QrCode extends HookWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: const BorderRadius.all(Radius.circular(11)),
           clipBehavior: Clip.antiAliasWithSaveLayer,
           child: SizedBox.fromSize(
             size: const Size.square(160),
@@ -165,10 +163,9 @@ class _QrCode extends HookWidget {
 
 class _Loading extends StatelessWidget {
   const _Loading({
-    Key? key,
     required this.title,
     required this.message,
-  }) : super(key: key);
+  });
 
   final String title;
   final String message;
@@ -213,10 +210,9 @@ class _Loading extends StatelessWidget {
 
 class _Retry extends StatelessWidget {
   const _Retry({
-    Key? key,
     required this.onTap,
     this.errorMessage,
-  }) : super(key: key);
+  });
 
   final VoidCallback onTap;
 

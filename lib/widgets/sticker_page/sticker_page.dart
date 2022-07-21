@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -10,22 +12,25 @@ import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../automatic_keep_alive_client_widget.dart';
 import '../cache_image.dart';
+import '../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../hover_overlay.dart';
 import '../interactive_decorated_box.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
 import 'bloc/cubit/sticker_cubit.dart';
+import 'emoji_page.dart';
 import 'sticker_item.dart';
 import 'sticker_store.dart';
 
 class StickerPage extends StatelessWidget {
   const StickerPage({
     required this.tabLength,
-    Key? key,
-    this.tabController,
-  }) : super(key: key);
+    super.key,
+    required this.tabController,
+  });
 
-  final TabController? tabController;
+  final TabController tabController;
   final int tabLength;
 
   @override
@@ -37,14 +42,14 @@ class StickerPage extends StatelessWidget {
           width: 464,
           height: 407,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             color: context.dynamicColor(
               const Color.fromRGBO(255, 255, 255, 1),
               darkColor: const Color.fromRGBO(62, 65, 72, 1),
             ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             child: Column(
               children: [
                 Expanded(
@@ -54,7 +59,18 @@ class StickerPage extends StatelessWidget {
                       tabLength,
                       (index) {
                         if (index == 0) return _StickerStoreEmptyPage();
-                        return _StickerAlbumPage(index: index);
+
+                        if (Platform.isLinux) {
+                          return _StickerAlbumPage(index: index);
+                        } else {
+                          if (index == 1) {
+                            return const AutomaticKeepAliveClientWidget(
+                              child: EmojiPage(),
+                            );
+                          } else {
+                            return _StickerAlbumPage(index: index - 1);
+                          }
+                        }
                       },
                     ),
                   ),
@@ -72,9 +88,8 @@ class StickerPage extends StatelessWidget {
 
 class _StickerAlbumPage extends HookWidget {
   const _StickerAlbumPage({
-    Key? key,
     required this.index,
-  }) : super(key: key);
+  });
 
   final int index;
 
@@ -116,9 +131,11 @@ class _StickerAlbumPage extends HookWidget {
       bloc: stickerCubit,
       converter: (state) => state.length,
     );
+    final controller = useMemoized(ScrollerScrollController.new);
     return BlocProvider.value(
       value: stickerCubit,
       child: GridView.builder(
+        controller: controller,
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
@@ -151,11 +168,10 @@ class _StickerStoreEmptyPage extends StatelessWidget {
 
 class _StickerAlbumPageItem extends HookWidget {
   const _StickerAlbumPageItem({
-    Key? key,
     required this.index,
     required this.updateUsedAt,
     this.rightClickDelete = false,
-  }) : super(key: key);
+  });
 
   final int index;
   final bool updateUsedAt;
@@ -209,37 +225,34 @@ class _StickerAlbumPageItem extends HookWidget {
 
 class _StickerAlbumBar extends HookWidget {
   const _StickerAlbumBar({
-    Key? key,
     required this.tabLength,
-    this.tabController,
-  }) : super(key: key);
+    required this.tabController,
+  });
 
   final int tabLength;
-  final TabController? tabController;
+  final TabController tabController;
 
   @override
   Widget build(BuildContext context) {
-    final validIndexRef = useRef<int?>(tabController?.index);
+    final validIndexRef = useRef<int?>(tabController.index);
 
     final setPreviousIndex = useCallback(() {
-      if (tabController == null) return;
-      final previousIndex = tabController!.previousIndex;
+      final previousIndex = tabController.previousIndex;
       if (previousIndex != 0) {
         validIndexRef.value = previousIndex;
       }
 
       if (validIndexRef.value != 0) {
         // Sometimes tabController.index is validIndex, but TabBar.currentIndex is 0, they are not synchronized, so we need reset tabController.index to 0, then set to validIndex.
-        tabController!.index = 0;
-        tabController!.index = validIndexRef.value!;
+        tabController
+          ..index = 0
+          ..index = validIndexRef.value!;
       }
     }, []);
 
     useEffect(() {
-      if (tabController == null) return () {};
       Future<void> listener() async {
-        if (tabController == null) return;
-        if (tabController!.index != 0) return;
+        if (tabController.index != 0) return;
 
         HoverOverlay.forceHidden(context);
         AccountKeyValue.instance.hasNewAlbum = false;
@@ -250,9 +263,9 @@ class _StickerAlbumBar extends HookWidget {
         setPreviousIndex();
       }
 
-      tabController!.addListener(listener);
+      tabController.addListener(listener);
       return () {
-        tabController!.removeListener(listener);
+        tabController.removeListener(listener);
       };
     }, [tabController]);
     return Container(
@@ -270,7 +283,7 @@ class _StickerAlbumBar extends HookWidget {
             const Color.fromRGBO(229, 231, 235, 1),
             darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
         ),
         labelPadding: EdgeInsets.zero,
         indicatorPadding: const EdgeInsets.all(5),
@@ -285,9 +298,8 @@ class _StickerAlbumBar extends HookWidget {
 
 class _StickerAlbumBarItem extends StatelessWidget {
   const _StickerAlbumBarItem({
-    Key? key,
     required this.index,
-  }) : super(key: key);
+  });
 
   final int index;
 
@@ -298,17 +310,19 @@ class _StickerAlbumBarItem extends StatelessWidget {
           child: Center(
             child: Builder(
               builder: (context) {
-                if (index < 3) {
+                final presetStickerAlbum = [
+                  if (AccountKeyValue.instance.hasNewAlbum)
+                    Resources.assetsImagesStickerStoreRedDotSvg
+                  else
+                    Resources.assetsImagesStickerStoreSvg,
+                  if (!Platform.isLinux) Resources.assetsImagesEmojiStickerSvg,
+                  Resources.assetsImagesRecentStickerSvg,
+                  Resources.assetsImagesPersonalStickerSvg,
+                ];
+
+                if (index < presetStickerAlbum.length) {
                   return SvgPicture.asset(
-                    {
-                      0: AccountKeyValue.instance.hasNewAlbum
-                          ? Resources.assetsImagesStickerStoreRedDotSvg
-                          : Resources.assetsImagesStickerStoreSvg,
-                      1: Resources.assetsImagesRecentStickerSvg,
-                      2: Resources.assetsImagesPersonalStickerSvg,
-                      // todo
-                      // 2: Resources.assetsImagesGifStickerSvg
-                    }[index]!,
+                    presetStickerAlbum[index],
                     color: index != 0 ? context.theme.secondaryText : null,
                     width: 24,
                     height: 24,
@@ -317,7 +331,8 @@ class _StickerAlbumBarItem extends StatelessWidget {
 
                 return BlocConverter<StickerAlbumsCubit, List<StickerAlbum>,
                     String>(
-                  converter: (state) => state[index - 3].iconUrl,
+                  converter: (state) =>
+                      state[index - presetStickerAlbum.length].iconUrl,
                   builder: (context, iconUrl) => CacheImage(
                     iconUrl,
                     width: 28,

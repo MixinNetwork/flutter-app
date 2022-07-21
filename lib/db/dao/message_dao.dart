@@ -19,7 +19,7 @@ part 'message_dao.g.dart';
 @DriftAccessor(tables: [Messages])
 class MessageDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageDaoMixin {
-  MessageDao(MixinDatabase db) : super(db);
+  MessageDao(super.db);
 
   late Stream<void> updateEvent = db.tableUpdates(
     TableUpdateQuery.onAllTables([
@@ -56,10 +56,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       for (final ids in chunkedIds) {
         messages.addAll(await _baseMessageItems(
             (message, _, __, ___, ____, _____, ______, _______, ________,
-                    _________, __________) =>
+                    _________, __________, em) =>
                 message.messageId.isIn(ids),
             (_, __, ___, ____, _____, ______, _______, ________, _________,
-                    __________, ___________) =>
+                    __________, ___________, em) =>
                 Limit(ids.length, 0)).get());
       }
       return messages;
@@ -69,7 +69,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   late Stream<NotificationMessage> notificationMessageStream = db.eventBus
       .watch<String>(DatabaseEvent.notification)
       .asyncBufferMap((event) => db.notificationMessage(event).get())
-      .flatMapIterable((value) => Stream.value(value));
+      .flatMapIterable(Stream.value);
 
   late Stream<String> deleteMessageIdStream =
       db.eventBus.watch<String>(DatabaseEvent.delete);
@@ -87,6 +87,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       Conversations conversation,
       MessageMentions messageMention,
       PinMessages pinMessage,
+      ExpiredMessages em,
     )
         where,
     Limit Function(
@@ -101,6 +102,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       Conversations conversation,
       MessageMentions messageMention,
       PinMessages pinMessage,
+      ExpiredMessages em,
     )
         limit, {
     OrderBy Function(
@@ -115,13 +117,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       Conversations conversation,
       MessageMentions messageMention,
       PinMessages pinMessage,
+      ExpiredMessages em,
     )?
         order,
   }) =>
       db.baseMessageItems(
           where,
           (message, sender, participant, snapshot, asset, sticker, hyperlink,
-                  sharedUser, conversation, messageMention, pinMessage) =>
+                  sharedUser, conversation, messageMention, pinMessage, em) =>
               order?.call(
                   message,
                   sender,
@@ -133,7 +136,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   sharedUser,
                   conversation,
                   messageMention,
-                  pinMessage) ??
+                  pinMessage,
+                  em) ??
               OrderBy([OrderingTerm.desc(message.createdAt)]),
           limit);
 
@@ -177,13 +181,20 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     }
   }
 
-  Future<int> insert(Message message, String currentUserId,
-      [bool? silent = false]) async {
+  Future<int> insert(
+    Message message,
+    String currentUserId, {
+    bool? silent = false,
+    int expireIn = 0,
+  }) async {
     final futures = <Future>[
       into(db.messages).insertOnConflictUpdate(message),
       _insertMessageFts(message),
+      if (expireIn > 0)
+        db.expiredMessageDao
+            .insert(messageId: message.messageId, expireIn: expireIn)
     ];
-    final result = (await Future.wait(futures))[0] as int;
+    final result = (await Future.wait(futures)).first as int;
 
     _updateConversationUnseenCount(message, currentUserId);
 
@@ -239,6 +250,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             .go(),
         _recallPinMessage(messageId),
         db.pinMessageDao.deleteByIds([messageId]),
+        db.expiredMessageDao.deleteByMessageId(messageId),
       ]);
     });
     db.eventBus.send(DatabaseEvent.delete, messageId);
@@ -301,7 +313,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       );
 
   Future<void> updateMediaStatus(String messageId, MediaStatus status) async {
-    if (await hasMediaStatus(messageId, status)) return;
+    if (!await hasMediaStatus(messageId, status, true)) return;
 
     final result = await db.transaction<List>(() => Future.wait([
           (db.update(db.messages)
@@ -316,58 +328,36 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     }
   }
 
-  Future<bool?> messageHasMediaStatus(String messageId, MediaStatus mediaStatus,
+  Future<bool> messageHasMediaStatus(String messageId, MediaStatus mediaStatus,
       [bool not = false]) async {
-    final mediaStatusColumn = db.messages.mediaStatus;
-    final _mediaStatus = await (selectOnly(db.messages)
-          ..addColumns([mediaStatusColumn])
-          ..where(db.messages.messageId.equals(messageId))
-          ..limit(1))
-        .map((row) =>
-            mediaStatusColumn.converter.mapToDart(row.read(mediaStatusColumn)))
-        .getSingleOrNull();
-    if (_mediaStatus == null) return null;
-    if (not) {
-      return _mediaStatus != mediaStatus;
-    }
-    return _mediaStatus == mediaStatus;
+    final equalsId = db.messages.messageId.equals(messageId);
+    final equalsStatus = db.messages.mediaStatus.equalsValue(mediaStatus);
+    final predicate =
+        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
+    return db.hasData(db.messages, [], predicate);
   }
 
-  Future<bool?> transcriptMessageHasMediaStatus(
+  Future<bool> transcriptMessageHasMediaStatus(
       String messageId, MediaStatus mediaStatus,
       [bool not = false]) async {
-    final mediaStatusColumn = db.transcriptMessages.mediaStatus;
-    final _mediaStatus = await (selectOnly(db.transcriptMessages)
-          ..addColumns([mediaStatusColumn])
-          ..where(db.transcriptMessages.messageId.equals(messageId))
-          ..limit(1))
-        .map((row) =>
-            mediaStatusColumn.converter.mapToDart(row.read(mediaStatusColumn)))
-        .getSingleOrNull();
-    if (_mediaStatus == null) return null;
-    if (not) {
-      return _mediaStatus != mediaStatus;
-    }
-    return _mediaStatus == mediaStatus;
+    final equalsId = db.transcriptMessages.messageId.equals(messageId);
+    final equalsStatus =
+        db.transcriptMessages.mediaStatus.equalsValue(mediaStatus);
+    final predicate =
+        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
+    return db.hasData(db.transcriptMessages, [], predicate);
   }
 
   Future<bool> hasMediaStatus(String messageId, MediaStatus mediaStatus,
       [bool not = false]) async {
-    final messageHasData =
-        await messageHasMediaStatus(messageId, mediaStatus, not);
-    final transcriptMessageHasData =
-        await transcriptMessageHasMediaStatus(messageId, mediaStatus, not);
-    if (messageHasData != null && transcriptMessageHasData != null) {
-      return messageHasData && transcriptMessageHasData;
-    }
-    return (messageHasData ?? false) || (transcriptMessageHasData ?? false);
+    final result = await Future.wait([
+      messageHasMediaStatus(messageId, mediaStatus, not),
+      transcriptMessageHasMediaStatus(messageId, mediaStatus, not)
+    ]);
+    return result.any((element) => element);
   }
 
-  Future<void> syncMessageMedia(String messageId, [bool force = false]) async {
-    if (!force && !await hasMediaStatus(messageId, MediaStatus.done)) {
-      return;
-    }
-
+  Future<void> syncMessageMedia(String messageId) async {
     var content = db.messages.content;
     var mediaUrl = db.messages.mediaUrl;
     var mediaSize = db.messages.mediaSize;
@@ -375,7 +365,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     var result = await (db.selectOnly(db.messages)
           ..addColumns([content, mediaUrl, mediaSize, mediaStatus])
-          ..where(db.messages.messageId.equals(messageId))
+          ..where(db.messages.messageId.equals(messageId) &
+              db.messages.mediaStatus.equalsValue(MediaStatus.done))
           ..limit(1))
         .getSingleOrNull();
     if (result == null) {
@@ -386,7 +377,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
       result = await (db.selectOnly(db.transcriptMessages)
             ..addColumns([content, mediaUrl, mediaSize, mediaStatus])
-            ..where(db.transcriptMessages.messageId.equals(messageId))
+            ..where(db.transcriptMessages.messageId.equals(messageId) &
+                db.transcriptMessages.mediaStatus.equalsValue(MediaStatus.done))
             ..limit(1))
           .getSingleOrNull();
     }
@@ -446,7 +438,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<int> markMessageRead(
-    String userId,
     Iterable<String> messageIds,
   ) async {
     final result = await (db.update(db.messages)
@@ -456,6 +447,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               tbl.status.equalsValue(MessageStatus.unknown).not()))
         .write(const MessagesCompanion(status: Value(MessageStatus.read)));
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+    await db.expiredMessageDao.onMessageRead(messageIds);
     return result;
   }
 
@@ -476,10 +468,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   ]) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
+                  _________, __________, em) =>
               message.conversationId.equals(conversationId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
+                  __________, ___________, em) =>
               Limit(limit, offset));
 
   Selectable<int> messageCountByConversationId(String conversationId) {
@@ -504,7 +496,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         .get();
     final ids = list.whereNotNull().toList();
     if (ids.isNotEmpty) {
-      await markMessageRead(userId, ids);
+      await markMessageRead(ids);
     }
     await takeUnseen(userId, conversationId);
     return ids;
@@ -715,103 +707,108 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   static const _mediaMessageTypes = [
     MessageCategory.signalImage,
     MessageCategory.plainImage,
+    MessageCategory.encryptedImage,
     MessageCategory.signalVideo,
     MessageCategory.plainVideo,
+    MessageCategory.encryptedVideo,
   ];
 
   Selectable<MessageItem> mediaMessages(
           String conversationId, int limit, int offset) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
+                  _________, __________, em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(_mediaMessageTypes),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
+                  __________, ___________, em) =>
               Limit(limit, offset));
 
   Selectable<MessageItem> mediaMessagesBefore(
           int rowId, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
-              CustomExpression<bool>('${message.aliasedName}.rowid < $rowId') &
+                  _________, __________, ___________) =>
               message.conversationId.equals(conversationId) &
-              message.category.isIn(_mediaMessageTypes),
+              message.category.isIn(_mediaMessageTypes) &
+              message.rowId.isSmallerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
-              Limit(limit, 0));
+                  __________, ___________, ____________) =>
+              Limit(limit, 0),
+          order: (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________, __________, ___________) =>
+              OrderBy([OrderingTerm.desc(message.createdAt)]));
 
   Selectable<MessageItem> mediaMessagesAfter(
           int rowId, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
+                  _________, __________, em) =>
               message.conversationId.equals(conversationId) &
-              CustomExpression<bool>('${message.aliasedName}.rowid > $rowId') &
-              message.category.isIn(_mediaMessageTypes),
+              message.category.isIn(_mediaMessageTypes) &
+              message.rowId.isBiggerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
+                  __________, ___________, ____________) =>
               Limit(limit, 0),
           order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
-              OrderBy([OrderingTerm.asc(message.createdAt)]));
+                  _________, __________, ___________) =>
+              OrderBy([OrderingTerm.desc(message.createdAt)]));
 
   Selectable<MessageItem> postMessages(
           String conversationId, int limit, int offset) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
+                  _________, __________, em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
+                  __________, ___________, em) =>
               Limit(limit, offset));
 
   Selectable<MessageItem> postMessagesBefore(
           int rowId, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
+                  _________, __________, em) =>
               message.conversationId.equals(conversationId) &
               CustomExpression<bool>('${message.aliasedName}.rowid < $rowId') &
               message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
+                  __________, ___________, em) =>
               Limit(limit, 0));
 
   Selectable<MessageItem> fileMessages(
           String conversationId, int limit, int offset) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
+                  _________, __________, em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
+                  __________, ___________, em) =>
               Limit(limit, offset));
 
   Selectable<MessageItem> fileMessagesBefore(
           int rowId, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
+                  _________, __________, em) =>
               message.conversationId.equals(conversationId) &
               CustomExpression<bool>('${message.aliasedName}.rowid < $rowId') &
               message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
+                  __________, ___________, em) =>
               Limit(limit, 0));
 
   Selectable<MessageItem> beforeMessagesByConversationId(
           int rowId, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
+                  _________, __________, em) =>
               message.conversationId.equals(conversationId) &
               CustomExpression<bool>('${message.aliasedName}.rowid < $rowId'),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
+                  __________, ___________, em) =>
               Limit(limit, 0));
 
   Selectable<MessageItem> afterMessagesByConversationId(
@@ -819,26 +816,39 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           {bool orEqual = false}) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
+                  _________, __________, em) =>
               message.conversationId.equals(conversationId) &
               CustomExpression<bool>(
                   '${message.aliasedName}.rowid >${orEqual ? '=' : ''} $rowId'),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
+                  __________, ___________, em) =>
               Limit(limit, 0),
           order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
+                  _________, __________, em) =>
               OrderBy([OrderingTerm.asc(message.createdAt)]));
 
   Selectable<MessageItem> messageItemByMessageId(
           String messageId) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________) =>
+                  _________, __________, em) =>
               message.messageId.equals(messageId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________) =>
+                  __________, ___________, em) =>
               Limit(1, 0));
+
+  Selectable<MessageItem> messageItemByMessageIds(List<String> messageIds) =>
+      _baseMessageItems(
+        (message, _, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, em) =>
+            message.messageId.isIn(messageIds),
+        (_, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________, em) =>
+            maxLimit,
+        order: (message, _, __, ___, ____, _____, ______, _______, ________,
+                _________, __________, em) =>
+            OrderBy([OrderingTerm.asc(message.createdAt)]),
+      );
 
   Future<MessageItem?> findNextAudioMessageItem({
     required String conversationId,
@@ -848,7 +858,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     final rowId = await messageRowId(messageId).getSingleOrNull();
     return _baseMessageItems(
       (message, _, __, ___, ____, _____, ______, _______, conversation,
-              ________, _________) =>
+              ________, _________, em) =>
           conversation.conversationId.equals(conversationId) &
           message.category.isIn([
             MessageCategory.signalAudio,
@@ -859,10 +869,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               message.createdAt.converter.mapToSql(createdAt)) &
           message.rowId.isBiggerThanValue(rowId),
       (_, __, ___, ____, _____, ______, _______, ________, _________,
-              __________, ___________) =>
+              __________, ___________, em) =>
           Limit(1, 0),
       order: (message, _, __, ___, ____, _____, ______, _______, ________,
-              _________, __________) =>
+              _________, __________, em) =>
           OrderBy([OrderingTerm.asc(message.createdAt)]),
     ).getSingleOrNull();
   }
@@ -923,6 +933,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     await _recallPinMessage(messageId);
 
     await db.pinMessageDao.deleteByIds([messageId]);
+    await db.expiredMessageDao.deleteByMessageId(messageId);
     // Maybe use another event
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
     db.eventBus.send(DatabaseEvent.notification, messageId);
@@ -1041,7 +1052,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     required String conversationId,
     required String userId,
     required String query,
-    List<String>? categories,
     required int limit,
     int offset = 0,
   }) {

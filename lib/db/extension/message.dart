@@ -3,10 +3,13 @@ import 'dart:convert';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../enum/media_status.dart';
+import '../../enum/message_category.dart';
+import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../converter/media_status_type_converter.dart';
 import '../converter/message_status_type_converter.dart';
 import '../converter/millis_date_converter.dart';
 import '../mixin_database.dart';
+import 'message_category.dart';
 
 extension MessageItemExtension on MessageItem {
   bool get isLottie => assetType?.toLowerCase() == 'json';
@@ -16,6 +19,22 @@ extension MessageItemExtension on MessageItem {
   bool get isEncrypted => type.startsWith('ENCRYPTED_');
 
   bool get isSecret => isSignal || isEncrypted;
+
+  bool get canForward =>
+      type.isText ||
+      type.isImage ||
+      type.isVideo ||
+      type.isAudio ||
+      type.isData ||
+      type.isSticker ||
+      type.isContact ||
+      type.isLive ||
+      type.isPost ||
+      type.isLocation ||
+      (type == MessageCategory.appCard &&
+          AppCardData.fromJson(jsonDecode(content!) as Map<String, dynamic>)
+              .shareable) ||
+      (type.isTranscript && mediaStatus == MediaStatus.done);
 }
 
 extension QuoteMessageItemExtension on QuoteMessageItem {
@@ -60,12 +79,9 @@ extension QuoteMessageItemExtension on QuoteMessageItem {
 
 QuoteMessageItem mapToQuoteMessage(Map<String, dynamic> map) {
   final createdAtJson = map['created_at'] ?? map['createdAt'];
-  DateTime createdAt;
-  if (createdAtJson is String) {
-    createdAt = DateTime.parse(createdAtJson);
-  } else {
-    createdAt = const MillisDateConverter().mapToDart(createdAtJson as int?)!;
-  }
+  final createdAt = createdAtJson is String
+      ? DateTime.parse(createdAtJson)
+      : const MillisDateConverter().mapToDart(createdAtJson as int?)!;
   return QuoteMessageItem(
     userId: map['user_id'] as String,
     status:

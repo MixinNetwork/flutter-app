@@ -1,8 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../constants/resources.dart';
-import '../../utils/auto_update_checker.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/system/package_info.dart';
@@ -11,7 +11,7 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 
 class AboutPage extends HookWidget {
-  const AboutPage({Key? key}) : super(key: key);
+  const AboutPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +85,7 @@ class AboutPage extends HookWidget {
                     ),
                     CellItem(
                       title: Text(context.l10n.checkNewVersion),
-                      onTap: () => checkUpdate(context: context, force: true),
+                      onTap: () => openCheckUpdate(context),
                     ),
                   ],
                 ),
@@ -95,5 +95,18 @@ class AboutPage extends HookWidget {
         ),
       ),
     );
+  }
+
+  void openCheckUpdate(BuildContext context) {
+    if (defaultTargetPlatform == TargetPlatform.linux) {
+      openUri(context, 'https://mixin.one/messenger');
+    } else if (defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      openUri(
+          context, 'https://apps.apple.com/app/mixin-messenger/id1571128582');
+    } else if (defaultTargetPlatform == TargetPlatform.windows) {
+      openUri(context,
+          'https://apps.microsoft.com/store/detail/mixin-desktop/9NQ6HF99B8NJ');
+    }
   }
 }

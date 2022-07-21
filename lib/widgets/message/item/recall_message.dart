@@ -12,9 +12,7 @@ import '../message.dart';
 import '../message_bubble.dart';
 
 class RecallMessage extends HookWidget {
-  const RecallMessage({
-    Key? key,
-  }) : super(key: key);
+  const RecallMessage({super.key});
 
   @override
   Widget build(BuildContext context) {

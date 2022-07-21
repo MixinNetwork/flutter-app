@@ -4,7 +4,6 @@ import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -26,8 +25,6 @@ import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
-import 'utils/app_lifecycle.dart';
-import 'utils/auto_update_checker.dart';
 import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
@@ -36,6 +33,7 @@ import 'utils/system/tray.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
 import 'widgets/message/item/text/mention_builder.dart';
+import 'widgets/portal_providers.dart';
 import 'widgets/window/menus.dart';
 import 'widgets/window/move_window.dart';
 import 'widgets/window/window_shortcuts.dart';
@@ -43,7 +41,7 @@ import 'widgets/window/window_shortcuts.dart';
 final rootRouteObserver = RouteObserver<ModalRoute>();
 
 class App extends StatelessWidget {
-  const App({Key? key}) : super(key: key);
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -105,9 +103,7 @@ class App extends StatelessWidget {
                 builder: (context, accountServer, child) {
                   if (accountServer != null) {
                     return _Providers(
-                      app: Portal(
-                        child: child!,
-                      ),
+                      app: child!,
                       accountServer: accountServer,
                     );
                   }
@@ -125,10 +121,9 @@ class App extends StatelessWidget {
 
 class _Providers extends StatelessWidget {
   const _Providers({
-    Key? key,
     required this.app,
     required this.accountServer,
-  }) : super(key: key);
+  });
 
   final Widget app;
   final AccountServer accountServer;
@@ -182,7 +177,7 @@ class _Providers extends StatelessWidget {
                   NotificationService(context: context),
               lazy: false,
               dispose: (_, notificationService) => notificationService.close(),
-              child: app,
+              child: PortalProviders(child: app),
             ),
           ),
         ),
@@ -190,9 +185,7 @@ class _Providers extends StatelessWidget {
 }
 
 class _App extends StatelessWidget {
-  const _App({
-    Key? key,
-  }) : super(key: key);
+  const _App();
 
   @override
   Widget build(BuildContext context) => WindowShortcuts(
@@ -240,9 +233,7 @@ class _App extends StatelessWidget {
 }
 
 class _Home extends HookWidget {
-  const _Home({
-    Key? key,
-  }) : super(key: key);
+  const _Home();
 
   @override
   Widget build(BuildContext context) {
@@ -262,23 +253,6 @@ class _Home extends HookWidget {
           ..initCircles();
       }
     }, [signed]);
-
-    useEffect(() {
-      if (Platform.isIOS || Platform.isAndroid || Platform.isWindows) {
-        return null;
-      }
-      void onAppStateChanged() {
-        if (isAppActive && accountServer != null) {
-          checkUpdate(context: context);
-        }
-      }
-
-      onAppStateChanged();
-      appActiveListener.addListener(onAppStateChanged);
-      return () {
-        appActiveListener.removeListener(onAppStateChanged);
-      };
-    }, [accountServer]);
 
     if (signed) {
       BlocProvider.of<ConversationListBloc>(context)

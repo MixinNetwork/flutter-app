@@ -29,13 +29,13 @@ import 'text/mention_builder.dart';
 // ignore_for_file: avoid_dynamic_calls
 class QuoteMessage extends HookWidget {
   const QuoteMessage({
-    Key? key,
+    super.key,
     this.content,
     this.quoteMessageId,
     this.messageId,
     this.message,
     this.isTranscriptPage = false,
-  }) : super(key: key);
+  });
 
   final String? content;
   final String? quoteMessageId;
@@ -336,7 +336,6 @@ class QuoteMessage extends HookWidget {
 
 class _QuoteMessageBase extends StatelessWidget {
   const _QuoteMessageBase({
-    Key? key,
     required this.messageId,
     required this.quoteMessageId,
     required this.userId,
@@ -346,7 +345,7 @@ class _QuoteMessageBase extends StatelessWidget {
     this.image,
     required this.inputMode,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final String? messageId;
   final String quoteMessageId;
@@ -367,7 +366,9 @@ class _QuoteMessageBase extends StatelessWidget {
         ? getNameColorById(userId!)
         : context.theme.accent;
     return ClipRRect(
-      borderRadius: inputMode ? BorderRadius.zero : BorderRadius.circular(8),
+      borderRadius: inputMode
+          ? BorderRadius.zero
+          : const BorderRadius.all(Radius.circular(8)),
       child: GestureDetector(
         onTap: () {
           if (onTap != null) {
@@ -469,7 +470,7 @@ class _QuoteMessageBase extends StatelessWidget {
                   height: 48,
                   child: RepaintBoundary(
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: const BorderRadius.all(Radius.circular(6)),
                       child: image,
                     ),
                   ),

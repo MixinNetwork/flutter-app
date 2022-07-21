@@ -8,7 +8,7 @@ part 'pin_message_dao.g.dart';
 @DriftAccessor(tables: [PinMessages])
 class PinMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$PinMessageDaoMixin {
-  PinMessageDao(MixinDatabase attachedDatabase) : super(attachedDatabase);
+  PinMessageDao(super.attachedDatabase);
 
   Future<int> insert(PinMessage pinMessage) =>
       into(db.pinMessages).insertOnConflictUpdate(pinMessage);
@@ -37,10 +37,10 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
       db.basePinMessageItems(
         conversationId,
         (_, message, __, ___, ____, _____, ______, _______, ________, _________,
-                __________) =>
+                __________, em) =>
             OrderBy([OrderingTerm.asc(message.createdAt)]),
         (_, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________) =>
+                __________, ___________, em) =>
             maxLimit,
       );
 }

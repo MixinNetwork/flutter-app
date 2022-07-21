@@ -26,7 +26,7 @@ extension SnapshotConverter on sdk.Snapshot {
 @DriftAccessor(tables: [Snapshots], include: {'../moor/dao/snapshot.drift'})
 class SnapshotDao extends DatabaseAccessor<MixinDatabase>
     with _$SnapshotDaoMixin {
-  SnapshotDao(MixinDatabase db) : super(db);
+  SnapshotDao(super.db);
 
   Future<int> insert(Snapshot snapshot) =>
       into(db.snapshots).insertOnConflictUpdate(snapshot);

@@ -2,13 +2,14 @@ import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../account/scam_warning.dart';
+import '../../../account/scam_warning_key_value.dart';
 import '../../../account/show_pin_message_key_value.dart';
 import '../../../bloc/simple_cubit.dart';
 import '../../../bloc/subscribe_mixin.dart';
@@ -33,10 +34,12 @@ import '../../../widgets/window/menus.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
+import '../bloc/message_selection_cubit.dart';
 import '../bloc/pending_jump_message_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import '../chat_slide_page/chat_info_page.dart';
 import '../chat_slide_page/circle_manager_page.dart';
+import '../chat_slide_page/disappear_message_page.dart';
 import '../chat_slide_page/group_participants_page.dart';
 import '../chat_slide_page/groups_in_common_page.dart';
 import '../chat_slide_page/pin_messages_page.dart';
@@ -50,6 +53,7 @@ import '../route/responsive_navigator_cubit.dart';
 import 'chat_bar.dart';
 import 'files_preview.dart';
 import 'input_container.dart';
+import 'selection_bottom_bar.dart';
 
 class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   ChatSideCubit() : super(const ResponsiveNavigatorState());
@@ -62,6 +66,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   static const pinMessages = 'pinMessages';
   static const sharedApps = 'sharedApps';
   static const groupsInCommon = 'groupsInCommon';
+  static const disappearMessages = 'disappearMessages';
 
   @override
   MaterialPage route(String name, Object? arguments) {
@@ -114,6 +119,12 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
           name: groupsInCommon,
           child: GroupsInCommonPage(),
         );
+      case disappearMessages:
+        return const MaterialPage(
+          key: ValueKey(disappearMessages),
+          name: disappearMessages,
+          child: DisappearMessagePage(),
+        );
       default:
         throw ArgumentError('Invalid route');
     }
@@ -150,11 +161,11 @@ class SearchConversationKeywordCubit
 }
 
 class ChatPage extends HookWidget {
-  const ChatPage({Key? key}) : super(key: key);
+  const ChatPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final chatContainerPageKey = useMemoized(() => GlobalKey());
+    final chatContainerPageKey = useMemoized(GlobalKey.new);
     final conversationId =
         useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
             converter: (state) => state?.conversationId);
@@ -162,12 +173,16 @@ class ChatPage extends HookWidget {
         useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
             converter: (state) => state?.initialSidePage);
 
-    final chatSideCubit =
-        useBloc(() => ChatSideCubit(), keys: [conversationId]);
+    final chatSideCubit = useBloc(ChatSideCubit.new, keys: [conversationId]);
 
     final searchConversationKeywordCubit = useBloc(
         () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
         keys: [conversationId]);
+
+    final messageSelectionCubit = useBloc(
+      MessageSelectionCubit.new,
+      keys: [conversationId],
+    );
 
     useEffect(() {
       if (initialSidePage != null) {
@@ -178,6 +193,17 @@ class ChatPage extends HookWidget {
     final navigatorState =
         useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
             bloc: chatSideCubit);
+
+    useEffect(
+        () => messageSelectionCubit.stream
+                .map((event) => event.hasSelectedMessage)
+                .distinct()
+                .listen((hasSelectedMessage) {
+              if (hasSelectedMessage) {
+                chatSideCubit.clear();
+              }
+            }).cancel,
+        [messageSelectionCubit, chatSideCubit]);
 
     final chatContainerPage = MaterialPage(
       key: const ValueKey('chatContainer'),
@@ -224,6 +250,7 @@ class ChatPage extends HookWidget {
               vlcService.dispose(),
         ),
         Provider.value(value: pinMessageState),
+        BlocProvider.value(value: messageSelectionCubit),
       ],
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -271,12 +298,11 @@ class ChatPage extends HookWidget {
 
 class _SideRouter extends StatelessWidget {
   const _SideRouter({
-    Key? key,
     required this.chatSideCubit,
     required this.pages,
     this.onPopPage,
     required this.constraints,
-  }) : super(key: key);
+  });
 
   final ChatSideCubit chatSideCubit;
 
@@ -289,31 +315,21 @@ class _SideRouter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final routeMode = chatSideCubit.state.routeMode;
-    if (routeMode) {
-      return SizedBox(
-        width: constraints.maxWidth,
-        child: Navigator(
-          pages: pages,
-          onPopPage: onPopPage,
-        ),
-      );
-    } else {
-      return _AnimatedChatSlide(
-        constraints: constraints,
-        pages: pages,
-        onPopPage: onPopPage,
-      );
-    }
+    return routeMode
+        ? SizedBox(
+            width: constraints.maxWidth,
+            child: Navigator(pages: pages, onPopPage: onPopPage))
+        : _AnimatedChatSlide(
+            constraints: constraints, pages: pages, onPopPage: onPopPage);
   }
 }
 
 class _AnimatedChatSlide extends HookWidget {
   const _AnimatedChatSlide({
-    Key? key,
     required this.pages,
     required this.constraints,
     required this.onPopPage,
-  }) : super(key: key);
+  });
 
   final List<Page<dynamic>> pages;
 
@@ -368,17 +384,20 @@ class _AnimatedChatSlide extends HookWidget {
 }
 
 class ChatContainer extends HookWidget {
-  const ChatContainer({
-    Key? key,
-  }) : super(key: key);
+  const ChatContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final quoteMessageCubit = useBloc(() => QuoteMessageCubit());
+    final quoteMessageCubit = useBloc(QuoteMessageCubit.new);
     BlocProvider.of<MessageBloc>(context).limit =
         MediaQuery.of(context).size.height ~/ 20;
 
-    final pendingJumpMessageCubit = useBloc(() => PendingJumpMessageCubit());
+    final pendingJumpMessageCubit = useBloc(PendingJumpMessageCubit.new);
+
+    final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
+        MessageSelectionState, bool>(
+      converter: (state) => state.hasSelectedMessage,
+    );
 
     return RepaintBoundary(
       child: MultiProvider(
@@ -386,103 +405,129 @@ class ChatContainer extends HookWidget {
           BlocProvider.value(value: quoteMessageCubit),
           BlocProvider.value(value: pendingJumpMessageCubit),
         ],
-        child: Column(
-          children: [
-            Container(
-              height: 64,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: context.theme.divider,
-                  ),
-                ),
-              ),
-              child: const ChatBar(),
-            ),
-            Expanded(
-              child: DecoratedBox(
+        child: FocusableActionDetector(
+          autofocus: true,
+          shortcuts: {
+            if (inMultiSelectMode)
+              const SingleActivator(LogicalKeyboardKey.escape):
+                  const _ExitSelectionModeIntent(),
+          },
+          actions: {
+            _ExitSelectionModeIntent: CallbackAction<_ExitSelectionModeIntent>(
+              onInvoke: (intent) {
+                context.read<MessageSelectionCubit>().clearSelection();
+              },
+            )
+          },
+          child: Column(
+            children: [
+              Container(
+                height: 64,
                 decoration: BoxDecoration(
-                  color: context.theme.chatBackground,
-                  image: DecorationImage(
-                    image: const ExactAssetImage(
-                      Resources.assetsImagesChatBackgroundPng,
-                    ),
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      context.brightnessValue == 1.0
-                          ? Colors.white.withOpacity(0.02)
-                          : Colors.black.withOpacity(0.03),
-                      BlendMode.srcIn,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: context.theme.divider,
                     ),
                   ),
                 ),
-                child: Navigator(
-                  onPopPage: (Route<dynamic> route, dynamic result) =>
-                      route.didPop(result),
-                  pages: [
-                    MaterialPage(
-                      child: _ChatDropOverlay(
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: context.theme.divider,
-                                    ),
-                                  ),
-                                ),
-                                child: Stack(
-                                  children: [
-                                    const RepaintBoundary(
-                                      child: _NotificationListener(
-                                        child: _List(),
-                                      ),
-                                    ),
-                                    const Positioned(
-                                      left: 6,
-                                      right: 6,
-                                      bottom: 6,
-                                      child: _BottomBanner(),
-                                    ),
-                                    Positioned(
-                                      bottom: 16,
-                                      right: 16,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: const [
-                                          _JumpMentionButton(),
-                                          _JumpCurrentButton(),
-                                        ],
-                                      ),
-                                    ),
-                                    const _PinMessagesBanner(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const InputContainer(),
-                          ],
-                        ),
+                child: const ChatBar(),
+              ),
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: context.theme.chatBackground,
+                    image: DecorationImage(
+                      image: const ExactAssetImage(
+                        Resources.assetsImagesChatBackgroundPng,
+                      ),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        context.brightnessValue == 1.0
+                            ? Colors.white.withOpacity(0.02)
+                            : Colors.black.withOpacity(0.03),
+                        BlendMode.srcIn,
                       ),
                     ),
-                  ],
+                  ),
+                  child: Navigator(
+                    onPopPage: (Route<dynamic> route, dynamic result) =>
+                        route.didPop(result),
+                    pages: [
+                      MaterialPage(
+                        child: _ChatDropOverlay(
+                          enable: !inMultiSelectMode,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: context.theme.divider,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      const RepaintBoundary(
+                                        child: _NotificationListener(
+                                          child: _List(),
+                                        ),
+                                      ),
+                                      const Positioned(
+                                        left: 6,
+                                        right: 6,
+                                        bottom: 6,
+                                        child: _BottomBanner(),
+                                      ),
+                                      Positioned(
+                                        bottom: 16,
+                                        right: 16,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: const [
+                                            _JumpMentionButton(),
+                                            _JumpCurrentButton(),
+                                          ],
+                                        ),
+                                      ),
+                                      const _PinMessagesBanner(),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              AnimatedCrossFade(
+                                firstChild: const InputContainer(),
+                                secondChild: const SelectionBottomBar(),
+                                crossFadeState: inMultiSelectMode
+                                    ? CrossFadeState.showSecond
+                                    : CrossFadeState.showFirst,
+                                duration: const Duration(milliseconds: 300),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
+class _ExitSelectionModeIntent extends Intent {
+  const _ExitSelectionModeIntent();
+}
+
 class _NotificationListener extends StatelessWidget {
   const _NotificationListener({
     required this.child,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -520,9 +565,7 @@ class _NotificationListener extends StatelessWidget {
 }
 
 class _List extends HookWidget {
-  const _List({
-    Key? key,
-  }) : super(key: key);
+  const _List();
 
   @override
   Widget build(BuildContext context) {
@@ -629,9 +672,7 @@ class _List extends HookWidget {
 }
 
 class _JumpCurrentButton extends HookWidget {
-  const _JumpCurrentButton({
-    Key? key,
-  }) : super(key: key);
+  const _JumpCurrentButton();
 
   @override
   Widget build(BuildContext context) {
@@ -714,7 +755,7 @@ class _JumpCurrentButton extends HookWidget {
 }
 
 class _BottomBanner extends HookWidget {
-  const _BottomBanner({Key? key}) : super(key: key);
+  const _BottomBanner();
 
   @override
   Widget build(BuildContext context) {
@@ -740,7 +781,7 @@ class _BottomBanner extends HookWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
           color: context.messageBubbleColor(false),
           boxShadow: const [
             BoxShadow(
@@ -793,7 +834,7 @@ class _BottomBanner extends HookWidget {
 }
 
 class _PinMessagesBanner extends HookWidget {
-  const _PinMessagesBanner({Key? key}) : super(key: key);
+  const _PinMessagesBanner();
 
   @override
   Widget build(BuildContext context) {
@@ -889,7 +930,7 @@ class _PinMessagesBanner extends HookWidget {
 }
 
 class _JumpMentionButton extends HookWidget {
-  const _JumpMentionButton({Key? key}) : super(key: key);
+  const _JumpMentionButton();
 
   @override
   Widget build(BuildContext context) {
@@ -978,11 +1019,13 @@ class _JumpMentionButton extends HookWidget {
 
 class _ChatDropOverlay extends HookWidget {
   const _ChatDropOverlay({
-    Key? key,
     required this.child,
-  }) : super(key: key);
+    required this.enable,
+  });
 
   final Widget child;
+
+  final bool enable;
 
   @override
   Widget build(BuildContext context) {
@@ -1006,7 +1049,7 @@ class _ChatDropOverlay extends HookWidget {
         );
         enable.value = true;
       },
-      enable: enable.value,
+      enable: this.enable && enable.value,
       child: Stack(
         children: [
           child,
@@ -1018,7 +1061,7 @@ class _ChatDropOverlay extends HookWidget {
 }
 
 class _ChatDragIndicator extends StatelessWidget {
-  const _ChatDragIndicator({Key? key}) : super(key: key);
+  const _ChatDragIndicator();
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -1049,9 +1092,8 @@ class _ChatDragIndicator extends StatelessWidget {
 
 class _ChatMenuHandler extends HookWidget {
   const _ChatMenuHandler({
-    Key? key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 

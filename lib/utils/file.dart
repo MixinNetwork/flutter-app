@@ -38,14 +38,31 @@ Future<bool> saveFileToSystem(
   String file, {
   String? suggestName,
 }) async {
-  final path = await file_selector.getSavePath(
+  final targetName = suggestName ?? p.basename(file);
+  final mineType = lookupMimeType(file);
+  final extension = p.extension(targetName);
+
+  d('saveFileToSystem: $file, $targetName, $mineType, $extension');
+
+  var path = await file_selector.getSavePath(
     confirmButtonText: context.l10n.save,
-    suggestedName: suggestName ?? p.basename(file),
+    suggestedName: targetName,
+    acceptedTypeGroups: [
+      file_selector.XTypeGroup(
+        label: mineType,
+        extensions: [extension],
+        mimeTypes: [if (mineType != null) mineType],
+      ),
+    ],
   );
-  if (path?.isEmpty ?? true) {
+  if (path == null || path.isEmpty) {
     return false;
   }
-  await File(file).copy(path!);
+
+  if (p.extension(path) != extension) {
+    path = path + extension;
+  }
+  await File(file).copy(path);
   return true;
 }
 
@@ -87,58 +104,9 @@ Future<void> initMixinDocumentsDirectory() async {
   if (Platform.isWindows) {
     mixinDocumentsDirectory = Directory(
         p.join((await getApplicationDocumentsDirectory()).path, 'Mixin'));
-    if (!mixinDocumentsDirectory.existsSync()) {
-      _copyLegacyWindowsFiles();
-    }
     return;
   }
   mixinDocumentsDirectory = await getApplicationDocumentsDirectory();
-}
-
-//TODO remove this in the next version.
-void _copyLegacyWindowsFiles() {
-  mixinDocumentsDirectory.create();
-  final legacyDir = mixinDocumentsDirectory.parent;
-
-  void _copyFile(String source) {
-    final path = p.join(legacyDir.path, source);
-    if (FileSystemEntity.isDirectorySync(path)) {
-      final dir = Directory(path);
-      for (final file in dir.listSync()) {
-        _copyFile(p.relative(file.path, from: legacyDir.path));
-      }
-    } else if (FileSystemEntity.isFileSync(path)) {
-      final file = File(p.join(legacyDir.path, source));
-      final dir = p.dirname(source);
-      Directory(p.join(mixinDocumentsDirectory.path, dir))
-          .createSync(recursive: true);
-      file.copySync(p.join(mixinDocumentsDirectory.path, source));
-    }
-  }
-
-  _copyFile('account_box');
-  _copyFile('crypto_box');
-  _copyFile('privacy_box');
-  _copyFile('show_pin_message_box');
-  _copyFile('hydrated_box.hive');
-  _copyFile('hydrated_box.lock');
-  _copyFile('signal.db');
-  _copyFile('signal.db-shm');
-  _copyFile('signal.db-wal');
-
-  for (final dir in legacyDir.listSync()) {
-    if (!p.basename(dir.path).isNumeric()) {
-      continue;
-    }
-    if (dir is! Directory) {
-      continue;
-    }
-    final db = File(p.join(dir.path, 'mixin.db'));
-    if (!db.existsSync()) {
-      continue;
-    }
-    _copyFile(p.basename(dir.path));
-  }
 }
 
 Future<File?> saveBytesToTempFile(

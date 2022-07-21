@@ -6,7 +6,7 @@ part 'app_dao.g.dart';
 
 @DriftAccessor(tables: [Apps])
 class AppDao extends DatabaseAccessor<MixinDatabase> with _$AppDaoMixin {
-  AppDao(MixinDatabase db) : super(db);
+  AppDao(super.db);
 
   Future<int> insert(App app) => into(db.apps).insertOnConflictUpdate(app);
 

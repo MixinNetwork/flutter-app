@@ -11,10 +11,10 @@ import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
+const kMaxWidth = 140.0;
+
 class StickerMessageWidget extends HookWidget {
-  const StickerMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const StickerMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,37 +31,37 @@ class StickerMessageWidget extends HookWidget {
     double width;
     double height;
     if (assetWidth == null || assetHeight == null) {
-      height = 120;
-      width = 120;
+      height = kMaxWidth;
+      width = kMaxWidth;
     } else if (assetWidth * 2 < dpToPx(context, 48) ||
         assetHeight * 2 < dpToPx(context, 48)) {
       if (assetWidth < assetHeight) {
         if (dpToPx(context, 48) * assetHeight / assetWidth >
-            dpToPx(context, 120)) {
-          height = 120;
-          width = 120 * assetWidth / assetHeight;
+            dpToPx(context, kMaxWidth)) {
+          height = kMaxWidth;
+          width = kMaxWidth * assetWidth / assetHeight;
         } else {
           width = 48;
-          height = 48 * assetHeight / assetWidth;
+          height = assetHeight * 48 / assetWidth;
         }
       } else {
         if (dpToPx(context, 48) * assetWidth / assetHeight >
-            dpToPx(context, 120)) {
-          width = 120;
-          height = 120 * assetHeight / assetWidth;
+            dpToPx(context, kMaxWidth)) {
+          width = kMaxWidth;
+          height = kMaxWidth * assetHeight / assetWidth;
         } else {
           height = 48;
-          width = 48 * assetWidth / assetHeight;
+          width = assetWidth * 48 / assetHeight;
         }
       }
-    } else if (assetWidth * 2 < dpToPx(context, 120) ||
-        assetHeight * 2 > dpToPx(context, 120)) {
+    } else if (assetWidth * 2 < dpToPx(context, kMaxWidth) ||
+        assetHeight * 2 > dpToPx(context, kMaxWidth)) {
       if (assetWidth > assetHeight) {
-        width = 120;
-        height = 120 * assetHeight / assetWidth;
+        width = kMaxWidth;
+        height = kMaxWidth * assetHeight / assetWidth;
       } else {
-        height = 120;
-        width = 120 * assetWidth / assetHeight;
+        height = kMaxWidth;
+        width = kMaxWidth * assetWidth / assetHeight;
       }
     } else {
       width = pxToDp(context, assetWidth * 2);

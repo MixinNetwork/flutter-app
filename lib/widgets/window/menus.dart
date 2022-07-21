@@ -63,9 +63,9 @@ class MacMenuBarCubit extends Cubit<MacMenuBarCubitState> {
 
 class MacosMenuBar extends StatelessWidget {
   const MacosMenuBar({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -79,7 +79,7 @@ class MacosMenuBar extends StatelessWidget {
 }
 
 class _Menus extends HookWidget {
-  const _Menus({Key? key, required this.child}) : super(key: key);
+  const _Menus({required this.child});
 
   final Widget child;
 
@@ -93,7 +93,7 @@ class _Menus extends HookWidget {
     } catch (_) {}
     final signed = authAvailable && accountServer != null;
 
-    final menuCubit = useBloc<MacMenuBarCubit>(() => MacMenuBarCubit());
+    final menuCubit = useBloc<MacMenuBarCubit>(MacMenuBarCubit.new);
 
     final handle = useBlocStateConverter<MacMenuBarCubit, MacMenuBarCubitState,
         ConversationMenuHandle?>(
@@ -162,9 +162,7 @@ class _Menus extends HookWidget {
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
                 label: '${context.l10n.about} Mixin',
-                onSelected: () {
-                  methodChannel.invokeMethod('showAbout');
-                },
+                onSelected: () => methodChannel.invokeMethod('showAbout'),
               ),
             ]),
             PlatformMenuItemGroup(members: [
@@ -207,15 +205,11 @@ class _Menus extends HookWidget {
                     LogicalKeyboardKey.keyH,
                     meta: true,
                   ),
-                  onSelected: () {
-                    appWindow.hide();
-                  },
+                  onSelected: appWindow.hide,
                 ),
                 PlatformMenuItem(
                   label: context.l10n.showMixin,
-                  onSelected: () {
-                    appWindow.show();
-                  },
+                  onSelected: appWindow.show,
                 ),
               ],
             ),
@@ -225,9 +219,7 @@ class _Menus extends HookWidget {
                 LogicalKeyboardKey.keyQ,
                 meta: true,
               ),
-              onSelected: () {
-                exit(0);
-              },
+              onSelected: () => exit(0),
             ),
           ],
         ),
@@ -287,9 +279,7 @@ class _Menus extends HookWidget {
                     LogicalKeyboardKey.keyW,
                     meta: true,
                   ),
-                  onSelected: () {
-                    appWindow.close();
-                  },
+                  onSelected: appWindow.close,
                 )
               ]),
             ]),
@@ -305,9 +295,13 @@ class _Menus extends HookWidget {
                 LogicalKeyboardKey.keyM,
                 meta: true,
               ),
-              onSelected: () {
-                appWindow.minimize();
-              },
+              onSelected: appWindow.minimize,
+            ),
+            PlatformMenuItem(
+              label: context.l10n.zoom,
+              onSelected: () => !appWindow.isMaximized
+                  ? appWindow.maximize()
+                  : appWindow.restore(),
             ),
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
@@ -339,11 +333,25 @@ class _Menus extends HookWidget {
                     : null,
               ),
             ]),
+            PlatformMenuItemGroup(members: [
+              PlatformMenuItem(
+                label: 'Mixin',
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.keyO,
+                  meta: true,
+                ),
+                onSelected: appWindow.show,
+              ),
+            ]),
+            PlatformMenuItemGroup(members: [
+              PlatformMenuItem(
+                label: context.l10n.bringAllToFront,
+                onSelected: appWindow.show,
+              ),
+            ]),
             PlatformMenuItem(
               label: 'Mixin',
-              onSelected: () {
-                appWindow.show();
-              },
+              onSelected: appWindow.show,
             ),
           ],
         ),
@@ -352,21 +360,18 @@ class _Menus extends HookWidget {
           menus: [
             PlatformMenuItem(
               label: context.l10n.helpCenter,
-              onSelected: () {
-                openUri(context, 'https://mixinmessenger.zendesk.com');
-              },
+              onSelected: () =>
+                  openUri(context, 'https://mixinmessenger.zendesk.com'),
             ),
             PlatformMenuItem(
               label: context.l10n.termsOfService,
-              onSelected: () {
-                openUri(context, 'https://mixin.one/pages/terms');
-              },
+              onSelected: () =>
+                  openUri(context, 'https://mixin.one/pages/terms'),
             ),
             PlatformMenuItem(
               label: context.l10n.privacyPolicy,
-              onSelected: () {
-                openUri(context, 'https://mixin.one/pages/privacy');
-              },
+              onSelected: () =>
+                  openUri(context, 'https://mixin.one/pages/privacy'),
             ),
           ],
         ),

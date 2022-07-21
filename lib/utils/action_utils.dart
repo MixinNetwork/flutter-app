@@ -8,7 +8,7 @@ extension OpenUriExtension on BuildContext {
     if (actionText.startsWith('input:')) {
       final content = actionText.substring(6).trim();
       final conversationItem = read<ConversationCubit>().state;
-      if (content.isNotEmpty == true && conversationItem != null) {
+      if (content.isNotEmpty && conversationItem != null) {
         accountServer.sendTextMessage(content, conversationItem.encryptCategory,
             conversationId: conversationItem.conversationId);
       }

@@ -20,7 +20,7 @@ Future<List<File>> getClipboardFiles() async {
     final filePaths = await Pasteboard.files();
     if (filePaths.isNotEmpty) {
       final files =
-          filePaths.map((e) => File(e)).where((e) => e.existsSync()).toList();
+          filePaths.map(File.new).where((e) => e.existsSync()).toList();
       if (files.isNotEmpty) {
         return files;
       }

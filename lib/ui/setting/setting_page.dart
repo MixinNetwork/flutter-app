@@ -8,18 +8,34 @@ import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/local_notification_center.dart';
+import '../../widgets/action_button.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/toast.dart';
 import '../home/bloc/multi_auth_cubit.dart';
+import '../home/home.dart';
 import '../home/route/responsive_navigator_cubit.dart';
 
 class SettingPage extends HookWidget {
-  const SettingPage({Key? key}) : super(key: key);
+  const SettingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final hasDrawer = context.watch<HasDrawerValueNotifier>();
+
+    Widget? leading;
+    if (hasDrawer.value) {
+      leading = ActionButton(
+        onTapUp: (event) => Scaffold.of(context).openDrawer(),
+        child: Icon(
+          Icons.menu,
+          size: 20,
+          color: context.theme.icon,
+        ),
+      );
+    }
+
     final appActive = useValueListenable(appActiveListener);
     final hasNotificationPermission = useMemoizedFuture(
         requestNotificationPermission, null,
@@ -27,8 +43,11 @@ class SettingPage extends HookWidget {
     final controller = useScrollController();
     return Column(
       children: [
-        const MixinAppBar(
-          backgroundColor: Colors.transparent,
+        MixinAppBar(
+          leading: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 150),
+            child: leading ?? const SizedBox(),
+          ),
         ),
         Expanded(
           child: SingleChildScrollView(
@@ -116,14 +135,13 @@ class SettingPage extends HookWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key? key,
     required this.assetName,
     required this.title,
     this.pageName,
     this.color,
     this.onTap,
     this.trailing = const Arrow(),
-  }) : super(key: key);
+  });
 
   final String assetName;
   final String title;
@@ -165,9 +183,7 @@ class _Item extends StatelessWidget {
 }
 
 class _UserProfile extends StatelessWidget {
-  const _UserProfile({
-    Key? key,
-  }) : super(key: key);
+  const _UserProfile();
 
   @override
   Widget build(BuildContext context) => Column(

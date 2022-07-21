@@ -22,11 +22,11 @@ const kMentionItemHeight = 48.0;
 
 class MentionPanelPortalEntry extends HookWidget {
   const MentionPanelPortalEntry({
-    Key? key,
+    super.key,
     required this.constraints,
     required this.textEditingController,
     required this.child,
-  }) : super(key: key);
+  });
 
   final BoxConstraints constraints;
   final TextEditingController textEditingController;
@@ -78,7 +78,7 @@ class MentionPanelPortalEntry extends HookWidget {
         ListSelectionSelectedIntent: CallbackAction<Intent>(
           onInvoke: (Intent intent) {
             final state = context.read<MentionCubit>().state;
-            _select(context, state.users[state.index]);
+            _select(state.users[state.index]);
           },
         ),
       },
@@ -106,7 +106,7 @@ class MentionPanelPortalEntry extends HookWidget {
               ),
               child: _MentionPanel(
                 mentionState: mentionState,
-                onSelect: (User user) => _select(context, user),
+                onSelect: _select,
               ),
             ),
           ),
@@ -116,7 +116,7 @@ class MentionPanelPortalEntry extends HookWidget {
     );
   }
 
-  void _select(BuildContext context, User user) {
+  void _select(User user) {
     final selectionOffset = max(textEditingController.selection.baseOffset, 0);
     final text = textEditingController.text;
 
@@ -139,10 +139,9 @@ class MentionPanelPortalEntry extends HookWidget {
 
 class _MentionPanel extends StatelessWidget {
   const _MentionPanel({
-    Key? key,
     required this.mentionState,
     required this.onSelect,
-  }) : super(key: key);
+  });
 
   final MentionState mentionState;
   final Function(User user) onSelect;
@@ -168,12 +167,11 @@ class _MentionPanel extends StatelessWidget {
 
 class _MentionItem extends StatelessWidget {
   const _MentionItem({
-    Key? key,
     required this.user,
     this.keyword,
     this.selected = false,
     this.onSelect,
-  }) : super(key: key);
+  });
 
   final User user;
   final String? keyword;

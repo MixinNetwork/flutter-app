@@ -10,7 +10,7 @@ import '../../widgets/cell.dart';
 import '../../widgets/radio.dart';
 
 class AppearancePage extends StatelessWidget {
-  const AppearancePage({Key? key}) : super(key: key);
+  const AppearancePage({super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -26,7 +26,7 @@ class AppearancePage extends StatelessWidget {
 }
 
 class _Body extends StatelessWidget {
-  const _Body({Key? key}) : super(key: key);
+  const _Body();
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
@@ -92,7 +92,7 @@ class _Body extends StatelessWidget {
 }
 
 class _MessageAvatarSetting extends HookWidget {
-  const _MessageAvatarSetting({Key? key}) : super(key: key);
+  const _MessageAvatarSetting();
 
   @override
   Widget build(BuildContext context) {

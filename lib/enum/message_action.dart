@@ -6,4 +6,5 @@ class MessageAction {
   static const String create = 'CREATE';
   static const String update = 'UPDATE';
   static const String role = 'ROLE';
+  static const String expire = 'EXPIRE';
 }

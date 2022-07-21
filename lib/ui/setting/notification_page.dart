@@ -15,7 +15,7 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 
 class NotificationPage extends HookWidget {
-  const NotificationPage({Key? key}) : super(key: key);
+  const NotificationPage({super.key});
 
   @override
   Widget build(BuildContext context) {

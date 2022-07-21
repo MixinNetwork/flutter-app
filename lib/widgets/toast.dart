@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
@@ -48,11 +49,11 @@ class Toast {
 
 class ToastWidget extends StatelessWidget {
   const ToastWidget({
-    Key? key,
+    super.key,
     this.barrierColor = const Color(0x80000000),
     this.icon,
     required this.text,
-  }) : super(key: key);
+  });
 
   final Color barrierColor;
   final Widget? icon;
@@ -69,9 +70,9 @@ class ToastWidget extends StatelessWidget {
               minWidth: 130,
             ),
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: const Color.fromRGBO(62, 65, 72, 0.7),
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+                color: Color.fromRGBO(62, 65, 72, 0.7),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -114,6 +115,7 @@ class ToastError extends Error {
 
   final String message;
 
+  // ignore: avoid-unused-parameters
   static ToastError? fromError(Object? error) => null;
 }
 
@@ -121,6 +123,8 @@ Future<void> showToastFailed(BuildContext context, Object? error) {
   String? message;
   if (error is ToastError) {
     message = error.message;
+  } else if (error is MixinApiError) {
+    message = (error.error as MixinError).description;
   } else {
     message = ToastError.fromError(error)?.message;
   }
@@ -144,7 +148,7 @@ void showToastLoading(BuildContext context) => Toast.createView(
     );
 
 class _Loading extends StatelessWidget {
-  const _Loading({Key? key}) : super(key: key);
+  const _Loading();
 
   @override
   Widget build(BuildContext context) => const CircularProgressIndicator(
@@ -154,7 +158,7 @@ class _Loading extends StatelessWidget {
 }
 
 class _Failed extends StatelessWidget {
-  const _Failed({Key? key}) : super(key: key);
+  const _Failed();
 
   @override
   Widget build(BuildContext context) =>
@@ -162,7 +166,7 @@ class _Failed extends StatelessWidget {
 }
 
 class _Successful extends StatelessWidget {
-  const _Successful({Key? key}) : super(key: key);
+  const _Successful();
 
   @override
   Widget build(BuildContext context) =>
@@ -184,4 +188,16 @@ Future<bool> runFutureWithToast(
   showToastSuccessful(context);
 
   return true;
+}
+
+Future<void> runWithLoading(
+    BuildContext context, Future<void> Function() function) async {
+  showToastLoading(context);
+  try {
+    await function();
+    Toast.dismiss();
+  } catch (error, s) {
+    e("runWithLoading's error: $error, $s");
+    await showToastFailed(context, error);
+  }
 }

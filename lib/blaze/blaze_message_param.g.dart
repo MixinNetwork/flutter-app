@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'blaze_param.dart';
+part of 'blaze_message_param.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
@@ -36,6 +36,7 @@ BlazeMessageParam _$BlazeMessageParamFromJson(Map<String, dynamic> json) =>
           ?.map((e) => e as String)
           .toList(),
       silent: json['silent'] as bool?,
+      expireIn: json['expire_in'] as int? ?? 0,
     );
 
 Map<String, dynamic> _$BlazeMessageParamToJson(BlazeMessageParam instance) =>
@@ -59,4 +60,5 @@ Map<String, dynamic> _$BlazeMessageParamToJson(BlazeMessageParam instance) =>
       'track_id': instance.trackId,
       'recipient_ids': instance.recipientIds,
       'silent': instance.silent,
+      'expire_in': instance.expireIn,
     };

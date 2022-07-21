@@ -9,9 +9,7 @@ import '../../toast.dart';
 import '../message.dart';
 
 class StrangerMessage extends StatelessWidget {
-  const StrangerMessage({
-    Key? key,
-  }) : super(key: key);
+  const StrangerMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -78,9 +76,8 @@ class StrangerMessage extends StatelessWidget {
 class _StrangerButton extends StatelessWidget {
   const _StrangerButton(
     this.text, {
-    Key? key,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final String text;
   final VoidCallback? onTap;
@@ -90,7 +87,7 @@ class _StrangerButton extends StatelessWidget {
         onTap: onTap,
         decoration: BoxDecoration(
           color: context.theme.primary,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
         ),
         child: ConstrainedBox(
           constraints: const BoxConstraints(

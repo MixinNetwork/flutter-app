@@ -19,7 +19,7 @@ final SystemTray _systemTray = SystemTray();
 final _enableTray = Platform.isWindows;
 
 class SystemTrayWidget extends HookWidget {
-  const SystemTrayWidget({Key? key, required this.child}) : super(key: key);
+  const SystemTrayWidget({super.key, required this.child});
 
   final Widget child;
 

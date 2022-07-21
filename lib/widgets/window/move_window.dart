@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 
 class MoveWindowBarrier extends StatelessWidget {
   const MoveWindowBarrier({
-    Key? key,
+    super.key,
     required this.child,
     this.enable = true,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -27,10 +27,10 @@ class MoveWindowBarrier extends StatelessWidget {
 /// Use [MoveWindowBarrier] to intercept window move action.
 class MoveWindow extends StatelessWidget {
   const MoveWindow({
-    Key? key,
+    super.key,
     this.child,
     this.behavior,
-  }) : super(key: key);
+  });
 
   final Widget? child;
 
@@ -53,7 +53,7 @@ class MoveWindow extends StatelessWidget {
 
 /// Global default window move action detector.
 class GlobalMoveWindow extends StatelessWidget {
-  const GlobalMoveWindow({Key? key, required this.child}) : super(key: key);
+  const GlobalMoveWindow({super.key, required this.child});
 
   final Widget child;
 

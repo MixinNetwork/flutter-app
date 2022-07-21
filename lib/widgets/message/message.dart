@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:equatable/equatable.dart';
@@ -7,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:open_file/open_file.dart';
@@ -18,12 +18,14 @@ import '../../account/account_server.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
 import '../../bloc/setting_cubit.dart';
 import '../../bloc/simple_cubit.dart';
+import '../../constants/resources.dart';
 import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
+import '../../ui/home/bloc/message_selection_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../ui/home/bloc/recall_message_bloc.dart';
 import '../../utils/datetime_format_utils.dart';
@@ -38,7 +40,6 @@ import '../toast.dart';
 import '../user/user_dialog.dart';
 import '../user_selector/conversation_selector.dart';
 import 'item/action/action_message.dart';
-import 'item/action_card/action_card_data.dart';
 import 'item/action_card/action_message.dart';
 import 'item/audio_message.dart';
 import 'item/contact_message_widget.dart';
@@ -62,7 +63,7 @@ import 'message_day_time.dart';
 import 'message_name.dart';
 
 class _MessageContextCubit extends SimpleCubit<_MessageContext> {
-  _MessageContextCubit(_MessageContext initialState) : super(initialState);
+  _MessageContextCubit(super.initialState);
 }
 
 class _MessageContext with EquatableMixin {
@@ -123,7 +124,7 @@ const _pinArrowWidth = 32.0;
 
 class MessageItemWidget extends HookWidget {
   const MessageItemWidget({
-    Key? key,
+    super.key,
     required this.message,
     this.prev,
     this.next,
@@ -131,7 +132,7 @@ class MessageItemWidget extends HookWidget {
     this.isTranscriptPage = false,
     this.blink = true,
     this.isPinnedPage = false,
-  }) : super(key: key);
+  });
 
   final MessageItem message;
   final MessageItem? prev;
@@ -231,192 +232,212 @@ class MessageItemWidget extends HookWidget {
                 return const StrangerMessage();
               }
 
-              return _MessageBubbleMargin(
-                userName: userName,
-                userId: userId,
-                userAvatarUrl: userAvatarUrl,
-                showAvatar: showAvatar,
-                isCurrentUser: isCurrentUser,
-                pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
-                showedMenu: showedMenuCubit.emit,
-                buildMenus: () => [
-                  if (message.type.isSticker)
-                    ContextMenu(
-                      title: context.l10n.addSticker,
-                      onTap: () => _onAddSticker(context),
-                    ),
-                  if (!isTranscriptPage &&
-                      message.type.canReply &&
-                      !isPinnedPage)
-                    ContextMenu(
-                      title: context.l10n.reply,
-                      onTap: () =>
-                          context.read<QuoteMessageCubit>().emit(message),
-                    ),
-                  if (!isTranscriptPage &&
-                      message.type.canReply &&
-                      const [
-                        MessageStatus.delivered,
-                        MessageStatus.read,
-                        MessageStatus.sent
-                      ].contains(message.status))
-                    _PinMenu(message: message),
-                  if (!isTranscriptPage && message.canForward)
-                    ContextMenu(
-                      title: context.l10n.forward,
-                      onTap: () async {
-                        final result = await showConversationSelector(
-                          context: context,
-                          singleSelect: true,
-                          title: context.l10n.forward,
-                          onlyContact: false,
-                        );
-                        if (result == null || result.isEmpty) return;
-                        await context.accountServer.forwardMessage(
-                          message.messageId,
-                          result.first.encryptCategory!,
-                          conversationId: result.first.conversationId,
-                          recipientId: result.first.userId,
-                        );
-                      },
-                    ),
-                  if (message.type.isText)
-                    ContextMenu(
-                      title: context.l10n.copy,
-                      onTap: () => Clipboard.setData(
-                          ClipboardData(text: message.content)),
-                    ),
-                  if (kPlatformIsMobile &&
-                      (message.type.isImage || message.type.isVideo))
-                    ContextMenu(
-                      title: context.l10n.saveToCameraRoll,
-                      onTap: () => saveAs(context, context.accountServer,
-                          message, isTranscriptPage),
-                    ),
-                  if (kPlatformIsDesktop &&
-                      message.mediaStatus == MediaStatus.done &&
-                      message.mediaUrl?.isNotEmpty == true &&
-                      (message.type.isData ||
-                          message.type.isImage ||
-                          message.type.isVideo ||
-                          message.type.isAudio)) ...[
-                    ContextMenu(
-                      title: context.l10n.saveAs,
-                      onTap: () => saveAs(context, context.accountServer,
-                          message, isTranscriptPage),
-                    ),
+              return _MessageSelectionWrapper(
+                messageId: message.messageId,
+                child: _MessageBubbleMargin(
+                  userName: userName,
+                  userId: userId,
+                  userAvatarUrl: userAvatarUrl,
+                  showAvatar: showAvatar,
+                  isCurrentUser: isCurrentUser,
+                  pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
+                  showedMenu: showedMenuCubit.emit,
+                  buildMenus: () => [
+                    if (message.type.isSticker)
+                      ContextMenu(
+                        icon: Resources.assetsImagesContextMenuStickerSvg,
+                        title: context.l10n.addSticker,
+                        onTap: () => _onAddSticker(context),
+                      ),
+                    if (!isTranscriptPage &&
+                        message.type.canReply &&
+                        !isPinnedPage)
+                      ContextMenu(
+                        icon: Resources.assetsImagesContextMenuReplySvg,
+                        title: context.l10n.reply,
+                        onTap: () =>
+                            context.read<QuoteMessageCubit>().emit(message),
+                      ),
+                    if (!isTranscriptPage &&
+                        message.type.canReply &&
+                        const [
+                          MessageStatus.delivered,
+                          MessageStatus.read,
+                          MessageStatus.sent
+                        ].contains(message.status))
+                      _PinMenu(message: message),
+                    if (!isTranscriptPage && message.canForward)
+                      ContextMenu(
+                        icon: Resources.assetsImagesContextMenuForwardSvg,
+                        title: context.l10n.forward,
+                        onTap: () async {
+                          final result = await showConversationSelector(
+                            context: context,
+                            singleSelect: true,
+                            title: context.l10n.forward,
+                            onlyContact: false,
+                          );
+                          if (result == null || result.isEmpty) return;
+                          await context.accountServer.forwardMessage(
+                            message.messageId,
+                            result.first.encryptCategory!,
+                            conversationId: result.first.conversationId,
+                            recipientId: result.first.userId,
+                          );
+                        },
+                      ),
+                    if (!isTranscriptPage)
+                      ContextMenu(
+                        icon: Resources.assetsImagesMultiSelectionSvg,
+                        title: context.l10n.select,
+                        onTap: () => context
+                            .read<MessageSelectionCubit>()
+                            .selectMessage(message.messageId),
+                      ),
+                    if (message.type.isText || message.type.isPost)
+                      ContextMenu(
+                        icon: Resources.assetsImagesContextMenuCopySvg,
+                        title: context.l10n.copy,
+                        onTap: () => Clipboard.setData(
+                            ClipboardData(text: message.content)),
+                      ),
+                    if (kPlatformIsMobile &&
+                        (message.type.isImage || message.type.isVideo))
+                      ContextMenu(
+                        icon: Resources.assetsImagesContextMenuDownloadSvg,
+                        title: context.l10n.saveToCameraRoll,
+                        onTap: () => saveAs(context, context.accountServer,
+                            message, isTranscriptPage),
+                      ),
+                    if (kPlatformIsDesktop &&
+                        message.mediaStatus == MediaStatus.done &&
+                        message.mediaUrl?.isNotEmpty == true &&
+                        (message.type.isData ||
+                            message.type.isImage ||
+                            message.type.isVideo ||
+                            message.type.isAudio)) ...[
+                      ContextMenu(
+                        icon: Resources.assetsImagesContextMenuDownloadSvg,
+                        title: context.l10n.saveAs,
+                        onTap: () => saveAs(context, context.accountServer,
+                            message, isTranscriptPage),
+                      ),
+                    ],
+                    if ([
+                          MessageStatus.sent,
+                          MessageStatus.delivered,
+                          MessageStatus.read,
+                        ].contains(message.status) &&
+                        !isTranscriptPage &&
+                        isCurrentUser &&
+                        message.type.canRecall &&
+                        DateTime.now().isBefore(
+                            message.createdAt.add(const Duration(minutes: 30))))
+                      ContextMenu(
+                        icon: Resources.assetsImagesContextMenuRecallSvg,
+                        title: context.l10n.deleteForEveryone,
+                        isDestructiveAction: true,
+                        onTap: () async {
+                          String? content;
+                          if (message.type.isText) {
+                            content = message.content;
+                          }
+                          await context.accountServer.sendRecallMessage(
+                            [message.messageId],
+                            conversationId: message.conversationId,
+                          );
+                          if (content != null) {
+                            context
+                                .read<RecallMessageReeditCubit>()
+                                .onRecalled(message.messageId, content);
+                          }
+                        },
+                      ),
+                    if (!isTranscriptPage)
+                      ContextMenu(
+                        icon: Resources.assetsImagesContextMenuDeleteSvg,
+                        title: context.l10n.deleteForMe,
+                        isDestructiveAction: true,
+                        onTap: () => context.accountServer
+                            .deleteMessage(message.messageId),
+                      ),
+                    if (!kReleaseMode)
+                      ContextMenu(
+                        icon: Resources.assetsImagesContextMenuCopySvg,
+                        title: 'Copy message',
+                        onTap: () => Clipboard.setData(
+                            ClipboardData(text: message.toString())),
+                      ),
                   ],
-                  if ([
-                        MessageStatus.sent,
-                        MessageStatus.delivered,
-                        MessageStatus.read,
-                      ].contains(message.status) &&
-                      !isTranscriptPage &&
-                      isCurrentUser &&
-                      message.type.canRecall &&
-                      DateTime.now().isBefore(
-                          message.createdAt.add(const Duration(minutes: 30))))
-                    ContextMenu(
-                      title: context.l10n.deleteForEveryone,
-                      isDestructiveAction: true,
-                      onTap: () async {
-                        String? content;
-                        if (message.type.isText) {
-                          content = message.content;
-                        }
-                        await context.accountServer.sendRecallMessage(
-                          [message.messageId],
-                          conversationId: message.conversationId,
-                        );
-                        if (content != null) {
-                          context
-                              .read<RecallMessageReeditCubit>()
-                              .onRecalled(message.messageId, content);
-                        }
-                      },
-                    ),
-                  if (!isTranscriptPage)
-                    ContextMenu(
-                      title: context.l10n.deleteForMe,
-                      isDestructiveAction: true,
-                      onTap: () => context.accountServer
-                          .deleteMessage(message.messageId),
-                    ),
-                  if (!kReleaseMode)
-                    ContextMenu(
-                      title: 'Copy message',
-                      onTap: () => Clipboard.setData(
-                          ClipboardData(text: message.toString())),
-                    ),
-                ],
-                builder: (BuildContext context) {
-                  if (message.type.isIllegalMessageCategory ||
-                      message.status == MessageStatus.unknown) {
+                  builder: (BuildContext context) {
+                    if (message.type.isIllegalMessageCategory ||
+                        message.status == MessageStatus.unknown) {
+                      return const UnknownMessage();
+                    }
+
+                    if (message.status == MessageStatus.failed) {
+                      return const WaitingMessage();
+                    }
+
+                    if (message.type.isTranscript) {
+                      return const TranscriptMessageWidget();
+                    }
+
+                    if (message.type.isLocation) {
+                      return const LocationMessageWidget();
+                    }
+
+                    if (message.type.isPost) {
+                      return const PostMessage();
+                    }
+
+                    if (message.type == MessageCategory.systemAccountSnapshot) {
+                      return const TransferMessage();
+                    }
+
+                    if (message.type.isContact) {
+                      return const ContactMessageWidget();
+                    }
+
+                    if (message.type == MessageCategory.appButtonGroup) {
+                      return const ActionMessage();
+                    }
+
+                    if (message.type == MessageCategory.appCard) {
+                      return const ActionCardMessage();
+                    }
+
+                    if (message.type.isData) {
+                      return const FileMessage();
+                    }
+
+                    if (message.type.isText) {
+                      return const TextMessage();
+                    }
+
+                    if (message.type.isSticker) {
+                      return const StickerMessageWidget();
+                    }
+
+                    if (message.type.isImage) {
+                      return const ImageMessageWidget();
+                    }
+
+                    if (message.type.isVideo || message.type.isLive) {
+                      return const VideoMessageWidget();
+                    }
+
+                    if (message.type.isAudio) {
+                      return const AudioMessage();
+                    }
+
+                    if (message.type.isRecall) {
+                      return const RecallMessage();
+                    }
+
                     return const UnknownMessage();
-                  }
-
-                  if (message.status == MessageStatus.failed) {
-                    return const WaitingMessage();
-                  }
-
-                  if (message.type.isTranscript) {
-                    return const TranscriptMessageWidget();
-                  }
-
-                  if (message.type.isLocation) {
-                    return const LocationMessageWidget();
-                  }
-
-                  if (message.type.isPost) {
-                    return const PostMessage();
-                  }
-
-                  if (message.type == MessageCategory.systemAccountSnapshot) {
-                    return const TransferMessage();
-                  }
-
-                  if (message.type.isContact) {
-                    return const ContactMessageWidget();
-                  }
-
-                  if (message.type == MessageCategory.appButtonGroup) {
-                    return const ActionMessage();
-                  }
-
-                  if (message.type == MessageCategory.appCard) {
-                    return const ActionCardMessage();
-                  }
-
-                  if (message.type.isData) {
-                    return const FileMessage();
-                  }
-
-                  if (message.type.isText) {
-                    return const TextMessage();
-                  }
-
-                  if (message.type.isSticker) {
-                    return const StickerMessageWidget();
-                  }
-
-                  if (message.type.isImage) {
-                    return const ImageMessageWidget();
-                  }
-
-                  if (message.type.isVideo || message.type.isLive) {
-                    return const VideoMessageWidget();
-                  }
-
-                  if (message.type.isAudio) {
-                    return const AudioMessage();
-                  }
-
-                  if (message.type.isRecall) {
-                    return const RecallMessage();
-                  }
-
-                  return const UnknownMessage();
-                },
+                  },
+                ),
               );
             },
           ),
@@ -487,24 +508,23 @@ class MessageItemWidget extends HookWidget {
 
 class MessageContext extends HookWidget {
   const MessageContext({
-    Key? key,
+    super.key,
     required this.isTranscriptPage,
     required this.isPinnedPage,
     required this.showNip,
     required this.isCurrentUser,
     required this.message,
     required this.child,
-  }) : super(key: key);
+  });
 
   MessageContext.fromMessageItem({
-    Key? key,
+    super.key,
     required this.message,
     required this.child,
     this.isTranscriptPage = false,
     this.isPinnedPage = false,
     this.showNip = false,
-  })  : isCurrentUser = message.relationship == UserRelationship.me,
-        super(key: key);
+  }) : isCurrentUser = message.relationship == UserRelationship.me;
 
   final bool isTranscriptPage;
   final bool isPinnedPage;
@@ -543,12 +563,9 @@ Future<void> saveAs(BuildContext context, AccountServer accountServer,
       accountServer.convertMessageAbsolutePath(message, isTranscriptPage);
   if (Platform.isAndroid || Platform.isIOS) {
     if (message.type.isImage || message.type.isVideo) {
-      final bool? result;
-      if (message.type.isImage) {
-        result = await GallerySaver.saveImage(path);
-      } else {
-        result = await GallerySaver.saveVideo(path);
-      }
+      final result = message.type.isImage
+          ? await GallerySaver.saveImage(path)
+          : await GallerySaver.saveVideo(path);
       if (result != true) {
         return showToastFailed(context, null);
       } else {
@@ -574,9 +591,8 @@ Future<void> saveAs(BuildContext context, AccountServer accountServer,
 
 class _PinMenu extends HookWidget {
   const _PinMenu({
-    Key? key,
     required this.message,
-  }) : super(key: key);
+  });
 
   final MessageItem message;
 
@@ -592,6 +608,9 @@ class _PinMenu extends HookWidget {
             .contains(message.status)) return const SizedBox();
 
     return ContextMenu(
+      icon: message.pinned
+          ? Resources.assetsImagesContextMenuUnpinSvg
+          : Resources.assetsImagesContextMenuPinSvg,
       title: message.pinned ? context.l10n.unpin : context.l10n.pinTitle,
       onTap: () async {
         final pinMessageMinimal = PinMessageMinimal(
@@ -617,7 +636,6 @@ class _PinMenu extends HookWidget {
 
 class _MessageBubbleMargin extends HookWidget {
   const _MessageBubbleMargin({
-    Key? key,
     required this.isCurrentUser,
     required this.userName,
     required this.userId,
@@ -627,7 +645,7 @@ class _MessageBubbleMargin extends HookWidget {
     this.showedMenu,
     required this.userAvatarUrl,
     required this.showAvatar,
-  }) : super(key: key);
+  });
 
   final bool isCurrentUser;
   final String? userName;
@@ -641,6 +659,11 @@ class _MessageBubbleMargin extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
+        MessageSelectionState, bool>(
+      converter: (state) => state.hasSelectedMessage,
+    );
+
     final messageColumn = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -653,6 +676,7 @@ class _MessageBubbleMargin extends HookWidget {
         ContextMenuPortalEntry(
           buildMenus: buildMenus,
           showedMenu: showedMenu,
+          enable: !inMultiSelectMode,
           child: Builder(builder: builder),
         ),
       ],
@@ -698,7 +722,7 @@ class _MessageBubbleMargin extends HookWidget {
 }
 
 class _UnreadMessageBar extends StatelessWidget {
-  const _UnreadMessageBar({Key? key}) : super(key: key);
+  const _UnreadMessageBar();
 
   @override
   Widget build(BuildContext context) => Container(
@@ -716,20 +740,111 @@ class _UnreadMessageBar extends StatelessWidget {
       );
 }
 
-extension _MessageForward on MessageItem {
-  bool get canForward =>
-      type.isText ||
-      type.isImage ||
-      type.isVideo ||
-      type.isAudio ||
-      type.isData ||
-      type.isSticker ||
-      type.isContact ||
-      type.isLive ||
-      type.isPost ||
-      type.isLocation ||
-      (type == MessageCategory.appCard &&
-          AppCardData.fromJson(jsonDecode(content!) as Map<String, dynamic>)
-              .shareable) ||
-      (type.isTranscript && mediaStatus == MediaStatus.done);
+class _MessageSelectionWrapper extends HookWidget {
+  const _MessageSelectionWrapper({
+    required this.child,
+    required this.messageId,
+  });
+
+  final Widget child;
+
+  final String messageId;
+
+  @override
+  Widget build(BuildContext context) {
+    final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
+        MessageSelectionState, bool>(
+      converter: (state) => state.hasSelectedMessage,
+    );
+
+    final selected = useBlocStateConverter<MessageSelectionCubit,
+        MessageSelectionState, bool>(
+      converter: (state) => state.selectedMessageIds.contains(messageId),
+    );
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        context.read<MessageSelectionCubit>().toggleSelection(messageId);
+      },
+      child: Row(
+        children: [
+          _AnimatedSelectionIcon(
+            selected: selected,
+            inSelectedMode: inMultiSelectMode,
+          ),
+          Expanded(
+            child: IgnorePointer(
+              ignoring: inMultiSelectMode,
+              child: child,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnimatedSelectionIcon extends HookWidget {
+  const _AnimatedSelectionIcon({
+    required this.selected,
+    required this.inSelectedMode,
+  });
+
+  final bool selected;
+
+  final bool inSelectedMode;
+
+  @override
+  Widget build(BuildContext context) {
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 300),
+    );
+
+    final animation = useMemoized(
+        () => animationController.drive(
+              Tween<double>(
+                begin: 0,
+                end: 48,
+              ).chain(
+                CurveTween(
+                  curve: Curves.easeInOut,
+                ),
+              ),
+            ),
+        [animationController]);
+
+    useEffect(() {
+      if (inSelectedMode) {
+        animationController.forward();
+      } else {
+        animationController.reverse();
+      }
+    }, [inSelectedMode]);
+
+    useListenable(animation);
+
+    if (animation.isDismissed) {
+      return const SizedBox();
+    }
+    return SizedBox(
+      width: animation.value,
+      height: 20,
+      child: Center(
+        child: ClipOval(
+          child: Container(
+            color:
+                selected ? context.theme.accent : context.theme.secondaryText,
+            height: 16,
+            width: 16,
+            alignment: const Alignment(0, -0.2),
+            child: SvgPicture.asset(
+              Resources.assetsImagesSelectedSvg,
+              height: 10,
+              width: 10,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

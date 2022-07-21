@@ -27,9 +27,9 @@ import 'bloc/slide_category_cubit.dart';
 
 class SlidePage extends StatelessWidget {
   const SlidePage({
-    Key? key,
+    super.key,
     required this.showCollapse,
-  }) : super(key: key);
+  });
   final bool showCollapse;
 
   @override
@@ -110,7 +110,7 @@ class SlidePage extends StatelessWidget {
                           height: 24,
                           color: context.theme.text,
                         ),
-                        title: context.l10n.collapse,
+                        title: Text(context.l10n.collapse),
                         onTap: () =>
                             context.settingCubit.collapsedSidebar = !collapse,
                       );
@@ -126,9 +126,7 @@ class SlidePage extends StatelessWidget {
 }
 
 class _CurrentUser extends StatelessWidget {
-  const _CurrentUser({
-    Key? key,
-  }) : super(key: key);
+  const _CurrentUser();
 
   @override
   Widget build(BuildContext context) => MoveWindowBarrier(
@@ -143,13 +141,31 @@ class _CurrentUser extends StatelessWidget {
               builder: (context, selected) {
                 assert(account != null);
                 return SelectItem(
-                  icon: AvatarWidget(
-                    avatarUrl: account?.avatarUrl,
-                    size: 24,
-                    name: account?.fullName,
-                    userId: account?.userId,
+                  icon: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: AvatarWidget(
+                      avatarUrl: account?.avatarUrl,
+                      size: 24,
+                      name: account?.fullName,
+                      userId: account?.userId,
+                    ),
                   ),
-                  title: account?.fullName ?? '',
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        account?.fullName ?? '',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${account?.identityNumber}',
+                        style: TextStyle(
+                            color: context.theme.secondaryText, fontSize: 12),
+                      )
+                    ],
+                  ),
                   selected: selected,
                   onTap: () {
                     BlocProvider.of<SlideCategoryCubit>(context)
@@ -167,9 +183,7 @@ class _CurrentUser extends StatelessWidget {
 }
 
 class _CircleList extends HookWidget {
-  const _CircleList({
-    Key? key,
-  }) : super(key: key);
+  const _CircleList();
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +251,7 @@ class _CircleList extends HookWidget {
                       child: ContextMenuPortalEntry(
                         buildMenus: () => [
                           ContextMenu(
+                              icon: Resources.assetsImagesContextMenuEditSvg,
                               title: context.l10n.editCircleName,
                               onTap: () async {
                                 final name = await showMixinDialog<String>(
@@ -256,6 +271,8 @@ class _CircleList extends HookWidget {
                                 );
                               }),
                           ContextMenu(
+                            icon:
+                                Resources.assetsImagesContextMenuEditCircleSvg,
                             title: context.l10n.writeCircles,
                             onTap: () async {
                               final initSelected = (await context
@@ -316,6 +333,7 @@ class _CircleList extends HookWidget {
                             },
                           ),
                           ContextMenu(
+                            icon: Resources.assetsImagesContextMenuDeleteSvg,
                             title: context.l10n.deleteCircle,
                             isDestructiveAction: true,
                             onTap: () async {
@@ -345,7 +363,7 @@ class _CircleList extends HookWidget {
                               height: 24,
                               color: getCircleColorById(circle.circleId),
                             ),
-                            title: circle.name,
+                            title: Text(circle.name),
                             onTap: () {
                               BlocProvider.of<SlideCategoryCubit>(context)
                                   .select(
@@ -376,9 +394,8 @@ class _CircleList extends HookWidget {
 
 class _CategoryList extends HookWidget {
   const _CategoryList({
-    Key? key,
     required this.children,
-  }) : super(key: key);
+  });
 
   final List<Widget> children;
 
@@ -399,11 +416,10 @@ class _CategoryList extends HookWidget {
 
 class _Item extends HookWidget {
   const _Item({
-    Key? key,
     required this.type,
     required this.title,
     required this.asset,
-  }) : super(key: key);
+  });
 
   final SlideCategoryType type;
   final String title;
@@ -453,7 +469,7 @@ class _Item extends HookWidget {
           height: 24,
           color: context.theme.text,
         ),
-        title: title,
+        title: Text(title),
         onTap: () {
           BlocProvider.of<SlideCategoryCubit>(context).select(
             type,
@@ -472,7 +488,7 @@ class _Item extends HookWidget {
 }
 
 class _Divider extends StatelessWidget {
-  const _Divider({Key? key}) : super(key: key);
+  const _Divider();
 
   @override
   Widget build(BuildContext context) => Container(

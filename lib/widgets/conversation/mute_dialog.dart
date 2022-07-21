@@ -7,9 +7,7 @@ import '../dialog.dart';
 import '../radio.dart';
 
 class MuteDialog extends HookWidget {
-  const MuteDialog({
-    Key? key,
-  }) : super(key: key);
+  const MuteDialog({super.key});
 
   @override
   Widget build(BuildContext context) {

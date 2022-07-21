@@ -11,7 +11,6 @@ import 'package:decimal/intl.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' hide Table;
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 import 'package:markdown/markdown.dart';
 import 'package:mime/mime.dart';
@@ -29,6 +28,7 @@ import '../../generated/l10n.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../widgets/brightness_observer.dart';
 import '../audio_message_player/audio_message_service.dart';
+import '../synchronized.dart';
 
 export 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     show UuidHashcodeExtension;

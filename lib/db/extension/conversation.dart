@@ -36,6 +36,11 @@ extension ConversationItemExtension on ConversationItem {
 
   DateTime? get validMuteUntil =>
       isGroupConversation ? muteUntil : ownerMuteUntil;
+
+  Duration get expireDuration {
+    final expireIn = this.expireIn ?? 0;
+    return expireIn == 0 ? Duration.zero : Duration(seconds: expireIn);
+  }
 }
 
 String conversationValidName(String? groupName, String? fullName) =>

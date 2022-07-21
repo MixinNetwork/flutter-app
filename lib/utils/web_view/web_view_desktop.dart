@@ -117,7 +117,7 @@ bool runWebViewNavigationBar(List<String> args) => runWebViewTitleBarWidget(
     );
 
 class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
-  const _BotWebViewRuntimeInstallDialog({Key? key}) : super(key: key);
+  const _BotWebViewRuntimeInstallDialog();
 
   @override
   Widget build(BuildContext context) {

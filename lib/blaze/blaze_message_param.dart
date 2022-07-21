@@ -6,7 +6,7 @@ import '../crypto/signal/signal_key_request.dart';
 import 'blaze_message_param_session.dart';
 import 'blaze_signal_key_message.dart';
 
-part 'blaze_param.g.dart';
+part 'blaze_message_param.g.dart';
 
 @JsonSerializable()
 class BlazeMessageParam {
@@ -30,6 +30,7 @@ class BlazeMessageParam {
     this.trackId,
     this.recipientIds,
     this.silent,
+    this.expireIn = 0,
   });
 
   factory BlazeMessageParam.fromJson(Map<String, dynamic> json) =>
@@ -73,6 +74,8 @@ class BlazeMessageParam {
   List<String>? recipientIds;
   @JsonKey(name: 'silent')
   bool? silent;
+  @JsonKey(name: 'expire_in')
+  int expireIn;
 
   Map<String, dynamic> toJson() => _$BlazeMessageParamToJson(this);
 }

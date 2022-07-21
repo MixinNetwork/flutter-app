@@ -109,7 +109,7 @@ Future<void> showStickerPageDialog(
 }
 
 class _StickerStorePage extends HookWidget {
-  const _StickerStorePage({Key? key}) : super(key: key);
+  const _StickerStorePage();
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +152,7 @@ class _StickerStorePage extends HookWidget {
 typedef _StickerAlbumItem = Tuple2<StickerAlbum, List<Sticker>>;
 
 class _List extends HookWidget {
-  const _List({Key? key}) : super(key: key);
+  const _List();
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +184,10 @@ class _List extends HookWidget {
 }
 
 class _Item extends HookWidget {
-  const _Item(this.album, this.stickers, {Key? key}) : super(key: key);
+  const _Item(
+    this.album,
+    this.stickers,
+  );
   final StickerAlbum album;
   final List<Sticker> stickers;
 
@@ -259,7 +262,7 @@ class _Item extends HookWidget {
 }
 
 class _StickerAlbumManagePage extends HookWidget {
-  const _StickerAlbumManagePage({Key? key}) : super(key: key);
+  const _StickerAlbumManagePage();
 
   @override
   Widget build(BuildContext context) {
@@ -360,9 +363,8 @@ class _StickerAlbumManagePage extends HookWidget {
 
 class _StickerPage extends HookWidget {
   const _StickerPage({
-    Key? key,
     required this.stickerId,
-  }) : super(key: key);
+  });
 
   final String stickerId;
 

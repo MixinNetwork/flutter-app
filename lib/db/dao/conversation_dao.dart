@@ -16,7 +16,7 @@ part 'conversation_dao.g.dart';
 @DriftAccessor(tables: [Conversations])
 class ConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationDaoMixin {
-  ConversationDao(MixinDatabase db) : super(db);
+  ConversationDao(super.db);
 
   late Stream<Set<TableUpdate>> updateEvent = db
       .tableUpdates(TableUpdateQuery.onAllTables([
@@ -52,11 +52,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         },
       );
 
-  Future<int> insert(Insertable<Conversation> conversation) async {
-    final result =
-        await into(db.conversations).insertOnConflictUpdate(conversation);
-    return result;
-  }
+  Future<int> insert(Insertable<Conversation> conversation) =>
+      into(db.conversations).insertOnConflictUpdate(conversation);
 
   Selectable<Conversation?> conversationById(String conversationId) =>
       (select(db.conversations)
@@ -93,15 +90,19 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     Users lastMessageSender,
     Snapshots snapshot,
     Users participant,
+    ExpiredMessages em,
   )
               limit) =>
       db.baseConversationItems(
-          (Conversations conversation,
-                  Users owner,
-                  Messages message,
-                  Users lastMessageSender,
-                  Snapshots snapshot,
-                  Users participant) =>
+          (
+            Conversations conversation,
+            Users owner,
+            Messages message,
+            Users lastMessageSender,
+            Snapshots snapshot,
+            Users participant,
+            ExpiredMessages em,
+          ) =>
               where(
                 conversation,
                 owner,
@@ -110,7 +111,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
                 snapshot,
                 participant,
               ),
-          (conversation, _, __, ___, ____, _____) =>
+          (conversation, _, __, ___, ____, _____, em) =>
               _baseConversationItemOrder(conversation),
           limit);
 
@@ -136,7 +137,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, owner, message, lastMessageSender, snapshot,
                 participant) =>
             _chatWhere(conversation),
-        (_, __, ___, ____, ______, _______) => Limit(limit, offset),
+        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
       );
 
   Future<bool> chatConversationHasData() =>
@@ -169,7 +170,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, owner, message, lastMessageSender, snapshot,
                 participant) =>
             _contactWhere(conversation, owner),
-        (_, __, ___, ____, ______, _______) => Limit(limit, offset),
+        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
       );
 
   Future<bool> contactConversationHasData() =>
@@ -195,7 +196,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, owner, message, lastMessageSender, snapshot,
                 participant) =>
             _strangerWhere(conversation, owner),
-        (_, __, ___, ____, ______, _______) => Limit(limit, offset),
+        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
       );
 
   Future<bool> strangerConversationHasData() =>
@@ -222,7 +223,16 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, owner, message, lastMessageSender, snapshot,
                 participant) =>
             _groupWhere(conversation),
-        (_, __, ___, ____, ______, _______) => Limit(limit, offset),
+        (
+          _,
+          __,
+          ___,
+          ____,
+          ______,
+          _______,
+          ExpiredMessages em,
+        ) =>
+            Limit(limit, offset),
       );
 
   Expression<bool?> _botWhere(Conversations conversation, Users owner) =>
@@ -243,7 +253,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, owner, message, lastMessageSender, snapshot,
                 participant) =>
             _botWhere(conversation, owner),
-        (_, __, ___, ____, ______, _______) => Limit(limit, offset),
+        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
       );
 
   Future<bool> botConversationHasData() =>
@@ -253,13 +263,13 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       _baseConversationItems(
         (conversation, _, __, ___, ____, ______) =>
             conversation.conversationId.equals(conversationId),
-        (_, __, ___, ____, ______, _______) => Limit(1, null),
+        (_, __, ___, ____, ______, _______, em) => Limit(1, null),
       );
 
   Selectable<ConversationItem> conversationItems() => _baseConversationItems(
         (conversation, _, __, ___, ____, ______) =>
             conversation.category.isIn(['CONTACT', 'GROUP']),
-        (_, __, ___, ____, ______, _______) => maxLimit,
+        (_, __, ___, ____, ______, _______, em) => maxLimit,
       );
 
   Selectable<int> conversationsCountByCircleId(String circleId) =>
@@ -270,9 +280,10 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           String circleId, int limit, int offset) =>
       db.baseConversationItemsByCircleId(
         circleId,
-        (conversation, _, __, ___, ____, _____, _____i) =>
+        (conversation, _, __, ___, ____, _____, _____i, em) =>
             _baseConversationItemOrder(conversation),
-        (_, __, ___, ____, ______, _______, ________) => Limit(limit, offset),
+        (_, __, ___, ____, ______, _______, ________, em) =>
+            Limit(limit, offset),
       );
 
   Future<bool> conversationHasDataByCircleId(String circleId) => db.hasData(
@@ -342,44 +353,53 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Selectable<ConversationStorageUsage> conversationStorageUsage() =>
       db.conversationStorageUsage();
 
-  Future<void> updateConversation(ConversationResponse conversation) =>
-      db.transaction(() async {
-        await Future.wait([
-          insert(
-            ConversationsCompanion(
-              conversationId: Value(conversation.conversationId),
-              ownerId: Value(conversation.creatorId),
-              category: Value(conversation.category),
-              name: Value(conversation.name),
-              iconUrl: Value(conversation.iconUrl),
-              announcement: Value(conversation.announcement),
-              codeUrl: Value(conversation.codeUrl),
-              createdAt: Value(conversation.createdAt),
-              status: const Value(ConversationStatus.success),
-              muteUntil: Value(DateTime.tryParse(conversation.muteUntil)),
+  Future<void> updateConversation(
+      ConversationResponse conversation, String currentUserId) {
+    var ownerId = conversation.creatorId;
+    if (conversation.category == ConversationCategory.contact) {
+      ownerId = conversation.participants
+          .firstWhere((e) => e.userId != currentUserId)
+          .userId;
+    }
+    return db.transaction(() async {
+      await Future.wait([
+        insert(
+          ConversationsCompanion(
+            conversationId: Value(conversation.conversationId),
+            ownerId: Value(ownerId),
+            category: Value(conversation.category),
+            name: Value(conversation.name),
+            iconUrl: Value(conversation.iconUrl),
+            announcement: Value(conversation.announcement),
+            codeUrl: Value(conversation.codeUrl),
+            createdAt: Value(conversation.createdAt),
+            status: const Value(ConversationStatus.success),
+            muteUntil: Value(DateTime.tryParse(conversation.muteUntil)),
+            expireIn: Value(conversation.expireIn),
+          ),
+        ),
+        ...conversation.participants.map(
+          (participant) => db.participantDao.insert(
+            Participant(
+              conversationId: conversation.conversationId,
+              userId: participant.userId,
+              createdAt: participant.createdAt ?? DateTime.now(),
+              role: participant.role,
             ),
           ),
-          ...conversation.participants.map(
-            (participant) => db.participantDao.insert(
-              Participant(
-                conversationId: conversation.conversationId,
-                userId: participant.userId,
-                createdAt: participant.createdAt ?? DateTime.now(),
-                role: participant.role,
-              ),
-            ),
-          ),
-          ...(conversation.participantSessions ?? [])
-              .map((p) => db.participantSessionDao.insert(
-                    ParticipantSessionData(
-                      conversationId: conversation.conversationId,
-                      userId: p.userId,
-                      sessionId: p.sessionId,
-                      publicKey: p.publicKey,
-                    ),
-                  ))
-        ]);
-      });
+        ),
+        ...(conversation.participantSessions ?? [])
+            .map((p) => db.participantSessionDao.insert(
+                  ParticipantSessionData(
+                    conversationId: conversation.conversationId,
+                    userId: p.userId,
+                    sessionId: p.sessionId,
+                    publicKey: p.publicKey,
+                  ),
+                ))
+      ]);
+    });
+  }
 
   Future<int> updateCodeUrl(String conversationId, String codeUrl) async {
     final already = await db.hasData(
@@ -422,4 +442,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Selectable<GroupMinimal> findTheSameConversations(
           String selfId, String userId) =>
       db.findSameConversations(selfId, userId);
+
+  Future<int> updateConversationExpireIn(String conversationId, int expireIn) =>
+      (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ConversationsCompanion(expireIn: Value(expireIn)));
 }

@@ -6,7 +6,7 @@ import '../utils/extension/extension.dart';
 import 'action_button.dart';
 
 class WebViewNavigationBar extends StatelessWidget {
-  const WebViewNavigationBar({Key? key}) : super(key: key);
+  const WebViewNavigationBar({super.key});
 
   @override
   Widget build(BuildContext context) {

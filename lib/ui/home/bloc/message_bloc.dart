@@ -315,14 +315,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     });
 
     final isOldest = list.length < limit;
-    final result = state.copyWith(
-      top: [
-        ...list.reversed.toList(),
-        ...state.top,
-      ],
-      isOldest: isOldest,
-    );
-    return result;
+    return state.copyWith(
+        top: [...list.reversed.toList(), ...state.top], isOldest: isOldest);
   }
 
   Future<MessageState> _after(String conversationId) async {
@@ -336,14 +330,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     });
 
     final isLatest = list.length < limit ? true : null;
-    final result = state.copyWith(
-      bottom: [
-        ...state.bottom,
-        ...list,
-      ],
-      isLatest: isLatest,
-    );
-    return result;
+    return state
+        .copyWith(bottom: [...state.bottom, ...list], isLatest: isLatest);
   }
 
   Future<MessageState> _resetMessageList(
@@ -363,13 +351,11 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       centerMessageId: _centerMessageId,
     );
 
-    final result = state.copyWith(
-      conversationId: conversationId,
-      center: state.center,
-      bottom: state.bottom,
-      top: state.top,
-    );
-    return result;
+    return state.copyWith(
+        conversationId: conversationId,
+        center: state.center,
+        bottom: state.bottom,
+        top: state.top);
   }
 
   Future<MessageState> _messagesByConversationId(
@@ -490,7 +476,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
             (position.hasContentDimensions &&
                 position.pixels == position.maxScrollExtent);
       } else {
-        if (currentUserSent) {
+        if (currentUserSent && item.status == MessageStatus.sending) {
           add(_MessageInitEvent());
           return null;
         }

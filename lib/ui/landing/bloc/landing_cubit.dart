@@ -17,7 +17,6 @@ import '../../../account/account_server.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/crypto_key_value.dart';
 import '../../../crypto/signal/signal_protocol.dart';
-import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/system/package_info.dart';
@@ -106,7 +105,7 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
                 .data
                 .secret)
         .handleError((e) => null)
-        .where((secret) => secret.isNotEmpty == true)
+        .where((secret) => secret.isNotEmpty)
         .doOnData((secret) {
           streamSubscription?.cancel();
           emit(state.copyWith(

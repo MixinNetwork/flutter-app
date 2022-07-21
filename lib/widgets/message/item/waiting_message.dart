@@ -12,9 +12,7 @@ import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
 
 class WaitingMessage extends HookWidget {
-  const WaitingMessage({
-    Key? key,
-  }) : super(key: key);
+  const WaitingMessage({super.key});
 
   @override
   Widget build(BuildContext context) {

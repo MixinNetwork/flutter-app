@@ -11,6 +11,7 @@ import '../../../blaze/vo/transcript_minimal.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
 import '../../../ui/home/bloc/blink_cubit.dart';
+import '../../../ui/home/bloc/message_selection_cubit.dart';
 import '../../../ui/home/chat/chat_page.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
@@ -35,9 +36,7 @@ class TranscriptMessagesWatcher {
 }
 
 class TranscriptMessageWidget extends HookWidget {
-  const TranscriptMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const TranscriptMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -152,9 +151,9 @@ class TranscriptMessageWidget extends HookWidget {
                       ),
                     ),
                     Container(
-                      decoration: BoxDecoration(
-                        color: const Color.fromRGBO(0, 0, 0, 0.04),
-                        borderRadius: BorderRadius.circular(6),
+                      decoration: const BoxDecoration(
+                        color: Color.fromRGBO(0, 0, 0, 0.04),
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
                       ),
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
@@ -208,11 +207,11 @@ class TranscriptMessageWidget extends HookWidget {
 
 class TranscriptPage extends HookWidget {
   const TranscriptPage({
-    Key? key,
+    super.key,
     required this.messageId,
     required this.conversationId,
     required this.vlcService,
-  }) : super(key: key);
+  });
   final String messageId;
   final String conversationId;
   final AudioMessagePlayService vlcService;
@@ -229,7 +228,7 @@ class TranscriptPage extends HookWidget {
 
     final list = useMemoizedStream(watchMessages).data ?? <MessageItem>[];
 
-    final chatSideCubit = useBloc(() => ChatSideCubit());
+    final chatSideCubit = useBloc(ChatSideCubit.new);
     final searchConversationKeywordCubit = useBloc(
       () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
     );
@@ -242,7 +241,7 @@ class TranscriptPage extends HookWidget {
       ),
     );
 
-    final scrollController = useMemoized(() => ScrollerScrollController());
+    final scrollController = useMemoized(ScrollerScrollController.new);
     final listKey =
         useMemoized(() => GlobalKey(debugLabel: 'transcript_list_key'));
 
@@ -266,6 +265,7 @@ class TranscriptPage extends HookWidget {
                       .convertMessageAbsolutePath(m, true)),
             ),
             Provider.value(value: TranscriptMessagesWatcher(watchMessages)),
+            BlocProvider(create: (_) => MessageSelectionCubit()),
           ],
           child: Column(
             children: [

@@ -7,7 +7,7 @@ part 'participant_session_dao.g.dart';
 @DriftAccessor(tables: [ParticipantSession])
 class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantSessionDaoMixin {
-  ParticipantSessionDao(MixinDatabase db) : super(db);
+  ParticipantSessionDao(super.db);
 
   Future<int> insert(ParticipantSessionData participantSession) =>
       into(db.participantSession)

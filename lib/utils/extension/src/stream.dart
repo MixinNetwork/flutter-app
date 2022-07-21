@@ -5,16 +5,39 @@ extension StreamExtensionWhereNotNull<T> on Stream<T?> {
 }
 
 extension StreamExtension<T> on Stream<T> {
+  StreamSubscription<T> asyncDropListen<E>(
+      Future<void> Function(T event) convert) {
+    T? lastEvent;
+    var running = false;
+    final lock = Lock();
+
+    return listen((event) async {
+      if (running) {
+        lastEvent = event;
+        return;
+      }
+      // ensure only one event is processed at a time
+      await lock.synchronized(() async {
+        running = true;
+        await convert(event);
+        while (true) {
+          final e = lastEvent;
+          if (e == null) break;
+          lastEvent = null;
+          await convert(e);
+        }
+        running = false;
+      });
+    });
+  }
+
   StreamSubscription asyncListen<E>(FutureOr<E> Function(T event) convert) =>
       asyncMap((e) => convert(e)).listen((_) {});
 
   Stream<E> asyncBufferMap<E>(FutureOr<E> Function(List<T> event) convert) {
     StreamController<E> controller;
-    if (isBroadcast) {
-      controller = StreamController<E>.broadcast();
-    } else {
-      controller = StreamController<E>();
-    }
+    controller =
+        isBroadcast ? StreamController<E>.broadcast() : StreamController<E>();
 
     final events = <T>[];
     var querying = false;
