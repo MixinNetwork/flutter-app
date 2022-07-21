@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:emojis/emoji.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -10,14 +11,30 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/logger.dart';
 import '../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../interactive_decorated_box.dart';
 
-class EmojiSelectedGroupIndexCubit extends Cubit<int> {
-  EmojiSelectedGroupIndexCubit() : super(1);
+class _EmojiSelectedGroupState with EquatableMixin {
+  const _EmojiSelectedGroupState.emoji(this.offset) : isRecent = false;
 
-  void setIndex(int index) => emit(index);
+  const _EmojiSelectedGroupState.recent()
+      : isRecent = true,
+        offset = 0;
+
+  final bool isRecent;
+  final double offset;
+
+  @override
+  List<Object?> get props => [isRecent, offset];
+}
+
+class EmojiSelectedGroupIndexCubit extends Cubit<_EmojiSelectedGroupState> {
+  EmojiSelectedGroupIndexCubit()
+      : super(const _EmojiSelectedGroupState.emoji(0));
+
+  void setRecent() => emit(const _EmojiSelectedGroupState.recent());
+
+  void setEmoji(double offset) => emit(_EmojiSelectedGroupState.emoji(offset));
 }
 
 const _emojiGroups = [
@@ -61,20 +78,37 @@ class EmojiPage extends HookWidget {
       Resources.assetsImagesEmojiFlagsSvg,
     ];
 
-    var selectedIndex = context.watch<EmojiSelectedGroupIndexCubit>().state;
+    final state = context.watch<EmojiSelectedGroupIndexCubit>().state;
 
-    useEffect(() {
-      assert(selectedIndex >= 0 && selectedIndex < emojiGroupIcon.length,
-          'selectedIndex must be in range [0, ${emojiGroupIcon.length - 1}]');
-      if (selectedIndex < 0 || selectedIndex >= emojiGroupIcon.length) {
-        selectedIndex = 0;
-      }
-    }, [selectedIndex]);
-
-    assert(
-      _emojiGroups.length == _groupedEmojis.length,
-      '_emojiGroups and _groupedEmojis must be same length',
+    final groupedEmojiLine = useMemoized(
+      () => List<List<List<String>>>.unmodifiable(
+          _groupedEmojis.map((e) => e.chunked(11))),
     );
+
+    final groupOffset = useMemoized(() {
+      final array = List<double>.filled(_emojiGroups.length, 0);
+      for (var i = 1; i < _emojiGroups.length; i++) {
+        array[i] = array[i - 1] +
+            (groupedEmojiLine[i - 1].length + 1 /* header */) *
+                _emojiItemExtent;
+      }
+      return array;
+    });
+
+    final selectedIndex = useMemoized(() {
+      if (state.isRecent) {
+        return 0;
+      }
+      for (var i = groupOffset.length - 1; i >= 0; i--) {
+        if (groupOffset[i] <= state.offset) {
+          return i + 1;
+        }
+      }
+      return 1;
+    }, [state]);
+
+    final emojiOffsetController = useStreamController<double>();
+    final emojiOffsetStream = useMemoized(() => emojiOffsetController.stream);
 
     return Column(
       children: [
@@ -82,7 +116,14 @@ class EmojiPage extends HookWidget {
           selectedIndex: selectedIndex,
           icons: emojiGroupIcon,
           onTap: (index) {
-            context.read<EmojiSelectedGroupIndexCubit>().setIndex(index);
+            if (index == 0) {
+              context.read<EmojiSelectedGroupIndexCubit>().setRecent();
+            } else {
+              context
+                  .read<EmojiSelectedGroupIndexCubit>()
+                  .setEmoji(groupOffset[index - 1]);
+              emojiOffsetController.add(groupOffset[index - 1]);
+            }
           },
         ),
         Divider(
@@ -91,9 +132,14 @@ class EmojiPage extends HookWidget {
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: selectedIndex == 0
+          child: state.isRecent
               ? const _RecentEmojiGroupPage()
-              : _AllEmojisPage(selectedGroupIndex: selectedIndex - 1),
+              : _AllEmojisPage(
+                  groupedEmojiLine: groupedEmojiLine,
+                  groupOffset: groupOffset,
+                  initialOffset: state.offset,
+                  offsetStream: emojiOffsetStream,
+                ),
         )
       ],
     );
@@ -155,8 +201,8 @@ class _EmojiGroupIcon extends StatelessWidget {
           padding: const EdgeInsets.all(4),
           child: SvgPicture.asset(
             icon,
-            width: 20,
-            height: 20,
+            width: 24,
+            height: 24,
             color: selectedIndex == index
                 ? context.theme.accent
                 : context.theme.secondaryText,
@@ -192,33 +238,23 @@ class _RecentEmojiGroupPage extends HookWidget {
 const _emojiItemExtent = 34.0;
 
 class _AllEmojisPage extends HookWidget {
-  _AllEmojisPage({
-    required this.selectedGroupIndex,
-  }) : assert(
-            selectedGroupIndex >= 0 &&
-                selectedGroupIndex < _groupedEmojis.length,
-            'selectedGroupIndex must be in range [0, ${_groupedEmojis.length - 1}]');
+  const _AllEmojisPage({
+    required this.groupOffset,
+    required this.groupedEmojiLine,
+    required this.initialOffset,
+    required this.offsetStream,
+  });
 
-  final int selectedGroupIndex;
+  final List<List<List<String>>> groupedEmojiLine;
+  final List<double> groupOffset;
+  final double initialOffset;
+  final Stream<double> offsetStream;
 
   @override
   Widget build(BuildContext context) {
-    final controller = useMemoized(ScrollerScrollController.new);
-
-    final groupedEmojiLine = useMemoized(
-      () => List<List<List<String>>>.unmodifiable(
-          _groupedEmojis.map((e) => e.chunked(11))),
-    );
-
-    final groupOffset = useMemoized(() {
-      final array = List<double>.filled(_emojiGroups.length, 0);
-      for (var i = 1; i < _emojiGroups.length; i++) {
-        array[i] = array[i - 1] +
-            (groupedEmojiLine[i - 1].length + 1 /* header */) *
-                _emojiItemExtent;
-      }
-      return array;
-    });
+    final controller = useMemoized(() => ScrollerScrollController(
+          initialScrollOffset: initialOffset,
+        ));
 
     final itemCount = useMemoized(
       () =>
@@ -239,14 +275,10 @@ class _AllEmojisPage extends HookWidget {
     ];
 
     useEffect(() {
-      WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
-        controller.jumpTo(groupOffset[selectedGroupIndex]);
-      });
-    }, [selectedGroupIndex]);
-
-    useEffect(() {
       void onScroll() {
-        d('scroll ${controller.offset}');
+        context
+            .read<EmojiSelectedGroupIndexCubit>()
+            .setEmoji(controller.offset);
       }
 
       controller.addListener(onScroll);
@@ -254,6 +286,11 @@ class _AllEmojisPage extends HookWidget {
         controller.removeListener(onScroll);
       };
     }, [controller]);
+
+    useEffect(
+      () => offsetStream.listen(controller.jumpTo).cancel,
+      [offsetStream],
+    );
 
     return ListView.builder(
       controller: controller,
