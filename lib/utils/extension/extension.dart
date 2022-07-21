@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
+import 'dart:ui';
 
-import 'package:cross_file/cross_file.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:decimal/decimal.dart';
 import 'package:decimal/intl.dart';
@@ -13,9 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' hide Table;
 import 'package:intl/intl.dart';
 import 'package:markdown/markdown.dart';
-import 'package:mime/mime.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:ulid/ulid.dart';
 import 'package:uuid/uuid.dart';
@@ -47,11 +44,11 @@ export '../action_utils.dart' show OpenUriExtension;
 export '../datetime_format_utils.dart'
     show DateTimeExtension, StringEpochNanoExtension;
 export 'src/errors.dart';
+export 'src/file.dart';
 export 'src/platforms.dart';
 
 part 'src/db.dart';
 part 'src/duration.dart';
-part 'src/file.dart';
 part 'src/image.dart';
 part 'src/info.dart';
 part 'src/iterable.dart';

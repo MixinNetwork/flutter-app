@@ -13,6 +13,7 @@ import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
+import '../api/giphy_vo/giphy_image.dart';
 import '../blaze/blaze.dart';
 import '../blaze/vo/pin_message_minimal.dart';
 import '../bloc/setting_cubit.dart';
@@ -352,6 +353,22 @@ class AccountServer {
       encryptCategory,
     );
   }
+
+  Future<void> sendGiphyGifMessage(
+    EncryptCategory encryptCategory,
+    GiphyImage sendImage,
+    String previewUrl, {
+    String? conversationId,
+    String? recipientId,
+  }) async =>
+      _sendMessageHelper.sendGiphyGifMessage(
+        await _initConversation(conversationId, recipientId),
+        userId,
+        encryptCategory.toCategory(MessageCategory.plainImage,
+            MessageCategory.signalImage, MessageCategory.encryptedImage),
+        sendImage,
+        previewUrl,
+      );
 
   Future<void> sendImageMessage(
     EncryptCategory encryptCategory, {
@@ -761,6 +778,15 @@ class AccountServer {
 
   Future<void> downloadAttachment(String messageId) async =>
       attachmentUtil.downloadAttachment(messageId: messageId);
+
+  Future<void> reUploadGiphyGif(db.MessageItem message) {
+    assert(
+        message.type.isImage &&
+            message.mediaMimeType == 'image/gif' &&
+            (message.mediaSize == null || message.mediaSize == 0),
+        'Invalid message');
+    return _sendMessageHelper.reUploadGiphyGif(message);
+  }
 
   Future<void> reUploadAttachment(db.MessageItem message) =>
       _sendMessageHelper.reUploadAttachment(

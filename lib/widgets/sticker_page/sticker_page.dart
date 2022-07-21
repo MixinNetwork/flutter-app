@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -20,18 +18,29 @@ import '../interactive_decorated_box.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
 import 'bloc/cubit/sticker_cubit.dart';
 import 'emoji_page.dart';
+import 'giphy_page.dart';
 import 'sticker_item.dart';
 import 'sticker_store.dart';
+
+enum PresetStickerGroup {
+  store,
+  emoji,
+  recent,
+  favorite,
+  gif;
+}
 
 class StickerPage extends StatelessWidget {
   const StickerPage({
     required this.tabLength,
     super.key,
     required this.tabController,
+    required this.presetStickerGroups,
   });
 
   final TabController tabController;
   final int tabLength;
+  final List<PresetStickerGroup> presetStickerGroups;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -58,19 +67,43 @@ class StickerPage extends StatelessWidget {
                     children: List.generate(
                       tabLength,
                       (index) {
-                        if (index == 0) return _StickerStoreEmptyPage();
-
-                        if (Platform.isLinux) {
-                          return _StickerAlbumPage(index: index);
-                        } else {
-                          if (index == 1) {
-                            return const AutomaticKeepAliveClientWidget(
-                              child: EmojiPage(),
-                            );
-                          } else {
-                            return _StickerAlbumPage(index: index - 1);
+                        if (index < presetStickerGroups.length) {
+                          final preset = presetStickerGroups[index];
+                          switch (preset) {
+                            case PresetStickerGroup.store:
+                              return _StickerStoreEmptyPage();
+                            case PresetStickerGroup.emoji:
+                              return const AutomaticKeepAliveClientWidget(
+                                child: EmojiPage(),
+                              );
+                            case PresetStickerGroup.recent:
+                              return _StickerAlbumPage(
+                                getStickers: () => context.database.stickerDao
+                                    .recentUsedStickers()
+                                    .watchThrottle(kVerySlowThrottleDuration),
+                                updateUsedAt: false,
+                              );
+                            case PresetStickerGroup.favorite:
+                              return _StickerAlbumPage(
+                                getStickers: () => context.database.stickerDao
+                                    .personalStickers()
+                                    .watchThrottle(kVerySlowThrottleDuration),
+                                rightClickDelete: true,
+                              );
+                            case PresetStickerGroup.gif:
+                              return const AutomaticKeepAliveClientWidget(
+                                child: GiphyPage(),
+                              );
                           }
                         }
+                        return _StickerAlbumPage(
+                          getStickers: () => context.database.stickerDao
+                              .stickerByAlbumId(
+                                  BlocProvider.of<StickerAlbumsCubit>(context)
+                                      .state[index - presetStickerGroups.length]
+                                      .albumId)
+                              .watchThrottle(kVerySlowThrottleDuration),
+                        );
                       },
                     ),
                   ),
@@ -78,6 +111,7 @@ class StickerPage extends StatelessWidget {
                 _StickerAlbumBar(
                   tabLength: tabLength,
                   tabController: tabController,
+                  presetStickerGroups: presetStickerGroups,
                 ),
               ],
             ),
@@ -88,44 +122,19 @@ class StickerPage extends StatelessWidget {
 
 class _StickerAlbumPage extends HookWidget {
   const _StickerAlbumPage({
-    required this.index,
+    required this.getStickers,
+    this.updateUsedAt = true,
+    this.rightClickDelete = false,
   });
 
-  final int index;
+  final Stream<List<Sticker>> Function() getStickers;
+
+  final bool updateUsedAt;
+  final bool rightClickDelete;
 
   @override
   Widget build(BuildContext context) {
-    final stickerDao = context.database.stickerDao;
-    if (index == 2) {
-      // todo can add or delete
-    }
-    final updateUsedAt = index != 1;
-    final rightClickDelete = index == 2;
-    final stickerCubit = useBloc(() {
-      Stream<List<Sticker>> stream;
-      switch (index) {
-        case 0:
-          stream = Stream.value([]);
-          break;
-        case 1:
-          stream = stickerDao
-              .recentUsedStickers()
-              .watchThrottle(kVerySlowThrottleDuration);
-          break;
-        case 2:
-          stream = stickerDao
-              .personalStickers()
-              .watchThrottle(kVerySlowThrottleDuration);
-          break;
-        default:
-          stream = stickerDao
-              .stickerByAlbumId(BlocProvider.of<StickerAlbumsCubit>(context)
-                  .state[index - 3]
-                  .albumId)
-              .watchThrottle(kVerySlowThrottleDuration);
-      }
-      return StickerCubit(stream);
-    }, keys: [index]);
+    final stickerCubit = useBloc(() => StickerCubit(getStickers()));
 
     final itemCount = useBlocStateConverter<StickerCubit, List<Sticker>, int>(
       bloc: stickerCubit,
@@ -227,10 +236,12 @@ class _StickerAlbumBar extends HookWidget {
   const _StickerAlbumBar({
     required this.tabLength,
     required this.tabController,
+    required this.presetStickerGroups,
   });
 
   final int tabLength;
   final TabController tabController;
+  final List<PresetStickerGroup> presetStickerGroups;
 
   @override
   Widget build(BuildContext context) {
@@ -289,7 +300,10 @@ class _StickerAlbumBar extends HookWidget {
         indicatorPadding: const EdgeInsets.all(5),
         tabs: List.generate(
           tabLength,
-          (index) => _StickerAlbumBarItem(index: index),
+          (index) => _StickerAlbumBarItem(
+            index: index,
+            presetStickerGroups: presetStickerGroups,
+          ),
         ),
       ),
     );
@@ -299,9 +313,11 @@ class _StickerAlbumBar extends HookWidget {
 class _StickerAlbumBarItem extends StatelessWidget {
   const _StickerAlbumBarItem({
     required this.index,
+    required this.presetStickerGroups,
   });
 
   final int index;
+  final List<PresetStickerGroup> presetStickerGroups;
 
   @override
   Widget build(BuildContext context) => SizedBox.fromSize(
@@ -310,19 +326,22 @@ class _StickerAlbumBarItem extends StatelessWidget {
           child: Center(
             child: Builder(
               builder: (context) {
-                final presetStickerAlbum = [
-                  if (AccountKeyValue.instance.hasNewAlbum)
-                    Resources.assetsImagesStickerStoreRedDotSvg
-                  else
-                    Resources.assetsImagesStickerStoreSvg,
-                  if (!Platform.isLinux) Resources.assetsImagesEmojiStickerSvg,
-                  Resources.assetsImagesRecentStickerSvg,
-                  Resources.assetsImagesPersonalStickerSvg,
-                ];
+                final presetStickerAlbum = {
+                  PresetStickerGroup.store: AccountKeyValue.instance.hasNewAlbum
+                      ? Resources.assetsImagesStickerStoreRedDotSvg
+                      : Resources.assetsImagesStickerStoreSvg,
+                  PresetStickerGroup.emoji:
+                      Resources.assetsImagesEmojiStickerSvg,
+                  PresetStickerGroup.recent:
+                      Resources.assetsImagesRecentStickerSvg,
+                  PresetStickerGroup.favorite:
+                      Resources.assetsImagesPersonalStickerSvg,
+                  PresetStickerGroup.gif: Resources.assetsImagesGifStickerSvg,
+                };
 
-                if (index < presetStickerAlbum.length) {
+                if (index < presetStickerGroups.length) {
                   return SvgPicture.asset(
-                    presetStickerAlbum[index],
+                    presetStickerAlbum[presetStickerGroups[index]]!,
                     color: index != 0 ? context.theme.secondaryText : null,
                     width: 24,
                     height: 24,
@@ -332,7 +351,7 @@ class _StickerAlbumBarItem extends StatelessWidget {
                 return BlocConverter<StickerAlbumsCubit, List<StickerAlbum>,
                     String>(
                   converter: (state) =>
-                      state[index - presetStickerAlbum.length].iconUrl,
+                      state[index - presetStickerGroups.length].iconUrl,
                   builder: (context, iconUrl) => CacheImage(
                     iconUrl,
                     width: 28,

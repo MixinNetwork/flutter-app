@@ -557,13 +557,21 @@ class _StickerButton extends HookWidget {
           .watchThrottle(kVerySlowThrottleDuration)),
     );
 
+    final presetStickerGroups = useMemoized(
+      () => [
+        PresetStickerGroup.store,
+        if (!Platform.isLinux) PresetStickerGroup.emoji,
+        PresetStickerGroup.recent,
+        PresetStickerGroup.favorite,
+        if (giphyApiKey.isNotEmpty) PresetStickerGroup.gif,
+      ],
+    );
+
     final tabLength =
         useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
       bloc: stickerAlbumsCubit,
-      converter: (state) =>
-          (state.length) +
-          // no emoji page on Linux.
-          (Platform.isLinux ? 3 : 4),
+      converter: (state) => state.length + presetStickerGroups.length,
+      keys: [presetStickerGroups],
     );
 
     return MultiProvider(
@@ -611,6 +619,7 @@ class _StickerButton extends HookWidget {
               builder: (context) => StickerPage(
                 tabController: DefaultTabController.of(context)!,
                 tabLength: tabLength,
+                presetStickerGroups: presetStickerGroups,
               ),
             ),
           ),

@@ -71,6 +71,24 @@ class MessageImage extends HookWidget {
 
     final playing = useImagePlaying(context);
 
+    final isUnDownloadGiphyGif = useMessageConverter(
+      converter: (message) =>
+          message.mediaMimeType == 'image/gif' &&
+          (message.mediaSize == null || message.mediaSize == 0),
+    );
+
+    final Widget thumbWidget;
+    if (isUnDownloadGiphyGif) {
+      // un-downloaded giphy gif image.
+      thumbWidget = CacheImage(
+        thumbImage,
+        controller: playing,
+        placeholder: () => ColoredBox(color: context.theme.secondaryText),
+      );
+    } else {
+      thumbWidget = ImageByBlurHashOrBase64(imageData: thumbImage);
+    }
+
     return InteractiveDecoratedBox(
       onTap: () {
         final message = context.message;
@@ -86,7 +104,11 @@ class MessageImage extends HookWidget {
           case MediaStatus.canceled:
             if (message.relationship == UserRelationship.me &&
                 message.mediaUrl?.isNotEmpty == true) {
-              context.accountServer.reUploadAttachment(message);
+              if (isUnDownloadGiphyGif) {
+                context.accountServer.reUploadGiphyGif(message);
+              } else {
+                context.accountServer.reUploadAttachment(message);
+              }
             } else {
               context.accountServer.downloadAttachment(message.messageId);
             }
@@ -113,8 +135,7 @@ class MessageImage extends HookWidget {
                 controller: playing,
               ),
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) =>
-                  ImageByBlurHashOrBase64(imageData: thumbImage),
+              errorBuilder: (_, __, ___) => thumbWidget,
             ),
             Center(
               child: HookBuilder(

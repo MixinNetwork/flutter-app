@@ -356,6 +356,9 @@ class Resources {
 
   static const String assetsImagesStickerSvg = 'assets/images/sticker.svg';
 
+  static const String assetsImagesStickerGifSvg =
+      'assets/images/sticker_gif.svg';
+
   static const String assetsImagesStickerStoreSvg =
       'assets/images/sticker_store.svg';
 
