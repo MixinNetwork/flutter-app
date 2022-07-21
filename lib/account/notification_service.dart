@@ -87,7 +87,6 @@ class NotificationService {
               currentUserId: context.accountServer.userId,
               participantFullName: event.participantFullName,
               senderFullName: event.senderFullName,
-              groupName: event.groupName,
               expireIn: int.tryParse(event.content ?? '0'),
             );
           } else if (event.type.isPin) {

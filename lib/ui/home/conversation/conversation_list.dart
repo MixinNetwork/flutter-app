@@ -314,7 +314,6 @@ class _MessageContent extends HookWidget {
             currentUserId: context.accountServer.userId,
             participantFullName: conversation.participantFullName,
             senderFullName: conversation.senderFullName,
-            groupName: conversation.groupName,
             expireIn: int.tryParse(conversation.content ?? '0'),
           );
         } else if (conversation.contentType.isPin) {

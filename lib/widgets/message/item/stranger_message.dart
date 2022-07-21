@@ -20,7 +20,7 @@ class StrangerMessage extends StatelessWidget {
       children: [
         Text(
           isBotConversation
-              ? context.l10n.chatAppReceptionTitle
+              ? context.l10n.chatBotReceptionTitle
               : context.l10n.strangerHint,
           style: TextStyle(
             fontSize: MessageItemWidget.primaryFontSize,

@@ -179,7 +179,7 @@ class ChatInfoPage extends HookWidget {
             ),
             CellGroup(
               child: CellItem(
-                title: Text(context.l10n.disappearingMessages),
+                title: Text(context.l10n.disappearingMessage),
                 description: Text(
                   expireIn.formatAsConversationExpireIn(
                     localization: context.l10n,

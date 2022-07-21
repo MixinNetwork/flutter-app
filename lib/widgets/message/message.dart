@@ -289,7 +289,7 @@ class MessageItemWidget extends HookWidget {
                     if (!isTranscriptPage)
                       ContextMenu(
                         icon: Resources.assetsImagesMultiSelectionSvg,
-                        title: context.l10n.select,
+                        title: context.l10n.choose,
                         onTap: () => context
                             .read<MessageSelectionCubit>()
                             .selectMessage(message.messageId),

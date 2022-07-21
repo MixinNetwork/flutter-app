@@ -190,6 +190,16 @@ class Localization {
     );
   }
 
+  /// `Add to Circle`
+  String get addToCircle {
+    return Intl.message(
+      'Add to Circle',
+      name: 'addToCircle',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Added`
   String get added {
     return Intl.message(
@@ -350,6 +360,16 @@ class Localization {
     );
   }
 
+  /// `Bring All To Front`
+  String get bringAllToFront {
+    return Intl.message(
+      'Bring All To Front',
+      name: 'bringAllToFront',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Can not recognize the QR code`
   String get canNotRecognizeQrCode {
     return Intl.message(
@@ -390,13 +410,13 @@ class Localization {
     );
   }
 
-  /// `Tap the button to interact with the bot`
-  String get chatAppReceptionTitle {
+  /// `{arg0} changed disappearing message settings.`
+  String changedDisappearingMessageSettings(Object arg0) {
     return Intl.message(
-      'Tap the button to interact with the bot',
-      name: 'chatAppReceptionTitle',
+      '$arg0 changed disappearing message settings.',
+      name: 'changedDisappearingMessageSettings',
       desc: '',
-      args: [],
+      args: [arg0],
     );
   }
 
@@ -410,6 +430,16 @@ class Localization {
     );
   }
 
+  /// `Tap the button to interact with the bot`
+  String get chatBotReceptionTitle {
+    return Intl.message(
+      'Tap the button to interact with the bot',
+      name: 'chatBotReceptionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Waiting for {arg0} to get online and establish an encrypted session.`
   String chatDecryptionFailedHint(Object arg0) {
     return Intl.message(
@@ -417,6 +447,18 @@ class Localization {
       name: 'chatDecryptionFailedHint',
       desc: '',
       args: [arg0],
+    );
+  }
+
+  /// `{count, plural, one{Delete {arg0} message?} other{Delete {arg0} messages?}}`
+  String chatDeleteMessage(num count, Object arg0) {
+    return Intl.plural(
+      count,
+      one: 'Delete $arg0 message?',
+      other: 'Delete $arg0 messages?',
+      name: 'chatDeleteMessage',
+      desc: '',
+      args: [count, arg0],
     );
   }
 
@@ -520,6 +562,16 @@ class Localization {
     );
   }
 
+  /// `CHOOSE`
+  String get choose {
+    return Intl.message(
+      'CHOOSE',
+      name: 'choose',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{count, plural, one{{arg0} Conversation} other{{arg0} Conversations}}`
   String circleSubtitle(num count, Object arg0) {
     return Intl.plural(
@@ -582,6 +634,16 @@ class Localization {
     );
   }
 
+  /// `Close`
+  String get close {
+    return Intl.message(
+      'Close',
+      name: 'close',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Close window`
   String get closeWindow {
     return Intl.message(
@@ -597,6 +659,16 @@ class Localization {
     return Intl.message(
       'Collapse',
       name: 'collapse',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Combine and forward`
+  String get combineAndForward {
+    return Intl.message(
+      'Combine and forward',
+      name: 'combineAndForward',
       desc: '',
       args: [],
     );
@@ -772,6 +844,16 @@ class Localization {
     );
   }
 
+  /// `Custom Time`
+  String get customTime {
+    return Intl.message(
+      'Custom Time',
+      name: 'customTime',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Dark`
   String get dark {
     return Intl.message(
@@ -897,6 +979,46 @@ class Localization {
     return Intl.message(
       'Developer',
       name: 'developer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{arg0} disabled disappearing message`
+  String disableDisappearingMessage(Object arg0) {
+    return Intl.message(
+      '$arg0 disabled disappearing message',
+      name: 'disableDisappearingMessage',
+      desc: '',
+      args: [arg0],
+    );
+  }
+
+  /// `The maximum time is {arg0}.`
+  String disappearingCustomTimeMaxWarning(Object arg0) {
+    return Intl.message(
+      'The maximum time is $arg0.',
+      name: 'disappearingCustomTimeMaxWarning',
+      desc: '',
+      args: [arg0],
+    );
+  }
+
+  /// `Disappearing Messages`
+  String get disappearingMessage {
+    return Intl.message(
+      'Disappearing Messages',
+      name: 'disappearingMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to **learn more**.`
+  String get disappearingMessageHint {
+    return Intl.message(
+      'When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to **learn more**.',
+      name: 'disappearingMessageHint',
       desc: '',
       args: [],
     );
@@ -1062,33 +1184,33 @@ class Localization {
     );
   }
 
-  /// `ERROR {arg0}: Sign in to continue`
-  String errorAuthentication(Object arg0) {
+  /// `ERROR 401: Sign in to continue`
+  String get errorAuthentication {
     return Intl.message(
-      'ERROR $arg0: Sign in to continue',
+      'ERROR 401: Sign in to continue',
       name: 'errorAuthentication',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: The request data has invalid field`
-  String errorBadData(Object arg0) {
+  /// `ERROR 10002: The request data has invalid field`
+  String get errorBadData {
     return Intl.message(
-      'ERROR $arg0: The request data has invalid field',
+      'ERROR 10002: The request data has invalid field',
       name: 'errorBadData',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Blockchain not in sync, please try again later.`
-  String errorBlockchain(Object arg0) {
+  /// `ERROR 30100: Blockchain not in sync, please try again later.`
+  String get errorBlockchain {
     return Intl.message(
-      'ERROR $arg0: Blockchain not in sync, please try again later.',
+      'ERROR 30100: Blockchain not in sync, please try again later.',
       name: 'errorBlockchain',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
@@ -1102,83 +1224,83 @@ class Localization {
     );
   }
 
-  /// `ERROR {arg0}: The group chat is full.`
-  String errorFullGroup(Object arg0) {
+  /// `ERROR 20116: The group chat is full.`
+  String get errorFullGroup {
     return Intl.message(
-      'ERROR $arg0: The group chat is full.',
+      'ERROR 20116: The group chat is full.',
       name: 'errorFullGroup',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Insufficient balance`
-  String errorInsufficientBalance(Object arg0) {
+  /// `ERROR 20117: Insufficient balance`
+  String get errorInsufficientBalance {
     return Intl.message(
-      'ERROR $arg0: Insufficient balance',
+      'ERROR 20117: Insufficient balance',
       name: 'errorInsufficientBalance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR 20124: Insufficient transaction fee. Please make sure your wallet has {arg0} as fee`
+  String errorInsufficientTransactionFeeWithAmount(Object arg0) {
+    return Intl.message(
+      'ERROR 20124: Insufficient transaction fee. Please make sure your wallet has $arg0 as fee',
+      name: 'errorInsufficientTransactionFeeWithAmount',
       desc: '',
       args: [arg0],
     );
   }
 
-  /// `ERROR {arg0}: Insufficient transaction fee. Please make sure your wallet has {arg1} as fee`
-  String errorInsufficientTransactionFeeWithAmount(Object arg0, Object arg1) {
+  /// `ERROR 30102: Invalid address format. Please enter the correct {arg0} {arg1} address!`
+  String errorInvalidAddress(Object arg0, Object arg1) {
     return Intl.message(
-      'ERROR $arg0: Insufficient transaction fee. Please make sure your wallet has $arg1 as fee',
-      name: 'errorInsufficientTransactionFeeWithAmount',
+      'ERROR 30102: Invalid address format. Please enter the correct $arg0 $arg1 address!',
+      name: 'errorInvalidAddress',
       desc: '',
       args: [arg0, arg1],
     );
   }
 
-  /// `ERROR {arg0}: Invalid address format. Please enter the correct {arg1} {arg2} address!`
-  String errorInvalidAddress(Object arg0, Object arg1, Object arg2) {
+  /// `ERROR 30102: Invalid address format.`
+  String get errorInvalidAddressPlain {
     return Intl.message(
-      'ERROR $arg0: Invalid address format. Please enter the correct $arg1 $arg2 address!',
-      name: 'errorInvalidAddress',
-      desc: '',
-      args: [arg0, arg1, arg2],
-    );
-  }
-
-  /// `ERROR {arg0}: Invalid address format.`
-  String errorInvalidAddressPlain(Object arg0) {
-    return Intl.message(
-      'ERROR $arg0: Invalid address format.',
+      'ERROR 30102: Invalid address format.',
       name: 'errorInvalidAddressPlain',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Send verification code too frequent, please try again later.`
-  String errorInvalidCodeTooFrequent(Object arg0) {
+  /// `ERROR 20129: Send verification code too frequent, please try again later.`
+  String get errorInvalidCodeTooFrequent {
     return Intl.message(
-      'ERROR $arg0: Send verification code too frequent, please try again later.',
+      'ERROR 20129: Send verification code too frequent, please try again later.',
       name: 'errorInvalidCodeTooFrequent',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Invalid emergency contact`
-  String errorInvalidEmergencyContact(Object arg0) {
+  /// `ERROR 20130: Invalid emergency contact`
+  String get errorInvalidEmergencyContact {
     return Intl.message(
-      'ERROR $arg0: Invalid emergency contact',
+      'ERROR 20130: Invalid emergency contact',
       name: 'errorInvalidEmergencyContact',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Invalid PIN format.`
-  String errorInvalidPinFormat(Object arg0) {
+  /// `ERROR 20118: Invalid PIN format.`
+  String get errorInvalidPinFormat {
     return Intl.message(
-      'ERROR $arg0: Invalid PIN format.',
+      'ERROR 20118: Invalid PIN format.',
       name: 'errorInvalidPinFormat',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
@@ -1192,13 +1314,13 @@ class Localization {
     );
   }
 
-  /// `ERROR {arg0}: Not found`
-  String errorNotFound(Object arg0) {
+  /// `ERROR 404: Not found`
+  String get errorNotFound {
     return Intl.message(
-      'ERROR $arg0: Not found',
+      'ERROR 404: Not found',
       name: 'errorNotFound',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
@@ -1212,23 +1334,23 @@ class Localization {
     );
   }
 
-  /// `ERROR {arg0}: The number has reached the limit.`
-  String errorNumberReachedLimit(Object arg0) {
+  /// `ERROR 20132: The number has reached the limit.`
+  String get errorNumberReachedLimit {
     return Intl.message(
-      'ERROR $arg0: The number has reached the limit.',
+      'ERROR 20132: The number has reached the limit.',
       name: 'errorNumberReachedLimit',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Please update Mixin({arg1}) to continue use the service.`
-  String errorOldVersion(Object arg0, Object arg1) {
+  /// `ERROR 10006: Please update Mixin({arg0}) to continue use the service.`
+  String errorOldVersion(Object arg0) {
     return Intl.message(
-      'ERROR $arg0: Please update Mixin($arg1) to continue use the service.',
+      'ERROR 10006: Please update Mixin($arg0) to continue use the service.',
       name: 'errorOldVersion',
       desc: '',
-      args: [arg0, arg1],
+      args: [arg0],
     );
   }
 
@@ -1252,43 +1374,43 @@ class Localization {
     );
   }
 
-  /// `ERROR {arg0}: Invalid phone number`
-  String errorPhoneInvalidFormat(Object arg0) {
+  /// `ERROR 20110: Invalid phone number`
+  String get errorPhoneInvalidFormat {
     return Intl.message(
-      'ERROR $arg0: Invalid phone number',
+      'ERROR 20110: Invalid phone number',
       name: 'errorPhoneInvalidFormat',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Failed to deliver SMS`
-  String errorPhoneSmsDelivery(Object arg0) {
+  /// `ERROR 10003: Failed to deliver SMS`
+  String get errorPhoneSmsDelivery {
     return Intl.message(
-      'ERROR $arg0: Failed to deliver SMS',
+      'ERROR 10003: Failed to deliver SMS',
       name: 'errorPhoneSmsDelivery',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Expired phone verification code`
-  String errorPhoneVerificationCodeExpired(Object arg0) {
+  /// `ERROR 20114: Expired phone verification code`
+  String get errorPhoneVerificationCodeExpired {
     return Intl.message(
-      'ERROR $arg0: Expired phone verification code',
+      'ERROR 20114: Expired phone verification code',
       name: 'errorPhoneVerificationCodeExpired',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Invalid phone verification code`
-  String errorPhoneVerificationCodeInvalid(Object arg0) {
+  /// `ERROR 20113: Invalid phone verification code`
+  String get errorPhoneVerificationCodeInvalid {
     return Intl.message(
-      'ERROR $arg0: Invalid phone verification code',
+      'ERROR 20113: Invalid phone verification code',
       name: 'errorPhoneVerificationCodeInvalid',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
@@ -1302,37 +1424,37 @@ class Localization {
     );
   }
 
-  /// `ERROR {arg0}: PIN incorrect`
-  String errorPinIncorrect(Object arg0) {
+  /// `ERROR 20119: PIN incorrect`
+  String get errorPinIncorrect {
     return Intl.message(
-      'ERROR $arg0: PIN incorrect',
+      'ERROR 20119: PIN incorrect',
       name: 'errorPinIncorrect',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `{count, plural, one{ERROR {arg0}: PIN incorrect. You still have {arg1} chance. Please wait for 24 hours to retry later.} other{ERROR {arg0}: PIN incorrect. You still have {arg1} chances. Please wait for 24 hours to retry later.}}`
-  String errorPinIncorrectWithTimes(num count, Object arg0, Object arg1) {
+  /// `{count, plural, one{ERROR 20119: PIN incorrect. You still have {arg0} chance. Please wait for 24 hours to retry later.} other{ERROR 20119: PIN incorrect. You still have {arg0} chances. Please wait for 24 hours to retry later.}}`
+  String errorPinIncorrectWithTimes(num count, Object arg0) {
     return Intl.plural(
       count,
       one:
-          'ERROR $arg0: PIN incorrect. You still have $arg1 chance. Please wait for 24 hours to retry later.',
+          'ERROR 20119: PIN incorrect. You still have $arg0 chance. Please wait for 24 hours to retry later.',
       other:
-          'ERROR $arg0: PIN incorrect. You still have $arg1 chances. Please wait for 24 hours to retry later.',
+          'ERROR 20119: PIN incorrect. You still have $arg0 chances. Please wait for 24 hours to retry later.',
       name: 'errorPinIncorrectWithTimes',
       desc: '',
-      args: [count, arg0, arg1],
+      args: [count, arg0],
     );
   }
 
-  /// `ERROR {arg0}: Recaptcha is invalid`
-  String errorRecaptchaIsInvalid(Object arg0) {
+  /// `ERROR 10004: Recaptcha is invalid`
+  String get errorRecaptchaIsInvalid {
     return Intl.message(
-      'ERROR $arg0: Recaptcha is invalid',
+      'ERROR 10004: Recaptcha is invalid',
       name: 'errorRecaptchaIsInvalid',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
@@ -1346,43 +1468,43 @@ class Localization {
     );
   }
 
-  /// `ERROR {arg0}: Rate limit exceeded`
-  String errorTooManyRequest(Object arg0) {
+  /// `ERROR 429: Rate limit exceeded`
+  String get errorTooManyRequest {
     return Intl.message(
-      'ERROR $arg0: Rate limit exceeded',
+      'ERROR 429: Rate limit exceeded',
       name: 'errorTooManyRequest',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Too many stickers`
-  String errorTooManyStickers(Object arg0) {
+  /// `ERROR 20126: Too many stickers`
+  String get errorTooManyStickers {
     return Intl.message(
-      'ERROR $arg0: Too many stickers',
+      'ERROR 20126: Too many stickers',
       name: 'errorTooManyStickers',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Transfer amount is too small`
-  String errorTooSmallTransferAmount(Object arg0) {
+  /// `ERROR 20120: Transfer amount is too small`
+  String get errorTooSmallTransferAmount {
     return Intl.message(
-      'ERROR $arg0: Transfer amount is too small',
+      'ERROR 20120: Transfer amount is too small',
       name: 'errorTooSmallTransferAmount',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
-  /// `ERROR {arg0}: Withdraw amount too small`
-  String errorTooSmallWithdrawAmount(Object arg0) {
+  /// `ERROR 20127: Withdraw amount too small`
+  String get errorTooSmallWithdrawAmount {
     return Intl.message(
-      'ERROR $arg0: Withdraw amount too small',
+      'ERROR 20127: Withdraw amount too small',
       name: 'errorTooSmallWithdrawAmount',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
@@ -1426,13 +1548,13 @@ class Localization {
     );
   }
 
-  /// `ERROR {arg0}: This phone number is already associated with another account.`
-  String errorUsedPhone(Object arg0) {
+  /// `ERROR 20122: This phone number is already associated with another account.`
+  String get errorUsedPhone {
     return Intl.message(
-      'ERROR $arg0: This phone number is already associated with another account.',
+      'ERROR 20122: This phone number is already associated with another account.',
       name: 'errorUsedPhone',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
@@ -1446,13 +1568,13 @@ class Localization {
     );
   }
 
-  /// `ERROR {arg0}: Withdrawal memo format incorrect.`
-  String errorWithdrawalMemoFormatIncorrect(Object arg0) {
+  /// `ERROR 20131: Withdrawal memo format incorrect.`
+  String get errorWithdrawalMemoFormatIncorrect {
     return Intl.message(
-      'ERROR $arg0: Withdrawal memo format incorrect.',
+      'ERROR 20131: Withdrawal memo format incorrect.',
       name: 'errorWithdrawalMemoFormatIncorrect',
       desc: '',
-      args: [arg0],
+      args: [],
     );
   }
 
@@ -1758,10 +1880,10 @@ class Localization {
     );
   }
 
-  /// `Initializing`
+  /// `Initializing…`
   String get initializing {
     return Intl.message(
-      'Initializing',
+      'Initializing…',
       name: 'initializing',
       desc: '',
       args: [],
@@ -2218,21 +2340,21 @@ class Localization {
     );
   }
 
-  /// `NO FILE`
-  String get noFile {
+  /// `NO FILES`
+  String get noFiles {
     return Intl.message(
-      'NO FILE',
-      name: 'noFile',
+      'NO FILES',
+      name: 'noFiles',
       desc: '',
       args: [],
     );
   }
 
-  /// `NO LINK`
-  String get noLink {
+  /// `NO LINKS`
+  String get noLinks {
     return Intl.message(
-      'NO LINK',
-      name: 'noLink',
+      'NO LINKS',
+      name: 'noLinks',
       desc: '',
       args: [],
     );
@@ -2258,21 +2380,21 @@ class Localization {
     );
   }
 
-  /// `NO POST`
-  String get noPost {
+  /// `NO POSTS`
+  String get noPosts {
     return Intl.message(
-      'NO POST',
-      name: 'noPost',
+      'NO POSTS',
+      name: 'noPosts',
       desc: '',
       args: [],
     );
   }
 
-  /// `No result`
-  String get noResult {
+  /// `NO RESULTS`
+  String get noResults {
     return Intl.message(
-      'No result',
-      name: 'noResult',
+      'NO RESULTS',
+      name: 'noResults',
       desc: '',
       args: [],
     );
@@ -2325,6 +2447,16 @@ class Localization {
       name: 'nowAnAddmin',
       desc: '',
       args: [arg0],
+    );
+  }
+
+  /// `One-by-One Forward`
+  String get oneByOneForward {
+    return Intl.message(
+      'One-by-One Forward',
+      name: 'oneByOneForward',
+      desc: '',
+      args: [],
     );
   }
 
@@ -2852,6 +2984,26 @@ class Localization {
     );
   }
 
+  /// `Set`
+  String get set {
+    return Intl.message(
+      'Set',
+      name: 'set',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{arg0} set disappearing message time to {arg1}`
+  String setDisappearingMessageTimeTo(Object arg0, Object arg1) {
+    return Intl.message(
+      '$arg0 set disappearing message time to $arg1',
+      name: 'setDisappearingMessageTimeTo',
+      desc: '',
+      args: [arg0, arg1],
+    );
+  }
+
   /// `Mixin ID, Name`
   String get settingAuthSearchHint {
     return Intl.message(
@@ -3232,6 +3384,66 @@ class Localization {
     );
   }
 
+  /// `{count, plural, one{day} other{days}}`
+  String unitDay(num count) {
+    return Intl.plural(
+      count,
+      one: 'day',
+      other: 'days',
+      name: 'unitDay',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, one{hour} other{hours}}`
+  String unitHour(num count) {
+    return Intl.plural(
+      count,
+      one: 'hour',
+      other: 'hours',
+      name: 'unitHour',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, one{minute} other{minutes}}`
+  String unitMinute(num count) {
+    return Intl.plural(
+      count,
+      one: 'minute',
+      other: 'minutes',
+      name: 'unitMinute',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, one{second} other{seconds}}`
+  String unitSecond(num count) {
+    return Intl.plural(
+      count,
+      one: 'second',
+      other: 'seconds',
+      name: 'unitSecond',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, one{week} other{weeks}}`
+  String unitWeek(num count) {
+    return Intl.plural(
+      count,
+      one: 'week',
+      other: 'weeks',
+      name: 'unitWeek',
+      desc: '',
+      args: [count],
+    );
+  }
+
   /// `Unmute`
   String get unmute {
     return Intl.message(
@@ -3412,271 +3624,11 @@ class Localization {
     );
   }
 
-  /// `Disappearing messages`
-  String get disappearingMessages {
-    return Intl.message(
-      'Disappearing messages',
-      name: 'disappearingMessages',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to learn more.`
-  String get disappearingMessagesDescription {
-    return Intl.message(
-      'When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to learn more.',
-      name: 'disappearingMessagesDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Learn more`
-  String get learnMore {
-    return Intl.message(
-      'Learn more',
-      name: 'learnMore',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Off`
-  String get off {
-    return Intl.message(
-      'Off',
-      name: 'off',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Custom time`
-  String get disappearingCustomTime {
-    return Intl.message(
-      'Custom time',
-      name: 'disappearingCustomTime',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `seconds`
-  String get seconds {
-    return Intl.message(
-      'seconds',
-      name: 'seconds',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `minutes`
-  String get minutes {
-    return Intl.message(
-      'minutes',
-      name: 'minutes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `hours`
-  String get hours {
-    return Intl.message(
-      'hours',
-      name: 'hours',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `days`
-  String get days {
-    return Intl.message(
-      'days',
-      name: 'days',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `weeks`
-  String get weeks {
-    return Intl.message(
-      'weeks',
-      name: 'weeks',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `second`
-  String get second {
-    return Intl.message(
-      'second',
-      name: 'second',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `minute`
-  String get minute {
-    return Intl.message(
-      'minute',
-      name: 'minute',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `hour`
-  String get hour {
-    return Intl.message(
-      'hour',
-      name: 'hour',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `day`
-  String get day {
-    return Intl.message(
-      'day',
-      name: 'day',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `week`
-  String get week {
-    return Intl.message(
-      'week',
-      name: 'week',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Set`
-  String get set {
-    return Intl.message(
-      'Set',
-      name: 'set',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{name} set disappearing message time to {duration}.`
-  String chatExpiredSet(Object name, Object duration) {
-    return Intl.message(
-      '$name set disappearing message time to $duration.',
-      name: 'chatExpiredSet',
-      desc: '',
-      args: [name, duration],
-    );
-  }
-
-  /// `{name} changed disappearing message settings.`
-  String chatExpiredSetWithoutDuration(Object name) {
-    return Intl.message(
-      '$name changed disappearing message settings.',
-      name: 'chatExpiredSetWithoutDuration',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `{name} disabled disappearing message.`
-  String chatExpiredDisabled(Object name) {
-    return Intl.message(
-      '$name disabled disappearing message.',
-      name: 'chatExpiredDisabled',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `The maximum time is {max}.`
-  String disappearingCustomTimeMaxWarning(Object max) {
-    return Intl.message(
-      'The maximum time is $max.',
-      name: 'disappearingCustomTimeMaxWarning',
-      desc: '',
-      args: [max],
-    );
-  }
-
   /// `Zoom`
   String get zoom {
     return Intl.message(
       'Zoom',
       name: 'zoom',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Bring All To Front`
-  String get bringAllToFront {
-    return Intl.message(
-      'Bring All To Front',
-      name: 'bringAllToFront',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add to Circle`
-  String get addToCircle {
-    return Intl.message(
-      'Add to Circle',
-      name: 'addToCircle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Select`
-  String get select {
-    return Intl.message(
-      'Select',
-      name: 'select',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Combine and Forward`
-  String get combineAndForward {
-    return Intl.message(
-      'Combine and Forward',
-      name: 'combineAndForward',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Forward One By One`
-  String get forwardOneByOne {
-    return Intl.message(
-      'Forward One By One',
-      name: 'forwardOneByOne',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Are you sure you want to delete the selected message?`
-  String get deleteSelectedMessageWarning {
-    return Intl.message(
-      'Are you sure you want to delete the selected message?',
-      name: 'deleteSelectedMessageWarning',
       desc: '',
       args: [],
     );
@@ -3689,6 +3641,9 @@ class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'in'),
+      Locale.fromSubtags(languageCode: 'ja'),
+      Locale.fromSubtags(languageCode: 'ms'),
       Locale.fromSubtags(languageCode: 'zh'),
     ];
   }
