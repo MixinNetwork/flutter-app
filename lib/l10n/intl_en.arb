@@ -371,5 +371,13 @@
   "select": "Select",
   "combineAndForward": "Combine and Forward",
   "forwardOneByOne": "Forward One By One",
-  "deleteSelectedMessageWarning": "Are you sure you want to delete the selected message?"
+  "deleteSelectedMessageWarning": "Are you sure you want to delete the selected message?",
+  "smileysAndPeople": "Smileys & People",
+  "animalsAndNature": "Animals & Nature",
+  "foodAndDrink": "Food & Drink",
+  "activity": "Activity",
+  "travelAndPlaces": "Travel & Places",
+  "objects": "Objects",
+  "symbols": "Symbols",
+  "flags": "Flags"
 }

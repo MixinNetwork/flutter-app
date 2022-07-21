@@ -10,6 +10,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/logger.dart';
 import '../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../interactive_decorated_box.dart';
 
@@ -18,6 +19,30 @@ class EmojiSelectedGroupIndexCubit extends Cubit<int> {
 
   void setIndex(int index) => emit(index);
 }
+
+const _emojiGroups = [
+  [EmojiGroup.smileysEmotion, EmojiGroup.peopleBody],
+  [EmojiGroup.animalsNature],
+  [EmojiGroup.foodDrink],
+  [EmojiGroup.travelPlaces],
+  [EmojiGroup.activities],
+  [EmojiGroup.objects],
+  [EmojiGroup.symbols],
+  [EmojiGroup.flags],
+];
+
+// ignore: avoid-non-ascii-symbols
+const macOSIgnoreEmoji = {'☺️', '☹️'};
+
+final _groupedEmojis = _emojiGroups
+    .map(
+      (group) => group
+          .expand(Emoji.byGroup)
+          .where((e) => !Platform.isMacOS || !macOSIgnoreEmoji.contains(e.char))
+          .map((emoji) => emoji.char)
+          .toList(),
+    )
+    .toList();
 
 class EmojiPage extends HookWidget {
   const EmojiPage({super.key});
@@ -46,6 +71,11 @@ class EmojiPage extends HookWidget {
       }
     }, [selectedIndex]);
 
+    assert(
+      _emojiGroups.length == _groupedEmojis.length,
+      '_emojiGroups and _groupedEmojis must be same length',
+    );
+
     return Column(
       children: [
         _EmojiGroupHeader(
@@ -63,18 +93,7 @@ class EmojiPage extends HookWidget {
         Expanded(
           child: selectedIndex == 0
               ? const _RecentEmojiGroupPage()
-              : _EmojiGroupPage(
-                  groups: const [
-                    [EmojiGroup.smileysEmotion, EmojiGroup.peopleBody],
-                    [EmojiGroup.animalsNature],
-                    [EmojiGroup.foodDrink],
-                    [EmojiGroup.travelPlaces],
-                    [EmojiGroup.activities],
-                    [EmojiGroup.objects],
-                    [EmojiGroup.symbols],
-                    [EmojiGroup.flags],
-                  ][selectedIndex - 1],
-                ),
+              : _AllEmojisPage(selectedGroupIndex: selectedIndex - 1),
         )
       ],
     );
@@ -151,56 +170,147 @@ class _RecentEmojiGroupPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final emojis = useState(AccountKeyValue.instance.recentUsedEmoji);
-    return _EmojiGridView(emojis: emojis.value);
-  }
-}
-
-class _EmojiGroupPage extends HookWidget {
-  const _EmojiGroupPage({required this.groups});
-
-  final List<EmojiGroup> groups;
-
-  @override
-  Widget build(BuildContext context) {
-    // ignore: avoid-non-ascii-symbols
-    const macOSIgnoreEmoji = {'☺️', '☹️'};
-
-    final emojis = useMemoized(
-      () => groups
-          .expand<Emoji>(Emoji.byGroup)
-          .map((e) => e.char)
-          .where((element) =>
-              !Platform.isMacOS || !macOSIgnoreEmoji.contains(element))
-          .toList(),
-      [groups],
+    final emojis =
+        useMemoized(() => AccountKeyValue.instance.recentUsedEmoji.chunked(11));
+    final controller = useMemoized(ScrollerScrollController.new);
+    return ListView.builder(
+      itemExtent: _emojiItemExtent,
+      controller: controller,
+      itemCount: emojis.length,
+      itemBuilder: (context, index) {
+        assert(index < emojis.length,
+            'index must be in range [0, ${emojis.length - 1}]');
+        if (index >= emojis.length) {
+          return const SizedBox();
+        }
+        return _EmojiLine(emojis: emojis[index]);
+      },
     );
-    return _EmojiGridView(emojis: emojis);
   }
 }
 
-class _EmojiGridView extends HookWidget {
-  const _EmojiGridView({required this.emojis});
+const _emojiItemExtent = 34.0;
 
-  final List<String> emojis;
+class _AllEmojisPage extends HookWidget {
+  _AllEmojisPage({
+    required this.selectedGroupIndex,
+  }) : assert(
+            selectedGroupIndex >= 0 &&
+                selectedGroupIndex < _groupedEmojis.length,
+            'selectedGroupIndex must be in range [0, ${_groupedEmojis.length - 1}]');
+
+  final int selectedGroupIndex;
 
   @override
   Widget build(BuildContext context) {
     final controller = useMemoized(ScrollerScrollController.new);
-    return GridView.builder(
+
+    final groupedEmojiLine = useMemoized(
+      () => List<List<List<String>>>.unmodifiable(
+          _groupedEmojis.map((e) => e.chunked(11))),
+    );
+
+    final groupOffset = useMemoized(() {
+      final array = List<double>.filled(_emojiGroups.length, 0);
+      for (var i = 1; i < _emojiGroups.length; i++) {
+        array[i] = array[i - 1] +
+            (groupedEmojiLine[i - 1].length + 1 /* header */) *
+                _emojiItemExtent;
+      }
+      return array;
+    });
+
+    final itemCount = useMemoized(
+      () =>
+          groupedEmojiLine.fold<int>(
+              0, (previousValue, element) => previousValue + element.length) +
+          groupedEmojiLine.length,
+    );
+
+    final groupTitles = [
+      context.l10n.smileysAndPeople,
+      context.l10n.animalsAndNature,
+      context.l10n.foodAndDrink,
+      context.l10n.travelAndPlaces,
+      context.l10n.activity,
+      context.l10n.objects,
+      context.l10n.symbols,
+      context.l10n.flags,
+    ];
+
+    useEffect(() {
+      WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+        controller.jumpTo(groupOffset[selectedGroupIndex]);
+      });
+    }, [selectedGroupIndex]);
+
+    useEffect(() {
+      void onScroll() {
+        d('scroll ${controller.offset}');
+      }
+
+      controller.addListener(onScroll);
+      return () {
+        controller.removeListener(onScroll);
+      };
+    }, [controller]);
+
+    return ListView.builder(
       controller: controller,
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 11,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 8,
-      ),
-      itemCount: emojis.length,
-      itemBuilder: (BuildContext context, int index) => _EmojiItem(
-        emoji: emojis[index],
-      ),
+      itemExtent: _emojiItemExtent,
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        var inGroupIndex = index;
+        for (var i = 0; i < groupedEmojiLine.length; i++) {
+          if (inGroupIndex <= groupedEmojiLine[i].length) {
+            if (inGroupIndex == 0) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10, left: 20),
+                child: SizedBox(
+                    height: 24,
+                    child: Text(
+                      groupTitles[i],
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: context.theme.secondaryText,
+                      ),
+                    )),
+              );
+            } else {
+              return _EmojiLine(
+                emojis: groupedEmojiLine[i][inGroupIndex - 1],
+              );
+            }
+          }
+          inGroupIndex -= groupedEmojiLine[i].length + 1;
+        }
+        assert(false, 'unreachable: $index');
+        return const SizedBox();
+      },
     );
   }
+}
+
+class _EmojiLine extends StatelessWidget {
+  const _EmojiLine({required this.emojis}) : assert(emojis.length <= 11);
+
+  final List<String> emojis;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 10, left: 20, right: 20),
+        child: SizedBox(
+          height: 24,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (final emoji in emojis) _EmojiItem(emoji: emoji),
+              for (var i = emojis.length; i < 11; i++)
+                const SizedBox.square(dimension: 24),
+            ],
+          ),
+        ),
+      );
 }
 
 class _EmojiItem extends StatelessWidget {
@@ -227,14 +337,12 @@ class _EmojiItem extends StatelessWidget {
           }
           AccountKeyValue.instance.onEmojiUsed(emoji);
         },
-        child: Center(
-          child: SizedBox.square(
-            dimension: 24,
-            child: Text(
-              emoji,
-              style: const TextStyle(fontSize: 20, height: 1),
-              textAlign: TextAlign.center,
-            ),
+        child: SizedBox.square(
+          dimension: 24,
+          child: Text(
+            emoji,
+            style: const TextStyle(fontSize: 20, height: 1),
+            textAlign: TextAlign.center,
           ),
         ),
       );

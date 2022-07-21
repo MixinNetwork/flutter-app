@@ -170,6 +170,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Messages to this conversation are encrypted end-to-end, tap for more info."),
         "aboutEncryptedInfoUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "activity": MessageLookupByLibrary.simpleMessage("Activity"),
         "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAnnouncement":
             MessageLookupByLibrary.simpleMessage("Add group description"),
@@ -180,6 +181,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addStickers": MessageLookupByLibrary.simpleMessage("Add Stickers"),
         "addToCircle": MessageLookupByLibrary.simpleMessage("Add to Circle"),
         "added": MessageLookupByLibrary.simpleMessage("Added"),
+        "animalsAndNature":
+            MessageLookupByLibrary.simpleMessage("Animals & Nature"),
         "appCard": MessageLookupByLibrary.simpleMessage("Card"),
         "appCardShareDisallow": MessageLookupByLibrary.simpleMessage(
             "Disallow sharing of this URL"),
@@ -403,10 +406,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "failedToOpenFile": m49,
         "file": MessageLookupByLibrary.simpleMessage("File"),
         "files": MessageLookupByLibrary.simpleMessage("Files"),
+        "flags": MessageLookupByLibrary.simpleMessage("Flags"),
         "followFacebook":
             MessageLookupByLibrary.simpleMessage("Follow us on Facebook"),
         "followTwitter":
             MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
+        "foodAndDrink": MessageLookupByLibrary.simpleMessage("Food & Drink"),
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "forwardOneByOne":
             MessageLookupByLibrary.simpleMessage("Forward One By One"),
@@ -515,6 +520,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Notifications are not allowed, please go to Notification Settings to turn on."),
         "notificationPermissionTitle":
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
+        "objects": MessageLookupByLibrary.simpleMessage("Objects"),
         "off": MessageLookupByLibrary.simpleMessage("Off"),
         "openLogDirectory":
             MessageLookupByLibrary.simpleMessage("open log directory"),
@@ -605,6 +611,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "showAvatar": MessageLookupByLibrary.simpleMessage("Show avatar"),
         "showMixin": MessageLookupByLibrary.simpleMessage("Show Mixin"),
         "signOut": MessageLookupByLibrary.simpleMessage("Sign Out"),
+        "smileysAndPeople":
+            MessageLookupByLibrary.simpleMessage("Smileys & People"),
         "sticker": MessageLookupByLibrary.simpleMessage("Sticker"),
         "stickerAlbumDetail":
             MessageLookupByLibrary.simpleMessage("Sticker album detail"),
@@ -616,6 +624,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "This sender is not in your contacts"),
         "strangers": MessageLookupByLibrary.simpleMessage("Strangers"),
         "successful": MessageLookupByLibrary.simpleMessage("Successful"),
+        "symbols": MessageLookupByLibrary.simpleMessage("Symbols"),
         "termsService":
             MessageLookupByLibrary.simpleMessage("Terms of Service"),
         "text": MessageLookupByLibrary.simpleMessage("Text"),
@@ -628,6 +637,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "transactionsId":
             MessageLookupByLibrary.simpleMessage("Transaction Id"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
+        "travelAndPlaces":
+            MessageLookupByLibrary.simpleMessage("Travel & Places"),
         "typeAMessage": MessageLookupByLibrary.simpleMessage("Type message"),
         "unMute": MessageLookupByLibrary.simpleMessage("Unmute"),
         "unPin": MessageLookupByLibrary.simpleMessage("Unpin"),
