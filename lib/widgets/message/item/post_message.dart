@@ -58,6 +58,7 @@ class MessagePost extends StatelessWidget {
                 return ConstrainedBox(
                   constraints: BoxConstraints(
                     minHeight: showStatus ? 48 : 0,
+                    minWidth: 128,
                   ),
                   child: IntrinsicWidth(
                     child: Column(

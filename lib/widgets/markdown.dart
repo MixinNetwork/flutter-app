@@ -25,10 +25,15 @@ StyleConfig buildMarkdownStyleConfig(BuildContext context, bool darkMode) =>
           height: height,
         );
       },
-      pConfig: PConfig(onLinkTap: (href) {
-        if (href?.isEmpty ?? true) return;
-        openUri(context, href!);
-      }),
+      pConfig: PConfig(
+        onLinkTap: (href) {
+          if (href?.isEmpty ?? true) return;
+          openUri(context, href!);
+        },
+        selectable: false,
+      ),
+      olConfig: OlConfig(selectable: false),
+      ulConfig: UlConfig(selectable: false),
     );
 
 class Markdown extends StatelessWidget {
