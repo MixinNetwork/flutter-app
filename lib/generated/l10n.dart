@@ -3781,6 +3781,86 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Smileys & People`
+  String get smileysAndPeople {
+    return Intl.message(
+      'Smileys & People',
+      name: 'smileysAndPeople',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Animals & Nature`
+  String get animalsAndNature {
+    return Intl.message(
+      'Animals & Nature',
+      name: 'animalsAndNature',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Food & Drink`
+  String get foodAndDrink {
+    return Intl.message(
+      'Food & Drink',
+      name: 'foodAndDrink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Activity`
+  String get activity {
+    return Intl.message(
+      'Activity',
+      name: 'activity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Travel & Places`
+  String get travelAndPlaces {
+    return Intl.message(
+      'Travel & Places',
+      name: 'travelAndPlaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Objects`
+  String get objects {
+    return Intl.message(
+      'Objects',
+      name: 'objects',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Symbols`
+  String get symbols {
+    return Intl.message(
+      'Symbols',
+      name: 'symbols',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Flags`
+  String get flags {
+    return Intl.message(
+      'Flags',
+      name: 'flags',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

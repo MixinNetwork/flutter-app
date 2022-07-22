@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:emojis/emoji.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -13,11 +14,52 @@ import '../../utils/extension/extension.dart';
 import '../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../interactive_decorated_box.dart';
 
-class EmojiSelectedGroupIndexCubit extends Cubit<int> {
-  EmojiSelectedGroupIndexCubit() : super(1);
+class _EmojiSelectedGroupState with EquatableMixin {
+  const _EmojiSelectedGroupState.emoji(this.offset) : isRecent = false;
 
-  void setIndex(int index) => emit(index);
+  const _EmojiSelectedGroupState.recent()
+      : isRecent = true,
+        offset = 0;
+
+  final bool isRecent;
+  final double offset;
+
+  @override
+  List<Object?> get props => [isRecent, offset];
 }
+
+class EmojiSelectedGroupIndexCubit extends Cubit<_EmojiSelectedGroupState> {
+  EmojiSelectedGroupIndexCubit()
+      : super(const _EmojiSelectedGroupState.emoji(0));
+
+  void setRecent() => emit(const _EmojiSelectedGroupState.recent());
+
+  void setEmoji(double offset) => emit(_EmojiSelectedGroupState.emoji(offset));
+}
+
+const _emojiGroups = [
+  [EmojiGroup.smileysEmotion, EmojiGroup.peopleBody],
+  [EmojiGroup.animalsNature],
+  [EmojiGroup.foodDrink],
+  [EmojiGroup.travelPlaces],
+  [EmojiGroup.activities],
+  [EmojiGroup.objects],
+  [EmojiGroup.symbols],
+  [EmojiGroup.flags],
+];
+
+// ignore: avoid-non-ascii-symbols
+const macOSIgnoreEmoji = {'☺️', '☹️'};
+
+final _groupedEmojis = _emojiGroups
+    .map(
+      (group) => group
+          .expand(Emoji.byGroup)
+          .where((e) => !Platform.isMacOS || !macOSIgnoreEmoji.contains(e.char))
+          .map((emoji) => emoji.char)
+          .toList(),
+    )
+    .toList();
 
 class EmojiPage extends HookWidget {
   const EmojiPage({super.key});
@@ -36,15 +78,37 @@ class EmojiPage extends HookWidget {
       Resources.assetsImagesEmojiFlagsSvg,
     ];
 
-    var selectedIndex = context.watch<EmojiSelectedGroupIndexCubit>().state;
+    final state = context.watch<EmojiSelectedGroupIndexCubit>().state;
 
-    useEffect(() {
-      assert(selectedIndex >= 0 && selectedIndex < emojiGroupIcon.length,
-          'selectedIndex must be in range [0, ${emojiGroupIcon.length - 1}]');
-      if (selectedIndex < 0 || selectedIndex >= emojiGroupIcon.length) {
-        selectedIndex = 0;
+    final groupedEmojiLine = useMemoized(
+      () => List<List<List<String>>>.unmodifiable(
+          _groupedEmojis.map((e) => e.chunked(11))),
+    );
+
+    final groupOffset = useMemoized(() {
+      final array = List<double>.filled(_emojiGroups.length, 0);
+      for (var i = 1; i < _emojiGroups.length; i++) {
+        array[i] = array[i - 1] +
+            (groupedEmojiLine[i - 1].length + 1 /* header */) *
+                _emojiItemExtent;
       }
-    }, [selectedIndex]);
+      return array;
+    });
+
+    final selectedIndex = useMemoized(() {
+      if (state.isRecent) {
+        return 0;
+      }
+      for (var i = groupOffset.length - 1; i >= 0; i--) {
+        if (groupOffset[i] <= state.offset) {
+          return i + 1;
+        }
+      }
+      return 1;
+    }, [state]);
+
+    final emojiOffsetController = useStreamController<double>();
+    final emojiOffsetStream = useMemoized(() => emojiOffsetController.stream);
 
     return Column(
       children: [
@@ -52,7 +116,14 @@ class EmojiPage extends HookWidget {
           selectedIndex: selectedIndex,
           icons: emojiGroupIcon,
           onTap: (index) {
-            context.read<EmojiSelectedGroupIndexCubit>().setIndex(index);
+            if (index == 0) {
+              context.read<EmojiSelectedGroupIndexCubit>().setRecent();
+            } else {
+              context
+                  .read<EmojiSelectedGroupIndexCubit>()
+                  .setEmoji(groupOffset[index - 1]);
+              emojiOffsetController.add(groupOffset[index - 1]);
+            }
           },
         ),
         Divider(
@@ -61,19 +132,13 @@ class EmojiPage extends HookWidget {
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: selectedIndex == 0
+          child: state.isRecent
               ? const _RecentEmojiGroupPage()
-              : _EmojiGroupPage(
-                  groups: const [
-                    [EmojiGroup.smileysEmotion, EmojiGroup.peopleBody],
-                    [EmojiGroup.animalsNature],
-                    [EmojiGroup.foodDrink],
-                    [EmojiGroup.travelPlaces],
-                    [EmojiGroup.activities],
-                    [EmojiGroup.objects],
-                    [EmojiGroup.symbols],
-                    [EmojiGroup.flags],
-                  ][selectedIndex - 1],
+              : _AllEmojisPage(
+                  groupedEmojiLine: groupedEmojiLine,
+                  groupOffset: groupOffset,
+                  initialOffset: state.offset,
+                  offsetStream: emojiOffsetStream,
                 ),
         )
       ],
@@ -136,8 +201,8 @@ class _EmojiGroupIcon extends StatelessWidget {
           padding: const EdgeInsets.all(4),
           child: SvgPicture.asset(
             icon,
-            width: 20,
-            height: 20,
+            width: 24,
+            height: 24,
             color: selectedIndex == index
                 ? context.theme.accent
                 : context.theme.secondaryText,
@@ -151,56 +216,138 @@ class _RecentEmojiGroupPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final emojis = useState(AccountKeyValue.instance.recentUsedEmoji);
-    return _EmojiGridView(emojis: emojis.value);
+    final emojis =
+        useMemoized(() => AccountKeyValue.instance.recentUsedEmoji.chunked(11));
+    final controller = useMemoized(ScrollerScrollController.new);
+    return ListView.builder(
+      itemExtent: _emojiItemExtent,
+      controller: controller,
+      itemCount: emojis.length,
+      itemBuilder: (context, index) {
+        assert(index < emojis.length,
+            'index must be in range [0, ${emojis.length - 1}]');
+        if (index >= emojis.length) {
+          return const SizedBox();
+        }
+        return _EmojiLine(emojis: emojis[index]);
+      },
+    );
   }
 }
 
-class _EmojiGroupPage extends HookWidget {
-  const _EmojiGroupPage({required this.groups});
+const _emojiItemExtent = 34.0;
 
-  final List<EmojiGroup> groups;
+class _AllEmojisPage extends HookWidget {
+  const _AllEmojisPage({
+    required this.groupOffset,
+    required this.groupedEmojiLine,
+    required this.initialOffset,
+    required this.offsetStream,
+  });
+
+  final List<List<List<String>>> groupedEmojiLine;
+  final List<double> groupOffset;
+  final double initialOffset;
+  final Stream<double> offsetStream;
 
   @override
   Widget build(BuildContext context) {
-    // ignore: avoid-non-ascii-symbols
-    const macOSIgnoreEmoji = {'☺️', '☹️'};
+    final controller = useMemoized(() => ScrollerScrollController(
+          initialScrollOffset: initialOffset,
+        ));
 
-    final emojis = useMemoized(
-      () => groups
-          .expand<Emoji>(Emoji.byGroup)
-          .map((e) => e.char)
-          .where((element) =>
-              !Platform.isMacOS || !macOSIgnoreEmoji.contains(element))
-          .toList(),
-      [groups],
+    final itemCount = useMemoized(
+      () =>
+          groupedEmojiLine.fold<int>(
+              0, (previousValue, element) => previousValue + element.length) +
+          groupedEmojiLine.length,
     );
-    return _EmojiGridView(emojis: emojis);
+
+    final groupTitles = [
+      context.l10n.smileysAndPeople,
+      context.l10n.animalsAndNature,
+      context.l10n.foodAndDrink,
+      context.l10n.travelAndPlaces,
+      context.l10n.activity,
+      context.l10n.objects,
+      context.l10n.symbols,
+      context.l10n.flags,
+    ];
+
+    useEffect(() {
+      void onScroll() {
+        context
+            .read<EmojiSelectedGroupIndexCubit>()
+            .setEmoji(controller.offset);
+      }
+
+      controller.addListener(onScroll);
+      return () {
+        controller.removeListener(onScroll);
+      };
+    }, [controller]);
+
+    useEffect(
+      () => offsetStream.listen(controller.jumpTo).cancel,
+      [offsetStream],
+    );
+
+    return ListView.builder(
+      controller: controller,
+      itemExtent: _emojiItemExtent,
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        var inGroupIndex = index;
+        for (var i = 0; i < groupedEmojiLine.length; i++) {
+          if (inGroupIndex <= groupedEmojiLine[i].length) {
+            if (inGroupIndex == 0) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10, left: 20),
+                child: SizedBox(
+                    height: 24,
+                    child: Text(
+                      groupTitles[i],
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: context.theme.secondaryText,
+                      ),
+                    )),
+              );
+            } else {
+              return _EmojiLine(
+                emojis: groupedEmojiLine[i][inGroupIndex - 1],
+              );
+            }
+          }
+          inGroupIndex -= groupedEmojiLine[i].length + 1;
+        }
+        assert(false, 'unreachable: $index');
+        return const SizedBox();
+      },
+    );
   }
 }
 
-class _EmojiGridView extends HookWidget {
-  const _EmojiGridView({required this.emojis});
+class _EmojiLine extends StatelessWidget {
+  const _EmojiLine({required this.emojis}) : assert(emojis.length <= 11);
 
   final List<String> emojis;
 
   @override
-  Widget build(BuildContext context) {
-    final controller = useMemoized(ScrollerScrollController.new);
-    return GridView.builder(
-      controller: controller,
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 11,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 8,
-      ),
-      itemCount: emojis.length,
-      itemBuilder: (BuildContext context, int index) => _EmojiItem(
-        emoji: emojis[index],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 10, left: 20, right: 20),
+        child: SizedBox(
+          height: 24,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (final emoji in emojis) _EmojiItem(emoji: emoji),
+              for (var i = emojis.length; i < 11; i++)
+                const SizedBox.square(dimension: 24),
+            ],
+          ),
+        ),
+      );
 }
 
 class _EmojiItem extends StatelessWidget {
@@ -227,14 +374,12 @@ class _EmojiItem extends StatelessWidget {
           }
           AccountKeyValue.instance.onEmojiUsed(emoji);
         },
-        child: Center(
-          child: SizedBox.square(
-            dimension: 24,
-            child: Text(
-              emoji,
-              style: const TextStyle(fontSize: 20, height: 1),
-              textAlign: TextAlign.center,
-            ),
+        child: SizedBox.square(
+          dimension: 24,
+          child: Text(
+            emoji,
+            style: const TextStyle(fontSize: 20, height: 1),
+            textAlign: TextAlign.center,
           ),
         ),
       );

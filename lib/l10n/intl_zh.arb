@@ -363,5 +363,13 @@
   "select": "选择",
   "combineAndForward": "合并转发",
   "forwardOneByOne": "逐条转发",
-  "deleteSelectedMessageWarning": "是否要删除选中的消息？"
+  "deleteSelectedMessageWarning": "是否要删除选中的消息？",
+  "smileysAndPeople": "表情符号与人物",
+  "animalsAndNature": "动物与自然",
+  "foodAndDrink": "食物与饮料",
+  "activity": "活动",
+  "travelAndPlaces": "旅行与地点",
+  "objects": "物件",
+  "symbols": "符号",
+  "flags": "旗帜"
 }

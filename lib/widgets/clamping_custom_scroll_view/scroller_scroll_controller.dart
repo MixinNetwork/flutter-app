@@ -5,6 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class ScrollerScrollController extends ScrollController {
+  ScrollerScrollController({
+    super.initialScrollOffset,
+    super.keepScrollOffset,
+    super.debugLabel,
+  });
+
   @override
   ScrollPosition createScrollPosition(ScrollPhysics physics,
           ScrollContext context, ScrollPosition? oldPosition) =>
