@@ -56,6 +56,7 @@ final _groupedEmojis = _emojiGroups
       (group) => group
           .expand(Emoji.byGroup)
           .where((e) => !Platform.isMacOS || !macOSIgnoreEmoji.contains(e.char))
+          .where((e) => !e.modifiable)
           .map((emoji) => emoji.char)
           .toList(),
     )
