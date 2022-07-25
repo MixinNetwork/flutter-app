@@ -13,13 +13,13 @@ import '../crypto/privacy_key_value.dart';
 import 'attachment/download_key_value.dart';
 import 'file.dart';
 
-Future<void> initKeyValues() => Future.wait([
-      PrivacyKeyValue.instance.init(),
-      CryptoKeyValue.instance.init(),
-      AccountKeyValue.instance.init(),
-      ShowPinMessageKeyValue.instance.init(),
-      ScamWarningKeyValue.instance.init(),
-      DownloadKeyValue.instance.init(),
+Future<void> initKeyValues(String identityNumber) => Future.wait([
+      PrivacyKeyValue.instance.init(identityNumber),
+      CryptoKeyValue.instance.init(identityNumber),
+      AccountKeyValue.instance.init(identityNumber),
+      ShowPinMessageKeyValue.instance.init(identityNumber),
+      ScamWarningKeyValue.instance.init(identityNumber),
+      DownloadKeyValue.instance.init(identityNumber),
     ]);
 
 Future<void> clearKeyValues() => Future.wait([
@@ -38,12 +38,22 @@ abstract class HiveKeyValue<E> {
   late Box<E> box;
   bool _hasInit = false;
 
-  Future init() async {
+  Future init(String identityNumber) async {
     if (_hasInit) {
       return;
     }
     final dbFolder = mixinDocumentsDirectory;
-    final file = File(p.join(dbFolder.path, _boxName));
+    final legacyBoxFile = File(p.join(dbFolder.path, _boxName));
+    final file = File(p.join(dbFolder.path, identityNumber, _boxName));
+
+    if (!file.existsSync() && legacyBoxFile.existsSync()) {
+      // copy legacy file to new file
+      file
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(legacyBoxFile.readAsBytesSync());
+      legacyBoxFile.deleteSync();
+    }
+
     WidgetsFlutterBinding.ensureInitialized();
     if (!kIsWeb) {
       Hive.init(file.absolute.path);
