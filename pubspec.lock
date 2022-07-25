@@ -466,7 +466,7 @@ packages:
       name: file_selector
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.4+3"
+    version: "0.9.0"
   file_selector_linux:
     dependency: "direct main"
     description:
@@ -480,7 +480,7 @@ packages:
       name: file_selector_macos
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.2+2"
+    version: "0.9.0"
   file_selector_platform_interface:
     dependency: transitive
     description:
@@ -494,14 +494,14 @@ packages:
       name: file_selector_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.1+5"
+    version: "0.9.0"
   file_selector_windows:
     dependency: "direct main"
     description:
       name: file_selector_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.2+2"
+    version: "0.9.0"
   filesize:
     dependency: "direct main"
     description:
