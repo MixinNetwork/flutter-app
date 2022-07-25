@@ -169,7 +169,7 @@ class _EmojiPageBody extends HookWidget {
   }
 }
 
-class _EmojiGroupHeader extends StatelessWidget {
+class _EmojiGroupHeader extends HookWidget {
   const _EmojiGroupHeader({
     required this.icons,
     required this.onTap,
@@ -181,23 +181,37 @@ class _EmojiGroupHeader extends StatelessWidget {
   final int selectedIndex;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-        child: Row(
-          children: [
-            for (var i = 0; i < icons.length; i++)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: _EmojiGroupIcon(
-                  icon: icons[i],
-                  onTap: () => onTap(i),
-                  index: i,
-                  selectedIndex: selectedIndex,
-                ),
+  Widget build(BuildContext context) {
+    final tabController = useTabController(initialLength: icons.length);
+    useEffect(() {
+      tabController.index = selectedIndex;
+    }, [selectedIndex]);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: TabBar(
+          controller: tabController,
+          isScrollable: true,
+          labelPadding: EdgeInsets.zero,
+          indicator: const BoxDecoration(color: Colors.transparent),
+          tabs: List.generate(
+            icons.length,
+            (index) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: _EmojiGroupIcon(
+                icon: icons[index],
+                onTap: () => onTap(index),
+                index: index,
+                selectedIndex: selectedIndex,
               ),
-          ],
+            ),
+          ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class _EmojiGroupIcon extends StatelessWidget {
