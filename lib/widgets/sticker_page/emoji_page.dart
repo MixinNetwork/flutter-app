@@ -403,14 +403,11 @@ class _EmojiItem extends StatelessWidget {
             borderRadius: const BorderRadius.all(Radius.circular(8)),
           ),
           child: Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                emoji,
-                style: const TextStyle(fontSize: 28, height: 1),
-                strutStyle: const StrutStyle(height: 1),
-                textAlign: TextAlign.center,
-              ),
+            child: Text(
+              emoji,
+              style: const TextStyle(fontSize: 26, height: 1),
+              strutStyle: const StrutStyle(height: 1),
+              textAlign: TextAlign.center,
             ),
           ),
         ),
