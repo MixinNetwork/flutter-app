@@ -27,6 +27,7 @@ import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../bloc/conversation_cubit.dart';
+import '../bloc/quote_message_cubit.dart';
 import 'image_editor.dart';
 
 Future<void> showFilesPreviewDialog(
@@ -37,6 +38,7 @@ Future<void> showFilesPreviewDialog(
       initialFiles: await Future.wait(files.map(
         (e) async => _File(e, await e.length(), null),
       )),
+      quoteMessageCubit: context.read<QuoteMessageCubit>(),
     ),
   );
 }
@@ -75,9 +77,11 @@ enum _TabType { image, files, zip }
 class _FilesPreviewDialog extends HookWidget {
   const _FilesPreviewDialog({
     required this.initialFiles,
+    this.quoteMessageCubit,
   });
 
   final List<_File> initialFiles;
+  final QuoteMessageCubit? quoteMessageCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -215,8 +219,10 @@ class _FilesPreviewDialog extends HookWidget {
                       onPressed: () async {
                         if (currentTab.value != _TabType.zip) {
                           for (final file in files.value) {
-                            unawaited(_sendFile(context, file));
+                            unawaited(_sendFile(context, file,
+                                quoteMessageCubit?.state?.messageId));
                           }
+                          quoteMessageCubit?.emit(null);
                           Navigator.pop(context);
                         } else {
                           final zipFilePath =
@@ -227,7 +233,9 @@ class _FilesPreviewDialog extends HookWidget {
                           unawaited(_sendFile(
                             context,
                             await _File.createFromPath(zipFilePath),
+                            quoteMessageCubit?.state?.messageId,
                           ));
+                          quoteMessageCubit?.emit(null);
                           Navigator.pop(context);
                         }
                       },
@@ -268,7 +276,8 @@ Future<String> _archiveFiles(List<String> paths) async {
   return outPath;
 }
 
-Future<void> _sendFile(BuildContext context, _File file) async {
+Future<void> _sendFile(
+    BuildContext context, _File file, String? quoteMessageId) async {
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
   final xFile = file.file;
@@ -278,6 +287,7 @@ Future<void> _sendFile(BuildContext context, _File file) async {
       file: xFile,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
+      quoteMessageId: quoteMessageId,
     );
   } else if (xFile.isVideo) {
     return context.accountServer.sendVideoMessage(
@@ -285,6 +295,7 @@ Future<void> _sendFile(BuildContext context, _File file) async {
       conversationItem.encryptCategory,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
+      quoteMessageId: quoteMessageId,
     );
   }
   await context.accountServer.sendDataMessage(
@@ -292,6 +303,7 @@ Future<void> _sendFile(BuildContext context, _File file) async {
     conversationItem.encryptCategory,
     conversationId: conversationItem.conversationId,
     recipientId: conversationItem.userId,
+    quoteMessageId: quoteMessageId,
   );
 }
 
