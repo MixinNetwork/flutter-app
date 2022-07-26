@@ -56,13 +56,27 @@ final _groupedEmojis = _emojiGroups
       (group) => group
           .expand(Emoji.byGroup)
           .where((e) => !Platform.isMacOS || !macOSIgnoreEmoji.contains(e.char))
+          .where((e) => !e.modifiable)
           .map((emoji) => emoji.char)
           .toList(),
     )
     .toList();
 
-class EmojiPage extends HookWidget {
+class EmojiPage extends StatelessWidget {
   const EmojiPage({super.key});
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) => _EmojiPageBody(
+          layoutWidth: constraints.maxWidth,
+        ),
+      );
+}
+
+class _EmojiPageBody extends HookWidget {
+  const _EmojiPageBody({required this.layoutWidth});
+
+  final double layoutWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -80,20 +94,28 @@ class EmojiPage extends HookWidget {
 
     final state = context.watch<EmojiSelectedGroupIndexCubit>().state;
 
-    final groupedEmojiLine = useMemoized(
-      () => List<List<List<String>>>.unmodifiable(
-          _groupedEmojis.map((e) => e.chunked(11))),
-    );
+    final emojiLineStride = useRef(8);
+
+    useEffect(() {
+      for (var stride = 10; stride >= 8; stride--) {
+        final emojiItemSize = (layoutWidth - 14 * 2) / stride;
+        if (emojiItemSize >= 40) {
+          emojiLineStride.value = stride;
+          break;
+        }
+      }
+    }, [layoutWidth]);
 
     final groupOffset = useMemoized(() {
       final array = List<double>.filled(_emojiGroups.length, 0);
       for (var i = 1; i < _emojiGroups.length; i++) {
-        array[i] = array[i - 1] +
-            (groupedEmojiLine[i - 1].length + 1 /* header */) *
-                _emojiItemExtent;
+        final emojiLineCount =
+            (_groupedEmojis[i - 1].length / emojiLineStride.value).ceil();
+        final emojiItemSize = (layoutWidth - 14 * 2) / emojiLineStride.value;
+        array[i] = array[i - 1] + emojiLineCount * emojiItemSize + 40;
       }
       return array;
-    });
+    }, [emojiLineStride.value, layoutWidth]);
 
     final selectedIndex = useMemoized(() {
       if (state.isRecent) {
@@ -133,12 +155,14 @@ class EmojiPage extends HookWidget {
         const SizedBox(height: 8),
         Expanded(
           child: state.isRecent
-              ? const _RecentEmojiGroupPage()
+              ? _RecentEmojiGroupPage(
+                  emojiLineStride: emojiLineStride.value,
+                )
               : _AllEmojisPage(
-                  groupedEmojiLine: groupedEmojiLine,
                   groupOffset: groupOffset,
                   initialOffset: state.offset,
                   offsetStream: emojiOffsetStream,
+                  emojiLineStride: emojiLineStride.value,
                 ),
         )
       ],
@@ -146,7 +170,7 @@ class EmojiPage extends HookWidget {
   }
 }
 
-class _EmojiGroupHeader extends StatelessWidget {
+class _EmojiGroupHeader extends HookWidget {
   const _EmojiGroupHeader({
     required this.icons,
     required this.onTap,
@@ -158,23 +182,37 @@ class _EmojiGroupHeader extends StatelessWidget {
   final int selectedIndex;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-        child: Row(
-          children: [
-            for (var i = 0; i < icons.length; i++)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: _EmojiGroupIcon(
-                  icon: icons[i],
-                  onTap: () => onTap(i),
-                  index: i,
-                  selectedIndex: selectedIndex,
-                ),
+  Widget build(BuildContext context) {
+    final tabController = useTabController(initialLength: icons.length);
+    useEffect(() {
+      tabController.index = selectedIndex;
+    }, [selectedIndex]);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: TabBar(
+          controller: tabController,
+          isScrollable: true,
+          labelPadding: EdgeInsets.zero,
+          indicator: const BoxDecoration(color: Colors.transparent),
+          tabs: List.generate(
+            icons.length,
+            (index) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: _EmojiGroupIcon(
+                icon: icons[index],
+                onTap: () => onTap(index),
+                index: index,
+                selectedIndex: selectedIndex,
               ),
-          ],
+            ),
+          ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class _EmojiGroupIcon extends StatelessWidget {
@@ -212,56 +250,46 @@ class _EmojiGroupIcon extends StatelessWidget {
 }
 
 class _RecentEmojiGroupPage extends HookWidget {
-  const _RecentEmojiGroupPage();
+  const _RecentEmojiGroupPage({required this.emojiLineStride});
+
+  final int emojiLineStride;
 
   @override
   Widget build(BuildContext context) {
-    final emojis =
-        useMemoized(() => AccountKeyValue.instance.recentUsedEmoji.chunked(11));
+    final emojis = useMemoized(() => AccountKeyValue.instance.recentUsedEmoji);
     final controller = useMemoized(ScrollerScrollController.new);
-    return ListView.builder(
-      itemExtent: _emojiItemExtent,
+    return GridView.custom(
       controller: controller,
-      itemCount: emojis.length,
-      itemBuilder: (context, index) {
-        assert(index < emojis.length,
-            'index must be in range [0, ${emojis.length - 1}]');
-        if (index >= emojis.length) {
-          return const SizedBox();
-        }
-        return _EmojiLine(emojis: emojis[index]);
-      },
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      childrenDelegate: SliverChildBuilderDelegate(
+        (context, index) => _EmojiItem(emoji: emojis[index]),
+        childCount: emojis.length,
+      ),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: emojiLineStride,
+      ),
     );
   }
 }
 
-const _emojiItemExtent = 34.0;
-
 class _AllEmojisPage extends HookWidget {
   const _AllEmojisPage({
     required this.groupOffset,
-    required this.groupedEmojiLine,
     required this.initialOffset,
     required this.offsetStream,
+    required this.emojiLineStride,
   });
 
-  final List<List<List<String>>> groupedEmojiLine;
   final List<double> groupOffset;
   final double initialOffset;
   final Stream<double> offsetStream;
+  final int emojiLineStride;
 
   @override
   Widget build(BuildContext context) {
     final controller = useMemoized(() => ScrollerScrollController(
           initialScrollOffset: initialOffset,
         ));
-
-    final itemCount = useMemoized(
-      () =>
-          groupedEmojiLine.fold<int>(
-              0, (previousValue, element) => previousValue + element.length) +
-          groupedEmojiLine.length,
-    );
 
     final groupTitles = [
       context.l10n.smileysAndPeople,
@@ -292,59 +320,51 @@ class _AllEmojisPage extends HookWidget {
       [offsetStream],
     );
 
-    return ListView.builder(
+    return CustomScrollView(
       controller: controller,
-      itemExtent: _emojiItemExtent,
-      itemCount: itemCount,
-      itemBuilder: (context, index) {
-        var inGroupIndex = index;
-        for (var i = 0; i < groupedEmojiLine.length; i++) {
-          if (inGroupIndex <= groupedEmojiLine[i].length) {
-            if (inGroupIndex == 0) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10, left: 20),
-                child: SizedBox(
-                    height: 24,
-                    child: Text(
-                      groupTitles[i],
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: context.theme.secondaryText,
-                      ),
-                    )),
-              );
-            } else {
-              return _EmojiLine(
-                emojis: groupedEmojiLine[i][inGroupIndex - 1],
-              );
-            }
-          }
-          inGroupIndex -= groupedEmojiLine[i].length + 1;
-        }
-        assert(false, 'unreachable: $index');
-        return const SizedBox();
-      },
+      slivers: [
+        for (var i = 0; i < _groupedEmojis.length; i++) ...[
+          SliverToBoxAdapter(
+            child: _EmojiGroupTitle(
+              title: groupTitles[i],
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            sliver: SliverGrid(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _EmojiItem(emoji: _groupedEmojis[i][index]),
+                childCount: _groupedEmojis[i].length,
+              ),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: emojiLineStride,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
 
-class _EmojiLine extends StatelessWidget {
-  const _EmojiLine({required this.emojis}) : assert(emojis.length <= 11);
+class _EmojiGroupTitle extends StatelessWidget {
+  const _EmojiGroupTitle({
+    required this.title,
+  });
 
-  final List<String> emojis;
+  final String title;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 10, left: 20, right: 20),
-        child: SizedBox(
-          height: 24,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              for (final emoji in emojis) _EmojiItem(emoji: emoji),
-              for (var i = emojis.length; i < 11; i++)
-                const SizedBox.square(dimension: 24),
-            ],
+  Widget build(BuildContext context) => SizedBox(
+        height: 40,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 20, top: 12),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              color: context.theme.secondaryText,
+            ),
           ),
         ),
       );
@@ -356,30 +376,40 @@ class _EmojiItem extends StatelessWidget {
   final String emoji;
 
   @override
-  Widget build(BuildContext context) => InteractiveDecoratedBox(
-        onTap: () {
-          final textController = context.read<TextEditingController>();
-          final textEditingValue = textController.value;
-          final selection = textEditingValue.selection;
-          if (!selection.isValid) {
-            textController.text = '${textEditingValue.text}$emoji';
-          } else {
-            final int lastSelectionIndex =
-                math.max(selection.baseOffset, selection.extentOffset);
-            final collapsedTextEditingValue = textEditingValue.copyWith(
-              selection: TextSelection.collapsed(offset: lastSelectionIndex),
-            );
-            textController.value =
-                collapsedTextEditingValue.replaced(selection, emoji);
-          }
-          AccountKeyValue.instance.onEmojiUsed(emoji);
-        },
-        child: SizedBox.square(
-          dimension: 24,
-          child: Text(
-            emoji,
-            style: const TextStyle(fontSize: 20, height: 1),
-            textAlign: TextAlign.center,
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(2),
+        child: InteractiveDecoratedBox(
+          onTap: () {
+            final textController = context.read<TextEditingController>();
+            final textEditingValue = textController.value;
+            final selection = textEditingValue.selection;
+            if (!selection.isValid) {
+              textController.text = '${textEditingValue.text}$emoji';
+            } else {
+              final int lastSelectionIndex =
+                  math.max(selection.baseOffset, selection.extentOffset);
+              final collapsedTextEditingValue = textEditingValue.copyWith(
+                selection: TextSelection.collapsed(offset: lastSelectionIndex),
+              );
+              textController.value =
+                  collapsedTextEditingValue.replaced(selection, emoji);
+            }
+            AccountKeyValue.instance.onEmojiUsed(emoji);
+          },
+          hoveringDecoration: BoxDecoration(
+            color: context.dynamicColor(
+              const Color.fromRGBO(229, 231, 235, 1),
+              darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          child: Center(
+            child: Text(
+              emoji,
+              style: const TextStyle(fontSize: 26, height: 1),
+              strutStyle: const StrutStyle(height: 1),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       );
