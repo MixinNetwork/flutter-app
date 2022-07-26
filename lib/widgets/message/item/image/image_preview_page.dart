@@ -440,6 +440,7 @@ class _Item extends HookWidget {
     required this.isTranscriptPage,
     required this.constraints,
   });
+
   final MessageItem message;
   final bool isTranscriptPage;
   final TransformImageController controller;
