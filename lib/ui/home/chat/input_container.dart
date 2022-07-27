@@ -577,7 +577,7 @@ class _StickerButton extends HookWidget {
     return MultiProvider(
       providers: [
         BlocProvider.value(value: stickerAlbumsCubit),
-        BlocProvider(create: (context) => EmojiSelectedGroupIndexCubit()),
+        BlocProvider(create: (context) => EmojiScrollOffsetCubit()),
         ChangeNotifierProvider.value(value: textEditingController),
       ],
       child: DefaultTabController(

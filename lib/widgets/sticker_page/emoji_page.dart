@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:emojis/emoji.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -14,30 +13,13 @@ import '../../utils/extension/extension.dart';
 import '../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../interactive_decorated_box.dart';
 
-class _EmojiSelectedGroupState with EquatableMixin {
-  const _EmojiSelectedGroupState.emoji(this.offset) : isRecent = false;
+class EmojiScrollOffsetCubit extends Cubit<double> {
+  EmojiScrollOffsetCubit() : super(0);
 
-  const _EmojiSelectedGroupState.recent()
-      : isRecent = true,
-        offset = 0;
-
-  final bool isRecent;
-  final double offset;
-
-  @override
-  List<Object?> get props => [isRecent, offset];
+  void setOffset(double offset) => emit(offset);
 }
 
-class EmojiSelectedGroupIndexCubit extends Cubit<_EmojiSelectedGroupState> {
-  EmojiSelectedGroupIndexCubit()
-      : super(const _EmojiSelectedGroupState.emoji(0));
-
-  void setRecent() => emit(const _EmojiSelectedGroupState.recent());
-
-  void setEmoji(double offset) => emit(_EmojiSelectedGroupState.emoji(offset));
-}
-
-const _emojiGroups = [
+const emojiGroups = [
   [EmojiGroup.smileysEmotion, EmojiGroup.peopleBody],
   [EmojiGroup.animalsNature],
   [EmojiGroup.foodDrink],
@@ -50,17 +32,6 @@ const _emojiGroups = [
 
 // ignore: avoid-non-ascii-symbols
 const macOSIgnoreEmoji = {'☺️', '☹️'};
-
-final _groupedEmojis = _emojiGroups
-    .map(
-      (group) => group
-          .expand(Emoji.byGroup)
-          .where((e) => !Platform.isMacOS || !macOSIgnoreEmoji.contains(e.char))
-          .where((e) => !e.modifiable)
-          .map((emoji) => emoji.char)
-          .toList(),
-    )
-    .toList();
 
 class EmojiPage extends StatelessWidget {
   const EmojiPage({super.key});
@@ -92,7 +63,7 @@ class _EmojiPageBody extends HookWidget {
       Resources.assetsImagesEmojiFlagsSvg,
     ];
 
-    final state = context.watch<EmojiSelectedGroupIndexCubit>().state;
+    final offset = context.watch<EmojiScrollOffsetCubit>().state;
 
     final emojiLineStride = useRef(8);
 
@@ -106,28 +77,44 @@ class _EmojiPageBody extends HookWidget {
       }
     }, [layoutWidth]);
 
+    final recentUsedEmoji =
+        useMemoized(() => AccountKeyValue.instance.recentUsedEmoji);
+
+    final groupedEmojis = useMemoized(
+        () => [
+              recentUsedEmoji,
+              ...emojiGroups.map(
+                (group) => group
+                    .expand(Emoji.byGroup)
+                    .where((e) =>
+                        !Platform.isMacOS || !macOSIgnoreEmoji.contains(e.char))
+                    .where((e) => !e.modifiable)
+                    .map((emoji) => emoji.char)
+                    .toList(),
+              )
+            ],
+        [recentUsedEmoji]);
+
     final groupOffset = useMemoized(() {
-      final array = List<double>.filled(_emojiGroups.length, 0);
-      for (var i = 1; i < _emojiGroups.length; i++) {
+      final array = List<double>.filled(groupedEmojis.length, 0);
+      for (var i = 1; i < groupedEmojis.length; i++) {
         final emojiLineCount =
-            (_groupedEmojis[i - 1].length / emojiLineStride.value).ceil();
+            (groupedEmojis[i - 1].length / emojiLineStride.value).ceil();
         final emojiItemSize = (layoutWidth - 14 * 2) / emojiLineStride.value;
-        array[i] = array[i - 1] + emojiLineCount * emojiItemSize + 40;
+        final headerHeight = i == 1 ? 0 : 40;
+        array[i] = array[i - 1] + emojiLineCount * emojiItemSize + headerHeight;
       }
       return array;
-    }, [emojiLineStride.value, layoutWidth]);
+    }, [emojiLineStride.value, layoutWidth, groupedEmojis]);
 
     final selectedIndex = useMemoized(() {
-      if (state.isRecent) {
-        return 0;
-      }
       for (var i = groupOffset.length - 1; i >= 0; i--) {
-        if (groupOffset[i] <= state.offset) {
-          return i + 1;
+        if (groupOffset[i] <= offset) {
+          return i;
         }
       }
-      return 1;
-    }, [state]);
+      return 0;
+    }, [offset]);
 
     final emojiOffsetController = useStreamController<double>();
     final emojiOffsetStream = useMemoized(() => emojiOffsetController.stream);
@@ -138,14 +125,10 @@ class _EmojiPageBody extends HookWidget {
           selectedIndex: selectedIndex,
           icons: emojiGroupIcon,
           onTap: (index) {
-            if (index == 0) {
-              context.read<EmojiSelectedGroupIndexCubit>().setRecent();
-            } else {
-              context
-                  .read<EmojiSelectedGroupIndexCubit>()
-                  .setEmoji(groupOffset[index - 1]);
-              emojiOffsetController.add(groupOffset[index - 1]);
-            }
+            context
+                .read<EmojiScrollOffsetCubit>()
+                .setOffset(groupOffset[index]);
+            emojiOffsetController.add(groupOffset[index]);
           },
         ),
         Divider(
@@ -154,16 +137,12 @@ class _EmojiPageBody extends HookWidget {
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: state.isRecent
-              ? _RecentEmojiGroupPage(
-                  emojiLineStride: emojiLineStride.value,
-                )
-              : _AllEmojisPage(
-                  groupOffset: groupOffset,
-                  initialOffset: state.offset,
-                  offsetStream: emojiOffsetStream,
-                  emojiLineStride: emojiLineStride.value,
-                ),
+          child: _AllEmojisPage(
+            initialOffset: offset,
+            offsetStream: emojiOffsetStream,
+            emojiLineStride: emojiLineStride.value,
+            groupedEmojis: groupedEmojis,
+          ),
         )
       ],
     );
@@ -249,41 +228,18 @@ class _EmojiGroupIcon extends StatelessWidget {
       );
 }
 
-class _RecentEmojiGroupPage extends HookWidget {
-  const _RecentEmojiGroupPage({required this.emojiLineStride});
-
-  final int emojiLineStride;
-
-  @override
-  Widget build(BuildContext context) {
-    final emojis = useMemoized(() => AccountKeyValue.instance.recentUsedEmoji);
-    final controller = useMemoized(ScrollerScrollController.new);
-    return GridView.custom(
-      controller: controller,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      childrenDelegate: SliverChildBuilderDelegate(
-        (context, index) => _EmojiItem(emoji: emojis[index]),
-        childCount: emojis.length,
-      ),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: emojiLineStride,
-      ),
-    );
-  }
-}
-
 class _AllEmojisPage extends HookWidget {
   const _AllEmojisPage({
-    required this.groupOffset,
     required this.initialOffset,
     required this.offsetStream,
     required this.emojiLineStride,
+    required this.groupedEmojis,
   });
 
-  final List<double> groupOffset;
   final double initialOffset;
   final Stream<double> offsetStream;
   final int emojiLineStride;
+  final List<List<String>> groupedEmojis;
 
   @override
   Widget build(BuildContext context) {
@@ -304,9 +260,7 @@ class _AllEmojisPage extends HookWidget {
 
     useEffect(() {
       void onScroll() {
-        context
-            .read<EmojiSelectedGroupIndexCubit>()
-            .setEmoji(controller.offset);
+        context.read<EmojiScrollOffsetCubit>().setOffset(controller.offset);
       }
 
       controller.addListener(onScroll);
@@ -323,24 +277,27 @@ class _AllEmojisPage extends HookWidget {
     return CustomScrollView(
       controller: controller,
       slivers: [
-        for (var i = 0; i < _groupedEmojis.length; i++) ...[
-          SliverToBoxAdapter(
-            child: _EmojiGroupTitle(
-              title: groupTitles[i],
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            sliver: SliverGrid(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _EmojiItem(emoji: _groupedEmojis[i][index]),
-                childCount: _groupedEmojis[i].length,
-              ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: emojiLineStride,
+        for (var i = 0; i < groupedEmojis.length; i++) ...[
+          if (i > 0)
+            SliverToBoxAdapter(
+              child: _EmojiGroupTitle(
+                title: groupTitles[i - 1],
               ),
             ),
-          ),
+          if (groupedEmojis[i].isNotEmpty)
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              sliver: SliverGrid(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) =>
+                      _EmojiItem(emoji: groupedEmojis[i][index]),
+                  childCount: groupedEmojis[i].length,
+                ),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: emojiLineStride,
+                ),
+              ),
+            ),
         ],
       ],
     );

@@ -48,7 +48,7 @@ class AccountKeyValue extends HiveKeyValue {
       ..remove(emoji)
       ..insert(0, emoji);
 
-    while (recentUsedEmoji.length > 50) {
+    while (recentUsedEmoji.length > 35) {
       recentUsedEmoji.removeLast();
     }
     box.put(_keyRecentUsedEmoji, recentUsedEmoji);
