@@ -15,6 +15,7 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   Participants get participants => attachedDatabase.participants;
   StickerAlbums get stickerAlbums => attachedDatabase.stickerAlbums;
   PinMessages get pinMessages => attachedDatabase.pinMessages;
+  Users get users => attachedDatabase.users;
   Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
@@ -35,7 +36,6 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   StickerRelationships get stickerRelationships =>
       attachedDatabase.stickerRelationships;
   Stickers get stickers => attachedDatabase.stickers;
-  Users get users => attachedDatabase.users;
   TranscriptMessages get transcriptMessages =>
       attachedDatabase.transcriptMessages;
   Fiats get fiats => attachedDatabase.fiats;
