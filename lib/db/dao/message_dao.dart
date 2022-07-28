@@ -820,7 +820,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               message.conversationId.equals(conversationId) &
               (orEqual
                   ? message.rowId.isBiggerOrEqualValue(rowId)
-                  : message.rowId.isSmallerThanValue(rowId)),
+                  : message.rowId.isBiggerThanValue(rowId)),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
                   __________, ___________, em) =>
               Limit(limit, 0),
