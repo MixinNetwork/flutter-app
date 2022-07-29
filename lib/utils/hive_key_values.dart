@@ -43,20 +43,20 @@ abstract class HiveKeyValue<E> {
       return;
     }
     final dbFolder = mixinDocumentsDirectory;
-    final legacyBoxFile = File(p.join(dbFolder.path, _boxName));
-    final file = File(p.join(dbFolder.path, identityNumber, _boxName));
 
-    if (!file.existsSync() && legacyBoxFile.existsSync()) {
+    final legacyBoxDirectory = Directory(p.join(dbFolder.path, _boxName));
+    final directory =
+        Directory(p.join(dbFolder.path, identityNumber, _boxName));
+
+    if (legacyBoxDirectory.existsSync()) {
       // copy legacy file to new file
-      file
-        ..createSync(recursive: true)
-        ..writeAsBytesSync(legacyBoxFile.readAsBytesSync());
-      legacyBoxFile.deleteSync();
+      await directory.delete(recursive: true);
+      await legacyBoxDirectory.rename(directory.path);
     }
 
     WidgetsFlutterBinding.ensureInitialized();
     if (!kIsWeb) {
-      Hive.init(file.absolute.path);
+      Hive.init(directory.absolute.path);
     }
     box = await Hive.openBox<E>(_boxName);
     _hasInit = true;
