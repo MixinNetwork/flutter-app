@@ -50,8 +50,8 @@ abstract class HiveKeyValue<E> {
 
     if (legacyBoxDirectory.existsSync()) {
       // copy legacy file to new file
-      await directory.delete(recursive: true);
-      await legacyBoxDirectory.rename(directory.path);
+      if (directory.existsSync()) directory.deleteSync(recursive: true);
+      legacyBoxDirectory.renameSync(directory.path);
     }
 
     WidgetsFlutterBinding.ensureInitialized();
