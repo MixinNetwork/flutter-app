@@ -32,6 +32,7 @@ import '../db/mixin_database.dart';
 import '../enum/message_category.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
+import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/reg_exp_utils.dart';
@@ -327,18 +328,18 @@ class _MessageProcessRunner {
       final jobs = await database.jobDao.ackJobs().get();
       if (jobs.isEmpty) break;
 
-      final ack = await Future.wait(
-        jobs.map(
-          (e) async {
-            final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
-            return BlazeAckMessage.fromJson(map);
-          },
-        ),
+      final ack = jobs.map(
+        (e) {
+          final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
+          return BlazeAckMessage.fromJson(map);
+        },
       );
 
       final jobIds = jobs.map((e) => e.jobId).toList();
       try {
-        await client.messageApi.acknowledgements(ack);
+        //  await client.messageApi.acknowledgements(ack);
+        final rsp = await client.dio.post('/acknowledgements', data: ack);
+        i('acknowledgements ids: ${ack.map((e) => e.messageId).toList()}, request id: ${rsp.headers['x-request-id']}');
         await database.jobDao.deleteJobs(jobIds);
       } catch (e, s) {
         w('Send ack error: $e, stack: $s');
