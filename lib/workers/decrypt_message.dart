@@ -497,6 +497,10 @@ class DecryptMessage extends Injector {
     final quoteMessage = await database.messageDao
         .findMessageItemById(data.conversationId, data.quoteMessageId!);
 
+    if (quoteMessage == null) {
+      i('quote message not found, messageId: ${data.quoteMessageId}');
+    }
+
     return quoteMessage != null ? generator(quoteMessage) : generator(null);
   }
 
