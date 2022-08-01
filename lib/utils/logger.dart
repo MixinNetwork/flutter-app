@@ -14,15 +14,6 @@ import 'extension/extension.dart';
 
 const kLogMode = !kReleaseMode;
 
-enum _LogLevel {
-  verbose,
-  debug,
-  info,
-  warning,
-  error,
-  wtf,
-}
-
 final _verbosePen = AnsiPen()..gray();
 final _debugPen = AnsiPen()..blue();
 final _infoPen = AnsiPen()..green();
@@ -30,23 +21,19 @@ final _warningPen = AnsiPen()..yellow();
 final _errorPen = AnsiPen()..red();
 final _wtfPen = AnsiPen()..magenta();
 
-extension _LogLevelExtension on _LogLevel {
-  String get prefix {
-    switch (this) {
-      case _LogLevel.verbose:
-        return '[V]';
-      case _LogLevel.debug:
-        return '[D]';
-      case _LogLevel.info:
-        return '[I]';
-      case _LogLevel.warning:
-        return '[W]';
-      case _LogLevel.error:
-        return '[E]';
-      case _LogLevel.wtf:
-        return '[WTF]';
-    }
-  }
+enum _LogLevel {
+  verbose('V'),
+  debug('D'),
+  info('I'),
+  warning('W'),
+  error('E'),
+  wtf('WTF');
+
+  const _LogLevel(this._prefix);
+
+  final String _prefix;
+
+  String get prefix => '[$_prefix]';
 
   String colorize(String message) {
     switch (this) {
