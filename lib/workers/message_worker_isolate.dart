@@ -328,14 +328,11 @@ class _MessageProcessRunner {
       final jobs = await database.jobDao.ackJobs().get();
       if (jobs.isEmpty) break;
 
-      final ack = await Future.wait(
-        jobs.map(
-          (e) async {
-            final map = await jsonDecodeWithIsolate(e.blazeMessage!)
-                as Map<String, dynamic>;
-            return BlazeAckMessage.fromJson(map);
-          },
-        ),
+      final ack = jobs.map(
+        (e) {
+          final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
+          return BlazeAckMessage.fromJson(map);
+        },
       );
 
       final jobIds = jobs.map((e) => e.jobId).toList();
