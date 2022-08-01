@@ -340,8 +340,9 @@ class _MessageProcessRunner {
       try {
         await client.messageApi.acknowledgements(ack);
         await database.jobDao.deleteJobs(jobIds);
+        wtf('Send ack success: $ack');
       } catch (e, s) {
-        w('Send ack error: $e, stack: $s');
+        wtf('Send ack error: $e, stack: $s');
       }
     }
   }
