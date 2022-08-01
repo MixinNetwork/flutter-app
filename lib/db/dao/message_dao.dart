@@ -9,7 +9,6 @@ import '../../constants/constants.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/logger.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../database_event_bus.dart';
 import '../mixin_database.dart';
