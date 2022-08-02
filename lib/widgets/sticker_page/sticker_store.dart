@@ -447,7 +447,7 @@ class _StickerPage extends HookWidget {
               AspectRatio(
                 aspectRatio: 1,
                 child: Container(
-                  margin: const EdgeInsets.all(56),
+                  margin: const EdgeInsets.all(56).copyWith(top: 0),
                   color: context.theme.background,
                   alignment: Alignment.center,
                   child: SizedBox(
