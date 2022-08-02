@@ -39,6 +39,7 @@ import '../bloc/recall_message_bloc.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'chat_page.dart';
 import 'files_preview.dart';
+import 'voice_recorder_bottom_bar.dart';
 
 class InputContainer extends HookWidget {
   const InputContainer({super.key});
@@ -63,21 +64,36 @@ class InputContainer extends HookWidget {
       context.read<QuoteMessageCubit>().emit(null);
     }, [conversationId]);
 
-    return hasParticipant
-        ? const _InputContainer()
-        : Container(
-            decoration: BoxDecoration(
-              color: context.theme.primary,
-            ),
-            height: 56,
-            alignment: Alignment.center,
-            child: Text(
-              context.l10n.groupCantSendDes,
-              style: TextStyle(
-                color: context.theme.secondaryText,
-              ),
-            ),
-          );
+    final voiceRecorderCubit = useMemoized(VoiceRecorderCubit.new);
+
+    final isRecorderStarted = useBlocStateConverter<VoiceRecorderCubit,
+        VoiceRecorderCubitState, bool>(
+      bloc: voiceRecorderCubit,
+      converter: (state) => state.isRecording,
+    );
+
+    if (!hasParticipant) {
+      return Container(
+        decoration: BoxDecoration(
+          color: context.theme.primary,
+        ),
+        height: 56,
+        alignment: Alignment.center,
+        child: Text(
+          context.l10n.groupCantSendDes,
+          style: TextStyle(
+            color: context.theme.secondaryText,
+          ),
+        ),
+      );
+    }
+
+    return BlocProvider<VoiceRecorderCubit>.value(
+      value: voiceRecorderCubit,
+      child: isRecorderStarted
+          ? const VoiceRecorderBottomBar()
+          : const _InputContainer(),
+    );
   }
 }
 
@@ -190,6 +206,15 @@ class _InputContainer extends HookWidget {
       }
     }, [chatSidePageSize]);
 
+    final hasInputText = useMemoizedStream(
+          () => textEditingValueStream
+              .map((event) => event.text.isNotEmpty)
+              .distinct(),
+          keys: [textEditingValueStream],
+          initialData: textEditingController.text.isNotEmpty,
+        ).data ??
+        false;
+
     return MultiProvider(
       providers: [
         BlocProvider.value(
@@ -234,25 +259,34 @@ class _InputContainer extends HookWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      ContextMenuPortalEntry(
-                        buildMenus: () => [
-                          ContextMenu(
-                            icon: Resources.assetsImagesContextMenuMuteSvg,
-                            title: context.l10n.sendWithoutSound,
-                            onTap: () => _sendMessage(
-                              context,
-                              textEditingController,
-                              silent: true,
+                      if (hasInputText)
+                        ContextMenuPortalEntry(
+                          buildMenus: () => [
+                            ContextMenu(
+                              icon: Resources.assetsImagesContextMenuMuteSvg,
+                              title: context.l10n.sendWithoutSound,
+                              onTap: () => _sendMessage(
+                                context,
+                                textEditingController,
+                                silent: true,
+                              ),
                             ),
+                          ],
+                          child: ActionButton(
+                            name: Resources.assetsImagesIcSendSvg,
+                            color: context.theme.icon,
+                            onTap: () =>
+                                _sendMessage(context, textEditingController),
                           ),
-                        ],
-                        child: ActionButton(
-                          name: Resources.assetsImagesIcSendSvg,
+                        )
+                      else
+                        ActionButton(
+                          name: Resources.assetsImagesMicrophoneSvg,
                           color: context.theme.icon,
-                          onTap: () =>
-                              _sendMessage(context, textEditingController),
+                          onTap: () => context
+                              .read<VoiceRecorderCubit>()
+                              .startRecording(),
                         ),
-                      ),
                     ],
                   ),
                 ),

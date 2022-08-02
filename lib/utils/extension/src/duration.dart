@@ -9,6 +9,18 @@ extension DurationToMinutesSecondsExtension on Duration {
     return '${duration.inMinutes.toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}';
   }
 
+  String get asMinutesSecondsWithDas {
+    var duration = this;
+    if (inMilliseconds < 1000) {
+      duration = const Duration(milliseconds: 1000);
+    }
+    final minutes = duration.inMinutes.toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final das =
+        (duration.inMilliseconds.remainder(1000) ~/ 100).toString();
+    return '$minutes:$seconds.$das';
+  }
+
   String formatAsConversationExpireIn({Localization? localization}) {
     final l10n = localization ?? Localization.current;
     if (inSeconds < 1) {

@@ -52,6 +52,9 @@ class Resources {
 
   static const String assetsImagesCloseOvalSvg = 'assets/images/close_oval.svg';
 
+  static const String assetsImagesCloseOvalRecordSvg =
+      'assets/images/close_oval_record.svg';
+
   static const String assetsImagesCollapseSvg = 'assets/images/collapse.svg';
 
   static const String assetsImagesContactSvg = 'assets/images/contact.svg';
@@ -304,6 +307,9 @@ class Resources {
 
   static const String assetsImagesMessageTranscriptForwardSvg =
       'assets/images/message_transcript_forward.svg';
+
+  static const String assetsImagesMicrophoneSvg =
+      'assets/images/microphone.svg';
 
   static const String assetsImagesMultiSelectionSvg =
       'assets/images/multi_selection.svg';
