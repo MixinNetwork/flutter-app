@@ -398,10 +398,6 @@ class SendMessageHelper {
     String? mediaDuration,
     String? mediaWaveform,
   }) async {
-
-    d('mediaDuration: $mediaDuration $mediaWaveform');
-
-
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'audio/ogg';
     final attachment = _attachmentUtil.getAttachmentFile(

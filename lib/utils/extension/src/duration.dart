@@ -16,8 +16,7 @@ extension DurationToMinutesSecondsExtension on Duration {
     }
     final minutes = duration.inMinutes.toString().padLeft(2, '0');
     final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    final das =
-        (duration.inMilliseconds.remainder(1000) ~/ 100).toString();
+    final das = (duration.inMilliseconds.remainder(1000) ~/ 100).toString();
     return '$minutes:$seconds.$das';
   }
 
