@@ -333,11 +333,11 @@ class _MessageProcessRunner {
           final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
           return BlazeAckMessage.fromJson(map);
         },
-      );
+      ).toList();
 
       final jobIds = jobs.map((e) => e.jobId).toList();
       try {
-        //  await client.messageApi.acknowledgements(ack);
+        // await client.messageApi.acknowledgements(ack);
         final rsp = await client.dio.post('/acknowledgements', data: ack);
         i('acknowledgements ids: ${ack.map((e) => e.messageId).toList()}, request id: ${rsp.headers['x-request-id']}');
         await database.jobDao.deleteJobs(jobIds);
