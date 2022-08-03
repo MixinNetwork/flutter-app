@@ -84,7 +84,7 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
     List<int>? waveform;
     double? duration;
 
-    recorder?.stop();
+    await recorder?.stop();
 
     if (!isCanceled) {
       waveform = await recorder?.getWaveformData();
