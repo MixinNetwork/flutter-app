@@ -72,7 +72,7 @@ dependencies:
   ogg_opus_player:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
-      ref: 5e55745fafd3ae54f6d195fcadc67c48cb09785a
+      ref: 13a1a91ef89ca5431e14a2e05ada1acf8b4108d2
       path: packages/ogg_opus_player
   open_file: ^3.2.1
   package_info_plus: ^1.4.2
