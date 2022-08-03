@@ -39,6 +39,7 @@ enum MixinSchemeHost {
   withdrawal,
   apps,
   snapshots,
+  conversations,
 }
 
 const int hour1 = 1000 * 60 * 60;
