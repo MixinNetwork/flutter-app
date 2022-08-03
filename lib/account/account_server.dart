@@ -400,17 +400,25 @@ class AccountServer {
               MessageCategory.signalData, MessageCategory.encryptedData),
           quoteMessageId);
 
-  Future<void> sendAudioMessage(XFile audio, EncryptCategory encryptCategory,
-          {String? conversationId,
-          String? recipientId,
-          String? quoteMessageId}) async =>
+  Future<void> sendAudioMessage(
+    XFile audio,
+    Duration duration,
+    String? waveform,
+    EncryptCategory encryptCategory, {
+    String? conversationId,
+    String? recipientId,
+    String? quoteMessageId,
+  }) async =>
       _sendMessageHelper.sendAudioMessage(
-          await _initConversation(conversationId, recipientId),
-          userId,
-          audio,
-          encryptCategory.toCategory(MessageCategory.plainAudio,
-              MessageCategory.signalAudio, MessageCategory.encryptedAudio),
-          quoteMessageId);
+        await _initConversation(conversationId, recipientId),
+        userId,
+        audio,
+        encryptCategory.toCategory(MessageCategory.plainAudio,
+            MessageCategory.signalAudio, MessageCategory.encryptedAudio),
+        quoteMessageId,
+        mediaDuration: duration.inMilliseconds.toString(),
+        mediaWaveform: waveform,
+      );
 
   Future<void> sendDataMessage(XFile file, EncryptCategory encryptCategory,
           {String? conversationId,

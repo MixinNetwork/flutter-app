@@ -11,6 +11,7 @@ import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../../widgets/action_button.dart';
 import '../bloc/conversation_cubit.dart';
@@ -26,6 +27,14 @@ class VoiceRecorderCubitState with EquatableMixin {
 
   @override
   List<Object?> get props => [startTime];
+}
+
+class RecorderResult {
+  RecorderResult(this.waveform, this.duration, this.path);
+
+  final List<int> waveform;
+  final Duration duration;
+  final String path;
 }
 
 class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
@@ -60,24 +69,43 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
     _startingCompleter!.complete();
   }
 
-  String _stopRecording() {
+  Future<RecorderResult> _stopRecording({bool isCanceled = false}) async {
     assert(_recorder != null, 'recorder is null.');
     assert(_recorderFilePath != null, 'recorder file path is null.');
     final path = _recorderFilePath;
-    _recorder?.stop();
-    _recorder?.dispose();
+    final recorder = _recorder;
+
     _recorder = null;
     _recorderFilePath = null;
     emit(const VoiceRecorderCubitState(
       startTime: null,
     ));
-    return path!;
+
+    List<int>? waveform;
+    double? duration;
+
+    recorder?.stop();
+
+    if (!isCanceled) {
+      waveform = await recorder?.getWaveformData();
+      duration = await recorder?.duration();
+    }
+
+    recorder?.dispose();
+
+    return RecorderResult(
+      waveform ?? const [],
+      duration == null
+          ? Duration.zero
+          : Duration(milliseconds: (duration * 1000).round()),
+      path!,
+    );
   }
 
   Future<void> cancelRecording() async {
-    final path = _stopRecording();
+    final result = await _stopRecording(isCanceled: true);
     try {
-      await File(path).delete();
+      await File(result.path).delete();
     } catch (error, stacktrace) {
       e('cancelRecording: failed to delete file. $error $stacktrace');
     }
@@ -149,9 +177,13 @@ class VoiceRecorderBottomBar extends HookWidget {
             color: context.theme.icon,
             onTap: () async {
               final conversationItem = context.read<ConversationCubit>().state;
+              final accountServer = context.accountServer;
+              final quietMessageId =
+                  context.read<QuoteMessageCubit>().state?.messageId;
 
-              final path = context.read<VoiceRecorderCubit>()._stopRecording();
-              final audioFile = File(path);
+              final result =
+                  await context.read<VoiceRecorderCubit>()._stopRecording();
+              final audioFile = File(result.path);
               if (!audioFile.existsSync()) {
                 e('audio file does not exist.');
                 return;
@@ -162,13 +194,14 @@ class VoiceRecorderBottomBar extends HookWidget {
               }
               if (conversationItem == null) return;
 
-              await context.accountServer.sendAudioMessage(
+              await accountServer.sendAudioMessage(
                 audioFile.xFile,
+                result.duration,
+                await base64EncodeWithIsolate(result.waveform),
                 conversationItem.encryptCategory,
                 conversationId: conversationItem.conversationId,
                 recipientId: conversationItem.userId,
-                quoteMessageId:
-                    context.read<QuoteMessageCubit>().state?.messageId,
+                quoteMessageId: quietMessageId,
               );
             },
           ),
