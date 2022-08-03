@@ -339,7 +339,7 @@ class _MessageProcessRunner {
       try {
         // await client.messageApi.acknowledgements(ack);
         final rsp = await client.dio.post('/acknowledgements', data: ack);
-        i('acknowledgements ids: ${ack.map((e) => e.messageId).toList()}, request id: ${rsp.headers['x-request-id']}');
+        i('ack ids: ${ack.map((e) => e.messageId).toList()}, request id: ${rsp.headers['x-request-id']}');
         await database.jobDao.deleteJobs(jobIds);
       } catch (e, s) {
         w('Send ack error: $e, stack: $s');
@@ -730,11 +730,12 @@ class _MessageProcessRunner {
       final encode = base64Encode(utf8.encode(jsonEncode(plainText)));
       // TODO check if safety to use a primary session.
       // final primarySessionId = AccountKeyValue.instance.primarySessionId;
-      final bm = createParamBlazeMessage(createPlainJsonParam(
-          conversationId, userId, encode,
-          sessionId: primarySessionId));
+      final param = createPlainJsonParam(conversationId, userId, encode,
+          sessionId: primarySessionId);
+      final bm = createParamBlazeMessage(param);
       try {
         final result = await _sender.deliver(bm);
+        i('session ack ids: ${ack.map((e) => e.messageId).toList()}, param.messageId: ${param.messageId}');
         if (result.success || result.errorCode == badData) {
           await database.jobDao.deleteJobs(jobIds);
         }
