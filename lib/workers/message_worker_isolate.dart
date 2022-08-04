@@ -735,7 +735,7 @@ class _MessageProcessRunner {
       final bm = createParamBlazeMessage(param);
       try {
         final result = await _sender.deliver(bm);
-        i('session ack ids: ${ack.map((e) => e.messageId).toList()}, param.messageId: ${param.messageId}');
+        i('session ack ids: ${ack.map((e) => e.messageId).toList()}, BlazeMessage.id: ${bm.id}, param.messageId: ${param.messageId}');
         if (result.success || result.errorCode == badData) {
           await database.jobDao.deleteJobs(jobIds);
         }
