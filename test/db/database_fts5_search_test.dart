@@ -13,6 +13,7 @@ const _testFts5Content = {
   '5': '中文文案',
   '6': 'gitlab.com',
   '7': 'hello_[]()/*_star_*',
+  '8': 'github.foo.com',
 };
 
 void main() {
@@ -46,7 +47,7 @@ void main() {
     }
 
     final ret = await search('github');
-    expect(ret, ['2', '4']);
+    expect(ret, ['2', '4', '8']);
 
     final ret2 = await search('中文');
     expect(ret2, ['4', '5']);
@@ -58,9 +59,12 @@ void main() {
     expect(ret4, ['4']);
 
     final ret5 = await search('git');
-    expect(ret5, ['2', '4', '6']);
+    expect(ret5, ['2', '4', '6', '8']);
 
     final ret6 = await search('hello_[]()');
     expect(ret6, ['7']);
+
+    final ret7 = await search('github.com');
+    expect(ret7, ['2']);
   });
 }
