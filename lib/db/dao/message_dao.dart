@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -949,6 +950,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     List<String>? categories,
   }) {
     final keywordFts5 = query.trim().escapeFts5();
+
+    debugPrint('fuzzySearchMessage: $keywordFts5');
+
     if (conversationId != null && userId != null) {
       if (categories != null) {
         return db.fuzzySearchMessageByConversationIdAndUserIdAndCategories(

@@ -85,7 +85,58 @@ String maxOf(String a, String b) => a.compareTo(b) > 0 ? a : b;
 extension SqlStringExt on String {
   String escapeSql() => RegExp.escape(this);
 
-  String escapeFts5() => escapeSql().joinStar().replaceQuotationMark();
+  String escapeFts5() => replaceQuotationMark()._escapeFts5Symbols();
+
+  String _escapeFts5Symbols() {
+    final result = <String>[];
+
+    final buffer = StringBuffer();
+
+    var lastIsGroup = false;
+    for (final char in characters) {
+      final runes = char.codeUnits;
+      assert(runes.isNotEmpty, '$char is not a valid character');
+      final first = runes.first;
+      if ((first >= 0x2E80 && first <= 0xA4CF) || // // cjk
+              (first >= 0xAC00 && first <= 0xD7AF) || // hangul
+              (first >= 0x0E00 && first <= 0x0E7F) || // thai
+              (first >= 0x0E80 && first <= 0x0EFF) || // Lao
+              (first >= 0x0F00 && first <= 0x0FFF) || // Tibetan
+              (first >= 0x1000 && first <= 0x109F) || // Myanmar
+              (first >= 0x1780 && first <= 0x17FF) || // Khmer
+              (first >= 0x1100 && first <= 0x11FF) || // Hangul Jamo
+              (first >= 0xA900 && first <= 0xA92F) || // Kayah Li
+              (first >= 0xA930 && first <= 0xA95F) || // Rejang
+              (first >= 0xA960 && first <= 0xA97F) || // Hangul Jamo Extended-A
+              (first >= 0xA9E0 && first <= 0xA9FF) || // Myanmar Extended-B
+              (first >= 0xAA60 && first <= 0xAA7F) || // Myanmar Extended-A
+              (first >= 0xAC00 && first <= 0xD7AF) || // Hangul Syllables
+              (first >= 0xD7B0 && first <= 0xD7FF) || // Hangul Jamo Extended-B
+              (first >= 0xF900 &&
+                  first <= 0xFAFF) || // CJK Compatibility Ideographs
+              (first >= 0xFE30 && first <= 0xFE4F) // CJK Compatibility Forms
+          ) {
+        if (buffer.isNotEmpty) {
+          result.add(buffer.toString());
+          buffer.clear();
+        }
+        result.add(char);
+        lastIsGroup = false;
+        continue;
+      } else {
+        if (lastIsGroup) {
+          assert(buffer.isNotEmpty, 'buffer is empty');
+        }
+        buffer.write(char);
+        lastIsGroup = true;
+        continue;
+      }
+    }
+    if (buffer.isNotEmpty) {
+      result.add(buffer.toString());
+    }
+    return '${result.map((e) => '"$e"').join('*')}*';
+  }
 
   String joinStar() => joinWithCharacter('*');
 
