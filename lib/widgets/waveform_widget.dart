@@ -10,6 +10,11 @@ const _barWidth = 2.0;
 const _barRadius = _barWidth / 2;
 const _barSpacing = 2.0;
 
+enum WaveBarAlignment {
+  center,
+  bottom,
+}
+
 class WaveformWidget extends StatelessWidget {
   const WaveformWidget({
     super.key,
@@ -17,12 +22,16 @@ class WaveformWidget extends StatelessWidget {
     required this.waveform,
     required this.backgroundColor,
     required this.foregroundColor,
+    this.maxBarCount = _maxBarCount,
+    this.alignment = WaveBarAlignment.bottom,
   });
 
   final double value;
   final List<int> waveform;
   final Color backgroundColor;
   final Color foregroundColor;
+  final int? maxBarCount;
+  final WaveBarAlignment alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +46,7 @@ class WaveformWidget extends StatelessWidget {
 
           final samples = useMemoized(() {
             final sampleCount =
-                min(min(waveform.length, _maxBarCount), maxBarCount);
+                min(this.maxBarCount ?? maxBarCount, maxBarCount);
             return waveform.asMap().entries.fold<List<int>>(
                 List.filled(sampleCount, 0), (previousValue, element) {
               final index = element.key;
@@ -60,6 +69,7 @@ class WaveformWidget extends StatelessWidget {
                 value: value,
                 backgroundColor: backgroundColor,
                 foregroundColor: foregroundColor,
+                alignment: alignment,
               ),
             ),
           );
@@ -75,6 +85,7 @@ class _WaveformPainter extends CustomPainter with EquatableMixin {
     required this.waveform,
     required Color backgroundColor,
     required Color foregroundColor,
+    required this.alignment,
   }) {
     backgroundPainter = Paint()
       ..color = backgroundColor
@@ -88,6 +99,7 @@ class _WaveformPainter extends CustomPainter with EquatableMixin {
   final List<int> waveform;
   late final Paint backgroundPainter;
   late final Paint foregroundPainter;
+  final WaveBarAlignment alignment;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -129,7 +141,19 @@ class _WaveformPainter extends CustomPainter with EquatableMixin {
       final index = entry.key;
       final value = entry.value;
 
-      final top = min(height - value * ratio, minTop);
+      final double top;
+      final double bottom;
+      switch (alignment) {
+        case WaveBarAlignment.center:
+          final barHeight = height - min(height - value * ratio, minTop);
+          top = height / 2 - barHeight / 2;
+          bottom = top + barHeight;
+          break;
+        case WaveBarAlignment.bottom:
+          top = min(height - value * ratio, minTop);
+          bottom = height;
+          break;
+      }
       final left = index * sampleX;
       final right = left + _barWidth;
       path.addRRect(
@@ -138,7 +162,7 @@ class _WaveformPainter extends CustomPainter with EquatableMixin {
           left,
           top,
           right,
-          height,
+          bottom,
         ),
       ));
     });
@@ -156,5 +180,6 @@ class _WaveformPainter extends CustomPainter with EquatableMixin {
         waveform,
         backgroundPainter.color,
         foregroundPainter.color,
+        alignment,
       ];
 }

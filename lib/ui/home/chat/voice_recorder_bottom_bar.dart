@@ -14,19 +14,29 @@ import '../../../utils/hook.dart';
 import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../../widgets/action_button.dart';
+import '../../../widgets/toast.dart';
+import '../../../widgets/waveform_widget.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 
+enum RecorderState {
+  idle,
+  recording,
+  recordingStopped,
+}
+
 class VoiceRecorderCubitState with EquatableMixin {
   const VoiceRecorderCubitState({
-    required this.startTime,
+    this.startTime,
+    required this.state,
   });
 
-  bool get isRecording => startTime != null;
+  final RecorderState state;
+
   final DateTime? startTime;
 
   @override
-  List<Object?> get props => [startTime];
+  List<Object?> get props => [startTime, state];
 }
 
 class RecorderResult {
@@ -38,7 +48,10 @@ class RecorderResult {
 }
 
 class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
-  VoiceRecorderCubit() : super(const VoiceRecorderCubitState(startTime: null));
+  VoiceRecorderCubit()
+      : super(const VoiceRecorderCubitState(
+          state: RecorderState.idle,
+        ));
 
   OggOpusRecorder? _recorder;
   String? _recorderFilePath;
@@ -65,11 +78,15 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
     _recorder?.start();
     emit(VoiceRecorderCubitState(
       startTime: DateTime.now(),
+      state: RecorderState.recording,
     ));
     _startingCompleter!.complete();
   }
 
-  Future<RecorderResult> _stopRecording({bool isCanceled = false}) async {
+  Future<RecorderResult> _stopRecording({
+    bool isCanceled = false,
+    bool exitRecordMode = false,
+  }) async {
     assert(_recorder != null, 'recorder is null.');
     assert(_recorderFilePath != null, 'recorder file path is null.');
     final path = _recorderFilePath;
@@ -77,9 +94,13 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
 
     _recorder = null;
     _recorderFilePath = null;
-    emit(const VoiceRecorderCubitState(
-      startTime: null,
-    ));
+    emit(
+      VoiceRecorderCubitState(
+        state: exitRecordMode
+            ? RecorderState.idle
+            : RecorderState.recordingStopped,
+      ),
+    );
 
     List<int>? waveform;
     double? duration;
@@ -102,8 +123,16 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
     );
   }
 
-  Future<void> cancelRecording() async {
-    final result = await _stopRecording(isCanceled: true);
+  Future<void> cancelAndExitRecordeMode() async {
+    debugPrint('state: ${state.state}');
+    if (state.state == RecorderState.idle) {
+      return;
+    }
+    if (state.state == RecorderState.recordingStopped) {
+      emit(const VoiceRecorderCubitState(state: RecorderState.idle));
+      return;
+    }
+    final result = await _stopRecording(isCanceled: true, exitRecordMode: true);
     try {
       await File(result.path).delete();
     } catch (error, stacktrace) {
@@ -113,16 +142,12 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
 
   @override
   Future<void> close() async {
-    d('cancel recording when closing.');
-    if (_recorder != null) {
-      await cancelRecording();
+    if (state.state == RecorderState.recording ||
+        state.state == RecorderState.recordingStopped) {
+      await cancelAndExitRecordeMode();
     } else if (_startingCompleter != null) {
-      assert(
-        _startingCompleter?.isCompleted == false,
-        'startingCompleter is completed.',
-      );
       await _startingCompleter?.future;
-      await cancelRecording();
+      await cancelAndExitRecordeMode();
     }
     await super.close();
   }
@@ -137,7 +162,11 @@ class VoiceRecorderBottomBar extends HookWidget {
         VoiceRecorderCubitState, DateTime?>(
       converter: (state) => state.startTime,
     );
-    assert(startTime != null, 'startTime is null.');
+    final isRecording = useBlocStateConverter<VoiceRecorderCubit,
+        VoiceRecorderCubitState, bool>(
+      converter: (state) => state.state == RecorderState.recording,
+    );
+    final recordedResult = useState<RecorderResult?>(null);
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(
@@ -150,28 +179,68 @@ class VoiceRecorderBottomBar extends HookWidget {
           ActionButton(
             name: Resources.assetsImagesCloseOvalRecordSvg,
             color: context.theme.icon,
-            onTap: () {
-              context.read<VoiceRecorderCubit>().cancelRecording();
+            onTap: () async {
+              final path = recordedResult.value?.path;
+              await context
+                  .read<VoiceRecorderCubit>()
+                  .cancelAndExitRecordeMode();
+              if (path != null) {
+                try {
+                  await File(path).delete();
+                } catch (error, stacktrace) {
+                  e('cancelRecording: failed to delete file. $error $stacktrace');
+                }
+              }
             },
           ),
-          const Spacer(),
-          HookBuilder(builder: (context) {
-            final tickerProvider = useSingleTickerProvider();
-
-            final duration = useState(Duration.zero);
-            useEffect(() {
-              final ticker = tickerProvider.createTicker((elapsed) {
-                duration.value = DateTime.now().difference(startTime!);
-              })
-                ..start();
-              return ticker.dispose;
-            }, [tickerProvider, startTime]);
-
-            return _RecorderDurationText(
-              duration: duration.value,
-            );
-          }),
-          const Spacer(),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: recordedResult.value == null
+                  ? startTime == null
+                      ? const SizedBox()
+                      : _RecordingLayout(startTime: startTime)
+                  : _RecordedResultPreviewLayout(result: recordedResult.value!),
+            ),
+          ),
+          if (isRecording)
+            ActionButton(
+              name: Resources.assetsImagesRecordStopSvg,
+              color: context.theme.accent,
+              onTap: () async {
+                final recorderCubit = context.read<VoiceRecorderCubit>();
+                final result = await recorderCubit._stopRecording();
+                final audioFile = File(result.path);
+                if (!audioFile.existsSync()) {
+                  e('audio file does not exist.');
+                  await showToastFailed(context, null);
+                  return;
+                }
+                if (audioFile.lengthSync() == 0) {
+                  e('audio file is empty.');
+                  await showToastFailed(context, null);
+                  return;
+                }
+                recordedResult.value = result;
+              },
+            )
+          else
+            ActionButton(
+              name: Resources.assetsImagesRecordRetrySvg,
+              color: context.theme.icon,
+              onTap: () async {
+                final path = recordedResult.value?.path;
+                recordedResult.value = null;
+                await context.read<VoiceRecorderCubit>().startRecording();
+                if (path != null) {
+                  try {
+                    await File(path).delete();
+                  } catch (error, stacktrace) {
+                    e('re-recorder: failed to delete file. $error $stacktrace');
+                  }
+                }
+              },
+            ),
           ActionButton(
             name: Resources.assetsImagesIcSendSvg,
             color: context.theme.icon,
@@ -181,8 +250,22 @@ class VoiceRecorderBottomBar extends HookWidget {
               final quietMessageId =
                   context.read<QuoteMessageCubit>().state?.messageId;
 
-              final result =
-                  await context.read<VoiceRecorderCubit>()._stopRecording();
+              final recorderCubit = context.read<VoiceRecorderCubit>();
+
+              final RecorderResult result;
+
+              if (recorderCubit.state.state == RecorderState.recording) {
+                result = await recorderCubit._stopRecording(
+                  exitRecordMode: true,
+                );
+              } else {
+                if (recordedResult.value == null) {
+                  e('result is null. ${recorderCubit.state}');
+                  return;
+                }
+                result = recordedResult.value!;
+                await recorderCubit.cancelAndExitRecordeMode();
+              }
               final audioFile = File(result.path);
               if (!audioFile.existsSync()) {
                 e('audio file does not exist.');
@@ -209,6 +292,168 @@ class VoiceRecorderBottomBar extends HookWidget {
       ),
     );
   }
+}
+
+class _Player {
+  _Player(this.path);
+
+  final String path;
+
+  final isPlaying = ValueNotifier<bool>(false);
+
+  double get position => _player?.currentPosition ?? 0.0;
+
+  OggOpusPlayer? _player;
+
+  void start() {
+    final player = OggOpusPlayer(path);
+    player.state.addListener(() {
+      final state = player.state.value;
+      isPlaying.value = state == PlayerState.playing;
+      if (state == PlayerState.ended) {
+        stop();
+      }
+    });
+    player.play();
+    _player = player;
+  }
+
+  void stop() {
+    _player?.pause();
+    _player?.dispose();
+    _player = null;
+    isPlaying.value = false;
+  }
+
+  void dispose() {
+    stop();
+  }
+}
+
+class _RecordedResultPreviewLayout extends HookWidget {
+  const _RecordedResultPreviewLayout({required this.result});
+
+  final RecorderResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final player = useMemoized(
+      () => _Player(result.path),
+    );
+    useEffect(() => player.dispose, []);
+    final isPlaying = useValueListenable(player.isPlaying);
+    return SizedBox(
+      height: 32,
+      child: Material(
+        color: context.theme.listSelected,
+        borderRadius: const BorderRadius.all(Radius.circular(15)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(width: 2),
+            if (!isPlaying)
+              ActionButton(
+                name: Resources.assetsImagesRecordPreviewPlaySvg,
+                onTap: player.start,
+              )
+            else
+              ActionButton(
+                name: Resources.assetsImagesRecordPreviewStopSvg,
+                onTap: player.stop,
+              ),
+            const SizedBox(width: 2),
+            Expanded(
+              child: SizedBox(
+                height: 20,
+                child: _TickRefreshContainer(
+                  active: isPlaying,
+                  builder: (context) => WaveformWidget(
+                    value: (player.position *
+                            1000 /
+                            result.duration.inMilliseconds)
+                        .clamp(0.0, 1.0),
+                    waveform: result.waveform,
+                    backgroundColor: context.theme.waveformBackground,
+                    foregroundColor: context.theme.waveformForeground,
+                    maxBarCount: null,
+                    alignment: WaveBarAlignment.center,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              result.duration.asMinutesSecondsWithDas,
+              style: TextStyle(
+                color: context.theme.text,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TickRefreshContainer extends HookWidget {
+  const _TickRefreshContainer({
+    required this.builder,
+    required this.active,
+  });
+
+  final WidgetBuilder builder;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    final tickerProvider = useSingleTickerProvider();
+    final state = useState<bool>(false);
+    final ticker = useMemoized(
+      () => tickerProvider.createTicker((elapsed) {
+        state.value = !state.value;
+      }),
+      [tickerProvider],
+    );
+    useEffect(
+      () => ticker.dispose,
+      [ticker],
+    );
+
+    useEffect(
+      () {
+        if (ticker.isActive == active) return;
+        if (ticker.isActive) {
+          ticker.stop();
+        } else {
+          ticker.start();
+        }
+      },
+      [active],
+    );
+    return builder(context);
+  }
+}
+
+class _RecordingLayout extends StatelessWidget {
+  const _RecordingLayout({required this.startTime});
+
+  final DateTime startTime;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        children: [
+          const Spacer(),
+          _TickRefreshContainer(
+            builder: (context) => _RecorderDurationText(
+              duration: DateTime.now().difference(startTime),
+            ),
+            active: true,
+          ),
+          const Spacer(),
+        ],
+      );
 }
 
 class _RecorderDurationText extends StatelessWidget {

@@ -64,12 +64,15 @@ class InputContainer extends HookWidget {
       context.read<QuoteMessageCubit>().emit(null);
     }, [conversationId]);
 
-    final voiceRecorderCubit = useMemoized(VoiceRecorderCubit.new);
+    final voiceRecorderCubit = useBloc(
+      VoiceRecorderCubit.new,
+      keys: [conversationId],
+    );
 
-    final isRecorderStarted = useBlocStateConverter<VoiceRecorderCubit,
+    final isRecorderMode = useBlocStateConverter<VoiceRecorderCubit,
         VoiceRecorderCubitState, bool>(
       bloc: voiceRecorderCubit,
-      converter: (state) => state.isRecording,
+      converter: (state) => state.state != RecorderState.idle,
     );
 
     if (!hasParticipant) {
@@ -90,7 +93,7 @@ class InputContainer extends HookWidget {
 
     return BlocProvider<VoiceRecorderCubit>.value(
       value: voiceRecorderCubit,
-      child: isRecorderStarted
+      child: isRecorderMode
           ? const VoiceRecorderBottomBar()
           : const _InputContainer(),
     );

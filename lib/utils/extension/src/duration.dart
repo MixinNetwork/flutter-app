@@ -10,13 +10,9 @@ extension DurationToMinutesSecondsExtension on Duration {
   }
 
   String get asMinutesSecondsWithDas {
-    var duration = this;
-    if (inMilliseconds < 1000) {
-      duration = const Duration(milliseconds: 1000);
-    }
-    final minutes = duration.inMinutes.toString().padLeft(2, '0');
-    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    final das = (duration.inMilliseconds.remainder(1000) ~/ 100).toString();
+    final minutes = inMinutes.toString().padLeft(2, '0');
+    final seconds = inSeconds.remainder(60).toString().padLeft(2, '0');
+    final das = (inMilliseconds.remainder(1000) ~/ 100).toString();
     return '$minutes:$seconds.$das';
   }
 

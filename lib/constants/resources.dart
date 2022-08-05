@@ -344,6 +344,18 @@ class Resources {
   static const String assetsImagesRecentStickerSvg =
       'assets/images/recent_sticker.svg';
 
+  static const String assetsImagesRecordPreviewPlaySvg =
+      'assets/images/record_preview_play.svg';
+
+  static const String assetsImagesRecordPreviewStopSvg =
+      'assets/images/record_preview_stop.svg';
+
+  static const String assetsImagesRecordRetrySvg =
+      'assets/images/record_retry.svg';
+
+  static const String assetsImagesRecordStopSvg =
+      'assets/images/record_stop.svg';
+
   static const String assetsImagesRotatoSvg = 'assets/images/rotato.svg';
 
   static const String assetsImagesSelectedSvg = 'assets/images/selected.svg';

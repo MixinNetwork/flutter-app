@@ -40,5 +40,8 @@ void main() {
 
     duration = const Duration(minutes: 120, seconds: 20, milliseconds: 120);
     expect(duration.asMinutesSecondsWithDas, '120:20.1');
+
+    duration = const Duration(milliseconds: 999);
+    expect(duration.asMinutesSecondsWithDas, '00:00.9');
   });
 }

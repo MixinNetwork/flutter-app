@@ -953,8 +953,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/ogg_opus_player"
-      ref: "3e5182622c669b63417124c36d2dc2b9ba4a0162"
-      resolved-ref: "3e5182622c669b63417124c36d2dc2b9ba4a0162"
+      ref: d0a751cc52a767d67483201fa5d0179ad271ebb9
+      resolved-ref: d0a751cc52a767d67483201fa5d0179ad271ebb9
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "0.3.2"
