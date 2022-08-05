@@ -98,6 +98,7 @@ part 'mixin_database.g.dart';
   queries: {},
 )
 class MixinDatabase extends _$MixinDatabase {
+  MixinDatabase(super.e);
   MixinDatabase.connect(super.c) : super.connect();
 
   @override
