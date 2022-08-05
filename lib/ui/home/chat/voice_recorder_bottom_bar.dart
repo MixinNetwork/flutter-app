@@ -29,22 +29,28 @@ class VoiceRecorderCubitState with EquatableMixin {
   const VoiceRecorderCubitState({
     this.startTime,
     required this.state,
+    this.recodedData,
   });
 
   final RecorderState state;
 
   final DateTime? startTime;
 
+  final RecordedData? recodedData;
+
   @override
   List<Object?> get props => [startTime, state];
 }
 
-class RecorderResult {
-  RecorderResult(this.waveform, this.duration, this.path);
+class RecordedData with EquatableMixin {
+  RecordedData(this.waveform, this.duration, this.path);
 
   final List<int> waveform;
   final Duration duration;
   final String path;
+
+  @override
+  List<Object?> get props => [waveform, duration, path];
 }
 
 class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
@@ -57,6 +63,8 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
   String? _recorderFilePath;
 
   Completer<void>? _startingCompleter;
+
+  Timer? _timer;
 
   Future<void> startRecording() async {
     if (_startingCompleter != null && !_startingCompleter!.isCompleted) {
@@ -76,6 +84,7 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
     d('start recode voice, path : $path');
     _recorder = OggOpusRecorder(path);
     _recorder?.start();
+    _timer = Timer(const Duration(seconds: 60), stopRecording);
     emit(VoiceRecorderCubitState(
       startTime: DateTime.now(),
       state: RecorderState.recording,
@@ -83,10 +92,12 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
     _startingCompleter!.complete();
   }
 
-  Future<RecorderResult> _stopRecording({
-    bool isCanceled = false,
-    bool exitRecordMode = false,
-  }) async {
+  Future<RecordedData> stopRecording({bool isCanceled = false}) async {
+    if (_timer?.isActive == true) {
+      _timer?.cancel();
+      _timer = null;
+    }
+
     assert(_recorder != null, 'recorder is null.');
     assert(_recorderFilePath != null, 'recorder file path is null.');
     final path = _recorderFilePath;
@@ -94,13 +105,6 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
 
     _recorder = null;
     _recorderFilePath = null;
-    emit(
-      VoiceRecorderCubitState(
-        state: exitRecordMode
-            ? RecorderState.idle
-            : RecorderState.recordingStopped,
-      ),
-    );
 
     List<int>? waveform;
     double? duration;
@@ -114,17 +118,22 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
 
     recorder?.dispose();
 
-    return RecorderResult(
+    final recodeData = RecordedData(
       waveform ?? const [],
       duration == null
           ? Duration.zero
           : Duration(milliseconds: (duration * 1000).round()),
       path!,
     );
+
+    emit(VoiceRecorderCubitState(
+      state: RecorderState.recordingStopped,
+      recodedData: recodeData,
+    ));
+    return recodeData;
   }
 
   Future<void> cancelAndExitRecordeMode() async {
-    debugPrint('state: ${state.state}');
     if (state.state == RecorderState.idle) {
       return;
     }
@@ -132,7 +141,8 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
       emit(const VoiceRecorderCubitState(state: RecorderState.idle));
       return;
     }
-    final result = await _stopRecording(isCanceled: true, exitRecordMode: true);
+    final result = await stopRecording(isCanceled: true);
+    emit(const VoiceRecorderCubitState(state: RecorderState.idle));
     try {
       await File(result.path).delete();
     } catch (error, stacktrace) {
@@ -149,6 +159,7 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
       await _startingCompleter?.future;
       await cancelAndExitRecordeMode();
     }
+    _timer?.cancel();
     await super.close();
   }
 }
@@ -166,7 +177,28 @@ class VoiceRecorderBottomBar extends HookWidget {
         VoiceRecorderCubitState, bool>(
       converter: (state) => state.state == RecorderState.recording,
     );
-    final recordedResult = useState<RecorderResult?>(null);
+    final recordedResult = useBlocStateConverter<VoiceRecorderCubit,
+        VoiceRecorderCubitState, RecordedData?>(
+      converter: (state) => state.recodedData,
+    );
+
+    useEffect(() {
+      if (recordedResult == null) {
+        return;
+      }
+      final audioFile = File(recordedResult.path);
+      if (!audioFile.existsSync()) {
+        e('audio file does not exist.');
+        showToastFailed(context, null);
+        return;
+      }
+      if (audioFile.lengthSync() == 0) {
+        e('audio file is empty.');
+        showToastFailed(context, null);
+        return;
+      }
+    }, [recordedResult]);
+
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(
@@ -180,7 +212,7 @@ class VoiceRecorderBottomBar extends HookWidget {
             name: Resources.assetsImagesCloseOvalRecordSvg,
             color: context.theme.icon,
             onTap: () async {
-              final path = recordedResult.value?.path;
+              final path = recordedResult?.path;
               await context
                   .read<VoiceRecorderCubit>()
                   .cancelAndExitRecordeMode();
@@ -196,11 +228,11 @@ class VoiceRecorderBottomBar extends HookWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: recordedResult.value == null
+              child: recordedResult == null
                   ? startTime == null
                       ? const SizedBox()
                       : _RecordingLayout(startTime: startTime)
-                  : _RecordedResultPreviewLayout(result: recordedResult.value!),
+                  : _RecordedResultPreviewLayout(result: recordedResult),
             ),
           ),
           if (isRecording)
@@ -209,19 +241,7 @@ class VoiceRecorderBottomBar extends HookWidget {
               color: context.theme.accent,
               onTap: () async {
                 final recorderCubit = context.read<VoiceRecorderCubit>();
-                final result = await recorderCubit._stopRecording();
-                final audioFile = File(result.path);
-                if (!audioFile.existsSync()) {
-                  e('audio file does not exist.');
-                  await showToastFailed(context, null);
-                  return;
-                }
-                if (audioFile.lengthSync() == 0) {
-                  e('audio file is empty.');
-                  await showToastFailed(context, null);
-                  return;
-                }
-                recordedResult.value = result;
+                await recorderCubit.stopRecording();
               },
             )
           else
@@ -229,8 +249,7 @@ class VoiceRecorderBottomBar extends HookWidget {
               name: Resources.assetsImagesRecordRetrySvg,
               color: context.theme.icon,
               onTap: () async {
-                final path = recordedResult.value?.path;
-                recordedResult.value = null;
+                final path = recordedResult?.path;
                 await context.read<VoiceRecorderCubit>().startRecording();
                 if (path != null) {
                   try {
@@ -252,20 +271,18 @@ class VoiceRecorderBottomBar extends HookWidget {
 
               final recorderCubit = context.read<VoiceRecorderCubit>();
 
-              final RecorderResult result;
+              final RecordedData result;
 
               if (recorderCubit.state.state == RecorderState.recording) {
-                result = await recorderCubit._stopRecording(
-                  exitRecordMode: true,
-                );
+                result = await recorderCubit.stopRecording();
               } else {
-                if (recordedResult.value == null) {
+                if (recordedResult == null) {
                   e('result is null. ${recorderCubit.state}');
                   return;
                 }
-                result = recordedResult.value!;
-                await recorderCubit.cancelAndExitRecordeMode();
+                result = recordedResult;
               }
+              await recorderCubit.cancelAndExitRecordeMode();
               final audioFile = File(result.path);
               if (!audioFile.existsSync()) {
                 e('audio file does not exist.');
@@ -333,7 +350,7 @@ class _Player {
 class _RecordedResultPreviewLayout extends HookWidget {
   const _RecordedResultPreviewLayout({required this.result});
 
-  final RecorderResult result;
+  final RecordedData result;
 
   @override
   Widget build(BuildContext context) {
