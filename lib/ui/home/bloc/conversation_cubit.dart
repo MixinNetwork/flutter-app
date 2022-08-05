@@ -213,6 +213,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     String? initIndexMessageId,
     String? initialChatSidePage,
     String? keyword,
+    bool sync = false,
   }) async {
     final accountServer = context.accountServer;
     final database = context.database;
@@ -234,6 +235,12 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     _conversation = conversation ??
         _conversation ??
         await _conversationItem(context, conversationId);
+
+    if (_conversation == null && sync) {
+      showToastLoading(context);
+      await context.accountServer.refreshConversation(conversationId);
+      _conversation = await _conversationItem(context, conversationId);
+    }
 
     hasUnreadMessage ??= (_conversation?.unseenMessageCount ?? 0) > 0;
 
@@ -270,6 +277,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       keyword: keyword,
     );
 
+    Toast.dismiss();
     conversationCubit.emit(conversationState);
 
     accountServer.selectConversation(conversationId);

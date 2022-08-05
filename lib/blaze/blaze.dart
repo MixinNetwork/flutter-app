@@ -73,7 +73,6 @@ class Blaze {
 
     _connectedStateBehaviorSubject.value = state;
 
-    i('connectedState: $state, ${StackTrace.current}');
     if (state == ConnectedState.connected) {
       _refreshOffset();
     }
