@@ -12,6 +12,7 @@ extension AssetConverter on sdk.Asset {
         name: name,
         iconUrl: iconUrl,
         balance: balance,
+        // ignore: deprecated_member_use
         destination: destination ?? '',
         tag: Value(tag),
         assetKey: Value(assetKey),
