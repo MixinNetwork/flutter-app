@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -22,6 +24,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Mixin uses your microphone to record voice messages to share with your contacts.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Mixin uses the photo library to set profile photo, and send photo to your contact in chat.</string>
 	<key>UILaunchStoryboardName</key>
@@ -43,9 +47,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>NSMicrophoneUsageDescription</key>
-    <string>Mixin uses your microphone to record voice messages to share with your contacts.</string>
 </dict>
 </plist>

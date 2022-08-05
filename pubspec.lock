@@ -952,12 +952,10 @@ packages:
   ogg_opus_player:
     dependency: "direct main"
     description:
-      path: "packages/ogg_opus_player"
-      ref: d0a751cc52a767d67483201fa5d0179ad271ebb9
-      resolved-ref: d0a751cc52a767d67483201fa5d0179ad271ebb9
-      url: "https://github.com/MixinNetwork/flutter-plugins.git"
-    source: git
-    version: "0.3.2"
+      name: ogg_opus_player
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.0"
   open_file:
     dependency: "direct main"
     description:
