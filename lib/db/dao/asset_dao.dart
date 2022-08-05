@@ -6,23 +6,30 @@ import '../mixin_database.dart';
 part 'asset_dao.g.dart';
 
 extension AssetConverter on sdk.Asset {
-  AssetsCompanion get asAssetsCompanion => AssetsCompanion.insert(
-        assetId: assetId,
-        symbol: symbol,
-        name: name,
-        iconUrl: iconUrl,
-        balance: balance,
-        destination: destination ?? '',
-        tag: Value(tag),
-        assetKey: Value(assetKey),
-        priceBtc: priceBtc,
-        priceUsd: priceUsd,
-        chainId: chainId,
-        changeUsd: changeUsd,
-        changeBtc: changeBtc,
-        confirmations: confirmations,
-        reserve: Value(reserve),
-      );
+  AssetsCompanion get asAssetsCompanion {
+    String? destination = '';
+    if (depositEntries?.isNotEmpty == true) {
+      // ignore: prefer-first
+      destination = depositEntries?[0].destination ?? destination;
+    }
+    return AssetsCompanion.insert(
+      assetId: assetId,
+      symbol: symbol,
+      name: name,
+      iconUrl: iconUrl,
+      balance: balance,
+      destination: destination,
+      tag: Value(tag),
+      assetKey: Value(assetKey),
+      priceBtc: priceBtc,
+      priceUsd: priceUsd,
+      chainId: chainId,
+      changeUsd: changeUsd,
+      changeBtc: changeBtc,
+      confirmations: confirmations,
+      reserve: Value(reserve),
+    );
+  }
 }
 
 @DriftAccessor(tables: [Assets])
