@@ -145,7 +145,6 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
         if (event != null && !event.isGroupConversation) {
           userId = event.ownerId;
         }
-        print('fuck update, ${event}');
         emit(
           state?.copyWith(
             conversation: event,
