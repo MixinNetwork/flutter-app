@@ -12,6 +12,10 @@ class MessageHistoryDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insert(MessagesHistoryData messagesHistory) =>
       into(db.messagesHistory).insertOnConflictUpdate(messagesHistory);
 
+  Future<void> insertList(Iterable<MessagesHistoryData> list) =>
+      batch((batch) => batch.insertAll(db.messagesHistory, list,
+          mode: InsertMode.insertOrReplace));
+
   Future deleteMessagesHistory(MessagesHistoryData messagesHistory) =>
       delete(db.messagesHistory).delete(messagesHistory);
 

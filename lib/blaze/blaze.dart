@@ -217,16 +217,9 @@ class Blaze {
   Future<bool> makeMessageStatus(String messageId, MessageStatus status) async {
     final currentStatus =
         await database.messageDao.findMessageStatusById(messageId);
-    if (currentStatus == MessageStatus.sending) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
-    } else if (currentStatus == MessageStatus.sent &&
-        (status == MessageStatus.delivered || status == MessageStatus.read)) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
-    } else if (currentStatus == MessageStatus.delivered &&
-        status == MessageStatus.read) {
+    if (currentStatus != null && status.index > currentStatus.index) {
       await database.messageDao.updateMessageStatusById(messageId, status);
     }
-
     return currentStatus != null;
   }
 
@@ -251,7 +244,14 @@ class Blaze {
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
         if (!(await makeMessageStatus(m.messageId, m.status))) {
-          pendingMessageStatusMap[m.messageId] = m.status;
+          final messagesHistory = await database.messagesHistoryDao
+              .findMessageHistoryById(m.messageId);
+          if (messagesHistory != null) return;
+
+          final status = pendingMessageStatusMap[m.messageId];
+          if (status == null || m.status.index > status.index) {
+            pendingMessageStatusMap[m.messageId] = m.status;
+          }
         }
 
         await database.offsetDao.insert(Offset(
