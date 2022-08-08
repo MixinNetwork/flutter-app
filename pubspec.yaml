@@ -49,7 +49,7 @@ dependencies:
   flutter_local_notifications: ^9.7.0
   flutter_localizations:
     sdk: flutter
-  flutter_portal: ^1.1.0
+  flutter_portal: ^1.1.1
   flutter_svg: ^1.1.3
   gallery_saver: ^2.3.2
   github: ^9.3.0
