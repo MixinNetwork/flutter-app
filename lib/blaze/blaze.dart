@@ -244,6 +244,10 @@ class Blaze {
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
         if (!(await makeMessageStatus(m.messageId, m.status))) {
+          final messagesHistory = await database.messagesHistoryDao
+              .findMessageHistoryById(m.messageId);
+          if (messagesHistory != null) return;
+
           final status = pendingMessageStatusMap[m.messageId];
           if (status == null || m.status.index > status.index) {
             pendingMessageStatusMap[m.messageId] = m.status;
