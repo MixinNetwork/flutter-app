@@ -12,8 +12,6 @@ cp -fr "$current_dir/deb/." "$package_dir"
 mkdir -p "$package_dir/usr/lib/$app_name"
 cp -fr "$project_dir/build/linux/x64/release/bundle/." \
   "$package_dir/usr/lib/$app_name"
-cp "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0" \
-  "$package_dir/usr/lib/$app_name/lib/libsqlite3.so"
 
 mkdir -p "$package_dir/usr/bin"
 pushd "$package_dir/usr/bin" || exit
