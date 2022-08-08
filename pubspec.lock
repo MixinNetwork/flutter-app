@@ -102,7 +102,7 @@ packages:
       name: bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.0.3"
+    version: "8.1.0"
   blurhash_dart:
     dependency: "direct main"
     description:
