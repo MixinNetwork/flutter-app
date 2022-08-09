@@ -220,11 +220,21 @@ class _StickerAlbumPageItem extends HookWidget {
         if (!rightClickDelete) return;
         // todo use native context menu.
       },
-      child: RepaintBoundary(
-        child: Builder(
-          builder: (context) => StickerItem(
-            assetUrl: sticker.assetUrl,
-            assetType: sticker.assetType,
+      hoveringDecoration: BoxDecoration(
+        color: context.dynamicColor(
+          const Color.fromRGBO(229, 231, 235, 1),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: RepaintBoundary(
+          child: Builder(
+            builder: (context) => StickerItem(
+              assetUrl: sticker.assetUrl,
+              assetType: sticker.assetType,
+            ),
           ),
         ),
       ),
