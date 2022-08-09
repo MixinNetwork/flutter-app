@@ -12,7 +12,7 @@ publish_to: none
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.36.6+13
+version: 0.36.6+17
 
 environment:
   sdk: '>=2.17.1 <3.0.0'
@@ -22,7 +22,7 @@ dependencies:
   archive: ^3.3.0
   async: ^2.8.1
   bitsdojo_window: ^0.1.1+1
-  bloc: ^8.0.3
+  bloc: ^8.1.0
   blurhash_dart: ^1.0.2
   decimal: ^2.2.0
   desktop_drop: ^0.3.3
@@ -49,13 +49,13 @@ dependencies:
   flutter_local_notifications: ^9.7.0
   flutter_localizations:
     sdk: flutter
-  flutter_portal: ^1.1.0
-  flutter_svg: ^1.1.0
+  flutter_portal: ^1.1.1
+  flutter_svg: ^1.1.3
   gallery_saver: ^2.3.2
   github: ^9.3.0
   hive: ^2.1.0
   hive_flutter: ^1.0.0
-  http: ^0.13.3
+  http: ^0.13.5
   hydrated_bloc: ^8.1.0
   image_picker: ^0.8.4+4
   intl: ^0.17.0
@@ -67,7 +67,7 @@ dependencies:
   map: ^1.3.3
   markdown_widget: ^1.2.9
   mime: ^1.0.0
-  mixin_bot_sdk_dart: ^0.2.15
+  mixin_bot_sdk_dart: ^0.3.0
   octo_image: ^1.0.0+1
   ogg_opus_player: ^0.4.0
   open_file: ^3.2.1
@@ -195,7 +195,7 @@ msix_config:
   publisher_display_name: Mixin Ltd
   identity_name: 14801MixinLtd.MixinDesktop
   publisher: CN=272248D5-9A62-44D7-A299-5E1F8B46A9B0
-  msix_version: 0.36.3.0
+  msix_version: 0.36.6.0
   logo_path: ./assets/icons/windows_app_icon.png
   vs_generated_images_folder_path: ./dist/icons
   icons_background_color: transparent

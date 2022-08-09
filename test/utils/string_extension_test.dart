@@ -38,4 +38,9 @@ void main() {
     expect(s1.joinWhiteSpace(), 'hello 520 你 好');
     expect(s2.joinWhiteSpace(), 'a 1 b 2 c 3 哈 4 de 哈 * #  ~ 6 f');
   });
+
+  test('tst escape fts5', () {
+    expect('github'.escapeFts5(), '"github"*');
+    expect('github中文'.escapeFts5(), '"github"*"中"*"文"*');
+  });
 }

@@ -949,6 +949,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     List<String>? categories,
   }) {
     final keywordFts5 = query.trim().escapeFts5();
+
     if (conversationId != null && userId != null) {
       if (categories != null) {
         return db.fuzzySearchMessageByConversationIdAndUserIdAndCategories(

@@ -855,8 +855,10 @@ class AccountServer {
     await addParticipant(conversationId, userIds);
   }
 
-  Future<void> exitGroup(String conversationId) =>
-      client.conversationApi.exit(conversationId);
+  Future<void> exitGroup(String conversationId) async {
+    await client.conversationApi.exit(conversationId);
+    await refreshConversation(conversationId);
+  }
 
   Future<void> joinGroup(String code) async {
     final response = await client.conversationApi.join(code);

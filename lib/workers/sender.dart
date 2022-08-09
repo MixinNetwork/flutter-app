@@ -197,6 +197,10 @@ class Sender {
       return checkSessionSenderKey(conversationId);
     }
     if (result.success) {
+      final messageIds = signalKeyMessages
+          .map((e) => db.MessagesHistoryData(messageId: e.messageId));
+      await database.messagesHistoryDao.insertList(messageIds);
+
       final sentSenderKeys = signalKeyMessages
           .map((e) => db.ParticipantSessionData(
               conversationId: conversationId,
