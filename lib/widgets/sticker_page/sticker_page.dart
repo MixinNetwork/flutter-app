@@ -11,7 +11,6 @@ import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../automatic_keep_alive_client_widget.dart';
-import '../cache_image.dart';
 import '../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../hover_overlay.dart';
 import '../interactive_decorated_box.dart';
@@ -353,10 +352,9 @@ class _StickerAlbumBarItem extends StatelessWidget {
                     String>(
                   converter: (state) =>
                       state[index - presetStickerGroups.length].iconUrl,
-                  builder: (context, iconUrl) => CacheImage(
-                    iconUrl,
-                    width: 28,
-                    height: 28,
+                  builder: (context, iconUrl) => StickerGroupIcon(
+                    iconUrl: iconUrl,
+                    size: 28,
                   ),
                 );
               },

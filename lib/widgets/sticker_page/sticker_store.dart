@@ -336,9 +336,9 @@ class _StickerAlbumManagePage extends HookWidget {
                   height: 72,
                   child: Row(
                     children: [
-                      StickerItem(
-                        assetType: '',
-                        assetUrl: album.iconUrl,
+                      StickerGroupIcon(
+                        iconUrl: album.iconUrl,
+                        size: 72,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
