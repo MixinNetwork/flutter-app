@@ -220,11 +220,21 @@ class _StickerAlbumPageItem extends HookWidget {
         if (!rightClickDelete) return;
         // todo use native context menu.
       },
-      child: RepaintBoundary(
-        child: Builder(
-          builder: (context) => StickerItem(
-            assetUrl: sticker.assetUrl,
-            assetType: sticker.assetType,
+      hoveringDecoration: BoxDecoration(
+        color: context.dynamicColor(
+          const Color.fromRGBO(229, 231, 235, 1),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: RepaintBoundary(
+          child: Builder(
+            builder: (context) => StickerItem(
+              assetUrl: sticker.assetUrl,
+              assetType: sticker.assetType,
+            ),
           ),
         ),
       ),
@@ -322,44 +332,82 @@ class _StickerAlbumBarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox.fromSize(
         size: const Size.square(50),
-        child: Center(
-          child: Center(
-            child: Builder(
-              builder: (context) {
-                final presetStickerAlbum = {
-                  PresetStickerGroup.store: AccountKeyValue.instance.hasNewAlbum
-                      ? Resources.assetsImagesStickerStoreRedDotSvg
-                      : Resources.assetsImagesStickerStoreSvg,
-                  PresetStickerGroup.emoji:
-                      Resources.assetsImagesEmojiStickerSvg,
-                  PresetStickerGroup.recent:
-                      Resources.assetsImagesRecentStickerSvg,
-                  PresetStickerGroup.favorite:
-                      Resources.assetsImagesPersonalStickerSvg,
-                  PresetStickerGroup.gif: Resources.assetsImagesGifStickerSvg,
-                };
+        child: Padding(
+          padding: const EdgeInsets.all(5),
+          child: _StickerGroupIconHoverContainer(
+            child: Center(
+              child: Center(
+                child: Builder(
+                  builder: (context) {
+                    final presetStickerAlbum = {
+                      PresetStickerGroup.store:
+                          AccountKeyValue.instance.hasNewAlbum
+                              ? Resources.assetsImagesStickerStoreRedDotSvg
+                              : Resources.assetsImagesStickerStoreSvg,
+                      PresetStickerGroup.emoji:
+                          Resources.assetsImagesEmojiStickerSvg,
+                      PresetStickerGroup.recent:
+                          Resources.assetsImagesRecentStickerSvg,
+                      PresetStickerGroup.favorite:
+                          Resources.assetsImagesPersonalStickerSvg,
+                      PresetStickerGroup.gif:
+                          Resources.assetsImagesGifStickerSvg,
+                    };
 
-                if (index < presetStickerGroups.length) {
-                  return SvgPicture.asset(
-                    presetStickerAlbum[presetStickerGroups[index]]!,
-                    color: index != 0 ? context.theme.secondaryText : null,
-                    width: 24,
-                    height: 24,
-                  );
-                }
+                    if (index < presetStickerGroups.length) {
+                      return SvgPicture.asset(
+                        presetStickerAlbum[presetStickerGroups[index]]!,
+                        color: index != 0 ? context.theme.secondaryText : null,
+                        width: 24,
+                        height: 24,
+                      );
+                    }
 
-                return BlocConverter<StickerAlbumsCubit, List<StickerAlbum>,
-                    String>(
-                  converter: (state) =>
-                      state[index - presetStickerGroups.length].iconUrl,
-                  builder: (context, iconUrl) => StickerGroupIcon(
-                    iconUrl: iconUrl,
-                    size: 28,
-                  ),
-                );
-              },
+                    return BlocConverter<StickerAlbumsCubit, List<StickerAlbum>,
+                        String>(
+                      converter: (state) =>
+                          state[index - presetStickerGroups.length].iconUrl,
+                      builder: (context, iconUrl) => StickerGroupIcon(
+                        iconUrl: iconUrl,
+                        size: 28,
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ),
       );
+}
+
+class _StickerGroupIconHoverContainer extends HookWidget {
+  const _StickerGroupIconHoverContainer({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final isHovering = useState(false);
+    return MouseRegion(
+      onEnter: (event) {
+        isHovering.value = true;
+      },
+      onExit: (event) {
+        isHovering.value = false;
+      },
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: isHovering.value
+              ? context.dynamicColor(
+                  const Color.fromRGBO(229, 231, 235, 1),
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+                )
+              : null,
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+        ),
+        child: child,
+      ),
+    );
+  }
 }
