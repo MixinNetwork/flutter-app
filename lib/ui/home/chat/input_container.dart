@@ -209,15 +209,6 @@ class _InputContainer extends HookWidget {
       }
     }, [chatSidePageSize]);
 
-    final hasInputText = useMemoizedStream(
-          () => textEditingValueStream
-              .map((event) => event.text.isNotEmpty)
-              .distinct(),
-          keys: [textEditingValueStream],
-          initialData: textEditingController.text.isNotEmpty,
-        ).data ??
-        false;
-
     return MultiProvider(
       providers: [
         BlocProvider.value(
@@ -262,34 +253,10 @@ class _InputContainer extends HookWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      if (hasInputText)
-                        ContextMenuPortalEntry(
-                          buildMenus: () => [
-                            ContextMenu(
-                              icon: Resources.assetsImagesContextMenuMuteSvg,
-                              title: context.l10n.sendWithoutSound,
-                              onTap: () => _sendMessage(
-                                context,
-                                textEditingController,
-                                silent: true,
-                              ),
-                            ),
-                          ],
-                          child: ActionButton(
-                            name: Resources.assetsImagesIcSendSvg,
-                            color: context.theme.icon,
-                            onTap: () =>
-                                _sendMessage(context, textEditingController),
-                          ),
-                        )
-                      else
-                        ActionButton(
-                          name: Resources.assetsImagesMicrophoneSvg,
-                          color: context.theme.icon,
-                          onTap: () => context
-                              .read<VoiceRecorderCubit>()
-                              .startRecording(),
-                        ),
+                      _AnimatedSendOrVoiceButton(
+                        textEditingController: textEditingController,
+                        textEditingValueStream: textEditingValueStream,
+                      )
                     ],
                   ),
                 ),
@@ -298,6 +265,97 @@ class _InputContainer extends HookWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AnimatedSendOrVoiceButton extends HookWidget {
+  const _AnimatedSendOrVoiceButton({
+    required this.textEditingValueStream,
+    required this.textEditingController,
+  });
+
+  final Stream<TextEditingValue> textEditingValueStream;
+  final TextEditingController textEditingController;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasInputText = useMemoizedStream(
+          () => textEditingValueStream
+              .map((event) => event.text.isNotEmpty)
+              .distinct(),
+          keys: [textEditingValueStream],
+          initialData: textEditingController.text.isNotEmpty,
+        ).data ??
+        false;
+
+    // start -> show voice button
+    // end -> show send button
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 200),
+      initialValue: hasInputText ? 1.0 : 0.0,
+    );
+
+    useEffect(() {
+      if (hasInputText) {
+        animationController.forward();
+      } else {
+        animationController.reverse();
+      }
+    }, [hasInputText]);
+
+    // 0 -> 0.5: scale down voice button from 1 -> 0.6
+    // 0.5 -> 1: scale up voice button from 0.6 -> 1
+    final animatedValue = useAnimation(animationController);
+
+    final double sendScale;
+    final double voiceScale;
+
+    if (animatedValue < 0.5) {
+      sendScale = 0;
+      voiceScale =
+          Tween<double>(begin: 1, end: 0.6).transform(animatedValue * 2.0);
+    } else {
+      voiceScale = 0;
+      sendScale = Tween<double>(begin: 0.6, end: 1)
+          .transform((animatedValue - 0.5) * 2);
+    }
+
+    return Stack(
+      fit: StackFit.passthrough,
+      children: [
+        if (sendScale >= 0.6)
+          Transform.scale(
+            scale: sendScale,
+            child: ContextMenuPortalEntry(
+              buildMenus: () => [
+                ContextMenu(
+                  icon: Resources.assetsImagesContextMenuMuteSvg,
+                  title: context.l10n.sendWithoutSound,
+                  onTap: () => _sendMessage(
+                    context,
+                    textEditingController,
+                    silent: true,
+                  ),
+                ),
+              ],
+              child: ActionButton(
+                name: Resources.assetsImagesIcSendSvg,
+                color: context.theme.icon,
+                onTap: () => _sendMessage(context, textEditingController),
+              ),
+            ),
+          ),
+        if (voiceScale >= 0.6)
+          Transform.scale(
+            scale: voiceScale,
+            child: ActionButton(
+              name: Resources.assetsImagesMicrophoneSvg,
+              color: context.theme.icon,
+              onTap: () => context.read<VoiceRecorderCubit>().startRecording(),
+            ),
+          ),
+      ],
     );
   }
 }
