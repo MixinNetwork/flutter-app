@@ -86,3 +86,25 @@ class StickerItem extends HookWidget {
     return child;
   }
 }
+
+class StickerGroupIcon extends StatelessWidget {
+  const StickerGroupIcon({
+    super.key,
+    required this.iconUrl,
+    required this.size,
+  });
+
+  final String iconUrl;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final isLottie = iconUrl.toLowerCase().endsWith('.json');
+    return StickerItem(
+      assetUrl: iconUrl,
+      assetType: isLottie ? 'json' : null,
+      width: size,
+      height: size,
+    );
+  }
+}
