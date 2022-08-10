@@ -134,7 +134,7 @@ class _WaveformPainter extends CustomPainter with EquatableMixin {
     final height = size.height;
     final minTop = height - _barMinHeight;
 
-    final ratio = height / maxSample;
+    final ratio = maxSample == 0 ? 0 : height / maxSample;
     final path = Path();
 
     samples.asMap().entries.forEach((entry) {
