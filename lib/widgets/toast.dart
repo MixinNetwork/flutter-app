@@ -65,36 +65,35 @@ class ToastWidget extends StatelessWidget {
         child: Container(
           color: barrierColor,
           alignment: Alignment.center,
-          child: ConstrainedBox(
+          child: Container(
             constraints: const BoxConstraints(
               minWidth: 130,
             ),
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                color: Color.fromRGBO(62, 65, 72, 0.7),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 20),
-                  if (icon != null)
-                    SizedBox(
-                      height: 30,
-                      width: 30,
-                      child: icon,
-                    ),
-                  if (icon != null) const SizedBox(height: 12),
-                  Text(
-                    text,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+              color: Color.fromRGBO(62, 65, 72, 0.7),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 20),
+                if (icon != null)
+                  SizedBox(
+                    height: 30,
+                    width: 30,
+                    child: icon,
                   ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+                if (icon != null) const SizedBox(height: 12),
+                Text(
+                  text,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
           ),
         ),
