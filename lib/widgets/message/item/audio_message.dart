@@ -157,6 +157,9 @@ class _AnimatedWave extends HookWidget {
       isMediaList: isTranscriptPage,
     );
 
+    final isMe = useMessageConverter(
+        converter: (state) => state.relationship == UserRelationship.me);
+
     double getPlayingFriction() {
       final friction =
           (context.audioMessageService.currentPosition.inMilliseconds) /
@@ -194,10 +197,12 @@ class _AnimatedWave extends HookWidget {
       child: WaveformWidget(
         value: position.value,
         waveform: waveform,
-        backgroundColor:
-            read ? context.theme.waveformBackground : context.theme.accent,
-        foregroundColor:
-            read ? context.theme.waveformForeground : context.theme.accent,
+        backgroundColor: isMe || read
+            ? context.theme.waveformBackground
+            : context.theme.accent,
+        foregroundColor: isMe || read
+            ? context.theme.waveformForeground
+            : context.theme.accent,
       ),
     );
   }

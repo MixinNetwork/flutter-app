@@ -469,7 +469,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
       return null;
     }
     // Save the image to the device's local storage.
-    final file = await saveBytesToTempFile(bytes, 'image_edit', '.png');
+    final file = await saveBytesToTempFile(bytes, TempFileType.editImage);
     if (file == null) {
       e('failed to save image to file');
       return null;
