@@ -36,6 +36,7 @@ jobs:
 
       - name: Build APP
         run: flutter build linux
+
       - name: Package APP
         run: ./dist/linux_deb.sh
 
