@@ -54,8 +54,11 @@ class MessageBubble extends HookWidget {
       converter: (message) => message.expireIn != null && message.expireIn! > 0,
     );
 
-    final quoteMessageId =
-        useMessageConverter(converter: (state) => state.quoteId);
+    final quoteContent =
+        useMessageConverter(converter: (state) => state.quoteContent);
+
+    final hasQuoteMessage = quoteContent?.isNotEmpty ?? false;
+
     final isTranscriptPage = useIsTranscriptPage();
 
     final bubbleColor =
@@ -75,7 +78,7 @@ class MessageBubble extends HookWidget {
       child: _child,
     );
 
-    if (quoteMessageId?.isNotEmpty ?? false) {
+    if (hasQuoteMessage) {
       _child = IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -84,10 +87,10 @@ class MessageBubble extends HookWidget {
             _MessageBubbleNipPadding(
               currentUser: isCurrentUser,
               child: HookBuilder(builder: (context) {
+                final quoteMessageId =
+                    useMessageConverter(converter: (state) => state.quoteId);
                 final messageId =
                     useMessageConverter(converter: (state) => state.messageId);
-                final quoteContent = useMessageConverter(
-                    converter: (state) => state.quoteContent);
 
                 return QuoteMessage(
                   messageId: messageId,
@@ -117,10 +120,10 @@ class MessageBubble extends HookWidget {
       );
     }
 
-    if (showBubble) {
+    if (hasQuoteMessage || showBubble) {
       _child = CustomPaint(
         painter: BubblePainter(
-          color: showBubble ? bubbleColor : Colors.transparent,
+          color: bubbleColor,
           clipper: clipper,
         ),
         child: _child,
