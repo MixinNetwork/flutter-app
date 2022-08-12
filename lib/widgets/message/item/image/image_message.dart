@@ -36,6 +36,7 @@ class ImageMessageWidget extends HookWidget {
       imageWidthInPixel: mediaWidth,
       imageHeightInPixel: mediaHeight,
       builder: (context, width, height) => MessageBubble(
+        showBubble: false,
         padding: EdgeInsets.zero,
         includeNip: true,
         clip: true,
