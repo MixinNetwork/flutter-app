@@ -301,6 +301,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Disappearing messages"),
         "disappearingMessagesDescription": MessageLookupByLibrary.simpleMessage(
             "When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to learn more."),
+        "discard": MessageLookupByLibrary.simpleMessage("Discard"),
+        "discardRecordingWarning": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to stop recording and discard your voice message?"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
         "download": MessageLookupByLibrary.simpleMessage("Download"),
         "downloadLink": MessageLookupByLibrary.simpleMessage("Download Link: "),

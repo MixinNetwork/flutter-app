@@ -379,5 +379,7 @@
   "travelAndPlaces": "Travel & Places",
   "objects": "Objects",
   "symbols": "Symbols",
-  "flags": "Flags"
+  "flags": "Flags",
+  "discardRecordingWarning": "Are you sure you want to stop recording and discard your voice message?",
+  "discard": "Discard"
 }

@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:ogg_opus_player/ogg_opus_player.dart';
 
 import '../../../constants/resources.dart';
@@ -14,6 +14,7 @@ import '../../../utils/hook.dart';
 import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../../widgets/action_button.dart';
+import '../../../widgets/dialog.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/waveform_widget.dart';
 import '../bloc/conversation_cubit.dart';
@@ -162,6 +163,190 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
     _timer?.cancel();
     await super.close();
   }
+}
+
+class VoiceRecorderBarOverlayComposition extends HookWidget {
+  const VoiceRecorderBarOverlayComposition({
+    super.key,
+    required this.child,
+    required this.layoutWidth,
+  });
+
+  final Widget child;
+
+  final double layoutWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final isRecorderMode = useBlocStateConverter<VoiceRecorderCubit,
+        VoiceRecorderCubitState, bool>(
+      converter: (state) => state.state != RecorderState.idle,
+    );
+    final link = useMemoized(LayerLink.new);
+    final overlay = Overlay.of(context, rootOverlay: true);
+
+    assert(overlay != null, 'overlay is null');
+
+    final recorderBottomBarEntry = useRef<OverlayEntry?>(null);
+
+    final voiceRecorderCubit = context.read<VoiceRecorderCubit>();
+    final quoteMessageCubit = context.read<QuoteMessageCubit>();
+    final conversationCubit = context.read<ConversationCubit>();
+
+    useEffect(
+      () {
+        recorderBottomBarEntry.value?.remove();
+        recorderBottomBarEntry.value = null;
+        if (!isRecorderMode) {
+          return;
+        }
+        final entry = OverlayEntry(
+          builder: (context) => MultiBlocProvider(
+            providers: [
+              BlocProvider<VoiceRecorderCubit>.value(
+                value: voiceRecorderCubit,
+              ),
+              BlocProvider<QuoteMessageCubit>.value(
+                value: quoteMessageCubit,
+              ),
+              BlocProvider<ConversationCubit>.value(
+                value: conversationCubit,
+              ),
+            ],
+            child: _RecordingInterceptor(
+              child: UnconstrainedBox(
+                child: CompositedTransformFollower(
+                  link: link,
+                  showWhenUnlinked: false,
+                  targetAnchor: Alignment.center,
+                  followerAnchor: Alignment.center,
+                  child: SizedBox(
+                    width: layoutWidth,
+                    child: const Material(child: VoiceRecorderBottomBar()),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        recorderBottomBarEntry.value = entry;
+        WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+          overlay!.insert(entry);
+        });
+      },
+      [isRecorderMode, layoutWidth],
+    );
+
+    return CompositedTransformTarget(link: link, child: child);
+  }
+}
+
+class _RecordingInterceptor extends HookWidget {
+  const _RecordingInterceptor({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final isRecording = useBlocStateConverter<VoiceRecorderCubit,
+        VoiceRecorderCubitState, bool>(
+      converter: (state) => state.state == RecorderState.recording,
+    );
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        if (isRecording)
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            child: const SizedBox.expand(),
+            onTap: () async {
+              _showDiscardRecordingWarningAlertOverlay(context, onDiscard: () {
+                context.read<VoiceRecorderCubit>().cancelAndExitRecordeMode();
+              });
+            },
+          ),
+        child,
+      ],
+    );
+  }
+}
+
+void _showDiscardRecordingWarningAlertOverlay(
+  BuildContext context, {
+  required VoidCallback onDiscard,
+}) {
+  final overlay = Overlay.of(context, rootOverlay: true);
+  if (overlay == null) {
+    e('_showDiscardRecordingWarningAlertOverlay: overlay is null');
+    return;
+  }
+  OverlayEntry? entry;
+
+  void dimiss() {
+    entry?.remove();
+    entry = null;
+  }
+
+  entry = OverlayEntry(
+    builder: (context) => Stack(
+      children: [
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: dimiss,
+          child: const SizedBox.expand(
+            child: ColoredBox(color: Color(0x80000000)),
+          ),
+        ),
+        Center(
+          child: SizedBox(
+            width: 400,
+            child: Material(
+              borderRadius: const BorderRadius.all(Radius.circular(11)),
+              color: context.theme.popUp,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 40),
+                    Text(
+                      context.l10n.discardRecordingWarning,
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 2,
+                        color: context.theme.text,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 36),
+                    Row(
+                      children: [
+                        const Spacer(),
+                        MixinButton(
+                          backgroundTransparent: true,
+                          onTap: dimiss,
+                          child: Text(context.l10n.cancel),
+                        ),
+                        MixinButton(
+                          onTap: () {
+                            dimiss();
+                            onDiscard();
+                          },
+                          child: Text(context.l10n.discard),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+  overlay.insert(entry!);
 }
 
 class VoiceRecorderBottomBar extends HookWidget {

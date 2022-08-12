@@ -69,12 +69,6 @@ class InputContainer extends HookWidget {
       keys: [conversationId],
     );
 
-    final isRecorderMode = useBlocStateConverter<VoiceRecorderCubit,
-        VoiceRecorderCubitState, bool>(
-      bloc: voiceRecorderCubit,
-      converter: (state) => state.state != RecorderState.idle,
-    );
-
     if (!hasParticipant) {
       return Container(
         decoration: BoxDecoration(
@@ -93,9 +87,12 @@ class InputContainer extends HookWidget {
 
     return BlocProvider<VoiceRecorderCubit>.value(
       value: voiceRecorderCubit,
-      child: isRecorderMode
-          ? const VoiceRecorderBottomBar()
-          : const _InputContainer(),
+      child: LayoutBuilder(
+        builder: (context, constraints) => VoiceRecorderBarOverlayComposition(
+          layoutWidth: constraints.maxWidth,
+          child: const _InputContainer(),
+        ),
+      ),
     );
   }
 }

@@ -3861,6 +3861,26 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Are you sure you want to stop recording and discard your voice message?`
+  String get discardRecordingWarning {
+    return Intl.message(
+      'Are you sure you want to stop recording and discard your voice message?',
+      name: 'discardRecordingWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discard`
+  String get discard {
+    return Intl.message(
+      'Discard',
+      name: 'discard',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

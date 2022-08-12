@@ -261,6 +261,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "disappearingMessages": MessageLookupByLibrary.simpleMessage("限时消息"),
         "disappearingMessagesDescription": MessageLookupByLibrary.simpleMessage(
             "启用后，在此聊天中发送和接收的新消息将在看到消失，请阅读文档以了解更多。"),
+        "discard": MessageLookupByLibrary.simpleMessage("废弃"),
+        "discardRecordingWarning":
+            MessageLookupByLibrary.simpleMessage("是否要停止并废弃已录制的语音消息？"),
         "done": MessageLookupByLibrary.simpleMessage("完成"),
         "download": MessageLookupByLibrary.simpleMessage("下载"),
         "downloadLink": MessageLookupByLibrary.simpleMessage("下载链接："),
