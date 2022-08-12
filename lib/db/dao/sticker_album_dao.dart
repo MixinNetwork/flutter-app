@@ -34,7 +34,8 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
 
   SimpleSelectStatement<StickerAlbums, StickerAlbum> systemAlbums() =>
       select(db.stickerAlbums)
-        ..where((tbl) => tbl.category.equals('SYSTEM'))
+        ..where((tbl) =>
+            tbl.category.equals('SYSTEM') & tbl.isVerified.equals(true))
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
   SimpleSelectStatement<StickerAlbums, StickerAlbum> personalAlbum() =>
