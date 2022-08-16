@@ -530,7 +530,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
-            "Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login."),
+            "1. Open Mixin Messenger on your phone \n2. Scan the QR Code on the screen \n3. Confirm your login."),
         "pageLandingLoginTitle": MessageLookupByLibrary.simpleMessage(
             "Login to Mixin Messenger by QR Code"),
         "pageRightEmptyMessage": MessageLookupByLibrary.simpleMessage(

@@ -4,7 +4,7 @@
   "provisioning": "Provisioning",
   "pleaseWait": "Please wait a moment",
   "pageLandingLoginTitle": "Login to Mixin Messenger by QR Code",
-  "pageLandingLoginMessage": "Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login.",
+  "pageLandingLoginMessage": "1. Open Mixin Messenger on your phone \n2. Scan the QR Code on the screen \n3. Confirm your login.",
   "pageLandingClickToReload": "CLICK TO RELOAD QR CODE",
   "contacts": "Contacts",
   "groups": "Groups",

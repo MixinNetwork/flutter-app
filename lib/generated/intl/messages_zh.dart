@@ -452,7 +452,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("点击重新加载二维码"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
-            "打开手机上的 Mixin Messenger，扫描屏幕上的二维码，确认登录。"),
+            "1. 打开手机上的 Mixin Messenger \n2.扫描屏幕上的二维码\n3.确认登录。"),
         "pageLandingLoginTitle":
             MessageLookupByLibrary.simpleMessage("通过二维码登录 Mixin Messenger"),
         "pageRightEmptyMessage":
