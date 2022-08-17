@@ -18,6 +18,7 @@ import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
 import '../../../image.dart';
 import '../../../interactive_decorated_box.dart';
+import '../../../menu.dart';
 import '../../../toast.dart';
 import '../../../user_selector/conversation_selector.dart';
 import '../../message.dart';
@@ -356,81 +357,158 @@ class _Bar extends StatelessWidget {
               ),
             ],
           ),
-          const Spacer(),
-          ActionButton(
-            name: Resources.assetsImagesZoomInSvg,
-            color: context.theme.icon,
-            size: 20,
-            onTap: controller.zoomIn,
-          ),
           const SizedBox(width: 14),
-          ActionButton(
-            name: Resources.assetsImagesZoomOutSvg,
-            size: 20,
-            color: context.theme.icon,
-            onTap: controller.zoomOut,
-          ),
-          const SizedBox(width: 14),
-          ActionButton(
-            name: Resources.assetsImagesRotatoSvg,
-            color: context.theme.icon,
-            size: 20,
-            onTap: controller.rotate,
-          ),
-          const SizedBox(width: 14),
-          if (!isTranscriptPage)
-            ActionButton(
-              name: Resources.assetsImagesShareSvg,
-              size: 20,
-              color: context.theme.icon,
-              onTap: () async {
-                final accountServer = context.accountServer;
-                final result = await showConversationSelector(
-                  context: context,
-                  singleSelect: true,
-                  title: context.l10n.forward,
-                  onlyContact: false,
-                );
-                if (result == null || result.isEmpty) return;
-                await accountServer.forwardMessage(
-                  message.messageId,
-                  result.first.encryptCategory!,
-                  conversationId: result.first.conversationId,
-                  recipientId: result.first.userId,
-                );
-              },
-            ),
-          if (!isTranscriptPage) const SizedBox(width: 14),
-          ActionButton(
-            name: Resources.assetsImagesCopySvg,
-            color: context.theme.icon,
-            size: 20,
-            onTap: () => _copyUrl(
-                context,
-                context.accountServer
-                    .convertMessageAbsolutePath(message, isTranscriptPage)),
-          ),
-          const SizedBox(width: 14),
-          ActionButton(
-            name: Resources.assetsImagesAttachmentDownloadSvg,
-            color: context.theme.icon,
-            size: 20,
-            onTap: () async {
-              if (message.mediaUrl?.isEmpty ?? true) return;
-              await saveAs(
-                  context, context.accountServer, message, isTranscriptPage);
-            },
-          ),
-          const SizedBox(width: 14),
-          ActionButton(
-            name: Resources.assetsImagesIcCloseBigSvg,
-            color: context.theme.icon,
-            size: 20,
-            onTap: () => Navigator.pop(context),
+          _Action(
+            controller: controller,
+            isTranscriptPage: isTranscriptPage,
+            message: message,
           ),
           const SizedBox(width: 24),
         ],
       );
+}
+
+class _Action extends StatelessWidget {
+  const _Action({
+    required this.controller,
+    required this.isTranscriptPage,
+    required this.message,
+  });
+
+  final TransformImageController controller;
+  final bool isTranscriptPage;
+  final MessageItem message;
+
+  static const _dividerWidth = 14.0;
+  static const _divider = SizedBox(width: _dividerWidth);
+  static const _width = 36;
+
+  @override
+  Widget build(BuildContext context) {
+    Future<void> share() async {
+      final accountServer = context.accountServer;
+      final result = await showConversationSelector(
+        context: context,
+        singleSelect: true,
+        title: context.l10n.forward,
+        onlyContact: false,
+      );
+      if (result == null || result.isEmpty) return;
+      await accountServer.forwardMessage(
+        message.messageId,
+        result.first.encryptCategory!,
+        conversationId: result.first.conversationId,
+        recipientId: result.first.userId,
+      );
+    }
+
+    Future<void> copy() => _copyUrl(
+        context,
+        context.accountServer
+            .convertMessageAbsolutePath(message, isTranscriptPage));
+
+    Future<void> download() async {
+      if (message.mediaUrl?.isEmpty ?? true) return;
+      await saveAs(context, context.accountServer, message, isTranscriptPage);
+    }
+
+    final collapsible = [
+      if (!isTranscriptPage)
+        ActionButton(
+          name: Resources.assetsImagesShareSvg,
+          size: 20,
+          color: context.theme.icon,
+          onTap: share,
+        ),
+      ActionButton(
+        name: Resources.assetsImagesCopySvg,
+        color: context.theme.icon,
+        size: 20,
+        onTap: copy,
+      ),
+      ActionButton(
+        name: Resources.assetsImagesAttachmentDownloadSvg,
+        color: context.theme.icon,
+        size: 20,
+        onTap: download,
+      )
+    ];
+
+    final close = ActionButton(
+      name: Resources.assetsImagesIcCloseBigSvg,
+      color: context.theme.icon,
+      size: 20,
+      onTap: () => Navigator.pop(context),
+    );
+
+    final common = [
+      ActionButton(
+        name: Resources.assetsImagesZoomInSvg,
+        color: context.theme.icon,
+        size: 20,
+        onTap: controller.zoomIn,
+      ),
+      ActionButton(
+        name: Resources.assetsImagesZoomOutSvg,
+        size: 20,
+        color: context.theme.icon,
+        onTap: controller.zoomOut,
+      ),
+      ActionButton(
+        name: Resources.assetsImagesRotatoSvg,
+        color: context.theme.icon,
+        size: 20,
+        onTap: controller.rotate,
+      ),
+    ];
+
+    final menu = ContextMenuPortalEntry(
+      buildMenus: () => [
+        ContextMenu(
+          icon: Resources.assetsImagesShareSvg,
+          title: context.l10n.forward,
+          onTap: share,
+        ),
+        ContextMenu(
+          icon: Resources.assetsImagesCopySvg,
+          title: context.l10n.copy,
+          onTap: copy,
+        ),
+        ContextMenu(
+          icon: Resources.assetsImagesAttachmentDownloadSvg,
+          title: context.l10n.download,
+          onTap: download,
+        ),
+      ],
+      child: Builder(
+        builder: (context) => ActionButton(
+          name: Resources.assetsImagesEllipsisSvg,
+          color: context.theme.icon,
+          size: 20,
+          onTapUp: (event) => context.sendMenuPosition(event.globalPosition),
+        ),
+      ),
+    );
+
+    return Expanded(
+      child: LayoutBuilder(builder: (context, constraints) {
+        final count = common.length + collapsible.length + 1;
+        final collapsed = (count * _width + (count - 1) * _dividerWidth) >=
+            constraints.maxWidth;
+
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            ...common,
+            if (collapsed) menu,
+            close,
+            if (!collapsed) ...collapsible,
+          ].joinList(_divider),
+        );
+      }),
+    );
+  }
 }
 
 class _Item extends HookWidget {
