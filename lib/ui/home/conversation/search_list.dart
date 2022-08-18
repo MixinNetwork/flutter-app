@@ -127,6 +127,7 @@ class SearchList extends HookWidget {
             child: SearchItem(
               name: context.l10n.searchPlaceholderNumber + keyword,
               keyword: keyword,
+              maxLines: true,
               onTap: () async {
                 showToastLoading(context);
 
@@ -289,19 +290,19 @@ class SearchList extends HookWidget {
 }
 
 class SearchItem extends StatelessWidget {
-  const SearchItem({
-    super.key,
-    this.avatar,
-    required this.name,
-    required this.keyword,
-    this.nameHighlight = true,
-    required this.onTap,
-    this.description,
-    this.descriptionIcon,
-    this.date,
-    this.trailing,
-    this.selected,
-  });
+  const SearchItem(
+      {super.key,
+      this.avatar,
+      required this.name,
+      required this.keyword,
+      this.nameHighlight = true,
+      required this.onTap,
+      this.description,
+      this.descriptionIcon,
+      this.date,
+      this.trailing,
+      this.selected,
+      this.maxLines = false});
 
   final Widget? avatar;
   final Widget? trailing;
@@ -313,6 +314,7 @@ class SearchItem extends StatelessWidget {
   final String? descriptionIcon;
   final DateTime? date;
   final bool? selected;
+  final bool maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -328,8 +330,7 @@ class SearchItem extends StatelessWidget {
         hoveringDecoration: selectedDecoration,
         onTap: onTap,
         child: Container(
-          height: 72,
-          width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 72),
           padding: const EdgeInsets.symmetric(
             horizontal: 6,
             vertical: 12,
@@ -356,8 +357,9 @@ class SearchItem extends StatelessWidget {
                               Flexible(
                                 child: HighlightText(
                                   name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: maxLines ? null : 1,
+                                  overflow:
+                                      maxLines ? null : TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: context.theme.text,
                                     fontSize: 16,
