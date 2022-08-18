@@ -42,5 +42,6 @@ void main() {
   test('tst escape fts5', () {
     expect('github'.escapeFts5(), '"github"*');
     expect('github中文'.escapeFts5(), '"github"*"中"*"文"*');
+    expect('hello520你好'.escapeFts5(), '"hello"*"520"*"你"*"好"*');
   });
 }
