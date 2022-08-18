@@ -3881,6 +3881,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Search Mixin ID or phone number: `
+  String get searchPlaceholderNumber {
+    return Intl.message(
+      'Search Mixin ID or phone number: ',
+      name: 'searchPlaceholderNumber',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

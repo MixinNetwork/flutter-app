@@ -497,6 +497,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "search": MessageLookupByLibrary.simpleMessage("搜索"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
+        "searchPlaceholderNumber":
+            MessageLookupByLibrary.simpleMessage("搜索 Mixin ID 或手机号码："),
         "searchRelatedMessage": m60,
         "searchUser": MessageLookupByLibrary.simpleMessage("搜索用户"),
         "searchUserHint": MessageLookupByLibrary.simpleMessage("Mixin ID 或手机号"),
