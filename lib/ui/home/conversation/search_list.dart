@@ -290,20 +290,19 @@ class SearchList extends HookWidget {
 }
 
 class SearchItem extends StatelessWidget {
-  const SearchItem({
-    super.key,
-    this.avatar,
-    required this.name,
-    required this.keyword,
-    this.nameHighlight = true,
-    required this.onTap,
-    this.description,
-    this.descriptionIcon,
-    this.date,
-    this.trailing,
-    this.selected,
-    this.maxLines = false
-  });
+  const SearchItem(
+      {super.key,
+      this.avatar,
+      required this.name,
+      required this.keyword,
+      this.nameHighlight = true,
+      required this.onTap,
+      this.description,
+      this.descriptionIcon,
+      this.date,
+      this.trailing,
+      this.selected,
+      this.maxLines = false});
 
   final Widget? avatar;
   final Widget? trailing;
@@ -331,9 +330,7 @@ class SearchItem extends StatelessWidget {
         hoveringDecoration: selectedDecoration,
         onTap: onTap,
         child: Container(
-          constraints: const BoxConstraints(
-            minHeight: 72
-          ),
+          constraints: const BoxConstraints(minHeight: 72),
           padding: const EdgeInsets.symmetric(
             horizontal: 6,
             vertical: 12,
@@ -361,7 +358,8 @@ class SearchItem extends StatelessWidget {
                                 child: HighlightText(
                                   name,
                                   maxLines: maxLines ? null : 1,
-                                  overflow: maxLines ? null :TextOverflow.ellipsis,
+                                  overflow:
+                                      maxLines ? null : TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: context.theme.text,
                                     fontSize: 16,
