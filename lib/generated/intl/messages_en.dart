@@ -582,6 +582,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
             "No chats, \ncontacts or messages found."),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
+        "searchPlaceholderNumber": MessageLookupByLibrary.simpleMessage(
+            "Search Mixin ID or phone number: "),
         "searchRelatedMessage": m60,
         "searchUser": MessageLookupByLibrary.simpleMessage("Search contact"),
         "searchUserHint":

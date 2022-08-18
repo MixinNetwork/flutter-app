@@ -381,5 +381,6 @@
   "symbols": "Symbols",
   "flags": "Flags",
   "discardRecordingWarning": "Are you sure you want to stop recording and discard your voice message?",
-  "discard": "Discard"
+  "discard": "Discard",
+  "searchPlaceholderNumber": "Search Mixin ID or phone number: "
 }

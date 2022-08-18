@@ -373,5 +373,6 @@
   "symbols": "符号",
   "flags": "旗帜",
   "discardRecordingWarning": "是否要停止并废弃已录制的语音消息？",
-  "discard": "废弃"
+  "discard": "废弃",
+  "searchPlaceholderNumber": "搜索 Mixin ID 或手机号码："
 }
