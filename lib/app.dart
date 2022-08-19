@@ -257,7 +257,7 @@ class _Home extends HookWidget {
     if (signed) {
       BlocProvider.of<ConversationListBloc>(context)
         ..limit = MediaQuery.of(context).size.height ~/
-            (ConversationPage.conversationItemHeight / 2)
+            (ConversationPage.conversationItemHeight / 1.5)
         ..init();
       return const HomePage();
     }
