@@ -129,7 +129,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m44(arg0) => "значение сейчас ${arg0}";
 
-  static String m45(arg0) => "значение, затем ${arg0}";
+  static String m45(arg0) => "значение затем ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -238,7 +238,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "createdThisGroup": m12,
         "customTime":
             MessageLookupByLibrary.simpleMessage("Пользовательское время"),
-        "dark": MessageLookupByLibrary.simpleMessage("Темный"),
+        "dark": MessageLookupByLibrary.simpleMessage("Темное"),
         "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage(
             "Использование данных и хранилища"),
         "dataError": MessageLookupByLibrary.simpleMessage("Ошибка данных"),
@@ -415,7 +415,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "landingValidationTitle": m29,
         "learnMore": MessageLookupByLibrary.simpleMessage("Узнать больше"),
         "less": MessageLookupByLibrary.simpleMessage("меньше"),
-        "light": MessageLookupByLibrary.simpleMessage("Свет"),
+        "light": MessageLookupByLibrary.simpleMessage("Светлое"),
         "live": MessageLookupByLibrary.simpleMessage("Вживую"),
         "loading": MessageLookupByLibrary.simpleMessage("Загрузка..."),
         "loadingTime": MessageLookupByLibrary.simpleMessage(
@@ -495,7 +495,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "photos": MessageLookupByLibrary.simpleMessage("Фото"),
         "pickAConversation": MessageLookupByLibrary.simpleMessage(
             "Выберите беседу и начните отправлять сообщение"),
-        "pinTitle": MessageLookupByLibrary.simpleMessage("Pin"),
+        "pinTitle": MessageLookupByLibrary.simpleMessage("Закрепить"),
         "pinnedMessageTitle": m34,
         "post": MessageLookupByLibrary.simpleMessage("Публикация"),
         "preferences": MessageLookupByLibrary.simpleMessage("Настройки"),
@@ -543,6 +543,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Поиск беседы"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
             "Чаты, контакты или сообщения не найдены."),
+        "searchPlaceholderNumber": MessageLookupByLibrary.simpleMessage(
+            "Найдите Mixin ID или номер телефона:"),
         "searchRelatedMessage": m36,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),

@@ -136,6 +136,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "aMessage": MessageLookupByLibrary.simpleMessage("a message"),
         "about": MessageLookupByLibrary.simpleMessage("About"),
         "accessDenied": MessageLookupByLibrary.simpleMessage("Access denied"),
+        "activity": MessageLookupByLibrary.simpleMessage("Activity"),
         "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addBotWithPlus": MessageLookupByLibrary.simpleMessage("+ Add Bot"),
         "addContact": MessageLookupByLibrary.simpleMessage("Add Contact"),
@@ -158,6 +159,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "alertKeyContactContactMessage":
             MessageLookupByLibrary.simpleMessage("sent you a contact"),
         "allChats": MessageLookupByLibrary.simpleMessage("Chats"),
+        "animalsAndNature":
+            MessageLookupByLibrary.simpleMessage("Animals & Nature"),
         "appCardShareDisallow": MessageLookupByLibrary.simpleMessage(
             "Disallow sharing of this URL"),
         "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
@@ -257,6 +260,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Disappearing Messages"),
         "disappearingMessageHint": MessageLookupByLibrary.simpleMessage(
             "When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to **learn more**."),
+        "discard": MessageLookupByLibrary.simpleMessage("Discard"),
+        "discardRecordingWarning": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to stop recording and discard your voice message?"),
         "dismissAsAdmin":
             MessageLookupByLibrary.simpleMessage("Dismiss as Admin"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
@@ -368,11 +374,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("File does not exist"),
         "fileError": MessageLookupByLibrary.simpleMessage("File error"),
         "files": MessageLookupByLibrary.simpleMessage("Files"),
+        "flags": MessageLookupByLibrary.simpleMessage("Flags"),
         "followSystem": MessageLookupByLibrary.simpleMessage("Follow System"),
         "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("Follow us on Facebook"),
         "followUsOnTwitter":
             MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
+        "foodAndDrink": MessageLookupByLibrary.simpleMessage("Food & Drink"),
         "formatNotSupported":
             MessageLookupByLibrary.simpleMessage("Format not supported"),
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
@@ -473,6 +481,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Notifications are not allowed, please go to Notification Settings to turn on."),
         "notifications": MessageLookupByLibrary.simpleMessage("Notifications"),
         "nowAnAddmin": m32,
+        "objects": MessageLookupByLibrary.simpleMessage("Objects"),
         "oneByOneForward":
             MessageLookupByLibrary.simpleMessage("One-by-One Forward"),
         "oneHour": MessageLookupByLibrary.simpleMessage("1 Hour"),
@@ -532,6 +541,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Search Conversation"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
             "No chats, contacts or messages found."),
+        "searchPlaceholderNumber": MessageLookupByLibrary.simpleMessage(
+            "Search Mixin ID or phone number:"),
         "searchRelatedMessage": m36,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
@@ -564,6 +575,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sign in with phone number"),
         "signWithQrcode":
             MessageLookupByLibrary.simpleMessage("Sign in with QrCode"),
+        "smileysAndPeople":
+            MessageLookupByLibrary.simpleMessage("Smileys & People"),
         "sticker": MessageLookupByLibrary.simpleMessage("Sticker"),
         "stickerAlbumDetail":
             MessageLookupByLibrary.simpleMessage("Sticker album detail"),
@@ -575,6 +588,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "This sender is not in your contacts"),
         "strangers": MessageLookupByLibrary.simpleMessage("Strangers"),
         "successful": MessageLookupByLibrary.simpleMessage("Successful"),
+        "symbols": MessageLookupByLibrary.simpleMessage("Symbols"),
         "termsOfService":
             MessageLookupByLibrary.simpleMessage("Terms of Service"),
         "text": MessageLookupByLibrary.simpleMessage("Text"),
@@ -589,6 +603,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "transactions": MessageLookupByLibrary.simpleMessage("Transactions"),
         "transcript": MessageLookupByLibrary.simpleMessage("Transcript"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
+        "travelAndPlaces":
+            MessageLookupByLibrary.simpleMessage("Travel & Places"),
         "turnOnNotifications":
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("Type message"),

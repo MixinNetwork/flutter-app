@@ -479,6 +479,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("チャットルームを検索"),
         "searchEmpty":
             MessageLookupByLibrary.simpleMessage("一致する情報は見つかりませんでした"),
+        "searchPlaceholderNumber":
+            MessageLookupByLibrary.simpleMessage("Mixin ID または電話番号を検索"),
         "searchRelatedMessage": m36,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),

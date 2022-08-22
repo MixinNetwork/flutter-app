@@ -80,6 +80,16 @@ class Localization {
     );
   }
 
+  /// `Activity`
+  String get activity {
+    return Intl.message(
+      'Activity',
+      name: 'activity',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add`
   String get add {
     return Intl.message(
@@ -235,6 +245,16 @@ class Localization {
     return Intl.message(
       'Chats',
       name: 'allChats',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Animals & Nature`
+  String get animalsAndNature {
+    return Intl.message(
+      'Animals & Nature',
+      name: 'animalsAndNature',
       desc: '',
       args: [],
     );
@@ -1024,6 +1044,26 @@ class Localization {
     );
   }
 
+  /// `Discard`
+  String get discard {
+    return Intl.message(
+      'Discard',
+      name: 'discard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to stop recording and discard your voice message?`
+  String get discardRecordingWarning {
+    return Intl.message(
+      'Are you sure you want to stop recording and discard your voice message?',
+      name: 'discardRecordingWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Dismiss as Admin`
   String get dismissAsAdmin {
     return Intl.message(
@@ -1658,6 +1698,16 @@ class Localization {
     );
   }
 
+  /// `Flags`
+  String get flags {
+    return Intl.message(
+      'Flags',
+      name: 'flags',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Follow System`
   String get followSystem {
     return Intl.message(
@@ -1683,6 +1733,16 @@ class Localization {
     return Intl.message(
       'Follow us on Twitter',
       name: 'followUsOnTwitter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Food & Drink`
+  String get foodAndDrink {
+    return Intl.message(
+      'Food & Drink',
+      name: 'foodAndDrink',
       desc: '',
       args: [],
     );
@@ -2450,6 +2510,16 @@ class Localization {
     );
   }
 
+  /// `Objects`
+  String get objects {
+    return Intl.message(
+      'Objects',
+      name: 'objects',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `One-by-One Forward`
   String get oneByOneForward {
     return Intl.message(
@@ -2912,6 +2982,16 @@ class Localization {
     );
   }
 
+  /// `Search Mixin ID or phone number:`
+  String get searchPlaceholderNumber {
+    return Intl.message(
+      'Search Mixin ID or phone number:',
+      name: 'searchPlaceholderNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{count, plural, one{{arg0} related message} other{{arg0} related messages}}`
   String searchRelatedMessage(num count, Object arg0) {
     return Intl.plural(
@@ -3154,6 +3234,16 @@ class Localization {
     );
   }
 
+  /// `Smileys & People`
+  String get smileysAndPeople {
+    return Intl.message(
+      'Smileys & People',
+      name: 'smileysAndPeople',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Sticker`
   String get sticker {
     return Intl.message(
@@ -3229,6 +3319,16 @@ class Localization {
     return Intl.message(
       'Successful',
       name: 'successful',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Symbols`
+  String get symbols {
+    return Intl.message(
+      'Symbols',
+      name: 'symbols',
       desc: '',
       args: [],
     );
@@ -3339,6 +3439,16 @@ class Localization {
     return Intl.message(
       'Transfer',
       name: 'transfer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Travel & Places`
+  String get travelAndPlaces {
+    return Intl.message(
+      'Travel & Places',
+      name: 'travelAndPlaces',
       desc: '',
       args: [],
     );
@@ -3645,6 +3755,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
       Locale.fromSubtags(languageCode: 'ja'),
       Locale.fromSubtags(languageCode: 'ms'),
       Locale.fromSubtags(languageCode: 'ru'),
+      Locale.fromSubtags(languageCode: 'zh-HK'),
       Locale.fromSubtags(languageCode: 'zh-TW'),
       Locale.fromSubtags(languageCode: 'zh'),
     ];

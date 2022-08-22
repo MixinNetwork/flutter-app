@@ -125,6 +125,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "aMessage": MessageLookupByLibrary.simpleMessage("一条消息"),
         "about": MessageLookupByLibrary.simpleMessage("关于"),
         "accessDenied": MessageLookupByLibrary.simpleMessage("禁止访问"),
+        "activity": MessageLookupByLibrary.simpleMessage("活动"),
         "add": MessageLookupByLibrary.simpleMessage("添加"),
         "addBotWithPlus": MessageLookupByLibrary.simpleMessage("+ 添加机器人"),
         "addContact": MessageLookupByLibrary.simpleMessage("添加联系人"),
@@ -143,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "alertKeyContactContactMessage":
             MessageLookupByLibrary.simpleMessage("分享了一个联系人"),
         "allChats": MessageLookupByLibrary.simpleMessage("全部聊天"),
+        "animalsAndNature": MessageLookupByLibrary.simpleMessage("动物与自然"),
         "appCardShareDisallow":
             MessageLookupByLibrary.simpleMessage("该链接已被设置为不允许分享"),
         "appearance": MessageLookupByLibrary.simpleMessage("外观"),
@@ -228,6 +230,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "disappearingMessage": MessageLookupByLibrary.simpleMessage("限时消息"),
         "disappearingMessageHint": MessageLookupByLibrary.simpleMessage(
             "启用后，在此聊天中发送和接收的新信息在被看到后会消失，阅读文档以**了解更多**。"),
+        "discard": MessageLookupByLibrary.simpleMessage("废弃"),
+        "discardRecordingWarning":
+            MessageLookupByLibrary.simpleMessage("是否要停止并废弃已录制的语音消息？"),
         "dismissAsAdmin": MessageLookupByLibrary.simpleMessage("撤销管理员身份"),
         "done": MessageLookupByLibrary.simpleMessage("完成"),
         "download": MessageLookupByLibrary.simpleMessage("下载"),
@@ -324,11 +329,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "fileDoesNotExist": MessageLookupByLibrary.simpleMessage("文件不存在"),
         "fileError": MessageLookupByLibrary.simpleMessage("文件错误"),
         "files": MessageLookupByLibrary.simpleMessage("文档"),
+        "flags": MessageLookupByLibrary.simpleMessage("旗帜"),
         "followSystem": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("关注我们的 Facebook"),
         "followUsOnTwitter":
             MessageLookupByLibrary.simpleMessage("关注我们的 Twitter"),
+        "foodAndDrink": MessageLookupByLibrary.simpleMessage("食物与饮料"),
         "formatNotSupported": MessageLookupByLibrary.simpleMessage("不支持该格式"),
         "forward": MessageLookupByLibrary.simpleMessage("转发"),
         "from": MessageLookupByLibrary.simpleMessage("来自"),
@@ -417,6 +424,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("未允许通知，请到通知设置开启。"),
         "notifications": MessageLookupByLibrary.simpleMessage("通知"),
         "nowAnAddmin": m32,
+        "objects": MessageLookupByLibrary.simpleMessage("物件"),
         "oneByOneForward": MessageLookupByLibrary.simpleMessage("逐条转发"),
         "oneHour": MessageLookupByLibrary.simpleMessage("1 小时"),
         "oneWeek": MessageLookupByLibrary.simpleMessage("1 星期"),
@@ -466,6 +474,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchContact": MessageLookupByLibrary.simpleMessage("搜索用户"),
         "searchConversation": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
+        "searchPlaceholderNumber":
+            MessageLookupByLibrary.simpleMessage("搜索 Mixin ID 或手机号码："),
         "searchRelatedMessage": m36,
         "send": MessageLookupByLibrary.simpleMessage("发送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),
@@ -492,6 +502,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "signOut": MessageLookupByLibrary.simpleMessage("登出"),
         "signWithPhoneNumber": MessageLookupByLibrary.simpleMessage("通过手机号登录"),
         "signWithQrcode": MessageLookupByLibrary.simpleMessage("通过二维码登录"),
+        "smileysAndPeople": MessageLookupByLibrary.simpleMessage("表情符号与人物"),
         "sticker": MessageLookupByLibrary.simpleMessage("贴纸"),
         "stickerAlbumDetail": MessageLookupByLibrary.simpleMessage("表情详情"),
         "stickerStore": MessageLookupByLibrary.simpleMessage("表情商店"),
@@ -501,6 +512,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "strangerHint": MessageLookupByLibrary.simpleMessage("对方不是你的联系人"),
         "strangers": MessageLookupByLibrary.simpleMessage("陌生人"),
         "successful": MessageLookupByLibrary.simpleMessage("成功"),
+        "symbols": MessageLookupByLibrary.simpleMessage("符号"),
         "termsOfService": MessageLookupByLibrary.simpleMessage("服务条款"),
         "text": MessageLookupByLibrary.simpleMessage("文字"),
         "theme": MessageLookupByLibrary.simpleMessage("主题"),
@@ -512,6 +524,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "transactions": MessageLookupByLibrary.simpleMessage("转账记录"),
         "transcript": MessageLookupByLibrary.simpleMessage("聊天记录"),
         "transfer": MessageLookupByLibrary.simpleMessage("转账"),
+        "travelAndPlaces": MessageLookupByLibrary.simpleMessage("旅行与地点"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("打开通知"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("输入消息"),
         "unableToOpenFile": m38,

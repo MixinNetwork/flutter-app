@@ -487,7 +487,7 @@ packages:
       name: file_selector_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.4"
+    version: "2.1.0"
   file_selector_web:
     dependency: transitive
     description:
@@ -1141,7 +1141,7 @@ packages:
       name: pointycastle
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.5.1"
+    version: "3.6.1"
   pool:
     dependency: transitive
     description:
