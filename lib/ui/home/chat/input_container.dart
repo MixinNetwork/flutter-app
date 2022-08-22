@@ -39,6 +39,7 @@ import '../bloc/recall_message_bloc.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'chat_page.dart';
 import 'files_preview.dart';
+import 'voice_recorder_bottom_bar.dart';
 
 class InputContainer extends HookWidget {
   const InputContainer({super.key});
@@ -63,21 +64,36 @@ class InputContainer extends HookWidget {
       context.read<QuoteMessageCubit>().emit(null);
     }, [conversationId]);
 
-    return hasParticipant
-        ? const _InputContainer()
-        : Container(
-            decoration: BoxDecoration(
-              color: context.theme.primary,
-            ),
-            height: 56,
-            alignment: Alignment.center,
-            child: Text(
-              context.l10n.groupCantSend,
-              style: TextStyle(
-                color: context.theme.secondaryText,
-              ),
-            ),
-          );
+    final voiceRecorderCubit = useBloc(
+      VoiceRecorderCubit.new,
+      keys: [conversationId],
+    );
+
+    if (!hasParticipant) {
+      return Container(
+        decoration: BoxDecoration(
+          color: context.theme.primary,
+        ),
+        height: 56,
+        alignment: Alignment.center,
+        child: Text(
+          context.l10n.groupCantSend,
+          style: TextStyle(
+            color: context.theme.secondaryText,
+          ),
+        ),
+      );
+    }
+
+    return BlocProvider<VoiceRecorderCubit>.value(
+      value: voiceRecorderCubit,
+      child: LayoutBuilder(
+        builder: (context, constraints) => VoiceRecorderBarOverlayComposition(
+          layoutWidth: constraints.maxWidth,
+          child: const _InputContainer(),
+        ),
+      ),
+    );
   }
 }
 
@@ -234,25 +250,10 @@ class _InputContainer extends HookWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      ContextMenuPortalEntry(
-                        buildMenus: () => [
-                          ContextMenu(
-                            icon: Resources.assetsImagesContextMenuMuteSvg,
-                            title: context.l10n.sendWithoutSound,
-                            onTap: () => _sendMessage(
-                              context,
-                              textEditingController,
-                              silent: true,
-                            ),
-                          ),
-                        ],
-                        child: ActionButton(
-                          name: Resources.assetsImagesIcSendSvg,
-                          color: context.theme.icon,
-                          onTap: () =>
-                              _sendMessage(context, textEditingController),
-                        ),
-                      ),
+                      _AnimatedSendOrVoiceButton(
+                        textEditingController: textEditingController,
+                        textEditingValueStream: textEditingValueStream,
+                      )
                     ],
                   ),
                 ),
@@ -261,6 +262,97 @@ class _InputContainer extends HookWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AnimatedSendOrVoiceButton extends HookWidget {
+  const _AnimatedSendOrVoiceButton({
+    required this.textEditingValueStream,
+    required this.textEditingController,
+  });
+
+  final Stream<TextEditingValue> textEditingValueStream;
+  final TextEditingController textEditingController;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasInputText = useMemoizedStream(
+          () => textEditingValueStream
+              .map((event) => event.text.isNotEmpty)
+              .distinct(),
+          keys: [textEditingValueStream],
+          initialData: textEditingController.text.isNotEmpty,
+        ).data ??
+        false;
+
+    // start -> show voice button
+    // end -> show send button
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 200),
+      initialValue: hasInputText ? 1.0 : 0.0,
+    );
+
+    useEffect(() {
+      if (hasInputText) {
+        animationController.forward();
+      } else {
+        animationController.reverse();
+      }
+    }, [hasInputText]);
+
+    // 0 -> 0.5: scale down voice button from 1 -> 0.6
+    // 0.5 -> 1: scale up voice button from 0.6 -> 1
+    final animatedValue = useAnimation(animationController);
+
+    final double sendScale;
+    final double voiceScale;
+
+    if (animatedValue < 0.5) {
+      sendScale = 0;
+      voiceScale =
+          Tween<double>(begin: 1, end: 0.6).transform(animatedValue * 2.0);
+    } else {
+      voiceScale = 0;
+      sendScale = Tween<double>(begin: 0.6, end: 1)
+          .transform((animatedValue - 0.5) * 2);
+    }
+
+    return Stack(
+      fit: StackFit.passthrough,
+      children: [
+        if (sendScale >= 0.6)
+          Transform.scale(
+            scale: sendScale,
+            child: ContextMenuPortalEntry(
+              buildMenus: () => [
+                ContextMenu(
+                  icon: Resources.assetsImagesContextMenuMuteSvg,
+                  title: context.l10n.sendWithoutSound,
+                  onTap: () => _sendMessage(
+                    context,
+                    textEditingController,
+                    silent: true,
+                  ),
+                ),
+              ],
+              child: ActionButton(
+                name: Resources.assetsImagesIcSendSvg,
+                color: context.theme.icon,
+                onTap: () => _sendMessage(context, textEditingController),
+              ),
+            ),
+          ),
+        if (voiceScale >= 0.6)
+          Transform.scale(
+            scale: voiceScale,
+            child: ActionButton(
+              name: Resources.assetsImagesMicrophoneSvg,
+              color: context.theme.icon,
+              onTap: () => context.read<VoiceRecorderCubit>().startRecording(),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -557,19 +649,27 @@ class _StickerButton extends HookWidget {
           .watchThrottle(kVerySlowThrottleDuration)),
     );
 
+    final presetStickerGroups = useMemoized(
+      () => [
+        PresetStickerGroup.store,
+        if (!Platform.isLinux) PresetStickerGroup.emoji,
+        PresetStickerGroup.recent,
+        PresetStickerGroup.favorite,
+        if (giphyApiKey.isNotEmpty) PresetStickerGroup.gif,
+      ],
+    );
+
     final tabLength =
         useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
       bloc: stickerAlbumsCubit,
-      converter: (state) =>
-          (state.length) +
-          // no emoji page on Linux.
-          (Platform.isLinux ? 3 : 4),
+      converter: (state) => state.length + presetStickerGroups.length,
+      keys: [presetStickerGroups],
     );
 
     return MultiProvider(
       providers: [
         BlocProvider.value(value: stickerAlbumsCubit),
-        BlocProvider(create: (context) => EmojiSelectedGroupIndexCubit()),
+        BlocProvider(create: (context) => EmojiScrollOffsetCubit()),
         ChangeNotifierProvider.value(value: textEditingController),
       ],
       child: DefaultTabController(
@@ -611,6 +711,7 @@ class _StickerButton extends HookWidget {
               builder: (context) => StickerPage(
                 tabController: DefaultTabController.of(context)!,
                 tabLength: tabLength,
+                presetStickerGroups: presetStickerGroups,
               ),
             ),
           ),

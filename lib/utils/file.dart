@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 import 'extension/extension.dart';
 import 'logger.dart';
@@ -109,16 +110,31 @@ Future<void> initMixinDocumentsDirectory() async {
   mixinDocumentsDirectory = await getApplicationDocumentsDirectory();
 }
 
+enum TempFileType {
+  pasteboardImage('mixin_paste_board_image', '.png'),
+  editImage('image_edit', '.png'),
+  voiceRecord('voice_record', '.ogg');
+
+  const TempFileType(this.prefix, this.suffix);
+
+  final String prefix;
+  final String suffix;
+}
+
+Future<String> generateTempFilePath(TempFileType type) async {
+  final tempDir = await getTemporaryDirectory();
+  return p.join(
+    tempDir.path,
+    '${type.prefix}_${const Uuid().v4()}${type.suffix}',
+  );
+}
+
 Future<File?> saveBytesToTempFile(
   Uint8List bytes,
-  String prefix, [
-  String? suffix,
-]) async {
-  final tempDir = await getTemporaryDirectory();
-
+  TempFileType type,
+) async {
   try {
-    final file = File(p.join(tempDir.path,
-        '${prefix}_${DateTime.now().millisecondsSinceEpoch}$suffix'));
+    final file = File(await generateTempFilePath(type));
     if (file.existsSync()) {
       await file.delete();
     }

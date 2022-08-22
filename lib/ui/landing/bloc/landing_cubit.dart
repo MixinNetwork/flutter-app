@@ -137,16 +137,10 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
         json.decode(String.fromCharCodes(result)) as Map<String, dynamic>;
 
     final edKeyPair = ed.generateKey();
-
-    await CryptoKeyValue.instance.init();
-    // ignore: avoid_dynamic_calls
     final private = base64.decode(msg['identity_key_private'] as String);
-    await SignalProtocol.initSignal(private);
-    final registrationId = CryptoKeyValue.instance.localRegistrationId;
+    final registrationId = await SignalProtocol.initSignal(private);
 
-    await AccountKeyValue.instance.init();
     final sessionId = msg['session_id'] as String;
-    AccountKeyValue.instance.primarySessionId = sessionId;
     final info = await getPackageInfo();
     final appVersion = '${info.version}(${info.buildNumber})';
     final platformVersion = await getPlatformVersion();
@@ -165,6 +159,11 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
     );
 
     final privateKey = base64Encode(edKeyPair.privateKey.bytes);
+
+    await AccountKeyValue.instance.init(rsp.data.identityNumber);
+    AccountKeyValue.instance.primarySessionId = sessionId;
+    await CryptoKeyValue.instance.init(rsp.data.identityNumber);
+    CryptoKeyValue.instance.localRegistrationId = registrationId;
 
     return Tuple2(
       rsp.data,

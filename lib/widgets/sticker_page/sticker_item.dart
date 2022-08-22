@@ -6,6 +6,7 @@ import '../../app.dart';
 import '../../utils/app_lifecycle.dart';
 import '../../utils/hook.dart';
 import '../cache_image.dart';
+import '../cache_lottie.dart';
 
 class StickerItem extends HookWidget {
   const StickerItem({
@@ -64,14 +65,17 @@ class StickerItem extends HookWidget {
     }, [controller, appActiveListener]);
 
     final child = isJson
-        ? Lottie.network(assetUrl,
+        ? LottieBuilder(
+            lottie: CachedNetworkLottie(assetUrl),
             controller: controller,
             height: height,
             width: width,
-            fit: BoxFit.contain, onLoaded: (composition) {
-            controller.duration = composition.duration;
-            listener();
-          })
+            fit: BoxFit.contain,
+            onLoaded: (composition) {
+              controller.duration = composition.duration;
+              listener();
+            },
+          )
         : CacheImage(assetUrl,
             height: height,
             width: width,
@@ -84,5 +88,27 @@ class StickerItem extends HookWidget {
     }
 
     return child;
+  }
+}
+
+class StickerGroupIcon extends StatelessWidget {
+  const StickerGroupIcon({
+    super.key,
+    required this.iconUrl,
+    required this.size,
+  });
+
+  final String iconUrl;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final isLottie = iconUrl.toLowerCase().endsWith('.json');
+    return StickerItem(
+      assetUrl: iconUrl,
+      assetType: isLottie ? 'json' : null,
+      width: size,
+      height: size,
+    );
   }
 }

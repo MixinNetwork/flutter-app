@@ -49,8 +49,8 @@ Future<List<File>> getClipboardFiles() async {
         e('re format image failed: $error $s');
       }
     }
-    final file = await saveBytesToTempFile(
-        imageBytes!, 'mixin_paste_board_image', '.png');
+    final file =
+        await saveBytesToTempFile(imageBytes!, TempFileType.pasteboardImage);
     if (file != null) {
       return [file];
     }

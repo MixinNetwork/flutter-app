@@ -62,7 +62,7 @@ class ChatInfoPage extends HookWidget {
     ).data;
     if (!conversation.isLoaded) return const SizedBox();
 
-    final isGroupConversation = conversation.isGroup!;
+    final isGroupConversation = conversation.isGroup ?? false;
     final muting = conversation.conversation?.isMute == true;
     final isOwnerOrAdmin = userParticipant?.role == ParticipantRole.owner ||
         userParticipant?.role == ParticipantRole.admin;
@@ -72,6 +72,7 @@ class ChatInfoPage extends HookWidget {
     final canModifyExpireIn =
         !isGroupConversation || (isGroupConversation && isOwnerOrAdmin);
 
+    final isExited = userParticipant == null;
     return Scaffold(
       appBar: MixinAppBar(
         actions: [
@@ -177,26 +178,27 @@ class ChatInfoPage extends HookWidget {
                 ],
               ),
             ),
-            CellGroup(
-              child: CellItem(
-                title: Text(context.l10n.disappearingMessage),
-                description: Text(
-                  expireIn.formatAsConversationExpireIn(
-                    localization: context.l10n,
+            if (!(isGroupConversation && isExited))
+              CellGroup(
+                child: CellItem(
+                  title: Text(context.l10n.disappearingMessage),
+                  description: Text(
+                    expireIn.formatAsConversationExpireIn(
+                      localization: context.l10n,
+                    ),
+                    style: TextStyle(
+                      color: context.theme.secondaryText,
+                      fontSize: 14,
+                    ),
                   ),
-                  style: TextStyle(
-                    color: context.theme.secondaryText,
-                    fontSize: 14,
-                  ),
+                  trailing: canModifyExpireIn ? const Arrow() : null,
+                  onTap: !canModifyExpireIn
+                      ? null
+                      : () => context
+                          .read<ChatSideCubit>()
+                          .pushPage(ChatSideCubit.disappearMessages),
                 ),
-                trailing: canModifyExpireIn ? const Arrow() : null,
-                onTap: !canModifyExpireIn
-                    ? null
-                    : () => context
-                        .read<ChatSideCubit>()
-                        .pushPage(ChatSideCubit.disappearMessages),
               ),
-            ),
             if (isGroupConversation && isOwnerOrAdmin)
               CellGroup(
                 child: Column(
@@ -235,47 +237,53 @@ class ChatInfoPage extends HookWidget {
             CellGroup(
               child: Column(
                 children: [
-                  CellItem(
-                    title:
-                        Text(muting ? context.l10n.unmute : context.l10n.muted),
-                    description: muting
-                        ? Text(
-                            DateFormat('yyyy/MM/dd, hh:mm a').format(
-                                conversation.conversation!.validMuteUntil!
-                                    .toLocal()),
-                            style: TextStyle(
-                              color: context.theme.secondaryText,
-                              fontSize: 14,
+                  if (!(isGroupConversation && isExited))
+                    CellItem(
+                      title: Text(
+                          muting ? context.l10n.unmute : context.l10n.muted),
+                      description: muting
+                          ? Text(
+                              DateFormat('yyyy/MM/dd, hh:mm a').format(
+                                  conversation.conversation!.validMuteUntil!
+                                      .toLocal()),
+                              style: TextStyle(
+                                color: context.theme.secondaryText,
+                                fontSize: 14,
+                              ),
+                            )
+                          : null,
+                      trailing: null,
+                      onTap: () async {
+                        if (muting) {
+                          await runFutureWithToast(
+                            context,
+                            context.accountServer.unMuteConversation(
+                              conversationId:
+                                  isGroupConversation ? conversationId : null,
+                              userId: isGroupConversation
+                                  ? null
+                                  : conversation.userId,
                             ),
-                          )
-                        : null,
-                    trailing: null,
-                    onTap: () async {
-                      final isGroup = conversation.isGroup ?? false;
-                      if (muting) {
+                          );
+                          return;
+                        }
+
+                        final result = await showMixinDialog<int?>(
+                            context: context, child: const MuteDialog());
+                        if (result == null) return;
+
                         await runFutureWithToast(
-                          context,
-                          context.accountServer.unMuteConversation(
-                            conversationId: isGroup ? conversationId : null,
-                            userId: isGroup ? null : conversation.userId,
-                          ),
-                        );
-                        return;
-                      }
-
-                      final result = await showMixinDialog<int?>(
-                          context: context, child: const MuteDialog());
-                      if (result == null) return;
-
-                      await runFutureWithToast(
-                          context,
-                          context.accountServer.muteConversation(
-                            result,
-                            conversationId: isGroup ? conversationId : null,
-                            userId: isGroup ? null : conversation.userId,
-                          ));
-                    },
-                  ),
+                            context,
+                            context.accountServer.muteConversation(
+                              result,
+                              conversationId:
+                                  isGroupConversation ? conversationId : null,
+                              userId: isGroupConversation
+                                  ? null
+                                  : conversation.userId,
+                            ));
+                      },
+                    ),
                   if (!isGroupConversation ||
                       (isGroupConversation && isOwnerOrAdmin))
                     CellItem(
@@ -405,8 +413,8 @@ class ChatInfoPage extends HookWidget {
                       context.read<MessageBloc>().reload();
                     },
                   ),
-                  if (conversation.isGroup!)
-                    if (userParticipant != null)
+                  if (isGroupConversation)
+                    if (!isExited)
                       CellItem(
                         title: Text(context.l10n.exitGroup),
                         color: context.theme.red,
@@ -421,6 +429,11 @@ class ChatInfoPage extends HookWidget {
                           await runFutureWithToast(
                             context,
                             accountServer.exitGroup(conversationId),
+                          );
+
+                          await ConversationCubit.selectConversation(
+                            context,
+                            conversationId,
                           );
                         },
                       )

@@ -39,6 +39,7 @@ enum MixinSchemeHost {
   withdrawal,
   apps,
   snapshots,
+  conversations,
 }
 
 const int hour1 = 1000 * 60 * 60;
@@ -52,3 +53,5 @@ const kMaxTextLength = 64 * 1024;
 
 const mixinDisappearingMessageHelpUrl =
     'https://mixinmessenger.zendesk.com/hc/articles/5127869180564';
+
+const giphyApiKey = String.fromEnvironment('MIXIN_GIPHY_KEY');

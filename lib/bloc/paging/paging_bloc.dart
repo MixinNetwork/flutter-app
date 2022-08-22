@@ -151,6 +151,7 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
             max(state.map.length, limit),
             state.map.isNotEmpty ? state.map.keys.reduce(min) : 0,
           ),
+          initialized: true,
         ));
       }
     } else if (event is PagingItemPositionEvent) {
@@ -186,6 +187,7 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
 
       emit(state.copyWith(
         map: map,
+        initialized: true,
       ));
     } else if (event is PagingInitEvent) {
       emit(state.copyWith(

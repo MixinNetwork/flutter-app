@@ -146,7 +146,7 @@ class _QrCode extends HookWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             context.l10n.loginByQrcodeTips,
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.left,
             style: TextStyle(
               fontSize: 14,
               color: context.dynamicColor(

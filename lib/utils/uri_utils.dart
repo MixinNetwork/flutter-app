@@ -3,6 +3,8 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/constants.dart';
+import '../crypto/uuid/uuid.dart';
+import '../ui/home/bloc/conversation_cubit.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/item/transfer/transfer_page.dart';
@@ -104,6 +106,29 @@ Future<bool> openUri(
       }
     }
 
+    final conversationId = uri.conversationId;
+    if (conversationId != null && conversationId.trim().isNotEmpty) {
+      final userId = uri.queryParameters['user'];
+      if (userId != null && userId.trim().isNotEmpty) {
+        showToastLoading(context);
+        await context.accountServer.refreshUsers([userId]);
+        Toast.dismiss();
+
+        if (conversationId !=
+            generateConversationId(context.accountServer.userId, userId)) {
+          await showToastFailed(context, null);
+          return false;
+        } else {
+          await ConversationCubit.selectUser(context, userId);
+          return true;
+        }
+      }
+
+      await ConversationCubit.selectConversation(context, conversationId,
+          sync: true);
+      return true;
+    }
+
     if (uri.isMixinScheme) {
       Toast.dismiss();
       await showUnknownMixinUrlDialog(context, uri);
@@ -142,6 +167,8 @@ extension _MixinUriExtension on Uri {
   String? get userId => _getValue(MixinSchemeHost.users);
 
   String? get code => _getValue(MixinSchemeHost.codes);
+
+  String? get conversationId => _getValue(MixinSchemeHost.conversations);
 
   String? get snapshotTraceId {
     if (_isTypeScheme(MixinSchemeHost.snapshots)) {

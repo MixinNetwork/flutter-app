@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
@@ -7,7 +9,6 @@ import '../../bloc/bloc_converter.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
-
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
 import '../home/bloc/multi_auth_cubit.dart';
@@ -160,8 +161,7 @@ class _Item extends StatelessWidget {
             darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
           );
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 90),
+    return _DynamicHorizontalPadding(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,4 +204,26 @@ class _Item extends StatelessWidget {
       ),
     );
   }
+}
+
+class _DynamicHorizontalPadding extends StatelessWidget {
+  const _DynamicHorizontalPadding({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          const maxPadding = 90.0;
+          const minPadding = 20.0;
+          final padding = math.min(
+            maxPadding,
+            math.max(minPadding, (constraints.maxWidth - 500) / 2),
+          );
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: padding),
+            child: child,
+          );
+        },
+      );
 }

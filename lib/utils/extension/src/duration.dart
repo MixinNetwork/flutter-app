@@ -9,6 +9,13 @@ extension DurationToMinutesSecondsExtension on Duration {
     return '${duration.inMinutes.toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}';
   }
 
+  String get asMinutesSecondsWithDas {
+    final minutes = inMinutes.toString().padLeft(2, '0');
+    final seconds = inSeconds.remainder(60).toString().padLeft(2, '0');
+    final das = (inMilliseconds.remainder(1000) ~/ 100).toString();
+    return '$minutes:$seconds.$das';
+  }
+
   String formatAsConversationExpireIn({Localization? localization}) {
     final l10n = localization ?? Localization.current;
     if (inSeconds < 1) {

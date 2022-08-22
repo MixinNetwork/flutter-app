@@ -35,9 +35,8 @@ class SignalProtocol {
   late MixinSignalProtocolStore mixinSignalProtocolStore;
   late MixinSenderKeyStore senderKeyStore;
 
-  static Future<void> initSignal(List<int>? private) async {
-    await generateSignalDatabaseIdentityKeyPair(SignalDatabase.get, private);
-  }
+  static Future<int> initSignal(List<int>? private) =>
+      generateSignalDatabaseIdentityKeyPair(SignalDatabase.get, private);
 
   Future<void> init() async {
     db = SignalDatabase.get;

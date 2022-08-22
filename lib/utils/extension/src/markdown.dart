@@ -4,7 +4,7 @@ extension MarkdownExtension on String {
   String postLengthOptimize([int target = 1024]) =>
       length > target ? substring(0, target) : this;
 
-  String postOptimize([int lines = 20]) =>
+  String postOptimize([int lines = 10]) =>
       LineSplitter.split(this).take(lines).join('\r\n').postLengthOptimize();
 
   String get postOptimizeMarkdown {

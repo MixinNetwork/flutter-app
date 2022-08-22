@@ -13,13 +13,13 @@ import '../crypto/privacy_key_value.dart';
 import 'attachment/download_key_value.dart';
 import 'file.dart';
 
-Future<void> initKeyValues() => Future.wait([
-      PrivacyKeyValue.instance.init(),
-      CryptoKeyValue.instance.init(),
-      AccountKeyValue.instance.init(),
-      ShowPinMessageKeyValue.instance.init(),
-      ScamWarningKeyValue.instance.init(),
-      DownloadKeyValue.instance.init(),
+Future<void> initKeyValues(String identityNumber) => Future.wait([
+      PrivacyKeyValue.instance.init(identityNumber),
+      CryptoKeyValue.instance.init(identityNumber),
+      AccountKeyValue.instance.init(identityNumber),
+      ShowPinMessageKeyValue.instance.init(identityNumber),
+      ScamWarningKeyValue.instance.init(identityNumber),
+      DownloadKeyValue.instance.init(identityNumber),
     ]);
 
 Future<void> clearKeyValues() => Future.wait([
@@ -38,15 +38,25 @@ abstract class HiveKeyValue<E> {
   late Box<E> box;
   bool _hasInit = false;
 
-  Future init() async {
+  Future init(String identityNumber) async {
     if (_hasInit) {
       return;
     }
     final dbFolder = mixinDocumentsDirectory;
-    final file = File(p.join(dbFolder.path, _boxName));
+
+    final legacyBoxDirectory = Directory(p.join(dbFolder.path, _boxName));
+    final directory =
+        Directory(p.join(dbFolder.path, identityNumber, _boxName));
+
+    if (legacyBoxDirectory.existsSync()) {
+      // copy legacy file to new file
+      if (directory.existsSync()) directory.deleteSync(recursive: true);
+      legacyBoxDirectory.renameSync(directory.path);
+    }
+
     WidgetsFlutterBinding.ensureInitialized();
     if (!kIsWeb) {
-      Hive.init(file.absolute.path);
+      Hive.init(directory.absolute.path);
     }
     box = await Hive.openBox<E>(_boxName);
     _hasInit = true;

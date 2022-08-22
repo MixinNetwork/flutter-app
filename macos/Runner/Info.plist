@@ -48,5 +48,7 @@
  	</array>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Mixin uses your microphone to record voice messages to share with your contacts.</string>
 </dict>
 </plist>

@@ -85,7 +85,12 @@ String maxOf(String a, String b) => a.compareTo(b) > 0 ? a : b;
 extension SqlStringExt on String {
   String escapeSql() => RegExp.escape(this);
 
-  String escapeFts5() => escapeSql().joinStar().replaceQuotationMark();
+  String escapeFts5() => replaceQuotationMark()._escapeFts5Symbols();
+
+  String _escapeFts5Symbols() {
+    final result = joinWhiteSpace().split(' ');
+    return '${result.map((e) => '"$e"').join('*')}*';
+  }
 
   String joinStar() => joinWithCharacter('*');
 

@@ -7,7 +7,7 @@ packages:
       name: _fe_analyzer_shared
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "40.0.0"
+    version: "46.0.0"
   adaptive_number:
     dependency: transitive
     description:
@@ -21,14 +21,14 @@ packages:
       name: analyzer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.0"
+    version: "4.6.0"
   analyzer_plugin:
     dependency: transitive
     description:
       name: analyzer_plugin
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.10.0"
+    version: "0.11.1"
   ansicolor:
     dependency: "direct main"
     description:
@@ -102,7 +102,7 @@ packages:
       name: bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.0.3"
+    version: "8.1.0"
   blurhash_dart:
     dependency: "direct main"
     description:
@@ -263,7 +263,7 @@ packages:
       name: dart_code_metrics
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.16.0"
+    version: "4.18.0-dev.2"
   dart_console:
     dependency: transitive
     description:
@@ -382,7 +382,7 @@ packages:
       name: drift_dev
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.7.0"
+    version: "1.7.1"
   ecache:
     dependency: "direct main"
     description:
@@ -417,7 +417,7 @@ packages:
       name: equatable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.5"
   extended_image:
     dependency: "direct main"
     description:
@@ -466,21 +466,21 @@ packages:
       name: file_selector
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.4+3"
+    version: "0.9.0"
   file_selector_linux:
     dependency: "direct main"
     description:
       name: file_selector_linux
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.2+1"
+    version: "0.9.0"
   file_selector_macos:
     dependency: "direct main"
     description:
       name: file_selector_macos
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.2+1"
+    version: "0.9.0"
   file_selector_platform_interface:
     dependency: transitive
     description:
@@ -494,14 +494,14 @@ packages:
       name: file_selector_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.1+3"
+    version: "0.9.0"
   file_selector_windows:
     dependency: "direct main"
     description:
       name: file_selector_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.2"
+    version: "0.9.1"
   filesize:
     dependency: "direct main"
     description:
@@ -534,7 +534,7 @@ packages:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.0.1"
+    version: "8.1.1"
   flutter_blurhash:
     dependency: transitive
     description:
@@ -562,7 +562,7 @@ packages:
       name: flutter_local_notifications
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "9.7.0"
+    version: "9.8.0+1"
   flutter_local_notifications_linux:
     dependency: transitive
     description:
@@ -595,14 +595,14 @@ packages:
       name: flutter_portal
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.1"
   flutter_svg:
     dependency: "direct main"
     description:
       name: flutter_svg
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.1+1"
+    version: "1.1.4"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -696,7 +696,7 @@ packages:
       name: http
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.13.4"
+    version: "0.13.5"
   http_client_helper:
     dependency: transitive
     description:
@@ -857,7 +857,7 @@ packages:
       name: libsignal_protocol_dart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.1"
+    version: "0.6.2"
   logging:
     dependency: transitive
     description:
@@ -871,14 +871,14 @@ packages:
       name: lottie
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.0"
+    version: "1.4.1"
   map:
     dependency: "direct main"
     description:
       name: map
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.2"
+    version: "1.3.3"
   markdown:
     dependency: transitive
     description:
@@ -927,14 +927,14 @@ packages:
       name: mixin_bot_sdk_dart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.16"
+    version: "0.3.1"
   msix:
     dependency: "direct dev"
     description:
       name: msix
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.6.2"
+    version: "3.6.3"
   nested:
     dependency: transitive
     description:
@@ -955,7 +955,7 @@ packages:
       name: ogg_opus_player
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.2"
+    version: "0.4.1"
   open_file:
     dependency: "direct main"
     description:
@@ -1041,14 +1041,14 @@ packages:
       name: path_drawing
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   path_parsing:
     dependency: transitive
     description:
       name: path_parsing
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   path_provider:
     dependency: "direct main"
     description:
@@ -1169,7 +1169,7 @@ packages:
       name: protocol_handler
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.3"
+    version: "0.1.4"
   provider:
     dependency: "direct main"
     description:
@@ -1314,7 +1314,7 @@ packages:
       name: sqlite3_flutter_libs
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.7"
+    version: "0.5.9"
   sqlparser:
     dependency: transitive
     description:
@@ -1594,7 +1594,7 @@ packages:
       name: win32_registry
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.2"
+    version: "1.0.2"
   win_toast:
     dependency: "direct main"
     description:

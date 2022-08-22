@@ -14,11 +14,14 @@ import '../utils/app_lifecycle.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/local_notification_center.dart';
+import '../utils/logger.dart';
 import '../utils/message_optimize.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/message/item/pin_message.dart';
 import '../widgets/message/item/system_message.dart';
 import '../widgets/message/item/text/mention_builder.dart';
+
+const _keyConversationId = 'conversationId';
 
 class NotificationService {
   NotificationService({
@@ -137,6 +140,10 @@ class NotificationService {
             scheme: enumConvertToString(NotificationScheme.conversation),
             host: event.conversationId,
             path: event.messageId,
+            queryParameters: {
+              // use queryParameters to avoid case transform.
+              _keyConversationId: event.conversationId,
+            },
           ),
           messageId: event.messageId,
           conversationId: event.conversationId,
@@ -145,13 +152,16 @@ class NotificationService {
       ..add(
         notificationSelectEvent(NotificationScheme.conversation).listen(
           (event) {
+            i('select notification $event');
             final slideCategoryCubit = context.read<SlideCategoryCubit>();
             if (slideCategoryCubit.state.type == SlideCategoryType.setting) {
               slideCategoryCubit.select(SlideCategoryType.chats);
             }
+            final conversationId =
+                event.queryParameters[_keyConversationId] ?? event.host;
             ConversationCubit.selectConversation(
               context,
-              event.host,
+              conversationId,
               initIndexMessageId: event.path,
             );
           },

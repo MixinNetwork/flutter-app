@@ -763,9 +763,10 @@ class _MessageSelectionWrapper extends HookWidget {
     );
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () {
-        context.read<MessageSelectionCubit>().toggleSelection(messageId);
-      },
+      onTap: inMultiSelectMode
+          ? () =>
+              context.read<MessageSelectionCubit>().toggleSelection(messageId)
+          : null,
       child: Row(
         children: [
           _AnimatedSelectionIcon(

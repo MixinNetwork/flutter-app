@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:markdown_widget/markdown_widget.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
@@ -42,30 +43,39 @@ class MessagePost extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InteractiveDecoratedBox(
         onTap: () => PostPreview.push(context, message: context.message),
+        behavior: HitTestBehavior.deferToChild,
         child: Container(
           padding: padding,
           decoration: decoration,
           child: Stack(
             children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: showStatus ? 48 : 0,
-                  maxHeight: 256,
-                  minWidth: 128,
-                ),
-                child: HookBuilder(builder: (context) {
-                  final content = useMessageConverter(
-                      converter: (state) => state.content ?? '');
-                  final postContent =
-                      useMemoized(content.postOptimize, [content]);
+              HookBuilder(builder: (context) {
+                final content = useMessageConverter(
+                    converter: (state) => state.content ?? '');
+                final postContent =
+                    useMemoized(content.postOptimize, [content]);
 
-                  return Markdown(
-                    data: postContent,
-                    physics: const NeverScrollableScrollPhysics(),
-                    darkMode: context.brightnessValue != 0,
-                  );
-                }),
-              ),
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: showStatus ? 48 : 0,
+                    minWidth: 128,
+                  ),
+                  child: IntrinsicWidth(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: MarkdownGenerator(
+                            data: postContent,
+                            styleConfig: buildMarkdownStyleConfig(
+                              context,
+                              context.brightnessValue != 0,
+                            ),
+                          ).widgets ??
+                          [],
+                    ),
+                  ),
+                );
+              }),
               Positioned(
                 right: 0,
                 top: 0,

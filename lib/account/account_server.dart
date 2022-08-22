@@ -13,6 +13,7 @@ import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
+import '../api/giphy_vo/giphy_image.dart';
 import '../blaze/blaze.dart';
 import '../blaze/vo/pin_message_minimal.dart';
 import '../bloc/setting_cubit.dart';
@@ -156,7 +157,7 @@ class AccountServer {
 
     _injector = Injector(userId, database, client);
 
-    await initKeyValues();
+    await initKeyValues(identityNumber);
   }
 
   late String userId;
@@ -310,8 +311,6 @@ class AccountServer {
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
     await clearKeyValues();
-    // Re-init keyValue to prepare for next login.
-    await initKeyValues();
     await SignalDatabase.get.clear();
     await database.participantSessionDao.deleteBySessionId(sessionId);
     await database.participantSessionDao.updateSentToServer();
@@ -353,6 +352,22 @@ class AccountServer {
     );
   }
 
+  Future<void> sendGiphyGifMessage(
+    EncryptCategory encryptCategory,
+    GiphyImage sendImage,
+    String previewUrl, {
+    String? conversationId,
+    String? recipientId,
+  }) async =>
+      _sendMessageHelper.sendGiphyGifMessage(
+        await _initConversation(conversationId, recipientId),
+        userId,
+        encryptCategory.toCategory(MessageCategory.plainImage,
+            MessageCategory.signalImage, MessageCategory.encryptedImage),
+        sendImage,
+        previewUrl,
+      );
+
   Future<void> sendImageMessage(
     EncryptCategory encryptCategory, {
     XFile? file,
@@ -385,17 +400,25 @@ class AccountServer {
               MessageCategory.signalData, MessageCategory.encryptedData),
           quoteMessageId);
 
-  Future<void> sendAudioMessage(XFile audio, EncryptCategory encryptCategory,
-          {String? conversationId,
-          String? recipientId,
-          String? quoteMessageId}) async =>
+  Future<void> sendAudioMessage(
+    XFile audio,
+    Duration duration,
+    String? waveform,
+    EncryptCategory encryptCategory, {
+    String? conversationId,
+    String? recipientId,
+    String? quoteMessageId,
+  }) async =>
       _sendMessageHelper.sendAudioMessage(
-          await _initConversation(conversationId, recipientId),
-          userId,
-          audio,
-          encryptCategory.toCategory(MessageCategory.plainAudio,
-              MessageCategory.signalAudio, MessageCategory.encryptedAudio),
-          quoteMessageId);
+        await _initConversation(conversationId, recipientId),
+        userId,
+        audio,
+        encryptCategory.toCategory(MessageCategory.plainAudio,
+            MessageCategory.signalAudio, MessageCategory.encryptedAudio),
+        quoteMessageId,
+        mediaDuration: duration.inMilliseconds.toString(),
+        mediaWaveform: waveform,
+      );
 
   Future<void> sendDataMessage(XFile file, EncryptCategory encryptCategory,
           {String? conversationId,
@@ -762,6 +785,15 @@ class AccountServer {
   Future<void> downloadAttachment(String messageId) async =>
       attachmentUtil.downloadAttachment(messageId: messageId);
 
+  Future<void> reUploadGiphyGif(db.MessageItem message) {
+    assert(
+        message.type.isImage &&
+            message.mediaMimeType == 'image/gif' &&
+            (message.mediaSize == null || message.mediaSize == 0),
+        'Invalid message');
+    return _sendMessageHelper.reUploadGiphyGif(message);
+  }
+
   Future<void> reUploadAttachment(db.MessageItem message) =>
       _sendMessageHelper.reUploadAttachment(
         message.conversationId,
@@ -823,8 +855,10 @@ class AccountServer {
     await addParticipant(conversationId, userIds);
   }
 
-  Future<void> exitGroup(String conversationId) =>
-      client.conversationApi.exit(conversationId);
+  Future<void> exitGroup(String conversationId) async {
+    await client.conversationApi.exit(conversationId);
+    await refreshConversation(conversationId);
+  }
 
   Future<void> joinGroup(String code) async {
     final response = await client.conversationApi.join(code);

@@ -752,7 +752,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               Limit(limit, 0),
           order: (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________, ___________) =>
-              OrderBy([OrderingTerm.desc(message.createdAt)]));
+              OrderBy([OrderingTerm.asc(message.createdAt)]));
 
   Selectable<MessageItem> postMessages(
           String conversationId, int limit, int offset) =>
@@ -771,8 +771,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________, em) =>
               message.conversationId.equals(conversationId) &
-              CustomExpression<bool>('${message.aliasedName}.rowid < $rowId') &
-              message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']),
+              message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']) &
+              message.rowId.isSmallerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
                   __________, ___________, em) =>
               Limit(limit, 0));
@@ -794,8 +794,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________, em) =>
               message.conversationId.equals(conversationId) &
-              CustomExpression<bool>('${message.aliasedName}.rowid < $rowId') &
-              message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']),
+              message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']) &
+              message.rowId.isSmallerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
                   __________, ___________, em) =>
               Limit(limit, 0));
@@ -806,7 +806,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________, em) =>
               message.conversationId.equals(conversationId) &
-              CustomExpression<bool>('${message.aliasedName}.rowid < $rowId'),
+              message.rowId.isSmallerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
                   __________, ___________, em) =>
               Limit(limit, 0));
@@ -818,8 +818,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________, em) =>
               message.conversationId.equals(conversationId) &
-              CustomExpression<bool>(
-                  '${message.aliasedName}.rowid >${orEqual ? '=' : ''} $rowId'),
+              (orEqual
+                  ? message.rowId.isBiggerOrEqualValue(rowId)
+                  : message.rowId.isBiggerThanValue(rowId)),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
                   __________, ___________, em) =>
               Limit(limit, 0),
@@ -948,6 +949,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     List<String>? categories,
   }) {
     final keywordFts5 = query.trim().escapeFts5();
+
     if (conversationId != null && userId != null) {
       if (categories != null) {
         return db.fuzzySearchMessageByConversationIdAndUserIdAndCategories(
@@ -1134,7 +1136,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Selectable<int?> messageRowId(String messageId) => (selectOnly(db.messages)
         ..addColumns([db.messages.rowId])
         ..where(db.messages.messageId.equals(messageId))
-        ..limit(1))
+        ..limit(1)
+        ..orderBy([OrderingTerm.desc(db.messages.createdAt)]))
       .map((row) => row.read(db.messages.rowId));
 
   Future<int> deleteFtsByMessageId(String messageId) =>
@@ -1165,4 +1168,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   void notifyMessageInsertOrReplaced(Iterable<String> messageIds) =>
       db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+
+  Future<void> updateGiphyMessage(String messageId, String mediaUrl,
+          int mediaSize, String? thumbImage) =>
+      (db.update(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
+          .write(MessagesCompanion(
+        mediaUrl: Value(mediaUrl),
+        mediaSize: Value(mediaSize),
+        thumbImage: Value(thumbImage),
+      ));
 }

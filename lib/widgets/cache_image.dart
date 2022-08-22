@@ -672,3 +672,10 @@ class MixinExtendedNetworkImageProvider
     return client;
   }
 }
+
+/// download image from network to cache. return the cache image file.
+/// [url] is the image url.
+Future<Uint8List?> downloadImage(String url) async {
+  final imageProvider = MixinExtendedNetworkImageProvider(url);
+  return imageProvider._loadCache(imageProvider, null, keyToMd5(url));
+}

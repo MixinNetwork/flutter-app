@@ -23,7 +23,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../crypto/crypto_key_value.dart';
 import '../../crypto/signal/signal_protocol.dart';
@@ -90,6 +89,7 @@ class _PhoneNumberInputScene extends HookWidget {
   const _PhoneNumberInputScene({
     required this.countries,
   });
+
   final List<Country> countries;
 
   @override
@@ -297,12 +297,8 @@ class _CodeInputScene extends HookWidget {
       assert(code.length == 4, 'Invalid code length: $code');
       showToastLoading(context);
       try {
-        await CryptoKeyValue.instance.init();
-        await AccountKeyValue.instance.init();
+        final registrationId = await SignalProtocol.initSignal(null);
 
-        await SignalProtocol.initSignal(null);
-
-        final registrationId = CryptoKeyValue.instance.localRegistrationId;
         final sessionKey = ed.generateKey();
         final sessionSecret = base64Encode(sessionKey.publicKey.bytes);
 
@@ -326,6 +322,10 @@ class _CodeInputScene extends HookWidget {
           accountRequest,
         );
         final privateKey = base64Encode(sessionKey.privateKey.bytes);
+
+        await CryptoKeyValue.instance.init(response.data.identityNumber);
+        CryptoKeyValue.instance.localRegistrationId = registrationId;
+
         context.multiAuthCubit.signIn(
           AuthState(account: response.data, privateKey: privateKey),
         );
