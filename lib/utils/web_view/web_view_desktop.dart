@@ -126,7 +126,7 @@ class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
     return SizedBox(
       width: 400,
       child: AlertDialogLayout(
-        title: Text(context.l10n.webViewRuntimeNotAvailable),
+        title: Text(context.l10n.webviewRuntimeUnavailable),
         content: DefaultTextStyle.merge(
           style: TextStyle(
             fontSize: 14,
@@ -135,7 +135,7 @@ class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Text(context.l10n.webView2RuntimeInstallDescription),
+              Text(context.l10n.webview2RuntimeInstallDescription),
               const SizedBox(height: 10),
               SelectableText.rich(TextSpan(children: [
                 TextSpan(text: context.l10n.downloadLink),

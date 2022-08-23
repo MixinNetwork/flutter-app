@@ -90,7 +90,7 @@ class EditProfilePage extends HookWidget {
               ),
               const SizedBox(height: 32),
               _Item(
-                title: context.l10n.introduction,
+                title: context.l10n.biography,
                 controller: bioTextEditingController,
               ),
               const SizedBox(height: 32),
@@ -112,9 +112,7 @@ class EditProfilePage extends HookWidget {
                 },
                 when: (a, b) => b != null,
                 builder: (context, createdAt) => Text(
-                  createdAt != null
-                      ? context.l10n.pageEditProfileJoin(createdAt)
-                      : '',
+                  createdAt != null ? context.l10n.joinedIn(createdAt) : '',
                   style: TextStyle(
                     fontSize: 14,
                     color: context.theme.secondaryText,

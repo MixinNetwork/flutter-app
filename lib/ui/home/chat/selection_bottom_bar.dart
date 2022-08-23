@@ -47,7 +47,7 @@ class SelectionBottomBar extends StatelessWidget {
               },
             ),
             _Button(
-              label: context.l10n.forwardOneByOne,
+              label: context.l10n.oneByOneForward,
               iconAssetName: Resources.assetsImagesContextMenuForwardSvg,
               onTap: () async {
                 final result = await showConversationSelector(
@@ -78,16 +78,18 @@ class SelectionBottomBar extends StatelessWidget {
               label: context.l10n.delete,
               iconAssetName: Resources.assetsImagesContextMenuDeleteSvg,
               onTap: () async {
+                final cubit = context.read<MessageSelectionCubit>();
+                final messagesToDelete = cubit.state.selectedMessageIds;
+
                 final confirm = await showConfirmMixinDialog(
                   context,
-                  context.l10n.deleteSelectedMessageWarning,
+                  context.l10n.chatDeleteMessage(
+                      messagesToDelete.length, messagesToDelete.length),
                   positiveText: context.l10n.delete,
                 );
                 if (!confirm) {
                   return;
                 }
-                final cubit = context.read<MessageSelectionCubit>();
-                final messagesToDelete = cubit.state.selectedMessageIds;
                 d('messagesToDelete: $messagesToDelete');
                 await runWithLoading(context, () async {
                   for (final id in messagesToDelete) {

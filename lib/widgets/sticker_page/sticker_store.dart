@@ -127,7 +127,7 @@ class _StickerStorePage extends HookWidget {
       children: [
         MixinAppBar(
           backgroundColor: Colors.transparent,
-          title: Text(context.l10n.stickerShop),
+          title: Text(context.l10n.stickerStore),
           leading: Center(
             child: ActionButton(
               name: Resources.assetsImagesSettingSvg,
@@ -289,7 +289,7 @@ class _StickerAlbumManagePage extends HookWidget {
       children: [
         MixinAppBar(
           backgroundColor: Colors.transparent,
-          title: Text(context.l10n.myStickerAlbums),
+          title: Text(context.l10n.myStickers),
           actions: [
             MixinCloseButton(
               onTap: () =>

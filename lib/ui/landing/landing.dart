@@ -104,10 +104,10 @@ class LandingModeSwitchButton extends HookWidget {
     final String buttonText;
     switch (mode) {
       case LandingMode.qrcode:
-        buttonText = context.l10n.loginWithMobile;
+        buttonText = context.l10n.signWithPhoneNumber;
         break;
       case LandingMode.mobile:
-        buttonText = context.l10n.loginWithQRCode;
+        buttonText = context.l10n.signWithQrcode;
         break;
     }
     return TextButton(

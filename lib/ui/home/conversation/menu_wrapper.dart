@@ -45,7 +45,7 @@ class ConversationMenuWrapper extends StatelessWidget {
         if (pinTime != null)
           ContextMenu(
             icon: Resources.assetsImagesContextMenuUnpinSvg,
-            title: context.l10n.unPin,
+            title: context.l10n.unpin,
             onTap: () => runFutureWithToast(
               context,
               context.accountServer.unpin(conversationId),
@@ -54,7 +54,7 @@ class ConversationMenuWrapper extends StatelessWidget {
         if (pinTime == null)
           ContextMenu(
             icon: Resources.assetsImagesContextMenuPinSvg,
-            title: context.l10n.pin,
+            title: context.l10n.pinTitle,
             onTap: () => runFutureWithToast(
               context,
               context.accountServer.pin(conversationId),
@@ -63,7 +63,7 @@ class ConversationMenuWrapper extends StatelessWidget {
         if (isMute)
           ContextMenu(
             icon: Resources.assetsImagesContextMenuMuteSvg,
-            title: context.l10n.unMute,
+            title: context.l10n.unmute,
             onTap: () async {
               await runFutureWithToast(
                 context,
@@ -139,7 +139,7 @@ class ConversationMenuWrapper extends StatelessWidget {
                 conversation?.validName ?? searchConversation!.validName;
             final ret = await showConfirmMixinDialog(
               context,
-              context.l10n.deleteChatHint(name),
+              context.l10n.conversationDeleteTitle(name),
               description: context.l10n.deleteChatDescription,
             );
             if (!ret) {

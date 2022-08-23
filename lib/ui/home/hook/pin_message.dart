@@ -84,7 +84,7 @@ PinMessageState usePinMessageState() {
           mentionCache: context.read<MentionCache>(),
         );
 
-        return context.l10n.pinned(message.userFullName ?? '', preview);
+        return context.l10n.chatPinMessage(message.userFullName ?? '', preview);
       });
     },
     keys: [showLastPinMessage, conversationId, pinMessageIds.firstOrNull],

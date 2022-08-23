@@ -289,7 +289,7 @@ class MessageItemWidget extends HookWidget {
                     if (!isTranscriptPage)
                       ContextMenu(
                         icon: Resources.assetsImagesMultiSelectionSvg,
-                        title: context.l10n.select,
+                        title: context.l10n.choose,
                         onTap: () => context
                             .read<MessageSelectionCubit>()
                             .selectMessage(message.messageId),
@@ -305,7 +305,7 @@ class MessageItemWidget extends HookWidget {
                         (message.type.isImage || message.type.isVideo))
                       ContextMenu(
                         icon: Resources.assetsImagesContextMenuDownloadSvg,
-                        title: context.l10n.saveToGallery,
+                        title: context.l10n.saveToCameraRoll,
                         onTap: () => saveAs(context, context.accountServer,
                             message, isTranscriptPage),
                       ),
@@ -611,7 +611,7 @@ class _PinMenu extends HookWidget {
       icon: message.pinned
           ? Resources.assetsImagesContextMenuUnpinSvg
           : Resources.assetsImagesContextMenuPinSvg,
-      title: message.pinned ? context.l10n.unPin : context.l10n.pin,
+      title: message.pinned ? context.l10n.unpin : context.l10n.pinTitle,
       onTap: () async {
         final pinMessageMinimal = PinMessageMinimal(
           messageId: message.messageId,
@@ -731,7 +731,7 @@ class _UnreadMessageBar extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 6),
         alignment: Alignment.center,
         child: Text(
-          context.l10n.unread,
+          context.l10n.unreadMessages,
           style: TextStyle(
             color: context.theme.secondaryText,
             fontSize: MessageItemWidget.secondaryFontSize,

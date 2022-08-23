@@ -30,7 +30,7 @@ class SharedAppsPage extends HookWidget {
     return Scaffold(
       backgroundColor: context.theme.primary,
       appBar: MixinAppBar(
-        title: Text(context.l10n.sharedApps),
+        title: Text(context.l10n.shareApps),
       ),
       body: Column(
         children: [

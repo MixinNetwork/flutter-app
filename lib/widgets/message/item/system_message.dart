@@ -20,8 +20,6 @@ class SystemMessage extends HookWidget {
         useMessageConverter(converter: (state) => state.participantFullName);
     final userFullName =
         useMessageConverter(converter: (state) => state.userFullName);
-    final groupName =
-        useMessageConverter(converter: (state) => state.groupName);
     final content = useMessageConverter(converter: (state) => state.content);
 
     return Center(
@@ -52,7 +50,6 @@ class SystemMessage extends HookWidget {
                   currentUserId: context.accountServer.userId,
                   participantFullName: participantFullName,
                   senderFullName: userFullName,
-                  groupName: groupName,
                   expireIn: int.tryParse(content ?? '0'),
                 ),
                 style: TextStyle(
@@ -77,7 +74,6 @@ String generateSystemText({
   required String currentUserId,
   required String? participantFullName,
   required String? senderFullName,
-  required String? groupName,
   required int? expireIn,
 }) {
   final participantIsCurrentUser = participantUserId == currentUserId;
@@ -88,20 +84,20 @@ String generateSystemText({
     case MessageAction.join:
       text = Localization.current.chatGroupJoin(
         participantIsCurrentUser
-            ? Localization.current.youStart
+            ? Localization.current.you
             : participantFullName ?? '',
       );
       break;
     case MessageAction.exit:
       text = Localization.current.chatGroupExit(
         participantIsCurrentUser
-            ? Localization.current.youStart
+            ? Localization.current.you
             : participantFullName ?? '',
       );
       break;
     case MessageAction.add:
       text = Localization.current.chatGroupAdd(
-        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
+        senderIsCurrentUser ? Localization.current.you : senderFullName!,
         participantIsCurrentUser
             ? Localization.current.you
             : participantFullName ?? '',
@@ -109,30 +105,31 @@ String generateSystemText({
       break;
     case MessageAction.remove:
       text = Localization.current.chatGroupRemove(
-        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
+        senderIsCurrentUser ? Localization.current.you : senderFullName!,
         participantIsCurrentUser
             ? Localization.current.you
             : participantFullName ?? '',
       );
       break;
     case MessageAction.create:
-      text = Localization.current.chatGroupCreate(
-        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
-        groupName!,
+      text = Localization.current.createdThisGroup(
+        senderIsCurrentUser ? Localization.current.you : senderFullName!,
       );
       break;
     case MessageAction.role:
-      text = Localization.current.chatGroupRole;
+      text = Localization.current.nowAnAddmin(
+          senderIsCurrentUser ? Localization.current.you : senderFullName!);
       break;
     case MessageAction.expire:
       final senderName =
-          senderIsCurrentUser ? Localization.current.youStart : senderFullName!;
+          senderIsCurrentUser ? Localization.current.you : senderFullName!;
       if (expireIn == null) {
-        text = Localization.current.chatExpiredSetWithoutDuration(senderName);
+        text =
+            Localization.current.changedDisappearingMessageSettings(senderName);
       } else if (expireIn <= 0) {
-        text = Localization.current.chatExpiredDisabled(senderName);
+        text = Localization.current.disableDisappearingMessage(senderName);
       } else {
-        text = Localization.current.chatExpiredSet(
+        text = Localization.current.setDisappearingMessageTimeTo(
           senderName,
           Duration(seconds: expireIn).formatAsConversationExpireIn(),
         );
@@ -140,7 +137,7 @@ String generateSystemText({
       break;
     case MessageAction.update:
     default:
-      text = Localization.current.chatNotSupport;
+      text = Localization.current.messageNotSupport;
       break;
   }
   return text;

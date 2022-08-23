@@ -60,7 +60,7 @@ class SlidePage extends StatelessWidget {
                   const SizedBox(height: 24),
                   _Item(
                     asset: Resources.assetsImagesChatSvg,
-                    title: context.l10n.chats,
+                    title: context.l10n.allChats,
                     type: SlideCategoryType.chats,
                   ),
                   const SizedBox(height: 12),
@@ -273,7 +273,7 @@ class _CircleList extends HookWidget {
                           ContextMenu(
                             icon:
                                 Resources.assetsImagesContextMenuEditCircleSvg,
-                            title: context.l10n.editCircle,
+                            title: context.l10n.writeCircles,
                             onTap: () async {
                               final initSelected = (await context
                                       .database.circleConversationDao
@@ -339,7 +339,7 @@ class _CircleList extends HookWidget {
                             onTap: () async {
                               final result = await showConfirmMixinDialog(
                                   context,
-                                  context.l10n.pageDeleteCircle(circle.name));
+                                  context.l10n.deleteTheCircle(circle.name));
                               if (!result) return;
                               await runFutureWithToast(
                                 context,

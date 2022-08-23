@@ -314,14 +314,13 @@ class _MessageContent extends HookWidget {
             currentUserId: context.accountServer.userId,
             participantFullName: conversation.participantFullName,
             senderFullName: conversation.senderFullName,
-            groupName: conversation.groupName,
             expireIn: int.tryParse(conversation.content ?? '0'),
           );
         } else if (conversation.contentType.isPin) {
           final pinMessageMinimal =
               PinMessageMinimal.fromJsonString(conversation.content ?? '');
           if (pinMessageMinimal == null) {
-            return context.l10n.pinned(
+            return context.l10n.chatPinMessage(
                 conversation.senderFullName ?? '', context.l10n.aMessage);
           }
           final preview = await generatePinPreviewText(
@@ -329,7 +328,7 @@ class _MessageContent extends HookWidget {
             mentionCache: context.read<MentionCache>(),
           );
           return context.l10n
-              .pinned(conversation.senderFullName ?? '', preview);
+              .chatPinMessage(conversation.senderFullName ?? '', preview);
         }
 
         final mentionCache = context.read<MentionCache>();

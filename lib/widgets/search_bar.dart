@@ -65,7 +65,7 @@ class SearchBar extends HookWidget {
               buildMenus: () => [
                 ContextMenu(
                   icon: Resources.assetsImagesContextMenuSearchUserSvg,
-                  title: context.l10n.searchUser,
+                  title: context.l10n.searchContact,
                   onTap: () => showMixinDialog<String>(
                     context: context,
                     child: const _SearchUserDialog(),
@@ -83,7 +83,7 @@ class SearchBar extends HookWidget {
                 ),
                 ContextMenu(
                   icon: Resources.assetsImagesContextMenuCreateGroupSvg,
-                  title: context.l10n.createGroupConversation,
+                  title: context.l10n.createGroup,
                   onTap: () async {
                     Actions.maybeInvoke(
                       context,
@@ -198,7 +198,7 @@ class _SearchUserDialog extends HookWidget {
                         },
                         child: DialogTextField(
                           textEditingController: textEditingController,
-                          hintText: context.l10n.searchUserHint,
+                          hintText: context.l10n.addPeopleSearchHint,
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp('[0-9+]'))
                           ],
@@ -208,8 +208,7 @@ class _SearchUserDialog extends HookWidget {
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
-                            context.l10n
-                                .currentIdentityNumber(currentIdentityNumber!),
+                            context.l10n.myMixinId(currentIdentityNumber!),
                             style: TextStyle(
                               color: context.theme.secondaryText,
                               fontSize: 12,

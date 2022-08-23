@@ -81,7 +81,7 @@ class SearchMessagePage extends HookWidget {
     return Scaffold(
       backgroundColor: context.theme.primary,
       appBar: MixinAppBar(
-        title: Text(context.l10n.searchMessageHistory),
+        title: Text(context.l10n.searchConversation),
         actions: [
           if (!Navigator.of(context).canPop())
             ActionButton(

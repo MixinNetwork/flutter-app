@@ -92,7 +92,7 @@ class FilePage extends HookWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              context.l10n.noFile,
+              context.l10n.noFiles,
               style: TextStyle(
                 fontSize: 12,
                 color: context.theme.secondaryText,

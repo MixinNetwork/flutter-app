@@ -32,7 +32,7 @@ class NotificationPage extends HookWidget {
     return Scaffold(
       backgroundColor: context.theme.background,
       appBar: MixinAppBar(
-        title: Text(context.l10n.notification),
+        title: Text(context.l10n.notifications),
       ),
       body: Container(
         alignment: Alignment.topCenter,
@@ -83,7 +83,7 @@ class NotificationPage extends HookWidget {
                         darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
                       ),
                       child: CellItem(
-                        title: Text(context.l10n.notificationPermissionTitle),
+                        title: Text(context.l10n.turnOnNotifications),
                         onTap: () => openUri(context,
                             'x-apple.systempreferences:com.apple.preference.notifications'),
                       ),
@@ -92,7 +92,7 @@ class NotificationPage extends HookWidget {
                       padding:
                           const EdgeInsets.only(left: 20, bottom: 14, top: 10),
                       child: Text(
-                        context.l10n.notificationPermissionDescription,
+                        context.l10n.notificationContent,
                         style: TextStyle(
                           color: context.theme.secondaryText,
                           fontSize: 14,
@@ -108,7 +108,7 @@ class NotificationPage extends HookWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 20, bottom: 14),
                   child: Text(
-                    '${context.l10n.notificationPermissionManually}${context.l10n.notificationPermissionDescription}',
+                    '${context.l10n.notificationPermissionManually}${context.l10n.notificationContent}',
                     style: TextStyle(
                       color: context.theme.secondaryText,
                       fontSize: 14,

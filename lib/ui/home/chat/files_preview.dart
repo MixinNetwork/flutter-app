@@ -146,7 +146,7 @@ class _FilesPreviewDialog extends HookWidget {
                       children: [
                         _Tab(
                           assetName: Resources.assetsImagesFilePreviewImagesSvg,
-                          tooltip: context.l10n.sendQuick,
+                          tooltip: context.l10n.sendQuickly,
                           onTap: () => currentTab.value = _TabType.image,
                           selected: currentTab.value == _TabType.image,
                           show: hasImage,
@@ -770,7 +770,7 @@ class _ChatDragIndicator extends StatelessWidget {
               )),
           child: Center(
             child: Text(
-              context.l10n.chatDragMoreFile,
+              context.l10n.addFile,
               style: TextStyle(
                 fontSize: 14,
                 color: context.theme.text,

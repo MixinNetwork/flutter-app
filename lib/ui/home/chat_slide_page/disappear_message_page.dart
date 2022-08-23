@@ -27,7 +27,7 @@ class DisappearMessagePage extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: context.theme.primary,
         appBar: MixinAppBar(
-          title: Text(context.l10n.disappearingMessages),
+          title: Text(context.l10n.disappearingMessage),
         ),
         body: SingleChildScrollView(
           child: Column(
@@ -42,7 +42,7 @@ class DisappearMessagePage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: HighlightText(
-                  context.l10n.disappearingMessagesDescription,
+                  context.l10n.disappearingMessageHint,
                   style: TextStyle(
                     color: context.theme.secondaryText,
                     height: 1.5,
@@ -90,7 +90,7 @@ class _Options extends HookWidget {
       child: Column(
         children: [
           CellItem(
-            title: Text(context.l10n.off),
+            title: Text(context.l10n.close),
             trailing: expireIn < const Duration(seconds: 1)
                 ? SvgPicture.asset(
                     Resources.assetsImagesCheckedSvg,
@@ -110,32 +110,32 @@ class _Options extends HookWidget {
             },
           ),
           _DurationOptionItem(
-            label: '30 ${context.l10n.seconds}',
+            label: '30 ${context.l10n.unitSecond(30)}',
             duration: const Duration(seconds: 30),
             current: expireIn,
           ),
           _DurationOptionItem(
-            label: '10 ${context.l10n.minutes}',
+            label: '10 ${context.l10n.unitMinute(10)}',
             duration: const Duration(minutes: 10),
             current: expireIn,
           ),
           _DurationOptionItem(
-            label: '2 ${context.l10n.hours}',
+            label: '2 ${context.l10n.unitHour(2)}',
             duration: const Duration(hours: 2),
             current: expireIn,
           ),
           _DurationOptionItem(
-            label: '1 ${context.l10n.day}',
+            label: '1 ${context.l10n.unitDay(1)}',
             duration: const Duration(days: 1),
             current: expireIn,
           ),
           _DurationOptionItem(
-            label: '1 ${context.l10n.week}',
+            label: '1 ${context.l10n.unitWeek(1)}',
             duration: const Duration(days: 7),
             current: expireIn,
           ),
           CellItem(
-            title: Text(context.l10n.disappearingCustomTime),
+            title: Text(context.l10n.customTime),
             onTap: () {
               showMixinDialog(
                 context: context,
@@ -267,7 +267,7 @@ class _CustomExpireTimeDialog extends HookWidget {
           children: [
             MixinAppBar(
               leading: const SizedBox(),
-              title: Text(context.l10n.disappearingCustomTime),
+              title: Text(context.l10n.customTime),
               actions: const [MixinCloseButton()],
             ),
             const SizedBox(height: 16),
@@ -372,41 +372,41 @@ class _CustomExpireUnitSelection extends StatelessWidget {
     final String text;
     switch (unit.value) {
       case _CustomExpireTimeUnit.second:
-        text = context.l10n.second;
+        text = context.l10n.unitSecond(1);
         break;
       case _CustomExpireTimeUnit.minute:
-        text = context.l10n.minute;
+        text = context.l10n.unitMinute(1);
         break;
       case _CustomExpireTimeUnit.hour:
-        text = context.l10n.hour;
+        text = context.l10n.unitHour(1);
         break;
       case _CustomExpireTimeUnit.day:
-        text = context.l10n.day;
+        text = context.l10n.unitDay(1);
         break;
       case _CustomExpireTimeUnit.week:
-        text = context.l10n.week;
+        text = context.l10n.unitWeek(1);
         break;
     }
     return ContextMenuPortalEntry(
       buildMenus: () => [
         ContextMenu(
-          title: context.l10n.second,
+          title: context.l10n.unitSecond(1),
           onTap: () => unit.value = _CustomExpireTimeUnit.second,
         ),
         ContextMenu(
-          title: context.l10n.minute,
+          title: context.l10n.unitMinute(1),
           onTap: () => unit.value = _CustomExpireTimeUnit.minute,
         ),
         ContextMenu(
-          title: context.l10n.hour,
+          title: context.l10n.unitHour(1),
           onTap: () => unit.value = _CustomExpireTimeUnit.hour,
         ),
         ContextMenu(
-          title: context.l10n.day,
+          title: context.l10n.unitDay(1),
           onTap: () => unit.value = _CustomExpireTimeUnit.day,
         ),
         ContextMenu(
-          title: context.l10n.week,
+          title: context.l10n.unitWeek(1),
           onTap: () => unit.value = _CustomExpireTimeUnit.week,
         ),
       ],

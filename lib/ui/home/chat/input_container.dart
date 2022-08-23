@@ -77,7 +77,7 @@ class InputContainer extends HookWidget {
         height: 56,
         alignment: Alignment.center,
         child: Text(
-          context.l10n.groupCantSendDes,
+          context.l10n.groupCantSend,
           style: TextStyle(
             color: context.theme.secondaryText,
           ),
@@ -358,7 +358,7 @@ class _AnimatedSendOrVoiceButton extends HookWidget {
 }
 
 void showMaxLengthReachedToast(BuildContext context) =>
-    showToastFailed(context, ToastError(context.l10n.messageTooLong));
+    showToastFailed(context, ToastError(context.l10n.contentTooLong));
 
 void _sendPostMessage(
     BuildContext context, TextEditingController textEditingController) {
@@ -510,8 +510,8 @@ class _SendTextField extends HookWidget {
             decoration: InputDecoration(
               isDense: true,
               hintText: isEncryptConversation
-                  ? context.l10n.chatInputHint
-                  : context.l10n.typeAMessage,
+                  ? context.l10n.chatHintE2e
+                  : context.l10n.typeMessage,
               hintStyle: TextStyle(
                 color: context.theme.secondaryText,
                 fontSize: 14,

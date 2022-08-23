@@ -206,7 +206,7 @@ class _PhoneNumberInputScene extends HookWidget {
               final phoneNumber = dialCode + mobileNumberStr;
               final ret = await showConfirmMixinDialog(
                 context,
-                context.l10n.sendCodeConfirm(phoneNumber),
+                context.l10n.landingInvitationDialogContent(phoneNumber),
                 maxWidth: 440,
               );
               if (!ret) {
@@ -225,8 +225,8 @@ class _PhoneNumberInputScene extends HookWidget {
                       DateTime.parse(response.deactivatedAt!).toLocal();
                   final continueLogin = await showConfirmMixinDialog(
                     context,
-                    context.l10n.landingDeletionWarningTitle,
-                    description: context.l10n.landingDeletionWarningContent(
+                    context.l10n.loginAndAbortAccountDeletion,
+                    description: context.l10n.landingDeleteContent(
                       DateFormat().format(date),
                     ),
                     maxWidth: 440,
@@ -367,7 +367,7 @@ class _CodeInputScene extends HookWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 125),
             child: Text(
-              context.l10n.enterVerificationCode(phoneNumber),
+              context.l10n.landingValidationTitle(phoneNumber),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
@@ -439,7 +439,7 @@ class _CodeInputScene extends HookWidget {
               vertical: 14,
             ),
             onTap: () => performLogin(codeInputController.text),
-            child: Text(context.l10n.login),
+            child: Text(context.l10n.signIn),
           ),
           const SizedBox(height: 90),
         ],
@@ -796,7 +796,7 @@ class _CaptchaWebViewDialog extends HookWidget {
         controllerRef.value!.loadUrl('about:blank');
         showToastFailed(
           context,
-          ToastError(context.l10n.errorRecaptchaTimeout),
+          ToastError(context.l10n.recaptchaTimeout),
         );
         Navigator.pop(context);
       }

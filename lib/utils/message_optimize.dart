@@ -21,11 +21,11 @@ String? messagePreviewOptimize(
 
   final trimContent = content?.trim();
   if (messageCategory.isIllegalMessageCategory) {
-    _content = Localization.current.chatNotSupport;
+    _content = Localization.current.messageNotSupport;
   } else if (messageStatus == MessageStatus.failed) {
     _content = Localization.current.waitingForThisMessage;
   } else if (messageStatus == MessageStatus.unknown) {
-    _content = Localization.current.chatNotSupport;
+    _content = Localization.current.messageNotSupport;
   } else if (messageCategory.isText) {
     _content = trimContent;
   } else if (messageCategory == MessageCategory.systemAccountSnapshot) {
@@ -57,7 +57,7 @@ String? messagePreviewOptimize(
           .join();
     } catch (_) {}
   } else if (messageCategory == MessageCategory.appCard) {
-    _content = '[${Localization.current.appCard}]';
+    _content = '[${Localization.current.card}]';
     try {
       _content =
           AppCardData.fromJson(jsonDecode(trimContent!) as Map<String, dynamic>)
@@ -66,19 +66,19 @@ String? messagePreviewOptimize(
   } else if (messageCategory.isContact) {
     _content = '[${Localization.current.contact}]';
   } else if (messageCategory.isCallMessage) {
-    _content = '[${Localization.current.videoCall}]';
+    _content = Localization.current.contentVoice;
   } else if (messageCategory.isRecall) {
     _content =
-        '[${isCurrentUser ? Localization.current.chatRecallMe : Localization.current.chatRecallDelete}]';
+        '[${isCurrentUser ? Localization.current.youDeletedThisMessage : Localization.current.thisMessageWasDeleted}]';
   } else if (messageCategory.isTranscript) {
-    _content = '[${Localization.current.chatTranscript}]';
+    _content = '[${Localization.current.transcript}]';
   } else {
-    _content = Localization.current.chatNotSupport;
+    _content = Localization.current.messageNotSupport;
   }
 
   if ((_content?.isNotEmpty ?? false) && isGroup) {
     final sender =
-        isCurrentUser ? Localization.current.youStart : senderFullName ?? '';
+        isCurrentUser ? Localization.current.you : senderFullName ?? '';
     _content = '$sender: $_content';
   }
 

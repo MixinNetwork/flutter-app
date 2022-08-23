@@ -23,9 +23,9 @@ class WaitingMessage extends HookWidget {
 
     final content = RichText(
       text: TextSpan(
-        text: context.l10n.chatWaiting(
+        text: context.l10n.chatDecryptionFailedHint(
           relationship == UserRelationship.me
-              ? context.l10n.chatWaitingDesktop
+              ? context.l10n.linkedDevice
               : userFullName!,
         ),
         style: TextStyle(
@@ -35,7 +35,7 @@ class WaitingMessage extends HookWidget {
         children: [
           TextSpan(
             mouseCursor: SystemMouseCursors.click,
-            text: context.l10n.chatLearn,
+            text: context.l10n.learnMore,
             style: TextStyle(
               fontSize: MessageItemWidget.primaryFontSize,
               color: context.theme.accent,

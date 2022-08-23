@@ -32,7 +32,7 @@ class _UnknownMixinUri extends StatelessWidget {
               children: [
                 const SizedBox(height: 36),
                 Text(
-                  context.l10n.uriCheckOnPhone,
+                  context.l10n.chatNotSupportUriOnPhone,
                   style: TextStyle(fontSize: 16, color: context.theme.text),
                 ),
                 const SizedBox(height: 36),

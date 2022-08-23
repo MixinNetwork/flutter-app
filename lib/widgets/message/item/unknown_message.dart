@@ -16,7 +16,7 @@ class UnknownMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final content = RichText(
       text: TextSpan(
-        text: context.l10n.chatNotSupport,
+        text: context.l10n.messageNotSupport,
         style: TextStyle(
           fontSize: MessageItemWidget.primaryFontSize,
           color: context.theme.text,
@@ -25,7 +25,7 @@ class UnknownMessage extends StatelessWidget {
           const TextSpan(text: ' '),
           TextSpan(
             mouseCursor: SystemMouseCursors.click,
-            text: context.l10n.chatLearn,
+            text: context.l10n.learnMore,
             style: TextStyle(
               fontSize: MessageItemWidget.primaryFontSize,
               color: context.theme.accent,

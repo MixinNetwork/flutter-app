@@ -264,8 +264,8 @@ class _AddToContactsButton extends StatelessWidget {
         },
         title: Text(
           user.isBot
-              ? context.l10n.conversationAddBot
-              : context.l10n.conversationAddContact,
+              ? context.l10n.addBotWithPlus
+              : context.l10n.addContactWithPlus,
           style: TextStyle(fontSize: 12, color: context.theme.accent),
         ),
       );

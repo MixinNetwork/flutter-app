@@ -93,7 +93,7 @@ class PostPage extends HookWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              context.l10n.noPost,
+              context.l10n.noPosts,
               style: TextStyle(
                 fontSize: 12,
                 color: context.theme.secondaryText,
