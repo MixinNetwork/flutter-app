@@ -501,9 +501,9 @@ class _Action extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             ...common,
-            if (collapsed) menu,
-            close,
             if (!collapsed) ...collapsible,
+            close,
+            if (collapsed) menu,
           ].joinList(_divider),
         );
       }),
