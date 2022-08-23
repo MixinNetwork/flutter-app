@@ -103,12 +103,18 @@ Future<void> main(List<String> args) async {
       // The macOS handle content size in native.
       if (!Platform.isMacOS) {
         final screen = await getCurrentScreen();
-        i('screen: ${screen?.visibleFrame}');
+        i('screen: ${screen?.visibleFrame} ${screen?.scaleFactor}');
         const defaultWindowSize = Size(1280, 750);
         if (screen != null) {
           appWindow.size = Size(
-            math.min(screen.visibleFrame.width, defaultWindowSize.width),
-            math.min(screen.visibleFrame.height, defaultWindowSize.height),
+            math.min(
+              screen.visibleFrame.width / screen.scaleFactor,
+              defaultWindowSize.width,
+            ),
+            math.min(
+              screen.visibleFrame.height / screen.scaleFactor,
+              defaultWindowSize.height,
+            ),
           );
         } else {
           appWindow.size = defaultWindowSize;
