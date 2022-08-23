@@ -25,7 +25,7 @@ class WaitingMessage extends HookWidget {
       text: TextSpan(
         text: context.l10n.chatDecryptionFailedHint(
           relationship == UserRelationship.me
-              ? context.l10n.mixinMessengerDesktop
+              ? context.l10n.linkedDevice
               : userFullName!,
         ),
         style: TextStyle(

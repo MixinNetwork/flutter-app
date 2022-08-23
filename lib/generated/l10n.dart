@@ -2050,6 +2050,16 @@ class Localization {
     );
   }
 
+  /// `linked device`
+  String get linkedDevice {
+    return Intl.message(
+      'linked device',
+      name: 'linkedDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Live`
   String get live {
     return Intl.message(

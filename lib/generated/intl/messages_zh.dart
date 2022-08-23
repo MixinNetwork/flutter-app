@@ -368,6 +368,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "learnMore": MessageLookupByLibrary.simpleMessage("了解更多"),
         "less": MessageLookupByLibrary.simpleMessage("更少"),
         "light": MessageLookupByLibrary.simpleMessage("浅色"),
+        "linkedDevice": MessageLookupByLibrary.simpleMessage("连接的设备"),
         "live": MessageLookupByLibrary.simpleMessage("直播"),
         "loading": MessageLookupByLibrary.simpleMessage("正在加载..."),
         "loadingTime":

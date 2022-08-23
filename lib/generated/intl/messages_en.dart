@@ -419,6 +419,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "learnMore": MessageLookupByLibrary.simpleMessage("Learn More"),
         "less": MessageLookupByLibrary.simpleMessage("less"),
         "light": MessageLookupByLibrary.simpleMessage("Light"),
+        "linkedDevice": MessageLookupByLibrary.simpleMessage("linked device"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading..."),
         "loadingTime": MessageLookupByLibrary.simpleMessage(
