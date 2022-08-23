@@ -106,15 +106,13 @@ Future<void> main(List<String> args) async {
         i('screen: ${screen?.visibleFrame} ${screen?.scaleFactor}');
         const defaultWindowSize = Size(1280, 750);
         if (screen != null) {
+          var screenSize = screen.visibleFrame.size;
+          if (Platform.isWindows) {
+            screenSize = screenSize / screen.scaleFactor;
+          }
           appWindow.size = Size(
-            math.min(
-              screen.visibleFrame.width / screen.scaleFactor,
-              defaultWindowSize.width,
-            ),
-            math.min(
-              screen.visibleFrame.height / screen.scaleFactor,
-              defaultWindowSize.height,
-            ),
+            math.min(screenSize.width, defaultWindowSize.width),
+            math.min(screenSize.height, defaultWindowSize.height),
           );
         } else {
           appWindow.size = defaultWindowSize;
