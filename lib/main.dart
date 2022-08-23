@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
@@ -13,6 +14,7 @@ import 'package:path/path.dart' as p;
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:quick_breakpad/quick_breakpad.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
+import 'package:window_size/window_size.dart';
 
 import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
@@ -95,12 +97,26 @@ Future<void> main(List<String> args) async {
   );
 
   if (kPlatformIsDesktop) {
-    doWhenWindowReady(() {
+    doWhenWindowReady(() async {
       appWindow.minSize =
           const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480);
       // The macOS handle content size in native.
       if (!Platform.isMacOS) {
-        appWindow.size = const Size(1280, 750);
+        final screen = await getCurrentScreen();
+        i('screen: ${screen?.visibleFrame} ${screen?.scaleFactor}');
+        const defaultWindowSize = Size(1280, 750);
+        if (screen != null) {
+          var screenSize = screen.visibleFrame.size;
+          if (Platform.isWindows) {
+            screenSize = screenSize / screen.scaleFactor;
+          }
+          appWindow.size = Size(
+            math.min(screenSize.width, defaultWindowSize.width),
+            math.min(screenSize.height, defaultWindowSize.height),
+          );
+        } else {
+          appWindow.size = defaultWindowSize;
+        }
         // FIXME remove this when the issues fixed.
         // https://github.com/bitsdojo/bitsdojo_window/issues/72
         // appWindow.alignment = Alignment.center;
