@@ -104,7 +104,7 @@
 "groupPopMenuMessage" : "Mesej {arg0}",
 "groupPopMenuRemove" : "Alih keluar {arg0}",
 "helpCenter" : "Pusat bantuan",
-"hour" : "{count, plural, one{null} other{%d Jam}}",
+"hour" : "{count, plural, one{null} other{{arg0} Jam}}",
 "initializing" : "Memulakan…",
 "inviteInfo" : "Sesiapa sahaja yang mempunyai Mixin boleh mengikuti pautan ini untuk menyertai kumpulan ini. Kongsi sahaja dengan orang yang anda percayai.",
 "inviteToGroupViaLink" : "Jemput ke Kumpulan melalui Pautan",

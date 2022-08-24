@@ -1888,15 +1888,15 @@ class Localization {
     );
   }
 
-  /// `{count, plural, one{%d Hour} other{%d Hours}}`
-  String hour(num count) {
+  /// `{count, plural, one{{arg0} Hour} other{{arg0} Hours}}`
+  String hour(num count, Object arg0) {
     return Intl.plural(
       count,
-      one: '%d Hour',
-      other: '%d Hours',
+      one: '$arg0 Hour',
+      other: '$arg0 Hours',
       name: 'hour',
       desc: '',
-      args: [count],
+      args: [count, arg0],
     );
   }
 

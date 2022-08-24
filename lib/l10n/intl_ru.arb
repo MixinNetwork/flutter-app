@@ -173,7 +173,7 @@
 "help" : "Помощь",
 "helpCenter" : "Центр помощи",
 "hideMixin" : "Скрыть Mixin",
-"hour" : "{count, plural, one{%d час} other{%d часы}}",
+"hour" : "{count, plural, one{{arg0} час} other{{arg0} часы}}",
 "ignoreThisVersion" : "Игнорировать новую версию",
 "image" : "изображение",
 "includeFiles" : "Включить файлы",

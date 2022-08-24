@@ -74,8 +74,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m24(arg0) => "移除 ${arg0}";
 
-  static String m25(count) =>
-      "${Intl.plural(count, one: '%d 小時', other: '%d 小時')}";
+  static String m25(count, arg0) =>
+      "${Intl.plural(count, one: '${arg0} 小時', other: '${arg0} 小時')}";
 
   static String m26(arg0) => "${arg0} 加入";
 

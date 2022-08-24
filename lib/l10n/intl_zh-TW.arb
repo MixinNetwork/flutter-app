@@ -175,7 +175,7 @@
 "help" : "幫助",
 "helpCenter" : "幫助中心",
 "hideMixin" : "隱藏 Mixin",
-"hour" : "{count, plural, one{%d 小時} other{%d 小時}}",
+"hour" : "{count, plural, one{{arg0} 小時} other{{arg0} 小時}}",
 "ignoreThisVersion" : "忽略這次版本更新",
 "image" : "圖片",
 "includeFiles" : "包括檔案",
