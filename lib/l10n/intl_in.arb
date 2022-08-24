@@ -104,7 +104,7 @@
 "groupPopMenuMessage" : "Kirim pesan ke {arg0}",
 "groupPopMenuRemove" : "Hapus {arg0}",
 "helpCenter" : "Pusat bantuan",
-"hour" : "{count, plural, one{null} other{%d Jam}}",
+"hour" : "{count, plural, one{null} other{{arg0} Jam}}",
 "initializing" : "Memulai...",
 "inviteInfo" : "Siapapun yang memiliki Mixin dapat mengikuti tautan ini untuk bergabung dengan grup ini. Hanya bagikan dengan orang yang Anda percaya.",
 "inviteToGroupViaLink" : "Undang ke Grup melalui Tautan",

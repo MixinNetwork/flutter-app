@@ -78,7 +78,7 @@ class ConversationMenuWrapper extends StatelessWidget {
         else
           ContextMenu(
             icon: Resources.assetsImagesContextMenuUnmuteSvg,
-            title: context.l10n.muted,
+            title: context.l10n.mute,
             onTap: () async {
               final result = await showMixinDialog<int?>(
                   context: context, child: const MuteDialog());

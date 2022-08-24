@@ -182,7 +182,7 @@
 "help" : "Help",
 "helpCenter" : "Help center",
 "hideMixin" : "Hide Mixin",
-"hour" : "{count, plural, one{%d Hour} other{%d Hours}}",
+"hour" : "{count, plural, one{{arg0} Hour} other{{arg0} Hours}}",
 "ignoreThisVersion" : "Ignore the new version",
 "image" : "image",
 "includeFiles" : "Include Files",

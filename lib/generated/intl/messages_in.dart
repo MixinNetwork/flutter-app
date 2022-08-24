@@ -55,8 +55,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m24(arg0) => "Hapus ${arg0}";
 
-  static String m25(count) =>
-      "${Intl.plural(count, one: 'null', other: '%d Jam')}";
+  static String m25(count, arg0) =>
+      "${Intl.plural(count, one: 'null', other: '${arg0} Jam')}";
 
   static String m26(arg0) => "Bergabung di ${arg0}";
 

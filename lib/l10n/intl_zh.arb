@@ -181,7 +181,7 @@
 "help" : "帮助",
 "helpCenter" : "帮助中心",
 "hideMixin" : "隐藏 Mixin",
-"hour" : "{count, plural, one{%d 小时} other{%d 小时}}",
+"hour" : "{count, plural, one{{arg0} 小时} other{{arg0} 小时}}",
 "ignoreThisVersion" : "忽略这次版本更新",
 "image" : "图片",
 "includeFiles" : "包括文件",

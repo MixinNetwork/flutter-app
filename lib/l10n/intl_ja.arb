@@ -173,7 +173,7 @@
 "help" : "ヘルプ",
 "helpCenter" : "ヘルプセンター",
 "hideMixin" : "Mixinを非表示にする",
-"hour" : "{count, plural, one{%d時間} other{%d時間}}",
+"hour" : "{count, plural, one{{arg0}時間} other{{arg0}時間}}",
 "ignoreThisVersion" : "最新版を無視",
 "image" : "画像",
 "includeFiles" : "ファイルが含まれています",

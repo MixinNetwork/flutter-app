@@ -74,8 +74,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m24(arg0) => "${arg0}をグループから退会させる";
 
-  static String m25(count) =>
-      "${Intl.plural(count, one: '%d時間', other: '%d時間')}";
+  static String m25(count, arg0) =>
+      "${Intl.plural(count, one: '${arg0}時間', other: '${arg0}時間')}";
 
   static String m26(arg0) => "${arg0}からMixinを利用しています";
 
