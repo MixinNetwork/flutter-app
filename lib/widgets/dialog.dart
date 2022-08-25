@@ -42,7 +42,7 @@ Future<T?> showMixinDialog<T>({
   required BuildContext context,
   RouteSettings? routeSettings,
   required Widget child,
-  EdgeInsetsGeometry? padding,
+  EdgeInsets? padding,
   Color? backgroundColor,
   bool barrierDismissible = true,
 }) =>
@@ -143,38 +143,42 @@ class _DialogPage extends StatelessWidget {
   });
 
   final Widget child;
-  final EdgeInsetsGeometry? padding;
+  final EdgeInsets? padding;
   final Color? backgroundColor;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: padding ?? EdgeInsets.zero,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(11)),
-            border: Border.all(
-              color: const Color.fromRGBO(255, 255, 255, 0.08),
+  Widget build(BuildContext context) {
+    final effectivePadding =
+        MediaQuery.of(context).viewInsets + (padding ?? EdgeInsets.zero);
+    return Padding(
+      padding: effectivePadding,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(11)),
+          border: Border.all(
+            color: const Color.fromRGBO(255, 255, 255, 0.08),
+          ),
+          boxShadow: [
+            const BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.15),
+              offset: Offset(0, 8),
+              blurRadius: 40,
             ),
-            boxShadow: [
-              const BoxShadow(
-                color: Color.fromRGBO(0, 0, 0, 0.15),
-                offset: Offset(0, 8),
-                blurRadius: 40,
-              ),
-              BoxShadow(
-                color: const Color.fromRGBO(0, 0, 0, 0.07),
-                offset: const Offset(0, 4),
-                blurRadius: lerpDouble(16, 6, context.brightnessValue)!,
-              ),
-            ],
-            color: backgroundColor ?? context.theme.popUp,
-          ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.all(Radius.circular(11)),
-            child: child,
-          ),
+            BoxShadow(
+              color: const Color.fromRGBO(0, 0, 0, 0.07),
+              offset: const Offset(0, 4),
+              blurRadius: lerpDouble(16, 6, context.brightnessValue)!,
+            ),
+          ],
+          color: backgroundColor ?? context.theme.popUp,
         ),
-      );
+        child: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(11)),
+          child: child,
+        ),
+      ),
+    );
+  }
 }
 
 /// default onTap is Navigator.pop
