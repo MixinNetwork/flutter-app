@@ -104,27 +104,31 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m37(arg0, arg1) => "1\$sは、消えるメッセージの有効時間を${arg0}に設定しました。";
 
-  static String m38(arg0) => "ファイルを開くことができません: ${arg0}";
+  static String m38(arg0) =>
+      "${arg0}と紐付けられたプロフィールとアカウント情報が削除されます。詳細はこちらをご覧ください。";
 
-  static String m39(count) => "${Intl.plural(count, one: '日', other: '日間')}";
+  static String m39(arg0) => "ファイルを開くことができません: ${arg0}";
 
-  static String m40(count) => "${Intl.plural(count, one: '時', other: '時間')}";
+  static String m40(count) => "${Intl.plural(count, one: '日', other: '日間')}";
 
-  static String m41(count) => "${Intl.plural(count, one: '分', other: '分間')}";
+  static String m41(count) => "${Intl.plural(count, one: '時', other: '時間')}";
 
-  static String m42(count) => "${Intl.plural(count, one: '秒', other: '秒間')}";
+  static String m42(count) => "${Intl.plural(count, one: '分', other: '分間')}";
 
-  static String m43(count) => "${Intl.plural(count, one: '週', other: '週間')}";
+  static String m43(count) => "${Intl.plural(count, one: '秒', other: '秒間')}";
 
-  static String m44(arg0) => "現在価格 ${arg0}";
+  static String m44(count) => "${Intl.plural(count, one: '週', other: '週間')}";
 
-  static String m45(arg0) => "当時の価格 ${arg0}";
+  static String m45(arg0) => "現在価格 ${arg0}";
+
+  static String m46(arg0) => "当時の価格 ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "aMessage": MessageLookupByLibrary.simpleMessage("メッセージ"),
         "about": MessageLookupByLibrary.simpleMessage("Mixinについて"),
         "accessDenied": MessageLookupByLibrary.simpleMessage("アクセスが拒否されました"),
+        "account": MessageLookupByLibrary.simpleMessage("アカウント"),
         "add": MessageLookupByLibrary.simpleMessage("追加"),
         "addBotWithPlus": MessageLookupByLibrary.simpleMessage("ミニアプリに追加"),
         "addContact": MessageLookupByLibrary.simpleMessage("友だちを追加"),
@@ -161,6 +165,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("キャンセル"),
         "card": MessageLookupByLibrary.simpleMessage("カード"),
         "change": MessageLookupByLibrary.simpleMessage("変更"),
+        "changeNumber": MessageLookupByLibrary.simpleMessage("電話番号を変更"),
+        "changeNumberInstead": MessageLookupByLibrary.simpleMessage("電話番号を変更"),
         "changedDisappearingMessageSettings": m0,
         "chatBackup": MessageLookupByLibrary.simpleMessage("チャットのバックアップ"),
         "chatBotReceptionTitle":
@@ -215,6 +221,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataError": MessageLookupByLibrary.simpleMessage("データエラー"),
         "dataLoading": MessageLookupByLibrary.simpleMessage("ロード中..."),
         "delete": MessageLookupByLibrary.simpleMessage("削除"),
+        "deleteAccountDetailHint": MessageLookupByLibrary.simpleMessage(
+            "ローカルメッセージとiCloudにバックアップされた内容は削除されません"),
+        "deleteAccountHint":
+            MessageLookupByLibrary.simpleMessage("アカウント情報とプロフィール画像を削除します"),
         "deleteChat": MessageLookupByLibrary.simpleMessage("チャットを削除"),
         "deleteChatDescription": MessageLookupByLibrary.simpleMessage(
             "チャットを削除すると、この端末のみからメッセージが削除されます。他の端末からは削除されません。"),
@@ -223,6 +233,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("全員のチャットから削除"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("あなたのチャットから削除"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("グループを削除"),
+        "deleteMyAccount": MessageLookupByLibrary.simpleMessage("アカウント削除"),
         "deleteTheCircle": m13,
         "developer": MessageLookupByLibrary.simpleMessage("開発者向け情報"),
         "disableDisappearingMessage": m14,
@@ -245,8 +256,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("すべての変更が失われます。本当に終了しますか？"),
         "editName": MessageLookupByLibrary.simpleMessage("名前を変更"),
         "editProfile": MessageLookupByLibrary.simpleMessage("プロフィールを編集"),
+        "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
+            "アカウントを削除するためにPINコードを入力してください"),
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("電話番号を入力して下さい"),
+        "enterYourPinToContinue":
+            MessageLookupByLibrary.simpleMessage("PINコードを入力して、続けてください"),
         "errorAddressExists": MessageLookupByLibrary.simpleMessage(
             "アドレスが存在しません。アドレスが正常に追加されていることを確認してください。"),
         "errorAddressNotSync": MessageLookupByLibrary.simpleMessage(
@@ -498,6 +513,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mixin ID, 名前"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
             "iCloudにチャット履歴をバックアップします。 iPhoneを紛失または機種変更した場合にMixinを再インストールしてチャット履歴を復元できます。バックアップしたメッセージはMixinのE2E暗号によって保護されていません。"),
+        "settingDeleteAccountPinContent": m38,
+        "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
+            "https://mixinmessenger.zendesk.com/hc/articles/4414170627988"),
         "share": MessageLookupByLibrary.simpleMessage("共有"),
         "shareApps": MessageLookupByLibrary.simpleMessage("共有ずみのアプリ"),
         "shareError": MessageLookupByLibrary.simpleMessage("エラーを共有"),
@@ -532,17 +550,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "toggleChatInfo": MessageLookupByLibrary.simpleMessage("チャット情報のオン/オフ"),
         "transactionId": MessageLookupByLibrary.simpleMessage("トランザクションID"),
         "transactions": MessageLookupByLibrary.simpleMessage("もらった・あげたコイン💰"),
+        "transactionsCannotBeDeleted":
+            MessageLookupByLibrary.simpleMessage("トランザクション履歴を削除することはできません"),
         "transcript": MessageLookupByLibrary.simpleMessage("メッセージ履歴"),
         "transfer": MessageLookupByLibrary.simpleMessage("送金"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("通知をオンにする"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("メッセージを入力"),
-        "unableToOpenFile": m38,
+        "unableToOpenFile": m39,
         "unblock": MessageLookupByLibrary.simpleMessage("ブロックを解除"),
-        "unitDay": m39,
-        "unitHour": m40,
-        "unitMinute": m41,
-        "unitSecond": m42,
-        "unitWeek": m43,
+        "unitDay": m40,
+        "unitHour": m41,
+        "unitMinute": m42,
+        "unitSecond": m43,
+        "unitWeek": m44,
         "unmute": MessageLookupByLibrary.simpleMessage("ミュート解除"),
         "unpin": MessageLookupByLibrary.simpleMessage("ピン留めを止める"),
         "unpinAllMessages":
@@ -551,8 +571,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("全てのメッセージのピン留めを解除しますか？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("新しいメッセージ"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("ユーザーが見つかりませんでした"),
-        "valueNow": m44,
-        "valueThen": m45,
+        "valueNow": m45,
+        "valueThen": m46,
+        "verifyPin": MessageLookupByLibrary.simpleMessage("PINコードを認証"),
         "video": MessageLookupByLibrary.simpleMessage("動画"),
         "videos": MessageLookupByLibrary.simpleMessage("動画"),
         "waitingForThisMessage":

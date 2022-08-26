@@ -73,14 +73,15 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m36(count, arg0) =>
       "${Intl.plural(count, one: 'null', other: '${arg0} mesej berkaitan')}";
 
-  static String m44(arg0) => "nilai sekarang ${arg0}";
+  static String m45(arg0) => "nilai sekarang ${arg0}";
 
-  static String m45(arg0) => "nilai maka ${arg0}";
+  static String m46(arg0) => "nilai maka ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "about": MessageLookupByLibrary.simpleMessage("Mengenai"),
         "accessDenied": MessageLookupByLibrary.simpleMessage("Akses dinafikan"),
+        "account": MessageLookupByLibrary.simpleMessage("Akaun"),
         "addContact": MessageLookupByLibrary.simpleMessage("Tambah Kenalan"),
         "addGroupDescription": MessageLookupByLibrary.simpleMessage(
             "Tambahkan keterangan kumpulan"),
@@ -351,8 +352,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "unmute": MessageLookupByLibrary.simpleMessage("Nyahsenyap"),
         "userNotFound":
             MessageLookupByLibrary.simpleMessage("Pengguna tidak ditemui"),
-        "valueNow": m44,
-        "valueThen": m45,
+        "valueNow": m45,
+        "valueThen": m46,
+        "verifyPin": MessageLookupByLibrary.simpleMessage("Sahkan PIN"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videos": MessageLookupByLibrary.simpleMessage("Video"),
         "whatsYourName":

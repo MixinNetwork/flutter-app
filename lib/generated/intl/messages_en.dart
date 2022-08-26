@@ -110,32 +110,36 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m37(arg0, arg1) =>
       "${arg0} set disappearing message time to ${arg1}";
 
-  static String m38(arg0) => "Unable to open file: ${arg0}";
+  static String m38(arg0) =>
+      "If you continue, your profile and account details will be delete on ${arg0}. read our document to **learn more**.";
 
-  static String m39(count) =>
-      "${Intl.plural(count, one: 'day', other: 'days')}";
+  static String m39(arg0) => "Unable to open file: ${arg0}";
 
   static String m40(count) =>
-      "${Intl.plural(count, one: 'hour', other: 'hours')}";
+      "${Intl.plural(count, one: 'day', other: 'days')}";
 
   static String m41(count) =>
-      "${Intl.plural(count, one: 'minute', other: 'minutes')}";
+      "${Intl.plural(count, one: 'hour', other: 'hours')}";
 
   static String m42(count) =>
-      "${Intl.plural(count, one: 'second', other: 'seconds')}";
+      "${Intl.plural(count, one: 'minute', other: 'minutes')}";
 
   static String m43(count) =>
+      "${Intl.plural(count, one: 'second', other: 'seconds')}";
+
+  static String m44(count) =>
       "${Intl.plural(count, one: 'week', other: 'weeks')}";
 
-  static String m44(arg0) => "value now ${arg0}";
+  static String m45(arg0) => "value now ${arg0}";
 
-  static String m45(arg0) => "value then ${arg0}";
+  static String m46(arg0) => "value then ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "aMessage": MessageLookupByLibrary.simpleMessage("a message"),
         "about": MessageLookupByLibrary.simpleMessage("About"),
         "accessDenied": MessageLookupByLibrary.simpleMessage("Access denied"),
+        "account": MessageLookupByLibrary.simpleMessage("Account"),
         "activity": MessageLookupByLibrary.simpleMessage("Activity"),
         "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addBotWithPlus": MessageLookupByLibrary.simpleMessage("+ Add Bot"),
@@ -182,6 +186,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "card": MessageLookupByLibrary.simpleMessage("Card"),
         "change": MessageLookupByLibrary.simpleMessage("Change"),
+        "changeNumber": MessageLookupByLibrary.simpleMessage("Change Number"),
+        "changeNumberInstead":
+            MessageLookupByLibrary.simpleMessage("Change Number Instead"),
         "changedDisappearingMessageSettings": m0,
         "chatBackup": MessageLookupByLibrary.simpleMessage("Chat Backup"),
         "chatBotReceptionTitle": MessageLookupByLibrary.simpleMessage(
@@ -244,6 +251,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataLoading": MessageLookupByLibrary.simpleMessage(
             "Data loading, please wait..."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
+        "deleteAccountDetailHint": MessageLookupByLibrary.simpleMessage(
+            "Local messages and iCloud Backups will not be deleted automatically"),
+        "deleteAccountHint": MessageLookupByLibrary.simpleMessage(
+            "Delete your account info and profile photo"),
         "deleteChat": MessageLookupByLibrary.simpleMessage("Delete Chat"),
         "deleteChatDescription": MessageLookupByLibrary.simpleMessage(
             "Deleting chat will remove messages form this devices only. They will not be removed from other devices."),
@@ -252,6 +263,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete for Everyone"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("Delete for me"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("Delete Group"),
+        "deleteMyAccount":
+            MessageLookupByLibrary.simpleMessage("Delete My Account"),
         "deleteTheCircle": m13,
         "developer": MessageLookupByLibrary.simpleMessage("Developer"),
         "disableDisappearingMessage": m14,
@@ -282,8 +295,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "All changes will be lost. Are you sure you want to exit?"),
         "editName": MessageLookupByLibrary.simpleMessage("Edit Name"),
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
+        "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
+            "Enter your PIN to delete your account"),
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("Enter your phone number"),
+        "enterYourPinToContinue":
+            MessageLookupByLibrary.simpleMessage("Enter your PIN to continue"),
         "errorAddressExists": MessageLookupByLibrary.simpleMessage(
             "The address does not exist, please make sure that the address is added successfully"),
         "errorAddressNotSync": MessageLookupByLibrary.simpleMessage(
@@ -314,6 +331,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "ERROR 20118: Invalid PIN format."),
         "errorNetworkTaskFailed": MessageLookupByLibrary.simpleMessage(
             "Network connection failed. Check or switch your network and try again"),
+        "errorNoPinToken": MessageLookupByLibrary.simpleMessage("No PIN token"),
         "errorNotFound":
             MessageLookupByLibrary.simpleMessage("ERROR 404: Not found"),
         "errorNotSupportedAudioFormat": MessageLookupByLibrary.simpleMessage(
@@ -561,6 +579,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
             "Back up your chat history to iCloud. if you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin Messenger. Messages you back up are not protected by Mixin Messenger end-to-end encryption while in iCloud."),
+        "settingDeleteAccountPinContent": m38,
+        "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
+            "https://mixinmessenger.zendesk.com/hc/articles/4414170627988"),
         "share": MessageLookupByLibrary.simpleMessage("Share"),
         "shareApps": MessageLookupByLibrary.simpleMessage("Shared Apps"),
         "shareContact": MessageLookupByLibrary.simpleMessage("Share Contact"),
@@ -602,6 +623,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Toggle chat info"),
         "transactionId": MessageLookupByLibrary.simpleMessage("Transaction Id"),
         "transactions": MessageLookupByLibrary.simpleMessage("Transactions"),
+        "transactionsCannotBeDeleted": MessageLookupByLibrary.simpleMessage(
+            "Transactions CANNOT be deleted"),
         "transcript": MessageLookupByLibrary.simpleMessage("Transcript"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
         "travelAndPlaces":
@@ -609,13 +632,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "turnOnNotifications":
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("Type message"),
-        "unableToOpenFile": m38,
+        "unableToOpenFile": m39,
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),
-        "unitDay": m39,
-        "unitHour": m40,
-        "unitMinute": m41,
-        "unitSecond": m42,
-        "unitWeek": m43,
+        "unitDay": m40,
+        "unitHour": m41,
+        "unitMinute": m42,
+        "unitSecond": m43,
+        "unitWeek": m44,
         "unmute": MessageLookupByLibrary.simpleMessage("Unmute"),
         "unpin": MessageLookupByLibrary.simpleMessage("Unpin"),
         "unpinAllMessages":
@@ -625,8 +648,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "unreadMessages":
             MessageLookupByLibrary.simpleMessage("Unread messages"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
-        "valueNow": m44,
-        "valueThen": m45,
+        "valueNow": m45,
+        "valueThen": m46,
+        "verifyPin": MessageLookupByLibrary.simpleMessage("Verify PIN"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "waitingForThisMessage":

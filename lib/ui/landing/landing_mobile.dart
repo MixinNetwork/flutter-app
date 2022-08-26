@@ -23,6 +23,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../../account/session_key_value.dart';
 import '../../constants/resources.dart';
 import '../../crypto/crypto_key_value.dart';
 import '../../crypto/signal/signal_protocol.dart';
@@ -323,9 +324,15 @@ class _CodeInputScene extends HookWidget {
         );
         final privateKey = base64Encode(sessionKey.privateKey.bytes);
 
-        await CryptoKeyValue.instance.init(response.data.identityNumber);
+        final identityNumber = response.data.identityNumber;
+        await CryptoKeyValue.instance.init(identityNumber);
         CryptoKeyValue.instance.localRegistrationId = registrationId;
 
+        await SessionKeyValue.instance.init(identityNumber);
+        SessionKeyValue.instance.pinToken = base64Encode(decryptPinToken(
+          response.data.pinToken,
+          sessionKey.privateKey,
+        ));
         context.multiAuthCubit.signIn(
           AuthState(account: response.data, privateKey: privateKey),
         );

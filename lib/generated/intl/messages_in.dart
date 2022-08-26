@@ -77,6 +77,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "about": MessageLookupByLibrary.simpleMessage("Tentang"),
         "accessDenied": MessageLookupByLibrary.simpleMessage("Akses ditolak"),
+        "account": MessageLookupByLibrary.simpleMessage("Akun"),
         "addContact": MessageLookupByLibrary.simpleMessage("Tambahkan Kontak"),
         "addGroupDescription":
             MessageLookupByLibrary.simpleMessage("Tambahkan deskripsi grup"),
@@ -347,6 +348,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unmute": MessageLookupByLibrary.simpleMessage("Suarakan"),
         "userNotFound":
             MessageLookupByLibrary.simpleMessage("Pengguna tidak ditemukan"),
+        "verifyPin": MessageLookupByLibrary.simpleMessage("Verifikasikan PIN"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videos": MessageLookupByLibrary.simpleMessage("Video"),
         "whatsYourName":

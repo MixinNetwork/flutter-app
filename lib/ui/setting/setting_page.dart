@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../account/account_key_value.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../utils/app_lifecycle.dart';
@@ -68,6 +71,20 @@ class SettingPage extends HookWidget {
                     CellGroup(
                       child: Column(
                         children: [
+                          if (Platform.isIOS &&
+                              AccountKeyValue.instance.primarySessionId ==
+                                  null &&
+                              context
+                                      .read<MultiAuthCubit>()
+                                      .state
+                                      .currentUser
+                                      ?.hasPin ==
+                                  true)
+                            _Item(
+                              assetName: Resources.assetsImagesAccountSvg,
+                              pageName: ResponsiveNavigatorCubit.accountPage,
+                              title: context.l10n.account,
+                            ),
                           _Item(
                             assetName: Resources.assetsImagesIcNotificationSvg,
                             pageName: ResponsiveNavigatorCubit.notificationPage,

@@ -80,6 +80,16 @@ class Localization {
     );
   }
 
+  /// `Account`
+  String get account {
+    return Intl.message(
+      'Account',
+      name: 'account',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Activity`
   String get activity {
     return Intl.message(
@@ -425,6 +435,26 @@ class Localization {
     return Intl.message(
       'Change',
       name: 'change',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change Number`
+  String get changeNumber {
+    return Intl.message(
+      'Change Number',
+      name: 'changeNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change Number Instead`
+  String get changeNumberInstead {
+    return Intl.message(
+      'Change Number Instead',
+      name: 'changeNumberInstead',
       desc: '',
       args: [],
     );
@@ -924,6 +954,26 @@ class Localization {
     );
   }
 
+  /// `Local messages and iCloud Backups will not be deleted automatically`
+  String get deleteAccountDetailHint {
+    return Intl.message(
+      'Local messages and iCloud Backups will not be deleted automatically',
+      name: 'deleteAccountDetailHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete your account info and profile photo`
+  String get deleteAccountHint {
+    return Intl.message(
+      'Delete your account info and profile photo',
+      name: 'deleteAccountHint',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Delete Chat`
   String get deleteChat {
     return Intl.message(
@@ -979,6 +1029,16 @@ class Localization {
     return Intl.message(
       'Delete Group',
       name: 'deleteGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete My Account`
+  String get deleteMyAccount {
+    return Intl.message(
+      'Delete My Account',
+      name: 'deleteMyAccount',
       desc: '',
       args: [],
     );
@@ -1184,11 +1244,31 @@ class Localization {
     );
   }
 
+  /// `Enter your PIN to delete your account`
+  String get enterPinToDeleteAccount {
+    return Intl.message(
+      'Enter your PIN to delete your account',
+      name: 'enterPinToDeleteAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Enter your phone number`
   String get enterYourPhoneNumber {
     return Intl.message(
       'Enter your phone number',
       name: 'enterYourPhoneNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter your PIN to continue`
+  String get enterYourPinToContinue {
+    return Intl.message(
+      'Enter your PIN to continue',
+      name: 'enterYourPinToContinue',
       desc: '',
       args: [],
     );
@@ -3114,6 +3194,26 @@ class Localization {
     );
   }
 
+  /// `If you continue, your profile and account details will be delete on {arg0}. read our document to **learn more**.`
+  String settingDeleteAccountPinContent(Object arg0) {
+    return Intl.message(
+      'If you continue, your profile and account details will be delete on $arg0. read our document to **learn more**.',
+      name: 'settingDeleteAccountPinContent',
+      desc: '',
+      args: [arg0],
+    );
+  }
+
+  /// `https://mixinmessenger.zendesk.com/hc/articles/4414170627988`
+  String get settingDeleteAccountUrl {
+    return Intl.message(
+      'https://mixinmessenger.zendesk.com/hc/articles/4414170627988',
+      name: 'settingDeleteAccountUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Share`
   String get share {
     return Intl.message(
@@ -3434,6 +3534,16 @@ class Localization {
     );
   }
 
+  /// `Transactions CANNOT be deleted`
+  String get transactionsCannotBeDeleted {
+    return Intl.message(
+      'Transactions CANNOT be deleted',
+      name: 'transactionsCannotBeDeleted',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Transcript`
   String get transcript {
     return Intl.message(
@@ -3644,6 +3754,16 @@ class Localization {
     );
   }
 
+  /// `Verify PIN`
+  String get verifyPin {
+    return Intl.message(
+      'Verify PIN',
+      name: 'verifyPin',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Video`
   String get video {
     return Intl.message(
@@ -3749,6 +3869,16 @@ class Localization {
     return Intl.message(
       'Zoom',
       name: 'zoom',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No PIN token`
+  String get errorNoPinToken {
+    return Intl.message(
+      'No PIN token',
+      name: 'errorNoPinToken',
       desc: '',
       args: [],
     );

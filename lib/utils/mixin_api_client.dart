@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_app/utils/platform.dart';
+import 'package:flutter_app/utils/system/package_info.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -53,9 +56,17 @@ Client createClient({
                 'now = ${DateTime.now().outputFormat()}');
             handler.next(e);
           },
-        )
+        ),
+        InterceptorsWrapper(onRequest: (options, handler) async {
+          final deviceId = await getDeviceId();
+          final userAgent = await generateUserAgent(await getPackageInfo());
+          options.headers['User-Agent'] = userAgent;
+          options.headers['Mixin-Device-Id'] = deviceId;
+          options.headers['Accept-Language'] = window.locale.languageCode;
+          handler.next(options);
+        })
       ],
-      httpLogLevel: HttpLogLevel.none,
+      httpLogLevel: HttpLogLevel.all,
     );
 
 final _formatter = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
