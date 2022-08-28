@@ -465,9 +465,13 @@ class MessageItemWidget extends HookWidget {
       showNip: showNip,
       isCurrentUser: isCurrentUser,
       message: message,
-      child: Padding(
-        padding: sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
-        child: child,
+      child: GestureDetector(
+        onDoubleTap: () => context.read<QuoteMessageCubit>().emit(message),
+        child: Padding(
+          padding:
+              sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
+          child: child,
+        ),
       ),
     );
   }
