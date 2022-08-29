@@ -36,7 +36,7 @@ dependencies:
   equatable: ^2.0.5
   extended_image: ^6.2.1
   file_picker: ^4.0.0
-  file_selector: ^0.9.0
+  file_selector: ^0.9.1
   file_selector_linux: ^0.9.0
   file_selector_macos: ^0.9.0
   file_selector_windows: ^0.9.1
