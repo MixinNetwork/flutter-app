@@ -188,21 +188,20 @@ class MessageItemWidget extends HookWidget {
 
     final showedMenuCubit = useBloc(() => SimpleCubit(false));
 
+    final blinkCubit = context.read<BlinkCubit>();
+
     final blinkColor = useMemoizedStream(
-          () {
-            final blinkCubit = context.read<BlinkCubit>();
-            return Rx.combineLatest2(
-              blinkCubit.stream.startWith(blinkCubit.state),
-              showedMenuCubit.stream.startWith(showedMenuCubit.state),
-              (BlinkState blinkState, bool showedMenu) {
-                if (showedMenu) return context.theme.listSelected;
-                if (blinkState.messageId == message.messageId && blink) {
-                  return blinkState.color;
-                }
-                return Colors.transparent;
-              },
-            );
-          },
+          () => Rx.combineLatest2(
+            blinkCubit.stream.startWith(blinkCubit.state),
+            showedMenuCubit.stream.startWith(showedMenuCubit.state),
+            (BlinkState blinkState, bool showedMenu) {
+              if (showedMenu) return context.theme.listSelected;
+              if (blinkState.messageId == message.messageId && blink) {
+                return blinkState.color;
+              }
+              return Colors.transparent;
+            },
+          ),
           keys: [message.messageId],
         ).data ??
         Colors.transparent;
@@ -466,7 +465,10 @@ class MessageItemWidget extends HookWidget {
       isCurrentUser: isCurrentUser,
       message: message,
       child: GestureDetector(
-        onDoubleTap: () => context.read<QuoteMessageCubit>().emit(message),
+        onDoubleTap: () {
+          blinkCubit.blinkByMessageId(message.messageId);
+          context.read<QuoteMessageCubit>().emit(message);
+        },
         child: Padding(
           padding:
               sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
