@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:tuple/tuple.dart';
 
@@ -7,9 +8,12 @@ import '../../account/session_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
+import '../../utils/uri_utils.dart';
 import '../../widgets/app_bar.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
+import '../../widgets/high_light_text.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/user/captcha_web_view_dialog.dart';
 import '../../widgets/user/pin_verification_dialog.dart';
@@ -50,6 +54,10 @@ class AccountDeletePage extends StatelessWidget {
                         return;
                       }
 
+                      _showDeleteAccountPinDialog(context,
+                          verificationId: 'verificationId');
+                      return;
+
                       final user =
                           context.read<MultiAuthCubit>().state.currentUser;
                       assert(user != null, 'user is null');
@@ -64,7 +72,6 @@ class AccountDeletePage extends StatelessWidget {
                         if (!verified) {
                           return;
                         }
-                        d('verified');
                         final confirmed = await showConfirmMixinDialog(
                           context,
                           context.l10n
@@ -83,16 +90,22 @@ class AccountDeletePage extends StatelessWidget {
                             phone: user.phone,
                             context: context,
                           );
+                          Toast.dismiss();
                         } catch (error, stacktrace) {
                           e('_requestVerificationCode $error, $stacktrace');
                           await showToastFailed(context, error);
                           return;
                         }
-                        final result = await showVerificationDialog(
+                        final verificationId = await showVerificationDialog(
                           context,
                           phoneNumber: user.phone,
                           verificationResponse: verificationResponse,
                         );
+                        if (verificationId == null || verificationId.isEmpty) {
+                          return;
+                        }
+                        await _showDeleteAccountPinDialog(context,
+                            verificationId: verificationId);
                       } else {
                         e('delete account no pin');
                       }
@@ -174,19 +187,17 @@ class _WarningItem extends StatelessWidget {
   }
 }
 
-Future<bool> showVerificationDialog(
+Future<String?> showVerificationDialog(
   BuildContext context, {
   required String phoneNumber,
   required VerificationResponse verificationResponse,
-}) async {
-  final ret = await showMixinDialog<bool>(
-      context: context,
-      child: _VerificationCodeDialog(
-        phoneNumber,
-        verificationResponse,
-      ));
-  return ret == true;
-}
+}) =>
+    showMixinDialog<String>(
+        context: context,
+        child: _VerificationCodeDialog(
+          phoneNumber,
+          verificationResponse,
+        ));
 
 class _VerificationCodeDialog extends StatelessWidget {
   const _VerificationCodeDialog(
@@ -200,23 +211,36 @@ class _VerificationCodeDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox(
         width: 520,
-        child: VerificationCodeInputLayout(
-          phoneNumber: phoneNumber,
-          initialVerificationResponse: initialVerificationResponse,
-          reRequestVerification: () => _requestVerificationCode(
-            context: context,
-            phone: phoneNumber,
-          ),
-          onVerification: (code, response) async {
-            try {
-              final result = await context.accountServer.client.accountApi
-                  .deactiveVerification(response.id, code);
-              d('deactiveVerification result: $result');
-            } catch (error, stacktrace) {
-              e('de-active Verification error: $error $stacktrace');
-              await showToastFailed(context, error);
-            }
-          },
+        height: 326,
+        child: Column(
+          children: [
+            const SizedBox(height: 56),
+            Material(
+              color: context.theme.popUp,
+              child: VerificationCodeInputLayout(
+                phoneNumber: phoneNumber,
+                initialVerificationResponse: initialVerificationResponse,
+                reRequestVerification: () => _requestVerificationCode(
+                  context: context,
+                  phone: phoneNumber,
+                ),
+                onVerification: (code, response) async {
+                  showToastLoading(context);
+                  try {
+                    final result = await context.accountServer.client.accountApi
+                        .deactiveVerification(response.id, code);
+                    d('deactiveVerification result: $result');
+                    Navigator.pop(context, result.data.id);
+                    Toast.dismiss();
+                  } catch (error, stacktrace) {
+                    e('de-active Verification error: $error $stacktrace');
+                    await showToastFailed(context, error);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: 77),
+          ],
         ),
       );
 }
@@ -260,4 +284,80 @@ Future<VerificationResponse> _requestVerificationCode({
   } catch (error) {
     rethrow;
   }
+}
+
+Future<void> _showDeleteAccountPinDialog(
+  BuildContext context, {
+  required String verificationId,
+}) async {
+  final confirmed = await showMixinDialog<bool>(
+    context: context,
+    child: _DeleteAccountPinDialog(verificationId: verificationId),
+    barrierDismissible: false,
+  );
+}
+
+class _DeleteAccountPinDialog extends StatelessWidget {
+  const _DeleteAccountPinDialog({required this.verificationId});
+
+  final String verificationId;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: 520,
+        height: 326,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 72),
+              child: Column(
+                children: [
+                  const SizedBox(height: 40),
+                  Text(
+                    context.l10n.enterPinToDeleteAccount,
+                    style: TextStyle(
+                      color: context.theme.red,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 29),
+                  const PinInputLayout(),
+                  const SizedBox(height: 29),
+                  HighlightText(
+                    context.l10n.settingDeleteAccountPinContent(
+                      DateFormat.yMMMd().format(
+                        DateTime.now().add(const Duration(days: 30)),
+                      ),
+                    ),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: context.theme.text,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                    highlightTextSpans: [
+                      HighlightTextSpan(
+                        context.l10n.learnMore,
+                        style: TextStyle(
+                          color: context.theme.accent,
+                        ),
+                        onTap: () => openUri(
+                            context, context.l10n.settingDeleteAccountUrl),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.all(22),
+                child: MixinCloseButton(),
+              ),
+            ),
+          ],
+        ),
+      );
 }

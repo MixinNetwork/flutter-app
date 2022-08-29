@@ -21,10 +21,8 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../account/session_key_value.dart';
-import '../../constants/constants.dart';
 import '../../constants/resources.dart';
 import '../../crypto/crypto_key_value.dart';
 import '../../crypto/signal/signal_protocol.dart';
@@ -36,9 +34,9 @@ import '../../utils/system/package_info.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/az_selection.dart';
 import '../../widgets/dialog.dart';
-import '../../widgets/interactive_decorated_box.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/user/captcha_web_view_dialog.dart';
+import '../../widgets/user/verification_dialog.dart';
 import '../home/bloc/multi_auth_cubit.dart';
 import 'bloc/landing_cubit.dart';
 import 'landing.dart';
@@ -296,7 +294,6 @@ class _CodeInputScene extends HookWidget {
         useRef<VerificationResponse>(initialVerificationResponse);
 
     Future<void> performLogin(String code) async {
-      d('Code input complete: $code');
       assert(code.length == 4, 'Invalid code length: $code');
       showToastLoading(context);
       try {
@@ -414,7 +411,7 @@ class _CodeInputScene extends HookWidget {
             ),
           ),
           const SizedBox(height: 0),
-          _ResendCodeWidget(
+          ResendCodeWidget(
             onResend: () async {
               showToastLoading(context);
               try {
@@ -454,48 +451,6 @@ class _CodeInputScene extends HookWidget {
         ],
       ),
     );
-  }
-}
-
-class _ResendCodeWidget extends HookWidget {
-  const _ResendCodeWidget({
-    required this.onResend,
-  });
-
-  final Future<bool> Function() onResend;
-
-  @override
-  Widget build(BuildContext context) {
-    final nextDuration = useState(60);
-    useEffect(() {
-      final timer = Timer.periodic(
-        const Duration(seconds: 1),
-        (timer) {
-          if (nextDuration.value > 0) {
-            nextDuration.value = math.max(0, nextDuration.value - 1);
-          }
-        },
-      );
-      return timer.cancel;
-    }, [nextDuration]);
-
-    return nextDuration.value > 0
-        ? Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(context.l10n.resendCodeIn(nextDuration.value),
-                style: TextStyle(
-                    fontSize: 14, color: context.theme.secondaryText)))
-        : InteractiveDecoratedBox(
-            onTap: () async {
-              if (await onResend()) {
-                nextDuration.value = 60;
-              }
-            },
-            child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(context.l10n.resendCode,
-                    style:
-                        TextStyle(fontSize: 14, color: context.theme.accent))));
   }
 }
 

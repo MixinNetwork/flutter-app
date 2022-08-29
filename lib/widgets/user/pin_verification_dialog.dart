@@ -45,7 +45,7 @@ class _PinVerificationDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const _PinInputLayout(),
+                const PinInputLayout(),
               ],
             ),
             const Align(
@@ -62,14 +62,14 @@ class _PinVerificationDialog extends StatelessWidget {
 
 const _kPinCodeLength = 6;
 
-class _PinInputLayout extends StatefulWidget {
-  const _PinInputLayout();
+class PinInputLayout extends StatefulWidget {
+  const PinInputLayout({super.key});
 
   @override
-  State<_PinInputLayout> createState() => _PinInputLayoutState();
+  State<PinInputLayout> createState() => _PinInputLayoutState();
 }
 
-class _PinInputLayoutState extends State<_PinInputLayout>
+class _PinInputLayoutState extends State<PinInputLayout>
     implements TextInputClient {
   final focusNode = FocusNode(debugLabel: '_PinInputLayoutState');
 

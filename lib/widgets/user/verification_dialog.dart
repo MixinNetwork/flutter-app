@@ -7,10 +7,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
-import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
-import '../action_button.dart';
 import '../interactive_decorated_box.dart';
 import '../toast.dart';
 
@@ -34,106 +32,82 @@ class VerificationCodeInputLayout extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final codeInputController = useTextEditingController();
-
     final verification =
         useRef<VerificationResponse>(initialVerificationResponse);
-
-    Future<void> performLogin(String code) async {
-      d('Code input complete: $code');
-    }
-
     useListenable(codeInputController);
-    return Material(
-      color: context.theme.popUp,
-      child: Column(
-        children: [
-          SizedBox(
-            height: 56,
-            child: Row(
-              children: [
-                const SizedBox(width: 12),
-                ActionButton(
-                  name: Resources.assetsImagesIcBackSvg,
-                  color: context.theme.icon,
-                  onTap: () => Navigator.maybePop(context),
-                ),
-                const Spacer(),
-              ],
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 125),
+          child: Text(
+            context.l10n.landingValidationTitle(phoneNumber),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: context.theme.text,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 125),
-            child: Text(
-              context.l10n.landingValidationTitle(phoneNumber),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: context.theme.text,
-              ),
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: 135,
+          child: PinCodeTextField(
+            autoFocus: true,
+            length: 4,
+            autoDisposeControllers: false,
+            controller: codeInputController,
+            appContext: context,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            keyboardType: TextInputType.number,
+            onCompleted: (code) => onVerification(code, verification.value),
+            useHapticFeedback: true,
+            pinTheme: PinTheme(
+              activeColor: context.theme.accent,
+              inactiveColor: context.theme.secondaryText,
+              fieldWidth: 15,
+              borderWidth: 2,
             ),
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: 135,
-            child: PinCodeTextField(
-              autoFocus: true,
-              length: 4,
-              autoDisposeControllers: false,
-              controller: codeInputController,
-              appContext: context,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              keyboardType: TextInputType.number,
-              onCompleted: performLogin,
-              useHapticFeedback: true,
-              pinTheme: PinTheme(
-                activeColor: context.theme.accent,
-                inactiveColor: context.theme.secondaryText,
-                fieldWidth: 15,
-                borderWidth: 2,
-              ),
-              textStyle: TextStyle(
-                fontSize: 18,
-                color: context.theme.text,
-              ),
-              onChanged: (String value) {},
+            textStyle: TextStyle(
+              fontSize: 18,
+              color: context.theme.text,
             ),
+            onChanged: (String value) {},
           ),
-          const SizedBox(height: 0),
-          _ResendCodeWidget(
-            onResend: () async {
-              showToastLoading(context);
-              try {
-                final response = await reRequestVerification();
-                Toast.dismiss();
-                verification.value = response;
-                return true;
-              } on MixinApiError catch (error) {
-                e('Error requesting verification code: $error');
-                final mixinError = error.error as MixinError;
-                await showToastFailed(
-                  context,
-                  ToastError(mixinError.toDisplayString(context)),
-                );
-                return false;
-              } catch (error) {
-                e('Error requesting verification code: $error');
-                await showToastFailed(context, null);
-                return false;
-              }
-            },
-          ),
-          const SizedBox(height: 90),
-        ],
-      ),
+        ),
+        const SizedBox(height: 0),
+        ResendCodeWidget(
+          onResend: () async {
+            showToastLoading(context);
+            try {
+              final response = await reRequestVerification();
+              Toast.dismiss();
+              verification.value = response;
+              return true;
+            } on MixinApiError catch (error) {
+              e('Error requesting verification code: $error');
+              final mixinError = error.error as MixinError;
+              await showToastFailed(
+                context,
+                ToastError(mixinError.toDisplayString(context)),
+              );
+              return false;
+            } catch (error) {
+              e('Error requesting verification code: $error');
+              await showToastFailed(context, null);
+              return false;
+            }
+          },
+        ),
+      ],
     );
   }
 }
 
-class _ResendCodeWidget extends HookWidget {
-  const _ResendCodeWidget({required this.onResend});
+class ResendCodeWidget extends HookWidget {
+  const ResendCodeWidget({super.key, required this.onResend});
 
   final Future<bool> Function() onResend;
 

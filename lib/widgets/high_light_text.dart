@@ -11,6 +11,7 @@ class HighlightText extends HookWidget {
     this.highlightTextSpans = const [],
     this.maxLines,
     this.overflow,
+    this.textAlign,
   });
 
   final String text;
@@ -18,6 +19,7 @@ class HighlightText extends HookWidget {
   final List<HighlightTextSpan> highlightTextSpans;
   final int? maxLines;
   final TextOverflow? overflow;
+  final TextAlign? textAlign;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,7 @@ class HighlightText extends HookWidget {
       maxLines: maxLines,
       overflow: overflow,
       textWidthBasis: TextWidthBasis.longestLine,
+      textAlign: textAlign,
     );
   }
 }
