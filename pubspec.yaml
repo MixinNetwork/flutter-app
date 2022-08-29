@@ -31,7 +31,7 @@ dependencies:
   device_info_plus: ^4.0.0
   dio: ^4.0.0
   drift: ^1.7.0
-  ecache: ^2.0.1
+  ecache: ^2.0.2
   emojis: ^0.9.9
   equatable: ^2.0.5
   extended_image: ^6.2.1
