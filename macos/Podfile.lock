@@ -114,7 +114,7 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/window_size/macos
 
 SPEC CHECKSUMS:
-  bitsdojo_window_macos: 7e9b1bbb09bdce418d9657ead7fc9d824203ff0d
+  bitsdojo_window_macos: 44e3b8fe3dd463820e0321f6256c5b1c16bb6a00
   desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
   desktop_lifecycle: a600c10e12fe033c7be9078f2e929b8241f2c1e3
   desktop_webview_window: d4365e71bcd4e1aa0c14cf0377aa24db0c16a7e2
