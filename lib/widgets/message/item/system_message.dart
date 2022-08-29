@@ -118,7 +118,10 @@ String generateSystemText({
       break;
     case MessageAction.role:
       text = Localization.current.nowAnAddmin(
-          senderIsCurrentUser ? Localization.current.you : senderFullName!);
+        participantIsCurrentUser
+            ? Localization.current.you
+            : participantFullName!,
+      );
       break;
     case MessageAction.expire:
       final senderName =
