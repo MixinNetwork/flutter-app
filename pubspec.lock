@@ -459,7 +459,7 @@ packages:
       name: file_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.5.1"
+    version: "4.6.1"
   file_selector:
     dependency: "direct main"
     description:
@@ -871,7 +871,7 @@ packages:
       name: lottie
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.1"
+    version: "1.4.2"
   map:
     dependency: "direct main"
     description:
@@ -920,7 +920,7 @@ packages:
       name: mime
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
   mixin_bot_sdk_dart:
     dependency: "direct main"
     description:
