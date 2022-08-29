@@ -63,13 +63,13 @@ packages:
       name: bitsdojo_window
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.1+1"
+    version: "0.1.2"
   bitsdojo_window_linux:
     dependency: "direct overridden"
     description:
       path: bitsdojo_window_linux
-      ref: "30467f95c06317c67a841b4ce1853d18e95ee3f9"
-      resolved-ref: "30467f95c06317c67a841b4ce1853d18e95ee3f9"
+      ref: "591aa41e4643efe74fb017a060b0ff60b88d948c"
+      resolved-ref: "591aa41e4643efe74fb017a060b0ff60b88d948c"
       url: "https://github.com/MixinNetwork/bitsdojo_window.git"
     source: git
     version: "0.1.2"
@@ -79,7 +79,7 @@ packages:
       name: bitsdojo_window_macos
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0"
+    version: "0.1.2"
   bitsdojo_window_platform_interface:
     dependency: transitive
     description:
@@ -91,8 +91,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: bitsdojo_window_windows
-      ref: "30467f95c06317c67a841b4ce1853d18e95ee3f9"
-      resolved-ref: "30467f95c06317c67a841b4ce1853d18e95ee3f9"
+      ref: "591aa41e4643efe74fb017a060b0ff60b88d948c"
+      resolved-ref: "591aa41e4643efe74fb017a060b0ff60b88d948c"
       url: "https://github.com/MixinNetwork/bitsdojo_window.git"
     source: git
     version: "0.1.2"
@@ -389,7 +389,7 @@ packages:
       name: ecache
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   ed25519_edwards:
     dependency: transitive
     description:
@@ -459,14 +459,14 @@ packages:
       name: file_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.5.1"
+    version: "4.6.1"
   file_selector:
     dependency: "direct main"
     description:
       name: file_selector
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.0"
+    version: "0.9.1"
   file_selector_linux:
     dependency: "direct main"
     description:
@@ -555,7 +555,7 @@ packages:
       name: flutter_hooks
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.18.2+1"
+    version: "0.18.5+1"
   flutter_local_notifications:
     dependency: "direct main"
     description:
@@ -668,7 +668,7 @@ packages:
       name: hive
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0"
+    version: "2.2.3"
   hive_flutter:
     dependency: "direct main"
     description:
@@ -808,14 +808,14 @@ packages:
       name: json_annotation
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.5.0"
+    version: "4.6.0"
   json_serializable:
     dependency: "direct dev"
     description:
       name: json_serializable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.2.0"
+    version: "6.3.1"
   latlng:
     dependency: transitive
     description:
@@ -871,7 +871,7 @@ packages:
       name: lottie
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.1"
+    version: "1.4.2"
   map:
     dependency: "direct main"
     description:
@@ -920,7 +920,7 @@ packages:
       name: mime
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
   mixin_bot_sdk_dart:
     dependency: "direct main"
     description:
@@ -948,7 +948,7 @@ packages:
       name: octo_image
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
   ogg_opus_player:
     dependency: "direct main"
     description:
