@@ -192,16 +192,16 @@ class MessageItemWidget extends HookWidget {
 
     final blinkColor = useMemoizedStream(
           () => Rx.combineLatest2(
-              blinkCubit.stream.startWith(blinkCubit.state),
-              showedMenuCubit.stream.startWith(showedMenuCubit.state),
-              (BlinkState blinkState, bool showedMenu) {
-                if (showedMenu) return context.theme.listSelected;
-                if (blinkState.messageId == message.messageId && blink) {
-                  return blinkState.color;
-                }
-                return Colors.transparent;
-              },
-            ),
+            blinkCubit.stream.startWith(blinkCubit.state),
+            showedMenuCubit.stream.startWith(showedMenuCubit.state),
+            (BlinkState blinkState, bool showedMenu) {
+              if (showedMenu) return context.theme.listSelected;
+              if (blinkState.messageId == message.messageId && blink) {
+                return blinkState.color;
+              }
+              return Colors.transparent;
+            },
+          ),
           keys: [message.messageId],
         ).data ??
         Colors.transparent;
