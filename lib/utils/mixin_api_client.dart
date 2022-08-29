@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:uuid/uuid.dart';
 
 import '../constants/constants.dart';
 import 'logger.dart';
@@ -61,9 +60,9 @@ Client createClient({
         InterceptorsWrapper(onRequest: (options, handler) async {
           final deviceId = await getDeviceId();
           final userAgent = await generateUserAgent(await getPackageInfo());
-          // options.headers['User-Agent'] = userAgent;
-          // options.headers['Mixin-Device-Id'] = deviceId;
-          // options.headers['Accept-Language'] = window.locale.languageCode;
+          options.headers['User-Agent'] = userAgent;
+          options.headers['Mixin-Device-Id'] = deviceId;
+          options.headers['Accept-Language'] = window.locale.languageCode;
           handler.next(options);
         })
       ],
