@@ -36,7 +36,7 @@ dependencies:
   equatable: ^2.0.5
   extended_image: ^6.2.1
   file_picker: ^4.0.0
-  file_selector: ^0.9.0
+  file_selector: ^0.9.1
   file_selector_linux: ^0.9.0
   file_selector_macos: ^0.9.0
   file_selector_windows: ^0.9.1
@@ -53,7 +53,7 @@ dependencies:
   flutter_svg: ^1.1.4
   gallery_saver: ^2.3.2
   github: ^9.3.0
-  hive: ^2.1.0
+  hive: ^2.2.3
   hive_flutter: ^1.0.0
   http: ^0.13.5
   hydrated_bloc: ^8.1.0
