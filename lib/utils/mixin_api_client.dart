@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_app/utils/platform.dart';
-import 'package:flutter_app/utils/system/package_info.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:uuid/uuid.dart';
 
 import '../constants/constants.dart';
 import 'logger.dart';
+import 'platform.dart';
+import 'system/package_info.dart';
 
 final tenSecond = const Duration(seconds: 10).inMilliseconds;
 
@@ -60,13 +61,13 @@ Client createClient({
         InterceptorsWrapper(onRequest: (options, handler) async {
           final deviceId = await getDeviceId();
           final userAgent = await generateUserAgent(await getPackageInfo());
-          options.headers['User-Agent'] = userAgent;
-          options.headers['Mixin-Device-Id'] = deviceId;
-          options.headers['Accept-Language'] = window.locale.languageCode;
+          // options.headers['User-Agent'] = userAgent;
+          // options.headers['Mixin-Device-Id'] = deviceId;
+          // options.headers['Accept-Language'] = window.locale.languageCode;
           handler.next(options);
         })
       ],
-      httpLogLevel: HttpLogLevel.all,
+      httpLogLevel: HttpLogLevel.none,
     );
 
 final _formatter = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');

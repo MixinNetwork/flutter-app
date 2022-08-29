@@ -24,6 +24,7 @@ import 'package:tuple/tuple.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../account/session_key_value.dart';
+import '../../constants/constants.dart';
 import '../../constants/resources.dart';
 import '../../crypto/crypto_key_value.dart';
 import '../../crypto/signal/signal_protocol.dart';
@@ -37,6 +38,7 @@ import '../../widgets/az_selection.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/interactive_decorated_box.dart';
 import '../../widgets/toast.dart';
+import '../../widgets/user/captcha_web_view_dialog.dart';
 import '../home/bloc/multi_auth_cubit.dart';
 import 'bloc/landing_cubit.dart';
 import 'landing.dart';
@@ -574,16 +576,16 @@ class _MobileInput extends HookWidget {
 Future<VerificationResponse> _requestVerificationCode({
   required String phone,
   required BuildContext context,
-  Tuple2<_CaptchaType, String>? captcha,
+  Tuple2<CaptchaType, String>? captcha,
 }) async {
   final request = VerificationRequest(
     phone: phone,
     purpose: VerificationPurpose.session,
     packageName: 'one.mixin.messenger',
     gRecaptchaResponse:
-        captcha?.item1 == _CaptchaType.gCaptcha ? captcha?.item2 : null,
+        captcha?.item1 == CaptchaType.gCaptcha ? captcha?.item2 : null,
     hCaptchaResponse:
-        captcha?.item1 == _CaptchaType.hCaptcha ? captcha?.item2 : null,
+        captcha?.item1 == CaptchaType.hCaptcha ? captcha?.item2 : null,
   );
   try {
     final cubit = context.read<LandingMobileCubit>();
@@ -593,13 +595,10 @@ Future<VerificationResponse> _requestVerificationCode({
     final mixinError = error.error as MixinError;
     if (mixinError.code == needCaptcha) {
       Toast.dismiss();
-      final result = await showMixinDialog<List<dynamic>>(
-        context: context,
-        child: const _CaptchaWebViewDialog(),
-      );
+      final result = await showCaptchaWebViewDialog(context);
       if (result != null) {
         assert(result.length == 2, 'Invalid result length');
-        final type = result.first as _CaptchaType;
+        final type = result.first as CaptchaType;
         final token = result[1] as String;
         d('Captcha type: $type, token: $token');
         return _requestVerificationCode(
@@ -778,112 +777,4 @@ class _CountryItem extends StatelessWidget {
           ),
         ),
       );
-}
-
-class _CaptchaWebViewDialog extends HookWidget {
-  const _CaptchaWebViewDialog();
-
-  @override
-  Widget build(BuildContext context) {
-    final timer = useRef<Timer?>(null);
-    final controllerRef = useRef<WebViewController?>(null);
-    final captcha = useRef<_CaptchaType>(_CaptchaType.gCaptcha);
-    useEffect(
-      () => () {
-        timer.value?.cancel();
-      },
-      [],
-    );
-
-    void loadFallback() {
-      if (captcha.value == _CaptchaType.gCaptcha) {
-        captcha.value = _CaptchaType.hCaptcha;
-        _loadCaptcha(controllerRef.value!, _CaptchaType.hCaptcha);
-      } else {
-        controllerRef.value!.loadUrl('about:blank');
-        showToastFailed(
-          context,
-          ToastError(context.l10n.recaptchaTimeout),
-        );
-        Navigator.pop(context);
-      }
-    }
-
-    return SizedBox(
-      width: 400,
-      height: 520,
-      child: WebView(
-        javascriptMode: JavascriptMode.unrestricted,
-        onWebViewCreated: (controller) {
-          controllerRef.value = controller;
-          _loadCaptcha(controller, captcha.value);
-        },
-        onPageStarted: (url) {
-          timer.value = Timer(const Duration(seconds: 15), loadFallback);
-        },
-        onPageFinished: (url) {
-          timer.value?.cancel();
-          timer.value = null;
-        },
-        javascriptChannels: {
-          JavascriptChannel(
-            name: 'MixinContextTokenCallback',
-            onMessageReceived: (message) {
-              timer.value?.cancel();
-              timer.value = null;
-              final token = message.message;
-              Navigator.pop(context, [captcha.value, token]);
-            },
-          ),
-          JavascriptChannel(
-            name: 'MixinContextErrorCallback',
-            onMessageReceived: (message) {
-              e('on captcha error: ${message.message}');
-              timer.value?.cancel();
-              timer.value = null;
-              loadFallback();
-            },
-          ),
-        },
-      ),
-    );
-  }
-}
-
-enum _CaptchaType {
-  gCaptcha,
-  hCaptcha,
-}
-
-const _kRecaptchaKey = '';
-const _hCaptchaKey = '';
-
-Future<void> _loadCaptcha(
-  WebViewController controller,
-  _CaptchaType type,
-) async {
-  i('load captcha: $type');
-  final html = await rootBundle.loadString(Resources.assetsCaptchaHtml);
-  final String apiKey;
-  final String src;
-  switch (type) {
-    case _CaptchaType.gCaptcha:
-      apiKey = _kRecaptchaKey;
-      src = 'https://www.recaptcha.net/recaptcha/api.js'
-          '?onload=onGCaptchaLoad&render=explicit';
-      break;
-    case _CaptchaType.hCaptcha:
-      apiKey = _hCaptchaKey;
-      src = 'https://hcaptcha.com/1/api.js'
-          '?onload=onHCaptchaLoad&render=explicit';
-      break;
-  }
-  final htmlWithCaptcha =
-      html.replaceAll('#src', src).replaceAll('#apiKey', apiKey);
-
-  await controller.clearCache();
-  await controller.loadHtmlString(
-    htmlWithCaptcha,
-    baseUrl: 'https://mixin.one',
-  );
 }

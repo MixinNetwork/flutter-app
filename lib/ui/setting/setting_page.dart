@@ -44,6 +44,11 @@ class SettingPage extends HookWidget {
         requestNotificationPermission, null,
         keys: [appActive]).data;
     final controller = useScrollController();
+
+    final userHasPin =
+        useBlocStateConverter<MultiAuthCubit, MultiAuthState, bool>(
+      converter: (e) => e.currentUser?.hasPin == true,
+    );
     return Column(
       children: [
         MixinAppBar(
@@ -72,14 +77,8 @@ class SettingPage extends HookWidget {
                       child: Column(
                         children: [
                           if (Platform.isIOS &&
-                              AccountKeyValue.instance.primarySessionId ==
-                                  null &&
-                              context
-                                      .read<MultiAuthCubit>()
-                                      .state
-                                      .currentUser
-                                      ?.hasPin ==
-                                  true)
+                              userHasPin &&
+                              AccountKeyValue.instance.primarySessionId == null)
                             _Item(
                               assetName: Resources.assetsImagesAccountSvg,
                               pageName: ResponsiveNavigatorCubit.accountPage,
