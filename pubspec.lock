@@ -920,7 +920,7 @@ packages:
       name: mime
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
   mixin_bot_sdk_dart:
     dependency: "direct main"
     description:
