@@ -54,10 +54,6 @@ class AccountDeletePage extends StatelessWidget {
                         return;
                       }
 
-                      _showDeleteAccountPinDialog(context,
-                          verificationId: 'verificationId');
-                      return;
-
                       final user =
                           context.read<MultiAuthCubit>().state.currentUser;
                       assert(user != null, 'user is null');

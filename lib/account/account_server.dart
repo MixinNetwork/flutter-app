@@ -40,6 +40,7 @@ import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
+import '../utils/platform.dart';
 import '../utils/system/package_info.dart';
 import '../utils/web_view/web_view_interface.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
@@ -207,6 +208,7 @@ class AccountServer {
         mixinDocumentDirectory: mixinDocumentsDirectory.path,
         primarySessionId: AccountKeyValue.instance.primarySessionId,
         packageInfo: await getPackageInfo(),
+        deviceId: Platform.isIOS ? await getDeviceId() : null,
       ),
       errorsAreFatal: false,
       onExit: exitReceivePort.sendPort,

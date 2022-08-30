@@ -50,6 +50,7 @@ class IsolateInitParams {
     required this.mixinDocumentDirectory,
     required this.primarySessionId,
     required this.packageInfo,
+    required this.deviceId,
   });
 
   final SendPort sendPort;
@@ -60,6 +61,7 @@ class IsolateInitParams {
   final String mixinDocumentDirectory;
   final String? primarySessionId;
   final PackageInfo packageInfo;
+  final String? deviceId;
 }
 
 Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
@@ -141,6 +143,8 @@ class _MessageProcessRunner {
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKeyStr,
+      packageInfo: initParams.packageInfo,
+      deviceId: initParams.deviceId,
       interceptors: [
         InterceptorsWrapper(
           onError: (
