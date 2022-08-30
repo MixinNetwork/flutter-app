@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
+import '../../widgets/user/change_number_dialog.dart';
 import '../home/route/responsive_navigator_cubit.dart';
 
 class AccountPage extends StatelessWidget {
@@ -27,9 +28,7 @@ class AccountPage extends StatelessWidget {
                   ),
                   child: CellItem(
                     title: Text(context.l10n.changeNumber),
-                    onTap: () {
-                      // TODO: implement
-                    },
+                    onTap: () => showChangeNumberDialog(context),
                   ),
                 ),
                 CellGroup(

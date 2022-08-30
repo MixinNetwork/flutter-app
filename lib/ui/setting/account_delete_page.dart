@@ -16,6 +16,7 @@ import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/user/captcha_web_view_dialog.dart';
+import '../../widgets/user/change_number_dialog.dart';
 import '../../widgets/user/pin_verification_dialog.dart';
 import '../../widgets/user/verification_dialog.dart';
 import '../home/bloc/multi_auth_cubit.dart';
@@ -121,7 +122,7 @@ class AccountDeletePage extends StatelessWidget {
                   ),
                   child: CellItem(
                     title: Text(context.l10n.changeNumberInstead),
-                    onTap: () {},
+                    onTap: () => showChangeNumberDialog(context),
                   ),
                 ),
               ],
