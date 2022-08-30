@@ -166,25 +166,31 @@ class _WarningItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = context.theme.text;
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 4,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
+    return SizedBox(
+      width: 380,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 4,
+            height: 4,
+            margin: const EdgeInsets.only(top: 7, right: 6),
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
           ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          title,
-          style: TextStyle(
-            color: color,
-            fontSize: 14,
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: color,
+                fontSize: 14,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
