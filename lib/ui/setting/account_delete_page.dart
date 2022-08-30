@@ -100,8 +100,14 @@ class AccountDeletePage extends StatelessWidget {
                         if (verificationId == null || verificationId.isEmpty) {
                           return;
                         }
-                        await _showDeleteAccountPinDialog(context,
-                            verificationId: verificationId);
+                        final deleted = await _showDeleteAccountPinDialog(
+                          context,
+                          verificationId: verificationId,
+                        );
+                        if (deleted) {
+                          w('account deleted');
+                          await context.accountServer.signOutAndClear();
+                        }
                       } else {
                         e('delete account no pin');
                       }
@@ -282,7 +288,7 @@ Future<VerificationResponse> _requestVerificationCode({
   }
 }
 
-Future<void> _showDeleteAccountPinDialog(
+Future<bool> _showDeleteAccountPinDialog(
   BuildContext context, {
   required String verificationId,
 }) async {
@@ -291,6 +297,7 @@ Future<void> _showDeleteAccountPinDialog(
     child: _DeleteAccountPinDialog(verificationId: verificationId),
     barrierDismissible: false,
   );
+  return confirmed == true;
 }
 
 class _DeleteAccountPinDialog extends StatelessWidget {
@@ -318,7 +325,14 @@ class _DeleteAccountPinDialog extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 29),
-                  const PinInputLayout(),
+                  PinInputLayout(
+                    doVerify: (String encryptedPin) async {
+                      await context.accountServer.client.accountApi.deactive(
+                        DeactivateRequest(encryptedPin, verificationId),
+                      );
+                      Navigator.pop(context, true);
+                    },
+                  ),
                   const SizedBox(height: 29),
                   HighlightText(
                     context.l10n.settingDeleteAccountPinContent(

@@ -45,7 +45,13 @@ class _PinVerificationDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const PinInputLayout(),
+                PinInputLayout(
+                  doVerify: (String encryptedPin) async {
+                    await context.accountServer.client.accountApi
+                        .verifyPin(encryptedPin);
+                    Navigator.pop(context, true);
+                  },
+                ),
               ],
             ),
             const Align(
@@ -63,7 +69,9 @@ class _PinVerificationDialog extends StatelessWidget {
 const _kPinCodeLength = 6;
 
 class PinInputLayout extends StatefulWidget {
-  const PinInputLayout({super.key});
+  const PinInputLayout({super.key, required this.doVerify});
+
+  final Future<void> Function(String encryptedPin) doVerify;
 
   @override
   State<PinInputLayout> createState() => _PinInputLayoutState();
@@ -114,10 +122,7 @@ class _PinInputLayoutState extends State<PinInputLayout>
     _closeInputConnection();
     showToastLoading(context);
     try {
-      d('verifying pin code: $code ${encryptPin(code)}');
-      await context.accountServer.client.accountApi
-          .verifyPin(encryptPin(code)!);
-      Navigator.pop(context, true);
+      await widget.doVerify(encryptPin(code)!);
       Toast.dismiss();
     } catch (error, stacktrace) {
       await showToastFailed(context, error);
