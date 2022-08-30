@@ -6,11 +6,128 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
+import '../dialog.dart';
 import '../interactive_decorated_box.dart';
 import '../toast.dart';
+import 'captcha_web_view_dialog.dart';
+
+// return: verification id.
+Future<T?> showVerificationDialog<T>(
+  BuildContext context, {
+  required String phoneNumber,
+  required VerificationResponse verificationResponse,
+  required RequestVerification reRequestVerification,
+  required VerifyPhoneCode<T> onVerification,
+}) =>
+    showMixinDialog<T>(
+      context: context,
+      child: _VerificationCodeDialog(
+        phoneNumber: phoneNumber,
+        initialVerificationResponse: verificationResponse,
+        reRequestVerification: reRequestVerification,
+        onVerification: onVerification,
+      ),
+    );
+
+typedef RequestVerification = Future<VerificationResponse> Function();
+typedef VerifyPhoneCode<T> = Future<T> Function(
+    String code, VerificationResponse response);
+
+class _VerificationCodeDialog<T> extends StatelessWidget {
+  const _VerificationCodeDialog({
+    required this.phoneNumber,
+    required this.initialVerificationResponse,
+    required this.reRequestVerification,
+    required this.onVerification,
+  });
+
+  final String phoneNumber;
+  final VerificationResponse initialVerificationResponse;
+  final RequestVerification reRequestVerification;
+
+  final VerifyPhoneCode<T> onVerification;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: 520,
+        height: 326,
+        child: Column(
+          children: [
+            const SizedBox(height: 56),
+            Material(
+              color: context.theme.popUp,
+              child: VerificationCodeInputLayout(
+                phoneNumber: phoneNumber,
+                initialVerificationResponse: initialVerificationResponse,
+                reRequestVerification: reRequestVerification,
+                onVerification: (code, response) async {
+                  showToastLoading(context);
+                  try {
+                    final result = await onVerification(code, response);
+                    d('_VerificationCodeDialog: result: $result');
+                    Navigator.pop(context, result);
+                    Toast.dismiss();
+                  } catch (error, stacktrace) {
+                    e('_VerificationCodeDialog error: $error $stacktrace');
+                    await showToastFailed(context, error);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: 77),
+          ],
+        ),
+      );
+}
+
+Future<VerificationResponse> requestVerificationCode({
+  required String phone,
+  required BuildContext context,
+  required VerificationPurpose purpose,
+  Tuple2<CaptchaType, String>? captcha,
+  AccountApi? accountApi,
+}) async {
+  final request = VerificationRequest(
+    phone: phone,
+    purpose: purpose,
+    packageName: 'one.mixin.messenger',
+    gRecaptchaResponse:
+        captcha?.item1 == CaptchaType.gCaptcha ? captcha?.item2 : null,
+    hCaptchaResponse:
+        captcha?.item1 == CaptchaType.hCaptcha ? captcha?.item2 : null,
+  );
+  final api = accountApi ?? context.accountServer.client.accountApi;
+  try {
+    final response = await api.verification(request);
+    return response.data;
+  } on MixinApiError catch (error) {
+    final mixinError = error.error as MixinError;
+    if (mixinError.code == needCaptcha) {
+      Toast.dismiss();
+      final result = await showCaptchaWebViewDialog(context);
+      if (result != null) {
+        assert(result.length == 2, 'Invalid result length');
+        final type = result.first as CaptchaType;
+        final token = result[1] as String;
+        d('Captcha type: $type, token: $token');
+        return requestVerificationCode(
+          phone: phone,
+          context: context,
+          captcha: Tuple2(type, token),
+          purpose: purpose,
+          accountApi: api,
+        );
+      }
+    }
+    rethrow;
+  } catch (error) {
+    rethrow;
+  }
+}
 
 class VerificationCodeInputLayout extends HookWidget {
   const VerificationCodeInputLayout({
@@ -24,10 +141,9 @@ class VerificationCodeInputLayout extends HookWidget {
   final String phoneNumber;
   final VerificationResponse initialVerificationResponse;
 
-  final Future<VerificationResponse> Function() reRequestVerification;
+  final RequestVerification reRequestVerification;
 
-  final Future<void> Function(String code, VerificationResponse response)
-      onVerification;
+  final void Function(String, VerificationResponse) onVerification;
 
   @override
   Widget build(BuildContext context) {

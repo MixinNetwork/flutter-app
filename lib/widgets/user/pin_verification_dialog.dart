@@ -8,19 +8,18 @@ import '../buttons.dart';
 import '../dialog.dart';
 import '../toast.dart';
 
-Future<bool> showPinVerificationDialog(
+/// return: verified succeed pin code. null if canceled.
+Future<String?> showPinVerificationDialog(
   BuildContext context, {
   required String title,
-}) async {
-  final ret = await showMixinDialog(
-    context: context,
-    child: _PinVerificationDialog(
-      title: title,
-    ),
-    barrierDismissible: false,
-  );
-  return ret == true;
-}
+}) =>
+    showMixinDialog<String>(
+      context: context,
+      child: _PinVerificationDialog(
+        title: title,
+      ),
+      barrierDismissible: false,
+    );
 
 class _PinVerificationDialog extends StatelessWidget {
   const _PinVerificationDialog({required this.title});
@@ -46,10 +45,10 @@ class _PinVerificationDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 PinInputLayout(
-                  doVerify: (String encryptedPin) async {
+                  doVerify: (String pin) async {
                     await context.accountServer.client.accountApi
-                        .verifyPin(encryptedPin);
-                    Navigator.pop(context, true);
+                        .verifyPin(encryptPin(pin)!);
+                    Navigator.pop(context, pin);
                   },
                 ),
               ],
@@ -71,7 +70,7 @@ const _kPinCodeLength = 6;
 class PinInputLayout extends StatefulWidget {
   const PinInputLayout({super.key, required this.doVerify});
 
-  final Future<void> Function(String encryptedPin) doVerify;
+  final Future<void> Function(String pinCode) doVerify;
 
   @override
   State<PinInputLayout> createState() => _PinInputLayoutState();
@@ -122,7 +121,7 @@ class _PinInputLayoutState extends State<PinInputLayout>
     _closeInputConnection();
     showToastLoading(context);
     try {
-      await widget.doVerify(encryptPin(code)!);
+      await widget.doVerify(code);
       Toast.dismiss();
     } catch (error, stacktrace) {
       await showToastFailed(context, error);

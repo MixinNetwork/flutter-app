@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:tuple/tuple.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide encryptPin;
 
 import '../../account/session_key_value.dart';
 import '../../constants/resources.dart';
@@ -15,7 +14,6 @@ import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/toast.dart';
-import '../../widgets/user/captcha_web_view_dialog.dart';
 import '../../widgets/user/change_number_dialog.dart';
 import '../../widgets/user/pin_verification_dialog.dart';
 import '../../widgets/user/verification_dialog.dart';
@@ -62,11 +60,11 @@ class AccountDeletePage extends StatelessWidget {
                         return;
                       }
                       if (user.hasPin) {
-                        final verified = await showPinVerificationDialog(
+                        final pin = await showPinVerificationDialog(
                           context,
                           title: context.l10n.enterYourPinToContinue,
                         );
-                        if (!verified) {
+                        if (pin == null) {
                           return;
                         }
                         final confirmed = await showConfirmMixinDialog(
@@ -83,9 +81,10 @@ class AccountDeletePage extends StatelessWidget {
                         VerificationResponse? verificationResponse;
 
                         try {
-                          verificationResponse = await _requestVerificationCode(
+                          verificationResponse = await requestVerificationCode(
                             phone: user.phone,
                             context: context,
+                            purpose: VerificationPurpose.deactivated,
                           );
                           Toast.dismiss();
                         } catch (error, stacktrace) {
@@ -97,6 +96,17 @@ class AccountDeletePage extends StatelessWidget {
                           context,
                           phoneNumber: user.phone,
                           verificationResponse: verificationResponse,
+                          reRequestVerification: () => requestVerificationCode(
+                            phone: user.phone,
+                            context: context,
+                            purpose: VerificationPurpose.deactivated,
+                          ),
+                          onVerification: (code, response) async {
+                            final result = await context
+                                .accountServer.client.accountApi
+                                .deactiveVerification(response.id, code);
+                            return result.data.id;
+                          },
                         );
                         if (verificationId == null || verificationId.isEmpty) {
                           return;
@@ -196,105 +206,6 @@ class _WarningItem extends StatelessWidget {
   }
 }
 
-Future<String?> showVerificationDialog(
-  BuildContext context, {
-  required String phoneNumber,
-  required VerificationResponse verificationResponse,
-}) =>
-    showMixinDialog<String>(
-        context: context,
-        child: _VerificationCodeDialog(
-          phoneNumber,
-          verificationResponse,
-        ));
-
-class _VerificationCodeDialog extends StatelessWidget {
-  const _VerificationCodeDialog(
-    this.phoneNumber,
-    this.initialVerificationResponse,
-  );
-
-  final String phoneNumber;
-  final VerificationResponse initialVerificationResponse;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-        width: 520,
-        height: 326,
-        child: Column(
-          children: [
-            const SizedBox(height: 56),
-            Material(
-              color: context.theme.popUp,
-              child: VerificationCodeInputLayout(
-                phoneNumber: phoneNumber,
-                initialVerificationResponse: initialVerificationResponse,
-                reRequestVerification: () => _requestVerificationCode(
-                  context: context,
-                  phone: phoneNumber,
-                ),
-                onVerification: (code, response) async {
-                  showToastLoading(context);
-                  try {
-                    final result = await context.accountServer.client.accountApi
-                        .deactiveVerification(response.id, code);
-                    d('deactiveVerification result: $result');
-                    Navigator.pop(context, result.data.id);
-                    Toast.dismiss();
-                  } catch (error, stacktrace) {
-                    e('de-active Verification error: $error $stacktrace');
-                    await showToastFailed(context, error);
-                  }
-                },
-              ),
-            ),
-            const SizedBox(height: 77),
-          ],
-        ),
-      );
-}
-
-Future<VerificationResponse> _requestVerificationCode({
-  required String phone,
-  required BuildContext context,
-  Tuple2<CaptchaType, String>? captcha,
-}) async {
-  final request = VerificationRequest(
-    phone: phone,
-    purpose: VerificationPurpose.deactivated,
-    packageName: 'one.mixin.messenger',
-    gRecaptchaResponse:
-        captcha?.item1 == CaptchaType.gCaptcha ? captcha?.item2 : null,
-    hCaptchaResponse:
-        captcha?.item1 == CaptchaType.hCaptcha ? captcha?.item2 : null,
-  );
-  try {
-    final response =
-        await context.accountServer.client.accountApi.verification(request);
-    return response.data;
-  } on MixinApiError catch (error) {
-    final mixinError = error.error as MixinError;
-    if (mixinError.code == needCaptcha) {
-      Toast.dismiss();
-      final result = await showCaptchaWebViewDialog(context);
-      if (result != null) {
-        assert(result.length == 2, 'Invalid result length');
-        final type = result.first as CaptchaType;
-        final token = result[1] as String;
-        d('Captcha type: $type, token: $token');
-        return _requestVerificationCode(
-          phone: phone,
-          context: context,
-          captcha: Tuple2(type, token),
-        );
-      }
-    }
-    rethrow;
-  } catch (error) {
-    rethrow;
-  }
-}
-
 Future<bool> _showDeleteAccountPinDialog(
   BuildContext context, {
   required String verificationId,
@@ -333,9 +244,9 @@ class _DeleteAccountPinDialog extends StatelessWidget {
                   ),
                   const SizedBox(height: 29),
                   PinInputLayout(
-                    doVerify: (String encryptedPin) async {
+                    doVerify: (String pin) async {
                       await context.accountServer.client.accountApi.deactive(
-                        DeactivateRequest(encryptedPin, verificationId),
+                        DeactivateRequest(encryptPin(pin)!, verificationId),
                       );
                       Navigator.pop(context, true);
                     },
