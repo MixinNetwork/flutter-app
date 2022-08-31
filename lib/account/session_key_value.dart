@@ -22,7 +22,6 @@ class SessionKeyValue extends HiveKeyValue {
 
   set pinToken(String? value) => box.put(_keyPinToken, value);
 
-
   int get pinIterator => box.get(_keyPinIterator, defaultValue: 1) as int;
 
   set pinIterator(int value) => box.put(_keyPinIterator, value);

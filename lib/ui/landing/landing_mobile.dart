@@ -3,8 +3,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-
-
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -93,7 +91,8 @@ class _PhoneNumberInputScene extends StatelessWidget {
                 );
                 Toast.dismiss();
                 if (response.deactivatedAt?.isNotEmpty ?? false) {
-                  final date = DateTime.parse(response.deactivatedAt!).toLocal();
+                  final date =
+                      DateTime.parse(response.deactivatedAt!).toLocal();
                   final continueLogin = await showConfirmMixinDialog(
                     context,
                     context.l10n.loginAndAbortAccountDeletion,
