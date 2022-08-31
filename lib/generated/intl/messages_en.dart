@@ -477,6 +477,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "myStickers": MessageLookupByLibrary.simpleMessage("My Stickers"),
         "na": MessageLookupByLibrary.simpleMessage("N/A"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
+        "networkConnectionFailed":
+            MessageLookupByLibrary.simpleMessage("Network connection failed"),
         "networkError": MessageLookupByLibrary.simpleMessage("Network error"),
         "newVersionAvailable":
             MessageLookupByLibrary.simpleMessage("New version available"),
