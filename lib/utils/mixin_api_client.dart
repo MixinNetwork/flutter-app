@@ -1,11 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui';
 
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../constants/constants.dart';
 import 'logger.dart';
+import 'platform.dart';
+import 'system/package_info.dart';
 
 final tenSecond = const Duration(seconds: 10).inMilliseconds;
 
@@ -16,12 +21,16 @@ Client createClient({
   required String sessionId,
   required String privateKey,
   List<Interceptor> interceptors = const [],
+  // remove this if https://github.com/flutter/flutter/issues/13937 fixed.
+  String? deviceId,
+  PackageInfo? packageInfo,
+  required bool loginByPhoneNumber,
 }) =>
     Client(
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKey,
-      scp: scp,
+      scp: loginByPhoneNumber ? scpFull : scp,
       dioOptions: BaseOptions(
         connectTimeout: tenSecond,
         receiveTimeout: tenSecond,
@@ -53,7 +62,17 @@ Client createClient({
                 'now = ${DateTime.now().outputFormat()}');
             handler.next(e);
           },
-        )
+        ),
+        if (Platform.isIOS)
+          InterceptorsWrapper(onRequest: (options, handler) async {
+            final userAgent =
+                await generateUserAgent(packageInfo ?? await getPackageInfo());
+            options.headers['User-Agent'] = userAgent;
+            options.headers['Mixin-Device-Id'] =
+                deviceId ?? await getDeviceId();
+            options.headers['Accept-Language'] = window.locale.languageCode;
+            handler.next(options);
+          }),
       ],
       httpLogLevel: HttpLogLevel.none,
     );

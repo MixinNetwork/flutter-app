@@ -1,6 +1,7 @@
 {
 "about" : "Mengenai",
 "accessDenied" : "Akses dinafikan",
+"account" : "Akaun",
 "addContact" : "Tambah Kenalan",
 "addGroupDescription" : "Tambahkan keterangan kumpulan",
 "addParticipants" : "Tambah Peserta",
@@ -193,6 +194,7 @@
 "userNotFound" : "Pengguna tidak ditemui",
 "valueNow" : "nilai sekarang {arg0}",
 "valueThen" : "nilai maka {arg0}",
+"verifyPin" : "Sahkan PIN",
 "video" : "Video",
 "videos" : "Video",
 "whatsYourName" : "Siapa nama awak?",

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../setting/about_page.dart';
+import '../../setting/account_delete_page.dart';
+import '../../setting/account_page.dart';
 import '../../setting/appearance_page.dart';
 import '../../setting/backup_page.dart';
 import '../../setting/edit_profile_page.dart';
@@ -22,6 +24,9 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
 
   static const chatPage = 'chatPage';
   static const editProfilePage = 'editProfilePage';
+  static const accountPage = 'accountPage';
+  static const accountDeletePage = 'accountDeletePage';
+  static const storagePage = 'storagePage';
   static const notificationPage = 'notificationPage';
   static const chatBackupPage = 'chatBackupPage';
   static const dataAndStorageUsagePage = 'dataAndStorageUsagePage';
@@ -39,6 +44,8 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
     aboutPage,
     storageUsage,
     storageUsageDetail,
+    accountPage,
+    accountDeletePage,
   };
 
   @override
@@ -121,6 +128,22 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
             child: AppearancePage(
               key: ValueKey(appearancePage),
             ));
+      case accountPage:
+        return const MaterialPage(
+          key: ValueKey(accountPage),
+          name: accountPage,
+          child: AccountPage(
+            key: ValueKey(accountPage),
+          ),
+        );
+      case accountDeletePage:
+        return const MaterialPage(
+          key: ValueKey(accountDeletePage),
+          name: accountDeletePage,
+          child: AccountDeletePage(
+            key: ValueKey(accountDeletePage),
+          ),
+        );
       default:
         throw ArgumentError('Invalid route');
     }

@@ -104,27 +104,30 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m37(arg0, arg1) => "${arg0}將限時訊息設定為 ${arg1}";
 
-  static String m38(arg0) => "無法開啟檔案：${arg0}";
+  static String m38(arg0) => "如果您繼續，您的個人資料和賬戶資訊將在${arg0}被刪除。閱讀我們的檔案以**瞭解更多**。";
 
-  static String m39(count) => "${Intl.plural(count, one: '天', other: '天')}";
+  static String m39(arg0) => "無法開啟檔案：${arg0}";
 
-  static String m40(count) => "${Intl.plural(count, one: '小時', other: '小時')}";
+  static String m40(count) => "${Intl.plural(count, one: '天', other: '天')}";
 
-  static String m41(count) => "${Intl.plural(count, one: '分', other: '分')}";
+  static String m41(count) => "${Intl.plural(count, one: '小時', other: '小時')}";
 
-  static String m42(count) => "${Intl.plural(count, one: '秒', other: '秒')}";
+  static String m42(count) => "${Intl.plural(count, one: '分', other: '分')}";
 
-  static String m43(count) => "${Intl.plural(count, one: '週', other: '週')}";
+  static String m43(count) => "${Intl.plural(count, one: '秒', other: '秒')}";
 
-  static String m44(arg0) => "價值 ${arg0}";
+  static String m44(count) => "${Intl.plural(count, one: '週', other: '週')}";
 
-  static String m45(arg0) => "當時價值 ${arg0}";
+  static String m45(arg0) => "價值 ${arg0}";
+
+  static String m46(arg0) => "當時價值 ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "aMessage": MessageLookupByLibrary.simpleMessage("一條訊息"),
         "about": MessageLookupByLibrary.simpleMessage("關於"),
         "accessDenied": MessageLookupByLibrary.simpleMessage("禁止訪問"),
+        "account": MessageLookupByLibrary.simpleMessage("賬號"),
         "add": MessageLookupByLibrary.simpleMessage("新增"),
         "addBotWithPlus": MessageLookupByLibrary.simpleMessage("+ 新增機器人"),
         "addContact": MessageLookupByLibrary.simpleMessage("新增聯絡人"),
@@ -162,6 +165,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("取消"),
         "card": MessageLookupByLibrary.simpleMessage("卡片"),
         "change": MessageLookupByLibrary.simpleMessage("更改"),
+        "changeNumber": MessageLookupByLibrary.simpleMessage("修改手機號"),
+        "changeNumberInstead": MessageLookupByLibrary.simpleMessage("僅修改手機號碼"),
         "changedDisappearingMessageSettings": m0,
         "chatBackup": MessageLookupByLibrary.simpleMessage("聊天記錄備份"),
         "chatBotReceptionTitle":
@@ -214,6 +219,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataError": MessageLookupByLibrary.simpleMessage("資料錯誤"),
         "dataLoading": MessageLookupByLibrary.simpleMessage("資料載入中，請稍後"),
         "delete": MessageLookupByLibrary.simpleMessage("刪除"),
+        "deleteAccountDetailHint":
+            MessageLookupByLibrary.simpleMessage("本地訊息和 iCloud 備份不會被自動刪除"),
+        "deleteAccountHint":
+            MessageLookupByLibrary.simpleMessage("刪除你的賬戶和個人照片"),
         "deleteChat": MessageLookupByLibrary.simpleMessage("刪除聊天"),
         "deleteChatDescription":
             MessageLookupByLibrary.simpleMessage("刪除會話只會刪除此裝置的聊天記錄，不會影響其他裝置。"),
@@ -221,6 +230,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteForEveryone": MessageLookupByLibrary.simpleMessage("撤回"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("刪除"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("刪除群組"),
+        "deleteMyAccount": MessageLookupByLibrary.simpleMessage("登出賬戶"),
         "deleteTheCircle": m13,
         "developer": MessageLookupByLibrary.simpleMessage("開發者"),
         "disableDisappearingMessage": m14,
@@ -241,8 +251,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("退出將會清除此次所有的改動。"),
         "editName": MessageLookupByLibrary.simpleMessage("修改暱稱"),
         "editProfile": MessageLookupByLibrary.simpleMessage("編輯資料"),
+        "enterPinToDeleteAccount":
+            MessageLookupByLibrary.simpleMessage("輸入你的 PIN 以登出你的賬戶"),
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("輸入你的手機號碼"),
+        "enterYourPinToContinue":
+            MessageLookupByLibrary.simpleMessage("輸入你的 PIN 以繼續"),
         "errorAddressExists":
             MessageLookupByLibrary.simpleMessage("地址不存在，請確保地址是否新增成功"),
         "errorAddressNotSync":
@@ -481,6 +495,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mixin ID, 暱稱"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
             "備份你的聊天記錄到 iCloud。如果你丟失或者更換手機，你可以在重新安裝 Mixin Messenger 時恢復你的聊天記錄。注意備份到 iCloud 中的聊天記錄不受端對端加密保護！"),
+        "settingDeleteAccountPinContent": m38,
         "share": MessageLookupByLibrary.simpleMessage("分享"),
         "shareApps": MessageLookupByLibrary.simpleMessage("分享的應用"),
         "shareContact": MessageLookupByLibrary.simpleMessage("分享聯絡人"),
@@ -512,17 +527,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "toggleChatInfo": MessageLookupByLibrary.simpleMessage("展開/關閉會話資訊"),
         "transactionId": MessageLookupByLibrary.simpleMessage("交易編號"),
         "transactions": MessageLookupByLibrary.simpleMessage("轉賬記錄"),
+        "transactionsCannotBeDeleted":
+            MessageLookupByLibrary.simpleMessage("轉賬記錄不會被刪除"),
         "transcript": MessageLookupByLibrary.simpleMessage("聊天記錄"),
         "transfer": MessageLookupByLibrary.simpleMessage("轉賬"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("開啟通知"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("輸入訊息"),
-        "unableToOpenFile": m38,
+        "unableToOpenFile": m39,
         "unblock": MessageLookupByLibrary.simpleMessage("解除封鎖"),
-        "unitDay": m39,
-        "unitHour": m40,
-        "unitMinute": m41,
-        "unitSecond": m42,
-        "unitWeek": m43,
+        "unitDay": m40,
+        "unitHour": m41,
+        "unitMinute": m42,
+        "unitSecond": m43,
+        "unitWeek": m44,
         "unmute": MessageLookupByLibrary.simpleMessage("取消靜音"),
         "unpin": MessageLookupByLibrary.simpleMessage("取消置頂"),
         "unpinAllMessages": MessageLookupByLibrary.simpleMessage("取消所有置頂訊息"),
@@ -530,8 +547,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("確定取消置頂所有訊息麼？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未讀訊息"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到這個使用者"),
-        "valueNow": m44,
-        "valueThen": m45,
+        "valueNow": m45,
+        "valueThen": m46,
+        "verifyPin": MessageLookupByLibrary.simpleMessage("驗證 PIN"),
         "video": MessageLookupByLibrary.simpleMessage("影片"),
         "videos": MessageLookupByLibrary.simpleMessage("影片"),
         "webview2RuntimeInstallDescription":

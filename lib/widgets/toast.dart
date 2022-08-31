@@ -123,7 +123,7 @@ Future<void> showToastFailed(BuildContext context, Object? error) {
   if (error is ToastError) {
     message = error.message;
   } else if (error is MixinApiError) {
-    message = (error.error as MixinError).description;
+    message = (error.error as MixinError).toDisplayString(context);
   } else {
     message = ToastError.fromError(error)?.message;
   }

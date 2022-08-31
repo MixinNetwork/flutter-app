@@ -927,7 +927,7 @@ packages:
       name: mixin_bot_sdk_dart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.1"
+    version: "0.3.2"
   msix:
     dependency: "direct dev"
     description:

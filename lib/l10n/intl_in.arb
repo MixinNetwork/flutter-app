@@ -1,6 +1,7 @@
 {
 "about" : "Tentang",
 "accessDenied" : "Akses ditolak",
+"account" : "Akun",
 "addContact" : "Tambahkan Kontak",
 "addGroupDescription" : "Tambahkan deskripsi grup",
 "addParticipants" : "Tambahkan Peserta",
@@ -190,6 +191,7 @@
 "unblock" : "Batal Blokir",
 "unmute" : "Suarakan",
 "userNotFound" : "Pengguna tidak ditemukan",
+"verifyPin" : "Verifikasikan PIN",
 "video" : "Video",
 "videos" : "Video",
 "whatsYourName" : "Siapa nama Anda?",
