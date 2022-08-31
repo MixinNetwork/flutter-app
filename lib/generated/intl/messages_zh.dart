@@ -290,6 +290,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("错误 20118：PIN 格式不正确"),
         "errorNetworkTaskFailed":
             MessageLookupByLibrary.simpleMessage("网络连接失败。检查或切换网络，然后重试"),
+        "errorNoPinToken":
+            MessageLookupByLibrary.simpleMessage("缺少凭据，请重新登录之后再尝试使用此功能。"),
         "errorNotFound":
             MessageLookupByLibrary.simpleMessage("错误 404：没有找到相应的信息"),
         "errorNotSupportedAudioFormat":

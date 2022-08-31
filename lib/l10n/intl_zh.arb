@@ -136,6 +136,7 @@
 "errorInvalidEmergencyContact" : "错误 20130：紧急联系人不正确",
 "errorInvalidPinFormat" : "错误 20118：PIN 格式不正确",
 "errorNetworkTaskFailed" : "网络连接失败。检查或切换网络，然后重试",
+"errorNoPinToken" : "缺少凭据，请重新登录之后再尝试使用此功能。",
 "errorNotFound" : "错误 404：没有找到相应的信息",
 "errorNotSupportedAudioFormat" : "不支持的音频格式，请用其他app打开。",
 "errorNumberReachedLimit" : "错误 20132： 已达到上限",

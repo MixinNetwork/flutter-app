@@ -1434,6 +1434,16 @@ class Localization {
     );
   }
 
+  /// `No token, Please log in again and try this feature again.`
+  String get errorNoPinToken {
+    return Intl.message(
+      'No token, Please log in again and try this feature again.',
+      name: 'errorNoPinToken',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `ERROR 404: Not found`
   String get errorNotFound {
     return Intl.message(
@@ -3869,16 +3879,6 @@ class Localization {
     return Intl.message(
       'Zoom',
       name: 'zoom',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No PIN token`
-  String get errorNoPinToken {
-    return Intl.message(
-      'No PIN token',
-      name: 'errorNoPinToken',
       desc: '',
       args: [],
     );

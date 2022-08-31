@@ -137,6 +137,7 @@
 "errorInvalidEmergencyContact" : "ERROR 20130: Invalid emergency contact",
 "errorInvalidPinFormat" : "ERROR 20118: Invalid PIN format.",
 "errorNetworkTaskFailed" : "Network connection failed. Check or switch your network and try again",
+"errorNoPinToken" : "No token, Please log in again and try this feature again.",
 "errorNotFound" : "ERROR 404: Not found",
 "errorNotSupportedAudioFormat" : "Not supported audio format, please open by other app.",
 "errorNumberReachedLimit" : "ERROR 20132: The number has reached the limit.",
@@ -378,6 +379,5 @@
 "writeCircles" : "Write Circles",
 "you" : "You",
 "youDeletedThisMessage" : "You deleted this message",
-"zoom" : "Zoom",
-  "errorNoPinToken": "No PIN token"
+"zoom" : "Zoom"
 }

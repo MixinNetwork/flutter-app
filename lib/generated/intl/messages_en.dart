@@ -331,7 +331,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "ERROR 20118: Invalid PIN format."),
         "errorNetworkTaskFailed": MessageLookupByLibrary.simpleMessage(
             "Network connection failed. Check or switch your network and try again"),
-        "errorNoPinToken": MessageLookupByLibrary.simpleMessage("No PIN token"),
+        "errorNoPinToken": MessageLookupByLibrary.simpleMessage(
+            "No token, Please log in again and try this feature again."),
         "errorNotFound":
             MessageLookupByLibrary.simpleMessage("ERROR 404: Not found"),
         "errorNotSupportedAudioFormat": MessageLookupByLibrary.simpleMessage(
