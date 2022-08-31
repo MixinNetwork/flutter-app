@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:extended_image/extended_image.dart';
@@ -278,7 +277,8 @@ class MixinFileImage extends FileImage {
   }
 
   @override
-  ImageStreamCompleter load(FileImage key, DecoderCallback decode) =>
+  ImageStreamCompleter loadBuffer(
+          FileImage key, DecoderBufferCallback decode) =>
       _MultiFrameImageStreamCompleter(
         codec: _loadAsync(key, decode),
         scale: key.scale,
@@ -289,7 +289,8 @@ class MixinFileImage extends FileImage {
         controller: controller,
       );
 
-  Future<ui.Codec> _loadAsync(FileImage key, DecoderCallback decode) async {
+  Future<ui.Codec> _loadAsync(
+      FileImage key, DecoderBufferCallback decode) async {
     assert(key == this);
 
     if (file.path.isEmpty) {
@@ -307,8 +308,7 @@ class MixinFileImage extends FileImage {
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
-
-    return decode(bytes);
+    return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
   }
 
   @override
@@ -318,7 +318,7 @@ class MixinFileImage extends FileImage {
       _lastModified == other._lastModified;
 
   @override
-  int get hashCode => hashValues(super.hashCode, _lastModified);
+  int get hashCode => Object.hash(super.hashCode, _lastModified);
 }
 
 @immutable
@@ -406,7 +406,10 @@ class MixinExtendedNetworkImageProvider
 
   @override
   ImageStreamCompleter load(
-      ExtendedNetworkImageProvider key, DecoderCallback decode) {
+    ExtendedNetworkImageProvider key,
+    // ignore: deprecated_member_use
+    DecoderCallback decode,
+  ) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -432,6 +435,8 @@ class MixinExtendedNetworkImageProvider
   Future<ui.Codec> _loadAsync(
     ExtendedNetworkImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
+    // TODO: migrate to DecoderBufferCallback once extend image has compat with flutter 3.3
+    // ignore: deprecated_member_use
     DecoderCallback decode,
   ) async {
     assert(key == this);
@@ -612,7 +617,7 @@ class MixinExtendedNetworkImageProvider
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         controller,
         url,
         scale,

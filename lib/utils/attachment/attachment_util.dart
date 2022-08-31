@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
