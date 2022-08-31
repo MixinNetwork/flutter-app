@@ -235,6 +235,7 @@
 "myStickers" : "My Stickers",
 "na" : "N/A",
 "name" : "Name",
+"networkConnectionFailed" : "Network connection failed",
 "networkError" : "Network error",
 "newVersionAvailable" : "New version available",
 "newVersionDescription" : "Mixin Messenger {arg0} is now available, you have {arg1}. Would you like to download it now?",

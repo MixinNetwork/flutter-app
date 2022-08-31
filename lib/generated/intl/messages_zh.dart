@@ -420,6 +420,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "myStickers": MessageLookupByLibrary.simpleMessage("我的表情"),
         "na": MessageLookupByLibrary.simpleMessage("暂无价格"),
         "name": MessageLookupByLibrary.simpleMessage("名称"),
+        "networkConnectionFailed":
+            MessageLookupByLibrary.simpleMessage("网络连接失败"),
         "networkError": MessageLookupByLibrary.simpleMessage("网络错误"),
         "newVersionAvailable": MessageLookupByLibrary.simpleMessage("发现新版本"),
         "newVersionDescription": m31,

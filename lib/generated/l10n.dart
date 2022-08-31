@@ -2420,6 +2420,16 @@ class Localization {
     );
   }
 
+  /// `Network connection failed`
+  String get networkConnectionFailed {
+    return Intl.message(
+      'Network connection failed',
+      name: 'networkConnectionFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Network error`
   String get networkError {
     return Intl.message(
