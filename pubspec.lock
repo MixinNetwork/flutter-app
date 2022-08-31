@@ -68,17 +68,19 @@ packages:
     dependency: "direct overridden"
     description:
       path: bitsdojo_window_linux
-      ref: "591aa41e4643efe74fb017a060b0ff60b88d948c"
-      resolved-ref: "591aa41e4643efe74fb017a060b0ff60b88d948c"
+      ref: c64b24cf9a828f72358eb6bd032a2e8ad52e3c6c
+      resolved-ref: c64b24cf9a828f72358eb6bd032a2e8ad52e3c6c
       url: "https://github.com/MixinNetwork/bitsdojo_window.git"
     source: git
     version: "0.1.2"
   bitsdojo_window_macos:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: bitsdojo_window_macos
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: bitsdojo_window_macos
+      ref: c64b24cf9a828f72358eb6bd032a2e8ad52e3c6c
+      resolved-ref: c64b24cf9a828f72358eb6bd032a2e8ad52e3c6c
+      url: "https://github.com/MixinNetwork/bitsdojo_window.git"
+    source: git
     version: "0.1.2"
   bitsdojo_window_platform_interface:
     dependency: transitive
@@ -91,8 +93,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: bitsdojo_window_windows
-      ref: "591aa41e4643efe74fb017a060b0ff60b88d948c"
-      resolved-ref: "591aa41e4643efe74fb017a060b0ff60b88d948c"
+      ref: c64b24cf9a828f72358eb6bd032a2e8ad52e3c6c
+      resolved-ref: c64b24cf9a828f72358eb6bd032a2e8ad52e3c6c
       url: "https://github.com/MixinNetwork/bitsdojo_window.git"
     source: git
     version: "0.1.2"
@@ -270,7 +272,7 @@ packages:
       name: dart_console
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.1.2"
   dart_jsonwebtoken:
     dependency: transitive
     description:
@@ -291,7 +293,7 @@ packages:
       name: dbus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.4"
+    version: "0.7.8"
   decimal:
     dependency: "direct main"
     description:
@@ -326,42 +328,42 @@ packages:
       name: device_info_plus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.0"
+    version: "4.1.2"
   device_info_plus_linux:
     dependency: transitive
     description:
       name: device_info_plus_linux
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.1"
+    version: "3.0.0"
   device_info_plus_macos:
     dependency: transitive
     description:
       name: device_info_plus_macos
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.3"
+    version: "3.0.0"
   device_info_plus_platform_interface:
     dependency: transitive
     description:
       name: device_info_plus_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.3.0+1"
+    version: "3.0.0"
   device_info_plus_web:
     dependency: transitive
     description:
       name: device_info_plus_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0"
+    version: "3.0.0"
   device_info_plus_windows:
     dependency: transitive
     description:
       name: device_info_plus_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.1"
+    version: "4.0.0"
   dio:
     dependency: "direct main"
     description:
@@ -445,7 +447,7 @@ packages:
       name: ffi
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.1"
+    version: "2.0.1"
   file:
     dependency: transitive
     description:
@@ -459,7 +461,7 @@ packages:
       name: file_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.6.1"
+    version: "5.0.1"
   file_selector:
     dependency: "direct main"
     description:
@@ -588,7 +590,7 @@ packages:
       name: flutter_plugin_android_lifecycle
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.5"
+    version: "2.0.7"
   flutter_portal:
     dependency: "direct main"
     description:
@@ -955,14 +957,16 @@ packages:
       name: ogg_opus_player
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.1"
+    version: "0.4.2"
   open_file:
     dependency: "direct main"
     description:
-      name: open_file
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.2.1"
+      path: "."
+      ref: fbf68e4bb5cb3e262d8f8ebe10b2f8449ff8e030
+      resolved-ref: fbf68e4bb5cb3e262d8f8ebe10b2f8449ff8e030
+      url: "https://github.com/crazecoder/open_file.git"
+    source: git
+    version: "3.2.2"
   optional:
     dependency: transitive
     description:
@@ -983,7 +987,7 @@ packages:
       name: package_info_plus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.2"
+    version: "1.4.3+1"
   package_info_plus_linux:
     dependency: transitive
     description:
@@ -1018,7 +1022,7 @@ packages:
       name: package_info_plus_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.5"
+    version: "2.0.0"
   pasteboard:
     dependency: "direct main"
     description:
@@ -1076,7 +1080,7 @@ packages:
       name: path_provider_linux
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.5"
+    version: "2.1.7"
   path_provider_macos:
     dependency: transitive
     description:
@@ -1097,7 +1101,7 @@ packages:
       name: path_provider_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.5"
+    version: "2.1.2"
   petitparser:
     dependency: transitive
     description:
@@ -1587,7 +1591,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.6.1"
+    version: "2.7.0"
   win32_registry:
     dependency: transitive
     description:
