@@ -1,5 +1,4 @@
 import 'dart:core';
-import 'dart:typed_data';
 
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:flutter/foundation.dart';
