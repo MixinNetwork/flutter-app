@@ -65,6 +65,9 @@ class AccountServer {
   final SettingCubit settingCubit;
   Timer? checkSignalKeyTimer;
 
+  bool get _loginByPhoneNumber =>
+      AccountKeyValue.instance.primarySessionId == null;
+
   Future<void> initServer(
     String userId,
     String sessionId,
@@ -79,10 +82,13 @@ class AccountServer {
     this.identityNumber = identityNumber;
     this.privateKey = privateKey;
 
+    await initKeyValues(identityNumber);
+
     client = createClient(
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKey,
+      loginByPhoneNumber: _loginByPhoneNumber,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -157,8 +163,6 @@ class AccountServer {
     _sendMessageHelper = SendMessageHelper(database, attachmentUtil);
 
     _injector = Injector(userId, database, client);
-
-    await initKeyValues(identityNumber);
   }
 
   late String userId;
@@ -209,6 +213,7 @@ class AccountServer {
         primarySessionId: AccountKeyValue.instance.primarySessionId,
         packageInfo: await getPackageInfo(),
         deviceId: Platform.isIOS ? await getDeviceId() : null,
+        loginByPhoneNumber: _loginByPhoneNumber,
       ),
       errorsAreFatal: false,
       onExit: exitReceivePort.sendPort,

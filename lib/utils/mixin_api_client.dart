@@ -24,12 +24,13 @@ Client createClient({
   // remove this if https://github.com/flutter/flutter/issues/13937 fixed.
   String? deviceId,
   PackageInfo? packageInfo,
+  required bool loginByPhoneNumber,
 }) =>
     Client(
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKey,
-      scp: scp,
+      scp: loginByPhoneNumber ? scpFull : scp,
       dioOptions: BaseOptions(
         connectTimeout: tenSecond,
         receiveTimeout: tenSecond,

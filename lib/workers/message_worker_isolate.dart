@@ -51,6 +51,7 @@ class IsolateInitParams {
     required this.primarySessionId,
     required this.packageInfo,
     required this.deviceId,
+    required this.loginByPhoneNumber,
   });
 
   final SendPort sendPort;
@@ -62,6 +63,7 @@ class IsolateInitParams {
   final String? primarySessionId;
   final PackageInfo packageInfo;
   final String? deviceId;
+  final bool loginByPhoneNumber;
 }
 
 Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
@@ -157,6 +159,7 @@ class _MessageProcessRunner {
           },
         ),
       ],
+      loginByPhoneNumber: initParams.loginByPhoneNumber,
     );
 
     blaze = Blaze(
