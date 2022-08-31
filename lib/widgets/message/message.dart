@@ -119,6 +119,9 @@ extension MessageContextExtension on BuildContext {
   MessageItem get message => read<_MessageContextCubit>().state.message;
 
   bool get isPinnedPage => read<_MessageContextCubit>().state.isPinnedPage;
+
+  bool get isTranscriptPage =>
+      read<_MessageContextCubit>().state.isTranscriptPage;
 }
 
 const _pinArrowWidth = 32.0;
@@ -126,6 +129,9 @@ const _pinArrowWidth = 32.0;
 void _quickReply(BuildContext context) {
   doubleTap('_quickReply', const Duration(milliseconds: 300), () {
     if (context.isPinnedPage) return;
+    if (context.isTranscriptPage) return;
+    if (!context.message.type.canReply) return;
+
     context.read<BlinkCubit>().blinkByMessageId(context.message.messageId);
     context.read<QuoteMessageCubit>().emit(context.message);
   });
