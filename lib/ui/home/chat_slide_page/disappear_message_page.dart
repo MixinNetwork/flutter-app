@@ -41,23 +41,18 @@ class DisappearMessagePage extends StatelessWidget {
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: HighlightText(
+                child: HighlightStarLinkText(
                   context.l10n.disappearingMessageHint,
                   style: TextStyle(
                     color: context.theme.secondaryText,
                     height: 1.5,
                     fontSize: 14,
                   ),
-                  highlightTextSpans: [
-                    HighlightTextSpan(
-                      context.l10n.learnMore,
-                      style: TextStyle(
-                        color: context.theme.accent,
-                      ),
-                      onTap: () =>
-                          openUri(context, mixinDisappearingMessageHelpUrl),
-                    ),
-                  ],
+                  highlightStyle: TextStyle(
+                    color: context.theme.accent,
+                  ),
+                  links: const [mixinDisappearingMessageHelpUrl],
+                  onLinkClick: (url) => openUri(context, url),
                 ),
               ),
               const SizedBox(height: 40),
