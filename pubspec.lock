@@ -475,7 +475,14 @@ packages:
       name: file_selector
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.1"
+    version: "0.9.2"
+  file_selector_ios:
+    dependency: transitive
+    description:
+      name: file_selector_ios
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.0+1"
   file_selector_linux:
     dependency: "direct main"
     description:
