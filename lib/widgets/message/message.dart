@@ -29,6 +29,7 @@ import '../../ui/home/bloc/message_selection_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../ui/home/bloc/recall_message_bloc.dart';
 import '../../utils/datetime_format_utils.dart';
+import '../../utils/double_tap_util.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/file.dart';
 import '../../utils/hook.dart';
@@ -118,9 +119,23 @@ extension MessageContextExtension on BuildContext {
   MessageItem get message => read<_MessageContextCubit>().state.message;
 
   bool get isPinnedPage => read<_MessageContextCubit>().state.isPinnedPage;
+
+  bool get isTranscriptPage =>
+      read<_MessageContextCubit>().state.isTranscriptPage;
 }
 
 const _pinArrowWidth = 32.0;
+
+void _quickReply(BuildContext context) {
+  if (context.isPinnedPage) return;
+  if (context.isTranscriptPage) return;
+  if (!context.message.type.canReply) return;
+
+  doubleTap('_quickReply', const Duration(milliseconds: 300), () {
+    context.read<BlinkCubit>().blinkByMessageId(context.message.messageId);
+    context.read<QuoteMessageCubit>().emit(context.message);
+  });
+}
 
 class MessageItemWidget extends HookWidget {
   const MessageItemWidget({
@@ -464,15 +479,14 @@ class MessageItemWidget extends HookWidget {
       showNip: showNip,
       isCurrentUser: isCurrentUser,
       message: message,
-      child: GestureDetector(
-        onDoubleTap: () {
-          blinkCubit.blinkByMessageId(message.messageId);
-          context.read<QuoteMessageCubit>().emit(message);
-        },
-        child: Padding(
-          padding:
-              sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
-          child: child,
+      child: Builder(
+        builder: (context) => GestureDetector(
+          onTap: () => _quickReply(context),
+          child: Padding(
+            padding:
+                sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
+            child: child,
+          ),
         ),
       ),
     );
@@ -683,6 +697,7 @@ class _MessageBubbleMargin extends HookWidget {
           buildMenus: buildMenus,
           showedMenu: showedMenu,
           enable: !inMultiSelectMode,
+          onTap: () => _quickReply(context),
           child: Builder(builder: builder),
         ),
       ],
