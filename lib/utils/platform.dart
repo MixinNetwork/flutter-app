@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:android_id/android_id.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 
@@ -47,8 +48,7 @@ Future<String> getDeviceId() async {
       e('failed to get iOS device id');
     }
     if (Platform.isAndroid) {
-      final androidInfo = await deviceInfo.androidInfo;
-      final id = androidInfo.androidId;
+      final id = await const AndroidId().getId();
       if (id != null) {
         return nameUuidFromBytes(utf8.encode(id)).uuid;
       }
