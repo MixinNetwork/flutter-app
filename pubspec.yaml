@@ -122,17 +122,17 @@ dependency_overrides:
   bitsdojo_window_linux:
     git:
       url: https://github.com/MixinNetwork/bitsdojo_window.git
-      ref: c64b24cf9a828f72358eb6bd032a2e8ad52e3c6c
+      ref: 4b26a2e46324e35a3a03ba9a2a01d9d51d342ff9
       path: bitsdojo_window_linux
   bitsdojo_window_macos:
     git:
       url: https://github.com/MixinNetwork/bitsdojo_window.git
-      ref: c64b24cf9a828f72358eb6bd032a2e8ad52e3c6c
+      ref: 4b26a2e46324e35a3a03ba9a2a01d9d51d342ff9
       path: bitsdojo_window_macos
   bitsdojo_window_windows:
     git:
       url: https://github.com/MixinNetwork/bitsdojo_window.git
-      ref: c64b24cf9a828f72358eb6bd032a2e8ad52e3c6c
+      ref: 4b26a2e46324e35a3a03ba9a2a01d9d51d342ff9
       path: bitsdojo_window_windows
 
 
