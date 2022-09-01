@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -524,6 +525,7 @@ class _SendTextField extends HookWidget {
                 bottom: 8,
               ),
             ),
+            selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
           ),
         ),
       ),
