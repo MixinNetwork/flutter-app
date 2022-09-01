@@ -1,3 +1,5 @@
+import 'dart:ui' as ui show BoxHeightStyle;
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -106,6 +108,7 @@ class HighlightSelectableText extends HookWidget {
       maxLines: maxLines,
       textWidthBasis: TextWidthBasis.longestLine,
       toolbarOptions: const ToolbarOptions(),
+      selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
     );
   }
 }
