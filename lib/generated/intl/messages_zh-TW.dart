@@ -159,6 +159,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "biography": MessageLookupByLibrary.simpleMessage("簡介"),
         "block": MessageLookupByLibrary.simpleMessage("封鎖使用者"),
         "bots": MessageLookupByLibrary.simpleMessage("機器人"),
+        "botsTitle": MessageLookupByLibrary.simpleMessage("機器人"),
         "bringAllToFront": MessageLookupByLibrary.simpleMessage("前置所有視窗"),
         "canNotRecognizeQrCode":
             MessageLookupByLibrary.simpleMessage("無法識別二維碼"),
@@ -200,7 +201,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "contact": MessageLookupByLibrary.simpleMessage("聯絡人"),
         "contactMixinId": m10,
         "contactMuteTitle": MessageLookupByLibrary.simpleMessage("靜音通知"),
-        "contacts": MessageLookupByLibrary.simpleMessage("聯絡人"),
+        "contactTitle": MessageLookupByLibrary.simpleMessage("聯絡人"),
         "contentTooLong": MessageLookupByLibrary.simpleMessage("內容過長"),
         "contentVoice": MessageLookupByLibrary.simpleMessage("[語音電話]"),
         "continueText": MessageLookupByLibrary.simpleMessage("繼續"),

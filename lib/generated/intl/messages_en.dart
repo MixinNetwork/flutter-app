@@ -179,6 +179,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "biography": MessageLookupByLibrary.simpleMessage("Biography"),
         "block": MessageLookupByLibrary.simpleMessage("Block"),
         "bots": MessageLookupByLibrary.simpleMessage("BOTS"),
+        "botsTitle": MessageLookupByLibrary.simpleMessage("Bots"),
         "bringAllToFront":
             MessageLookupByLibrary.simpleMessage("Bring All To Front"),
         "canNotRecognizeQrCode": MessageLookupByLibrary.simpleMessage(
@@ -228,7 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "contactMixinId": m10,
         "contactMuteTitle":
             MessageLookupByLibrary.simpleMessage("Mute notifications for…"),
-        "contacts": MessageLookupByLibrary.simpleMessage("CONTACTS"),
+        "contactTitle": MessageLookupByLibrary.simpleMessage("Contacts"),
         "contentTooLong":
             MessageLookupByLibrary.simpleMessage("Content too long"),
         "contentVoice": MessageLookupByLibrary.simpleMessage("[Voice call]"),
@@ -599,7 +600,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "signWithPhoneNumber":
             MessageLookupByLibrary.simpleMessage("Sign in with phone number"),
         "signWithQrcode":
-            MessageLookupByLibrary.simpleMessage("Sign in with QrCode"),
+            MessageLookupByLibrary.simpleMessage("Sign in with QR code"),
         "smileysAndPeople":
             MessageLookupByLibrary.simpleMessage("Smileys & People"),
         "sticker": MessageLookupByLibrary.simpleMessage("Sticker"),

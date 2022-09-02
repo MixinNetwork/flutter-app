@@ -30,6 +30,7 @@ class SlidePage extends StatelessWidget {
     super.key,
     required this.showCollapse,
   });
+
   final bool showCollapse;
 
   @override
@@ -70,7 +71,7 @@ class SlidePage extends StatelessWidget {
                     children: [
                       _Item(
                         asset: Resources.assetsImagesSlideContactsSvg,
-                        title: context.l10n.contacts,
+                        title: context.l10n.contactTitle,
                         type: SlideCategoryType.contacts,
                       ),
                       _Item(
@@ -80,7 +81,7 @@ class SlidePage extends StatelessWidget {
                       ),
                       _Item(
                         asset: Resources.assetsImagesBotSvg,
-                        title: Localization.current.bots,
+                        title: Localization.current.botsTitle,
                         type: SlideCategoryType.bots,
                       ),
                       _Item(
