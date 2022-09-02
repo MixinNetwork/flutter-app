@@ -160,6 +160,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "biography": MessageLookupByLibrary.simpleMessage("自己紹介文"),
         "block": MessageLookupByLibrary.simpleMessage("ブロック"),
         "bots": MessageLookupByLibrary.simpleMessage("ミニアプリ"),
+        "botsTitle": MessageLookupByLibrary.simpleMessage("Myミニアプリ一覧"),
         "canNotRecognizeQrCode":
             MessageLookupByLibrary.simpleMessage("QRコードが見つかりません"),
         "cancel": MessageLookupByLibrary.simpleMessage("キャンセル"),
@@ -201,7 +202,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "contact": MessageLookupByLibrary.simpleMessage("連絡先"),
         "contactMixinId": m10,
         "contactMuteTitle": MessageLookupByLibrary.simpleMessage("通知をミュート"),
-        "contacts": MessageLookupByLibrary.simpleMessage("連絡先"),
+        "contactTitle": MessageLookupByLibrary.simpleMessage("連絡先"),
         "contentTooLong": MessageLookupByLibrary.simpleMessage("文字数を減らしてください"),
         "contentVoice": MessageLookupByLibrary.simpleMessage("[音声通話]"),
         "continueText": MessageLookupByLibrary.simpleMessage("続ける"),

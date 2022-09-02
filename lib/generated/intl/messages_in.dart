@@ -92,6 +92,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "audio": MessageLookupByLibrary.simpleMessage("Audio"),
         "block": MessageLookupByLibrary.simpleMessage("Blokir"),
         "bots": MessageLookupByLibrary.simpleMessage("BOT"),
+        "botsTitle": MessageLookupByLibrary.simpleMessage("Bot"),
         "canNotRecognizeQrCode": MessageLookupByLibrary.simpleMessage(
             "Tidak dapat mengenal kode QR"),
         "cancel": MessageLookupByLibrary.simpleMessage("Batal"),
@@ -114,7 +115,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "contactMixinId": m10,
         "contactMuteTitle":
             MessageLookupByLibrary.simpleMessage("Matikan notifikasi selama…"),
-        "contacts": MessageLookupByLibrary.simpleMessage("KONTAK"),
         "contentTooLong":
             MessageLookupByLibrary.simpleMessage("Konten terlalu panjang"),
         "contentVoice":

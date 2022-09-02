@@ -390,6 +390,16 @@ class Localization {
     );
   }
 
+  /// `Bots`
+  String get botsTitle {
+    return Intl.message(
+      'Bots',
+      name: 'botsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Bring All To Front`
   String get bringAllToFront {
     return Intl.message(
@@ -764,11 +774,11 @@ class Localization {
     );
   }
 
-  /// `CONTACTS`
-  String get contacts {
+  /// `Contacts`
+  String get contactTitle {
     return Intl.message(
-      'CONTACTS',
-      name: 'contacts',
+      'Contacts',
+      name: 'contactTitle',
       desc: '',
       args: [],
     );
@@ -3354,10 +3364,10 @@ class Localization {
     );
   }
 
-  /// `Sign in with QrCode`
+  /// `Sign in with QR code`
   String get signWithQrcode {
     return Intl.message(
-      'Sign in with QrCode',
+      'Sign in with QR code',
       name: 'signWithQrcode',
       desc: '',
       args: [],

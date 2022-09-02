@@ -178,6 +178,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "biography": MessageLookupByLibrary.simpleMessage("Биография"),
         "block": MessageLookupByLibrary.simpleMessage("Блокировать"),
         "bots": MessageLookupByLibrary.simpleMessage("БОТЫ"),
+        "botsTitle": MessageLookupByLibrary.simpleMessage("Боты"),
         "canNotRecognizeQrCode":
             MessageLookupByLibrary.simpleMessage("Не могу распознать QR-код"),
         "cancel": MessageLookupByLibrary.simpleMessage("Отмена"),
@@ -226,7 +227,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "contactMixinId": m10,
         "contactMuteTitle":
             MessageLookupByLibrary.simpleMessage("Отключить уведомления для…"),
-        "contacts": MessageLookupByLibrary.simpleMessage("КОНТАКТЫ"),
+        "contactTitle": MessageLookupByLibrary.simpleMessage("Контакты"),
         "contentTooLong":
             MessageLookupByLibrary.simpleMessage("Слишком длинный контент"),
         "contentVoice":
