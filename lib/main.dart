@@ -110,10 +110,17 @@ Future<void> main(List<String> args) async {
           if (Platform.isWindows) {
             screenSize = screenSize / screen.scaleFactor;
           }
-          appWindow.size = Size(
+          final size = Size(
             math.min(screenSize.width, defaultWindowSize.width),
             math.min(screenSize.height, defaultWindowSize.height),
           );
+          appWindow.size = size;
+          if (Platform.isWindows) {
+            // TODO: remove this once https://github.com/bitsdojo/bitsdojo_window/issues/193 fixed
+            WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+              appWindow.size = size + const Offset(0, 1);
+            });
+          }
         } else {
           appWindow.size = defaultWindowSize;
         }
