@@ -59,7 +59,8 @@ class TextMessage extends HookWidget {
               style: TextStyle(
                 color: context.theme.accent,
               ),
-              onTap: () => openUri(context, e[0]!, app:  context.read<ConversationCubit>().state?.app),
+              onTap: () => openUri(context, e[0]!,
+                  app: context.read<ConversationCubit>().state?.app),
             ),
           ),
       [content],
