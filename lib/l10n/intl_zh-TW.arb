@@ -309,6 +309,8 @@
 "shareContact" : "分享聯絡人",
 "shareError" : "分享出錯",
 "shareLink" : "分享邀請連結",
+"shareMessageDescription" : "你確定要傳送來自{arg0}的{arg1}？",
+"shareMessageDescriptionEmpty" : "你確定要傳送該{arg0}？",
 "sharedMedia" : "媒體內容",
 "show" : "顯示",
 "showAvatar" : "顯示頭像",

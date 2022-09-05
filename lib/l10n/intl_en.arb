@@ -322,6 +322,8 @@
 "shareContact" : "Share Contact",
 "shareError" : "Share error.",
 "shareLink" : "Share Link",
+"shareMessageDescription" : "Are you sure you want to send a {arg0} from {arg1}?",
+"shareMessageDescriptionEmpty" : "Are you sure you want to send the {arg0}?",
 "sharedMedia" : "Shared Media",
 "show" : "Show",
 "showAvatar" : "Show avatar",

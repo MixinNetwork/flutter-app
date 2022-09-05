@@ -12,7 +12,7 @@ AppCardData _$AppCardDataFromJson(Map<String, dynamic> json) => AppCardData(
       json['title'] as String,
       json['description'] as String,
       json['action'] as String,
-      json['updated_at'] as String,
+      json['updated_at'] as String?,
       json['shareable'] as bool? ?? true,
     );
 

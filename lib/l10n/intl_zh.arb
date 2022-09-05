@@ -319,6 +319,8 @@
 "shareContact" : "分享联系人",
 "shareError" : "分享出错",
 "shareLink" : "分享邀请链接",
+"shareMessageDescription" : "你确定要发送来自{arg0}的{arg1}？",
+"shareMessageDescriptionEmpty" : "你确定要发送该{arg0}？",
 "sharedMedia" : "媒体内容",
 "show" : "显示",
 "showAvatar" : "显示头像",

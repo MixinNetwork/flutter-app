@@ -3294,6 +3294,26 @@ class Localization {
     );
   }
 
+  /// `Are you sure you want to send a {arg0} from {arg1}?`
+  String shareMessageDescription(Object arg0, Object arg1) {
+    return Intl.message(
+      'Are you sure you want to send a $arg0 from $arg1?',
+      name: 'shareMessageDescription',
+      desc: '',
+      args: [arg0, arg1],
+    );
+  }
+
+  /// `Are you sure you want to send the {arg0}?`
+  String shareMessageDescriptionEmpty(Object arg0) {
+    return Intl.message(
+      'Are you sure you want to send the $arg0?',
+      name: 'shareMessageDescriptionEmpty',
+      desc: '',
+      args: [arg0],
+    );
+  }
+
   /// `Shared Media`
   String get sharedMedia {
     return Intl.message(

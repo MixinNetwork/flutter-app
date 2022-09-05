@@ -172,6 +172,8 @@
 "share" : "Bagikan",
 "shareError" : "Bagikan kesalahan.",
 "shareLink" : "Bagikan Tautan",
+"shareMessageDescription" : "Yakin ingin mengirim {arg0} dari {arg1}?",
+"shareMessageDescriptionEmpty" : "Yakin ingin mengirim {arg0}?",
 "sharedMedia" : "Media Bersama",
 "show" : "Tampilkan",
 "signIn" : "Masuk",

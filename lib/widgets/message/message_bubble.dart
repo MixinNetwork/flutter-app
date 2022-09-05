@@ -16,13 +16,13 @@ import 'message.dart';
 const _nipWidth = 9.0;
 const _lightCurrentBubble = Color.fromRGBO(197, 237, 253, 1);
 const _darkCurrentBubble = Color.fromRGBO(59, 79, 103, 1);
-const _lightOtherBubble = Color.fromRGBO(255, 255, 255, 1);
-const _darkOtherBubble = Color.fromRGBO(52, 59, 67, 1);
+const lightOtherBubble = Colors.white;
+const darkOtherBubble = Color.fromRGBO(52, 59, 67, 1);
 
 extension BubbleColor on BuildContext {
   Color messageBubbleColor(bool isCurrentUser) => isCurrentUser
       ? dynamicColor(_lightCurrentBubble, darkColor: _darkCurrentBubble)
-      : dynamicColor(_lightOtherBubble, darkColor: _darkOtherBubble);
+      : dynamicColor(lightOtherBubble, darkColor: darkOtherBubble);
 }
 
 class MessageBubble extends HookWidget {

@@ -113,26 +113,31 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m38(arg0) =>
       "If you continue, your profile and account details will be delete on ${arg0}. read our document to **learn more**.";
 
-  static String m39(arg0) => "Unable to open file: ${arg0}";
+  static String m39(arg0, arg1) =>
+      "Are you sure you want to send a ${arg0} from ${arg1}?";
 
-  static String m40(count) =>
-      "${Intl.plural(count, one: 'day', other: 'days')}";
+  static String m40(arg0) => "Are you sure you want to send the ${arg0}?";
 
-  static String m41(count) =>
-      "${Intl.plural(count, one: 'hour', other: 'hours')}";
+  static String m41(arg0) => "Unable to open file: ${arg0}";
 
   static String m42(count) =>
-      "${Intl.plural(count, one: 'minute', other: 'minutes')}";
+      "${Intl.plural(count, one: 'day', other: 'days')}";
 
   static String m43(count) =>
-      "${Intl.plural(count, one: 'second', other: 'seconds')}";
+      "${Intl.plural(count, one: 'hour', other: 'hours')}";
 
   static String m44(count) =>
+      "${Intl.plural(count, one: 'minute', other: 'minutes')}";
+
+  static String m45(count) =>
+      "${Intl.plural(count, one: 'second', other: 'seconds')}";
+
+  static String m46(count) =>
       "${Intl.plural(count, one: 'week', other: 'weeks')}";
 
-  static String m45(arg0) => "value now ${arg0}";
+  static String m47(arg0) => "value now ${arg0}";
 
-  static String m46(arg0) => "value then ${arg0}";
+  static String m48(arg0) => "value then ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -591,6 +596,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareContact": MessageLookupByLibrary.simpleMessage("Share Contact"),
         "shareError": MessageLookupByLibrary.simpleMessage("Share error."),
         "shareLink": MessageLookupByLibrary.simpleMessage("Share Link"),
+        "shareMessageDescription": m39,
+        "shareMessageDescriptionEmpty": m40,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
         "show": MessageLookupByLibrary.simpleMessage("Show"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("Show avatar"),
@@ -636,13 +643,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "turnOnNotifications":
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("Type message"),
-        "unableToOpenFile": m39,
+        "unableToOpenFile": m41,
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),
-        "unitDay": m40,
-        "unitHour": m41,
-        "unitMinute": m42,
-        "unitSecond": m43,
-        "unitWeek": m44,
+        "unitDay": m42,
+        "unitHour": m43,
+        "unitMinute": m44,
+        "unitSecond": m45,
+        "unitWeek": m46,
         "unmute": MessageLookupByLibrary.simpleMessage("Unmute"),
         "unpin": MessageLookupByLibrary.simpleMessage("Unpin"),
         "unpinAllMessages":
@@ -652,8 +659,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unreadMessages":
             MessageLookupByLibrary.simpleMessage("Unread messages"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
-        "valueNow": m45,
-        "valueThen": m46,
+        "valueNow": m47,
+        "valueThen": m48,
         "verifyPin": MessageLookupByLibrary.simpleMessage("Verify PIN"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),

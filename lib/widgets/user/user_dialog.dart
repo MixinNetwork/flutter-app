@@ -138,6 +138,7 @@ class _UserProfileBody extends StatelessWidget {
   const _UserProfileBody({
     required this.user,
   });
+
   final User user;
 
   @override
@@ -298,7 +299,7 @@ class _UserProfileButtonBar extends StatelessWidget {
             context,
             context.accountServer.sendContactMessage(
               user.userId,
-              user.fullName!,
+              user.fullName,
               result.first.encryptCategory!,
               conversationId: conversationId,
               recipientId: result.first.userId,

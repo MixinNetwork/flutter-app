@@ -6,9 +6,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../api/giphy_api.dart';
 import '../../api/giphy_vo/giphy_gif.dart';
-import '../../app.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
-import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
@@ -171,44 +169,21 @@ class _GifItem extends HookWidget {
   Widget build(BuildContext context) {
     final previewImage = gif.images.fixedWidthDownsampled;
     final sendImage = gif.images.fixedWidth;
-    final playing = useState(true);
-
-    final isCurrentRoute = useRef(true);
-
-    final secondContext = useSecondNavigatorContext(context);
-
-    final listener = useCallback(() {
-      if (isAppActive && isCurrentRoute.value) {
-        playing.value = true;
-      } else {
-        playing.value = false;
-      }
-    }, []);
-
-    useRouteObserver(
-      rootRouteObserver,
-      context: secondContext,
-      didPushNext: () {
-        isCurrentRoute.value = false;
-        listener();
-      },
-      didPopNext: () {
-        isCurrentRoute.value = true;
-        listener();
-      },
-    );
+    final playing = useImagePlaying(context);
 
     return InteractiveDecoratedBox(
       onTap: () async {
         final accountServer = context.accountServer;
         final conversationItem = context.read<ConversationCubit>().state;
         if (conversationItem == null) return;
-        await accountServer.sendGiphyGifMessage(
+        await accountServer.sendImageMessageByUrl(
           conversationItem.encryptCategory,
-          sendImage,
+          sendImage.url,
           previewImage.url,
           conversationId: conversationItem.conversationId,
           recipientId: conversationItem.user?.userId,
+          width: int.tryParse(sendImage.width),
+          height: int.tryParse(sendImage.height),
         );
       },
       child: CacheImage(

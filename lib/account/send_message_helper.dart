@@ -4,11 +4,11 @@ import 'dart:ui' as ui;
 
 import 'package:cross_file/cross_file.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/rendering.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
-import '../api/giphy_vo/giphy_image.dart';
 import '../blaze/vo/pin_message_minimal.dart';
 import '../blaze/vo/pin_message_payload.dart';
 import '../blaze/vo/recall_message.dart';
@@ -33,6 +33,9 @@ import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/cache_image.dart';
 import 'show_pin_message_key_value.dart';
+
+const jpegMimeType = 'image/jpeg';
+const gifMimeType = 'image/gif';
 
 class SendMessageHelper {
   SendMessageHelper(
@@ -117,8 +120,11 @@ class SendMessageHelper {
     AttachmentResult? attachmentResult,
   }) async {
     final messageId = const Uuid().v4();
-    final mimeType =
-        file?.mimeType ?? lookupMimeType(file?.path ?? '') ?? 'image/jpeg';
+    final _bytes = bytes ?? await file!.readAsBytes();
+    final mimeType = file?.mimeType ??
+        lookupMimeType(file?.path ?? '',
+            headerBytes: _bytes.take(defaultMagicNumbersMaxLength).toList()) ??
+        'image/jpeg';
 
     var attachment = _attachmentUtil.getAttachmentFile(
       category,
@@ -127,8 +133,6 @@ class SendMessageHelper {
       file?.name,
       mimeType: mimeType,
     );
-
-    final _bytes = bytes ?? await file!.readAsBytes();
 
     // Only retrieve image bounds info.
     final buffer = await ui.ImmutableBuffer.fromUint8List(_bytes);
@@ -1098,41 +1102,59 @@ class SendMessageHelper {
     String conversationId,
     String senderId,
     String category,
-    GiphyImage sendImage,
-    String previewUrl,
-  ) async {
-    const gifMineType = 'image/gif';
-
+    String url,
+    String previewUrl, {
+    int? width,
+    int? height,
+    bool defaultGifMimeType = true,
+  }) async {
     final messageId = const Uuid().v4();
-    final message = Message(
-      messageId: messageId,
-      conversationId: conversationId,
-      userId: senderId,
-      content: '',
-      category: category,
-      mediaUrl: sendImage.url,
-      mediaMimeType: gifMineType,
-      mediaSize: 0,
-      mediaWidth: int.tryParse(sendImage.width),
-      mediaHeight: int.tryParse(sendImage.height),
-      mediaStatus: MediaStatus.pending,
-      status: MessageStatus.sending,
-      createdAt: DateTime.now(),
-      thumbImage: previewUrl,
-    );
-    await _insertSendMessageToDb(message);
+    final defaultMimeType = defaultGifMimeType ? gifMimeType : jpegMimeType;
+    var _width = width;
+    var _height = height;
+
+    Future<Message> insertMessage(
+        int? width, int? height, String mimeType) async {
+      final message = Message(
+        messageId: messageId,
+        conversationId: conversationId,
+        userId: senderId,
+        content: '',
+        category: category,
+        mediaUrl: url,
+        mediaMimeType: mimeType,
+        mediaSize: 0,
+        mediaWidth: width,
+        mediaHeight: height,
+        mediaStatus: MediaStatus.pending,
+        status: MessageStatus.sending,
+        createdAt: DateTime.now(),
+        thumbImage: previewUrl,
+      );
+      await _insertSendMessageToDb(message);
+      return message;
+    }
 
     Uint8List? sendImageBytes;
     try {
-      sendImageBytes = await downloadImage(sendImage.url);
+      sendImageBytes = await downloadImage(url);
     } catch (error, stacktrace) {
       e('failed to download image: $error $stacktrace');
     }
     if (sendImageBytes == null) {
-      e('failed to get send image bytes. ${sendImage.url}');
+      e('failed to get send image bytes. $url');
+      final message = await insertMessage(width, height, defaultMimeType);
       await _messageDao.updateMediaStatus(
           message.messageId, MediaStatus.canceled);
       return;
+    } else {
+      final image = await decodeImageFromList(sendImageBytes);
+      final mimeType = lookupMimeType(url,
+          headerBytes:
+              sendImageBytes.take(defaultMagicNumbersMaxLength).toList());
+      _width = image.width;
+      _height = image.height;
+      await insertMessage(_width, _height, mimeType ?? defaultMimeType);
     }
 
     var attachment = _attachmentUtil.getAttachmentFile(
@@ -1140,7 +1162,7 @@ class SendMessageHelper {
       conversationId,
       messageId,
       null,
-      mimeType: gifMineType,
+      mimeType: defaultMimeType,
     );
     attachment = await attachment.create(recursive: true);
     await attachment.writeAsBytes(sendImageBytes);
@@ -1165,11 +1187,11 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
       attachmentResult.attachmentId,
-      gifMineType,
+      defaultMimeType,
       mediaSize,
       null,
-      int.tryParse(sendImage.width),
-      int.tryParse(sendImage.height),
+      _width,
+      _height,
       thumbImage,
       null,
       null,

@@ -73,6 +73,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m36(count, arg0) =>
       "${Intl.plural(count, one: 'null', other: '${arg0} pesan terkait')}";
 
+  static String m39(arg0, arg1) => "Yakin ingin mengirim ${arg0} dari ${arg1}?";
+
+  static String m40(arg0) => "Yakin ingin mengirim ${arg0}?";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "about": MessageLookupByLibrary.simpleMessage("Tentang"),
@@ -323,6 +327,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareError":
             MessageLookupByLibrary.simpleMessage("Bagikan kesalahan."),
         "shareLink": MessageLookupByLibrary.simpleMessage("Bagikan Tautan"),
+        "shareMessageDescription": m39,
+        "shareMessageDescriptionEmpty": m40,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Media Bersama"),
         "show": MessageLookupByLibrary.simpleMessage("Tampilkan"),
         "signIn": MessageLookupByLibrary.simpleMessage("Masuk"),

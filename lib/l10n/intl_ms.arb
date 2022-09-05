@@ -172,6 +172,8 @@
 "share" : "Berkongsi",
 "shareError" : "Kongsi ralat",
 "shareLink" : "Kongsi pautan",
+"shareMessageDescription" : "Adakah anda pasti mahu menghantar {arg0} dari {arg1}?",
+"shareMessageDescriptionEmpty" : "Adakah anda pasti mahu menghantar {arg0}?",
 "sharedMedia" : "Media Berkongsi",
 "show" : "Tunjuk",
 "signIn" : "Log masuk",

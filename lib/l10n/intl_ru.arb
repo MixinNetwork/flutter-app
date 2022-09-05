@@ -309,6 +309,8 @@
 "shareContact" : "Поделиться контактом",
 "shareError" : "Поделитесь ошибкой.",
 "shareLink" : "Поделиться ссылкой",
+"shareMessageDescription" : "Вы уверены, что хотите отправить {arg0} от {arg1}?",
+"shareMessageDescriptionEmpty" : "Вы уверены, что хотите отправить {arg0}?",
 "sharedMedia" : "Общие медиа",
 "show" : "Показать",
 "showAvatar" : "Показать аватар",

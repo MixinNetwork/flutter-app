@@ -146,7 +146,7 @@ class ChatInfoPage extends HookWidget {
                         context,
                         accountServer.sendContactMessage(
                           conversation.userId!,
-                          conversation.name!,
+                          conversation.name,
                           result.first.encryptCategory!,
                           conversationId: conversationId,
                           recipientId: result.first.userId,

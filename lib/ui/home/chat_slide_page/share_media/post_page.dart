@@ -172,6 +172,7 @@ class _Item extends StatelessWidget {
           child: MessageContext.fromMessageItem(
             message: message,
             child: MessagePost(
+              content: message.content ?? '',
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: context.theme.sidebarSelected,

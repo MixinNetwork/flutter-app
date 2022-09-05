@@ -306,6 +306,8 @@
 "shareApps" : "共有ずみのアプリ",
 "shareError" : "エラーを共有",
 "shareLink" : "リンクをシェアする",
+"shareMessageDescription" : "{arg0}から{arg1}を送信しますか？",
+"shareMessageDescriptionEmpty" : "{arg0}を送信しますか？",
 "sharedMedia" : "共有されたメディア",
 "show" : "表示",
 "showAvatar" : "アバターの表示",
