@@ -247,7 +247,7 @@ class MessageItemWidget extends HookWidget {
               }
 
               return _MessageSelectionWrapper(
-                messageId: message.messageId,
+                message: message,
                 child: _MessageBubbleMargin(
                   userName: userName,
                   userId: userId,
@@ -306,7 +306,7 @@ class MessageItemWidget extends HookWidget {
                         title: context.l10n.choose,
                         onTap: () => context
                             .read<MessageSelectionCubit>()
-                            .selectMessage(message.messageId),
+                            .selectMessage(message),
                       ),
                     if (message.type.isText || message.type.isPost)
                       ContextMenu(
@@ -764,12 +764,12 @@ class _UnreadMessageBar extends StatelessWidget {
 class _MessageSelectionWrapper extends HookWidget {
   const _MessageSelectionWrapper({
     required this.child,
-    required this.messageId,
+    required this.message,
   });
 
   final Widget child;
 
-  final String messageId;
+  final MessageItem message;
 
   @override
   Widget build(BuildContext context) {
@@ -780,13 +780,13 @@ class _MessageSelectionWrapper extends HookWidget {
 
     final selected = useBlocStateConverter<MessageSelectionCubit,
         MessageSelectionState, bool>(
-      converter: (state) => state.selectedMessageIds.contains(messageId),
+      converter: (state) =>
+          state.selectedMessageIds.contains(message.messageId),
     );
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: inMultiSelectMode
-          ? () =>
-              context.read<MessageSelectionCubit>().toggleSelection(messageId)
+          ? () => context.read<MessageSelectionCubit>().toggleSelection(message)
           : null,
       child: Row(
         children: [
