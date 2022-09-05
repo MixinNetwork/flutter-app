@@ -18,7 +18,7 @@ class MessageSelectionState with EquatableMixin {
   final bool canForward;
 
   @override
-  List<Object?> get props => [selectedMessageIds];
+  List<Object?> get props => [selectedMessageIds, canForward];
 }
 
 class MessageSelectionCubit extends Cubit<MessageSelectionState>
