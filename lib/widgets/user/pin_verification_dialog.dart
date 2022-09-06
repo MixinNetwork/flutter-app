@@ -294,4 +294,9 @@ class _PinInputLayoutState extends State<PinInputLayout>
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     // ignore
   }
+
+  @override
+  void performSelector(String selectorName) {
+    // ignore
+  }
 }
