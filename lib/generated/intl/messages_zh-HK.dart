@@ -106,21 +106,25 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m38(arg0) => "如果您繼續，您的個人資料和賬户信息將在${arg0}被刪除。閲讀我們的文檔以**瞭解更多**。";
 
-  static String m39(arg0) => "無法打開檔案：${arg0}";
+  static String m39(arg0, arg1) => "你確定要發送來自${arg0}的${arg1}？";
 
-  static String m40(count) => "${Intl.plural(count, one: '天', other: '天')}";
+  static String m40(arg0) => "你確定要發送該${arg0}？";
 
-  static String m41(count) => "${Intl.plural(count, one: '小時', other: '小時')}";
+  static String m41(arg0) => "無法打開檔案：${arg0}";
 
-  static String m42(count) => "${Intl.plural(count, one: '分', other: '分')}";
+  static String m42(count) => "${Intl.plural(count, one: '天', other: '天')}";
 
-  static String m43(count) => "${Intl.plural(count, one: '秒', other: '秒')}";
+  static String m43(count) => "${Intl.plural(count, one: '小時', other: '小時')}";
 
-  static String m44(count) => "${Intl.plural(count, one: '週', other: '週')}";
+  static String m44(count) => "${Intl.plural(count, one: '分', other: '分')}";
 
-  static String m45(arg0) => "價值 ${arg0}";
+  static String m45(count) => "${Intl.plural(count, one: '秒', other: '秒')}";
 
-  static String m46(arg0) => "當時價值 ${arg0}";
+  static String m46(count) => "${Intl.plural(count, one: '週', other: '週')}";
+
+  static String m47(arg0) => "價值 ${arg0}";
+
+  static String m48(arg0) => "當時價值 ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -185,7 +189,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("不支持此類型消息，請在手機上查看。"),
         "chatPinMessage": m7,
         "checkNewVersion": MessageLookupByLibrary.simpleMessage("檢查新版本"),
-        "choose": MessageLookupByLibrary.simpleMessage("選擇"),
         "circleSubtitle": m8,
         "circleTitle": m9,
         "circles": MessageLookupByLibrary.simpleMessage("圈子"),
@@ -484,6 +487,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPlaceholderNumber":
             MessageLookupByLibrary.simpleMessage("搜索 Mixin ID 或手機號碼："),
         "searchRelatedMessage": m36,
+        "select": MessageLookupByLibrary.simpleMessage("選擇"),
         "send": MessageLookupByLibrary.simpleMessage("發送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 發送"),
         "sendQuickly": MessageLookupByLibrary.simpleMessage("快速發送"),
@@ -502,6 +506,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareContact": MessageLookupByLibrary.simpleMessage("分享聯繫人"),
         "shareError": MessageLookupByLibrary.simpleMessage("分享出錯"),
         "shareLink": MessageLookupByLibrary.simpleMessage("分享邀請鏈接"),
+        "shareMessageDescription": m39,
+        "shareMessageDescriptionEmpty": m40,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("媒體內容"),
         "show": MessageLookupByLibrary.simpleMessage("顯示"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("顯示頭像"),
@@ -534,13 +540,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "transfer": MessageLookupByLibrary.simpleMessage("轉賬"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("打開通知"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("輸入消息"),
-        "unableToOpenFile": m39,
+        "unableToOpenFile": m41,
         "unblock": MessageLookupByLibrary.simpleMessage("解除屏蔽"),
-        "unitDay": m40,
-        "unitHour": m41,
-        "unitMinute": m42,
-        "unitSecond": m43,
-        "unitWeek": m44,
+        "unitDay": m42,
+        "unitHour": m43,
+        "unitMinute": m44,
+        "unitSecond": m45,
+        "unitWeek": m46,
         "unmute": MessageLookupByLibrary.simpleMessage("取消靜音"),
         "unpin": MessageLookupByLibrary.simpleMessage("取消置頂"),
         "unpinAllMessages": MessageLookupByLibrary.simpleMessage("取消所有置頂消息"),
@@ -548,8 +554,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("確定取消置頂所有消息麼？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未讀消息"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到這個用户"),
-        "valueNow": m45,
-        "valueThen": m46,
+        "valueNow": m47,
+        "valueThen": m48,
         "verifyPin": MessageLookupByLibrary.simpleMessage("驗證 PIN"),
         "video": MessageLookupByLibrary.simpleMessage("視頻"),
         "videos": MessageLookupByLibrary.simpleMessage("視頻"),

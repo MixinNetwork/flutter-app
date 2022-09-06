@@ -113,26 +113,31 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m38(arg0) =>
       "Если вы продолжите, ваш профиль и данные аккаунта будут удалены ${arg0}. прочтите наш документ, чтобы **Узнать больше**.";
 
-  static String m39(arg0) => "Не удалось открыть файл: ${arg0}";
+  static String m39(arg0, arg1) =>
+      "Вы уверены, что хотите отправить ${arg0} от ${arg1}?";
 
-  static String m40(count) =>
-      "${Intl.plural(count, one: 'день', other: 'дни')}";
+  static String m40(arg0) => "Вы уверены, что хотите отправить ${arg0}?";
 
-  static String m41(count) =>
-      "${Intl.plural(count, one: 'час', other: 'часы')}";
+  static String m41(arg0) => "Не удалось открыть файл: ${arg0}";
 
   static String m42(count) =>
-      "${Intl.plural(count, one: 'минута', other: 'минуты')}";
+      "${Intl.plural(count, one: 'день', other: 'дни')}";
 
   static String m43(count) =>
-      "${Intl.plural(count, one: 'секунда', other: 'секунды')}";
+      "${Intl.plural(count, one: 'час', other: 'часы')}";
 
   static String m44(count) =>
+      "${Intl.plural(count, one: 'минута', other: 'минуты')}";
+
+  static String m45(count) =>
+      "${Intl.plural(count, one: 'секунда', other: 'секунды')}";
+
+  static String m46(count) =>
       "${Intl.plural(count, one: 'неделя', other: 'недели')}";
 
-  static String m45(arg0) => "значение сейчас ${arg0}";
+  static String m47(arg0) => "значение сейчас ${arg0}";
 
-  static String m46(arg0) => "значение затем ${arg0}";
+  static String m48(arg0) => "значение затем ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -209,7 +214,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "chatPinMessage": m7,
         "checkNewVersion":
             MessageLookupByLibrary.simpleMessage("Проверить новую версию"),
-        "choose": MessageLookupByLibrary.simpleMessage("ВЫБРАТЬ"),
         "circleSubtitle": m8,
         "circleTitle": m9,
         "circles": MessageLookupByLibrary.simpleMessage("Круги"),
@@ -566,6 +570,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchRelatedMessage": m36,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "select": MessageLookupByLibrary.simpleMessage("Выбрать"),
         "send": MessageLookupByLibrary.simpleMessage("Отправить"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Заархивированы все файлы в один zip файл"),
@@ -590,6 +595,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareError":
             MessageLookupByLibrary.simpleMessage("Поделитесь ошибкой."),
         "shareLink": MessageLookupByLibrary.simpleMessage("Поделиться ссылкой"),
+        "shareMessageDescription": m39,
+        "shareMessageDescriptionEmpty": m40,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Общие медиа"),
         "show": MessageLookupByLibrary.simpleMessage("Показать"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("Показать аватар"),
@@ -632,13 +639,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Включить уведомления"),
         "typeMessage":
             MessageLookupByLibrary.simpleMessage("Введите сообщение"),
-        "unableToOpenFile": m39,
+        "unableToOpenFile": m41,
         "unblock": MessageLookupByLibrary.simpleMessage("Разблокировать"),
-        "unitDay": m40,
-        "unitHour": m41,
-        "unitMinute": m42,
-        "unitSecond": m43,
-        "unitWeek": m44,
+        "unitDay": m42,
+        "unitHour": m43,
+        "unitMinute": m44,
+        "unitSecond": m45,
+        "unitWeek": m46,
         "unmute": MessageLookupByLibrary.simpleMessage("Включить звук"),
         "unpin": MessageLookupByLibrary.simpleMessage("Открепить"),
         "unpinAllMessages":
@@ -649,8 +656,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Непрочитанные сообщения"),
         "userNotFound":
             MessageLookupByLibrary.simpleMessage("Пользователь не найден"),
-        "valueNow": m45,
-        "valueThen": m46,
+        "valueNow": m47,
+        "valueThen": m48,
         "verifyPin":
             MessageLookupByLibrary.simpleMessage("Подтвердить PIN-код"),
         "video": MessageLookupByLibrary.simpleMessage("Видео"),
