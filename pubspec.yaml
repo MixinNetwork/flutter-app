@@ -111,7 +111,7 @@ dependencies:
   web_socket_channel: ^2.2.0
   webview_flutter: ^3.0.4
   win32: ^2.6.1
-  win_toast: ^0.0.2
+  win_toast: ^0.1.0
   window_size:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
