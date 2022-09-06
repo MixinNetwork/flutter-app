@@ -1,6 +1,6 @@
 Section: x11
 Priority: optional
-Version: 0.37.1
+Version: 0.37.2
 Homepage: https://mixin.one/messenger
 Package: mixin-desktop
 Maintainer: Mixin Team
