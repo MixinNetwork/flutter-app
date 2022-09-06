@@ -20,12 +20,13 @@ extension MessageItemExtension on MessageItem {
 
   bool get isSecret => isSignal || isEncrypted;
 
+  bool _isFinishedAttachment() =>
+      (type.isImage || type.isVideo || type.isAudio || type.isData) &&
+      (mediaStatus == MediaStatus.done || mediaStatus == MediaStatus.read);
+
   bool get canForward =>
       type.isText ||
-      type.isImage ||
-      type.isVideo ||
-      type.isAudio ||
-      type.isData ||
+      _isFinishedAttachment() ||
       type.isSticker ||
       type.isContact ||
       type.isLive ||
