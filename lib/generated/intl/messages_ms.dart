@@ -73,9 +73,14 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m36(count, arg0) =>
       "${Intl.plural(count, one: 'null', other: '${arg0} mesej berkaitan')}";
 
-  static String m45(arg0) => "nilai sekarang ${arg0}";
+  static String m39(arg0, arg1) =>
+      "Adakah anda pasti mahu menghantar ${arg0} dari ${arg1}?";
 
-  static String m46(arg0) => "nilai maka ${arg0}";
+  static String m40(arg0) => "Adakah anda pasti mahu menghantar ${arg0}?";
+
+  static String m47(arg0) => "nilai sekarang ${arg0}";
+
+  static String m48(arg0) => "nilai maka ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -320,12 +325,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchRelatedMessage": m36,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "select": MessageLookupByLibrary.simpleMessage("Pilih"),
         "send": MessageLookupByLibrary.simpleMessage("Hantar"),
         "settingAuthSearchHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID, Nama"),
         "share": MessageLookupByLibrary.simpleMessage("Berkongsi"),
         "shareError": MessageLookupByLibrary.simpleMessage("Kongsi ralat"),
         "shareLink": MessageLookupByLibrary.simpleMessage("Kongsi pautan"),
+        "shareMessageDescription": m39,
+        "shareMessageDescriptionEmpty": m40,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Media Berkongsi"),
         "show": MessageLookupByLibrary.simpleMessage("Tunjuk"),
         "signIn": MessageLookupByLibrary.simpleMessage("Log masuk"),
@@ -352,8 +360,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unmute": MessageLookupByLibrary.simpleMessage("Nyahsenyap"),
         "userNotFound":
             MessageLookupByLibrary.simpleMessage("Pengguna tidak ditemui"),
-        "valueNow": m45,
-        "valueThen": m46,
+        "valueNow": m47,
+        "valueThen": m48,
         "verifyPin": MessageLookupByLibrary.simpleMessage("Sahkan PIN"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videos": MessageLookupByLibrary.simpleMessage("Video"),

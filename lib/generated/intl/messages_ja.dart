@@ -107,21 +107,25 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m38(arg0) =>
       "${arg0}と紐付けられたプロフィールとアカウント情報が削除されます。詳細はこちらをご覧ください。";
 
-  static String m39(arg0) => "ファイルを開くことができません: ${arg0}";
+  static String m39(arg0, arg1) => "${arg0}から${arg1}を送信しますか？";
 
-  static String m40(count) => "${Intl.plural(count, one: '日', other: '日間')}";
+  static String m40(arg0) => "${arg0}を送信しますか？";
 
-  static String m41(count) => "${Intl.plural(count, one: '時', other: '時間')}";
+  static String m41(arg0) => "ファイルを開くことができません: ${arg0}";
 
-  static String m42(count) => "${Intl.plural(count, one: '分', other: '分間')}";
+  static String m42(count) => "${Intl.plural(count, one: '日', other: '日間')}";
 
-  static String m43(count) => "${Intl.plural(count, one: '秒', other: '秒間')}";
+  static String m43(count) => "${Intl.plural(count, one: '時', other: '時間')}";
 
-  static String m44(count) => "${Intl.plural(count, one: '週', other: '週間')}";
+  static String m44(count) => "${Intl.plural(count, one: '分', other: '分間')}";
 
-  static String m45(arg0) => "現在価格 ${arg0}";
+  static String m45(count) => "${Intl.plural(count, one: '秒', other: '秒間')}";
 
-  static String m46(arg0) => "当時の価格 ${arg0}";
+  static String m46(count) => "${Intl.plural(count, one: '週', other: '週間')}";
+
+  static String m47(arg0) => "現在価格 ${arg0}";
+
+  static String m48(arg0) => "当時の価格 ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -187,7 +191,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "この種類のチャットは読み込めません。お使いの携帯電話の設定をご確認ください"),
         "chatPinMessage": m7,
         "checkNewVersion": MessageLookupByLibrary.simpleMessage("最新版をチェック"),
-        "choose": MessageLookupByLibrary.simpleMessage("選択"),
         "circleSubtitle": m8,
         "circleTitle": m9,
         "circles": MessageLookupByLibrary.simpleMessage("グループリスト"),
@@ -500,6 +503,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchRelatedMessage": m36,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "select": MessageLookupByLibrary.simpleMessage("選択"),
         "send": MessageLookupByLibrary.simpleMessage("送る"),
         "sendArchived":
             MessageLookupByLibrary.simpleMessage("1つのZIPファイルにアーカイブ"),
@@ -521,6 +525,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareApps": MessageLookupByLibrary.simpleMessage("共有ずみのアプリ"),
         "shareError": MessageLookupByLibrary.simpleMessage("エラーを共有"),
         "shareLink": MessageLookupByLibrary.simpleMessage("リンクをシェアする"),
+        "shareMessageDescription": m39,
+        "shareMessageDescriptionEmpty": m40,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("共有されたメディア"),
         "show": MessageLookupByLibrary.simpleMessage("表示"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("アバターの表示"),
@@ -557,13 +563,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "transfer": MessageLookupByLibrary.simpleMessage("送金"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("通知をオンにする"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("メッセージを入力"),
-        "unableToOpenFile": m39,
+        "unableToOpenFile": m41,
         "unblock": MessageLookupByLibrary.simpleMessage("ブロックを解除"),
-        "unitDay": m40,
-        "unitHour": m41,
-        "unitMinute": m42,
-        "unitSecond": m43,
-        "unitWeek": m44,
+        "unitDay": m42,
+        "unitHour": m43,
+        "unitMinute": m44,
+        "unitSecond": m45,
+        "unitWeek": m46,
         "unmute": MessageLookupByLibrary.simpleMessage("ミュート解除"),
         "unpin": MessageLookupByLibrary.simpleMessage("ピン留めを止める"),
         "unpinAllMessages":
@@ -572,8 +578,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("全てのメッセージのピン留めを解除しますか？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("新しいメッセージ"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("ユーザーが見つかりませんでした"),
-        "valueNow": m45,
-        "valueThen": m46,
+        "valueNow": m47,
+        "valueThen": m48,
         "verifyPin": MessageLookupByLibrary.simpleMessage("PINコードを認証"),
         "video": MessageLookupByLibrary.simpleMessage("動画"),
         "videos": MessageLookupByLibrary.simpleMessage("動画"),
