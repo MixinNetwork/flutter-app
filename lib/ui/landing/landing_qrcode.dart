@@ -5,7 +5,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../constants/resources.dart';
-import '../../generated/l10n.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
@@ -14,7 +13,7 @@ import 'bloc/landing_state.dart';
 import 'landing.dart';
 
 class LandingQrCodeWidget extends HookWidget {
-  const LandingQrCodeWidget({Key? key}) : super(key: key);
+  const LandingQrCodeWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +35,14 @@ class LandingQrCodeWidget extends HookWidget {
       child = Center(
         child: _Loading(
           title: context.l10n.initializing,
-          message: context.l10n.chatInputHint,
+          message: context.l10n.chatHintE2e,
         ),
       );
     } else if (status == LandingStatus.provisioning) {
       child = Center(
         child: _Loading(
-          title: context.l10n.provisioning,
-          message: Localization.current.chatInputHint,
+          title: context.l10n.loading,
+          message: context.l10n.chatHintE2e,
         ),
       );
     } else {
@@ -76,9 +75,7 @@ class LandingQrCodeWidget extends HookWidget {
 }
 
 class _QrCode extends HookWidget {
-  const _QrCode({
-    Key? key,
-  }) : super(key: key);
+  const _QrCode();
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +105,7 @@ class _QrCode extends HookWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: const BorderRadius.all(Radius.circular(11)),
           clipBehavior: Clip.antiAliasWithSaveLayer,
           child: SizedBox.fromSize(
             size: const Size.square(160),
@@ -138,7 +135,7 @@ class _QrCode extends HookWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          context.l10n.pageLandingLoginTitle,
+          context.l10n.loginByQrcode,
           style: TextStyle(
             fontSize: 16,
             color: context.theme.text,
@@ -148,8 +145,8 @@ class _QrCode extends HookWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
-            context.l10n.pageLandingLoginMessage,
-            textAlign: TextAlign.center,
+            context.l10n.loginByQrcodeTips,
+            textAlign: TextAlign.left,
             style: TextStyle(
               fontSize: 14,
               color: context.dynamicColor(
@@ -166,10 +163,9 @@ class _QrCode extends HookWidget {
 
 class _Loading extends StatelessWidget {
   const _Loading({
-    Key? key,
     required this.title,
     required this.message,
-  }) : super(key: key);
+  });
 
   final String title;
   final String message;
@@ -214,10 +210,9 @@ class _Loading extends StatelessWidget {
 
 class _Retry extends StatelessWidget {
   const _Retry({
-    Key? key,
     required this.onTap,
     this.errorMessage,
-  }) : super(key: key);
+  });
 
   final VoidCallback onTap;
 
@@ -247,7 +242,7 @@ class _Retry extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
-                      context.l10n.pageLandingClickToReload,
+                      context.l10n.clickToReloadQrcode,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Color.fromRGBO(255, 255, 255, 0.9),

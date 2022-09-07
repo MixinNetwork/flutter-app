@@ -22,7 +22,9 @@ Future<void> showTransferDialog(
     );
 
 class _TransferPage extends HookWidget {
-  const _TransferPage(this.snapshotId, {Key? key}) : super(key: key);
+  const _TransferPage(
+    this.snapshotId,
+  );
 
   final String snapshotId;
 
@@ -106,9 +108,8 @@ class _TransferPage extends HookWidget {
 
 class _SnapshotDetailHeader extends HookWidget {
   const _SnapshotDetailHeader({
-    Key? key,
     required this.snapshot,
-  }) : super(key: key);
+  });
 
   final SnapshotItem snapshot;
 
@@ -171,9 +172,8 @@ class _SnapshotDetailHeader extends HookWidget {
 
 class _ValuesDescription extends HookWidget {
   const _ValuesDescription({
-    Key? key,
     required this.snapshot,
-  }) : super(key: key);
+  });
 
   final SnapshotItem snapshot;
 
@@ -190,21 +190,28 @@ class _ValuesDescription extends HookWidget {
 
     final String? thatTimeValue;
 
-    final currentValue = context.l10n.walletTransactionCurrentValue(
-      context.currencyFormat(snapshot.amountOfCurrentCurrency().abs()),
-    );
+    final current = snapshot.amountOfCurrentCurrency().abs();
+    final unitValue = context
+        .currencyFormat((current / snapshot.amount.asDecimal.abs()).toDouble());
+    final symbol = snapshot.symbol?.overflow ?? '';
+    final currentValue = '${context.l10n.valueNow(
+      context.currencyFormat(current),
+    )}($unitValue/$symbol)';
 
     if (ticker == null) {
       thatTimeValue = null;
     } else if (ticker.priceUsd == '0') {
-      thatTimeValue = context.l10n.walletTransactionThatTimeNoValue;
+      thatTimeValue = context.l10n.valueThen(context.l10n.na);
     } else {
-      thatTimeValue = context.l10n.walletTransactionThatTimeValue(
-        context.currencyFormat((snapshot.amount.asDecimal *
-                ticker.priceUsd.asDecimal *
-                snapshot.fiatRate!.asDecimal)
-            .abs()),
-      );
+      final past = (snapshot.amount.asDecimal *
+              ticker.priceUsd.asDecimal *
+              snapshot.fiatRate!.asDecimal)
+          .abs();
+      final unitValue = context
+          .currencyFormat((past / snapshot.amount.asDecimal.abs()).toDouble());
+      thatTimeValue = '${context.l10n.valueThen(
+        context.currencyFormat(past),
+      )}($unitValue/$symbol)';
     }
     return DefaultTextStyle.merge(
       style: TextStyle(
@@ -235,10 +242,9 @@ class _ValuesDescription extends HookWidget {
 
 class _TransactionDetailInfo extends StatelessWidget {
   const _TransactionDetailInfo({
-    Key? key,
     required this.snapshot,
     required this.opponentFullName,
-  }) : super(key: key);
+  });
 
   final SnapshotItem snapshot;
   final String? opponentFullName;
@@ -251,7 +257,7 @@ class _TransactionDetailInfo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TransactionInfoTile(
-              title: Text(context.l10n.transactionsId),
+              title: Text(context.l10n.transactionId),
               subtitle: SelectableText(snapshot.snapshotId),
             ),
             TransactionInfoTile(
@@ -260,8 +266,9 @@ class _TransactionDetailInfo extends StatelessWidget {
             ),
             if (opponentFullName?.isNotEmpty ?? false)
               TransactionInfoTile(
-                title: Text(
-                    snapshot.isPositive ? context.l10n.from : context.l10n.to),
+                title: Text(snapshot.isPositive
+                    ? context.l10n.from
+                    : context.l10n.receiver),
                 subtitle: SelectableText(opponentFullName ?? ''),
               ),
             if (snapshot.memo?.isNotEmpty ?? false)
@@ -287,11 +294,11 @@ class _TransactionDetailInfo extends StatelessWidget {
 
 class TransactionInfoTile extends StatelessWidget {
   const TransactionInfoTile({
-    Key? key,
+    super.key,
     required this.title,
     required this.subtitle,
     this.subtitleColor,
-  }) : super(key: key);
+  });
 
   final Widget title;
   final Widget subtitle;
@@ -327,7 +334,6 @@ class TransactionInfoTile extends StatelessWidget {
 
 class _SymbolIconWithBorder extends StatelessWidget {
   const _SymbolIconWithBorder({
-    Key? key,
     required this.symbolUrl,
     this.chainUrl,
     required this.size,
@@ -335,7 +341,7 @@ class _SymbolIconWithBorder extends StatelessWidget {
     this.chainBorder = const BorderSide(color: Colors.white),
     // ignore: unused_element
     this.symbolBorder = BorderSide.none,
-  }) : super(key: key);
+  });
 
   final String? symbolUrl;
   final String? chainUrl;
@@ -352,7 +358,7 @@ class _SymbolIconWithBorder extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: Container(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.symmetric(
@@ -373,7 +379,7 @@ class _SymbolIconWithBorder extends StatelessWidget {
                         symbolBorder.width - chainBorder.width,
                         chainBorder.width - symbolBorder.width,
                       ),
-                      child: Container(
+                      child: DecoratedBox(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.symmetric(

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 class UnreadText extends StatelessWidget {
   const UnreadText({
-    Key? key,
+    super.key,
     required this.data,
     this.backgroundColor,
     this.textColor,
     this.fontWeight,
-  }) : super(key: key);
+  });
 
   final Color? backgroundColor;
   final Color? textColor;
@@ -20,7 +20,7 @@ class UnreadText extends StatelessWidget {
             const BoxConstraints(minWidth: 26, minHeight: 20, maxHeight: 20),
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 5),
         alignment: Alignment.center,

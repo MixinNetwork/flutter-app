@@ -6,7 +6,7 @@ part of 'mixin_database.dart';
 // MoorGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
+// ignore_for_file: type=lint
 class Conversation extends DataClass implements Insertable<Conversation> {
   final String conversationId;
   final String? ownerId;
@@ -25,6 +25,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   final ConversationStatus status;
   final String? draft;
   final DateTime? muteUntil;
+  final int? expireIn;
   Conversation(
       {required this.conversationId,
       this.ownerId,
@@ -42,7 +43,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       this.unseenMessageCount,
       required this.status,
       this.draft,
-      this.muteUntil});
+      this.muteUntil,
+      this.expireIn});
   factory Conversation.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return Conversation(
@@ -81,6 +83,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           .mapFromDatabaseResponse(data['${effectivePrefix}draft']),
       muteUntil: Conversations.$converter5.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}mute_until'])),
+      expireIn: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}expire_in']),
     );
   }
   @override
@@ -142,6 +146,9 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       final converter = Conversations.$converter5;
       map['mute_until'] = Variable<int?>(converter.mapToSql(muteUntil));
     }
+    if (!nullToAbsent || expireIn != null) {
+      map['expire_in'] = Variable<int?>(expireIn);
+    }
     return map;
   }
 
@@ -189,6 +196,9 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       muteUntil: muteUntil == null && nullToAbsent
           ? const Value.absent()
           : Value(muteUntil),
+      expireIn: expireIn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expireIn),
     );
   }
 
@@ -216,6 +226,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       status: serializer.fromJson<ConversationStatus>(json['status']),
       draft: serializer.fromJson<String?>(json['draft']),
       muteUntil: serializer.fromJson<DateTime?>(json['mute_until']),
+      expireIn: serializer.fromJson<int?>(json['expire_in']),
     );
   }
   @override
@@ -240,6 +251,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       'status': serializer.toJson<ConversationStatus>(status),
       'draft': serializer.toJson<String?>(draft),
       'mute_until': serializer.toJson<DateTime?>(muteUntil),
+      'expire_in': serializer.toJson<int?>(expireIn),
     };
   }
 
@@ -260,7 +272,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           Value<int?> unseenMessageCount = const Value.absent(),
           ConversationStatus? status,
           Value<String?> draft = const Value.absent(),
-          Value<DateTime?> muteUntil = const Value.absent()}) =>
+          Value<DateTime?> muteUntil = const Value.absent(),
+          Value<int?> expireIn = const Value.absent()}) =>
       Conversation(
         conversationId: conversationId ?? this.conversationId,
         ownerId: ownerId.present ? ownerId.value : this.ownerId,
@@ -287,6 +300,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
         status: status ?? this.status,
         draft: draft.present ? draft.value : this.draft,
         muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
+        expireIn: expireIn.present ? expireIn.value : this.expireIn,
       );
   @override
   String toString() {
@@ -307,7 +321,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           ..write('unseenMessageCount: $unseenMessageCount, ')
           ..write('status: $status, ')
           ..write('draft: $draft, ')
-          ..write('muteUntil: $muteUntil')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('expireIn: $expireIn')
           ..write(')'))
         .toString();
   }
@@ -330,7 +345,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       unseenMessageCount,
       status,
       draft,
-      muteUntil);
+      muteUntil,
+      expireIn);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -351,7 +367,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           other.unseenMessageCount == this.unseenMessageCount &&
           other.status == this.status &&
           other.draft == this.draft &&
-          other.muteUntil == this.muteUntil);
+          other.muteUntil == this.muteUntil &&
+          other.expireIn == this.expireIn);
 }
 
 class ConversationsCompanion extends UpdateCompanion<Conversation> {
@@ -372,6 +389,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
   final Value<ConversationStatus> status;
   final Value<String?> draft;
   final Value<DateTime?> muteUntil;
+  final Value<int?> expireIn;
   const ConversationsCompanion({
     this.conversationId = const Value.absent(),
     this.ownerId = const Value.absent(),
@@ -390,6 +408,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     this.status = const Value.absent(),
     this.draft = const Value.absent(),
     this.muteUntil = const Value.absent(),
+    this.expireIn = const Value.absent(),
   });
   ConversationsCompanion.insert({
     required String conversationId,
@@ -409,6 +428,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     required ConversationStatus status,
     this.draft = const Value.absent(),
     this.muteUntil = const Value.absent(),
+    this.expireIn = const Value.absent(),
   })  : conversationId = Value(conversationId),
         createdAt = Value(createdAt),
         status = Value(status);
@@ -430,6 +450,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     Expression<ConversationStatus>? status,
     Expression<String?>? draft,
     Expression<DateTime?>? muteUntil,
+    Expression<int?>? expireIn,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -451,6 +472,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       if (status != null) 'status': status,
       if (draft != null) 'draft': draft,
       if (muteUntil != null) 'mute_until': muteUntil,
+      if (expireIn != null) 'expire_in': expireIn,
     });
   }
 
@@ -471,7 +493,8 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       Value<int?>? unseenMessageCount,
       Value<ConversationStatus>? status,
       Value<String?>? draft,
-      Value<DateTime?>? muteUntil}) {
+      Value<DateTime?>? muteUntil,
+      Value<int?>? expireIn}) {
     return ConversationsCompanion(
       conversationId: conversationId ?? this.conversationId,
       ownerId: ownerId ?? this.ownerId,
@@ -490,6 +513,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       status: status ?? this.status,
       draft: draft ?? this.draft,
       muteUntil: muteUntil ?? this.muteUntil,
+      expireIn: expireIn ?? this.expireIn,
     );
   }
 
@@ -554,6 +578,9 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       final converter = Conversations.$converter5;
       map['mute_until'] = Variable<int?>(converter.mapToSql(muteUntil.value));
     }
+    if (expireIn.present) {
+      map['expire_in'] = Variable<int?>(expireIn.value);
+    }
     return map;
   }
 
@@ -576,7 +603,8 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
           ..write('unseenMessageCount: $unseenMessageCount, ')
           ..write('status: $status, ')
           ..write('draft: $draft, ')
-          ..write('muteUntil: $muteUntil')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('expireIn: $expireIn')
           ..write(')'))
         .toString();
   }
@@ -702,6 +730,12 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<DateTime>(Conversations.$converter5);
+  final VerificationMeta _expireInMeta = const VerificationMeta('expireIn');
+  late final GeneratedColumn<int?> expireIn = GeneratedColumn<int?>(
+      'expire_in', aliasedName, true,
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         conversationId,
@@ -720,7 +754,8 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
         unseenMessageCount,
         status,
         draft,
-        muteUntil
+        muteUntil,
+        expireIn
       ];
   @override
   String get aliasedName => _alias ?? 'conversations';
@@ -794,6 +829,10 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
           _draftMeta, draft.isAcceptableOrUnknown(data['draft']!, _draftMeta));
     }
     context.handle(_muteUntilMeta, const VerificationResult.success());
+    if (data.containsKey('expire_in')) {
+      context.handle(_expireInMeta,
+          expireIn.isAcceptableOrUnknown(data['expire_in']!, _expireInMeta));
+    }
     return context;
   }
 
@@ -1797,7 +1836,7 @@ class Message extends DataClass implements Insertable<Message> {
   final MediaStatus? mediaStatus;
   final MessageStatus status;
   final DateTime createdAt;
-  final MessageAction? action;
+  final String? action;
   final String? participantId;
   final String? snapshotId;
   final String? hyperlink;
@@ -1881,8 +1920,8 @@ class Message extends DataClass implements Insertable<Message> {
           .mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
       createdAt: Messages.$converter2.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      action: Messages.$converter3.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}action'])),
+      action: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}action']),
       participantId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}participant_id']),
       snapshotId: const StringType()
@@ -1962,8 +2001,7 @@ class Message extends DataClass implements Insertable<Message> {
       map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
     }
     if (!nullToAbsent || action != null) {
-      final converter = Messages.$converter3;
-      map['action'] = Variable<String?>(converter.mapToSql(action));
+      map['action'] = Variable<String?>(action);
     }
     if (!nullToAbsent || participantId != null) {
       map['participant_id'] = Variable<String?>(participantId);
@@ -2109,7 +2147,7 @@ class Message extends DataClass implements Insertable<Message> {
       mediaStatus: serializer.fromJson<MediaStatus?>(json['media_status']),
       status: serializer.fromJson<MessageStatus>(json['status']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      action: serializer.fromJson<MessageAction?>(json['action']),
+      action: serializer.fromJson<String?>(json['action']),
       participantId: serializer.fromJson<String?>(json['participant_id']),
       snapshotId: serializer.fromJson<String?>(json['snapshot_id']),
       hyperlink: serializer.fromJson<String?>(json['hyperlink']),
@@ -2146,7 +2184,7 @@ class Message extends DataClass implements Insertable<Message> {
       'media_status': serializer.toJson<MediaStatus?>(mediaStatus),
       'status': serializer.toJson<MessageStatus>(status),
       'created_at': serializer.toJson<DateTime>(createdAt),
-      'action': serializer.toJson<MessageAction?>(action),
+      'action': serializer.toJson<String?>(action),
       'participant_id': serializer.toJson<String?>(participantId),
       'snapshot_id': serializer.toJson<String?>(snapshotId),
       'hyperlink': serializer.toJson<String?>(hyperlink),
@@ -2181,7 +2219,7 @@ class Message extends DataClass implements Insertable<Message> {
           Value<MediaStatus?> mediaStatus = const Value.absent(),
           MessageStatus? status,
           DateTime? createdAt,
-          Value<MessageAction?> action = const Value.absent(),
+          Value<String?> action = const Value.absent(),
           Value<String?> participantId = const Value.absent(),
           Value<String?> snapshotId = const Value.absent(),
           Value<String?> hyperlink = const Value.absent(),
@@ -2362,7 +2400,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
   final Value<MediaStatus?> mediaStatus;
   final Value<MessageStatus> status;
   final Value<DateTime> createdAt;
-  final Value<MessageAction?> action;
+  final Value<String?> action;
   final Value<String?> participantId;
   final Value<String?> snapshotId;
   final Value<String?> hyperlink;
@@ -2465,7 +2503,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     Expression<MediaStatus?>? mediaStatus,
     Expression<MessageStatus>? status,
     Expression<DateTime>? createdAt,
-    Expression<MessageAction?>? action,
+    Expression<String?>? action,
     Expression<String?>? participantId,
     Expression<String?>? snapshotId,
     Expression<String?>? hyperlink,
@@ -2533,7 +2571,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       Value<MediaStatus?>? mediaStatus,
       Value<MessageStatus>? status,
       Value<DateTime>? createdAt,
-      Value<MessageAction?>? action,
+      Value<String?>? action,
       Value<String?>? participantId,
       Value<String?>? snapshotId,
       Value<String?>? hyperlink,
@@ -2643,8 +2681,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
     }
     if (action.present) {
-      final converter = Messages.$converter3;
-      map['action'] = Variable<String?>(converter.mapToSql(action.value));
+      map['action'] = Variable<String?>(action.value);
     }
     if (participantId.present) {
       map['participant_id'] = Variable<String?>(participantId.value);
@@ -2847,12 +2884,11 @@ class Messages extends Table with TableInfo<Messages, Message> {
               $customConstraints: 'NOT NULL')
           .withConverter<DateTime>(Messages.$converter2);
   final VerificationMeta _actionMeta = const VerificationMeta('action');
-  late final GeneratedColumnWithTypeConverter<MessageAction, String?> action =
-      GeneratedColumn<String?>('action', aliasedName, true,
-              type: const StringType(),
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<MessageAction>(Messages.$converter3);
+  late final GeneratedColumn<String?> action = GeneratedColumn<String?>(
+      'action', aliasedName, true,
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _participantIdMeta =
       const VerificationMeta('participantId');
   late final GeneratedColumn<String?> participantId = GeneratedColumn<String?>(
@@ -3058,7 +3094,10 @@ class Messages extends Table with TableInfo<Messages, Message> {
     context.handle(_mediaStatusMeta, const VerificationResult.success());
     context.handle(_statusMeta, const VerificationResult.success());
     context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_actionMeta, const VerificationResult.success());
+    if (data.containsKey('action')) {
+      context.handle(_actionMeta,
+          action.isAcceptableOrUnknown(data['action']!, _actionMeta));
+    }
     if (data.containsKey('participant_id')) {
       context.handle(
           _participantIdMeta,
@@ -3140,8 +3179,6 @@ class Messages extends Table with TableInfo<Messages, Message> {
   static TypeConverter<MessageStatus, String> $converter1 =
       const MessageStatusTypeConverter();
   static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
-  static TypeConverter<MessageAction, String> $converter3 =
-      const MessageActionConverter();
   @override
   List<String> get customConstraints => const [
         'PRIMARY KEY(message_id)',
@@ -4208,6 +4245,637 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY (message_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class User extends DataClass implements Insertable<User> {
+  final String userId;
+  final String identityNumber;
+  final UserRelationship? relationship;
+  final String? fullName;
+  final String? avatarUrl;
+  final String? phone;
+  final bool? isVerified;
+  final DateTime? createdAt;
+  final DateTime? muteUntil;
+  final int? hasPin;
+  final String? appId;
+  final String? biography;
+  final int? isScam;
+  User(
+      {required this.userId,
+      required this.identityNumber,
+      this.relationship,
+      this.fullName,
+      this.avatarUrl,
+      this.phone,
+      this.isVerified,
+      this.createdAt,
+      this.muteUntil,
+      this.hasPin,
+      this.appId,
+      this.biography,
+      this.isScam});
+  factory User.fromData(Map<String, dynamic> data, {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return User(
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
+      identityNumber: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}identity_number'])!,
+      relationship: Users.$converter0.mapToDart(const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}relationship'])),
+      fullName: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}full_name']),
+      avatarUrl: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}avatar_url']),
+      phone: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}phone']),
+      isVerified: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}is_verified']),
+      createdAt: Users.$converter1.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
+      muteUntil: Users.$converter2.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}mute_until'])),
+      hasPin: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}has_pin']),
+      appId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}app_id']),
+      biography: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}biography']),
+      isScam: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}is_scam']),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['user_id'] = Variable<String>(userId);
+    map['identity_number'] = Variable<String>(identityNumber);
+    if (!nullToAbsent || relationship != null) {
+      final converter = Users.$converter0;
+      map['relationship'] = Variable<String?>(converter.mapToSql(relationship));
+    }
+    if (!nullToAbsent || fullName != null) {
+      map['full_name'] = Variable<String?>(fullName);
+    }
+    if (!nullToAbsent || avatarUrl != null) {
+      map['avatar_url'] = Variable<String?>(avatarUrl);
+    }
+    if (!nullToAbsent || phone != null) {
+      map['phone'] = Variable<String?>(phone);
+    }
+    if (!nullToAbsent || isVerified != null) {
+      map['is_verified'] = Variable<bool?>(isVerified);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      final converter = Users.$converter1;
+      map['created_at'] = Variable<int?>(converter.mapToSql(createdAt));
+    }
+    if (!nullToAbsent || muteUntil != null) {
+      final converter = Users.$converter2;
+      map['mute_until'] = Variable<int?>(converter.mapToSql(muteUntil));
+    }
+    if (!nullToAbsent || hasPin != null) {
+      map['has_pin'] = Variable<int?>(hasPin);
+    }
+    if (!nullToAbsent || appId != null) {
+      map['app_id'] = Variable<String?>(appId);
+    }
+    if (!nullToAbsent || biography != null) {
+      map['biography'] = Variable<String?>(biography);
+    }
+    if (!nullToAbsent || isScam != null) {
+      map['is_scam'] = Variable<int?>(isScam);
+    }
+    return map;
+  }
+
+  UsersCompanion toCompanion(bool nullToAbsent) {
+    return UsersCompanion(
+      userId: Value(userId),
+      identityNumber: Value(identityNumber),
+      relationship: relationship == null && nullToAbsent
+          ? const Value.absent()
+          : Value(relationship),
+      fullName: fullName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fullName),
+      avatarUrl: avatarUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(avatarUrl),
+      phone:
+          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
+      isVerified: isVerified == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isVerified),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      muteUntil: muteUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muteUntil),
+      hasPin:
+          hasPin == null && nullToAbsent ? const Value.absent() : Value(hasPin),
+      appId:
+          appId == null && nullToAbsent ? const Value.absent() : Value(appId),
+      biography: biography == null && nullToAbsent
+          ? const Value.absent()
+          : Value(biography),
+      isScam:
+          isScam == null && nullToAbsent ? const Value.absent() : Value(isScam),
+    );
+  }
+
+  factory User.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return User(
+      userId: serializer.fromJson<String>(json['user_id']),
+      identityNumber: serializer.fromJson<String>(json['identity_number']),
+      relationship:
+          serializer.fromJson<UserRelationship?>(json['relationship']),
+      fullName: serializer.fromJson<String?>(json['full_name']),
+      avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
+      phone: serializer.fromJson<String?>(json['phone']),
+      isVerified: serializer.fromJson<bool?>(json['is_verified']),
+      createdAt: serializer.fromJson<DateTime?>(json['created_at']),
+      muteUntil: serializer.fromJson<DateTime?>(json['mute_until']),
+      hasPin: serializer.fromJson<int?>(json['has_pin']),
+      appId: serializer.fromJson<String?>(json['app_id']),
+      biography: serializer.fromJson<String?>(json['biography']),
+      isScam: serializer.fromJson<int?>(json['is_scam']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'user_id': serializer.toJson<String>(userId),
+      'identity_number': serializer.toJson<String>(identityNumber),
+      'relationship': serializer.toJson<UserRelationship?>(relationship),
+      'full_name': serializer.toJson<String?>(fullName),
+      'avatar_url': serializer.toJson<String?>(avatarUrl),
+      'phone': serializer.toJson<String?>(phone),
+      'is_verified': serializer.toJson<bool?>(isVerified),
+      'created_at': serializer.toJson<DateTime?>(createdAt),
+      'mute_until': serializer.toJson<DateTime?>(muteUntil),
+      'has_pin': serializer.toJson<int?>(hasPin),
+      'app_id': serializer.toJson<String?>(appId),
+      'biography': serializer.toJson<String?>(biography),
+      'is_scam': serializer.toJson<int?>(isScam),
+    };
+  }
+
+  User copyWith(
+          {String? userId,
+          String? identityNumber,
+          Value<UserRelationship?> relationship = const Value.absent(),
+          Value<String?> fullName = const Value.absent(),
+          Value<String?> avatarUrl = const Value.absent(),
+          Value<String?> phone = const Value.absent(),
+          Value<bool?> isVerified = const Value.absent(),
+          Value<DateTime?> createdAt = const Value.absent(),
+          Value<DateTime?> muteUntil = const Value.absent(),
+          Value<int?> hasPin = const Value.absent(),
+          Value<String?> appId = const Value.absent(),
+          Value<String?> biography = const Value.absent(),
+          Value<int?> isScam = const Value.absent()}) =>
+      User(
+        userId: userId ?? this.userId,
+        identityNumber: identityNumber ?? this.identityNumber,
+        relationship:
+            relationship.present ? relationship.value : this.relationship,
+        fullName: fullName.present ? fullName.value : this.fullName,
+        avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
+        phone: phone.present ? phone.value : this.phone,
+        isVerified: isVerified.present ? isVerified.value : this.isVerified,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
+        hasPin: hasPin.present ? hasPin.value : this.hasPin,
+        appId: appId.present ? appId.value : this.appId,
+        biography: biography.present ? biography.value : this.biography,
+        isScam: isScam.present ? isScam.value : this.isScam,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('User(')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('relationship: $relationship, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('phone: $phone, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('hasPin: $hasPin, ')
+          ..write('appId: $appId, ')
+          ..write('biography: $biography, ')
+          ..write('isScam: $isScam')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      userId,
+      identityNumber,
+      relationship,
+      fullName,
+      avatarUrl,
+      phone,
+      isVerified,
+      createdAt,
+      muteUntil,
+      hasPin,
+      appId,
+      biography,
+      isScam);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is User &&
+          other.userId == this.userId &&
+          other.identityNumber == this.identityNumber &&
+          other.relationship == this.relationship &&
+          other.fullName == this.fullName &&
+          other.avatarUrl == this.avatarUrl &&
+          other.phone == this.phone &&
+          other.isVerified == this.isVerified &&
+          other.createdAt == this.createdAt &&
+          other.muteUntil == this.muteUntil &&
+          other.hasPin == this.hasPin &&
+          other.appId == this.appId &&
+          other.biography == this.biography &&
+          other.isScam == this.isScam);
+}
+
+class UsersCompanion extends UpdateCompanion<User> {
+  final Value<String> userId;
+  final Value<String> identityNumber;
+  final Value<UserRelationship?> relationship;
+  final Value<String?> fullName;
+  final Value<String?> avatarUrl;
+  final Value<String?> phone;
+  final Value<bool?> isVerified;
+  final Value<DateTime?> createdAt;
+  final Value<DateTime?> muteUntil;
+  final Value<int?> hasPin;
+  final Value<String?> appId;
+  final Value<String?> biography;
+  final Value<int?> isScam;
+  const UsersCompanion({
+    this.userId = const Value.absent(),
+    this.identityNumber = const Value.absent(),
+    this.relationship = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.isVerified = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.muteUntil = const Value.absent(),
+    this.hasPin = const Value.absent(),
+    this.appId = const Value.absent(),
+    this.biography = const Value.absent(),
+    this.isScam = const Value.absent(),
+  });
+  UsersCompanion.insert({
+    required String userId,
+    required String identityNumber,
+    this.relationship = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.isVerified = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.muteUntil = const Value.absent(),
+    this.hasPin = const Value.absent(),
+    this.appId = const Value.absent(),
+    this.biography = const Value.absent(),
+    this.isScam = const Value.absent(),
+  })  : userId = Value(userId),
+        identityNumber = Value(identityNumber);
+  static Insertable<User> custom({
+    Expression<String>? userId,
+    Expression<String>? identityNumber,
+    Expression<UserRelationship?>? relationship,
+    Expression<String?>? fullName,
+    Expression<String?>? avatarUrl,
+    Expression<String?>? phone,
+    Expression<bool?>? isVerified,
+    Expression<DateTime?>? createdAt,
+    Expression<DateTime?>? muteUntil,
+    Expression<int?>? hasPin,
+    Expression<String?>? appId,
+    Expression<String?>? biography,
+    Expression<int?>? isScam,
+  }) {
+    return RawValuesInsertable({
+      if (userId != null) 'user_id': userId,
+      if (identityNumber != null) 'identity_number': identityNumber,
+      if (relationship != null) 'relationship': relationship,
+      if (fullName != null) 'full_name': fullName,
+      if (avatarUrl != null) 'avatar_url': avatarUrl,
+      if (phone != null) 'phone': phone,
+      if (isVerified != null) 'is_verified': isVerified,
+      if (createdAt != null) 'created_at': createdAt,
+      if (muteUntil != null) 'mute_until': muteUntil,
+      if (hasPin != null) 'has_pin': hasPin,
+      if (appId != null) 'app_id': appId,
+      if (biography != null) 'biography': biography,
+      if (isScam != null) 'is_scam': isScam,
+    });
+  }
+
+  UsersCompanion copyWith(
+      {Value<String>? userId,
+      Value<String>? identityNumber,
+      Value<UserRelationship?>? relationship,
+      Value<String?>? fullName,
+      Value<String?>? avatarUrl,
+      Value<String?>? phone,
+      Value<bool?>? isVerified,
+      Value<DateTime?>? createdAt,
+      Value<DateTime?>? muteUntil,
+      Value<int?>? hasPin,
+      Value<String?>? appId,
+      Value<String?>? biography,
+      Value<int?>? isScam}) {
+    return UsersCompanion(
+      userId: userId ?? this.userId,
+      identityNumber: identityNumber ?? this.identityNumber,
+      relationship: relationship ?? this.relationship,
+      fullName: fullName ?? this.fullName,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      phone: phone ?? this.phone,
+      isVerified: isVerified ?? this.isVerified,
+      createdAt: createdAt ?? this.createdAt,
+      muteUntil: muteUntil ?? this.muteUntil,
+      hasPin: hasPin ?? this.hasPin,
+      appId: appId ?? this.appId,
+      biography: biography ?? this.biography,
+      isScam: isScam ?? this.isScam,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (identityNumber.present) {
+      map['identity_number'] = Variable<String>(identityNumber.value);
+    }
+    if (relationship.present) {
+      final converter = Users.$converter0;
+      map['relationship'] =
+          Variable<String?>(converter.mapToSql(relationship.value));
+    }
+    if (fullName.present) {
+      map['full_name'] = Variable<String?>(fullName.value);
+    }
+    if (avatarUrl.present) {
+      map['avatar_url'] = Variable<String?>(avatarUrl.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String?>(phone.value);
+    }
+    if (isVerified.present) {
+      map['is_verified'] = Variable<bool?>(isVerified.value);
+    }
+    if (createdAt.present) {
+      final converter = Users.$converter1;
+      map['created_at'] = Variable<int?>(converter.mapToSql(createdAt.value));
+    }
+    if (muteUntil.present) {
+      final converter = Users.$converter2;
+      map['mute_until'] = Variable<int?>(converter.mapToSql(muteUntil.value));
+    }
+    if (hasPin.present) {
+      map['has_pin'] = Variable<int?>(hasPin.value);
+    }
+    if (appId.present) {
+      map['app_id'] = Variable<String?>(appId.value);
+    }
+    if (biography.present) {
+      map['biography'] = Variable<String?>(biography.value);
+    }
+    if (isScam.present) {
+      map['is_scam'] = Variable<int?>(isScam.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UsersCompanion(')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('relationship: $relationship, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('phone: $phone, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('hasPin: $hasPin, ')
+          ..write('appId: $appId, ')
+          ..write('biography: $biography, ')
+          ..write('isScam: $isScam')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Users extends Table with TableInfo<Users, User> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Users(this.attachedDatabase, [this._alias]);
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _identityNumberMeta =
+      const VerificationMeta('identityNumber');
+  late final GeneratedColumn<String?> identityNumber = GeneratedColumn<String?>(
+      'identity_number', aliasedName, false,
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _relationshipMeta =
+      const VerificationMeta('relationship');
+  late final GeneratedColumnWithTypeConverter<UserRelationship, String?>
+      relationship = GeneratedColumn<String?>('relationship', aliasedName, true,
+              type: const StringType(),
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<UserRelationship>(Users.$converter0);
+  final VerificationMeta _fullNameMeta = const VerificationMeta('fullName');
+  late final GeneratedColumn<String?> fullName = GeneratedColumn<String?>(
+      'full_name', aliasedName, true,
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _avatarUrlMeta = const VerificationMeta('avatarUrl');
+  late final GeneratedColumn<String?> avatarUrl = GeneratedColumn<String?>(
+      'avatar_url', aliasedName, true,
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  late final GeneratedColumn<String?> phone = GeneratedColumn<String?>(
+      'phone', aliasedName, true,
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _isVerifiedMeta = const VerificationMeta('isVerified');
+  late final GeneratedColumn<bool?> isVerified = GeneratedColumn<bool?>(
+      'is_verified', aliasedName, true,
+      type: const BoolType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, true,
+              type: const IntType(),
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Users.$converter1);
+  final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> muteUntil =
+      GeneratedColumn<int?>('mute_until', aliasedName, true,
+              type: const IntType(),
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Users.$converter2);
+  final VerificationMeta _hasPinMeta = const VerificationMeta('hasPin');
+  late final GeneratedColumn<int?> hasPin = GeneratedColumn<int?>(
+      'has_pin', aliasedName, true,
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _appIdMeta = const VerificationMeta('appId');
+  late final GeneratedColumn<String?> appId = GeneratedColumn<String?>(
+      'app_id', aliasedName, true,
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _biographyMeta = const VerificationMeta('biography');
+  late final GeneratedColumn<String?> biography = GeneratedColumn<String?>(
+      'biography', aliasedName, true,
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _isScamMeta = const VerificationMeta('isScam');
+  late final GeneratedColumn<int?> isScam = GeneratedColumn<int?>(
+      'is_scam', aliasedName, true,
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns => [
+        userId,
+        identityNumber,
+        relationship,
+        fullName,
+        avatarUrl,
+        phone,
+        isVerified,
+        createdAt,
+        muteUntil,
+        hasPin,
+        appId,
+        biography,
+        isScam
+      ];
+  @override
+  String get aliasedName => _alias ?? 'users';
+  @override
+  String get actualTableName => 'users';
+  @override
+  VerificationContext validateIntegrity(Insertable<User> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('identity_number')) {
+      context.handle(
+          _identityNumberMeta,
+          identityNumber.isAcceptableOrUnknown(
+              data['identity_number']!, _identityNumberMeta));
+    } else if (isInserting) {
+      context.missing(_identityNumberMeta);
+    }
+    context.handle(_relationshipMeta, const VerificationResult.success());
+    if (data.containsKey('full_name')) {
+      context.handle(_fullNameMeta,
+          fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
+    }
+    if (data.containsKey('avatar_url')) {
+      context.handle(_avatarUrlMeta,
+          avatarUrl.isAcceptableOrUnknown(data['avatar_url']!, _avatarUrlMeta));
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+          _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
+    }
+    if (data.containsKey('is_verified')) {
+      context.handle(
+          _isVerifiedMeta,
+          isVerified.isAcceptableOrUnknown(
+              data['is_verified']!, _isVerifiedMeta));
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_muteUntilMeta, const VerificationResult.success());
+    if (data.containsKey('has_pin')) {
+      context.handle(_hasPinMeta,
+          hasPin.isAcceptableOrUnknown(data['has_pin']!, _hasPinMeta));
+    }
+    if (data.containsKey('app_id')) {
+      context.handle(
+          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
+    }
+    if (data.containsKey('biography')) {
+      context.handle(_biographyMeta,
+          biography.isAcceptableOrUnknown(data['biography']!, _biographyMeta));
+    }
+    if (data.containsKey('is_scam')) {
+      context.handle(_isScamMeta,
+          isScam.isAcceptableOrUnknown(data['is_scam']!, _isScamMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId};
+  @override
+  User map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return User.fromData(data,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  Users createAlias(String alias) {
+    return Users(attachedDatabase, alias);
+  }
+
+  static TypeConverter<UserRelationship, String> $converter0 =
+      const UserRelationshipConverter();
+  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(user_id)'];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -9873,637 +10541,6 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
   bool get dontWriteConstraints => true;
 }
 
-class User extends DataClass implements Insertable<User> {
-  final String userId;
-  final String identityNumber;
-  final UserRelationship? relationship;
-  final String? fullName;
-  final String? avatarUrl;
-  final String? phone;
-  final bool? isVerified;
-  final DateTime? createdAt;
-  final DateTime? muteUntil;
-  final int? hasPin;
-  final String? appId;
-  final String? biography;
-  final int? isScam;
-  User(
-      {required this.userId,
-      required this.identityNumber,
-      this.relationship,
-      this.fullName,
-      this.avatarUrl,
-      this.phone,
-      this.isVerified,
-      this.createdAt,
-      this.muteUntil,
-      this.hasPin,
-      this.appId,
-      this.biography,
-      this.isScam});
-  factory User.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return User(
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      identityNumber: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}identity_number'])!,
-      relationship: Users.$converter0.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}relationship'])),
-      fullName: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}full_name']),
-      avatarUrl: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}avatar_url']),
-      phone: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}phone']),
-      isVerified: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}is_verified']),
-      createdAt: Users.$converter1.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
-      muteUntil: Users.$converter2.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}mute_until'])),
-      hasPin: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}has_pin']),
-      appId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}app_id']),
-      biography: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}biography']),
-      isScam: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}is_scam']),
-    );
-  }
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['user_id'] = Variable<String>(userId);
-    map['identity_number'] = Variable<String>(identityNumber);
-    if (!nullToAbsent || relationship != null) {
-      final converter = Users.$converter0;
-      map['relationship'] = Variable<String?>(converter.mapToSql(relationship));
-    }
-    if (!nullToAbsent || fullName != null) {
-      map['full_name'] = Variable<String?>(fullName);
-    }
-    if (!nullToAbsent || avatarUrl != null) {
-      map['avatar_url'] = Variable<String?>(avatarUrl);
-    }
-    if (!nullToAbsent || phone != null) {
-      map['phone'] = Variable<String?>(phone);
-    }
-    if (!nullToAbsent || isVerified != null) {
-      map['is_verified'] = Variable<bool?>(isVerified);
-    }
-    if (!nullToAbsent || createdAt != null) {
-      final converter = Users.$converter1;
-      map['created_at'] = Variable<int?>(converter.mapToSql(createdAt));
-    }
-    if (!nullToAbsent || muteUntil != null) {
-      final converter = Users.$converter2;
-      map['mute_until'] = Variable<int?>(converter.mapToSql(muteUntil));
-    }
-    if (!nullToAbsent || hasPin != null) {
-      map['has_pin'] = Variable<int?>(hasPin);
-    }
-    if (!nullToAbsent || appId != null) {
-      map['app_id'] = Variable<String?>(appId);
-    }
-    if (!nullToAbsent || biography != null) {
-      map['biography'] = Variable<String?>(biography);
-    }
-    if (!nullToAbsent || isScam != null) {
-      map['is_scam'] = Variable<int?>(isScam);
-    }
-    return map;
-  }
-
-  UsersCompanion toCompanion(bool nullToAbsent) {
-    return UsersCompanion(
-      userId: Value(userId),
-      identityNumber: Value(identityNumber),
-      relationship: relationship == null && nullToAbsent
-          ? const Value.absent()
-          : Value(relationship),
-      fullName: fullName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(fullName),
-      avatarUrl: avatarUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(avatarUrl),
-      phone:
-          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
-      isVerified: isVerified == null && nullToAbsent
-          ? const Value.absent()
-          : Value(isVerified),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-      muteUntil: muteUntil == null && nullToAbsent
-          ? const Value.absent()
-          : Value(muteUntil),
-      hasPin:
-          hasPin == null && nullToAbsent ? const Value.absent() : Value(hasPin),
-      appId:
-          appId == null && nullToAbsent ? const Value.absent() : Value(appId),
-      biography: biography == null && nullToAbsent
-          ? const Value.absent()
-          : Value(biography),
-      isScam:
-          isScam == null && nullToAbsent ? const Value.absent() : Value(isScam),
-    );
-  }
-
-  factory User.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return User(
-      userId: serializer.fromJson<String>(json['user_id']),
-      identityNumber: serializer.fromJson<String>(json['identity_number']),
-      relationship:
-          serializer.fromJson<UserRelationship?>(json['relationship']),
-      fullName: serializer.fromJson<String?>(json['full_name']),
-      avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
-      phone: serializer.fromJson<String?>(json['phone']),
-      isVerified: serializer.fromJson<bool?>(json['is_verified']),
-      createdAt: serializer.fromJson<DateTime?>(json['created_at']),
-      muteUntil: serializer.fromJson<DateTime?>(json['mute_until']),
-      hasPin: serializer.fromJson<int?>(json['has_pin']),
-      appId: serializer.fromJson<String?>(json['app_id']),
-      biography: serializer.fromJson<String?>(json['biography']),
-      isScam: serializer.fromJson<int?>(json['is_scam']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'user_id': serializer.toJson<String>(userId),
-      'identity_number': serializer.toJson<String>(identityNumber),
-      'relationship': serializer.toJson<UserRelationship?>(relationship),
-      'full_name': serializer.toJson<String?>(fullName),
-      'avatar_url': serializer.toJson<String?>(avatarUrl),
-      'phone': serializer.toJson<String?>(phone),
-      'is_verified': serializer.toJson<bool?>(isVerified),
-      'created_at': serializer.toJson<DateTime?>(createdAt),
-      'mute_until': serializer.toJson<DateTime?>(muteUntil),
-      'has_pin': serializer.toJson<int?>(hasPin),
-      'app_id': serializer.toJson<String?>(appId),
-      'biography': serializer.toJson<String?>(biography),
-      'is_scam': serializer.toJson<int?>(isScam),
-    };
-  }
-
-  User copyWith(
-          {String? userId,
-          String? identityNumber,
-          Value<UserRelationship?> relationship = const Value.absent(),
-          Value<String?> fullName = const Value.absent(),
-          Value<String?> avatarUrl = const Value.absent(),
-          Value<String?> phone = const Value.absent(),
-          Value<bool?> isVerified = const Value.absent(),
-          Value<DateTime?> createdAt = const Value.absent(),
-          Value<DateTime?> muteUntil = const Value.absent(),
-          Value<int?> hasPin = const Value.absent(),
-          Value<String?> appId = const Value.absent(),
-          Value<String?> biography = const Value.absent(),
-          Value<int?> isScam = const Value.absent()}) =>
-      User(
-        userId: userId ?? this.userId,
-        identityNumber: identityNumber ?? this.identityNumber,
-        relationship:
-            relationship.present ? relationship.value : this.relationship,
-        fullName: fullName.present ? fullName.value : this.fullName,
-        avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
-        phone: phone.present ? phone.value : this.phone,
-        isVerified: isVerified.present ? isVerified.value : this.isVerified,
-        createdAt: createdAt.present ? createdAt.value : this.createdAt,
-        muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
-        hasPin: hasPin.present ? hasPin.value : this.hasPin,
-        appId: appId.present ? appId.value : this.appId,
-        biography: biography.present ? biography.value : this.biography,
-        isScam: isScam.present ? isScam.value : this.isScam,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('User(')
-          ..write('userId: $userId, ')
-          ..write('identityNumber: $identityNumber, ')
-          ..write('relationship: $relationship, ')
-          ..write('fullName: $fullName, ')
-          ..write('avatarUrl: $avatarUrl, ')
-          ..write('phone: $phone, ')
-          ..write('isVerified: $isVerified, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('muteUntil: $muteUntil, ')
-          ..write('hasPin: $hasPin, ')
-          ..write('appId: $appId, ')
-          ..write('biography: $biography, ')
-          ..write('isScam: $isScam')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-      userId,
-      identityNumber,
-      relationship,
-      fullName,
-      avatarUrl,
-      phone,
-      isVerified,
-      createdAt,
-      muteUntil,
-      hasPin,
-      appId,
-      biography,
-      isScam);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is User &&
-          other.userId == this.userId &&
-          other.identityNumber == this.identityNumber &&
-          other.relationship == this.relationship &&
-          other.fullName == this.fullName &&
-          other.avatarUrl == this.avatarUrl &&
-          other.phone == this.phone &&
-          other.isVerified == this.isVerified &&
-          other.createdAt == this.createdAt &&
-          other.muteUntil == this.muteUntil &&
-          other.hasPin == this.hasPin &&
-          other.appId == this.appId &&
-          other.biography == this.biography &&
-          other.isScam == this.isScam);
-}
-
-class UsersCompanion extends UpdateCompanion<User> {
-  final Value<String> userId;
-  final Value<String> identityNumber;
-  final Value<UserRelationship?> relationship;
-  final Value<String?> fullName;
-  final Value<String?> avatarUrl;
-  final Value<String?> phone;
-  final Value<bool?> isVerified;
-  final Value<DateTime?> createdAt;
-  final Value<DateTime?> muteUntil;
-  final Value<int?> hasPin;
-  final Value<String?> appId;
-  final Value<String?> biography;
-  final Value<int?> isScam;
-  const UsersCompanion({
-    this.userId = const Value.absent(),
-    this.identityNumber = const Value.absent(),
-    this.relationship = const Value.absent(),
-    this.fullName = const Value.absent(),
-    this.avatarUrl = const Value.absent(),
-    this.phone = const Value.absent(),
-    this.isVerified = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.muteUntil = const Value.absent(),
-    this.hasPin = const Value.absent(),
-    this.appId = const Value.absent(),
-    this.biography = const Value.absent(),
-    this.isScam = const Value.absent(),
-  });
-  UsersCompanion.insert({
-    required String userId,
-    required String identityNumber,
-    this.relationship = const Value.absent(),
-    this.fullName = const Value.absent(),
-    this.avatarUrl = const Value.absent(),
-    this.phone = const Value.absent(),
-    this.isVerified = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.muteUntil = const Value.absent(),
-    this.hasPin = const Value.absent(),
-    this.appId = const Value.absent(),
-    this.biography = const Value.absent(),
-    this.isScam = const Value.absent(),
-  })  : userId = Value(userId),
-        identityNumber = Value(identityNumber);
-  static Insertable<User> custom({
-    Expression<String>? userId,
-    Expression<String>? identityNumber,
-    Expression<UserRelationship?>? relationship,
-    Expression<String?>? fullName,
-    Expression<String?>? avatarUrl,
-    Expression<String?>? phone,
-    Expression<bool?>? isVerified,
-    Expression<DateTime?>? createdAt,
-    Expression<DateTime?>? muteUntil,
-    Expression<int?>? hasPin,
-    Expression<String?>? appId,
-    Expression<String?>? biography,
-    Expression<int?>? isScam,
-  }) {
-    return RawValuesInsertable({
-      if (userId != null) 'user_id': userId,
-      if (identityNumber != null) 'identity_number': identityNumber,
-      if (relationship != null) 'relationship': relationship,
-      if (fullName != null) 'full_name': fullName,
-      if (avatarUrl != null) 'avatar_url': avatarUrl,
-      if (phone != null) 'phone': phone,
-      if (isVerified != null) 'is_verified': isVerified,
-      if (createdAt != null) 'created_at': createdAt,
-      if (muteUntil != null) 'mute_until': muteUntil,
-      if (hasPin != null) 'has_pin': hasPin,
-      if (appId != null) 'app_id': appId,
-      if (biography != null) 'biography': biography,
-      if (isScam != null) 'is_scam': isScam,
-    });
-  }
-
-  UsersCompanion copyWith(
-      {Value<String>? userId,
-      Value<String>? identityNumber,
-      Value<UserRelationship?>? relationship,
-      Value<String?>? fullName,
-      Value<String?>? avatarUrl,
-      Value<String?>? phone,
-      Value<bool?>? isVerified,
-      Value<DateTime?>? createdAt,
-      Value<DateTime?>? muteUntil,
-      Value<int?>? hasPin,
-      Value<String?>? appId,
-      Value<String?>? biography,
-      Value<int?>? isScam}) {
-    return UsersCompanion(
-      userId: userId ?? this.userId,
-      identityNumber: identityNumber ?? this.identityNumber,
-      relationship: relationship ?? this.relationship,
-      fullName: fullName ?? this.fullName,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      phone: phone ?? this.phone,
-      isVerified: isVerified ?? this.isVerified,
-      createdAt: createdAt ?? this.createdAt,
-      muteUntil: muteUntil ?? this.muteUntil,
-      hasPin: hasPin ?? this.hasPin,
-      appId: appId ?? this.appId,
-      biography: biography ?? this.biography,
-      isScam: isScam ?? this.isScam,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (identityNumber.present) {
-      map['identity_number'] = Variable<String>(identityNumber.value);
-    }
-    if (relationship.present) {
-      final converter = Users.$converter0;
-      map['relationship'] =
-          Variable<String?>(converter.mapToSql(relationship.value));
-    }
-    if (fullName.present) {
-      map['full_name'] = Variable<String?>(fullName.value);
-    }
-    if (avatarUrl.present) {
-      map['avatar_url'] = Variable<String?>(avatarUrl.value);
-    }
-    if (phone.present) {
-      map['phone'] = Variable<String?>(phone.value);
-    }
-    if (isVerified.present) {
-      map['is_verified'] = Variable<bool?>(isVerified.value);
-    }
-    if (createdAt.present) {
-      final converter = Users.$converter1;
-      map['created_at'] = Variable<int?>(converter.mapToSql(createdAt.value));
-    }
-    if (muteUntil.present) {
-      final converter = Users.$converter2;
-      map['mute_until'] = Variable<int?>(converter.mapToSql(muteUntil.value));
-    }
-    if (hasPin.present) {
-      map['has_pin'] = Variable<int?>(hasPin.value);
-    }
-    if (appId.present) {
-      map['app_id'] = Variable<String?>(appId.value);
-    }
-    if (biography.present) {
-      map['biography'] = Variable<String?>(biography.value);
-    }
-    if (isScam.present) {
-      map['is_scam'] = Variable<int?>(isScam.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('UsersCompanion(')
-          ..write('userId: $userId, ')
-          ..write('identityNumber: $identityNumber, ')
-          ..write('relationship: $relationship, ')
-          ..write('fullName: $fullName, ')
-          ..write('avatarUrl: $avatarUrl, ')
-          ..write('phone: $phone, ')
-          ..write('isVerified: $isVerified, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('muteUntil: $muteUntil, ')
-          ..write('hasPin: $hasPin, ')
-          ..write('appId: $appId, ')
-          ..write('biography: $biography, ')
-          ..write('isScam: $isScam')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class Users extends Table with TableInfo<Users, User> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  Users(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
-      'user_id', aliasedName, false,
-      type: const StringType(),
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _identityNumberMeta =
-      const VerificationMeta('identityNumber');
-  late final GeneratedColumn<String?> identityNumber = GeneratedColumn<String?>(
-      'identity_number', aliasedName, false,
-      type: const StringType(),
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _relationshipMeta =
-      const VerificationMeta('relationship');
-  late final GeneratedColumnWithTypeConverter<UserRelationship, String?>
-      relationship = GeneratedColumn<String?>('relationship', aliasedName, true,
-              type: const StringType(),
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<UserRelationship>(Users.$converter0);
-  final VerificationMeta _fullNameMeta = const VerificationMeta('fullName');
-  late final GeneratedColumn<String?> fullName = GeneratedColumn<String?>(
-      'full_name', aliasedName, true,
-      type: const StringType(),
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  final VerificationMeta _avatarUrlMeta = const VerificationMeta('avatarUrl');
-  late final GeneratedColumn<String?> avatarUrl = GeneratedColumn<String?>(
-      'avatar_url', aliasedName, true,
-      type: const StringType(),
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  final VerificationMeta _phoneMeta = const VerificationMeta('phone');
-  late final GeneratedColumn<String?> phone = GeneratedColumn<String?>(
-      'phone', aliasedName, true,
-      type: const StringType(),
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  final VerificationMeta _isVerifiedMeta = const VerificationMeta('isVerified');
-  late final GeneratedColumn<bool?> isVerified = GeneratedColumn<bool?>(
-      'is_verified', aliasedName, true,
-      type: const BoolType(),
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
-      GeneratedColumn<int?>('created_at', aliasedName, true,
-              type: const IntType(),
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime>(Users.$converter1);
-  final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> muteUntil =
-      GeneratedColumn<int?>('mute_until', aliasedName, true,
-              type: const IntType(),
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime>(Users.$converter2);
-  final VerificationMeta _hasPinMeta = const VerificationMeta('hasPin');
-  late final GeneratedColumn<int?> hasPin = GeneratedColumn<int?>(
-      'has_pin', aliasedName, true,
-      type: const IntType(),
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  final VerificationMeta _appIdMeta = const VerificationMeta('appId');
-  late final GeneratedColumn<String?> appId = GeneratedColumn<String?>(
-      'app_id', aliasedName, true,
-      type: const StringType(),
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  final VerificationMeta _biographyMeta = const VerificationMeta('biography');
-  late final GeneratedColumn<String?> biography = GeneratedColumn<String?>(
-      'biography', aliasedName, true,
-      type: const StringType(),
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  final VerificationMeta _isScamMeta = const VerificationMeta('isScam');
-  late final GeneratedColumn<int?> isScam = GeneratedColumn<int?>(
-      'is_scam', aliasedName, true,
-      type: const IntType(),
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  @override
-  List<GeneratedColumn> get $columns => [
-        userId,
-        identityNumber,
-        relationship,
-        fullName,
-        avatarUrl,
-        phone,
-        isVerified,
-        createdAt,
-        muteUntil,
-        hasPin,
-        appId,
-        biography,
-        isScam
-      ];
-  @override
-  String get aliasedName => _alias ?? 'users';
-  @override
-  String get actualTableName => 'users';
-  @override
-  VerificationContext validateIntegrity(Insertable<User> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    if (data.containsKey('identity_number')) {
-      context.handle(
-          _identityNumberMeta,
-          identityNumber.isAcceptableOrUnknown(
-              data['identity_number']!, _identityNumberMeta));
-    } else if (isInserting) {
-      context.missing(_identityNumberMeta);
-    }
-    context.handle(_relationshipMeta, const VerificationResult.success());
-    if (data.containsKey('full_name')) {
-      context.handle(_fullNameMeta,
-          fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
-    }
-    if (data.containsKey('avatar_url')) {
-      context.handle(_avatarUrlMeta,
-          avatarUrl.isAcceptableOrUnknown(data['avatar_url']!, _avatarUrlMeta));
-    }
-    if (data.containsKey('phone')) {
-      context.handle(
-          _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
-    }
-    if (data.containsKey('is_verified')) {
-      context.handle(
-          _isVerifiedMeta,
-          isVerified.isAcceptableOrUnknown(
-              data['is_verified']!, _isVerifiedMeta));
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_muteUntilMeta, const VerificationResult.success());
-    if (data.containsKey('has_pin')) {
-      context.handle(_hasPinMeta,
-          hasPin.isAcceptableOrUnknown(data['has_pin']!, _hasPinMeta));
-    }
-    if (data.containsKey('app_id')) {
-      context.handle(
-          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
-    }
-    if (data.containsKey('biography')) {
-      context.handle(_biographyMeta,
-          biography.isAcceptableOrUnknown(data['biography']!, _biographyMeta));
-    }
-    if (data.containsKey('is_scam')) {
-      context.handle(_isScamMeta,
-          isScam.isAcceptableOrUnknown(data['is_scam']!, _isScamMeta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {userId};
-  @override
-  User map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return User.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
-  }
-
-  @override
-  Users createAlias(String alias) {
-    return Users(attachedDatabase, alias);
-  }
-
-  static TypeConverter<UserRelationship, String> $converter0 =
-      const UserRelationshipConverter();
-  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(user_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
 class TranscriptMessage extends DataClass
     implements Insertable<TranscriptMessage> {
   final String transcriptId;
@@ -12120,6 +12157,228 @@ class FavoriteApps extends Table with TableInfo<FavoriteApps, FavoriteApp> {
   bool get dontWriteConstraints => true;
 }
 
+class ExpiredMessage extends DataClass implements Insertable<ExpiredMessage> {
+  final String messageId;
+  final int expireIn;
+  final int? expireAt;
+  ExpiredMessage(
+      {required this.messageId, required this.expireIn, this.expireAt});
+  factory ExpiredMessage.fromData(Map<String, dynamic> data, {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return ExpiredMessage(
+      messageId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
+      expireIn: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}expire_in'])!,
+      expireAt: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}expire_at']),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['message_id'] = Variable<String>(messageId);
+    map['expire_in'] = Variable<int>(expireIn);
+    if (!nullToAbsent || expireAt != null) {
+      map['expire_at'] = Variable<int?>(expireAt);
+    }
+    return map;
+  }
+
+  ExpiredMessagesCompanion toCompanion(bool nullToAbsent) {
+    return ExpiredMessagesCompanion(
+      messageId: Value(messageId),
+      expireIn: Value(expireIn),
+      expireAt: expireAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expireAt),
+    );
+  }
+
+  factory ExpiredMessage.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExpiredMessage(
+      messageId: serializer.fromJson<String>(json['message_id']),
+      expireIn: serializer.fromJson<int>(json['expire_in']),
+      expireAt: serializer.fromJson<int?>(json['expire_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'message_id': serializer.toJson<String>(messageId),
+      'expire_in': serializer.toJson<int>(expireIn),
+      'expire_at': serializer.toJson<int?>(expireAt),
+    };
+  }
+
+  ExpiredMessage copyWith(
+          {String? messageId,
+          int? expireIn,
+          Value<int?> expireAt = const Value.absent()}) =>
+      ExpiredMessage(
+        messageId: messageId ?? this.messageId,
+        expireIn: expireIn ?? this.expireIn,
+        expireAt: expireAt.present ? expireAt.value : this.expireAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('ExpiredMessage(')
+          ..write('messageId: $messageId, ')
+          ..write('expireIn: $expireIn, ')
+          ..write('expireAt: $expireAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(messageId, expireIn, expireAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExpiredMessage &&
+          other.messageId == this.messageId &&
+          other.expireIn == this.expireIn &&
+          other.expireAt == this.expireAt);
+}
+
+class ExpiredMessagesCompanion extends UpdateCompanion<ExpiredMessage> {
+  final Value<String> messageId;
+  final Value<int> expireIn;
+  final Value<int?> expireAt;
+  const ExpiredMessagesCompanion({
+    this.messageId = const Value.absent(),
+    this.expireIn = const Value.absent(),
+    this.expireAt = const Value.absent(),
+  });
+  ExpiredMessagesCompanion.insert({
+    required String messageId,
+    required int expireIn,
+    this.expireAt = const Value.absent(),
+  })  : messageId = Value(messageId),
+        expireIn = Value(expireIn);
+  static Insertable<ExpiredMessage> custom({
+    Expression<String>? messageId,
+    Expression<int>? expireIn,
+    Expression<int?>? expireAt,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (expireIn != null) 'expire_in': expireIn,
+      if (expireAt != null) 'expire_at': expireAt,
+    });
+  }
+
+  ExpiredMessagesCompanion copyWith(
+      {Value<String>? messageId, Value<int>? expireIn, Value<int?>? expireAt}) {
+    return ExpiredMessagesCompanion(
+      messageId: messageId ?? this.messageId,
+      expireIn: expireIn ?? this.expireIn,
+      expireAt: expireAt ?? this.expireAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (expireIn.present) {
+      map['expire_in'] = Variable<int>(expireIn.value);
+    }
+    if (expireAt.present) {
+      map['expire_at'] = Variable<int?>(expireAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpiredMessagesCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('expireIn: $expireIn, ')
+          ..write('expireAt: $expireAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class ExpiredMessages extends Table
+    with TableInfo<ExpiredMessages, ExpiredMessage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  ExpiredMessages(this.attachedDatabase, [this._alias]);
+  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      type: const StringType(),
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _expireInMeta = const VerificationMeta('expireIn');
+  late final GeneratedColumn<int?> expireIn = GeneratedColumn<int?>(
+      'expire_in', aliasedName, false,
+      type: const IntType(),
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _expireAtMeta = const VerificationMeta('expireAt');
+  late final GeneratedColumn<int?> expireAt = GeneratedColumn<int?>(
+      'expire_at', aliasedName, true,
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns => [messageId, expireIn, expireAt];
+  @override
+  String get aliasedName => _alias ?? 'expired_messages';
+  @override
+  String get actualTableName => 'expired_messages';
+  @override
+  VerificationContext validateIntegrity(Insertable<ExpiredMessage> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('expire_in')) {
+      context.handle(_expireInMeta,
+          expireIn.isAcceptableOrUnknown(data['expire_in']!, _expireInMeta));
+    } else if (isInserting) {
+      context.missing(_expireInMeta);
+    }
+    if (data.containsKey('expire_at')) {
+      context.handle(_expireAtMeta,
+          expireAt.isAcceptableOrUnknown(data['expire_at']!, _expireAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId};
+  @override
+  ExpiredMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return ExpiredMessage.fromData(data,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  ExpiredMessages createAlias(String alias) {
+    return ExpiredMessages(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -12145,6 +12404,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexMessagesConversationIdCreatedAt = Index(
       'index_messages_conversation_id_created_at',
       'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at DESC)');
+  late final Index indexMessagesConversationIdCategoryCreatedAt = Index(
+      'index_messages_conversation_id_category_created_at',
+      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category_created_at ON messages (conversation_id, category, created_at DESC)');
   late final Participants participants = Participants(this);
   late final Index indexParticipantsConversationIdCreatedAt = Index(
       'index_participants_conversation_id_created_at',
@@ -12160,6 +12422,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexMessageConversationIdStatusUserId = Index(
       'index_message_conversation_id_status_user_id',
       'CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messages (conversation_id, status, user_id)');
+  late final Users users = Users(this);
+  late final Index indexUsersIdentityNumber = Index(
+      'index_users_identity_number',
+      'CREATE INDEX IF NOT EXISTS index_users_identity_number ON users (identity_number)');
   late final Trigger conversationLastMessageDelete = Trigger(
       'CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (SELECT message_id FROM messages WHERE conversation_id = old.conversation_id ORDER BY created_at DESC LIMIT 1) WHERE conversation_id = old.conversation_id;END',
       'conversation_last_message_delete');
@@ -12182,10 +12448,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final StickerRelationships stickerRelationships =
       StickerRelationships(this);
   late final Stickers stickers = Stickers(this);
-  late final Users users = Users(this);
   late final TranscriptMessages transcriptMessages = TranscriptMessages(this);
   late final Fiats fiats = Fiats(this);
   late final FavoriteApps favoriteApps = FavoriteApps(this);
+  late final ExpiredMessages expiredMessages = ExpiredMessages(this);
   late final AddressDao addressDao = AddressDao(this as MixinDatabase);
   late final AppDao appDao = AppDao(this as MixinDatabase);
   late final AssetDao assetDao = AssetDao(this as MixinDatabase);
@@ -12223,6 +12489,55 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final FiatDao fiatDao = FiatDao(this as MixinDatabase);
   late final FavoriteAppDao favoriteAppDao =
       FavoriteAppDao(this as MixinDatabase);
+  late final ExpiredMessageDao expiredMessageDao =
+      ExpiredMessageDao(this as MixinDatabase);
+  Selectable<ExpiredMessage> getExpiredMessages(int? currentTime, int limit) {
+    return customSelect(
+        'SELECT * FROM expired_messages WHERE expire_at <= ?1 ORDER BY expire_at ASC LIMIT ?2',
+        variables: [
+          Variable<int?>(currentTime),
+          Variable<int>(limit)
+        ],
+        readsFrom: {
+          expiredMessages,
+        }).map(expiredMessages.mapFromRow);
+  }
+
+  Selectable<ExpiredMessage> getFirstExpiredMessage() {
+    return customSelect(
+        'SELECT * FROM expired_messages WHERE expire_at IS NOT NULL ORDER BY expire_at ASC LIMIT 1',
+        variables: [],
+        readsFrom: {
+          expiredMessages,
+        }).map(expiredMessages.mapFromRow);
+  }
+
+  Future<int> updateExpiredMessage(int? expireAt, String messageId) {
+    return customUpdate(
+      'UPDATE expired_messages SET expire_at = ?1 WHERE expire_at > ?1 AND message_id = ?2',
+      variables: [Variable<int?>(expireAt), Variable<String>(messageId)],
+      updates: {expiredMessages},
+      updateKind: UpdateKind.update,
+    );
+  }
+
+  Future<int> markExpiredMessageRead(double currentTime,
+      Expression<bool?> Function(ExpiredMessages expired_messages) where) {
+    var $arrayStartIndex = 2;
+    final generatedwhere =
+        $write(where(this.expiredMessages), startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    return customUpdate(
+      'UPDATE expired_messages SET expire_at = CAST((?1 + expire_in)AS INTEGER) WHERE(expire_at >(?1 + expire_in)OR expire_at IS NULL)AND ${generatedwhere.sql}',
+      variables: [
+        Variable<double>(currentTime),
+        ...generatedwhere.introducedVariables
+      ],
+      updates: {expiredMessages},
+      updateKind: UpdateKind.update,
+    );
+  }
+
   Future<int> deleteFavoriteAppByAppIdAndUserId(String appId, String userId) {
     return customUpdate(
       'DELETE FROM favorite_apps WHERE app_id = ?1 AND user_id = ?2',
@@ -12290,7 +12605,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Hyperlinks hyperlink,
               Users sharedUser,
               Conversations conversation,
-              MessageMentions messageMention)
+              MessageMentions messageMention,
+              ExpiredMessages em)
           order,
       Limit Function(
               PinMessages pinMessage,
@@ -12303,7 +12619,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Hyperlinks hyperlink,
               Users sharedUser,
               Conversations conversation,
-              MessageMentions messageMention)
+              MessageMentions messageMention,
+              ExpiredMessages em)
           limit) {
     var $arrayStartIndex = 2;
     final generatedorder = $write(
@@ -12318,7 +12635,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.hyperlinks, 'hyperlink'),
             alias(this.users, 'sharedUser'),
             alias(this.conversations, 'conversation'),
-            alias(this.messageMentions, 'messageMention')),
+            alias(this.messageMentions, 'messageMention'),
+            alias(this.expiredMessages, 'em')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedorder.amountOfVariables;
@@ -12334,12 +12652,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.hyperlinks, 'hyperlink'),
             alias(this.users, 'sharedUser'),
             alias(this.conversations, 'conversation'),
-            alias(this.messageMentions, 'messageMention')),
+            alias(this.messageMentions, 'messageMention'),
+            alias(this.expiredMessages, 'em')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           ...generatedorder.introducedVariables,
@@ -12354,6 +12673,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           hyperlinks,
           messageMentions,
+          expiredMessages,
           pinMessages,
           ...generatedorder.watchedTables,
           ...generatedlimit.watchedTables,
@@ -12379,8 +12699,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaDuration: row.read<String?>('mediaDuration'),
         quoteId: row.read<String?>('quoteId'),
         quoteContent: row.read<String?>('quoteContent'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        actionName: row.read<String?>('actionName'),
         sharedUserId: row.read<String?>('sharedUserId'),
         userId: row.read<String>('userId'),
         userFullName: row.read<String?>('userFullName'),
@@ -12417,6 +12736,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteDescription: row.read<String?>('siteDescription'),
         siteImage: row.read<String?>('siteImage'),
         mentionRead: row.read<bool?>('mentionRead'),
+        expireIn: row.read<int?>('expireIn'),
         pinned: row.read<bool>('pinned'),
       );
     });
@@ -12425,7 +12745,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<PinMessageItemResult> pinMessageItem(
       String conversationId, String? messageId) {
     return customSelect(
-        'SELECT message.content AS content, sender.full_name AS userFullName FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id WHERE message.conversation_id = ?1 AND message.quote_message_id = ?2 AND message.category = \'MESSAGE_PIN\' ORDER BY message.created_at DESC LIMIT 1',
+        'SELECT message.content AS content, sender.full_name AS userFullName FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id WHERE message.conversation_id = ?1 AND message.category = \'MESSAGE_PIN\' AND message.quote_message_id = ?2 ORDER BY message.created_at DESC LIMIT 1',
         variables: [
           Variable<String>(conversationId),
           Variable<String?>(messageId)
@@ -12656,10 +12976,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(users.mapFromRow);
   }
 
-  Selectable<String?> biographyByIdentityNumber(String user_id) {
+  Selectable<String?> biographyByIdentityNumber(String userId) {
     return customSelect('SELECT biography FROM users WHERE user_id = ?1',
         variables: [
-          Variable<String>(user_id)
+          Variable<String>(userId)
         ],
         readsFrom: {
           users,
@@ -12849,7 +13169,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Users sharedUser,
               Conversations conversation,
               MessageMentions messageMention,
-              PinMessages pinMessage)
+              PinMessages pinMessage,
+              ExpiredMessages em)
           where,
       OrderBy Function(
               Messages message,
@@ -12862,7 +13183,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Users sharedUser,
               Conversations conversation,
               MessageMentions messageMention,
-              PinMessages pinMessage)
+              PinMessages pinMessage,
+              ExpiredMessages em)
           order,
       Limit Function(
               Messages message,
@@ -12875,7 +13197,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Users sharedUser,
               Conversations conversation,
               MessageMentions messageMention,
-              PinMessages pinMessage)
+              PinMessages pinMessage,
+              ExpiredMessages em)
           limit) {
     var $arrayStartIndex = 1;
     final generatedwhere = $write(
@@ -12890,7 +13213,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'sharedUser'),
             alias(this.conversations, 'conversation'),
             alias(this.messageMentions, 'messageMention'),
-            alias(this.pinMessages, 'pinMessage')),
+            alias(this.pinMessages, 'pinMessage'),
+            alias(this.expiredMessages, 'em')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
@@ -12906,7 +13230,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'sharedUser'),
             alias(this.conversations, 'conversation'),
             alias(this.messageMentions, 'messageMention'),
-            alias(this.pinMessages, 'pinMessage')),
+            alias(this.pinMessages, 'pinMessage'),
+            alias(this.expiredMessages, 'em')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedorder.amountOfVariables;
@@ -12922,12 +13247,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'sharedUser'),
             alias(this.conversations, 'conversation'),
             alias(this.messageMentions, 'messageMention'),
-            alias(this.pinMessages, 'pinMessage')),
+            alias(this.pinMessages, 'pinMessage'),
+            alias(this.expiredMessages, 'em')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.sticker_id AS stickerId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
@@ -12942,6 +13268,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           hyperlinks,
           messageMentions,
+          expiredMessages,
           pinMessages,
           ...generatedwhere.watchedTables,
           ...generatedorder.watchedTables,
@@ -12968,9 +13295,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaDuration: row.read<String?>('mediaDuration'),
         quoteId: row.read<String?>('quoteId'),
         quoteContent: row.read<String?>('quoteContent'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        actionName: row.read<String?>('actionName'),
         sharedUserId: row.read<String?>('sharedUserId'),
+        stickerId: row.read<String?>('stickerId'),
         userId: row.read<String>('userId'),
         userFullName: row.read<String?>('userFullName'),
         userIdentityNumber: row.read<String>('userIdentityNumber'),
@@ -12990,7 +13317,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         assetUrl: row.read<String?>('assetUrl'),
         assetWidth: row.read<int?>('assetWidth'),
         assetHeight: row.read<int?>('assetHeight'),
-        stickerId: row.read<String?>('stickerId'),
         assetName: row.read<String?>('assetName'),
         assetType: row.read<String?>('assetType'),
         participantFullName: row.read<String?>('participantFullName'),
@@ -13006,6 +13332,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteDescription: row.read<String?>('siteDescription'),
         siteImage: row.read<String?>('siteImage'),
         mentionRead: row.read<bool?>('mentionRead'),
+        expireIn: row.read<int?>('expireIn'),
         pinned: row.read<bool>('pinned'),
       );
     });
@@ -13053,7 +13380,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, message.shared_user_id AS sharedUserId, shareUser.full_name AS sharedUserFullName, shareUser.identity_number AS sharedUserIdentityNumber, shareUser.avatar_url AS sharedUserAvatarUrl, shareUser.is_verified AS sharedUserIsVerified, shareUser.app_id AS sharedUserAppId FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN users AS shareUser ON message.shared_user_id = shareUser.user_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message.sticker_id AS stickerId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, message.shared_user_id AS sharedUserId, shareUser.full_name AS sharedUserFullName, shareUser.identity_number AS sharedUserIdentityNumber, shareUser.avatar_url AS sharedUserAvatarUrl, shareUser.is_verified AS sharedUserIsVerified, shareUser.app_id AS sharedUserAppId FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN users AS shareUser ON message.shared_user_id = shareUser.user_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
@@ -13093,10 +13420,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaDuration: row.read<String?>('mediaDuration'),
         quoteId: row.read<String?>('quoteId'),
         quoteContent: row.read<String?>('quoteContent'),
+        stickerId: row.read<String?>('stickerId'),
         assetUrl: row.read<String?>('assetUrl'),
         assetWidth: row.read<int?>('assetWidth'),
         assetHeight: row.read<int?>('assetHeight'),
-        stickerId: row.read<String?>('stickerId'),
         assetName: row.read<String?>('assetName'),
         assetType: row.read<String?>('assetType'),
         sharedUserId: row.read<String?>('sharedUserId'),
@@ -13121,11 +13448,11 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         Messages.$converter1.mapToDart(row.read<String>('status'))!);
   }
 
-  Selectable<SendingMessage> sendingMessage(String message_id) {
+  Selectable<SendingMessage> sendingMessage(String messageId) {
     return customSelect(
         'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type, m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key, m.media_digest, m.media_status, m.status, m.created_at, m."action", m.participant_id, m.snapshot_id, m.hyperlink, m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.quote_message_id, m.quote_content, rm.status AS resend_status, rm.user_id AS resend_user_id, rm.session_id AS resend_session_id FROM messages AS m LEFT JOIN resend_session_messages AS rm ON m.message_id = rm.message_id WHERE m.message_id = ?1 AND(m.status = \'SENDING\' OR rm.status = 1)AND m.content IS NOT NULL LIMIT 1',
         variables: [
-          Variable<String>(message_id)
+          Variable<String>(messageId)
         ],
         readsFrom: {
           messages,
@@ -13151,7 +13478,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Messages.$converter0.mapToDart(row.read<String?>('media_status')),
         status: Messages.$converter1.mapToDart(row.read<String>('status'))!,
         createdAt: Messages.$converter2.mapToDart(row.read<int>('created_at'))!,
-        action: Messages.$converter3.mapToDart(row.read<String?>('action')),
+        action: row.read<String?>('action'),
         participantId: row.read<String?>('participant_id'),
         snapshotId: row.read<String?>('snapshot_id'),
         hyperlink: row.read<String?>('hyperlink'),
@@ -13318,8 +13645,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        actionName: row.read<String?>('actionName'),
         relationship:
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
         participantFullName: row.read<String?>('participantFullName'),
@@ -13680,7 +14006,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Messages lastMessage,
               Users lastMessageSender,
               Snapshots snapshot,
-              Users participant)
+              Users participant,
+              ExpiredMessages em)
           where,
       OrderBy Function(
               Conversations conversation,
@@ -13688,7 +14015,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Messages lastMessage,
               Users lastMessageSender,
               Snapshots snapshot,
-              Users participant)
+              Users participant,
+              ExpiredMessages em)
           order,
       Limit Function(
               Conversations conversation,
@@ -13696,7 +14024,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Messages lastMessage,
               Users lastMessageSender,
               Snapshots snapshot,
-              Users participant)
+              Users participant,
+              ExpiredMessages em)
           limit) {
     var $arrayStartIndex = 1;
     final generatedwhere = $write(
@@ -13706,7 +14035,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.messages, 'lastMessage'),
             alias(this.users, 'lastMessageSender'),
             alias(this.snapshots, 'snapshot'),
-            alias(this.users, 'participant')),
+            alias(this.users, 'participant'),
+            alias(this.expiredMessages, 'em')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
@@ -13717,7 +14047,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.messages, 'lastMessage'),
             alias(this.users, 'lastMessageSender'),
             alias(this.snapshots, 'snapshot'),
-            alias(this.users, 'participant')),
+            alias(this.users, 'participant'),
+            alias(this.expiredMessages, 'em')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedorder.amountOfVariables;
@@ -13728,12 +14059,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.messages, 'lastMessage'),
             alias(this.users, 'lastMessageSender'),
             alias(this.snapshots, 'snapshot'),
-            alias(this.users, 'participant')),
+            alias(this.users, 'participant'),
+            alias(this.expiredMessages, 'em')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, (SELECT COUNT(1) FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.expire_in AS expireIn, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, em.expire_in AS messageExpireIn, (SELECT COUNT(1) FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id LEFT JOIN expired_messages AS em ON lastMessage.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
@@ -13744,6 +14076,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           users,
           messages,
           snapshots,
+          expiredMessages,
           messageMentions,
           ...generatedwhere.watchedTables,
           ...generatedorder.watchedTables,
@@ -13763,6 +14096,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        expireIn: row.read<int?>('expireIn'),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
         ownerVerified: row.read<bool?>('ownerVerified'),
@@ -13778,14 +14112,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             .mapToDart(row.read<int?>('lastMessageCreatedAt')),
         mediaUrl: row.read<String?>('mediaUrl'),
         senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        actionName: row.read<String?>('actionName'),
         messageStatus:
             Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
         senderFullName: row.read<String?>('senderFullName'),
         snapshotType: row.read<String?>('SnapshotType'),
         participantFullName: row.read<String?>('participantFullName'),
         participantUserId: row.read<String?>('participantUserId'),
+        messageExpireIn: row.read<int?>('messageExpireIn'),
         mentionCount: row.read<int>('mentionCount'),
         relationship:
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
@@ -13802,7 +14136,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Messages lastMessage,
               Users lastMessageSender,
               Snapshots snapshot,
-              Users participant)
+              Users participant,
+              ExpiredMessages em)
           order,
       Limit Function(
               Conversations conversation,
@@ -13811,7 +14146,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Messages lastMessage,
               Users lastMessageSender,
               Snapshots snapshot,
-              Users participant)
+              Users participant,
+              ExpiredMessages em)
           limit) {
     var $arrayStartIndex = 2;
     final generatedorder = $write(
@@ -13822,7 +14158,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.messages, 'lastMessage'),
             alias(this.users, 'lastMessageSender'),
             alias(this.snapshots, 'snapshot'),
-            alias(this.users, 'participant')),
+            alias(this.users, 'participant'),
+            alias(this.expiredMessages, 'em')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedorder.amountOfVariables;
@@ -13834,12 +14171,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.messages, 'lastMessage'),
             alias(this.users, 'lastMessageSender'),
             alias(this.snapshots, 'snapshot'),
-            alias(this.users, 'participant')),
+            alias(this.users, 'participant'),
+            alias(this.expiredMessages, 'em')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, (SELECT COUNT(1) FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id WHERE circleConversation.circle_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.expire_in AS expireIn, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, em.expire_in AS messageExpireIn, (SELECT COUNT(1) FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id LEFT JOIN expired_messages AS em ON lastMessage.message_id = em.message_id WHERE circleConversation.circle_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           Variable<String?>(circleId),
           ...generatedorder.introducedVariables,
@@ -13850,6 +14188,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           users,
           messages,
           snapshots,
+          expiredMessages,
           messageMentions,
           circleConversations,
           ...generatedorder.watchedTables,
@@ -13869,6 +14208,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        expireIn: row.read<int?>('expireIn'),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
         ownerVerified: row.read<bool?>('ownerVerified'),
@@ -13884,14 +14224,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             .mapToDart(row.read<int?>('lastMessageCreatedAt')),
         mediaUrl: row.read<String?>('mediaUrl'),
         senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        actionName: row.read<String?>('actionName'),
         messageStatus:
             Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
         senderFullName: row.read<String?>('senderFullName'),
         snapshotType: row.read<String?>('SnapshotType'),
         participantFullName: row.read<String?>('participantFullName'),
         participantUserId: row.read<String?>('participantUserId'),
+        messageExpireIn: row.read<int?>('messageExpireIn'),
         mentionCount: row.read<int>('mentionCount'),
         relationship:
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
@@ -14066,6 +14406,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         indexMessageMentionsConversationIdHasRead,
         messages,
         indexMessagesConversationIdCreatedAt,
+        indexMessagesConversationIdCategoryCreatedAt,
         participants,
         indexParticipantsConversationIdCreatedAt,
         stickerAlbums,
@@ -14073,6 +14414,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         pinMessages,
         indexPinMessagesConversationId,
         indexMessageConversationIdStatusUserId,
+        users,
+        indexUsersIdentityNumber,
         conversationLastMessageDelete,
         addresses,
         apps,
@@ -14089,10 +14432,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         snapshots,
         stickerRelationships,
         stickers,
-        users,
         transcriptMessages,
         fiats,
-        favoriteApps
+        favoriteApps,
+        expiredMessages
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -14142,7 +14485,7 @@ class MessageItem {
   final String? mediaDuration;
   final String? quoteId;
   final String? quoteContent;
-  final MessageAction? actionName;
+  final String? actionName;
   final String? sharedUserId;
   final String userId;
   final String? userFullName;
@@ -14177,6 +14520,7 @@ class MessageItem {
   final String? siteDescription;
   final String? siteImage;
   final bool? mentionRead;
+  final int? expireIn;
   final bool pinned;
   MessageItem({
     required this.messageId,
@@ -14233,6 +14577,7 @@ class MessageItem {
     this.siteDescription,
     this.siteImage,
     this.mentionRead,
+    this.expireIn,
     required this.pinned,
   });
   @override
@@ -14291,6 +14636,7 @@ class MessageItem {
         siteDescription,
         siteImage,
         mentionRead,
+        expireIn,
         pinned
       ]);
   @override
@@ -14351,6 +14697,7 @@ class MessageItem {
           other.siteDescription == this.siteDescription &&
           other.siteImage == this.siteImage &&
           other.mentionRead == this.mentionRead &&
+          other.expireIn == this.expireIn &&
           other.pinned == this.pinned);
   @override
   String toString() {
@@ -14409,6 +14756,7 @@ class MessageItem {
           ..write('siteDescription: $siteDescription, ')
           ..write('siteImage: $siteImage, ')
           ..write('mentionRead: $mentionRead, ')
+          ..write('expireIn: $expireIn, ')
           ..write('pinned: $pinned')
           ..write(')'))
         .toString();
@@ -14699,10 +15047,10 @@ class QuoteMessageItem {
   final String? mediaDuration;
   final String? quoteId;
   final String? quoteContent;
+  final String? stickerId;
   final String? assetUrl;
   final int? assetWidth;
   final int? assetHeight;
-  final String? stickerId;
   final String? assetName;
   final String? assetType;
   final String? sharedUserId;
@@ -14735,10 +15083,10 @@ class QuoteMessageItem {
     this.mediaDuration,
     this.quoteId,
     this.quoteContent,
+    this.stickerId,
     this.assetUrl,
     this.assetWidth,
     this.assetHeight,
-    this.stickerId,
     this.assetName,
     this.assetType,
     this.sharedUserId,
@@ -14773,10 +15121,10 @@ class QuoteMessageItem {
         mediaDuration,
         quoteId,
         quoteContent,
+        stickerId,
         assetUrl,
         assetWidth,
         assetHeight,
-        stickerId,
         assetName,
         assetType,
         sharedUserId,
@@ -14813,10 +15161,10 @@ class QuoteMessageItem {
           other.mediaDuration == this.mediaDuration &&
           other.quoteId == this.quoteId &&
           other.quoteContent == this.quoteContent &&
+          other.stickerId == this.stickerId &&
           other.assetUrl == this.assetUrl &&
           other.assetWidth == this.assetWidth &&
           other.assetHeight == this.assetHeight &&
-          other.stickerId == this.stickerId &&
           other.assetName == this.assetName &&
           other.assetType == this.assetType &&
           other.sharedUserId == this.sharedUserId &&
@@ -14851,10 +15199,10 @@ class QuoteMessageItem {
           ..write('mediaDuration: $mediaDuration, ')
           ..write('quoteId: $quoteId, ')
           ..write('quoteContent: $quoteContent, ')
+          ..write('stickerId: $stickerId, ')
           ..write('assetUrl: $assetUrl, ')
           ..write('assetWidth: $assetWidth, ')
           ..write('assetHeight: $assetHeight, ')
-          ..write('stickerId: $stickerId, ')
           ..write('assetName: $assetName, ')
           ..write('assetType: $assetType, ')
           ..write('sharedUserId: $sharedUserId, ')
@@ -14887,7 +15235,7 @@ class SendingMessage {
   final MediaStatus? mediaStatus;
   final MessageStatus status;
   final DateTime createdAt;
-  final MessageAction? action;
+  final String? action;
   final String? participantId;
   final String? snapshotId;
   final String? hyperlink;
@@ -15159,7 +15507,7 @@ class NotificationMessage {
   final String? ownerFullName;
   final DateTime createdAt;
   final ConversationCategory? category;
-  final MessageAction? actionName;
+  final String? actionName;
   final UserRelationship? relationship;
   final String? participantFullName;
   final String? participantUserId;
@@ -15267,6 +15615,7 @@ class ConversationItem {
   final String? ownerId;
   final DateTime? pinTime;
   final DateTime? muteUntil;
+  final int? expireIn;
   final String? avatarUrl;
   final String? name;
   final bool? ownerVerified;
@@ -15279,12 +15628,13 @@ class ConversationItem {
   final DateTime? lastMessageCreatedAt;
   final String? mediaUrl;
   final String? senderId;
-  final MessageAction? actionName;
+  final String? actionName;
   final MessageStatus? messageStatus;
   final String? senderFullName;
   final String? snapshotType;
   final String? participantFullName;
   final String? participantUserId;
+  final int? messageExpireIn;
   final int mentionCount;
   final UserRelationship? relationship;
   ConversationItem({
@@ -15299,6 +15649,7 @@ class ConversationItem {
     this.ownerId,
     this.pinTime,
     this.muteUntil,
+    this.expireIn,
     this.avatarUrl,
     this.name,
     this.ownerVerified,
@@ -15317,6 +15668,7 @@ class ConversationItem {
     this.snapshotType,
     this.participantFullName,
     this.participantUserId,
+    this.messageExpireIn,
     required this.mentionCount,
     this.relationship,
   });
@@ -15333,6 +15685,7 @@ class ConversationItem {
         ownerId,
         pinTime,
         muteUntil,
+        expireIn,
         avatarUrl,
         name,
         ownerVerified,
@@ -15351,6 +15704,7 @@ class ConversationItem {
         snapshotType,
         participantFullName,
         participantUserId,
+        messageExpireIn,
         mentionCount,
         relationship
       ]);
@@ -15369,6 +15723,7 @@ class ConversationItem {
           other.ownerId == this.ownerId &&
           other.pinTime == this.pinTime &&
           other.muteUntil == this.muteUntil &&
+          other.expireIn == this.expireIn &&
           other.avatarUrl == this.avatarUrl &&
           other.name == this.name &&
           other.ownerVerified == this.ownerVerified &&
@@ -15387,6 +15742,7 @@ class ConversationItem {
           other.snapshotType == this.snapshotType &&
           other.participantFullName == this.participantFullName &&
           other.participantUserId == this.participantUserId &&
+          other.messageExpireIn == this.messageExpireIn &&
           other.mentionCount == this.mentionCount &&
           other.relationship == this.relationship);
   @override
@@ -15403,6 +15759,7 @@ class ConversationItem {
           ..write('ownerId: $ownerId, ')
           ..write('pinTime: $pinTime, ')
           ..write('muteUntil: $muteUntil, ')
+          ..write('expireIn: $expireIn, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('name: $name, ')
           ..write('ownerVerified: $ownerVerified, ')
@@ -15421,6 +15778,7 @@ class ConversationItem {
           ..write('snapshotType: $snapshotType, ')
           ..write('participantFullName: $participantFullName, ')
           ..write('participantUserId: $participantUserId, ')
+          ..write('messageExpireIn: $messageExpireIn, ')
           ..write('mentionCount: $mentionCount, ')
           ..write('relationship: $relationship')
           ..write(')'))

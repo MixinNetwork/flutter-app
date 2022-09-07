@@ -51,11 +51,10 @@ Future<void> showConversationDialog(BuildContext context,
 
 class _ConversationDialog extends StatelessWidget {
   const _ConversationDialog({
-    Key? key,
     required this.conversationResponse,
     required this.users,
     required this.code,
-  }) : super(key: key);
+  });
 
   final ConversationResponse conversationResponse;
   final List<User> users;
@@ -92,11 +91,10 @@ class _ConversationDialog extends StatelessWidget {
 
 class _ConversationInfo extends HookWidget {
   const _ConversationInfo({
-    Key? key,
     required this.conversationResponse,
     required this.users,
     required this.code,
-  }) : super(key: key);
+  });
 
   final ConversationResponse conversationResponse;
   final List<User> users;
@@ -124,8 +122,8 @@ class _ConversationInfo extends HookWidget {
           ),
           const SizedBox(height: 4),
           SelectableText(
-            context.l10n.conversationParticipantsCountDescription(
-                conversationResponse.participants.length),
+            context.l10n
+                .participantsCount(conversationResponse.participants.length),
             style: TextStyle(
               color: context.theme.secondaryText,
               fontSize: 12,
@@ -142,7 +140,7 @@ class _ConversationInfo extends HookWidget {
                 Navigator.pop(context);
               }(),
             ),
-            title: Text(context.l10n.joinGroup),
+            title: Text(context.l10n.joinGroupWithPlus),
           ),
           const SizedBox(height: 56),
         ],

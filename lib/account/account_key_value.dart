@@ -1,3 +1,4 @@
+import '../utils/extension/extension.dart';
 import '../utils/hive_key_values.dart';
 
 class AccountKeyValue extends HiveKeyValue {
@@ -12,8 +13,7 @@ class AccountKeyValue extends HiveKeyValue {
   static const _refreshStickerLastTime = 'refreshStickerLastTime';
   static const _primarySessionId = 'primarySessionId';
   static const _hasNewAlbum = 'hasNewAlbum';
-  static const _checkUpdateLastTime = 'checkUpdateLastTime';
-  static const _ignoredVersion = '_ignoredVersion';
+  static const _keyRecentUsedEmoji = 'recentUsedEmoji';
 
   bool get hasSyncCircle =>
       box.get(_hasSyncCircle, defaultValue: false) as bool;
@@ -35,13 +35,28 @@ class AccountKeyValue extends HiveKeyValue {
 
   set hasNewAlbum(bool value) => box.put(_hasNewAlbum, value);
 
-  int get checkUpdateLastTime =>
-      box.get(_checkUpdateLastTime, defaultValue: 0) as int;
+  List<String>? _recentUsedEmoji;
 
-  set checkUpdateLastTime(int value) => box.put(_checkUpdateLastTime, value);
+  List<String> get recentUsedEmoji => _recentUsedEmoji ??=
+      (box.get(_keyRecentUsedEmoji, defaultValue: []) as List).cast<String>();
 
-  String? get ignoredVersion =>
-      box.get(_ignoredVersion, defaultValue: '0.0.0') as String?;
+  void onEmojiUsed(String emoji) {
+    if (recentUsedEmoji.firstOrNull == emoji) {
+      return;
+    }
+    recentUsedEmoji
+      ..remove(emoji)
+      ..insert(0, emoji);
 
-  set ignoredVersion(String? value) => box.put(_ignoredVersion, value);
+    while (recentUsedEmoji.length > 35) {
+      recentUsedEmoji.removeLast();
+    }
+    box.put(_keyRecentUsedEmoji, recentUsedEmoji);
+  }
+
+  @override
+  Future delete() {
+    _recentUsedEmoji = null;
+    return super.delete();
+  }
 }

@@ -10,23 +10,36 @@ import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../cache_image.dart';
+import '../automatic_keep_alive_client_widget.dart';
+import '../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../hover_overlay.dart';
 import '../interactive_decorated_box.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
 import 'bloc/cubit/sticker_cubit.dart';
+import 'emoji_page.dart';
+import 'giphy_page.dart';
 import 'sticker_item.dart';
 import 'sticker_store.dart';
+
+enum PresetStickerGroup {
+  store,
+  emoji,
+  recent,
+  favorite,
+  gif;
+}
 
 class StickerPage extends StatelessWidget {
   const StickerPage({
     required this.tabLength,
-    Key? key,
-    this.tabController,
-  }) : super(key: key);
+    super.key,
+    required this.tabController,
+    required this.presetStickerGroups,
+  });
 
-  final TabController? tabController;
+  final TabController tabController;
   final int tabLength;
+  final List<PresetStickerGroup> presetStickerGroups;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -37,24 +50,60 @@ class StickerPage extends StatelessWidget {
           width: 464,
           height: 407,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             color: context.dynamicColor(
               const Color.fromRGBO(255, 255, 255, 1),
               darkColor: const Color.fromRGBO(62, 65, 72, 1),
             ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
             child: Column(
               children: [
                 Expanded(
                   child: TabBarView(
                     controller: tabController,
+                    physics: const NeverScrollableScrollPhysics(),
                     children: List.generate(
                       tabLength,
                       (index) {
-                        if (index == 0) return _StickerStoreEmptyPage();
-                        return _StickerAlbumPage(index: index);
+                        if (index < presetStickerGroups.length) {
+                          final preset = presetStickerGroups[index];
+                          switch (preset) {
+                            case PresetStickerGroup.store:
+                              return _StickerStoreEmptyPage();
+                            case PresetStickerGroup.emoji:
+                              return const AutomaticKeepAliveClientWidget(
+                                child: EmojiPage(),
+                              );
+                            case PresetStickerGroup.recent:
+                              return _StickerAlbumPage(
+                                getStickers: () => context.database.stickerDao
+                                    .recentUsedStickers()
+                                    .watchThrottle(kVerySlowThrottleDuration),
+                                updateUsedAt: false,
+                              );
+                            case PresetStickerGroup.favorite:
+                              return _StickerAlbumPage(
+                                getStickers: () => context.database.stickerDao
+                                    .personalStickers()
+                                    .watchThrottle(kVerySlowThrottleDuration),
+                                rightClickDelete: true,
+                              );
+                            case PresetStickerGroup.gif:
+                              return const AutomaticKeepAliveClientWidget(
+                                child: GiphyPage(),
+                              );
+                          }
+                        }
+                        return _StickerAlbumPage(
+                          getStickers: () => context.database.stickerDao
+                              .stickerByAlbumId(
+                                  BlocProvider.of<StickerAlbumsCubit>(context)
+                                      .state[index - presetStickerGroups.length]
+                                      .albumId)
+                              .watchThrottle(kVerySlowThrottleDuration),
+                        );
                       },
                     ),
                   ),
@@ -62,6 +111,7 @@ class StickerPage extends StatelessWidget {
                 _StickerAlbumBar(
                   tabLength: tabLength,
                   tabController: tabController,
+                  presetStickerGroups: presetStickerGroups,
                 ),
               ],
             ),
@@ -72,53 +122,29 @@ class StickerPage extends StatelessWidget {
 
 class _StickerAlbumPage extends HookWidget {
   const _StickerAlbumPage({
-    Key? key,
-    required this.index,
-  }) : super(key: key);
+    required this.getStickers,
+    this.updateUsedAt = true,
+    this.rightClickDelete = false,
+  });
 
-  final int index;
+  final Stream<List<Sticker>> Function() getStickers;
+
+  final bool updateUsedAt;
+  final bool rightClickDelete;
 
   @override
   Widget build(BuildContext context) {
-    final stickerDao = context.database.stickerDao;
-    if (index == 2) {
-      // todo can add or delete
-    }
-    final updateUsedAt = index != 1;
-    final rightClickDelete = index == 2;
-    final stickerCubit = useBloc(() {
-      Stream<List<Sticker>> stream;
-      switch (index) {
-        case 0:
-          stream = Stream.value([]);
-          break;
-        case 1:
-          stream = stickerDao
-              .recentUsedStickers()
-              .watchThrottle(kVerySlowThrottleDuration);
-          break;
-        case 2:
-          stream = stickerDao
-              .personalStickers()
-              .watchThrottle(kVerySlowThrottleDuration);
-          break;
-        default:
-          stream = stickerDao
-              .stickerByAlbumId(BlocProvider.of<StickerAlbumsCubit>(context)
-                  .state[index - 3]
-                  .albumId)
-              .watchThrottle(kVerySlowThrottleDuration);
-      }
-      return StickerCubit(stream);
-    }, keys: [index]);
+    final stickerCubit = useBloc(() => StickerCubit(getStickers()));
 
     final itemCount = useBlocStateConverter<StickerCubit, List<Sticker>, int>(
       bloc: stickerCubit,
       converter: (state) => state.length,
     );
+    final controller = useMemoized(ScrollerScrollController.new);
     return BlocProvider.value(
       value: stickerCubit,
       child: GridView.builder(
+        controller: controller,
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
@@ -140,7 +166,7 @@ class _StickerStoreEmptyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
         child: Text(
-          context.l10n.stickerShop,
+          context.l10n.stickerStore,
           style: TextStyle(
             color: context.theme.secondaryText,
             fontSize: 18,
@@ -151,11 +177,10 @@ class _StickerStoreEmptyPage extends StatelessWidget {
 
 class _StickerAlbumPageItem extends HookWidget {
   const _StickerAlbumPageItem({
-    Key? key,
     required this.index,
     required this.updateUsedAt,
     this.rightClickDelete = false,
-  }) : super(key: key);
+  });
 
   final int index;
   final bool updateUsedAt;
@@ -195,11 +220,21 @@ class _StickerAlbumPageItem extends HookWidget {
         if (!rightClickDelete) return;
         // todo use native context menu.
       },
-      child: RepaintBoundary(
-        child: Builder(
-          builder: (context) => StickerItem(
-            assetUrl: sticker.assetUrl,
-            assetType: sticker.assetType,
+      hoveringDecoration: BoxDecoration(
+        color: context.dynamicColor(
+          const Color.fromRGBO(229, 231, 235, 1),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: RepaintBoundary(
+          child: Builder(
+            builder: (context) => StickerItem(
+              assetUrl: sticker.assetUrl,
+              assetType: sticker.assetType,
+            ),
           ),
         ),
       ),
@@ -209,37 +244,36 @@ class _StickerAlbumPageItem extends HookWidget {
 
 class _StickerAlbumBar extends HookWidget {
   const _StickerAlbumBar({
-    Key? key,
     required this.tabLength,
-    this.tabController,
-  }) : super(key: key);
+    required this.tabController,
+    required this.presetStickerGroups,
+  });
 
   final int tabLength;
-  final TabController? tabController;
+  final TabController tabController;
+  final List<PresetStickerGroup> presetStickerGroups;
 
   @override
   Widget build(BuildContext context) {
-    final validIndexRef = useRef<int?>(tabController?.index);
+    final validIndexRef = useRef<int?>(tabController.index);
 
     final setPreviousIndex = useCallback(() {
-      if (tabController == null) return;
-      final previousIndex = tabController!.previousIndex;
+      final previousIndex = tabController.previousIndex;
       if (previousIndex != 0) {
         validIndexRef.value = previousIndex;
       }
 
       if (validIndexRef.value != 0) {
         // Sometimes tabController.index is validIndex, but TabBar.currentIndex is 0, they are not synchronized, so we need reset tabController.index to 0, then set to validIndex.
-        tabController!.index = 0;
-        tabController!.index = validIndexRef.value!;
+        tabController
+          ..index = 0
+          ..index = validIndexRef.value!;
       }
     }, []);
 
     useEffect(() {
-      if (tabController == null) return () {};
       Future<void> listener() async {
-        if (tabController == null) return;
-        if (tabController!.index != 0) return;
+        if (tabController.index != 0) return;
 
         HoverOverlay.forceHidden(context);
         AccountKeyValue.instance.hasNewAlbum = false;
@@ -250,9 +284,9 @@ class _StickerAlbumBar extends HookWidget {
         setPreviousIndex();
       }
 
-      tabController!.addListener(listener);
+      tabController.addListener(listener);
       return () {
-        tabController!.removeListener(listener);
+        tabController.removeListener(listener);
       };
     }, [tabController]);
     return Container(
@@ -270,13 +304,16 @@ class _StickerAlbumBar extends HookWidget {
             const Color.fromRGBO(229, 231, 235, 1),
             darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
         ),
         labelPadding: EdgeInsets.zero,
         indicatorPadding: const EdgeInsets.all(5),
         tabs: List.generate(
           tabLength,
-          (index) => _StickerAlbumBarItem(index: index),
+          (index) => _StickerAlbumBarItem(
+            index: index,
+            presetStickerGroups: presetStickerGroups,
+          ),
         ),
       ),
     );
@@ -285,48 +322,92 @@ class _StickerAlbumBar extends HookWidget {
 
 class _StickerAlbumBarItem extends StatelessWidget {
   const _StickerAlbumBarItem({
-    Key? key,
     required this.index,
-  }) : super(key: key);
+    required this.presetStickerGroups,
+  });
 
   final int index;
+  final List<PresetStickerGroup> presetStickerGroups;
 
   @override
   Widget build(BuildContext context) => SizedBox.fromSize(
         size: const Size.square(50),
-        child: Center(
-          child: Center(
-            child: Builder(
-              builder: (context) {
-                if (index < 3) {
-                  return SvgPicture.asset(
-                    {
-                      0: AccountKeyValue.instance.hasNewAlbum
-                          ? Resources.assetsImagesStickerStoreRedDotSvg
-                          : Resources.assetsImagesStickerStoreSvg,
-                      1: Resources.assetsImagesRecentStickerSvg,
-                      2: Resources.assetsImagesPersonalStickerSvg,
-                      // todo
-                      // 2: Resources.assetsImagesGifStickerSvg
-                    }[index]!,
-                    color: index != 0 ? context.theme.secondaryText : null,
-                    width: 24,
-                    height: 24,
-                  );
-                }
+        child: Padding(
+          padding: const EdgeInsets.all(5),
+          child: _StickerGroupIconHoverContainer(
+            child: Center(
+              child: Center(
+                child: Builder(
+                  builder: (context) {
+                    final presetStickerAlbum = {
+                      PresetStickerGroup.store:
+                          AccountKeyValue.instance.hasNewAlbum
+                              ? Resources.assetsImagesStickerStoreRedDotSvg
+                              : Resources.assetsImagesStickerStoreSvg,
+                      PresetStickerGroup.emoji:
+                          Resources.assetsImagesEmojiStickerSvg,
+                      PresetStickerGroup.recent:
+                          Resources.assetsImagesRecentStickerSvg,
+                      PresetStickerGroup.favorite:
+                          Resources.assetsImagesPersonalStickerSvg,
+                      PresetStickerGroup.gif:
+                          Resources.assetsImagesGifStickerSvg,
+                    };
 
-                return BlocConverter<StickerAlbumsCubit, List<StickerAlbum>,
-                    String>(
-                  converter: (state) => state[index - 3].iconUrl,
-                  builder: (context, iconUrl) => CacheImage(
-                    iconUrl,
-                    width: 28,
-                    height: 28,
-                  ),
-                );
-              },
+                    if (index < presetStickerGroups.length) {
+                      return SvgPicture.asset(
+                        presetStickerAlbum[presetStickerGroups[index]]!,
+                        color: index != 0 ? context.theme.secondaryText : null,
+                        width: 24,
+                        height: 24,
+                      );
+                    }
+
+                    return BlocConverter<StickerAlbumsCubit, List<StickerAlbum>,
+                        String>(
+                      converter: (state) =>
+                          state[index - presetStickerGroups.length].iconUrl,
+                      builder: (context, iconUrl) => StickerGroupIcon(
+                        iconUrl: iconUrl,
+                        size: 28,
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ),
       );
+}
+
+class _StickerGroupIconHoverContainer extends HookWidget {
+  const _StickerGroupIconHoverContainer({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final isHovering = useState(false);
+    return MouseRegion(
+      onEnter: (event) {
+        isHovering.value = true;
+      },
+      onExit: (event) {
+        isHovering.value = false;
+      },
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: isHovering.value
+              ? context.dynamicColor(
+                  const Color.fromRGBO(229, 231, 235, 1),
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+                )
+              : null,
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+        ),
+        child: child,
+      ),
+    );
+  }
 }

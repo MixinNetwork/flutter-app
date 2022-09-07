@@ -15,11 +15,11 @@ class SelectItem extends HookWidget {
     required this.onTap,
     this.selected = false,
     this.showTooltip = true,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Widget icon;
-  final String title;
+  final Widget title;
   final bool selected;
   final int count;
   final int mutedCount;
@@ -31,14 +31,14 @@ class SelectItem extends HookWidget {
     final showed = useState(false);
     final showedTooltip = useState(false);
 
-    final boxDecoration = BoxDecoration(
-      borderRadius: BorderRadius.circular(8),
+    const boxDecoration = BoxDecoration(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
     );
     return InteractiveDecoratedBox.color(
       onEnter: (_) => showed.value = true,
       onExit: (_) => showed.value = false,
       onTap: onTap,
-      decoration: selected == true
+      decoration: selected
           ? boxDecoration.copyWith(color: context.theme.sidebarSelected)
           : boxDecoration,
       hoveringColor: context.theme.sidebarSelected
@@ -46,13 +46,13 @@ class SelectItem extends HookWidget {
       child: LayoutBuilder(builder: (context, boxConstraints) {
         final hideTitle = boxConstraints.maxWidth < 75;
         final hideUnreadText = boxConstraints.maxWidth < 100;
-        final titleWidget = Text(
-          title,
+        final titleWidget = DefaultTextStyle.merge(
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: context.theme.text,
             fontSize: 14,
           ),
+          child: title,
         );
         final dynamicColor = context.dynamicColor(
           const Color.fromRGBO(51, 51, 51, 0.16),
@@ -63,14 +63,16 @@ class SelectItem extends HookWidget {
           backgroundColor: dynamicColor,
           textColor: context.theme.text,
         );
-        return PortalEntry(
+        return PortalTarget(
           visible: hideTitle &&
               hideUnreadText &&
               showTooltip &&
               (showed.value || showedTooltip.value),
-          childAnchor: Alignment.centerRight,
-          portalAnchor: Alignment.centerLeft,
-          portal: InteractiveDecoratedBox.color(
+          anchor: const Aligned(
+            follower: Alignment.centerLeft,
+            target: Alignment.centerRight,
+          ),
+          portalFollower: InteractiveDecoratedBox.color(
             onEnter: (_) => showedTooltip.value = true,
             onExit: (_) => showedTooltip.value = false,
             onTap: onTap,

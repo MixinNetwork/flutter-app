@@ -19,9 +19,7 @@ import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
 class FileMessage extends HookWidget {
-  const FileMessage({
-    Key? key,
-  }) : super(key: key);
+  const FileMessage({super.key});
 
   @override
   Widget build(BuildContext context) => const MessageBubble(
@@ -31,9 +29,7 @@ class FileMessage extends HookWidget {
 }
 
 class MessageFile extends HookWidget {
-  const MessageFile({
-    Key? key,
-  }) : super(key: key);
+  const MessageFile({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +76,7 @@ class MessageFile extends HookWidget {
             if (openResult.type != ResultType.done) {
               i('open file result: $mediaName ${openResult.type} ${openResult.message}');
               await showToastFailed(context,
-                  ToastError(context.l10n.failedToOpenFile(mediaName)));
+                  ToastError(context.l10n.unableToOpenFile(mediaName)));
             }
           } else {
             await saveAs(
@@ -97,12 +93,10 @@ class MessageFile extends HookWidget {
           Builder(builder: (context) {
             switch (mediaStatus) {
               case MediaStatus.canceled:
-                if (relationship == UserRelationship.me &&
-                    mediaUrl?.isNotEmpty == true) {
-                  return const StatusUpload();
-                } else {
-                  return const StatusDownload();
-                }
+                return relationship == UserRelationship.me &&
+                        mediaUrl?.isNotEmpty == true
+                    ? const StatusUpload()
+                    : const StatusDownload();
               case MediaStatus.pending:
                 return const StatusPending();
               case MediaStatus.expired:

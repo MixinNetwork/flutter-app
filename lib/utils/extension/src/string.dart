@@ -2,6 +2,7 @@ part of '../extension.dart';
 
 extension StringExtension on String {
   String get overflow => Characters(this)
+      // ignore: avoid-non-ascii-symbols
       .replaceAll(Characters(''), Characters('\u{200B}'))
       .toString();
 
@@ -77,26 +78,19 @@ extension NullableStringExtension on String? {
   }
 }
 
-String minOf(String a, String b) {
-  if (a.compareTo(b) < 0) {
-    return a;
-  } else {
-    return b;
-  }
-}
+String minOf(String a, String b) => a.compareTo(b) < 0 ? a : b;
 
-String maxOf(String a, String b) {
-  if (a.compareTo(b) > 0) {
-    return a;
-  } else {
-    return b;
-  }
-}
+String maxOf(String a, String b) => a.compareTo(b) > 0 ? a : b;
 
 extension SqlStringExt on String {
   String escapeSql() => RegExp.escape(this);
 
-  String escapeFts5() => '"${escapeSql().joinStar().replaceQuotationMark()}"';
+  String escapeFts5() => replaceQuotationMark()._escapeFts5Symbols();
+
+  String _escapeFts5Symbols() {
+    final result = joinWhiteSpace().split(' ');
+    return '${result.map((e) => '"$e"').join('*')}*';
+  }
 
   String joinStar() => joinWithCharacter('*');
 

@@ -17,9 +17,7 @@ import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
 class AudioMessage extends HookWidget {
-  const AudioMessage({
-    Key? key,
-  }) : super(key: key);
+  const AudioMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -89,12 +87,10 @@ class AudioMessage extends HookWidget {
               builder: (BuildContext context) {
                 switch (mediaStatus) {
                   case MediaStatus.canceled:
-                    if (relationship == UserRelationship.me &&
-                        mediaUrl?.isNotEmpty == true) {
-                      return const StatusUpload();
-                    } else {
-                      return const StatusDownload();
-                    }
+                    return relationship == UserRelationship.me &&
+                            mediaUrl?.isNotEmpty == true
+                        ? const StatusUpload()
+                        : const StatusDownload();
                   case MediaStatus.pending:
                     return const StatusPending();
                   case MediaStatus.expired:
@@ -137,9 +133,8 @@ class AudioMessage extends HookWidget {
 
 class _AnimatedWave extends HookWidget {
   const _AnimatedWave({
-    Key? key,
     required this.duration,
-  }) : super(key: key);
+  });
 
   final Duration duration;
 
@@ -161,6 +156,9 @@ class _AnimatedWave extends HookWidget {
       messageId,
       isMediaList: isTranscriptPage,
     );
+
+    final isMe = useMessageConverter(
+        converter: (state) => state.relationship == UserRelationship.me);
 
     double getPlayingFriction() {
       final friction =
@@ -199,10 +197,12 @@ class _AnimatedWave extends HookWidget {
       child: WaveformWidget(
         value: position.value,
         waveform: waveform,
-        backgroundColor:
-            read ? context.theme.waveformBackground : context.theme.accent,
-        foregroundColor:
-            read ? context.theme.waveformForeground : context.theme.accent,
+        backgroundColor: isMe || read
+            ? context.theme.waveformBackground
+            : context.theme.accent,
+        foregroundColor: isMe || read
+            ? context.theme.waveformForeground
+            : context.theme.accent,
       ),
     );
   }

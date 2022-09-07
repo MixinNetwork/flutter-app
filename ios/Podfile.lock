@@ -1,14 +1,14 @@
 PODS:
   - device_info_plus (0.0.1):
     - Flutter
-  - DKImagePickerController/Core (4.3.2):
+  - DKImagePickerController/Core (4.3.4):
     - DKImagePickerController/ImageDataManager
     - DKImagePickerController/Resource
-  - DKImagePickerController/ImageDataManager (4.3.2)
-  - DKImagePickerController/PhotoGallery (4.3.2):
+  - DKImagePickerController/ImageDataManager (4.3.4)
+  - DKImagePickerController/PhotoGallery (4.3.4):
     - DKImagePickerController/Core
     - DKPhotoGallery
-  - DKImagePickerController/Resource (4.3.2)
+  - DKImagePickerController/Resource (4.3.4)
   - DKPhotoGallery (0.0.17):
     - DKPhotoGallery/Core (= 0.0.17)
     - DKPhotoGallery/Model (= 0.0.17)
@@ -35,6 +35,8 @@ PODS:
   - file_picker (0.0.1):
     - DKImagePickerController/PhotoGallery
     - Flutter
+  - file_selector_ios (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - flutter_app_icon_badge (0.0.1):
     - Flutter
@@ -60,23 +62,25 @@ PODS:
     - Flutter
   - path_provider_ios (0.0.1):
     - Flutter
-  - SDWebImage (5.12.3):
-    - SDWebImage/Core (= 5.12.3)
-  - SDWebImage/Core (5.12.3)
-  - sqlite3 (3.38.0):
-    - sqlite3/common (= 3.38.0)
-  - sqlite3/common (3.38.0)
-  - sqlite3/fts5 (3.38.0):
+  - protocol_handler (0.0.1):
+    - Flutter
+  - SDWebImage (5.13.2):
+    - SDWebImage/Core (= 5.13.2)
+  - SDWebImage/Core (5.13.2)
+  - sqlite3 (3.39.2):
+    - sqlite3/common (= 3.39.2)
+  - sqlite3/common (3.39.2)
+  - sqlite3/fts5 (3.39.2):
     - sqlite3/common
-  - sqlite3/json1 (3.38.0):
+  - sqlite3/json1 (3.39.2):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.38.0):
+  - sqlite3/perf-threadsafe (3.39.2):
     - sqlite3/common
-  - sqlite3/rtree (3.38.0):
+  - sqlite3/rtree (3.39.2):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
-    - sqlite3 (~> 3.38.0)
+    - sqlite3 (~> 3.39.2)
     - sqlite3/fts5
     - sqlite3/json1
     - sqlite3/perf-threadsafe
@@ -86,12 +90,15 @@ PODS:
     - Flutter
   - url_launcher_ios (0.0.1):
     - Flutter
+  - video_player_avfoundation (0.0.1):
+    - Flutter
   - webview_flutter_wkwebview (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
+  - file_selector_ios (from `.symlinks/plugins/file_selector_ios/ios`)
   - Flutter (from `Flutter`)
   - flutter_app_icon_badge (from `.symlinks/plugins/flutter_app_icon_badge/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
@@ -103,9 +110,11 @@ DEPENDENCIES:
   - open_file (from `.symlinks/plugins/open_file/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - protocol_handler (from `.symlinks/plugins/protocol_handler/ios`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
   - system_clock (from `.symlinks/plugins/system_clock/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/ios`)
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
 
 SPEC REPOS:
@@ -122,6 +131,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/device_info_plus/ios"
   file_picker:
     :path: ".symlinks/plugins/file_picker/ios"
+  file_selector_ios:
+    :path: ".symlinks/plugins/file_selector_ios/ios"
   Flutter:
     :path: Flutter
   flutter_app_icon_badge:
@@ -144,21 +155,26 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_ios:
     :path: ".symlinks/plugins/path_provider_ios/ios"
+  protocol_handler:
+    :path: ".symlinks/plugins/protocol_handler/ios"
   sqlite3_flutter_libs:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
   system_clock:
     :path: ".symlinks/plugins/system_clock/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
+  video_player_avfoundation:
+    :path: ".symlinks/plugins/video_player_avfoundation/ios"
   webview_flutter_wkwebview:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
 
 SPEC CHECKSUMS:
   device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
-  DKImagePickerController: b5eb7f7a388e4643264105d648d01f727110fc3d
+  DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
-  file_picker: 3e6c3790de664ccf9b882732d9db5eaf6b8d4eb1
-  Flutter: 405776dd0763d7e32a8f989d4e271ca1317d080c
+  file_picker: 817ab1d8cd2da9d2da412a417162deee3500fc95
+  file_selector_ios: 6e9b6d7300556c730f224905726f0a2d5d874e51
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_app_icon_badge: 844847adbd7a1c6f325d6b41b942428981b839cc
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542
@@ -170,12 +186,14 @@ SPEC CHECKSUMS:
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
-  SDWebImage: 53179a2dba77246efa8a9b85f5c5b21f8f43e38f
-  sqlite3: 2c78798a817aa040981e2b0cfb4eb94523c0f55f
-  sqlite3_flutter_libs: 14a93fdcff62c6a346356df0b8e1b3f35fbab8f2
+  protocol_handler: ae9efcf3b307f3fdffcd9d5252775b9f7d9f0d09
+  SDWebImage: 72f86271a6f3139cc7e4a89220946489d4b9a866
+  sqlite3: d115522c740c457b805c018b0296b5ba003da280
+  sqlite3_flutter_libs: 1641350489d5c2bcb9d0773ade9693624111b24c
   SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
   system_clock: 3efb51d18e565092e2a97bc605c6255f328bd13a
   url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
+  video_player_avfoundation: e489aac24ef5cf7af82702979ed16f2a5ef84cff
   webview_flutter_wkwebview: 005fbd90c888a42c5690919a1527ecc6649e1162
 
 PODFILE CHECKSUM: c7cf6cd0af5391000f485bb7f6561b845e054d60

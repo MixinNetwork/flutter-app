@@ -27,6 +27,7 @@ import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../bloc/conversation_cubit.dart';
+import '../bloc/quote_message_cubit.dart';
 import 'image_editor.dart';
 
 Future<void> showFilesPreviewDialog(
@@ -37,6 +38,7 @@ Future<void> showFilesPreviewDialog(
       initialFiles: await Future.wait(files.map(
         (e) async => _File(e, await e.length(), null),
       )),
+      quoteMessageCubit: context.read<QuoteMessageCubit>(),
     ),
   );
 }
@@ -74,11 +76,12 @@ enum _TabType { image, files, zip }
 
 class _FilesPreviewDialog extends HookWidget {
   const _FilesPreviewDialog({
-    Key? key,
     required this.initialFiles,
-  }) : super(key: key);
+    this.quoteMessageCubit,
+  });
 
   final List<_File> initialFiles;
+  final QuoteMessageCubit? quoteMessageCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -122,11 +125,7 @@ class _FilesPreviewDialog extends HookWidget {
     final showAsBigImage = useState(hasImage);
 
     useEffect(() {
-      if (hasImage && currentTab.value == _TabType.image) {
-        showAsBigImage.value = true;
-      } else {
-        showAsBigImage.value = false;
-      }
+      showAsBigImage.value = hasImage && currentTab.value == _TabType.image;
     }, [hasImage, currentTab.value]);
 
     return Material(
@@ -147,7 +146,7 @@ class _FilesPreviewDialog extends HookWidget {
                       children: [
                         _Tab(
                           assetName: Resources.assetsImagesFilePreviewImagesSvg,
-                          tooltip: context.l10n.sendQuick,
+                          tooltip: context.l10n.sendQuickly,
                           onTap: () => currentTab.value = _TabType.image,
                           selected: currentTab.value == _TabType.image,
                           show: hasImage,
@@ -220,8 +219,10 @@ class _FilesPreviewDialog extends HookWidget {
                       onPressed: () async {
                         if (currentTab.value != _TabType.zip) {
                           for (final file in files.value) {
-                            unawaited(_sendFile(context, file));
+                            unawaited(_sendFile(context, file,
+                                quoteMessageCubit?.state?.messageId));
                           }
+                          quoteMessageCubit?.emit(null);
                           Navigator.pop(context);
                         } else {
                           final zipFilePath =
@@ -232,14 +233,16 @@ class _FilesPreviewDialog extends HookWidget {
                           unawaited(_sendFile(
                             context,
                             await _File.createFromPath(zipFilePath),
+                            quoteMessageCubit?.state?.messageId,
                           ));
+                          quoteMessageCubit?.emit(null);
                           Navigator.pop(context);
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.only(
                             left: 32, top: 18, bottom: 18, right: 32),
-                        primary: context.theme.accent,
+                        backgroundColor: context.theme.accent,
                       ),
                       child: Text(context.l10n.send.toUpperCase()),
                     ),
@@ -262,18 +265,19 @@ class _FilesPreviewDialog extends HookWidget {
 
 Future<String> _archiveFiles(List<String> paths) async {
   assert(paths.length > 1, 'paths[0] should be temp file dir');
-  final outPath = path.join(
-      paths[0], 'mixin_archive_${DateTime.now().millisecondsSinceEpoch}.zip');
+  final outPath = path.join(paths.first,
+      'mixin_archive_${DateTime.now().millisecondsSinceEpoch}.zip');
   final encoder = ZipFileEncoder()..create(outPath);
   paths.removeAt(0);
   for (final filePath in paths) {
-    encoder.addFile(File(filePath), path.basename(filePath));
+    await encoder.addFile(File(filePath), path.basename(filePath));
   }
   encoder.close();
   return outPath;
 }
 
-Future<void> _sendFile(BuildContext context, _File file) async {
+Future<void> _sendFile(
+    BuildContext context, _File file, String? quoteMessageId) async {
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
   final xFile = file.file;
@@ -283,6 +287,7 @@ Future<void> _sendFile(BuildContext context, _File file) async {
       file: xFile,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
+      quoteMessageId: quoteMessageId,
     );
   } else if (xFile.isVideo) {
     return context.accountServer.sendVideoMessage(
@@ -290,6 +295,7 @@ Future<void> _sendFile(BuildContext context, _File file) async {
       conversationItem.encryptCategory,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
+      quoteMessageId: quoteMessageId,
     );
   }
   await context.accountServer.sendDataMessage(
@@ -297,18 +303,19 @@ Future<void> _sendFile(BuildContext context, _File file) async {
     conversationItem.encryptCategory,
     conversationId: conversationItem.conversationId,
     recipientId: conversationItem.userId,
+    quoteMessageId: quoteMessageId,
   );
 }
 
 class _AnimatedFileTile extends HookWidget {
   const _AnimatedFileTile({
-    Key? key,
+    super.key,
     required this.file,
     required this.animation,
     this.onDelete,
     required this.showBigImage,
     this.onImageEdited,
-  }) : super(key: key);
+  });
 
   final _File file;
   final Animation<double> animation;
@@ -359,13 +366,12 @@ class _AnimatedFileTile extends HookWidget {
 
 class _Tab extends StatelessWidget {
   const _Tab({
-    Key? key,
     required this.assetName,
     required this.tooltip,
     required this.onTap,
     this.selected = false,
     this.show = true,
-  }) : super(key: key);
+  });
 
   final String assetName;
 
@@ -406,7 +412,7 @@ class _Tab extends StatelessWidget {
 }
 
 class _PageZip extends StatelessWidget {
-  const _PageZip({Key? key}) : super(key: key);
+  const _PageZip();
 
   @override
   Widget build(BuildContext context) => Column(
@@ -451,12 +457,11 @@ class _PageZip extends StatelessWidget {
 
 class _AnimatedListBuilder extends HookWidget {
   const _AnimatedListBuilder({
-    Key? key,
     required this.files,
     required this.onFileAdded,
     required this.onFileDeleted,
     required this.builder,
-  }) : super(key: key);
+  });
 
   final List<_File> files;
   final Stream<int> onFileAdded;
@@ -495,11 +500,10 @@ class _AnimatedListBuilder extends HookWidget {
 
 class _TileBigImage extends HookWidget {
   const _TileBigImage({
-    Key? key,
     required this.file,
     required this.onDelete,
     required this.onEdited,
-  }) : super(key: key);
+  });
 
   final _File file;
 
@@ -519,7 +523,7 @@ class _TileBigImage extends HookWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: const BorderRadius.all(Radius.circular(6)),
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
@@ -557,19 +561,11 @@ class _TileBigImage extends HookWidget {
                         name: Resources.assetsImagesEditImageSvg,
                         padding: const EdgeInsets.all(10),
                         onTap: () async {
-                          ImageEditorSnapshot? snapshot;
-                          if (file.imageEditorSnapshot != null) {
-                            snapshot = await showImageEditor(
-                              context,
-                              path: file.imageEditorSnapshot!.rawImagePath,
-                              snapshot: file.imageEditorSnapshot,
-                            );
-                          } else {
-                            snapshot = await showImageEditor(
-                              context,
-                              path: file.path,
-                            );
-                          }
+                          final snapshot = file.imageEditorSnapshot != null
+                              ? await showImageEditor(context,
+                                  path: file.imageEditorSnapshot!.rawImagePath,
+                                  snapshot: file.imageEditorSnapshot)
+                              : await showImageEditor(context, path: file.path);
                           if (snapshot == null) {
                             return;
                           }
@@ -585,9 +581,9 @@ class _TileBigImage extends HookWidget {
                     ],
                   ),
                 ),
-                crossFadeState: !showDelete.value
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
+                crossFadeState: kPlatformIsMobile || showDelete.value
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
                 duration: const Duration(milliseconds: 150),
               )
             ],
@@ -599,7 +595,7 @@ class _TileBigImage extends HookWidget {
 }
 
 class _FileIcon extends StatelessWidget {
-  const _FileIcon({Key? key, required this.extension}) : super(key: key);
+  const _FileIcon({required this.extension});
 
   final String extension;
 
@@ -626,10 +622,9 @@ class _FileIcon extends StatelessWidget {
 
 class _TileNormalFile extends HookWidget {
   const _TileNormalFile({
-    Key? key,
     required this.file,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   final _File file;
 
@@ -699,10 +694,9 @@ class _TileNormalFile extends HookWidget {
 
 class _FileInputOverlay extends HookWidget {
   const _FileInputOverlay({
-    Key? key,
     required this.child,
     required this.onFileAdded,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -758,7 +752,7 @@ class _PasteFileOrImageIntent extends Intent {
 }
 
 class _ChatDragIndicator extends StatelessWidget {
-  const _ChatDragIndicator({Key? key}) : super(key: key);
+  const _ChatDragIndicator();
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -776,7 +770,7 @@ class _ChatDragIndicator extends StatelessWidget {
               )),
           child: Center(
             child: Text(
-              context.l10n.chatDragMoreFile,
+              context.l10n.addFile,
               style: TextStyle(
                 fontSize: 14,
                 color: context.theme.text,

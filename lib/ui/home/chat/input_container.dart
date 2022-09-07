@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
+import '../../../widgets/sticker_page/emoji_page.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
@@ -38,11 +40,10 @@ import '../bloc/recall_message_bloc.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'chat_page.dart';
 import 'files_preview.dart';
+import 'voice_recorder_bottom_bar.dart';
 
 class InputContainer extends HookWidget {
-  const InputContainer({
-    Key? key,
-  }) : super(key: key);
+  const InputContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -64,28 +65,41 @@ class InputContainer extends HookWidget {
       context.read<QuoteMessageCubit>().emit(null);
     }, [conversationId]);
 
-    return hasParticipant
-        ? const _InputContainer()
-        : Container(
-            decoration: BoxDecoration(
-              color: context.theme.primary,
-            ),
-            height: 56,
-            alignment: Alignment.center,
-            child: Text(
-              context.l10n.groupCantSendDes,
-              style: TextStyle(
-                color: context.theme.secondaryText,
-              ),
-            ),
-          );
+    final voiceRecorderCubit = useBloc(
+      VoiceRecorderCubit.new,
+      keys: [conversationId],
+    );
+
+    if (!hasParticipant) {
+      return Container(
+        decoration: BoxDecoration(
+          color: context.theme.primary,
+        ),
+        height: 56,
+        alignment: Alignment.center,
+        child: Text(
+          context.l10n.groupCantSend,
+          style: TextStyle(
+            color: context.theme.secondaryText,
+          ),
+        ),
+      );
+    }
+
+    return BlocProvider<VoiceRecorderCubit>.value(
+      value: voiceRecorderCubit,
+      child: LayoutBuilder(
+        builder: (context, constraints) => VoiceRecorderBarOverlayComposition(
+          layoutWidth: constraints.maxWidth,
+          child: const _InputContainer(),
+        ),
+      ),
+    );
   }
 }
 
 class _InputContainer extends HookWidget {
-  const _InputContainer({
-    Key? key,
-  }) : super(key: key);
+  const _InputContainer();
 
   @override
   Widget build(BuildContext context) {
@@ -111,18 +125,12 @@ class _InputContainer extends HookWidget {
       () {
         final draft =
             context.read<ConversationCubit>().state?.conversation?.draft;
-        final textEditingController = HighlightTextEditingController(
-          initialText: draft,
-          highlightTextStyle: TextStyle(
-            color: context.theme.accent,
-          ),
-          mentionCache: context.read<MentionCache>(),
-        )..selection = TextSelection.fromPosition(
-            TextPosition(
-              offset: draft?.length ?? 0,
-            ),
-          );
-        return textEditingController;
+        return HighlightTextEditingController(
+            initialText: draft,
+            highlightTextStyle: TextStyle(color: context.theme.accent),
+            mentionCache: context.read<MentionCache>())
+          ..selection = TextSelection.fromPosition(
+              TextPosition(offset: draft?.length ?? 0));
       },
       [conversationId],
     );
@@ -232,7 +240,9 @@ class _InputContainer extends HookWidget {
                       _FileButton(actionColor: context.theme.icon),
                       const _ImagePickButton(),
                       const SizedBox(width: 6),
-                      const _StickerButton(),
+                      _StickerButton(
+                        textEditingController: textEditingController,
+                      ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _SendTextField(
@@ -241,24 +251,10 @@ class _InputContainer extends HookWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      ContextMenuPortalEntry(
-                        buildMenus: () => [
-                          ContextMenu(
-                            title: context.l10n.sendWithoutSound,
-                            onTap: () => _sendMessage(
-                              context,
-                              textEditingController,
-                              silent: true,
-                            ),
-                          ),
-                        ],
-                        child: ActionButton(
-                          name: Resources.assetsImagesIcSendSvg,
-                          color: context.theme.icon,
-                          onTap: () =>
-                              _sendMessage(context, textEditingController),
-                        ),
-                      ),
+                      _AnimatedSendOrVoiceButton(
+                        textEditingController: textEditingController,
+                        textEditingValueStream: textEditingValueStream,
+                      )
                     ],
                   ),
                 ),
@@ -271,8 +267,99 @@ class _InputContainer extends HookWidget {
   }
 }
 
+class _AnimatedSendOrVoiceButton extends HookWidget {
+  const _AnimatedSendOrVoiceButton({
+    required this.textEditingValueStream,
+    required this.textEditingController,
+  });
+
+  final Stream<TextEditingValue> textEditingValueStream;
+  final TextEditingController textEditingController;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasInputText = useMemoizedStream(
+          () => textEditingValueStream
+              .map((event) => event.text.isNotEmpty)
+              .distinct(),
+          keys: [textEditingValueStream],
+          initialData: textEditingController.text.isNotEmpty,
+        ).data ??
+        false;
+
+    // start -> show voice button
+    // end -> show send button
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 200),
+      initialValue: hasInputText ? 1.0 : 0.0,
+    );
+
+    useEffect(() {
+      if (hasInputText) {
+        animationController.forward();
+      } else {
+        animationController.reverse();
+      }
+    }, [hasInputText]);
+
+    // 0 -> 0.5: scale down voice button from 1 -> 0.6
+    // 0.5 -> 1: scale up voice button from 0.6 -> 1
+    final animatedValue = useAnimation(animationController);
+
+    final double sendScale;
+    final double voiceScale;
+
+    if (animatedValue < 0.5) {
+      sendScale = 0;
+      voiceScale =
+          Tween<double>(begin: 1, end: 0.6).transform(animatedValue * 2.0);
+    } else {
+      voiceScale = 0;
+      sendScale = Tween<double>(begin: 0.6, end: 1)
+          .transform((animatedValue - 0.5) * 2);
+    }
+
+    return Stack(
+      fit: StackFit.passthrough,
+      children: [
+        if (sendScale >= 0.6)
+          Transform.scale(
+            scale: sendScale,
+            child: ContextMenuPortalEntry(
+              buildMenus: () => [
+                ContextMenu(
+                  icon: Resources.assetsImagesContextMenuMuteSvg,
+                  title: context.l10n.sendWithoutSound,
+                  onTap: () => _sendMessage(
+                    context,
+                    textEditingController,
+                    silent: true,
+                  ),
+                ),
+              ],
+              child: ActionButton(
+                name: Resources.assetsImagesIcSendSvg,
+                color: context.theme.icon,
+                onTap: () => _sendMessage(context, textEditingController),
+              ),
+            ),
+          ),
+        if (voiceScale >= 0.6)
+          Transform.scale(
+            scale: voiceScale,
+            child: ActionButton(
+              name: Resources.assetsImagesMicrophoneSvg,
+              color: context.theme.icon,
+              onTap: () => context.read<VoiceRecorderCubit>().startRecording(),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 void showMaxLengthReachedToast(BuildContext context) =>
-    showToastFailed(context, ToastError(context.l10n.messageTooLong));
+    showToastFailed(context, ToastError(context.l10n.contentTooLong));
 
 void _sendPostMessage(
     BuildContext context, TextEditingController textEditingController) {
@@ -424,8 +511,8 @@ class _SendTextField extends HookWidget {
             decoration: InputDecoration(
               isDense: true,
               hintText: isEncryptConversation
-                  ? context.l10n.chatInputHint
-                  : context.l10n.typeAMessage,
+                  ? context.l10n.chatHintE2e
+                  : context.l10n.typeMessage,
               hintStyle: TextStyle(
                 color: context.theme.secondaryText,
                 fontSize: 14,
@@ -438,6 +525,7 @@ class _SendTextField extends HookWidget {
                 bottom: 8,
               ),
             ),
+            selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
           ),
         ),
       ),
@@ -501,7 +589,7 @@ class _QuoteMessage extends StatelessWidget {
 }
 
 class _ImagePickButton extends StatelessWidget {
-  const _ImagePickButton({Key? key}) : super(key: key);
+  const _ImagePickButton();
 
   @override
   Widget build(BuildContext context) {
@@ -529,9 +617,8 @@ class _ImagePickButton extends StatelessWidget {
 
 class _FileButton extends StatelessWidget {
   const _FileButton({
-    Key? key,
     required this.actionColor,
-  }) : super(key: key);
+  });
 
   final Color actionColor;
 
@@ -549,12 +636,14 @@ class _FileButton extends StatelessWidget {
 
 class _StickerButton extends HookWidget {
   const _StickerButton({
-    Key? key,
-  }) : super(key: key);
+    required this.textEditingController,
+  });
+
+  final TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
-    final key = useMemoized(() => GlobalKey());
+    final key = useMemoized(GlobalKey.new);
 
     final stickerAlbumsCubit = useBloc(
       () => StickerAlbumsCubit(context.database.stickerAlbumDao
@@ -562,14 +651,29 @@ class _StickerButton extends HookWidget {
           .watchThrottle(kVerySlowThrottleDuration)),
     );
 
+    final presetStickerGroups = useMemoized(
+      () => [
+        PresetStickerGroup.store,
+        if (!Platform.isLinux) PresetStickerGroup.emoji,
+        PresetStickerGroup.recent,
+        PresetStickerGroup.favorite,
+        if (giphyApiKey.isNotEmpty) PresetStickerGroup.gif,
+      ],
+    );
+
     final tabLength =
         useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
       bloc: stickerAlbumsCubit,
-      converter: (state) => (state.length) + 3,
+      converter: (state) => state.length + presetStickerGroups.length,
+      keys: [presetStickerGroups],
     );
 
-    return BlocProvider.value(
-      value: stickerAlbumsCubit,
+    return MultiProvider(
+      providers: [
+        BlocProvider.value(value: stickerAlbumsCubit),
+        BlocProvider(create: (context) => EmojiScrollOffsetCubit()),
+        ChangeNotifierProvider.value(value: textEditingController),
+      ],
       child: DefaultTabController(
         length: tabLength,
         initialIndex: 1,
@@ -581,7 +685,7 @@ class _StickerButton extends HookWidget {
           closeWaitDuration: const Duration(milliseconds: 300),
           inCurve: Curves.easeOut,
           outCurve: Curves.easeOut,
-          portalBuilder: (context, progress, child) {
+          portalBuilder: (context, progress, _, child) {
             context.accountServer.refreshSticker();
 
             final renderBox =
@@ -607,8 +711,9 @@ class _StickerButton extends HookWidget {
             padding: const EdgeInsets.all(8),
             child: Builder(
               builder: (context) => StickerPage(
-                tabController: DefaultTabController.of(context),
+                tabController: DefaultTabController.of(context)!,
                 tabLength: tabLength,
+                presetStickerGroups: presetStickerGroups,
               ),
             ),
           ),

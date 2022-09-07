@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../../../app.dart';
 import '../../../../enum/media_status.dart';
-import '../../../../utils/app_lifecycle.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../cache_image.dart';
@@ -21,9 +19,7 @@ import '../unknown_message.dart';
 import 'image_preview_page.dart';
 
 class ImageMessageWidget extends HookWidget {
-  const ImageMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const ImageMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +36,7 @@ class ImageMessageWidget extends HookWidget {
       imageWidthInPixel: mediaWidth,
       imageHeightInPixel: mediaHeight,
       builder: (context, width, height) => MessageBubble(
+        showBubble: false,
         padding: EdgeInsets.zero,
         includeNip: true,
         clip: true,
@@ -54,10 +51,10 @@ class ImageMessageWidget extends HookWidget {
 
 class MessageImage extends HookWidget {
   const MessageImage({
-    Key? key,
+    super.key,
     this.size,
     required this.showStatus,
-  }) : super(key: key);
+  });
 
   final Size? size;
   final bool showStatus;
@@ -73,32 +70,25 @@ class MessageImage extends HookWidget {
         useMessageConverter(converter: (state) => state.thumbImage ?? '');
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
-    final secondContext = useSecondNavigatorContext(context);
-    final isCurrentRoute = useRef(true);
-    final playing = useState(true);
+    final playing = useImagePlaying(context);
 
-    final listener = useCallback(() {
-      playing.value = isAppActive && isCurrentRoute.value;
-    }, []);
-
-    useRouteObserver(
-      rootRouteObserver,
-      context: secondContext,
-      didPushNext: () {
-        isCurrentRoute.value = false;
-        listener();
-      },
-      didPopNext: () {
-        isCurrentRoute.value = true;
-        listener();
-      },
+    final isUnDownloadGiphyGif = useMessageConverter(
+      converter: (message) =>
+          message.mediaMimeType == 'image/gif' &&
+          (message.mediaSize == null || message.mediaSize == 0),
     );
 
-    useEffect(() {
-      listener();
-      appActiveListener.addListener(listener);
-      return () => appActiveListener.removeListener(listener);
-    }, []);
+    final Widget thumbWidget;
+    if (isUnDownloadGiphyGif) {
+      // un-downloaded giphy gif image.
+      thumbWidget = CacheImage(
+        thumbImage,
+        controller: playing,
+        placeholder: () => ColoredBox(color: context.theme.secondaryText),
+      );
+    } else {
+      thumbWidget = ImageByBlurHashOrBase64(imageData: thumbImage);
+    }
 
     return InteractiveDecoratedBox(
       onTap: () {
@@ -115,7 +105,11 @@ class MessageImage extends HookWidget {
           case MediaStatus.canceled:
             if (message.relationship == UserRelationship.me &&
                 message.mediaUrl?.isNotEmpty == true) {
-              context.accountServer.reUploadAttachment(message);
+              if (isUnDownloadGiphyGif) {
+                context.accountServer.reUploadGiphyGif(message);
+              } else {
+                context.accountServer.reUploadAttachment(message);
+              }
             } else {
               context.accountServer.downloadAttachment(message.messageId);
             }
@@ -142,8 +136,7 @@ class MessageImage extends HookWidget {
                 controller: playing,
               ),
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) =>
-                  ImageByBlurHashOrBase64(imageData: thumbImage),
+              errorBuilder: (_, __, ___) => thumbWidget,
             ),
             Center(
               child: HookBuilder(
@@ -155,12 +148,10 @@ class MessageImage extends HookWidget {
 
                   switch (mediaStatus) {
                     case MediaStatus.canceled:
-                      if (relationship == UserRelationship.me &&
-                          mediaUrl?.isNotEmpty == true) {
-                        return const StatusUpload();
-                      } else {
-                        return const StatusDownload();
-                      }
+                      return relationship == UserRelationship.me &&
+                              mediaUrl?.isNotEmpty == true
+                          ? const StatusUpload()
+                          : const StatusDownload();
                     case MediaStatus.pending:
                       return const StatusPending();
                     case MediaStatus.expired:
@@ -212,13 +203,12 @@ typedef ImageLayoutBuilder = Widget Function(
 /// or too short.
 class ImageMessageLayout extends StatelessWidget {
   const ImageMessageLayout({
-    Key? key,
+    super.key,
     required this.builder,
     required this.imageWidthInPixel,
     required this.imageHeightInPixel,
   })  : assert(imageHeightInPixel > 0),
-        assert(imageWidthInPixel > 0),
-        super(key: key);
+        assert(imageWidthInPixel > 0);
 
   final ImageLayoutBuilder builder;
 

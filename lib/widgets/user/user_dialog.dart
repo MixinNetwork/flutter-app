@@ -39,7 +39,7 @@ Future<void> showUserDialog(BuildContext context, String? userId,
         ?.firstOrNull;
   }
 
-  if (identityNumber != null) {
+  if (user == null && identityNumber != null) {
     user =
         (await context.accountServer.updateUserByIdentityNumber(identityNumber))
             ?.firstOrNull;
@@ -71,10 +71,10 @@ Future<void> showUserDialog(BuildContext context, String? userId,
 
 class UserDialog extends StatelessWidget {
   const UserDialog({
-    Key? key,
+    super.key,
     required this.userId,
     this.refreshUser = true,
-  }) : super(key: key);
+  });
 
   final String userId;
   final bool refreshUser;
@@ -108,9 +108,8 @@ class UserDialog extends StatelessWidget {
 class _UserProfileLoader extends HookWidget {
   const _UserProfileLoader(
     this.userId, {
-    Key? key,
     this.refreshUser = true,
-  }) : super(key: key);
+  });
 
   final String userId;
   final bool refreshUser;
@@ -131,25 +130,20 @@ class _UserProfileLoader extends HookWidget {
     }, [userId, refreshUser]);
 
     if (user == null) return const SizedBox();
-    return _UserProfileBody(
-      user: user,
-      isSelf: accountServer.userId == user.userId,
-    );
+    return _UserProfileBody(user: user);
   }
 }
 
 class _UserProfileBody extends StatelessWidget {
   const _UserProfileBody({
-    Key? key,
     required this.user,
-    required this.isSelf,
-  }) : super(key: key);
+  });
   final User user;
-  final bool isSelf;
 
   @override
   Widget build(BuildContext context) {
     final anonymous = user.identityNumber == '0';
+    final biographyIsNotEmpty = !(user.biography?.isEmpty ?? true);
     return AnimatedSize(
       duration: const Duration(milliseconds: 150),
       child: Column(
@@ -157,7 +151,7 @@ class _UserProfileBody extends StatelessWidget {
         children: [
           AvatarWidget(
             size: 90,
-            avatarUrl: anonymous ? null : user.avatarUrl,
+            avatarUrl: user.avatarUrl,
             userId: user.userId,
             name: user.fullName,
           ),
@@ -182,29 +176,37 @@ class _UserProfileBody extends StatelessWidget {
               )
             ],
           ),
-          if (!anonymous)
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 4),
-                SelectableText(
-                  context.l10n.contactMixinId(user.identityNumber),
-                  style: TextStyle(
-                    color: context.theme.secondaryText,
-                    fontSize: 12,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!anonymous)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: SelectableText(
+                    context.l10n.contactMixinId(user.identityNumber),
+                    style: TextStyle(
+                      color: context.theme.secondaryText,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-                if (user.isStranger)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: _AddToContactsButton(user: user),
-                  ),
-                const SizedBox(height: 20),
-                _BioText(biography: user.biography ?? ''),
-                const SizedBox(height: 24),
-                _UserProfileButtonBar(user: user),
-              ],
-            ),
+              if (!anonymous && user.isStranger)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: _AddToContactsButton(user: user),
+                ),
+              if (biographyIsNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: _BioText(biography: user.biography ?? ''),
+                ),
+              if (!anonymous)
+                Padding(
+                  padding: const EdgeInsets.only(top: 24),
+                  child: _UserProfileButtonBar(user: user),
+                ),
+            ],
+          ),
           const SizedBox(height: 56),
         ],
       ),
@@ -214,9 +216,8 @@ class _UserProfileBody extends StatelessWidget {
 
 class _BioText extends StatelessWidget {
   const _BioText({
-    Key? key,
     required this.biography,
-  }) : super(key: key);
+  });
 
   final String biography;
 
@@ -244,9 +245,8 @@ class _BioText extends StatelessWidget {
 
 class _AddToContactsButton extends StatelessWidget {
   const _AddToContactsButton({
-    Key? key,
     required this.user,
-  }) : super(key: key);
+  });
 
   final User user;
 
@@ -264,15 +264,15 @@ class _AddToContactsButton extends StatelessWidget {
         },
         title: Text(
           user.isBot
-              ? context.l10n.conversationAddBot
-              : context.l10n.conversationAddContact,
+              ? context.l10n.addBotWithPlus
+              : context.l10n.addContactWithPlus,
           style: TextStyle(fontSize: 12, color: context.theme.accent),
         ),
       );
 }
 
 class _UserProfileButtonBar extends StatelessWidget {
-  const _UserProfileButtonBar({Key? key, required this.user}) : super(key: key);
+  const _UserProfileButtonBar({required this.user});
 
   final User user;
 
@@ -292,7 +292,7 @@ class _UserProfileButtonBar extends StatelessWidget {
           );
 
           if (result == null || result.isEmpty) return;
-          final conversationId = result[0].conversationId;
+          final conversationId = result.first.conversationId;
 
           await runFutureWithToast(
             context,
@@ -301,7 +301,7 @@ class _UserProfileButtonBar extends StatelessWidget {
               user.fullName!,
               result.first.encryptCategory!,
               conversationId: conversationId,
-              recipientId: result[0].userId,
+              recipientId: result.first.userId,
             ),
           );
         },

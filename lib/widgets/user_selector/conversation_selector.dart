@@ -44,13 +44,16 @@ String? _getUserId(dynamic item) {
 }
 
 EncryptCategory _getEncryptedCategory(dynamic item, Map<String, App> map) {
-  bool isEncrypted(appId) {
+  bool isEncrypted(String appId) {
     final app = map[appId];
     return app != null && app.capabilities?.contains('ENCRYPTED') == true;
   }
 
   if (item is ConversationItem) {
-    if (isEncrypted(item.ownerId)) return EncryptCategory.encrypted;
+    // ignore: cast_nullable_to_non_nullable
+    if (item.ownerId != null && isEncrypted(item.ownerId as String)) {
+      return EncryptCategory.encrypted;
+    }
     return item.isBotConversation
         ? EncryptCategory.plain
         : EncryptCategory.signal;
@@ -210,8 +213,8 @@ class _ConversationSelector extends HookWidget {
     final selected =
         useBlocState<SimpleCubit<List<dynamic>>, List<dynamic>>(bloc: selector);
 
-    final boxDecoration = BoxDecoration(
-      borderRadius: BorderRadius.circular(8),
+    const boxDecoration = BoxDecoration(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
     );
 
     return Material(
@@ -297,7 +300,7 @@ class _ConversationSelector extends HookWidget {
               margin: const EdgeInsets.only(top: 8, right: 24, left: 24),
               decoration: BoxDecoration(
                 color: context.theme.background,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
               ),
               alignment: Alignment.center,
               child: TextField(
@@ -379,7 +382,7 @@ class _ConversationSelector extends HookWidget {
                   slivers: [
                     if (conversationFilterState.recentConversations.isNotEmpty)
                       _Section(
-                        title: context.l10n.recentConversations,
+                        title: context.l10n.recentChats,
                         count:
                             conversationFilterState.recentConversations.length,
                         builder: (BuildContext context, int index) {
@@ -403,7 +406,7 @@ class _ConversationSelector extends HookWidget {
                       ),
                     if (conversationFilterState.friends.isNotEmpty)
                       _Section(
-                        title: context.l10n.contacts,
+                        title: context.l10n.contactTitle,
                         count: conversationFilterState.friends.length,
                         builder: (BuildContext context, int index) {
                           final item = conversationFilterState.friends[index];
@@ -458,9 +461,8 @@ class _ConversationSelector extends HookWidget {
 
 class _AvatarSmallCloseIcon extends StatelessWidget {
   const _AvatarSmallCloseIcon({
-    Key? key,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final VoidCallback onTap;
 
@@ -506,8 +508,7 @@ class _Section extends StatelessWidget {
     required this.builder,
     required this.title,
     required this.count,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final IndexedWidgetBuilder builder;
   final String title;
@@ -545,13 +546,12 @@ class _Section extends StatelessWidget {
 
 class _BaseItem extends StatelessWidget {
   const _BaseItem({
-    Key? key,
     required this.keyword,
     required this.title,
     required this.avatar,
     this.showSelector = false,
     this.selected = false,
-  }) : super(key: key);
+  });
 
   final String title;
   final Widget avatar;

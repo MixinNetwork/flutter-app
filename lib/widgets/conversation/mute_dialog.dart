@@ -7,23 +7,21 @@ import '../dialog.dart';
 import '../radio.dart';
 
 class MuteDialog extends HookWidget {
-  const MuteDialog({
-    Key? key,
-  }) : super(key: key);
+  const MuteDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
     final result = useState<int?>(null);
     return AlertDialogLayout(
-      title: Text(context.l10n.muteTitle),
+      title: Text(context.l10n.contactMuteTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Tuple2(context.l10n.mute1hour, 1 * 60 * 60),
-            Tuple2(context.l10n.mute8hours, 8 * 60 * 60),
-            Tuple2(context.l10n.mute1week, 7 * 24 * 60 * 60),
-            Tuple2(context.l10n.mute1year, 365 * 24 * 60 * 60),
+            Tuple2(context.l10n.oneHour, 1 * 60 * 60),
+            Tuple2(context.l10n.hour(8, 8), 8 * 60 * 60),
+            Tuple2(context.l10n.oneWeek, 7 * 24 * 60 * 60),
+            Tuple2(context.l10n.oneYear, 365 * 24 * 60 * 60),
           ]
               .map(
                 (e) => RadioItem<int>(

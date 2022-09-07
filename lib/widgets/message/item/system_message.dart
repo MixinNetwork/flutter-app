@@ -7,9 +7,7 @@ import '../../../utils/extension/extension.dart';
 import '../message.dart';
 
 class SystemMessage extends HookWidget {
-  const SystemMessage({
-    Key? key,
-  }) : super(key: key);
+  const SystemMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +20,7 @@ class SystemMessage extends HookWidget {
         useMessageConverter(converter: (state) => state.participantFullName);
     final userFullName =
         useMessageConverter(converter: (state) => state.userFullName);
-    final groupName =
-        useMessageConverter(converter: (state) => state.groupName);
+    final content = useMessageConverter(converter: (state) => state.content);
 
     return Center(
       child: Padding(
@@ -38,7 +35,7 @@ class SystemMessage extends HookWidget {
               color: context.dynamicColor(
                 const Color.fromRGBO(202, 234, 201, 1),
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -53,7 +50,7 @@ class SystemMessage extends HookWidget {
                   currentUserId: context.accountServer.userId,
                   participantFullName: participantFullName,
                   senderFullName: userFullName,
-                  groupName: groupName,
+                  expireIn: int.tryParse(content ?? '0'),
                 ),
                 style: TextStyle(
                   fontSize: MessageItemWidget.secondaryFontSize,
@@ -71,13 +68,13 @@ class SystemMessage extends HookWidget {
 }
 
 String generateSystemText({
-  required MessageAction? actionName,
+  required String? actionName,
   required String? participantUserId,
   required String? senderId,
   required String currentUserId,
   required String? participantFullName,
   required String? senderFullName,
-  required String? groupName,
+  required int? expireIn,
 }) {
   final participantIsCurrentUser = participantUserId == currentUserId;
   final senderIsCurrentUser = senderId == currentUserId;
@@ -87,20 +84,20 @@ String generateSystemText({
     case MessageAction.join:
       text = Localization.current.chatGroupJoin(
         participantIsCurrentUser
-            ? Localization.current.youStart
+            ? Localization.current.you
             : participantFullName ?? '',
       );
       break;
     case MessageAction.exit:
       text = Localization.current.chatGroupExit(
         participantIsCurrentUser
-            ? Localization.current.youStart
+            ? Localization.current.you
             : participantFullName ?? '',
       );
       break;
     case MessageAction.add:
       text = Localization.current.chatGroupAdd(
-        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
+        senderIsCurrentUser ? Localization.current.you : senderFullName!,
         participantIsCurrentUser
             ? Localization.current.you
             : participantFullName ?? '',
@@ -108,24 +105,42 @@ String generateSystemText({
       break;
     case MessageAction.remove:
       text = Localization.current.chatGroupRemove(
-        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
+        senderIsCurrentUser ? Localization.current.you : senderFullName!,
         participantIsCurrentUser
             ? Localization.current.you
             : participantFullName ?? '',
       );
       break;
     case MessageAction.create:
-      text = Localization.current.chatGroupCreate(
-        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
-        groupName!,
+      text = Localization.current.createdThisGroup(
+        senderIsCurrentUser ? Localization.current.you : senderFullName!,
       );
       break;
     case MessageAction.role:
-      text = Localization.current.chatGroupRole;
+      text = Localization.current.nowAnAddmin(
+        participantIsCurrentUser
+            ? Localization.current.you
+            : participantFullName!,
+      );
+      break;
+    case MessageAction.expire:
+      final senderName =
+          senderIsCurrentUser ? Localization.current.you : senderFullName!;
+      if (expireIn == null) {
+        text =
+            Localization.current.changedDisappearingMessageSettings(senderName);
+      } else if (expireIn <= 0) {
+        text = Localization.current.disableDisappearingMessage(senderName);
+      } else {
+        text = Localization.current.setDisappearingMessageTimeTo(
+          senderName,
+          Duration(seconds: expireIn).formatAsConversationExpireIn(),
+        );
+      }
       break;
     case MessageAction.update:
-    case null:
-      text = Localization.current.chatNotSupport;
+    default:
+      text = Localization.current.messageNotSupport;
       break;
   }
   return text;

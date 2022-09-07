@@ -14,15 +14,6 @@ import 'extension/extension.dart';
 
 const kLogMode = !kReleaseMode;
 
-enum _LogLevel {
-  verbose,
-  debug,
-  info,
-  warning,
-  error,
-  wtf,
-}
-
 final _verbosePen = AnsiPen()..gray();
 final _debugPen = AnsiPen()..blue();
 final _infoPen = AnsiPen()..green();
@@ -30,23 +21,19 @@ final _warningPen = AnsiPen()..yellow();
 final _errorPen = AnsiPen()..red();
 final _wtfPen = AnsiPen()..magenta();
 
-extension _LogLevelExtension on _LogLevel {
-  String get prefix {
-    switch (this) {
-      case _LogLevel.verbose:
-        return '[V]';
-      case _LogLevel.debug:
-        return '[D]';
-      case _LogLevel.info:
-        return '[I]';
-      case _LogLevel.warning:
-        return '[W]';
-      case _LogLevel.error:
-        return '[E]';
-      case _LogLevel.wtf:
-        return '[WTF]';
-    }
-  }
+enum _LogLevel {
+  verbose('V'),
+  debug('D'),
+  info('I'),
+  warning('W'),
+  error('E'),
+  wtf('WTF');
+
+  const _LogLevel(this._prefix);
+
+  final String _prefix;
+
+  String get prefix => '[$_prefix]';
 
   String colorize(String message) {
     switch (this) {
@@ -99,16 +86,18 @@ void wtf(String message) {
   _print(message, _LogLevel.wtf);
 }
 
+String _currentTimeStamp() =>
+    DateFormat('yyyy-MM-dd HH:mm:ss.SSS').format(DateTime.now());
+
 void _print(String message, _LogLevel level) {
   final logToFile = kLogMode || level.index > _LogLevel.debug.index;
   if (logToFile) {
-    final now = DateTime.now();
-    final date = DateFormat('yyyy-MM-dd HH:mm:ss.SSS').format(now);
-    LogFileManager.instance?.write('$date ${level.prefix} $message');
+    LogFileManager.instance
+        ?.write('${_currentTimeStamp()} ${level.prefix} $message');
   }
   if (!kLogMode) return;
   // ignore: avoid_print
-  print(level.colorize('${level.prefix} $message'));
+  print(level.colorize('${_currentTimeStamp()} ${level.prefix} $message'));
 }
 
 class LogFileManager {
@@ -141,7 +130,7 @@ class LogFileManager {
   final SendPort _sendPort;
 
   static Future<void> _logIsolate(List<dynamic> args) async {
-    final responsePort = args[0] as SendPort;
+    final responsePort = args.first as SendPort;
     final messageReceiver = ReceivePort();
     final dir = args[1] as String;
     final logFileHandler = LogFileHandler(dir);

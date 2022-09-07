@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
-import '../../../../bloc/paging/load_more_paging.dart';
+import '../../../../bloc/paging/load_more_paging_state.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
@@ -18,10 +18,10 @@ import '../shared_media_page.dart';
 
 class FilePage extends HookWidget {
   const FilePage({
-    Key? key,
+    super.key,
     required this.maxHeight,
     required this.conversationId,
-  }) : super(key: key);
+  });
 
   final double maxHeight;
   final String conversationId;
@@ -92,7 +92,7 @@ class FilePage extends HookWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              context.l10n.noFile,
+              context.l10n.noFiles,
               style: TextStyle(
                 fontSize: 12,
                 color: context.theme.secondaryText,
@@ -158,9 +158,8 @@ class FilePage extends HookWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key? key,
     required this.message,
-  }) : super(key: key);
+  });
 
   final MessageItem message;
 

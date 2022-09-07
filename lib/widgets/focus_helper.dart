@@ -5,9 +5,9 @@ import '../utils/app_lifecycle.dart';
 
 class FocusHelper extends HookWidget {
   const FocusHelper({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 

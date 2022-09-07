@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/menu.dart';
@@ -12,7 +13,7 @@ import 'share_media/media_page.dart';
 import 'share_media/post_page.dart';
 
 class SharedMediaPage extends HookWidget {
-  const SharedMediaPage({Key? key}) : super(key: key);
+  const SharedMediaPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -92,10 +93,10 @@ class SharedMediaPage extends HookWidget {
 
 class ShareMediaItemMenuWrapper extends StatelessWidget {
   const ShareMediaItemMenuWrapper({
-    Key? key,
+    super.key,
     required this.child,
     required this.messageId,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final String messageId;
@@ -104,7 +105,8 @@ class ShareMediaItemMenuWrapper extends StatelessWidget {
   Widget build(BuildContext context) => ContextMenuPortalEntry(
         buildMenus: () => [
           ContextMenu(
-            title: context.l10n.goToChat,
+            icon: Resources.assetsImagesContextMenuGotoSvg,
+            title: context.l10n.locateToChat,
             onTap: () {
               context.read<BlinkCubit>().blinkByMessageId(messageId);
               context.read<MessageBloc>().scrollTo(messageId);

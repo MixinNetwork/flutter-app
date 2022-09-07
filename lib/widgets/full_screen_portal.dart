@@ -8,17 +8,17 @@ import '../utils/hook.dart';
 import 'menu.dart';
 
 class FullScreenVisibleCubit extends SimpleCubit<bool> {
-  FullScreenVisibleCubit(bool state) : super(state);
+  FullScreenVisibleCubit(super.state);
 }
 
 class FullScreenPortal extends HookWidget {
   const FullScreenPortal({
-    Key? key,
+    super.key,
     required this.builder,
     required this.portalBuilder,
     this.duration = const Duration(milliseconds: 100),
     this.curve = Curves.easeOut,
-  }) : super(key: key);
+  });
 
   final WidgetBuilder builder;
   final WidgetBuilder portalBuilder;
@@ -38,10 +38,10 @@ class FullScreenPortal extends HookWidget {
         duration: duration,
         visible: visible,
         onClose: () => visibleBloc.emit(false),
-        child: PortalEntry(
+        child: PortalTarget(
           closeDuration: duration,
           visible: visible,
-          portal: TweenAnimationBuilder<double>(
+          portalFollower: TweenAnimationBuilder<double>(
             duration: duration,
             tween: Tween(begin: 0, end: visible ? 1 : 0),
             curve: curve,

@@ -22,9 +22,7 @@ import '../bloc/conversation_cubit.dart';
 import '../chat/chat_page.dart';
 
 class PinMessagesPage extends HookWidget {
-  const PinMessagesPage({
-    Key? key,
-  }) : super(key: key);
+  const PinMessagesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +36,7 @@ class PinMessagesPage extends HookWidget {
       keys: [conversationId],
     ).data;
 
-    final chatSideCubit = useBloc(() => ChatSideCubit());
+    final chatSideCubit = useBloc(ChatSideCubit.new);
     final searchConversationKeywordCubit = useBloc(
       () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
     );
@@ -51,7 +49,7 @@ class PinMessagesPage extends HookWidget {
     final list = (rawList ?? []).reversed.toList();
 
     final scrollController = useMemoized(
-      () => ScrollerScrollController(),
+      ScrollerScrollController.new,
     );
     final listKey = useMemoized(() => GlobalKey(debugLabel: 'PinMessagesPage'));
 
@@ -68,7 +66,8 @@ class PinMessagesPage extends HookWidget {
       child: Scaffold(
         backgroundColor: context.theme.popUp,
         appBar: MixinAppBar(
-          title: Text(context.l10n.pinMessageCount(list.length)),
+          title:
+              Text(context.l10n.pinnedMessageTitle(list.length, list.length)),
           backgroundColor: context.theme.popUp,
           actions: [
             if (!Navigator.of(context).canPop())
@@ -114,7 +113,7 @@ class PinMessagesPage extends HookWidget {
                   child: Builder(
                       builder: (context) => AlertDialogLayout(
                             title:
-                                Text(context.l10n.unpinAllMessagesDescription),
+                                Text(context.l10n.unpinAllMessagesConfirmation),
                             content: const SizedBox(),
                             actions: [
                               MixinButton(

@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:markdown/markdown.dart';
+import 'package:markdown_widget/markdown_widget.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/extension/extension.dart';
-import '../../../utils/uri_utils.dart';
 import '../../app_bar.dart';
 import '../../buttons.dart';
 import '../../interactive_decorated_box.dart';
+import '../../markdown.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -21,9 +20,7 @@ const _decoration = BoxDecoration(
 );
 
 class PostMessage extends StatelessWidget {
-  const PostMessage({
-    Key? key,
-  }) : super(key: key);
+  const PostMessage({super.key});
 
   @override
   Widget build(BuildContext context) => const MessageBubble(
@@ -33,11 +30,11 @@ class PostMessage extends StatelessWidget {
 
 class MessagePost extends StatelessWidget {
   const MessagePost({
-    Key? key,
+    super.key,
     this.padding,
     this.decoration,
     required this.showStatus,
-  }) : super(key: key);
+  });
 
   final EdgeInsetsGeometry? padding;
   final Decoration? decoration;
@@ -46,36 +43,39 @@ class MessagePost extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InteractiveDecoratedBox(
         onTap: () => PostPreview.push(context, message: context.message),
+        behavior: HitTestBehavior.deferToChild,
         child: Container(
           padding: padding,
           decoration: decoration,
           child: Stack(
             children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: showStatus ? 48 : 0,
-                  minWidth: 128,
-                ),
-                child: HookBuilder(builder: (context) {
-                  final content = useMessageConverter(
-                      converter: (state) => state.content ?? '');
-                  final postContent =
-                      useMemoized(content.postOptimize, [content]);
+              HookBuilder(builder: (context) {
+                final content = useMessageConverter(
+                    converter: (state) => state.content ?? '');
+                final postContent =
+                    useMemoized(content.postOptimize, [content]);
 
-                  return MarkdownBody(
-                    data: postContent,
-                    extensionSet: ExtensionSet.gitHubWeb,
-                    styleSheet: context.markdownStyleSheet,
-                    softLineBreak: true,
-                    imageBuilder: (_, __, ___) => const SizedBox(),
-                    onTapLink: (String text, String? href, String title) {
-                      if (href?.isEmpty ?? true) return;
-
-                      openUri(context, href!);
-                    },
-                  );
-                }),
-              ),
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: showStatus ? 48 : 0,
+                    minWidth: 128,
+                  ),
+                  child: IntrinsicWidth(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: MarkdownGenerator(
+                            data: postContent,
+                            styleConfig: buildMarkdownStyleConfig(
+                              context,
+                              context.brightnessValue != 0,
+                            ),
+                          ).widgets ??
+                          [],
+                    ),
+                  ),
+                );
+              }),
               Positioned(
                 right: 0,
                 top: 0,
@@ -112,9 +112,9 @@ class MessagePost extends StatelessWidget {
 
 class PostPreview extends StatelessWidget {
   const PostPreview({
-    Key? key,
+    super.key,
     required this.message,
-  }) : super(key: key);
+  });
 
   static Future<void> push(
     BuildContext context, {
@@ -158,12 +158,9 @@ class PostPreview extends StatelessWidget {
             Expanded(
               child: Markdown(
                 data: message.content ?? '',
-                extensionSet: ExtensionSet.gitHubWeb,
-                styleSheet: context.markdownStyleSheet,
-                selectable: true,
-                softLineBreak: true,
-                onTapLink: (String text, String? href, String title) =>
-                    openUri(context, href!),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+                darkMode: context.brightnessValue != 0,
               ),
             ),
           ],

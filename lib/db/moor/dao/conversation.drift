@@ -14,6 +14,7 @@ SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS 
     conversation.last_read_message_id AS lastReadMessageId,
     conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId,
     conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil,
+    conversation.expire_in as expireIn,
     owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified,
     owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil,
     owner.app_id AS appId,
@@ -24,6 +25,7 @@ SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS 
     lastMessage.status AS messageStatus,
     lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType,
     participant.full_name AS participantFullName, participant.user_id AS participantUserId,
+    em.expire_in AS messageExpireIn,
     (SELECT COUNT(1)
      FROM message_mentions messageMention
      WHERE messageMention.conversation_id = conversation.conversation_id AND
@@ -35,6 +37,7 @@ FROM conversations conversation
          LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id
          LEFT JOIN snapshots snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id
          LEFT JOIN users participant ON participant.user_id = lastMessage.participant_id
+         LEFT JOIN expired_messages em ON lastMessage.message_id = em.message_id
 WHERE $where
 ORDER BY $order
 LIMIT $limit;
@@ -46,6 +49,7 @@ SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS 
     conversation.last_read_message_id AS lastReadMessageId,
     conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId,
     conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil,
+    conversation.expire_in as expireIn,
     owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified,
     owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil,
     owner.app_id AS appId,
@@ -56,6 +60,7 @@ SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS 
     lastMessage.status AS messageStatus,
     lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType,
     participant.full_name AS participantFullName, participant.user_id AS participantUserId,
+    em.expire_in AS messageExpireIn,
     (SELECT COUNT(1)
      FROM message_mentions messageMention
      WHERE messageMention.conversation_id = conversation.conversation_id AND
@@ -68,6 +73,7 @@ FROM conversations conversation
          LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id
          LEFT JOIN snapshots snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id
          LEFT JOIN users participant ON participant.user_id = lastMessage.participant_id
+         LEFT JOIN expired_messages em ON lastMessage.message_id = em.message_id
 WHERE circleConversation.circle_id = :circleId
 ORDER BY $order
 LIMIT $limit;

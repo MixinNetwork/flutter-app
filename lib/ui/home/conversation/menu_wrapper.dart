@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import '../../../constants/resources.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
@@ -15,12 +16,12 @@ import '../bloc/slide_category_cubit.dart';
 
 class ConversationMenuWrapper extends StatelessWidget {
   const ConversationMenuWrapper({
-    Key? key,
+    super.key,
     this.conversation,
     this.searchConversation,
     required this.child,
     this.removeChatFromCircle = false,
-  }) : super(key: key);
+  });
 
   final ConversationItem? conversation;
   final SearchConversationItem? searchConversation;
@@ -43,7 +44,8 @@ class ConversationMenuWrapper extends StatelessWidget {
       buildMenus: () => [
         if (pinTime != null)
           ContextMenu(
-            title: context.l10n.unPin,
+            icon: Resources.assetsImagesContextMenuUnpinSvg,
+            title: context.l10n.unpin,
             onTap: () => runFutureWithToast(
               context,
               context.accountServer.unpin(conversationId),
@@ -51,7 +53,8 @@ class ConversationMenuWrapper extends StatelessWidget {
           ),
         if (pinTime == null)
           ContextMenu(
-            title: context.l10n.pin,
+            icon: Resources.assetsImagesContextMenuPinSvg,
+            title: context.l10n.pinTitle,
             onTap: () => runFutureWithToast(
               context,
               context.accountServer.pin(conversationId),
@@ -59,7 +62,8 @@ class ConversationMenuWrapper extends StatelessWidget {
           ),
         if (isMute)
           ContextMenu(
-            title: context.l10n.unMute,
+            icon: Resources.assetsImagesContextMenuMuteSvg,
+            title: context.l10n.unmute,
             onTap: () async {
               await runFutureWithToast(
                 context,
@@ -73,7 +77,8 @@ class ConversationMenuWrapper extends StatelessWidget {
           )
         else
           ContextMenu(
-            title: context.l10n.muted,
+            icon: Resources.assetsImagesContextMenuUnmuteSvg,
+            title: context.l10n.mute,
             onTap: () async {
               final result = await showMixinDialog<int?>(
                   context: context, child: const MuteDialog());
@@ -89,7 +94,44 @@ class ConversationMenuWrapper extends StatelessWidget {
               return;
             },
           ),
+        HookBuilder(builder: (_) {
+          final menus = useMemoizedFuture(
+                  () => context.database.circleDao
+                      .otherCircleByConversationId(conversationId)
+                      .get(),
+                  null,
+                  keys: []).data ??
+              [];
+          return SubContextMenu(
+              icon: Resources.assetsImagesCircleSvg,
+              title: context.l10n.addToCircle,
+              menus: menus
+                  .map((e) => ContextMenu(
+                        title: e.name,
+                        onTap: () async {
+                          await runFutureWithToast(
+                            context,
+                            () async {
+                              await context.accountServer
+                                  .editCircleConversation(
+                                e.circleId,
+                                [
+                                  CircleConversationRequest(
+                                    action: CircleConversationAction.add,
+                                    conversationId: conversationId,
+                                    userId:
+                                        isGroupConversation ? null : ownerId,
+                                  ),
+                                ],
+                              );
+                            }(),
+                          );
+                        },
+                      ))
+                  .toList());
+        }),
         ContextMenu(
+          icon: Resources.assetsImagesContextMenuDeleteSvg,
           title: context.l10n.deleteChat,
           isDestructiveAction: true,
           onTap: () async {
@@ -97,7 +139,7 @@ class ConversationMenuWrapper extends StatelessWidget {
                 conversation?.validName ?? searchConversation!.validName;
             final ret = await showConfirmMixinDialog(
               context,
-              context.l10n.deleteChatHint(name),
+              context.l10n.conversationDeleteTitle(name),
               description: context.l10n.deleteChatDescription,
             );
             if (!ret) {
@@ -124,6 +166,7 @@ class ConversationMenuWrapper extends StatelessWidget {
             if (circleId?.isEmpty ?? true) return const SizedBox();
 
             return ContextMenu(
+              icon: Resources.assetsImagesContextMenuDeleteSvg,
               title: context.l10n.removeChatFromCircle,
               isDestructiveAction: true,
               onTap: () async {

@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 import 'extension/extension.dart';
 import 'logger.dart';
@@ -38,14 +39,31 @@ Future<bool> saveFileToSystem(
   String file, {
   String? suggestName,
 }) async {
-  final path = await file_selector.getSavePath(
+  final targetName = suggestName ?? p.basename(file);
+  final mineType = lookupMimeType(file);
+  final extension = p.extension(targetName);
+
+  d('saveFileToSystem: $file, $targetName, $mineType, $extension');
+
+  var path = await file_selector.getSavePath(
     confirmButtonText: context.l10n.save,
-    suggestedName: suggestName ?? p.basename(file),
+    suggestedName: targetName,
+    acceptedTypeGroups: [
+      file_selector.XTypeGroup(
+        label: mineType,
+        extensions: [extension],
+        mimeTypes: [if (mineType != null) mineType],
+      ),
+    ],
   );
-  if (path?.isEmpty ?? true) {
+  if (path == null || path.isEmpty) {
     return false;
   }
-  await File(file).copy(path!);
+
+  if (p.extension(path) != extension) {
+    path = path + extension;
+  }
+  await File(file).copy(path);
   return true;
 }
 
@@ -87,70 +105,36 @@ Future<void> initMixinDocumentsDirectory() async {
   if (Platform.isWindows) {
     mixinDocumentsDirectory = Directory(
         p.join((await getApplicationDocumentsDirectory()).path, 'Mixin'));
-    if (!mixinDocumentsDirectory.existsSync()) {
-      _copyLegacyWindowsFiles();
-    }
     return;
   }
   mixinDocumentsDirectory = await getApplicationDocumentsDirectory();
 }
 
-//TODO remove this in the next version.
-void _copyLegacyWindowsFiles() {
-  mixinDocumentsDirectory.create();
-  final legacyDir = mixinDocumentsDirectory.parent;
+enum TempFileType {
+  pasteboardImage('mixin_paste_board_image', '.png'),
+  editImage('image_edit', '.png'),
+  voiceRecord('voice_record', '.ogg');
 
-  void _copyFile(String source) {
-    final path = p.join(legacyDir.path, source);
-    if (FileSystemEntity.isDirectorySync(path)) {
-      final dir = Directory(path);
-      for (final file in dir.listSync()) {
-        _copyFile(p.relative(file.path, from: legacyDir.path));
-      }
-    } else if (FileSystemEntity.isFileSync(path)) {
-      final file = File(p.join(legacyDir.path, source));
-      final dir = p.dirname(source);
-      Directory(p.join(mixinDocumentsDirectory.path, dir))
-          .createSync(recursive: true);
-      file.copySync(p.join(mixinDocumentsDirectory.path, source));
-    }
-  }
+  const TempFileType(this.prefix, this.suffix);
 
-  _copyFile('account_box');
-  _copyFile('crypto_box');
-  _copyFile('privacy_box');
-  _copyFile('show_pin_message_box');
-  _copyFile('hydrated_box.hive');
-  _copyFile('hydrated_box.lock');
-  _copyFile('signal.db');
-  _copyFile('signal.db-shm');
-  _copyFile('signal.db-wal');
+  final String prefix;
+  final String suffix;
+}
 
-  for (final dir in legacyDir.listSync()) {
-    if (!p.basename(dir.path).isNumeric()) {
-      continue;
-    }
-    if (dir is! Directory) {
-      continue;
-    }
-    final db = File(p.join(dir.path, 'mixin.db'));
-    if (!db.existsSync()) {
-      continue;
-    }
-    _copyFile(p.basename(dir.path));
-  }
+Future<String> generateTempFilePath(TempFileType type) async {
+  final tempDir = await getTemporaryDirectory();
+  return p.join(
+    tempDir.path,
+    '${type.prefix}_${const Uuid().v4()}${type.suffix}',
+  );
 }
 
 Future<File?> saveBytesToTempFile(
   Uint8List bytes,
-  String prefix, [
-  String? suffix,
-]) async {
-  final tempDir = await getTemporaryDirectory();
-
+  TempFileType type,
+) async {
   try {
-    final file = File(p.join(tempDir.path,
-        '${prefix}_${DateTime.now().millisecondsSinceEpoch}$suffix'));
+    final file = File(await generateTempFilePath(type));
     if (file.existsSync()) {
       await file.delete();
     }

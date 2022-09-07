@@ -14,11 +14,14 @@ import '../utils/app_lifecycle.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/local_notification_center.dart';
+import '../utils/logger.dart';
 import '../utils/message_optimize.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/message/item/pin_message.dart';
 import '../widgets/message/item/system_message.dart';
 import '../widgets/message/item/text/mention_builder.dart';
+
+const _keyConversationId = 'conversationId';
 
 class NotificationService {
   NotificationService({
@@ -78,7 +81,7 @@ class NotificationService {
         );
 
         String? body;
-        if (context.multiAuthState.currentMessagePreview) {
+        if (context.settingCubit.state.messagePreview) {
           if (event.type == MessageCategory.systemConversation) {
             body = generateSystemText(
               actionName: event.actionName,
@@ -87,14 +90,14 @@ class NotificationService {
               currentUserId: context.accountServer.userId,
               participantFullName: event.participantFullName,
               senderFullName: event.senderFullName,
-              groupName: event.groupName,
+              expireIn: int.tryParse(event.content ?? '0'),
             );
           } else if (event.type.isPin) {
             final pinMessageMinimal =
                 PinMessageMinimal.fromJsonString(event.content ?? '');
 
             if (pinMessageMinimal == null) {
-              body = Localization.current.pinned(
+              body = Localization.current.chatPinMessage(
                   event.senderFullName ?? '', Localization.current.aMessage);
             } else {
               final preview = await generatePinPreviewText(
@@ -103,7 +106,7 @@ class NotificationService {
               );
 
               body = Localization.current
-                  .pinned(event.senderFullName ?? '', preview);
+                  .chatPinMessage(event.senderFullName ?? '', preview);
             }
           } else {
             final isGroup = event.category == ConversationCategory.group ||
@@ -125,9 +128,9 @@ class NotificationService {
               event.senderFullName,
             );
           }
-          body ??= Localization.current.chatNotSupport;
+          body ??= Localization.current.messageNotSupport;
         } else {
-          body = Localization.current.sentYouAMessage;
+          body = Localization.current.aMessage;
         }
 
         await showNotification(
@@ -137,6 +140,10 @@ class NotificationService {
             scheme: enumConvertToString(NotificationScheme.conversation),
             host: event.conversationId,
             path: event.messageId,
+            queryParameters: {
+              // use queryParameters to avoid case transform.
+              _keyConversationId: event.conversationId,
+            },
           ),
           messageId: event.messageId,
           conversationId: event.conversationId,
@@ -145,13 +152,16 @@ class NotificationService {
       ..add(
         notificationSelectEvent(NotificationScheme.conversation).listen(
           (event) {
+            i('select notification $event');
             final slideCategoryCubit = context.read<SlideCategoryCubit>();
             if (slideCategoryCubit.state.type == SlideCategoryType.setting) {
               slideCategoryCubit.select(SlideCategoryType.chats);
             }
+            final conversationId =
+                event.queryParameters[_keyConversationId] ?? event.host;
             ConversationCubit.selectConversation(
               context,
-              event.host,
+              conversationId,
               initIndexMessageId: event.path,
             );
           },

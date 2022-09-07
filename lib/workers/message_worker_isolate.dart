@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
+import 'package:equatable/equatable.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
@@ -15,7 +16,7 @@ import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
-import '../blaze/blaze_param.dart';
+import '../blaze/blaze_message_param.dart';
 import '../blaze/vo/message_result.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../constants/constants.dart';
@@ -31,7 +32,9 @@ import '../db/mixin_database.dart';
 import '../enum/message_category.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
+import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
+import '../utils/mixin_api_client.dart';
 import '../utils/reg_exp_utils.dart';
 import 'decrypt_message.dart';
 import 'isolate_event.dart';
@@ -47,6 +50,8 @@ class IsolateInitParams {
     required this.mixinDocumentDirectory,
     required this.primarySessionId,
     required this.packageInfo,
+    required this.deviceId,
+    required this.loginByPhoneNumber,
   });
 
   final SendPort sendPort;
@@ -57,9 +62,12 @@ class IsolateInitParams {
   final String mixinDocumentDirectory;
   final String? primarySessionId;
   final PackageInfo packageInfo;
+  final String? deviceId;
+  final bool loginByPhoneNumber;
 }
 
 Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
+  EquatableConfig.stringify = true;
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
   final isolateChannel =
       IsolateChannel<IsolateEvent>.connectSend(params.sendPort);
@@ -123,6 +131,8 @@ class _MessageProcessRunner {
 
   final jobSubscribers = <StreamSubscription>[];
 
+  Timer? _nextExpiredMessageRunner;
+
   Future<void> init(IsolateInitParams initParams) async {
     database = Database(await connectToDatabase(identityNumber, readCount: 2));
     jobSubscribers.add(
@@ -131,19 +141,12 @@ class _MessageProcessRunner {
       }),
     );
 
-    final tenSecond = const Duration(seconds: 10).inMilliseconds;
-    client = Client(
+    client = createClient(
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKeyStr,
-      scp: scp,
-      dioOptions: BaseOptions(
-        connectTimeout: tenSecond,
-        receiveTimeout: tenSecond,
-        sendTimeout: tenSecond,
-        followRedirects: false,
-      ),
-      jsonDecodeCallback: jsonDecode,
+      packageInfo: initParams.packageInfo,
+      deviceId: initParams.deviceId,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -156,7 +159,7 @@ class _MessageProcessRunner {
           },
         ),
       ],
-      httpLogLevel: HttpLogLevel.none,
+      loginByPhoneNumber: initParams.loginByPhoneNumber,
     );
 
     blaze = Blaze(
@@ -204,7 +207,7 @@ class _MessageProcessRunner {
     if (primarySessionId != null) {
       jobSubscribers.add(database.jobDao
           .watchHasSessionAckJobs()
-          .asyncListen((_) => _runSessionAckJob()));
+          .asyncDropListen((_) => _runSessionAckJob()));
     }
 
     jobSubscribers
@@ -212,24 +215,20 @@ class _MessageProcessRunner {
         // runFloodJob when socket connected.
         blaze.connectedStateStream
             .where((state) => state == ConnectedState.connected),
-        database.mixinDatabase
-            .tableUpdates(
+        database.mixinDatabase.tableUpdates(
           TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
         )
-            .map((event) {
-          // TODO remove this log after flood job is working well.
-          i('flood message table updated.');
-          return event;
-        })
-      ]).asyncListen((_) async {
+      ]).asyncDropListen((_) async {
         try {
           await _runProcessFloodJob();
         } catch (error, stacktrace) {
           e('runProcessFloodJob error: $error, stacktrace: $stacktrace');
         }
       }))
-      ..add(database.jobDao.watchHasAckJobs().asyncListen((_) => _runAckJob()))
-      ..add(database.jobDao.watchHasSendingJobs().asyncListen((_) async {
+      ..add(database.jobDao
+          .watchHasAckJobs()
+          .asyncDropListen((_) => _runAckJob()))
+      ..add(database.jobDao.watchHasSendingJobs().asyncDropListen((_) async {
         while (true) {
           final jobs = await database.jobDao.sendingJobs().get();
           if (jobs.isEmpty) break;
@@ -255,10 +254,15 @@ class _MessageProcessRunner {
       }))
       ..add(database.jobDao
           .watchHasUpdateAssetJobs()
-          .asyncListen((_) => _runUpdateAssetJob()))
+          .asyncDropListen((_) => _runUpdateAssetJob()))
       ..add(database.jobDao
           .watchHasUpdateStickerJobs()
-          .asyncListen((_) => _runUpdateStickerJob()));
+          .asyncDropListen((_) => _runUpdateStickerJob()))
+      ..add(database.mixinDatabase
+          .tableUpdates(
+            TableUpdateQuery.onTable(database.mixinDatabase.expiredMessages),
+          )
+          .asyncDropListen((event) => _scheduleExpiredJob()));
   }
 
   void _sendEventToMainIsolate(WorkerIsolateEventType event,
@@ -266,14 +270,58 @@ class _MessageProcessRunner {
     eventSink.add(event.toEvent(argument));
   }
 
+  Future<void> _scheduleExpiredJob() async {
+    d('_scheduleExpiredJob');
+    while (true) {
+      final messages =
+          await database.expiredMessageDao.getCurrentExpiredMessages();
+      if (messages.isEmpty) {
+        break;
+      }
+      for (final em in messages) {
+        // cancel attachment download.
+        final message =
+            await database.messageDao.findMessageByMessageId(em.messageId);
+        if (message == null) {
+          e('message is null, messageId: ${em.messageId} ${em.expireAt}');
+          continue;
+        }
+        await database.messageDao.deleteMessage(em.messageId);
+        if (message.category.isAttachment || message.category.isTranscript) {
+          _sendEventToMainIsolate(
+            WorkerIsolateEventType.requestDownloadAttachment,
+            AttachmentDeleteRequest(message: message),
+          );
+        }
+      }
+    }
+
+    final firstExpiredMessage =
+        await database.mixinDatabase.getFirstExpiredMessage().getSingleOrNull();
+    if (firstExpiredMessage == null) {
+      _nextExpiredMessageRunner?.cancel();
+      _nextExpiredMessageRunner = null;
+      return;
+    }
+    _nextExpiredMessageRunner?.cancel();
+    _nextExpiredMessageRunner = Timer(
+      Duration(
+          seconds: firstExpiredMessage.expireAt! -
+              DateTime.now().millisecondsSinceEpoch ~/ 1000),
+      _scheduleExpiredJob,
+    );
+  }
+
   Future<void> _runProcessFloodJob() async {
+    var first = true;
     while (true) {
       final floodMessages =
           await database.floodMessageDao.findFloodMessage().get();
       if (floodMessages.isEmpty) {
-        i('_runProcessFloodJob: no flood message');
+        i('_runProcessFloodJob: no flood message: $first');
         return;
       }
+      first = false;
       final stopwatch = Stopwatch()..start();
       for (final message in floodMessages) {
         await _decryptMessage.process(message);
@@ -287,21 +335,18 @@ class _MessageProcessRunner {
       final jobs = await database.jobDao.ackJobs().get();
       if (jobs.isEmpty) break;
 
-      final ack = await Future.wait(
-        jobs.map(
-          (e) async {
-            final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
-            return BlazeAckMessage(
-              messageId: map['message_id'] as String,
-              status: map['status'] as String,
-            );
-          },
-        ),
-      );
+      final ack = jobs.map(
+        (e) {
+          final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
+          return BlazeAckMessage.fromJson(map);
+        },
+      ).toList();
 
       final jobIds = jobs.map((e) => e.jobId).toList();
       try {
-        await client.messageApi.acknowledgements(ack);
+        // await client.messageApi.acknowledgements(ack);
+        final rsp = await client.dio.post('/acknowledgements', data: ack);
+        i('ack ids: ${ack.map((e) => e.messageId).toList()}, request id: ${rsp.headers['x-request-id']}');
         await database.jobDao.deleteJobs(jobIds);
       } catch (e, s) {
         w('Send ack error: $e, stack: $s');
@@ -328,25 +373,24 @@ class _MessageProcessRunner {
   }
 
   Future<void> _runUpdateStickerJob() async {
-    final jobs = await database.jobDao.updateStickerJobs().get();
-    if (jobs.isEmpty) return;
+    while (true) {
+      final jobs = await database.jobDao.updateStickerJobs().get();
+      if (jobs.isEmpty) return;
 
-    await Future.wait(jobs.map((db.Job job) async {
-      try {
-        final stickerId = job.blazeMessage;
-        if (stickerId == null) {
-        } else {
-          final sticker =
-              (await client.accountApi.getStickerById(stickerId)).data;
-          await database.stickerDao.insert(sticker.asStickersCompanion);
+      await Future.wait(jobs.map((db.Job job) async {
+        try {
+          final stickerId = job.blazeMessage;
+          if (stickerId != null) {
+            final sticker =
+                (await client.accountApi.getStickerById(stickerId)).data;
+            await database.stickerDao.insert(sticker.asStickersCompanion);
+          }
+          await database.jobDao.deleteJobById(job.jobId);
+        } catch (e, s) {
+          w('Update sticker job error: $e, stack: $s');
         }
-        await database.jobDao.deleteJobById(job.jobId);
-      } catch (e, s) {
-        w('Update sticker job error: $e, stack: $s');
-      }
-    }));
-
-    await _runUpdateStickerJob();
+      }));
+    }
   }
 
   Future<void> _runSendJob(List<db.Job> jobs) async {
@@ -355,11 +399,13 @@ class _MessageProcessRunner {
       String messageId;
       String? recipientId;
       var silent = false;
+      int? expireIn;
       try {
         final json = jsonDecode(job.blazeMessage!) as Map<String, dynamic>;
         messageId = json[JobDao.messageIdKey] as String;
         recipientId = json[JobDao.recipientIdKey] as String?;
         silent = json[JobDao.silentKey] as bool;
+        expireIn = json[JobDao.expireInKey] as int?;
       } catch (_) {
         messageId = job.blazeMessage!;
       }
@@ -374,19 +420,24 @@ class _MessageProcessRunner {
         final list = await database.transcriptMessageDao
             .transcriptMessageByTranscriptId(messageId)
             .get();
-        final json = list
-            .map((e) => e.toJson(serializer: const UtcValueSerializer())
-              ..remove('media_status'))
-            .toList();
+        final json = list.map((e) {
+          final map = e.toJson(serializer: const UtcValueSerializer());
+          map['media_duration'] =
+              int.tryParse(map['media_duration'] as String? ?? '');
+          map.remove('media_status');
+
+          return map;
+        }).toList();
         message = message.copyWith(content: jsonEncode(json));
       }
 
       MessageResult? result;
       var content = message.content;
+      String? lengthLimitedContent;
       if (message.category.isPost || message.category.isText) {
         content = content?.substring(0, min(content.length, kMaxTextLength));
+        lengthLimitedContent = content;
       }
-      final newContent = content;
 
       final conversation = await database.conversationDao
           .conversationById(message.conversationId)
@@ -395,14 +446,30 @@ class _MessageProcessRunner {
         e('Conversation not found');
         return;
       }
-      await _sender.checkConversationExists(conversation);
+
+      try {
+        await _sender.checkConversationExists(conversation);
+      } on MixinApiError catch (apiError) {
+        e('Send message error: ${apiError.message} $apiError');
+        final error = apiError.error;
+        // Maybe get a badData response when create conversation with
+        // an invalid user(for example: network user).
+        if (error is MixinError && error.code == badData) {
+          await database.jobDao.deleteJobById(job.jobId);
+          return;
+        }
+        rethrow;
+      }
 
       if (message.category.isPlain ||
           message.category == MessageCategory.appCard ||
           message.category.isPin) {
         if (message.category == MessageCategory.appCard ||
             message.category.isPost ||
-            message.category.isText) {
+            message.category.isTranscript ||
+            message.category.isText ||
+            message.category.isLive ||
+            message.category.isLocation) {
           final list = utf8.encode(content!);
           content = base64Encode(list);
         }
@@ -411,6 +478,7 @@ class _MessageProcessRunner {
           content!,
           recipientId: recipientId,
           silent: silent,
+          expireIn: expireIn ?? 0,
         );
         result = await _sender.deliver(blazeMessage);
       } else if (message.category.isEncrypted) {
@@ -427,15 +495,12 @@ class _MessageProcessRunner {
           await _sender.checkConversation(message.conversationId);
           return;
         }
-        final List<int> plaintext;
-        if (message.category.isAttachment ||
-            message.category.isSticker ||
-            message.category.isContact ||
-            message.category.isLive) {
-          plaintext = base64Decode(message.content!);
-        } else {
-          plaintext = utf8.encode(message.content!);
-        }
+        final plaintext = message.category.isAttachment ||
+                message.category.isSticker ||
+                message.category.isContact ||
+                message.category.isLive
+            ? base64Decode(message.content!)
+            : utf8.encode(message.content!);
         final content = _encryptedProtocol.encryptMessage(
             privateKey,
             plaintext,
@@ -448,19 +513,35 @@ class _MessageProcessRunner {
           message,
           base64Encode(content),
           silent: silent,
+          expireIn: expireIn ?? 0,
         );
         result = await _sender.deliver(blazeMessage);
       } else if (message.category.isSignal) {
-        result = await _sendSignalMessage(message, silent: silent);
-      } else {}
-
-      if (result?.success ?? false) {
-        await database.messageDao.updateMessageContentAndStatus(
-          message.messageId,
-          newContent,
-          MessageStatus.sent,
+        result = await _sendSignalMessage(
+          message,
+          silent: silent,
+          expireIn: expireIn ?? 0,
         );
+      }
+
+      if (result?.success ?? false || result?.errorCode == badData) {
+        if (result?.errorCode == null) {
+          await database.messageDao.updateMessageContentAndStatus(
+            message.messageId,
+            lengthLimitedContent,
+            MessageStatus.sent,
+          );
+        }
         await database.jobDao.deleteJobById(job.jobId);
+
+        if (conversation.expireIn != null && conversation.expireIn! > 0) {
+          await database.expiredMessageDao.insert(
+            messageId: messageId,
+            expireIn: conversation.expireIn!,
+            expireAt: DateTime.now().millisecondsSinceEpoch ~/ 1000 +
+                conversation.expireIn!,
+          );
+        }
       }
     }
 
@@ -488,7 +569,7 @@ class _MessageProcessRunner {
           id: const Uuid().v4(), action: kCreateMessage, params: blazeParam);
       try {
         final result = await _sender.deliver(blazeMessage);
-        if (result.success) {
+        if (result.success || result.errorCode == badData) {
           await database.jobDao.deleteJobById(e.jobId);
         }
       } catch (e, s) {
@@ -512,7 +593,7 @@ class _MessageProcessRunner {
           id: const Uuid().v4(), action: kCreateMessage, params: blazeParam);
       try {
         final result = await _sender.deliver(blazeMessage);
-        if (result.success) {
+        if (result.success || result.errorCode == badData) {
           await database.jobDao.deleteJobById(e.jobId);
         }
       } catch (e, s) {
@@ -524,6 +605,7 @@ class _MessageProcessRunner {
   Future<MessageResult?> _sendSignalMessage(
     db.SendingMessage message, {
     bool silent = false,
+    required int expireIn,
   }) async {
     MessageResult? result;
     if (message.resendStatus != null) {
@@ -538,9 +620,10 @@ class _MessageProcessRunner {
             sessionId: message.resendSessionId,
             mentionData: await getMentionData(message.messageId),
             silent: silent,
+            expireIn: expireIn,
           );
           result = await _sender.deliver(encrypted);
-          if (result.success) {
+          if (result.success || result.errorCode == badData) {
             await database.resendSessionMessageDao
                 .deleteResendSessionMessageById(message.messageId);
           }
@@ -556,11 +639,13 @@ class _MessageProcessRunner {
     result = await _sender.deliver(await encryptNormalMessage(
       message,
       silent: silent,
+      expireIn: expireIn,
     ));
-    if (result.success == false && result.retry == true) {
+    if (!result.success && result.retry) {
       return _sendSignalMessage(
         message,
         silent: silent,
+        expireIn: expireIn,
       );
     }
     return result;
@@ -569,18 +654,27 @@ class _MessageProcessRunner {
   Future<BlazeMessage> encryptNormalMessage(
     db.SendingMessage message, {
     bool silent = false,
-  }) async =>
-      signalProtocol.encryptGroupMessage(
-        message,
-        await getMentionData(message.messageId),
-        silent: silent,
-      );
+    int expireIn = 0,
+  }) async {
+    var m = message;
+    if (message.category.isLive && message.content != null) {
+      final list = utf8.encode(message.content!);
+      m = message.copyWith(content: base64Encode(list));
+    }
+    return signalProtocol.encryptGroupMessage(
+      m,
+      await getMentionData(m.messageId),
+      silent: silent,
+      expireIn: expireIn,
+    );
+  }
 
   BlazeMessage _createBlazeMessage(
     db.SendingMessage message,
     String data, {
     String? recipientId,
     bool silent = false,
+    required int expireIn,
   }) {
     final blazeParam = BlazeMessageParam(
       conversationId: message.conversationId,
@@ -590,6 +684,7 @@ class _MessageProcessRunner {
       data: data,
       quoteMessageId: message.quoteMessageId,
       silent: silent,
+      expireIn: expireIn,
     );
 
     return BlazeMessage(
@@ -622,42 +717,39 @@ class _MessageProcessRunner {
   }
 
   Future<void> _runSessionAckJob() async {
-    final jobs = await database.jobDao.sessionAckJobs().get();
-    if (jobs.isEmpty) return;
+    while (true) {
+      final jobs = await database.jobDao.sessionAckJobs().get();
+      if (jobs.isEmpty) return;
 
-    final conversationId =
-        await database.participantDao.findJoinedConversationId(userId);
-    if (conversationId == null) {
-      return;
-    }
-    final ack = jobs.map(
-      (e) {
-        final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
-        return BlazeAckMessage(
-          messageId: map['message_id'] as String,
-          status: map['status'] as String,
-        );
-      },
-    ).toList();
-    final jobIds = jobs.map((e) => e.jobId).toList();
-    final plainText = PlainJsonMessage(
-        kAcknowledgeMessageReceipts, null, null, null, null, ack);
-    final encode = base64Encode(utf8.encode(jsonEncode(plainText)));
-    // TODO check if safety to use a primary session.
-    // final primarySessionId = AccountKeyValue.instance.primarySessionId;
-    final bm = createParamBlazeMessage(createPlainJsonParam(
-        conversationId, userId, encode,
-        sessionId: primarySessionId));
-    try {
-      final result = await _sender.deliver(bm);
-      if (result.success) {
-        await database.jobDao.deleteJobs(jobIds);
+      final conversationId =
+          await database.participantDao.findJoinedConversationId(userId);
+      if (conversationId == null) return;
+
+      final ack = jobs.map(
+        (e) {
+          final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
+          return BlazeAckMessage.fromJson(map);
+        },
+      ).toList();
+      final jobIds = jobs.map((e) => e.jobId).toList();
+      final plainText = PlainJsonMessage(
+          kAcknowledgeMessageReceipts, null, null, null, null, ack);
+      final encode = base64Encode(utf8.encode(jsonEncode(plainText)));
+      // TODO check if safety to use a primary session.
+      // final primarySessionId = AccountKeyValue.instance.primarySessionId;
+      final param = createPlainJsonParam(conversationId, userId, encode,
+          sessionId: primarySessionId);
+      final bm = createParamBlazeMessage(param);
+      try {
+        final result = await _sender.deliver(bm);
+        i('session ack ids: ${ack.map((e) => e.messageId).toList()}, BlazeMessage.id: ${bm.id}, param.messageId: ${param.messageId}');
+        if (result.success || result.errorCode == badData) {
+          await database.jobDao.deleteJobs(jobIds);
+        }
+      } catch (e, s) {
+        w('Send session ack error: $e, stack: $s');
       }
-    } catch (e, s) {
-      w('Send session ack error: $e, stack: $s');
     }
-
-    await _runSessionAckJob();
   }
 
   void onEvent(MainIsolateEvent event) {

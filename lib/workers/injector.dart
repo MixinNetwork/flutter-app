@@ -18,7 +18,9 @@ class Injector {
 
   Future<void> syncConversion(String? conversationId,
       {bool force = false, bool unWait = false}) async {
-    if (conversationId == null || conversationId == systemUser) {
+    if (conversationId == null ||
+        conversationId == systemUser ||
+        conversationId == accountId) {
       return;
     }
     final conversation = await database.conversationDao
@@ -58,6 +60,7 @@ class Injector {
           status: ConversationStatus.success,
           muteUntil: DateTime.parse(response.data.muteUntil),
           codeUrl: response.data.codeUrl,
+          expireIn: response.data.expireIn,
         ),
       );
 

@@ -6,7 +6,6 @@ import '../converter/message_status_type_converter.dart';
 import '../converter/user_relationship_converter.dart';
 import '../converter/participant_role_converter.dart';
 import '../converter/millis_date_converter.dart';
-import '../converter/message_action_converter.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../enum/message_action.dart';
@@ -21,7 +20,7 @@ CREATE TABLE circle_conversations ( conversation_id TEXT NOT NULL, circle_id TEX
 
 CREATE TABLE circles ( circle_id TEXT NOT NULL, name TEXT NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, ordered_at INTEGER MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(circle_id) );
 
-CREATE TABLE conversations ( conversation_id TEXT NOT NULL, owner_id TEXT, category TEXT MAPPED BY `const ConversationCategoryTypeConverter()`, name TEXT, icon_url TEXT, announcement TEXT, code_url TEXT, pay_type TEXT, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, pin_time INTEGER MAPPED BY `const MillisDateConverter()`, last_message_id TEXT, last_message_created_at INTEGER MAPPED BY `const MillisDateConverter()`, last_read_message_id TEXT, unseen_message_count INTEGER, status INTEGER NOT NULL MAPPED BY `const ConversationStatusTypeConverter()`, draft TEXT, mute_until INTEGER MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(conversation_id) );
+CREATE TABLE conversations ( conversation_id TEXT NOT NULL, owner_id TEXT, category TEXT MAPPED BY `const ConversationCategoryTypeConverter()`, name TEXT, icon_url TEXT, announcement TEXT, code_url TEXT, pay_type TEXT, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, pin_time INTEGER MAPPED BY `const MillisDateConverter()`, last_message_id TEXT, last_message_created_at INTEGER MAPPED BY `const MillisDateConverter()`, last_read_message_id TEXT, unseen_message_count INTEGER, status INTEGER NOT NULL MAPPED BY `const ConversationStatusTypeConverter()`, draft TEXT, mute_until INTEGER MAPPED BY `const MillisDateConverter()`, expire_in INTEGER, PRIMARY KEY(conversation_id) );
 
 CREATE TABLE flood_messages ( message_id TEXT NOT NULL, data TEXT NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(message_id) );
 
@@ -31,7 +30,7 @@ CREATE TABLE jobs ( job_id TEXT NOT NULL, "action" TEXT NOT NULL, created_at INT
 
 CREATE TABLE message_mentions ( message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, has_read BOOLEAN, PRIMARY KEY(message_id) );
 
-CREATE TABLE messages ( message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, category TEXT NOT NULL, content TEXT, media_url TEXT, media_mime_type TEXT, media_size INTEGER, media_duration TEXT, media_width INTEGER, media_height INTEGER, media_hash TEXT, thumb_image TEXT, media_key TEXT, media_digest TEXT, media_status TEXT MAPPED BY `const MediaStatusTypeConverter()`, status TEXT NOT NULL MAPPED BY `const MessageStatusTypeConverter()`, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, "action" TEXT MAPPED BY `const MessageActionConverter()`, participant_id TEXT, snapshot_id TEXT, hyperlink TEXT, name TEXT, album_id TEXT, sticker_id TEXT, shared_user_id TEXT, media_waveform TEXT, quote_message_id TEXT, quote_content TEXT, thumb_url TEXT, caption TEXT, PRIMARY KEY(message_id), FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE );
+CREATE TABLE messages ( message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, category TEXT NOT NULL, content TEXT, media_url TEXT, media_mime_type TEXT, media_size INTEGER, media_duration TEXT, media_width INTEGER, media_height INTEGER, media_hash TEXT, thumb_image TEXT, media_key TEXT, media_digest TEXT, media_status TEXT MAPPED BY `const MediaStatusTypeConverter()`, status TEXT NOT NULL MAPPED BY `const MessageStatusTypeConverter()`, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, "action" TEXT, participant_id TEXT, snapshot_id TEXT, hyperlink TEXT, name TEXT, album_id TEXT, sticker_id TEXT, shared_user_id TEXT, media_waveform TEXT, quote_message_id TEXT, quote_content TEXT, thumb_url TEXT, caption TEXT, PRIMARY KEY(message_id), FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE );
 
 CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING FTS5( message_id UNINDEXED , conversation_id UNINDEXED , content, created_at UNINDEXED , user_id UNINDEXED , reserved_int UNINDEXED , reserved_text UNINDEXED , tokenize='unicode61' );
 
@@ -65,15 +64,19 @@ CREATE TABLE fiats (code TEXT NOT NULL, rate DOUBLE NOT NULL, PRIMARY KEY(code))
 
 CREATE TABLE favorite_apps (app_id TEXT NOT NULL, user_id TEXT NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(app_id, user_id));
 
+CREATE TABLE expired_messages (message_id TEXT NOT NULL, expire_in INTEGER NOT NULL, expire_at INTEGER, PRIMARY KEY(message_id));
+
 CREATE INDEX IF NOT EXISTS index_conversations_category_status ON conversations(category, status);
 CREATE INDEX IF NOT EXISTS index_conversations_mute_until ON conversations(mute_until);
 CREATE INDEX IF NOT EXISTS index_flood_messages_created_at ON flood_messages(created_at);
 CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs("action");
 CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id_has_read ON message_mentions(conversation_id, has_read);
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages(conversation_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category_created_at ON messages(conversation_id, category,created_at DESC);
 CREATE INDEX IF NOT EXISTS index_participants_conversation_id_created_at ON participants(conversation_id, created_at);
 CREATE INDEX IF NOT EXISTS index_sticker_albums_category_created_at ON sticker_albums(category, created_at DESC);
 CREATE INDEX IF NOT EXISTS index_pin_messages_conversation_id ON pin_messages(conversation_id);
 CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messages(conversation_id, status, user_id);
+CREATE INDEX IF NOT EXISTS index_users_identity_number ON users(identity_number);
 
 CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (select message_id from messages where conversation_id = old.conversation_id order by created_at DESC limit 1) WHERE conversation_id = old.conversation_id; END;

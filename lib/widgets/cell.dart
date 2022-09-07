@@ -8,12 +8,11 @@ import 'interactive_decorated_box.dart';
 
 class CellGroup extends StatelessWidget {
   const CellGroup(
-      {Key? key,
+      {super.key,
       this.borderRadius = const BorderRadius.all(Radius.circular(8)),
       required this.child,
       this.padding = const EdgeInsets.only(right: 10, left: 10, bottom: 10),
-      this.cellBackgroundColor})
-      : super(key: key);
+      this.cellBackgroundColor});
 
   final BorderRadius borderRadius;
   final Widget child;
@@ -40,10 +39,9 @@ class CellGroup extends StatelessWidget {
 
 class _CellItemStyle extends InheritedWidget {
   const _CellItemStyle({
-    Key? key,
-    required Widget child,
+    required super.child,
     required this.backgroundColor,
-  }) : super(key: key, child: child);
+  });
 
   final Color backgroundColor;
 
@@ -60,7 +58,7 @@ class _CellItemStyle extends InheritedWidget {
 
 class CellItem extends StatelessWidget {
   const CellItem({
-    Key? key,
+    super.key,
     this.leading,
     required this.title,
     this.color,
@@ -68,7 +66,7 @@ class CellItem extends StatelessWidget {
     this.selected = false,
     this.trailing = const Arrow(),
     this.description,
-  }) : super(key: key);
+  });
 
   final Widget? leading;
   final Widget title;
@@ -136,9 +134,7 @@ class CellItem extends StatelessWidget {
 }
 
 class Arrow extends StatelessWidget {
-  const Arrow({
-    Key? key,
-  }) : super(key: key);
+  const Arrow({super.key});
 
   @override
   Widget build(BuildContext context) => SvgPicture.asset(

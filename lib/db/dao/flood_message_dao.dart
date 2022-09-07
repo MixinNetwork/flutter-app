@@ -7,7 +7,7 @@ part 'flood_message_dao.g.dart';
 @DriftAccessor(tables: [FloodMessages])
 class FloodMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$FloodMessageDaoMixin {
-  FloodMessageDao(MixinDatabase db) : super(db);
+  FloodMessageDao(super.db);
 
   Future<int> insert(FloodMessage message) =>
       into(db.floodMessages).insertOnConflictUpdate(message);

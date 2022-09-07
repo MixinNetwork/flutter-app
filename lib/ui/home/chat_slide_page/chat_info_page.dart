@@ -22,7 +22,7 @@ import '../chat/chat_page.dart';
 import 'shared_apps_page.dart';
 
 class ChatInfoPage extends HookWidget {
-  const ChatInfoPage({Key? key}) : super(key: key);
+  const ChatInfoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -43,26 +43,36 @@ class ChatInfoPage extends HookWidget {
     final userParticipant = conversation.participant;
 
     useEffect(() {
-      if (conversation.isGroup == true) {
-        accountServer.refreshGroup(conversationId);
-      } else if (conversation.userId != null) {
-        accountServer.refreshUsers([conversation.userId!], force: true);
-      }
+      accountServer.refreshConversation(conversationId);
     }, [conversationId]);
 
+    final userId = conversation.userId;
+
+    useEffect(() {
+      if (conversation.isGroup == true) return;
+      if (userId == null) return;
+
+      accountServer.refreshUsers([userId], force: true);
+    }, [userId]);
+
     final announcement = useStream<String?>(
-            useMemoized(() => context.database.conversationDao
-                .announcement(conversationId)
-                .watchSingleThrottle(kVerySlowThrottleDuration)),
-            initialData: null)
-        .data;
+      useMemoized(() => context.database.conversationDao
+          .announcement(conversationId)
+          .watchSingleThrottle(kVerySlowThrottleDuration)),
+    ).data;
     if (!conversation.isLoaded) return const SizedBox();
 
-    final isGroupConversation = conversation.isGroup!;
+    final isGroupConversation = conversation.isGroup ?? false;
     final muting = conversation.conversation?.isMute == true;
     final isOwnerOrAdmin = userParticipant?.role == ParticipantRole.owner ||
         userParticipant?.role == ParticipantRole.admin;
 
+    final expireIn = conversation.conversation?.expireDuration ?? Duration.zero;
+
+    final canModifyExpireIn =
+        !isGroupConversation || (isGroupConversation && isOwnerOrAdmin);
+
+    final isExited = userParticipant == null;
     return Scaffold(
       appBar: MixinAppBar(
         actions: [
@@ -130,16 +140,16 @@ class ChatInfoPage extends HookWidget {
                     );
 
                     if (result == null || result.isEmpty) return;
-                    final conversationId = result[0].conversationId;
+                    final conversationId = result.first.conversationId;
 
                     await runFutureWithToast(
                         context,
                         accountServer.sendContactMessage(
                           conversation.userId!,
                           conversation.name!,
-                          result[0].encryptCategory!,
+                          result.first.encryptCategory!,
                           conversationId: conversationId,
-                          recipientId: result[0].userId,
+                          recipientId: result.first.userId,
                         ));
                   },
                 ),
@@ -158,7 +168,7 @@ class ChatInfoPage extends HookWidget {
                     _SharedApps(userId: conversation.userId!),
                   CellItem(
                     title: Text(
-                      context.l10n.searchMessageHistory,
+                      context.l10n.searchConversation,
                       maxLines: 1,
                     ),
                     onTap: () => context
@@ -168,6 +178,27 @@ class ChatInfoPage extends HookWidget {
                 ],
               ),
             ),
+            if (!(isGroupConversation && isExited))
+              CellGroup(
+                child: CellItem(
+                  title: Text(context.l10n.disappearingMessage),
+                  description: Text(
+                    expireIn.formatAsConversationExpireIn(
+                      localization: context.l10n,
+                    ),
+                    style: TextStyle(
+                      color: context.theme.secondaryText,
+                      fontSize: 14,
+                    ),
+                  ),
+                  trailing: canModifyExpireIn ? const Arrow() : null,
+                  onTap: !canModifyExpireIn
+                      ? null
+                      : () => context
+                          .read<ChatSideCubit>()
+                          .pushPage(ChatSideCubit.disappearMessages),
+                ),
+              ),
             if (isGroupConversation && isOwnerOrAdmin)
               CellGroup(
                 child: Column(
@@ -175,8 +206,8 @@ class ChatInfoPage extends HookWidget {
                   children: [
                     Builder(builder: (context) {
                       final announcementTitle = announcement?.isEmpty ?? true
-                          ? context.l10n.addAnnouncement
-                          : context.l10n.editAnnouncement;
+                          ? context.l10n.addGroupDescription
+                          : context.l10n.editGroupDescription;
                       return CellItem(
                         title: Text(announcementTitle),
                         onTap: () async {
@@ -206,47 +237,53 @@ class ChatInfoPage extends HookWidget {
             CellGroup(
               child: Column(
                 children: [
-                  CellItem(
-                    title:
-                        Text(muting ? context.l10n.unMute : context.l10n.muted),
-                    description: muting
-                        ? Text(
-                            DateFormat('yyyy/MM/dd, hh:mm a').format(
-                                conversation.conversation!.validMuteUntil!
-                                    .toLocal()),
-                            style: TextStyle(
-                              color: context.theme.secondaryText,
-                              fontSize: 14,
+                  if (!(isGroupConversation && isExited))
+                    CellItem(
+                      title: Text(
+                          muting ? context.l10n.unmute : context.l10n.muted),
+                      description: muting
+                          ? Text(
+                              DateFormat('yyyy/MM/dd, hh:mm a').format(
+                                  conversation.conversation!.validMuteUntil!
+                                      .toLocal()),
+                              style: TextStyle(
+                                color: context.theme.secondaryText,
+                                fontSize: 14,
+                              ),
+                            )
+                          : null,
+                      trailing: null,
+                      onTap: () async {
+                        if (muting) {
+                          await runFutureWithToast(
+                            context,
+                            context.accountServer.unMuteConversation(
+                              conversationId:
+                                  isGroupConversation ? conversationId : null,
+                              userId: isGroupConversation
+                                  ? null
+                                  : conversation.userId,
                             ),
-                          )
-                        : null,
-                    trailing: null,
-                    onTap: () async {
-                      final isGroup = conversation.isGroup ?? false;
-                      if (muting) {
+                          );
+                          return;
+                        }
+
+                        final result = await showMixinDialog<int?>(
+                            context: context, child: const MuteDialog());
+                        if (result == null) return;
+
                         await runFutureWithToast(
-                          context,
-                          context.accountServer.unMuteConversation(
-                            conversationId: isGroup ? conversationId : null,
-                            userId: isGroup ? null : conversation.userId,
-                          ),
-                        );
-                        return;
-                      }
-
-                      final result = await showMixinDialog<int?>(
-                          context: context, child: const MuteDialog());
-                      if (result == null) return;
-
-                      await runFutureWithToast(
-                          context,
-                          context.accountServer.muteConversation(
-                            result,
-                            conversationId: isGroup ? conversationId : null,
-                            userId: isGroup ? null : conversation.userId,
-                          ));
-                    },
-                  ),
+                            context,
+                            context.accountServer.muteConversation(
+                              result,
+                              conversationId:
+                                  isGroupConversation ? conversationId : null,
+                              userId: isGroupConversation
+                                  ? null
+                                  : conversation.userId,
+                            ));
+                      },
+                    ),
                   if (!isGroupConversation ||
                       (isGroupConversation && isOwnerOrAdmin))
                     CellItem(
@@ -258,7 +295,7 @@ class ChatInfoPage extends HookWidget {
                           child: EditDialog(
                             editText: conversation.name ?? '',
                             title: Text(context.l10n.editName),
-                            hintText: context.l10n.conversationName,
+                            hintText: context.l10n.groupName,
                             positiveAction: context.l10n.change,
                           ),
                         );
@@ -376,8 +413,8 @@ class ChatInfoPage extends HookWidget {
                       context.read<MessageBloc>().reload();
                     },
                   ),
-                  if (conversation.isGroup!)
-                    if (userParticipant != null)
+                  if (isGroupConversation)
+                    if (!isExited)
                       CellItem(
                         title: Text(context.l10n.exitGroup),
                         color: context.theme.red,
@@ -392,6 +429,11 @@ class ChatInfoPage extends HookWidget {
                           await runFutureWithToast(
                             context,
                             accountServer.exitGroup(conversationId),
+                          );
+
+                          await ConversationCubit.selectConversation(
+                            context,
+                            conversationId,
                           );
                         },
                       )
@@ -434,7 +476,7 @@ class ChatInfoPage extends HookWidget {
                   onTap: () async {
                     final result = await showConfirmMixinDialog(
                       context,
-                      context.l10n.reportWarning,
+                      context.l10n.reportAndBlock,
                     );
                     if (!result) return;
                     final userId = conversation.userId;
@@ -456,12 +498,12 @@ class ChatInfoPage extends HookWidget {
 
 class ConversationBio extends HookWidget {
   const ConversationBio({
-    Key? key,
+    super.key,
     this.fontSize = 14,
     required this.conversationId,
     required this.userId,
     required this.isGroup,
-  }) : super(key: key);
+  });
 
   final double fontSize;
   final String conversationId;
@@ -503,9 +545,9 @@ class ConversationBio extends HookWidget {
 ///
 /// if conversation is not stranger, show nothing.
 class _AddToContactsButton extends StatelessWidget {
-  _AddToContactsButton(this.conversation, {Key? key})
-      : assert(conversation.isLoaded),
-        super(key: key);
+  _AddToContactsButton(
+    this.conversation,
+  ) : assert(conversation.isLoaded);
   final ConversationState conversation;
 
   @override
@@ -520,8 +562,8 @@ class _AddToContactsButton extends StatelessWidget {
                     backgroundColor: context.theme.statusBackground,
                     padding:
                         const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
                   ),
                   onPressed: () {
@@ -540,8 +582,8 @@ class _AddToContactsButton extends StatelessWidget {
                   },
                   child: Text(
                     conversation.isBot!
-                        ? context.l10n.conversationAddBot
-                        : context.l10n.conversationAddContact,
+                        ? context.l10n.addBotWithPlus
+                        : context.l10n.addContactWithPlus,
                     style: TextStyle(fontSize: 12, color: context.theme.accent),
                   ),
                 ),
@@ -551,7 +593,7 @@ class _AddToContactsButton extends StatelessWidget {
 }
 
 class _SharedApps extends HookWidget {
-  const _SharedApps({Key? key, required this.userId}) : super(key: key);
+  const _SharedApps({required this.userId});
 
   final String userId;
 
@@ -574,7 +616,7 @@ class _SharedApps extends HookWidget {
       child: data.isEmpty
           ? const SizedBox()
           : CellItem(
-              title: Text(context.l10n.sharedApps),
+              title: Text(context.l10n.shareApps),
               trailing: OverlappedAppIcons(apps: data),
               onTap: () => context
                   .read<ChatSideCubit>()

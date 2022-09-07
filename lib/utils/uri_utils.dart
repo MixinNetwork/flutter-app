@@ -3,6 +3,8 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/constants.dart';
+import '../crypto/uuid/uuid.dart';
+import '../ui/home/bloc/conversation_cubit.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/item/transfer/transfer_page.dart';
@@ -22,24 +24,24 @@ Future<bool> openUriWithWebView(
   String? conversationId,
   AppCardData? appCardData,
 }) async =>
-    openUri(context, text, fallbackHandler: (url) async {
+    openUri(context, text, fallbackHandler: (uri) async {
       if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
         await MixinWebView.instance.openWebViewWindowWithUrl(
           context,
-          url,
+          uri.toString(),
           conversationId: conversationId,
           title: title,
           appCardData: appCardData,
         );
         return true;
       }
-      return launch(url);
+      return launchUrl(uri);
     });
 
 Future<bool> openUri(
   BuildContext context,
   String text, {
-  Future<bool> Function(String url) fallbackHandler = launch,
+  Future<bool> Function(Uri uri) fallbackHandler = launchUrl,
 }) async {
   final uri = Uri.parse(text);
   if (uri.scheme.isEmpty) return Future.value(false);
@@ -104,6 +106,29 @@ Future<bool> openUri(
       }
     }
 
+    final conversationId = uri.conversationId;
+    if (conversationId != null && conversationId.trim().isNotEmpty) {
+      final userId = uri.queryParameters['user'];
+      if (userId != null && userId.trim().isNotEmpty) {
+        showToastLoading(context);
+        await context.accountServer.refreshUsers([userId]);
+        Toast.dismiss();
+
+        if (conversationId !=
+            generateConversationId(context.accountServer.userId, userId)) {
+          await showToastFailed(context, null);
+          return false;
+        } else {
+          await ConversationCubit.selectUser(context, userId);
+          return true;
+        }
+      }
+
+      await ConversationCubit.selectConversation(context, conversationId,
+          sync: true);
+      return true;
+    }
+
     if (uri.isMixinScheme) {
       Toast.dismiss();
       await showUnknownMixinUrlDialog(context, uri);
@@ -111,7 +136,7 @@ Future<bool> openUri(
     }
   }
 
-  return fallbackHandler(uri.toString());
+  return fallbackHandler(uri);
 }
 
 extension _MixinUriExtension on Uri {
@@ -127,7 +152,7 @@ extension _MixinUriExtension on Uri {
   bool _isTypeHost(MixinSchemeHost type) =>
       _isMixinHost &&
       pathSegments.isNotEmpty &&
-      pathSegments[0] == enumConvertToString(type);
+      pathSegments.first == enumConvertToString(type);
 
   String? _getValue(MixinSchemeHost type) {
     if (_isTypeScheme(type)) {
@@ -142,6 +167,8 @@ extension _MixinUriExtension on Uri {
   String? get userId => _getValue(MixinSchemeHost.users);
 
   String? get code => _getValue(MixinSchemeHost.codes);
+
+  String? get conversationId => _getValue(MixinSchemeHost.conversations);
 
   String? get snapshotTraceId {
     if (_isTypeScheme(MixinSchemeHost.snapshots)) {

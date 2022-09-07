@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
@@ -84,25 +83,27 @@ class AttachmentUtil extends ChangeNotifier {
 
   final _attachmentJob = <String, _AttachmentJobBase>{};
 
+  /// check if the attachment is downloaded, if not, return false, otherwise sync it and  return true
+  Future<bool> checkSyncMessageMedia(String messageId) async {
+    Future<bool> checkDownloaded() async =>
+        await _messageDao.messageHasMediaStatus(messageId, MediaStatus.done) ||
+        await _messageDao.transcriptMessageHasMediaStatus(
+            messageId, MediaStatus.done);
+
+    if (!_hasAttachmentJob(messageId) && await checkDownloaded()) {
+      await syncMessageMedia(messageId);
+      await _updateTranscriptMessageStatus(messageId);
+      return true;
+    }
+    return false;
+  }
+
   Future<void> downloadAttachment({
     required String messageId,
   }) async {
-    if (_hasAttachmentJob(messageId)) {
-      return _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
-    } else {
-      if (await _messageDao.messageHasMediaStatus(
-                  messageId, MediaStatus.done) ==
-              true &&
-          await _messageDao.transcriptMessageHasMediaStatus(
-                  messageId, MediaStatus.done, true) ==
-              true) {
-        await syncMessageMedia(messageId);
-        await _updateTranscriptMessageStatus(messageId);
-        return;
-      }
+    if (await checkSyncMessageMedia(messageId)) return;
 
-      await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
-    }
+    await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
 
     AttachmentMessage? attachmentMessage;
 
@@ -112,7 +113,7 @@ class AttachmentUtil extends ChangeNotifier {
           .transcriptMessageByMessageId(messageId)
           .getSingleOrNull(),
     ]);
-    final message = list[0] as Message?;
+    final message = list.first as Message?;
     final transcriptMessage = list[1] as TranscriptMessage?;
 
     if (message != null && attachmentMessage == null) {
@@ -258,7 +259,7 @@ class AttachmentUtil extends ChangeNotifier {
       if (file.existsSync()) await file.delete();
       await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
     } finally {
-      await _removeAttachmentJob(messageId);
+      await removeAttachmentJob(messageId);
     }
   }
 
@@ -310,7 +311,7 @@ class AttachmentUtil extends ChangeNotifier {
       await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
       return null;
     } finally {
-      await _removeAttachmentJob(messageId);
+      await removeAttachmentJob(messageId);
     }
   }
 
@@ -430,7 +431,7 @@ class AttachmentUtil extends ChangeNotifier {
     }
   }
 
-  Future<void> _removeAttachmentJob(String messageId) async {
+  Future<void> removeAttachmentJob(String messageId) async {
     await DownloadKeyValue.instance.removeMessageId(messageId);
     _attachmentJob[messageId]?.cancel();
     _attachmentJob.remove(messageId);
@@ -451,8 +452,7 @@ class AttachmentUtil extends ChangeNotifier {
   Future<bool> syncMessageMedia(String messageId) async {
     Future<bool> fromMessage() async {
       if (await _messageDao.messageHasMediaStatus(
-              messageId, MediaStatus.done) ==
-          true) {
+          messageId, MediaStatus.done)) {
         final message = await _messageDao.findMessageByMessageId(messageId);
         final path = convertAbsolutePath(
           category: message!.category,
@@ -469,7 +469,7 @@ class AttachmentUtil extends ChangeNotifier {
 
         await File(path).copy(transcriptPath);
 
-        await _messageDao.syncMessageMedia(messageId, true);
+        await _messageDao.syncMessageMedia(messageId);
         return true;
       }
 
@@ -486,8 +486,8 @@ class AttachmentUtil extends ChangeNotifier {
         MediaStatus.done,
         true,
       );
-      if (await done == true && await notDone == true) {
-        await _messageDao.syncMessageMedia(messageId, true);
+      if (await done && await notDone) {
+        await _messageDao.syncMessageMedia(messageId);
         return true;
       }
 

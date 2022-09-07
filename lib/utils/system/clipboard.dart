@@ -20,7 +20,7 @@ Future<List<File>> getClipboardFiles() async {
     final filePaths = await Pasteboard.files();
     if (filePaths.isNotEmpty) {
       final files =
-          filePaths.map((e) => File(e)).where((e) => e.existsSync()).toList();
+          filePaths.map(File.new).where((e) => e.existsSync()).toList();
       if (files.isNotEmpty) {
         return files;
       }
@@ -49,8 +49,8 @@ Future<List<File>> getClipboardFiles() async {
         e('re format image failed: $error $s');
       }
     }
-    final file = await saveBytesToTempFile(
-        imageBytes!, 'mixin_paste_board_image', '.png');
+    final file =
+        await saveBytesToTempFile(imageBytes!, TempFileType.pasteboardImage);
     if (file != null) {
       return [file];
     }

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
@@ -73,7 +72,6 @@ class Blaze {
 
     _connectedStateBehaviorSubject.value = state;
 
-    i('connectedState: $state, ${StackTrace.current}');
     if (state == ConnectedState.connected) {
       _refreshOffset();
     }
@@ -210,26 +208,18 @@ class Blaze {
           data.messageId,
           MessageStatus.delivered));
     }
-    if (stopwatch != null) {
+    if (stopwatch != null && stopwatch.elapsedMilliseconds > 5) {
       d('handle execution time: ${stopwatch.elapsedMilliseconds}');
     }
   }
 
-  Future<void> updateRemoteMessageStatus(
-      String messageId, MessageStatus status) async {}
-
-  Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
+  Future<bool> makeMessageStatus(String messageId, MessageStatus status) async {
     final currentStatus =
         await database.messageDao.findMessageStatusById(messageId);
-    if (currentStatus == MessageStatus.sending) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
-    } else if (currentStatus == MessageStatus.sent &&
-        (status == MessageStatus.delivered || status == MessageStatus.read)) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
-    } else if (currentStatus == MessageStatus.delivered &&
-        status == MessageStatus.read) {
+    if (currentStatus != null && status.index > currentStatus.index) {
       await database.messageDao.updateMessageStatusById(messageId, status);
     }
+    return currentStatus != null;
   }
 
   Future<void> _sendListPending() async {
@@ -244,12 +234,7 @@ class Blaze {
   Future<void> _refreshOffset() async {
     final offset =
         await database.offsetDao.findStatusOffset().getSingleOrNull();
-    var status = 0;
-    if (offset != null) {
-      status = offset.epochNano;
-    } else {
-      status = DateTime.now().epochNano;
-    }
+    var status = offset != null ? offset.epochNano : DateTime.now().epochNano;
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);
       final blazeMessages = response.data;
@@ -257,9 +242,17 @@ class Blaze {
         break;
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
-        pendingMessageStatusMap[m.messageId] = m.status;
+        if (!(await makeMessageStatus(m.messageId, m.status))) {
+          final messagesHistory = await database.messagesHistoryDao
+              .findMessageHistoryById(m.messageId);
+          if (messagesHistory != null) return;
 
-        await makeMessageStatus(m.messageId, m.status);
+          final status = pendingMessageStatusMap[m.messageId];
+          if (status == null || m.status.index > status.index) {
+            pendingMessageStatusMap[m.messageId] = m.status;
+          }
+        }
+
         await database.offsetDao.insert(Offset(
             key: statusOffset, timestamp: m.updatedAt.toIso8601String()));
       });
@@ -343,9 +336,7 @@ BlazeMessage parseBlazeMessage(List<int> list) =>
 
 BlazeMessage _parseBlazeMessageInternal(List<int> message) {
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
-  final blazeMessage =
-      BlazeMessage.fromJson(jsonDecode(content) as Map<String, dynamic>);
-  return blazeMessage;
+  return BlazeMessage.fromJson(jsonDecode(content) as Map<String, dynamic>);
 }
 
 class WebSocketTransaction<T> {

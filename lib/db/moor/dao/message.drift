@@ -21,6 +21,7 @@ SELECT message.message_id AS messageId,
     message.quote_content AS quoteContent,
     message.action AS actionName,
     message.shared_user_id AS sharedUserId,
+    message.sticker_id AS stickerId,
     sender.user_id AS userId,
     sender.full_name AS userFullName,
     sender.identity_number AS userIdentityNumber,
@@ -38,7 +39,6 @@ SELECT message.message_id AS messageId,
     sticker.asset_url AS assetUrl,
     sticker.asset_width AS assetWidth,
     sticker.asset_height AS assetHeight,
-    sticker.sticker_id AS stickerId,
     sticker.name AS assetName,
     sticker.asset_type AS assetType,
     participant.full_name AS participantFullName,
@@ -54,6 +54,7 @@ SELECT message.message_id AS messageId,
     hyperlink.site_description AS siteDescription,
     hyperlink.site_image AS siteImage,
     messageMention.has_read AS mentionRead,
+    em.expire_in AS expireIn,
     CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned
 FROM messages message
          INNER JOIN users sender ON message.user_id = sender.user_id
@@ -67,6 +68,7 @@ FROM messages message
 ON message.conversation_id = conversation.conversation_id
          LEFT JOIN message_mentions messageMention ON message.message_id = messageMention.message_id
          LEFT JOIN pin_messages pinMessage on message.message_id = pinMessage.message_id
+         LEFT JOIN expired_messages em ON message.message_id = em.message_id
 WHERE $where
 ORDER BY $order
 LIMIT $limit;
@@ -85,9 +87,9 @@ SELECT message.message_id AS messageId, message.conversation_id AS conversationI
     message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl,
     message.media_duration AS mediaDuration,
     message.quote_message_id AS quoteId, message.quote_content AS quoteContent,
+    message.sticker_id AS stickerId,
     sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth,
     sticker.asset_height AS assetHeight,
-    sticker.sticker_id AS stickerId,
     sticker.name AS assetName, sticker.asset_type AS assetType,
     message.shared_user_id AS sharedUserId,
     shareUser.full_name AS sharedUserFullName,

@@ -6,16 +6,17 @@ import '../../app.dart';
 import '../../utils/app_lifecycle.dart';
 import '../../utils/hook.dart';
 import '../cache_image.dart';
+import '../cache_lottie.dart';
 
 class StickerItem extends HookWidget {
   const StickerItem({
-    Key? key,
+    super.key,
     required this.assetUrl,
     required this.assetType,
     this.placeholder,
     this.width,
     this.height,
-  }) : super(key: key);
+  });
 
   final String assetUrl;
   final String? assetType;
@@ -25,7 +26,6 @@ class StickerItem extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    late Widget child;
     final isJson = useMemoized(() => assetType == 'json', [assetType]);
 
     final playing = useState(true);
@@ -64,33 +64,51 @@ class StickerItem extends HookWidget {
       return () => appActiveListener.removeListener(listener);
     }, [controller, appActiveListener]);
 
-    if (isJson) {
-      child = Lottie.network(
-        assetUrl,
-        controller: controller,
-        height: height,
-        width: width,
-        fit: BoxFit.contain,
-        onLoaded: (composition) {
-          controller.duration = composition.duration;
-          listener();
-        },
-      );
-    } else {
-      child = CacheImage(
-        assetUrl,
-        height: height,
-        width: width,
-        controller: playing,
-        fit: BoxFit.contain,
-        placeholder: () => placeholder ?? const SizedBox(),
-      );
-    }
+    final child = isJson
+        ? LottieBuilder(
+            lottie: CachedNetworkLottie(assetUrl),
+            controller: controller,
+            height: height,
+            width: width,
+            fit: BoxFit.contain,
+            onLoaded: (composition) {
+              controller.duration = composition.duration;
+              listener();
+            },
+          )
+        : CacheImage(assetUrl,
+            height: height,
+            width: width,
+            controller: playing,
+            fit: BoxFit.contain,
+            placeholder: () => placeholder ?? const SizedBox());
 
     if (width == null || height == null) {
       return AspectRatio(aspectRatio: 1, child: child);
     }
 
     return child;
+  }
+}
+
+class StickerGroupIcon extends StatelessWidget {
+  const StickerGroupIcon({
+    super.key,
+    required this.iconUrl,
+    required this.size,
+  });
+
+  final String iconUrl;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final isLottie = iconUrl.toLowerCase().endsWith('.json');
+    return StickerItem(
+      assetUrl: iconUrl,
+      assetType: isLottie ? 'json' : null,
+      width: size,
+      height: size,
+    );
   }
 }

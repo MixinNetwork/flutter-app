@@ -10,23 +10,22 @@ import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
 
 class UnknownMessage extends StatelessWidget {
-  const UnknownMessage({
-    Key? key,
-  }) : super(key: key);
+  const UnknownMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final content = RichText(
       text: TextSpan(
-        text: context.l10n.chatNotSupport,
+        text: context.l10n.messageNotSupport,
         style: TextStyle(
           fontSize: MessageItemWidget.primaryFontSize,
           color: context.theme.text,
         ),
         children: [
+          const TextSpan(text: ' '),
           TextSpan(
             mouseCursor: SystemMouseCursors.click,
-            text: context.l10n.chatLearn,
+            text: context.l10n.learnMore,
             style: TextStyle(
               fontSize: MessageItemWidget.primaryFontSize,
               color: context.theme.accent,

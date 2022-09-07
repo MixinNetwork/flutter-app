@@ -146,11 +146,11 @@ class MentionCache {
 
 class MentionBuilder extends HookWidget {
   const MentionBuilder({
-    Key? key,
+    super.key,
     required this.content,
     required this.builder,
     this.generateHighlightTextSpan = true,
-  }) : super(key: key);
+  });
 
   final String? content;
   final bool generateHighlightTextSpan;

@@ -10,7 +10,7 @@ import '../../widgets/cell.dart';
 import '../../widgets/radio.dart';
 
 class AppearancePage extends StatelessWidget {
-  const AppearancePage({Key? key}) : super(key: key);
+  const AppearancePage({super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -26,7 +26,7 @@ class AppearancePage extends StatelessWidget {
 }
 
 class _Body extends StatelessWidget {
-  const _Body({Key? key}) : super(key: key);
+  const _Body();
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
@@ -38,7 +38,7 @@ class _Body extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 10, bottom: 14),
                 child: Text(
-                  context.l10n.settingTheme,
+                  context.l10n.theme,
                   style: TextStyle(
                     color: context.theme.secondaryText,
                     fontSize: 14,
@@ -55,30 +55,30 @@ class _Body extends StatelessWidget {
                   children: [
                     CellItem(
                       title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.settingThemeAuto),
+                        title: Text(context.l10n.followSystem),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
-                            context.read<SettingCubit>().brightness = value,
+                            context.settingCubit.brightness = value,
                         value: null,
                       ),
                       trailing: null,
                     ),
                     CellItem(
                       title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.settingThemeLight),
+                        title: Text(context.l10n.light),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
-                            context.read<SettingCubit>().brightness = value,
+                            context.settingCubit.brightness = value,
                         value: Brightness.light,
                       ),
                       trailing: null,
                     ),
                     CellItem(
                       title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.settingThemeNight),
+                        title: Text(context.l10n.dark),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
-                            context.read<SettingCubit>().brightness = value,
+                            context.settingCubit.brightness = value,
                         value: Brightness.dark,
                       ),
                       trailing: null,
@@ -92,7 +92,7 @@ class _Body extends StatelessWidget {
 }
 
 class _MessageAvatarSetting extends HookWidget {
-  const _MessageAvatarSetting({Key? key}) : super(key: key);
+  const _MessageAvatarSetting();
 
   @override
   Widget build(BuildContext context) {
@@ -125,9 +125,8 @@ class _MessageAvatarSetting extends HookWidget {
                 child: CupertinoSwitch(
                   activeColor: context.theme.accent,
                   value: showAvatar,
-                  onChanged: (bool value) {
-                    context.read<SettingCubit>().enableMessageAvatar(value);
-                  },
+                  onChanged: (bool value) =>
+                      context.settingCubit.messageShowAvatar = value,
                 )),
           ),
         )

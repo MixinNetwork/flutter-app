@@ -15,9 +15,8 @@ Future<void> showUnknownMixinUrlDialog(
 
 class _UnknownMixinUri extends StatelessWidget {
   const _UnknownMixinUri({
-    Key? key,
     required this.uri,
-  }) : super(key: key);
+  });
 
   final Uri uri;
 
@@ -33,12 +32,12 @@ class _UnknownMixinUri extends StatelessWidget {
               children: [
                 const SizedBox(height: 36),
                 Text(
-                  context.l10n.uriCheckOnPhone,
+                  context.l10n.chatNotSupportUriOnPhone,
                   style: TextStyle(fontSize: 16, color: context.theme.text),
                 ),
                 const SizedBox(height: 36),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
                   child: SizedBox.square(
                     dimension: 240,
                     child: QrImage(

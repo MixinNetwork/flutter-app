@@ -17,7 +17,6 @@ import '../../../account/account_server.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/crypto_key_value.dart';
 import '../../../crypto/signal/signal_protocol.dart';
-import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/system/package_info.dart';
@@ -106,7 +105,7 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
                 .data
                 .secret)
         .handleError((e) => null)
-        .where((secret) => secret.isNotEmpty == true)
+        .where((secret) => secret.isNotEmpty)
         .doOnData((secret) {
           streamSubscription?.cancel();
           emit(state.copyWith(
@@ -138,16 +137,10 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
         json.decode(String.fromCharCodes(result)) as Map<String, dynamic>;
 
     final edKeyPair = ed.generateKey();
-
-    await CryptoKeyValue.instance.init();
-    // ignore: avoid_dynamic_calls
     final private = base64.decode(msg['identity_key_private'] as String);
-    await SignalProtocol.initSignal(private);
-    final registrationId = CryptoKeyValue.instance.localRegistrationId;
+    final registrationId = await SignalProtocol.initSignal(private);
 
-    await AccountKeyValue.instance.init();
     final sessionId = msg['session_id'] as String;
-    AccountKeyValue.instance.primarySessionId = sessionId;
     final info = await getPackageInfo();
     final appVersion = '${info.version}(${info.buildNumber})';
     final platformVersion = await getPlatformVersion();
@@ -166,6 +159,11 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
     );
 
     final privateKey = base64Encode(edKeyPair.privateKey.bytes);
+
+    await AccountKeyValue.instance.init(rsp.data.identityNumber);
+    AccountKeyValue.instance.primarySessionId = sessionId;
+    await CryptoKeyValue.instance.init(rsp.data.identityNumber);
+    CryptoKeyValue.instance.localRegistrationId = registrationId;
 
     return Tuple2(
       rsp.data,

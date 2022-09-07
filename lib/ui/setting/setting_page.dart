@@ -1,34 +1,61 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../account/account_key_value.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/local_notification_center.dart';
+import '../../widgets/action_button.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/toast.dart';
 import '../home/bloc/multi_auth_cubit.dart';
+import '../home/home.dart';
 import '../home/route/responsive_navigator_cubit.dart';
 
 class SettingPage extends HookWidget {
-  const SettingPage({Key? key}) : super(key: key);
+  const SettingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final hasDrawer = context.watch<HasDrawerValueNotifier>();
+
+    Widget? leading;
+    if (hasDrawer.value) {
+      leading = ActionButton(
+        onTapUp: (event) => Scaffold.of(context).openDrawer(),
+        child: Icon(
+          Icons.menu,
+          size: 20,
+          color: context.theme.icon,
+        ),
+      );
+    }
+
     final appActive = useValueListenable(appActiveListener);
     final hasNotificationPermission = useMemoizedFuture(
         requestNotificationPermission, null,
         keys: [appActive]).data;
     final controller = useScrollController();
+
+    final userHasPin =
+        useBlocStateConverter<MultiAuthCubit, MultiAuthState, bool>(
+      converter: (e) => e.currentUser?.hasPin == true,
+    );
     return Column(
       children: [
-        const MixinAppBar(
-          backgroundColor: Colors.transparent,
+        MixinAppBar(
+          leading: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 150),
+            child: leading ?? const SizedBox(),
+          ),
         ),
         Expanded(
           child: SingleChildScrollView(
@@ -49,10 +76,18 @@ class SettingPage extends HookWidget {
                     CellGroup(
                       child: Column(
                         children: [
+                          if (Platform.isIOS &&
+                              userHasPin &&
+                              AccountKeyValue.instance.primarySessionId == null)
+                            _Item(
+                              assetName: Resources.assetsImagesAccountSvg,
+                              pageName: ResponsiveNavigatorCubit.accountPage,
+                              title: context.l10n.account,
+                            ),
                           _Item(
                             assetName: Resources.assetsImagesIcNotificationSvg,
                             pageName: ResponsiveNavigatorCubit.notificationPage,
-                            title: context.l10n.notification,
+                            title: context.l10n.notifications,
                             trailing: hasNotificationPermission == false
                                 ? Padding(
                                     padding: const EdgeInsets.all(4),
@@ -116,14 +151,13 @@ class SettingPage extends HookWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key? key,
     required this.assetName,
     required this.title,
     this.pageName,
     this.color,
     this.onTap,
     this.trailing = const Arrow(),
-  }) : super(key: key);
+  });
 
   final String assetName;
   final String title;
@@ -165,9 +199,7 @@ class _Item extends StatelessWidget {
 }
 
 class _UserProfile extends StatelessWidget {
-  const _UserProfile({
-    Key? key,
-  }) : super(key: key);
+  const _UserProfile();
 
   @override
   Widget build(BuildContext context) => Column(

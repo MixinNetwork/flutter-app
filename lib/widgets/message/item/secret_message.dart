@@ -6,7 +6,7 @@ import '../../../utils/uri_utils.dart';
 import '../message.dart';
 
 class SecretMessage extends StatelessWidget {
-  const SecretMessage({Key? key}) : super(key: key);
+  const SecretMessage({super.key});
 
   @override
   Widget build(BuildContext context) => Center(
@@ -15,16 +15,16 @@ class SecretMessage extends StatelessWidget {
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
-              onTap: () => openUri(context, context.l10n.aboutEncryptedInfoUrl),
+              onTap: () => openUri(context, context.l10n.secretUrl),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: context.theme.encrypt,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(10),
                   child: Text(
-                    context.l10n.aboutEncryptedInfo,
+                    context.l10n.messageE2ee,
                     style: TextStyle(
                       fontSize: MessageItemWidget.secondaryFontSize,
                       color: context.dynamicColor(

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui show BoxHeightStyle;
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -6,18 +8,20 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 class HighlightText extends HookWidget {
   const HighlightText(
     this.text, {
-    Key? key,
+    super.key,
     this.style,
     this.highlightTextSpans = const [],
     this.maxLines,
     this.overflow,
-  }) : super(key: key);
+    this.textAlign,
+  });
 
   final String text;
   final TextStyle? style;
   final List<HighlightTextSpan> highlightTextSpans;
   final int? maxLines;
   final TextOverflow? overflow;
+  final TextAlign? textAlign;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +36,7 @@ class HighlightText extends HookWidget {
       maxLines: maxLines,
       overflow: overflow,
       textWidthBasis: TextWidthBasis.longestLine,
+      textAlign: textAlign,
     );
   }
 }
@@ -40,7 +45,7 @@ List<InlineSpan> buildHighlightTextSpan(
     String text, List<HighlightTextSpan> highlightTextSpans,
     [TextStyle? style]) {
   final map = Map<String, HighlightTextSpan>.fromIterable(
-    highlightTextSpans.where((element) => element.text.isNotEmpty == true),
+    highlightTextSpans.where((element) => element.text.isNotEmpty),
     key: (item) => (item as HighlightTextSpan).text.toLowerCase(),
   );
   final pattern = "(${map.keys.map(RegExp.escape).join('|')})";
@@ -78,11 +83,11 @@ List<InlineSpan> buildHighlightTextSpan(
 class HighlightSelectableText extends HookWidget {
   const HighlightSelectableText(
     this.text, {
-    Key? key,
+    super.key,
     this.style,
     this.highlightTextSpans = const [],
     this.maxLines,
-  }) : super(key: key);
+  });
 
   final String text;
   final TextStyle? style;
@@ -103,6 +108,7 @@ class HighlightSelectableText extends HookWidget {
       maxLines: maxLines,
       textWidthBasis: TextWidthBasis.longestLine,
       toolbarOptions: const ToolbarOptions(),
+      selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
     );
   }
 }
@@ -123,4 +129,85 @@ class HighlightTextSpan extends Equatable {
         text,
         style,
       ];
+}
+
+class HighlightStarLinkText extends HookWidget {
+  const HighlightStarLinkText(
+    this.text, {
+    super.key,
+    required this.links,
+    this.style,
+    this.highlightStyle,
+    this.onLinkClick,
+    this.maxLines,
+    this.overflow,
+  });
+
+  final String text;
+  final List<String> links;
+  final TextStyle? style;
+  final TextStyle? highlightStyle;
+  final void Function(String link)? onLinkClick;
+  final int? maxLines;
+  final TextOverflow? overflow;
+
+  @override
+  Widget build(BuildContext context) {
+    final spans = useMemoized(
+      () {
+        // replace ** around text with highlight text span
+        var start = text.indexOf('**');
+        var end = 0;
+        final spans = <TextSpan>[];
+
+        if (start == -1) {
+          spans.add(TextSpan(text: text, style: style));
+          return spans;
+        }
+        var count = 0;
+        while (start != -1) {
+          end = text.indexOf('**', start + 2);
+          if (end == -1) {
+            assert(false, 'text must be surrounded by **. $text');
+            spans.add(TextSpan(text: text.substring(start), style: style));
+            break;
+          }
+
+          // add text before **
+          if (start > 0) {
+            spans.add(TextSpan(text: text.substring(0, start), style: style));
+          }
+
+          final link = links[count];
+          spans.add(
+            TextSpan(
+              text: text.substring(start + 2, end),
+              style: style?.merge(highlightStyle),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  onLinkClick?.call(link);
+                },
+            ),
+          );
+          start = text.indexOf('**', end + 2);
+          count++;
+        }
+        // add text after end.
+        if (end + 2 < text.length) {
+          spans.add(TextSpan(text: text.substring(end + 2), style: style));
+        }
+        return spans;
+      },
+      [text, highlightStyle, links],
+    );
+    return Text.rich(
+      TextSpan(
+        children: spans,
+      ),
+      maxLines: maxLines,
+      overflow: overflow,
+      style: style,
+      textWidthBasis: TextWidthBasis.longestLine,
+    );
+  }
 }

@@ -14,7 +14,7 @@ import '../bloc/conversation_cubit.dart';
 import '../conversation/conversation_page.dart';
 
 class GroupsInCommonPage extends HookWidget {
-  const GroupsInCommonPage({Key? key}) : super(key: key);
+  const GroupsInCommonPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +35,8 @@ class GroupsInCommonPage extends HookWidget {
 
 class _ConversationList extends HookWidget {
   const _ConversationList({
-    Key? key,
     required this.userId,
-  }) : super(key: key);
+  });
 
   final String userId;
 
@@ -92,9 +91,8 @@ class _ConversationList extends HookWidget {
 
 class _GroupConversationItemWidget extends StatelessWidget {
   const _GroupConversationItemWidget({
-    Key? key,
     required this.group,
-  }) : super(key: key);
+  });
 
   final GroupMinimal group;
 

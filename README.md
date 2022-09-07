@@ -4,6 +4,8 @@
 
 Mixin Messenger for macOS, Windows and Linux, powered by [Flutter](https://flutter.dev/), the Signal Protocol is implemented with our [libsignal_protocol_dart](https://github.com/MixinNetwork/libsignal_protocol_dart).
 
+Download release version from https://mixin.one/mm
+
 ## Quick start
 
 ```

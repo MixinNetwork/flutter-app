@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,10 +11,12 @@ import '../../../blaze/vo/transcript_minimal.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
 import '../../../ui/home/bloc/blink_cubit.dart';
+import '../../../ui/home/bloc/message_selection_cubit.dart';
 import '../../../ui/home/chat/chat_page.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/logger.dart';
 import '../../../utils/message_optimize.dart';
 import '../../action_button.dart';
 import '../../clamping_custom_scroll_view/scroller_scroll_controller.dart';
@@ -34,9 +36,7 @@ class TranscriptMessagesWatcher {
 }
 
 class TranscriptMessageWidget extends HookWidget {
-  const TranscriptMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const TranscriptMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,9 @@ class TranscriptMessageWidget extends HookWidget {
             .map((json) =>
                 TranscriptMinimal.fromJson(json as Map<String, dynamic>))
             .toList();
-      } catch (_) {
+      } catch (error) {
+        e('TranscriptMessageWidget.build $error');
+        e('parse json failed: $content');
         return null;
       }
     }, [content]);
@@ -57,6 +59,7 @@ class TranscriptMessageWidget extends HookWidget {
     final isCurrentUser = useIsCurrentUser();
 
     if (transcriptMinimals == null) {
+      e('TranscriptMessageWidget: transcriptMinimals is null');
       return const UnknownMessage();
     }
 
@@ -77,7 +80,7 @@ class TranscriptMessageWidget extends HookWidget {
 
       final transcriptTexts = useMemoized(
           () => List.generate(
-              min(transcriptMinimals.length, 4),
+              math.min(transcriptMinimals.length, 4),
               (index) =>
                   index).map((i) =>
               '${transcriptMinimals[i].name}: ${previews.isEmpty ? '' : previews[i]}'
@@ -124,7 +127,7 @@ class TranscriptMessageWidget extends HookWidget {
                         children: [
                           const SizedBox(width: 4),
                           Text(
-                            context.l10n.chatTranscript,
+                            context.l10n.transcript,
                             style: TextStyle(
                               color: context.theme.text,
                               fontSize: MessageItemWidget.primaryFontSize,
@@ -148,9 +151,9 @@ class TranscriptMessageWidget extends HookWidget {
                       ),
                     ),
                     Container(
-                      decoration: BoxDecoration(
-                        color: const Color.fromRGBO(0, 0, 0, 0.04),
-                        borderRadius: BorderRadius.circular(6),
+                      decoration: const BoxDecoration(
+                        color: Color.fromRGBO(0, 0, 0, 0.04),
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
                       ),
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
@@ -204,11 +207,11 @@ class TranscriptMessageWidget extends HookWidget {
 
 class TranscriptPage extends HookWidget {
   const TranscriptPage({
-    Key? key,
+    super.key,
     required this.messageId,
     required this.conversationId,
     required this.vlcService,
-  }) : super(key: key);
+  });
   final String messageId;
   final String conversationId;
   final AudioMessagePlayService vlcService;
@@ -225,7 +228,7 @@ class TranscriptPage extends HookWidget {
 
     final list = useMemoizedStream(watchMessages).data ?? <MessageItem>[];
 
-    final chatSideCubit = useBloc(() => ChatSideCubit());
+    final chatSideCubit = useBloc(ChatSideCubit.new);
     final searchConversationKeywordCubit = useBloc(
       () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
     );
@@ -238,7 +241,7 @@ class TranscriptPage extends HookWidget {
       ),
     );
 
-    final scrollController = useMemoized(() => ScrollerScrollController());
+    final scrollController = useMemoized(ScrollerScrollController.new);
     final listKey =
         useMemoized(() => GlobalKey(debugLabel: 'transcript_list_key'));
 
@@ -262,6 +265,7 @@ class TranscriptPage extends HookWidget {
                       .convertMessageAbsolutePath(m, true)),
             ),
             Provider.value(value: TranscriptMessagesWatcher(watchMessages)),
+            BlocProvider(create: (_) => MessageSelectionCubit()),
           ],
           child: Column(
             children: [
@@ -283,7 +287,7 @@ class TranscriptPage extends HookWidget {
                     Expanded(
                       child: Align(
                         child: Text(
-                          context.l10n.chatTranscript,
+                          context.l10n.transcript,
                           style: TextStyle(
                             color: context.theme.text,
                             fontSize: 16,

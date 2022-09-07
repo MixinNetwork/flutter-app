@@ -15,7 +15,7 @@ import '../../widgets/cell.dart';
 import '../home/route/responsive_navigator_cubit.dart';
 
 class StorageUsageListPage extends HookWidget {
-  const StorageUsageListPage({Key? key}) : super(key: key);
+  const StorageUsageListPage({super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -28,7 +28,7 @@ class StorageUsageListPage extends HookWidget {
 }
 
 class _Content extends HookWidget {
-  const _Content({Key? key}) : super(key: key);
+  const _Content();
 
   @override
   Widget build(BuildContext context) {
@@ -87,10 +87,9 @@ class _Content extends HookWidget {
 
 class _Item extends HookWidget {
   const _Item({
-    Key? key,
     required this.item,
     required this.size,
-  }) : super(key: key);
+  });
 
   final ConversationStorageUsage item;
   final int size;

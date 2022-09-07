@@ -24,7 +24,7 @@ extension StickerAlbumsCompanionExtension on sdk.StickerAlbum {
 @DriftAccessor(tables: [StickerAlbums])
 class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerAlbumDaoMixin {
-  StickerAlbumDao(MixinDatabase db) : super(db);
+  StickerAlbumDao(super.db);
 
   Future<int> insert(StickerAlbumsCompanion stickerAlbum) =>
       into(db.stickerAlbums).insertOnConflictUpdate(stickerAlbum);
@@ -34,7 +34,8 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
 
   SimpleSelectStatement<StickerAlbums, StickerAlbum> systemAlbums() =>
       select(db.stickerAlbums)
-        ..where((tbl) => tbl.category.equals('SYSTEM'))
+        ..where((tbl) =>
+            tbl.category.equals('SYSTEM') & tbl.isVerified.equals(true))
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
   SimpleSelectStatement<StickerAlbums, StickerAlbum> personalAlbum() =>
@@ -60,7 +61,7 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
           .write(
         StickerAlbumsCompanion(
           added: Value(added),
-          orderedAt: added == false ? const Value(0) : const Value.absent(),
+          orderedAt: !added ? const Value(0) : const Value.absent(),
         ),
       );
 

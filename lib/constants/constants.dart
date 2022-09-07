@@ -2,6 +2,7 @@ const systemUser = '00000000-0000-0000-0000-000000000000';
 
 const scp =
     'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE STICKERS:READ STICKERS:WRITE';
+const scpFull = 'FULL';
 
 const kAcknowledgeMessageReceipt = 'ACKNOWLEDGE_MESSAGE_RECEIPT';
 const kAcknowledgeMessageReceipts = 'ACKNOWLEDGE_MESSAGE_RECEIPTS';
@@ -39,16 +40,8 @@ enum MixinSchemeHost {
   withdrawal,
   apps,
   snapshots,
+  conversations,
 }
-
-const mixinProtocolUrls = {
-  MixinSchemeHost.codes: 'https://mixin.one/codes',
-  MixinSchemeHost.transfer: 'https://mixin.one/transfer',
-  MixinSchemeHost.address: 'https://mixin.one/address',
-  MixinSchemeHost.withdrawal: 'https://mixin.one/withdrawal',
-  MixinSchemeHost.apps: 'https://mixin.one/apps',
-  MixinSchemeHost.snapshots: 'https://mixin.one/snapshots'
-};
 
 const int hour1 = 1000 * 60 * 60;
 const int hours24 = hour1 * 24;
@@ -58,3 +51,11 @@ const statusOffset = 'messages_status_offset';
 const kMarkLimit = 10000;
 
 const kMaxTextLength = 64 * 1024;
+
+const mixinDisappearingMessageHelpUrl =
+    'https://mixinmessenger.zendesk.com/hc/articles/5127869180564';
+
+const giphyApiKey = String.fromEnvironment('MIXIN_GIPHY_KEY');
+
+const kRecaptchaKey = '';
+const hCaptchaKey = '';

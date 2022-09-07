@@ -93,14 +93,19 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
               detail.startsWith('SCAN') || detail.startsWith('USE TEMP B-TREE'))
           .isNotEmpty;
       // if (needPrint) {
-      w('''
+      if (stopwatch.elapsed.inMilliseconds > 15) {
+        w('''
 execution time: ${stopwatch.elapsed.inMilliseconds} MS, args: $args, sql:
 $statement
 ${needPrint ? 'details:\n${details.join('\n')}' : ''}
 ''');
+      }
       // }
     }
 
     return result;
   }
+
+  @override
+  SqlDialect get dialect => queryExecutor.dialect;
 }

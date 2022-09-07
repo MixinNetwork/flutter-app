@@ -10,7 +10,7 @@ import '../../../widgets/user/user_dialog.dart';
 import '../bloc/conversation_cubit.dart';
 
 class SharedAppsPage extends HookWidget {
-  const SharedAppsPage({Key? key}) : super(key: key);
+  const SharedAppsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class SharedAppsPage extends HookWidget {
     return Scaffold(
       backgroundColor: context.theme.primary,
       appBar: MixinAppBar(
-        title: Text(context.l10n.sharedApps),
+        title: Text(context.l10n.shareApps),
       ),
       body: Column(
         children: [
@@ -43,7 +43,7 @@ class SharedAppsPage extends HookWidget {
 }
 
 class _AppTile extends StatelessWidget {
-  const _AppTile({Key? key, required this.app}) : super(key: key);
+  const _AppTile({required this.app});
 
   final App app;
 
@@ -84,9 +84,7 @@ class _AppTile extends StatelessWidget {
 }
 
 class OverlappedAppIcons extends StatelessWidget {
-  OverlappedAppIcons({Key? key, required this.apps})
-      : assert(apps.isNotEmpty),
-        super(key: key);
+  OverlappedAppIcons({super.key, required this.apps}) : assert(apps.isNotEmpty);
 
   final List<App> apps;
 
@@ -112,8 +110,7 @@ class OverlappedAppIcons extends StatelessWidget {
 }
 
 class _AppIcon extends StatelessWidget {
-  const _AppIcon({Key? key, required this.app, required this.size})
-      : super(key: key);
+  const _AppIcon({required this.app, required this.size});
 
   final App app;
 

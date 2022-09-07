@@ -7,7 +7,7 @@ part 'offset_dao.g.dart';
 
 @DriftAccessor(tables: [Offsets])
 class OffsetDao extends DatabaseAccessor<MixinDatabase> with _$OffsetDaoMixin {
-  OffsetDao(MixinDatabase db) : super(db);
+  OffsetDao(super.db);
 
   Future<int> insert(Offset offset) =>
       into(db.offsets).insertOnConflictUpdate(offset);

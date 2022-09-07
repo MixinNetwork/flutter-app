@@ -11,12 +11,10 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 
 import '../enum/media_status.dart';
-import '../enum/message_action.dart';
 import '../utils/file.dart';
 import 'converter/conversation_category_type_converter.dart';
 import 'converter/conversation_status_type_converter.dart';
 import 'converter/media_status_type_converter.dart';
-import 'converter/message_action_converter.dart';
 import 'converter/message_status_type_converter.dart';
 import 'converter/millis_date_converter.dart';
 import 'converter/participant_role_converter.dart';
@@ -28,6 +26,7 @@ import 'dao/asset_dao.dart';
 import 'dao/circle_conversation_dao.dart';
 import 'dao/circle_dao.dart';
 import 'dao/conversation_dao.dart';
+import 'dao/expired_message_dao.dart';
 import 'dao/favorite_app_dao.dart';
 import 'dao/fiat_dao.dart';
 import 'dao/flood_message_dao.dart';
@@ -66,6 +65,7 @@ part 'mixin_database.g.dart';
     'moor/dao/pin_message.drift',
     'moor/dao/sticker_relationship.drift',
     'moor/dao/favorite_app.drift',
+    'moor/dao/expired_message.drift',
   },
   daos: [
     AddressDao,
@@ -93,14 +93,16 @@ part 'mixin_database.g.dart';
     PinMessageDao,
     FiatDao,
     FavoriteAppDao,
+    ExpiredMessageDao,
   ],
   queries: {},
 )
 class MixinDatabase extends _$MixinDatabase {
-  MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
+  MixinDatabase(super.e);
+  MixinDatabase.connect(super.c) : super.connect();
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 16;
 
   final eventBus = DataBaseEventBus();
 
@@ -110,6 +112,7 @@ class MixinDatabase extends _$MixinDatabase {
           if (executor.dialect == SqlDialect.sqlite) {
             await customStatement('PRAGMA journal_mode=WAL');
             await customStatement('PRAGMA foreign_keys=ON');
+            await customStatement('PRAGMA synchronous=NORMAL');
           }
         },
         onUpgrade: (Migrator m, int from, int to) async {
@@ -205,6 +208,19 @@ class MixinDatabase extends _$MixinDatabase {
                 stickerAlbums.actualTableName, stickerAlbums.isVerified.name)) {
               await m.addColumn(stickerAlbums, stickerAlbums.isVerified);
             }
+          }
+          if (from <= 13) {
+            if (!await _checkColumnExists(
+                conversations.actualTableName, conversations.expireIn.name)) {
+              await m.addColumn(conversations, conversations.expireIn);
+            }
+            await m.createTable(expiredMessages);
+          }
+          if (from <= 14) {
+            await m.createIndex(indexMessagesConversationIdCategoryCreatedAt);
+          }
+          if (from <= 15) {
+            await m.createIndex(indexUsersIdentityNumber);
           }
         },
       );

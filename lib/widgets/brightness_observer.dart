@@ -8,7 +8,7 @@ import '../utils/system/system_utils.dart';
 
 class BrightnessObserver extends HookWidget {
   const BrightnessObserver({
-    Key? key,
+    super.key,
     this.duration = const Duration(milliseconds: 200),
     this.curve = Curves.linear,
     this.onEnd,
@@ -16,7 +16,7 @@ class BrightnessObserver extends HookWidget {
     required this.lightThemeData,
     required this.darkThemeData,
     this.forceBrightness,
-  }) : super(key: key);
+  });
 
   final Duration duration;
   final Curve curve;
@@ -92,10 +92,10 @@ class BrightnessObserver extends HookWidget {
 class BrightnessData extends InheritedWidget {
   const BrightnessData({
     required this.value,
-    required Widget child,
-    Key? key,
+    required super.child,
+    super.key,
     required this.brightnessThemeData,
-  }) : super(key: key, child: child);
+  });
 
   final double value;
   final BrightnessThemeData brightnessThemeData;

@@ -8,8 +8,7 @@ typedef OnSelection = void Function(String char);
 
 /// Custom render for vertical A_Z list.
 class AZSelection extends SingleChildRenderObjectWidget {
-  const AZSelection({Key? key, this.onSelection, this.textStyle})
-      : super(key: key);
+  const AZSelection({super.key, this.onSelection, this.textStyle});
 
   final OnSelection? onSelection;
   final TextStyle? textStyle;

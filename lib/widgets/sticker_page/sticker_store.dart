@@ -64,52 +64,59 @@ Future<void> showStickerPageDialog(
 
   return showMixinDialog(
     context: context,
-    child: ConstrainedBox(
-      constraints: BoxConstraints.loose(const Size(480, 600)),
-      child: HookBuilder(builder: (context) {
-        final album = useMemoizedStream(() => context
-                .database.stickerRelationshipDao
-                .stickerSystemAlbum(stickerId)
-                .watchSingleOrNullThrottle(kSlowThrottleDuration)).data ??
-            a;
+    child: Material(
+      color: Colors.transparent,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: 480,
+          // minHeight: 600,
+        ),
+        child: HookBuilder(builder: (context) {
+          final album = useMemoizedStream(() => context
+                  .database.stickerRelationshipDao
+                  .stickerSystemAlbum(stickerId)
+                  .watchSingleOrNullThrottle(kSlowThrottleDuration)).data ??
+              a;
 
-        useEffect(() {
-          Future<void> effect() async {
-            var albumId = album?.albumId;
+          useEffect(() {
+            Future<void> effect() async {
+              var albumId = album?.albumId;
 
-            final accountServer = context.accountServer;
-            final database = context.database;
-            final client = accountServer.client;
+              final accountServer = context.accountServer;
+              final database = context.database;
+              final client = accountServer.client;
 
-            albumId ??= (await client.accountApi.getStickerById(stickerId))
-                .data
-                .albumId;
+              albumId ??= (await client.accountApi.getStickerById(stickerId))
+                  .data
+                  .albumId;
 
-            if (albumId == null || albumId.isEmpty) return;
+              if (albumId == null || albumId.isEmpty) return;
 
-            final stickerAlbum =
-                (await client.accountApi.getStickerAlbum(albumId)).data;
-            await database.stickerAlbumDao
-                .insert(stickerAlbum.asStickerAlbumsCompanion);
+              final stickerAlbum =
+                  (await client.accountApi.getStickerAlbum(albumId)).data;
+              await database.stickerAlbumDao
+                  .insert(stickerAlbum.asStickerAlbumsCompanion);
 
-            await accountServer.updateStickerAlbums(albumId);
-          }
+              await accountServer.updateStickerAlbums(albumId);
+            }
 
-          effect();
-        }, [album?.albumId]);
+            effect();
+          }, [album?.albumId]);
 
-        if (album?.albumId.isNotEmpty == true && album?.category == 'SYSTEM') {
-          return StickerAlbumPage(albumId: album!.albumId);
-        }
+          final albumId =
+              album?.albumId.isNotEmpty == true && album?.category == 'SYSTEM'
+                  ? album!.albumId
+                  : null;
 
-        return _StickerPage(stickerId: stickerId);
-      }),
+          return _StickerPage(stickerId: stickerId, albumId: albumId);
+        }),
+      ),
     ),
   );
 }
 
 class _StickerStorePage extends HookWidget {
-  const _StickerStorePage({Key? key}) : super(key: key);
+  const _StickerStorePage();
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +127,7 @@ class _StickerStorePage extends HookWidget {
       children: [
         MixinAppBar(
           backgroundColor: Colors.transparent,
-          title: Text(context.l10n.stickerShop),
+          title: Text(context.l10n.stickerStore),
           leading: Center(
             child: ActionButton(
               name: Resources.assetsImagesSettingSvg,
@@ -152,7 +159,7 @@ class _StickerStorePage extends HookWidget {
 typedef _StickerAlbumItem = Tuple2<StickerAlbum, List<Sticker>>;
 
 class _List extends HookWidget {
-  const _List({Key? key}) : super(key: key);
+  const _List();
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +191,11 @@ class _List extends HookWidget {
 }
 
 class _Item extends HookWidget {
-  const _Item(this.album, this.stickers, {Key? key}) : super(key: key);
+  const _Item(
+    this.album,
+    this.stickers,
+  );
+
   final StickerAlbum album;
   final List<Sticker> stickers;
 
@@ -259,7 +270,7 @@ class _Item extends HookWidget {
 }
 
 class _StickerAlbumManagePage extends HookWidget {
-  const _StickerAlbumManagePage({Key? key}) : super(key: key);
+  const _StickerAlbumManagePage();
 
   @override
   Widget build(BuildContext context) {
@@ -278,7 +289,7 @@ class _StickerAlbumManagePage extends HookWidget {
       children: [
         MixinAppBar(
           backgroundColor: Colors.transparent,
-          title: Text(context.l10n.myStickerAlbums),
+          title: Text(context.l10n.myStickers),
           actions: [
             MixinCloseButton(
               onTap: () =>
@@ -325,9 +336,9 @@ class _StickerAlbumManagePage extends HookWidget {
                   height: 72,
                   child: Row(
                     children: [
-                      StickerItem(
-                        assetType: '',
-                        assetUrl: album.iconUrl,
+                      StickerGroupIcon(
+                        iconUrl: album.iconUrl,
+                        size: 72,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -360,51 +371,158 @@ class _StickerAlbumManagePage extends HookWidget {
 
 class _StickerPage extends HookWidget {
   const _StickerPage({
-    Key? key,
     required this.stickerId,
-  }) : super(key: key);
+    this.albumId,
+  });
 
   final String stickerId;
+  final String? albumId;
 
   @override
   Widget build(BuildContext context) {
-    final sticker = useMemoizedStream(
-        () => context.database.stickerDao
+    final sticker = useState<Sticker?>(null);
+    useEffect(() {
+      Future<void> effect() async {
+        final s = await context.database.stickerDao
             .sticker(stickerId)
-            .watchSingleThrottle(kVerySlowThrottleDuration),
-        keys: [stickerId]).data;
+            .getSingleOrNull();
+        sticker.value = s;
+      }
 
-    return Column(
-      children: [
-        MixinAppBar(
-          backgroundColor: Colors.transparent,
-          leading: const SizedBox(),
-          actions: [
-            MixinCloseButton(
-              onTap: () =>
-                  Navigator.maybeOf(context, rootNavigator: true)?.pop(),
-            ),
-          ],
-        ),
-        AspectRatio(
-          aspectRatio: 1,
-          child: Container(
-            margin: const EdgeInsets.all(56),
-            color: context.theme.background,
-            alignment: Alignment.center,
-            child: SizedBox(
-              height: 256,
-              width: 256,
-              child: sticker?.assetUrl.isNotEmpty == true
-                  ? StickerItem(
-                      assetUrl: sticker?.assetUrl ?? '',
-                      assetType: sticker?.assetType ?? '',
-                    )
-                  : const SizedBox(),
-            ),
+      effect();
+      return;
+    }, []);
+
+    final album = useMemoizedStream(
+      () {
+        if (albumId == null) return Stream.value(null);
+        return context.database.stickerAlbumDao
+            .album(albumId!)
+            .watchSingleThrottle(kDefaultThrottleDuration);
+      },
+      keys: [albumId],
+    ).data;
+
+    final stickers = useMemoizedStream(() {
+          if (album == null) return Stream.value(<Sticker>[]);
+          return context.database.stickerDao
+              .stickerByAlbumId(album.albumId)
+              .watchThrottle(kDefaultThrottleDuration);
+        }, keys: [album?.albumId]).data ??
+        [];
+
+    return DefaultTabController(
+      length: stickers.length,
+      child: HookBuilder(builder: (context) {
+        final tabController = DefaultTabController.of(context);
+        useEffect(() {
+          void listener() {
+            if (tabController == null) return;
+
+            sticker.value = stickers[tabController.index];
+          }
+
+          tabController?.addListener(listener);
+
+          return () {
+            tabController?.removeListener(listener);
+          };
+        });
+
+        return AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MixinAppBar(
+                backgroundColor: Colors.transparent,
+                leading: const SizedBox(),
+                actions: [
+                  MixinCloseButton(
+                    onTap: () =>
+                        Navigator.maybeOf(context, rootNavigator: true)?.pop(),
+                  ),
+                ],
+              ),
+              AspectRatio(
+                aspectRatio: 1,
+                child: Container(
+                  margin: const EdgeInsets.all(56).copyWith(top: 0),
+                  color: context.theme.background,
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    height: 256,
+                    width: 256,
+                    child: sticker.value?.assetUrl.isNotEmpty == true
+                        ? StickerItem(
+                            assetUrl: sticker.value?.assetUrl ?? '',
+                            assetType: sticker.value?.assetType ?? '',
+                          )
+                        : const SizedBox(),
+                  ),
+                ),
+              ),
+              if (album != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          album.name,
+                          style: TextStyle(
+                            color: context.theme.text,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      MixinButton(
+                        backgroundColor: album.added == true
+                            ? context.theme.red
+                            : context.theme.accent,
+                        onTap: () => context.database.stickerAlbumDao
+                            .updateAdded(album.albumId, !(album.added == true)),
+                        child: Text(
+                          album.added == true
+                              ? context.l10n.removeStickers
+                              : context.l10n.addStickers,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              if (album != null && stickers.isNotEmpty)
+                TabBar(
+                  isScrollable: true,
+                  overlayColor: MaterialStateProperty.all(Colors.transparent),
+                  indicator: BoxDecoration(
+                    color: context.dynamicColor(
+                      const Color.fromRGBO(229, 231, 235, 1),
+                      darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  ),
+                  labelPadding: EdgeInsets.zero,
+                  indicatorPadding: const EdgeInsets.all(6),
+                  tabs: stickers
+                      .map(
+                        (e) => Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: StickerItem(
+                            assetUrl: e.assetUrl,
+                            assetType: e.assetType,
+                            width: 64,
+                            height: 64,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+            ],
           ),
-        ),
-      ],
+        );
+      }),
     );
   }
 }

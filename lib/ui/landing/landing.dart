@@ -21,11 +21,11 @@ class LandingModeCubit extends Cubit<LandingMode> {
 }
 
 class LandingPage extends HookWidget {
-  const LandingPage({Key? key}) : super(key: key);
+  const LandingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final modeCubit = useBloc(() => LandingModeCubit());
+    final modeCubit = useBloc(LandingModeCubit.new);
     final mode = useBlocState<LandingModeCubit, LandingMode>(bloc: modeCubit);
     final Widget child;
     switch (mode) {
@@ -45,9 +45,8 @@ class LandingPage extends HookWidget {
 
 class _LandingScaffold extends HookWidget {
   const _LandingScaffold({
-    Key? key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -69,10 +68,10 @@ class _LandingScaffold extends HookWidget {
                 height: 418,
                 child: Material(
                   color: context.theme.popUp,
-                  borderRadius: BorderRadius.circular(13),
+                  borderRadius: const BorderRadius.all(Radius.circular(13)),
                   elevation: 10,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(13),
+                    borderRadius: const BorderRadius.all(Radius.circular(13)),
                     child: child,
                   ),
                 ),
@@ -97,7 +96,7 @@ class _LandingScaffold extends HookWidget {
 }
 
 class LandingModeSwitchButton extends HookWidget {
-  const LandingModeSwitchButton({Key? key}) : super(key: key);
+  const LandingModeSwitchButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -105,10 +104,10 @@ class LandingModeSwitchButton extends HookWidget {
     final String buttonText;
     switch (mode) {
       case LandingMode.qrcode:
-        buttonText = context.l10n.loginWithMobile;
+        buttonText = context.l10n.signWithPhoneNumber;
         break;
       case LandingMode.mobile:
-        buttonText = context.l10n.loginWithQRCode;
+        buttonText = context.l10n.signWithQrcode;
         break;
     }
     return TextButton(

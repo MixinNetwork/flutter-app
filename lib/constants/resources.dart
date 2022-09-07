@@ -14,6 +14,8 @@ class Resources {
 
   static const String assetsImagesAboutLogoPng = 'assets/images/about_logo.png';
 
+  static const String assetsImagesAccountSvg = 'assets/images/account.svg';
+
   static const String assetsImagesAppButtonSvg = 'assets/images/app_button.svg';
 
   static const String assetsImagesAttachmentDownloadSvg =
@@ -41,6 +43,8 @@ class Resources {
 
   static const String assetsImagesChatSmallSvg = 'assets/images/chat_small.svg';
 
+  static const String assetsImagesCheckedSvg = 'assets/images/checked.svg';
+
   static const String assetsImagesCircleSvg = 'assets/images/circle.svg';
 
   static const String assetsImagesCircleAddSvg = 'assets/images/circle_add.svg';
@@ -50,15 +54,87 @@ class Resources {
 
   static const String assetsImagesCloseOvalSvg = 'assets/images/close_oval.svg';
 
+  static const String assetsImagesCloseOvalRecordSvg =
+      'assets/images/close_oval_record.svg';
+
   static const String assetsImagesCollapseSvg = 'assets/images/collapse.svg';
 
   static const String assetsImagesContactSvg = 'assets/images/contact.svg';
+
+  static const String assetsImagesContextMenuChatSvg =
+      'assets/images/context_menu_chat.svg';
+
+  static const String assetsImagesContextMenuCopySvg =
+      'assets/images/context_menu_copy.svg';
+
+  static const String assetsImagesContextMenuCreateConversationSvg =
+      'assets/images/context_menu_create_conversation.svg';
+
+  static const String assetsImagesContextMenuCreateGroupSvg =
+      'assets/images/context_menu_create_group.svg';
+
+  static const String assetsImagesContextMenuDeleteSvg =
+      'assets/images/context_menu_delete.svg';
+
+  static const String assetsImagesContextMenuDownloadSvg =
+      'assets/images/context_menu_download.svg';
+
+  static const String assetsImagesContextMenuEditSvg =
+      'assets/images/context_menu_edit.svg';
+
+  static const String assetsImagesContextMenuEditCircleSvg =
+      'assets/images/context_menu_edit_circle.svg';
+
+  static const String assetsImagesContextMenuForwardSvg =
+      'assets/images/context_menu_forward.svg';
+
+  static const String assetsImagesContextMenuGotoSvg =
+      'assets/images/context_menu_goto.svg';
+
+  static const String assetsImagesContextMenuLinkSvg =
+      'assets/images/context_menu_link.svg';
+
+  static const String assetsImagesContextMenuMuteSvg =
+      'assets/images/context_menu_mute.svg';
+
+  static const String assetsImagesContextMenuPinSvg =
+      'assets/images/context_menu_pin.svg';
+
+  static const String assetsImagesContextMenuRecallSvg =
+      'assets/images/context_menu_recall.svg';
+
+  static const String assetsImagesContextMenuReplySvg =
+      'assets/images/context_menu_reply.svg';
+
+  static const String assetsImagesContextMenuSearchUserSvg =
+      'assets/images/context_menu_search_user.svg';
+
+  static const String assetsImagesContextMenuStickerSvg =
+      'assets/images/context_menu_sticker.svg';
+
+  static const String assetsImagesContextMenuStopSvg =
+      'assets/images/context_menu_stop.svg';
+
+  static const String assetsImagesContextMenuUnmuteSvg =
+      'assets/images/context_menu_unmute.svg';
+
+  static const String assetsImagesContextMenuUnpinSvg =
+      'assets/images/context_menu_unpin.svg';
+
+  static const String assetsImagesContextMenuUserEditSvg =
+      'assets/images/context_menu_user_edit.svg';
 
   static const String assetsImagesCopySvg = 'assets/images/copy.svg';
 
   static const String assetsImagesDeleteSvg = 'assets/images/delete.svg';
 
+  static const String assetsImagesDeleteAccountSvg =
+      'assets/images/delete_account.svg';
+
   static const String assetsImagesDeliveredSvg = 'assets/images/delivered.svg';
+
+  static const String assetsImagesDisappearingMessageSvg =
+      'assets/images/disappearing_message.svg';
 
   static const String assetsImagesDownloadSvg = 'assets/images/download.svg';
 
@@ -85,6 +161,36 @@ class Resources {
   static const String assetsImagesEditImageUndoSvg =
       'assets/images/edit_image_undo.svg';
 
+  static const String assetsImagesEllipsisSvg = 'assets/images/ellipsis.svg';
+
+  static const String assetsImagesEmojiAnimalSvg =
+      'assets/images/emoji_animal.svg';
+
+  static const String assetsImagesEmojiFaceSvg = 'assets/images/emoji_face.svg';
+
+  static const String assetsImagesEmojiFlagsSvg =
+      'assets/images/emoji_flags.svg';
+
+  static const String assetsImagesEmojiFoodSvg = 'assets/images/emoji_food.svg';
+
+  static const String assetsImagesEmojiObjectsSvg =
+      'assets/images/emoji_objects.svg';
+
+  static const String assetsImagesEmojiRecentSvg =
+      'assets/images/emoji_recent.svg';
+
+  static const String assetsImagesEmojiSportsSvg =
+      'assets/images/emoji_sports.svg';
+
+  static const String assetsImagesEmojiStickerSvg =
+      'assets/images/emoji_sticker.svg';
+
+  static const String assetsImagesEmojiSymbolSvg =
+      'assets/images/emoji_symbol.svg';
+
+  static const String assetsImagesEmojiTravelSvg =
+      'assets/images/emoji_travel.svg';
+
   static const String assetsImagesEmptyFileSvg = 'assets/images/empty_file.svg';
 
   static const String assetsImagesEmptyImageSvg =
@@ -94,6 +200,11 @@ class Resources {
       'assets/images/exclamation_mark.svg';
 
   static const String assetsImagesExpandedSvg = 'assets/images/expanded.svg';
+
+  static const String assetsImagesExpiringSvg = 'assets/images/expiring.svg';
+
+  static const String assetsImagesExpiringDarkSvg =
+      'assets/images/expiring_dark.svg';
 
   static const String assetsImagesFailedSvg = 'assets/images/failed.svg';
 
@@ -201,6 +312,15 @@ class Resources {
   static const String assetsImagesMessageSecretSvg =
       'assets/images/message_secret.svg';
 
+  static const String assetsImagesMessageTranscriptForwardSvg =
+      'assets/images/message_transcript_forward.svg';
+
+  static const String assetsImagesMicrophoneSvg =
+      'assets/images/microphone.svg';
+
+  static const String assetsImagesMultiSelectionSvg =
+      'assets/images/multi_selection.svg';
+
   static const String assetsImagesMuteSvg = 'assets/images/mute.svg';
 
   static const String assetsImagesNextSvg = 'assets/images/next.svg';
@@ -231,6 +351,18 @@ class Resources {
   static const String assetsImagesRecentStickerSvg =
       'assets/images/recent_sticker.svg';
 
+  static const String assetsImagesRecordPreviewPlaySvg =
+      'assets/images/record_preview_play.svg';
+
+  static const String assetsImagesRecordPreviewStopSvg =
+      'assets/images/record_preview_stop.svg';
+
+  static const String assetsImagesRecordRetrySvg =
+      'assets/images/record_retry.svg';
+
+  static const String assetsImagesRecordStopSvg =
+      'assets/images/record_stop.svg';
+
   static const String assetsImagesRotatoSvg = 'assets/images/rotato.svg';
 
   static const String assetsImagesSelectedSvg = 'assets/images/selected.svg';
@@ -248,6 +380,9 @@ class Resources {
       'assets/images/small_close.svg';
 
   static const String assetsImagesStickerSvg = 'assets/images/sticker.svg';
+
+  static const String assetsImagesStickerGifSvg =
+      'assets/images/sticker_gif.svg';
 
   static const String assetsImagesStickerStoreSvg =
       'assets/images/sticker_store.svg';
