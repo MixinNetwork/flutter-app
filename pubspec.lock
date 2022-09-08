@@ -305,8 +305,8 @@ packages:
     dependency: "direct dev"
     description:
       path: "packages/debug_info_collector"
-      ref: "0b3a7fc6e971b92ea32923bc5ab5d60d9b10ee64"
-      resolved-ref: "0b3a7fc6e971b92ea32923bc5ab5d60d9b10ee64"
+      ref: ec94a35f60efade893abb160e1a2d2b40a6d2516
+      resolved-ref: ec94a35f60efade893abb160e1a2d2b40a6d2516
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "1.0.0"
