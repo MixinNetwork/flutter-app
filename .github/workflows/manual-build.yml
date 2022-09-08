@@ -102,5 +102,5 @@ jobs:
       - name: Upload debug info
         uses: actions/upload-artifact@v2
         with:
-          name: windows_debug_info.zip
+          name: windows_debug_info
           path: build\syms
