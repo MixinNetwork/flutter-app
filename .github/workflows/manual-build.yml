@@ -3,7 +3,7 @@ name: Manual Build App
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
 on:
-   workflow_dispatch:
+  workflow_dispatch:
      inputs:
        flutter_channel:
          description: "run with flutter channel, eg: master, beta, stable"
@@ -57,7 +57,7 @@ jobs:
         with:
           name: AppImage
           path: './*.AppImage*'
-  
+
   build-windows:
     runs-on: windows-latest
     steps:
@@ -67,29 +67,40 @@ jobs:
         with:
           channel: '${{ github.event.inputs.flutter_channel }}'
       - run: flutter config --enable-windows-desktop
-      
+      # fix error when dump debug info: (msdia*.dll unregistered?)
+      - run: regsvr32 "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\Remote Debugger\x64\msdia140.dll"
+
       - name: Run tests
         run: flutter test
-        
+
       - name: Build APP
         run: flutter build windows
-      
+
       - name: Build Installer
         run: |
           "%programfiles(x86)%\Inno Setup 6\iscc.exe" "windows_inno_setup.iss"
         shell: cmd
-        
+
       - name: Upload Installer
         uses: actions/upload-artifact@v2
         with:
           name: mixin_setup.exe.zip
           path: build\mixin_setup.exe
-        
+
       - name: Build msix
         run: flutter pub run msix:create
-        
+
       - name: Upload msix
         uses: actions/upload-artifact@v2
         with:
           name: flutter_app.msix.zip
           path: build\windows\runner\Release\flutter_app.msix
+
+      - name: collect debug info
+        run: flutter pub run debug_info_collector
+
+      - name: Upload debug info
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows_debug_info
+          path: build\syms

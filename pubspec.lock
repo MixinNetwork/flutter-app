@@ -301,6 +301,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.7.8"
+  debug_info_collector:
+    dependency: "direct dev"
+    description:
+      path: "packages/debug_info_collector"
+      ref: "393b52040e982ee1a31169f86face252701907ee"
+      resolved-ref: "393b52040e982ee1a31169f86face252701907ee"
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
+    version: "1.0.0"
   decimal:
     dependency: "direct main"
     description:
