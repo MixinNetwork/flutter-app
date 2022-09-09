@@ -1098,7 +1098,7 @@ class SendMessageHelper {
     );
   }
 
-  Future<void> sendGiphyGifMessage(
+  Future<void> sendImageMessageByUrl(
     String conversationId,
     String senderId,
     String category,
@@ -1135,6 +1135,9 @@ class SendMessageHelper {
       return message;
     }
 
+    final hasSize = width != null && height != null && defaultGifMimeType;
+    if (hasSize) await insertMessage(width, height, defaultMimeType);
+
     Uint8List? sendImageBytes;
     try {
       sendImageBytes = await downloadImage(url);
@@ -1143,11 +1146,10 @@ class SendMessageHelper {
     }
     if (sendImageBytes == null) {
       e('failed to get send image bytes. $url');
-      final message = await insertMessage(width, height, defaultMimeType);
-      await _messageDao.updateMediaStatus(
-          message.messageId, MediaStatus.canceled);
+      if (!hasSize) await insertMessage(width, height, defaultMimeType);
+      await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
       return;
-    } else {
+    } else if (!hasSize) {
       final image = await decodeImageFromList(sendImageBytes);
       final mimeType = lookupMimeType(url,
           headerBytes:

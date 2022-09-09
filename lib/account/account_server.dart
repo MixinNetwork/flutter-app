@@ -368,7 +368,7 @@ class AccountServer {
     int? height,
     bool defaultGifMimeType = true,
   }) async =>
-      _sendMessageHelper.sendGiphyGifMessage(
+      _sendMessageHelper.sendImageMessageByUrl(
         await _initConversation(conversationId, recipientId),
         userId,
         encryptCategory.toCategory(MessageCategory.plainImage,
