@@ -36,50 +36,78 @@ class ContactMessageWidget extends HookWidget {
           context,
           sharedUserId,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AvatarWidget(
-              size: 40,
-              avatarUrl: sharedUserAvatarUrl,
-              userId: sharedUserId,
-              name: sharedUserFullName,
-            ),
-            const SizedBox(width: 8),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        sharedUserFullName ?? '',
-                        style: TextStyle(
-                          color: context.theme.text,
-                          fontSize: MessageItemWidget.primaryFontSize,
-                        ),
-                      ),
-                    ),
-                    VerifiedOrBotWidget(
-                      verified: sharedUserIsVerified,
-                      isBot: sharedUserAppId != null,
-                    ),
-                  ],
-                ),
-                Text(
-                  sharedUserIdentityNumber,
-                  style: TextStyle(
-                    color: context.theme.secondaryText,
-                    fontSize: MessageItemWidget.secondaryFontSize,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+        child: ContactItem(
+            avatarUrl: sharedUserAvatarUrl,
+            userId: sharedUserId,
+            fullName: sharedUserFullName,
+            isVerified: sharedUserIsVerified,
+            appId: sharedUserAppId,
+            identityNumber: sharedUserIdentityNumber),
       ),
     );
   }
+}
+
+class ContactItem extends StatelessWidget {
+  const ContactItem({
+    super.key,
+    required this.avatarUrl,
+    required this.userId,
+    required this.fullName,
+    required this.isVerified,
+    required this.appId,
+    required this.identityNumber,
+  });
+
+  final String? avatarUrl;
+  final String? userId;
+  final String? fullName;
+  final bool? isVerified;
+  final String? appId;
+  final String identityNumber;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AvatarWidget(
+            size: 40,
+            avatarUrl: avatarUrl,
+            userId: userId,
+            name: fullName,
+          ),
+          const SizedBox(width: 8),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      fullName ?? '',
+                      style: TextStyle(
+                        color: context.theme.text,
+                        fontSize: MessageItemWidget.primaryFontSize,
+                      ),
+                    ),
+                  ),
+                  VerifiedOrBotWidget(
+                    verified: isVerified,
+                    isBot: appId != null,
+                  ),
+                ],
+              ),
+              Text(
+                identityNumber,
+                style: TextStyle(
+                  color: context.theme.secondaryText,
+                  fontSize: MessageItemWidget.secondaryFontSize,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
 }

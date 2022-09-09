@@ -278,7 +278,7 @@ class _ShareMenuItem extends StatelessWidget {
             if (appCardData?.appId != null) {
               app = await context.accountServer.getAppAndCheckUser(
                 appCardData!.appId!,
-                DateTime.parse(appCardData!.updatedAt),
+                DateTime.tryParse(appCardData!.updatedAt ?? ''),
               );
             }
 

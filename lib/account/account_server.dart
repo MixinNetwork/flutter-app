@@ -13,7 +13,6 @@ import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
-import '../api/giphy_vo/giphy_image.dart';
 import '../blaze/blaze.dart';
 import '../blaze/vo/pin_message_minimal.dart';
 import '../bloc/setting_cubit.dart';
@@ -359,20 +358,26 @@ class AccountServer {
     );
   }
 
-  Future<void> sendGiphyGifMessage(
+  Future<void> sendImageMessageByUrl(
     EncryptCategory encryptCategory,
-    GiphyImage sendImage,
+    String url,
     String previewUrl, {
     String? conversationId,
     String? recipientId,
+    int? width,
+    int? height,
+    bool defaultGifMimeType = true,
   }) async =>
-      _sendMessageHelper.sendGiphyGifMessage(
+      _sendMessageHelper.sendImageMessageByUrl(
         await _initConversation(conversationId, recipientId),
         userId,
         encryptCategory.toCategory(MessageCategory.plainImage,
             MessageCategory.signalImage, MessageCategory.encryptedImage),
-        sendImage,
+        url,
         previewUrl,
+        width: width,
+        height: height,
+        defaultGifMimeType: defaultGifMimeType,
       );
 
   Future<void> sendImageMessage(
@@ -453,19 +458,23 @@ class AccountServer {
           encryptCategory.toCategory(MessageCategory.plainSticker,
               MessageCategory.signalSticker, MessageCategory.encryptedSticker));
 
-  Future<void> sendContactMessage(String shareUserId, String shareUserFullName,
-          EncryptCategory encryptCategory,
-          {String? conversationId,
-          String? recipientId,
-          String? quoteMessageId}) async =>
-      _sendMessageHelper.sendContactMessage(
-        await _initConversation(conversationId, recipientId),
-        userId,
-        ContactMessage(shareUserId),
-        shareUserFullName,
-        encryptCategory: encryptCategory,
-        quoteMessageId: quoteMessageId,
-      );
+  Future<void> sendContactMessage(String shareUserId, String? shareUserFullName,
+      EncryptCategory encryptCategory,
+      {String? conversationId,
+      String? recipientId,
+      String? quoteMessageId}) async {
+    final fullName = shareUserFullName ??
+        (await database.userDao.userById(shareUserId).getSingleOrNull())
+            ?.fullName;
+    return _sendMessageHelper.sendContactMessage(
+      await _initConversation(conversationId, recipientId),
+      userId,
+      ContactMessage(shareUserId),
+      fullName,
+      encryptCategory: encryptCategory,
+      quoteMessageId: quoteMessageId,
+    );
+  }
 
   Future<void> sendRecallMessage(List<String> messageIds,
           {String? conversationId, String? recipientId}) async =>

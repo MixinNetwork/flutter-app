@@ -36,8 +36,6 @@ class ActionCardMessage extends HookWidget {
       [content],
     );
 
-    final playing = useImagePlaying(context);
-
     if (appCardData == null) return const UnknownMessage();
 
     return MessageBubble(
@@ -54,47 +52,60 @@ class ActionCardMessage extends HookWidget {
                 context.read<ConversationCubit>().state?.conversationId,
           );
         },
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(4)),
-              child: CacheImage(
-                appCardData.iconUrl,
-                height: 40,
-                width: 40,
-                controller: playing,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    appCardData.title,
-                    style: TextStyle(
-                      color: context.theme.text,
-                      fontSize: MessageItemWidget.secondaryFontSize,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    appCardData.description,
-                    maxLines: 1,
-                    style: TextStyle(
-                      color: context.theme.secondaryText,
-                      fontSize: MessageItemWidget.tertiaryFontSize,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+        child: AppCardItem(data: appCardData),
       ),
+    );
+  }
+}
+
+class AppCardItem extends HookWidget {
+  const AppCardItem({super.key, required this.data});
+
+  final AppCardData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final playing = useImagePlaying(context);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
+          child: CacheImage(
+            data.iconUrl,
+            height: 40,
+            width: 40,
+            controller: playing,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                data.title,
+                style: TextStyle(
+                  color: context.theme.text,
+                  fontSize: MessageItemWidget.secondaryFontSize,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                data.description,
+                maxLines: 1,
+                style: TextStyle(
+                  color: context.theme.secondaryText,
+                  fontSize: MessageItemWidget.tertiaryFontSize,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

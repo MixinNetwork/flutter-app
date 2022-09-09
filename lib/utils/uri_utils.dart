@@ -4,10 +4,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/constants.dart';
 import '../crypto/uuid/uuid.dart';
+import '../db/mixin_database.dart' hide User;
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/item/transfer/transfer_page.dart';
+import '../widgets/message/send_message_dialog/send_message_dialog.dart';
 import '../widgets/toast.dart';
 import '../widgets/unknown_mixin_url_dialog.dart';
 import '../widgets/user/user_dialog.dart';
@@ -42,6 +44,7 @@ Future<bool> openUri(
   BuildContext context,
   String text, {
   Future<bool> Function(Uri uri) fallbackHandler = launchUrl,
+  App? app,
 }) async {
   final uri = Uri.parse(text);
   if (uri.scheme.isEmpty) return Future.value(false);
@@ -55,78 +58,22 @@ Future<bool> openUri(
 
     final code = uri.code;
     if (code != null && code.trim().isNotEmpty) {
-      showToastLoading(context);
-      try {
-        final mixinResponse =
-            await context.accountServer.client.accountApi.code(code);
-        final data = mixinResponse.data;
-        if (data is User) {
-          await showUserDialog(context, data.userId);
-          return true;
-        } else if (data is ConversationResponse) {
-          await showConversationDialog(context, data, code);
-          return true;
-        }
-
-        Toast.dismiss();
-        await showUnknownMixinUrlDialog(context, uri);
-        return false;
-      } catch (error) {
-        e('open code: $error');
-        await showToastFailed(context, error);
-        return false;
-      }
+      return _showCodeDialog(context, code, uri);
     }
 
     final snapshotTraceId = uri.snapshotTraceId;
     if (snapshotTraceId != null && snapshotTraceId.trim().isNotEmpty) {
-      try {
-        showToastLoading(context);
-
-        final snapshotId = await context.database.snapshotDao
-            .snapshotIdByTraceId(snapshotTraceId)
-            .getSingleOrNull();
-
-        if (snapshotId != null && snapshotId.trim().isNotEmpty) {
-          Toast.dismiss();
-          await showTransferDialog(context, snapshotId);
-          return true;
-        }
-
-        final snapshot = await context.accountServer
-            .updateSnapshotByTraceId(traceId: snapshotTraceId);
-
-        Toast.dismiss();
-        await showTransferDialog(context, snapshot.snapshotId);
-        return true;
-      } catch (error) {
-        e('get snapshot by traceId: $error');
-        await showToastFailed(context, error);
-        return false;
-      }
+      return _showTransferDialog(context, snapshotTraceId);
     }
 
     final conversationId = uri.conversationId;
     if (conversationId != null && conversationId.trim().isNotEmpty) {
-      final userId = uri.queryParameters['user'];
-      if (userId != null && userId.trim().isNotEmpty) {
-        showToastLoading(context);
-        await context.accountServer.refreshUsers([userId]);
-        Toast.dismiss();
+      return _selectConversation(uri, context, conversationId);
+    }
 
-        if (conversationId !=
-            generateConversationId(context.accountServer.userId, userId)) {
-          await showToastFailed(context, null);
-          return false;
-        } else {
-          await ConversationCubit.selectUser(context, userId);
-          return true;
-        }
-      }
-
-      await ConversationCubit.selectConversation(context, conversationId,
-          sync: true);
-      return true;
+    if (uri.isSend) {
+      return showSendDialog(context, uri.categoryOfSend,
+          uri.conversationIdOfSend, uri.dataOfSend, app);
     }
 
     if (uri.isMixinScheme) {
@@ -137,6 +84,81 @@ Future<bool> openUri(
   }
 
   return fallbackHandler(uri);
+}
+
+Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
+  showToastLoading(context);
+  try {
+    final mixinResponse =
+        await context.accountServer.client.accountApi.code(code);
+    final data = mixinResponse.data;
+    if (data is User) {
+      await showUserDialog(context, data.userId);
+      return true;
+    } else if (data is ConversationResponse) {
+      await showConversationDialog(context, data, code);
+      return true;
+    }
+
+    Toast.dismiss();
+    await showUnknownMixinUrlDialog(context, uri);
+    return false;
+  } catch (error) {
+    e('open code: $error');
+    await showToastFailed(context, error);
+    return false;
+  }
+}
+
+Future<bool> _showTransferDialog(
+    BuildContext context, String snapshotTraceId) async {
+  try {
+    showToastLoading(context);
+
+    final snapshotId = await context.database.snapshotDao
+        .snapshotIdByTraceId(snapshotTraceId)
+        .getSingleOrNull();
+
+    if (snapshotId != null && snapshotId.trim().isNotEmpty) {
+      Toast.dismiss();
+      await showTransferDialog(context, snapshotId);
+      return true;
+    }
+
+    final snapshot = await context.accountServer
+        .updateSnapshotByTraceId(traceId: snapshotTraceId);
+
+    Toast.dismiss();
+    await showTransferDialog(context, snapshot.snapshotId);
+    return true;
+  } catch (error) {
+    e('get snapshot by traceId: $error');
+    await showToastFailed(context, error);
+    return false;
+  }
+}
+
+Future<bool> _selectConversation(
+    Uri uri, BuildContext context, String conversationId) async {
+  final userId = uri.queryParameters['user'];
+  if (userId != null && userId.trim().isNotEmpty) {
+    showToastLoading(context);
+    await context.accountServer.refreshUsers([userId]);
+    Toast.dismiss();
+
+    if (conversationId !=
+        generateConversationId(context.accountServer.userId, userId)) {
+      await showToastFailed(context, null);
+      return false;
+    } else {
+      await ConversationCubit.selectUser(context, userId);
+      return true;
+    }
+  }
+
+  await ConversationCubit.selectConversation(context, conversationId,
+      sync: true);
+  return true;
 }
 
 extension _MixinUriExtension on Uri {
@@ -174,5 +196,22 @@ extension _MixinUriExtension on Uri {
     if (_isTypeScheme(MixinSchemeHost.snapshots)) {
       return queryParameters['trace'];
     }
+  }
+
+  bool get isSend => _isTypeScheme(MixinSchemeHost.send);
+
+  String? get categoryOfSend {
+    if (!isSend) return null;
+    return queryParameters['category'];
+  }
+
+  String? get conversationIdOfSend {
+    if (!isSend) return null;
+    return queryParameters['conversation'];
+  }
+
+  String? get dataOfSend {
+    if (!isSend) return null;
+    return queryParameters['data'];
   }
 }

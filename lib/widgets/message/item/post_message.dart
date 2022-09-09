@@ -19,13 +19,18 @@ const _decoration = BoxDecoration(
   color: Color.fromRGBO(0, 0, 0, 0.2),
 );
 
-class PostMessage extends StatelessWidget {
+class PostMessage extends HookWidget {
   const PostMessage({super.key});
 
   @override
-  Widget build(BuildContext context) => const MessageBubble(
-        child: MessagePost(showStatus: true),
-      );
+  Widget build(BuildContext context) {
+    final content =
+        useMessageConverter(converter: (state) => state.content ?? '');
+
+    return MessageBubble(
+      child: MessagePost(showStatus: true, content: content),
+    );
+  }
 }
 
 class MessagePost extends StatelessWidget {
@@ -34,15 +39,21 @@ class MessagePost extends StatelessWidget {
     this.padding,
     this.decoration,
     required this.showStatus,
+    required this.content,
+    this.clickable = true,
   });
 
   final EdgeInsetsGeometry? padding;
   final Decoration? decoration;
   final bool showStatus;
+  final String content;
+  final bool clickable;
 
   @override
   Widget build(BuildContext context) => InteractiveDecoratedBox(
-        onTap: () => PostPreview.push(context, message: context.message),
+        onTap: clickable
+            ? () => PostPreview.push(context, message: context.message)
+            : null,
         behavior: HitTestBehavior.deferToChild,
         child: Container(
           padding: padding,
@@ -50,8 +61,6 @@ class MessagePost extends StatelessWidget {
           child: Stack(
             children: [
               HookBuilder(builder: (context) {
-                final content = useMessageConverter(
-                    converter: (state) => state.content ?? '');
                 final postContent =
                     useMemoized(content.postOptimize, [content]);
 
