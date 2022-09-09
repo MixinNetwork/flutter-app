@@ -21,6 +21,8 @@ extension UserExtension on sdk.User {
         appId: app?.appId,
         biography: biography,
         isScam: isScam ? 1 : 0,
+        codeId: codeId,
+        codeUrl: codeUrl,
       );
 }
 
