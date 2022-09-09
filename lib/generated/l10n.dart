@@ -622,16 +622,6 @@ class Localization {
     );
   }
 
-  /// `CHOOSE`
-  String get choose {
-    return Intl.message(
-      'CHOOSE',
-      name: 'choose',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `{count, plural, one{{arg0} Conversation} other{{arg0} Conversations}}`
   String circleSubtitle(num count, Object arg0) {
     return Intl.plural(
@@ -3129,6 +3119,16 @@ class Localization {
     return Intl.message(
       'https://mixin.one/pages/1000007',
       name: 'secretUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select`
+  String get select {
+    return Intl.message(
+      'Select',
+      name: 'select',
       desc: '',
       args: [],
     );

@@ -167,6 +167,7 @@
 "searchConversation" : "Cari Percakapan",
 "searchRelatedMessage" : "{count, plural, one{null} other{{arg0} pesan terkait}}",
 "secretUrl" : "https://mixin.one/pages/1000007",
+"select" : "Pilih",
 "send" : "Kirim",
 "settingAuthSearchHint" : "Mixin ID, Nama",
 "share" : "Bagikan",

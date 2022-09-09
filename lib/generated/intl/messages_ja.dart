@@ -191,7 +191,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "この種類のチャットは読み込めません。お使いの携帯電話の設定をご確認ください"),
         "chatPinMessage": m7,
         "checkNewVersion": MessageLookupByLibrary.simpleMessage("最新版をチェック"),
-        "choose": MessageLookupByLibrary.simpleMessage("選択"),
         "circleSubtitle": m8,
         "circleTitle": m9,
         "circles": MessageLookupByLibrary.simpleMessage("グループリスト"),
@@ -504,6 +503,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchRelatedMessage": m36,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "select": MessageLookupByLibrary.simpleMessage("選択"),
         "send": MessageLookupByLibrary.simpleMessage("送る"),
         "sendArchived":
             MessageLookupByLibrary.simpleMessage("1つのZIPファイルにアーカイブ"),

@@ -214,7 +214,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "chatPinMessage": m7,
         "checkNewVersion":
             MessageLookupByLibrary.simpleMessage("Проверить новую версию"),
-        "choose": MessageLookupByLibrary.simpleMessage("ВЫБРАТЬ"),
         "circleSubtitle": m8,
         "circleTitle": m9,
         "circles": MessageLookupByLibrary.simpleMessage("Круги"),
@@ -571,6 +570,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchRelatedMessage": m36,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "select": MessageLookupByLibrary.simpleMessage("Выбрать"),
         "send": MessageLookupByLibrary.simpleMessage("Отправить"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Заархивированы все файлы в один zip файл"),

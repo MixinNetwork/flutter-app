@@ -191,7 +191,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("不支持此类型消息，请在手机上查看。"),
         "chatPinMessage": m7,
         "checkNewVersion": MessageLookupByLibrary.simpleMessage("检查新版本"),
-        "choose": MessageLookupByLibrary.simpleMessage("选择"),
         "circleSubtitle": m8,
         "circleTitle": m9,
         "circles": MessageLookupByLibrary.simpleMessage("圈子"),
@@ -501,6 +500,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPlaceholderNumber":
             MessageLookupByLibrary.simpleMessage("搜索 Mixin ID 或手机号码："),
         "searchRelatedMessage": m36,
+        "select": MessageLookupByLibrary.simpleMessage("选择"),
         "send": MessageLookupByLibrary.simpleMessage("发送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),
         "sendQuickly": MessageLookupByLibrary.simpleMessage("快速发送"),
