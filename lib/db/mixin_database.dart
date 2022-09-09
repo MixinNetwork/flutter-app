@@ -99,10 +99,11 @@ part 'mixin_database.g.dart';
 )
 class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);
+
   MixinDatabase.connect(super.c) : super.connect();
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   final eventBus = DataBaseEventBus();
 
@@ -222,8 +223,19 @@ class MixinDatabase extends _$MixinDatabase {
           if (from <= 15) {
             await m.createIndex(indexUsersIdentityNumber);
           }
+          if (from <= 16) {
+            await _addColumnIfNotExists(m, users, users.codeUrl);
+            await _addColumnIfNotExists(m, users, users.codeId);
+          }
         },
       );
+
+  Future<void> _addColumnIfNotExists(
+      Migrator m, TableInfo table, GeneratedColumn column) async {
+    if (!await _checkColumnExists(table.actualTableName, column.name)) {
+      await m.addColumn(table, column);
+    }
+  }
 
   Future<bool> _checkColumnExists(String tableName, String columnName) async {
     final queryRow = await customSelect(

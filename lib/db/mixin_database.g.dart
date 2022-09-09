@@ -4263,6 +4263,8 @@ class User extends DataClass implements Insertable<User> {
   final String? appId;
   final String? biography;
   final int? isScam;
+  final String? codeUrl;
+  final String? codeId;
   User(
       {required this.userId,
       required this.identityNumber,
@@ -4276,7 +4278,9 @@ class User extends DataClass implements Insertable<User> {
       this.hasPin,
       this.appId,
       this.biography,
-      this.isScam});
+      this.isScam,
+      this.codeUrl,
+      this.codeId});
   factory User.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return User(
@@ -4306,6 +4310,10 @@ class User extends DataClass implements Insertable<User> {
           .mapFromDatabaseResponse(data['${effectivePrefix}biography']),
       isScam: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}is_scam']),
+      codeUrl: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}code_url']),
+      codeId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}code_id']),
     );
   }
   @override
@@ -4349,6 +4357,12 @@ class User extends DataClass implements Insertable<User> {
     if (!nullToAbsent || isScam != null) {
       map['is_scam'] = Variable<int?>(isScam);
     }
+    if (!nullToAbsent || codeUrl != null) {
+      map['code_url'] = Variable<String?>(codeUrl);
+    }
+    if (!nullToAbsent || codeId != null) {
+      map['code_id'] = Variable<String?>(codeId);
+    }
     return map;
   }
 
@@ -4385,6 +4399,11 @@ class User extends DataClass implements Insertable<User> {
           : Value(biography),
       isScam:
           isScam == null && nullToAbsent ? const Value.absent() : Value(isScam),
+      codeUrl: codeUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(codeUrl),
+      codeId:
+          codeId == null && nullToAbsent ? const Value.absent() : Value(codeId),
     );
   }
 
@@ -4406,6 +4425,8 @@ class User extends DataClass implements Insertable<User> {
       appId: serializer.fromJson<String?>(json['app_id']),
       biography: serializer.fromJson<String?>(json['biography']),
       isScam: serializer.fromJson<int?>(json['is_scam']),
+      codeUrl: serializer.fromJson<String?>(json['code_url']),
+      codeId: serializer.fromJson<String?>(json['code_id']),
     );
   }
   @override
@@ -4425,6 +4446,8 @@ class User extends DataClass implements Insertable<User> {
       'app_id': serializer.toJson<String?>(appId),
       'biography': serializer.toJson<String?>(biography),
       'is_scam': serializer.toJson<int?>(isScam),
+      'code_url': serializer.toJson<String?>(codeUrl),
+      'code_id': serializer.toJson<String?>(codeId),
     };
   }
 
@@ -4441,7 +4464,9 @@ class User extends DataClass implements Insertable<User> {
           Value<int?> hasPin = const Value.absent(),
           Value<String?> appId = const Value.absent(),
           Value<String?> biography = const Value.absent(),
-          Value<int?> isScam = const Value.absent()}) =>
+          Value<int?> isScam = const Value.absent(),
+          Value<String?> codeUrl = const Value.absent(),
+          Value<String?> codeId = const Value.absent()}) =>
       User(
         userId: userId ?? this.userId,
         identityNumber: identityNumber ?? this.identityNumber,
@@ -4457,6 +4482,8 @@ class User extends DataClass implements Insertable<User> {
         appId: appId.present ? appId.value : this.appId,
         biography: biography.present ? biography.value : this.biography,
         isScam: isScam.present ? isScam.value : this.isScam,
+        codeUrl: codeUrl.present ? codeUrl.value : this.codeUrl,
+        codeId: codeId.present ? codeId.value : this.codeId,
       );
   @override
   String toString() {
@@ -4473,7 +4500,9 @@ class User extends DataClass implements Insertable<User> {
           ..write('hasPin: $hasPin, ')
           ..write('appId: $appId, ')
           ..write('biography: $biography, ')
-          ..write('isScam: $isScam')
+          ..write('isScam: $isScam, ')
+          ..write('codeUrl: $codeUrl, ')
+          ..write('codeId: $codeId')
           ..write(')'))
         .toString();
   }
@@ -4492,7 +4521,9 @@ class User extends DataClass implements Insertable<User> {
       hasPin,
       appId,
       biography,
-      isScam);
+      isScam,
+      codeUrl,
+      codeId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4509,7 +4540,9 @@ class User extends DataClass implements Insertable<User> {
           other.hasPin == this.hasPin &&
           other.appId == this.appId &&
           other.biography == this.biography &&
-          other.isScam == this.isScam);
+          other.isScam == this.isScam &&
+          other.codeUrl == this.codeUrl &&
+          other.codeId == this.codeId);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -4526,6 +4559,8 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String?> appId;
   final Value<String?> biography;
   final Value<int?> isScam;
+  final Value<String?> codeUrl;
+  final Value<String?> codeId;
   const UsersCompanion({
     this.userId = const Value.absent(),
     this.identityNumber = const Value.absent(),
@@ -4540,6 +4575,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.appId = const Value.absent(),
     this.biography = const Value.absent(),
     this.isScam = const Value.absent(),
+    this.codeUrl = const Value.absent(),
+    this.codeId = const Value.absent(),
   });
   UsersCompanion.insert({
     required String userId,
@@ -4555,6 +4592,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.appId = const Value.absent(),
     this.biography = const Value.absent(),
     this.isScam = const Value.absent(),
+    this.codeUrl = const Value.absent(),
+    this.codeId = const Value.absent(),
   })  : userId = Value(userId),
         identityNumber = Value(identityNumber);
   static Insertable<User> custom({
@@ -4571,6 +4610,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String?>? appId,
     Expression<String?>? biography,
     Expression<int?>? isScam,
+    Expression<String?>? codeUrl,
+    Expression<String?>? codeId,
   }) {
     return RawValuesInsertable({
       if (userId != null) 'user_id': userId,
@@ -4586,6 +4627,8 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (appId != null) 'app_id': appId,
       if (biography != null) 'biography': biography,
       if (isScam != null) 'is_scam': isScam,
+      if (codeUrl != null) 'code_url': codeUrl,
+      if (codeId != null) 'code_id': codeId,
     });
   }
 
@@ -4602,7 +4645,9 @@ class UsersCompanion extends UpdateCompanion<User> {
       Value<int?>? hasPin,
       Value<String?>? appId,
       Value<String?>? biography,
-      Value<int?>? isScam}) {
+      Value<int?>? isScam,
+      Value<String?>? codeUrl,
+      Value<String?>? codeId}) {
     return UsersCompanion(
       userId: userId ?? this.userId,
       identityNumber: identityNumber ?? this.identityNumber,
@@ -4617,6 +4662,8 @@ class UsersCompanion extends UpdateCompanion<User> {
       appId: appId ?? this.appId,
       biography: biography ?? this.biography,
       isScam: isScam ?? this.isScam,
+      codeUrl: codeUrl ?? this.codeUrl,
+      codeId: codeId ?? this.codeId,
     );
   }
 
@@ -4666,6 +4713,12 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (isScam.present) {
       map['is_scam'] = Variable<int?>(isScam.value);
     }
+    if (codeUrl.present) {
+      map['code_url'] = Variable<String?>(codeUrl.value);
+    }
+    if (codeId.present) {
+      map['code_id'] = Variable<String?>(codeId.value);
+    }
     return map;
   }
 
@@ -4684,7 +4737,9 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('hasPin: $hasPin, ')
           ..write('appId: $appId, ')
           ..write('biography: $biography, ')
-          ..write('isScam: $isScam')
+          ..write('isScam: $isScam, ')
+          ..write('codeUrl: $codeUrl, ')
+          ..write('codeId: $codeId')
           ..write(')'))
         .toString();
   }
@@ -4778,6 +4833,18 @@ class Users extends Table with TableInfo<Users, User> {
       type: const IntType(),
       requiredDuringInsert: false,
       $customConstraints: '');
+  final VerificationMeta _codeUrlMeta = const VerificationMeta('codeUrl');
+  late final GeneratedColumn<String?> codeUrl = GeneratedColumn<String?>(
+      'code_url', aliasedName, true,
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _codeIdMeta = const VerificationMeta('codeId');
+  late final GeneratedColumn<String?> codeId = GeneratedColumn<String?>(
+      'code_id', aliasedName, true,
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         userId,
@@ -4792,7 +4859,9 @@ class Users extends Table with TableInfo<Users, User> {
         hasPin,
         appId,
         biography,
-        isScam
+        isScam,
+        codeUrl,
+        codeId
       ];
   @override
   String get aliasedName => _alias ?? 'users';
@@ -4853,6 +4922,14 @@ class Users extends Table with TableInfo<Users, User> {
     if (data.containsKey('is_scam')) {
       context.handle(_isScamMeta,
           isScam.isAcceptableOrUnknown(data['is_scam']!, _isScamMeta));
+    }
+    if (data.containsKey('code_url')) {
+      context.handle(_codeUrlMeta,
+          codeUrl.isAcceptableOrUnknown(data['code_url']!, _codeUrlMeta));
+    }
+    if (data.containsKey('code_id')) {
+      context.handle(_codeIdMeta,
+          codeId.isAcceptableOrUnknown(data['code_id']!, _codeIdMeta));
     }
     return context;
   }

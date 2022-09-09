@@ -656,6 +656,8 @@ class AccountServer {
       muteUntil: DateTime.tryParse(me.muteUntil),
       biography: me.biography,
       isScam: me.isScam ? 1 : 0,
+      codeId: me.codeId,
+      codeUrl: me.codeUrl,
     ));
     multiAuthCubit.updateAccount(me);
   }
