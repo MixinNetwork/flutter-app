@@ -316,7 +316,7 @@ packages:
       name: decimal
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.0"
+    version: "2.3.0"
   desktop_drop:
     dependency: "direct main"
     description:
