@@ -1,5 +1,6 @@
+import 'dart:async';
+
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../constants/constants.dart';
 import '../db/dao/user_dao.dart';

@@ -1,8 +1,9 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../../../account/account_server.dart';
 import '../../../bloc/simple_cubit.dart';

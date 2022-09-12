@@ -13,7 +13,6 @@ import 'package:isolate/isolate.dart';
 import 'package:path/path.dart' as p;
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:quick_breakpad/quick_breakpad.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 import 'package:window_size/window_size.dart';
 
 import 'app.dart';

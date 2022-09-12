@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
