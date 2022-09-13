@@ -17,6 +17,7 @@ import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/search_text_field.dart';
+import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
 import '../chat/chat_page.dart';
@@ -347,11 +348,18 @@ class _SearchMessageList extends HookWidget {
           message: message,
           keyword: keyword,
           showSender: true,
-          onTap: () async => ConversationCubit.selectConversation(
-            context,
-            message.conversationId,
-            initIndexMessageId: message.messageId,
-          ),
+          onTap: () {
+            ConversationCubit.selectConversation(
+              context,
+              message.conversationId,
+              initIndexMessageId: message.messageId,
+            );
+            context.read<BlinkCubit>().blinkByMessageId(message.messageId);
+            final chatSideCubit = context.read<ChatSideCubit>();
+            if (chatSideCubit.state.routeMode) {
+              chatSideCubit.clear();
+            }
+          },
         );
       },
     );
