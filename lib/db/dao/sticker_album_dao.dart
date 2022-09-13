@@ -80,7 +80,7 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
         ..orderBy([OrderingTerm.desc(db.stickerAlbums.createdAt)])
         ..limit(1))
       .map((row) => db.stickerAlbums.createdAt.converter
-          .mapToDart(row.read(db.stickerAlbums.createdAt)));
+          .fromSql(row.read(db.stickerAlbums.createdAt)));
 
   Selectable<int?> maxOrder() {
     final max = db.stickerAlbums.orderedAt.max();

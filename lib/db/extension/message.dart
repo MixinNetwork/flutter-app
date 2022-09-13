@@ -48,9 +48,9 @@ extension QuoteMessageItemExtension on QuoteMessageItem {
         'app_id': appId,
         'type': type,
         'content': content,
-        'createdAt': const MillisDateConverter().mapToSql(createdAt),
-        'status': const MessageStatusTypeConverter().mapToSql(status),
-        'media_status': const MediaStatusTypeConverter().mapToSql(mediaStatus),
+        'createdAt': const MillisDateConverter().toSql(createdAt),
+        'status': const MessageStatusTypeConverter().toSql(status),
+        'media_status': const MediaStatusTypeConverter().toSql(mediaStatus),
         'media_waveform': mediaWaveform,
         'media_name': mediaName,
         'media_mime_type': mediaMimeType,
@@ -82,11 +82,11 @@ QuoteMessageItem mapToQuoteMessage(Map<String, dynamic> map) {
   final createdAtJson = map['created_at'] ?? map['createdAt'];
   final createdAt = createdAtJson is String
       ? DateTime.parse(createdAtJson)
-      : const MillisDateConverter().mapToDart(createdAtJson as int?)!;
+      : const MillisDateConverter().fromSql(createdAtJson as int);
   return QuoteMessageItem(
     userId: map['user_id'] as String,
     status:
-        const MessageStatusTypeConverter().mapToDart(map['status'] as String?)!,
+        const MessageStatusTypeConverter().fromSql(map['status'] as String),
     messageId: map['message_id'] as String,
     sharedUserIdentityNumber: map['shared_user_identity_number'] as String?,
     type: map['type'] as String,
@@ -97,7 +97,7 @@ QuoteMessageItem mapToQuoteMessage(Map<String, dynamic> map) {
     appId: map['app_id'] as String?,
     content: map['content'] as String?,
     mediaStatus: const MediaStatusTypeConverter()
-        .mapToDart(map['media_status'] as String?),
+        .fromSql(map['media_status'] as String?),
     mediaWaveform: map['media_waveform'] as String?,
     mediaName: map['media_name'] as String?,
     mediaMimeType: map['media_mime_type'] as String?,

@@ -43,7 +43,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Selectable<int?> allUnseenIgnoreMuteMessageCount() =>
       db.baseUnseenMessageCount(
         (conversation, owner, __) {
-          final now = const MillisDateConverter().mapToSql(DateTime.now());
+          final now = const MillisDateConverter().toSql(DateTime.now());
           final groupExpression =
               conversation.category.equalsValue(ConversationCategory.group) &
                   conversation.muteUntil.isSmallerOrEqualValue(now);
@@ -70,14 +70,14 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       );
 
   Selectable<int> _baseConversationItemCount(
-          Expression<bool?> Function(Conversations conversation, Users owner,
+          Expression<bool> Function(Conversations conversation, Users owner,
                   CircleConversations circleConversation)
               where) =>
       db.baseConversationItemCount((conversation, owner, circleConversation) =>
           where(conversation, owner, circleConversation));
 
   Selectable<ConversationItem> _baseConversationItems(
-          Expression<bool?> Function(
+          Expression<bool> Function(
                   Conversations conversation,
                   Users owner,
                   Messages message,
@@ -117,7 +117,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
               _baseConversationItemOrder(conversation),
           limit);
 
-  Future<bool> _conversationHasData(Expression<bool?> predicate) => db.hasData(
+  Future<bool> _conversationHasData(Expression<bool> predicate) => db.hasData(
       db.conversations,
       [
         innerJoin(db.users, db.conversations.ownerId.equalsExp(db.users.userId),
@@ -125,7 +125,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       ],
       predicate);
 
-  Expression<bool?> _chatWhere(Conversations conversation) =>
+  Expression<bool> _chatWhere(Conversations conversation) =>
       conversation.category.isIn(['CONTACT', 'GROUP']);
 
   Selectable<int> chatConversationCount() => _baseConversationItemCount(
@@ -145,13 +145,13 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Future<bool> chatConversationHasData() =>
       _conversationHasData(_chatWhere(db.conversations));
 
-  Expression<bool?> _contactWhere(Conversations conversation, Users owner) =>
+  Expression<bool> _contactWhere(Conversations conversation, Users owner) =>
       conversation.category.equalsValue(ConversationCategory.contact) &
       owner.relationship.equalsValue(UserRelationship.friend) &
       owner.appId.isNull();
 
   Selectable<BaseUnseenConversationCountResult> _baseUnseenConversationCount(
-          Expression<bool?> Function(Conversations conversation, Users owner)
+          Expression<bool> Function(Conversations conversation, Users owner)
               where) =>
       db.baseUnseenConversationCount((conversation, owner) =>
           conversation.unseenMessageCount.isBiggerThanValue(0) &
@@ -178,7 +178,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Future<bool> contactConversationHasData() =>
       _conversationHasData(_contactWhere(db.conversations, db.users));
 
-  Expression<bool?> _strangerWhere(Conversations conversation, Users owner) =>
+  Expression<bool> _strangerWhere(Conversations conversation, Users owner) =>
       conversation.category.equalsValue(ConversationCategory.contact) &
       owner.relationship.equalsValue(UserRelationship.stranger) &
       owner.appId.isNull();
@@ -204,7 +204,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Future<bool> strangerConversationHasData() =>
       _conversationHasData(_strangerWhere(db.conversations, db.users));
 
-  Expression<bool?> _groupWhere(Conversations conversation) =>
+  Expression<bool> _groupWhere(Conversations conversation) =>
       conversation.category.equalsValue(ConversationCategory.group);
 
   Selectable<BaseUnseenConversationCountResult>
@@ -237,7 +237,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
             Limit(limit, offset),
       );
 
-  Expression<bool?> _botWhere(Conversations conversation, Users owner) =>
+  Expression<bool> _botWhere(Conversations conversation, Users owner) =>
       conversation.category.equalsValue(ConversationCategory.contact) &
       owner.appId.isNotNull();
 
@@ -324,8 +324,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         [],
         db.conversations.conversationId.equals(conversationId) &
             db.conversations.status
-                .equals(
-                    const ConversationStatusTypeConverter().mapToSql(status))
+                .equals(const ConversationStatusTypeConverter().toSql(status)!)
                 .not());
     if (already) return -1;
     return (db.update(db.conversations)
@@ -333,7 +332,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
               tbl.conversationId.equals(conversationId) &
               tbl.status
                   .equals(
-                      const ConversationStatusTypeConverter().mapToSql(status))
+                      const ConversationStatusTypeConverter().toSql(status)!)
                   .not()))
         .write(ConversationsCompanion(status: Value(status)));
   }

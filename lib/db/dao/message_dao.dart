@@ -75,7 +75,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       db.eventBus.watch<String>(DatabaseEvent.delete);
 
   Selectable<MessageItem> _baseMessageItems(
-    Expression<bool?> Function(
+    Expression<bool> Function(
       Messages message,
       Users sender,
       Users participant,
@@ -389,7 +389,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       path: result.read(mediaUrl)!,
       messageId: messageId,
       mediaSize: result.read(mediaSize)!,
-      mediaStatus: mediaStatus.converter.mapToDart(result.read(mediaStatus))!,
+      mediaStatus: mediaStatus.converter.fromSql(result.read(mediaStatus))!,
       content: result.read(content),
     );
   }
@@ -415,7 +415,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               db.messages.status.isIn([
                 MessageStatus.sent,
                 MessageStatus.delivered
-              ].map((e) => db.messages.status.converter.mapToSql(e)))))
+              ].map((e) => db.messages.status.converter.toSql(e)!))))
         .map((row) => row.read(countColumn))
         .getSingleOrNull();
 
@@ -423,8 +423,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         db.conversations,
         [],
         db.conversations.conversationId.equals(conversationId) &
-            db.conversations.lastMessageId.equals(messageId) &
-            db.conversations.unseenMessageCount.equals(count));
+            db.conversations.lastMessageId.equalsNullable(messageId) &
+            db.conversations.unseenMessageCount.equalsNullable(count));
 
     // For reduce update event
     if (already) return -1;
@@ -480,7 +480,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           ..addColumns([countExp])
           ..where(db.messages.conversationId.equals(conversationId)))
         .map(
-      (row) => row.read(countExp),
+      (row) => row.read(countExp)!,
     );
   }
 
@@ -572,7 +572,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             ..where(db.messages.conversationId.equals(conversationId) &
                 db.messages.quoteMessageId.equals(messageId) &
                 db.messages.quoteContent.isNull()))
-          .map((row) => row.read(db.messages.messageId.count()))
+          .map((row) => row.read(db.messages.messageId.count())!)
           .getSingle();
 
   Future<int> updateQuoteContentByQuoteId(
@@ -856,7 +856,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     required String messageId,
     required DateTime createdAt,
   }) async {
-    final rowId = await messageRowId(messageId).getSingleOrNull();
+    final rowId = await messageRowId(messageId).getSingleOrNull() ?? -1;
     return _baseMessageItems(
       (message, _, __, ___, ____, _____, ______, _______, conversation,
               ________, _________, em) =>
@@ -867,7 +867,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             MessageCategory.encryptedAudio
           ]) &
           message.createdAt.isBiggerOrEqualValue(
-              message.createdAt.converter.mapToSql(createdAt)) &
+              message.createdAt.converter.toSql(createdAt)!) &
           message.rowId.isBiggerThanValue(rowId),
       (_, __, ___, ____, _____, ______, _______, ________, _________,
               __________, ___________, em) =>
@@ -1129,7 +1129,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           ..addColumns([countExp])
           ..where(predicate))
         .map(
-      (row) => row.read(countExp),
+      (row) => row.read(countExp)!,
     );
   }
 
