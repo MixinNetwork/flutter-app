@@ -234,6 +234,15 @@ class Blaze {
   Future<void> _refreshOffset() async {
     final offset =
         await database.offsetDao.findStatusOffset().getSingleOrNull();
+    if (offset == null) {
+      e('blaze#_refreshOffset: offset is null');
+      // Update offset to now. to avoid if there is not message status offset in
+      // first login, the pending message status will not be updated.
+      await database.offsetDao.insert(Offset(
+        key: statusOffset,
+        timestamp: DateTime.now().toIso8601String(),
+      ));
+    }
     var status = offset != null ? offset.epochNano : DateTime.now().epochNano;
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);
