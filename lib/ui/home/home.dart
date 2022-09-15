@@ -9,6 +9,7 @@ import '../../bloc/bloc_converter.dart';
 import '../../bloc/setting_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/platform.dart';
 import '../../utils/uri_utils.dart';
 import '../../widgets/actions/actions.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
@@ -192,7 +193,7 @@ class _HomePage extends HookWidget {
     final collapse = userCollapse || autoCollapse;
 
     var targetWidth = collapse ? kSlidePageMinWidth : kSlidePageMaxWidth;
-    if (clampSlideWidth <= kSlidePageMinWidth) {
+    if (clampSlideWidth <= kSlidePageMinWidth || kPlatformIsIphone) {
       targetWidth = 0;
     }
 
