@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:android_id/android_id.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:ui_device/ui_device.dart' as ui_device;
 
 import '../crypto/uuid/uuid.dart';
 import 'logger.dart';
@@ -14,6 +15,12 @@ bool kPlatformIsDesktop =
     Platform.isMacOS || Platform.isLinux || Platform.isWindows;
 
 bool kPlatformIsMobile = Platform.isAndroid || Platform.isIOS;
+
+bool kPlatformIsPad = Platform.isIOS && !kPlatformIsIphone;
+
+bool kPlatformIsIphone = Platform.isIOS &&
+    ui_device.current.userInterfaceIdiom ==
+        ui_device.UIUserInterfaceIdiom.UIUserInterfaceIdiomPhone;
 
 Future<String> getPlatformVersion() async {
   try {
