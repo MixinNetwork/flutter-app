@@ -791,6 +791,9 @@ class _UnseenConversationList extends HookWidget {
       final index = conversationItems.indexWhere(
         (element) => element.conversationId == currentConversationId,
       );
+      if (index == -1) {
+        return;
+      }
 
       // use 0.9 instead 1 to ensure that the next conversation is visible if we forward.
       // in forward navigation, if alignment is 1, ScrollablePositionedList will only
@@ -808,10 +811,10 @@ class _UnseenConversationList extends HookWidget {
           break;
         }
       }
-
-      if (index != -1) {
-        itemScrollController.jumpTo(index: index, alignment: trailingEdge);
-      }
+      itemScrollController.scrollTo(
+        index: index,
+        duration: const Duration(milliseconds: 200),
+      );
     }, [conversationItems, currentConversationId]);
 
     if (conversationItems.isEmpty) {
