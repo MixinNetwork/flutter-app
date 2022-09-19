@@ -153,7 +153,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   hive_generator: ^1.1.0
-  json_serializable: ^6.1.6
+  json_serializable: ^6.3.2
   msix: ^3.6.3
 
 # For information on the generic Dart part of this file, see the
