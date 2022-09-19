@@ -952,7 +952,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     final keywordFts5 = query.trim().escapeFts5();
 
     assert(
-      unseenConversationOnly == false || conversationId == null,
+      !unseenConversationOnly || conversationId == null,
       'unseenConversationOnly and conversationId can not be set at the same time',
     );
 
@@ -1027,7 +1027,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     final keywordFts5 = keyword.trim().escapeFts5();
 
     assert(
-      unseenConversationOnly == false || conversationId == null,
+      !unseenConversationOnly || conversationId == null,
       'unseenConversationOnly and conversationId can not be set at the same time',
     );
 
