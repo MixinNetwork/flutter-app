@@ -97,7 +97,7 @@ dependencies:
   rxdart: ^0.27.5
   scrollable_positioned_list: ^0.3.4
   sliver_tools: ^0.2.8
-  sqlite3_flutter_libs: ^0.5.9
+  sqlite3_flutter_libs: ^0.5.10
   stream_transform: ^2.0.0
   system_tray:
     path: third_party/system_tray
