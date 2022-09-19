@@ -3114,6 +3114,16 @@ class Localization {
     );
   }
 
+  /// `Search Unread`
+  String get searchUnread {
+    return Intl.message(
+      'Search Unread',
+      name: 'searchUnread',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `https://mixin.one/pages/1000007`
   String get secretUrl {
     return Intl.message(

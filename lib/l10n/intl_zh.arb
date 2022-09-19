@@ -303,6 +303,7 @@
 "searchEmpty" : "找不到联系人或消息。",
 "searchPlaceholderNumber" : "搜索 Mixin ID 或手机号码：",
 "searchRelatedMessage" : "{count, plural, one{{arg0} 条相关的消息} other{{arg0} 条相关的消息}}",
+"searchUnread" : "搜索未读会话",
 "select" : "选择",
 "send" : "发送",
 "sendArchived" : "打包成 zip 发送",

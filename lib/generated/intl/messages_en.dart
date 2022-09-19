@@ -571,6 +571,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPlaceholderNumber": MessageLookupByLibrary.simpleMessage(
             "Search Mixin ID or phone number:"),
         "searchRelatedMessage": m36,
+        "searchUnread": MessageLookupByLibrary.simpleMessage("Search Unread"),
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
         "select": MessageLookupByLibrary.simpleMessage("Select"),

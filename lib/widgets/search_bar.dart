@@ -59,7 +59,9 @@ class SearchBar extends HookWidget {
                   controller: context.read<TextEditingController>(),
                   onChanged: (keyword) =>
                       context.read<KeywordCubit>().emit(keyword),
-                  hintText: context.l10n.search,
+                  hintText: filterUnseen
+                      ? context.l10n.searchUnread
+                      : context.l10n.search,
                 ),
               ),
             ),

@@ -500,6 +500,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPlaceholderNumber":
             MessageLookupByLibrary.simpleMessage("搜索 Mixin ID 或手机号码："),
         "searchRelatedMessage": m36,
+        "searchUnread": MessageLookupByLibrary.simpleMessage("搜索未读会话"),
         "select": MessageLookupByLibrary.simpleMessage("选择"),
         "send": MessageLookupByLibrary.simpleMessage("发送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),
