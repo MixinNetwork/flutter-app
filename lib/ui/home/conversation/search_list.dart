@@ -772,6 +772,32 @@ class _UnseenConversationList extends HookWidget {
             }
           }
         }
+        newItems.sort((a, b) {
+          // pinTime
+          if (a.pinTime != null) {
+            if (b.pinTime != null) {
+              return b.pinTime!.compareTo(a.pinTime!);
+            } else {
+              return -1;
+            }
+          } else if (b.pinTime != null) {
+            return 1;
+          }
+
+          // lastMessageCreatedAt
+          if (a.lastMessageCreatedAt != null) {
+            if (b.lastMessageCreatedAt != null) {
+              return b.lastMessageCreatedAt!.compareTo(a.lastMessageCreatedAt!);
+            } else {
+              return -1;
+            }
+          } else if (b.lastMessageCreatedAt != null) {
+            return 1;
+          }
+
+          // createdAt
+          return b.createdAt.compareTo(a.createdAt);
+        });
         unreadConversations.value = newItems;
       });
       return subscription.cancel;
@@ -784,45 +810,10 @@ class _UnseenConversationList extends HookWidget {
       converter: (state) => state.routeMode,
     );
 
-    final itemScrollController = useMemoized(ItemScrollController.new);
-    final itemPositionsListener = useMemoized(ItemPositionsListener.create);
-
-    useEffect(() {
-      final index = conversationItems.indexWhere(
-        (element) => element.conversationId == currentConversationId,
-      );
-      if (index == -1) {
-        return;
-      }
-
-      // use 0.9 instead 1 to ensure that the next conversation is visible if we forward.
-      // in forward navigation, if alignment is 1, ScrollablePositionedList will only
-      // show current conversation at the end, not the next one.
-      const trailingEdge = 0.9;
-
-      for (final position in itemPositionsListener.itemPositions.value) {
-        if (position.index == index) {
-          if (position.itemLeadingEdge > 0 &&
-              position.itemTrailingEdge < trailingEdge) {
-            // in viewport, do not need scroll.
-            // https://github.com/google/flutter.widgets/issues/276
-            return;
-          }
-          break;
-        }
-      }
-      itemScrollController.scrollTo(
-        index: index,
-        duration: const Duration(milliseconds: 200),
-      );
-    }, [conversationItems, currentConversationId]);
-
     if (conversationItems.isEmpty) {
       return const _SearchEmpty();
     }
     return ScrollablePositionedList.builder(
-      itemScrollController: itemScrollController,
-      itemPositionsListener: itemPositionsListener,
       itemBuilder: (context, index) {
         final conversation = conversationItems[index];
         return ConversationMenuWrapper(
