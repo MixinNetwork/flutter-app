@@ -135,6 +135,7 @@ class SearchList extends HookWidget {
       return _SearchMessageList(
         keyword: keyword,
         onTap: () => type.value = null,
+        filterUnseen: filterUnseen,
       );
     }
     return CustomScrollView(
@@ -456,10 +457,12 @@ class _SearchMessageList extends HookWidget {
   const _SearchMessageList({
     required this.keyword,
     required this.onTap,
+    required this.filterUnseen,
   });
 
   final String keyword;
   final VoidCallback onTap;
+  final bool filterUnseen;
 
   @override
   Widget build(BuildContext context) {
@@ -469,16 +472,24 @@ class _SearchMessageList extends HookWidget {
         initState: const PagingState<SearchMessageDetailItem>(),
         limit: context.read<ConversationListBloc>().limit,
         queryCount: () => context.database.messageDao
-            .fuzzySearchMessageCount(keyword)
+            .fuzzySearchMessageCount(
+              keyword,
+              unseenConversationOnly: filterUnseen,
+            )
             .getSingle(),
         queryRange: (int limit, int offset) async {
           if (keyword.isEmpty) return [];
           return context.database.messageDao
-              .fuzzySearchMessage(query: keyword, limit: limit, offset: offset)
+              .fuzzySearchMessage(
+                query: keyword,
+                limit: limit,
+                offset: offset,
+                unseenConversationOnly: filterUnseen,
+              )
               .get();
         },
       ),
-      keys: [keyword],
+      keys: [keyword, filterUnseen],
     );
     useEffect(
       () => context.database.messageDao.searchMessageUpdateEvent
