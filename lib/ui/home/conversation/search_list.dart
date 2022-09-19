@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ import '../../../widgets/user/user_dialog.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_filter_unseen_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
+import '../route/responsive_navigator_cubit.dart';
 import 'conversation_list.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
@@ -38,7 +40,6 @@ void _clear(BuildContext context) {
   context.read<KeywordCubit>().emit('');
   context.read<TextEditingController>().text = '';
   context.read<FocusNode>().unfocus();
-  context.read<ConversationFilterUnseenCubit>().reset();
 }
 
 class SearchList extends HookWidget {
@@ -730,6 +731,7 @@ class _SearchEmpty extends StatelessWidget {
               ),
               onPressed: () {
                 _clear(context);
+                context.read<ConversationFilterUnseenCubit>().reset();
               },
             ),
           ],
@@ -742,16 +744,82 @@ class _UnseenConversationList extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final conversationItems = useMemoizedStream(() => context
-            .accountServer.database.conversationDao
-            .filterConversationByUnseen()
-            .watchThrottle(kSlowThrottleDuration)).data ??
-        [];
+    final unreadConversations = useState(<ConversationItem>[]);
+
+    final currentConversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) => state?.conversationId,
+    );
+
+    useEffect(() {
+      final subscription = context.accountServer.database.conversationDao
+          .filterConversationByUnseen()
+          .watchThrottle(kSlowThrottleDuration)
+          .asyncListen((items) async {
+        final oldItems = unreadConversations.value;
+
+        final newItems = List<ConversationItem>.from(items);
+        final newItemIdsSet = items.map((e) => e.conversationId).toSet();
+
+        for (final oldItem in oldItems) {
+          if (!newItemIdsSet.contains(oldItem.conversationId)) {
+            final item = await context.database.conversationDao
+                .conversationItem(oldItem.conversationId)
+                .getSingleOrNull();
+            assert(item != null, 'Conversation not found');
+            if (item != null) {
+              newItems.add(item);
+            }
+          }
+        }
+        unreadConversations.value = newItems;
+      });
+      return subscription.cancel;
+    }, const []);
+
+    final conversationItems = unreadConversations.value;
+
+    final routeMode = useBlocStateConverter<ResponsiveNavigatorCubit,
+        ResponsiveNavigatorState, bool>(
+      converter: (state) => state.routeMode,
+    );
+
+    final itemScrollController = useMemoized(ItemScrollController.new);
+    final itemPositionsListener = useMemoized(ItemPositionsListener.create);
+
+    useEffect(() {
+      final index = conversationItems.indexWhere(
+        (element) => element.conversationId == currentConversationId,
+      );
+
+      // use 0.9 instead 1 to ensure that the next conversation is visible if we forward.
+      // in forward navigation, if alignment is 1, ScrollablePositionedList will only
+      // show current conversation at the end, not the next one.
+      const trailingEdge = 0.9;
+
+      for (final position in itemPositionsListener.itemPositions.value) {
+        if (position.index == index) {
+          if (position.itemLeadingEdge > 0 &&
+              position.itemTrailingEdge < trailingEdge) {
+            // in viewport, do not need scroll.
+            // https://github.com/google/flutter.widgets/issues/276
+            return;
+          }
+          break;
+        }
+      }
+
+      if (index != -1) {
+        itemScrollController.jumpTo(index: index, alignment: trailingEdge);
+      }
+    }, [conversationItems, currentConversationId]);
 
     if (conversationItems.isEmpty) {
       return const _SearchEmpty();
     }
-    return ListView.builder(
+    return ScrollablePositionedList.builder(
+      itemScrollController: itemScrollController,
+      itemPositionsListener: itemPositionsListener,
       itemBuilder: (context, index) {
         final conversation = conversationItems[index];
         return ConversationMenuWrapper(
@@ -759,6 +827,8 @@ class _UnseenConversationList extends HookWidget {
           removeChatFromCircle: true,
           child: ConversationItemWidget(
             conversation: conversation,
+            selected: conversation.conversationId == currentConversationId &&
+                !routeMode,
             onTap: () {
               _clear(context);
               ConversationCubit.selectConversation(
