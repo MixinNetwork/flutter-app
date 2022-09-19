@@ -61,6 +61,7 @@
 "circles" : "Circles",
 "clear" : "Clear",
 "clearChat" : "Clear Chat",
+"clearFilter" : "Clear filter",
 "clickToReloadQrcode" : "Click to reload QR code",
 "close" : "Close",
 "closeWindow" : "Close window",

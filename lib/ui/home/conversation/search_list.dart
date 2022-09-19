@@ -128,7 +128,7 @@ class SearchList extends HookWidget {
     }
 
     if (resultIsEmpty && !shouldTips) {
-      return const SearchEmpty();
+      return const _SearchEmpty();
     }
 
     if (type.value == _ShowMoreType.message) {
@@ -508,7 +508,7 @@ class _SearchMessageList extends HookWidget {
             ),
           )
         : pageState.count <= 0
-            ? const SearchEmpty()
+            ? const _SearchEmpty()
             : ScrollablePositionedList.builder(
                 itemPositionsListener: searchMessageBloc.itemPositionsListener,
                 itemCount: pageState.count,
@@ -699,8 +699,8 @@ class SearchMessageItem extends HookWidget {
   }
 }
 
-class SearchEmpty extends StatelessWidget {
-  const SearchEmpty({super.key});
+class _SearchEmpty extends StatelessWidget {
+  const _SearchEmpty();
 
   @override
   Widget build(BuildContext context) => Container(
@@ -710,12 +710,29 @@ class SearchEmpty extends StatelessWidget {
         ),
         width: double.infinity,
         alignment: Alignment.topCenter,
-        child: Text(
-          context.l10n.searchEmpty,
-          style: TextStyle(
-            fontSize: 14,
-            color: context.theme.secondaryText,
-          ),
+        child: Column(
+          children: [
+            Text(
+              context.l10n.searchEmpty,
+              style: TextStyle(
+                fontSize: 14,
+                color: context.theme.secondaryText,
+              ),
+            ),
+            const SizedBox(height: 4),
+            TextButton(
+              child: Text(
+                context.l10n.clearFilter,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: context.theme.accent,
+                ),
+              ),
+              onPressed: () {
+                _clear(context);
+              },
+            ),
+          ],
         ),
       );
 }
@@ -732,7 +749,7 @@ class _UnseenConversationList extends HookWidget {
         [];
 
     if (conversationItems.isEmpty) {
-      return const SearchEmpty();
+      return const _SearchEmpty();
     }
     return ListView.builder(
       itemBuilder: (context, index) {

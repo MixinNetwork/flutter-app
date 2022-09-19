@@ -196,6 +196,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("圈子"),
         "clear": MessageLookupByLibrary.simpleMessage("清理"),
         "clearChat": MessageLookupByLibrary.simpleMessage("清除聊天记录"),
+        "clearFilter": MessageLookupByLibrary.simpleMessage("清除筛选条件"),
         "clickToReloadQrcode":
             MessageLookupByLibrary.simpleMessage("点击重新加载二维码"),
         "close": MessageLookupByLibrary.simpleMessage("关闭"),

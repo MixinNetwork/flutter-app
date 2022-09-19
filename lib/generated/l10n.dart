@@ -674,6 +674,16 @@ class Localization {
     );
   }
 
+  /// `Clear filter`
+  String get clearFilter {
+    return Intl.message(
+      'Clear filter',
+      name: 'clearFilter',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Click to reload QR code`
   String get clickToReloadQrcode {
     return Intl.message(

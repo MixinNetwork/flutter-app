@@ -221,6 +221,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("Circles"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "clearChat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
+        "clearFilter": MessageLookupByLibrary.simpleMessage("Clear filter"),
         "clickToReloadQrcode":
             MessageLookupByLibrary.simpleMessage("Click to reload QR code"),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
