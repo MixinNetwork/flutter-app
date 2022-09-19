@@ -150,6 +150,24 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;
 
+fuzzySearchMessageInUnseenConversation AS SearchMessageDetailItem:
+SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
+    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
+    c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
+    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
+    INNER JOIN conversations c ON c.conversation_id = m.conversation_id
+    INNER JOIN users u ON m.user_id = u.user_id
+    WHERE m.message_id = fts.message_id AND c.unseen_message_count > 0
+    ORDER BY m.created_at DESC
+    LIMIT :limit OFFSET :offset;
+
+
+fuzzySearchMessageCountInUnseenConversation:
+SELECT COUNT(1)
+    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
+    INNER JOIN conversations c ON c.conversation_id = m.conversation_id
+    WHERE m.message_id = fts.message_id AND c.unseen_message_count > 0;
+
 notificationMessage AS NotificationMessage:
 SELECT m.message_id                   AS messageId,
        m.conversation_id              AS conversationId,

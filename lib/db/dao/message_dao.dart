@@ -947,8 +947,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String? conversationId,
     String? userId,
     List<String>? categories,
+    bool unseenConversationOnly = false,
   }) {
     final keywordFts5 = query.trim().escapeFts5();
+
+    assert(
+      unseenConversationOnly == false || conversationId == null,
+      'unseenConversationOnly and conversationId can not be set at the same time',
+    );
 
     if (conversationId != null && userId != null) {
       if (categories != null) {
@@ -996,6 +1002,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       );
     }
 
+    if (unseenConversationOnly) {
+      return db.fuzzySearchMessageInUnseenConversation(
+        keywordFts5,
+        limit,
+        offset,
+      );
+    }
+
     return db.fuzzySearchMessage(
       keywordFts5,
       limit,
@@ -1008,8 +1022,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String? conversationId,
     String? userId,
     List<String>? categories,
+    bool unseenConversationOnly = false,
   }) {
     final keywordFts5 = keyword.trim().escapeFts5();
+
+    assert(
+      unseenConversationOnly == false || conversationId == null,
+      'unseenConversationOnly and conversationId can not be set at the same time',
+    );
 
     if (conversationId != null && userId != null) {
       if (categories != null) {
@@ -1047,6 +1067,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     if (categories != null) {
       return db.fuzzySearchMessageCountByCategories(keywordFts5, categories);
     }
+
+    if (unseenConversationOnly) {
+      return db.fuzzySearchMessageCountInUnseenConversation(keywordFts5);
+    }
+
     return db.fuzzySearchMessageCount(keywordFts5);
   }
 

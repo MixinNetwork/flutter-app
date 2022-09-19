@@ -13688,6 +13688,56 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<SearchMessageDetailItem> fuzzySearchMessageInUnseenConversation(
+      String query, int limit, int offset) {
+    return customSelect(
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.message_id = fts.message_id AND c.unseen_message_count > 0 ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
+        variables: [
+          Variable<String>(query),
+          Variable<int>(limit),
+          Variable<int>(offset)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          messagesFts,
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.read<String>('messageId'),
+        userId: row.read<String>('userId'),
+        userAvatarUrl: row.read<String?>('userAvatarUrl'),
+        userFullName: row.read<String?>('userFullName'),
+        status: Messages.$converter1.mapToDart(row.read<String>('status'))!,
+        type: row.read<String>('type'),
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
+        mediaName: row.read<String?>('mediaName'),
+        appId: row.read<String?>('appId'),
+        verified: row.read<bool?>('verified'),
+        conversationOwnerId: row.read<String?>('conversationOwnerId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        conversationId: row.read<String>('conversationId'),
+      );
+    });
+  }
+
+  Selectable<int> fuzzySearchMessageCountInUnseenConversation(String query) {
+    return customSelect(
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id WHERE m.message_id = fts.message_id AND c.unseen_message_count > 0',
+        variables: [
+          Variable<String>(query)
+        ],
+        readsFrom: {
+          messages,
+          messagesFts,
+          conversations,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
   Selectable<NotificationMessage> notificationMessage(List<String> messageId) {
     var $arrayStartIndex = 1;
     final expandedmessageId = $expandVar($arrayStartIndex, messageId.length);
@@ -14372,9 +14422,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<SearchConversationItem> fuzzySearchConversation(
       String query,
+      Expression<bool?> Function(
+              Conversations conversation, Users owner, Messages message)
+          where,
       Limit Function(Conversations conversation, Users owner, Messages message)
           limit) {
     var $arrayStartIndex = 2;
+    final generatedwhere = $write(
+        where(alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'), alias(this.messages, 'message')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedlimit = $write(
         limit(alias(this.conversations, 'conversation'),
             alias(this.users, 'owner'), alias(this.messages, 'message')),
@@ -14382,9 +14441,53 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id WHERE(conversation.category = \'GROUP\' AND conversation.name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')OR(conversation.category = \'CONTACT\' AND(owner.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' OR owner.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\'))ORDER BY(conversation.category = \'GROUP\' AND conversation.name = ?1 COLLATE NOCASE)OR(conversation.category = \'CONTACT\' AND(owner.full_name = ?1 COLLATE NOCASE OR owner.identity_number = ?1 COLLATE NOCASE))DESC, conversation.pin_time DESC, message.created_at DESC ${generatedlimit.sql}',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id WHERE((conversation.category = \'GROUP\' AND conversation.name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')OR(conversation.category = \'CONTACT\' AND(owner.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' OR owner.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')))AND ${generatedwhere.sql} ORDER BY(conversation.category = \'GROUP\' AND conversation.name = ?1 COLLATE NOCASE)OR(conversation.category = \'CONTACT\' AND(owner.full_name = ?1 COLLATE NOCASE OR owner.identity_number = ?1 COLLATE NOCASE))DESC, conversation.pin_time DESC, message.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
+          ...generatedwhere.introducedVariables,
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          ...generatedwhere.watchedTables,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) {
+      return SearchConversationItem(
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        ownerId: row.read<String?>('ownerId'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
+        fullName: row.read<String?>('fullName'),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        isVerified: row.read<bool?>('isVerified'),
+        appId: row.read<String?>('appId'),
+      );
+    });
+  }
+
+  Selectable<SearchConversationItem> filterConversationByUnseen(
+      Limit Function(Conversations conversation, Users owner, Messages message)
+          limit) {
+    var $arrayStartIndex = 1;
+    final generatedlimit = $write(
+        limit(alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'), alias(this.messages, 'message')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
+    return customSelect(
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id WHERE conversation.unseen_message_count > 0 ORDER BY conversation.pin_time DESC, message.created_at DESC ${generatedlimit.sql}',
+        variables: [
           ...generatedlimit.introducedVariables
         ],
         readsFrom: {

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../bloc/keyword_cubit.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/search_bar.dart';
+import '../bloc/conversation_filter_unseen_cubit.dart';
 import '../bloc/slide_category_cubit.dart';
 import 'conversation_list.dart';
 import 'search_list.dart';
@@ -31,6 +32,8 @@ class ConversationPage extends HookWidget {
       keys: [key],
     );
 
+    final filterUnseen = useBlocState<ConversationFilterUnseenCubit, bool>();
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<TextEditingController>.value(
@@ -43,15 +46,15 @@ class ConversationPage extends HookWidget {
       child: Column(
         children: [
           const SearchBar(),
-          if (!hasKeyword)
+          if (!filterUnseen && !hasKeyword)
             Expanded(
               child: ConversationList(
                 key: PageStorageKey(slideCategoryState),
               ),
             ),
-          if (hasKeyword)
-            const Expanded(
-              child: SearchList(),
+          if (filterUnseen || hasKeyword)
+            Expanded(
+              child: SearchList(filterUnseen: filterUnseen),
             ),
         ],
       ),

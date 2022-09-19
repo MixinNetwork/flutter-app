@@ -340,11 +340,24 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Selectable<SearchConversationItem> fuzzySearchConversation(
-          String query, int limit) =>
+          String query, int limit, {bool filterUnseen = false}) =>
       db.fuzzySearchConversation(
           query.trim().escapeSql(),
           (Conversations conversation, Users owner, Messages message) =>
+              filterUnseen
+                  ? conversation.unseenMessageCount.isBiggerThanValue(0)
+                  : ignoreWhere,
+          (Conversations conversation, Users owner, Messages message) =>
               Limit(limit, null));
+
+  Selectable<ConversationItem> filterConversationByUnseen() =>
+      _baseConversationItems(
+        (conversation, owner, message, lastMessageSender, snapshot,
+                participant) =>
+            _chatWhere(conversation) &
+            conversation.unseenMessageCount.isBiggerThanValue(0),
+        (_, __, ___, ____, ______, _______, em) => maxLimit,
+      );
 
   Selectable<String?> announcement(String conversationId) =>
       (db.selectOnly(db.conversations)

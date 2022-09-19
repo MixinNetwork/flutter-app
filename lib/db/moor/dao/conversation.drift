@@ -112,11 +112,12 @@ SELECT conversation.conversation_id AS conversationId,
 FROM conversations conversation
          INNER JOIN users owner ON owner.user_id = conversation.owner_id
          LEFT JOIN messages message ON conversation.last_message_id = message.message_id
-WHERE (conversation.category = 'GROUP' AND
-       conversation.name LIKE '%' || :query || '%' ESCAPE '\') OR
-    (conversation.category = 'CONTACT'
-        AND (owner.full_name LIKE '%' || :query || '%' ESCAPE '\'
-            OR owner.identity_number LIKE '%' || :query || '%' ESCAPE '\'))
+WHERE ((conversation.category = 'GROUP' AND conversation.name LIKE '%' || :query || '%' ESCAPE '\') OR
+         (conversation.category = 'CONTACT' AND
+           (owner.full_name LIKE '%' || :query || '%' ESCAPE '\' OR
+            owner.identity_number LIKE '%' || :query || '%' ESCAPE '\'))
+      ) AND $where
+
 ORDER BY (conversation.category = 'GROUP' AND conversation.name = :query COLLATE NOCASE)
     OR (conversation.category = 'CONTACT'
         AND (owner.full_name = :query COLLATE NOCASE

@@ -26,7 +26,9 @@ import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
 import '../bloc/conversation_cubit.dart';
+import '../bloc/conversation_filter_unseen_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
+import 'conversation_list.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
 
@@ -36,10 +38,13 @@ void _clear(BuildContext context) {
   context.read<KeywordCubit>().emit('');
   context.read<TextEditingController>().text = '';
   context.read<FocusNode>().unfocus();
+  context.read<ConversationFilterUnseenCubit>().reset();
 }
 
 class SearchList extends HookWidget {
-  const SearchList({super.key});
+  const SearchList({super.key, this.filterUnseen = false});
+
+  final bool filterUnseen;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +54,7 @@ class SearchList extends HookWidget {
             return Stream.value(keywordCubit.state)
                 .merge(keywordCubit.stream)
                 .map((event) => event.trim())
+                .distinct()
                 .throttleTime(
                   const Duration(milliseconds: 150),
                   trailing: true,
@@ -64,6 +70,8 @@ class SearchList extends HookWidget {
             final keywordCubit = context.read<KeywordCubit>();
             return Stream.value(keywordCubit.state)
                 .merge(keywordCubit.stream)
+                .map((event) => event.trim())
+                .distinct()
                 .debounceTime(const Duration(milliseconds: 150));
           },
           initialData: null,
@@ -73,14 +81,16 @@ class SearchList extends HookWidget {
     final accountServer = context.accountServer;
 
     final users = useMemoizedStream(() {
-          if (keyword.trim().isEmpty) return Stream.value(<User>[]);
+          if (keyword.trim().isEmpty || filterUnseen) {
+            return Stream.value(<User>[]);
+          }
           return accountServer.database.userDao
               .fuzzySearchUser(
                   id: accountServer.userId,
                   username: keyword,
                   identityNumber: keyword)
               .watchThrottle(kSlowThrottleDuration);
-        }, keys: [keyword]).data ??
+        }, keys: [keyword, filterUnseen]).data ??
         [];
 
     final conversations = useMemoizedStream(() {
@@ -88,18 +98,21 @@ class SearchList extends HookWidget {
             return Stream.value(<SearchConversationItem>[]);
           }
           return accountServer.database.conversationDao
-              .fuzzySearchConversation(keyword, 32)
+              .fuzzySearchConversation(keyword, 32, filterUnseen: filterUnseen)
               .watchThrottle(kSlowThrottleDuration);
-        }, keys: [keyword]).data ??
+        }, keys: [keyword, filterUnseen]).data ??
         [];
 
     final messages = useMemoizedStream(
-            () => messageKeyword.trim().isEmpty
+            () => messageKeyword.isEmpty
                 ? Stream.value(<SearchMessageDetailItem>[])
                 : accountServer.database.messageDao
-                    .fuzzySearchMessage(query: messageKeyword, limit: 4)
+                    .fuzzySearchMessage(
+                        query: messageKeyword,
+                        limit: 4,
+                        unseenConversationOnly: filterUnseen)
                     .watchThrottle(kSlowThrottleDuration),
-            keys: [messageKeyword]).data ??
+            keys: [messageKeyword, filterUnseen]).data ??
         [];
 
     final shouldTips =
@@ -107,10 +120,14 @@ class SearchList extends HookWidget {
 
     final type = useState<_ShowMoreType?>(null);
 
-    if (users.isEmpty &&
-        conversations.isEmpty &&
-        messages.isEmpty &&
-        !shouldTips) {
+    final resultIsEmpty =
+        users.isEmpty && conversations.isEmpty && messages.isEmpty;
+
+    if (keyword.isEmpty && filterUnseen) {
+      return const _UnseenConversationList();
+    }
+
+    if (resultIsEmpty && !shouldTips) {
       return const SearchEmpty();
     }
 
@@ -690,4 +707,40 @@ class SearchEmpty extends StatelessWidget {
           ),
         ),
       );
+}
+
+class _UnseenConversationList extends HookWidget {
+  const _UnseenConversationList();
+
+  @override
+  Widget build(BuildContext context) {
+    final conversationItems = useMemoizedStream(() => context
+            .accountServer.database.conversationDao
+            .filterConversationByUnseen()
+            .watchThrottle(kSlowThrottleDuration)).data ??
+        [];
+
+    if (conversationItems.isEmpty) {
+      return const SearchEmpty();
+    }
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        final conversation = conversationItems[index];
+        return ConversationMenuWrapper(
+          conversation: conversation,
+          removeChatFromCircle: true,
+          child: ConversationItemWidget(
+            conversation: conversation,
+            onTap: () {
+              _clear(context);
+              ConversationCubit.selectConversation(
+                  context, conversation.conversationId,
+                  conversation: conversation);
+            },
+          ),
+        );
+      },
+      itemCount: conversationItems.length,
+    );
+  }
 }

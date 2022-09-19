@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../bloc/keyword_cubit.dart';
 import '../constants/resources.dart';
+import '../ui/home/bloc/conversation_filter_unseen_cubit.dart';
 import '../ui/home/home.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
@@ -37,6 +38,8 @@ class SearchBar extends HookWidget {
       );
     }
 
+    final filterUnseen = useBlocState<ConversationFilterUnseenCubit, bool>();
+
     return MoveWindow(
       child: SizedBox(
         height: 64,
@@ -61,6 +64,13 @@ class SearchBar extends HookWidget {
               ),
             ),
             const SizedBox(width: 8),
+            ActionButton(
+              name: Resources.assetsImagesFilterUnseenSvg,
+              onTap: () =>
+                  context.read<ConversationFilterUnseenCubit>().toggle(),
+              color: filterUnseen ? context.theme.accent : context.theme.icon,
+            ),
+            const SizedBox(width: 4),
             ContextMenuPortalEntry(
               buildMenus: () => [
                 ContextMenu(

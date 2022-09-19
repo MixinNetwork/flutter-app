@@ -219,6 +219,9 @@ class Resources {
   static const String assetsImagesFilePreviewZipSvg =
       'assets/images/file_preview_zip.svg';
 
+  static const String assetsImagesFilterUnseenSvg =
+      'assets/images/filter_unseen.svg';
+
   static const String assetsImagesGifStickerSvg =
       'assets/images/gif_sticker.svg';
 

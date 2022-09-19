@@ -17,6 +17,7 @@ import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
 import 'ui/home/bloc/conversation_cubit.dart';
+import 'ui/home/bloc/conversation_filter_unseen_cubit.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/bloc/multi_auth_cubit.dart';
 import 'ui/home/bloc/recall_message_bloc.dart';
@@ -156,6 +157,9 @@ class _Providers extends StatelessWidget {
                   responsiveNavigatorCubit:
                       context.read<ResponsiveNavigatorCubit>(),
                 ),
+              ),
+              BlocProvider(
+                create: (context) => ConversationFilterUnseenCubit(),
               ),
               BlocProvider(
                 create: (BuildContext context) => KeywordCubit(),
