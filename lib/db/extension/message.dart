@@ -85,8 +85,7 @@ QuoteMessageItem mapToQuoteMessage(Map<String, dynamic> map) {
       : const MillisDateConverter().fromSql(createdAtJson as int);
   return QuoteMessageItem(
     userId: map['user_id'] as String,
-    status:
-        const MessageStatusTypeConverter().fromSql(map['status'] as String),
+    status: const MessageStatusTypeConverter().fromSql(map['status'] as String),
     messageId: map['message_id'] as String,
     sharedUserIdentityNumber: map['shared_user_identity_number'] as String?,
     type: map['type'] as String,
