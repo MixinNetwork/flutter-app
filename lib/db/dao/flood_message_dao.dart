@@ -29,7 +29,7 @@ class FloodMessageDao extends DatabaseAccessor<MixinDatabase>
   Future<int> getFloodMessageCount() {
     final countExp = db.floodMessages.messageId.count();
     final query = selectOnly(db.floodMessages)..addColumns([countExp]);
-    return query.map((row) => row.read(countExp)).getSingle();
+    return query.map((row) => row.read(countExp)!).getSingle();
   }
 
   Future<DateTime?> getLastBlazeMessageCreatedAt() =>

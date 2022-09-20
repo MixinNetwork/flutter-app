@@ -62,19 +62,15 @@ class _LocalNotificationManager extends _NotificationManager {
 
   @override
   Future<void> initialize() async {
-    const initializationSettingsMacOS = MacOSInitializationSettings();
-    final initializationSettingsIOS =
-        IOSInitializationSettings(onDidReceiveLocalNotification: (
-      int id,
-      String? title,
-      String? body,
-      String? payload,
-    ) async {
+    final darwinInitializationSettings = DarwinInitializationSettings(
+        onDidReceiveLocalNotification:
+            (int id, String? title, String? body, String? payload) {
       i('onDidReceiveLocalNotification: $id');
     });
+
     final initializationSettings = InitializationSettings(
-      iOS: initializationSettingsIOS,
-      macOS: initializationSettingsMacOS,
+      iOS: darwinInitializationSettings,
+      macOS: darwinInitializationSettings,
       linux: LinuxInitializationSettings(
         defaultActionName: kDefaultAction,
         defaultIcon: AssetsLinuxIcon(Resources.assetsIconsMacosAppIconPng),
@@ -82,7 +78,7 @@ class _LocalNotificationManager extends _NotificationManager {
       ),
     );
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: _onSelectNotification);
+        onDidReceiveNotificationResponse: _onSelectNotification);
     await flutterLocalNotificationsPlugin.cancelAll();
   }
 
@@ -96,13 +92,15 @@ class _LocalNotificationManager extends _NotificationManager {
     required String messageId,
   }) async {
     await requestPermission();
-    // TODO Set mixin.caf to be invalid.
+
+    const notificationDetails = DarwinNotificationDetails(
+      sound: 'mixin.caf',
+      presentSound: true,
+    );
+
     const platformChannelSpecifics = NotificationDetails(
-      macOS: MacOSNotificationDetails(sound: 'mixin.caf'),
-      iOS: IOSNotificationDetails(
-        sound: 'mixin.caf',
-        presentSound: true,
-      ),
+      macOS: notificationDetails,
+      iOS: notificationDetails,
     );
 
     await flutterLocalNotificationsPlugin.show(
@@ -129,7 +127,8 @@ class _LocalNotificationManager extends _NotificationManager {
         sound: true,
       );
 
-  Future<dynamic> _onSelectNotification(String? payload) async {
+  Future<dynamic> _onSelectNotification(NotificationResponse details) async {
+    final payload = details.payload;
     if (payload?.isEmpty ?? true) return;
     final uri = Uri.tryParse(payload!);
     if (uri == null) return;
