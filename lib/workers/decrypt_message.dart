@@ -773,7 +773,7 @@ class DecryptMessage extends Injector {
     final userId = systemMessage.userId ?? data.senderId;
     if (userId == systemUser &&
         (await database.userDao.userById(userId).getSingleOrNull()) == null) {
-      await database.userDao.insert(db.User(
+      await database.userDao.insert(const db.User(
         userId: systemUser,
         identityNumber: '0',
       ));

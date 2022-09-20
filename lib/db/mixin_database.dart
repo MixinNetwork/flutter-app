@@ -247,7 +247,7 @@ class MixinDatabase extends _$MixinDatabase {
   Stream<bool> watchHasData<T extends HasResultSet, R>(
     ResultSetImplementation<T, R> table, [
     List<Join> joins = const [],
-    Expression<bool?> predicate = ignoreWhere,
+    Expression<bool> predicate = ignoreWhere,
   ]) =>
       (selectOnly(table)
             ..addColumns([const CustomExpression<String>('1')])
@@ -260,7 +260,7 @@ class MixinDatabase extends _$MixinDatabase {
   Future<bool> hasData<T extends HasResultSet, R>(
     ResultSetImplementation<T, R> table, [
     List<Join> joins = const [],
-    Expression<bool?> predicate = ignoreWhere,
+    Expression<bool> predicate = ignoreWhere,
   ]) async =>
       (await (selectOnly(table)
                 ..addColumns([const CustomExpression<String>('1')])
@@ -344,7 +344,7 @@ Future<DriftIsolate> _crateIsolate(
 void _startBackground(_IsolateStartRequest request) {
   final executor = _openConnection(request.dbFile);
   final isolate = DriftIsolate.inCurrent(
-    () => DatabaseConnection.fromExecutor(executor),
+    () => DatabaseConnection(executor),
   );
   request.sendMoorIsolate.send(isolate);
 }

@@ -393,14 +393,14 @@ packages:
       name: drift
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.7.1"
+    version: "2.1.0"
   drift_dev:
     dependency: "direct dev"
     description:
       name: drift_dev
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.7.1"
+    version: "2.1.0"
   ecache:
     dependency: "direct main"
     description:
@@ -1348,7 +1348,7 @@ packages:
       name: sqlparser
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.22.0"
+    version: "0.23.2"
   stack_trace:
     dependency: transitive
     description:

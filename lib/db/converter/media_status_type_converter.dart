@@ -4,14 +4,13 @@ import 'package:recase/recase.dart';
 
 import '../../enum/media_status.dart';
 
-class MediaStatusTypeConverter extends TypeConverter<MediaStatus, String> {
+class MediaStatusTypeConverter extends TypeConverter<MediaStatus?, String?> {
   const MediaStatusTypeConverter();
 
   @override
-  MediaStatus? mapToDart(String? fromDb) =>
+  MediaStatus? fromSql(String? fromDb) =>
       fromStringToEnum(MediaStatus.values, fromDb);
 
   @override
-  String? mapToSql(MediaStatus? value) =>
-      enumConvertToString(value)?.constantCase;
+  String? toSql(MediaStatus? value) => enumConvertToString(value)?.constantCase;
 }

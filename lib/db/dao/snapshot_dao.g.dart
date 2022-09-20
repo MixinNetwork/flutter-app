@@ -43,15 +43,9 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Selectable<SnapshotItem> snapshotItems(
       String currentFiat,
-      Expression<bool?> Function(Snapshots snapshot, Users opponent,
-              Assets asset, Assets tempAsset, Fiats fiat)
-          where,
-      OrderBy Function(Snapshots snapshot, Users opponent, Assets asset,
-              Assets tempAsset, Fiats fiat)
-          order,
-      Limit Function(Snapshots snapshot, Users opponent, Assets asset,
-              Assets tempAsset, Fiats fiat)
-          limit) {
+      SnapshotItems$where where,
+      SnapshotItems$order order,
+      SnapshotItems$limit limit) {
     var $arrayStartIndex = 2;
     final generatedwhere = $write(
         where(
@@ -64,12 +58,13 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedorder = $write(
-        order(
-            alias(this.snapshots, 'snapshot'),
-            alias(this.users, 'opponent'),
-            alias(this.assets, 'asset'),
-            alias(this.assets, 'tempAsset'),
-            alias(this.fiats, 'fiat')),
+        order?.call(
+                alias(this.snapshots, 'snapshot'),
+                alias(this.users, 'opponent'),
+                alias(this.assets, 'asset'),
+                alias(this.assets, 'tempAsset'),
+                alias(this.fiats, 'fiat')) ??
+            const OrderBy.nothing(),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedorder.amountOfVariables;
@@ -102,29 +97,28 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         }).map((QueryRow row) {
       return SnapshotItem(
         snapshotId: row.read<String>('snapshot_id'),
-        traceId: row.read<String?>('trace_id'),
+        traceId: row.readNullable<String>('trace_id'),
         type: row.read<String>('type'),
         assetId: row.read<String>('asset_id'),
         amount: row.read<String>('amount'),
-        createdAt:
-            Snapshots.$converter0.mapToDart(row.read<int>('created_at'))!,
-        opponentId: row.read<String?>('opponent_id'),
-        transactionHash: row.read<String?>('transaction_hash'),
-        sender: row.read<String?>('sender'),
-        receiver: row.read<String?>('receiver'),
-        memo: row.read<String?>('memo'),
-        confirmations: row.read<int?>('confirmations'),
-        avatarUrl: row.read<String?>('avatar_url'),
-        opponentFulName: row.read<String?>('opponent_ful_name'),
-        priceUsd: row.read<String?>('price_usd'),
-        chainId: row.read<String?>('chain_id'),
-        symbol: row.read<String?>('symbol'),
-        symbolName: row.read<String?>('symbolName'),
-        tag: row.read<String?>('tag'),
-        assetConfirmations: row.read<int?>('asset_confirmations'),
-        symbolIconUrl: row.read<String?>('symbolIconUrl'),
-        chainIconUrl: row.read<String?>('chainIconUrl'),
-        fiatRate: row.read<double?>('fiatRate'),
+        createdAt: Snapshots.$converter0.fromSql(row.read<int>('created_at')),
+        opponentId: row.readNullable<String>('opponent_id'),
+        transactionHash: row.readNullable<String>('transaction_hash'),
+        sender: row.readNullable<String>('sender'),
+        receiver: row.readNullable<String>('receiver'),
+        memo: row.readNullable<String>('memo'),
+        confirmations: row.readNullable<int>('confirmations'),
+        avatarUrl: row.readNullable<String>('avatar_url'),
+        opponentFulName: row.readNullable<String>('opponent_ful_name'),
+        priceUsd: row.readNullable<String>('price_usd'),
+        chainId: row.readNullable<String>('chain_id'),
+        symbol: row.readNullable<String>('symbol'),
+        symbolName: row.readNullable<String>('symbolName'),
+        tag: row.readNullable<String>('tag'),
+        assetConfirmations: row.readNullable<int>('asset_confirmations'),
+        symbolIconUrl: row.readNullable<String>('symbolIconUrl'),
+        chainIconUrl: row.readNullable<String>('chainIconUrl'),
+        fiatRate: row.readNullable<double>('fiatRate'),
       );
     });
   }
@@ -262,3 +256,10 @@ class SnapshotItem {
         .toString();
   }
 }
+
+typedef SnapshotItems$where = Expression<bool> Function(Snapshots snapshot,
+    Users opponent, Assets asset, Assets tempAsset, Fiats fiat);
+typedef SnapshotItems$order = OrderBy Function(Snapshots snapshot,
+    Users opponent, Assets asset, Assets tempAsset, Fiats fiat);
+typedef SnapshotItems$limit = Limit Function(Snapshots snapshot, Users opponent,
+    Assets asset, Assets tempAsset, Fiats fiat);

@@ -56,7 +56,7 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
       db.customUpdate(
         'UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
         variables: [
-          Variable<String?>(const ParticipantRoleJsonConverter().toJson(role)),
+          Variable<String>(const ParticipantRoleJsonConverter().toJson(role)),
           Variable.withString(conversationId),
           Variable.withString(participantId)
         ],
