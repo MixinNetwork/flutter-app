@@ -10,6 +10,7 @@ import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../buttons.dart';
+import '../../../cache_image.dart';
 import '../../../dialog.dart';
 
 Future<void> showTransferDialog(
@@ -119,7 +120,7 @@ class _SnapshotDetailHeader extends HookWidget {
         children: [
           const SizedBox(height: 20),
           _SymbolIconWithBorder(
-            symbolUrl: snapshot.symbolIconUrl,
+            symbolUrl: snapshot.symbolIconUrl ?? '',
             chainUrl: snapshot.chainIconUrl,
             size: 58,
             chainSize: 14,
@@ -339,61 +340,44 @@ class _SymbolIconWithBorder extends StatelessWidget {
     required this.size,
     required this.chainSize,
     this.chainBorder = const BorderSide(color: Colors.white),
-    // ignore: unused_element
-    this.symbolBorder = BorderSide.none,
   });
 
-  final String? symbolUrl;
+  final String symbolUrl;
   final String? chainUrl;
   final double size;
   final double chainSize;
 
   final BorderSide chainBorder;
 
-  final BorderSide symbolBorder;
-
   @override
   Widget build(BuildContext context) => SizedBox.square(
-        dimension: size + symbolBorder.width,
+        dimension: size + chainBorder.width,
         child: Stack(
+          fit: StackFit.expand,
           children: [
-            Positioned.fill(
+            Padding(
+              padding: EdgeInsets.all(chainBorder.width),
+              child: CacheImage(symbolUrl),
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.symmetric(
-                    vertical: symbolBorder,
-                    horizontal: symbolBorder,
+                  border: Border.fromBorderSide(chainBorder),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(chainBorder.width),
+                  child: SizedBox.square(
+                    dimension: chainSize,
+                    child: CacheImage(
+                      chainUrl ?? '',
+                      width: chainSize,
+                      height: chainSize,
+                    ),
                   ),
                 ),
-                child: Image.network(symbolUrl ?? ''),
               ),
-            ),
-            Positioned(
-              left: 0,
-              bottom: 0,
-              child: (chainUrl?.isEmpty ?? true)
-                  ? const SizedBox()
-                  : Transform.translate(
-                      offset: Offset(
-                        symbolBorder.width - chainBorder.width,
-                        chainBorder.width - symbolBorder.width,
-                      ),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.symmetric(
-                            vertical: chainBorder,
-                            horizontal: chainBorder,
-                          ),
-                        ),
-                        child: Image.network(
-                          chainUrl ?? '',
-                          width: chainSize,
-                          height: chainSize,
-                        ),
-                      ),
-                    ),
             ),
           ],
         ),

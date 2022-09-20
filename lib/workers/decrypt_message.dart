@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -6,7 +7,6 @@ import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze_message.dart';
 import '../blaze/vo/pin_message_minimal.dart';

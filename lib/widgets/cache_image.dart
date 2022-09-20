@@ -405,10 +405,9 @@ class MixinExtendedNetworkImageProvider
   final Duration? cacheMaxAge;
 
   @override
-  ImageStreamCompleter load(
+  ImageStreamCompleter loadBuffer(
     ExtendedNetworkImageProvider key,
-    // ignore: deprecated_member_use
-    DecoderCallback decode,
+    DecoderBufferCallback decode,
   ) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
@@ -435,9 +434,7 @@ class MixinExtendedNetworkImageProvider
   Future<ui.Codec> _loadAsync(
     ExtendedNetworkImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
-    // TODO: migrate to DecoderBufferCallback once extend image has compat with flutter 3.3
-    // ignore: deprecated_member_use
-    DecoderCallback decode,
+    DecoderBufferCallback decode,
   ) async {
     assert(key == this);
     final md5Key = cacheKey ?? keyToMd5(key.url);

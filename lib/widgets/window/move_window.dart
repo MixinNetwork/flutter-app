@@ -2,6 +2,8 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../utils/platform.dart';
+
 class MoveWindowBarrier extends StatelessWidget {
   const MoveWindowBarrier({
     super.key,
@@ -43,6 +45,9 @@ class MoveWindow extends StatelessWidget {
           if (defaultTargetPlatform == TargetPlatform.windows) {
             // Disable MoveWindow for windows.
             // Windows already has a title bar.
+            return;
+          }
+          if (!kPlatformIsDesktop) {
             return;
           }
           appWindow.startDragging();

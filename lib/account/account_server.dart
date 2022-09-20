@@ -11,7 +11,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/vo/pin_message_minimal.dart';

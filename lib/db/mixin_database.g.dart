@@ -13031,7 +13031,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<ParticipantSessionKey> otherParticipantSessionKey(
       String conversationId, String userId, String sessionId) {
     return customSelect(
-        'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id == ?2 AND session_id != ?3',
+        'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id == ?2 AND session_id != ?3 ORDER BY created_at DESC LIMIT 1',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),

@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../constants/constants.dart';
 import '../db/dao/user_dao.dart';
 import '../db/database.dart';
 import '../db/mixin_database.dart' as db;
+import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 
 class Injector {
@@ -49,6 +51,12 @@ class Injector {
       } else if (response.data.category == ConversationCategory.group) {
         await refreshUsers(<String>[ownerId]);
       }
+      final status = response.data.participants
+                  .firstWhereOrNull((element) => element.userId == accountId) !=
+              null
+          ? ConversationStatus.success
+          : ConversationStatus.quit;
+
       await database.conversationDao.insert(
         db.Conversation(
           conversationId: response.data.conversationId,
@@ -57,7 +65,7 @@ class Injector {
           name: response.data.name,
           announcement: response.data.announcement,
           createdAt: response.data.createdAt,
-          status: ConversationStatus.success,
+          status: status,
           muteUntil: DateTime.parse(response.data.muteUntil),
           codeUrl: response.data.codeUrl,
           expireIn: response.data.expireIn,

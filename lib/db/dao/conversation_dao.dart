@@ -270,7 +270,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<ConversationItem> conversationItems() => _baseConversationItems(
         (conversation, _, __, ___, ____, ______) =>
-            conversation.category.isIn(['CONTACT', 'GROUP']),
+            conversation.category.isIn(['CONTACT', 'GROUP']) &
+            conversation.status.equalsValue(ConversationStatus.success),
         (_, __, ___, ____, ______, _______, em) => maxLimit,
       );
 

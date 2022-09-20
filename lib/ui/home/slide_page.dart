@@ -34,91 +34,93 @@ class SlidePage extends StatelessWidget {
   final bool showCollapse;
 
   @override
-  Widget build(BuildContext context) => RepaintBoundary(
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: context.brightnessValue == 1.0
-                ? Colors.black.withOpacity(0.03)
-                : Colors.white.withOpacity(0.01),
-            border: Border(
-              right: BorderSide(
-                color: context.theme.divider,
+  Widget build(BuildContext context) => SafeArea(
+        child: RepaintBoundary(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.brightnessValue == 1.0
+                  ? Colors.black.withOpacity(0.03)
+                  : Colors.white.withOpacity(0.01),
+              border: Border(
+                right: BorderSide(
+                  color: context.theme.divider,
+                ),
               ),
             ),
-          ),
-          child: MoveWindow(
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                      height: (defaultTargetPlatform == TargetPlatform.macOS)
-                          ? 64.0
-                          : 16.0),
-                  const _CurrentUser(),
-                  const SizedBox(height: 24),
-                  _Item(
-                    asset: Resources.assetsImagesChatSvg,
-                    title: context.l10n.allChats,
-                    type: SlideCategoryType.chats,
-                  ),
-                  const SizedBox(height: 12),
-                  const _Divider(),
-                  const SizedBox(height: 12),
-                  _CategoryList(
-                    children: [
-                      _Item(
-                        asset: Resources.assetsImagesSlideContactsSvg,
-                        title: context.l10n.contactTitle,
-                        type: SlideCategoryType.contacts,
-                      ),
-                      _Item(
-                        asset: Resources.assetsImagesGroupSvg,
-                        title: context.l10n.groups,
-                        type: SlideCategoryType.groups,
-                      ),
-                      _Item(
-                        asset: Resources.assetsImagesBotSvg,
-                        title: Localization.current.botsTitle,
-                        type: SlideCategoryType.bots,
-                      ),
-                      _Item(
-                        asset: Resources.assetsImagesStrangersSvg,
-                        title: context.l10n.strangers,
-                        type: SlideCategoryType.strangers,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Expanded(child: _CircleList()),
-                  AnimatedVisibility(
-                    alignment: Alignment.bottomCenter,
-                    visible: showCollapse,
-                    child: HookBuilder(builder: (context) {
-                      final collapse = useBlocStateConverter<SettingCubit,
-                          SettingState, bool>(
-                        converter: (style) => style.collapsedSidebar,
-                      );
-
-                      return SelectItem(
-                        icon: SvgPicture.asset(
-                          collapse
-                              ? Resources.assetsImagesExpandedSvg
-                              : Resources.assetsImagesCollapseSvg,
-                          width: 24,
-                          height: 24,
-                          color: context.theme.text,
+            child: MoveWindow(
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                        height: (defaultTargetPlatform == TargetPlatform.macOS)
+                            ? 64.0
+                            : 16.0),
+                    const _CurrentUser(),
+                    const SizedBox(height: 24),
+                    _Item(
+                      asset: Resources.assetsImagesChatSvg,
+                      title: context.l10n.allChats,
+                      type: SlideCategoryType.chats,
+                    ),
+                    const SizedBox(height: 12),
+                    const _Divider(),
+                    const SizedBox(height: 12),
+                    _CategoryList(
+                      children: [
+                        _Item(
+                          asset: Resources.assetsImagesSlideContactsSvg,
+                          title: context.l10n.contactTitle,
+                          type: SlideCategoryType.contacts,
                         ),
-                        title: Text(context.l10n.collapse),
-                        onTap: () =>
-                            context.settingCubit.collapsedSidebar = !collapse,
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 4),
-                ],
+                        _Item(
+                          asset: Resources.assetsImagesGroupSvg,
+                          title: context.l10n.groups,
+                          type: SlideCategoryType.groups,
+                        ),
+                        _Item(
+                          asset: Resources.assetsImagesBotSvg,
+                          title: Localization.current.botsTitle,
+                          type: SlideCategoryType.bots,
+                        ),
+                        _Item(
+                          asset: Resources.assetsImagesStrangersSvg,
+                          title: context.l10n.strangers,
+                          type: SlideCategoryType.strangers,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Expanded(child: _CircleList()),
+                    AnimatedVisibility(
+                      alignment: Alignment.bottomCenter,
+                      visible: showCollapse,
+                      child: HookBuilder(builder: (context) {
+                        final collapse = useBlocStateConverter<SettingCubit,
+                            SettingState, bool>(
+                          converter: (style) => style.collapsedSidebar,
+                        );
+
+                        return SelectItem(
+                          icon: SvgPicture.asset(
+                            collapse
+                                ? Resources.assetsImagesExpandedSvg
+                                : Resources.assetsImagesCollapseSvg,
+                            width: 24,
+                            height: 24,
+                            color: context.theme.text,
+                          ),
+                          title: Text(context.l10n.collapse),
+                          onTap: () =>
+                              context.settingCubit.collapsedSidebar = !collapse,
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                ),
               ),
             ),
           ),
