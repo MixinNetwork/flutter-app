@@ -434,8 +434,6 @@ class MixinExtendedNetworkImageProvider
   Future<ui.Codec> _loadAsync(
     ExtendedNetworkImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
-    // TODO: migrate to DecoderBufferCallback once extend image has compat with flutter 3.3
-    // ignore: deprecated_member_use
     DecoderBufferCallback decode,
   ) async {
     assert(key == this);
