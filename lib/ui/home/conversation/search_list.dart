@@ -751,27 +751,28 @@ class _UnseenConversationList extends HookWidget {
       converter: (state) => state?.conversationId,
     );
 
+    final selectedConversation = useRef<String?>(null);
+
     useEffect(() {
       final subscription = context.accountServer.database.conversationDao
           .filterConversationByUnseen()
           .watchThrottle(kSlowThrottleDuration)
           .asyncListen((items) async {
-        final oldItems = unreadConversations.value;
-
         final newItems = List<ConversationItem>.from(items);
-        final newItemIdsSet = items.map((e) => e.conversationId).toSet();
 
-        for (final oldItem in oldItems) {
-          if (!newItemIdsSet.contains(oldItem.conversationId)) {
-            final item = await context.database.conversationDao
-                .conversationItem(oldItem.conversationId)
-                .getSingleOrNull();
-            assert(item != null, 'Conversation not found');
-            if (item != null) {
-              newItems.add(item);
-            }
+        final selectedConversationId = selectedConversation.value;
+        if (selectedConversationId != null &&
+            !newItems
+                .any((item) => item.conversationId == selectedConversationId)) {
+          final selectedConversationItem = await context
+              .accountServer.database.conversationDao
+              .conversationItem(selectedConversationId)
+              .getSingleOrNull();
+          if (selectedConversationItem != null) {
+            newItems.add(selectedConversationItem);
           }
         }
+
         newItems.sort((a, b) {
           // pinTime
           if (a.pinTime != null) {
@@ -825,6 +826,7 @@ class _UnseenConversationList extends HookWidget {
                 !routeMode,
             onTap: () {
               _clear(context);
+              selectedConversation.value = conversation.conversationId;
               ConversationCubit.selectConversation(
                   context, conversation.conversationId,
                   conversation: conversation);
