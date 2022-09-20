@@ -325,15 +325,14 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         [],
         db.conversations.conversationId.equals(conversationId) &
             db.conversations.status
-                .equals(const ConversationStatusTypeConverter().toSql(status)!)
+                .equals(const ConversationStatusTypeConverter().toSql(status))
                 .not());
     if (already) return -1;
     return (db.update(db.conversations)
           ..where((tbl) =>
               tbl.conversationId.equals(conversationId) &
               tbl.status
-                  .equals(
-                      const ConversationStatusTypeConverter().toSql(status)!)
+                  .equals(const ConversationStatusTypeConverter().toSql(status))
                   .not()))
         .write(ConversationsCompanion(status: Value(status)));
   }

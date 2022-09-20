@@ -852,7 +852,7 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
   static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
   static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
   static TypeConverter<DateTime, int> $converter3 = const MillisDateConverter();
-  static TypeConverter<ConversationStatus, int?> $converter4 =
+  static TypeConverter<ConversationStatus, int> $converter4 =
       const ConversationStatusTypeConverter();
   static TypeConverter<DateTime, int> $converter5 = const MillisDateConverter();
   static TypeConverter<DateTime?, int?> $converter2n =
