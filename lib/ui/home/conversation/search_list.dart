@@ -29,10 +29,9 @@ import '../../../widgets/user/user_dialog.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_filter_unseen_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
-import '../route/responsive_navigator_cubit.dart';
-import 'conversation_list.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
+import 'unseen_conversation_list.dart';
 
 const _defaultLimit = 3;
 
@@ -125,11 +124,11 @@ class SearchList extends HookWidget {
         users.isEmpty && conversations.isEmpty && messages.isEmpty;
 
     if (keyword.isEmpty && filterUnseen) {
-      return const _UnseenConversationList();
+      return const UnseenConversationList();
     }
 
     if (resultIsEmpty && !shouldTips) {
-      return const _SearchEmpty();
+      return const SearchEmptyWidget();
     }
 
     if (type.value == _ShowMoreType.message) {
@@ -509,7 +508,7 @@ class _SearchMessageList extends HookWidget {
             ),
           )
         : pageState.count <= 0
-            ? const _SearchEmpty()
+            ? const SearchEmptyWidget()
             : ScrollablePositionedList.builder(
                 itemPositionsListener: searchMessageBloc.itemPositionsListener,
                 itemCount: pageState.count,
@@ -700,8 +699,8 @@ class SearchMessageItem extends HookWidget {
   }
 }
 
-class _SearchEmpty extends StatelessWidget {
-  const _SearchEmpty();
+class SearchEmptyWidget extends StatelessWidget {
+  const SearchEmptyWidget({super.key});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -737,104 +736,4 @@ class _SearchEmpty extends StatelessWidget {
           ],
         ),
       );
-}
-
-class _UnseenConversationList extends HookWidget {
-  const _UnseenConversationList();
-
-  @override
-  Widget build(BuildContext context) {
-    final unreadConversations = useState(<ConversationItem>[]);
-
-    final currentConversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-    );
-
-    final selectedConversation = useRef<String?>(null);
-
-    useEffect(() {
-      final subscription = context.accountServer.database.conversationDao
-          .filterConversationByUnseen()
-          .watchThrottle(kSlowThrottleDuration)
-          .asyncListen((items) async {
-        final newItems = List<ConversationItem>.from(items);
-
-        final selectedConversationId = selectedConversation.value;
-        if (selectedConversationId != null &&
-            !newItems
-                .any((item) => item.conversationId == selectedConversationId)) {
-          final selectedConversationItem = await context
-              .accountServer.database.conversationDao
-              .conversationItem(selectedConversationId)
-              .getSingleOrNull();
-          if (selectedConversationItem != null) {
-            newItems.add(selectedConversationItem);
-          }
-        }
-
-        newItems.sort((a, b) {
-          // pinTime
-          if (a.pinTime != null) {
-            if (b.pinTime != null) {
-              return b.pinTime!.compareTo(a.pinTime!);
-            } else {
-              return -1;
-            }
-          } else if (b.pinTime != null) {
-            return 1;
-          }
-
-          // lastMessageCreatedAt
-          if (a.lastMessageCreatedAt != null) {
-            if (b.lastMessageCreatedAt != null) {
-              return b.lastMessageCreatedAt!.compareTo(a.lastMessageCreatedAt!);
-            } else {
-              return -1;
-            }
-          } else if (b.lastMessageCreatedAt != null) {
-            return 1;
-          }
-
-          // createdAt
-          return b.createdAt.compareTo(a.createdAt);
-        });
-        unreadConversations.value = newItems;
-      });
-      return subscription.cancel;
-    }, const []);
-
-    final conversationItems = unreadConversations.value;
-
-    final routeMode = useBlocStateConverter<ResponsiveNavigatorCubit,
-        ResponsiveNavigatorState, bool>(
-      converter: (state) => state.routeMode,
-    );
-
-    if (conversationItems.isEmpty) {
-      return const _SearchEmpty();
-    }
-    return ScrollablePositionedList.builder(
-      itemBuilder: (context, index) {
-        final conversation = conversationItems[index];
-        return ConversationMenuWrapper(
-          conversation: conversation,
-          removeChatFromCircle: true,
-          child: ConversationItemWidget(
-            conversation: conversation,
-            selected: conversation.conversationId == currentConversationId &&
-                !routeMode,
-            onTap: () {
-              _clear(context);
-              selectedConversation.value = conversation.conversationId;
-              ConversationCubit.selectConversation(
-                  context, conversation.conversationId,
-                  conversation: conversation);
-            },
-          ),
-        );
-      },
-      itemCount: conversationItems.length,
-    );
-  }
 }

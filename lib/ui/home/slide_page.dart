@@ -7,7 +7,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../bloc/bloc_converter.dart';
-import '../../bloc/keyword_cubit.dart';
 import '../../bloc/setting_cubit.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
@@ -23,7 +22,6 @@ import '../../widgets/select_item.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/user_selector/conversation_selector.dart';
 import '../../widgets/window/move_window.dart';
-import 'bloc/conversation_filter_unseen_cubit.dart';
 import 'bloc/multi_auth_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
 
@@ -442,20 +440,11 @@ class _Item extends HookWidget {
         final dao = context.database.conversationDao;
         switch (type) {
           case SlideCategoryType.contacts:
-            return dao
-                .contactUnseenConversationCount()
-                .watchSingleThrottle(kDefaultThrottleDuration);
           case SlideCategoryType.groups:
-            return dao
-                .groupUnseenConversationCount()
-                .watchSingleThrottle(kDefaultThrottleDuration);
           case SlideCategoryType.bots:
-            return dao
-                .botUnseenConversationCount()
-                .watchSingleThrottle(kDefaultThrottleDuration);
           case SlideCategoryType.strangers:
             return dao
-                .strangerUnseenConversationCount()
+                .unseenConversationCountByCategory(type)
                 .watchSingleThrottle(kDefaultThrottleDuration);
           case SlideCategoryType.chats:
           case SlideCategoryType.circle:
@@ -480,8 +469,6 @@ class _Item extends HookWidget {
             type,
             title,
           );
-          context.read<ConversationFilterUnseenCubit>().reset();
-          context.read<KeywordCubit>().emit('');
           if (ModalRoute.of(context)?.canPop == true) {
             Navigator.pop(context);
           }

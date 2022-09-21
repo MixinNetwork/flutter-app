@@ -46,63 +46,21 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     SlideCategoryState state,
     int limit,
   ) {
+    final dao = database.conversationDao;
     switch (state.type) {
       case SlideCategoryType.chats:
-        _map[state] ??= _ConversationListBloc(
-          limit,
-          () => database.conversationDao.chatConversationCount().getSingle(),
-          (limit, offset) =>
-              database.conversationDao.chatConversations(limit, offset).get(),
-          database.conversationDao.updateEvent,
-          mentionCache,
-          database.conversationDao.chatConversationHasData,
-        );
-        break;
       case SlideCategoryType.contacts:
-        _map[state] ??= _ConversationListBloc(
-          limit,
-          () => database.conversationDao.contactConversationCount().getSingle(),
-          (limit, offset) => database.conversationDao
-              .contactConversations(limit, offset)
-              .get(),
-          database.conversationDao.updateEvent,
-          mentionCache,
-          database.conversationDao.contactConversationHasData,
-        );
-        break;
       case SlideCategoryType.groups:
-        _map[state] ??= _ConversationListBloc(
-          limit,
-          () => database.conversationDao.groupConversationCount().getSingle(),
-          (limit, offset) =>
-              database.conversationDao.groupConversations(limit, offset).get(),
-          database.conversationDao.updateEvent,
-          mentionCache,
-          database.conversationDao.groupConversationHasData,
-        );
-        break;
       case SlideCategoryType.bots:
-        _map[state] ??= _ConversationListBloc(
-          limit,
-          () => database.conversationDao.botConversationCount().getSingle(),
-          (limit, offset) =>
-              database.conversationDao.botConversations(limit, offset).get(),
-          database.conversationDao.updateEvent,
-          mentionCache,
-          database.conversationDao.botConversationHasData,
-        );
-        break;
       case SlideCategoryType.strangers:
         _map[state] ??= _ConversationListBloc(
           limit,
-          () =>
-              database.conversationDao.strangerConversationCount().getSingle(),
-          (limit, offset) => database.conversationDao
-              .strangerConversations(limit, offset)
-              .get(),
+          () => dao.conversationCountByCategory(state.type),
+          (limit, offset) =>
+              dao.conversationItemsByCategory(state.type, limit, offset),
           database.conversationDao.updateEvent,
           mentionCache,
-          database.conversationDao.strangerConversationHasData,
+          () => dao.conversationHasDataByCategory(state.type),
         );
         break;
       case SlideCategoryType.circle:

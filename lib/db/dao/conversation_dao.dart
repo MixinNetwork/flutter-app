@@ -6,6 +6,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
 import 'package:rxdart/rxdart.dart';
 
 import '../../enum/encrypt_category.dart';
+import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../converter/conversation_status_type_converter.dart';
 import '../converter/millis_date_converter.dart';
@@ -70,9 +71,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       );
 
   Selectable<int> _baseConversationItemCount(
-          Expression<bool> Function(Conversations conversation, Users owner,
-                  CircleConversations circleConversation)
-              where) =>
+    BaseConversationItemCount$where where,
+  ) =>
       db.baseConversationItemCount((conversation, owner, circleConversation) =>
           where(conversation, owner, circleConversation));
 
@@ -85,37 +85,96 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
                   Snapshots snapshot,
                   Users participant)
               where,
-          Limit Function(
-    Conversations conversation,
-    Users user,
-    Messages message,
-    Users lastMessageSender,
-    Snapshots snapshot,
-    Users participant,
-    ExpiredMessages em,
-  )
-              limit) =>
+          Limit limit) =>
       db.baseConversationItems(
-          (
-            Conversations conversation,
-            Users owner,
-            Messages message,
-            Users lastMessageSender,
-            Snapshots snapshot,
-            Users participant,
-            ExpiredMessages em,
-          ) =>
-              where(
-                conversation,
-                owner,
-                message,
-                lastMessageSender,
-                snapshot,
-                participant,
-              ),
-          (conversation, _, __, ___, ____, _____, em) =>
-              _baseConversationItemOrder(conversation),
-          limit);
+        (
+          Conversations conversation,
+          Users owner,
+          Messages message,
+          Users lastMessageSender,
+          Snapshots snapshot,
+          Users participant,
+          ExpiredMessages em,
+        ) =>
+            where(
+          conversation,
+          owner,
+          message,
+          lastMessageSender,
+          snapshot,
+          participant,
+        ),
+        (conversation, _, __, ___, ____, _____, em) =>
+            _baseConversationItemOrder(conversation),
+        (_, __, ___, ____, ______, _______, em) => limit,
+      );
+
+  Expression<bool> _conversationPredicateByCategory(SlideCategoryType category,
+      [Conversations? conversation, Users? owner]) {
+    final Expression<bool> predicate;
+    conversation ??= db.conversations;
+    owner ??= db.users;
+    switch (category) {
+      case SlideCategoryType.chats:
+        predicate = conversation.category.isIn(['CONTACT', 'GROUP']);
+        break;
+      case SlideCategoryType.contacts:
+        predicate =
+            conversation.category.equalsValue(ConversationCategory.contact) &
+                owner.relationship.equalsValue(UserRelationship.friend) &
+                owner.appId.isNull();
+        break;
+      case SlideCategoryType.groups:
+        predicate =
+            conversation.category.equalsValue(ConversationCategory.group);
+        break;
+      case SlideCategoryType.bots:
+        predicate =
+            conversation.category.equalsValue(ConversationCategory.contact) &
+                owner.appId.isNotNull();
+        break;
+      case SlideCategoryType.strangers:
+        predicate =
+            conversation.category.equalsValue(ConversationCategory.contact) &
+                owner.relationship.equalsValue(UserRelationship.stranger) &
+                owner.appId.isNull();
+        break;
+      case SlideCategoryType.circle:
+      case SlideCategoryType.setting:
+        throw UnsupportedError('Unsupported category: $category');
+    }
+    return predicate;
+  }
+
+  Future<bool> conversationHasDataByCategory(SlideCategoryType category) =>
+      _conversationHasData(_conversationPredicateByCategory(category));
+
+  Future<int> conversationCountByCategory(SlideCategoryType category) =>
+      _baseConversationItemCount((conversation, owner, circle) =>
+              _conversationPredicateByCategory(category, conversation, owner))
+          .getSingle();
+
+  Future<List<ConversationItem>> conversationItemsByCategory(
+    SlideCategoryType category,
+    int limit,
+    int offset,
+  ) =>
+      _baseConversationItems(
+        (conversation, owner, message, lastMessageSender, snapshot,
+                participant) =>
+            _conversationPredicateByCategory(category, conversation, owner),
+        Limit(limit, offset),
+      ).get();
+
+  Selectable<ConversationItem> unseenConversationByCategory(
+          SlideCategoryType category) =>
+      _baseConversationItems(
+        (conversation, owner, message, lastMessageSender, snapshot,
+                participant) =>
+            _conversationPredicateByCategory(category, conversation, owner) &
+            conversation.unseenMessageCount.isBiggerThanValue(0),
+        maxLimit,
+      );
 
   Future<bool> _conversationHasData(Expression<bool> predicate) => db.hasData(
       db.conversations,
@@ -125,31 +184,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       ],
       predicate);
 
-  Expression<bool> _chatWhere(Conversations conversation) =>
-      conversation.category.isIn(['CONTACT', 'GROUP']);
-
-  Selectable<int> chatConversationCount() => _baseConversationItemCount(
-      (conversation, owner, circleConversation) => _chatWhere(conversation));
-
-  Selectable<ConversationItem> chatConversations(
-    int limit,
-    int offset,
-  ) =>
-      _baseConversationItems(
-        (conversation, owner, message, lastMessageSender, snapshot,
-                participant) =>
-            _chatWhere(conversation),
-        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
-      );
-
-  Future<bool> chatConversationHasData() =>
-      _conversationHasData(_chatWhere(db.conversations));
-
-  Expression<bool> _contactWhere(Conversations conversation, Users owner) =>
-      conversation.category.equalsValue(ConversationCategory.contact) &
-      owner.relationship.equalsValue(UserRelationship.friend) &
-      owner.appId.isNull();
-
   Selectable<BaseUnseenConversationCountResult> _baseUnseenConversationCount(
           Expression<bool> Function(Conversations conversation, Users owner)
               where) =>
@@ -158,121 +192,22 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           where(conversation, owner));
 
   Selectable<BaseUnseenConversationCountResult>
-      contactUnseenConversationCount() =>
-          _baseUnseenConversationCount(_contactWhere);
-
-  Selectable<int> contactConversationCount() => _baseConversationItemCount(
-      (conversation, owner, _) => _contactWhere(conversation, owner));
-
-  Selectable<ConversationItem> contactConversations(
-    int limit,
-    int offset,
-  ) =>
-      _baseConversationItems(
-        (conversation, owner, message, lastMessageSender, snapshot,
-                participant) =>
-            _contactWhere(conversation, owner),
-        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
-      );
-
-  Future<bool> contactConversationHasData() =>
-      _conversationHasData(_contactWhere(db.conversations, db.users));
-
-  Expression<bool> _strangerWhere(Conversations conversation, Users owner) =>
-      conversation.category.equalsValue(ConversationCategory.contact) &
-      owner.relationship.equalsValue(UserRelationship.stranger) &
-      owner.appId.isNull();
-
-  Selectable<BaseUnseenConversationCountResult>
-      strangerUnseenConversationCount() =>
-          _baseUnseenConversationCount(_strangerWhere);
-
-  Selectable<int> strangerConversationCount() => _baseConversationItemCount(
-      (conversation, owner, _) => _strangerWhere(conversation, owner));
-
-  Selectable<ConversationItem> strangerConversations(
-    int limit,
-    int offset,
-  ) =>
-      _baseConversationItems(
-        (conversation, owner, message, lastMessageSender, snapshot,
-                participant) =>
-            _strangerWhere(conversation, owner),
-        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
-      );
-
-  Future<bool> strangerConversationHasData() =>
-      _conversationHasData(_strangerWhere(db.conversations, db.users));
-
-  Expression<bool> _groupWhere(Conversations conversation) =>
-      conversation.category.equalsValue(ConversationCategory.group);
-
-  Selectable<BaseUnseenConversationCountResult>
-      groupUnseenConversationCount() => _baseUnseenConversationCount(
-          (conversation, _) => _groupWhere(conversation));
-
-  Selectable<int> groupConversationCount() => _baseConversationItemCount(
-      (conversation, _, __) => _groupWhere(conversation));
-
-  Future<bool> groupConversationHasData() =>
-      _conversationHasData(_groupWhere(db.conversations));
-
-  Selectable<ConversationItem> groupConversations(
-    int limit,
-    int offset,
-  ) =>
-      _baseConversationItems(
-        (conversation, owner, message, lastMessageSender, snapshot,
-                participant) =>
-            _groupWhere(conversation),
-        (
-          _,
-          __,
-          ___,
-          ____,
-          ______,
-          _______,
-          ExpiredMessages em,
-        ) =>
-            Limit(limit, offset),
-      );
-
-  Expression<bool> _botWhere(Conversations conversation, Users owner) =>
-      conversation.category.equalsValue(ConversationCategory.contact) &
-      owner.appId.isNotNull();
-
-  Selectable<BaseUnseenConversationCountResult> botUnseenConversationCount() =>
-      _baseUnseenConversationCount(_botWhere);
-
-  Selectable<int> botConversationCount() => _baseConversationItemCount(
-      (conversation, owner, _) => _botWhere(conversation, owner));
-
-  Selectable<ConversationItem> botConversations(
-    int limit,
-    int offset,
-  ) =>
-      _baseConversationItems(
-        (conversation, owner, message, lastMessageSender, snapshot,
-                participant) =>
-            _botWhere(conversation, owner),
-        (_, __, ___, ____, ______, _______, em) => Limit(limit, offset),
-      );
-
-  Future<bool> botConversationHasData() =>
-      _conversationHasData(_botWhere(db.conversations, db.users));
+      unseenConversationCountByCategory(SlideCategoryType category) =>
+          _baseUnseenConversationCount((conversation, owner) =>
+              _conversationPredicateByCategory(category, conversation, owner));
 
   Selectable<ConversationItem> conversationItem(String conversationId) =>
       _baseConversationItems(
         (conversation, _, __, ___, ____, ______) =>
             conversation.conversationId.equals(conversationId),
-        (_, __, ___, ____, ______, _______, em) => Limit(1, null),
+        Limit(1, null),
       );
 
   Selectable<ConversationItem> conversationItems() => _baseConversationItems(
         (conversation, _, __, ___, ____, ______) =>
             conversation.category.isIn(['CONTACT', 'GROUP']) &
             conversation.status.equalsValue(ConversationStatus.success),
-        (_, __, ___, ____, ______, _______, em) => maxLimit,
+        maxLimit,
       );
 
   Selectable<int> conversationsCountByCircleId(String circleId) =>
@@ -347,15 +282,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
                   : ignoreWhere,
           (Conversations conversation, Users owner, Messages message) =>
               Limit(limit, null));
-
-  Selectable<ConversationItem> filterConversationByUnseen() =>
-      _baseConversationItems(
-        (conversation, owner, message, lastMessageSender, snapshot,
-                participant) =>
-            _chatWhere(conversation) &
-            conversation.unseenMessageCount.isBiggerThanValue(0),
-        (_, __, ___, ____, ______, _______, em) => maxLimit,
-      );
 
   Selectable<String?> announcement(String conversationId) =>
       (db.selectOnly(db.conversations)
