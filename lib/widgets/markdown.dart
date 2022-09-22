@@ -30,6 +30,7 @@ StyleConfig buildMarkdownStyleConfig(BuildContext context, bool darkMode) =>
           if (href?.isEmpty ?? true) return;
           openUri(context, href!);
         },
+        selectable: false,
       ),
       olConfig: OlConfig(selectable: false),
       ulConfig: UlConfig(selectable: false),
