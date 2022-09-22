@@ -104,9 +104,14 @@ class SearchList extends HookWidget {
             return Stream.value(<SearchConversationItem>[]);
           }
           return accountServer.database.conversationDao
-              .fuzzySearchConversation(keyword, 32, filterUnseen: filterUnseen)
+              .fuzzySearchConversation(
+                keyword,
+                32,
+                filterUnseen: filterUnseen,
+                category: slideCategoryState,
+              )
               .watchThrottle(kSlowThrottleDuration);
-        }, keys: [keyword, filterUnseen]).data ??
+        }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
         [];
 
     final messages = useMemoizedStream(

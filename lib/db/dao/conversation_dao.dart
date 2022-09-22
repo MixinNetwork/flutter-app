@@ -284,13 +284,36 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Selectable<SearchConversationItem> fuzzySearchConversation(
-          String query, int limit, {bool filterUnseen = false}) =>
-      db.fuzzySearchConversation(
-          query.trim().escapeSql(),
-          (Conversations conversation, Users owner, Messages message) =>
-              filterUnseen
-                  ? conversation.unseenMessageCount.isBiggerThanValue(0)
-                  : ignoreWhere,
+    String query,
+    int limit, {
+    bool filterUnseen = false,
+    SlideCategoryState? category,
+  }) =>
+      db.fuzzySearchConversation(query.trim().escapeSql(),
+          (Conversations conversation, Users owner, Messages message) {
+        Expression<bool> predicate = ignoreWhere;
+        switch (category?.type) {
+          case SlideCategoryType.contacts:
+          case SlideCategoryType.groups:
+          case SlideCategoryType.bots:
+          case SlideCategoryType.strangers:
+            predicate = _conversationPredicateByCategory(
+                category!.type, conversation, owner);
+            break;
+
+          case SlideCategoryType.circle:
+          case SlideCategoryType.setting:
+            assert(false, 'Invalid category type: ${category!.type}');
+            break;
+          case null:
+          case SlideCategoryType.chats:
+            break;
+        }
+        if (filterUnseen) {
+          predicate &= conversation.unseenMessageCount.isBiggerThanValue(0);
+        }
+        return predicate;
+      },
           (Conversations conversation, Users owner, Messages message) =>
               Limit(limit, null));
 
