@@ -12929,18 +12929,41 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.read<String>('user_id'));
   }
 
-  Selectable<User> fuzzySearchUser(
-      String id, String username, String identityNumber) {
+  Selectable<User> fuzzySearchUser(String id, String username,
+      String identityNumber, FuzzySearchUser$filter filter) {
+    var $arrayStartIndex = 4;
+    final generatedfilter = $write(filter(this.users, this.conversations),
+        hasMultipleTables: true, startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedfilter.amountOfVariables;
     return customSelect(
-        'SELECT users.* FROM users LEFT JOIN conversations ON conversations.owner_id = user_id WHERE conversations.status IS NULL AND user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \'%\' || ?3 || \'%\' ESCAPE \'\\\')ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
+        'SELECT users.* FROM users LEFT JOIN conversations ON conversations.owner_id = user_id WHERE conversations.status IS NULL AND user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \'%\' || ?3 || \'%\' ESCAPE \'\\\')AND ${generatedfilter.sql} ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(username),
-          Variable<String>(identityNumber)
+          Variable<String>(identityNumber),
+          ...generatedfilter.introducedVariables
         ],
         readsFrom: {
           users,
           conversations,
+          ...generatedfilter.watchedTables,
+        }).asyncMap(users.mapFromRow);
+  }
+
+  Selectable<User> fuzzySearchUserInCircle(
+      String id, String username, String identityNumber, String? circleId) {
+    return customSelect(
+        'SELECT user.* FROM users AS user LEFT JOIN conversations ON conversations.owner_id = user.user_id LEFT JOIN circle_conversations AS circleConversation ON user.user_id = circleConversation.user_id WHERE conversations.status IS NULL AND user.user_id != ?1 AND user.relationship = \'FRIEND\' AND(user.full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR user.identity_number LIKE \'%\' || ?3 || \'%\' ESCAPE \'\\\')AND circleConversation.circle_id = ?4 ORDER BY user.full_name = ?2 COLLATE nocase OR user.identity_number = ?3 COLLATE nocase DESC',
+        variables: [
+          Variable<String>(id),
+          Variable<String>(username),
+          Variable<String>(identityNumber),
+          Variable<String>(circleId)
+        ],
+        readsFrom: {
+          users,
+          conversations,
+          circleConversations,
         }).asyncMap(users.mapFromRow);
   }
 
@@ -14852,6 +14875,9 @@ class ConversationCircleManagerItem {
         .toString();
   }
 }
+
+typedef FuzzySearchUser$filter = Expression<bool> Function(
+    Users users, Conversations conversations);
 
 class MentionUser {
   final String userId;

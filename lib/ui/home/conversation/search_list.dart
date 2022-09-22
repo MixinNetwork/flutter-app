@@ -29,6 +29,7 @@ import '../../../widgets/user/user_dialog.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_filter_unseen_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
+import '../bloc/slide_category_cubit.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
 import 'unseen_conversation_list.dart';
@@ -80,17 +81,22 @@ class SearchList extends HookWidget {
 
     final accountServer = context.accountServer;
 
+    final slideCategoryState =
+        useBlocState<SlideCategoryCubit, SlideCategoryState>();
+
     final users = useMemoizedStream(() {
           if (keyword.trim().isEmpty || filterUnseen) {
             return Stream.value(<User>[]);
           }
           return accountServer.database.userDao
               .fuzzySearchUser(
-                  id: accountServer.userId,
-                  username: keyword,
-                  identityNumber: keyword)
+                id: accountServer.userId,
+                username: keyword,
+                identityNumber: keyword,
+                category: slideCategoryState,
+              )
               .watchThrottle(kSlowThrottleDuration);
-        }, keys: [keyword, filterUnseen]).data ??
+        }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
         [];
 
     final conversations = useMemoizedStream(() {
