@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert' as convert;
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:isolate/isolate.dart';

@@ -167,7 +167,7 @@ class Sender {
                 userId: k.userId, sessionId: k.sessionId));
           }
         } else {
-          i('No any group signal key from server: $requestSignalKeyUsers');
+          i('No any group signal key from server: ${requestSignalKeyUsers.toString()}');
         }
 
         final noKeyList = requestSignalKeyUsers.where((e) => !keys.contains(e));

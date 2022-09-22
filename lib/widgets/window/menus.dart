@@ -154,6 +154,7 @@ class _Menus extends HookWidget {
     const methodChannel = MethodChannel('mixin_desktop/platform_menus');
 
     return PlatformMenuBar(
+      body: BlocProvider.value(value: menuCubit, child: child),
       menus: [
         PlatformMenu(
           label: 'Mixin',
@@ -375,7 +376,6 @@ class _Menus extends HookWidget {
           ],
         ),
       ],
-      child: BlocProvider.value(value: menuCubit, child: child),
     );
   }
 }
