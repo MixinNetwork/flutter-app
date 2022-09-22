@@ -14082,10 +14082,23 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   }
 
   Selectable<ConversationItem> baseConversationItemsByCircleId(
-      String? circleId,
+      BaseConversationItemsByCircleId$where where,
       BaseConversationItemsByCircleId$order order,
       BaseConversationItemsByCircleId$limit limit) {
-    var $arrayStartIndex = 2;
+    var $arrayStartIndex = 1;
+    final generatedwhere = $write(
+        where(
+            alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'),
+            alias(this.circleConversations, 'circleConversation'),
+            alias(this.messages, 'lastMessage'),
+            alias(this.users, 'lastMessageSender'),
+            alias(this.snapshots, 'snapshot'),
+            alias(this.users, 'participant'),
+            alias(this.expiredMessages, 'em')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedorder = $write(
         order?.call(
                 alias(this.conversations, 'conversation'),
@@ -14114,9 +14127,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.expire_in AS expireIn, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, em.expire_in AS messageExpireIn, (SELECT COUNT(1) FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id LEFT JOIN expired_messages AS em ON lastMessage.message_id = em.message_id WHERE circleConversation.circle_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.expire_in AS expireIn, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, em.expire_in AS messageExpireIn, (SELECT COUNT(1) FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id LEFT JOIN expired_messages AS em ON lastMessage.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
-          Variable<String>(circleId),
+          ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
           ...generatedlimit.introducedVariables
         ],
@@ -14128,6 +14141,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           expiredMessages,
           messageMentions,
           circleConversations,
+          ...generatedwhere.watchedTables,
           ...generatedorder.watchedTables,
           ...generatedlimit.watchedTables,
         }).map((QueryRow row) {
@@ -15855,6 +15869,15 @@ typedef BaseConversationItems$order = OrderBy Function(
 typedef BaseConversationItems$limit = Limit Function(
     Conversations conversation,
     Users owner,
+    Messages lastMessage,
+    Users lastMessageSender,
+    Snapshots snapshot,
+    Users participant,
+    ExpiredMessages em);
+typedef BaseConversationItemsByCircleId$where = Expression<bool> Function(
+    Conversations conversation,
+    Users owner,
+    CircleConversations circleConversation,
     Messages lastMessage,
     Users lastMessageSender,
     Snapshots snapshot,

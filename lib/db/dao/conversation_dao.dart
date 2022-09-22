@@ -217,7 +217,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Selectable<ConversationItem> conversationsByCircleId(
           String circleId, int limit, int offset) =>
       db.baseConversationItemsByCircleId(
-        circleId,
+        (conversation, o, circleConversation, lm, ls, s, p, em) =>
+            circleConversation.circleId.equals(circleId),
         (conversation, _, __, ___, ____, _____, _____i, em) =>
             _baseConversationItemOrder(conversation),
         (_, __, ___, ____, ______, _______, ________, em) =>
@@ -235,6 +236,16 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         )
       ],
       db.circleConversations.circleId.equals(circleId));
+
+  Selectable<ConversationItem> unseenConversationsByCircleId(String circleId) =>
+      db.baseConversationItemsByCircleId(
+        (conversation, o, circleConversation, lm, ls, s, p, em) =>
+            circleConversation.circleId.equals(circleId) &
+            conversation.unseenMessageCount.isBiggerThanValue(0),
+        (conversation, _, __, ___, ____, _____, _____i, em) =>
+            _baseConversationItemOrder(conversation),
+        (_, __, ___, ____, ______, _______, ________, em) => maxLimit,
+      );
 
   Future<int> pin(String conversationId) => (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))

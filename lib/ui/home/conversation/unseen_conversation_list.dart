@@ -71,7 +71,9 @@ class UnseenConversationList extends HookWidget {
               .watchThrottle(kSlowThrottleDuration);
           break;
         case SlideCategoryType.circle:
-          unseenConversations = const Stream.empty();
+          unseenConversations = context.database.conversationDao
+              .unseenConversationsByCircleId(slideCategoryState.id!)
+              .watchThrottle(kSlowThrottleDuration);
           break;
         case SlideCategoryType.setting:
           unseenConversations = const Stream.empty();
