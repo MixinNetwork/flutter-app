@@ -73,16 +73,24 @@ Future<void> main(List<String> args) async {
     await protocolHandler.register('mixin');
   }
 
-  FlutterError.onError = (details) {
-    e('FlutterError: ${details.exception} ${details.stack}');
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    e('unhandled error: $error $stack');
-    return true;
-  };
-
   HydratedBlocOverrides.runZoned(
-    () => runApp(const App()),
+    () => runZonedGuarded(
+      () => runApp(const App()),
+      (Object error, StackTrace stack) {
+        if (!kLogMode) return;
+        e('$error, $stack');
+      },
+      zoneSpecification: ZoneSpecification(
+        handleUncaughtError: (_, __, ___, Object error, StackTrace stack) {
+          if (!kLogMode) return;
+          wtf('$error, $stack');
+        },
+        print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+          if (!kLogMode) return;
+          parent.print(zone, colorizeNonAnsi(line));
+        },
+      ),
+    ),
     blocObserver: kDebugMode ? CustomBlocObserver() : null,
     storage: storage,
   );
