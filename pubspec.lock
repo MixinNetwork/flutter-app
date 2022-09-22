@@ -279,7 +279,7 @@ packages:
       name: dart_console
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.2"
+    version: "1.1.1"
   dart_jsonwebtoken:
     dependency: transitive
     description:
