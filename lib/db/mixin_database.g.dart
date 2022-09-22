@@ -14318,6 +14318,68 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<SearchConversationItem> fuzzySearchConversationInCircle(
+      String query,
+      String? circleId,
+      FuzzySearchConversationInCircle$where where,
+      FuzzySearchConversationInCircle$limit limit) {
+    var $arrayStartIndex = 3;
+    final generatedwhere = $write(
+        where(
+            alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'),
+            alias(this.messages, 'message'),
+            alias(this.circleConversations, 'circleConversation')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    final generatedlimit = $write(
+        limit(
+            alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'),
+            alias(this.messages, 'message'),
+            alias(this.circleConversations, 'circleConversation')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
+    return customSelect(
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id WHERE((conversation.category = \'GROUP\' AND conversation.name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')OR(conversation.category = \'CONTACT\' AND(owner.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' OR owner.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')))AND circleConversation.circle_id = ?2 AND ${generatedwhere.sql} ORDER BY(conversation.category = \'GROUP\' AND conversation.name = ?1 COLLATE NOCASE)OR(conversation.category = \'CONTACT\' AND(owner.full_name = ?1 COLLATE NOCASE OR owner.identity_number = ?1 COLLATE NOCASE))DESC, conversation.pin_time DESC, message.created_at DESC ${generatedlimit.sql}',
+        variables: [
+          Variable<String>(query),
+          Variable<String>(circleId),
+          ...generatedwhere.introducedVariables,
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          circleConversations,
+          ...generatedwhere.watchedTables,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) {
+      return SearchConversationItem(
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.readNullable<String>('groupIconUrl'),
+        category: Conversations.$converter0
+            .fromSql(row.readNullable<String>('category')),
+        groupName: row.readNullable<String>('groupName'),
+        pinTime: NullAwareTypeConverter.wrapFromSql(
+            Conversations.$converter2, row.readNullable<int>('pinTime')),
+        muteUntil: NullAwareTypeConverter.wrapFromSql(
+            Conversations.$converter5, row.readNullable<int>('muteUntil')),
+        ownerId: row.readNullable<String>('ownerId'),
+        ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
+            Users.$converter2, row.readNullable<int>('ownerMuteUntil')),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
+        fullName: row.readNullable<String>('fullName'),
+        avatarUrl: row.readNullable<String>('avatarUrl'),
+        isVerified: row.readNullable<bool>('isVerified'),
+        appId: row.readNullable<String>('appId'),
+      );
+    });
+  }
+
   Selectable<int> conversationParticipantsCount(String conversationId) {
     return customSelect(
         'SELECT COUNT(1) AS _c0 FROM participants WHERE conversation_id = ?1',
@@ -16048,6 +16110,16 @@ typedef FuzzySearchConversation$where = Expression<bool> Function(
     Conversations conversation, Users owner, Messages message);
 typedef FuzzySearchConversation$limit = Limit Function(
     Conversations conversation, Users owner, Messages message);
+typedef FuzzySearchConversationInCircle$where = Expression<bool> Function(
+    Conversations conversation,
+    Users owner,
+    Messages message,
+    CircleConversations circleConversation);
+typedef FuzzySearchConversationInCircle$limit = Limit Function(
+    Conversations conversation,
+    Users owner,
+    Messages message,
+    CircleConversations circleConversation);
 
 class ConversationStorageUsage {
   final String conversationId;

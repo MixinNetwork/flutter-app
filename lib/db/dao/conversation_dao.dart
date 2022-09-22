@@ -288,34 +288,45 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     int limit, {
     bool filterUnseen = false,
     SlideCategoryState? category,
-  }) =>
-      db.fuzzySearchConversation(query.trim().escapeSql(),
-          (Conversations conversation, Users owner, Messages message) {
-        Expression<bool> predicate = ignoreWhere;
-        switch (category?.type) {
-          case SlideCategoryType.contacts:
-          case SlideCategoryType.groups:
-          case SlideCategoryType.bots:
-          case SlideCategoryType.strangers:
-            predicate = _conversationPredicateByCategory(
-                category!.type, conversation, owner);
-            break;
+  }) {
+    if (category?.type == SlideCategoryType.circle) {
+      return db.fuzzySearchConversationInCircle(
+        query.trim().escapeSql(),
+        category!.id,
+        (conversation, owner, message, cc) => filterUnseen
+            ? conversation.unseenMessageCount.isBiggerThanValue(0)
+            : ignoreWhere,
+        (conversation, owner, message, cc) => Limit(limit, null),
+      );
+    }
+    return db.fuzzySearchConversation(query.trim().escapeSql(),
+        (Conversations conversation, Users owner, Messages message) {
+      Expression<bool> predicate = ignoreWhere;
+      switch (category?.type) {
+        case SlideCategoryType.contacts:
+        case SlideCategoryType.groups:
+        case SlideCategoryType.bots:
+        case SlideCategoryType.strangers:
+          predicate = _conversationPredicateByCategory(
+              category!.type, conversation, owner);
+          break;
 
-          case SlideCategoryType.circle:
-          case SlideCategoryType.setting:
-            assert(false, 'Invalid category type: ${category!.type}');
-            break;
-          case null:
-          case SlideCategoryType.chats:
-            break;
-        }
-        if (filterUnseen) {
-          predicate &= conversation.unseenMessageCount.isBiggerThanValue(0);
-        }
-        return predicate;
-      },
-          (Conversations conversation, Users owner, Messages message) =>
-              Limit(limit, null));
+        case SlideCategoryType.circle:
+        case SlideCategoryType.setting:
+          assert(false, 'Invalid category type: ${category!.type}');
+          break;
+        case null:
+        case SlideCategoryType.chats:
+          break;
+      }
+      if (filterUnseen) {
+        predicate &= conversation.unseenMessageCount.isBiggerThanValue(0);
+      }
+      return predicate;
+    },
+        (Conversations conversation, Users owner, Messages message) =>
+            Limit(limit, null));
+  }
 
   Selectable<String?> announcement(String conversationId) =>
       (db.selectOnly(db.conversations)
