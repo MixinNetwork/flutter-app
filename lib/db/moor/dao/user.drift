@@ -34,9 +34,20 @@ FROM users
          LEFT JOIN conversations ON conversations.owner_id = user_id
 WHERE conversations.status IS NULL AND user_id != :id AND relationship = 'FRIEND' AND
     (full_name LIKE '%' || :username || '%' ESCAPE '\'
-        OR identity_number LIKE '%' || :identityNumber || '%' ESCAPE '\')
+        OR identity_number LIKE '%' || :identityNumber || '%' ESCAPE '\') AND $filter
 ORDER BY full_name = :username COLLATE nocase
     OR identity_number = :identityNumber COLLATE nocase DESC;
+
+fuzzySearchUserInCircle:
+SELECT user.*
+FROM users user
+         LEFT JOIN conversations ON conversations.owner_id = user.user_id
+         LEFT JOIN circle_conversations circleConversation ON user.user_id = circleConversation.user_id
+WHERE conversations.status IS NULL AND user.user_id != :id AND user.relationship = 'FRIEND' AND
+    (user.full_name LIKE '%' || :username || '%' ESCAPE '\'
+        OR user.identity_number LIKE '%' || :identityNumber || '%' ESCAPE '\') AND circleConversation.circle_id = :circleId
+ORDER BY user.full_name = :username COLLATE nocase
+    OR user.identity_number = :identityNumber COLLATE nocase DESC;
 
 biographyByIdentityNumber:
 SELECT biography FROM users WHERE user_id = :user_id;

@@ -196,6 +196,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("圈子"),
         "clear": MessageLookupByLibrary.simpleMessage("清理"),
         "clearChat": MessageLookupByLibrary.simpleMessage("清除聊天记录"),
+        "clearFilter": MessageLookupByLibrary.simpleMessage("清除筛选条件"),
         "clickToReloadQrcode":
             MessageLookupByLibrary.simpleMessage("点击重新加载二维码"),
         "close": MessageLookupByLibrary.simpleMessage("关闭"),
@@ -500,6 +501,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPlaceholderNumber":
             MessageLookupByLibrary.simpleMessage("搜索 Mixin ID 或手机号码："),
         "searchRelatedMessage": m36,
+        "searchUnread": MessageLookupByLibrary.simpleMessage("搜索未读会话"),
         "select": MessageLookupByLibrary.simpleMessage("选择"),
         "send": MessageLookupByLibrary.simpleMessage("发送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),

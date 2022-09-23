@@ -674,6 +674,16 @@ class Localization {
     );
   }
 
+  /// `Clear filter`
+  String get clearFilter {
+    return Intl.message(
+      'Clear filter',
+      name: 'clearFilter',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Click to reload QR code`
   String get clickToReloadQrcode {
     return Intl.message(
@@ -3111,6 +3121,16 @@ class Localization {
       name: 'searchRelatedMessage',
       desc: '',
       args: [count, arg0],
+    );
+  }
+
+  /// `Search Unread`
+  String get searchUnread {
+    return Intl.message(
+      'Search Unread',
+      name: 'searchUnread',
+      desc: '',
+      args: [],
     );
   }
 

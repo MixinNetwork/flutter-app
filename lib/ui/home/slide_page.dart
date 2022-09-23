@@ -440,20 +440,11 @@ class _Item extends HookWidget {
         final dao = context.database.conversationDao;
         switch (type) {
           case SlideCategoryType.contacts:
-            return dao
-                .contactUnseenConversationCount()
-                .watchSingleThrottle(kDefaultThrottleDuration);
           case SlideCategoryType.groups:
-            return dao
-                .groupUnseenConversationCount()
-                .watchSingleThrottle(kDefaultThrottleDuration);
           case SlideCategoryType.bots:
-            return dao
-                .botUnseenConversationCount()
-                .watchSingleThrottle(kDefaultThrottleDuration);
           case SlideCategoryType.strangers:
             return dao
-                .strangerUnseenConversationCount()
+                .unseenConversationCountByCategory(type)
                 .watchSingleThrottle(kDefaultThrottleDuration);
           case SlideCategoryType.chats:
           case SlideCategoryType.circle:

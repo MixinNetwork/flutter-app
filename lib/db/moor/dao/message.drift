@@ -117,11 +117,6 @@ SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.medi
       FROM messages m LEFT JOIN resend_session_messages rm on m.message_id = rm.message_id
       WHERE m.message_id = :message_id AND (m.status = 'SENDING' OR rm.status = 1) AND m.content IS NOT NULL LIMIT 1;
 
-fuzzySearchMessageCount:
-SELECT COUNT(1)
-    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
-    WHERE m.message_id = fts.message_id;
-
 fuzzySearchMessageCountByCategories:
 SELECT COUNT(1)
     FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
@@ -138,6 +133,30 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     ORDER BY m.created_at DESC
     LIMIT $limit;
 
+fuzzySearchMessageCount:
+SELECT COUNT(1)
+    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
+    WHERE m.message_id = fts.message_id;
+
+fuzzySearchMessageCountWithConversation:
+SELECT COUNT(1)
+    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
+    INNER JOIN conversations c ON c.conversation_id = m.conversation_id
+    WHERE m.message_id = fts.message_id AND $where;
+
+fuzzySearchMessageCountWithConversationOwner:
+SELECT COUNT(1)
+    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
+    INNER JOIN conversations c ON c.conversation_id = m.conversation_id
+    INNER JOIN users u ON u.user_id = c.owner_id
+    WHERE m.message_id = fts.message_id AND $where;
+
+fuzzySearchMessageCountWithCircle:
+SELECT COUNT(1)
+    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
+    INNER JOIN conversations c ON c.conversation_id = m.conversation_id
+    INNER JOIN circle_conversations cc ON cc.conversation_id = c.conversation_id
+    WHERE m.message_id = fts.message_id AND $where;
 
 fuzzySearchMessage AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
@@ -146,7 +165,31 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
-    WHERE m.message_id = fts.message_id
+    WHERE m.message_id = fts.message_id AND $where
+    ORDER BY m.created_at DESC
+    LIMIT :limit OFFSET :offset;
+
+fuzzySearchMessageWithConversationOwner AS SearchMessageDetailItem:
+SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
+    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
+    c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
+    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
+    INNER JOIN conversations c ON c.conversation_id = m.conversation_id
+    INNER JOIN users u ON m.user_id = u.user_id
+    INNER JOIN users owner ON c.owner_id = owner.user_id
+    WHERE m.message_id = fts.message_id AND $where
+    ORDER BY m.created_at DESC
+    LIMIT :limit OFFSET :offset;
+
+fuzzySearchMessageWithCircle AS SearchMessageDetailItem:
+SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
+    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
+    c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
+    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
+    INNER JOIN conversations c ON c.conversation_id = m.conversation_id
+    INNER JOIN users u ON m.user_id = u.user_id
+    INNER JOIN circle_conversations cc ON cc.conversation_id = c.conversation_id
+    WHERE m.message_id = fts.message_id AND $where
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;
 

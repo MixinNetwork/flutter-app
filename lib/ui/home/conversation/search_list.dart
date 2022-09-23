@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -26,9 +27,12 @@ import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
 import '../bloc/conversation_cubit.dart';
+import '../bloc/conversation_filter_unseen_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
+import '../bloc/slide_category_cubit.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
+import 'unseen_conversation_list.dart';
 
 const _defaultLimit = 3;
 
@@ -39,7 +43,9 @@ void _clear(BuildContext context) {
 }
 
 class SearchList extends HookWidget {
-  const SearchList({super.key});
+  const SearchList({super.key, this.filterUnseen = false});
+
+  final bool filterUnseen;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +55,7 @@ class SearchList extends HookWidget {
             return Stream.value(keywordCubit.state)
                 .merge(keywordCubit.stream)
                 .map((event) => event.trim())
+                .distinct()
                 .throttleTime(
                   const Duration(milliseconds: 150),
                   trailing: true,
@@ -64,6 +71,8 @@ class SearchList extends HookWidget {
             final keywordCubit = context.read<KeywordCubit>();
             return Stream.value(keywordCubit.state)
                 .merge(keywordCubit.stream)
+                .map((event) => event.trim())
+                .distinct()
                 .debounceTime(const Duration(milliseconds: 150));
           },
           initialData: null,
@@ -72,15 +81,22 @@ class SearchList extends HookWidget {
 
     final accountServer = context.accountServer;
 
+    final slideCategoryState =
+        useBlocState<SlideCategoryCubit, SlideCategoryState>();
+
     final users = useMemoizedStream(() {
-          if (keyword.trim().isEmpty) return Stream.value(<User>[]);
+          if (keyword.trim().isEmpty || filterUnseen) {
+            return Stream.value(<User>[]);
+          }
           return accountServer.database.userDao
               .fuzzySearchUser(
-                  id: accountServer.userId,
-                  username: keyword,
-                  identityNumber: keyword)
+                id: accountServer.userId,
+                username: keyword,
+                identityNumber: keyword,
+                category: slideCategoryState,
+              )
               .watchThrottle(kSlowThrottleDuration);
-        }, keys: [keyword]).data ??
+        }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
         [];
 
     final conversations = useMemoizedStream(() {
@@ -88,18 +104,28 @@ class SearchList extends HookWidget {
             return Stream.value(<SearchConversationItem>[]);
           }
           return accountServer.database.conversationDao
-              .fuzzySearchConversation(keyword, 32)
+              .fuzzySearchConversation(
+                keyword,
+                32,
+                filterUnseen: filterUnseen,
+                category: slideCategoryState,
+              )
               .watchThrottle(kSlowThrottleDuration);
-        }, keys: [keyword]).data ??
+        }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
         [];
 
     final messages = useMemoizedStream(
-            () => messageKeyword.trim().isEmpty
+            () => messageKeyword.isEmpty
                 ? Stream.value(<SearchMessageDetailItem>[])
                 : accountServer.database.messageDao
-                    .fuzzySearchMessage(query: messageKeyword, limit: 4)
+                    .fuzzySearchMessageByCategory(
+                      messageKeyword,
+                      limit: 4,
+                      unseenConversationOnly: filterUnseen,
+                      category: slideCategoryState,
+                    )
                     .watchThrottle(kSlowThrottleDuration),
-            keys: [messageKeyword]).data ??
+            keys: [messageKeyword, filterUnseen, slideCategoryState]).data ??
         [];
 
     final shouldTips =
@@ -107,17 +133,23 @@ class SearchList extends HookWidget {
 
     final type = useState<_ShowMoreType?>(null);
 
-    if (users.isEmpty &&
-        conversations.isEmpty &&
-        messages.isEmpty &&
-        !shouldTips) {
-      return const SearchEmpty();
+    final resultIsEmpty =
+        users.isEmpty && conversations.isEmpty && messages.isEmpty;
+
+    if (keyword.isEmpty && filterUnseen) {
+      return const UnseenConversationList();
+    }
+
+    if (resultIsEmpty && !shouldTips) {
+      return const SearchEmptyWidget();
     }
 
     if (type.value == _ShowMoreType.message) {
       return _SearchMessageList(
         keyword: keyword,
         onTap: () => type.value = null,
+        filterUnseen: filterUnseen,
+        categoryState: slideCategoryState,
       );
     }
     return CustomScrollView(
@@ -439,10 +471,14 @@ class _SearchMessageList extends HookWidget {
   const _SearchMessageList({
     required this.keyword,
     required this.onTap,
+    required this.filterUnseen,
+    required this.categoryState,
   });
 
   final String keyword;
   final VoidCallback onTap;
+  final bool filterUnseen;
+  final SlideCategoryState categoryState;
 
   @override
   Widget build(BuildContext context) {
@@ -451,17 +487,26 @@ class _SearchMessageList extends HookWidget {
       () => AnonymousPagingBloc<SearchMessageDetailItem>(
         initState: const PagingState<SearchMessageDetailItem>(),
         limit: context.read<ConversationListBloc>().limit,
-        queryCount: () => context.database.messageDao
-            .fuzzySearchMessageCount(keyword)
-            .getSingle(),
+        queryCount: () =>
+            context.database.messageDao.fuzzySearchMessageCountByCategory(
+          keyword,
+          unseenConversationOnly: filterUnseen,
+          category: categoryState,
+        ),
         queryRange: (int limit, int offset) async {
           if (keyword.isEmpty) return [];
           return context.database.messageDao
-              .fuzzySearchMessage(query: keyword, limit: limit, offset: offset)
+              .fuzzySearchMessageByCategory(
+                keyword,
+                limit: limit,
+                offset: offset,
+                unseenConversationOnly: filterUnseen,
+                category: categoryState,
+              )
               .get();
         },
       ),
-      keys: [keyword],
+      keys: [keyword, filterUnseen, categoryState],
     );
     useEffect(
       () => context.database.messageDao.searchMessageUpdateEvent
@@ -480,7 +525,7 @@ class _SearchMessageList extends HookWidget {
             ),
           )
         : pageState.count <= 0
-            ? const SearchEmpty()
+            ? const SearchEmptyWidget()
             : ScrollablePositionedList.builder(
                 itemPositionsListener: searchMessageBloc.itemPositionsListener,
                 itemCount: pageState.count,
@@ -671,8 +716,8 @@ class SearchMessageItem extends HookWidget {
   }
 }
 
-class SearchEmpty extends StatelessWidget {
-  const SearchEmpty({super.key});
+class SearchEmptyWidget extends StatelessWidget {
+  const SearchEmptyWidget({super.key});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -682,12 +727,30 @@ class SearchEmpty extends StatelessWidget {
         ),
         width: double.infinity,
         alignment: Alignment.topCenter,
-        child: Text(
-          context.l10n.searchEmpty,
-          style: TextStyle(
-            fontSize: 14,
-            color: context.theme.secondaryText,
-          ),
+        child: Column(
+          children: [
+            Text(
+              context.l10n.searchEmpty,
+              style: TextStyle(
+                fontSize: 14,
+                color: context.theme.secondaryText,
+              ),
+            ),
+            const SizedBox(height: 4),
+            TextButton(
+              child: Text(
+                context.l10n.clearFilter,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: context.theme.accent,
+                ),
+              ),
+              onPressed: () {
+                _clear(context);
+                context.read<ConversationFilterUnseenCubit>().reset();
+              },
+            ),
+          ],
         ),
       );
 }

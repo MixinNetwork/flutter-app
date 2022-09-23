@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
+import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../mixin_database.dart';
 
@@ -101,9 +102,36 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     required String id,
     required String username,
     required String identityNumber,
-  }) =>
-      db.fuzzySearchUser(
-          id, username.trim().escapeSql(), identityNumber.trim().escapeSql());
+    SlideCategoryState? category,
+  }) {
+    if (category?.type == SlideCategoryType.circle) {
+      final circleId = category!.id;
+      return db.fuzzySearchUserInCircle(id, username, identityNumber, circleId);
+    }
+    return db.fuzzySearchUser(
+        id, username.trim().escapeSql(), identityNumber.trim().escapeSql(),
+        (users, conversation) {
+      switch (category?.type) {
+        case null:
+        case SlideCategoryType.chats:
+          return const Constant(true);
+        case SlideCategoryType.contacts:
+          return users.relationship.equalsValue(sdk.UserRelationship.friend) &
+              users.appId.isNull();
+        case SlideCategoryType.groups:
+          return const Constant(false);
+        case SlideCategoryType.bots:
+          return users.appId.isNotNull();
+        case SlideCategoryType.strangers:
+          return users.relationship.equalsValue(sdk.UserRelationship.stranger) &
+              users.appId.isNull();
+        case SlideCategoryType.circle:
+        case SlideCategoryType.setting:
+          assert(false, 'Unsupported category: $category');
+          return const Constant(false);
+      }
+    });
+  }
 
   Selectable<String?> biography(String userId) =>
       db.biographyByIdentityNumber(userId);

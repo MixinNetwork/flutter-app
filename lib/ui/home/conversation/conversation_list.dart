@@ -80,7 +80,7 @@ class ConversationList extends HookWidget {
               return ConversationMenuWrapper(
                 conversation: conversation,
                 removeChatFromCircle: true,
-                child: _Item(
+                child: ConversationItemWidget(
                   selected: selected,
                   conversation: conversation,
                   onTap: () {
@@ -133,8 +133,9 @@ class _Empty extends StatelessWidget {
   }
 }
 
-class _Item extends StatelessWidget {
-  const _Item({
+class ConversationItemWidget extends StatelessWidget {
+  const ConversationItemWidget({
+    super.key,
     this.selected = false,
     required this.conversation,
     required this.onTap,

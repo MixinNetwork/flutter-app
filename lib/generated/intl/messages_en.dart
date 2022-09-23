@@ -221,6 +221,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("Circles"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "clearChat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
+        "clearFilter": MessageLookupByLibrary.simpleMessage("Clear filter"),
         "clickToReloadQrcode":
             MessageLookupByLibrary.simpleMessage("Click to reload QR code"),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
@@ -571,6 +572,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPlaceholderNumber": MessageLookupByLibrary.simpleMessage(
             "Search Mixin ID or phone number:"),
         "searchRelatedMessage": m36,
+        "searchUnread": MessageLookupByLibrary.simpleMessage("Search Unread"),
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
         "select": MessageLookupByLibrary.simpleMessage("Select"),
