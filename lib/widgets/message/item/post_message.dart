@@ -69,18 +69,20 @@ class MessagePost extends StatelessWidget {
                     minHeight: showStatus ? 48 : 0,
                     minWidth: 128,
                   ),
-                  child: IntrinsicWidth(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: MarkdownGenerator(
-                            data: postContent,
-                            styleConfig: buildMarkdownStyleConfig(
-                              context,
-                              context.brightnessValue != 0,
-                            ),
-                          ).widgets ??
-                          [],
+                  child: SelectionArea(
+                    child: IntrinsicWidth(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: MarkdownGenerator(
+                              data: postContent,
+                              styleConfig: buildMarkdownStyleConfig(
+                                context,
+                                context.brightnessValue != 0,
+                              ),
+                            ).widgets ??
+                            [],
+                      ),
                     ),
                   ),
                 );
