@@ -59,6 +59,10 @@ class UnseenConversationList extends HookWidget {
         useBlocState<SlideCategoryCubit, SlideCategoryState>();
 
     useEffect(() {
+      selectedConversation.value = null;
+    }, [slideCategoryState]);
+
+    useEffect(() {
       final Stream<List<ConversationItem>> unseenConversations;
       switch (slideCategoryState.type) {
         case SlideCategoryType.chats:
