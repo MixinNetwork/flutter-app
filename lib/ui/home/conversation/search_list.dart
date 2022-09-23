@@ -118,12 +118,14 @@ class SearchList extends HookWidget {
             () => messageKeyword.isEmpty
                 ? Stream.value(<SearchMessageDetailItem>[])
                 : accountServer.database.messageDao
-                    .fuzzySearchMessage(
-                        query: messageKeyword,
-                        limit: 4,
-                        unseenConversationOnly: filterUnseen)
+                    .fuzzySearchMessageByCategory(
+                      messageKeyword,
+                      limit: 4,
+                      unseenConversationOnly: filterUnseen,
+                      category: slideCategoryState,
+                    )
                     .watchThrottle(kSlowThrottleDuration),
-            keys: [messageKeyword, filterUnseen]).data ??
+            keys: [messageKeyword, filterUnseen, slideCategoryState]).data ??
         [];
 
     final shouldTips =
@@ -147,6 +149,7 @@ class SearchList extends HookWidget {
         keyword: keyword,
         onTap: () => type.value = null,
         filterUnseen: filterUnseen,
+        categoryState: slideCategoryState,
       );
     }
     return CustomScrollView(
@@ -469,11 +472,13 @@ class _SearchMessageList extends HookWidget {
     required this.keyword,
     required this.onTap,
     required this.filterUnseen,
+    required this.categoryState,
   });
 
   final String keyword;
   final VoidCallback onTap;
   final bool filterUnseen;
+  final SlideCategoryState categoryState;
 
   @override
   Widget build(BuildContext context) {
@@ -482,25 +487,26 @@ class _SearchMessageList extends HookWidget {
       () => AnonymousPagingBloc<SearchMessageDetailItem>(
         initState: const PagingState<SearchMessageDetailItem>(),
         limit: context.read<ConversationListBloc>().limit,
-        queryCount: () => context.database.messageDao
-            .fuzzySearchMessageCount(
-              keyword,
-              unseenConversationOnly: filterUnseen,
-            )
-            .getSingle(),
+        queryCount: () =>
+            context.database.messageDao.fuzzySearchMessageCountByCategory(
+          keyword,
+          unseenConversationOnly: filterUnseen,
+          category: categoryState,
+        ),
         queryRange: (int limit, int offset) async {
           if (keyword.isEmpty) return [];
           return context.database.messageDao
-              .fuzzySearchMessage(
-                query: keyword,
+              .fuzzySearchMessageByCategory(
+                keyword,
                 limit: limit,
                 offset: offset,
                 unseenConversationOnly: filterUnseen,
+                category: categoryState,
               )
               .get();
         },
       ),
-      keys: [keyword, filterUnseen],
+      keys: [keyword, filterUnseen, categoryState],
     );
     useEffect(
       () => context.database.messageDao.searchMessageUpdateEvent

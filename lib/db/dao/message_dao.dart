@@ -8,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../constants/constants.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
+import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../database_event_bus.dart';
@@ -940,6 +941,121 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     db.eventBus.send(DatabaseEvent.notification, messageId);
   }
 
+  Selectable<SearchMessageDetailItem> fuzzySearchMessageByCategory(String keyword, {
+    required int limit,
+    SlideCategoryState? category,
+    int offset = 0,
+    bool unseenConversationOnly = false,
+  }) {
+    Expression<bool> unseenFilter(Conversations tbl) => unseenConversationOnly ? tbl.unseenMessageCount.isBiggerThanValue(0) : const Constant(true);
+    final query = keyword.trim().escapeFts5();
+    switch (category?.type) {
+      case null:
+      case SlideCategoryType.chats:
+        return db.fuzzySearchMessage(
+            query, (m, c, u) => unseenFilter(c), limit, offset);
+      case SlideCategoryType.contacts:
+        return db.fuzzySearchMessageWithConversationOwner(
+            query,
+            (m, c, u, owner) =>
+                c.category.equalsValue(ConversationCategory.contact) &
+                owner.relationship.equalsValue(UserRelationship.friend) &
+                owner.appId.isNull() & unseenFilter(c),
+            limit,
+            offset);
+      case SlideCategoryType.groups:
+        return db.fuzzySearchMessage(
+            query,
+            (m, c, u) => c.category.equalsValue(ConversationCategory.group) & unseenFilter(c),
+            limit,
+            offset);
+      case SlideCategoryType.bots:
+        return db.fuzzySearchMessageWithConversationOwner(
+            query,
+            (m, c, u, owner) =>
+                c.category.equalsValue(ConversationCategory.contact) &
+                owner.appId.isNotNull() & unseenFilter(c),
+            limit,
+            offset);
+      case SlideCategoryType.strangers:
+        return db.fuzzySearchMessageWithConversationOwner(
+            query,
+            (m, c, u, owner) =>
+                c.category.equalsValue(ConversationCategory.contact) &
+                owner.relationship.equalsValue(UserRelationship.stranger) &
+                owner.appId.isNull() & unseenFilter(c),
+            limit,
+            offset);
+      case SlideCategoryType.circle:
+        final circleId = category!.id!;
+        return db.fuzzySearchMessageWithCircle(query,
+                (m, c, u, cc) => cc.circleId.equals(circleId) & unseenFilter(c),
+            limit,
+            offset);
+      case SlideCategoryType.setting:
+        assert(false, 'Setting category should not be searched');
+        return db.fuzzySearchMessage(
+            query, (m, c, u) => ignoreWhere, limit, offset);
+    }
+  }
+
+  Future<int> fuzzySearchMessageCountByCategory(String keyword, {
+    SlideCategoryState? category,
+    bool unseenConversationOnly = false,
+  }) {
+    final query = keyword.trim().escapeFts5();
+    Expression<bool> unseenFilter(Conversations tbl) => unseenConversationOnly ? tbl.unseenMessageCount.isBiggerThanValue(0) : const Constant(true);
+    switch (category?.type) {
+      case null:
+      case SlideCategoryType.chats:
+        if (unseenConversationOnly){
+          return db.fuzzySearchMessageCountWithConversation(query, (m,c) =>
+            c.unseenMessageCount.isBiggerThanValue(0)
+          ).getSingle();
+        } else {
+          return db.fuzzySearchMessageCount(query).getSingle();
+        }
+      case SlideCategoryType.contacts:
+        return db.fuzzySearchMessageCountWithConversationOwner(
+            query,
+            (m, c, owner) =>
+                c.category.equalsValue(ConversationCategory.contact) &
+                owner.relationship.equalsValue(UserRelationship.friend) &
+                owner.appId.isNull() & unseenFilter(c),
+        ).getSingle();
+      case SlideCategoryType.groups:
+        return db.fuzzySearchMessageCountWithConversation(
+            query,
+            (m, c) =>
+                c.category.equalsValue(ConversationCategory.group) & unseenFilter(c),
+        ).getSingle();
+      case SlideCategoryType.bots:
+        return db.fuzzySearchMessageCountWithConversationOwner(
+            query,
+            (m, c, owner) =>
+                c.category.equalsValue(ConversationCategory.contact) &
+                owner.appId.isNotNull() & unseenFilter(c),
+        ).getSingle();
+      case SlideCategoryType.strangers:
+        return db.fuzzySearchMessageCountWithConversationOwner(
+            query,
+            (m, c, owner) =>
+                c.category.equalsValue(ConversationCategory.contact) &
+                owner.relationship.equalsValue(UserRelationship.stranger) &
+                owner.appId.isNull() & unseenFilter(c),
+        ).getSingle();
+      case SlideCategoryType.circle:
+        final circleId = category!.id!;
+        return db.fuzzySearchMessageCountWithCircle(
+            query,
+            (m, c, cc) => cc.circleId.equals(circleId) & unseenFilter(c),
+        ).getSingle();
+      case SlideCategoryType.setting:
+        assert(false, 'Setting category should not be searched');
+        return db.fuzzySearchMessageCount(query).getSingle();
+    }
+  }
+
   Selectable<SearchMessageDetailItem> fuzzySearchMessage({
     required String query,
     required int limit,
@@ -947,14 +1063,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String? conversationId,
     String? userId,
     List<String>? categories,
-    bool unseenConversationOnly = false,
   }) {
     final keywordFts5 = query.trim().escapeFts5();
-
-    assert(
-      !unseenConversationOnly || conversationId == null,
-      'unseenConversationOnly and conversationId can not be set at the same time',
-    );
 
     if (conversationId != null && userId != null) {
       if (categories != null) {
@@ -1002,16 +1112,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       );
     }
 
-    if (unseenConversationOnly) {
-      return db.fuzzySearchMessageInUnseenConversation(
-        keywordFts5,
-        limit,
-        offset,
-      );
-    }
-
     return db.fuzzySearchMessage(
       keywordFts5,
+      (m, c, u) => ignoreWhere,
       limit,
       offset,
     );
@@ -1022,14 +1125,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String? conversationId,
     String? userId,
     List<String>? categories,
-    bool unseenConversationOnly = false,
   }) {
     final keywordFts5 = keyword.trim().escapeFts5();
-
-    assert(
-      !unseenConversationOnly || conversationId == null,
-      'unseenConversationOnly and conversationId can not be set at the same time',
-    );
 
     if (conversationId != null && userId != null) {
       if (categories != null) {
@@ -1066,10 +1163,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     if (categories != null) {
       return db.fuzzySearchMessageCountByCategories(keywordFts5, categories);
-    }
-
-    if (unseenConversationOnly) {
-      return db.fuzzySearchMessageCountInUnseenConversation(keywordFts5);
     }
 
     return db.fuzzySearchMessageCount(keywordFts5);

@@ -13445,18 +13445,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<int> fuzzySearchMessageCount(String query) {
-    return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.message_id = fts.message_id',
-        variables: [
-          Variable<String>(query)
-        ],
-        readsFrom: {
-          messages,
-          messagesFts,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
   Selectable<int> fuzzySearchMessageCountByCategories(
       String query, List<String> categories) {
     var $arrayStartIndex = 2;
@@ -13523,91 +13511,228 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<SearchMessageDetailItem> fuzzySearchMessage(
-      String query, int limit, int offset) {
+  Selectable<int> fuzzySearchMessageCount(String query) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
-        variables: [
-          Variable<String>(query),
-          Variable<int>(limit),
-          Variable<int>(offset)
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          messagesFts,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        userId: row.read<String>('userId'),
-        userAvatarUrl: row.readNullable<String>('userAvatarUrl'),
-        userFullName: row.readNullable<String>('userFullName'),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        conversationOwnerId: row.readNullable<String>('conversationOwnerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$converter0
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-      );
-    });
-  }
-
-  Selectable<SearchMessageDetailItem> fuzzySearchMessageInUnseenConversation(
-      String query, int limit, int offset) {
-    return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.message_id = fts.message_id AND c.unseen_message_count > 0 ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
-        variables: [
-          Variable<String>(query),
-          Variable<int>(limit),
-          Variable<int>(offset)
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          messagesFts,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        userId: row.read<String>('userId'),
-        userAvatarUrl: row.readNullable<String>('userAvatarUrl'),
-        userFullName: row.readNullable<String>('userFullName'),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        conversationOwnerId: row.readNullable<String>('conversationOwnerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$converter0
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-      );
-    });
-  }
-
-  Selectable<int> fuzzySearchMessageCountInUnseenConversation(String query) {
-    return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id WHERE m.message_id = fts.message_id AND c.unseen_message_count > 0',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.message_id = fts.message_id',
         variables: [
           Variable<String>(query)
         ],
         readsFrom: {
           messages,
           messagesFts,
-          conversations,
         }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
+  Selectable<int> fuzzySearchMessageCountWithConversation(
+      String query, FuzzySearchMessageCountWithConversation$where where) {
+    var $arrayStartIndex = 2;
+    final generatedwhere = $write(
+        where(alias(this.messages, 'm'), alias(this.conversations, 'c')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    return customSelect(
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql}',
+        variables: [
+          Variable<String>(query),
+          ...generatedwhere.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          messagesFts,
+          conversations,
+          ...generatedwhere.watchedTables,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
+  Selectable<int> fuzzySearchMessageCountWithConversationOwner(
+      String query, FuzzySearchMessageCountWithConversationOwner$where where) {
+    var $arrayStartIndex = 2;
+    final generatedwhere = $write(
+        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    return customSelect(
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON u.user_id = c.owner_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql}',
+        variables: [
+          Variable<String>(query),
+          ...generatedwhere.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          messagesFts,
+          conversations,
+          users,
+          ...generatedwhere.watchedTables,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
+  Selectable<int> fuzzySearchMessageCountWithCircle(
+      String query, FuzzySearchMessageCountWithCircle$where where) {
+    var $arrayStartIndex = 2;
+    final generatedwhere = $write(
+        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.circleConversations, 'cc')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    return customSelect(
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN circle_conversations AS cc ON cc.conversation_id = c.conversation_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql}',
+        variables: [
+          Variable<String>(query),
+          ...generatedwhere.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          messagesFts,
+          conversations,
+          circleConversations,
+          ...generatedwhere.watchedTables,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
+  Selectable<SearchMessageDetailItem> fuzzySearchMessage(
+      String query, FuzzySearchMessage$where where, int limit, int offset) {
+    var $arrayStartIndex = 4;
+    final generatedwhere = $write(
+        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    return customSelect(
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql} ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
+        variables: [
+          Variable<String>(query),
+          Variable<int>(limit),
+          Variable<int>(offset),
+          ...generatedwhere.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          messagesFts,
+          ...generatedwhere.watchedTables,
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.read<String>('messageId'),
+        userId: row.read<String>('userId'),
+        userAvatarUrl: row.readNullable<String>('userAvatarUrl'),
+        userFullName: row.readNullable<String>('userFullName'),
+        status: Messages.$converter1.fromSql(row.read<String>('status')),
+        type: row.read<String>('type'),
+        content: row.readNullable<String>('content'),
+        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
+        mediaName: row.readNullable<String>('mediaName'),
+        appId: row.readNullable<String>('appId'),
+        verified: row.readNullable<bool>('verified'),
+        conversationOwnerId: row.readNullable<String>('conversationOwnerId'),
+        groupIconUrl: row.readNullable<String>('groupIconUrl'),
+        category: Conversations.$converter0
+            .fromSql(row.readNullable<String>('category')),
+        groupName: row.readNullable<String>('groupName'),
+        conversationId: row.read<String>('conversationId'),
+      );
+    });
+  }
+
+  Selectable<SearchMessageDetailItem> fuzzySearchMessageWithConversationOwner(
+      String query,
+      FuzzySearchMessageWithConversationOwner$where where,
+      int limit,
+      int offset) {
+    var $arrayStartIndex = 4;
+    final generatedwhere = $write(
+        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u'), alias(this.users, 'owner')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    return customSelect(
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql} ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
+        variables: [
+          Variable<String>(query),
+          Variable<int>(limit),
+          Variable<int>(offset),
+          ...generatedwhere.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          messagesFts,
+          ...generatedwhere.watchedTables,
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.read<String>('messageId'),
+        userId: row.read<String>('userId'),
+        userAvatarUrl: row.readNullable<String>('userAvatarUrl'),
+        userFullName: row.readNullable<String>('userFullName'),
+        status: Messages.$converter1.fromSql(row.read<String>('status')),
+        type: row.read<String>('type'),
+        content: row.readNullable<String>('content'),
+        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
+        mediaName: row.readNullable<String>('mediaName'),
+        appId: row.readNullable<String>('appId'),
+        verified: row.readNullable<bool>('verified'),
+        conversationOwnerId: row.readNullable<String>('conversationOwnerId'),
+        groupIconUrl: row.readNullable<String>('groupIconUrl'),
+        category: Conversations.$converter0
+            .fromSql(row.readNullable<String>('category')),
+        groupName: row.readNullable<String>('groupName'),
+        conversationId: row.read<String>('conversationId'),
+      );
+    });
+  }
+
+  Selectable<SearchMessageDetailItem> fuzzySearchMessageWithCircle(String query,
+      FuzzySearchMessageWithCircle$where where, int limit, int offset) {
+    var $arrayStartIndex = 4;
+    final generatedwhere = $write(
+        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u'), alias(this.circleConversations, 'cc')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    return customSelect(
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS conversationOwnerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN circle_conversations AS cc ON cc.conversation_id = c.conversation_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql} ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
+        variables: [
+          Variable<String>(query),
+          Variable<int>(limit),
+          Variable<int>(offset),
+          ...generatedwhere.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          messagesFts,
+          circleConversations,
+          ...generatedwhere.watchedTables,
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.read<String>('messageId'),
+        userId: row.read<String>('userId'),
+        userAvatarUrl: row.readNullable<String>('userAvatarUrl'),
+        userFullName: row.readNullable<String>('userFullName'),
+        status: Messages.$converter1.fromSql(row.read<String>('status')),
+        type: row.read<String>('type'),
+        content: row.readNullable<String>('content'),
+        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
+        mediaName: row.readNullable<String>('mediaName'),
+        appId: row.readNullable<String>('appId'),
+        verified: row.readNullable<bool>('verified'),
+        conversationOwnerId: row.readNullable<String>('conversationOwnerId'),
+        groupIconUrl: row.readNullable<String>('groupIconUrl'),
+        category: Conversations.$converter0
+            .fromSql(row.readNullable<String>('category')),
+        groupName: row.readNullable<String>('groupName'),
+        conversationId: row.read<String>('conversationId'),
+      );
+    });
   }
 
   Selectable<NotificationMessage> notificationMessage(List<String> messageId) {
@@ -15629,6 +15754,18 @@ class SearchMessageDetailItem {
 
 typedef FuzzySearchMessageByCategories$limit = Limit Function(
     Messages m, Conversations c, Users u);
+typedef FuzzySearchMessageCountWithConversation$where = Expression<bool>
+    Function(Messages m, Conversations c);
+typedef FuzzySearchMessageCountWithConversationOwner$where = Expression<bool>
+    Function(Messages m, Conversations c, Users u);
+typedef FuzzySearchMessageCountWithCircle$where = Expression<bool> Function(
+    Messages m, Conversations c, CircleConversations cc);
+typedef FuzzySearchMessage$where = Expression<bool> Function(
+    Messages m, Conversations c, Users u);
+typedef FuzzySearchMessageWithConversationOwner$where = Expression<bool>
+    Function(Messages m, Conversations c, Users u, Users owner);
+typedef FuzzySearchMessageWithCircle$where = Expression<bool> Function(
+    Messages m, Conversations c, Users u, CircleConversations cc);
 
 class NotificationMessage {
   final String messageId;
