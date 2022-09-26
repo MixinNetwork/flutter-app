@@ -247,6 +247,7 @@ class _MessageProcessRunner {
               }
             } catch (error) {
               e('send job error: $error');
+              await Future.delayed(const Duration(seconds: 1));
             }
             return null;
           });
@@ -350,6 +351,7 @@ class _MessageProcessRunner {
         await database.jobDao.deleteJobs(jobIds);
       } catch (e, s) {
         w('Send ack error: $e, stack: $s');
+        await Future.delayed(const Duration(seconds: 1));
       }
     }
   }
@@ -367,6 +369,7 @@ class _MessageProcessRunner {
           await database.jobDao.deleteJobById(job.jobId);
         } catch (e, s) {
           w('Update asset job error: $e, stack: $s');
+          await Future.delayed(const Duration(seconds: 1));
         }
       }));
     }
@@ -388,6 +391,7 @@ class _MessageProcessRunner {
           await database.jobDao.deleteJobById(job.jobId);
         } catch (e, s) {
           w('Update sticker job error: $e, stack: $s');
+          await Future.delayed(const Duration(seconds: 1));
         }
       }));
     }
