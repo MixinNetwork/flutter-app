@@ -805,7 +805,7 @@ packages:
       name: intl_phone_number_input
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.0+2"
+    version: "0.7.1"
   io:
     dependency: transitive
     description:
