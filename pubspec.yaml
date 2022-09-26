@@ -110,7 +110,7 @@ dependencies:
   ulid: ^2.0.0
   url_launcher: ^6.1.5
   uuid: ^3.0.4
-  very_good_analysis: ^3.0.2
+  very_good_analysis: ^3.1.0
   visibility_detector: ^0.3.3
   watcher: ^1.0.0
   web_socket_channel: ^2.2.0
