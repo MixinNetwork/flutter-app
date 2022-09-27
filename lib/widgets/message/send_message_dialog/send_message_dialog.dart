@@ -77,6 +77,17 @@ Future<bool> showSendDialog(
           result = json['user_id'];
         }
         break;
+      case _Category.sticker:
+        {
+          final json =
+              await jsonDecodeWithIsolate(_data) as Map<String, dynamic>;
+          if (json['sticker_id'] == null ||
+              (json['sticker_id'] as String).isEmpty) {
+            return false;
+          }
+          result = json['sticker_id'];
+        }
+        break;
       case _Category.app_card:
         {
           final json =
