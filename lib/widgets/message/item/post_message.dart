@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:markdown_widget/markdown_widget.dart';
@@ -50,26 +51,27 @@ class MessagePost extends StatelessWidget {
   final bool clickable;
 
   @override
-  Widget build(BuildContext context) => InteractiveDecoratedBox(
-        onTap: clickable
-            ? () => PostPreview.push(context, message: context.message)
-            : null,
-        behavior: HitTestBehavior.deferToChild,
-        child: Container(
-          padding: padding,
-          decoration: decoration,
-          child: Stack(
-            children: [
-              HookBuilder(builder: (context) {
-                final postContent =
-                    useMemoized(content.postOptimize, [content]);
+  Widget build(BuildContext context) => SelectionArea(
+        selectionControls: _PostTextSelectionControls(),
+        child: InteractiveDecoratedBox(
+          onTap: clickable
+              ? () => PostPreview.push(context, message: context.message)
+              : null,
+          behavior: HitTestBehavior.deferToChild,
+          child: Container(
+            padding: padding,
+            decoration: decoration,
+            child: Stack(
+              children: [
+                HookBuilder(builder: (context) {
+                  final postContent =
+                      useMemoized(content.postOptimize, [content]);
 
-                return ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: showStatus ? 48 : 0,
-                    minWidth: 128,
-                  ),
-                  child: SelectionArea(
+                  return ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: showStatus ? 48 : 0,
+                      minWidth: 128,
+                    ),
                     child: IntrinsicWidth(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -84,38 +86,38 @@ class MessagePost extends StatelessWidget {
                             [],
                       ),
                     ),
-                  ),
-                );
-              }),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  decoration: _decoration,
-                  alignment: Alignment.center,
-                  child: SvgPicture.asset(
-                    Resources.assetsImagesPostDetailSvg,
-                    width: 20,
-                    height: 20,
-                  ),
-                ),
-              ),
-              if (showStatus)
+                  );
+                }),
                 Positioned(
                   right: 0,
-                  bottom: 0,
+                  top: 0,
                   child: Container(
                     decoration: _decoration,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    child: const MessageDatetimeAndStatus(
-                      color: Color.fromRGBO(255, 255, 255, 1),
+                    alignment: Alignment.center,
+                    child: SvgPicture.asset(
+                      Resources.assetsImagesPostDetailSvg,
+                      width: 20,
+                      height: 20,
                     ),
                   ),
                 ),
-            ],
+                if (showStatus)
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      decoration: _decoration,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      child: const MessageDatetimeAndStatus(
+                        color: Color.fromRGBO(255, 255, 255, 1),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       );
@@ -177,4 +179,31 @@ class PostPreview extends StatelessWidget {
           ],
         ),
       );
+}
+
+class _PostTextSelectionControls extends TextSelectionControls {
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type,
+          double textLineHeight,
+          [VoidCallback? onTap]) =>
+      const SizedBox.shrink();
+
+  @override
+  Widget buildToolbar(
+          BuildContext context,
+          Rect globalEditableRegion,
+          double textLineHeight,
+          Offset position,
+          List<TextSelectionPoint> endpoints,
+          TextSelectionDelegate delegate,
+          ClipboardStatusNotifier? clipboardStatus,
+          Offset? lastSecondaryTapDownPosition) =>
+      const SizedBox.shrink();
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) =>
+      Offset.zero;
+
+  @override
+  Size getHandleSize(double textLineHeight) => Size.zero;
 }
