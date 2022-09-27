@@ -15,6 +15,7 @@ import '../../../status.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
+import '../transcript_message.dart';
 import '../unknown_message.dart';
 import 'image_preview_page.dart';
 
@@ -90,6 +91,13 @@ class MessageImage extends HookWidget {
       thumbWidget = ImageByBlurHashOrBase64(imageData: thumbImage);
     }
 
+    final relationship =
+        useMessageConverter(converter: (state) => state.relationship);
+
+    final isMessageSentOut = (isTranscriptPage &&
+            TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
+        (!isTranscriptPage && relationship == UserRelationship.me);
+
     return InteractiveDecoratedBox(
       onTap: () {
         final message = context.message;
@@ -103,9 +111,18 @@ class MessageImage extends HookWidget {
             );
             break;
           case MediaStatus.canceled:
-            if (message.relationship == UserRelationship.me &&
-                message.mediaUrl?.isNotEmpty == true) {
-              if (isUnDownloadGiphyGif) {
+            if (message.mediaUrl?.isNotEmpty == true && isMessageSentOut) {
+              if (isTranscriptPage) {
+                final transcriptMessageId =
+                    TranscriptPage.of(context)?.messageId;
+                assert(
+                    transcriptMessageId != null, 'transcriptMessageId is null');
+                if (transcriptMessageId != null) {
+                  context.accountServer.reUploadTranscriptAttachment(
+                    transcriptMessageId,
+                  );
+                }
+              } else if (isUnDownloadGiphyGif) {
                 context.accountServer.reUploadGiphyGif(message);
               } else {
                 context.accountServer.reUploadAttachment(message);
@@ -143,13 +160,10 @@ class MessageImage extends HookWidget {
                 builder: (BuildContext context) {
                   final mediaStatus = useMessageConverter(
                       converter: (state) => state.mediaStatus);
-                  final relationship = useMessageConverter(
-                      converter: (state) => state.relationship);
 
                   switch (mediaStatus) {
                     case MediaStatus.canceled:
-                      return relationship == UserRelationship.me &&
-                              mediaUrl?.isNotEmpty == true
+                      return isMessageSentOut && mediaUrl?.isNotEmpty == true
                           ? const StatusUpload()
                           : const StatusDownload();
                     case MediaStatus.pending:
