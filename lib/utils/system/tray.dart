@@ -91,23 +91,6 @@ Future<void> _initSystemTray() async {
     switch (eventName) {
       case 'leftMouseUp':
         windowManager.show();
-        // if (Platform.isWindows) {
-        //   final handle = appWindow.handle;
-        //   assert(handle != null, 'handle is null');
-        //   if (handle != null) {
-        //     final placement =
-        //         calloc.allocate<WINDOWPLACEMENT>(sizeOf<WINDOWPLACEMENT>());
-        //     GetWindowPlacement(handle, placement);
-        //     if (placement.ref.showCmd == SW_SHOWMINIMIZED) {
-        //       ShowWindow(handle, SW_RESTORE);
-        //     }
-        //     calloc.free(placement);
-        //     SetForegroundWindow(handle);
-        //     appWindow.show();
-        //   }
-        // } else {
-        //   appWindow.show();
-        // }
         break;
       case 'rightMouseUp':
         _systemTray.popUpContextMenu();
