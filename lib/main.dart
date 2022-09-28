@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -13,6 +12,7 @@ import 'package:isolate/isolate.dart';
 import 'package:path/path.dart' as p;
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:quick_breakpad/quick_breakpad.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart';
 
 import 'app.dart';
@@ -88,38 +88,38 @@ Future<void> main(List<String> args) async {
   );
 
   if (kPlatformIsDesktop) {
-    doWhenWindowReady(() async {
-      appWindow.minSize =
-          const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480);
-      // The macOS handle content size in native.
-      if (!Platform.isMacOS) {
-        final screen = await getCurrentScreen();
-        i('screen: ${screen?.visibleFrame} ${screen?.scaleFactor}');
-        const defaultWindowSize = Size(1280, 750);
-        if (screen != null) {
-          var screenSize = screen.visibleFrame.size;
-          if (Platform.isWindows) {
-            screenSize = screenSize / screen.scaleFactor;
-          }
-          final size = Size(
-            math.min(screenSize.width, defaultWindowSize.width),
-            math.min(screenSize.height, defaultWindowSize.height),
-          );
-          appWindow.size = size;
-          if (Platform.isWindows) {
-            // TODO: remove this once https://github.com/bitsdojo/bitsdojo_window/issues/193 fixed
-            WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
-              appWindow.size = size + const Offset(0, 1);
-            });
-          }
-        } else {
-          appWindow.size = defaultWindowSize;
+    Size? windowSize;
+    if (!Platform.isMacOS) {
+      final screen = await getCurrentScreen();
+      i('screen: ${screen?.visibleFrame} ${screen?.scaleFactor}');
+      const defaultWindowSize = Size(1280, 750);
+      if (screen != null) {
+        var screenSize = screen.visibleFrame.size;
+        if (Platform.isWindows) {
+          screenSize = screenSize / screen.scaleFactor;
         }
-        // FIXME remove this when the issues fixed.
-        // https://github.com/bitsdojo/bitsdojo_window/issues/72
-        // appWindow.alignment = Alignment.center;
+        final size = Size(
+          math.min(screenSize.width, defaultWindowSize.width),
+          math.min(screenSize.height, defaultWindowSize.height),
+        );
+        windowSize = size;
+      } else {
+        windowSize = defaultWindowSize;
       }
-      appWindow.show();
+    }
+
+    final windowOptions = WindowOptions(
+      titleBarStyle: Platform.isMacOS ? TitleBarStyle.hidden : null,
+      minimumSize:
+          const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480),
+      size: windowSize,
+      center: Platform.isMacOS ? null : true,
+    );
+
+    await windowManager.ensureInitialized();
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
     });
   }
 }

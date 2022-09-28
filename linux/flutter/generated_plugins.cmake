@@ -3,16 +3,17 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  bitsdojo_window_linux
   desktop_drop
   desktop_lifecycle
   desktop_webview_window
   file_selector_linux
   flutter_app_icon_badge
   pasteboard
+  screen_retriever
   sqlite3_flutter_libs
   system_clock
   url_launcher_linux
+  window_manager
   window_size
 )
 

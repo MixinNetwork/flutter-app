@@ -1,10 +1,10 @@
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
 import 'package:win32/win32.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../logger.dart';
 import '../platform.dart';
@@ -50,7 +50,8 @@ void setSystemUiWithAppBrightness(Brightness brightness) {
     return;
   }
   if (Platform.isWindows) {
-    final windowHandle = appWindow.handle;
+    // TODO
+    final windowHandle = 0;
     if (windowHandle == null) {
       e('failed to get window handle');
       return;

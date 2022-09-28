@@ -1,6 +1,6 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../utils/platform.dart';
 
@@ -50,7 +50,7 @@ class MoveWindow extends StatelessWidget {
           if (!kPlatformIsDesktop) {
             return;
           }
-          appWindow.startDragging();
+          windowManager.startDragging();
         },
         child: child,
       );
