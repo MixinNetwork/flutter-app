@@ -123,9 +123,13 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
       cancelToken: cancelToken,
     );
 
-    if (response.statusCode != 200) throw Error();
+    if (response.statusCode != 200) {
+      throw Exception('invalid status code: ${response.statusCode}');
+    }
 
     options.sendPort.send(digest);
-  } catch (_) {}
+  } catch (error, stacktrace) {
+    e('failed to upload attachment $error, $stacktrace');
+  }
   options.sendPort.send(_killMessage);
 }

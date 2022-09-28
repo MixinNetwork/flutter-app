@@ -104,8 +104,7 @@ class TranscriptMessageWidget extends HookWidget {
                 context: context,
                 padding: const EdgeInsets.symmetric(vertical: 80),
                 child: TranscriptPage(
-                  messageId: message.messageId,
-                  conversationId: message.conversationId,
+                  transcriptMessage: message,
                   vlcService: context.audioMessageService,
                 ));
 
@@ -208,19 +207,22 @@ class TranscriptMessageWidget extends HookWidget {
 class TranscriptPage extends HookWidget {
   const TranscriptPage({
     super.key,
-    required this.messageId,
-    required this.conversationId,
     required this.vlcService,
+    required this.transcriptMessage,
   });
-  final String messageId;
-  final String conversationId;
+
   final AudioMessagePlayService vlcService;
+  final MessageItem transcriptMessage;
+
+  static MessageItem? of(BuildContext context) => context
+      .findAncestorWidgetOfExactType<TranscriptPage>()
+      ?.transcriptMessage;
 
   @override
   Widget build(BuildContext context) {
     Stream<List<MessageItem>> watchMessages() => context
         .database.transcriptMessageDao
-        .transactionMessageItem(messageId)
+        .transactionMessageItem(transcriptMessage.messageId)
         .watchThrottle(kDefaultThrottleDuration)
         .map((list) => list
             .map((transcriptMessageItem) => transcriptMessageItem.messageItem)

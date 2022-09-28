@@ -828,6 +828,9 @@ class AccountServer {
         message.content,
       );
 
+  Future<void> reUploadTranscriptAttachment(String messageId) =>
+      _sendMessageHelper.reUploadTranscriptAttachment(messageId);
+
   Future<void> addUser(String userId, String? fullName) =>
       _relationship(RelationshipRequest(
         userId: userId,
