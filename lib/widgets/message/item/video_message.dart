@@ -19,6 +19,7 @@ import '../../status.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import 'transcript_message.dart';
 
 const _kDefaultVideoSize = 200;
 
@@ -73,13 +74,25 @@ class MessageVideo extends HookWidget {
         useMessageConverter(converter: (state) => state.thumbImage);
     final thumbUrl = useMessageConverter(converter: (state) => state.thumbUrl);
 
+    final relationship =
+        useMessageConverter(converter: (state) => state.relationship);
+
+    final isMessageSentOut = (isTranscriptPage &&
+            TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
+        (!isTranscriptPage && relationship == UserRelationship.me);
+
     return InteractiveDecoratedBox(
       onTap: () {
         final message = context.message;
         if (message.mediaStatus == MediaStatus.canceled) {
-          if (message.relationship == UserRelationship.me &&
-              message.mediaUrl?.isNotEmpty == true) {
-            context.accountServer.reUploadAttachment(message);
+          if (isMessageSentOut && message.mediaUrl?.isNotEmpty == true) {
+            if (isTranscriptPage) {
+              final transcriptMessageId = TranscriptPage.of(context)!.messageId;
+              context.accountServer
+                  .reUploadTranscriptAttachment(transcriptMessageId);
+            } else {
+              context.accountServer.reUploadAttachment(message);
+            }
           } else {
             context.accountServer.downloadAttachment(message.messageId);
           }
@@ -129,10 +142,15 @@ class VideoMessageMediaStatusWidget extends HookWidget {
     final relationship =
         useMessageConverter(converter: (state) => state.relationship);
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
+
+    final isTranscriptPage = useIsTranscriptPage();
+    final isMessageSentOut = (isTranscriptPage &&
+            TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
+        (!isTranscriptPage && relationship == UserRelationship.me);
+
     switch (mediaStatus) {
       case MediaStatus.canceled:
-        return relationship == UserRelationship.me &&
-                mediaUrl?.isNotEmpty == true
+        return isMessageSentOut && mediaUrl?.isNotEmpty == true
             ? const StatusUpload()
             : const StatusDownload();
       case MediaStatus.pending:

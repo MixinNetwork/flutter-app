@@ -17,6 +17,7 @@ import '../../toast.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import 'transcript_message.dart';
 
 class FileMessage extends HookWidget {
   const FileMessage({super.key});
@@ -56,13 +57,22 @@ class MessageFile extends HookWidget {
     final mediaSizeText =
         useMessageConverter(converter: (state) => filesize(state.mediaSize));
 
+    final isMessageSentOut = (isTranscriptPage &&
+            TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
+        (!isTranscriptPage && relationship == UserRelationship.me);
+
     return InteractiveDecoratedBox(
       onTap: () async {
         final message = context.message;
         if (message.mediaStatus == MediaStatus.canceled) {
-          if (message.relationship == UserRelationship.me &&
-              message.mediaUrl?.isNotEmpty == true) {
-            await context.accountServer.reUploadAttachment(message);
+          if (isMessageSentOut && message.mediaUrl?.isNotEmpty == true) {
+            if (isTranscriptPage) {
+              final transcriptMessageId = TranscriptPage.of(context)?.messageId;
+              await context.accountServer
+                  .reUploadTranscriptAttachment(transcriptMessageId!);
+            } else {
+              await context.accountServer.reUploadAttachment(message);
+            }
           } else {
             await context.accountServer.downloadAttachment(message.messageId);
           }
@@ -93,8 +103,7 @@ class MessageFile extends HookWidget {
           Builder(builder: (context) {
             switch (mediaStatus) {
               case MediaStatus.canceled:
-                return relationship == UserRelationship.me &&
-                        mediaUrl?.isNotEmpty == true
+                return isMessageSentOut && mediaUrl?.isNotEmpty == true
                     ? const StatusUpload()
                     : const StatusDownload();
               case MediaStatus.pending:

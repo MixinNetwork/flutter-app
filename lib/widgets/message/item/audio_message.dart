@@ -15,6 +15,7 @@ import '../../waveform_widget.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import 'transcript_message.dart';
 
 class AudioMessage extends HookWidget {
   const AudioMessage({super.key});
@@ -38,6 +39,10 @@ class AudioMessage extends HookWidget {
         milliseconds: int.tryParse(state.mediaDuration ?? '') ?? 0,
       ),
     );
+
+    final isMessageSentOut = (isTranscriptPage &&
+            TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
+        (!isTranscriptPage && relationship == UserRelationship.me);
 
     return MessageBubble(
       outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
@@ -64,9 +69,15 @@ class AudioMessage extends HookWidget {
               context.audioMessageService.playAudioMessage(message);
               break;
             case MediaStatus.canceled:
-              if (message.relationship == UserRelationship.me &&
-                  message.mediaUrl?.isNotEmpty == true) {
-                context.accountServer.reUploadAttachment(message);
+              if (isMessageSentOut && message.mediaUrl?.isNotEmpty == true) {
+                if (isTranscriptPage) {
+                  final transcriptMessageId =
+                      TranscriptPage.of(context)?.messageId;
+                  context.accountServer
+                      .reUploadTranscriptAttachment(transcriptMessageId!);
+                } else {
+                  context.accountServer.reUploadAttachment(message);
+                }
               } else {
                 context.accountServer.downloadAttachment(message.messageId);
               }
@@ -87,8 +98,7 @@ class AudioMessage extends HookWidget {
               builder: (BuildContext context) {
                 switch (mediaStatus) {
                   case MediaStatus.canceled:
-                    return relationship == UserRelationship.me &&
-                            mediaUrl?.isNotEmpty == true
+                    return isMessageSentOut && mediaUrl?.isNotEmpty == true
                         ? const StatusUpload()
                         : const StatusDownload();
                   case MediaStatus.pending:
