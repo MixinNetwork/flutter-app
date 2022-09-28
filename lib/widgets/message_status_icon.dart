@@ -1,12 +1,15 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
+import '../utils/hook.dart';
 
 class MessageStatusIcon extends StatelessWidget {
   const MessageStatusIcon({
@@ -38,7 +41,7 @@ class MessageStatusIcon extends StatelessWidget {
       case MessageStatus.failed:
       case MessageStatus.unknown:
       case null:
-        return _AnimatedMessageSendingIcon(color: color);
+        return _VisibilityAwareAnimatedSendingIcon(color: color);
     }
     return SvgPicture.asset(
       icon,
@@ -47,26 +50,54 @@ class MessageStatusIcon extends StatelessWidget {
   }
 }
 
-class _AnimatedMessageSendingIcon extends HookWidget {
-  const _AnimatedMessageSendingIcon({
-    required this.color,
-  });
+class _VisibilityAwareAnimatedSendingIcon extends HookWidget {
+  const _VisibilityAwareAnimatedSendingIcon({required this.color});
 
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final tickerProvider = useSingleTickerProvider();
+    final visible = useState(false);
+    final key = useMemoized(UniqueKey.new);
+    return VisibilityDetector(
+      onVisibilityChanged: (info) {
+        visible.value = info.visibleFraction > 0;
+      },
+      key: key,
+      child: _AnimatedMessageSendingIcon(
+        color: color,
+        play: visible.value,
+      ),
+    );
+  }
+}
 
+class _AnimatedMessageSendingIcon extends HookWidget {
+  const _AnimatedMessageSendingIcon({
+    required this.color,
+    required this.play,
+  });
+
+  final Color color;
+  final bool play;
+
+  @override
+  Widget build(BuildContext context) {
     final time = useState(0);
 
+    final play = useValueListenable(useImagePlaying(context)) && this.play;
     useEffect(() {
-      final ticker = tickerProvider.createTicker((elapsed) {
-        time.value = elapsed.inMilliseconds;
-      })
-        ..start();
-      return ticker.dispose;
-    }, [tickerProvider]);
+      Timer? timer;
+      if (play) {
+        const periodic = 40;
+        timer = Timer.periodic(const Duration(milliseconds: periodic), (timer) {
+          time.value = time.value + periodic;
+        });
+      }
+      return () {
+        timer?.cancel();
+      };
+    }, [play]);
 
     // small is slow, big is fast
     const scale = 1 / 10;
