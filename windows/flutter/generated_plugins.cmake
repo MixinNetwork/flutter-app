@@ -3,7 +3,6 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  bitsdojo_window_windows
   desktop_drop
   desktop_lifecycle
   desktop_webview_window
@@ -12,11 +11,13 @@ list(APPEND FLUTTER_PLUGIN_LIST
   pasteboard
   protocol_handler
   quick_breakpad
+  screen_retriever
   sqlite3_flutter_libs
   system_clock
   system_tray
   url_launcher_windows
   win_toast
+  window_manager
   window_size
 )
 

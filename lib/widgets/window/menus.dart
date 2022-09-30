@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../account/account_server.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
@@ -173,7 +173,7 @@ class _Menus extends HookWidget {
                 ),
                 onSelected: signed
                     ? () {
-                        appWindow.show();
+                        windowManager.show();
                         context
                             .read<SlideCategoryCubit>()
                             .select(SlideCategoryType.setting);
@@ -204,11 +204,11 @@ class _Menus extends HookWidget {
                     LogicalKeyboardKey.keyH,
                     meta: true,
                   ),
-                  onSelected: appWindow.hide,
+                  onSelected: windowManager.hide,
                 ),
                 PlatformMenuItem(
                   label: context.l10n.showMixin,
-                  onSelected: appWindow.show,
+                  onSelected: windowManager.show,
                 ),
               ],
             ),
@@ -234,7 +234,7 @@ class _Menus extends HookWidget {
                 ),
                 onSelected: signed
                     ? () {
-                        appWindow.show();
+                        windowManager.show();
                         Actions.invoke<CreateConversationIntent>(
                           context,
                           const CreateConversationIntent(),
@@ -251,7 +251,7 @@ class _Menus extends HookWidget {
                 ),
                 onSelected: signed
                     ? () {
-                        appWindow.show();
+                        windowManager.show();
                         Actions.invoke<CreateGroupConversationIntent>(
                           context,
                           const CreateGroupConversationIntent(),
@@ -263,7 +263,7 @@ class _Menus extends HookWidget {
                 label: context.l10n.createCircle,
                 onSelected: signed
                     ? () {
-                        appWindow.show();
+                        windowManager.show();
                         Actions.invoke<CreateCircleIntent>(
                           context,
                           const CreateCircleIntent(),
@@ -278,7 +278,7 @@ class _Menus extends HookWidget {
                     LogicalKeyboardKey.keyW,
                     meta: true,
                   ),
-                  onSelected: appWindow.close,
+                  onSelected: windowManager.close,
                 )
               ]),
             ]),
@@ -294,13 +294,13 @@ class _Menus extends HookWidget {
                 LogicalKeyboardKey.keyM,
                 meta: true,
               ),
-              onSelected: appWindow.minimize,
+              onSelected: windowManager.minimize,
             ),
             PlatformMenuItem(
               label: context.l10n.zoom,
-              onSelected: () => !appWindow.isMaximized
-                  ? appWindow.maximize()
-                  : appWindow.restore(),
+              onSelected: () async => !await windowManager.isMaximized()
+                  ? windowManager.maximize()
+                  : windowManager.restore(),
             ),
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
@@ -339,18 +339,18 @@ class _Menus extends HookWidget {
                   LogicalKeyboardKey.keyO,
                   meta: true,
                 ),
-                onSelected: appWindow.show,
+                onSelected: windowManager.show,
               ),
             ]),
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
                 label: context.l10n.bringAllToFront,
-                onSelected: appWindow.show,
+                onSelected: windowManager.show,
               ),
             ]),
             PlatformMenuItem(
               label: 'Mixin',
-              onSelected: appWindow.show,
+              onSelected: windowManager.show,
             ),
           ],
         ),
