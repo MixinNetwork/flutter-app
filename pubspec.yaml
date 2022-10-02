@@ -92,7 +92,7 @@ dependencies:
   qr_flutter: ^4.0.0
   quick_breakpad:
     path: third_party/quick_breakpad
-  recase: ^4.0.0
+  recase: ^4.1.0
   rxdart: ^0.27.5
   scrollable_positioned_list: ^0.3.4
   sliver_tools: ^0.2.8
