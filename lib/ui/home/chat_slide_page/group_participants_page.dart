@@ -265,6 +265,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
 
 class _RoleWidget extends StatelessWidget {
   const _RoleWidget({required this.role});
+
   final ParticipantRole? role;
 
   @override
@@ -319,19 +320,14 @@ class _ActionAddParticipants extends StatelessWidget {
               );
               if (result == null || result.isEmpty) return;
 
-              final userIds = [
-                context.accountServer.userId,
-                ...result.where((e) => e.userId != null).map(
-                      (e) => e.userId!,
-                    )
-              ];
+              final userIds =
+                  result.map((e) => e.userId).whereNotNull().toList();
               final conversationId =
                   context.read<ConversationCubit>().state?.conversationId;
               assert(conversationId != null);
               await runFutureWithToast(
                 context,
-                Future.wait(userIds.map((userId) => context.accountServer
-                    .addParticipant(conversationId!, [userId]))),
+                context.accountServer.addParticipant(conversationId!, userIds),
               );
             },
           ),
