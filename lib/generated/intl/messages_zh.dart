@@ -420,7 +420,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mixin Messenger 桌面"),
         "more": MessageLookupByLibrary.simpleMessage("更多"),
         "mute": MessageLookupByLibrary.simpleMessage("静音"),
-        "muted": MessageLookupByLibrary.simpleMessage("已静音"),
         "myMixinId": m30,
         "myStickers": MessageLookupByLibrary.simpleMessage("我的表情"),
         "na": MessageLookupByLibrary.simpleMessage("暂无价格"),

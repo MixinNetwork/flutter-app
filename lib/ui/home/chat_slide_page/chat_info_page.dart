@@ -240,7 +240,7 @@ class ChatInfoPage extends HookWidget {
                   if (!(isGroupConversation && isExited))
                     CellItem(
                       title: Text(
-                          muting ? context.l10n.unmute : context.l10n.muted),
+                          muting ? context.l10n.unmute : context.l10n.mute),
                       description: muting
                           ? Text(
                               DateFormat('yyyy/MM/dd, hh:mm a').format(

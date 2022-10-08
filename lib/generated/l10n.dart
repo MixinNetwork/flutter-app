@@ -2380,16 +2380,6 @@ class Localization {
     );
   }
 
-  /// `Muted`
-  String get muted {
-    return Intl.message(
-      'Muted',
-      name: 'muted',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `My Mixin ID: {arg0}`
   String myMixinId(Object arg0) {
     return Intl.message(
