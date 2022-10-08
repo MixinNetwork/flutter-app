@@ -478,7 +478,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mixin Messenger Desktop"),
         "more": MessageLookupByLibrary.simpleMessage("More"),
         "mute": MessageLookupByLibrary.simpleMessage("Mute"),
-        "muted": MessageLookupByLibrary.simpleMessage("Muted"),
         "myMixinId": m30,
         "myStickers": MessageLookupByLibrary.simpleMessage("My Stickers"),
         "na": MessageLookupByLibrary.simpleMessage("N/A"),

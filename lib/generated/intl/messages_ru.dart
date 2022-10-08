@@ -472,7 +472,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Рабочий стол Mixin Messenger"),
         "more": MessageLookupByLibrary.simpleMessage("Больше"),
         "mute": MessageLookupByLibrary.simpleMessage("Беззвучный"),
-        "muted": MessageLookupByLibrary.simpleMessage("Приглушен"),
         "myMixinId": m30,
         "myStickers": MessageLookupByLibrary.simpleMessage("Мои стикеры"),
         "na": MessageLookupByLibrary.simpleMessage("Нет данных"),

@@ -417,7 +417,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "mixinMessengerDesktop":
             MessageLookupByLibrary.simpleMessage("Mixin デスクトップ"),
         "more": MessageLookupByLibrary.simpleMessage("もっとみる"),
-        "muted": MessageLookupByLibrary.simpleMessage("ミュートされました"),
         "myMixinId": m30,
         "myStickers": MessageLookupByLibrary.simpleMessage("マイスタンプ"),
         "na": MessageLookupByLibrary.simpleMessage("なし"),
