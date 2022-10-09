@@ -272,6 +272,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteMyAccount":
             MessageLookupByLibrary.simpleMessage("Удалить мой аккаунт"),
         "deleteTheCircle": m13,
+        "deposit": MessageLookupByLibrary.simpleMessage("Депозит"),
         "developer": MessageLookupByLibrary.simpleMessage("Разработчик"),
         "disableDisappearingMessage": m14,
         "disappearingMessage":
@@ -389,6 +390,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "exit": MessageLookupByLibrary.simpleMessage("Выход"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("Выйти из группы"),
         "failed": MessageLookupByLibrary.simpleMessage("Не удалось"),
+        "fee": MessageLookupByLibrary.simpleMessage("Комиссия"),
         "file": MessageLookupByLibrary.simpleMessage("Файл"),
         "fileChooserError":
             MessageLookupByLibrary.simpleMessage("Ошибка выбора файла"),
@@ -526,6 +528,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Политика конфиденциальности"),
         "quickSearch": MessageLookupByLibrary.simpleMessage("Быстрый поиск"),
         "quitMixin": MessageLookupByLibrary.simpleMessage("Выйти из Mixin"),
+        "raw": MessageLookupByLibrary.simpleMessage("Исходный"),
+        "rebate": MessageLookupByLibrary.simpleMessage("Скидка"),
         "recaptchaTimeout":
             MessageLookupByLibrary.simpleMessage("Тайм-аут рекапчи"),
         "receiver": MessageLookupByLibrary.simpleMessage("Получатель"),
@@ -629,6 +633,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "toggleChatInfo": MessageLookupByLibrary.simpleMessage(
             "Переключить информацию о чате"),
         "transactionId": MessageLookupByLibrary.simpleMessage("ID транзакции"),
+        "transactionType": MessageLookupByLibrary.simpleMessage("Тип операции"),
         "transactions": MessageLookupByLibrary.simpleMessage("Транзакции"),
         "transactionsCannotBeDeleted": MessageLookupByLibrary.simpleMessage(
             "Транзакции НЕ МОГУТ быть удалены"),
@@ -669,6 +674,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Среда выполнения WebView недоступна"),
         "whatsYourName": MessageLookupByLibrary.simpleMessage("Как вас зовут?"),
         "window": MessageLookupByLibrary.simpleMessage("Окно"),
+        "withdrawal": MessageLookupByLibrary.simpleMessage("Вывести"),
         "writeCircles": MessageLookupByLibrary.simpleMessage("Написать круги"),
         "you": MessageLookupByLibrary.simpleMessage("Вы"),
         "youDeletedThisMessage":

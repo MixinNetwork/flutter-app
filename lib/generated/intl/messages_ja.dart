@@ -239,6 +239,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteGroup": MessageLookupByLibrary.simpleMessage("グループを削除"),
         "deleteMyAccount": MessageLookupByLibrary.simpleMessage("アカウント削除"),
         "deleteTheCircle": m13,
+        "deposit": MessageLookupByLibrary.simpleMessage("入金"),
         "developer": MessageLookupByLibrary.simpleMessage("開発者向け情報"),
         "disableDisappearingMessage": m14,
         "disappearingMessage":
@@ -344,6 +345,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "exit": MessageLookupByLibrary.simpleMessage("退出"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("グループから退出"),
         "failed": MessageLookupByLibrary.simpleMessage("失敗しました"),
+        "fee": MessageLookupByLibrary.simpleMessage("手数料"),
         "file": MessageLookupByLibrary.simpleMessage("ファイル"),
         "fileChooserError": MessageLookupByLibrary.simpleMessage("ファイル選択エラー"),
         "fileDoesNotExist": MessageLookupByLibrary.simpleMessage("ファイルが存在しません"),
@@ -465,6 +467,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("プライバシーポリシー"),
         "quickSearch": MessageLookupByLibrary.simpleMessage("クイック検索"),
         "quitMixin": MessageLookupByLibrary.simpleMessage("終了"),
+        "raw": MessageLookupByLibrary.simpleMessage("その他"),
+        "rebate": MessageLookupByLibrary.simpleMessage("払い戻し"),
         "recaptchaTimeout":
             MessageLookupByLibrary.simpleMessage("Recaptchaがタイムアウトしました"),
         "receiver": MessageLookupByLibrary.simpleMessage("受取人"),
@@ -555,6 +559,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "today": MessageLookupByLibrary.simpleMessage("今日"),
         "toggleChatInfo": MessageLookupByLibrary.simpleMessage("チャット情報のオン/オフ"),
         "transactionId": MessageLookupByLibrary.simpleMessage("トランザクションID"),
+        "transactionType": MessageLookupByLibrary.simpleMessage("トランザクションタイプ"),
         "transactions": MessageLookupByLibrary.simpleMessage("もらった・あげたコイン💰"),
         "transactionsCannotBeDeleted":
             MessageLookupByLibrary.simpleMessage("トランザクション履歴を削除することはできません"),
@@ -590,6 +595,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("WebView runtimeは利用できません"),
         "whatsYourName": MessageLookupByLibrary.simpleMessage("お名前は何ですか？"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),
+        "withdrawal": MessageLookupByLibrary.simpleMessage("出金"),
         "writeCircles": MessageLookupByLibrary.simpleMessage("グループリストの変更"),
         "you": MessageLookupByLibrary.simpleMessage("自分"),
         "youDeletedThisMessage":

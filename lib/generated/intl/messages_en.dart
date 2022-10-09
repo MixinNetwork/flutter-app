@@ -272,6 +272,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteMyAccount":
             MessageLookupByLibrary.simpleMessage("Delete My Account"),
         "deleteTheCircle": m13,
+        "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
         "developer": MessageLookupByLibrary.simpleMessage("Developer"),
         "disableDisappearingMessage": m14,
         "disappearingCustomTimeMaxWarning": m15,
@@ -392,6 +393,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "exit": MessageLookupByLibrary.simpleMessage("Exit"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("Exit Group"),
         "failed": MessageLookupByLibrary.simpleMessage("Failed"),
+        "fee": MessageLookupByLibrary.simpleMessage("Fee"),
         "file": MessageLookupByLibrary.simpleMessage("File"),
         "fileChooserError":
             MessageLookupByLibrary.simpleMessage("File chooser error"),
@@ -533,6 +535,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "quickSearch": MessageLookupByLibrary.simpleMessage("Quick search"),
         "quitMixin": MessageLookupByLibrary.simpleMessage("Quit Mixin"),
+        "raw": MessageLookupByLibrary.simpleMessage("Raw"),
+        "rebate": MessageLookupByLibrary.simpleMessage("Rebate"),
         "recaptchaTimeout":
             MessageLookupByLibrary.simpleMessage("Recaptcha timeout"),
         "receiver": MessageLookupByLibrary.simpleMessage("Receiver"),
@@ -634,6 +638,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "toggleChatInfo":
             MessageLookupByLibrary.simpleMessage("Toggle chat info"),
         "transactionId": MessageLookupByLibrary.simpleMessage("Transaction Id"),
+        "transactionType":
+            MessageLookupByLibrary.simpleMessage("Transaction Type"),
         "transactions": MessageLookupByLibrary.simpleMessage("Transactions"),
         "transactionsCannotBeDeleted": MessageLookupByLibrary.simpleMessage(
             "Transactions CANNOT be deleted"),
@@ -674,6 +680,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsYourName":
             MessageLookupByLibrary.simpleMessage("What\'s your name?"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),
+        "withdrawal": MessageLookupByLibrary.simpleMessage("Withdraw"),
         "writeCircles": MessageLookupByLibrary.simpleMessage("Write Circles"),
         "you": MessageLookupByLibrary.simpleMessage("You"),
         "youDeletedThisMessage":
