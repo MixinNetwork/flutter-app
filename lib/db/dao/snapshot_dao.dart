@@ -27,22 +27,13 @@ extension SnapshotConverter on sdk.Snapshot {
 
 extension SnapshotItemExtension on SnapshotItem {
   String l10nType(BuildContext context) {
-    switch (type) {
-      case 'transfer':
-        return context.l10n.transfer;
-      case 'deposit':
-        return context.l10n.deposit;
-      case 'withdrawal':
-        return context.l10n.withdrawal;
-      case 'fee':
-        return context.l10n.fee;
-      case 'rebate':
-        return context.l10n.rebate;
-      case 'raw':
-        return context.l10n.raw;
-      default:
-        return context.l10n.na;
-    }
+    if (type == sdk.SnapshotType.transfer) return context.l10n.transfer;
+    if (type == sdk.SnapshotType.deposit) return context.l10n.deposit;
+    if (type == sdk.SnapshotType.withdrawal) return context.l10n.withdrawal;
+    if (type == sdk.SnapshotType.fee) return context.l10n.fee;
+    if (type == sdk.SnapshotType.rebate) return context.l10n.rebate;
+    if (type == sdk.SnapshotType.raw) return context.l10n.raw;
+    return context.l10n.na;
   }
 }
 

@@ -230,6 +230,16 @@ class Localization {
     );
   }
 
+  /// `Address`
+  String get address {
+    return Intl.message(
+      'Address',
+      name: 'address',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Admin`
   String get admin {
     return Intl.message(
@@ -2740,6 +2750,18 @@ class Localization {
     );
   }
 
+  /// `{count, plural, one{{arg0}/{arg1} confirmation} other{{arg0}/{arg1} confirmations}}`
+  String pendingConfirmation(num count, Object arg0, Object arg1) {
+    return Intl.plural(
+      count,
+      one: '$arg0/$arg1 confirmation',
+      other: '$arg0/$arg1 confirmations',
+      name: 'pendingConfirmation',
+      desc: '',
+      args: [count, arg0, arg1],
+    );
+  }
+
   /// `Phone Number`
   String get phoneNumber {
     return Intl.message(
@@ -3454,6 +3476,16 @@ class Localization {
     );
   }
 
+  /// `Status`
+  String get status {
+    return Intl.message(
+      'Status',
+      name: 'status',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Sticker`
   String get sticker {
     return Intl.message(
@@ -3609,6 +3641,26 @@ class Localization {
     return Intl.message(
       'Toggle chat info',
       name: 'toggleChatInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trace`
+  String get trace {
+    return Intl.message(
+      'Trace',
+      name: 'trace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transaction Hash`
+  String get transactionHash {
+    return Intl.message(
+      'Transaction Hash',
+      name: 'transactionHash',
       desc: '',
       args: [],
     );

@@ -68,14 +68,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m30(arg0) => "ID Mixin saya: ${arg0}";
 
-  static String m35(arg0) => "Kirim ulang kode dalam ${arg0} d";
+  static String m34(count, arg0, arg1) =>
+      "${Intl.plural(count, one: 'null', other: '${arg0}/${arg1} konfirmasi')}";
 
-  static String m36(count, arg0) =>
+  static String m36(arg0) => "Kirim ulang kode dalam ${arg0} d";
+
+  static String m37(count, arg0) =>
       "${Intl.plural(count, one: 'null', other: '${arg0} pesan terkait')}";
 
-  static String m39(arg0, arg1) => "Yakin ingin mengirim ${arg0} dari ${arg1}?";
+  static String m40(arg0, arg1) => "Yakin ingin mengirim ${arg0} dari ${arg1}?";
 
-  static String m40(arg0) => "Yakin ingin mengirim ${arg0}?";
+  static String m41(arg0) => "Yakin ingin mengirim ${arg0}?";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -89,6 +92,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tambahkan Peserta"),
         "addStickerFailed":
             MessageLookupByLibrary.simpleMessage("Gagal menambahkan stiker"),
+        "address": MessageLookupByLibrary.simpleMessage("Alamat"),
         "admin": MessageLookupByLibrary.simpleMessage("admin"),
         "alertKeyContactContactMessage":
             MessageLookupByLibrary.simpleMessage("berbagi kontak"),
@@ -295,6 +299,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "oneYear": MessageLookupByLibrary.simpleMessage("1 Tahun"),
         "openHomePage": MessageLookupByLibrary.simpleMessage("Buka Beranda"),
         "owner": MessageLookupByLibrary.simpleMessage("pemilik"),
+        "pendingConfirmation": m34,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Nomor Telepon"),
         "photos": MessageLookupByLibrary.simpleMessage("Foto"),
         "post": MessageLookupByLibrary.simpleMessage("Postingan"),
@@ -311,7 +316,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeContact": MessageLookupByLibrary.simpleMessage("Hapus kontak"),
         "report": MessageLookupByLibrary.simpleMessage("Laporkan"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Kirim ulang kode"),
-        "resendCodeIn": m35,
+        "resendCodeIn": m36,
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("Unggahan ulang gagal."),
         "save": MessageLookupByLibrary.simpleMessage("Simpan"),
@@ -321,7 +326,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "search": MessageLookupByLibrary.simpleMessage("Cari"),
         "searchConversation":
             MessageLookupByLibrary.simpleMessage("Cari Percakapan"),
-        "searchRelatedMessage": m36,
+        "searchRelatedMessage": m37,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
         "select": MessageLookupByLibrary.simpleMessage("Pilih"),
@@ -332,13 +337,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareError":
             MessageLookupByLibrary.simpleMessage("Bagikan kesalahan."),
         "shareLink": MessageLookupByLibrary.simpleMessage("Bagikan Tautan"),
-        "shareMessageDescription": m39,
-        "shareMessageDescriptionEmpty": m40,
+        "shareMessageDescription": m40,
+        "shareMessageDescriptionEmpty": m41,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Media Bersama"),
         "show": MessageLookupByLibrary.simpleMessage("Tampilkan"),
         "signIn": MessageLookupByLibrary.simpleMessage("Masuk"),
         "signWithPhoneNumber":
             MessageLookupByLibrary.simpleMessage("Masuk dengan nomor telepon"),
+        "status": MessageLookupByLibrary.simpleMessage("Status"),
         "sticker": MessageLookupByLibrary.simpleMessage("Stiker"),
         "storageUsage":
             MessageLookupByLibrary.simpleMessage("Penggunaan Penyimpanan"),
@@ -350,6 +356,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pesan ini telah dihapus"),
         "time": MessageLookupByLibrary.simpleMessage("Waktu"),
         "today": MessageLookupByLibrary.simpleMessage("Hari ini"),
+        "transactionHash":
+            MessageLookupByLibrary.simpleMessage("Hash Transaksi"),
         "transactionId": MessageLookupByLibrary.simpleMessage("ID Transaksi"),
         "transactionType":
             MessageLookupByLibrary.simpleMessage("Jenis Transaksi"),
