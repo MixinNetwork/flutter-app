@@ -68,19 +68,22 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m30(arg0) => "ID Mixin Saya: ${arg0}";
 
-  static String m35(arg0) => "Hantar semula kod dalam ${arg0} s";
+  static String m34(count, arg0, arg1) =>
+      "${Intl.plural(count, one: 'null', other: '${arg0}/${arg1} pengesahan')}";
 
-  static String m36(count, arg0) =>
+  static String m36(arg0) => "Hantar semula kod dalam ${arg0} s";
+
+  static String m37(count, arg0) =>
       "${Intl.plural(count, one: 'null', other: '${arg0} mesej berkaitan')}";
 
-  static String m39(arg0, arg1) =>
+  static String m40(arg0, arg1) =>
       "Adakah anda pasti mahu menghantar ${arg0} dari ${arg1}?";
 
-  static String m40(arg0) => "Adakah anda pasti mahu menghantar ${arg0}?";
+  static String m41(arg0) => "Adakah anda pasti mahu menghantar ${arg0}?";
 
-  static String m47(arg0) => "nilai sekarang ${arg0}";
+  static String m48(arg0) => "nilai sekarang ${arg0}";
 
-  static String m48(arg0) => "nilai maka ${arg0}";
+  static String m49(arg0) => "nilai maka ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -94,6 +97,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tambah Peserta"),
         "addStickerFailed":
             MessageLookupByLibrary.simpleMessage("Penambahan pelekat gagal"),
+        "address": MessageLookupByLibrary.simpleMessage("Alamat"),
         "admin": MessageLookupByLibrary.simpleMessage("pentadbir"),
         "alertKeyContactContactMessage":
             MessageLookupByLibrary.simpleMessage("berkongsi kenalan"),
@@ -301,6 +305,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "openHomePage":
             MessageLookupByLibrary.simpleMessage("Buka laman Utama"),
         "owner": MessageLookupByLibrary.simpleMessage("pemilik"),
+        "pendingConfirmation": m34,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Nombor telefon"),
         "photos": MessageLookupByLibrary.simpleMessage("Foto"),
         "post": MessageLookupByLibrary.simpleMessage("Kirim"),
@@ -316,7 +321,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeContact": MessageLookupByLibrary.simpleMessage("Buang kenalan"),
         "report": MessageLookupByLibrary.simpleMessage("Lapor"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Hantar semula kod"),
-        "resendCodeIn": m35,
+        "resendCodeIn": m36,
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("Gagal memuat naik semula."),
         "save": MessageLookupByLibrary.simpleMessage("Jimat"),
@@ -326,7 +331,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "search": MessageLookupByLibrary.simpleMessage("Cari"),
         "searchConversation":
             MessageLookupByLibrary.simpleMessage("Cari Perbualan"),
-        "searchRelatedMessage": m36,
+        "searchRelatedMessage": m37,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
         "select": MessageLookupByLibrary.simpleMessage("Pilih"),
@@ -336,13 +341,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "share": MessageLookupByLibrary.simpleMessage("Berkongsi"),
         "shareError": MessageLookupByLibrary.simpleMessage("Kongsi ralat"),
         "shareLink": MessageLookupByLibrary.simpleMessage("Kongsi pautan"),
-        "shareMessageDescription": m39,
-        "shareMessageDescriptionEmpty": m40,
+        "shareMessageDescription": m40,
+        "shareMessageDescriptionEmpty": m41,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Media Berkongsi"),
         "show": MessageLookupByLibrary.simpleMessage("Tunjuk"),
         "signIn": MessageLookupByLibrary.simpleMessage("Log masuk"),
         "signWithPhoneNumber": MessageLookupByLibrary.simpleMessage(
             "Log masuk dengan nombor telefon"),
+        "status": MessageLookupByLibrary.simpleMessage("Status"),
         "sticker": MessageLookupByLibrary.simpleMessage("Pelekat"),
         "storageUsage":
             MessageLookupByLibrary.simpleMessage("Penggunaan Storan"),
@@ -354,6 +360,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mesej ini telah dipadamkan"),
         "time": MessageLookupByLibrary.simpleMessage("Masa"),
         "today": MessageLookupByLibrary.simpleMessage("Hari ini"),
+        "trace": MessageLookupByLibrary.simpleMessage("Jejak"),
+        "transactionHash":
+            MessageLookupByLibrary.simpleMessage("Urus niaga Cincangan"),
         "transactionId": MessageLookupByLibrary.simpleMessage("Id Urus Niaga"),
         "transactionType":
             MessageLookupByLibrary.simpleMessage("Jenis Transaksi"),
@@ -366,8 +375,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unmute": MessageLookupByLibrary.simpleMessage("Nyahsenyap"),
         "userNotFound":
             MessageLookupByLibrary.simpleMessage("Pengguna tidak ditemui"),
-        "valueNow": m47,
-        "valueThen": m48,
+        "valueNow": m48,
+        "valueThen": m49,
         "verifyPin": MessageLookupByLibrary.simpleMessage("Sahkan PIN"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videos": MessageLookupByLibrary.simpleMessage("Video"),

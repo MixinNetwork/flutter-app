@@ -269,13 +269,68 @@ class _TransactionDetailInfo extends StatelessWidget {
               title: Text(context.l10n.transactionType),
               subtitle: SelectableText(snapshot.l10nType(context)),
             ),
-            if (opponentFullName?.isNotEmpty ?? false)
+            if (snapshot.type == SnapshotType.deposit) ...[
               TransactionInfoTile(
-                title: Text(snapshot.isPositive
-                    ? context.l10n.from
-                    : context.l10n.receiver),
-                subtitle: SelectableText(opponentFullName ?? ''),
+                title: Text(context.l10n.from),
+                subtitle: SelectableText(snapshot.sender ?? ''),
               ),
+              TransactionInfoTile(
+                title: Text(context.l10n.transactionHash),
+                subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              ),
+            ] else if (snapshot.type == SnapshotType.pending) ...[
+              TransactionInfoTile(
+                title: Text(context.l10n.status),
+                subtitle: SelectableText(
+                  context.l10n.pendingConfirmation(
+                    snapshot.confirmations ?? 0,
+                    snapshot.confirmations ?? 0,
+                    snapshot.assetConfirmations ?? 0,
+                  ),
+                ),
+              ),
+              TransactionInfoTile(
+                title: Text(context.l10n.from),
+                subtitle: SelectableText(snapshot.sender ?? ''),
+              ),
+              TransactionInfoTile(
+                title: Text(context.l10n.transactionHash),
+                subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              ),
+            ] else if (snapshot.type == SnapshotType.transfer) ...[
+              TransactionInfoTile(
+                title: Text(context.l10n.from),
+                subtitle: SelectableText((snapshot.isPositive
+                        ? opponentFullName
+                        : context.multiAuthState.currentUser?.fullName) ??
+                    ''),
+              ),
+              TransactionInfoTile(
+                title: Text(context.l10n.receiver),
+                subtitle: SelectableText((!snapshot.isPositive
+                        ? opponentFullName
+                        : context.multiAuthState.currentUser?.fullName) ??
+                    ''),
+              ),
+            ] else if (snapshot.tag?.isNotEmpty ?? false) ...[
+              TransactionInfoTile(
+                title: Text(context.l10n.transactionHash),
+                subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              ),
+              TransactionInfoTile(
+                title: Text(context.l10n.address),
+                subtitle: SelectableText(snapshot.receiver ?? ''),
+              ),
+            ] else ...[
+              TransactionInfoTile(
+                title: Text(context.l10n.transactionHash),
+                subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              ),
+              TransactionInfoTile(
+                title: Text(context.l10n.receiver),
+                subtitle: SelectableText(snapshot.receiver ?? ''),
+              ),
+            ],
             if (snapshot.memo?.isNotEmpty ?? false)
               TransactionInfoTile(
                 title: Text(context.l10n.memo),
@@ -287,9 +342,11 @@ class _TransactionDetailInfo extends StatelessWidget {
                   '${DateFormat.yMMMMd().format(snapshot.createdAt)} '
                   '${DateFormat.Hms().format(snapshot.createdAt)}'),
             ),
-            if (snapshot.traceId != null && snapshot.traceId!.isNotEmpty)
+            if (snapshot.type == SnapshotType.transfer &&
+                snapshot.traceId != null &&
+                snapshot.traceId!.isNotEmpty)
               TransactionInfoTile(
-                title: const Text('Trace Id'),
+                title: Text(context.l10n.trace),
                 subtitle: SelectableText(snapshot.traceId ?? ''),
               ),
           ],

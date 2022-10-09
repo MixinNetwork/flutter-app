@@ -99,45 +99,48 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m33(arg0) => "${arg0} УЧАСТНИКОВ";
 
-  static String m34(count, arg0) =>
+  static String m34(count, arg0, arg1) =>
+      "${Intl.plural(count, one: '${arg0}/${arg1} подтверждение', other: '${arg0}/${arg1} подтверждения')}";
+
+  static String m35(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} закрепленное сообщение', other: '${arg0} закрепленных сообщений')}";
 
-  static String m35(arg0) => "Повторно отправить код через ${arg0} с.";
+  static String m36(arg0) => "Повторно отправить код через ${arg0} с.";
 
-  static String m36(count, arg0) =>
+  static String m37(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} связанное сообщение', other: '${arg0} похожие сообщения')}";
 
-  static String m37(arg0, arg1) =>
+  static String m38(arg0, arg1) =>
       "${arg0} установил время исчезновения сообщения на ${arg1}.";
 
-  static String m38(arg0) =>
+  static String m39(arg0) =>
       "Если вы продолжите, ваш профиль и данные аккаунта будут удалены ${arg0}. прочтите наш документ, чтобы **Узнать больше**.";
 
-  static String m39(arg0, arg1) =>
+  static String m40(arg0, arg1) =>
       "Вы уверены, что хотите отправить ${arg0} от ${arg1}?";
 
-  static String m40(arg0) => "Вы уверены, что хотите отправить ${arg0}?";
+  static String m41(arg0) => "Вы уверены, что хотите отправить ${arg0}?";
 
-  static String m41(arg0) => "Не удалось открыть файл: ${arg0}";
-
-  static String m42(count) =>
-      "${Intl.plural(count, one: 'день', other: 'дни')}";
+  static String m42(arg0) => "Не удалось открыть файл: ${arg0}";
 
   static String m43(count) =>
-      "${Intl.plural(count, one: 'час', other: 'часы')}";
+      "${Intl.plural(count, one: 'день', other: 'дни')}";
 
   static String m44(count) =>
-      "${Intl.plural(count, one: 'минута', other: 'минуты')}";
+      "${Intl.plural(count, one: 'час', other: 'часы')}";
 
   static String m45(count) =>
-      "${Intl.plural(count, one: 'секунда', other: 'секунды')}";
+      "${Intl.plural(count, one: 'минута', other: 'минуты')}";
 
   static String m46(count) =>
+      "${Intl.plural(count, one: 'секунда', other: 'секунды')}";
+
+  static String m47(count) =>
       "${Intl.plural(count, one: 'неделя', other: 'недели')}";
 
-  static String m47(arg0) => "значение сейчас ${arg0}";
+  static String m48(arg0) => "значение сейчас ${arg0}";
 
-  static String m48(arg0) => "значение затем ${arg0}";
+  static String m49(arg0) => "значение затем ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -164,6 +167,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Не удалось добавить стикер"),
         "addStickers": MessageLookupByLibrary.simpleMessage("Добавить стикеры"),
         "added": MessageLookupByLibrary.simpleMessage("Добавлен"),
+        "address": MessageLookupByLibrary.simpleMessage("Адрес"),
         "admin": MessageLookupByLibrary.simpleMessage("Администратор"),
         "alertKeyContactContactMessage":
             MessageLookupByLibrary.simpleMessage("отправил вам контакт"),
@@ -514,12 +518,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "originalImage": MessageLookupByLibrary.simpleMessage("Оригинал"),
         "owner": MessageLookupByLibrary.simpleMessage("Владелец"),
         "participantsCount": m33,
+        "pendingConfirmation": m34,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Номер телефона"),
         "photos": MessageLookupByLibrary.simpleMessage("Фото"),
         "pickAConversation": MessageLookupByLibrary.simpleMessage(
             "Выберите беседу и начните отправлять сообщение"),
         "pinTitle": MessageLookupByLibrary.simpleMessage("Закрепить"),
-        "pinnedMessageTitle": m34,
+        "pinnedMessageTitle": m35,
         "post": MessageLookupByLibrary.simpleMessage("Публикация"),
         "preferences": MessageLookupByLibrary.simpleMessage("Настройки"),
         "previousConversation":
@@ -550,7 +555,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Пожаловаться и заблокировать?"),
         "resendCode":
             MessageLookupByLibrary.simpleMessage("Отправить код еще раз"),
-        "resendCodeIn": m35,
+        "resendCodeIn": m36,
         "reset": MessageLookupByLibrary.simpleMessage("Перезагрузить"),
         "resetLink": MessageLookupByLibrary.simpleMessage("Сбросить ссылку"),
         "retryUploadFailed": MessageLookupByLibrary.simpleMessage(
@@ -570,7 +575,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Чаты, контакты или сообщения не найдены."),
         "searchPlaceholderNumber": MessageLookupByLibrary.simpleMessage(
             "Найдите Mixin ID или номер телефона:"),
-        "searchRelatedMessage": m36,
+        "searchRelatedMessage": m37,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
         "select": MessageLookupByLibrary.simpleMessage("Выбрать"),
@@ -583,12 +588,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendWithoutSound":
             MessageLookupByLibrary.simpleMessage("Отправить без звука"),
         "set": MessageLookupByLibrary.simpleMessage("Установлен"),
-        "setDisappearingMessageTimeTo": m37,
+        "setDisappearingMessageTimeTo": m38,
         "settingAuthSearchHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID, имя"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
             "Создайте резервную копию истории чата в iCloud. Если вы потеряете свой iPhone или переключитесь на новый, вы сможете восстановить историю чата при переустановке Mixin Messenger. Сообщения, которые вы резервируете, не защищены сквозным шифрованием Mixin Messenger в iCloud."),
-        "settingDeleteAccountPinContent": m38,
+        "settingDeleteAccountPinContent": m39,
         "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixinmessenger.zendesk.com/hc/articles/4414170627988"),
         "share": MessageLookupByLibrary.simpleMessage("Поделиться"),
@@ -598,8 +603,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareError":
             MessageLookupByLibrary.simpleMessage("Поделитесь ошибкой."),
         "shareLink": MessageLookupByLibrary.simpleMessage("Поделиться ссылкой"),
-        "shareMessageDescription": m39,
-        "shareMessageDescriptionEmpty": m40,
+        "shareMessageDescription": m40,
+        "shareMessageDescriptionEmpty": m41,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Общие медиа"),
         "show": MessageLookupByLibrary.simpleMessage("Показать"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("Показать аватар"),
@@ -610,6 +615,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Войти через номер телефона"),
         "signWithQrcode":
             MessageLookupByLibrary.simpleMessage("Войти с QrCode"),
+        "status": MessageLookupByLibrary.simpleMessage("Статус"),
         "sticker": MessageLookupByLibrary.simpleMessage("Наклейка"),
         "stickerAlbumDetail":
             MessageLookupByLibrary.simpleMessage("Деталь альбома стикеров"),
@@ -632,6 +638,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "today": MessageLookupByLibrary.simpleMessage("Сегодня"),
         "toggleChatInfo": MessageLookupByLibrary.simpleMessage(
             "Переключить информацию о чате"),
+        "trace": MessageLookupByLibrary.simpleMessage("След"),
+        "transactionHash":
+            MessageLookupByLibrary.simpleMessage("Хэш транзакции"),
         "transactionId": MessageLookupByLibrary.simpleMessage("ID транзакции"),
         "transactionType": MessageLookupByLibrary.simpleMessage("Тип операции"),
         "transactions": MessageLookupByLibrary.simpleMessage("Транзакции"),
@@ -643,13 +652,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Включить уведомления"),
         "typeMessage":
             MessageLookupByLibrary.simpleMessage("Введите сообщение"),
-        "unableToOpenFile": m41,
+        "unableToOpenFile": m42,
         "unblock": MessageLookupByLibrary.simpleMessage("Разблокировать"),
-        "unitDay": m42,
-        "unitHour": m43,
-        "unitMinute": m44,
-        "unitSecond": m45,
-        "unitWeek": m46,
+        "unitDay": m43,
+        "unitHour": m44,
+        "unitMinute": m45,
+        "unitSecond": m46,
+        "unitWeek": m47,
         "unmute": MessageLookupByLibrary.simpleMessage("Включить звук"),
         "unpin": MessageLookupByLibrary.simpleMessage("Открепить"),
         "unpinAllMessages":
@@ -660,8 +669,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Непрочитанные сообщения"),
         "userNotFound":
             MessageLookupByLibrary.simpleMessage("Пользователь не найден"),
-        "valueNow": m47,
-        "valueThen": m48,
+        "valueNow": m48,
+        "valueThen": m49,
         "verifyPin":
             MessageLookupByLibrary.simpleMessage("Подтвердить PIN-код"),
         "video": MessageLookupByLibrary.simpleMessage("Видео"),
