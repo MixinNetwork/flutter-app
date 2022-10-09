@@ -265,6 +265,10 @@ class _TransactionDetailInfo extends StatelessWidget {
               title: Text(context.l10n.assetType),
               subtitle: SelectableText(snapshot.symbolName ?? ''),
             ),
+            TransactionInfoTile(
+              title: Text(context.l10n.transactionType),
+              subtitle: SelectableText(snapshot.l10nType(context)),
+            ),
             if (opponentFullName?.isNotEmpty ?? false)
               TransactionInfoTile(
                 title: Text(snapshot.isPositive

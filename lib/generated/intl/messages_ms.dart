@@ -141,6 +141,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteForMe":
             MessageLookupByLibrary.simpleMessage("Padamkan untuk saya"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("Padam Kumpulan"),
+        "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
         "developer": MessageLookupByLibrary.simpleMessage("Pemaju"),
         "dismissAsAdmin":
             MessageLookupByLibrary.simpleMessage("Ketepikan pentadbir"),
@@ -225,6 +226,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "RALAT 20131: Penarikan format memo tidak betul."),
         "exit": MessageLookupByLibrary.simpleMessage("Keluar"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("Keluar Kumpulan"),
+        "fee": MessageLookupByLibrary.simpleMessage("Bayaran"),
         "file": MessageLookupByLibrary.simpleMessage("Fail"),
         "fileChooserError":
             MessageLookupByLibrary.simpleMessage("Ralat pemilih fail"),
@@ -303,6 +305,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "photos": MessageLookupByLibrary.simpleMessage("Foto"),
         "post": MessageLookupByLibrary.simpleMessage("Kirim"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("Dasar Privasi"),
+        "raw": MessageLookupByLibrary.simpleMessage("Mentah"),
+        "rebate": MessageLookupByLibrary.simpleMessage("Rebat"),
         "recaptchaTimeout":
             MessageLookupByLibrary.simpleMessage("Tamat masa Recaptcha"),
         "receiver": MessageLookupByLibrary.simpleMessage("Penerima"),
@@ -351,6 +355,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "time": MessageLookupByLibrary.simpleMessage("Masa"),
         "today": MessageLookupByLibrary.simpleMessage("Hari ini"),
         "transactionId": MessageLookupByLibrary.simpleMessage("Id Urus Niaga"),
+        "transactionType":
+            MessageLookupByLibrary.simpleMessage("Jenis Transaksi"),
         "transactions": MessageLookupByLibrary.simpleMessage("Urus Niaga"),
         "transfer": MessageLookupByLibrary.simpleMessage("Pindah"),
         "turnOnNotifications":
@@ -367,6 +373,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("Video"),
         "whatsYourName":
             MessageLookupByLibrary.simpleMessage("Siapa nama awak?"),
+        "withdrawal": MessageLookupByLibrary.simpleMessage("Pengeluaran"),
         "writeCircles": MessageLookupByLibrary.simpleMessage("Tulis Lingkaran"),
         "you": MessageLookupByLibrary.simpleMessage("Anda"),
         "youDeletedThisMessage":

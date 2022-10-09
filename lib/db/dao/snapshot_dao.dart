@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
+import '../../utils/extension/extension.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -21,6 +23,27 @@ extension SnapshotConverter on sdk.Snapshot {
         memo: Value(memo),
         confirmations: Value(confirmations),
       );
+}
+
+extension SnapshotItemExtension on SnapshotItem {
+  String l10nType(BuildContext context) {
+    switch (type) {
+      case 'transfer':
+        return context.l10n.transfer;
+      case 'deposit':
+        return context.l10n.deposit;
+      case 'withdrawal':
+        return context.l10n.withdrawal;
+      case 'fee':
+        return context.l10n.fee;
+      case 'rebate':
+        return context.l10n.rebate;
+      case 'raw':
+        return context.l10n.raw;
+      default:
+        return context.l10n.na;
+    }
+  }
 }
 
 @DriftAccessor(tables: [Snapshots], include: {'../moor/dao/snapshot.drift'})

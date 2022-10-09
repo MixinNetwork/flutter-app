@@ -1064,6 +1064,16 @@ class Localization {
     );
   }
 
+  /// `Deposit`
+  String get deposit {
+    return Intl.message(
+      'Deposit',
+      name: 'deposit',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Developer`
   String get developer {
     return Intl.message(
@@ -1743,6 +1753,16 @@ class Localization {
     return Intl.message(
       'Failed',
       name: 'failed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fee`
+  String get fee {
+    return Intl.message(
+      'Fee',
+      name: 'fee',
       desc: '',
       args: [],
     );
@@ -2832,6 +2852,26 @@ class Localization {
     );
   }
 
+  /// `Raw`
+  String get raw {
+    return Intl.message(
+      'Raw',
+      name: 'raw',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rebate`
+  String get rebate {
+    return Intl.message(
+      'Rebate',
+      name: 'rebate',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Recaptcha timeout`
   String get recaptchaTimeout {
     return Intl.message(
@@ -3584,6 +3624,16 @@ class Localization {
     );
   }
 
+  /// `Transaction Type`
+  String get transactionType {
+    return Intl.message(
+      'Transaction Type',
+      name: 'transactionType',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Transactions`
   String get transactions {
     return Intl.message(
@@ -3889,6 +3939,16 @@ class Localization {
     return Intl.message(
       'Window',
       name: 'window',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Withdraw`
+  String get withdrawal {
+    return Intl.message(
+      'Withdraw',
+      name: 'withdrawal',
       desc: '',
       args: [],
     );
