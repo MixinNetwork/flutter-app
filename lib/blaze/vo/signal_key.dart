@@ -38,7 +38,7 @@ class SignalKey {
       registrationId,
       sessionId.getDeviceId(),
       preKey.keyId,
-      getPreKeyPublic()!,
+      getPreKeyPublic(),
       signedPreKey.keyId,
       getSignedPreKeyPublic(),
       getSignedSignature(),
