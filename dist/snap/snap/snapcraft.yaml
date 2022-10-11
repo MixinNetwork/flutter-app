@@ -14,6 +14,10 @@ apps:
       - gnome
     plugs:
       - network
+      - audio-playback
+      - audio-record
+      - alsa
+      - pulseaudio
 
 parts:
   mixin-desktop:
