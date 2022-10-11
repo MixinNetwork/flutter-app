@@ -1,0 +1,29 @@
+name: mixin-desktop
+version: 0.37.5
+summary: Mixin Desktop
+description: Mixin Messenger
+
+confinement: strict
+base: core22
+grade: stable
+
+apps:
+  mixin-desktop:
+    command: mixin_desktop
+    extensions:
+      - gnome
+    plugs:
+      - network
+      - audio-playback
+      - audio-record
+      - alsa
+      - pulseaudio
+
+parts:
+  mixin-desktop:
+    source: ./mixin_desktop
+    plugin: dump
+    stage-packages:
+      - libsdl2-2.0-0
+      - libgtk-3-0
+      - libwebkit2gtk-4.0-37

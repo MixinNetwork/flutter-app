@@ -37,6 +37,20 @@ jobs:
       - name: Build APP
         run: flutter build linux
 
+      - name: Prepare snap build
+        run: ./dist/linux_snap_prepare.sh
+
+      - uses: snapcore/action-build@v1
+        id: build-snap
+        with:
+          snapcraft-args: '--enable-experimental-extensions'
+          path: dist/snap
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: mixin-desktop-snap
+          path: ${{ steps.build-snap.outputs.snap }}
+
       - name: Package APP
         run: ./dist/linux_deb.sh
 
