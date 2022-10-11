@@ -16,6 +16,7 @@ jobs:
         id: build-snap
         with:
           snapcraft-args: '--enable-experimental-extensions'
+          snapcraft-channel: 'edge/core20'
 
       - uses: actions/upload-artifact@v3
         with:
