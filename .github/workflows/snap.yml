@@ -1,0 +1,23 @@
+name: snap
+on:
+  push:
+    branches:
+      - publish_snap
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      snap-file: ${{ steps.build-snap.outputs.snap }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: snapcore/action-build@v1
+        id: build-snap
+        with:
+          snapcraft-args: '--enable-experimental-extensions'
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: mixin-desktop-snap
+          path: ${{ steps.build-snap.outputs.snap }}
