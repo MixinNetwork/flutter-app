@@ -6,7 +6,7 @@ current_dir=$(dirname "$0")
 project_dir="${current_dir}/.."
 package_dir="${current_dir}/snap/mixin_desktop"
 
-snap_craft_file="${current_dir}/snap/snapcraft.yaml"
+snap_craft_file="${current_dir}/snap/snap/snapcraft.yaml"
 
 rm -rf "${package_dir}"
 
