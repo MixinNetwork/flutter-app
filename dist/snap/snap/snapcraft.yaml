@@ -2,6 +2,7 @@ name: mixin-desktop
 version: 0.37.5
 summary: Mixin Desktop
 description: Mixin Messenger
+license: GPL-3.0
 
 confinement: strict
 base: core22
@@ -18,6 +19,8 @@ apps:
       - audio-record
       - alsa
       - pulseaudio
+      - home
+      - removable-media
 
 parts:
   mixin-desktop:
