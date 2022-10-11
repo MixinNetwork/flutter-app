@@ -9,9 +9,7 @@ import '../utils/hook.dart';
 import 'message/message.dart';
 
 class StatusPending extends HookWidget {
-  const StatusPending({
-    Key? key,
-  }) : super(key: key);
+  const StatusPending({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +21,7 @@ class StatusPending extends HookWidget {
       converter: (AttachmentUtil attachmentUtil) =>
           attachmentUtil.getAttachmentProgress(messageId),
       keys: [messageId],
-    ).requireData.toDouble();
+    ).requireData;
 
     return _StatusPending(value: value);
   }
@@ -31,9 +29,8 @@ class StatusPending extends HookWidget {
 
 class _StatusPending extends StatelessWidget {
   const _StatusPending({
-    Key? key,
     required this.value,
-  }) : super(key: key);
+  });
 
   final double value;
 
@@ -68,9 +65,7 @@ class _StatusPending extends StatelessWidget {
 }
 
 class StatusWarning extends StatelessWidget {
-  const StatusWarning({
-    Key? key,
-  }) : super(key: key);
+  const StatusWarning({super.key});
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
@@ -84,9 +79,7 @@ class StatusWarning extends StatelessWidget {
 }
 
 class StatusDownload extends StatelessWidget {
-  const StatusDownload({
-    Key? key,
-  }) : super(key: key);
+  const StatusDownload({super.key});
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
@@ -100,9 +93,7 @@ class StatusDownload extends StatelessWidget {
 }
 
 class StatusUpload extends StatelessWidget {
-  const StatusUpload({
-    Key? key,
-  }) : super(key: key);
+  const StatusUpload({super.key});
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
@@ -116,9 +107,7 @@ class StatusUpload extends StatelessWidget {
 }
 
 class StatusAudioPlay extends StatelessWidget {
-  const StatusAudioPlay({
-    Key? key,
-  }) : super(key: key);
+  const StatusAudioPlay({super.key});
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
@@ -132,9 +121,7 @@ class StatusAudioPlay extends StatelessWidget {
 }
 
 class StatusAudioStop extends StatelessWidget {
-  const StatusAudioStop({
-    Key? key,
-  }) : super(key: key);
+  const StatusAudioStop({super.key});
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
@@ -149,9 +136,8 @@ class StatusAudioStop extends StatelessWidget {
 
 class _StatusLayout extends StatelessWidget {
   const _StatusLayout({
-    Key? key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 

@@ -8,7 +8,7 @@ part 'pin_message_dao.g.dart';
 @DriftAccessor(tables: [PinMessages])
 class PinMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$PinMessageDaoMixin {
-  PinMessageDao(MixinDatabase attachedDatabase) : super(attachedDatabase);
+  PinMessageDao(super.attachedDatabase);
 
   Future<int> insert(PinMessage pinMessage) =>
       into(db.pinMessages).insertOnConflictUpdate(pinMessage);
@@ -29,18 +29,18 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
             ..orderBy([OrderingTerm.desc(db.pinMessages.createdAt)]))
           .map((row) => row.read(db.pinMessages.messageId));
 
-  Selectable<LastPinMessageItemResult> lastPinMessageItem(
-          String conversationId) =>
-      db.lastPinMessageItem(conversationId);
+  Selectable<PinMessageItemResult> pinMessageItem(
+          String conversationId, String messageId) =>
+      db.pinMessageItem(conversationId, messageId);
 
   Selectable<MessageItem> messageItems(String conversationId) =>
       db.basePinMessageItems(
         conversationId,
-        (pinMessage, _, __, ___, ____, _____, ______, _______, ________,
-                _________, __________) =>
-            OrderBy([OrderingTerm.asc(pinMessage.createdAt)]),
+        (_, message, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, em) =>
+            OrderBy([OrderingTerm.asc(message.createdAt)]),
         (_, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________) =>
+                __________, ___________, em) =>
             maxLimit,
       );
 }

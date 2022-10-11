@@ -11,9 +11,7 @@ import '../../message_datetime_and_status.dart';
 import 'transfer_page.dart';
 
 class TransferMessage extends HookWidget {
-  const TransferMessage({
-    Key? key,
-  }) : super(key: key);
+  const TransferMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +27,7 @@ class TransferMessage extends HookWidget {
         onTap: () {
           final snapshotId = context.message.snapshotId;
           if (snapshotId == null) return;
-          showTransferDialog(context, snapshotId, context.message.userFullName);
+          showTransferDialog(context, snapshotId);
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,

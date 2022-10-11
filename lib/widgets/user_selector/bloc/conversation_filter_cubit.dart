@@ -81,15 +81,13 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     }
     final keyword = state.keyword!.toLowerCase();
 
-    final recentConversations = conversations.where((element) {
-      if (element.isGroupConversation) {
-        return element.groupName != null &&
-            element.groupName!.toLowerCase().contains(keyword);
-      } else {
-        return element.name!.toLowerCase().contains(keyword) ||
-            element.ownerIdentityNumber.toLowerCase().startsWith(keyword);
-      }
-    }).toList()
+    final recentConversations = conversations
+        .where((element) => element.isGroupConversation
+            ? element.groupName != null &&
+                element.groupName!.toLowerCase().contains(keyword)
+            : element.name!.toLowerCase().contains(keyword) ||
+                element.ownerIdentityNumber.toLowerCase().startsWith(keyword))
+        .toList()
       ..sort(compareValuesBy((e) {
         if (e.isGroupConversation) {
           return e.groupName!.toLowerCase().indexOf(keyword);

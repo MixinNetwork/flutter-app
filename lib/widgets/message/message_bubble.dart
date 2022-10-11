@@ -1,30 +1,33 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../constants/resources.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../action_button.dart';
+import '../toast.dart';
 import 'item/quote_message.dart';
 import 'message.dart';
 
 const _nipWidth = 9.0;
 const _lightCurrentBubble = Color.fromRGBO(197, 237, 253, 1);
 const _darkCurrentBubble = Color.fromRGBO(59, 79, 103, 1);
-const _lightOtherBubble = Color.fromRGBO(255, 255, 255, 1);
-const _darkOtherBubble = Color.fromRGBO(52, 59, 67, 1);
+const lightOtherBubble = Colors.white;
+const darkOtherBubble = Color.fromRGBO(52, 59, 67, 1);
 
 extension BubbleColor on BuildContext {
   Color messageBubbleColor(bool isCurrentUser) => isCurrentUser
       ? dynamicColor(_lightCurrentBubble, darkColor: _darkCurrentBubble)
-      : dynamicColor(_lightOtherBubble, darkColor: _darkOtherBubble);
+      : dynamicColor(lightOtherBubble, darkColor: darkOtherBubble);
 }
 
 class MessageBubble extends HookWidget {
   const MessageBubble({
-    Key? key,
+    super.key,
     required this.child,
     this.showBubble = true,
     this.includeNip = false,
@@ -32,7 +35,7 @@ class MessageBubble extends HookWidget {
     this.padding = const EdgeInsets.all(8),
     this.outerTimeAndStatusWidget,
     this.forceIsCurrentUserColor,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final bool showBubble;
@@ -47,9 +50,16 @@ class MessageBubble extends HookWidget {
     final showNip = useShowNip();
     final isCurrentUser = useIsCurrentUser();
     final isPinnedPage = useIsPinnedPage();
+    final isDisappearingMessage = useMessageConverter<bool>(
+      converter: (message) => message.expireIn != null && message.expireIn! > 0,
+    );
 
-    final quoteMessageId =
-        useMessageConverter(converter: (state) => state.quoteId);
+    final quoteContent =
+        useMessageConverter(converter: (state) => state.quoteContent);
+
+    final hasQuoteMessage = quoteContent?.isNotEmpty ?? false;
+
+    final isTranscriptPage = useIsTranscriptPage();
 
     final bubbleColor =
         context.messageBubbleColor(forceIsCurrentUserColor ?? isCurrentUser);
@@ -68,7 +78,7 @@ class MessageBubble extends HookWidget {
       child: _child,
     );
 
-    if (quoteMessageId?.isNotEmpty ?? false) {
+    if (hasQuoteMessage) {
       _child = IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -77,15 +87,16 @@ class MessageBubble extends HookWidget {
             _MessageBubbleNipPadding(
               currentUser: isCurrentUser,
               child: HookBuilder(builder: (context) {
+                final quoteMessageId =
+                    useMessageConverter(converter: (state) => state.quoteId);
                 final messageId =
                     useMessageConverter(converter: (state) => state.messageId);
-                final quoteContent = useMessageConverter(
-                    converter: (state) => state.quoteContent);
 
                 return QuoteMessage(
                   messageId: messageId,
                   quoteMessageId: quoteMessageId,
                   content: quoteContent,
+                  isTranscriptPage: isTranscriptPage,
                 );
               }),
             ),
@@ -109,10 +120,10 @@ class MessageBubble extends HookWidget {
       );
     }
 
-    if (showBubble) {
+    if (hasQuoteMessage || showBubble) {
       _child = CustomPaint(
         painter: BubblePainter(
-          color: showBubble ? bubbleColor : Colors.transparent,
+          color: bubbleColor,
           clipper: clipper,
         ),
         child: _child,
@@ -131,6 +142,10 @@ class MessageBubble extends HookWidget {
             message.conversationId,
             initIndexMessageId: message.messageId,
           );
+          // pop to chat page if current pin page is modal.
+          if (ModalRoute.of(context)?.canPop == true) {
+            Navigator.maybePop(context);
+          }
         },
       );
 
@@ -140,6 +155,49 @@ class MessageBubble extends HookWidget {
           if (isCurrentUser) pinArrow,
           Flexible(child: _child),
           if (!isCurrentUser) pinArrow,
+        ],
+      );
+    }
+
+    if (isDisappearingMessage) {
+      Widget icon = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: SvgPicture.asset(
+          context.brightness == Brightness.dark
+              ? Resources.assetsImagesExpiringDarkSvg
+              : Resources.assetsImagesExpiringSvg,
+          width: 16,
+          height: 16,
+        ),
+      );
+
+      if (!kReleaseMode) {
+        icon = GestureDetector(
+          child: icon,
+          onTap: () async {
+            final message = context.message;
+            final expireAt = await context
+                .accountServer.database.expiredMessageDao
+                .getMessageExpireAt([message.messageId]);
+            final time = (expireAt[message.messageId] ?? 0) -
+                DateTime.now().millisecondsSinceEpoch ~/ 1000;
+            await Toast.createView(
+              context: context,
+              child: ToastWidget(
+                  barrierColor: Colors.transparent,
+                  text: 'expire in: ${message.expireIn}. '
+                      'will delete after: ${time < 0 ? 0 : time} seconds'),
+            );
+          },
+        );
+      }
+
+      _child = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isCurrentUser) icon,
+          Flexible(child: _child),
+          if (!isCurrentUser) icon,
         ],
       );
     }
@@ -168,10 +226,9 @@ class MessageBubble extends HookWidget {
 
 class _MessageBubbleNipPadding extends StatelessWidget {
   const _MessageBubbleNipPadding({
-    Key? key,
     required this.currentUser,
     required this.child,
-  }) : super(key: key);
+  });
 
   final bool currentUser;
   final Widget child;
@@ -210,8 +267,9 @@ class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
     return Path.combine(PathOperation.union, bubblePath, nipPath);
   }
 
-  Path _bubblePath(Size size) =>
-      Path()..addRRect(BorderRadius.circular(8).toRRect(Offset.zero & size));
+  Path _bubblePath(Size size) => Path()
+    ..addRRect(
+        const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size));
 
   Path _leftNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 12);

@@ -12,9 +12,9 @@ import '../../../db/dao/message_dao.dart';
 import '../../../db/database.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
-import '../../../enum/message_status.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/synchronized.dart';
 import '../../../widgets/clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import 'conversation_cubit.dart';
@@ -189,6 +189,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.mentionCache,
     required this.accountServer,
   }) : super(const MessageState()) {
+    on<_MessageEvent>((event, emit) => _lock.synchronized(
+          () => _onEvent(event, emit),
+        ));
+
     add(_MessageInitEvent(
       centerMessageId: conversationCubit.state?.initIndexMessageId,
       lastReadMessageId: conversationCubit.state?.lastReadMessageId,
@@ -228,6 +232,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   final AccountServer accountServer;
   int limit;
 
+  final _lock = Lock();
+
   MessageDao get messageDao => database.messageDao;
 
   Future<void> _preCacheMention(MessageState state) async {
@@ -239,8 +245,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
   }
 
-  @override
-  Stream<MessageState> mapEventToState(_MessageEvent event) async* {
+  Future<void> _onEvent(_MessageEvent event, Emitter<MessageState> emit) async {
     // Avoid value change
     final finalLimit = limit;
 
@@ -258,31 +263,31 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         event.centerMessageId,
       );
       await _preCacheMention(messageState);
-      yield _pretreatment(messageState.copyWith(
+      emit(_pretreatment(messageState.copyWith(
         refreshKey: Object(),
         lastReadMessageId: event.lastReadMessageId,
-      ));
+      )));
     } else if (event is _MessageDeleteEvent) {
       final messageState = state.removeMessage(event.messageId);
-      yield _pretreatment(messageState);
+      emit(_pretreatment(messageState));
     } else {
       if (event is _MessageLoadMoreEvent) {
         if (event is _MessageLoadAfterEvent) {
           if (state.isLatest) return;
           final messageState = await _after(conversationId);
           await _preCacheMention(messageState);
-          yield _pretreatment(messageState);
+          emit(_pretreatment(messageState));
         } else if (event is _MessageLoadBeforeEvent) {
           if (state.isOldest) return;
           final messageState = await _before(conversationId);
           await _preCacheMention(messageState);
-          yield _pretreatment(messageState);
+          emit(_pretreatment(messageState));
         }
       } else if (event is _MessageInsertOrReplaceEvent) {
         final result = _insertOrReplace(conversationId, event.data);
         if (result != null) {
           await _preCacheMention(result);
-          yield _pretreatment(result);
+          emit(_pretreatment(result));
         }
       } else if (event is _MessageScrollEvent) {
         add(_MessageInitEvent(
@@ -290,7 +295,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           lastReadMessageId: state.lastReadMessageId,
         ));
       } else if (event is _MessageJumpCurrentEvent) {
-        yield _pretreatment(state._copyWithJumpCurrentState());
+        emit(_pretreatment(state._copyWithJumpCurrentState()));
       }
     }
   }
@@ -310,14 +315,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     });
 
     final isOldest = list.length < limit;
-    final result = state.copyWith(
-      top: [
-        ...list.reversed.toList(),
-        ...state.top,
-      ],
-      isOldest: isOldest,
-    );
-    return result;
+    return state.copyWith(
+        top: [...list.reversed.toList(), ...state.top], isOldest: isOldest);
   }
 
   Future<MessageState> _after(String conversationId) async {
@@ -331,14 +330,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     });
 
     final isLatest = list.length < limit ? true : null;
-    final result = state.copyWith(
-      bottom: [
-        ...state.bottom,
-        ...list,
-      ],
-      isLatest: isLatest,
-    );
-    return result;
+    return state
+        .copyWith(bottom: [...state.bottom, ...list], isLatest: isLatest);
   }
 
   Future<MessageState> _resetMessageList(
@@ -358,13 +351,11 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       centerMessageId: _centerMessageId,
     );
 
-    final result = state.copyWith(
-      conversationId: conversationId,
-      center: state.center,
-      bottom: state.bottom,
-      top: state.top,
-    );
-    return result;
+    return state.copyWith(
+        conversationId: conversationId,
+        center: state.center,
+        bottom: state.bottom,
+        top: state.top);
   }
 
   Future<MessageState> _messagesByConversationId(
@@ -464,8 +455,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         continue;
       }
 
-      // if don't have messages or older message after then item
-      if (state.topMessage?.createdAt.isAfter(item.createdAt) ?? false) {
+      // if don't have messages or older message after then valid item
+      if (state.topMessage?.type != MessageCategory.secret &&
+          (state.topMessage?.createdAt.isAfter(item.createdAt) ?? false)) {
         continue;
       }
 
@@ -484,7 +476,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
             (position.hasContentDimensions &&
                 position.pixels == position.maxScrollExtent);
       } else {
-        if (currentUserSent) {
+        if (currentUserSent && item.status == MessageStatus.sending) {
           add(_MessageInitEvent());
           return null;
         }

@@ -1,7 +1,3 @@
 import '../mixin.drift';
 
-systemAlbums:
-SELECT * FROM sticker_albums WHERE category = 'SYSTEM' ORDER BY created_at DESC;
 
-personalAlbums:
-SELECT * FROM sticker_albums WHERE category = 'PERSONAL' ORDER BY created_at ASC LIMIT 1;

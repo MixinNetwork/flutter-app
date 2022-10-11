@@ -94,7 +94,7 @@ class PagingUpdateEvent extends PagingEvent {
 abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     with SubscribeMixin {
   PagingBloc({
-    this.itemPositionsListener,
+    required this.itemPositionsListener,
     required this.limit,
     this.jumpTo,
     int offset = 0,
@@ -102,7 +102,8 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     double alignment = 0,
     required PagingState<T> initState,
   }) : super(initState) {
-    itemPositionsListener?.itemPositions.addListener(onItemPositions);
+    on<PagingEvent>(_onEvent);
+    itemPositionsListener.itemPositions.addListener(onItemPositions);
     add(PagingInitEvent(
       offset: offset,
       index: index,
@@ -110,7 +111,7 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     ));
   }
 
-  final ItemPositionsListener? itemPositionsListener;
+  final ItemPositionsListener itemPositionsListener;
   final void Function({int index, double alignment})? jumpTo;
 
   int limit;
@@ -118,37 +119,40 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
 
   void onItemPositions() {
     final list =
-        itemPositionsListener?.itemPositions.value.map((e) => e.index).toList();
-    if (list?.isEmpty ?? true) return;
+        itemPositionsListener.itemPositions.value.map((e) => e.index).toList();
+    if (list.isEmpty) return;
 
-    add(PagingItemPositionEvent(list!));
+    add(PagingItemPositionEvent(list));
   }
 
   @override
   Future<void> close() async {
-    itemPositionsListener?.itemPositions.removeListener(onItemPositions);
+    itemPositionsListener.itemPositions.removeListener(onItemPositions);
     await super.close();
   }
 
-  @override
-  Stream<PagingState<T>> mapEventToState(PagingEvent event) async* {
+  Future<void> _onEvent(
+    PagingEvent event,
+    Emitter<PagingState<T>> emit,
+  ) async {
     final prefetchDistance = limit ~/ 2;
 
     if (event is PagingUpdateEvent) {
       final count = await queryCount();
-      yield state.copyWith(
+      emit(state.copyWith(
         count: count,
         hasData: count != 0,
         map: count == 0 ? {} : state.map,
-      );
+      ));
 
       if (count != 0) {
-        yield state.copyWith(
+        emit(state.copyWith(
           map: await queryMap(
             max(state.map.length, limit),
             state.map.isNotEmpty ? state.map.keys.reduce(min) : 0,
           ),
-        );
+          initialized: true,
+        ));
       }
     } else if (event is PagingItemPositionEvent) {
       lastItemPositions = event.itemPositions;
@@ -181,25 +185,26 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
         }
       }
 
-      yield state.copyWith(
+      emit(state.copyWith(
         map: map,
-      );
+        initialized: true,
+      ));
     } else if (event is PagingInitEvent) {
-      yield state.copyWith(
+      emit(state.copyWith(
         hasData: await queryHasData(),
-      );
+      ));
 
       final offset = event.offset;
 
       final count = await queryCount();
 
-      yield state.copyWith(
+      emit(state.copyWith(
         map: await queryMap(limit, offset),
         count: count,
         initialized: true,
         index: event.index,
         alignment: event.alignment,
-      );
+      ));
 
       jumpTo?.call(
         index: event.index,
@@ -211,11 +216,9 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
   Future<Map<int, T>> queryMap(int limit, int _offset) async {
     final offset = max(_offset, 0);
     final list = await queryRange(limit, max(offset, 0));
-    final map = Map.fromIterables(
-      List.generate(min(limit, list.length), (index) => offset + index),
-      list,
-    );
-    return map;
+    return Map.fromIterables(
+        List.generate(min(limit, list.length), (index) => offset + index),
+        list);
   }
 
   bool expectMinListRange(int _start, int _end) {
@@ -255,16 +258,14 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
 
 class AnonymousPagingBloc<T> extends PagingBloc<T> {
   AnonymousPagingBloc({
-    required int limit,
-    required PagingState<T> initState,
+    required super.limit,
+    required super.initState,
     required Future<int> Function() queryCount,
     required Future<List<T>> Function(int limit, int offset) queryRange,
   })  : _queryCount = queryCount,
         _queryRange = queryRange,
         super(
-          initState: initState,
           itemPositionsListener: ItemPositionsListener.create(),
-          limit: limit,
         );
 
   final Future<int> Function() _queryCount;

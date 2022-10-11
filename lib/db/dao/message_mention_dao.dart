@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 
-import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/reg_exp_utils.dart';
 import '../mixin_database.dart';
@@ -10,7 +9,7 @@ part 'message_mention_dao.g.dart';
 @DriftAccessor(tables: [MessageMentions])
 class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageMentionDaoMixin {
-  MessageMentionDao(MixinDatabase db) : super(db);
+  MessageMentionDao(super.db);
 
   Future<int> insert(MessageMention messageMention) =>
       into(db.messageMentions).insertOnConflictUpdate(messageMention);
@@ -29,15 +28,15 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
     String conversationId,
     String senderId,
     QuoteMessageItem? quoteMessage,
+    String currentUserId,
+    String currentUserIdentityNumber,
   ) async {
     var mentionMe = false;
-    final currentUserId = MultiAuthCubit.currentAccount?.userId;
-
     if (content?.isNotEmpty == true) {
       final numbers =
           mentionNumberRegExp.allMatchesAndSort(content!).map((e) => e[1]!);
       mentionMe = senderId != currentUserId &&
-          numbers.contains(MultiAuthCubit.currentAccount?.identityNumber);
+          numbers.contains(currentUserIdentityNumber);
     }
 
     if (!mentionMe &&
@@ -63,8 +62,17 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
                 tbl.conversationId.equals(conversationId) &
                 tbl.hasRead.equals(false)));
 
-  Future<int> markMentionRead(String messageId) =>
-      (db.update(db.messageMentions)
-            ..where((tbl) => tbl.messageId.equals(messageId)))
-          .write(MessageMentionsCompanion(hasRead: const Value(true)));
+  Future<void> markMentionRead(String messageId) async {
+    final already = await db.hasData(
+        db.messageMentions,
+        [],
+        db.messageMentions.messageId.equals(messageId) &
+            db.messageMentions.hasRead.equals(true));
+
+    if (already) return;
+
+    await (db.update(db.messageMentions)
+          ..where((tbl) => tbl.messageId.equals(messageId)))
+        .write(const MessageMentionsCompanion(hasRead: Value(true)));
+  }
 }

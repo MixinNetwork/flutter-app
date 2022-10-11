@@ -2,8 +2,8 @@ import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
 import '../../../utils/logger.dart';
 import '../dao/identity_dao.dart';
+import '../identity_extension.dart';
 import '../signal_database.dart';
-import '../signal_vo_extension.dart';
 
 class MixinIdentityKeyStore extends IdentityKeyStore {
   MixinIdentityKeyStore(SignalDatabase db, this._accountId) {
@@ -14,10 +14,10 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
   late final String? _accountId;
 
   @override
-  Future<IdentityKey> getIdentity(SignalProtocolAddress address) async =>
+  Future<IdentityKey?> getIdentity(SignalProtocolAddress address) async =>
       identityDao
           .getIdentityByAddress(address.toString())
-          .then((value) => value!.getIdentityKey());
+          .then((value) => value?.getIdentityKey());
 
   @override
   Future<IdentityKeyPair> getIdentityKeyPair() async => identityDao
@@ -49,8 +49,6 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
             identityKey!, await identityDao.getIdentityByAddress(theirAddress));
       case Direction.receiving:
         return true;
-      default:
-        throw AssertionError('Unknown direction: $direction');
     }
   }
 

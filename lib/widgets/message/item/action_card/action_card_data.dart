@@ -25,7 +25,7 @@ class AppCardData {
   final String description;
   final String action;
   @JsonKey(name: 'updated_at')
-  final String updatedAt;
+  final String? updatedAt;
 
   @JsonKey(defaultValue: true)
   final bool shareable;

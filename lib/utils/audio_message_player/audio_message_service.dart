@@ -19,7 +19,7 @@ class AudioMessagePlayService {
     this._accountServer,
     Stream<String?> conversationIdStream,
   ) {
-    _player = AudioMessagePlayer.platform();
+    _player = AudioMessagePlayer.oggOpus();
     initListen();
     conversationIdSubscription =
         conversationIdStream.distinct().listen((event) => _player.stop());
@@ -75,7 +75,7 @@ class AudioMessagePlayService {
 
     if (message.mediaStatus == MediaStatus.done) {
       unawaited(_accountServer.database.messageDao
-          .updateMediaStatus(MediaStatus.read, message.messageId));
+          .updateMediaStatus(message.messageId, MediaStatus.read));
     }
 
     _player.play([
@@ -116,10 +116,11 @@ bool useAudioMessagePlaying(String messageId, {bool isMediaList = false}) {
     () {
       final ams = context.audioMessageService;
 
-      return CombineLatestStream.combine2(
+      return CombineLatestStream.combine2<MessageMedia?, bool,
+          Tuple2<MessageMedia?, bool>>(
         ams._player.currentStream,
         ams._player.playbackStream.map((e) => e.isPlaying).distinct(),
-        (MessageMedia? a, bool playing) => Tuple2(a, playing),
+        Tuple2.new,
       ).map((event) {
         if (!event.item2) return false;
 

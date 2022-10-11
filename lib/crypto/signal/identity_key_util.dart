@@ -1,17 +1,17 @@
 import 'package:drift/drift.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
-import '../crypto_key_value.dart';
+import 'identity_extension.dart';
 import 'signal_database.dart';
-import 'signal_vo_extension.dart';
 
-Future<void> generateIdentityKeyPair(
+Future<int> generateSignalDatabaseIdentityKeyPair(
   SignalDatabase db,
-  List<int> privateKey,
+  List<int>? privateKey,
 ) async {
   final registrationId = generateRegistrationId(false);
-  CryptoKeyValue.instance.localRegistrationId = registrationId;
-  final identityKeyPair = generateIdentityKeyPairFromPrivate(privateKey);
+  final identityKeyPair = privateKey == null
+      ? generateIdentityKeyPair()
+      : generateIdentityKeyPairFromPrivate(privateKey);
   final identity = IdentitiesCompanion.insert(
       address: '-1',
       registrationId: Value(registrationId),
@@ -19,6 +19,7 @@ Future<void> generateIdentityKeyPair(
       privateKey: Value(identityKeyPair.getPrivateKey().serialize()),
       timestamp: DateTime.now().millisecondsSinceEpoch);
   await db.identityDao.insert(identity);
+  return registrationId;
 }
 
 Future<IdentityKeyPair?> getIdentityKeyPair(SignalDatabase db) async =>

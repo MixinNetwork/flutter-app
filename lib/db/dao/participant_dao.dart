@@ -9,7 +9,7 @@ part 'participant_dao.g.dart';
 @DriftAccessor(tables: [Participants])
 class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantDaoMixin {
-  ParticipantDao(MixinDatabase db) : super(db);
+  ParticipantDao(super.db);
 
   Future<int> insert(Participant participant) =>
       into(db.participants).insertOnConflictUpdate(participant);
@@ -56,7 +56,7 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
       db.customUpdate(
         'UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
         variables: [
-          Variable<String?>(const ParticipantRoleJsonConverter().toJson(role)),
+          Variable<String>(const ParticipantRoleJsonConverter().toJson(role)),
           Variable.withString(conversationId),
           Variable.withString(participantId)
         ],

@@ -7,7 +7,7 @@ part 'flood_message_dao.g.dart';
 @DriftAccessor(tables: [FloodMessages])
 class FloodMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$FloodMessageDaoMixin {
-  FloodMessageDao(MixinDatabase db) : super(db);
+  FloodMessageDao(super.db);
 
   Future<int> insert(FloodMessage message) =>
       into(db.floodMessages).insertOnConflictUpdate(message);
@@ -29,7 +29,7 @@ class FloodMessageDao extends DatabaseAccessor<MixinDatabase>
   Future<int> getFloodMessageCount() {
     final countExp = db.floodMessages.messageId.count();
     final query = selectOnly(db.floodMessages)..addColumns([countExp]);
-    return query.map((row) => row.read(countExp)).getSingle();
+    return query.map((row) => row.read(countExp)!).getSingle();
   }
 
   Future<DateTime?> getLastBlazeMessageCreatedAt() =>

@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BlocConverter<C extends BlocBase<S>, S, T> extends StatefulWidget {
   const BlocConverter({
-    Key? key,
+    super.key,
     this.cubit,
     this.when,
     required this.converter,
@@ -14,8 +14,7 @@ class BlocConverter<C extends BlocBase<S>, S, T> extends StatefulWidget {
     this.listener,
     this.immediatelyCallListener = false,
   })  : assert(builder != null || child != null),
-        assert(!(builder != null && child != null)),
-        super(key: key);
+        assert(!(builder != null && child != null));
 
   final C? cubit;
   final BlocBuilderCondition<T?>? when;

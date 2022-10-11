@@ -1,33 +1,27 @@
 import 'package:collection/collection.dart';
-import 'package:filesize/filesize.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
-import 'package:mime/mime.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
-import '../../../../bloc/paging/load_more_paging.dart';
-import '../../../../constants/brightness_theme_data.dart';
+import '../../../../bloc/paging/load_more_paging_state.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
-import '../../../../enum/media_status.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
-import '../../../../utils/file.dart';
 import '../../../../utils/hook.dart';
-import '../../../../widgets/interactive_decorated_box.dart';
-import '../../../../widgets/status.dart';
+import '../../../../widgets/message/item/file_message.dart';
+import '../../../../widgets/message/message.dart';
 import '../shared_media_page.dart';
 
 class FilePage extends HookWidget {
   const FilePage({
-    Key? key,
+    super.key,
     required this.maxHeight,
     required this.conversationId,
-  }) : super(key: key);
+  });
 
   final double maxHeight;
   final String conversationId;
@@ -85,6 +79,8 @@ class FilePage extends HookWidget {
       ),
     );
 
+    final scrollController = useScrollController();
+
     if (map.isEmpty) {
       return Center(
         child: Column(
@@ -96,7 +92,7 @@ class FilePage extends HookWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              context.l10n.noFile,
+              context.l10n.noFiles,
               style: TextStyle(
                 fontSize: 12,
                 color: context.theme.secondaryText,
@@ -123,6 +119,7 @@ class FilePage extends HookWidget {
         return false;
       },
       child: CustomScrollView(
+        controller: scrollController,
         slivers: map.entries
             .map(
               (e) => MultiSliver(
@@ -161,108 +158,19 @@ class FilePage extends HookWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key? key,
     required this.message,
-  }) : super(key: key);
+  });
 
   final MessageItem message;
 
   @override
   Widget build(BuildContext context) => ShareMediaItemMenuWrapper(
         messageId: message.messageId,
-        child: InteractiveDecoratedBox(
-          onTap: () async {
-            if (message.mediaStatus == MediaStatus.canceled) {
-              if (message.relationship == UserRelationship.me &&
-                  message.mediaUrl?.isNotEmpty == true) {
-                await context.accountServer.reUploadAttachment(message);
-              } else {
-                await context.accountServer.downloadAttachment(message);
-              }
-            } else if (message.mediaStatus == MediaStatus.done &&
-                message.mediaUrl != null) {
-              if (message.mediaUrl?.isEmpty ?? true) return;
-              await saveFileToSystem(
-                context,
-                context.accountServer.convertMessageAbsolutePath(message),
-                suggestName: message.mediaName,
-              );
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                SizedBox.fromSize(
-                  size: const Size.square(50),
-                  child: Builder(builder: (context) {
-                    switch (message.mediaStatus) {
-                      case MediaStatus.canceled:
-                        if (message.relationship == UserRelationship.me &&
-                            message.mediaUrl?.isNotEmpty == true) {
-                          return const StatusUpload();
-                        } else {
-                          return const StatusDownload();
-                        }
-                      case MediaStatus.pending:
-                        return const StatusPending();
-                      case MediaStatus.expired:
-                        return const StatusWarning();
-                      default:
-                        break;
-                    }
-
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: context.theme.statusBackground,
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Builder(builder: (context) {
-                        var extension = 'FILE';
-                        if (message.mediaName != null) {
-                          final _lookupMimeType =
-                              lookupMimeType(message.mediaName!);
-                          if (_lookupMimeType != null) {
-                            extension = extensionFromMime(_lookupMimeType)
-                                .toUpperCase();
-                          }
-                        }
-                        return Text(
-                          extension,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: lightBrightnessThemeData.secondaryText,
-                          ),
-                        );
-                      }),
-                    );
-                  }),
-                ),
-                const SizedBox(width: 10),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      message.mediaName?.overflow ?? '',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: context.theme.text,
-                      ),
-                      maxLines: 1,
-                    ),
-                    Text(
-                      filesize(message.mediaSize),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: context.theme.secondaryText,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        child: MessageContext.fromMessageItem(
+          message: message,
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: MessageFile(),
           ),
         ),
       );

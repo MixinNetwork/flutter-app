@@ -4,7 +4,6 @@ import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -18,26 +17,32 @@ import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
 import 'ui/home/bloc/conversation_cubit.dart';
+import 'ui/home/bloc/conversation_filter_unseen_cubit.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/bloc/multi_auth_cubit.dart';
 import 'ui/home/bloc/recall_message_bloc.dart';
 import 'ui/home/bloc/slide_category_cubit.dart';
-import 'ui/home/conversation_page.dart';
+import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
 import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
+import 'utils/system/system_fonts.dart';
 import 'utils/system/tray.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
 import 'widgets/message/item/text/mention_builder.dart';
+import 'widgets/portal_providers.dart';
+import 'widgets/window/menus.dart';
 import 'widgets/window/move_window.dart';
 import 'widgets/window/window_shortcuts.dart';
 
+final rootRouteObserver = RouteObserver<ModalRoute>();
+
 class App extends StatelessWidget {
-  const App({Key? key}) : super(key: key);
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +54,21 @@ class App extends StatelessWidget {
           BlocProvider(
             create: (context) => MultiAuthCubit(),
           ),
-          BlocProvider(create: (context) => SettingCubit()),
+          BlocProvider(create: (context) {
+            final authState = context.multiAuthState.current;
+            final settingCubit = SettingCubit()
+              ..migrate(
+                messagePreview: authState?.messagePreview,
+                photoAutoDownload: authState?.photoAutoDownload,
+                videoAutoDownload: authState?.videoAutoDownload,
+                fileAutoDownload: authState?.fileAutoDownload,
+                collapsedSidebar: authState?.collapsedSidebar,
+              );
+
+            context.multiAuthCubit.cleanCurrentSetting();
+
+            return settingCubit;
+          }),
         ],
         child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
           converter: (state) => state.current,
@@ -64,7 +83,8 @@ class App extends StatelessWidget {
                 authState.privateKey,
               )),
               create: (BuildContext context) async {
-                final accountServer = AccountServer(context.multiAuthCubit);
+                final accountServer =
+                    AccountServer(context.multiAuthCubit, context.settingCubit);
                 try {
                   await accountServer.initServer(
                     authState.account.userId,
@@ -73,6 +93,7 @@ class App extends StatelessWidget {
                     authState.privateKey,
                   );
                 } catch (e, s) {
+                  lastInitErrorMessage = e.toString();
                   w('accountServer.initServer error: $e, $s');
                   rethrow;
                 }
@@ -83,9 +104,7 @@ class App extends StatelessWidget {
                 builder: (context, accountServer, child) {
                   if (accountServer != null) {
                     return _Providers(
-                      app: Portal(
-                        child: child!,
-                      ),
+                      app: child!,
                       accountServer: accountServer,
                     );
                   }
@@ -103,10 +122,9 @@ class App extends StatelessWidget {
 
 class _Providers extends StatelessWidget {
   const _Providers({
-    Key? key,
     required this.app,
     required this.accountServer,
-  }) : super(key: key);
+  });
 
   final Widget app;
   final AccountServer accountServer;
@@ -141,6 +159,9 @@ class _Providers extends StatelessWidget {
                 ),
               ),
               BlocProvider(
+                create: (context) => ConversationFilterUnseenCubit(),
+              ),
+              BlocProvider(
                 create: (BuildContext context) => KeywordCubit(),
               ),
               BlocProvider(
@@ -160,7 +181,7 @@ class _Providers extends StatelessWidget {
                   NotificationService(context: context),
               lazy: false,
               dispose: (_, notificationService) => notificationService.close(),
-              child: app,
+              child: PortalProviders(child: app),
             ),
           ),
         ),
@@ -168,15 +189,14 @@ class _Providers extends StatelessWidget {
 }
 
 class _App extends StatelessWidget {
-  const _App({
-    Key? key,
-  }) : super(key: key);
+  const _App();
 
   @override
   Widget build(BuildContext context) => WindowShortcuts(
         child: GlobalMoveWindow(
           child: MaterialApp(
             title: 'Mixin',
+            navigatorObservers: [rootRouteObserver],
             debugShowCheckedModeBanner: false,
             localizationsDelegates: const [
               Localization.delegate,
@@ -187,15 +207,7 @@ class _App extends StatelessWidget {
             supportedLocales: [
               ...Localization.delegate.supportedLocales,
             ],
-            theme: ThemeData(
-              pageTransitionsTheme: const PageTransitionsTheme(
-                builders: <TargetPlatform, PageTransitionsBuilder>{
-                  TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
-                  TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-                  TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
-                },
-              ),
-            ),
+            theme: ThemeData().withFallbackFonts(),
             builder: (context, child) {
               try {
                 context.accountServer.language =
@@ -225,9 +237,7 @@ class _App extends StatelessWidget {
 }
 
 class _Home extends HookWidget {
-  const _Home({
-    Key? key,
-  }) : super(key: key);
+  const _Home();
 
   @override
   Widget build(BuildContext context) {
@@ -243,7 +253,7 @@ class _Home extends HookWidget {
         accountServer!
           ..refreshSelf()
           ..refreshFriends()
-          ..initSticker()
+          ..refreshSticker()
           ..initCircles();
       }
     }, [signed]);
@@ -251,10 +261,10 @@ class _Home extends HookWidget {
     if (signed) {
       BlocProvider.of<ConversationListBloc>(context)
         ..limit = MediaQuery.of(context).size.height ~/
-            (ConversationPage.conversationItemHeight / 2)
+            (ConversationPage.conversationItemHeight / 1.5)
         ..init();
       return const HomePage();
     }
-    return const LandingPage();
+    return const MacosMenuBar(child: LandingPage());
   }
 }

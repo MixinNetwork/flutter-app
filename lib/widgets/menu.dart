@@ -4,15 +4,19 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 import '../bloc/simple_cubit.dart';
+import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
+import 'hover_overlay.dart';
 import 'interactive_decorated_box.dart';
+import 'portal_providers.dart';
 
 class _OffsetCubit extends SimpleCubit<Offset?> {
-  _OffsetCubit(Offset? state) : super(state);
+  _OffsetCubit(super.state);
 }
 
 extension ContextMenuPortalEntrySender on BuildContext {
@@ -23,15 +27,21 @@ extension ContextMenuPortalEntrySender on BuildContext {
 
 class ContextMenuPortalEntry extends HookWidget {
   const ContextMenuPortalEntry({
-    Key? key,
+    super.key,
     required this.child,
     required this.buildMenus,
     this.showedMenu,
-  }) : super(key: key);
+    this.interactiveForTap = false,
+    this.enable = true,
+    this.onTap,
+  });
 
   final Widget child;
   final List<Widget> Function() buildMenus;
   final ValueChanged<bool>? showedMenu;
+  final bool interactiveForTap;
+  final bool enable;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -49,36 +59,32 @@ class ContextMenuPortalEntry extends HookWidget {
       showedMenu?.call(visible);
     }, [visible]);
 
+    useEffect(() {
+      if (!enable) {
+        offsetCubit.emit(null);
+      }
+    }, [enable]);
+
+    if (!enable) {
+      return child;
+    }
     return Provider.value(
       value: offsetCubit,
       child: Barrier(
-        duration: const Duration(milliseconds: 100),
         visible: visible,
         onClose: () => offsetCubit.emit(null),
-        child: PortalEntry(
+        child: PortalTarget(
           visible: visible,
-          closeDuration: const Duration(milliseconds: 100),
-          portal: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: visible ? 1 : 0),
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.easeOut,
-            builder: (context, progress, child) => Opacity(
-              opacity: progress,
-              child: child,
-            ),
-            child: Builder(builder: (context) {
-              if (offset != null) {
-                return CustomSingleChildLayout(
-                  delegate: PositionedLayoutDelegate(
-                    position: offset,
-                  ),
-                  child: ContextMenuPage(menus: buildMenus()),
-                );
-              }
+          portalFollower: Builder(builder: (context) {
+            if (offset != null && visible) {
+              return CustomSingleChildLayout(
+                delegate: PositionedLayoutDelegate(position: offset),
+                child: ContextMenuPage(menus: buildMenus()),
+              );
+            }
 
-              return const SizedBox();
-            }),
-          ),
+            return const SizedBox();
+          }),
           child: InteractiveDecoratedBox(
             onRightClick: (PointerUpEvent pointerUpEvent) =>
                 offsetCubit.emit(pointerUpEvent.position),
@@ -87,6 +93,10 @@ class ContextMenuPortalEntry extends HookWidget {
                 offsetCubit.emit(details.globalPosition);
               }
             },
+            onTapUp: interactiveForTap
+                ? (details) => offsetCubit.emit(details.globalPosition)
+                : null,
+            onTap: onTap,
             child: child,
           ),
         ),
@@ -97,23 +107,23 @@ class ContextMenuPortalEntry extends HookWidget {
 
 class Barrier extends StatelessWidget {
   const Barrier({
-    Key? key,
+    super.key,
     required this.onClose,
     required this.visible,
     required this.child,
-    required this.duration,
-  }) : super(key: key);
+    this.duration,
+  });
 
   final Widget child;
   final VoidCallback onClose;
   final bool visible;
-  final Duration duration;
+  final Duration? duration;
 
   @override
-  Widget build(BuildContext context) => PortalEntry(
+  Widget build(BuildContext context) => PortalTarget(
         visible: visible,
         closeDuration: duration,
-        portal: GestureDetector(
+        portalFollower: GestureDetector(
           behavior:
               visible ? HitTestBehavior.opaque : HitTestBehavior.deferToChild,
           onTap: onClose,
@@ -123,9 +133,7 @@ class Barrier extends StatelessWidget {
 }
 
 class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
-  PositionedLayoutDelegate({
-    required this.position,
-  });
+  PositionedLayoutDelegate({required this.position});
 
   final Offset position;
 
@@ -157,9 +165,9 @@ class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
 
 class ContextMenuPage extends StatelessWidget {
   const ContextMenuPage({
-    Key? key,
+    super.key,
     required this.menus,
-  }) : super(key: key);
+  });
 
   final List<Widget> menus;
 
@@ -168,7 +176,7 @@ class ContextMenuPage extends StatelessWidget {
     final brightnessData = context.brightnessValue;
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: const BorderRadius.all(Radius.circular(11)),
         border: Border.all(
           color: Color.lerp(
             Colors.transparent,
@@ -194,7 +202,7 @@ class ContextMenuPage extends StatelessWidget {
         ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: const BorderRadius.all(Radius.circular(11)),
         child: IntrinsicWidth(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -209,16 +217,24 @@ class ContextMenuPage extends StatelessWidget {
 
 class ContextMenu extends StatelessWidget {
   const ContextMenu({
-    Key? key,
+    super.key,
     required this.title,
     this.isDestructiveAction = false,
     this.onTap,
-  }) : super(
-          key: key,
-        );
+    this.icon,
+  }) : _subMenuMode = false;
 
+  const ContextMenu._sub({
+    required this.title,
+    this.isDestructiveAction = false,
+    this.icon,
+  })  : _subMenuMode = true,
+        onTap = null;
+
+  final String? icon;
   final String title;
   final bool isDestructiveAction;
+  final bool _subMenuMode;
   final VoidCallback? onTap;
 
   @override
@@ -227,6 +243,12 @@ class ContextMenu extends StatelessWidget {
       const Color.fromRGBO(255, 255, 255, 1),
       darkColor: const Color.fromRGBO(62, 65, 72, 1),
     );
+    final color = isDestructiveAction
+        ? context.theme.red
+        : context.dynamicColor(
+            const Color.fromRGBO(0, 0, 0, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+          );
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 160),
       child: InteractiveDecoratedBox.color(
@@ -239,24 +261,80 @@ class ContextMenu extends StatelessWidget {
         ),
         onTap: () {
           onTap?.call();
-          context.closeMenu();
+          if (!_subMenuMode) context.closeMenu();
+        },
+        onTapUp: (details) {
+          if (_subMenuMode && details.kind == PointerDeviceKind.touch) {
+            const SubMenuClickedByTouchNotification().dispatch(context);
+          }
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 16,
-              color: isDestructiveAction
-                  ? context.theme.red
-                  : context.dynamicColor(
-                      const Color.fromRGBO(0, 0, 0, 1),
-                      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                    ),
-            ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              if (icon != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: SvgPicture.asset(icon!,
+                      color: color, width: 20, height: 20),
+                ),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: color,
+                  ),
+                ),
+              ),
+              if (_subMenuMode)
+                SvgPicture.asset(
+                  Resources.assetsImagesIcArrowRightSvg,
+                  width: 20,
+                  height: 20,
+                  color: context.theme.secondaryText,
+                ),
+            ],
           ),
         ),
       ),
     );
   }
+}
+
+class SubContextMenu extends StatelessWidget {
+  const SubContextMenu({
+    super.key,
+    required this.title,
+    required this.menus,
+    this.icon,
+    this.isDestructiveAction = false,
+  });
+
+  final String? icon;
+  final String title;
+  final bool isDestructiveAction;
+  final List<Widget> menus;
+
+  @override
+  Widget build(BuildContext context) => HoverOverlay(
+        closeDuration: Duration.zero,
+        duration: Duration.zero,
+        portalCandidateLabels: const [secondPortal],
+        anchor: const Aligned(
+          follower: Alignment.centerLeft,
+          target: Alignment.centerRight,
+          offset: Offset(-8, 0),
+        ),
+        portal: ContextMenuPage(menus: menus),
+        child: ContextMenu._sub(
+          icon: icon,
+          title: title,
+          isDestructiveAction: isDestructiveAction,
+        ),
+      );
+}
+
+class SubMenuClickedByTouchNotification extends Notification {
+  const SubMenuClickedByTouchNotification();
 }

@@ -3,16 +3,13 @@ import 'package:flutter/widgets.dart';
 
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/uri_utils.dart';
-import '../../../utils/webview.dart';
+import '../../../utils/web_view/web_view_interface.dart';
 import '../../interactive_decorated_box.dart';
 import '../../toast.dart';
 import '../message.dart';
 
 class StrangerMessage extends StatelessWidget {
-  const StrangerMessage({
-    Key? key,
-  }) : super(key: key);
+  const StrangerMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +20,8 @@ class StrangerMessage extends StatelessWidget {
       children: [
         Text(
           isBotConversation
-              ? context.l10n.botInteractInfo
-              : context.l10n.strangerFromMessage,
+              ? context.l10n.chatBotReceptionTitle
+              : context.l10n.strangerHint,
           style: TextStyle(
             fontSize: MessageItemWidget.primaryFontSize,
             color: context.theme.text,
@@ -36,7 +33,7 @@ class StrangerMessage extends StatelessWidget {
           children: [
             _StrangerButton(
               isBotConversation
-                  ? context.l10n.botInteractOpen
+                  ? context.l10n.openHomePage
                   : context.l10n.block,
               onTap: () async {
                 final message = context.message;
@@ -44,12 +41,8 @@ class StrangerMessage extends StatelessWidget {
                   final app =
                       await context.database.appDao.findAppById(message.appId!);
                   if (app == null) return;
-                  if (kIsSupportWebView) {
-                    await openBotWebViewWindow(context, app,
-                        conversationId: message.conversationId);
-                  } else {
-                    await openUri(context, app.homeUri);
-                  }
+                  await MixinWebView.instance.openBotWebViewWindow(context, app,
+                      conversationId: message.conversationId);
                 } else {
                   await runFutureWithToast(
                     context,
@@ -60,9 +53,7 @@ class StrangerMessage extends StatelessWidget {
             ),
             const SizedBox(width: 16),
             _StrangerButton(
-              isBotConversation
-                  ? context.l10n.botInteractHi
-                  : context.l10n.addContact,
+              isBotConversation ? context.l10n.sayHi : context.l10n.addContact,
               onTap: () {
                 final message = context.message;
                 if (isBotConversation) {
@@ -85,9 +76,8 @@ class StrangerMessage extends StatelessWidget {
 class _StrangerButton extends StatelessWidget {
   const _StrangerButton(
     this.text, {
-    Key? key,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final String text;
   final VoidCallback? onTap;
@@ -97,7 +87,7 @@ class _StrangerButton extends StatelessWidget {
         onTap: onTap,
         decoration: BoxDecoration(
           color: context.theme.primary,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
         ),
         child: ConstrainedBox(
           constraints: const BoxConstraints(

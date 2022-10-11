@@ -10,13 +10,9 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../message.dart';
 import '../message_bubble.dart';
-import '../message_datetime_and_status.dart';
-import '../message_layout.dart';
 
 class RecallMessage extends HookWidget {
-  const RecallMessage({
-    Key? key,
-  }) : super(key: key);
+  const RecallMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +41,8 @@ class RecallMessage extends HookWidget {
             TextSpan(children: [
               TextSpan(
                 text: isCurrentUser
-                    ? context.l10n.chatRecallMe
-                    : context.l10n.chatRecallDelete,
+                    ? context.l10n.youDeletedThisMessage
+                    : context.l10n.thisMessageWasDeleted,
               ),
               if (recalledText != null)
                 TextSpan(
@@ -67,13 +63,8 @@ class RecallMessage extends HookWidget {
         ),
       ],
     );
-    const dateAndStatus = MessageDatetimeAndStatus();
     return MessageBubble(
-      child: MessageLayout(
-        spacing: 6,
-        content: content,
-        dateAndStatus: dateAndStatus,
-      ),
+      child: content,
     );
   }
 }

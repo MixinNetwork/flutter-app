@@ -11,7 +11,7 @@ import '../cache_image.dart';
 
 class ConversationAvatarWidget extends HookWidget {
   const ConversationAvatarWidget({
-    Key? key,
+    super.key,
     this.conversation,
     required this.size,
     this.conversationId,
@@ -20,7 +20,7 @@ class ConversationAvatarWidget extends HookWidget {
     this.groupIconUrl,
     this.avatarUrl,
     this.category,
-  }) : super(key: key);
+  });
 
   final ConversationItem? conversation;
   final String? userId;
@@ -65,17 +65,13 @@ class ConversationAvatarWidget extends HookWidget {
         ).data ??
         <User>[];
 
-    Widget child;
-    if (_category == ConversationCategory.contact) {
-      child = AvatarWidget(
-        userId: _userId,
-        name: _name ?? '',
-        avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
-        size: size,
-      );
-    } else {
-      child = AvatarPuzzlesWidget(list, size);
-    }
+    final child = _category == ConversationCategory.contact
+        ? AvatarWidget(
+            userId: _userId,
+            name: _name,
+            avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
+            size: size)
+        : AvatarPuzzlesWidget(list, size);
 
     return SizedBox.fromSize(
       size: Size.square(size),
@@ -87,8 +83,7 @@ class ConversationAvatarWidget extends HookWidget {
 }
 
 class AvatarPuzzlesWidget extends HookWidget {
-  const AvatarPuzzlesWidget(this.users, this.size, {Key? key})
-      : super(key: key);
+  const AvatarPuzzlesWidget(this.users, this.size, {super.key});
 
   final List<User> users;
   final double size;
@@ -102,7 +97,7 @@ class AvatarPuzzlesWidget extends HookWidget {
           size: size,
           clipOval: false,
           userId: users.single.userId,
-          name: users.single.fullName!,
+          name: users.single.fullName,
           avatarUrl: users.single.avatarUrl,
         );
       case 2:
@@ -114,9 +109,9 @@ class AvatarPuzzlesWidget extends HookWidget {
           children: [
             Expanded(
                 child: AvatarWidget(
-              userId: users[0].userId,
-              name: users[0].fullName!,
-              avatarUrl: users[0].avatarUrl,
+              userId: users.first.userId,
+              name: users.first.fullName,
+              avatarUrl: users.first.avatarUrl,
               size: size,
               clipOval: false,
             )),
@@ -146,7 +141,7 @@ class AvatarPuzzlesWidget extends HookWidget {
   Widget _buildAvatarImage(User user) => Expanded(
         child: AvatarWidget(
           userId: user.userId,
-          name: user.fullName ?? '?',
+          name: user.fullName,
           avatarUrl: user.avatarUrl,
           size: size,
           clipOval: false,
@@ -156,17 +151,17 @@ class AvatarPuzzlesWidget extends HookWidget {
 
 class AvatarWidget extends StatelessWidget {
   const AvatarWidget({
-    Key? key,
+    super.key,
     required this.size,
     this.clipOval = true,
     required this.avatarUrl,
     required this.userId,
     required this.name,
-  }) : super(key: key);
+  });
 
   final String? avatarUrl;
   final String? userId;
-  final String name;
+  final String? name;
   final double size;
   final bool clipOval;
 
@@ -182,7 +177,9 @@ class AvatarWidget extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            name[0].toUpperCase(),
+            (name?.isNotEmpty == true)
+                ? name!.characters.first.toUpperCase()
+                : '',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -193,17 +190,10 @@ class AvatarWidget extends StatelessWidget {
       ),
     );
 
-    Widget child;
-    if (avatarUrl?.isNotEmpty == true) {
-      child = CacheImage(
-        avatarUrl!,
-        width: size,
-        height: size,
-        placeholder: (_, __) => placeholder,
-      );
-    } else {
-      child = placeholder;
-    }
+    final child = avatarUrl?.isNotEmpty == true
+        ? CacheImage(avatarUrl!,
+            width: size, height: size, placeholder: () => placeholder)
+        : placeholder;
 
     if (clipOval) return ClipOval(child: child);
     return child;

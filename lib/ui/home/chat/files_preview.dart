@@ -18,6 +18,7 @@ import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/load_balancer_utils.dart';
+import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/system/clipboard.dart';
 import '../../../widgets/action_button.dart';
@@ -26,6 +27,8 @@ import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../bloc/conversation_cubit.dart';
+import '../bloc/quote_message_cubit.dart';
+import 'image_editor.dart';
 
 Future<void> showFilesPreviewDialog(
     BuildContext context, List<XFile> files) async {
@@ -33,15 +36,16 @@ Future<void> showFilesPreviewDialog(
     context: context,
     child: _FilesPreviewDialog(
       initialFiles: await Future.wait(files.map(
-        (e) async => _File(e, await e.length()),
+        (e) async => _File(e, await e.length(), null),
       )),
+      quoteMessageCubit: context.read<QuoteMessageCubit>(),
     ),
   );
 }
 
 /// We need this view object to keep the value of file#length.
 class _File {
-  _File(this.file, this.length);
+  _File(this.file, this.length, this.imageEditorSnapshot);
 
   static Future<_File> createFromPath(String path) {
     final file = File(path);
@@ -49,9 +53,11 @@ class _File {
   }
 
   static Future<_File> createFromFile(File file) async =>
-      _File(file.xFile, await file.length());
+      _File(file.xFile, await file.length(), null);
 
   final XFile file;
+
+  final ImageEditorSnapshot? imageEditorSnapshot;
 
   String get path => file.path;
 
@@ -62,8 +68,7 @@ class _File {
   bool get isImage => file.isImage;
 }
 
-typedef _FileDeleteCallback = void Function(_File);
-typedef _FileAddCallback = void Function(List<_File>);
+typedef _ImageEditedCallback = void Function(_File, ImageEditorSnapshot);
 
 const _kDefaultArchiveName = 'Archive.zip';
 
@@ -71,11 +76,12 @@ enum _TabType { image, files, zip }
 
 class _FilesPreviewDialog extends HookWidget {
   const _FilesPreviewDialog({
-    Key? key,
     required this.initialFiles,
-  }) : super(key: key);
+    this.quoteMessageCubit,
+  });
 
   final List<_File> initialFiles;
+  final QuoteMessageCubit? quoteMessageCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -119,11 +125,7 @@ class _FilesPreviewDialog extends HookWidget {
     final showAsBigImage = useState(hasImage);
 
     useEffect(() {
-      if (hasImage && currentTab.value == _TabType.image) {
-        showAsBigImage.value = true;
-      } else {
-        showAsBigImage.value = false;
-      }
+      showAsBigImage.value = hasImage && currentTab.value == _TabType.image;
     }, [hasImage, currentTab.value]);
 
     return Material(
@@ -144,7 +146,7 @@ class _FilesPreviewDialog extends HookWidget {
                       children: [
                         _Tab(
                           assetName: Resources.assetsImagesFilePreviewImagesSvg,
-                          tooltip: context.l10n.sendQuick,
+                          tooltip: context.l10n.sendQuickly,
                           onTap: () => currentTab.value = _TabType.image,
                           selected: currentTab.value == _TabType.image,
                           show: hasImage,
@@ -193,6 +195,18 @@ class _FilesPreviewDialog extends HookWidget {
                                     animation: animation,
                                     onDelete: removeFile,
                                     showBigImage: showAsBigImage,
+                                    onImageEdited: (file, image) async {
+                                      final index = files.value.indexOf(file);
+                                      if (index == -1) {
+                                        e('failed to found file');
+                                        return;
+                                      }
+                                      final list = files.value.toList();
+                                      final newFile = File(image.imagePath);
+                                      list[index] = _File(newFile.xFile,
+                                          await newFile.length(), image);
+                                      files.value = list;
+                                    },
                                   )),
                           const _PageZip(),
                         ],
@@ -205,8 +219,10 @@ class _FilesPreviewDialog extends HookWidget {
                       onPressed: () async {
                         if (currentTab.value != _TabType.zip) {
                           for (final file in files.value) {
-                            unawaited(_sendFile(context, file));
+                            unawaited(_sendFile(context, file,
+                                quoteMessageCubit?.state?.messageId));
                           }
+                          quoteMessageCubit?.emit(null);
                           Navigator.pop(context);
                         } else {
                           final zipFilePath =
@@ -217,14 +233,16 @@ class _FilesPreviewDialog extends HookWidget {
                           unawaited(_sendFile(
                             context,
                             await _File.createFromPath(zipFilePath),
+                            quoteMessageCubit?.state?.messageId,
                           ));
+                          quoteMessageCubit?.emit(null);
                           Navigator.pop(context);
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.only(
                             left: 32, top: 18, bottom: 18, right: 32),
-                        primary: context.theme.accent,
+                        backgroundColor: context.theme.accent,
                       ),
                       child: Text(context.l10n.send.toUpperCase()),
                     ),
@@ -247,18 +265,19 @@ class _FilesPreviewDialog extends HookWidget {
 
 Future<String> _archiveFiles(List<String> paths) async {
   assert(paths.length > 1, 'paths[0] should be temp file dir');
-  final outPath = path.join(
-      paths[0], 'mixin_archive_${DateTime.now().millisecondsSinceEpoch}.zip');
+  final outPath = path.join(paths.first,
+      'mixin_archive_${DateTime.now().millisecondsSinceEpoch}.zip');
   final encoder = ZipFileEncoder()..create(outPath);
   paths.removeAt(0);
   for (final filePath in paths) {
-    encoder.addFile(File(filePath), path.basename(filePath));
+    await encoder.addFile(File(filePath), path.basename(filePath));
   }
   encoder.close();
   return outPath;
 }
 
-Future<void> _sendFile(BuildContext context, _File file) async {
+Future<void> _sendFile(
+    BuildContext context, _File file, String? quoteMessageId) async {
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
   final xFile = file.file;
@@ -268,6 +287,7 @@ Future<void> _sendFile(BuildContext context, _File file) async {
       file: xFile,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
+      quoteMessageId: quoteMessageId,
     );
   } else if (xFile.isVideo) {
     return context.accountServer.sendVideoMessage(
@@ -275,6 +295,7 @@ Future<void> _sendFile(BuildContext context, _File file) async {
       conversationItem.encryptCategory,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
+      quoteMessageId: quoteMessageId,
     );
   }
   await context.accountServer.sendDataMessage(
@@ -282,22 +303,26 @@ Future<void> _sendFile(BuildContext context, _File file) async {
     conversationItem.encryptCategory,
     conversationId: conversationItem.conversationId,
     recipientId: conversationItem.userId,
+    quoteMessageId: quoteMessageId,
   );
 }
 
 class _AnimatedFileTile extends HookWidget {
   const _AnimatedFileTile({
-    Key? key,
+    super.key,
     required this.file,
     required this.animation,
     this.onDelete,
     required this.showBigImage,
-  }) : super(key: key);
+    this.onImageEdited,
+  });
 
   final _File file;
   final Animation<double> animation;
 
-  final _FileDeleteCallback? onDelete;
+  final void Function(_File)? onDelete;
+
+  final _ImageEditedCallback? onImageEdited;
 
   final ValueNotifier<bool> showBigImage;
 
@@ -315,6 +340,8 @@ class _AnimatedFileTile extends HookWidget {
                   firstChild: _TileBigImage(
                     file: file,
                     onDelete: () => onDelete?.call(file),
+                    onEdited: (file, snapshot) =>
+                        onImageEdited?.call(file, snapshot),
                   ),
                   secondChild: _TileNormalFile(
                     file: file,
@@ -339,13 +366,12 @@ class _AnimatedFileTile extends HookWidget {
 
 class _Tab extends StatelessWidget {
   const _Tab({
-    Key? key,
     required this.assetName,
     required this.tooltip,
     required this.onTap,
     this.selected = false,
     this.show = true,
-  }) : super(key: key);
+  });
 
   final String assetName;
 
@@ -386,7 +412,7 @@ class _Tab extends StatelessWidget {
 }
 
 class _PageZip extends StatelessWidget {
-  const _PageZip({Key? key}) : super(key: key);
+  const _PageZip();
 
   @override
   Widget build(BuildContext context) => Column(
@@ -429,23 +455,19 @@ class _PageZip extends StatelessWidget {
       );
 }
 
-typedef FileItemBuilder = Widget Function(
-    BuildContext, _File, Animation<double>);
-
 class _AnimatedListBuilder extends HookWidget {
   const _AnimatedListBuilder({
-    Key? key,
     required this.files,
     required this.onFileAdded,
     required this.onFileDeleted,
     required this.builder,
-  }) : super(key: key);
+  });
 
   final List<_File> files;
   final Stream<int> onFileAdded;
   final Stream<Tuple2<int, _File>> onFileDeleted;
 
-  final FileItemBuilder builder;
+  final Widget Function(BuildContext, _File, Animation<double>) builder;
 
   @override
   Widget build(BuildContext context) {
@@ -478,14 +500,16 @@ class _AnimatedListBuilder extends HookWidget {
 
 class _TileBigImage extends HookWidget {
   const _TileBigImage({
-    Key? key,
     required this.file,
     required this.onDelete,
-  }) : super(key: key);
+    required this.onEdited,
+  });
 
   final _File file;
 
   final VoidCallback onDelete;
+
+  final _ImageEditedCallback onEdited;
 
   @override
   Widget build(BuildContext context) {
@@ -499,7 +523,7 @@ class _TileBigImage extends HookWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: const BorderRadius.all(Radius.circular(6)),
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
@@ -529,19 +553,37 @@ class _TileBigImage extends HookWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   )),
-                  child: Align(
-                    alignment: Alignment.bottomRight,
-                    child: ActionButton(
-                      color: Colors.white,
-                      name: Resources.assetsImagesDeleteSvg,
-                      padding: const EdgeInsets.all(10),
-                      onTap: onDelete,
-                    ),
+                  child: Row(
+                    children: [
+                      const Spacer(),
+                      ActionButton(
+                        color: Colors.white,
+                        name: Resources.assetsImagesEditImageSvg,
+                        padding: const EdgeInsets.all(10),
+                        onTap: () async {
+                          final snapshot = file.imageEditorSnapshot != null
+                              ? await showImageEditor(context,
+                                  path: file.imageEditorSnapshot!.rawImagePath,
+                                  snapshot: file.imageEditorSnapshot)
+                              : await showImageEditor(context, path: file.path);
+                          if (snapshot == null) {
+                            return;
+                          }
+                          onEdited.call(file, snapshot);
+                        },
+                      ),
+                      ActionButton(
+                        color: Colors.white,
+                        name: Resources.assetsImagesDeleteSvg,
+                        padding: const EdgeInsets.all(10),
+                        onTap: onDelete,
+                      ),
+                    ],
                   ),
                 ),
-                crossFadeState: !showDelete.value
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
+                crossFadeState: kPlatformIsMobile || showDelete.value
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
                 duration: const Duration(milliseconds: 150),
               )
             ],
@@ -553,7 +595,7 @@ class _TileBigImage extends HookWidget {
 }
 
 class _FileIcon extends StatelessWidget {
-  const _FileIcon({Key? key, required this.extension}) : super(key: key);
+  const _FileIcon({required this.extension});
 
   final String extension;
 
@@ -580,10 +622,9 @@ class _FileIcon extends StatelessWidget {
 
 class _TileNormalFile extends HookWidget {
   const _TileNormalFile({
-    Key? key,
     required this.file,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   final _File file;
 
@@ -653,14 +694,13 @@ class _TileNormalFile extends HookWidget {
 
 class _FileInputOverlay extends HookWidget {
   const _FileInputOverlay({
-    Key? key,
     required this.child,
     required this.onFileAdded,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
-  final _FileAddCallback onFileAdded;
+  final void Function(List<_File>) onFileAdded;
 
   @override
   Widget build(BuildContext context) {
@@ -684,18 +724,17 @@ class _FileInputOverlay extends HookWidget {
         onDragEntered: (_) => dragging.value = true,
         onDragExited: (_) => dragging.value = false,
         onDragDone: (details) async {
-          final files = <_File>[];
-          for (final uri in details.urls) {
-            final file = File(uri.toFilePath(windows: Platform.isWindows));
-            if (!file.existsSync()) {
-              continue;
-            }
-            files.add(await _File.createFromFile(file));
-          }
+          final files = details.files.where((xFile) {
+            final file = File(xFile.path);
+            return file.existsSync();
+          });
           if (files.isEmpty) {
             return;
           }
-          onFileAdded(files);
+          onFileAdded(await Future.wait(
+            files.map((file) async =>
+                _File(file.withMineType(), await file.length(), null)),
+          ));
         },
         child: Stack(
           children: [
@@ -713,7 +752,7 @@ class _PasteFileOrImageIntent extends Intent {
 }
 
 class _ChatDragIndicator extends StatelessWidget {
-  const _ChatDragIndicator({Key? key}) : super(key: key);
+  const _ChatDragIndicator();
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -731,7 +770,7 @@ class _ChatDragIndicator extends StatelessWidget {
               )),
           child: Center(
             child: Text(
-              context.l10n.chatDragMoreFile,
+              context.l10n.addFile,
               style: TextStyle(
                 fontSize: 14,
                 color: context.theme.text,

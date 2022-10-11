@@ -12,6 +12,7 @@ class MinuteTimerCubit extends Cubit<DateTime> {
 
   late Timer timer;
 
+  // ignore: avoid-unused-parameters
   void handleTimeout(Timer timer) => emit(DateTime.now());
 
   @override

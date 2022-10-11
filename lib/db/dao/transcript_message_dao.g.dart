@@ -15,6 +15,7 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   Participants get participants => attachedDatabase.participants;
   StickerAlbums get stickerAlbums => attachedDatabase.stickerAlbums;
   PinMessages get pinMessages => attachedDatabase.pinMessages;
+  Users get users => attachedDatabase.users;
   Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
@@ -35,21 +36,14 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   StickerRelationships get stickerRelationships =>
       attachedDatabase.stickerRelationships;
   Stickers get stickers => attachedDatabase.stickers;
-  Users get users => attachedDatabase.users;
   TranscriptMessages get transcriptMessages =>
       attachedDatabase.transcriptMessages;
   Fiats get fiats => attachedDatabase.fiats;
+  FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
+  ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Selectable<TranscriptMessageItem> baseTranscriptMessageItem(
-      Expression<bool?> Function(
-              TranscriptMessages transcript,
-              Messages message,
-              Users sender,
-              Users sharedUser,
-              Stickers sticker)
-          where,
-      Limit Function(TranscriptMessages transcript, Messages message,
-              Users sender, Users sharedUser, Stickers sticker)
-          limit) {
+      BaseTranscriptMessageItem$where where,
+      BaseTranscriptMessageItem$limit limit) {
     var $arrayStartIndex = 1;
     final generatedwhere = $write(
         where(
@@ -90,87 +84,88 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         messageId: row.read<String>('messageId'),
         conversationId: row.read<String>('conversationId'),
         type: row.read<String>('type'),
-        content: row.read<String?>('content'),
-        createdAt: TranscriptMessages.$converter0
-            .mapToDart(row.read<int>('createdAt'))!,
-        status: Messages.$converter1.mapToDart(row.read<String>('status'))!,
+        content: row.readNullable<String>('content'),
+        createdAt:
+            TranscriptMessages.$converter0.fromSql(row.read<int>('createdAt')),
+        status: Messages.$converter1.fromSql(row.read<String>('status')),
         mediaStatus: TranscriptMessages.$converter1
-            .mapToDart(row.read<String?>('mediaStatus')),
-        mediaWaveform: row.read<String?>('mediaWaveform'),
-        mediaName: row.read<String?>('mediaName'),
-        mediaMimeType: row.read<String?>('mediaMimeType'),
-        mediaSize: row.read<int?>('mediaSize'),
-        mediaWidth: row.read<int?>('mediaWidth'),
-        mediaHeight: row.read<int?>('mediaHeight'),
-        thumbImage: row.read<String?>('thumbImage'),
-        thumbUrl: row.read<String?>('thumbUrl'),
-        mediaUrl: row.read<String?>('mediaUrl'),
-        mediaDuration: row.read<String?>('mediaDuration'),
-        quoteId: row.read<String?>('quoteId'),
-        quoteContent: row.read<String?>('quoteContent'),
-        sharedUserId: row.read<String?>('sharedUserId'),
-        userId: row.read<String?>('userId'),
-        userFullName: row.read<String?>('userFullName'),
-        userIdentityNumber: row.read<String?>('userIdentityNumber'),
-        appId: row.read<String?>('appId'),
+            .fromSql(row.readNullable<String>('mediaStatus')),
+        mediaWaveform: row.readNullable<String>('mediaWaveform'),
+        mediaName: row.readNullable<String>('mediaName'),
+        mediaMimeType: row.readNullable<String>('mediaMimeType'),
+        mediaSize: row.readNullable<int>('mediaSize'),
+        mediaWidth: row.readNullable<int>('mediaWidth'),
+        mediaHeight: row.readNullable<int>('mediaHeight'),
+        thumbImage: row.readNullable<String>('thumbImage'),
+        thumbUrl: row.readNullable<String>('thumbUrl'),
+        mediaUrl: row.readNullable<String>('mediaUrl'),
+        mediaDuration: row.readNullable<String>('mediaDuration'),
+        quoteId: row.readNullable<String>('quoteId'),
+        quoteContent: row.readNullable<String>('quoteContent'),
+        sharedUserId: row.readNullable<String>('sharedUserId'),
+        userId: row.readNullable<String>('userId'),
+        userFullName: row.readNullable<String>('userFullName'),
+        userIdentityNumber: row.readNullable<String>('userIdentityNumber'),
+        appId: row.readNullable<String>('appId'),
         relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
-        avatarUrl: row.read<String?>('avatarUrl'),
-        sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
-        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
-        sharedUserAppId: row.read<String?>('sharedUserAppId'),
-        assetUrl: row.read<String?>('assetUrl'),
-        assetWidth: row.read<int?>('assetWidth'),
-        assetHeight: row.read<int?>('assetHeight'),
-        stickerId: row.read<String?>('stickerId'),
-        assetName: row.read<String?>('assetName'),
-        assetType: row.read<String?>('assetType'),
+            Users.$converter0.fromSql(row.readNullable<String>('relationship')),
+        avatarUrl: row.readNullable<String>('avatarUrl'),
+        sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
+        sharedUserIdentityNumber:
+            row.readNullable<String>('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
+        sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
+        assetUrl: row.readNullable<String>('assetUrl'),
+        assetWidth: row.readNullable<int>('assetWidth'),
+        assetHeight: row.readNullable<int>('assetHeight'),
+        stickerId: row.readNullable<String>('stickerId'),
+        assetName: row.readNullable<String>('assetName'),
+        assetType: row.readNullable<String>('assetType'),
       );
     });
   }
 }
 
 class TranscriptMessageItem {
-  String transcriptId;
-  String messageId;
-  String conversationId;
-  String type;
-  String? content;
-  DateTime createdAt;
-  MessageStatus status;
-  MediaStatus? mediaStatus;
-  String? mediaWaveform;
-  String? mediaName;
-  String? mediaMimeType;
-  int? mediaSize;
-  int? mediaWidth;
-  int? mediaHeight;
-  String? thumbImage;
-  String? thumbUrl;
-  String? mediaUrl;
-  String? mediaDuration;
-  String? quoteId;
-  String? quoteContent;
-  String? sharedUserId;
-  String? userId;
-  String? userFullName;
-  String? userIdentityNumber;
-  String? appId;
-  UserRelationship? relationship;
-  String? avatarUrl;
-  String? sharedUserFullName;
-  String? sharedUserIdentityNumber;
-  String? sharedUserAvatarUrl;
-  bool? sharedUserIsVerified;
-  String? sharedUserAppId;
-  String? assetUrl;
-  int? assetWidth;
-  int? assetHeight;
-  String? stickerId;
-  String? assetName;
-  String? assetType;
+  final String transcriptId;
+  final String messageId;
+  final String conversationId;
+  final String type;
+  final String? content;
+  final DateTime createdAt;
+  final MessageStatus status;
+  final MediaStatus? mediaStatus;
+  final String? mediaWaveform;
+  final String? mediaName;
+  final String? mediaMimeType;
+  final int? mediaSize;
+  final int? mediaWidth;
+  final int? mediaHeight;
+  final String? thumbImage;
+  final String? thumbUrl;
+  final String? mediaUrl;
+  final String? mediaDuration;
+  final String? quoteId;
+  final String? quoteContent;
+  final String? sharedUserId;
+  final String? userId;
+  final String? userFullName;
+  final String? userIdentityNumber;
+  final String? appId;
+  final UserRelationship? relationship;
+  final String? avatarUrl;
+  final String? sharedUserFullName;
+  final String? sharedUserIdentityNumber;
+  final String? sharedUserAvatarUrl;
+  final bool? sharedUserIsVerified;
+  final String? sharedUserAppId;
+  final String? assetUrl;
+  final int? assetWidth;
+  final int? assetHeight;
+  final String? stickerId;
+  final String? assetName;
+  final String? assetType;
   TranscriptMessageItem({
     required this.transcriptId,
     required this.messageId,
@@ -339,3 +334,16 @@ class TranscriptMessageItem {
         .toString();
   }
 }
+
+typedef BaseTranscriptMessageItem$where = Expression<bool> Function(
+    TranscriptMessages transcript,
+    Messages message,
+    Users sender,
+    Users sharedUser,
+    Stickers sticker);
+typedef BaseTranscriptMessageItem$limit = Limit Function(
+    TranscriptMessages transcript,
+    Messages message,
+    Users sender,
+    Users sharedUser,
+    Stickers sticker);

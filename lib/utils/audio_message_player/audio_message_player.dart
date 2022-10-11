@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:equatable/equatable.dart';
 
 import '../../db/mixin_database.dart';
 import 'ogg_opus_audio_player.dart';
-import 'vlc_audio_player.dart';
 
 class MessageMedia {
   const MessageMedia(
@@ -33,16 +30,7 @@ abstract class PlaybackState extends Equatable {
 abstract class AudioMessagePlayer {
   AudioMessagePlayer();
 
-  factory AudioMessagePlayer.vlc() => VlcAudioMessagePlayer();
-
   factory AudioMessagePlayer.oggOpus() => OggOpusAudioMessagePlayer();
-
-  factory AudioMessagePlayer.platform() {
-    if (Platform.isIOS || Platform.isMacOS) {
-      return AudioMessagePlayer.oggOpus();
-    }
-    return AudioMessagePlayer.vlc();
-  }
 
   bool get isPlaying;
 

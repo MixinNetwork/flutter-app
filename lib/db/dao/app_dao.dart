@@ -4,9 +4,13 @@ import '../mixin_database.dart';
 
 part 'app_dao.g.dart';
 
+extension IsEncryptedExtension on App {
+  bool get isEncrypted => capabilities?.contains('ENCRYPTED') == true;
+}
+
 @DriftAccessor(tables: [Apps])
 class AppDao extends DatabaseAccessor<MixinDatabase> with _$AppDaoMixin {
-  AppDao(MixinDatabase db) : super(db);
+  AppDao(super.db);
 
   Future<int> insert(App app) => into(db.apps).insertOnConflictUpdate(app);
 

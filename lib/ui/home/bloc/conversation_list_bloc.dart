@@ -32,9 +32,13 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   late int limit;
   StreamSubscription? streamSubscription;
 
-  ItemPositionsListener? itemPositionsListener(
+  ItemPositionsListener itemPositionsListener(
           SlideCategoryState slideCategoryState) =>
       _map[slideCategoryState]!.itemPositionsListener;
+
+  ItemScrollController itemScrollController(
+          SlideCategoryState slideCategoryState) =>
+      _map[slideCategoryState]!.itemScrollController;
 
   void init() => _switchBloc(slideCategoryCubit.state, limit);
 
@@ -42,63 +46,21 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     SlideCategoryState state,
     int limit,
   ) {
+    final dao = database.conversationDao;
     switch (state.type) {
       case SlideCategoryType.chats:
-        _map[state] ??= _ConversationListBloc(
-          limit,
-          () => database.conversationDao.chatConversationCount().getSingle(),
-          (limit, offset) =>
-              database.conversationDao.chatConversations(limit, offset).get(),
-          database.conversationDao.updateEvent,
-          mentionCache,
-          database.conversationDao.chatConversationHasData,
-        );
-        break;
       case SlideCategoryType.contacts:
-        _map[state] ??= _ConversationListBloc(
-          limit,
-          () => database.conversationDao.contactConversationCount().getSingle(),
-          (limit, offset) => database.conversationDao
-              .contactConversations(limit, offset)
-              .get(),
-          database.conversationDao.updateEvent,
-          mentionCache,
-          database.conversationDao.contactConversationHasData,
-        );
-        break;
       case SlideCategoryType.groups:
-        _map[state] ??= _ConversationListBloc(
-          limit,
-          () => database.conversationDao.groupConversationCount().getSingle(),
-          (limit, offset) =>
-              database.conversationDao.groupConversations(limit, offset).get(),
-          database.conversationDao.updateEvent,
-          mentionCache,
-          database.conversationDao.groupConversationHasData,
-        );
-        break;
       case SlideCategoryType.bots:
-        _map[state] ??= _ConversationListBloc(
-          limit,
-          () => database.conversationDao.botConversationCount().getSingle(),
-          (limit, offset) =>
-              database.conversationDao.botConversations(limit, offset).get(),
-          database.conversationDao.updateEvent,
-          mentionCache,
-          database.conversationDao.botConversationHasData,
-        );
-        break;
       case SlideCategoryType.strangers:
         _map[state] ??= _ConversationListBloc(
           limit,
-          () =>
-              database.conversationDao.strangerConversationCount().getSingle(),
-          (limit, offset) => database.conversationDao
-              .strangerConversations(limit, offset)
-              .get(),
+          () => dao.conversationCountByCategory(state.type),
+          (limit, offset) =>
+              dao.conversationItemsByCategory(state.type, limit, offset),
           database.conversationDao.updateEvent,
           mentionCache,
-          database.conversationDao.strangerConversationHasData,
+          () => dao.conversationHasDataByCategory(state.type),
         );
         break;
       case SlideCategoryType.circle:
@@ -116,7 +78,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               database.conversationDao.conversationHasDataByCircleId(state.id!),
         );
         break;
-      default:
+      case SlideCategoryType.setting:
         return;
     }
     final bloc = _map[state];
@@ -175,6 +137,8 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
   final Future<List<ConversationItem>> Function(int limit, int offset)
       _queryRange;
   final Future<bool> Function() _queryHasData;
+
+  final ItemScrollController itemScrollController = ItemScrollController();
 
   @override
   Future<int> queryCount() => _queryCount();

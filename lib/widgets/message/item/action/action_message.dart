@@ -15,9 +15,7 @@ import '../unknown_message.dart';
 import 'action_data.dart';
 
 class ActionMessage extends HookWidget {
-  const ActionMessage({
-    Key? key,
-  }) : super(key: key);
+  const ActionMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +73,7 @@ class ActionMessage extends HookWidget {
                           fontSize: MessageItemWidget.primaryFontSize,
                           // ignore: avoid_dynamic_calls
                           color: colorHex(e.color) ?? Colors.black,
+                          height: 1,
                         ),
                       ),
                     ),

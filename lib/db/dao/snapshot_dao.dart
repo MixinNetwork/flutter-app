@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
+import '../../utils/extension/extension.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -9,6 +11,7 @@ part 'snapshot_dao.g.dart';
 extension SnapshotConverter on sdk.Snapshot {
   SnapshotsCompanion get asDbSnapshotObject => SnapshotsCompanion.insert(
         snapshotId: snapshotId,
+        traceId: Value(traceId),
         type: type,
         assetId: assetId,
         amount: amount,
@@ -22,10 +25,22 @@ extension SnapshotConverter on sdk.Snapshot {
       );
 }
 
+extension SnapshotItemExtension on SnapshotItem {
+  String l10nType(BuildContext context) {
+    if (type == sdk.SnapshotType.transfer) return context.l10n.transfer;
+    if (type == sdk.SnapshotType.deposit) return context.l10n.deposit;
+    if (type == sdk.SnapshotType.withdrawal) return context.l10n.withdrawal;
+    if (type == sdk.SnapshotType.fee) return context.l10n.fee;
+    if (type == sdk.SnapshotType.rebate) return context.l10n.rebate;
+    if (type == sdk.SnapshotType.raw) return context.l10n.raw;
+    return context.l10n.na;
+  }
+}
+
 @DriftAccessor(tables: [Snapshots], include: {'../moor/dao/snapshot.drift'})
 class SnapshotDao extends DatabaseAccessor<MixinDatabase>
     with _$SnapshotDaoMixin {
-  SnapshotDao(MixinDatabase db) : super(db);
+  SnapshotDao(super.db);
 
   Future<int> insert(Snapshot snapshot) =>
       into(db.snapshots).insertOnConflictUpdate(snapshot);
@@ -36,7 +51,7 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
   Future deleteSnapshot(Snapshot snapshot) =>
       delete(db.snapshots).delete(snapshot);
 
-  Selectable<SnapshotItem> snapshotById(
+  Selectable<SnapshotItem> snapshotItemById(
           String snapshotId, String currentFiat) =>
       snapshotItems(
         currentFiat,
@@ -45,4 +60,11 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
         (snapshot, opponent, asset, tempAsset, fiats) => ignoreOrderBy,
         (snapshot, opponent, asset, tempAsset, fiats) => Limit(1, 0),
       );
+
+  Selectable<String?> snapshotIdByTraceId(String traceId) =>
+      (selectOnly(db.snapshots)
+            ..addColumns([db.snapshots.snapshotId])
+            ..where(db.snapshots.traceId.equals(traceId))
+            ..limit(1))
+          .map((row) => row.read(db.snapshots.snapshotId));
 }

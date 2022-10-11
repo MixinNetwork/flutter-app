@@ -8,7 +8,7 @@ part 'session_dao.g.dart';
 @DriftAccessor(tables: [Sessions])
 class SessionDao extends DatabaseAccessor<SignalDatabase>
     with _$SessionDaoMixin {
-  SessionDao(SignalDatabase db) : super(db);
+  SessionDao(super.db);
 
   Future<Session?> getSession(String address, int deviceId) =>
       (select(db.sessions)

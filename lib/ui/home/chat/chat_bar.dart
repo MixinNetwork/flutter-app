@@ -4,21 +4,20 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
-import '../../../utils/webview.dart';
+import '../../../utils/web_view/web_view_interface.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/buttons.dart';
+import '../../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
 import '../bloc/conversation_cubit.dart';
-import '../conversation_page.dart';
+import '../bloc/message_selection_cubit.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'chat_page.dart';
 
 class ChatBar extends HookWidget {
-  const ChatBar({
-    Key? key,
-  }) : super(key: key);
+  const ChatBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +39,24 @@ class ChatBar extends HookWidget {
       when: (state) => state?.isLoaded == true,
     )!;
 
+    final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
+        MessageSelectionState, bool>(
+      converter: (state) => state.hasSelectedMessage,
+    );
+
     MoveWindowBarrier toggleInfoPageWrapper({
       required Widget child,
-      behavior = HitTestBehavior.opaque,
+      HitTestBehavior behavior = HitTestBehavior.opaque,
     }) =>
         MoveWindowBarrier(
           child: InteractiveDecoratedBox(
-            onTap: chatSideCubit.toggleInfoPage,
+            onTap: () {
+              if (inMultiSelectMode) {
+                return;
+              }
+              chatSideCubit.toggleInfoPage();
+            },
+            behavior: behavior,
             child: child,
           ),
         );
@@ -107,34 +117,44 @@ class ChatBar extends HookWidget {
               child: _BotIcon(conversation: conversation),
             ),
           ),
-          MoveWindowBarrier(
-            child: ActionButton(
-              name: Resources.assetsImagesIcSearchSvg,
-              color: actionColor,
-              onTap: () {
-                final cubit = context.read<ChatSideCubit>();
-                if (cubit.state.pages.lastOrNull?.name ==
-                    ChatSideCubit.searchMessageHistory) {
-                  return cubit.pop();
-                }
-
-                cubit.replace(ChatSideCubit.searchMessageHistory);
-              },
+          if (inMultiSelectMode)
+            MoveWindowBarrier(
+              child: TextButton(
+                onPressed: () {
+                  context.read<MessageSelectionCubit>().clearSelection();
+                },
+                child: Text(context.l10n.cancel),
+              ),
+            )
+          else ...[
+            MoveWindowBarrier(
+              child: ActionButton(
+                name: Resources.assetsImagesIcSearchSvg,
+                color: actionColor,
+                onTap: () {
+                  final cubit = context.read<ChatSideCubit>();
+                  if (cubit.state.pages.lastOrNull?.name ==
+                      ChatSideCubit.searchMessageHistory) {
+                    return cubit.pop();
+                  }
+                  cubit.replace(ChatSideCubit.searchMessageHistory);
+                },
+              ),
             ),
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            alignment: Alignment.centerLeft,
-            child: MoveWindowBarrier(
-              child: chatSideRouteMode
-                  ? const SizedBox()
-                  : ActionButton(
-                      name: Resources.assetsImagesIcScreenSvg,
-                      color: actionColor,
-                      onTap: chatSideCubit.toggleInfoPage,
-                    ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 200),
+              alignment: Alignment.centerLeft,
+              child: MoveWindowBarrier(
+                child: chatSideRouteMode
+                    ? const SizedBox()
+                    : ActionButton(
+                        name: Resources.assetsImagesIcScreenSvg,
+                        color: actionColor,
+                        onTap: chatSideCubit.toggleInfoPage,
+                      ),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -143,10 +163,10 @@ class ChatBar extends HookWidget {
 
 class ConversationIDOrCount extends HookWidget {
   const ConversationIDOrCount({
-    Key? key,
+    super.key,
     this.fontSize = 14,
     required this.conversationState,
-  }) : super(key: key);
+  });
 
   final double fontSize;
   final ConversationState? conversationState;
@@ -189,9 +209,7 @@ class ConversationIDOrCount extends HookWidget {
       builder: (context, snapshot) {
         final count = snapshot.data;
         return SelectableText(
-          count != null
-              ? context.l10n.conversationParticipantsCount(count)
-              : '',
+          count != null ? context.l10n.participantsCount(count) : '',
           style: textStyle,
         );
       },
@@ -201,11 +219,11 @@ class ConversationIDOrCount extends HookWidget {
 
 class ConversationName extends StatelessWidget {
   const ConversationName({
-    Key? key,
+    super.key,
     this.fontSize = 16,
     required this.conversationState,
     this.overflow = true,
-  }) : super(key: key);
+  });
 
   final double fontSize;
   final ConversationState conversationState;
@@ -241,10 +259,10 @@ class ConversationName extends StatelessWidget {
 
 class ConversationAvatar extends StatelessWidget {
   const ConversationAvatar({
-    Key? key,
+    super.key,
     this.size = 36,
     required this.conversationState,
-  }) : super(key: key);
+  });
 
   final double size;
   final ConversationState? conversationState;
@@ -264,9 +282,9 @@ class ConversationAvatar extends StatelessWidget {
             if (conversationState?.user != null) {
               return AvatarWidget(
                 size: size,
-                userId: conversationState!.user!.userId,
-                avatarUrl: conversationState!.user!.avatarUrl,
-                name: conversationState!.name!,
+                userId: conversationState?.user?.userId,
+                avatarUrl: conversationState?.user?.avatarUrl,
+                name: conversationState?.name,
               );
             }
 
@@ -277,7 +295,7 @@ class ConversationAvatar extends StatelessWidget {
 }
 
 class _BotIcon extends HookWidget {
-  const _BotIcon({Key? key, required this.conversation}) : super(key: key);
+  const _BotIcon({required this.conversation});
 
   final ConversationState conversation;
 
@@ -287,24 +305,16 @@ class _BotIcon extends HookWidget {
       return const SizedBox();
     }
 
-    final child = ActionButton(
+    return ActionButton(
       name: Resources.assetsImagesBotSvg,
       color: context.theme.icon,
       onTap: () {
-        if (!kIsSupportWebView) {
-          return;
-        }
-        openBotWebViewWindow(
+        MixinWebView.instance.openBotWebViewWindow(
           context,
           conversation.app!,
           conversationId: conversation.conversationId,
         );
       },
     );
-
-    if (kIsSupportWebView) {
-      return child;
-    }
-    return Tooltip(message: context.l10n.comingSoon, child: child);
   }
 }

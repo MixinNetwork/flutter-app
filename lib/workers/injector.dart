@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../constants/constants.dart';
 import '../db/dao/user_dao.dart';
 import '../db/database.dart';
 import '../db/mixin_database.dart' as db;
+import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 
 class Injector {
@@ -18,7 +20,9 @@ class Injector {
 
   Future<void> syncConversion(String? conversationId,
       {bool force = false, bool unWait = false}) async {
-    if (conversationId == null || conversationId == systemUser) {
+    if (conversationId == null ||
+        conversationId == systemUser ||
+        conversationId == accountId) {
       return;
     }
     final conversation = await database.conversationDao
@@ -47,6 +51,12 @@ class Injector {
       } else if (response.data.category == ConversationCategory.group) {
         await refreshUsers(<String>[ownerId]);
       }
+      final status = response.data.participants
+                  .firstWhereOrNull((element) => element.userId == accountId) !=
+              null
+          ? ConversationStatus.success
+          : ConversationStatus.quit;
+
       await database.conversationDao.insert(
         db.Conversation(
           conversationId: response.data.conversationId,
@@ -55,9 +65,10 @@ class Injector {
           name: response.data.name,
           announcement: response.data.announcement,
           createdAt: response.data.createdAt,
-          status: ConversationStatus.success,
+          status: status,
           muteUntil: DateTime.parse(response.data.muteUntil),
           codeUrl: response.data.codeUrl,
+          expireIn: response.data.expireIn,
         ),
       );
 
@@ -166,24 +177,6 @@ class Injector {
     return result;
   }
 
-  Future<void> refreshSticker(String stickerId) async {
-    try {
-      final sticker = (await client.accountApi.getStickerById(stickerId)).data;
-      await database.stickerDao.insert(db.Sticker(
-        stickerId: sticker.stickerId,
-        albumId: sticker.albumId,
-        name: sticker.name,
-        assetUrl: sticker.assetUrl,
-        assetType: sticker.assetType,
-        assetWidth: sticker.assetWidth,
-        assetHeight: sticker.assetHeight,
-        createdAt: sticker.createdAt,
-      ));
-    } catch (e, s) {
-      w('refreshSticker error $e, stack: $s');
-    }
-  }
-
   Future<void> refreshCircle({String? circleId}) async {
     if (circleId == null) {
       final res = await client.circleApi.getCircles();
@@ -192,7 +185,7 @@ class Injector {
             circleId: circle.circleId,
             name: circle.name,
             createdAt: circle.createdAt));
-        await handleCircle(circle);
+        await _handleCircle(circle);
       });
     } else {
       final circle = (await client.circleApi.getCircle(circleId)).data;
@@ -200,7 +193,7 @@ class Injector {
           circleId: circle.circleId,
           name: circle.name,
           createdAt: circle.createdAt));
-      await handleCircle(circle);
+      await _handleCircle(circle);
     }
 
     if (refreshUserIdSet.isNotEmpty) {
@@ -209,7 +202,7 @@ class Injector {
     }
   }
 
-  Future<void> handleCircle(CircleResponse circle, {int? offset}) async {
+  Future<void> _handleCircle(CircleResponse circle, {int? offset}) async {
     final ccList =
         (await client.circleApi.getCircleConversations(circle.circleId)).data;
     for (final cc in ccList) {
@@ -226,7 +219,17 @@ class Injector {
       }
     }
     if (ccList.length >= 500) {
-      await handleCircle(circle, offset: offset ?? 0 + 500);
+      await _handleCircle(circle, offset: offset ?? 0 + 500);
+    }
+  }
+
+  Future<List<db.User>?> updateUserByIdentityNumber(
+      String identityNumber) async {
+    try {
+      return await insertUpdateUsers(
+          [(await client.userApi.search(identityNumber)).data]);
+    } catch (e, s) {
+      w('updateUserByIdentityNumber error $e, stack: $s');
     }
   }
 }

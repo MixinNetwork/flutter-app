@@ -15,6 +15,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   Participants get participants => attachedDatabase.participants;
   StickerAlbums get stickerAlbums => attachedDatabase.stickerAlbums;
   PinMessages get pinMessages => attachedDatabase.pinMessages;
+  Users get users => attachedDatabase.users;
   Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
@@ -35,21 +36,16 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   StickerRelationships get stickerRelationships =>
       attachedDatabase.stickerRelationships;
   Stickers get stickers => attachedDatabase.stickers;
-  Users get users => attachedDatabase.users;
   TranscriptMessages get transcriptMessages =>
       attachedDatabase.transcriptMessages;
   Fiats get fiats => attachedDatabase.fiats;
+  FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
+  ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Selectable<SnapshotItem> snapshotItems(
       String currentFiat,
-      Expression<bool?> Function(Snapshots snapshot, Users opponent,
-              Assets asset, Assets tempAsset, Fiats fiat)
-          where,
-      OrderBy Function(Snapshots snapshot, Users opponent, Assets asset,
-              Assets tempAsset, Fiats fiat)
-          order,
-      Limit Function(Snapshots snapshot, Users opponent, Assets asset,
-              Assets tempAsset, Fiats fiat)
-          limit) {
+      SnapshotItems$where where,
+      SnapshotItems$order order,
+      SnapshotItems$limit limit) {
     var $arrayStartIndex = 2;
     final generatedwhere = $write(
         where(
@@ -62,12 +58,13 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedorder = $write(
-        order(
-            alias(this.snapshots, 'snapshot'),
-            alias(this.users, 'opponent'),
-            alias(this.assets, 'asset'),
-            alias(this.assets, 'tempAsset'),
-            alias(this.fiats, 'fiat')),
+        order?.call(
+                alias(this.snapshots, 'snapshot'),
+                alias(this.users, 'opponent'),
+                alias(this.assets, 'asset'),
+                alias(this.assets, 'tempAsset'),
+                alias(this.fiats, 'fiat')) ??
+            const OrderBy.nothing(),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedorder.amountOfVariables;
@@ -100,58 +97,60 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         }).map((QueryRow row) {
       return SnapshotItem(
         snapshotId: row.read<String>('snapshot_id'),
+        traceId: row.readNullable<String>('trace_id'),
         type: row.read<String>('type'),
         assetId: row.read<String>('asset_id'),
         amount: row.read<String>('amount'),
-        createdAt:
-            Snapshots.$converter0.mapToDart(row.read<int>('created_at'))!,
-        opponentId: row.read<String?>('opponent_id'),
-        transactionHash: row.read<String?>('transaction_hash'),
-        sender: row.read<String?>('sender'),
-        receiver: row.read<String?>('receiver'),
-        memo: row.read<String?>('memo'),
-        confirmations: row.read<int?>('confirmations'),
-        avatarUrl: row.read<String?>('avatar_url'),
-        opponentFulName: row.read<String?>('opponent_ful_name'),
-        priceUsd: row.read<String?>('price_usd'),
-        chainId: row.read<String?>('chain_id'),
-        symbol: row.read<String?>('symbol'),
-        symbolName: row.read<String?>('symbolName'),
-        tag: row.read<String?>('tag'),
-        assetConfirmations: row.read<int?>('asset_confirmations'),
-        symbolIconUrl: row.read<String?>('symbolIconUrl'),
-        chainIconUrl: row.read<String?>('chainIconUrl'),
-        fiatRate: row.read<double?>('fiatRate'),
+        createdAt: Snapshots.$converter0.fromSql(row.read<int>('created_at')),
+        opponentId: row.readNullable<String>('opponent_id'),
+        transactionHash: row.readNullable<String>('transaction_hash'),
+        sender: row.readNullable<String>('sender'),
+        receiver: row.readNullable<String>('receiver'),
+        memo: row.readNullable<String>('memo'),
+        confirmations: row.readNullable<int>('confirmations'),
+        avatarUrl: row.readNullable<String>('avatar_url'),
+        opponentFulName: row.readNullable<String>('opponent_ful_name'),
+        priceUsd: row.readNullable<String>('price_usd'),
+        chainId: row.readNullable<String>('chain_id'),
+        symbol: row.readNullable<String>('symbol'),
+        symbolName: row.readNullable<String>('symbolName'),
+        tag: row.readNullable<String>('tag'),
+        assetConfirmations: row.readNullable<int>('asset_confirmations'),
+        symbolIconUrl: row.readNullable<String>('symbolIconUrl'),
+        chainIconUrl: row.readNullable<String>('chainIconUrl'),
+        fiatRate: row.readNullable<double>('fiatRate'),
       );
     });
   }
 }
 
 class SnapshotItem {
-  String snapshotId;
-  String type;
-  String assetId;
-  String amount;
-  DateTime createdAt;
-  String? opponentId;
-  String? transactionHash;
-  String? sender;
-  String? receiver;
-  String? memo;
-  int? confirmations;
-  String? avatarUrl;
-  String? opponentFulName;
-  String? priceUsd;
-  String? chainId;
-  String? symbol;
-  String? symbolName;
-  String? tag;
-  int? assetConfirmations;
-  String? symbolIconUrl;
-  String? chainIconUrl;
-  double? fiatRate;
+  final String snapshotId;
+  final String? traceId;
+  final String type;
+  final String assetId;
+  final String amount;
+  final DateTime createdAt;
+  final String? opponentId;
+  final String? transactionHash;
+  final String? sender;
+  final String? receiver;
+  final String? memo;
+  final int? confirmations;
+  final String? avatarUrl;
+  final String? opponentFulName;
+  final String? priceUsd;
+  final String? chainId;
+  final String? symbol;
+  final String? symbolName;
+  final String? tag;
+  final int? assetConfirmations;
+  final String? symbolIconUrl;
+  final String? chainIconUrl;
+  final double? fiatRate;
   SnapshotItem({
     required this.snapshotId,
+    this.traceId,
     required this.type,
     required this.assetId,
     required this.amount,
@@ -177,6 +176,7 @@ class SnapshotItem {
   @override
   int get hashCode => Object.hashAll([
         snapshotId,
+        traceId,
         type,
         assetId,
         amount,
@@ -204,6 +204,7 @@ class SnapshotItem {
       identical(this, other) ||
       (other is SnapshotItem &&
           other.snapshotId == this.snapshotId &&
+          other.traceId == this.traceId &&
           other.type == this.type &&
           other.assetId == this.assetId &&
           other.amount == this.amount &&
@@ -229,6 +230,7 @@ class SnapshotItem {
   String toString() {
     return (StringBuffer('SnapshotItem(')
           ..write('snapshotId: $snapshotId, ')
+          ..write('traceId: $traceId, ')
           ..write('type: $type, ')
           ..write('assetId: $assetId, ')
           ..write('amount: $amount, ')
@@ -254,3 +256,10 @@ class SnapshotItem {
         .toString();
   }
 }
+
+typedef SnapshotItems$where = Expression<bool> Function(Snapshots snapshot,
+    Users opponent, Assets asset, Assets tempAsset, Fiats fiat);
+typedef SnapshotItems$order = OrderBy Function(Snapshots snapshot,
+    Users opponent, Assets asset, Assets tempAsset, Fiats fiat);
+typedef SnapshotItems$limit = Limit Function(Snapshots snapshot, Users opponent,
+    Assets asset, Assets tempAsset, Fiats fiat);

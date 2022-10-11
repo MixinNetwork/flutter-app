@@ -13,9 +13,7 @@ import '../message.dart';
 import 'text/mention_builder.dart';
 
 class PinMessageWidget extends HookWidget {
-  const PinMessageWidget({
-    Key? key,
-  }) : super(key: key);
+  const PinMessageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +29,7 @@ class PinMessageWidget extends HookWidget {
 
     final cachePreview = useMemoized(() {
       if (pinMessageMinimal == null) {
-        return context.l10n.pinned(userFullName, context.l10n.aMessage);
+        return context.l10n.chatPinMessage(userFullName, context.l10n.aMessage);
       }
       final preview = cachePinPreviewText(
         pinMessageMinimal: pinMessageMinimal,
@@ -42,7 +40,7 @@ class PinMessageWidget extends HookWidget {
       final singleLinePreview =
           lines.length > 1 ? '${lines.first}...' : lines.firstOrNull ?? '';
 
-      return context.l10n.pinned(userFullName, singleLinePreview);
+      return context.l10n.chatPinMessage(userFullName, singleLinePreview);
     }, [userFullName, content]);
 
     final text = useMemoizedFuture(
@@ -57,7 +55,9 @@ class PinMessageWidget extends HookWidget {
         final lines = const LineSplitter().convert(preview);
         final singleLinePreview =
             lines.length > 1 ? '${lines.first}...' : lines.firstOrNull ?? '';
-        return context.l10n.pinned(userFullName, singleLinePreview).overflow;
+        return context.l10n
+            .chatPinMessage(userFullName, singleLinePreview)
+            .overflow;
       },
       cachePreview,
       keys: [userFullName, content],
@@ -78,7 +78,7 @@ class PinMessageWidget extends HookWidget {
               color: context.dynamicColor(
                 const Color.fromRGBO(202, 234, 201, 1),
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -107,43 +107,25 @@ class PinMessageWidget extends HookWidget {
 Future<String> generatePinPreviewText({
   required PinMessageMinimal pinMessageMinimal,
   required MentionCache mentionCache,
-}) async {
-  if (pinMessageMinimal.type.isText) {
-    return mentionCache.replaceMention(
-          pinMessageMinimal.content,
-          await mentionCache.checkMentionCache({pinMessageMinimal.content}),
-        ) ??
-        '';
-  } else {
-    return messagePreviewOptimize(
-          null,
-          pinMessageMinimal.type,
-          pinMessageMinimal.content,
-          false,
-          true,
-        ) ??
-        '';
-  }
-}
+}) async =>
+    pinMessageMinimal.type.isText
+        ? mentionCache.replaceMention(
+                pinMessageMinimal.content,
+                await mentionCache
+                    .checkMentionCache({pinMessageMinimal.content})) ??
+            ''
+        : messagePreviewOptimize(null, pinMessageMinimal.type,
+                pinMessageMinimal.content, false, true) ??
+            '';
 
 String cachePinPreviewText({
   required PinMessageMinimal pinMessageMinimal,
   required MentionCache mentionCache,
-}) {
-  if (pinMessageMinimal.type.isText) {
-    return mentionCache.replaceMention(
-          pinMessageMinimal.content,
-          mentionCache.mentionCache(pinMessageMinimal.content),
-        ) ??
-        '';
-  } else {
-    return messagePreviewOptimize(
-          null,
-          pinMessageMinimal.type,
-          pinMessageMinimal.content,
-          false,
-          true,
-        ) ??
-        '';
-  }
-}
+}) =>
+    pinMessageMinimal.type.isText
+        ? mentionCache.replaceMention(pinMessageMinimal.content,
+                mentionCache.mentionCache(pinMessageMinimal.content)) ??
+            ''
+        : messagePreviewOptimize(null, pinMessageMinimal.type,
+                pinMessageMinimal.content, false, true) ??
+            '';

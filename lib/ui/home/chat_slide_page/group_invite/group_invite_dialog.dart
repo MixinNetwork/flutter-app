@@ -24,9 +24,8 @@ Future<void> showGroupInviteByLinkDialog(BuildContext context,
 
 class _GroupInviteByLinkDialog extends HookWidget {
   const _GroupInviteByLinkDialog({
-    Key? key,
     required this.conversationId,
-  }) : super(key: key);
+  });
 
   final String conversationId;
 
@@ -34,7 +33,7 @@ class _GroupInviteByLinkDialog extends HookWidget {
   Widget build(BuildContext context) {
     final conversation = useStream(
       useMemoized(() {
-        context.accountServer.refreshGroup(conversationId);
+        context.accountServer.refreshConversation(conversationId);
         return context.database.conversationDao
             .conversationById(conversationId)
             .watchSingleOrNullThrottle(kDefaultThrottleDuration);
@@ -55,7 +54,7 @@ class _GroupInviteByLinkDialog extends HookWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 30),
                       child: Text(
-                        context.l10n.groupInvite,
+                        context.l10n.inviteToGroupViaLink,
                         style: TextStyle(
                           fontSize: 18,
                           color: context.theme.text,
@@ -75,8 +74,7 @@ class _GroupInviteByLinkDialog extends HookWidget {
 }
 
 class _GroupInviteBody extends StatelessWidget {
-  const _GroupInviteBody({Key? key, required this.conversation})
-      : super(key: key);
+  const _GroupInviteBody({required this.conversation});
 
   final Conversation conversation;
 
@@ -121,7 +119,7 @@ class _GroupInviteBody extends StatelessWidget {
           SizedBox(
             width: 338,
             child: Text(
-              context.l10n.groupInviteInfo,
+              context.l10n.inviteInfo,
               style: TextStyle(
                 fontSize: 12,
                 color: context.theme.secondaryText,
@@ -138,9 +136,8 @@ class _GroupInviteBody extends StatelessWidget {
 
 class _ActionButtons extends StatelessWidget {
   const _ActionButtons({
-    Key? key,
     required this.conversation,
-  }) : super(key: key);
+  });
 
   final Conversation conversation;
 
@@ -149,7 +146,7 @@ class _ActionButtons extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _IconButton(
-            label: context.l10n.groupInviteShare,
+            label: context.l10n.shareLink,
             iconAssetName: Resources.assetsImagesInviteShareSvg,
             onTap: () async {
               assert(conversation.codeUrl != null);
@@ -171,7 +168,7 @@ class _ActionButtons extends StatelessWidget {
             },
           ),
           _IconButton(
-            label: context.l10n.groupInviteCopy,
+            label: context.l10n.copyInvite,
             iconAssetName: Resources.assetsImagesInviteCopySvg,
             onTap: () async {
               await Clipboard.setData(
@@ -180,7 +177,7 @@ class _ActionButtons extends StatelessWidget {
             },
           ),
           _IconButton(
-            label: context.l10n.groupInviteReset,
+            label: context.l10n.resetLink,
             iconAssetName: Resources.assetsImagesInviteRefreshSvg,
             onTap: () {
               runFutureWithToast(context,
@@ -193,11 +190,10 @@ class _ActionButtons extends StatelessWidget {
 
 class _IconButton extends StatelessWidget {
   const _IconButton({
-    Key? key,
     required this.label,
     required this.iconAssetName,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final String label;
   final String iconAssetName;

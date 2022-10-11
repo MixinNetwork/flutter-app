@@ -7,8 +7,7 @@ part 'signed_pre_key.g.dart';
 
 @JsonSerializable()
 class SignedPreKey extends OneTimePreKey with EquatableMixin {
-  SignedPreKey(int keyId, String? pubKey, this.signature)
-      : super(keyId, pubKey);
+  SignedPreKey(super.keyId, super.pubKey, this.signature);
 
   factory SignedPreKey.fromJson(Map<String, dynamic> json) =>
       _$SignedPreKeyFromJson(json);

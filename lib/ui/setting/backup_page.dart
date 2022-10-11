@@ -10,7 +10,7 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 
 class BackupPage extends HookWidget {
-  const BackupPage({Key? key}) : super(key: key);
+  const BackupPage({super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -33,7 +33,7 @@ class BackupPage extends HookWidget {
               SizedBox(
                 width: 500,
                 child: Text(
-                  context.l10n.chatBackupDescription,
+                  context.l10n.settingBackupTips,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,

@@ -20,6 +20,7 @@ import '../../../utils/logger.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../cache_image.dart';
 import '../../image.dart';
+import '../../sticker_page/sticker_item.dart';
 import '../message.dart';
 import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
@@ -28,17 +29,19 @@ import 'text/mention_builder.dart';
 // ignore_for_file: avoid_dynamic_calls
 class QuoteMessage extends HookWidget {
   const QuoteMessage({
-    Key? key,
+    super.key,
     this.content,
     this.quoteMessageId,
     this.messageId,
     this.message,
-  }) : super(key: key);
+    this.isTranscriptPage = false,
+  });
 
   final String? content;
   final String? quoteMessageId;
   final String? messageId;
   final MessageItem? message;
+  final bool isTranscriptPage;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +71,7 @@ class QuoteMessage extends HookWidget {
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
           userId: null,
-          description: context.l10n.chatNotSupport,
+          description: context.l10n.messageNotSupport,
           icon: SvgPicture.asset(
             Resources.assetsImagesRecallSvg,
             color: iconColor,
@@ -117,6 +120,7 @@ class QuoteMessage extends HookWidget {
               type,
               quote.conversationId as String,
               quote.mediaUrl as String?,
+              isTranscriptPage,
             ))),
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) =>
@@ -157,8 +161,8 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           image: CacheImage(
             quote.thumbUrl as String,
-            placeholder: (_, __) => placeholder,
-            errorWidget: (_, __, ___) => placeholder,
+            placeholder: () => placeholder,
+            errorWidget: () => placeholder,
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesLiveSvg,
@@ -192,7 +196,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesFileSvg,
             color: iconColor,
           ),
-          description: context.l10n.chatTranscript,
+          description: context.l10n.transcript,
           inputMode: inputMode,
         );
       }
@@ -244,7 +248,10 @@ class QuoteMessage extends HookWidget {
           quoteMessageId: quoteMessageId!,
           userId: userId,
           name: userFullName,
-          image: CacheImage(quote.assetUrl as String),
+          image: StickerItem(
+            assetUrl: quote.assetUrl as String,
+            assetType: quote.assetType as String,
+          ),
           icon: SvgPicture.asset(
             Resources.assetsImagesStickerSvg,
             color: iconColor,
@@ -262,8 +269,8 @@ class QuoteMessage extends HookWidget {
           image: Padding(
             padding: const EdgeInsets.all(6),
             child: AvatarWidget(
-              name: quote.sharedUserFullName as String,
-              userId: quote.sharedUserId as String,
+              name: quote.sharedUserFullName as String?,
+              userId: quote.sharedUserId as String?,
               size: 48,
               avatarUrl: quote.sharedUserAvatarUrl as String?,
             ),
@@ -304,7 +311,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesAppButtonSvg,
             color: iconColor,
           ),
-          description: description ?? context.l10n.extensions,
+          description: description ?? context.l10n.bots,
           inputMode: inputMode,
         );
       }
@@ -316,7 +323,7 @@ class QuoteMessage extends HookWidget {
       messageId: messageId,
       quoteMessageId: quoteMessageId!,
       userId: null,
-      description: context.l10n.chatNotFound,
+      description: context.l10n.messageNotFound,
       icon: SvgPicture.asset(
         Resources.assetsImagesRecallSvg,
         color: iconColor,
@@ -329,7 +336,6 @@ class QuoteMessage extends HookWidget {
 
 class _QuoteMessageBase extends StatelessWidget {
   const _QuoteMessageBase({
-    Key? key,
     required this.messageId,
     required this.quoteMessageId,
     required this.userId,
@@ -339,7 +345,7 @@ class _QuoteMessageBase extends StatelessWidget {
     this.image,
     required this.inputMode,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final String? messageId;
   final String quoteMessageId;
@@ -360,7 +366,9 @@ class _QuoteMessageBase extends StatelessWidget {
         ? getNameColorById(userId!)
         : context.theme.accent;
     return ClipRRect(
-      borderRadius: inputMode ? BorderRadius.zero : BorderRadius.circular(8),
+      borderRadius: inputMode
+          ? BorderRadius.zero
+          : const BorderRadius.all(Radius.circular(8)),
       child: GestureDetector(
         onTap: () {
           if (onTap != null) {
@@ -462,7 +470,7 @@ class _QuoteMessageBase extends StatelessWidget {
                   height: 48,
                   child: RepaintBoundary(
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: const BorderRadius.all(Radius.circular(6)),
                       child: image,
                     ),
                   ),

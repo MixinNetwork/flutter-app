@@ -1,5 +1,4 @@
 import 'dart:core';
-import 'dart:typed_data';
 
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:flutter/foundation.dart';
@@ -28,25 +27,23 @@ class EncryptedProtocol {
         publicKeyToCurve25519(Uint8List.fromList(ed.public(privateKey).bytes));
     final version = [0x01];
 
-    if (extensionSessionKey != null && extensionSessionId != null) {
-      return [
-        ...version,
-        ...toLeByteArray(2),
-        ...senderPublicKey,
-        ...Uuid.parse(extensionSessionId),
-        ...encryptCipherMessageKey(privateKey, extensionSessionKey, key),
-        ...messageKeyWithSession,
-        ...encryptedMessageData
-      ];
-    } else {
-      return [
-        ...version,
-        ...toLeByteArray(1),
-        ...senderPublicKey,
-        ...messageKeyWithSession,
-        ...encryptedMessageData
-      ];
-    }
+    return extensionSessionKey != null && extensionSessionId != null
+        ? [
+            ...version,
+            ...toLeByteArray(2),
+            ...senderPublicKey,
+            ...Uuid.parse(extensionSessionId),
+            ...encryptCipherMessageKey(privateKey, extensionSessionKey, key),
+            ...messageKeyWithSession,
+            ...encryptedMessageData
+          ]
+        : [
+            ...version,
+            ...toLeByteArray(1),
+            ...senderPublicKey,
+            ...messageKeyWithSession,
+            ...encryptedMessageData
+          ];
   }
 
   List<int> encryptCipherMessageKey(
@@ -73,9 +70,9 @@ class EncryptedProtocol {
     List<int>? messageKey;
     for (var i = 0; i < sessionSize; ++i) {
       final offset = i * 64;
-      final sid = cipherText.sublist(35 + offset, 51 + offset);
+      final sid = cipherText.sublist(offset + 35, offset + 51);
       if (listEquals(sid, sessionId)) {
-        messageKey = cipherText.sublist(51 + offset, 99 + offset);
+        messageKey = cipherText.sublist(offset + 51, offset + 99);
       }
     }
     if (messageKey == null) {

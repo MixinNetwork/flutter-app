@@ -1,3 +1,4 @@
+// ignore_for_file: invalid_use_of_visible_for_testing_member
 part of 'multi_auth_cubit.dart';
 
 class MultiAuthState extends Equatable {
@@ -21,16 +22,6 @@ class MultiAuthState extends Equatable {
   final Set<AuthState> _auths;
 
   AuthState? get current => _auths.isNotEmpty ? _auths.last : null;
-
-  bool get currentMessagePreview => current?.messagePreview ?? true;
-
-  bool get currentPhotoAutoDownload => current?.photoAutoDownload ?? true;
-
-  bool get currentVideoAutoDownload => current?.videoAutoDownload ?? true;
-
-  bool get currentFileAutoDownload => current?.fileAutoDownload ?? true;
-
-  bool get collapsedSidebar => current?.collapsedSidebar ?? false;
 
   AuthState? get currentAuthState => current;
 
@@ -56,6 +47,8 @@ class AuthState extends Equatable {
   const AuthState({
     required this.account,
     required this.privateKey,
+
+    // Use SettingState instead
     this.messagePreview,
     this.photoAutoDownload,
     this.videoAutoDownload,
@@ -78,6 +71,8 @@ class AuthState extends Equatable {
 
   final Account account;
   final String privateKey;
+
+  // Use SettingState instead
   final bool? messagePreview;
   final bool? photoAutoDownload;
   final bool? videoAutoDownload;

@@ -7,10 +7,10 @@ const _nipWidth = 7.0;
 
 class PinMessageBubble extends StatelessWidget {
   const PinMessageBubble({
-    Key? key,
+    super.key,
     required this.child,
     this.padding = const EdgeInsets.symmetric(horizontal: 16),
-  }) : super(key: key);
+  });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -26,7 +26,7 @@ class PinMessageBubble extends StatelessWidget {
       child: Padding(
         padding: padding.add(const EdgeInsets.only(right: _nipWidth)),
         child: SizedBox.expand(
-          child: DefaultTextStyle(
+          child: DefaultTextStyle.merge(
             style: TextStyle(
               color: context.theme.text,
             ),
@@ -48,8 +48,9 @@ class _PinBubbleClipper extends CustomClipper<Path> {
     return Path.combine(PathOperation.union, bubblePath, nipPath);
   }
 
-  Path _bubblePath(Size size) =>
-      Path()..addRRect(BorderRadius.circular(8).toRRect(Offset.zero & size));
+  Path _bubblePath(Size size) => Path()
+    ..addRRect(
+        const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size));
 
   Path _rightNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 10);

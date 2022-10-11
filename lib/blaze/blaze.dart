@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -13,14 +13,12 @@ import '../constants/constants.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
-import '../enum/message_status.dart';
-import '../main.dart';
 import '../utils/extension/extension.dart';
-import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
+import '../utils/system/package_info.dart';
+import '../workers/message_worker_isolate.dart';
 import 'blaze_message.dart';
 import 'blaze_message_param_session.dart';
-import 'vo/blaze_message_data.dart';
 
 const String _wsHost1 = 'wss://blaze.mixin.one';
 const String _wsHost2 = 'wss://mixin-blaze.zeromesh.net';
@@ -40,6 +38,7 @@ class Blaze {
     this.privateKey,
     this.database,
     this.client,
+    this.packageInfo,
   );
 
   final String userId;
@@ -48,11 +47,16 @@ class Blaze {
   final Database database;
   final Client client; // todo delete
 
+  final PackageInfo packageInfo;
+
   String _host = _wsHost1;
   String? _token;
 
-  BehaviorSubject<ConnectedState> connectedStateBehaviorSubject =
+  final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
       BehaviorSubject<ConnectedState>();
+
+  ValueStream<ConnectedState> get connectedStateStream =>
+      _connectedStateBehaviorSubject.stream;
 
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
@@ -61,25 +65,53 @@ class Blaze {
 
   String? _userAgent;
 
+  ConnectedState get _connectedState => _connectedStateBehaviorSubject.value;
+
+  set _connectedState(ConnectedState state) {
+    if (_connectedStateBehaviorSubject.valueOrNull == state) return;
+
+    _connectedStateBehaviorSubject.value = state;
+
+    if (state == ConnectedState.connected) {
+      _refreshOffset();
+    }
+  }
+
+  Timer? _checkTimeoutTimer;
+
   Future<void> connect() async {
     i('reconnecting set false, ${StackTrace.current}');
-    connectedStateBehaviorSubject.value = ConnectedState.connecting;
+    _connectedState = ConnectedState.connecting;
 
-    i('ws connect');
-    _token ??= signAuthTokenWithEdDSA(
-        userId, sessionId, privateKey, scp, 'GET', '/', '');
-    _userAgent ??= await _getUserAgent();
     try {
+      i('ws connect');
+      _token ??= signAuthTokenWithEdDSA(
+          userId, sessionId, privateKey, scp, 'GET', '/', '');
+      i('ws _token?.isNotEmpty == true: ${_token?.isNotEmpty == true}');
+      _userAgent ??= await generateUserAgent(packageInfo);
+      i('ws _userAgent: $_userAgent');
       _connect(_token!);
-    } catch (_) {
+      _checkTimeoutTimer = Timer(const Duration(seconds: 10), () {
+        i('ws webSocket state: ${channel?.innerWebSocket?.readyState}');
+
+        if (channel?.innerWebSocket?.readyState == WebSocket.open) return;
+        if (_connectedState == ConnectedState.connected) return;
+        _connectedState = ConnectedState.disconnected;
+
+        i('ws webSocket connect timeout');
+
+        reconnect();
+      });
+    } catch (error, stack) {
+      e('ws connect error: $error, $stack');
+      _connectedState = ConnectedState.disconnected;
       await reconnect();
     }
   }
 
   void _connect(String token) {
-    if (connectedStateBehaviorSubject.value != ConnectedState.connecting) {
-      return;
-    }
+    _disconnect(false);
+    _connectedState = ConnectedState.connecting;
     channel = IOWebSocketChannel.connect(
       _host,
       protocols: ['Mixin-Blaze-1'],
@@ -92,12 +124,12 @@ class Blaze {
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
       (blazeMessage) async {
-        connectedStateBehaviorSubject.value = ConnectedState.connected;
+        _connectedState = ConnectedState.connected;
         d('blazeMessage receive: ${blazeMessage.toJson()}');
 
         if (blazeMessage.action == kErrorAction &&
             blazeMessage.error?.code == authentication) {
-          connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+          _connectedState = ConnectedState.disconnected;
           await reconnect();
           return;
         }
@@ -125,17 +157,16 @@ class Blaze {
       },
       onError: (error, s) {
         i('ws error: $error, s: $s');
-        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+        _connectedState = ConnectedState.disconnected;
         reconnect();
       },
       onDone: () {
         i('web socket done');
-        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+        _connectedState = ConnectedState.disconnected;
         reconnect();
       },
       cancelOnError: true,
     );
-    _refreshOffset();
     _sendListPending();
   }
 
@@ -164,7 +195,7 @@ class Blaze {
       } else {
         await database.floodMessageDao.insert(FloodMessage(
             messageId: data.messageId,
-            data: await jsonEncodeWithIsolate(data),
+            data: jsonEncode(data),
             createdAt: data.createdAt));
       }
     } else if (blazeMessage.action == kCreateCall ||
@@ -177,26 +208,18 @@ class Blaze {
           data.messageId,
           MessageStatus.delivered));
     }
-    if (stopwatch != null) {
+    if (stopwatch != null && stopwatch.elapsedMilliseconds > 5) {
       d('handle execution time: ${stopwatch.elapsedMilliseconds}');
     }
   }
 
-  Future<void> updateRemoteMessageStatus(
-      String messageId, MessageStatus status) async {}
-
-  Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
+  Future<bool> makeMessageStatus(String messageId, MessageStatus status) async {
     final currentStatus =
         await database.messageDao.findMessageStatusById(messageId);
-    if (currentStatus == MessageStatus.sending) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
-    } else if (currentStatus == MessageStatus.sent &&
-        (status == MessageStatus.delivered || status == MessageStatus.read)) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
-    } else if (currentStatus == MessageStatus.delivered &&
-        status == MessageStatus.read) {
+    if (currentStatus != null && status.index > currentStatus.index) {
       await database.messageDao.updateMessageStatusById(messageId, status);
     }
+    return currentStatus != null;
   }
 
   Future<void> _sendListPending() async {
@@ -211,23 +234,25 @@ class Blaze {
   Future<void> _refreshOffset() async {
     final offset =
         await database.offsetDao.findStatusOffset().getSingleOrNull();
-    var status = 0;
-    if (offset != null) {
-      status = offset.epochNano;
-    } else {
-      status = DateTime.now().epochNano;
-    }
+    var status = offset != null ? offset.epochNano : DateTime.now().epochNano;
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);
-      final blazeMessages = (response.data as List<dynamic>)
-          .map((itemJson) =>
-              BlazeMessageData.fromJson(itemJson as Map<String, dynamic>))
-          .toList();
+      final blazeMessages = response.data;
       if (blazeMessages.isEmpty) {
         break;
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
-        await makeMessageStatus(m.messageId, m.status);
+        if (!(await makeMessageStatus(m.messageId, m.status))) {
+          final messagesHistory = await database.messagesHistoryDao
+              .findMessageHistoryById(m.messageId);
+          if (messagesHistory != null) return;
+
+          final status = pendingMessageStatusMap[m.messageId];
+          if (status == null || m.status.index > status.index) {
+            pendingMessageStatusMap[m.messageId] = m.status;
+          }
+        }
+
         await database.offsetDao.insert(Offset(
             key: statusOffset, timestamp: m.updatedAt.toIso8601String()));
       });
@@ -240,23 +265,25 @@ class Blaze {
   }
 
   Future<void> _sendGZip(BlazeMessage msg) async {
-    channel?.sink.add(GZipEncoder().encode(
-        Uint8List.fromList((await jsonEncodeWithIsolate(msg)).codeUnits)));
+    channel?.sink.add(
+        GZipEncoder().encode(Uint8List.fromList((jsonEncode(msg)).codeUnits)));
   }
 
-  void _disconnect() {
+  void _disconnect([bool resetConnectedState = true]) {
     i('ws _disconnect');
-    connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+    if (resetConnectedState) _connectedState = ConnectedState.disconnected;
+    _checkTimeoutTimer?.cancel();
     transactions.clear();
     subscription?.cancel();
     channel?.sink.close();
     subscription = null;
     channel = null;
+    _checkTimeoutTimer = null;
   }
 
   void waitSyncTime() {
     _disconnect();
-    connectedStateBehaviorSubject.value = ConnectedState.hasLocalTimeError;
+    _connectedState = ConnectedState.hasLocalTimeError;
   }
 
   Future<BlazeMessage?> sendMessage(BlazeMessage blazeMessage) async {
@@ -271,12 +298,12 @@ class Blaze {
   }
 
   Future<void> reconnect() async {
-    i('_reconnect reconnecting: ${connectedStateBehaviorSubject.value} start: ${StackTrace.current}');
-    if (connectedStateBehaviorSubject.value == ConnectedState.connecting ||
-        connectedStateBehaviorSubject.value == ConnectedState.reconnecting) {
+    i('_reconnect reconnecting: $_connectedState start: ${StackTrace.current}');
+    if (_connectedState == ConnectedState.connecting ||
+        _connectedState == ConnectedState.reconnecting) {
       return;
     }
-    connectedStateBehaviorSubject.value = ConnectedState.reconnecting;
+    _connectedState = ConnectedState.reconnecting;
     _host = _host == _wsHost1 ? _wsHost2 : _wsHost1;
 
     try {
@@ -288,11 +315,11 @@ class Blaze {
       w('ws ping error: $e');
       if (e is MixinApiError &&
           (e.error as MixinError).code == authentication) {
-        connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+        _connectedState = ConnectedState.disconnected;
         return;
       }
       await Future.delayed(const Duration(seconds: 2));
-      connectedStateBehaviorSubject.value = ConnectedState.disconnected;
+      _connectedState = ConnectedState.disconnected;
       i('reconnecting set false, ${StackTrace.current}');
       return reconnect();
     }
@@ -300,18 +327,16 @@ class Blaze {
 
   void dispose() {
     _disconnect();
-    connectedStateBehaviorSubject.close();
+    _connectedStateBehaviorSubject.close();
   }
 }
 
-Future<BlazeMessage> parseBlazeMessage(List<int> list) =>
-    runLoadBalancer(_parseBlazeMessageInternal, list);
+BlazeMessage parseBlazeMessage(List<int> list) =>
+    _parseBlazeMessageInternal(list);
 
 BlazeMessage _parseBlazeMessageInternal(List<int> message) {
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
-  final blazeMessage =
-      BlazeMessage.fromJson(jsonDecode(content) as Map<String, dynamic>);
-  return blazeMessage;
+  return BlazeMessage.fromJson(jsonDecode(content) as Map<String, dynamic>);
 }
 
 class WebSocketTransaction<T> {
@@ -336,29 +361,4 @@ class WebSocketTransaction<T> {
   void error(T? data) {
     _completer.complete(data);
   }
-}
-
-Future<String> _getUserAgent() async {
-  final version = await packageInfoFuture;
-  String? systemAndVersion;
-  if (Platform.isMacOS) {
-    final result = await Process.run('sw_vers', []);
-    if (result.stdout != null) {
-      final stdout = result.stdout as String;
-      final map = Map.fromEntries(const LineSplitter()
-          .convert(stdout)
-          .map((e) => e.split(':'))
-          .where((element) => element.length >= 2)
-          .map((e) => MapEntry(e[0].trim(), e[1].trim())));
-      // example
-      // ProductName: macOS
-      // ProductVersion: 12.0.1
-      // BuildVersion: 21A559
-      systemAndVersion =
-          '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
-    }
-  }
-  systemAndVersion ??=
-      '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
-  return 'Mixin/${version.version} (Flutter $systemAndVersion; ${Platform.localeName})';
 }

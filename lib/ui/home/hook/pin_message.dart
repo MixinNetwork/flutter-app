@@ -47,7 +47,7 @@ PinMessageState usePinMessageState() {
       if (conversationId == null) return Stream.value([]);
       return context.database.pinMessageDao
           .getPinMessageIds(conversationId)
-          .watchThrottle(kDefaultThrottleDuration)
+          .watchThrottle(kSlowThrottleDuration)
           .map((event) => event.whereNotNull().toList());
     },
     initialData: [],
@@ -65,12 +65,14 @@ PinMessageState usePinMessageState() {
 
   final previewContent = useMemoizedStream<String?>(
     () {
-      if (!showLastPinMessage || conversationId == null) {
+      if (!showLastPinMessage ||
+          conversationId == null ||
+          pinMessageIds.firstOrNull == null) {
         return Stream.value(null);
       }
       return context.database.pinMessageDao
-          .lastPinMessageItem(conversationId)
-          .watchSingleOrNullThrottle(kDefaultThrottleDuration)
+          .pinMessageItem(conversationId, pinMessageIds.first)
+          .watchSingleOrNullThrottle(kSlowThrottleDuration)
           .asyncMap((message) async {
         if (message == null) return null;
 
@@ -82,10 +84,10 @@ PinMessageState usePinMessageState() {
           mentionCache: context.read<MentionCache>(),
         );
 
-        return context.l10n.pinned(message.userFullName ?? '', preview);
+        return context.l10n.chatPinMessage(message.userFullName ?? '', preview);
       });
     },
-    keys: [showLastPinMessage, conversationId],
+    keys: [showLastPinMessage, conversationId, pinMessageIds.firstOrNull],
   ).data;
 
   return useMemoized(

@@ -17,15 +17,14 @@ import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/search_text_field.dart';
+import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
 import '../chat/chat_page.dart';
-import '../conversation_page.dart';
+import '../conversation/search_list.dart';
 
 class SearchMessagePage extends HookWidget {
-  const SearchMessagePage({
-    Key? key,
-  }) : super(key: key);
+  const SearchMessagePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +82,7 @@ class SearchMessagePage extends HookWidget {
     return Scaffold(
       backgroundColor: context.theme.primary,
       appBar: MixinAppBar(
-        title: Text(context.l10n.searchMessageHistory),
+        title: Text(context.l10n.searchConversation),
         actions: [
           if (!Navigator.of(context).canPop())
             ActionButton(
@@ -141,9 +140,9 @@ class SearchMessagePage extends HookWidget {
                                     padding: const EdgeInsets.only(right: 8),
                                     child: AvatarWidget(
                                       size: 20,
-                                      name: selectedUser.value!.fullName ?? '',
-                                      avatarUrl: selectedUser.value!.avatarUrl,
-                                      userId: selectedUser.value!.userId,
+                                      name: selectedUser.value?.fullName,
+                                      avatarUrl: selectedUser.value?.avatarUrl,
+                                      userId: selectedUser.value?.userId,
                                     ),
                                   ),
                               ],
@@ -174,7 +173,7 @@ class SearchMessagePage extends HookWidget {
                       return SizedBox(
                         height: 36,
                         child: ActionButton(
-                          name: Resources.assetsImagesContactSvg,
+                          name: Resources.assetsImagesUserSearchSvg,
                           color: context.theme.icon,
                           onTap: () {
                             editingController.text = '';
@@ -250,10 +249,9 @@ class SearchMessagePage extends HookWidget {
 
 class _SearchMessageList extends HookWidget {
   const _SearchMessageList({
-    Key? key,
     this.selectedUserId,
     this.categories,
-  }) : super(key: key);
+  });
 
   final String? selectedUserId;
   final List<String>? categories;
@@ -285,17 +283,12 @@ class _SearchMessageList extends HookWidget {
         limit: context.read<ConversationListBloc>().limit,
         queryCount: () async {
           if (keyword.trim().isEmpty) {
-            if (selectedUserId != null) {
-              return context.database.messageDao
-                  .messageCountByConversationAndUser(
-                    conversationId,
-                    selectedUserId!,
-                    categories,
-                  )
-                  .getSingle();
-            } else {
-              return 0;
-            }
+            return selectedUserId != null
+                ? context.database.messageDao
+                    .messageCountByConversationAndUser(
+                        conversationId, selectedUserId!, categories)
+                    .getSingle()
+                : Future.value(0);
           }
 
           return context.database.messageDao
@@ -309,18 +302,15 @@ class _SearchMessageList extends HookWidget {
         },
         queryRange: (int limit, int offset) async {
           if (keyword.trim().isEmpty) {
-            if (selectedUserId != null) {
-              return context.database.messageDao
-                  .messageByConversationAndUser(
-                    conversationId: conversationId,
-                    userId: selectedUserId!,
-                    limit: limit,
-                    offset: offset,
-                  )
-                  .get();
-            } else {
-              return [];
-            }
+            return selectedUserId != null
+                ? context.database.messageDao
+                    .messageByConversationAndUser(
+                        conversationId: conversationId,
+                        userId: selectedUserId!,
+                        limit: limit,
+                        offset: offset)
+                    .get()
+                : Future.value([]);
           }
 
           return context.database.messageDao
@@ -358,11 +348,18 @@ class _SearchMessageList extends HookWidget {
           message: message,
           keyword: keyword,
           showSender: true,
-          onTap: () async => ConversationCubit.selectConversation(
-            context,
-            message.conversationId,
-            initIndexMessageId: message.messageId,
-          ),
+          onTap: () {
+            ConversationCubit.selectConversation(
+              context,
+              message.conversationId,
+              initIndexMessageId: message.messageId,
+            );
+            context.read<BlinkCubit>().blinkByMessageId(message.messageId);
+            final chatSideCubit = context.read<ChatSideCubit>();
+            if (chatSideCubit.state.routeMode) {
+              chatSideCubit.clear();
+            }
+          },
         );
       },
     );
@@ -371,10 +368,9 @@ class _SearchMessageList extends HookWidget {
 
 class _SearchParticipantList extends HookWidget {
   const _SearchParticipantList({
-    Key? key,
     required this.onSelected,
     required this.editingController,
-  }) : super(key: key);
+  });
 
   final ValueChanged<User> onSelected;
   final TextEditingController editingController;
@@ -393,18 +389,16 @@ class _SearchParticipantList extends HookWidget {
               final userDao = context.database.userDao;
 
               if (state?.isBot ?? false) {
-                if (value.isEmpty) {
-                  return userDao.friends().watchThrottle(kSlowThrottleDuration);
-                } else {
-                  return userDao
-                      .fuzzySearchBotGroupUser(
-                        currentUserId:
-                            context.multiAuthCubit.state.currentUserId ?? '',
-                        conversationId: conversationId,
-                        keyword: value,
-                      )
-                      .watchThrottle(kVerySlowThrottleDuration);
-                }
+                return value.isEmpty
+                    ? userDao.friends().watchThrottle(kSlowThrottleDuration)
+                    : userDao
+                        .fuzzySearchBotGroupUser(
+                            currentUserId:
+                                context.multiAuthCubit.state.currentUserId ??
+                                    '',
+                            conversationId: conversationId,
+                            keyword: value)
+                        .watchThrottle(kVerySlowThrottleDuration);
               }
 
               if (value.isEmpty) {
@@ -434,7 +428,7 @@ class _SearchParticipantList extends HookWidget {
               children: [
                 AvatarWidget(
                   userId: user.userId,
-                  name: user.fullName ?? '',
+                  name: user.fullName,
                   avatarUrl: user.avatarUrl,
                   size: 38,
                 ),
@@ -457,12 +451,11 @@ class _SearchParticipantList extends HookWidget {
 
 class _CategoryItem extends StatelessWidget {
   const _CategoryItem({
-    Key? key,
     required this.name,
     required this.categories,
     required this.selectedCategories,
     required this.onSelected,
-  }) : super(key: key);
+  });
 
   final String name;
   final List<String> categories;

@@ -2,41 +2,57 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    hide Snapshot, Asset;
+    hide Snapshot, Asset, User;
+import 'package:rxdart/rxdart.dart';
 
 import '../../../../db/dao/snapshot_dao.dart';
+import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../buttons.dart';
+import '../../../cache_image.dart';
 import '../../../dialog.dart';
 
 Future<void> showTransferDialog(
   BuildContext context,
   String snapshotId,
-  String? userName,
 ) =>
     showMixinDialog(
       context: context,
-      child: _TransferPage(snapshotId, userName),
+      child: _TransferPage(snapshotId),
     );
 
 class _TransferPage extends HookWidget {
-  const _TransferPage(this.snapshotId, this.userName, {Key? key})
-      : super(key: key);
+  const _TransferPage(
+    this.snapshotId,
+  );
 
   final String snapshotId;
-  final String? userName;
 
   @override
   Widget build(BuildContext context) {
     useEffect(() {
       context.accountServer.updateFiats();
-    });
+    }, []);
 
     final snapshotItem = useMemoizedStream(() => context.database.snapshotDao
-        .snapshotById(
+        .snapshotItemById(
             snapshotId, context.multiAuthState.currentUser!.fiatCurrency)
         .watchSingleOrNullThrottle(kDefaultThrottleDuration)).data;
+
+    final opponentFullName = useMemoizedStream<User?>(() {
+      final opponentId = snapshotItem?.opponentId;
+      if (opponentId != null && opponentId.trim().isNotEmpty) {
+        final stream = context.database.userDao
+            .userById(opponentId)
+            .watchSingleOrNullThrottle(kSlowThrottleDuration);
+        return stream.doOnData((event) {
+          if (event != null) return;
+          context.accountServer.refreshUsers([opponentId]);
+        });
+      }
+      return Stream.value(null);
+    }, keys: [snapshotItem?.opponentId]).data?.fullName;
 
     useEffect(() {
       context.accountServer.updateSnapshotById(snapshotId: snapshotId);
@@ -56,7 +72,7 @@ class _TransferPage extends HookWidget {
 
     if (snapshotItem == null) return const SizedBox();
     return SizedBox(
-      width: 340,
+      width: 400,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -80,7 +96,7 @@ class _TransferPage extends HookWidget {
                 ),
                 _TransactionDetailInfo(
                   snapshot: snapshotItem,
-                  userName: userName,
+                  opponentFullName: opponentFullName,
                 ),
               ],
             ),
@@ -93,9 +109,8 @@ class _TransferPage extends HookWidget {
 
 class _SnapshotDetailHeader extends HookWidget {
   const _SnapshotDetailHeader({
-    Key? key,
     required this.snapshot,
-  }) : super(key: key);
+  });
 
   final SnapshotItem snapshot;
 
@@ -105,7 +120,7 @@ class _SnapshotDetailHeader extends HookWidget {
         children: [
           const SizedBox(height: 20),
           _SymbolIconWithBorder(
-            symbolUrl: snapshot.symbolIconUrl,
+            symbolUrl: snapshot.symbolIconUrl ?? '',
             chainUrl: snapshot.chainIconUrl,
             size: 58,
             chainSize: 14,
@@ -158,9 +173,8 @@ class _SnapshotDetailHeader extends HookWidget {
 
 class _ValuesDescription extends HookWidget {
   const _ValuesDescription({
-    Key? key,
     required this.snapshot,
-  }) : super(key: key);
+  });
 
   final SnapshotItem snapshot;
 
@@ -177,23 +191,30 @@ class _ValuesDescription extends HookWidget {
 
     final String? thatTimeValue;
 
-    final currentValue = context.l10n.walletTransactionCurrentValue(
-      context.currencyFormat(snapshot.amountOfCurrentCurrency().abs()),
-    );
+    final current = snapshot.amountOfCurrentCurrency().abs();
+    final unitValue = context
+        .currencyFormat((current / snapshot.amount.asDecimal.abs()).toDouble());
+    final symbol = snapshot.symbol?.overflow ?? '';
+    final currentValue = '${context.l10n.valueNow(
+      context.currencyFormat(current),
+    )}($unitValue/$symbol)';
 
     if (ticker == null) {
       thatTimeValue = null;
     } else if (ticker.priceUsd == '0') {
-      thatTimeValue = context.l10n.walletTransactionThatTimeNoValue;
+      thatTimeValue = context.l10n.valueThen(context.l10n.na);
     } else {
-      thatTimeValue = context.l10n.walletTransactionThatTimeValue(
-        context.currencyFormat((snapshot.amount.asDecimal *
-                ticker.priceUsd.asDecimal *
-                snapshot.fiatRate!.asDecimal)
-            .abs()),
-      );
+      final past = (snapshot.amount.asDecimal *
+              ticker.priceUsd.asDecimal *
+              snapshot.fiatRate!.asDecimal)
+          .abs();
+      final unitValue = context
+          .currencyFormat((past / snapshot.amount.asDecimal.abs()).toDouble());
+      thatTimeValue = '${context.l10n.valueThen(
+        context.currencyFormat(past),
+      )}($unitValue/$symbol)';
     }
-    return DefaultTextStyle(
+    return DefaultTextStyle.merge(
       style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w400,
@@ -222,13 +243,12 @@ class _ValuesDescription extends HookWidget {
 
 class _TransactionDetailInfo extends StatelessWidget {
   const _TransactionDetailInfo({
-    Key? key,
     required this.snapshot,
-    required this.userName,
-  }) : super(key: key);
+    required this.opponentFullName,
+  });
 
   final SnapshotItem snapshot;
-  final String? userName;
+  final String? opponentFullName;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -238,19 +258,79 @@ class _TransactionDetailInfo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TransactionInfoTile(
-              title: Text(context.l10n.transactionsId),
+              title: Text(context.l10n.transactionId),
               subtitle: SelectableText(snapshot.snapshotId),
             ),
             TransactionInfoTile(
               title: Text(context.l10n.assetType),
               subtitle: SelectableText(snapshot.symbolName ?? ''),
             ),
-            if (userName?.isNotEmpty ?? false)
+            TransactionInfoTile(
+              title: Text(context.l10n.transactionType),
+              subtitle: SelectableText(snapshot.l10nType(context)),
+            ),
+            if (snapshot.type == SnapshotType.deposit) ...[
               TransactionInfoTile(
-                title: Text(
-                    snapshot.isPositive ? context.l10n.from : context.l10n.to),
-                subtitle: SelectableText(userName ?? ''),
+                title: Text(context.l10n.from),
+                subtitle: SelectableText(snapshot.sender ?? ''),
               ),
+              TransactionInfoTile(
+                title: Text(context.l10n.transactionHash),
+                subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              ),
+            ] else if (snapshot.type == SnapshotType.pending) ...[
+              TransactionInfoTile(
+                title: Text(context.l10n.status),
+                subtitle: SelectableText(
+                  context.l10n.pendingConfirmation(
+                    snapshot.confirmations ?? 0,
+                    snapshot.confirmations ?? 0,
+                    snapshot.assetConfirmations ?? 0,
+                  ),
+                ),
+              ),
+              TransactionInfoTile(
+                title: Text(context.l10n.from),
+                subtitle: SelectableText(snapshot.sender ?? ''),
+              ),
+              TransactionInfoTile(
+                title: Text(context.l10n.transactionHash),
+                subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              ),
+            ] else if (snapshot.type == SnapshotType.transfer) ...[
+              TransactionInfoTile(
+                title: Text(context.l10n.from),
+                subtitle: SelectableText((snapshot.isPositive
+                        ? opponentFullName
+                        : context.multiAuthState.currentUser?.fullName) ??
+                    ''),
+              ),
+              TransactionInfoTile(
+                title: Text(context.l10n.receiver),
+                subtitle: SelectableText((!snapshot.isPositive
+                        ? opponentFullName
+                        : context.multiAuthState.currentUser?.fullName) ??
+                    ''),
+              ),
+            ] else if (snapshot.tag?.isNotEmpty ?? false) ...[
+              TransactionInfoTile(
+                title: Text(context.l10n.transactionHash),
+                subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              ),
+              TransactionInfoTile(
+                title: Text(context.l10n.address),
+                subtitle: SelectableText(snapshot.receiver ?? ''),
+              ),
+            ] else ...[
+              TransactionInfoTile(
+                title: Text(context.l10n.transactionHash),
+                subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              ),
+              TransactionInfoTile(
+                title: Text(context.l10n.receiver),
+                subtitle: SelectableText(snapshot.receiver ?? ''),
+              ),
+            ],
             if (snapshot.memo?.isNotEmpty ?? false)
               TransactionInfoTile(
                 title: Text(context.l10n.memo),
@@ -262,6 +342,13 @@ class _TransactionDetailInfo extends StatelessWidget {
                   '${DateFormat.yMMMMd().format(snapshot.createdAt)} '
                   '${DateFormat.Hms().format(snapshot.createdAt)}'),
             ),
+            if (snapshot.type == SnapshotType.transfer &&
+                snapshot.traceId != null &&
+                snapshot.traceId!.isNotEmpty)
+              TransactionInfoTile(
+                title: Text(context.l10n.trace),
+                subtitle: SelectableText(snapshot.traceId ?? ''),
+              ),
           ],
         ),
       );
@@ -269,11 +356,11 @@ class _TransactionDetailInfo extends StatelessWidget {
 
 class TransactionInfoTile extends StatelessWidget {
   const TransactionInfoTile({
-    Key? key,
+    super.key,
     required this.title,
     required this.subtitle,
     this.subtitleColor,
-  }) : super(key: key);
+  });
 
   final Widget title;
   final Widget subtitle;
@@ -285,7 +372,7 @@ class TransactionInfoTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 12),
-          DefaultTextStyle(
+          DefaultTextStyle.merge(
             style: TextStyle(
               fontSize: 16,
               height: 1,
@@ -294,7 +381,7 @@ class TransactionInfoTile extends StatelessWidget {
             child: title,
           ),
           const SizedBox(height: 8),
-          DefaultTextStyle(
+          DefaultTextStyle.merge(
             style: TextStyle(
               fontSize: 16,
               height: 1,
@@ -309,66 +396,49 @@ class TransactionInfoTile extends StatelessWidget {
 
 class _SymbolIconWithBorder extends StatelessWidget {
   const _SymbolIconWithBorder({
-    Key? key,
     required this.symbolUrl,
     this.chainUrl,
     required this.size,
     required this.chainSize,
     this.chainBorder = const BorderSide(color: Colors.white),
-    this.symbolBorder = BorderSide.none,
-  }) : super(key: key);
+  });
 
-  final String? symbolUrl;
+  final String symbolUrl;
   final String? chainUrl;
   final double size;
   final double chainSize;
 
   final BorderSide chainBorder;
 
-  final BorderSide symbolBorder;
-
   @override
   Widget build(BuildContext context) => SizedBox.square(
-        dimension: size + symbolBorder.width,
+        dimension: size + chainBorder.width,
         child: Stack(
+          fit: StackFit.expand,
           children: [
-            Positioned.fill(
-              child: Container(
+            Padding(
+              padding: EdgeInsets.all(chainBorder.width),
+              child: CacheImage(symbolUrl),
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.symmetric(
-                    vertical: symbolBorder,
-                    horizontal: symbolBorder,
+                  border: Border.fromBorderSide(chainBorder),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(chainBorder.width),
+                  child: SizedBox.square(
+                    dimension: chainSize,
+                    child: CacheImage(
+                      chainUrl ?? '',
+                      width: chainSize,
+                      height: chainSize,
+                    ),
                   ),
                 ),
-                child: Image.network(symbolUrl ?? ''),
               ),
-            ),
-            Positioned(
-              left: 0,
-              bottom: 0,
-              child: (chainUrl?.isEmpty ?? true)
-                  ? const SizedBox()
-                  : Transform.translate(
-                      offset: Offset(
-                        symbolBorder.width - chainBorder.width,
-                        chainBorder.width - symbolBorder.width,
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.symmetric(
-                            vertical: chainBorder,
-                            horizontal: chainBorder,
-                          ),
-                        ),
-                        child: Image.network(
-                          chainUrl ?? '',
-                          width: chainSize,
-                          height: chainSize,
-                        ),
-                      ),
-                    ),
             ),
           ],
         ),

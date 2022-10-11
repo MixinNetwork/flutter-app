@@ -1,20 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../constants/resources.dart';
-import '../../main.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/system/package_info.dart';
 import '../../utils/uri_utils.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 
 class AboutPage extends HookWidget {
-  const AboutPage({Key? key}) : super(key: key);
+  const AboutPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final info = useMemoizedFuture(() => packageInfoFuture, null).data;
+    final info = useMemoizedFuture(getPackageInfo, null).data;
     return Scaffold(
       backgroundColor: context.theme.background,
       appBar: MixinAppBar(
@@ -33,7 +34,7 @@ class AboutPage extends HookWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                context.l10n.mixinMessenger,
+                context.l10n.mixinMessengerDesktop,
                 style: TextStyle(
                   color: context.theme.text,
                   fontSize: 18,
@@ -58,12 +59,12 @@ class AboutPage extends HookWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CellItem(
-                      title: Text(context.l10n.followTwitter),
+                      title: Text(context.l10n.followUsOnTwitter),
                       onTap: () => openUri(
                           context, 'https://twitter.com/MixinMessenger'),
                     ),
                     CellItem(
-                      title: Text(context.l10n.followFacebook),
+                      title: Text(context.l10n.followUsOnFacebook),
                       onTap: () =>
                           openUri(context, 'https://fb.com/MixinMessenger'),
                     ),
@@ -73,7 +74,7 @@ class AboutPage extends HookWidget {
                           context, 'https://mixinmessenger.zendesk.com'),
                     ),
                     CellItem(
-                      title: Text(context.l10n.termsService),
+                      title: Text(context.l10n.termsOfService),
                       onTap: () =>
                           openUri(context, 'https://mixin.one/pages/terms'),
                     ),
@@ -81,6 +82,10 @@ class AboutPage extends HookWidget {
                       title: Text(context.l10n.privacyPolicy),
                       onTap: () =>
                           openUri(context, 'https://mixin.one/pages/privacy'),
+                    ),
+                    CellItem(
+                      title: Text(context.l10n.checkNewVersion),
+                      onTap: () => openCheckUpdate(context),
                     ),
                   ],
                 ),
@@ -90,5 +95,18 @@ class AboutPage extends HookWidget {
         ),
       ),
     );
+  }
+
+  void openCheckUpdate(BuildContext context) {
+    if (defaultTargetPlatform == TargetPlatform.linux) {
+      openUri(context, 'https://mixin.one/messenger');
+    } else if (defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      openUri(
+          context, 'https://apps.apple.com/app/mixin-messenger/id1571128582');
+    } else if (defaultTargetPlatform == TargetPlatform.windows) {
+      openUri(context,
+          'https://apps.microsoft.com/store/detail/mixin-desktop/9NQ6HF99B8NJ');
+    }
   }
 }

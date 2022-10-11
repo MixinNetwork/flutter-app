@@ -20,7 +20,7 @@ jobs:
 
       - uses: subosito/flutter-action@v1
         with:
-          channel: 'master' # 'master', 'beta', 'dev' or 'stable'
+          channel: 'stable' # 'master', 'beta', 'dev' or 'stable'
 
       # flutter build need ninja.
       # https://github.com/subosito/flutter-action/issues/49
@@ -29,9 +29,7 @@ jobs:
           flutter doctor
           sudo apt-get update -y
           sudo apt-get install -y ninja-build libgtk-3-dev
-          sudo apt-get install vlc
-          sudo apt-get install libvlc-dev
-          sudo apt install libappindicator3-dev gir1.2-appindicator3-0.1
+          sudo apt-get install libsdl2-dev
           sudo apt-get install webkit2gtk-4.0
           flutter doctor
 
@@ -51,7 +49,7 @@ jobs:
       # package:test for this step to succeed. Note that Flutter projects will
       # want to change this to 'flutter test'.
       - name: Run tests
-        run: flutter test --no-sound-null-safety
+        run: flutter test
 
       - name: Build APP
-        run: flutter build linux --no-sound-null-safety
+        run: flutter build linux

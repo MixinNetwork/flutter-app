@@ -2,7 +2,6 @@ import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../enum/media_status.dart';
-import '../../enum/message_status.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -13,7 +12,7 @@ part 'transcript_message_dao.g.dart';
     include: {'../moor/dao/transcript_message.drift'})
 class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$TranscriptMessageDaoMixin {
-  TranscriptMessageDao(MixinDatabase db) : super(db);
+  TranscriptMessageDao(super.db);
 
   Future<void> insertAll(List<TranscriptMessage> transcripts) =>
       batch((batch) => batch.insertAll(db.transcriptMessages, transcripts,
@@ -55,16 +54,6 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
             ..addColumns([db.transcriptMessages.messageId])
             ..where(db.transcriptMessages.messageId.isIn(messageIds)))
           .map((row) => row.read(db.transcriptMessages.messageId));
-
-  Future<void> updateMediaStatus(
-          MediaStatus mediaStatus, String transcriptId, String messageId) =>
-      (db.update(db.transcriptMessages)
-            ..where((tbl) =>
-                tbl.transcriptId.equals(transcriptId) &
-                tbl.messageId.equals(messageId)))
-          .write(TranscriptMessagesCompanion(
-        mediaStatus: Value(mediaStatus),
-      ));
 
   Future<void> updateTranscript({
     required String transcriptId,

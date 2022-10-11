@@ -15,9 +15,7 @@ import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
 
 class CircleManagerPage extends HookWidget {
-  const CircleManagerPage({
-    Key? key,
-  }) : super(key: key);
+  const CircleManagerPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -116,12 +114,11 @@ class CircleManagerPage extends HookWidget {
 
 class _CircleManagerItem extends StatelessWidget {
   const _CircleManagerItem({
-    Key? key,
     required this.name,
     required this.count,
     required this.circleId,
     required this.selected,
-  }) : super(key: key);
+  });
 
   final String name;
   final int count;
@@ -206,7 +203,7 @@ class _CircleManagerItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  context.l10n.conversationCount(count),
+                  context.l10n.circleSubtitle(count, count),
                   style: TextStyle(
                     color: context.theme.secondaryText,
                     fontSize: 14,

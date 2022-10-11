@@ -73,24 +73,15 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
   @override
   Map<String, dynamic> toJson(MultiAuthState state) => state.toMap();
 
-  void setCurrentSetting({
-    bool? messagePreview,
-    bool? photoAutoDownload,
-    bool? videoAutoDownload,
-    bool? fileAutoDownload,
-    bool? collapsedSidebar,
-  }) {
+  void cleanCurrentSetting() {
     final current = state.current;
-    assert(current != null);
+    if (current == null) return;
 
     final auths = state._auths.toSet()
       ..remove(current)
-      ..add(current!.copyWith(
-        messagePreview: messagePreview,
-        photoAutoDownload: photoAutoDownload,
-        videoAutoDownload: videoAutoDownload,
-        fileAutoDownload: fileAutoDownload,
-        collapsedSidebar: collapsedSidebar,
+      ..add(AuthState(
+        account: current.account,
+        privateKey: current.privateKey,
       ));
 
     emit(MultiAuthState(

@@ -1,8 +1,9 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../../../account/account_server.dart';
 import '../../../bloc/simple_cubit.dart';
@@ -29,6 +30,7 @@ class ConversationState extends Equatable {
     this.participant,
     required this.refreshKey,
     this.initialSidePage,
+    this.keyword,
   });
 
   final String conversationId;
@@ -42,6 +44,7 @@ class ConversationState extends Equatable {
   final Object refreshKey;
 
   final String? initialSidePage;
+  final String? keyword;
 
   bool get isLoaded => conversation != null || user != null;
 
@@ -84,13 +87,13 @@ class ConversationState extends Equatable {
         refreshKey,
         initialSidePage,
         participant,
+        keyword,
       ];
 
   ConversationState copyWith({
     String? conversationId,
     String? userId,
     String? initIndexMessageId,
-    int? unseenMessageCount,
     String? lastReadMessageId,
     ConversationItem? conversation,
     User? user,
@@ -98,6 +101,7 @@ class ConversationState extends Equatable {
     Participant? participant,
     Object? refreshKey,
     String? initialSidePage,
+    String? keyword,
   }) =>
       ConversationState(
         conversationId: conversationId ?? this.conversationId,
@@ -110,6 +114,7 @@ class ConversationState extends Equatable {
         refreshKey: refreshKey ?? this.refreshKey,
         initialSidePage: initialSidePage ?? this.initialSidePage,
         participant: participant ?? this.participant,
+        keyword: keyword ?? this.keyword,
       );
 }
 
@@ -208,6 +213,8 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     ConversationItem? conversation,
     String? initIndexMessageId,
     String? initialChatSidePage,
+    String? keyword,
+    bool sync = false,
   }) async {
     final accountServer = context.accountServer;
     final database = context.database;
@@ -229,6 +236,12 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     _conversation = conversation ??
         _conversation ??
         await _conversationItem(context, conversationId);
+
+    if (_conversation == null && sync) {
+      showToastLoading(context);
+      await context.accountServer.refreshConversation(conversationId);
+      _conversation = await _conversationItem(context, conversationId);
+    }
 
     hasUnreadMessage ??= (_conversation?.unseenMessageCount ?? 0) > 0;
 
@@ -262,8 +275,10 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       initialSidePage: initialChatSidePage,
       refreshKey: Object(),
       participant: await participantFuture,
+      keyword: keyword,
     );
 
+    Toast.dismiss();
     conversationCubit.emit(conversationState);
 
     accountServer.selectConversation(conversationId);

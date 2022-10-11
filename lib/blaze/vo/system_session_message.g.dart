@@ -16,7 +16,7 @@ SystemSessionMessage _$SystemSessionMessageFromJson(
 Map<String, dynamic> _$SystemSessionMessageToJson(
         SystemSessionMessage instance) =>
     <String, dynamic>{
-      'action': _$SystemUserActionEnumMap[instance.action],
+      'action': _$SystemUserActionEnumMap[instance.action]!,
       'user_id': instance.userId,
       'session_id': instance.sessionId,
     };

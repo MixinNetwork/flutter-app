@@ -6,18 +6,16 @@ part 'circle_dao.g.dart';
 
 @DriftAccessor(tables: [Circles])
 class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
-  CircleDao(MixinDatabase db) : super(db);
+  CircleDao(super.db);
 
   Future<void> insertUpdate(Circle circle) async {
     await transaction(() async {
       final c = await (select(db.circles)
             ..where((tbl) => tbl.circleId.equals(circle.circleId)))
           .getSingleOrNull();
-      if (null == c) {
-        return into(db.circles).insert(circle);
-      } else {
-        return into(db.circles).insertOnConflictUpdate(circle);
-      }
+      return null == c
+          ? into(db.circles).insert(circle)
+          : into(db.circles).insertOnConflictUpdate(circle);
     });
   }
 
@@ -43,4 +41,20 @@ class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
 
   Future<int> deleteCircleById(String circleId) =>
       db.deleteCircleById(circleId);
+
+  Future<void> updateOrders(List<ConversationCircleItem> value) {
+    final now = DateTime.now();
+    final newCircles = value.asMap().entries.map((e) {
+      final index = e.key;
+      final circle = e.value;
+      return Circle(
+        createdAt: circle.createdAt,
+        circleId: circle.circleId,
+        name: circle.name,
+        orderedAt: now.add(Duration(milliseconds: index)),
+      );
+    });
+    return batch(
+        (batch) => batch.insertAllOnConflictUpdate(db.circles, newCircles));
+  }
 }

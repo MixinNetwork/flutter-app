@@ -12,17 +12,17 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
+import '../../../widgets/clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/audio_message.dart';
 import '../../../widgets/message/message.dart';
+import '../../../widgets/message/message_day_time.dart';
 import '../bloc/conversation_cubit.dart';
 import '../chat/chat_page.dart';
 
 class PinMessagesPage extends HookWidget {
-  const PinMessagesPage({
-    Key? key,
-  }) : super(key: key);
+  const PinMessagesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class PinMessagesPage extends HookWidget {
       keys: [conversationId],
     ).data;
 
-    final chatSideCubit = useBloc(() => ChatSideCubit());
+    final chatSideCubit = useBloc(ChatSideCubit.new);
     final searchConversationKeywordCubit = useBloc(
       () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
     );
@@ -47,6 +47,11 @@ class PinMessagesPage extends HookWidget {
     }, [rawList?.isNotEmpty]);
 
     final list = (rawList ?? []).reversed.toList();
+
+    final scrollController = useMemoized(
+      ScrollerScrollController.new,
+    );
+    final listKey = useMemoized(() => GlobalKey(debugLabel: 'PinMessagesPage'));
 
     return MultiProvider(
       providers: [
@@ -61,7 +66,8 @@ class PinMessagesPage extends HookWidget {
       child: Scaffold(
         backgroundColor: context.theme.popUp,
         appBar: MixinAppBar(
-          title: Text(context.l10n.pinMessageCount(list.length)),
+          title:
+              Text(context.l10n.pinnedMessageTitle(list.length, list.length)),
           backgroundColor: context.theme.popUp,
           actions: [
             if (!Navigator.of(context).canPop())
@@ -75,20 +81,28 @@ class PinMessagesPage extends HookWidget {
         body: Column(
           children: [
             Expanded(
-              child: ListView.builder(
+              child: MessageDayTimeViewportWidget.singleList(
+                scrollController: scrollController,
+                listKey: listKey,
+                reTraversalKey: list,
                 reverse: true,
-                padding: const EdgeInsets.only(bottom: 16),
-                itemBuilder: (BuildContext context, int index) {
-                  final messageItem = list[index];
-                  return MessageItemWidget(
-                    prev: list.getOrNull(index + 1),
-                    message: messageItem,
-                    next: list.getOrNull(index - 1),
-                    blink: false,
-                    isPinnedPage: true,
-                  );
-                },
-                itemCount: list.length,
+                child: ListView.builder(
+                  key: listKey,
+                  reverse: true,
+                  padding: const EdgeInsets.only(bottom: 16),
+                  controller: scrollController,
+                  itemBuilder: (BuildContext context, int index) {
+                    final messageItem = list[index];
+                    return MessageItemWidget(
+                      prev: list.getOrNull(index + 1),
+                      message: messageItem,
+                      next: list.getOrNull(index - 1),
+                      blink: false,
+                      isPinnedPage: true,
+                    );
+                  },
+                  itemCount: list.length,
+                ),
               ),
             ),
             InteractiveDecoratedBox(
@@ -99,7 +113,7 @@ class PinMessagesPage extends HookWidget {
                   child: Builder(
                       builder: (context) => AlertDialogLayout(
                             title:
-                                Text(context.l10n.unpinAllMessagesDescription),
+                                Text(context.l10n.unpinAllMessagesConfirmation),
                             content: const SizedBox(),
                             actions: [
                               MixinButton(

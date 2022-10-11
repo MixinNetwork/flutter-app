@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide MenuItem;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:path/path.dart' as p;
 import 'package:system_tray/system_tray.dart';
-import 'package:win_toast/win_toast.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../constants/resources.dart';
 import '../extension/extension.dart';
@@ -17,7 +16,7 @@ final SystemTray _systemTray = SystemTray();
 final _enableTray = Platform.isWindows;
 
 class SystemTrayWidget extends HookWidget {
-  const SystemTrayWidget({Key? key, required this.child}) : super(key: key);
+  const SystemTrayWidget({super.key, required this.child});
 
   final Widget child;
 
@@ -41,9 +40,7 @@ class SystemTrayWidget extends HookWidget {
         [
           MenuItem(
             label: show,
-            onClicked: () {
-              appWindow.show();
-            },
+            onClicked: windowManager.show,
           ),
           MenuSeparator(),
           MenuItem(
@@ -54,7 +51,7 @@ class SystemTrayWidget extends HookWidget {
           ),
         ],
       );
-    }, [show, exit]);
+    }, [show, exitStr]);
 
     return child;
   }
@@ -66,7 +63,7 @@ Future<void> _initSystemTray() async {
     path = p.joinAll([
       p.dirname(Platform.resolvedExecutable),
       'data/flutter_assets',
-      Resources.assetsImagesNotifyIconIco
+      Resources.assetsImagesNotifyIconIco,
     ]);
   } else if (Platform.isMacOS) {
     path = p.joinAll(['AppIcon']);
@@ -83,7 +80,7 @@ Future<void> _initSystemTray() async {
 
   // We first init the systray menu and then add the menu entries
   unawaited(_systemTray.initSystemTray(
-    'Mixin',
+    title: 'Mixin',
     iconPath: path,
     toolTip: 'Mixin',
   ));
@@ -93,10 +90,10 @@ Future<void> _initSystemTray() async {
     d('eventName: $eventName');
     switch (eventName) {
       case 'leftMouseUp':
-        if (Platform.isWindows) {
-          WinToast.instance().bringWindowToFront();
-        }
-        appWindow.show();
+        windowManager.show();
+        break;
+      case 'rightMouseUp':
+        _systemTray.popUpContextMenu();
         break;
       default:
         break;

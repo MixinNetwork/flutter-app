@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:core';
-import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart' as cr;
 import 'package:flutter/foundation.dart';
 import 'package:pointycastle/api.dart';
-import 'package:pointycastle/block/aes_fast.dart';
+import 'package:pointycastle/block/aes.dart';
 import 'package:pointycastle/block/modes/cbc.dart';
 import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
 import 'package:pointycastle/paddings/pkcs7.dart';
@@ -96,7 +95,7 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
     final macOutput = AccumulatorSink<cr.Digest>();
     final macSink = mac.startChunkedConversion(macOutput);
 
-    final cbcCipher = CBCBlockCipher(AESFastEngine());
+    final cbcCipher = CBCBlockCipher(AESEngine());
 
     final digestOutput = AccumulatorSink<cr.Digest>();
     final digestSink = cr.sha256.startChunkedConversion(digestOutput);
@@ -245,7 +244,7 @@ extension EncryptAttachmentStreamExtension on Stream<List<int>> {
     final macOutput = AccumulatorSink<cr.Digest>();
     final macSink = mac.startChunkedConversion(macOutput);
 
-    final cbcCipher = CBCBlockCipher(AESFastEngine());
+    final cbcCipher = CBCBlockCipher(AESEngine());
     var _aesCipher = _getAesCipher(cbcCipher, aesKey, iv, true);
 
     final digestOutput = AccumulatorSink<cr.Digest>();

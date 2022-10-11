@@ -32,7 +32,7 @@ class UtcValueSerializer extends ValueSerializer {
   @override
   dynamic toJson<T>(T value) {
     if (value is DateTime) {
-      return value.toUtc().toString();
+      return value.toUtc().toIso8601String();
     }
 
     return value;

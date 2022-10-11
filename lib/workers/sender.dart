@@ -1,15 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
+import '../blaze/blaze_message_param.dart';
 import '../blaze/blaze_message_param_session.dart';
-import '../blaze/blaze_param.dart';
 import '../blaze/blaze_signal_key_message.dart';
-import '../blaze/vo/blaze_message_data.dart';
 import '../blaze/vo/message_result.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../blaze/vo/sender_key_status.dart';
@@ -19,9 +18,7 @@ import '../crypto/signal/signal_protocol.dart';
 import '../db/database.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/message_category.dart';
-import '../enum/message_status.dart';
 import '../utils/extension/extension.dart';
-import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 
 class Sender {
@@ -48,26 +45,30 @@ class Sender {
       final checksum = await getCheckSum(cid);
       params.conversationChecksum = checksum;
     }
+    i('deliver blazeMessage: ${blazeMessage.id}');
     final bm = await blaze.sendMessage(blazeMessage);
     if (bm == null) {
       await _sleep(1);
       return deliver(blazeMessage);
     } else if (bm.error != null) {
+      w('deliver error code: ${bm.error?.code}, description: ${bm.error?.description}');
       if (bm.error?.code == conversationChecksumInvalidError) {
         final cid = (blazeMessage.params as BlazeMessageParam).conversationId;
         i('checksum error: ${bm.error?.code}  cid:$cid');
         if (cid != null) {
           await _syncConversation(cid);
         }
-        return MessageResult(false, true);
+        return MessageResult(false, true, bm.error?.code);
       } else if (bm.error?.code == forbidden) {
-        return MessageResult(true, false);
+        return MessageResult(true, false, bm.error?.code);
+      } else if (bm.error?.code == badData) {
+        return MessageResult(true, false, bm.error?.code);
       } else {
         await _sleep(1);
         return deliver(blazeMessage);
       }
     } else {
-      return MessageResult(true, false);
+      return MessageResult(true, false, bm.error?.code);
     }
   }
 
@@ -106,7 +107,7 @@ class Sender {
       final keys = List<SignalKey>.from((data as List<dynamic>)
           .map((e) => SignalKey.fromJson(e as Map<String, dynamic>)));
       if (keys.isNotEmpty) {
-        final preKeyBundle = keys[0].createPreKeyBundle();
+        final preKeyBundle = keys.first.createPreKeyBundle();
         await signalProtocol.processSession(recipientId, preKeyBundle);
       } else {
         return false;
@@ -166,7 +167,7 @@ class Sender {
                 userId: k.userId, sessionId: k.sessionId));
           }
         } else {
-          i('No any group signal key from server: ${requestSignalKeyUsers.toString()}');
+          i('No any group signal key from server: $requestSignalKeyUsers');
         }
 
         final noKeyList = requestSignalKeyUsers.where((e) => !keys.contains(e));
@@ -196,6 +197,10 @@ class Sender {
       return checkSessionSenderKey(conversationId);
     }
     if (result.success) {
+      final messageIds = signalKeyMessages
+          .map((e) => db.MessagesHistoryData(messageId: e.messageId));
+      await database.messagesHistoryDao.insertList(messageIds);
+
       final sentSenderKeys = signalKeyMessages
           .map((e) => db.ParticipantSessionData(
               conversationId: conversationId,
@@ -210,11 +215,7 @@ class Sender {
   Future<String> getCheckSum(String conversationId) async {
     final sessions = await database.participantSessionDao
         .getParticipantSessionsByConversationId(conversationId);
-    if (sessions.isEmpty) {
-      return '';
-    } else {
-      return generateConversationChecksum(sessions);
-    }
+    return sessions.isEmpty ? '' : generateConversationChecksum(sessions);
   }
 
   String generateConversationChecksum(List<db.ParticipantSessionData> devices) {
@@ -230,10 +231,10 @@ class Sender {
     if (conversation == null) {
       return;
     }
-    if (conversation.category == ConversationCategory.group) {
-      await _syncConversation(conversationId);
+    if (conversation.status != ConversationStatus.success) {
+      await checkConversationExists(conversation);
     } else {
-      await _checkConversationExists(conversation);
+      await _syncConversation(conversationId);
     }
   }
 
@@ -259,9 +260,11 @@ class Sender {
     final remote = <db.ParticipantSessionData>[];
     for (final s in data) {
       remote.add(db.ParticipantSessionData(
-          conversationId: conversationId,
-          userId: s.userId,
-          sessionId: s.sessionId));
+        conversationId: conversationId,
+        userId: s.userId,
+        sessionId: s.sessionId,
+        publicKey: s.publicKey,
+      ));
     }
     if (remote.isEmpty) {
       await database.participantSessionDao
@@ -295,7 +298,7 @@ class Sender {
     }
   }
 
-  Future _checkConversationExists(db.Conversation conversation) async {
+  Future<void> checkConversationExists(db.Conversation conversation) async {
     if (conversation.status != ConversationStatus.success) {
       await _createConversation(conversation);
     }
@@ -319,9 +322,11 @@ class Sender {
       final newParticipantSessions = <db.ParticipantSessionData>[];
       for (final p in sessionParticipants) {
         newParticipantSessions.add(db.ParticipantSessionData(
-            conversationId: conversation.conversationId,
-            userId: p.userId,
-            sessionId: p.sessionId));
+          conversationId: conversation.conversationId,
+          userId: p.userId,
+          sessionId: p.sessionId,
+          publicKey: p.publicKey,
+        ));
       }
       if (newParticipantSessions.isNotEmpty) {
         await database.participantSessionDao
@@ -344,7 +349,7 @@ class Sender {
     final keys = List<SignalKey>.from((data as List<dynamic>)
         .map((e) => SignalKey.fromJson(e as Map<String, dynamic>)));
     if (keys.isNotEmpty) {
-      final preKeyBundle = keys[0].createPreKeyBundle();
+      final preKeyBundle = keys.first.createPreKeyBundle();
       await signalProtocol.processSession(recipientId, preKeyBundle);
     } else {
       await database.participantSessionDao.insert(db.ParticipantSessionData(
@@ -385,7 +390,7 @@ class Sender {
     final plainText = PlainJsonMessage(kNoKey, null, null, null, null, null)
         .toJson()
         .toString();
-    final encoded = base64Encode(await utf8EncodeWithIsolate(plainText));
+    final encoded = base64Encode(utf8.encode(plainText));
     final blazeParam = BlazeMessageParam(
       conversationId: conversationId,
       recipientId: recipientId,
@@ -431,9 +436,11 @@ class Sender {
     final list = <db.ParticipantSessionData>[];
     response.data.forEach((e) {
       list.add(db.ParticipantSessionData(
-          conversationId: conversationId,
-          userId: e.userId,
-          sessionId: e.sessionId));
+        conversationId: conversationId,
+        userId: e.userId,
+        sessionId: e.sessionId,
+        publicKey: e.publicKey,
+      ));
     });
     if (list.isNotEmpty) {
       await database.participantSessionDao.insertAll(list);

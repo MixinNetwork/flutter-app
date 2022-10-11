@@ -7,7 +7,7 @@ part 'sticker_relationship_dao.g.dart';
 @DriftAccessor(tables: [StickerRelationships])
 class StickerRelationshipDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerRelationshipDaoMixin {
-  StickerRelationshipDao(MixinDatabase db) : super(db);
+  StickerRelationshipDao(super.db);
 
   Future<int> insert(StickerRelationship stickerRelationship) =>
       into(db.stickerRelationships).insertOnConflictUpdate(stickerRelationship);
@@ -20,4 +20,10 @@ class StickerRelationshipDao extends DatabaseAccessor<MixinDatabase>
         batch.insertAllOnConflictUpdate(
             db.stickerRelationships, stickerRelationships);
       });
+
+  Selectable<String> stickerSystemAlbumId(String stickerId) =>
+      db.stickerSystemAlbumId(stickerId);
+
+  Selectable<StickerAlbum> stickerSystemAlbum(String stickerId) =>
+      db.stickerSystemAlbum(stickerId);
 }

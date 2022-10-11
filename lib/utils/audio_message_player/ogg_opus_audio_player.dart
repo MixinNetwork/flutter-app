@@ -74,10 +74,10 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
     _disposeCurrentPlayer();
     final media = _medias[_index];
     final player = OggOpusPlayer(media.mediaPath);
-    player.state.addListener(_handlePlayerState);
-    player.play();
     assert(_player == null);
     _player = player;
+    player.state.addListener(_handlePlayerState);
+    player.play();
     _currentPlaying.value = current;
   }
 
@@ -103,9 +103,8 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
   }
 
   @override
-  Stream<PlaybackState> get playbackStream => _playbackState.stream
-      .distinct()
-      .map((event) => _OggOpusPlaybackState(event));
+  Stream<PlaybackState> get playbackStream =>
+      _playbackState.stream.distinct().map(_OggOpusPlaybackState.new);
 
   void _disposeCurrentPlayer() {
     _player?.state.removeListener(_handlePlayerState);

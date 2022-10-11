@@ -1,9 +1,9 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:window_manager/window_manager.dart';
 
 class WindowShortcuts extends StatelessWidget {
-  const WindowShortcuts({Key? key, required this.child}) : super(key: key);
+  const WindowShortcuts({super.key, required this.child});
 
   final Widget child;
 
@@ -15,7 +15,7 @@ class WindowShortcuts extends StatelessWidget {
         },
         actions: {
           _CloseWindowIntent: CallbackAction(onInvoke: (intent) {
-            appWindow.hide();
+            windowManager.hide();
             // if appWindow hidden, RawKeyboard#keysPressed will not clear.
             // However TextFiled will use RawKeyboard#keysPressed to decide if
             // handle the command + V/C events.

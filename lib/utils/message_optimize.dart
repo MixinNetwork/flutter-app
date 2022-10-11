@@ -1,8 +1,9 @@
 import 'dart:convert';
 
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
 import '../constants/resources.dart';
 import '../enum/message_category.dart';
-import '../enum/message_status.dart';
 import '../generated/l10n.dart';
 import '../widgets/message/item/action/action_data.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
@@ -20,9 +21,11 @@ String? messagePreviewOptimize(
 
   final trimContent = content?.trim();
   if (messageCategory.isIllegalMessageCategory) {
-    _content = Localization.current.chatNotSupport;
+    _content = Localization.current.messageNotSupport;
   } else if (messageStatus == MessageStatus.failed) {
     _content = Localization.current.waitingForThisMessage;
+  } else if (messageStatus == MessageStatus.unknown) {
+    _content = Localization.current.messageNotSupport;
   } else if (messageCategory.isText) {
     _content = trimContent;
   } else if (messageCategory == MessageCategory.systemAccountSnapshot) {
@@ -54,7 +57,7 @@ String? messagePreviewOptimize(
           .join();
     } catch (_) {}
   } else if (messageCategory == MessageCategory.appCard) {
-    _content = '[${Localization.current.appCard}]';
+    _content = '[${Localization.current.card}]';
     try {
       _content =
           AppCardData.fromJson(jsonDecode(trimContent!) as Map<String, dynamic>)
@@ -63,23 +66,19 @@ String? messagePreviewOptimize(
   } else if (messageCategory.isContact) {
     _content = '[${Localization.current.contact}]';
   } else if (messageCategory.isCallMessage) {
-    _content = '[${Localization.current.videoCall}]';
+    _content = Localization.current.contentVoice;
   } else if (messageCategory.isRecall) {
     _content =
-        '[${isCurrentUser ? Localization.current.chatRecallMe : Localization.current.chatRecallDelete}]';
+        '[${isCurrentUser ? Localization.current.youDeletedThisMessage : Localization.current.thisMessageWasDeleted}]';
   } else if (messageCategory.isTranscript) {
-    _content = '[${Localization.current.chatTranscript}]';
+    _content = '[${Localization.current.transcript}]';
   } else {
-    _content = Localization.current.chatNotSupport;
+    _content = Localization.current.messageNotSupport;
   }
 
   if ((_content?.isNotEmpty ?? false) && isGroup) {
-    late String sender;
-    if (isCurrentUser) {
-      sender = Localization.current.youStart;
-    } else {
-      sender = senderFullName ?? '';
-    }
+    final sender =
+        isCurrentUser ? Localization.current.you : senderFullName ?? '';
     _content = '$sender: $_content';
   }
 

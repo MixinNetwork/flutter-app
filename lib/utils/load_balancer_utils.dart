@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert' as convert;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:isolate/isolate.dart';
@@ -28,7 +27,8 @@ List<int> _utf8Encode(String input) => convert.utf8.encode(input);
 Future<List<int>> utf8EncodeWithIsolate(String input) =>
     runLoadBalancer(_utf8Encode, input);
 
-String _utf8Decode(List<int> codeUnits) => convert.utf8.decode(codeUnits);
+String _utf8Decode(List<int> codeUnits) =>
+    convert.utf8.decode(codeUnits, allowMalformed: true);
 
 Future<String> utf8DecodeWithIsolate(List<int> codeUnits) =>
     runLoadBalancer(_utf8Decode, codeUnits);

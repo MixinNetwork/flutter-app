@@ -24,4 +24,24 @@ void main() {
     duration = const Duration(milliseconds: 999);
     expect(duration.asMinutesSeconds, '00:01');
   });
+
+  test('test format duration asMinutesSecondsWithDas', () {
+    var duration = const Duration(minutes: 12, seconds: 20);
+    expect(duration.asMinutesSecondsWithDas, '12:20.0');
+
+    duration = const Duration(seconds: 20);
+    expect(duration.asMinutesSecondsWithDas, '00:20.0');
+
+    duration = const Duration(seconds: 120, milliseconds: 999);
+    expect(duration.asMinutesSecondsWithDas, '02:00.9');
+
+    duration = const Duration(minutes: 1200, seconds: 20, milliseconds: 20);
+    expect(duration.asMinutesSecondsWithDas, '1200:20.0');
+
+    duration = const Duration(minutes: 120, seconds: 20, milliseconds: 120);
+    expect(duration.asMinutesSecondsWithDas, '120:20.1');
+
+    duration = const Duration(milliseconds: 999);
+    expect(duration.asMinutesSecondsWithDas, '00:00.9');
+  });
 }

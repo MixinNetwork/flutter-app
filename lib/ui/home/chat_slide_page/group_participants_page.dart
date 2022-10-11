@@ -9,6 +9,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
+import '../../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/search_text_field.dart';
@@ -16,12 +17,11 @@ import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../bloc/conversation_cubit.dart';
-import '../conversation_page.dart';
 import 'group_invite/group_invite_dialog.dart';
 
 /// The participants of group.
 class GroupParticipantsPage extends HookWidget {
-  const GroupParticipantsPage({Key? key}) : super(key: key);
+  const GroupParticipantsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class GroupParticipantsPage extends HookWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SearchTextField(
-              hintText: context.l10n.groupSearchParticipants,
+              hintText: context.l10n.settingAuthSearchHint,
               autofocus: context.textFieldAutoGainFocus,
               controller: controller,
             ),
@@ -84,11 +84,10 @@ class GroupParticipantsPage extends HookWidget {
 
 class _ParticipantList extends HookWidget {
   const _ParticipantList({
-    Key? key,
     required this.filterKeyword,
     required this.participants,
     required this.currentUser,
-  }) : super(key: key);
+  });
 
   /// The keyword to filter participants of group.
   /// Empty indicates non filter.
@@ -128,10 +127,9 @@ class _ParticipantList extends HookWidget {
 class _ParticipantTile extends StatelessWidget {
   const _ParticipantTile({
     required this.participant,
-    Key? key,
     required this.currentUser,
     required this.keyword,
-  }) : super(key: key);
+  });
 
   final ParticipantUser participant;
 
@@ -150,7 +148,7 @@ class _ParticipantTile extends StatelessWidget {
             size: 50,
             avatarUrl: participant.avatarUrl,
             userId: participant.userId,
-            name: participant.fullName ?? '?',
+            name: participant.fullName,
           ),
           title: Row(
             children: [
@@ -187,11 +185,10 @@ class _ParticipantTile extends StatelessWidget {
 
 class _ParticipantMenuEntry extends StatelessWidget {
   const _ParticipantMenuEntry({
-    Key? key,
     required this.child,
     required this.participant,
     required this.currentUser,
-  }) : super(key: key);
+  });
 
   final ParticipantUser participant;
   final ParticipantUser? currentUser;
@@ -208,6 +205,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
       buildMenus: () {
         final menus = [
           ContextMenu(
+            icon: Resources.assetsImagesContextMenuChatSvg,
             title:
                 context.l10n.groupPopMenuMessage(participant.fullName ?? '?'),
             onTap: () {
@@ -221,7 +219,8 @@ class _ParticipantMenuEntry extends StatelessWidget {
         if (currentUser?.role == ParticipantRole.owner) {
           if (participant.role != ParticipantRole.admin) {
             menus.add(ContextMenu(
-              title: context.l10n.groupPopMenuMakeAdmin,
+              icon: Resources.assetsImagesContextMenuUserEditSvg,
+              title: context.l10n.makeGroupAdmin,
               onTap: () => runFutureWithToast(
                 context,
                 context.accountServer.updateParticipantRole(
@@ -232,7 +231,8 @@ class _ParticipantMenuEntry extends StatelessWidget {
             ));
           } else {
             menus.add(ContextMenu(
-              title: context.l10n.groupPopMenuDismissAdmin,
+              icon: Resources.assetsImagesContextMenuStopSvg,
+              title: context.l10n.dismissAsAdmin,
               onTap: () => runFutureWithToast(
                   context,
                   context.accountServer.updateParticipantRole(
@@ -246,9 +246,9 @@ class _ParticipantMenuEntry extends StatelessWidget {
         if (currentUser?.role != null && participant.role == null ||
             currentUser?.role == ParticipantRole.owner) {
           menus.add(ContextMenu(
+            icon: Resources.assetsImagesContextMenuDeleteSvg,
             isDestructiveAction: true,
-            title: context.l10n
-                .groupPopMenuRemoveParticipants(participant.fullName ?? '?'),
+            title: context.l10n.groupPopMenuRemove(participant.fullName ?? '?'),
             onTap: () => runFutureWithToast(
                 context,
                 context.accountServer.removeParticipant(
@@ -264,24 +264,27 @@ class _ParticipantMenuEntry extends StatelessWidget {
 }
 
 class _RoleWidget extends StatelessWidget {
-  const _RoleWidget({Key? key, required this.role}) : super(key: key);
+  const _RoleWidget({required this.role});
+
   final ParticipantRole? role;
 
   @override
   Widget build(BuildContext context) {
     switch (role) {
       case ParticipantRole.owner:
-        return _RoleLabel(context.l10n.groupOwner);
+        return _RoleLabel(context.l10n.owner);
       case ParticipantRole.admin:
-        return _RoleLabel(context.l10n.groupAdmin);
-      default:
+        return _RoleLabel(context.l10n.admin);
+      case null:
         return Container(width: 0);
     }
   }
 }
 
 class _RoleLabel extends StatelessWidget {
-  const _RoleLabel(this.label, {Key? key}) : super(key: key);
+  const _RoleLabel(
+    this.label,
+  );
 
   final String label;
 
@@ -297,9 +300,8 @@ class _RoleLabel extends StatelessWidget {
 
 class _ActionAddParticipants extends StatelessWidget {
   const _ActionAddParticipants({
-    Key? key,
     required this.participants,
-  }) : super(key: key);
+  });
 
   final List<ParticipantUser> participants;
 
@@ -307,34 +309,31 @@ class _ActionAddParticipants extends StatelessWidget {
   Widget build(BuildContext context) => ContextMenuPortalEntry(
         buildMenus: () => [
           ContextMenu(
-            title: context.l10n.groupAdd,
+            icon: Resources.assetsImagesContextMenuSearchUserSvg,
+            title: context.l10n.addParticipants,
             onTap: () async {
               final result = await showConversationSelector(
                 context: context,
                 singleSelect: false,
-                title: context.l10n.groupAdd,
+                title: context.l10n.addParticipants,
                 onlyContact: true,
               );
               if (result == null || result.isEmpty) return;
 
-              final userIds = [
-                context.accountServer.userId,
-                ...result.where((e) => e.userId != null).map(
-                      (e) => e.userId!,
-                    )
-              ];
+              final userIds =
+                  result.map((e) => e.userId).whereNotNull().toList();
               final conversationId =
                   context.read<ConversationCubit>().state?.conversationId;
               assert(conversationId != null);
               await runFutureWithToast(
                 context,
-                Future.wait(userIds.map((userId) => context.accountServer
-                    .addParticipant(conversationId!, [userId]))),
+                context.accountServer.addParticipant(conversationId!, userIds),
               );
             },
           ),
           ContextMenu(
-            title: context.l10n.groupInvite,
+            icon: Resources.assetsImagesContextMenuLinkSvg,
+            title: context.l10n.inviteToGroupViaLink,
             onTap: () {
               final conversationCubit = context.read<ConversationCubit>().state;
               assert(conversationCubit != null);

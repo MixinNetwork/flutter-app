@@ -12,9 +12,7 @@ import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
 
 class WaitingMessage extends HookWidget {
-  const WaitingMessage({
-    Key? key,
-  }) : super(key: key);
+  const WaitingMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +23,9 @@ class WaitingMessage extends HookWidget {
 
     final content = RichText(
       text: TextSpan(
-        text: context.l10n.chatWaiting(
+        text: context.l10n.chatDecryptionFailedHint(
           relationship == UserRelationship.me
-              ? context.l10n.chatWaitingDesktop
+              ? context.l10n.linkedDevice
               : userFullName!,
         ),
         style: TextStyle(
@@ -37,7 +35,7 @@ class WaitingMessage extends HookWidget {
         children: [
           TextSpan(
             mouseCursor: SystemMouseCursors.click,
-            text: context.l10n.chatLearn,
+            text: context.l10n.learnMore,
             style: TextStyle(
               fontSize: MessageItemWidget.primaryFontSize,
               color: context.theme.accent,

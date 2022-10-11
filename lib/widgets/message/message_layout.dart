@@ -5,26 +5,28 @@ import 'package:flutter/widgets.dart';
 
 class MessageLayout extends MultiChildRenderObjectWidget {
   MessageLayout({
-    Key? key,
+    super.key,
     this.spacing = 0.0,
     this.clipBehavior = Clip.none,
     required Widget content,
     required Widget dateAndStatus,
-  }) : super(key: key, children: [content, dateAndStatus]);
+  }) : super(children: [content, dateAndStatus]);
 
   final double spacing;
   final Clip clipBehavior;
 
   @override
-  _RenderMessageLayout createRenderObject(BuildContext context) =>
-      _RenderMessageLayout(
+  RenderObject createRenderObject(BuildContext context) => _RenderMessageLayout(
         spacing: spacing,
         clipBehavior: clipBehavior,
       );
 
   @override
   void updateRenderObject(
-      BuildContext context, _RenderMessageLayout renderObject) {
+    BuildContext context,
+    // ignore: library_private_types_in_public_api
+    _RenderMessageLayout renderObject,
+  ) {
     renderObject
       ..spacing = spacing
       ..clipBehavior = clipBehavior;

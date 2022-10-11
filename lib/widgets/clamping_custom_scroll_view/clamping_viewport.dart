@@ -5,24 +5,15 @@ import 'package:flutter/widgets.dart';
 
 class ClampingViewport extends Viewport {
   ClampingViewport({
-    Key? key,
-    AxisDirection axisDirection = AxisDirection.down,
-    AxisDirection? crossAxisDirection,
+    super.key,
+    super.axisDirection,
+    super.crossAxisDirection,
     double anchor = 0.0,
-    required ViewportOffset offset,
-    Key? center,
-    double? cacheExtent,
-    List<Widget> slivers = const <Widget>[],
-  })  : _anchor = anchor,
-        super(
-          key: key,
-          axisDirection: axisDirection,
-          crossAxisDirection: crossAxisDirection,
-          offset: offset,
-          center: center,
-          cacheExtent: cacheExtent,
-          slivers: slivers,
-        );
+    required super.offset,
+    super.center,
+    super.cacheExtent,
+    super.slivers,
+  }) : _anchor = anchor;
 
   final double _anchor;
 
@@ -65,30 +56,22 @@ class ClampingRenderViewport extends RenderViewport {
   /// list, if any, is used.
   ///
   /// The [offset] must be specified. For testing purposes, consider passing a
-  /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
+  /// [ViewportOffset.zero] or [ViewportOffset.fixed].
   ClampingRenderViewport({
-    AxisDirection axisDirection = AxisDirection.down,
-    required AxisDirection crossAxisDirection,
-    required ViewportOffset offset,
+    super.axisDirection,
+    required super.crossAxisDirection,
+    required super.offset,
     double anchor = 0.0,
     List<RenderSliver>? children,
     RenderSliver? center,
-    double? cacheExtent,
-    CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
-    Clip clipBehavior = Clip.antiAlias,
+    super.cacheExtent,
+    super.cacheExtentStyle,
+    super.clipBehavior = Clip.antiAlias,
   })  : assert(anchor >= 0.0 && anchor <= 1.0),
         assert(cacheExtentStyle != CacheExtentStyle.viewport ||
             cacheExtent != null),
         _anchor = anchor,
-        _center = center,
-        super(
-          axisDirection: axisDirection,
-          crossAxisDirection: crossAxisDirection,
-          offset: offset,
-          cacheExtent: cacheExtent,
-          cacheExtentStyle: cacheExtentStyle,
-          clipBehavior: clipBehavior,
-        ) {
+        _center = center {
     addAll(children);
     if (center == null && firstChild != null) _center = firstChild;
   }

@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:tuple/tuple.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
+import '../../../../bloc/keyword_cubit.dart';
+import '../../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../../ui/home/chat/chat_page.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
+import '../../../../utils/logger.dart';
 import '../../../../utils/reg_exp_utils.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../high_light_text.dart';
@@ -17,9 +21,7 @@ import '../../message_layout.dart';
 import 'mention_builder.dart';
 
 class TextMessage extends HookWidget {
-  const TextMessage({
-    Key? key,
-  }) : super(key: key);
+  const TextMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +33,24 @@ class TextMessage extends HookWidget {
       backgroundColor: context.theme.highlight,
     );
 
-    final keyword = useBlocStateConverter<SearchConversationKeywordCubit,
+    var keyword = useBlocStateConverter<SearchConversationKeywordCubit,
         Tuple2<String?, String>, String>(
-      converter: (state) => state.item1 != userId ? '' : state.item2,
+      converter: (state) {
+        if (state.item1 == null || state.item1 == userId) return state.item2;
+        return '';
+      },
       keys: [userId],
     );
+
+    final globalKeyword = useBlocState<KeywordCubit, String>();
+    final conversationKeyword =
+        useBlocState<ConversationCubit, ConversationState?>()?.keyword;
+
+    if (globalKeyword.isNotEmpty) {
+      keyword = globalKeyword;
+    } else if (conversationKeyword?.isNotEmpty ?? false) {
+      keyword = conversationKeyword!;
+    }
 
     final urlHighlightTextSpans = useMemoized(
       () => uriRegExp.allMatchesAndSort(content).map(
@@ -44,7 +59,24 @@ class TextMessage extends HookWidget {
               style: TextStyle(
                 color: context.theme.accent,
               ),
-              onTap: () => openUri(context, e[0]!),
+              onTap: () => openUri(context, e[0]!,
+                  app: context.read<ConversationCubit>().state?.app),
+            ),
+          ),
+      [content],
+    );
+    final mailHighlightTextSpans = useMemoized(
+      () => mailRegExp.allMatchesAndSort(content).map(
+            (e) => HighlightTextSpan(
+              e[0]!,
+              style: TextStyle(
+                color: context.theme.accent,
+              ),
+              onTap: () {
+                final uri = 'mailto:${e[0]!}';
+                d('open mail uri: $uri');
+                launchUrlString(uri);
+              },
             ),
           ),
       [content],
@@ -65,9 +97,16 @@ class TextMessage extends HookWidget {
 
     final keywordHighlightTextSpans = useMemoized(
         () => keyword.trim().isEmpty
-            ? [...urlHighlightTextSpans, ...botNumberHighlightTextSpans]
-            : [...urlHighlightTextSpans, ...botNumberHighlightTextSpans]
-                .fold<Set<HighlightTextSpan>>({}, (previousValue, element) {
+            ? [
+                ...urlHighlightTextSpans,
+                ...mailHighlightTextSpans,
+                ...botNumberHighlightTextSpans
+              ]
+            : [
+                ...urlHighlightTextSpans,
+                ...mailHighlightTextSpans,
+                ...botNumberHighlightTextSpans
+              ].fold<Set<HighlightTextSpan>>({}, (previousValue, element) {
                 element.text.splitMapJoin(
                   RegExp(keyword, caseSensitive: false),
                   onMatch: (match) {
@@ -101,7 +140,7 @@ class TextMessage extends HookWidget {
         content: content,
         builder: (context, newContent, mentionHighlightTextSpans) =>
             HighlightSelectableText(
-          newContent!,
+          newContent ?? ' ',
           highlightTextSpans: [
             ...keywordHighlightTextSpans,
             HighlightTextSpan(

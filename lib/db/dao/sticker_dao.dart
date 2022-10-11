@@ -1,24 +1,40 @@
 import 'package:drift/drift.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
 import '../mixin_database.dart';
 
 part 'sticker_dao.g.dart';
 
+extension StickerConverter on sdk.Sticker {
+  StickersCompanion get asStickersCompanion => StickersCompanion(
+        stickerId: Value(stickerId),
+        albumId: Value(albumId),
+        name: Value(name),
+        assetUrl: Value(assetUrl),
+        assetType: Value(assetType),
+        assetWidth: Value(assetWidth),
+        assetHeight: Value(assetHeight),
+        createdAt: Value(createdAt),
+      );
+}
+
 @DriftAccessor(tables: [Sticker])
 class StickerDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerDaoMixin {
-  StickerDao(MixinDatabase db) : super(db);
+  StickerDao(super.db);
 
-  Future<int> insert(Sticker sticker) =>
+  Future<int> insert(StickersCompanion sticker) =>
       into(db.stickers).insertOnConflictUpdate(sticker);
+
+  Future<void> insertAll(Iterable<StickersCompanion> stickers) =>
+      batch((batch) => batch.insertAllOnConflictUpdate(db.stickers, stickers));
 
   Future<int> deleteSticker(Sticker sticker) =>
       delete(db.stickers).delete(sticker);
 
   Selectable<Sticker> recentUsedStickers() => db.recentUsedStickers();
 
-  SimpleSelectStatement<Stickers, Sticker> getStickerByUnique(
-          String stickerId) =>
+  SimpleSelectStatement<Stickers, Sticker> sticker(String stickerId) =>
       (select(db.stickers)
         ..where((tbl) => tbl.stickerId.equals(stickerId))
         ..limit(1));
@@ -29,7 +45,9 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
       (t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)
     ]);
 
-  Selectable<Sticker> personalStickers() => db.personalStickers();
+  Selectable<Sticker> personalStickers() => db.stickersByCategory('PERSONAL');
+
+  Selectable<Sticker> systemStickers() => db.stickersByCategory('SYSTEM');
 
   Future<int> updateUsedAt(String stickerId, DateTime dateTime) =>
       (update(db.stickers)..where((tbl) => tbl.stickerId.equals(stickerId)))

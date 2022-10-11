@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Mixin"
-#define MyAppVersion "0.17.6"
+#define MyAppVersion "0.37.5"
 #define MyAppPublisher "Mixin, Inc."
 #define MyAppURL "https://mixin.one/"
 #define MyAppExeName "mixin_desktop.exe"
@@ -32,6 +32,7 @@ AppMutex=Mixin_flutter_single_instance_identity_mutex_name,Global/Mixin_flutter_
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "chinesesimplified"; MessagesFile: "{#SourcePath}dist\exe\ChineseSimplified.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked

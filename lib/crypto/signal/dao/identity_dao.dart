@@ -7,11 +7,10 @@ part 'identity_dao.g.dart';
 @DriftAccessor(tables: [Identities])
 class IdentityDao extends DatabaseAccessor<SignalDatabase>
     with _$IdentityDaoMixin {
-  IdentityDao(SignalDatabase db) : super(db);
+  IdentityDao(super.db);
 
   Future<Identitie?> getIdentityByAddress(String address) async =>
-      (select(db.identities)
-            ..where((tbl) => tbl.address.equals(address.toString())))
+      (select(db.identities)..where((tbl) => tbl.address.equals(address)))
           .getSingleOrNull();
 
   Future insert(IdentitiesCompanion identitiesCompanion) => into(db.identities)

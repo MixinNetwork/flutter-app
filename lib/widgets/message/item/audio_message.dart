@@ -15,11 +15,10 @@ import '../../waveform_widget.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import 'transcript_message.dart';
 
 class AudioMessage extends HookWidget {
-  const AudioMessage({
-    Key? key,
-  }) : super(key: key);
+  const AudioMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +39,10 @@ class AudioMessage extends HookWidget {
         milliseconds: int.tryParse(state.mediaDuration ?? '') ?? 0,
       ),
     );
+
+    final isMessageSentOut = (isTranscriptPage &&
+            TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
+        (!isTranscriptPage && relationship == UserRelationship.me);
 
     return MessageBubble(
       outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
@@ -66,18 +69,25 @@ class AudioMessage extends HookWidget {
               context.audioMessageService.playAudioMessage(message);
               break;
             case MediaStatus.canceled:
-              if (message.relationship == UserRelationship.me &&
-                  message.mediaUrl?.isNotEmpty == true) {
-                context.accountServer.reUploadAttachment(message);
+              if (isMessageSentOut && message.mediaUrl?.isNotEmpty == true) {
+                if (isTranscriptPage) {
+                  final transcriptMessageId =
+                      TranscriptPage.of(context)?.messageId;
+                  context.accountServer
+                      .reUploadTranscriptAttachment(transcriptMessageId!);
+                } else {
+                  context.accountServer.reUploadAttachment(message);
+                }
               } else {
-                context.accountServer.downloadAttachment(message);
+                context.accountServer.downloadAttachment(message.messageId);
               }
               break;
             case MediaStatus.pending:
               context.accountServer
                   .cancelProgressAttachmentJob(message.messageId);
               break;
-            default:
+            case MediaStatus.expired:
+            case null:
               break;
           }
         },
@@ -88,17 +98,16 @@ class AudioMessage extends HookWidget {
               builder: (BuildContext context) {
                 switch (mediaStatus) {
                   case MediaStatus.canceled:
-                    if (relationship == UserRelationship.me &&
-                        mediaUrl?.isNotEmpty == true) {
-                      return const StatusUpload();
-                    } else {
-                      return const StatusDownload();
-                    }
+                    return isMessageSentOut && mediaUrl?.isNotEmpty == true
+                        ? const StatusUpload()
+                        : const StatusDownload();
                   case MediaStatus.pending:
                     return const StatusPending();
                   case MediaStatus.expired:
                     return const StatusWarning();
-                  default:
+                  case MediaStatus.done:
+                  case MediaStatus.read:
+                  case null:
                     return playing
                         ? const StatusAudioStop()
                         : const StatusAudioPlay();
@@ -134,9 +143,8 @@ class AudioMessage extends HookWidget {
 
 class _AnimatedWave extends HookWidget {
   const _AnimatedWave({
-    Key? key,
     required this.duration,
-  }) : super(key: key);
+  });
 
   final Duration duration;
 
@@ -158,6 +166,9 @@ class _AnimatedWave extends HookWidget {
       messageId,
       isMediaList: isTranscriptPage,
     );
+
+    final isMe = useMessageConverter(
+        converter: (state) => state.relationship == UserRelationship.me);
 
     double getPlayingFriction() {
       final friction =
@@ -196,10 +207,12 @@ class _AnimatedWave extends HookWidget {
       child: WaveformWidget(
         value: position.value,
         waveform: waveform,
-        backgroundColor:
-            read ? context.theme.waveformBackground : context.theme.accent,
-        foregroundColor:
-            read ? context.theme.waveformForeground : context.theme.accent,
+        backgroundColor: isMe || read
+            ? context.theme.waveformBackground
+            : context.theme.accent,
+        foregroundColor: isMe || read
+            ? context.theme.waveformForeground
+            : context.theme.accent,
       ),
     );
   }
