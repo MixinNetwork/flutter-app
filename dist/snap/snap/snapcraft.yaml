@@ -4,7 +4,7 @@ summary: Mixin Desktop
 description: Mixin Messenger
 
 confinement: strict
-base: core18
+base: core22
 grade: stable
 
 apps:
@@ -12,6 +12,7 @@ apps:
     command: mixin_desktop
     plugs:
       - network
+      - desktop
 
 parts:
   mixin-desktop:
