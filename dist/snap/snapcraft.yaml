@@ -1,48 +1,23 @@
-name: mixin-desktop
-version: 0.17.6+0
+name: mixin_desktop
+version: 0.37.5
 summary: Mixin Desktop
 description: Mixin Messenger
 
 confinement: strict
-base: core20
+base: core18
 grade: stable
-
-slots:
-  dbus-super-cool-app: # adjust accordingly to your app name
-    interface: dbus
-    bus: session
-    name: org.bar.super_cool_app # adjust accordingly to your app name and
 
 apps:
   mixin-desktop:
     command: mixin_desktop
-    extensions: [ flutter-stable ]
     plugs:
       - network
+
 parts:
   mixin-desktop:
-    source: .
-    plugin: flutter
-    build-packages:
-      - libappindicator3-dev
-      - gir1.2-appindicator3-0.1
-      - libsqlite3-dev
-      - libwebkit2gtk-4.0-dev
-      - curl
-      - unzip
-      - zip
-      - xz-utils
-      - clang
-      - cmake
-      - ninja-build
-      - pkg-config
-      - libgtk-3-dev
+    source: ./mixin_desktop
+    plugin: dump
     stage-packages:
-      - sqlite3
       - libsdl2-2.0-0
       - libgtk-3-0
       - libwebkit2gtk-4.0-37
-    flutter-target: lib/main.dart
-    override-build: |
-      flutter clean
-      snapcraftctl build
