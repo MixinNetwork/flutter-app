@@ -16,7 +16,7 @@ slots:
 apps:
   mixin-desktop:
     command: mixin_desktop
-    extensions: [ flutter-stable ]
+    extensions: [ flutter-master ]
     plugs:
       - network
 parts:
