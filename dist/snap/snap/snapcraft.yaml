@@ -4,15 +4,13 @@ summary: Mixin Desktop
 description: Mixin Messenger
 license: GPL-3.0
 
-confinement: strict
+confinement: classic
 base: core22
 grade: stable
 
 apps:
   mixin-desktop:
     command: mixin_desktop
-    extensions:
-      - gnome
     plugs:
       - network
       - audio-playback
