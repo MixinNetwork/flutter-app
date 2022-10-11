@@ -10,10 +10,10 @@ grade: stable
 apps:
   mixin-desktop:
     command: mixin_desktop
+    extensions:
+      - gnome
     plugs:
       - network
-      - desktop
-      - x11
 
 parts:
   mixin-desktop:
