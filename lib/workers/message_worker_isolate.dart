@@ -390,6 +390,17 @@ class _MessageProcessRunner {
           }
           await database.jobDao.deleteJobById(job.jobId);
         } catch (e, s) {
+          if (e is MixinApiError) {
+            var code = e.response?.statusCode;
+            final error = e.error;
+            if (code != 404 && error != null && error is MixinError) {
+              code = error.code;
+            }
+            if (code == 404) {
+              await database.jobDao.deleteJobById(job.jobId);
+              return;
+            }
+          }
           w('Update sticker job error: $e, stack: $s');
           await Future.delayed(const Duration(seconds: 1));
         }
