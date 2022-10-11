@@ -397,6 +397,7 @@ class _MessageProcessRunner {
               code = error.code;
             }
             if (code == 404) {
+              i('Sticker not found: ${job.blazeMessage}');
               await database.jobDao.deleteJobById(job.jobId);
               return;
             }
