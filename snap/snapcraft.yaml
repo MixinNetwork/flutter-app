@@ -4,7 +4,7 @@ summary: Mixin Desktop
 description: Mixin Messenger
 
 confinement: strict
-base: core18
+base: core20
 grade: stable
 
 slots:
@@ -16,7 +16,7 @@ slots:
 apps:
   mixin-desktop:
     command: mixin_desktop
-    extensions: [ flutter-master ]
+    extensions: [ flutter-stable ]
     plugs:
       - network
 parts:
