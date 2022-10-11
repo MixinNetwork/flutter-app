@@ -13,6 +13,7 @@ apps:
     plugs:
       - network
       - desktop
+      - x11
 
 parts:
   mixin-desktop:
