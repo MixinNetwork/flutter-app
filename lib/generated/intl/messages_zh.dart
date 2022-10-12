@@ -168,6 +168,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backup": MessageLookupByLibrary.simpleMessage("备份"),
         "biography": MessageLookupByLibrary.simpleMessage("简介"),
         "block": MessageLookupByLibrary.simpleMessage("屏蔽用户"),
+        "botNotFound": MessageLookupByLibrary.simpleMessage("找不到这个机器人"),
         "bots": MessageLookupByLibrary.simpleMessage("机器人"),
         "botsTitle": MessageLookupByLibrary.simpleMessage("机器人"),
         "bringAllToFront": MessageLookupByLibrary.simpleMessage("前置所有窗口"),

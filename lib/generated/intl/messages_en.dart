@@ -187,6 +187,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
         "biography": MessageLookupByLibrary.simpleMessage("Biography"),
         "block": MessageLookupByLibrary.simpleMessage("Block"),
+        "botNotFound": MessageLookupByLibrary.simpleMessage("Bot not found"),
         "bots": MessageLookupByLibrary.simpleMessage("BOTS"),
         "botsTitle": MessageLookupByLibrary.simpleMessage("Bots"),
         "bringAllToFront":

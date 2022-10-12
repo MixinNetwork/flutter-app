@@ -167,6 +167,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backup": MessageLookupByLibrary.simpleMessage("チャット履歴のバックアップ"),
         "biography": MessageLookupByLibrary.simpleMessage("自己紹介文"),
         "block": MessageLookupByLibrary.simpleMessage("ブロック"),
+        "botNotFound": MessageLookupByLibrary.simpleMessage("ミニアプリが見つかりません"),
         "bots": MessageLookupByLibrary.simpleMessage("ミニアプリ"),
         "botsTitle": MessageLookupByLibrary.simpleMessage("Myミニアプリ一覧"),
         "canNotRecognizeQrCode":

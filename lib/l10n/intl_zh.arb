@@ -33,6 +33,7 @@
 "backup" : "备份",
 "biography" : "简介",
 "block" : "屏蔽用户",
+"botNotFound" : "找不到这个机器人",
 "bots" : "机器人",
 "botsTitle" : "机器人",
 "bringAllToFront" : "前置所有窗口",

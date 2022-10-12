@@ -30,6 +30,7 @@
 "backup" : "チャット履歴のバックアップ",
 "biography" : "自己紹介文",
 "block" : "ブロック",
+"botNotFound" : "ミニアプリが見つかりません",
 "bots" : "ミニアプリ",
 "botsTitle" : "Myミニアプリ一覧",
 "canNotRecognizeQrCode" : "QRコードが見つかりません",
