@@ -14,8 +14,8 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v1
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
         with:
           channel: '${{ github.event.inputs.flutter_channel }}' # 'master', 'beta', 'dev' or 'stable'
 
@@ -75,9 +75,9 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v2
         with:
           channel: '${{ github.event.inputs.flutter_channel }}'
       - run: flutter config --enable-windows-desktop
