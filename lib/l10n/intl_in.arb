@@ -12,6 +12,7 @@
 "appearance" : "Tampilan",
 "audio" : "Audio",
 "block" : "Blokir",
+"botNotFound" : "Aplikasi tidak ditemukan",
 "bots" : "BOT",
 "botsTitle" : "Bot",
 "canNotRecognizeQrCode" : "Tidak dapat mengenal kode QR",

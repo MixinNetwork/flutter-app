@@ -76,6 +76,36 @@ Future<bool> openUri(
           uri.conversationIdOfSend, uri.dataOfSend, app);
     }
 
+    if (uri.appId != null && uri.actionIsOpen) {
+      await context.accountServer.refreshUsers([uri.appId!]);
+      final app = await context.database.appDao.findAppById(uri.appId!);
+      var homeUri = Uri.tryParse(app?.homeUri ?? '');
+
+      if (app == null || homeUri == null) {
+        await showToastFailed(
+          context,
+          ToastError(
+            context.l10n.botNotFound,
+          ),
+        );
+        return true;
+      }
+
+      final queryParameters = ({...homeUri.queryParameters})
+        ..addAll(({...uri.queryParameters})..remove('action'));
+
+      homeUri = homeUri.replace(queryParameters: queryParameters);
+      if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
+        await MixinWebView.instance.openWebViewWindowWithUrl(
+          context,
+          homeUri.toString(),
+          conversationId: conversationId,
+        );
+        return true;
+      }
+      return fallbackHandler(homeUri);
+    }
+
     if (uri.isMixinScheme) {
       Toast.dismiss();
       await showUnknownMixinUrlDialog(context, uri);
@@ -169,12 +199,12 @@ extension _MixinUriExtension on Uri {
   bool get isMixin => isMixinScheme || _isMixinHost;
 
   bool _isTypeScheme(MixinSchemeHost type) =>
-      isMixinScheme && host == enumConvertToString(type);
+      isMixinScheme && host == type.name;
 
   bool _isTypeHost(MixinSchemeHost type) =>
       _isMixinHost &&
       pathSegments.isNotEmpty &&
-      pathSegments.first == enumConvertToString(type);
+      pathSegments.first == type.name;
 
   String? _getValue(MixinSchemeHost type) {
     if (_isTypeScheme(type)) {
@@ -185,6 +215,10 @@ extension _MixinUriExtension on Uri {
     }
     return null;
   }
+
+  String? get appId => _getValue(MixinSchemeHost.apps);
+
+  bool get actionIsOpen => queryParameters['action'] == 'open';
 
   String? get userId => _getValue(MixinSchemeHost.users);
 

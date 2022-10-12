@@ -390,6 +390,16 @@ class Localization {
     );
   }
 
+  /// `Bot not found`
+  String get botNotFound {
+    return Intl.message(
+      'Bot not found',
+      name: 'botNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `BOTS`
   String get bots {
     return Intl.message(

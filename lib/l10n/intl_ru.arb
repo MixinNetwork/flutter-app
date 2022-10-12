@@ -30,6 +30,7 @@
 "backup" : "Резервное копирование",
 "biography" : "Биография",
 "block" : "Блокировать",
+"botNotFound" : "Бот не найден",
 "bots" : "БОТЫ",
 "botsTitle" : "Боты",
 "canNotRecognizeQrCode" : "Не могу распознать QR-код",

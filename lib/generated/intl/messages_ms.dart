@@ -104,6 +104,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "appearance": MessageLookupByLibrary.simpleMessage("Penampilan"),
         "audio": MessageLookupByLibrary.simpleMessage("Audio"),
         "block": MessageLookupByLibrary.simpleMessage("Sekat"),
+        "botNotFound":
+            MessageLookupByLibrary.simpleMessage("Aplikasi tidak dijumpai"),
         "bots": MessageLookupByLibrary.simpleMessage("BOT"),
         "botsTitle": MessageLookupByLibrary.simpleMessage("Bot"),
         "canNotRecognizeQrCode": MessageLookupByLibrary.simpleMessage(

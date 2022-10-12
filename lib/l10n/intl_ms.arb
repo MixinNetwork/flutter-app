@@ -12,6 +12,7 @@
 "appearance" : "Penampilan",
 "audio" : "Audio",
 "block" : "Sekat",
+"botNotFound" : "Aplikasi tidak dijumpai",
 "bots" : "BOT",
 "botsTitle" : "Bot",
 "canNotRecognizeQrCode" : "Tidak dapat mengenali kod QR",

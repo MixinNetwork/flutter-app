@@ -31,6 +31,7 @@
 "backup" : "備份",
 "biography" : "簡介",
 "block" : "屏蔽用户",
+"botNotFound" : "找不到這個機器人",
 "bots" : "機器人",
 "botsTitle" : "機器人",
 "bringAllToFront" : "前置所有窗口",

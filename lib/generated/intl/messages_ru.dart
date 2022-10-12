@@ -186,6 +186,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backup": MessageLookupByLibrary.simpleMessage("Резервное копирование"),
         "biography": MessageLookupByLibrary.simpleMessage("Биография"),
         "block": MessageLookupByLibrary.simpleMessage("Блокировать"),
+        "botNotFound": MessageLookupByLibrary.simpleMessage("Бот не найден"),
         "bots": MessageLookupByLibrary.simpleMessage("БОТЫ"),
         "botsTitle": MessageLookupByLibrary.simpleMessage("Боты"),
         "canNotRecognizeQrCode":
