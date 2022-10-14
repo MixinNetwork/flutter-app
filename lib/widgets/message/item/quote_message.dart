@@ -448,7 +448,6 @@ class _QuoteMessageBase extends StatelessWidget {
                                       fontSize:
                                           MessageItemWidget.tertiaryFontSize,
                                       color: context.theme.secondaryText,
-                                      height: 1,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
