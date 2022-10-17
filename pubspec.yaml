@@ -28,7 +28,7 @@ dependencies:
   desktop_drop: ^0.3.3
   desktop_lifecycle: ^0.1.0
   desktop_webview_window: ^0.1.6
-  device_info_plus: ^5.0.5
+  device_info_plus: ^6.0.0
   dio: ^4.0.0
   drift: ^2.1.0
   ecache: ^2.0.2
