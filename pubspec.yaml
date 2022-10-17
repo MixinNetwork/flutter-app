@@ -135,7 +135,7 @@ dev_dependencies:
   drift_dev: ^2.1.0
   flutter_test:
     sdk: flutter
-  hive_generator: ^1.1.0
+  hive_generator: ^2.0.0
   json_serializable: ^6.5.1
   msix: ^3.6.6
 
