@@ -1928,6 +1928,16 @@ class Localization {
     );
   }
 
+  /// `You already in the group`
+  String get groupAlreadyIn {
+    return Intl.message(
+      'You already in the group',
+      name: 'groupAlreadyIn',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `You can't send messages to this group because you're no longer a participant.`
   String get groupCantSend {
     return Intl.message(

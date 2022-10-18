@@ -137,6 +137,15 @@ Future<void> showToastFailed(BuildContext context, Object? error) {
   );
 }
 
+Future<void> showToast(BuildContext context, String message) =>
+    Toast.createView(
+      context: context,
+      child: ToastWidget(
+        barrierColor: Colors.transparent,
+        text: message,
+      ),
+    );
+
 void showToastLoading(BuildContext context) => Toast.createView(
       context: context,
       child: ToastWidget(

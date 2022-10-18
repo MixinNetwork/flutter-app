@@ -414,6 +414,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("Перенаправить"),
         "from": MessageLookupByLibrary.simpleMessage("От"),
         "fromWithColon": MessageLookupByLibrary.simpleMessage("От:"),
+        "groupAlreadyIn":
+            MessageLookupByLibrary.simpleMessage("Вы уже в группе"),
         "groupCantSend": MessageLookupByLibrary.simpleMessage(
             "Вы не можете отправлять сообщения в эту группу, потому что вы больше не являетесь ее участником."),
         "groupName": MessageLookupByLibrary.simpleMessage("Название группы"),

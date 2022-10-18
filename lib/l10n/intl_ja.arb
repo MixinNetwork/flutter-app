@@ -175,6 +175,7 @@
 "forward" : "転送",
 "from" : "より",
 "fromWithColon" : "アイコンより：",
+"groupAlreadyIn" : "すでにこのグループに参加しています。",
 "groupCantSend" : "参加者ではないため、このグループにメッセージを送ることができません。",
 "groupName" : "グループ名",
 "groupParticipants" : "参加者",

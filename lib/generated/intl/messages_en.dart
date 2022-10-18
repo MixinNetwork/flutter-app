@@ -418,6 +418,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "from": MessageLookupByLibrary.simpleMessage("From"),
         "fromWithColon": MessageLookupByLibrary.simpleMessage("From:"),
+        "groupAlreadyIn":
+            MessageLookupByLibrary.simpleMessage("You already in the group"),
         "groupCantSend": MessageLookupByLibrary.simpleMessage(
             "You can\'t send messages to this group because you\'re no longer a participant."),
         "groupName": MessageLookupByLibrary.simpleMessage("Group Name"),

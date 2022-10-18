@@ -24,7 +24,7 @@ Future<void> showConversationDialog(BuildContext context,
   final existed = conversationResponse.participants
       .any((element) => element.userId == context.multiAuthState.currentUserId);
   if (existed) {
-    Toast.dismiss();
+    await showToast(context, context.l10n.groupAlreadyIn);
     await ConversationCubit.selectConversation(
       context,
       conversationResponse.conversationId,
