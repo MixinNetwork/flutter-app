@@ -358,6 +358,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("轉發"),
         "from": MessageLookupByLibrary.simpleMessage("來自"),
         "fromWithColon": MessageLookupByLibrary.simpleMessage("來自："),
+        "groupAlreadyIn": MessageLookupByLibrary.simpleMessage("你已經在該群組裡"),
         "groupCantSend":
             MessageLookupByLibrary.simpleMessage("您不能傳送訊息，因為您已經不再是此群組成員。"),
         "groupName": MessageLookupByLibrary.simpleMessage("群組名稱"),

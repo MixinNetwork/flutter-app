@@ -177,6 +177,7 @@
 "forward" : "轉發",
 "from" : "來自",
 "fromWithColon" : "來自：",
+"groupAlreadyIn" : "你已經在該羣組裏",
 "groupCantSend" : "您不能發送消息，因為您已經不再是此羣組成員。",
 "groupName" : "羣組名稱",
 "groupParticipants" : "羣成員",

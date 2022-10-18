@@ -242,6 +242,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "formatNotSupported":
             MessageLookupByLibrary.simpleMessage("Format tidak didukung"),
         "forward": MessageLookupByLibrary.simpleMessage("Teruskan"),
+        "groupAlreadyIn": MessageLookupByLibrary.simpleMessage(
+            "Anda sudah bergabung dalam grup"),
         "groupCantSend": MessageLookupByLibrary.simpleMessage(
             "Anda tidak dapat mengirim pesan ke grup ini karena Anda bukan lagi peserta."),
         "groupName": MessageLookupByLibrary.simpleMessage("Nama Grup"),

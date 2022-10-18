@@ -186,6 +186,7 @@
 "forward" : "Forward",
 "from" : "From",
 "fromWithColon" : "From:",
+"groupAlreadyIn" : "You already in the group",
 "groupCantSend" : "You can't send messages to this group because you're no longer a participant.",
 "groupName" : "Group Name",
 "groupParticipants" : "Participants",

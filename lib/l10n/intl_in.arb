@@ -104,6 +104,7 @@
 "followUsOnTwitter" : "Ikuti kami di Twitter",
 "formatNotSupported" : "Format tidak didukung",
 "forward" : "Teruskan",
+"groupAlreadyIn" : "Anda sudah bergabung dalam grup",
 "groupCantSend" : "Anda tidak dapat mengirim pesan ke grup ini karena Anda bukan lagi peserta.",
 "groupName" : "Nama Grup",
 "groupPopMenuMessage" : "Kirim pesan ke {arg0}",
