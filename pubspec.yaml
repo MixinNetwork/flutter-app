@@ -74,7 +74,7 @@ dependencies:
     git:
       url: https://github.com/crazecoder/open_file.git
       ref: fbf68e4bb5cb3e262d8f8ebe10b2f8449ff8e030
-  package_info_plus: ^2.0.0
+  package_info_plus: ^3.0.1
   pasteboard:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
