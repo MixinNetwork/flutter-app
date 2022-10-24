@@ -52,7 +52,7 @@ dependencies:
   flutter_portal: ^1.1.1
   flutter_svg: ^1.1.5
   gallery_saver: ^2.3.2
-  github: ^9.3.0
+  github: ^9.5.0
   hive: ^2.2.3
   hive_flutter: ^1.0.0
   http: ^0.13.5
