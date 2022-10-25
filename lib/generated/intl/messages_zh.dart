@@ -260,6 +260,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "downloadLink": MessageLookupByLibrary.simpleMessage("下载链接："),
         "dragAndDropFileHere": MessageLookupByLibrary.simpleMessage("拖放文件到此处"),
         "durationIsTooShort": MessageLookupByLibrary.simpleMessage("时间太短"),
+        "edit": MessageLookupByLibrary.simpleMessage("编辑"),
         "editCircleName": MessageLookupByLibrary.simpleMessage("编辑名称"),
         "editGroupDescription": MessageLookupByLibrary.simpleMessage("编辑群公告"),
         "editGroupName": MessageLookupByLibrary.simpleMessage("编辑名称"),

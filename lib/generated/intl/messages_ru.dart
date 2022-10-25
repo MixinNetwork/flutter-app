@@ -294,6 +294,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Перетащите файлы сюда"),
         "durationIsTooShort": MessageLookupByLibrary.simpleMessage(
             "Продолжительность слишком мала"),
+        "edit": MessageLookupByLibrary.simpleMessage("Редактировать"),
         "editCircleName":
             MessageLookupByLibrary.simpleMessage("Изменить название круга"),
         "editGroupDescription":
