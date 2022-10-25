@@ -297,6 +297,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Drag and drop files here"),
         "durationIsTooShort":
             MessageLookupByLibrary.simpleMessage("Duration is too short"),
+        "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "editCircleName":
             MessageLookupByLibrary.simpleMessage("Edit Circle Name"),
         "editGroupDescription":

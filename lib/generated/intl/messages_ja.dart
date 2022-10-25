@@ -258,6 +258,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "dragAndDropFileHere":
             MessageLookupByLibrary.simpleMessage("ファイルをドラッグ＆ドロップ"),
         "durationIsTooShort": MessageLookupByLibrary.simpleMessage("期間が短すぎます"),
+        "edit": MessageLookupByLibrary.simpleMessage("編集"),
         "editCircleName": MessageLookupByLibrary.simpleMessage("グループリスト名を編集"),
         "editGroupDescription":
             MessageLookupByLibrary.simpleMessage("グループアナウンスを編集"),

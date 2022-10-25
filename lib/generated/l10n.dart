@@ -1224,6 +1224,16 @@ class Localization {
     );
   }
 
+  /// `Edit`
+  String get edit {
+    return Intl.message(
+      'Edit',
+      name: 'edit',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Edit Circle Name`
   String get editCircleName {
     return Intl.message(

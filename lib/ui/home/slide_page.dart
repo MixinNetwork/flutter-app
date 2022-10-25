@@ -263,6 +263,7 @@ class _CircleList extends HookWidget {
                                     editText: circle.name,
                                     title: Text(context.l10n.circles),
                                     hintText: context.l10n.editCircleName,
+                                    positiveAction: context.l10n.edit,
                                   ),
                                 );
                                 if (name?.isEmpty ?? true) return;

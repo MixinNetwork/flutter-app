@@ -8,12 +8,12 @@ import Foundation
 import desktop_drop
 import desktop_lifecycle
 import desktop_webview_window
-import device_info_plus_macos
+import device_info_plus
 import file_selector_macos
 import flutter_app_icon_badge
 import flutter_local_notifications
 import ogg_opus_player
-import package_info_plus_macos
+import package_info_plus
 import pasteboard
 import path_provider_macos
 import protocol_handler
