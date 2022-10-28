@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:path/path.dart' as p;
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:quick_breakpad/quick_breakpad.dart';
@@ -82,7 +83,7 @@ Future<void> main(List<String> args) async {
   };
 
   HydratedBlocOverrides.runZoned(
-    () => runApp(const App()),
+    () => runApp(const OverlaySupport.global(child: App())),
     blocObserver: kDebugMode ? CustomBlocObserver() : null,
     storage: storage,
   );
