@@ -580,15 +580,15 @@ class _Item extends HookWidget {
 
 Future<void> _copyUrl(BuildContext context, String? filePath) async {
   if (filePath?.isEmpty ?? true) {
-    return showToastFailed(context, null);
+    return showToastFailed(null);
   }
   try {
     await Pasteboard.writeFiles([filePath!]);
   } catch (error) {
-    await showToastFailed(context, error);
+    showToastFailed(error);
     return;
   }
-  showToastSuccessful(context);
+  showToastSuccessful();
 }
 
 class _CopyIntent extends Intent {

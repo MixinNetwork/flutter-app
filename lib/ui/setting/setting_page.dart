@@ -130,7 +130,6 @@ class SettingPage extends HookWidget {
                     title: context.l10n.signOut,
                     onTap: () async {
                       final succeed = await runFutureWithToast(
-                        context,
                         context.accountServer.signOutAndClear(),
                       );
                       if (!succeed) return;

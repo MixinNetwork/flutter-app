@@ -74,7 +74,6 @@ class StorageUsageDetailPage extends HookWidget {
             child: MixinButton(
               backgroundTransparent: true,
               onTap: () => runFutureWithToast(
-                context,
                 () async {
                   final accountServer = context.accountServer;
                   if (selected.value.item1) {

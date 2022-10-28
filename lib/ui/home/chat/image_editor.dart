@@ -1500,11 +1500,11 @@ class _NormalOperationBar extends HookWidget {
             ),
             TextButton(
               onPressed: () async {
-                showToastLoading(context);
+                showToastLoading();
                 final snapshot =
                     await context.read<_ImageEditorBloc>().takeSnapshot();
                 if (snapshot == null) {
-                  await showToastFailed(context, null);
+                  showToastFailed(null);
                   return;
                 }
                 Toast.dismiss();

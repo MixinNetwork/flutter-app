@@ -45,7 +45,6 @@ class StrangerMessage extends StatelessWidget {
                       conversationId: message.conversationId);
                 } else {
                   await runFutureWithToast(
-                    context,
                     context.accountServer.blockUser(message.userId),
                   );
                 }

@@ -181,13 +181,8 @@ class MessageBubble extends HookWidget {
                 .getMessageExpireAt([message.messageId]);
             final time = (expireAt[message.messageId] ?? 0) -
                 DateTime.now().millisecondsSinceEpoch ~/ 1000;
-            await Toast.createView(
-              context: context,
-              child: ToastWidget(
-                  barrierColor: Colors.transparent,
-                  text: 'expire in: ${message.expireIn}. '
-                      'will delete after: ${time < 0 ? 0 : time} seconds'),
-            );
+            showToast('expire in: ${message.expireIn}. '
+                'will delete after: ${time < 0 ? 0 : time} seconds');
           },
         );
       }

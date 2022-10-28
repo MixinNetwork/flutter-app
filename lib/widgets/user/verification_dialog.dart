@@ -65,7 +65,7 @@ class _VerificationCodeDialog<T> extends StatelessWidget {
                 initialVerificationResponse: initialVerificationResponse,
                 reRequestVerification: reRequestVerification,
                 onVerification: (code, response) async {
-                  showToastLoading(context);
+                  showToastLoading();
                   try {
                     final result = await onVerification(code, response);
                     d('_VerificationCodeDialog: result: $result');
@@ -73,7 +73,7 @@ class _VerificationCodeDialog<T> extends StatelessWidget {
                     Toast.dismiss();
                   } catch (error, stacktrace) {
                     e('_VerificationCodeDialog error: $error $stacktrace');
-                    await showToastFailed(context, error);
+                    showToastFailed(error);
                   }
                 },
               ),
@@ -196,7 +196,7 @@ class VerificationCodeInputLayout extends HookWidget {
         const SizedBox(height: 0),
         ResendCodeWidget(
           onResend: () async {
-            showToastLoading(context);
+            showToastLoading();
             try {
               final response = await reRequestVerification();
               Toast.dismiss();
@@ -205,14 +205,13 @@ class VerificationCodeInputLayout extends HookWidget {
             } on MixinApiError catch (error) {
               e('Error requesting verification code: $error');
               final mixinError = error.error as MixinError;
-              await showToastFailed(
-                context,
+              showToastFailed(
                 ToastError(mixinError.toDisplayString(context)),
               );
               return false;
             } catch (error) {
               e('Error requesting verification code: $error');
-              await showToastFailed(context, null);
+              showToastFailed(null);
               return false;
             }
           },

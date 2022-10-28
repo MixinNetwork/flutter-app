@@ -42,7 +42,6 @@ class CreateGroupConversationAction
     if (name?.isEmpty ?? true) return;
 
     await runFutureWithToast(
-      context,
       context.accountServer.createGroupConversation(name!, userIds),
     );
   }

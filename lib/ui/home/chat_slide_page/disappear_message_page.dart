@@ -204,7 +204,7 @@ Future<void> _updateConversationExpireDuration(
     );
   } catch (error, stackTrace) {
     e('update conversation expire duration failed $error $stackTrace');
-    await showToastFailed(context, error);
+    showToastFailed(error);
   }
 }
 
@@ -330,8 +330,7 @@ class _CustomExpireTimeDialog extends HookWidget {
                   return;
                 }
                 if (value > unit.value.maxValue) {
-                  await showToastFailed(
-                    context,
+                  showToastFailed(
                     ToastError(context.l10n.disappearingCustomTimeMaxWarning(
                         unit.value
                             .toDuration(unit.value.maxValue)
@@ -340,7 +339,7 @@ class _CustomExpireTimeDialog extends HookWidget {
                   );
                   return;
                 }
-                showToastLoading(context);
+                showToastLoading();
                 await _updateConversationExpireDuration(context,
                     duration: duration, conversationId: conversationId);
                 Toast.dismiss();

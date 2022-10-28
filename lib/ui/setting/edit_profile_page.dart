@@ -43,7 +43,6 @@ class EditProfilePage extends HookWidget {
             MixinButton(
               onTap: () {
                 runFutureWithToast(
-                  context,
                   context.accountServer.updateAccount(
                     fullName: nameTextEditingController.text.trim(),
                     biography: bioTextEditingController.text.trim(),

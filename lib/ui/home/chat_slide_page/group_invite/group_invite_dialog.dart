@@ -157,14 +157,12 @@ class _ActionButtons extends StatelessWidget {
                 onlyContact: false,
               );
               if (result == null || result.isEmpty) return;
-              await runFutureWithToast(
-                  context,
-                  context.accountServer.sendTextMessage(
-                    conversation.codeUrl!,
-                    result.first.encryptCategory!,
-                    conversationId: result.first.conversationId,
-                    recipientId: result.first.userId,
-                  ));
+              await runFutureWithToast(context.accountServer.sendTextMessage(
+                conversation.codeUrl!,
+                result.first.encryptCategory!,
+                conversationId: result.first.conversationId,
+                recipientId: result.first.userId,
+              ));
             },
           ),
           _IconButton(
@@ -173,14 +171,14 @@ class _ActionButtons extends StatelessWidget {
             onTap: () async {
               await Clipboard.setData(
                   ClipboardData(text: conversation.codeUrl));
-              showToastSuccessful(context);
+              showToastSuccessful();
             },
           ),
           _IconButton(
             label: context.l10n.resetLink,
             iconAssetName: Resources.assetsImagesInviteRefreshSvg,
             onTap: () {
-              runFutureWithToast(context,
+              runFutureWithToast(
                   context.accountServer.rotate(conversation.conversationId));
             },
           ),

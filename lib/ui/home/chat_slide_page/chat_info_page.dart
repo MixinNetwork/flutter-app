@@ -142,15 +142,13 @@ class ChatInfoPage extends HookWidget {
                     if (result == null || result.isEmpty) return;
                     final conversationId = result.first.conversationId;
 
-                    await runFutureWithToast(
-                        context,
-                        accountServer.sendContactMessage(
-                          conversation.userId!,
-                          conversation.name,
-                          result.first.encryptCategory!,
-                          conversationId: conversationId,
-                          recipientId: result.first.userId,
-                        ));
+                    await runFutureWithToast(accountServer.sendContactMessage(
+                      conversation.userId!,
+                      conversation.name,
+                      result.first.encryptCategory!,
+                      conversationId: conversationId,
+                      recipientId: result.first.userId,
+                    ));
                   },
                 ),
               ),
@@ -222,7 +220,6 @@ class ChatInfoPage extends HookWidget {
                           if (result == null) return;
 
                           await runFutureWithToast(
-                            context,
                             context.accountServer.editGroup(
                               conversationId,
                               announcement: result,
@@ -256,7 +253,6 @@ class ChatInfoPage extends HookWidget {
                       onTap: () async {
                         if (muting) {
                           await runFutureWithToast(
-                            context,
                             context.accountServer.unMuteConversation(
                               conversationId:
                                   isGroupConversation ? conversationId : null,
@@ -273,15 +269,13 @@ class ChatInfoPage extends HookWidget {
                         if (result == null) return;
 
                         await runFutureWithToast(
-                            context,
                             context.accountServer.muteConversation(
-                              result,
-                              conversationId:
-                                  isGroupConversation ? conversationId : null,
-                              userId: isGroupConversation
-                                  ? null
-                                  : conversation.userId,
-                            ));
+                          result,
+                          conversationId:
+                              isGroupConversation ? conversationId : null,
+                          userId:
+                              isGroupConversation ? null : conversation.userId,
+                        ));
                       },
                     ),
                   if (!isGroupConversation ||
@@ -302,7 +296,6 @@ class ChatInfoPage extends HookWidget {
                         if (name?.isEmpty ?? true) return;
 
                         await runFutureWithToast(
-                          context,
                           isGroupConversation
                               ? accountServer.editGroup(
                                   conversation.conversationId,
@@ -359,7 +352,6 @@ class ChatInfoPage extends HookWidget {
                         if (!result) return;
 
                         await runFutureWithToast(
-                          context,
                           accountServer.unblockUser(conversation.userId!),
                         );
                       },
@@ -381,7 +373,6 @@ class ChatInfoPage extends HookWidget {
                           if (!result) return;
 
                           await runFutureWithToast(
-                            context,
                             accountServer.removeUser(conversation.userId!),
                           );
                         },
@@ -400,7 +391,6 @@ class ChatInfoPage extends HookWidget {
                         if (!result) return;
 
                         await runFutureWithToast(
-                          context,
                           accountServer.blockUser(conversation.userId!),
                         );
                       },
@@ -435,7 +425,6 @@ class ChatInfoPage extends HookWidget {
                           if (!result) return;
 
                           await runFutureWithToast(
-                            context,
                             accountServer.exitGroup(conversationId),
                           );
 
@@ -491,7 +480,6 @@ class ChatInfoPage extends HookWidget {
                     if (userId == null) return;
 
                     await runFutureWithToast(
-                      context,
                       accountServer.report(userId),
                     );
                   },
@@ -581,12 +569,10 @@ class _AddToContactsButton extends StatelessWidget {
                         'ContactsAdd: username should not be null.');
                     assert(conversation.isGroup != true,
                         'ContactsAdd conversation should not be a group.');
-                    runFutureWithToast(
-                        context,
-                        context.accountServer.addUser(
-                          conversation.userId!,
-                          username,
-                        ));
+                    runFutureWithToast(context.accountServer.addUser(
+                      conversation.userId!,
+                      username,
+                    ));
                   },
                   child: Text(
                     conversation.isBot!

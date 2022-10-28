@@ -493,7 +493,7 @@ class MessageItemWidget extends HookWidget {
   }
 
   Future<void> _onAddSticker(BuildContext context) async {
-    showToastLoading(context);
+    showToastLoading();
     try {
       final accountServer = context.accountServer;
 
@@ -519,9 +519,9 @@ class MessageItemWidget extends HookWidget {
           ));
         });
       }
-      showToastSuccessful(context);
+      showToastSuccessful();
     } catch (_) {
-      await showToastFailed(context, ToastError(context.l10n.addStickerFailed));
+      showToastFailed(ToastError(context.l10n.addStickerFailed));
     }
   }
 }
@@ -587,9 +587,9 @@ Future<void> saveAs(BuildContext context, AccountServer accountServer,
           ? await GallerySaver.saveImage(path)
           : await GallerySaver.saveVideo(path);
       if (result != true) {
-        return showToastFailed(context, null);
+        return showToastFailed(null);
       } else {
-        showToastSuccessful(context);
+        showToastSuccessful();
         return;
       }
     } else {
@@ -602,9 +602,9 @@ Future<void> saveAs(BuildContext context, AccountServer accountServer,
         path,
         suggestName: message.mediaName,
       );
-      if (result) return showToastSuccessful(context);
+      if (result) return showToastSuccessful();
     } catch (error) {
-      return showToastFailed(context, error);
+      return showToastFailed(error);
     }
   }
 }

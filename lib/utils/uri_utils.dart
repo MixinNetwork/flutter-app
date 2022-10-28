@@ -82,8 +82,7 @@ Future<bool> openUri(
       var homeUri = Uri.tryParse(app?.homeUri ?? '');
 
       if (app == null || homeUri == null) {
-        await showToastFailed(
-          context,
+        showToastFailed(
           ToastError(
             context.l10n.botNotFound,
           ),
@@ -117,7 +116,7 @@ Future<bool> openUri(
 }
 
 Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
-  showToastLoading(context);
+  showToastLoading();
   try {
     final mixinResponse =
         await context.accountServer.client.accountApi.code(code);
@@ -135,7 +134,7 @@ Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
     return false;
   } catch (error) {
     e('open code: $error');
-    await showToastFailed(context, error);
+    showToastFailed(error);
     return false;
   }
 }
@@ -143,7 +142,7 @@ Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
 Future<bool> _showTransferDialog(
     BuildContext context, String snapshotTraceId) async {
   try {
-    showToastLoading(context);
+    showToastLoading();
 
     final snapshotId = await context.database.snapshotDao
         .snapshotIdByTraceId(snapshotTraceId)
@@ -163,7 +162,7 @@ Future<bool> _showTransferDialog(
     return true;
   } catch (error) {
     e('get snapshot by traceId: $error');
-    await showToastFailed(context, error);
+    showToastFailed(error);
     return false;
   }
 }
@@ -172,13 +171,13 @@ Future<bool> _selectConversation(
     Uri uri, BuildContext context, String conversationId) async {
   final userId = uri.queryParameters['user'];
   if (userId != null && userId.trim().isNotEmpty) {
-    showToastLoading(context);
+    showToastLoading();
     await context.accountServer.refreshUsers([userId]);
     Toast.dismiss();
 
     if (conversationId !=
         generateConversationId(context.accountServer.userId, userId)) {
-      await showToastFailed(context, null);
+      showToastFailed(null);
       return false;
     } else {
       await ConversationCubit.selectUser(context, userId);

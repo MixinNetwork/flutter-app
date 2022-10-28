@@ -24,7 +24,7 @@ Future<void> showConversationDialog(BuildContext context,
   final existed = conversationResponse.participants
       .any((element) => element.userId == context.multiAuthState.currentUserId);
   if (existed) {
-    await showToast(context, context.l10n.groupAlreadyIn);
+    showToast(context.l10n.groupAlreadyIn);
     await ConversationCubit.selectConversation(
       context,
       conversationResponse.conversationId,
@@ -132,7 +132,6 @@ class _ConversationInfo extends HookWidget {
           const SizedBox(height: 8),
           DialogAddOrJoinButton(
             onTap: () => runFutureWithToast(
-              context,
               () async {
                 await context.accountServer.joinGroup(code);
                 await ConversationCubit.selectConversation(

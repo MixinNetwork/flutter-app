@@ -83,7 +83,7 @@ class _PhoneNumberInputScene extends StatelessWidget {
                 return;
               }
 
-              showToastLoading(context);
+              showToastLoading();
               try {
                 final response = await _requestVerificationCode(
                   phone: phoneNumber,
@@ -121,14 +121,13 @@ class _PhoneNumberInputScene extends StatelessWidget {
               } on MixinApiError catch (error) {
                 e('Error requesting verification code: $error');
                 final mixinError = error.error as MixinError;
-                await showToastFailed(
-                  context,
+                showToastFailed(
                   ToastError(mixinError.toDisplayString(context)),
                 );
                 return;
               } catch (error) {
                 e('Error requesting verification code: $error');
-                await showToastFailed(context, null);
+                showToastFailed(null);
                 return;
               }
             }),
@@ -158,7 +157,7 @@ class _CodeInputScene extends HookWidget {
 
     Future<void> performLogin(String code) async {
       assert(code.length == 4, 'Invalid code length: $code');
-      showToastLoading(context);
+      showToastLoading();
       try {
         final registrationId = await SignalProtocol.initSignal(null);
 
@@ -203,12 +202,11 @@ class _CodeInputScene extends HookWidget {
         e('login account error: $error');
         if (error is MixinApiError) {
           final mixinError = error.error as MixinError;
-          await showToastFailed(
-            context,
+          showToastFailed(
             ToastError(mixinError.toDisplayString(context)),
           );
         } else {
-          await showToastFailed(context, null);
+          showToastFailed(null);
         }
         return;
       }
@@ -276,7 +274,7 @@ class _CodeInputScene extends HookWidget {
           const SizedBox(height: 0),
           ResendCodeWidget(
             onResend: () async {
-              showToastLoading(context);
+              showToastLoading();
               try {
                 final response = await _requestVerificationCode(
                   phone: phoneNumber,
@@ -288,14 +286,13 @@ class _CodeInputScene extends HookWidget {
               } on MixinApiError catch (error) {
                 e('Error requesting verification code: $error');
                 final mixinError = error.error as MixinError;
-                await showToastFailed(
-                  context,
+                showToastFailed(
                   ToastError(mixinError.toDisplayString(context)),
                 );
                 return false;
               } catch (error) {
                 e('Error requesting verification code: $error');
-                await showToastFailed(context, null);
+                showToastFailed(null);
                 return false;
               }
             },

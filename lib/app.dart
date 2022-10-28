@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -194,43 +195,45 @@ class _App extends StatelessWidget {
   @override
   Widget build(BuildContext context) => WindowShortcuts(
         child: GlobalMoveWindow(
-          child: MaterialApp(
-            title: 'Mixin',
-            navigatorObservers: [rootRouteObserver],
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: const [
-              Localization.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            supportedLocales: [
-              ...Localization.delegate.supportedLocales,
-            ],
-            theme: ThemeData().withFallbackFonts(),
-            builder: (context, child) {
-              try {
-                context.accountServer.language =
-                    Localizations.localeOf(context).languageCode;
-              } catch (_) {}
-              final mediaQueryData = MediaQuery.of(context);
-              // Different linux distro change the value, e.g. 1.2
-              const textScaleFactor = 1.0;
-              return BrightnessObserver(
-                lightThemeData: lightBrightnessThemeData,
-                darkThemeData: darkBrightnessThemeData,
-                forceBrightness: context.watch<SettingCubit>().brightness,
-                child: MediaQuery(
-                  data: mediaQueryData.copyWith(
-                    textScaleFactor: Platform.isLinux
-                        ? textScaleFactor
-                        : mediaQueryData.textScaleFactor,
+          child: OverlaySupport.global(
+            child: MaterialApp(
+              title: 'Mixin',
+              navigatorObservers: [rootRouteObserver],
+              debugShowCheckedModeBanner: false,
+              localizationsDelegates: const [
+                Localization.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+              supportedLocales: [
+                ...Localization.delegate.supportedLocales,
+              ],
+              theme: ThemeData().withFallbackFonts(),
+              builder: (context, child) {
+                try {
+                  context.accountServer.language =
+                      Localizations.localeOf(context).languageCode;
+                } catch (_) {}
+                final mediaQueryData = MediaQuery.of(context);
+                // Different linux distro change the value, e.g. 1.2
+                const textScaleFactor = 1.0;
+                return BrightnessObserver(
+                  lightThemeData: lightBrightnessThemeData,
+                  darkThemeData: darkBrightnessThemeData,
+                  forceBrightness: context.watch<SettingCubit>().brightness,
+                  child: MediaQuery(
+                    data: mediaQueryData.copyWith(
+                      textScaleFactor: Platform.isLinux
+                          ? textScaleFactor
+                          : mediaQueryData.textScaleFactor,
+                    ),
+                    child: SystemTrayWidget(child: child!),
                   ),
-                  child: SystemTrayWidget(child: child!),
-                ),
-              );
-            },
-            home: const _Home(),
+                );
+              },
+              home: const _Home(),
+            ),
           ),
         ),
       );

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import 'package:overlay_support/overlay_support.dart';
+
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
@@ -16,34 +18,26 @@ class Toast {
   static const shortDuration = Duration(seconds: 1);
   static const longDuration = Duration(seconds: 2);
 
-  static OverlayState? overlayState;
-  static OverlayEntry? _overlayEntry;
-  static bool _isVisible = false;
+  static OverlaySupportEntry? _lastLoadingEntry;
 
-  static Future<void> createView({
-    required BuildContext context,
-    required Widget child,
+  static void createView({
+    required WidgetBuilder builder,
     Duration? duration = Toast.shortDuration,
-  }) async {
+  }) {
     dismiss();
-    _isVisible = true;
-
-    overlayState = Overlay.of(context, rootOverlay: true);
-
-    _overlayEntry = OverlayEntry(builder: (BuildContext context) => child);
-    overlayState!.insert(_overlayEntry!);
-
-    if (duration == null) return;
-    await Future.delayed(duration);
-    dismiss();
+    showOverlay(
+      (context, progress) => Opacity(
+        opacity: progress,
+        child: builder(context),
+      ),
+      duration: duration ?? Duration.zero,
+      key: const ValueKey('toast'),
+    );
   }
 
   static void dismiss() {
-    if (!_isVisible) {
-      return;
-    }
-    _isVisible = false;
-    _overlayEntry?.remove();
+    _lastLoadingEntry?.dismiss();
+    _lastLoadingEntry = null;
   }
 }
 
@@ -100,9 +94,8 @@ class ToastWidget extends StatelessWidget {
       );
 }
 
-void showToastSuccessful(BuildContext context) => Toast.createView(
-      context: context,
-      child: ToastWidget(
+void showToastSuccessful() => Toast.createView(
+      builder: (context) => ToastWidget(
         barrierColor: Colors.transparent,
         icon: const _Successful(),
         text: context.l10n.successful,
@@ -118,37 +111,33 @@ class ToastError extends Error {
   static ToastError? fromError(Object? error) => null;
 }
 
-Future<void> showToastFailed(BuildContext context, Object? error) {
-  String? message;
-  if (error is ToastError) {
-    message = error.message;
-  } else if (error is MixinApiError) {
-    message = (error.error as MixinError).toDisplayString(context);
-  } else {
-    message = ToastError.fromError(error)?.message;
-  }
-  return Toast.createView(
-    context: context,
-    child: ToastWidget(
-      barrierColor: Colors.transparent,
-      icon: const _Failed(),
-      text: message ?? context.l10n.failed,
-    ),
-  );
-}
+void showToastFailed(Object? error) => Toast.createView(
+      builder: (context) {
+        String? message;
+        if (error is ToastError) {
+          message = error.message;
+        } else if (error is MixinApiError) {
+          message = (error.error as MixinError).toDisplayString(context);
+        } else {
+          message = ToastError.fromError(error)?.message;
+        }
+        return ToastWidget(
+          barrierColor: Colors.transparent,
+          icon: const _Failed(),
+          text: message ?? context.l10n.failed,
+        );
+      },
+    );
 
-Future<void> showToast(BuildContext context, String message) =>
-    Toast.createView(
-      context: context,
-      child: ToastWidget(
+void showToast(String message) => Toast.createView(
+      builder: (context) => ToastWidget(
         barrierColor: Colors.transparent,
         text: message,
       ),
     );
 
-void showToastLoading(BuildContext context) => Toast.createView(
-      context: context,
-      child: ToastWidget(
+void showToastLoading() => Toast.createView(
+      builder: (context) => ToastWidget(
         icon: const _Loading(),
         text: context.l10n.loading,
       ),
@@ -181,31 +170,27 @@ class _Successful extends StatelessWidget {
       SvgPicture.asset(Resources.assetsImagesSuccessfulSvg);
 }
 
-Future<bool> runFutureWithToast(
-  BuildContext context,
-  Future<dynamic> future,
-) async {
-  showToastLoading(context);
+Future<bool> runFutureWithToast(Future<dynamic> future) async {
+  showToastLoading();
   try {
     await future;
   } catch (error, s) {
     e("runFutureWithToast's error: $error, $s");
-    await showToastFailed(context, error);
+    showToastFailed(error);
     return false;
   }
-  showToastSuccessful(context);
+  showToastSuccessful();
 
   return true;
 }
 
-Future<void> runWithLoading(
-    BuildContext context, Future<void> Function() function) async {
-  showToastLoading(context);
+Future<void> runWithLoading(Future<void> Function() function) async {
+  showToastLoading();
   try {
     await function();
     Toast.dismiss();
   } catch (error, s) {
     e("runWithLoading's error: $error, $s");
-    await showToastFailed(context, error);
+    showToastFailed(error);
   }
 }

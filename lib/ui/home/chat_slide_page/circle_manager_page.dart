@@ -67,7 +67,6 @@ class CircleManagerPage extends HookWidget {
               );
 
               await runFutureWithToast(
-                context,
                 context.accountServer.createCircle(name!, [
                   CircleConversationRequest(
                     action: CircleConversationAction.add,
@@ -138,7 +137,6 @@ class _CircleManagerItem extends StatelessWidget {
 
                 if (selected) {
                   await runFutureWithToast(
-                    context,
                     context.accountServer.circleRemoveConversation(
                         circleId, conversation!.conversationId),
                   );
@@ -146,7 +144,6 @@ class _CircleManagerItem extends StatelessWidget {
                 }
 
                 await runFutureWithToast(
-                  context,
                   context.accountServer.editCircleConversation(
                     circleId,
                     [

@@ -256,8 +256,7 @@ class _ShareMenuItem extends StatelessWidget {
         onTap: () async {
           // can not share app
           if (appCardData?.shareable == false) {
-            await showToastFailed(
-              context,
+            showToastFailed(
               ToastError(context.l10n.appCardShareDisallow),
             );
           } else {

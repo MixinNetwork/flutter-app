@@ -119,12 +119,12 @@ class _PinInputLayoutState extends State<PinInputLayout>
     }
     _isVerifying = true;
     _closeInputConnection();
-    showToastLoading(context);
+    showToastLoading();
     try {
       await widget.doVerify(code);
       Toast.dismiss();
     } catch (error, stacktrace) {
-      await showToastFailed(context, error);
+      showToastFailed(error);
       e('_verifyPinCode: $error $stacktrace');
       _openInputConnection();
     } finally {

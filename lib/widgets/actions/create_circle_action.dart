@@ -35,7 +35,6 @@ class CreateCircleAction extends Action<CreateCircleIntent> {
     if (list == null) return;
 
     await runFutureWithToast(
-      context,
       context.accountServer.createCircle(
         name!,
         list
