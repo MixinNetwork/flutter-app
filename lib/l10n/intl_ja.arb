@@ -251,6 +251,7 @@
 "oneWeek" : "1週間",
 "oneYear" : "1年間",
 "openHomePage" : "ホームページを開く",
+"openLink" : "リンクを開く: {arg0}",
 "openLogDirectory" : "ログディレクトリを開く",
 "originalImage" : "オリジナル",
 "owner" : "オーナー",

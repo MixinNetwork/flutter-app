@@ -267,6 +267,7 @@
 "oneWeek" : "1 Week",
 "oneYear" : "1 Year",
 "openHomePage" : "Open Home page",
+"openLink" : "Open Link: {arg0}",
 "openLogDirectory" : "open log directory",
 "originalImage" : "Original",
 "owner" : "Owner",

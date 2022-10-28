@@ -255,6 +255,7 @@
 "oneWeek" : "1 星期",
 "oneYear" : "1 年",
 "openHomePage" : "開啟主頁",
+"openLink" : "開啟連結：{arg0}",
 "openLogDirectory" : "開啟日誌資料夾",
 "originalImage" : "原圖",
 "owner" : "群主",

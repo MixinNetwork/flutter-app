@@ -92,42 +92,44 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m32(arg0) => "${arg0}现在是管理员";
 
-  static String m33(arg0) => "${arg0} 位群组成员";
+  static String m33(arg0) => "打开链接：${arg0}";
 
-  static String m34(count, arg0, arg1) =>
+  static String m34(arg0) => "${arg0} 位群组成员";
+
+  static String m35(count, arg0, arg1) =>
       "${Intl.plural(count, one: '${arg0}/${arg1} 区块确认数', other: '${arg0}/${arg1} 区块确认数')}";
 
-  static String m35(count, arg0) =>
+  static String m36(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} 条置顶消息', other: '${arg0} 条置顶消息')}";
 
-  static String m36(arg0) => "${arg0} 秒后重新发送验证码";
+  static String m37(arg0) => "${arg0} 秒后重新发送验证码";
 
-  static String m37(count, arg0) =>
+  static String m38(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} 条相关的消息', other: '${arg0} 条相关的消息')}";
 
-  static String m38(arg0, arg1) => "${arg0}将限时消息设置为 ${arg1}";
+  static String m39(arg0, arg1) => "${arg0}将限时消息设置为 ${arg1}";
 
-  static String m39(arg0) => "如果您继续，您的个人资料和账户信息将在${arg0}被删除。阅读我们的文档以**了解更多**。";
+  static String m40(arg0) => "如果您继续，您的个人资料和账户信息将在${arg0}被删除。阅读我们的文档以**了解更多**。";
 
-  static String m40(arg0, arg1) => "你确定要发送来自${arg0}的${arg1}？";
+  static String m41(arg0, arg1) => "你确定要发送来自${arg0}的${arg1}？";
 
-  static String m41(arg0) => "你确定要发送该${arg0}？";
+  static String m42(arg0) => "你确定要发送该${arg0}？";
 
-  static String m42(arg0) => "无法打开文件：${arg0}";
+  static String m43(arg0) => "无法打开文件：${arg0}";
 
-  static String m43(count) => "${Intl.plural(count, one: '天', other: '天')}";
+  static String m44(count) => "${Intl.plural(count, one: '天', other: '天')}";
 
-  static String m44(count) => "${Intl.plural(count, one: '小时', other: '小时')}";
+  static String m45(count) => "${Intl.plural(count, one: '小时', other: '小时')}";
 
-  static String m45(count) => "${Intl.plural(count, one: '分', other: '分')}";
+  static String m46(count) => "${Intl.plural(count, one: '分', other: '分')}";
 
-  static String m46(count) => "${Intl.plural(count, one: '秒', other: '秒')}";
+  static String m47(count) => "${Intl.plural(count, one: '秒', other: '秒')}";
 
-  static String m47(count) => "${Intl.plural(count, one: '周', other: '周')}";
+  static String m48(count) => "${Intl.plural(count, one: '周', other: '周')}";
 
-  static String m48(arg0) => "价值 ${arg0}";
+  static String m49(arg0) => "价值 ${arg0}";
 
-  static String m49(arg0) => "当时价值 ${arg0}";
+  static String m50(arg0) => "当时价值 ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -462,17 +464,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "oneWeek": MessageLookupByLibrary.simpleMessage("1 星期"),
         "oneYear": MessageLookupByLibrary.simpleMessage("1 年"),
         "openHomePage": MessageLookupByLibrary.simpleMessage("打开主页"),
+        "openLink": m33,
         "openLogDirectory": MessageLookupByLibrary.simpleMessage("打开日志文件夹"),
         "originalImage": MessageLookupByLibrary.simpleMessage("原图"),
         "owner": MessageLookupByLibrary.simpleMessage("群主"),
-        "participantsCount": m33,
-        "pendingConfirmation": m34,
+        "participantsCount": m34,
+        "pendingConfirmation": m35,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("手机号码"),
         "photos": MessageLookupByLibrary.simpleMessage("照片"),
         "pickAConversation":
             MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
         "pinTitle": MessageLookupByLibrary.simpleMessage("置顶"),
-        "pinnedMessageTitle": m35,
+        "pinnedMessageTitle": m36,
         "post": MessageLookupByLibrary.simpleMessage("文章"),
         "preferences": MessageLookupByLibrary.simpleMessage("偏好设置"),
         "previousConversation": MessageLookupByLibrary.simpleMessage("上一个会话"),
@@ -495,7 +498,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "report": MessageLookupByLibrary.simpleMessage("举报"),
         "reportAndBlock": MessageLookupByLibrary.simpleMessage("举报并屏蔽？"),
         "resendCode": MessageLookupByLibrary.simpleMessage("重发验证码"),
-        "resendCodeIn": m36,
+        "resendCodeIn": m37,
         "reset": MessageLookupByLibrary.simpleMessage("重置"),
         "resetLink": MessageLookupByLibrary.simpleMessage("重置邀请链接"),
         "retryUploadFailed": MessageLookupByLibrary.simpleMessage("重新上传失败。"),
@@ -511,7 +514,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
         "searchPlaceholderNumber":
             MessageLookupByLibrary.simpleMessage("搜索 Mixin ID 或手机号码："),
-        "searchRelatedMessage": m37,
+        "searchRelatedMessage": m38,
         "searchUnread": MessageLookupByLibrary.simpleMessage("搜索未读会话"),
         "select": MessageLookupByLibrary.simpleMessage("选择"),
         "send": MessageLookupByLibrary.simpleMessage("发送"),
@@ -521,19 +524,19 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("发送原始文件"),
         "sendWithoutSound": MessageLookupByLibrary.simpleMessage("静音发送"),
         "set": MessageLookupByLibrary.simpleMessage("设置"),
-        "setDisappearingMessageTimeTo": m38,
+        "setDisappearingMessageTimeTo": m39,
         "settingAuthSearchHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID, 昵称"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
             "备份你的聊天记录到 iCloud。如果你丢失或者更换手机，你可以在重新安装 Mixin Messenger 时恢复你的聊天记录。注意备份到 iCloud 中的聊天记录不受端对端加密保护！"),
-        "settingDeleteAccountPinContent": m39,
+        "settingDeleteAccountPinContent": m40,
         "share": MessageLookupByLibrary.simpleMessage("分享"),
         "shareApps": MessageLookupByLibrary.simpleMessage("分享的应用"),
         "shareContact": MessageLookupByLibrary.simpleMessage("分享联系人"),
         "shareError": MessageLookupByLibrary.simpleMessage("分享出错"),
         "shareLink": MessageLookupByLibrary.simpleMessage("分享邀请链接"),
-        "shareMessageDescription": m40,
-        "shareMessageDescriptionEmpty": m41,
+        "shareMessageDescription": m41,
+        "shareMessageDescriptionEmpty": m42,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("媒体内容"),
         "show": MessageLookupByLibrary.simpleMessage("显示"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("显示头像"),
@@ -572,13 +575,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "travelAndPlaces": MessageLookupByLibrary.simpleMessage("旅行与地点"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("打开通知"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("输入消息"),
-        "unableToOpenFile": m42,
+        "unableToOpenFile": m43,
         "unblock": MessageLookupByLibrary.simpleMessage("解除屏蔽"),
-        "unitDay": m43,
-        "unitHour": m44,
-        "unitMinute": m45,
-        "unitSecond": m46,
-        "unitWeek": m47,
+        "unitDay": m44,
+        "unitHour": m45,
+        "unitMinute": m46,
+        "unitSecond": m47,
+        "unitWeek": m48,
         "unmute": MessageLookupByLibrary.simpleMessage("取消静音"),
         "unpin": MessageLookupByLibrary.simpleMessage("取消置顶"),
         "unpinAllMessages": MessageLookupByLibrary.simpleMessage("取消所有置顶消息"),
@@ -586,8 +589,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("确定取消置顶所有消息么？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未读消息"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到这个用户"),
-        "valueNow": m48,
-        "valueThen": m49,
+        "valueNow": m49,
+        "valueThen": m50,
         "verifyPin": MessageLookupByLibrary.simpleMessage("验证 PIN"),
         "video": MessageLookupByLibrary.simpleMessage("视频"),
         "videos": MessageLookupByLibrary.simpleMessage("视频"),
