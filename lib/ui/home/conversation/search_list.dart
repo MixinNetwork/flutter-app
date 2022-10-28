@@ -19,6 +19,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
 import '../../../utils/reg_exp_utils.dart';
+import '../../../utils/uri_utils.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../../widgets/high_light_text.dart';
@@ -128,8 +129,12 @@ class SearchList extends HookWidget {
             keys: [messageKeyword, filterUnseen, slideCategoryState]).data ??
         [];
 
-    final shouldTips =
+    final isMixinNumber =
         useMemoized(() => numberRegExp.hasMatch(keyword), [keyword]);
+    final isUrl = useMemoized(() {
+      final uri = Uri.tryParse(keyword);
+      return uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
+    }, [keyword]);
 
     final type = useState<_ShowMoreType?>(null);
 
@@ -140,7 +145,7 @@ class SearchList extends HookWidget {
       return const UnseenConversationList();
     }
 
-    if (resultIsEmpty && !shouldTips) {
+    if (resultIsEmpty && (!isMixinNumber && !isUrl)) {
       return const SearchEmptyWidget();
     }
 
@@ -154,7 +159,16 @@ class SearchList extends HookWidget {
     }
     return CustomScrollView(
       slivers: [
-        if (users.isEmpty && shouldTips)
+        if (users.isEmpty && isUrl)
+          SliverToBoxAdapter(
+            child: SearchItem(
+              name: context.l10n.openLink(keyword),
+              keyword: keyword,
+              maxLines: true,
+              onTap: () => openUriWithWebView(context, keyword),
+            ),
+          ),
+        if (users.isEmpty && isMixinNumber)
           SliverToBoxAdapter(
             child: SearchItem(
               name: context.l10n.searchPlaceholderNumber + keyword,

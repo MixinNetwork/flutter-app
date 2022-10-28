@@ -266,6 +266,7 @@
 "oneWeek" : "1 星期",
 "oneYear" : "1 年",
 "openHomePage" : "打开主页",
+"openLink" : "打开链接：{arg0}",
 "openLogDirectory" : "打开日志文件夹",
 "originalImage" : "原图",
 "owner" : "群主",

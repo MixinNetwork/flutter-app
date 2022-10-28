@@ -97,50 +97,52 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m32(arg0) => "${arg0} now an admin";
 
-  static String m33(arg0) => "${arg0} PARTICIPANTS";
+  static String m33(arg0) => "Open Link: ${arg0}";
 
-  static String m34(count, arg0, arg1) =>
+  static String m34(arg0) => "${arg0} PARTICIPANTS";
+
+  static String m35(count, arg0, arg1) =>
       "${Intl.plural(count, one: '${arg0}/${arg1} confirmation', other: '${arg0}/${arg1} confirmations')}";
 
-  static String m35(count, arg0) =>
+  static String m36(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} Pinned Message', other: '${arg0} Pinned Messages')}";
 
-  static String m36(arg0) => "Resend code in ${arg0} s";
+  static String m37(arg0) => "Resend code in ${arg0} s";
 
-  static String m37(count, arg0) =>
+  static String m38(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} related message', other: '${arg0} related messages')}";
 
-  static String m38(arg0, arg1) =>
+  static String m39(arg0, arg1) =>
       "${arg0} set disappearing message time to ${arg1}";
 
-  static String m39(arg0) =>
+  static String m40(arg0) =>
       "If you continue, your profile and account details will be delete on ${arg0}. read our document to **learn more**.";
 
-  static String m40(arg0, arg1) =>
+  static String m41(arg0, arg1) =>
       "Are you sure you want to send a ${arg0} from ${arg1}?";
 
-  static String m41(arg0) => "Are you sure you want to send the ${arg0}?";
+  static String m42(arg0) => "Are you sure you want to send the ${arg0}?";
 
-  static String m42(arg0) => "Unable to open file: ${arg0}";
-
-  static String m43(count) =>
-      "${Intl.plural(count, one: 'day', other: 'days')}";
+  static String m43(arg0) => "Unable to open file: ${arg0}";
 
   static String m44(count) =>
-      "${Intl.plural(count, one: 'hour', other: 'hours')}";
+      "${Intl.plural(count, one: 'day', other: 'days')}";
 
   static String m45(count) =>
-      "${Intl.plural(count, one: 'minute', other: 'minutes')}";
+      "${Intl.plural(count, one: 'hour', other: 'hours')}";
 
   static String m46(count) =>
-      "${Intl.plural(count, one: 'second', other: 'seconds')}";
+      "${Intl.plural(count, one: 'minute', other: 'minutes')}";
 
   static String m47(count) =>
+      "${Intl.plural(count, one: 'second', other: 'seconds')}";
+
+  static String m48(count) =>
       "${Intl.plural(count, one: 'week', other: 'weeks')}";
 
-  static String m48(arg0) => "value now ${arg0}";
+  static String m49(arg0) => "value now ${arg0}";
 
-  static String m49(arg0) => "value then ${arg0}";
+  static String m50(arg0) => "value then ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -525,18 +527,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "oneWeek": MessageLookupByLibrary.simpleMessage("1 Week"),
         "oneYear": MessageLookupByLibrary.simpleMessage("1 Year"),
         "openHomePage": MessageLookupByLibrary.simpleMessage("Open Home page"),
+        "openLink": m33,
         "openLogDirectory":
             MessageLookupByLibrary.simpleMessage("open log directory"),
         "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
         "owner": MessageLookupByLibrary.simpleMessage("Owner"),
-        "participantsCount": m33,
-        "pendingConfirmation": m34,
+        "participantsCount": m34,
+        "pendingConfirmation": m35,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone Number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "pickAConversation": MessageLookupByLibrary.simpleMessage(
             "Select a conversation and start sending a message"),
         "pinTitle": MessageLookupByLibrary.simpleMessage("Pin"),
-        "pinnedMessageTitle": m35,
+        "pinnedMessageTitle": m36,
         "post": MessageLookupByLibrary.simpleMessage("Post"),
         "preferences": MessageLookupByLibrary.simpleMessage("Preferences"),
         "previousConversation":
@@ -563,7 +566,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportAndBlock":
             MessageLookupByLibrary.simpleMessage("Report and block?"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Resend code"),
-        "resendCodeIn": m36,
+        "resendCodeIn": m37,
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "resetLink": MessageLookupByLibrary.simpleMessage("Reset Link"),
         "retryUploadFailed":
@@ -583,7 +586,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "No chats, contacts or messages found."),
         "searchPlaceholderNumber": MessageLookupByLibrary.simpleMessage(
             "Search Mixin ID or phone number:"),
-        "searchRelatedMessage": m37,
+        "searchRelatedMessage": m38,
         "searchUnread": MessageLookupByLibrary.simpleMessage("Search Unread"),
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
@@ -597,12 +600,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendWithoutSound":
             MessageLookupByLibrary.simpleMessage("Send Without Sound"),
         "set": MessageLookupByLibrary.simpleMessage("Set"),
-        "setDisappearingMessageTimeTo": m38,
+        "setDisappearingMessageTimeTo": m39,
         "settingAuthSearchHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
             "Back up your chat history to iCloud. if you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin Messenger. Messages you back up are not protected by Mixin Messenger end-to-end encryption while in iCloud."),
-        "settingDeleteAccountPinContent": m39,
+        "settingDeleteAccountPinContent": m40,
         "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixinmessenger.zendesk.com/hc/articles/4414170627988"),
         "share": MessageLookupByLibrary.simpleMessage("Share"),
@@ -610,8 +613,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareContact": MessageLookupByLibrary.simpleMessage("Share Contact"),
         "shareError": MessageLookupByLibrary.simpleMessage("Share error."),
         "shareLink": MessageLookupByLibrary.simpleMessage("Share Link"),
-        "shareMessageDescription": m40,
-        "shareMessageDescriptionEmpty": m41,
+        "shareMessageDescription": m41,
+        "shareMessageDescriptionEmpty": m42,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
         "show": MessageLookupByLibrary.simpleMessage("Show"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("Show avatar"),
@@ -663,13 +666,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "turnOnNotifications":
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("Type message"),
-        "unableToOpenFile": m42,
+        "unableToOpenFile": m43,
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),
-        "unitDay": m43,
-        "unitHour": m44,
-        "unitMinute": m45,
-        "unitSecond": m46,
-        "unitWeek": m47,
+        "unitDay": m44,
+        "unitHour": m45,
+        "unitMinute": m46,
+        "unitSecond": m47,
+        "unitWeek": m48,
         "unmute": MessageLookupByLibrary.simpleMessage("Unmute"),
         "unpin": MessageLookupByLibrary.simpleMessage("Unpin"),
         "unpinAllMessages":
@@ -679,8 +682,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unreadMessages":
             MessageLookupByLibrary.simpleMessage("Unread messages"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
-        "valueNow": m48,
-        "valueThen": m49,
+        "valueNow": m49,
+        "valueThen": m50,
         "verifyPin": MessageLookupByLibrary.simpleMessage("Verify PIN"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),

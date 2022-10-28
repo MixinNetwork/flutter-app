@@ -2740,6 +2740,16 @@ class Localization {
     );
   }
 
+  /// `Open Link: {arg0}`
+  String openLink(Object arg0) {
+    return Intl.message(
+      'Open Link: $arg0',
+      name: 'openLink',
+      desc: '',
+      args: [arg0],
+    );
+  }
+
   /// `open log directory`
   String get openLogDirectory {
     return Intl.message(

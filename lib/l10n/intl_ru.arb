@@ -253,6 +253,7 @@
 "oneWeek" : "1 неделя",
 "oneYear" : "1 год",
 "openHomePage" : "Открыть домашнюю страницу",
+"openLink" : "Открыть ссылку: {arg0}",
 "openLogDirectory" : "открыть каталог журналов",
 "originalImage" : "Оригинал",
 "owner" : "Владелец",
