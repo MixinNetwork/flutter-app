@@ -18,14 +18,14 @@ class Toast {
   static const shortDuration = Duration(seconds: 1);
   static const longDuration = Duration(seconds: 2);
 
-  static OverlaySupportEntry? _lastLoadingEntry;
+  static OverlaySupportEntry? _entry;
 
   static void createView({
     required WidgetBuilder builder,
     Duration? duration = Toast.shortDuration,
   }) {
     dismiss();
-    showOverlay(
+    _entry = showOverlay(
       (context, progress) => Opacity(
         opacity: progress,
         child: builder(context),
@@ -36,8 +36,8 @@ class Toast {
   }
 
   static void dismiss() {
-    _lastLoadingEntry?.dismiss();
-    _lastLoadingEntry = null;
+    _entry?.dismiss();
+    _entry = null;
   }
 }
 
