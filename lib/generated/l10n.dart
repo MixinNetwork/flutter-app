@@ -1728,6 +1728,16 @@ class Localization {
     );
   }
 
+  /// `Failed to upload message attachment`
+  String get errorUploadAttachmentFailed {
+    return Intl.message(
+      'Failed to upload message attachment',
+      name: 'errorUploadAttachmentFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `ERROR 20122: This phone number is already associated with another account.`
   String get errorUsedPhone {
     return Intl.message(

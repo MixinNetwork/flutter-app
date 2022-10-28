@@ -391,6 +391,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Can\'t find an app able to open this media."),
         "errorUnknownWithCode": m21,
         "errorUnknownWithMessage": m22,
+        "errorUploadAttachmentFailed": MessageLookupByLibrary.simpleMessage(
+            "Failed to upload message attachment"),
         "errorUsedPhone": MessageLookupByLibrary.simpleMessage(
             "ERROR 20122: This phone number is already associated with another account."),
         "errorUserInvalidFormat":

@@ -166,6 +166,7 @@
 "errorUnableToOpenMedia" : "Can't find an app able to open this media.",
 "errorUnknownWithCode" : "ERROR: {arg0}",
 "errorUnknownWithMessage" : "ERROR: {arg0}",
+"errorUploadAttachmentFailed" : "Failed to upload message attachment",
 "errorUsedPhone" : "ERROR 20122: This phone number is already associated with another account.",
 "errorUserInvalidFormat" : "Invalid user id",
 "errorWithdrawalMemoFormatIncorrect" : "ERROR 20131: Withdrawal memo format incorrect.",

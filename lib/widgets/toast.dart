@@ -103,30 +103,43 @@ void showToastSuccessful() => Toast.createView(
     );
 
 class ToastError extends Error {
-  ToastError(this.message);
+  factory ToastError(String message) => ToastError._internal(message: message);
 
-  final String message;
+  factory ToastError.builder(String Function(BuildContext context)? builder) =>
+      ToastError._internal(messageBuilder: builder);
 
-  // ignore: avoid-unused-parameters
-  static ToastError? fromError(Object? error) => null;
+  ToastError._internal({this.message, this.messageBuilder});
+
+  static String errorToString(BuildContext context, Object? error) {
+    if (error is ToastError) {
+      if (error.message != null) {
+        return error.message!;
+      } else if (error.messageBuilder != null) {
+        return error.messageBuilder!(context);
+      } else {
+        return context.l10n.failed;
+      }
+    } else if (error is MixinApiError) {
+      return (error.error as MixinError).toDisplayString(context);
+    } else if (error is MixinError) {
+      return error.toDisplayString(context);
+    } else if (error is String) {
+      return error;
+    } else {
+      return error?.toString() ?? context.l10n.failed;
+    }
+  }
+
+  final String? message;
+  final String Function(BuildContext)? messageBuilder;
 }
 
 void showToastFailed(Object? error) => Toast.createView(
-      builder: (context) {
-        String? message;
-        if (error is ToastError) {
-          message = error.message;
-        } else if (error is MixinApiError) {
-          message = (error.error as MixinError).toDisplayString(context);
-        } else {
-          message = ToastError.fromError(error)?.message;
-        }
-        return ToastWidget(
-          barrierColor: Colors.transparent,
-          icon: const _Failed(),
-          text: message ?? context.l10n.failed,
-        );
-      },
+      builder: (context) => ToastWidget(
+        barrierColor: Colors.transparent,
+        icon: const _Failed(),
+        text: ToastError.errorToString(context, error),
+      ),
     );
 
 void showToast(String message) => Toast.createView(
