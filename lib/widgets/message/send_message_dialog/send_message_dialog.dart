@@ -267,7 +267,6 @@ Future<void> _sendMessage(BuildContext context, String conversationId,
   if (category == _Category.image) {
     final sendImageData = data as SendImageData;
     await runWithLoading(
-      context,
       () => context.accountServer.sendImageMessageByUrl(
         encryptCategory,
         sendImageData.url,

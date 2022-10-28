@@ -41,7 +41,6 @@ class SelectionBottomBar extends HookWidget {
               final messageIds = cubit.state.selectedMessageIds;
 
               await runWithLoading(
-                context,
                 () => context.accountServer.sendTranscriptMessage(
                   messageIds.toList(),
                   result.first.encryptCategory!,
@@ -68,7 +67,7 @@ class SelectionBottomBar extends HookWidget {
               final cubit = context.read<MessageSelectionCubit>();
               final messageIds = cubit.state.selectedMessageIds;
 
-              await runWithLoading(context, () async {
+              await runWithLoading(() async {
                 for (final id in messageIds) {
                   await context.accountServer.forwardMessage(
                     id,
@@ -98,7 +97,7 @@ class SelectionBottomBar extends HookWidget {
                 return;
               }
               d('messagesToDelete: $messagesToDelete');
-              await runWithLoading(context, () async {
+              await runWithLoading(() async {
                 for (final id in messagesToDelete) {
                   await context.accountServer.deleteMessage(id);
                 }

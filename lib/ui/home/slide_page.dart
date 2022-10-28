@@ -269,7 +269,6 @@ class _CircleList extends HookWidget {
                                 if (name?.isEmpty ?? true) return;
 
                                 await runFutureWithToast(
-                                  context,
                                   context.accountServer
                                       .updateCircle(circle.circleId, name!),
                                 );
@@ -302,7 +301,6 @@ class _CircleList extends HookWidget {
                               if (result == null || result.isEmpty) return;
 
                               await runFutureWithToast(
-                                context,
                                 () async {
                                   final add = result.where((element) =>
                                       !initSelected
@@ -346,7 +344,6 @@ class _CircleList extends HookWidget {
                                   context.l10n.deleteTheCircle(circle.name));
                               if (!result) return;
                               await runFutureWithToast(
-                                context,
                                 () async {
                                   await context.accountServer
                                       .deleteCircle(circle.circleId);

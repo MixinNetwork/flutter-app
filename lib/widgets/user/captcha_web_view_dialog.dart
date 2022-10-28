@@ -48,7 +48,6 @@ class CaptchaWebViewDialog extends HookWidget {
       } else {
         controllerRef.value!.loadUrl('about:blank');
         showToastFailed(
-          context,
           ToastError(context.l10n.recaptchaTimeout),
         );
         Navigator.pop(context);

@@ -238,7 +238,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
         await _conversationItem(context, conversationId);
 
     if (_conversation == null && sync) {
-      showToastLoading(context);
+      showToastLoading();
       await context.accountServer.refreshConversation(conversationId);
       _conversation = await _conversationItem(context, conversationId);
     }
@@ -246,7 +246,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     hasUnreadMessage ??= (_conversation?.unseenMessageCount ?? 0) > 0;
 
     if (_conversation == null) {
-      return showToastFailed(context, null);
+      return showToastFailed(null);
     }
 
     final _initIndexMessageId = initIndexMessageId ??
@@ -313,7 +313,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
         user ?? await database.userDao.userById(userId).getSingleOrNull();
 
     if (_user == null) {
-      return showToastFailed(context, ToastError(context.l10n.userNotFound));
+      return showToastFailed(ToastError(context.l10n.userNotFound));
     }
 
     final app = await database.appDao.findAppById(userId);

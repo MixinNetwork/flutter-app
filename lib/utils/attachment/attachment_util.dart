@@ -16,6 +16,7 @@ import '../../db/dao/transcript_message_dao.dart';
 import '../../db/mixin_database.dart';
 import '../../db/util/util.dart';
 import '../../enum/media_status.dart';
+import '../../widgets/toast.dart';
 import '../crypto_util.dart';
 import '../extension/extension.dart';
 import '../file.dart';
@@ -306,8 +307,10 @@ class AttachmentUtil extends ChangeNotifier {
               ? await base64EncodeWithIsolate(digest!)
               : null,
           response.data.createdAt);
-    } catch (e, s) {
-      w('upload failed error: $e, $s');
+    } catch (error, s) {
+      w('upload failed error: $error, $s');
+      showToastFailed(ToastError.builder(
+          (context) => context.l10n.errorUploadAttachmentFailed));
       await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
       return null;
     } finally {

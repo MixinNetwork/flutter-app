@@ -359,7 +359,7 @@ class _AnimatedSendOrVoiceButton extends HookWidget {
 }
 
 void showMaxLengthReachedToast(BuildContext context) =>
-    showToastFailed(context, ToastError(context.l10n.contentTooLong));
+    showToastFailed(ToastError(context.l10n.contentTooLong));
 
 void _sendPostMessage(
     BuildContext context, TextEditingController textEditingController) {

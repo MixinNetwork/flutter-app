@@ -165,6 +165,7 @@
 "errorUnableToOpenMedia" : "无法找到能打开该媒体的应用",
 "errorUnknownWithCode" : "错误：{arg0}",
 "errorUnknownWithMessage" : "错误：{arg0}",
+"errorUploadAttachmentFailed" : "消息附件上传失败",
 "errorUsedPhone" : "错误 20122：电话号码已经被占用。",
 "errorUserInvalidFormat" : "用户数据不合法",
 "errorWithdrawalMemoFormatIncorrect" : "错误 20131：提现备注格式不正确",

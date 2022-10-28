@@ -46,8 +46,7 @@ class AccountDeletePage extends StatelessWidget {
                     color: context.theme.red,
                     onTap: () async {
                       if (!SessionKeyValue.instance.checkPinToken()) {
-                        await showToastFailed(
-                          context,
+                        showToastFailed(
                           ToastError(context.l10n.errorNoPinToken),
                         );
                         return;
@@ -77,7 +76,7 @@ class AccountDeletePage extends StatelessWidget {
                         if (!confirmed) {
                           return;
                         }
-                        showToastLoading(context);
+                        showToastLoading();
                         VerificationResponse? verificationResponse;
 
                         try {
@@ -89,7 +88,7 @@ class AccountDeletePage extends StatelessWidget {
                           Toast.dismiss();
                         } catch (error, stacktrace) {
                           e('_requestVerificationCode $error, $stacktrace');
-                          await showToastFailed(context, error);
+                          showToastFailed(error);
                           return;
                         }
                         final verificationId = await showVerificationDialog(

@@ -374,12 +374,12 @@ class VoiceRecorderBottomBar extends HookWidget {
       final audioFile = File(recordedResult.path);
       if (!audioFile.existsSync()) {
         e('audio file does not exist.');
-        showToastFailed(context, null);
+        showToastFailed(null);
         return;
       }
       if (audioFile.lengthSync() == 0) {
         e('audio file is empty.');
-        showToastFailed(context, null);
+        showToastFailed(null);
         return;
       }
     }, [recordedResult]);

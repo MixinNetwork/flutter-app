@@ -27,7 +27,7 @@ Future<void> showChangeNumberDialog(BuildContext context) async {
 
   VerificationResponse? response;
   try {
-    showToastLoading(context);
+    showToastLoading();
     response = await requestVerificationCode(
       phone: phoneNumber,
       context: context,
@@ -36,7 +36,7 @@ Future<void> showChangeNumberDialog(BuildContext context) async {
     Toast.dismiss();
   } catch (error, stacktrace) {
     e('showChangeNumberDialog: $error $stacktrace');
-    await showToastFailed(context, error);
+    showToastFailed(error);
     return;
   }
 
@@ -72,7 +72,7 @@ Future<void> showChangeNumberDialog(BuildContext context) async {
     return;
   }
   context.multiAuthCubit.updateAccount(account);
-  showToastSuccessful(context);
+  showToastSuccessful();
 }
 
 Future<String?> _showPhoneNumberInputDialog(BuildContext context) =>

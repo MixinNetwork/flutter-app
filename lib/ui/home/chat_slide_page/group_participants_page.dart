@@ -222,7 +222,6 @@ class _ParticipantMenuEntry extends StatelessWidget {
               icon: Resources.assetsImagesContextMenuUserEditSvg,
               title: context.l10n.makeGroupAdmin,
               onTap: () => runFutureWithToast(
-                context,
                 context.accountServer.updateParticipantRole(
                     context.read<ConversationCubit>().state!.conversationId,
                     participant.userId,
@@ -233,9 +232,8 @@ class _ParticipantMenuEntry extends StatelessWidget {
             menus.add(ContextMenu(
               icon: Resources.assetsImagesContextMenuStopSvg,
               title: context.l10n.dismissAsAdmin,
-              onTap: () => runFutureWithToast(
-                  context,
-                  context.accountServer.updateParticipantRole(
+              onTap: () => runFutureWithToast(context.accountServer
+                  .updateParticipantRole(
                       context.read<ConversationCubit>().state!.conversationId,
                       participant.userId,
                       null)),
@@ -249,9 +247,8 @@ class _ParticipantMenuEntry extends StatelessWidget {
             icon: Resources.assetsImagesContextMenuDeleteSvg,
             isDestructiveAction: true,
             title: context.l10n.groupPopMenuRemove(participant.fullName ?? '?'),
-            onTap: () => runFutureWithToast(
-                context,
-                context.accountServer.removeParticipant(
+            onTap: () => runFutureWithToast(context.accountServer
+                .removeParticipant(
                     context.read<ConversationCubit>().state!.conversationId,
                     participant.userId)),
           ));
@@ -326,7 +323,6 @@ class _ActionAddParticipants extends StatelessWidget {
                   context.read<ConversationCubit>().state?.conversationId;
               assert(conversationId != null);
               await runFutureWithToast(
-                context,
                 context.accountServer.addParticipant(conversationId!, userIds),
               );
             },

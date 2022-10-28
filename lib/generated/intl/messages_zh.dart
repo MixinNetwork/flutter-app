@@ -345,6 +345,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("无法找到能打开该媒体的应用"),
         "errorUnknownWithCode": m21,
         "errorUnknownWithMessage": m22,
+        "errorUploadAttachmentFailed":
+            MessageLookupByLibrary.simpleMessage("消息附件上传失败"),
         "errorUsedPhone":
             MessageLookupByLibrary.simpleMessage("错误 20122：电话号码已经被占用。"),
         "errorUserInvalidFormat":

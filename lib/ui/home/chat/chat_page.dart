@@ -1168,7 +1168,6 @@ class _ConversationHandle extends ConversationMenuHandle {
     }
     final isGroupConversation = conversationState.isGroup == true;
     await runFutureWithToast(
-      context,
       context.accountServer.muteConversation(
         result,
         conversationId: isGroupConversation ? conversationId : null,
@@ -1182,7 +1181,6 @@ class _ConversationHandle extends ConversationMenuHandle {
   @override
   void pin() {
     runFutureWithToast(
-      context,
       context.accountServer.pin(conversationId),
     );
   }
@@ -1206,7 +1204,6 @@ class _ConversationHandle extends ConversationMenuHandle {
   @override
   void unPin() {
     runFutureWithToast(
-      context,
       context.accountServer.unpin(conversationId),
     );
   }
@@ -1219,7 +1216,6 @@ class _ConversationHandle extends ConversationMenuHandle {
     }
     final isGroup = conversationState.isGroup == true;
     runFutureWithToast(
-      context,
       context.accountServer.unMuteConversation(
         conversationId: isGroup ? conversationId : null,
         userId: isGroup ? null : conversationState.conversation?.ownerId,

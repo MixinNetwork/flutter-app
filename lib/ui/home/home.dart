@@ -140,23 +140,22 @@ class _SetupNameWidget extends HookWidget {
             MixinButton(
               disable: textEditingValue.text.trim().isEmpty,
               onTap: () async {
-                showToastLoading(context);
+                showToastLoading();
                 try {
                   await context.accountServer.updateAccount(
                     fullName: textEditingController.text.trim(),
                   );
                 } on MixinApiError catch (error) {
                   final mixinError = error.error as MixinError;
-                  await showToastFailed(
-                    context,
+                  showToastFailed(
                     ToastError(mixinError.toDisplayString(context)),
                   );
                   return;
                 } catch (error) {
-                  await showToastFailed(context, null);
+                  showToastFailed(null);
                   return;
                 }
-                showToastSuccessful(context);
+                showToastSuccessful();
               },
               child: Text(context.l10n.confirm),
             ),

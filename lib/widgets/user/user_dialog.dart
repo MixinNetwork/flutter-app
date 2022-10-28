@@ -31,7 +31,7 @@ Future<void> showUserDialog(BuildContext context, String? userId,
     return;
   }
 
-  showToastLoading(context);
+  showToastLoading();
 
   User? user;
   if (_userId != null) {
@@ -46,8 +46,7 @@ Future<void> showUserDialog(BuildContext context, String? userId,
   }
 
   if (user == null) {
-    await showToastFailed(
-      context,
+    showToastFailed(
       ToastError(
         context.l10n.userNotFound,
       ),
@@ -256,7 +255,6 @@ class _AddToContactsButton extends StatelessWidget {
         onTap: () {
           assert(user.fullName != null, ' username should not be null.');
           runFutureWithToast(
-            context,
             context.accountServer.addUser(
               user.userId,
               user.fullName,
@@ -296,7 +294,6 @@ class _UserProfileButtonBar extends StatelessWidget {
           final conversationId = result.first.conversationId;
 
           await runFutureWithToast(
-            context,
             context.accountServer.sendContactMessage(
               user.userId,
               user.fullName,

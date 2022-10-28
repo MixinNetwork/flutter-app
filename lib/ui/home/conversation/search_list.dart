@@ -175,7 +175,7 @@ class SearchList extends HookWidget {
               keyword: keyword,
               maxLines: true,
               onTap: () async {
-                showToastLoading(context);
+                showToastLoading();
 
                 String? userId;
 
@@ -187,8 +187,7 @@ class SearchList extends HookWidget {
                       .insertSdkUser(mixinResponse.data);
                   userId = mixinResponse.data.userId;
                 } catch (error) {
-                  await showToastFailed(
-                      context, ToastError(context.l10n.userNotFound));
+                  showToastFailed(ToastError(context.l10n.userNotFound));
                 }
 
                 Toast.dismiss();

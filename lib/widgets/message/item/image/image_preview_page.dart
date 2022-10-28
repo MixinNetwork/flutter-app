@@ -200,10 +200,8 @@ class ImagePreviewPage extends HookWidget {
       },
       actions: {
         _CopyIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => _copyUrl(
-              context,
-              context.accountServer
-                  .convertMessageAbsolutePath(current.value, isTranscriptPage)),
+          onInvoke: (Intent intent) => _copyUrl(context.accountServer
+              .convertMessageAbsolutePath(current.value, isTranscriptPage)),
         ),
         _PreviousImageIntent: CallbackAction<Intent>(
           onInvoke: (intent) {
@@ -402,10 +400,8 @@ class _Action extends StatelessWidget {
       );
     }
 
-    Future<void> copy() => _copyUrl(
-        context,
-        context.accountServer
-            .convertMessageAbsolutePath(message, isTranscriptPage));
+    Future<void> copy() => _copyUrl(context.accountServer
+        .convertMessageAbsolutePath(message, isTranscriptPage));
 
     Future<void> download() async {
       if (message.mediaUrl?.isEmpty ?? true) return;
@@ -578,17 +574,17 @@ class _Item extends HookWidget {
   }
 }
 
-Future<void> _copyUrl(BuildContext context, String? filePath) async {
+Future<void> _copyUrl(String? filePath) async {
   if (filePath?.isEmpty ?? true) {
-    return showToastFailed(context, null);
+    return showToastFailed(null);
   }
   try {
     await Pasteboard.writeFiles([filePath!]);
   } catch (error) {
-    await showToastFailed(context, error);
+    showToastFailed(error);
     return;
   }
-  showToastSuccessful(context);
+  showToastSuccessful();
 }
 
 class _CopyIntent extends Intent {

@@ -47,7 +47,6 @@ class ConversationMenuWrapper extends StatelessWidget {
             icon: Resources.assetsImagesContextMenuUnpinSvg,
             title: context.l10n.unpin,
             onTap: () => runFutureWithToast(
-              context,
               context.accountServer.unpin(conversationId),
             ),
           ),
@@ -56,7 +55,6 @@ class ConversationMenuWrapper extends StatelessWidget {
             icon: Resources.assetsImagesContextMenuPinSvg,
             title: context.l10n.pinTitle,
             onTap: () => runFutureWithToast(
-              context,
               context.accountServer.pin(conversationId),
             ),
           ),
@@ -66,7 +64,6 @@ class ConversationMenuWrapper extends StatelessWidget {
             title: context.l10n.unmute,
             onTap: () async {
               await runFutureWithToast(
-                context,
                 context.accountServer.unMuteConversation(
                   conversationId: isGroupConversation ? conversationId : null,
                   userId: isGroupConversation ? null : ownerId,
@@ -84,7 +81,6 @@ class ConversationMenuWrapper extends StatelessWidget {
                   context: context, child: const MuteDialog());
               if (result == null) return;
               await runFutureWithToast(
-                context,
                 context.accountServer.muteConversation(
                   result,
                   conversationId: isGroupConversation ? conversationId : null,
@@ -110,7 +106,6 @@ class ConversationMenuWrapper extends StatelessWidget {
                         title: e.name,
                         onTap: () async {
                           await runFutureWithToast(
-                            context,
                             () async {
                               await context.accountServer
                                   .editCircleConversation(
@@ -171,7 +166,6 @@ class ConversationMenuWrapper extends StatelessWidget {
               isDestructiveAction: true,
               onTap: () async {
                 await runFutureWithToast(
-                  context,
                   context.accountServer.editCircleConversation(
                     circleId!,
                     [

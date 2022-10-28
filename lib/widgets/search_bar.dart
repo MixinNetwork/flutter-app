@@ -166,8 +166,7 @@ class _SearchUserDialog extends HookWidget {
         await context.database.userDao.insertSdkUser(mixinResponse.data);
         resultUserId.value = mixinResponse.data.userId;
       } catch (e) {
-        unawaited(
-            showToastFailed(context, ToastError(context.l10n.userNotFound)));
+        showToastFailed(ToastError(context.l10n.userNotFound));
       }
 
       loading.value = false;
