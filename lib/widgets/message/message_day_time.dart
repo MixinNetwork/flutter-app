@@ -23,7 +23,9 @@ class MessageDayTime extends HookWidget {
   Widget build(BuildContext context) {
     final hide =
         useBlocStateConverter<_HiddenMessageDayTimeBloc, DateTime?, bool>(
-            converter: (state) => isSameDay(state, dateTime));
+      converter: (state) => isSameDay(state, dateTime),
+      keys: [dateTime],
+    );
     return Center(
       child: Opacity(
         opacity: hide ? 0 : 1,
