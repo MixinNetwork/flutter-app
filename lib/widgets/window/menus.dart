@@ -274,10 +274,6 @@ class _Menus extends HookWidget {
               PlatformMenuItemGroup(members: [
                 PlatformMenuItem(
                   label: context.l10n.closeWindow,
-                  shortcut: const SingleActivator(
-                    LogicalKeyboardKey.keyW,
-                    meta: true,
-                  ),
                   onSelected: windowManager.close,
                 )
               ]),
