@@ -59,8 +59,14 @@ class _VisibilityAwareAnimatedSendingIcon extends HookWidget {
   Widget build(BuildContext context) {
     final visible = useState(false);
     final key = useMemoized(UniqueKey.new);
+    final isMount = useIsMounted();
     return VisibilityDetector(
       onVisibilityChanged: (info) {
+        if (!isMount()) {
+          // onVisibilityChanged called by WidgetsBinding.postFrameCallback,
+          // so it may be called after unmount.
+          return;
+        }
         visible.value = info.visibleFraction > 0;
       },
       key: key,
