@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
@@ -75,11 +76,31 @@ class ContextMenuPortalEntry extends HookWidget {
         onClose: () => offsetCubit.emit(null),
         child: PortalTarget(
           visible: visible,
-          portalFollower: Builder(builder: (context) {
-            if (offset != null && visible) {
-              return CustomSingleChildLayout(
-                delegate: PositionedLayoutDelegate(position: offset),
-                child: ContextMenuPage(menus: buildMenus()),
+          portalFollower: HookBuilder(builder: (context) {
+            final focusNode = useMemoized(FocusNode.new);
+            final show = offset != null && visible;
+            useEffect(() {
+              if (!show) {
+                return;
+              }
+              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                focusNode.requestFocus();
+              });
+            }, [focusNode]);
+            if (show) {
+              return Focus(
+                focusNode: focusNode,
+                onKeyEvent: (node, key) {
+                  if (key.logicalKey == LogicalKeyboardKey.escape) {
+                    offsetCubit.emit(null);
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: CustomSingleChildLayout(
+                  delegate: PositionedLayoutDelegate(position: offset),
+                  child: ContextMenuPage(menus: buildMenus()),
+                ),
               );
             }
 
