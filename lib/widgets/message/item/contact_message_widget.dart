@@ -77,36 +77,40 @@ class ContactItem extends StatelessWidget {
             name: fullName,
           ),
           const SizedBox(width: 8),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      fullName ?? '',
-                      style: TextStyle(
-                        color: context.theme.text,
-                        fontSize: MessageItemWidget.primaryFontSize,
+          Flexible(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        fullName?.overflow ?? '',
+                        style: TextStyle(
+                          color: context.theme.text,
+                          fontSize: MessageItemWidget.primaryFontSize,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  ),
-                  VerifiedOrBotWidget(
-                    verified: isVerified,
-                    isBot: appId != null,
-                  ),
-                ],
-              ),
-              Text(
-                identityNumber,
-                style: TextStyle(
-                  color: context.theme.secondaryText,
-                  fontSize: MessageItemWidget.secondaryFontSize,
+                    VerifiedOrBotWidget(
+                      verified: isVerified,
+                      isBot: appId != null,
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                Text(
+                  identityNumber,
+                  style: TextStyle(
+                    color: context.theme.secondaryText,
+                    fontSize: MessageItemWidget.secondaryFontSize,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       );

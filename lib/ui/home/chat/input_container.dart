@@ -711,7 +711,7 @@ class _StickerButton extends HookWidget {
             padding: const EdgeInsets.all(8),
             child: Builder(
               builder: (context) => StickerPage(
-                tabController: DefaultTabController.of(context)!,
+                tabController: DefaultTabController.of(context),
                 tabLength: tabLength,
                 presetStickerGroups: presetStickerGroups,
               ),

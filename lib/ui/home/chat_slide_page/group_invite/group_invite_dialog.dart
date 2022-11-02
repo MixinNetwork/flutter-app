@@ -112,7 +112,6 @@ class _GroupInviteBody extends StatelessWidget {
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
-              toolbarOptions: const ToolbarOptions(),
             ),
           ),
           const SizedBox(height: 8),

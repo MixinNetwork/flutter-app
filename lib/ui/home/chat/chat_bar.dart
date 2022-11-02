@@ -61,102 +61,100 @@ class ChatBar extends HookWidget {
           ),
         );
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
-      child: Row(
-        children: [
-          Builder(
-            builder: (context) => routeMode
-                ? MoveWindowBarrier(
-                    child: MixinBackButton(
-                      color: actionColor,
-                      onTap: () =>
-                          context.read<ConversationCubit>().unselected(),
-                    ),
-                  )
-                : const SizedBox(width: 16),
+    return Row(
+      children: [
+        Builder(
+          builder: (context) => routeMode
+              ? MoveWindowBarrier(
+                  child: MixinBackButton(
+                    color: actionColor,
+                    onTap: () => context.read<ConversationCubit>().unselected(),
+                  ),
+                )
+              : const SizedBox(width: 16),
+        ),
+        toggleInfoPageWrapper(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ConversationAvatar(
+                conversationState: conversation,
+              ),
+              const SizedBox(width: 10),
+            ],
           ),
-          toggleInfoPageWrapper(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ConversationAvatar(
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IgnorePointer(
+                child: ConversationName(
                   conversationState: conversation,
                 ),
-                const SizedBox(width: 10),
-              ],
-            ),
+              ),
+              const SizedBox(height: 4),
+              IgnorePointer(
+                child: ConversationIDOrCount(
+                  conversationState: conversation,
+                ),
+              ),
+            ]
+                .map((e) => toggleInfoPageWrapper(
+                      child: e,
+                      behavior: HitTestBehavior.deferToChild,
+                    ))
+                .toList(),
           ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IgnorePointer(
-                  child: ConversationName(
-                    conversationState: conversation,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                IgnorePointer(
-                  child: ConversationIDOrCount(
-                    conversationState: conversation,
-                  ),
-                ),
-              ]
-                  .map((e) => toggleInfoPageWrapper(
-                        child: e,
-                        behavior: HitTestBehavior.deferToChild,
-                      ))
-                  .toList(),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          alignment: Alignment.centerLeft,
+          child: MoveWindowBarrier(
+            child: _BotIcon(conversation: conversation),
+          ),
+        ),
+        if (inMultiSelectMode)
+          MoveWindowBarrier(
+            child: TextButton(
+              onPressed: () {
+                context.read<MessageSelectionCubit>().clearSelection();
+              },
+              child: Text(context.l10n.cancel),
+            ),
+          )
+        else ...[
+          MoveWindowBarrier(
+            child: ActionButton(
+              name: Resources.assetsImagesIcSearchSvg,
+              color: actionColor,
+              onTap: () {
+                final cubit = context.read<ChatSideCubit>();
+                if (cubit.state.pages.lastOrNull?.name ==
+                    ChatSideCubit.searchMessageHistory) {
+                  return cubit.pop();
+                }
+                cubit.replace(ChatSideCubit.searchMessageHistory);
+              },
             ),
           ),
           AnimatedSize(
             duration: const Duration(milliseconds: 200),
             alignment: Alignment.centerLeft,
             child: MoveWindowBarrier(
-              child: _BotIcon(conversation: conversation),
+              child: chatSideRouteMode
+                  ? const SizedBox()
+                  : ActionButton(
+                      name: Resources.assetsImagesIcScreenSvg,
+                      color: actionColor,
+                      onTap: chatSideCubit.toggleInfoPage,
+                    ),
             ),
           ),
-          if (inMultiSelectMode)
-            MoveWindowBarrier(
-              child: TextButton(
-                onPressed: () {
-                  context.read<MessageSelectionCubit>().clearSelection();
-                },
-                child: Text(context.l10n.cancel),
-              ),
-            )
-          else ...[
-            MoveWindowBarrier(
-              child: ActionButton(
-                name: Resources.assetsImagesIcSearchSvg,
-                color: actionColor,
-                onTap: () {
-                  final cubit = context.read<ChatSideCubit>();
-                  if (cubit.state.pages.lastOrNull?.name ==
-                      ChatSideCubit.searchMessageHistory) {
-                    return cubit.pop();
-                  }
-                  cubit.replace(ChatSideCubit.searchMessageHistory);
-                },
-              ),
-            ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              alignment: Alignment.centerLeft,
-              child: MoveWindowBarrier(
-                child: chatSideRouteMode
-                    ? const SizedBox()
-                    : ActionButton(
-                        name: Resources.assetsImagesIcScreenSvg,
-                        color: actionColor,
-                        onTap: chatSideCubit.toggleInfoPage,
-                      ),
-              ),
-            ),
-          ],
+          const SizedBox(width: 16),
         ],
-      ),
+      ],
     );
   }
 }

@@ -185,8 +185,6 @@ class VoiceRecorderBarOverlayComposition extends HookWidget {
     final link = useMemoized(LayerLink.new);
     final overlay = Overlay.of(context, rootOverlay: true);
 
-    assert(overlay != null, 'overlay is null');
-
     final recorderBottomBarEntry = useRef<OverlayEntry?>(null);
 
     final voiceRecorderCubit = context.read<VoiceRecorderCubit>();
@@ -231,7 +229,7 @@ class VoiceRecorderBarOverlayComposition extends HookWidget {
         );
         recorderBottomBarEntry.value = entry;
         WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
-          overlay!.insert(entry);
+          overlay.insert(entry);
         });
       },
       [isRecorderMode, layoutWidth],
@@ -276,10 +274,7 @@ void _showDiscardRecordingWarningAlertOverlay(
   required VoidCallback onDiscard,
 }) {
   final overlay = Overlay.of(context, rootOverlay: true);
-  if (overlay == null) {
-    e('_showDiscardRecordingWarningAlertOverlay: overlay is null');
-    return;
-  }
+
   OverlayEntry? entry;
 
   void dimiss() {
