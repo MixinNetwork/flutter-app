@@ -2,7 +2,6 @@ import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
 import '../mixin_database.dart';
-import '../util/util.dart';
 
 part 'asset_dao.g.dart';
 
