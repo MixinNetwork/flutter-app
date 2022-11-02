@@ -491,6 +491,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "mixinMessengerDesktop":
             MessageLookupByLibrary.simpleMessage("Mixin Messenger Desktop"),
         "more": MessageLookupByLibrary.simpleMessage("More"),
+        "multisigTransaction":
+            MessageLookupByLibrary.simpleMessage("Multisig Transaction"),
         "mute": MessageLookupByLibrary.simpleMessage("Mute"),
         "myMixinId": m30,
         "myStickers": MessageLookupByLibrary.simpleMessage("My Stickers"),
@@ -573,6 +575,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "resetLink": MessageLookupByLibrary.simpleMessage("Reset Link"),
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("Retry upload failed."),
+        "revokeMultisigTransaction":
+            MessageLookupByLibrary.simpleMessage("Revoke Multisig Transaction"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveAs": MessageLookupByLibrary.simpleMessage("Save as"),
         "saveToCameraRoll":

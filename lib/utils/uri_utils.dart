@@ -10,6 +10,7 @@ import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/item/transfer/transfer_page.dart';
 import '../widgets/message/send_message_dialog/send_message_dialog.dart';
+import '../widgets/payment/multisigs_payment_dialog.dart';
 import '../widgets/toast.dart';
 import '../widgets/unknown_mixin_url_dialog.dart';
 import '../widgets/user/user_dialog.dart';
@@ -121,15 +122,52 @@ Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
     final mixinResponse =
         await context.accountServer.client.accountApi.code(code);
     final data = mixinResponse.data;
+    Toast.dismiss();
     if (data is User) {
       await showUserDialog(context, data.userId);
       return true;
     } else if (data is ConversationResponse) {
       await showConversationDialog(context, data, code);
       return true;
+    } else if (data is PaymentCodeResponse) {
+      final asset =
+          await context.accountServer.checkAsset(assetId: data.assetId);
+      if (asset == null) {
+        await showUnknownMixinUrlDialog(context, uri);
+        return false;
+      }
+      await showMultisigsPaymentDialog(context,
+          item: MultisigsPaymentItem(
+            senders: [context.accountServer.userId],
+            receivers: data.receivers,
+            threshold: data.threshold,
+            asset: asset,
+            amount: data.amount,
+            state: data.status,
+            uri: uri,
+          ));
+      return true;
+    } else if (data is MultisigsResponse) {
+      debugPrint('PaymentCodeResponse: ${data.toJson()}');
+      final asset =
+          await context.accountServer.checkAsset(assetId: data.assetId);
+      if (asset == null) {
+        await showUnknownMixinUrlDialog(context, uri);
+        return false;
+      }
+      await showMultisigsPaymentDialog(context,
+          item: Multi2MultiItem(
+            senders: data.senders,
+            receivers: data.receivers,
+            threshold: data.threshold,
+            asset: asset,
+            amount: data.amount,
+            state: data.state,
+            action: data.action,
+            uri: uri,
+          ));
+      return true;
     }
-
-    Toast.dismiss();
     await showUnknownMixinUrlDialog(context, uri);
     return false;
   } catch (error) {

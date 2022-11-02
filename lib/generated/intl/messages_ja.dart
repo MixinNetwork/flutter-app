@@ -429,6 +429,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "mixinMessengerDesktop":
             MessageLookupByLibrary.simpleMessage("Mixin デスクトップ"),
         "more": MessageLookupByLibrary.simpleMessage("もっとみる"),
+        "multisigTransaction":
+            MessageLookupByLibrary.simpleMessage("マルチシグトランザクション"),
         "myMixinId": m30,
         "myStickers": MessageLookupByLibrary.simpleMessage("マイスタンプ"),
         "na": MessageLookupByLibrary.simpleMessage("なし"),
@@ -501,6 +503,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "resetLink": MessageLookupByLibrary.simpleMessage("リンクを取り消す"),
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("アップロードの再試行に失敗しました。"),
+        "revokeMultisigTransaction":
+            MessageLookupByLibrary.simpleMessage("マルチシグトランザクションを取り消す"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
         "saveAs": MessageLookupByLibrary.simpleMessage("名前をつけて保存"),
         "saveToCameraRoll": MessageLookupByLibrary.simpleMessage("カメラロールに保存する"),

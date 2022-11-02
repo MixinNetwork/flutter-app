@@ -2440,6 +2440,16 @@ class Localization {
     );
   }
 
+  /// `Multisig Transaction`
+  String get multisigTransaction {
+    return Intl.message(
+      'Multisig Transaction',
+      name: 'multisigTransaction',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Mute`
   String get mute {
     return Intl.message(
@@ -3109,6 +3119,16 @@ class Localization {
     return Intl.message(
       'Retry upload failed.',
       name: 'retryUploadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Revoke Multisig Transaction`
+  String get revokeMultisigTransaction {
+    return Intl.message(
+      'Revoke Multisig Transaction',
+      name: 'revokeMultisigTransaction',
       desc: '',
       args: [],
     );
