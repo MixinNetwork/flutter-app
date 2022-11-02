@@ -121,8 +121,14 @@ class Identitie extends DataClass implements Insertable<Identitie> {
   }
 
   @override
-  int get hashCode => Object.hash(id, address, registrationId, publicKey,
-      privateKey, nextPrekeyId, timestamp);
+  int get hashCode => Object.hash(
+      id,
+      address,
+      registrationId,
+      $driftBlobEquality.hash(publicKey),
+      $driftBlobEquality.hash(privateKey),
+      nextPrekeyId,
+      timestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -130,8 +136,8 @@ class Identitie extends DataClass implements Insertable<Identitie> {
           other.id == this.id &&
           other.address == this.address &&
           other.registrationId == this.registrationId &&
-          other.publicKey == this.publicKey &&
-          other.privateKey == this.privateKey &&
+          $driftBlobEquality.equals(other.publicKey, this.publicKey) &&
+          $driftBlobEquality.equals(other.privateKey, this.privateKey) &&
           other.nextPrekeyId == this.nextPrekeyId &&
           other.timestamp == this.timestamp);
 }
@@ -445,14 +451,15 @@ class Prekey extends DataClass implements Insertable<Prekey> {
   }
 
   @override
-  int get hashCode => Object.hash(id, prekeyId, record);
+  int get hashCode =>
+      Object.hash(id, prekeyId, $driftBlobEquality.hash(record));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Prekey &&
           other.id == this.id &&
           other.prekeyId == this.prekeyId &&
-          other.record == this.record);
+          $driftBlobEquality.equals(other.record, this.record));
 }
 
 class PrekeysCompanion extends UpdateCompanion<Prekey> {
@@ -663,14 +670,15 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
   }
 
   @override
-  int get hashCode => Object.hash(id, prekeyId, record, timestamp);
+  int get hashCode =>
+      Object.hash(id, prekeyId, $driftBlobEquality.hash(record), timestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SignedPrekey &&
           other.id == this.id &&
           other.prekeyId == this.prekeyId &&
-          other.record == this.record &&
+          $driftBlobEquality.equals(other.record, this.record) &&
           other.timestamp == this.timestamp);
 }
 
@@ -922,7 +930,8 @@ class Session extends DataClass implements Insertable<Session> {
   }
 
   @override
-  int get hashCode => Object.hash(id, address, device, record, timestamp);
+  int get hashCode => Object.hash(
+      id, address, device, $driftBlobEquality.hash(record), timestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -930,7 +939,7 @@ class Session extends DataClass implements Insertable<Session> {
           other.id == this.id &&
           other.address == this.address &&
           other.device == this.device &&
-          other.record == this.record &&
+          $driftBlobEquality.equals(other.record, this.record) &&
           other.timestamp == this.timestamp);
 }
 
@@ -1186,14 +1195,15 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
   }
 
   @override
-  int get hashCode => Object.hash(groupId, senderId, record);
+  int get hashCode =>
+      Object.hash(groupId, senderId, $driftBlobEquality.hash(record));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SenderKey &&
           other.groupId == this.groupId &&
           other.senderId == this.senderId &&
-          other.record == this.record);
+          $driftBlobEquality.equals(other.record, this.record));
 }
 
 class SenderKeysCompanion extends UpdateCompanion<SenderKey> {

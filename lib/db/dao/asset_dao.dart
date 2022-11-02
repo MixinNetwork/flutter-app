@@ -32,7 +32,7 @@ extension AssetConverter on sdk.Asset {
   }
 }
 
-@DriftAccessor(tables: [Assets])
+@DriftAccessor(tables: [Assets], include: {'../moor/dao/asset.drift'})
 class AssetDao extends DatabaseAccessor<MixinDatabase> with _$AssetDaoMixin {
   AssetDao(super.db);
 

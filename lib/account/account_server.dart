@@ -20,6 +20,7 @@ import '../crypto/privacy_key_value.dart';
 import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/uuid/uuid.dart';
+import '../db/dao/asset_dao.dart';
 import '../db/dao/sticker_album_dao.dart';
 import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
@@ -1312,6 +1313,22 @@ class AccountServer {
 
   Future<void> updateAssetById({required String assetId}) =>
       database.jobDao.insertUpdateAssetJob(assetId);
+
+  Future<AssetItem?> checkAsset({required String assetId}) async {
+    final asset = await database.assetDao.findAssetById(assetId);
+    if (asset == null) {
+      try {
+        final a = (await client.assetApi.getAssetById(assetId)).data;
+        await database.assetDao.insertSdkAsset(a);
+        await checkAsset(assetId: a.chainId);
+      } catch (error, stacktrace) {
+        e('checkAsset: $error $stacktrace');
+      }
+    } else if (assetId != asset.chainId) {
+      await checkAsset(assetId: asset.chainId);
+    }
+    return database.assetDao.assetItem(assetId).getSingleOrNull();
+  }
 
   Future<void> updateFiats() async {
     final data = await client.accountApi.getFiats();

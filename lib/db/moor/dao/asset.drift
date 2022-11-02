@@ -1,0 +1,22 @@
+import '../mixin.drift';
+
+_assetItems as AssetItem:
+SELECT asset.*,
+       tempAsset.symbol AS chainSymbol,
+       tempAsset.icon_url AS chainIconUrl,
+       tempAsset.name as chainName
+FROM assets asset
+LEFT JOIN assets tempAsset ON asset.chain_id = tempAsset.asset_id
+WHERE $where
+ORDER BY $orderBy
+LIMIT $limit;
+
+assetItem as AssetItem:
+SELECT asset.*,
+       tempAsset.symbol AS chainSymbol,
+       tempAsset.icon_url AS chainIconUrl,
+       tempAsset.name as chainName
+FROM assets asset
+LEFT JOIN assets tempAsset ON asset.chain_id = tempAsset.asset_id
+WHERE asset.asset_id = :assetId
+LIMIT 1;

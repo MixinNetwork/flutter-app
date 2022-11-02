@@ -119,7 +119,7 @@ class _SnapshotDetailHeader extends HookWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 20),
-          _SymbolIconWithBorder(
+          SymbolIconWithBorder(
             symbolUrl: snapshot.symbolIconUrl ?? '',
             chainUrl: snapshot.chainIconUrl,
             size: 58,
@@ -394,8 +394,9 @@ class TransactionInfoTile extends StatelessWidget {
       );
 }
 
-class _SymbolIconWithBorder extends StatelessWidget {
-  const _SymbolIconWithBorder({
+class SymbolIconWithBorder extends StatelessWidget {
+  const SymbolIconWithBorder({
+    super.key,
     required this.symbolUrl,
     this.chainUrl,
     required this.size,

@@ -483,6 +483,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
             "Рабочий стол Mixin Messenger"),
         "more": MessageLookupByLibrary.simpleMessage("Больше"),
+        "multisigTransaction":
+            MessageLookupByLibrary.simpleMessage("Мультиподписная транзакция"),
         "mute": MessageLookupByLibrary.simpleMessage("Беззвучный"),
         "myMixinId": m30,
         "myStickers": MessageLookupByLibrary.simpleMessage("Мои стикеры"),
@@ -567,6 +569,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "resetLink": MessageLookupByLibrary.simpleMessage("Сбросить ссылку"),
         "retryUploadFailed": MessageLookupByLibrary.simpleMessage(
             "Повторная загрузка не удалась."),
+        "revokeMultisigTransaction": MessageLookupByLibrary.simpleMessage(
+            "Отозвать транзакцию с мультиподписью"),
         "save": MessageLookupByLibrary.simpleMessage("Сохранить"),
         "saveAs": MessageLookupByLibrary.simpleMessage("Сохранить как"),
         "saveToCameraRoll":

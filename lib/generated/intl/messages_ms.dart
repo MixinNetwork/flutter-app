@@ -285,6 +285,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "mixinMessengerDesktop":
             MessageLookupByLibrary.simpleMessage("Desktop Mixin Messenger"),
         "more": MessageLookupByLibrary.simpleMessage("Lebih banyak lagi"),
+        "multisigTransaction":
+            MessageLookupByLibrary.simpleMessage("Transaksi Multisig"),
         "myMixinId": m30,
         "na": MessageLookupByLibrary.simpleMessage("N/A"),
         "name": MessageLookupByLibrary.simpleMessage("Nama"),
@@ -328,6 +330,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "resendCodeIn": m37,
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("Gagal memuat naik semula."),
+        "revokeMultisigTransaction": MessageLookupByLibrary.simpleMessage(
+            "Batalkan Urus Niaga Multisig"),
         "save": MessageLookupByLibrary.simpleMessage("Jimat"),
         "sayHi": MessageLookupByLibrary.simpleMessage("Ucap hai"),
         "scamWarning": MessageLookupByLibrary.simpleMessage(

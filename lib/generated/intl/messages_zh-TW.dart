@@ -419,6 +419,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mixinMessengerDesktop":
             MessageLookupByLibrary.simpleMessage("Mixin Messenger 桌面"),
         "more": MessageLookupByLibrary.simpleMessage("更多"),
+        "multisigTransaction": MessageLookupByLibrary.simpleMessage("多重簽名交易"),
         "mute": MessageLookupByLibrary.simpleMessage("靜音"),
         "myMixinId": m30,
         "myStickers": MessageLookupByLibrary.simpleMessage("我的表情"),
@@ -488,6 +489,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reset": MessageLookupByLibrary.simpleMessage("重置"),
         "resetLink": MessageLookupByLibrary.simpleMessage("重置邀請連結"),
         "retryUploadFailed": MessageLookupByLibrary.simpleMessage("重新上傳失敗。"),
+        "revokeMultisigTransaction":
+            MessageLookupByLibrary.simpleMessage("撤銷多重簽名交易"),
         "save": MessageLookupByLibrary.simpleMessage("儲存"),
         "saveAs": MessageLookupByLibrary.simpleMessage("另存為"),
         "saveToCameraRoll": MessageLookupByLibrary.simpleMessage("儲存到相簿"),
