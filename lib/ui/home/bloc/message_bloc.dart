@@ -126,14 +126,14 @@ class MessageState extends Equatable {
       ];
 
   MessageState copyWith({
-   String? conversationId,
-   List<MessageItem>? top,
-   MessageItem? center,
-   List<MessageItem>? bottom,
-   bool? isLatest,
-   bool? isOldest,
-   String? lastReadMessageId,
-   Object? refreshKey,
+    String? conversationId,
+    List<MessageItem>? top,
+    MessageItem? center,
+    List<MessageItem>? bottom,
+    bool? isLatest,
+    bool? isOldest,
+    String? lastReadMessageId,
+    Object? refreshKey,
   }) =>
       MessageState(
         conversationId: conversationId ?? this.conversationId,
@@ -315,8 +315,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     });
 
     final isOldest = list.length < limit;
-    return state.copyWith(
-        top: [...list.reversed, ...state.top], isOldest: isOldest);
+    return state
+        .copyWith(top: [...list.reversed, ...state.top], isOldest: isOldest);
   }
 
   Future<MessageState> _after(String conversationId) async {

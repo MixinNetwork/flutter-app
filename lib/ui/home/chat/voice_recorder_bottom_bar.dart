@@ -185,7 +185,6 @@ class VoiceRecorderBarOverlayComposition extends HookWidget {
     final link = useMemoized(LayerLink.new);
     final overlay = Overlay.of(context, rootOverlay: true);
 
-
     final recorderBottomBarEntry = useRef<OverlayEntry?>(null);
 
     final voiceRecorderCubit = context.read<VoiceRecorderCubit>();
