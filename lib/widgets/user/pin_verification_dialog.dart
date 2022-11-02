@@ -239,11 +239,6 @@ class _PinInputLayoutState extends State<PinInputLayout>
   TextEditingValue? get currentTextEditingValue => _controller.value;
 
   @override
-  void insertTextPlaceholder(Size size) {
-    // ignore
-  }
-
-  @override
   void performAction(TextInputAction action) {
     // ignore
   }
@@ -254,17 +249,7 @@ class _PinInputLayoutState extends State<PinInputLayout>
   }
 
   @override
-  void removeTextPlaceholder() {
-    // ignore
-  }
-
-  @override
   void showAutocorrectionPromptRect(int start, int end) {
-    // ignore
-  }
-
-  @override
-  void showToolbar() {
     // ignore
   }
 
@@ -293,5 +278,16 @@ class _PinInputLayoutState extends State<PinInputLayout>
   @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     // ignore
+  }
+
+  @override
+  void performSelector(String selectorName) {
+    // TODO: implement performSelector
+  }
+
+  @override
+  void didChangeInputControl(
+      TextInputControl? oldControl, TextInputControl? newControl) {
+    // TODO: implement didChangeInputControl
   }
 }
