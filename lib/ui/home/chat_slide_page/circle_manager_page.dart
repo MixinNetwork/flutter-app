@@ -90,8 +90,7 @@ class CircleManagerPage extends HookWidget {
                     circleId: e.circleId,
                     selected: true,
                   ),
-                )
-                .toList(),
+                ),
           if (circles.isNotEmpty && otherCircles.isNotEmpty)
             const SizedBox(height: 10),
           if (otherCircles.isNotEmpty)
@@ -103,8 +102,7 @@ class CircleManagerPage extends HookWidget {
                     circleId: e.circleId,
                     selected: false,
                   ),
-                )
-                .toList(),
+                ),
         ],
       ),
     );

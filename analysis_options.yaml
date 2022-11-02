@@ -1,8 +1,8 @@
-include: package:very_good_analysis/analysis_options.3.0.1.yaml
+include: package:very_good_analysis/analysis_options.3.1.0.yaml
 
 analyzer:
   plugins:
-    - dart_code_metrics
+#    - dart_code_metrics
   language:
     strict-inference: false
     strict-raw-types: false
@@ -70,6 +70,10 @@ linter:
     flutter_style_todos: false
     prefer_asserts_with_message: false
     avoid_positional_boolean_parameters: false
+
+    depend_on_referenced_packages: false
+    no_leading_underscores_for_local_identifiers: false
+    use_if_null_to_convert_nulls_to_bools: false
 
 dart_code_metrics:
   rules:

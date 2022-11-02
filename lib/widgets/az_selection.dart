@@ -16,14 +16,14 @@ class AZSelection extends SingleChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) => AZRender()
     ..onSelection = onSelection
-    ..textStyle = textStyle ?? Theme.of(context).textTheme.bodyText1;
+    ..textStyle = textStyle ?? Theme.of(context).textTheme.bodyLarge;
 
   @override
   void updateRenderObject(
       BuildContext context, covariant AZRender renderObject) {
     renderObject
       ..onSelection = onSelection
-      ..textStyle = textStyle ?? Theme.of(context).textTheme.bodyText1;
+      ..textStyle = textStyle ?? Theme.of(context).textTheme.bodyLarge;
   }
 }
 

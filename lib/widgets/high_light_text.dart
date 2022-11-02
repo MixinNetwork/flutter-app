@@ -107,7 +107,7 @@ class HighlightSelectableText extends HookWidget {
       ),
       maxLines: maxLines,
       textWidthBasis: TextWidthBasis.longestLine,
-      toolbarOptions: const ToolbarOptions(),
+      contextMenuBuilder: (context, editState) => const SizedBox.shrink(),
       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
     );
   }

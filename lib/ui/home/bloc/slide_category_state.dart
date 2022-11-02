@@ -23,8 +23,8 @@ class SlideCategoryState extends Equatable {
   List<Object?> get props => [type, id];
 
   SlideCategoryState copyWith({
-    final SlideCategoryType? type,
-    final String? id,
+     SlideCategoryType? type,
+     String? id,
   }) =>
       SlideCategoryState(
         type: type ?? this.type,

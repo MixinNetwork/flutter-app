@@ -32,9 +32,9 @@ class MentionState extends Equatable {
   List<Object?> get props => [text, users, index];
 
   MentionState copyWith({
-    final String? text,
-    final List<User>? users,
-    final int? index,
+   String? text,
+   List<User>? users,
+   int? index,
   }) =>
       MentionState(
         text: text ?? this.text,

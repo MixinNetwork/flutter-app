@@ -45,8 +45,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
                       style: actionTextStyle,
                       child: e,
                     ),
-                  ))
-              .toList(),
+                  )),
           const SizedBox(width: 8),
         ],
         elevation: 0,
