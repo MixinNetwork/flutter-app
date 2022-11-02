@@ -20,8 +20,8 @@ class BlinkState extends Equatable {
       ];
 
   BlinkState copyWith({
-    final Color? color,
-    final String? messageId,
+    Color? color,
+    String? messageId,
   }) =>
       BlinkState(
         color: color ?? this.color,

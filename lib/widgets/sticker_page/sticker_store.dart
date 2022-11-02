@@ -417,17 +417,15 @@ class _StickerPage extends HookWidget {
         final tabController = DefaultTabController.of(context);
         useEffect(() {
           void listener() {
-            if (tabController == null) return;
-
             sticker.value = stickers[tabController.index];
           }
 
-          tabController?.addListener(listener);
+          tabController.addListener(listener);
 
           return () {
-            tabController?.removeListener(listener);
+            tabController.removeListener(listener);
           };
-        });
+        }, [tabController]);
 
         return AnimatedSize(
           duration: const Duration(milliseconds: 200),

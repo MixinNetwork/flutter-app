@@ -82,29 +82,25 @@ class CircleManagerPage extends HookWidget {
       body: ListView(
         children: <Widget>[
           if (circles.isNotEmpty)
-            ...circles
-                .map(
-                  (e) => _CircleManagerItem(
-                    name: e.name,
-                    count: e.count,
-                    circleId: e.circleId,
-                    selected: true,
-                  ),
-                )
-                .toList(),
+            ...circles.map(
+              (e) => _CircleManagerItem(
+                name: e.name,
+                count: e.count,
+                circleId: e.circleId,
+                selected: true,
+              ),
+            ),
           if (circles.isNotEmpty && otherCircles.isNotEmpty)
             const SizedBox(height: 10),
           if (otherCircles.isNotEmpty)
-            ...otherCircles
-                .map(
-                  (e) => _CircleManagerItem(
-                    name: e.name,
-                    count: e.count,
-                    circleId: e.circleId,
-                    selected: false,
-                  ),
-                )
-                .toList(),
+            ...otherCircles.map(
+              (e) => _CircleManagerItem(
+                name: e.name,
+                count: e.count,
+                circleId: e.circleId,
+                selected: false,
+              ),
+            ),
         ],
       ),
     );
