@@ -32,6 +32,7 @@ there are some addition library needed.
 sudo apt-get install libsqlite3-dev
 sudo apt-get install webkit2gtk-4.0
 sudo apt-get install libsdl2-dev
+sudo apt-get install libopus-dev
 ```
 
 
