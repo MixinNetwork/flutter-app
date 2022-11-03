@@ -32,6 +32,7 @@ AppDir:
     - libgtk-3-0
     - libwebkit2gtk-4.0-37
     - libsdl2-2.0-0
+    - libopus0
     exclude:
     - humanity-icon-theme
     - hicolor-icon-theme
