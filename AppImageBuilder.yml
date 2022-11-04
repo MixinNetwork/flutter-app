@@ -50,6 +50,7 @@ AppDir:
       GIO_MODULE_DIR: $APPDIR/usr/lib/x86_64-linux-gnu/gio/modules/
       # Needed by Wayland
       XDG_DATA_DIRS: $APPDIR/usr/local/share/:$APPDIR/usr/share/
+      XDG_CONFIG_DIRS: $APPDIR/etc/xdg
   test:
     fedora:
       image: appimagecrafters/tests-env:fedora-30
