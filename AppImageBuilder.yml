@@ -48,6 +48,8 @@ AppDir:
   runtime:
     env:
       GIO_MODULE_DIR: $APPDIR/usr/lib/x86_64-linux-gnu/gio/modules/
+      # Needed by Wayland
+      GDK_BACKEND: x11
   test:
     fedora:
       image: appimagecrafters/tests-env:fedora-30
