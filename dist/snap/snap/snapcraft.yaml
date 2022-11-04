@@ -30,3 +30,4 @@ parts:
       - libsdl2-2.0-0
       - libgtk-3-0
       - libwebkit2gtk-4.0-37
+      - libopus0
