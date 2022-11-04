@@ -62,7 +62,7 @@ jobs:
           path: build/mixin_desktop_amd64.deb
 
       - name: Build AppImage unsing appimage-builder
-        uses: docker://appimagecrafters/appimage-builder:1.1.0
+        uses: docker://appimagecrafters/appimage-builder:0.9.1
         with:
           entrypoint: appimage-builder
           args: --recipe ./AppImageBuilder.yml --skip-test
