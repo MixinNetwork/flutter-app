@@ -42,7 +42,7 @@ Future<T?> showMixinDialog<T>({
   required BuildContext context,
   RouteSettings? routeSettings,
   required Widget child,
-  EdgeInsets? padding,
+  EdgeInsets? padding = const EdgeInsets.all(32),
   Color? backgroundColor,
   bool barrierDismissible = true,
 }) =>

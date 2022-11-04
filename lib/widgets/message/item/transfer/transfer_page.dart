@@ -85,20 +85,22 @@ class _TransferPage extends HookWidget {
               ),
             ],
           ),
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _SnapshotDetailHeader(snapshot: snapshotItem),
-                Container(
-                  color: context.theme.divider,
-                  height: 10,
-                ),
-                _TransactionDetailInfo(
-                  snapshot: snapshotItem,
-                  opponentFullName: opponentFullName,
-                ),
-              ],
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _SnapshotDetailHeader(snapshot: snapshotItem),
+                  Container(
+                    color: context.theme.divider,
+                    height: 10,
+                  ),
+                  _TransactionDetailInfo(
+                    snapshot: snapshotItem,
+                    opponentFullName: opponentFullName,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
