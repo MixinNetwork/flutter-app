@@ -5,5 +5,5 @@ Homepage: https://mixin.one/messenger
 Package: mixin-desktop
 Maintainer: Mixin Team
 Architecture: amd64
-Depends: libgtk-3-0 (>= 3.10.0), libsdl2-2.0-0 , libwebkit2gtk-4.0-37
+Depends: libgtk-3-0 (>= 3.10.0), libsdl2-2.0-0, libwebkit2gtk-4.0-37, libopus0
 Description: Mixin messenger desktop
