@@ -290,7 +290,7 @@ class _AnimatedSendOrVoiceButton extends HookWidget {
     // start -> show voice button
     // end -> show send button
     final animationController = useAnimationController(
-      duration: const Duration(milliseconds: 200),
+      duration: Duration.zero,
       initialValue: hasInputText ? 1.0 : 0.0,
     );
 
