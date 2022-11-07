@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../utils/app_lifecycle.dart';
+import '../utils/logger.dart';
 
 class FocusHelper extends HookWidget {
   const FocusHelper({
@@ -43,10 +44,10 @@ void useDesktopLifecycleAutoFocus() {
 
 void _cleanSelection(BuildContext? context) {
   try {
-    if (context is! StatefulElement || context.widget is! EditableText) {
+    final editableText = context?.findAncestorWidgetOfExactType<EditableText>();
+    if (editableText == null) {
       return;
     }
-    final editableText = context.widget as EditableText;
 
     final controller = editableText.controller;
     final selection = controller.selection;
@@ -55,7 +56,9 @@ void _cleanSelection(BuildContext? context) {
       extentOffset: selection.baseOffset,
       isDirectional: true,
     );
-  } catch (_) {}
+  } catch (error, stacktrace) {
+    e('_cleanSelection $error $stacktrace');
+  }
 }
 
 void useEditableTextAutoCleanSelection() {
