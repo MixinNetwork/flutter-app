@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../../../utils/dp_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../interactive_decorated_box.dart';
@@ -86,49 +85,11 @@ class StickerMessageWidget extends HookWidget {
       keys: [messageAssetUrl, stickerId],
     ).data;
 
-    final assetWidth = stickerData?.assetWidth;
-    final assetHeight = stickerData?.assetHeight;
     final assetType = stickerData?.assetType;
 
-    double width;
-    double height;
-    if (assetWidth == null || assetHeight == null) {
-      height = kMaxWidth;
-      width = kMaxWidth;
-    } else if (assetWidth * 2 < dpToPx(context, 48) ||
-        assetHeight * 2 < dpToPx(context, 48)) {
-      if (assetWidth < assetHeight) {
-        if (dpToPx(context, 48) * assetHeight / assetWidth >
-            dpToPx(context, kMaxWidth)) {
-          height = kMaxWidth;
-          width = kMaxWidth * assetWidth / assetHeight;
-        } else {
-          width = 48;
-          height = assetHeight * 48 / assetWidth;
-        }
-      } else {
-        if (dpToPx(context, 48) * assetWidth / assetHeight >
-            dpToPx(context, kMaxWidth)) {
-          width = kMaxWidth;
-          height = kMaxWidth * assetHeight / assetWidth;
-        } else {
-          height = 48;
-          width = assetWidth * 48 / assetHeight;
-        }
-      }
-    } else if (assetWidth * 2 < dpToPx(context, kMaxWidth) ||
-        assetHeight * 2 > dpToPx(context, kMaxWidth)) {
-      if (assetWidth > assetHeight) {
-        width = kMaxWidth;
-        height = kMaxWidth * assetHeight / assetWidth;
-      } else {
-        height = kMaxWidth;
-        width = kMaxWidth * assetWidth / assetHeight;
-      }
-    } else {
-      width = pxToDp(context, assetWidth * 2);
-      height = pxToDp(context, assetHeight * 2);
-    }
+    const width = kMaxWidth;
+    const height = kMaxWidth;
+
     final placeholder = Container(
       width: width,
       height: height,
