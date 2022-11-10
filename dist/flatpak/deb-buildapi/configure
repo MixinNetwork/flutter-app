@@ -1,7 +1,0 @@
-#!/bin/sh
-
-if [ ! -e Makefile ]; then
-	cp "$(dirname "$0")/Makefile" Makefile
-fi
-
-exit 0
