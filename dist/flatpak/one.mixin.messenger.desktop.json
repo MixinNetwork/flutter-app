@@ -13,17 +13,11 @@
       "--socket=pulseaudio",
       "--share=network",
       "--filesystem=home",
-      "--env=PATH=/usr/bin:/app/bin"
+      "--talk-name=org.freedesktop.Notifications",
+      "--device=all",
+      "--env=PATH=/app/bin:/usr/bin",
+      "--env=LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/lib"
     ],
-    "add-extensions": {
-      "org.freedesktop.Platform.ffmpeg-full": {
-        "directory": "lib/ffmpeg",
-        "version": "21.08",
-        "add-ld-path": ".",
-        "autodownload": true,
-        "autodelete": false
-      }
-    },
     "modules": [
       {
         "name": "mixin_desktop",
@@ -40,21 +34,25 @@
           "ln -s /app/FlutterApp/mixin_desktop /app/bin/mixin_desktop",
           "mkdir -p /app/share/metainfo",
           "cp -r one.mixin.messenger.desktop.metainfo.xml /app/share/metainfo/",
-          "mkdir -p /app/share/icons/hicolor/256x256/apps",
-          "cp -r mixin_desktop.png /app/share/icons/hicolor/256x256/apps/mixin_desktop.png",
+          "mkdir -p /app/share/icons/hicolor/scalable/apps",
+          "cp -r icon.svg /app/share/icons/hicolor/scalable/apps/one.mixin.messenger.desktop.svg",
           "mkdir -p /app/share/applications",
-          "cp -r one.mixin.messenger.desktop /app/share/applications/",
+          "cp -r mixin_desktop.desktop /app/share/applications/one.mixin.messenger.desktop",
           "mkdir -p /app/share/appdata",
           "cp -r one.mixin.messenger.desktop.metainfo.xml /app/share/appdata/"
         ],
         "sources": [
           {
             "type": "file",
-            "path": "one.mixin.messenger.desktop"
+            "path": "mixin_desktop.desktop"
           },
           {
             "type": "file",
             "path": "mixin_desktop.png"
+          },
+          {
+            "type": "file",
+            "path": "icon.svg"
           },
           {
             "type": "file",
@@ -63,6 +61,20 @@
           {
             "type": "file",
             "path": "one.mixin.messenger.desktop.metainfo.xml"
+          }
+        ]
+      },
+      {
+        "name": "ogg",
+        "config-opts": [
+          "--disable-static",
+          "--disable-examples"
+        ],
+        "sources": [
+          {
+            "type": "archive",
+            "url": "https://downloads.xiph.org/releases/ogg/libogg-1.3.5.tar.gz",
+            "sha256": "0eb4b4b9420a0f51db142ba3f9c64b333f826532dc0f48c6410ae51f4799b664"
           }
         ]
       }
