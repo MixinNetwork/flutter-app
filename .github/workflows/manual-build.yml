@@ -102,14 +102,8 @@ jobs:
       - name: Build .flatpak
         uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
         with:
-          bundle: FlutterApp.flatpak
+          bundle: mixin-desktop-linux.flatpak
           manifest-path: dist/flatpak/one.mixin.messenger.desktop.json
-
-      - name: Upload .flatpak artifact to workflow
-        uses: actions/upload-artifact@v2
-        with:
-          name: Flatpak artifact
-          path: FlutterApp.flatpak
 
   build-windows:
     runs-on: windows-latest
