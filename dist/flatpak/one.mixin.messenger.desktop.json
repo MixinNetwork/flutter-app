@@ -40,7 +40,7 @@
           "ln -s /app/FlutterApp/mixin_desktop /app/bin/mixin_desktop",
           "mkdir -p /app/share/metainfo",
           "cp -r one.mixin.messenger.desktop.metainfo.xml /app/share/metainfo/",
-          "mkdir -p /app/share/icons/hicolor/scalable/apps",
+          "mkdir -p /app/share/icons/hicolor/256x256/apps",
           "cp -r mixin_desktop.png /app/share/icons/hicolor/256x256/apps/mixin_desktop.png",
           "mkdir -p /app/share/applications",
           "cp -r one.mixin.messenger.desktop /app/share/applications/",
