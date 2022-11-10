@@ -47,7 +47,7 @@
           },
           {
             "type": "file",
-            "path": "mixin-linux-portable.tar.gz"
+            "path": "mixin-desktop-linux-portable.tar.gz"
           }
         ]
       }
