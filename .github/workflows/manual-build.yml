@@ -97,6 +97,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: mixin-desktop-linux-portable-archive
+          path: dist/flatpak
 
       - name: Build .flatpak
         uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4

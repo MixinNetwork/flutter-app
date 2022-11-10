@@ -22,7 +22,7 @@
         ],
         "build-commands": [
           "mkdir -p FlutterApp",
-          "tar -xf mixin-linux-portable.tar.gz -C FlutterApp",
+          "tar -xf mixin-desktop-linux-portable.tar.gz -C FlutterApp",
           "cp -r FlutterApp /app/",
           "chmod +x /app/FlutterApp/mixin_desktop",
           "mkdir -p /app/bin",
