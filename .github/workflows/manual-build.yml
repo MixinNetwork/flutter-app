@@ -38,6 +38,15 @@ jobs:
       - name: Build APP
         run: flutter build linux
 
+      - name: Compress Flutter build
+        run: tar -C build/linux/x64/release/bundle -cvf mixin-desktop-linux-portable.tar.gz .
+
+      - name: Upload app archive for next steps
+        uses: actions/upload-artifact@v2
+        with:
+          name: mixin-desktop-linux-portable-archive
+          path: mixin-desktop-linux-portable.tar.gz
+
       - name: Prepare snap build
         run: ./dist/linux_snap_prepare.sh
 
@@ -72,6 +81,33 @@ jobs:
         with:
           name: AppImage
           path: './*.AppImage*'
+
+  build-linux-flatpak:
+    needs: build-linux
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:freedesktop-21.08
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download app archive
+        uses: actions/download-artifact@v3
+        with:
+          name: mixin-desktop-linux-portable-archive
+
+      - name: Build .flatpak
+        uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
+        with:
+          bundle: FlutterApp.flatpak
+          manifest-path: dist/flatpak/one.mixin.messenger.desktop.json
+
+      - name: Upload .flatpak artifact to workflow
+        uses: actions/upload-artifact@v2
+        with:
+          name: Flatpak artifact
+          path: FlutterApp.flatpak
 
   build-windows:
     runs-on: windows-latest

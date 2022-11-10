@@ -1,0 +1,55 @@
+{
+    "app-id": "one.mixin.messenger.desktop",
+    "runtime": "org.freedesktop.Platform",
+    "runtime-version": "21.08",
+    "sdk": "org.freedesktop.Sdk",
+    "command": "mixin_desktop",
+    "separate-locales": false,
+    "finish-args": [
+      "--share=ipc",
+      "--socket=fallback-x11",
+      "--socket=wayland",
+      "--device=dri",
+      "--socket=pulseaudio",
+      "--share=network"
+    ],
+    "modules": [
+      {
+        "name": "mixin_desktop",
+        "buildsystem": "simple",
+        "only-arches": [
+          "x86_64"
+        ],
+        "build-commands": [
+          "mkdir -p FlutterApp",
+          "tar -xf mixin-linux-portable.tar.gz -C FlutterApp",
+          "cp -r FlutterApp /app/",
+          "chmod +x /app/FlutterApp/mixin_desktop",
+          "mkdir -p /app/bin",
+          "ln -s /app/FlutterApp/mixin_desktop /app/bin/mixin_desktop",
+          "mkdir -p /app/share/metainfo",
+          "cp -r one.mixin.messenger.metainfo.xml /app/share/metainfo/",
+          "mkdir -p /app/share/icons/hicolor/scalable/apps",
+          "cp -r icon.svg /app/share/icons/hicolor/scalable/apps/one.mixin.messenger.desktop.svg",
+          "mkdir -p /app/share/applications",
+          "cp -r one.mixin.messenger.desktop /app/share/applications/",
+          "mkdir -p /app/share/appdata",
+          "cp -r one.mixin.messenger.metainfo.xml /app/share/appdata/"
+        ],
+        "sources": [
+          {
+            "type": "file",
+            "path": "one.mixin.messenger.desktop"
+          },
+          {
+            "type": "file",
+            "path": "icon.svg"
+          },
+          {
+            "type": "file",
+            "path": "mixin-linux-portable.tar.gz"
+          }
+        ]
+      }
+    ]
+  }
