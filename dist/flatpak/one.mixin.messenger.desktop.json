@@ -1,8 +1,8 @@
 {
     "app-id": "one.mixin.messenger.desktop",
-    "runtime": "org.freedesktop.Platform",
+    "runtime": "org.gnome.Platform",
     "runtime-version": "21.08",
-    "sdk": "org.freedesktop.Sdk",
+    "sdk": "org.gnome.Sdk",
     "command": "mixin_desktop",
     "separate-locales": false,
     "finish-args": [

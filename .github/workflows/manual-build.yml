@@ -87,7 +87,7 @@ jobs:
     needs: build-linux
     runs-on: ubuntu-latest
     container:
-      image: bilelmoussaoui/flatpak-github-actions:freedesktop-21.08
+      image: bilelmoussaoui/flatpak-github-actions:gnome-42
       options: --privileged
     steps:
       - name: Checkout code
