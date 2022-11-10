@@ -28,7 +28,7 @@
           "mkdir -p /app/bin",
           "ln -s /app/FlutterApp/mixin_desktop /app/bin/mixin_desktop",
           "mkdir -p /app/share/metainfo",
-          "cp -r one.mixin.messenger.metainfo.xml /app/share/metainfo/",
+          "cp -r one.mixin.messenger.desktop.metainfo.xml /app/share/metainfo/",
           "mkdir -p /app/share/icons/hicolor/scalable/apps",
           "cp -r icon.svg /app/share/icons/hicolor/scalable/apps/one.mixin.messenger.desktop.svg",
           "mkdir -p /app/share/applications",
@@ -48,6 +48,10 @@
           {
             "type": "file",
             "path": "mixin-desktop-linux-portable.tar.gz"
+          },
+          {
+            "type": "file",
+            "path": "one.mixin.messenger.desktop.metainfo.xml"
           }
         ]
       }
