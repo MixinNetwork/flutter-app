@@ -30,7 +30,7 @@
           "mkdir -p /app/share/metainfo",
           "cp -r one.mixin.messenger.desktop.metainfo.xml /app/share/metainfo/",
           "mkdir -p /app/share/icons/hicolor/scalable/apps",
-          "cp -r icon.svg /app/share/icons/hicolor/scalable/apps/one.mixin.messenger.desktop.svg",
+          "cp -r icon.svg /app/share/icons/hicolor/scalable/apps/mixin_desktop.svg",
           "mkdir -p /app/share/applications",
           "cp -r one.mixin.messenger.desktop /app/share/applications/",
           "mkdir -p /app/share/appdata",
