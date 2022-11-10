@@ -12,11 +12,15 @@
       "--device=dri",
       "--socket=pulseaudio",
       "--share=network",
-      "--filesystem=home"
+      "--filesystem=home",
+      "--env=PATH=/usr/bin:/app/bin"
     ],
-    "sdk-extensions": [
-      "org.freedesktop.Platform.ffmpeg-full"
-    ],
+    "add-extensions": {
+      "org.freedesktop.Platform.ffmpeg-full": {
+        "directory": "lib/ffmpeg",
+        "version": "21.08"
+      }
+    },
     "modules": [
       {
         "name": "mixin_desktop",
