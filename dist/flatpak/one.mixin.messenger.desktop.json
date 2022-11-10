@@ -34,7 +34,7 @@
           "mkdir -p /app/share/applications",
           "cp -r one.mixin.messenger.desktop /app/share/applications/",
           "mkdir -p /app/share/appdata",
-          "cp -r one.mixin.messenger.metainfo.xml /app/share/appdata/"
+          "cp -r one.mixin.messenger.desktop.metainfo.xml /app/share/appdata/"
         ],
         "sources": [
           {
