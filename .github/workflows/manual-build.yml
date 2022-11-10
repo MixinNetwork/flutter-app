@@ -103,6 +103,7 @@ jobs:
         uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
         with:
           bundle: mixin-desktop-linux.flatpak
+          cache-key: flatpak-builder-${{ github.sha }}
           manifest-path: dist/flatpak/one.mixin.messenger.desktop.json
 
   build-windows:
