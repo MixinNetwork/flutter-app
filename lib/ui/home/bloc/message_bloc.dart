@@ -176,6 +176,7 @@ class MessageState extends Equatable {
       );
     }
 
+    // ignore: avoid_returning_this
     return this;
   }
 }
