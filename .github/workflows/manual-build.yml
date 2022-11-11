@@ -28,7 +28,7 @@ jobs:
           sudo apt-get install -y ninja-build libgtk-3-dev
           sudo apt-get install libsdl2-dev
           sudo apt-get install webkit2gtk-4.0
-          sudo apt-get install libopus-dev
+          sudo apt-get install libopus-dev libogg-dev
           flutter doctor
 
       - run: flutter config --enable-linux-desktop
@@ -38,19 +38,14 @@ jobs:
       - name: Build APP
         run: flutter build linux
 
-      - name: Prepare snap build
-        run: ./dist/linux_snap_prepare.sh
+      - name: Compress Flutter build
+        run: tar -C build/linux/x64/release/bundle -cvf mixin-desktop-linux-portable.tar.gz .
 
-      - uses: snapcore/action-build@v1
-        id: build-snap
+      - name: Upload app archive for next steps
+        uses: actions/upload-artifact@v2
         with:
-          snapcraft-args: '--enable-experimental-extensions'
-          path: dist/snap
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: mixin-desktop-snap
-          path: ${{ steps.build-snap.outputs.snap }}
+          name: mixin-desktop-linux-portable-archive
+          path: mixin-desktop-linux-portable.tar.gz
 
       - name: Package APP
         run: ./dist/linux_deb.sh
@@ -60,6 +55,79 @@ jobs:
         with:
           name: mixin_desktop_amd64.deb.zip
           path: build/mixin_desktop_amd64.deb
+
+  build-linux-flatpak:
+    needs: build-linux
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:gnome-42
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download app archive
+        uses: actions/download-artifact@v3
+        with:
+          name: mixin-desktop-linux-portable-archive
+          path: dist/flatpak
+
+      - name: Build .flatpak
+        uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
+        with:
+          bundle: mixin-desktop-flatpak.flatpak
+          cache-key: flatpak-builder-${{ github.sha }}
+          manifest-path: dist/flatpak/one.mixin.messenger.desktop.yml
+
+  build-linux-snap:
+    needs: build-linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download app archive
+        uses: actions/download-artifact@v3
+        with:
+          name: mixin-desktop-linux-portable-archive
+
+      - name: uncompress app archive
+        run: |
+          mkdir -p build/linux/x64/release/bundle
+          tar -C build/linux/x64/release/bundle -xvf mixin-desktop-linux-portable.tar.gz
+
+      - name: Prepare snap build
+        run: ./dist/linux_snap_prepare.sh
+
+      - name: Build .snap
+        uses: snapcore/action-build@v1
+        id: build-snap
+        with:
+          snapcraft-args: '--enable-experimental-extensions'
+          path: dist/snap
+
+      - name: Upload snap
+        uses: actions/upload-artifact@v3
+        with:
+          name: mixin-desktop-snap
+          path: ${{ steps.build-snap.outputs.snap }}
+
+  build-linux-appimage:
+    needs: build-linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download app archive
+        uses: actions/download-artifact@v3
+        with:
+          name: mixin-desktop-linux-portable-archive
+
+      - name: uncompress app archive
+        run: |
+          mkdir -p build/linux/x64/release/bundle
+          tar -C build/linux/x64/release/bundle -xvf mixin-desktop-linux-portable.tar.gz
 
       - name: Build AppImage unsing appimage-builder
         uses: docker://appimagecrafters/appimage-builder:0.9.1

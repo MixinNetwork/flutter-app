@@ -1026,10 +1026,10 @@ packages:
     dependency: "direct main"
     description:
       name: ogg_opus_player
-      sha256: a3d5cde18fdc376fd322a57404cd8c8446f75f61acaf659058119a4b091c3592
+      sha256: "9d3f813d3ed39dc9bd58e599ed835ce9c06018d48c58237ee5c5ed85411aa8fb"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.0"
+    version: "0.5.1"
   open_file:
     dependency: "direct main"
     description:
