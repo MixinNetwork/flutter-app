@@ -104,7 +104,7 @@ jobs:
         with:
           bundle: mixin-desktop-linux.flatpak
           cache-key: flatpak-builder-${{ github.sha }}
-          manifest-path: dist/flatpak/one.mixin.messenger.desktop.json
+          manifest-path: dist/flatpak/one.mixin.messenger.desktop.yml
 
   build-windows:
     runs-on: windows-latest
