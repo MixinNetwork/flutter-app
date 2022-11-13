@@ -24,12 +24,11 @@ bool _isRepresentative(
     (message.userId != userId);
 
 class MessageDatetimeAndStatus extends HookWidget {
-  const MessageDatetimeAndStatus({
-    super.key,
-    this.color,
-  });
+  const MessageDatetimeAndStatus(
+      {super.key, this.color, this.hideStatus = false});
 
   final Color? color;
+  final bool hideStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +79,10 @@ class MessageDatetimeAndStatus extends HookWidget {
             dateTime: createdAt,
             color: color,
           ),
-          if (isCurrentUser && !isTranscriptPage && !isPinnedPage)
+          if (isCurrentUser &&
+              !isTranscriptPage &&
+              !isPinnedPage &&
+              !hideStatus)
             HookBuilder(builder: (context) {
               final status =
                   useMessageConverter(converter: (state) => state.status);
