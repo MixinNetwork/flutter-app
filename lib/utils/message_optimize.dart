@@ -41,7 +41,7 @@ String? messagePreviewOptimize(
   } else if (messageCategory.isData) {
     _content = '[${Localization.current.file}]';
   } else if (messageCategory.isPost) {
-    _content = _content?.postOptimizeMarkdown ?? Localization.current.post;
+    _content = trimContent?.postOptimizeMarkdown ?? Localization.current.post;
   } else if (messageCategory.isLocation) {
     _content = '[${Localization.current.location}]';
   } else if (messageCategory.isAudio) {
