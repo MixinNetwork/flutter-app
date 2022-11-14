@@ -22,7 +22,8 @@ class TransferMessage extends HookWidget {
     final assetSymbol =
         useMessageConverter(converter: (state) => state.assetSymbol ?? '');
     return MessageBubble(
-      outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
+      outerTimeAndStatusWidget:
+          const MessageDatetimeAndStatus(hideStatus: true),
       child: InteractiveDecoratedBox(
         onTap: () {
           final snapshotId = context.message.snapshotId;

@@ -123,7 +123,7 @@ SPEC CHECKSUMS:
   file_selector_macos: f1b08a781e66103e3ba279fd5d4024a2478b3af6
   flutter_app_icon_badge: 099b018a4b36109fb73874411fb4e8b5febac20e
   flutter_local_notifications: 3805ca215b2fb7f397d78b66db91f6a747af52e4
-  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  FlutterMacOS: 85f90bfb3f1703249cf1539e4dfbff31e8584698
   ogg_opus_player: 67fc56771b16586b9b2478f848e632f751400604
   package_info_plus: 02d7a575e80f194102bef286361c6c326e4c29ce
   pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
