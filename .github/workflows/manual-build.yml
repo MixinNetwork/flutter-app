@@ -79,39 +79,6 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
 
-  build-linux-flatpak:
-    needs: build-linux
-    runs-on: ubuntu-latest
-    container:
-      image: bilelmoussaoui/flatpak-github-actions:gnome-42
-      options: --privileged
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Download app archive
-        uses: actions/download-artifact@v3
-        with:
-          name: mixin-desktop-linux-portable-archive
-          path: dist/flatpak
-
-      - name: Build .flatpak
-        uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
-        with:
-          bundle: mixin-desktop-flatpak.flatpak
-          cache-key: flatpak-builder-${{ github.sha }}
-          manifest-path: dist/flatpak/one.mixin.messenger.desktop.yml
-
-      - name: Upload linux flatpak
-        uses: svenstaro/upload-release-action@v2
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: mixin-desktop-flatpak.flatpak
-          asset_name: mixin_desktop_linux_amd64.flatpak
-          tag: ${{ github.ref }}
-          overwrite: true
-
   build-linux-snap:
     needs: build-linux
     runs-on: ubuntu-latest
