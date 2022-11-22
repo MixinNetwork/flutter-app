@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -20,7 +19,6 @@ import '../../../avatar_view/avatar_view.dart';
 import '../../../image.dart';
 import '../../../interactive_decorated_box.dart';
 import '../../../menu.dart';
-import '../../../toast.dart';
 import '../../../user_selector/conversation_selector.dart';
 import '../../message.dart';
 import '../transcript_message.dart';
