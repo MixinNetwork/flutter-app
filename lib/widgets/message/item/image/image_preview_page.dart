@@ -12,6 +12,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../enum/message_category.dart';
+import '../../../../utils/copy.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
@@ -200,7 +201,7 @@ class ImagePreviewPage extends HookWidget {
       },
       actions: {
         _CopyIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => _copyUrl(context.accountServer
+          onInvoke: (Intent intent) => copyFile(context.accountServer
               .convertMessageAbsolutePath(current.value, isTranscriptPage)),
         ),
         _PreviousImageIntent: CallbackAction<Intent>(
@@ -400,7 +401,7 @@ class _Action extends StatelessWidget {
       );
     }
 
-    Future<void> copy() => _copyUrl(context.accountServer
+    Future<void> copy() => copyFile(context.accountServer
         .convertMessageAbsolutePath(message, isTranscriptPage));
 
     Future<void> download() async {
@@ -572,19 +573,6 @@ class _Item extends HookWidget {
       ),
     );
   }
-}
-
-Future<void> _copyUrl(String? filePath) async {
-  if (filePath?.isEmpty ?? true) {
-    return showToastFailed(null);
-  }
-  try {
-    await Pasteboard.writeFiles([filePath!]);
-  } catch (error) {
-    showToastFailed(error);
-    return;
-  }
-  showToastSuccessful();
 }
 
 class _CopyIntent extends Intent {
