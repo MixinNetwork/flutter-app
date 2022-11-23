@@ -34,6 +34,7 @@ import '../../utils/extension/extension.dart';
 import '../../utils/file.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
+import '../../utils/system/clipboard.dart';
 import '../avatar_view/avatar_view.dart';
 import '../interactive_decorated_box.dart';
 import '../menu.dart';
@@ -308,12 +309,22 @@ class MessageItemWidget extends HookWidget {
                             .read<MessageSelectionCubit>()
                             .selectMessage(message),
                       ),
-                    if (message.type.isText || message.type.isPost)
+                    if (message.type.isText ||
+                        message.type.isPost ||
+                        message.type.isImage)
                       ContextMenu(
                         icon: Resources.assetsImagesContextMenuCopySvg,
                         title: context.l10n.copy,
-                        onTap: () => Clipboard.setData(
-                            ClipboardData(text: message.content)),
+                        onTap: () {
+                          if (message.type.isImage) {
+                            copyFile(context.accountServer
+                                .convertMessageAbsolutePath(
+                                    message, isTranscriptPage));
+                            return;
+                          }
+                          Clipboard.setData(
+                              ClipboardData(text: message.content));
+                        },
                       ),
                     if (kPlatformIsMobile &&
                         (message.type.isImage || message.type.isVideo))

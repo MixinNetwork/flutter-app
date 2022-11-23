@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -14,12 +13,12 @@ import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/platform.dart';
+import '../../../../utils/system/clipboard.dart';
 import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
 import '../../../image.dart';
 import '../../../interactive_decorated_box.dart';
 import '../../../menu.dart';
-import '../../../toast.dart';
 import '../../../user_selector/conversation_selector.dart';
 import '../../message.dart';
 import '../transcript_message.dart';
@@ -200,7 +199,7 @@ class ImagePreviewPage extends HookWidget {
       },
       actions: {
         _CopyIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => _copyUrl(context.accountServer
+          onInvoke: (Intent intent) => copyFile(context.accountServer
               .convertMessageAbsolutePath(current.value, isTranscriptPage)),
         ),
         _PreviousImageIntent: CallbackAction<Intent>(
@@ -400,7 +399,7 @@ class _Action extends StatelessWidget {
       );
     }
 
-    Future<void> copy() => _copyUrl(context.accountServer
+    Future<void> copy() => copyFile(context.accountServer
         .convertMessageAbsolutePath(message, isTranscriptPage));
 
     Future<void> download() async {
@@ -572,19 +571,6 @@ class _Item extends HookWidget {
       ),
     );
   }
-}
-
-Future<void> _copyUrl(String? filePath) async {
-  if (filePath?.isEmpty ?? true) {
-    return showToastFailed(null);
-  }
-  try {
-    await Pasteboard.writeFiles([filePath!]);
-  } catch (error) {
-    showToastFailed(error);
-    return;
-  }
-  showToastSuccessful();
 }
 
 class _CopyIntent extends Intent {
