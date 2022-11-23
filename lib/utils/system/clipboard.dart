@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:pasteboard/pasteboard.dart';
 
+import '../../widgets/toast.dart';
 import '../file.dart';
 import '../logger.dart';
 
@@ -57,4 +58,17 @@ Future<List<File>> getClipboardFiles() async {
   }
 
   return const [];
+}
+
+Future<void> copyFile(String? filePath) async {
+  if (filePath?.isEmpty ?? true) {
+    return showToastFailed(null);
+  }
+  try {
+    await Pasteboard.writeFiles([filePath!]);
+  } catch (error) {
+    showToastFailed(error);
+    return;
+  }
+  showToastSuccessful();
 }
