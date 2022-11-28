@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../../blaze/blaze.dart';
 import '../../bloc/bloc_converter.dart';
@@ -10,11 +9,11 @@ import '../../bloc/setting_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
-import '../../utils/uri_utils.dart';
 import '../../widgets/actions/actions.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
+import '../../widgets/protocol_handler.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/window/menus.dart';
 import '../setting/setting_page.dart';
@@ -216,12 +215,8 @@ class _HomePage extends HookWidget {
               )
             : null,
         body: SafeArea(
-          child: HookBuilder(builder: (context) {
-            useProtocol((String url) {
-              windowManager.show();
-              openUri(context, url);
-            });
-            return Row(
+          child: AppProtocolHandler(
+            child: Row(
               children: [
                 TweenAnimationBuilder(
                   tween: Tween<double>(end: targetWidth),
@@ -266,8 +261,8 @@ class _HomePage extends HookWidget {
                   ),
                 ),
               ],
-            );
-          }),
+            ),
+          ),
         ),
       ),
     );

@@ -27,6 +27,7 @@ import 'utils/logger.dart';
 import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/web_view/web_view_desktop.dart';
+import 'widgets/protocol_handler.dart';
 
 Future<void> main(List<String> args) async {
   EquatableConfig.stringify = true;
@@ -73,6 +74,7 @@ Future<void> main(List<String> args) async {
   if (Platform.isWindows || Platform.isMacOS) {
     await protocolHandler.register('mixin');
   }
+  await parseAppInitialArguments(args);
 
   FlutterError.onError = (details) {
     e('FlutterError: ${details.exception} ${details.stack}');

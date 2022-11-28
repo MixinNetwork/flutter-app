@@ -6,6 +6,7 @@
 #endif
 
 #include "string"
+#include "dbus/dbus.h"
 
 #include "flutter/generated_plugin_registrant.h"
 
@@ -23,6 +24,48 @@ std::string GetIconPath() {
   std::string icon_path(g_path_get_dirname(execute_path));
   icon_path.append(icon_relative_path);
   return icon_path;
+}
+
+int send_remote_args_to_primary_instance(char **arguments) {
+  DBusError err;
+  dbus_error_init(&err);
+  auto connection = dbus_bus_get(DBUS_BUS_SESSION, &err);
+  if (dbus_error_is_set(&err)) {
+    fprintf(stderr, "Connection Error (%s)\n", err.message);
+    dbus_error_free(&err);
+  }
+  if (connection == nullptr) {
+    return -1;
+  }
+
+  dbus_uint32_t serial = 0;
+  auto msg = dbus_message_new_method_call(
+      "one.mixin.messenger",
+      "/one/mixin/messenger",
+      "one.mixin.messenger",
+      "Open");
+  DBusMessageIter args;
+  dbus_message_iter_init_append(msg, &args);
+
+  for (int i = 0; arguments[i] != nullptr; i++) {
+    if (!dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &arguments[i])) {
+      g_warning("Out Of Memory!\n");
+      return -1;
+    }
+  }
+
+  auto send = dbus_connection_send(
+      connection,
+      msg,
+      &serial);
+
+  if (!send) {
+    g_warning("Failed to send message to primary instance");
+    return -1;
+  }
+  dbus_connection_flush(connection);
+  dbus_message_unref(msg);
+  return 0;
 }
 
 }
@@ -75,6 +118,21 @@ static gboolean my_application_local_command_line(GApplication *application, gch
     return TRUE;
   }
 
+  if (g_application_get_is_remote(application)) {
+    g_warning("already running, try to open in primary instance.\n");
+    char **args = g_strdupv(*arguments + 1);
+    // send the args to primary instance by dbus
+    int result = send_remote_args_to_primary_instance(args);
+    if (result == 0) {
+      g_info("Send args to primary instance successfully");
+    } else {
+      g_warning("Failed to send args to primary instance");
+    }
+    g_strfreev(args);
+    *exit_status = 0;
+    return TRUE;
+  }
+
   g_application_activate(application);
   *exit_status = 0;
 
@@ -99,6 +157,6 @@ static void my_application_init(MyApplication *self) {}
 MyApplication *my_application_new() {
   return MY_APPLICATION(g_object_new(my_application_get_type(),
                                      "application-id", APPLICATION_ID,
-                                     "flags", G_APPLICATION_NON_UNIQUE,
+                                     "flags", G_APPLICATION_HANDLES_COMMAND_LINE,
                                      nullptr));
 }

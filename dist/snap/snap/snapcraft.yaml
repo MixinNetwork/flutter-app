@@ -8,6 +8,12 @@ confinement: strict
 base: core22
 grade: stable
 
+slots:
+  dbus-mixin:
+    interface: dbus
+    bus: session
+    name: one.mixin.messenger
+
 apps:
   mixin-desktop:
     command: mixin_desktop
@@ -21,6 +27,8 @@ apps:
       - pulseaudio
       - home
       - removable-media
+    slots:
+      - dbus-mixin
 
 parts:
   mixin-desktop:
