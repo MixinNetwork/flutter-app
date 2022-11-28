@@ -27,6 +27,8 @@ apps:
       - pulseaudio
       - home
       - removable-media
+    slots:
+      - dbus-mixin
 
 parts:
   mixin-desktop:
