@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dbus/dbus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../utils/extension/extension.dart';
@@ -10,13 +12,32 @@ import '../utils/hook.dart';
 import '../utils/logger.dart';
 import '../utils/uri_utils.dart';
 
-class AppProtocolHandler extends StatelessWidget {
+String? _initialUrl;
+
+Future<void> parseAppInitialArguments(List<String> args) async {
+  try {
+    if (Platform.isLinux) {
+      _initialUrl = args.firstOrNull;
+    } else if (Platform.isWindows || Platform.isMacOS) {
+      _initialUrl = await protocolHandler.getInitialUrl();
+    }
+  } catch (error, stacktrace) {
+    e('parseAppInitialArguments error $error $stacktrace');
+  }
+}
+
+class AppProtocolHandler extends HookWidget {
   const AppProtocolHandler({super.key, required this.child});
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    useEffect(() {
+      if (_initialUrl != null) {
+        openUri(context, _initialUrl!);
+      }
+    }, [_initialUrl]);
     if (Platform.isLinux) {
       return _LinuxAppProtocolHandler(child: child);
     } else {
@@ -25,56 +46,45 @@ class AppProtocolHandler extends StatelessWidget {
   }
 }
 
-class _LinuxAppProtocolHandler extends StatefulWidget {
+class _LinuxAppProtocolHandler extends HookWidget {
   const _LinuxAppProtocolHandler({required this.child});
 
   final Widget child;
 
   @override
-  State<_LinuxAppProtocolHandler> createState() =>
-      _LinuxAppProtocolHandlerState();
-}
-
-class _LinuxAppProtocolHandlerState extends State<_LinuxAppProtocolHandler> {
-  final client = DBusClient.session();
-  late _MixinDbusObject object;
-
-  @override
-  void initState() {
-    super.initState();
-    object = _MixinDbusObject(
-      open: (url) {
-        windowManager
-          ..show()
-          ..focus();
-        if (url != null) {
-          openUri(context, url);
+  Widget build(BuildContext context) {
+    final client = useMemoized(DBusClient.session);
+    useEffect(() {
+      final object = _MixinDbusObject(
+        open: (url) {
+          windowManager
+            ..show()
+            ..focus();
+          if (url != null) {
+            openUri(context, url);
+          }
+        },
+      );
+      scheduleMicrotask(() async {
+        final replay = await client.requestName(
+          'one.mixin.messenger',
+          flags: {DBusRequestNameFlag.replaceExisting},
+        );
+        if (replay != DBusRequestNameReply.primaryOwner) {
+          e('Failed to request name: $replay');
+          return;
         }
-      },
-    );
-    _initialize();
+        await client.registerObject(object);
+      });
+      return () {
+        client
+          ..unregisterObject(object)
+          ..releaseName('one.mixin.messenger')
+          ..close();
+      };
+    }, [client]);
+    return child;
   }
-
-  Future<void> _initialize() async {
-    final replay = await client.requestName(
-      'one.mixin.messenger',
-      flags: {DBusRequestNameFlag.replaceExisting},
-    );
-    if (replay != DBusRequestNameReply.primaryOwner) {
-      e('Failed to request name: $replay');
-      return;
-    }
-    await client.registerObject(object);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    client.unregisterObject(object);
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
 }
 
 class _MixinDbusObject extends DBusObject {
