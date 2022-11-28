@@ -65,7 +65,7 @@ class _MoreExtendedText extends HookWidget {
         final textPainter = TextPainter(
           text: overflowTextSpan,
           textDirection: TextDirection.rtl,
-          maxLines: 3,
+          maxLines: 6,
         )..layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
         final overflowTextSpanSize = textPainter.size;
 

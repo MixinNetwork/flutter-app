@@ -224,7 +224,7 @@ class _BioText extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ConstrainedBox(
         constraints: const BoxConstraints(
-          maxHeight: 74,
+          maxHeight: 120,
           minWidth: 160,
         ),
         child: SingleChildScrollView(
