@@ -119,7 +119,7 @@ static gboolean my_application_local_command_line(GApplication *application, gch
   }
 
   if (g_application_get_is_remote(application)) {
-    g_warning("Cannot run multiple instances of the same application.");
+    g_warning("already running, try to open in primary instance.\n");
     char **args = g_strdupv(*arguments + 1);
     // send the args to primary instance by dbus
     int result = send_remote_args_to_primary_instance(args);
