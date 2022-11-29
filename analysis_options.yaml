@@ -137,7 +137,6 @@ dart_code_metrics:
     #    - avoid-returning-widgets
     - avoid-unnecessary-setstate
     #    - avoid-wrapping-in-padding
-    - avoid-use-expanded-as-spacer
     - prefer-const-border-radius
     #    - prefer-extracting-callbacks
     #    - prefer-single-widget-per-file

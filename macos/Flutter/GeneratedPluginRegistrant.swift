@@ -19,7 +19,6 @@ import path_provider_macos
 import protocol_handler
 import screen_retriever
 import sqlite3_flutter_libs
-import system_clock
 import url_launcher_macos
 import window_manager
 import window_size
@@ -39,7 +38,6 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   ProtocolHandlerPlugin.register(with: registry.registrar(forPlugin: "ProtocolHandlerPlugin"))
   ScreenRetrieverPlugin.register(with: registry.registrar(forPlugin: "ScreenRetrieverPlugin"))
   Sqlite3FlutterLibsPlugin.register(with: registry.registrar(forPlugin: "Sqlite3FlutterLibsPlugin"))
-  SystemClockPlugin.register(with: registry.registrar(forPlugin: "SystemClockPlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
   WindowManagerPlugin.register(with: registry.registrar(forPlugin: "WindowManagerPlugin"))
   WindowSizePlugin.register(with: registry.registrar(forPlugin: "WindowSizePlugin"))

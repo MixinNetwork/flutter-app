@@ -13,7 +13,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   quick_breakpad
   screen_retriever
   sqlite3_flutter_libs
-  system_clock
   system_tray
   url_launcher_windows
   win_toast
@@ -23,6 +22,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   ogg_opus_player
+  system_clock
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)
