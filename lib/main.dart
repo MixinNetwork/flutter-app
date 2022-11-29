@@ -61,10 +61,6 @@ Future<void> main(List<String> args) async {
 
   unawaited(LogFileManager.init(mixinLogDirectory.path));
 
-  final storage = await HydratedStorage.build(
-    storageDirectory: mixinDocumentsDirectory,
-  );
-
   debugHighlightDeprecatedWidgets = true;
 
   unawaited(initListener());
@@ -84,11 +80,14 @@ Future<void> main(List<String> args) async {
     return true;
   };
 
-  HydratedBlocOverrides.runZoned(
-    () => runApp(const OverlaySupport.global(child: App())),
-    blocObserver: kDebugMode ? CustomBlocObserver() : null,
-    storage: storage,
+  HydratedBloc.storage = await HydratedStorage.build(
+    storageDirectory: mixinDocumentsDirectory,
   );
+  if (kDebugMode) {
+    Bloc.observer = CustomBlocObserver();
+  }
+
+  runApp(const OverlaySupport.global(child: App()));
 
   if (kPlatformIsDesktop) {
     Size? windowSize;
