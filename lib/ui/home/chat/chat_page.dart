@@ -238,17 +238,6 @@ class ChatPage extends HookWidget {
             limit: windowHeight ~/ 20,
           ),
         ),
-        Provider(
-          create: (context) => AudioMessagePlayService(
-            context.accountServer,
-            context
-                .read<ConversationCubit>()
-                .stream
-                .map((event) => event?.conversationId),
-          ),
-          dispose: (BuildContext context, AudioMessagePlayService vlcService) =>
-              vlcService.dispose(),
-        ),
         Provider.value(value: pinMessageState),
         BlocProvider.value(value: messageSelectionCubit),
       ],

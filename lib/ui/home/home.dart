@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../blaze/blaze.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../bloc/setting_cubit.dart';
+import '../../utils/audio_message_player/audio_message_service.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
@@ -200,8 +201,15 @@ class _HomePage extends HookWidget {
 
     final hasDrawer = useListenable(hasDrawerValueNotifier);
 
-    return ChangeNotifierProvider.value(
-      value: hasDrawerValueNotifier,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: hasDrawerValueNotifier),
+        Provider(
+          create: (context) => AudioMessagePlayService(context.accountServer),
+          dispose: (BuildContext context, AudioMessagePlayService service) =>
+              service.dispose(),
+        ),
+      ],
       child: Scaffold(
         backgroundColor: context.theme.primary,
         drawerEnableOpenDragGesture: false,

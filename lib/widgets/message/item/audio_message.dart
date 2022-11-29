@@ -170,42 +170,13 @@ class _AnimatedWave extends HookWidget {
     final isMe = useMessageConverter(
         converter: (state) => state.relationship == UserRelationship.me);
 
-    double getPlayingFriction() {
-      final friction =
-          (context.audioMessageService.currentPosition.inMilliseconds) /
-              duration.inMilliseconds;
-      return friction.clamp(0.0, 1.0);
-    }
-
-    final position = useState(playing ? getPlayingFriction() : 0.0);
-
-    final tickerProvider = useSingleTickerProvider();
-    final ticker = useMemoized(
-        () => tickerProvider.createTicker((elapsed) {
-              final newValue = getPlayingFriction();
-              // Avoid update too often. since there is performance issue in Flutter.
-              // https://github.com/flutter/flutter/issues/85781
-              if (newValue == 0 ||
-                  newValue == 1 ||
-                  (newValue - position.value).abs() > 0.01) {
-                position.value = newValue;
-              }
-            }),
-        [tickerProvider]);
-    useEffect(() => ticker.dispose, [ticker]);
-    useEffect(() {
-      if (playing) {
-        ticker.start();
-      } else {
-        ticker.stop();
-        position.value = 0;
-      }
-    }, [playing]);
+    final position =
+        (useAudioPlayerPosition() / duration.inMilliseconds).clamp(0.0, 1.0);
 
     return SizedBox(
       height: 12,
       child: WaveformWidget(
-        value: position.value,
+        value: playing ? position : 0,
         waveform: waveform,
         backgroundColor: isMe || read
             ? context.theme.waveformBackground

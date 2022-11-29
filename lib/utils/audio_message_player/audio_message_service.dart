@@ -15,23 +15,17 @@ import 'audio_message_player.dart';
 export 'audio_message_player.dart';
 
 class AudioMessagePlayService {
-  AudioMessagePlayService(
-    this._accountServer,
-    Stream<String?> conversationIdStream,
-  ) {
+  AudioMessagePlayService(this._accountServer) {
     _player = AudioMessagePlayer.oggOpus();
     initListen();
-    conversationIdSubscription =
-        conversationIdStream.distinct().listen((event) => _player.stop());
   }
 
   final AccountServer _accountServer;
 
   late final AudioMessagePlayer _player;
   bool _isMediaList = false;
-  StreamSubscription<String?>? conversationIdSubscription;
 
-  bool get playing => _player.isPlaying;
+  bool get playing => _player.playbackState.isPlaying;
 
   Duration get currentPosition => _player.currentPosition();
 
@@ -58,7 +52,6 @@ class AudioMessagePlayService {
   }
 
   void dispose() {
-    conversationIdSubscription?.cancel();
     _player.dispose();
   }
 
@@ -107,6 +100,14 @@ class AudioMessagePlayService {
   void stop() {
     _player.stop();
   }
+
+  void pause() {
+    _player.pause();
+  }
+
+  void resume() {
+    _player.resume();
+  }
 }
 
 bool useAudioMessagePlaying(String messageId, {bool isMediaList = false}) {
@@ -133,4 +134,63 @@ bool useAudioMessagePlaying(String messageId, {bool isMediaList = false}) {
     keys: [messageId, isMediaList, context],
   );
   return result.data ?? false;
+}
+
+PlaybackState useAudioMessagePlayerState() {
+  final context = useContext();
+
+  final result = useMemoizedStream(
+    () {
+      final ams = context.audioMessageService;
+      return ams._player.playbackStream.distinct();
+    },
+    keys: [context],
+  );
+  return result.data ?? PlaybackState.idle;
+}
+
+MessageItem? useCurrentPlayingMessage() {
+  final context = useContext();
+
+  final result = useMemoizedStream(
+    () {
+      final ams = context.audioMessageService;
+      return ams._player.currentStream.map((e) => e?.messageItem).distinct();
+    },
+    keys: [context],
+  );
+  return result.data;
+}
+
+double useAudioPlayerPosition() {
+  final context = useContext();
+  final ams = context.audioMessageService;
+  final position = useState<double>(0);
+  final isImagePlay = useValueListenable(useImagePlaying(context));
+  useEffect(() {
+    Timer? timer;
+    final subscription = ams._player.playbackStream.listen((event) {
+      timer?.cancel();
+      if (event == PlaybackState.idle || event == PlaybackState.completed) {
+        position.value = 0;
+        return;
+      }
+      if (event == PlaybackState.paused) {
+        position.value = ams.currentPosition.inMilliseconds.toDouble();
+        return;
+      }
+      // Avoid update too often. since there is performance issue in Flutter.
+      // https://github.com/flutter/flutter/issues/85781
+      timer = Timer.periodic(Duration(milliseconds: isImagePlay ? 40 : 200),
+          (timer) {
+        position.value = ams.currentPosition.inMilliseconds.toDouble();
+      });
+    });
+    return () {
+      subscription.cancel();
+      timer?.cancel();
+    };
+  }, [ams, isImagePlay]);
+
+  return position.value;
 }

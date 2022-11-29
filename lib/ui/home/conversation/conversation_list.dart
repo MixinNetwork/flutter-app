@@ -26,6 +26,7 @@ import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
 import '../bloc/slide_category_cubit.dart';
 import '../route/responsive_navigator_cubit.dart';
+import 'audio_player_bar.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
 import 'network_status.dart';
@@ -96,6 +97,10 @@ class ConversationList extends HookWidget {
     return Column(
       children: [
         const NetworkStatus(),
+        const AnimatedSize(
+          duration: Duration(milliseconds: 200),
+          child: AudioPlayerBar(),
+        ),
         Expanded(
           child: child,
         ),
@@ -299,6 +304,7 @@ class _MessageContent extends HookWidget {
   const _MessageContent({
     required this.conversation,
   });
+
   final ConversationItem conversation;
 
   @override
@@ -427,6 +433,7 @@ class _StatusRow extends StatelessWidget {
   const _StatusRow({
     required this.conversation,
   });
+
   final ConversationItem conversation;
 
   @override
