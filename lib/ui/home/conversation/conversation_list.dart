@@ -97,12 +97,10 @@ class ConversationList extends HookWidget {
     return Column(
       children: [
         const NetworkStatus(),
+        Expanded(child: child),
         const AnimatedSize(
           duration: Duration(milliseconds: 200),
           child: AudioPlayerBar(),
-        ),
-        Expanded(
-          child: child,
         ),
       ],
     );
