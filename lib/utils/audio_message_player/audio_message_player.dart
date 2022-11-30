@@ -1,5 +1,3 @@
-import 'package:equatable/equatable.dart';
-
 import '../../db/mixin_database.dart';
 import 'ogg_opus_audio_player.dart';
 
@@ -15,16 +13,15 @@ class MessageMedia {
   String get mediaPath => convertMessageAbsolutePath(messageItem);
 }
 
-abstract class PlaybackState extends Equatable {
-  bool get isCompleted;
+enum PlaybackState {
+  idle,
+  playing,
+  paused,
+  completed;
 
-  bool get isPlaying;
+  bool get isPlaying => this == PlaybackState.playing;
 
-  @override
-  List<Object> get props => [
-        isCompleted,
-        isPlaying,
-      ];
+  bool get isCompleted => this == PlaybackState.completed;
 }
 
 abstract class AudioMessagePlayer {
@@ -32,7 +29,7 @@ abstract class AudioMessagePlayer {
 
   factory AudioMessagePlayer.oggOpus() => OggOpusAudioMessagePlayer();
 
-  bool get isPlaying;
+  PlaybackState get playbackState;
 
   MessageMedia? get current;
 
@@ -43,6 +40,10 @@ abstract class AudioMessagePlayer {
   void dispose();
 
   void stop();
+
+  void pause();
+
+  void resume();
 
   void play(List<MessageMedia> media);
 

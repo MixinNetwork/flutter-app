@@ -7,18 +7,6 @@ import '../extension/extension.dart';
 import '../logger.dart';
 import 'audio_message_service.dart';
 
-class _OggOpusPlaybackState extends PlaybackState {
-  _OggOpusPlaybackState(this._state);
-
-  final PlayerState _state;
-
-  @override
-  bool get isCompleted => _state == PlayerState.ended;
-
-  @override
-  bool get isPlaying => _state == PlayerState.playing;
-}
-
 class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
   final _currentPlaying = BehaviorSubject<MessageMedia?>();
 
@@ -28,7 +16,7 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
 
   int _index = -1;
 
-  final _playbackState = BehaviorSubject.seeded(PlayerState.idle);
+  final _playbackState = BehaviorSubject.seeded(PlaybackState.idle);
 
   @override
   Stream<MessageMedia?> get currentStream => _currentPlaying.stream;
@@ -41,7 +29,7 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
   }
 
   @override
-  bool get isPlaying => _playbackState.value == PlayerState.playing;
+  PlaybackState get playbackState => _playbackState.value;
 
   @override
   MessageMedia? get current => _medias.getOrNull(_index);
@@ -63,7 +51,7 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
     if (_index >= _medias.length - 1) {
       // play ended.
       _disposeCurrentPlayer();
-      _playbackState.value = PlayerState.ended;
+      _playbackState.value = PlaybackState.completed;
       return;
     }
     if (_index < 0) {
@@ -93,18 +81,22 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
     };
     final state = player.state.value;
     if (!interceptedEventType.contains(state)) {
-      _playbackState.value = state;
+      if (state == PlayerState.paused) {
+        _playbackState.value = PlaybackState.paused;
+      } else if (state == PlayerState.playing) {
+        _playbackState.value = PlaybackState.playing;
+      }
     }
     if (state == PlayerState.ended) {
       _playNext();
     } else if (state == PlayerState.error) {
       i('play ${current?.mediaPath} failed.');
+      stop();
     }
   }
 
   @override
-  Stream<PlaybackState> get playbackStream =>
-      _playbackState.stream.distinct().map(_OggOpusPlaybackState.new);
+  Stream<PlaybackState> get playbackStream => _playbackState.stream;
 
   void _disposeCurrentPlayer() {
     _player?.state.removeListener(_handlePlayerState);
@@ -115,7 +107,24 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
   @override
   void stop() {
     _disposeCurrentPlayer();
-    _playbackState.value = PlayerState.idle;
+    _playbackState.value = PlaybackState.idle;
+  }
+
+  @override
+  void pause() {
+    _player?.pause();
+  }
+
+  @override
+  void resume() {
+    if (_player == null) {
+      e('resume failed, player is null.');
+      return;
+    }
+    assert(_playbackState.value == PlaybackState.paused,
+        'resume failed, player is not paused.');
+    _player?.play();
+    _playbackState.value = PlaybackState.playing;
   }
 
   @override
