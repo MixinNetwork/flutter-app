@@ -170,6 +170,7 @@ class _ProgressBar extends HookWidget {
       height: 3,
       child: LinearProgressIndicator(
         value: progress,
+        backgroundColor: Colors.transparent,
         valueColor: AlwaysStoppedAnimation(context.theme.accent),
       ),
     );
