@@ -80,7 +80,6 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
       PlayerState.ended,
     };
     final state = player.state.value;
-    d('player state changed: $state');
     if (!interceptedEventType.contains(state)) {
       if (state == PlayerState.paused) {
         _playbackState.value = PlaybackState.paused;

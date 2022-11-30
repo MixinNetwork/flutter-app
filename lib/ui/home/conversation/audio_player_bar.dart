@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
@@ -80,16 +81,17 @@ class AudioPlayerBar extends HookWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ConversationAvatarWidget(
-                        conversation: conversationItem,
-                        size: 32,
-                      ),
+                      _Icon(conversation: conversationItem),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
                           conversationItem?.validName ?? '',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: context.theme.text,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ],
@@ -112,6 +114,39 @@ class AudioPlayerBar extends HookWidget {
       ),
     );
   }
+}
+
+class _Icon extends StatelessWidget {
+  const _Icon({required this.conversation});
+
+  final ConversationItem? conversation;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        height: 32,
+        width: 40,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ConversationAvatarWidget(
+                conversation: conversation,
+                size: 32,
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: SvgPicture.asset(
+                Resources.assetsImagesAudioSvg,
+                color: context.theme.icon,
+                width: 16,
+                height: 16,
+              ),
+            ),
+          ],
+        ),
+      );
 }
 
 class _ProgressBar extends HookWidget {
