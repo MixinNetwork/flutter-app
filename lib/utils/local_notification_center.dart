@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:bring_window_to_front/bring_window_to_front.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -139,6 +140,10 @@ class _LocalNotificationManager extends _NotificationManager {
             (element.notification as Tuple2<Uri, int>).item1 == uri,
         orElse: () => null);
     if (notification != null) notifications.remove(notification);
+
+    if (Platform.isLinux) {
+      unawaited(bringWindowToFront());
+    }
 
     onNotificationSelected(uri);
   }

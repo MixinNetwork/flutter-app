@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:bring_window_to_front/bring_window_to_front.dart';
 import 'package:dbus/dbus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -57,9 +58,8 @@ class _LinuxAppProtocolHandler extends HookWidget {
     useEffect(() {
       final object = _MixinDbusObject(
         open: (url) {
-          windowManager
-            ..show()
-            ..focus();
+          windowManager.show();
+          bringWindowToFront();
           if (url != null) {
             openUri(context, url);
           }
