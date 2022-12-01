@@ -24,6 +24,11 @@ dependencies:
   async: ^2.8.1
   bloc: ^8.1.0
   blurhash_dart: ^1.0.2
+  bring_window_to_front:
+    git:
+      url: https://github.com/MixinNetwork/flutter-plugins.git
+      ref: 904786942d698d103ef1f27b5e9331c6a6ec8a37
+      path: packages/bring_window_to_front
   dbus: ^0.7.8
   decimal: ^2.3.0
   desktop_drop: ^0.4.0

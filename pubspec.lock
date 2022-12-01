@@ -97,6 +97,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  bring_window_to_front:
+    dependency: "direct main"
+    description:
+      path: "packages/bring_window_to_front"
+      ref: "904786942d698d103ef1f27b5e9331c6a6ec8a37"
+      resolved-ref: "904786942d698d103ef1f27b5e9331c6a6ec8a37"
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
+    version: "0.0.1"
   build:
     dependency: transitive
     description:
