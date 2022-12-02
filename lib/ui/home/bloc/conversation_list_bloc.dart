@@ -8,6 +8,7 @@ import '../../../bloc/paging/paging_bloc.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/database.dart';
 import '../../../db/mixin_database.dart';
+import '../../../utils/platform.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import 'slide_category_cubit.dart';
 
@@ -95,6 +96,10 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
 
   Future<void> _initBadge() async {
     Future<void> updateBadge(int? count) async {
+      if (!kPlatformIsDarwin) {
+        // not work on other platform.
+        return;
+      }
       if ((count ?? 0) == 0) {
         await FlutterAppIconBadge.removeBadge();
         return;
