@@ -30,7 +30,8 @@ class NotificationService {
     streamSubscriptions
       ..add(context.database.messageDao.notificationMessageStream
           .where((event) => event.type == MessageCategory.messageRecall)
-          .asyncMap((event) => dismissByMessageId(event.messageId))
+          .asyncMap((event) =>
+              dismissByMessageId(event.messageId, event.conversationId))
           .listen((event) {}))
       ..add(context.database.messageDao.notificationMessageStream
           .where((event) => event.type != MessageCategory.messageRecall)

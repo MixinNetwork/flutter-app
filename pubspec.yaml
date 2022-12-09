@@ -122,7 +122,7 @@ dependencies:
   web_socket_channel: ^2.2.0
   webview_flutter: ^3.0.4
   win32: ^3.1.2
-  win_toast: ^0.1.1
+  win_toast: ^0.3.0
   window_manager: ^0.2.8
   window_size:
     git:
@@ -211,4 +211,8 @@ msix_config:
   icons_background_color: transparent
   architecture: x64
   capabilities: 'internetClient,microphone'
-  store: true
+  store: false
+  toast_activator:
+    clsid: "94B64592-528D-48B4-B37B-C82D634F1BE7"
+    arguments: "-ToastActivated"
+    display_name: "Mixin Desktop"

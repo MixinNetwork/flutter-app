@@ -5,8 +5,10 @@ import 'package:bring_window_to_front/bring_window_to_front.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
-import 'package:win_toast/win_toast.dart' as win;
+import 'package:win_toast/win_toast.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../constants/resources.dart';
 import 'logger.dart';
@@ -24,8 +26,7 @@ class Notification {
 }
 
 abstract class _NotificationManager {
-  final StreamController<Uri> _payloadStreamController =
-      StreamController<Uri>.broadcast();
+  final _payloadStreamController = BehaviorSubject<Uri>();
   final List<Notification> notifications = [];
 
   Future<void> initialize();
@@ -41,7 +42,7 @@ abstract class _NotificationManager {
 
   Future<void> dismissByConversationId(String conversationId);
 
-  Future<void> dismissByMessageId(String messageId);
+  Future<void> dismissByMessageId(String messageId, String conversationId);
 
   Future<bool?> requestPermission();
 
@@ -161,7 +162,8 @@ class _LocalNotificationManager extends _NotificationManager {
   }
 
   @override
-  Future<void> dismissByMessageId(String messageId) async {
+  Future<void> dismissByMessageId(
+      String messageId, String conversationId) async {
     final notification = notifications.cast<Notification?>().firstWhere(
         (element) => element?.messageId == messageId,
         orElse: () => null);
@@ -175,12 +177,24 @@ class _LocalNotificationManager extends _NotificationManager {
 class _WindowsNotificationManager extends _NotificationManager {
   @override
   Future<void> initialize() async {
-    await win.WinToast.instance().initialize(
-      appName: 'Mixin',
-      productName: 'mixin_desktop',
-      companyName: 'mixin',
+    WinToast.instance().setActivatedCallback(_handleToastActivated);
+    await WinToast.instance().initialize(
+      aumId: '14801MixinLtd.MixinDesktop',
+      displayName: 'Mixin Desktop',
+      iconPath: '',
+      clsid: '94B64592-528D-48B4-B37B-C82D634F1BE7',
     );
-    await win.WinToast.instance().clear();
+  }
+
+  void _handleToastActivated(ActivatedEvent event) {
+    final params = Uri.splitQueryString(event.argument);
+    d('win toast activated: $params');
+    final uri = Uri.tryParse(params['uri'] ?? '');
+    if (uri == null) {
+      return;
+    }
+    windowManager.show(inactive: true);
+    onNotificationSelected(uri);
   }
 
   @override
@@ -192,55 +206,40 @@ class _WindowsNotificationManager extends _NotificationManager {
     required String conversationId,
     required String messageId,
   }) async {
-    final type = body == null || body.isEmpty
-        ? win.ToastType.text01
-        : win.ToastType.text02;
-    final toast = await win.WinToast.instance().showToast(
-      type: type,
-      title: title,
-      subtitle: body ?? '',
+    await WinToast.instance().showToast(
+      toast: Toast(
+        duration: ToastDuration.short,
+        launch: 'uri=$uri',
+        children: [
+          ToastChildVisual(
+            binding: ToastVisualBinding(
+              children: [
+                ToastVisualBindingChildText(text: title, id: 1),
+                ToastVisualBindingChildText(text: body ?? '', id: 2),
+              ],
+            ),
+          )
+        ],
+      ),
+      tag: messageId,
+      group: conversationId,
     );
-    if (toast == null) {
-      return;
-    }
-
-    final notificationObj = Notification(
-        conversationId: conversationId,
-        messageId: messageId,
-        notification: toast);
-    notifications.add(notificationObj);
-
-    toast.eventStream.listen((event) {
-      if (event is win.ActivatedEvent) {
-        win.WinToast.instance().bringWindowToFront();
-
-        notifications.remove(notificationObj);
-
-        onNotificationSelected(uri);
-      }
-    });
   }
 
   @override
   Future<void> dismissByConversationId(String conversationId) async {
-    notifications.removeWhere((element) {
-      if (element.conversationId == conversationId) {
-        (element.notification as win.Toast).dismiss();
-
-        return true;
-      }
-      return false;
-    });
+    await WinToast.instance().dismiss(tag: '', group: conversationId);
   }
 
   @override
-  Future<void> dismissByMessageId(String messageId) async {
-    final notificationObj = notifications.cast<Notification?>().firstWhere(
-        (element) => element?.messageId == messageId,
-        orElse: () => null);
-    if (notificationObj == null) return;
-    (notificationObj.notification as win.Toast).dismiss();
-    notifications.remove(notificationObj);
+  Future<void> dismissByMessageId(
+    String messageId,
+    String conversationId,
+  ) async {
+    await WinToast.instance().dismiss(
+      tag: messageId,
+      group: conversationId,
+    );
   }
 
   @override
@@ -302,8 +301,9 @@ Future<void> showNotification({
 Future<void> dismissByConversationId(String conversationId) async =>
     await _notificationManager?.dismissByConversationId(conversationId);
 
-Future<void> dismissByMessageId(String messageId) async =>
-    await _notificationManager?.dismissByMessageId(messageId);
+Future<void> dismissByMessageId(
+        String messageId, String conversationId) async =>
+    await _notificationManager?.dismissByMessageId(messageId, conversationId);
 
 Future<bool?> requestNotificationPermission() async =>
     _notificationManager?.requestPermission();
