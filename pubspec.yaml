@@ -214,4 +214,4 @@ msix_config:
   toast_activator:
     clsid: "94B64592-528D-48B4-B37B-C82D634F1BE7"
     arguments: "-ToastActivated"
-    display_name: "Mixin Desktop"
+    display_name: "Mixin Messenger"

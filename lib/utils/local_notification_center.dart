@@ -180,7 +180,7 @@ class _WindowsNotificationManager extends _NotificationManager {
     WinToast.instance().setActivatedCallback(_handleToastActivated);
     await WinToast.instance().initialize(
       aumId: '14801MixinLtd.MixinDesktop',
-      displayName: 'Mixin Desktop',
+      displayName: 'Mixin Messenger',
       iconPath: '',
       clsid: '94B64592-528D-48B4-B37B-C82D634F1BE7',
     );
