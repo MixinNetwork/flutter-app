@@ -211,6 +211,7 @@ msix_config:
   icons_background_color: transparent
   architecture: x64
   capabilities: 'internetClient,microphone'
+  store: true
   toast_activator:
     clsid: "94B64592-528D-48B4-B37B-C82D634F1BE7"
     arguments: "-ToastActivated"
