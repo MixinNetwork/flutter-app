@@ -91,6 +91,7 @@ class EditProfilePage extends HookWidget {
               _Item(
                 title: context.l10n.biography,
                 controller: bioTextEditingController,
+                maxLength: 140,
               ),
               const SizedBox(height: 32),
               BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
@@ -132,11 +133,13 @@ class _Item extends StatelessWidget {
     required this.title,
     required this.controller,
     this.readOnly = false,
+    this.maxLength,
   });
 
   final String title;
   final TextEditingController controller;
   final bool readOnly;
+  final int? maxLength;
 
   @override
   Widget build(BuildContext context) {
@@ -184,6 +187,7 @@ class _Item extends StatelessWidget {
             ),
             minLines: 1,
             maxLines: 10,
+            maxLength: maxLength,
             decoration: InputDecoration(
               isDense: true,
               border: outlineInputBorder,
@@ -196,6 +200,10 @@ class _Item extends StatelessWidget {
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 20,
                 vertical: 24,
+              ),
+              counterStyle: TextStyle(
+                fontSize: 14,
+                color: context.theme.secondaryText,
               ),
             ),
           ),
