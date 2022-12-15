@@ -134,7 +134,7 @@ class AccountServer {
         final deviceTime =
             e.requestOptions.extra[kRequestTimeStampKey] as DateTime?;
         final difference = time.difference(deviceTime ?? DateTime.now());
-        if (difference.inMinutes.abs() > 5) {
+        if (difference.abs() >= const Duration(minutes: 5)) {
           _notifyBlazeWaitSyncTime();
           return;
         }
