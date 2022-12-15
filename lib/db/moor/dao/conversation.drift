@@ -108,10 +108,17 @@ SELECT conversation.conversation_id AS conversationId,
     owner.identity_number AS ownerIdentityNumber,
     owner.full_name AS fullName,
     owner.avatar_url AS avatarUrl,
-    owner.is_verified AS isVerified, owner.app_id AS appId
+    owner.is_verified AS isVerified,
+    owner.app_id AS appId,
+    message.status AS messageStatus,
+    message.content AS content,
+    message.category AS contentType,
+    message.user_id AS senderId,
+    lastMessageSender.full_name AS senderFullName
 FROM conversations conversation
          INNER JOIN users owner ON owner.user_id = conversation.owner_id
          LEFT JOIN messages message ON conversation.last_message_id = message.message_id
+         LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = message.user_id
 WHERE ((conversation.category = 'GROUP' AND conversation.name LIKE '%' || :query || '%' ESCAPE '\') OR
          (conversation.category = 'CONTACT' AND
            (owner.full_name LIKE '%' || :query || '%' ESCAPE '\' OR
@@ -139,10 +146,17 @@ SELECT conversation.conversation_id AS conversationId,
     owner.identity_number AS ownerIdentityNumber,
     owner.full_name AS fullName,
     owner.avatar_url AS avatarUrl,
-    owner.is_verified AS isVerified, owner.app_id AS appId
+    owner.is_verified AS isVerified,
+    owner.app_id AS appId,
+    message.status AS messageStatus,
+    message.content AS content,
+    message.category AS contentType,
+    message.user_id AS senderId,
+    lastMessageSender.full_name AS senderFullName
 FROM conversations conversation
          INNER JOIN users owner ON owner.user_id = conversation.owner_id
          LEFT JOIN messages message ON conversation.last_message_id = message.message_id
+         LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = message.user_id
          LEFT JOIN circle_conversations circleConversation ON conversation.conversation_id = circleConversation.conversation_id
 WHERE ((conversation.category = 'GROUP' AND conversation.name LIKE '%' || :query || '%' ESCAPE '\') OR
             (conversation.category = 'CONTACT' AND

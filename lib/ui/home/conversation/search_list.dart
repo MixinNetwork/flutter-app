@@ -222,6 +222,7 @@ class SearchList extends HookWidget {
                     avatarUrl: user.avatarUrl,
                   ),
                   name: user.fullName ?? '?',
+                  description: context.l10n.contactMixinId(user.identityNumber),
                   trailing: VerifiedOrBotWidget(
                     verified: user.isVerified,
                     isBot: user.appId != null,
@@ -262,34 +263,60 @@ class SearchList extends HookWidget {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 final conversation = conversations[index];
-                return ConversationMenuWrapper(
-                  searchConversation: conversation,
-                  child: SearchItem(
-                    avatar: ConversationAvatarWidget(
-                      conversationId: conversation.conversationId,
-                      fullName: conversation.validName,
-                      groupIconUrl: conversation.groupIconUrl,
-                      avatarUrl: conversation.avatarUrl,
-                      category: conversation.category,
-                      size: ConversationPage.conversationItemAvatarSize,
-                      userId: conversation.ownerId,
-                    ),
-                    name: conversation.validName,
-                    trailing: VerifiedOrBotWidget(
-                      verified: conversation.isVerified,
-                      isBot: conversation.appId != null,
-                    ),
-                    keyword: keyword,
-                    onTap: () async {
-                      await ConversationCubit.selectConversation(
-                        context,
-                        conversation.conversationId,
-                      );
+                return HookBuilder(builder: (context) {
+                  final description = useMemoizedFuture(() async {
+                    final mentionCache = context.read<MentionCache>();
 
-                      _clear(context);
-                    },
-                  ),
-                );
+                    return messagePreviewOptimize(
+                        conversation.messageStatus,
+                        conversation.contentType,
+                        mentionCache.replaceMention(
+                          conversation.content,
+                          await mentionCache
+                              .checkMentionCache({conversation.content}),
+                        ),
+                        conversation.senderId == context.accountServer.userId,
+                        conversation.isGroupConversation,
+                        conversation.senderFullName);
+                  }, null, keys: [
+                    conversation.messageStatus,
+                    conversation.contentType,
+                    conversation.content,
+                    conversation.senderId,
+                    conversation.isGroupConversation,
+                    conversation.senderFullName
+                  ]).data;
+
+                  return ConversationMenuWrapper(
+                    searchConversation: conversation,
+                    child: SearchItem(
+                      avatar: ConversationAvatarWidget(
+                        conversationId: conversation.conversationId,
+                        fullName: conversation.validName,
+                        groupIconUrl: conversation.groupIconUrl,
+                        avatarUrl: conversation.avatarUrl,
+                        category: conversation.category,
+                        size: ConversationPage.conversationItemAvatarSize,
+                        userId: conversation.ownerId,
+                      ),
+                      name: conversation.validName,
+                      description: description,
+                      trailing: VerifiedOrBotWidget(
+                        verified: conversation.isVerified,
+                        isBot: conversation.appId != null,
+                      ),
+                      keyword: keyword,
+                      onTap: () async {
+                        await ConversationCubit.selectConversation(
+                          context,
+                          conversation.conversationId,
+                        );
+
+                        _clear(context);
+                      },
+                    ),
+                  );
+                });
               },
               childCount: type.value == _ShowMoreType.conversation
                   ? conversations.length

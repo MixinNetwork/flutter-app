@@ -110,7 +110,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     }
     return db.fuzzySearchUser(
         id, username.trim().escapeSql(), identityNumber.trim().escapeSql(),
-        (users, conversation) {
+        (users) {
       switch (category?.type) {
         case null:
         case SlideCategoryType.chats:
