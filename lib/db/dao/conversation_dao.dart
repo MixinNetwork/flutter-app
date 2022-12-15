@@ -293,14 +293,14 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       return db.fuzzySearchConversationInCircle(
         query.trim().escapeSql(),
         category!.id,
-        (conversation, owner, message, cc) => filterUnseen
+        (conversation, owner, message, _, cc) => filterUnseen
             ? conversation.unseenMessageCount.isBiggerThanValue(0)
             : ignoreWhere,
-        (conversation, owner, message, cc) => Limit(limit, null),
+        (conversation, owner, message, _, cc) => Limit(limit, null),
       );
     }
     return db.fuzzySearchConversation(query.trim().escapeSql(),
-        (Conversations conversation, Users owner, Messages message) {
+        (Conversations conversation, Users owner, Messages message, _) {
       Expression<bool> predicate = ignoreWhere;
       switch (category?.type) {
         case SlideCategoryType.contacts:
@@ -324,7 +324,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       }
       return predicate;
     },
-        (Conversations conversation, Users owner, Messages message) =>
+        (Conversations conversation, Users owner, Messages message, _) =>
             Limit(limit, null));
   }
 

@@ -31,8 +31,7 @@ SELECT user_id FROM users WHERE user_id IN :userIds;
 fuzzySearchUser:
 SELECT users.*
 FROM users
-         LEFT JOIN conversations ON conversations.owner_id = user_id
-WHERE conversations.status IS NULL AND user_id != :id AND relationship = 'FRIEND' AND
+WHERE user_id != :id AND relationship = 'FRIEND' AND
     (full_name LIKE '%' || :username || '%' ESCAPE '\'
         OR identity_number LIKE '%' || :identityNumber || '%' ESCAPE '\') AND $filter
 ORDER BY full_name = :username COLLATE nocase
