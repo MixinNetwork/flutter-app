@@ -286,8 +286,7 @@ Future<MixinDatabase> connectToDatabase(
   bool fromMainIsolate = false,
 }) async {
   final backgroundPortName = 'one_mixin_drift_background_$identityNumber';
-  final foregroundPortName =
-      'one_mixin_drift_foreground_${identityNumber}_$readCount';
+  final foregroundPortName = 'one_mixin_drift_foreground_$identityNumber';
 
   final writeIsolate = await _crateIsolate(
     identityNumber,
@@ -326,6 +325,7 @@ Future<DriftIsolate> _crateIsolate(
   final existingIsolate = IsolateNameServer.lookupPortByName(name);
 
   if (existingIsolate == null) {
+    assert(fromMainIsolate, 'Isolate should be created from main isolate');
     final dbFile =
         File(p.join(mixinDocumentsDirectory.path, identityNumber, 'mixin.db'));
     final receivePort = ReceivePort();
