@@ -325,6 +325,7 @@ Future<DriftIsolate> _crateIsolate(
   final existingIsolate = IsolateNameServer.lookupPortByName(name);
 
   if (existingIsolate == null) {
+    assert(fromMainIsolate, 'Isolate should be created from main isolate');
     final dbFile =
         File(p.join(mixinDocumentsDirectory.path, identityNumber, 'mixin.db'));
     final receivePort = ReceivePort();
