@@ -286,8 +286,7 @@ Future<MixinDatabase> connectToDatabase(
   bool fromMainIsolate = false,
 }) async {
   final backgroundPortName = 'one_mixin_drift_background_$identityNumber';
-  final foregroundPortName =
-      'one_mixin_drift_foreground_${identityNumber}_$readCount';
+  final foregroundPortName = 'one_mixin_drift_foreground_$identityNumber';
 
   final writeIsolate = await _crateIsolate(
     identityNumber,
