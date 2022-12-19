@@ -266,7 +266,7 @@ class Blaze {
 
   Future<void> _sendGZip(BlazeMessage msg) async {
     channel?.sink.add(
-        GZipEncoder().encode(Uint8List.fromList((jsonEncode(msg)).codeUnits)));
+        GZipEncoder().encode(Uint8List.fromList(jsonEncode(msg).codeUnits)));
   }
 
   void _disconnect([bool resetConnectedState = true]) {
