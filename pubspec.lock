@@ -142,10 +142,10 @@ packages:
     dependency: "direct dev"
     description:
       name: build_runner
-      sha256: "6f48c61a9dcd2c3a9e62d3dcdab1ba382790e2f31026288cbabe55d6003c9c23"
+      sha256: b0a8a7b8a76c493e85f1b84bffa0588859a06197863dba8c9036b15581fd9727
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.2"
+    version: "2.3.3"
   build_runner_core:
     dependency: transitive
     description:
@@ -625,10 +625,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_portal
-      sha256: bf644efff5882dbac65fc0a47b8d9ad57432f54b49fe36ede593fe880ccab91b
+      sha256: ec5bd9a0aa7efeea5a95abf54ce91039c812fe6cc8e30d499eaa45ce387e482e
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.1.3"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -939,10 +939,10 @@ packages:
     dependency: "direct main"
     description:
       name: lottie
-      sha256: "9e3c5424008322b83b45c9adcfa4c96dc3e9306c7e82c0ba22fa189a40980cb5"
+      sha256: "0205213a2fc9ac016f07de3354663594236c76cece1572c683e79822d6fcfdb4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.1.0"
   map:
     dependency: "direct main"
     description:
@@ -971,10 +971,10 @@ packages:
     dependency: transitive
     description:
       name: matcher
-      sha256: "16db949ceee371e9b99d22f88fa3a73c4e59fd0afed0bd25fc336eb76c198b72"
+      sha256: c94db23593b89766cda57aab9ac311e3616cf87c6fa4e9749df032f66f30dcb8
       url: "https://pub.dev"
     source: hosted
-    version: "0.12.13"
+    version: "0.12.14"
   material_color_utilities:
     dependency: transitive
     description:
@@ -1003,10 +1003,10 @@ packages:
     dependency: "direct main"
     description:
       name: mixin_bot_sdk_dart
-      sha256: "7c8f34bd0b28476f15d4a8e91114129e586f576a68358979b689f900b1e31137"
+      sha256: "2276f0f2e3f36603e19d913813fc93a8e67791497e608fc8adde770817b13da4"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.7"
+    version: "0.3.8"
   msix:
     dependency: "direct dev"
     description:
@@ -1101,10 +1101,10 @@ packages:
     dependency: "direct main"
     description:
       name: path
-      sha256: db9d4f58c908a4ba5953fcee2ae317c94889433e5024c27ce74a37f94267945b
+      sha256: "8829d8a55c13fc0e37127c29fedf290c102f4e40ae94ada574091fe0ff96c917"
       url: "https://pub.dev"
     source: hosted
-    version: "1.8.2"
+    version: "1.8.3"
   path_drawing:
     dependency: transitive
     description:
@@ -1466,10 +1466,10 @@ packages:
     dependency: transitive
     description:
       name: string_scanner
-      sha256: "862015c5db1f3f3c4ea3b94dc2490363a84262994b88902315ed74be1155612f"
+      sha256: "556692adab6cfa87322a115640c11f13cb77b3f076ddcc5d6ae3c20242bedcde"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.2.0"
   synchronized:
     dependency: transitive
     description:
@@ -1505,10 +1505,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: c9aba3b3dbfe8878845dfab5fa096eb8de7b62231baeeb1cea8e3ee81ca8c6d8
+      sha256: c9282698e2982b6c3817037554e52f99d4daba493e8028f8112a83d68ccd0b12
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.15"
+    version: "0.4.17"
   timezone:
     dependency: transitive
     description:
@@ -1714,34 +1714,34 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter
-      sha256: "392c1d83b70fe2495de3ea2c84531268d5b8de2de3f01086a53334d8b6030a88"
+      sha256: "85557bf0a4a7cee48566da129a8f7ab3d62b6b6e8c4b9e49be977b2fe8f66c60"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.4"
+    version: "4.0.0"
   webview_flutter_android:
     dependency: transitive
     description:
       name: webview_flutter_android
-      sha256: "8b3b2450e98876c70bfcead876d9390573b34b9418c19e28168b74f6cb252dbd"
+      sha256: ec9596e4fa02b1cd4e1bedf3f9a58eba9d8e406c2228f124af70aa905ee9a174
       url: "https://pub.dev"
     source: hosted
-    version: "2.10.4"
+    version: "3.0.0"
   webview_flutter_platform_interface:
     dependency: transitive
     description:
       name: webview_flutter_platform_interface
-      sha256: "812165e4e34ca677bdfbfa58c01e33b27fd03ab5fa75b70832d4b7d4ca1fa8cf"
+      sha256: "461c4b749048761f8677f529e0841e634e987bd2251c83a9d9b066216818fc7c"
       url: "https://pub.dev"
     source: hosted
-    version: "1.9.5"
+    version: "2.0.0"
   webview_flutter_wkwebview:
     dependency: transitive
     description:
       name: webview_flutter_wkwebview
-      sha256: a5364369c758892aa487cbf59ea41d9edd10f9d9baf06a94e80f1bd1b4c7bbc0
+      sha256: a78acba1a64f831c482faedb8c82447fa2ee5858bb36d44310915efde5f1e965
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.5"
+    version: "3.0.0"
   win32:
     dependency: "direct main"
     description:
@@ -1816,5 +1816,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.18.0 <4.0.0"
+  dart: ">=2.19.0-0 <4.0.0"
   flutter: ">=3.3.0"
