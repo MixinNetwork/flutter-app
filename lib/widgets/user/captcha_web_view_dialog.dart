@@ -50,7 +50,7 @@ class CaptchaWebViewDialog extends HookWidget {
           captcha.value = CaptchaType.hCaptcha;
           _loadCaptcha(controller, CaptchaType.hCaptcha);
         } else {
-          controller.loadHtmlString('about:blank');
+          controller.loadRequest(Uri.parse('about:blank'));
           showToastFailed(
             ToastError(context.l10n.recaptchaTimeout),
           );
