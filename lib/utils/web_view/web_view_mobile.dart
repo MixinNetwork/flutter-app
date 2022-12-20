@@ -16,7 +16,7 @@ import '../logger.dart';
 import 'web_view_interface.dart';
 
 class MobileMixinWebView extends MixinWebView {
-  final _cookieManager = CookieManager();
+  final _cookieManager = WebViewCookieManager();
 
   @override
   void clearWebViewCacheAndCookies() {
@@ -68,7 +68,12 @@ class _FullWindowInAppWebViewPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final webViewController = useState<WebViewController?>(null);
+    final webViewController = useMemoized(() {
+      final controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..loadRequest(Uri.parse(initialUrl));
+      return controller;
+    });
     return Material(
       color: context.theme.background,
       child: SafeArea(
@@ -76,13 +81,7 @@ class _FullWindowInAppWebViewPage extends HookWidget {
           fit: StackFit.expand,
           children: [
             Center(
-              child: WebView(
-                initialUrl: initialUrl,
-                javascriptMode: JavascriptMode.unrestricted,
-                onWebViewCreated: (WebViewController controller) {
-                  webViewController.value = controller;
-                },
-              ),
+              child: WebViewWidget(controller: webViewController),
             ),
             Positioned(
               top: 8,
@@ -90,7 +89,7 @@ class _FullWindowInAppWebViewPage extends HookWidget {
               width: 88,
               height: 32,
               child: _WebControl(
-                webViewController: webViewController.value,
+                webViewController: webViewController,
                 app: app,
                 appCardData: appCardData,
               ),

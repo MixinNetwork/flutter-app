@@ -32,8 +32,8 @@ class CaptchaWebViewDialog extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final timer = useRef<Timer?>(null);
-    final controllerRef = useRef<WebViewController?>(null);
     final captcha = useRef<CaptchaType>(CaptchaType.gCaptcha);
+
     useEffect(
       () => () {
         timer.value?.cancel();
@@ -41,56 +41,59 @@ class CaptchaWebViewDialog extends HookWidget {
       [],
     );
 
-    void loadFallback() {
-      if (captcha.value == CaptchaType.gCaptcha) {
-        captcha.value = CaptchaType.hCaptcha;
-        _loadCaptcha(controllerRef.value!, CaptchaType.hCaptcha);
-      } else {
-        controllerRef.value!.loadUrl('about:blank');
-        showToastFailed(
-          ToastError(context.l10n.recaptchaTimeout),
-        );
-        Navigator.pop(context);
+    final controller = useMemoized(() {
+      final controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted);
+
+      void loadFallback() {
+        if (captcha.value == CaptchaType.gCaptcha) {
+          captcha.value = CaptchaType.hCaptcha;
+          _loadCaptcha(controller, CaptchaType.hCaptcha);
+        } else {
+          controller.loadHtmlString('about:blank');
+          showToastFailed(
+            ToastError(context.l10n.recaptchaTimeout),
+          );
+          Navigator.pop(context);
+        }
       }
-    }
+
+      controller
+        ..setNavigationDelegate(NavigationDelegate(
+          onPageStarted: (url) {
+            timer.value = Timer(const Duration(seconds: 15), loadFallback);
+          },
+          onPageFinished: (url) {
+            timer.value?.cancel();
+            timer.value = null;
+          },
+        ))
+        ..addJavaScriptChannel(
+          'MixinContextTokenCallback',
+          onMessageReceived: (message) {
+            timer.value?.cancel();
+            timer.value = null;
+            final token = message.message;
+            Navigator.pop(context, [captcha.value, token]);
+          },
+        )
+        ..addJavaScriptChannel(
+          'MixinContextErrorCallback',
+          onMessageReceived: (message) {
+            e('on captcha error: ${message.message}');
+            timer.value?.cancel();
+            timer.value = null;
+            loadFallback();
+          },
+        );
+      _loadCaptcha(controller, captcha.value);
+      return controller;
+    });
 
     return SizedBox(
       width: 400,
       height: 520,
-      child: WebView(
-        javascriptMode: JavascriptMode.unrestricted,
-        onWebViewCreated: (controller) {
-          controllerRef.value = controller;
-          _loadCaptcha(controller, captcha.value);
-        },
-        onPageStarted: (url) {
-          timer.value = Timer(const Duration(seconds: 15), loadFallback);
-        },
-        onPageFinished: (url) {
-          timer.value?.cancel();
-          timer.value = null;
-        },
-        javascriptChannels: {
-          JavascriptChannel(
-            name: 'MixinContextTokenCallback',
-            onMessageReceived: (message) {
-              timer.value?.cancel();
-              timer.value = null;
-              final token = message.message;
-              Navigator.pop(context, [captcha.value, token]);
-            },
-          ),
-          JavascriptChannel(
-            name: 'MixinContextErrorCallback',
-            onMessageReceived: (message) {
-              e('on captcha error: ${message.message}');
-              timer.value?.cancel();
-              timer.value = null;
-              loadFallback();
-            },
-          ),
-        },
-      ),
+      child: WebViewWidget(controller: controller),
     );
   }
 }
