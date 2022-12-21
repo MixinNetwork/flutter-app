@@ -3,7 +3,7 @@ import '../mixin.drift';
 participantsAvatar:
 SELECT user.*
 FROM participants AS participant
-         left join users user on participant.user_id = user.user_id
+         INNER JOIN users user on participant.user_id = user.user_id
 WHERE participant.conversation_id = :conversationId
 ORDER BY participant.created_at ASC
 LIMIT 4;
