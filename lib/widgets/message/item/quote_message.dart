@@ -56,17 +56,15 @@ class QuoteMessage extends HookWidget {
     final iconColor = context.theme.secondaryText;
 
     try {
-      late dynamic quote;
+      dynamic quote;
       if (message != null) {
         quote = message;
         inputMode = true;
       } else if (decodeMap != null) {
         quote = mapToQuoteMessage(decodeMap as Map<String, dynamic>);
-      } else {
-        throw ArgumentError('quote message not found');
       }
       final type = quote?.type as String?;
-      if (type == null || type.isIllegalMessageCategory) {
+      if (content != null && (type == null || type.isIllegalMessageCategory)) {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
@@ -80,8 +78,8 @@ class QuoteMessage extends HookWidget {
           onTap: () {},
         );
       }
-      final userId = quote.userId as String?;
-      final userFullName = quote.userFullName as String?;
+      final userId = quote?.userId as String?;
+      final userFullName = quote?.userFullName as String?;
       if (type.isText) {
         return HookBuilder(
           builder: (context) {
@@ -107,8 +105,8 @@ class QuoteMessage extends HookWidget {
           },
         );
       }
-      final thumbImage = quote.thumbImage as String?;
-      if (type.isImage) {
+      final thumbImage = quote?.thumbImage as String?;
+      if (type != null && type.isImage) {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
