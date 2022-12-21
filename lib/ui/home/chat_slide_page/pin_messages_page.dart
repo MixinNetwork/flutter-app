@@ -12,7 +12,6 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
-import '../../../widgets/clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/audio_message.dart';
@@ -48,9 +47,7 @@ class PinMessagesPage extends HookWidget {
 
     final list = (rawList ?? []).reversed.toList();
 
-    final scrollController = useMemoized(
-      ScrollerScrollController.new,
-    );
+    final scrollController = useMemoized(ScrollController.new);
     final listKey = useMemoized(() => GlobalKey(debugLabel: 'PinMessagesPage'));
 
     return MultiProvider(

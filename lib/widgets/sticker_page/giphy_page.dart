@@ -11,7 +11,6 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
 import '../cache_image.dart';
-import '../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../interactive_decorated_box.dart';
 import '../search_text_field.dart';
 
@@ -130,7 +129,7 @@ class _GifGridView extends HookWidget {
     // initial load.
     useMemoized(load);
 
-    final controller = useMemoized(ScrollerScrollController.new);
+    final controller = useMemoized(ScrollController.new);
     useEffect(() {
       void onScroll() {
         if (controller.position.pixels == controller.position.maxScrollExtent) {

@@ -44,6 +44,7 @@ class _ImageByBlurHash extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final image = useState<ui.Image?>(null);
+    final isMounted = useIsMounted();
     useEffect(() {
       ui.decodeImageFromPixels(
         blurHash.toImage(width, height).getBytes(),
@@ -51,6 +52,9 @@ class _ImageByBlurHash extends HookWidget {
         height,
         ui.PixelFormat.rgba8888,
         (result) {
+          if (!isMounted()) {
+            return;
+          }
           image.value = result;
         },
       );
