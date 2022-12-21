@@ -54,8 +54,7 @@ class MessageBubble extends HookWidget {
       converter: (message) => message.expireIn != null && message.expireIn! > 0,
     );
 
-    final quoteId =
-        useMessageConverter(converter: (state) => state.quoteId);
+    final quoteId = useMessageConverter(converter: (state) => state.quoteId);
 
     final hasQuoteMessage = quoteId?.isNotEmpty ?? false;
 
@@ -87,8 +86,8 @@ class MessageBubble extends HookWidget {
             _MessageBubbleNipPadding(
               currentUser: isCurrentUser,
               child: HookBuilder(builder: (context) {
-                final quoteContent =
-                    useMessageConverter(converter: (state) => state.quoteContent);
+                final quoteContent = useMessageConverter(
+                    converter: (state) => state.quoteContent);
                 final messageId =
                     useMessageConverter(converter: (state) => state.messageId);
 
