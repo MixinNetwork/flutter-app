@@ -13020,7 +13020,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<User> participantsAvatar(String conversationId) {
     return customSelect(
-        'SELECT user.* FROM participants AS participant LEFT JOIN users AS user ON participant.user_id = user.user_id WHERE participant.conversation_id = ?1 ORDER BY participant.created_at ASC LIMIT 4',
+        'SELECT user.* FROM participants AS participant INNER JOIN users AS user ON participant.user_id = user.user_id WHERE participant.conversation_id = ?1 ORDER BY participant.created_at ASC LIMIT 4',
         variables: [
           Variable<String>(conversationId)
         ],
