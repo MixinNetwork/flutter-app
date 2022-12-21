@@ -52,5 +52,4 @@ abstract class AudioMessagePlayer {
   Duration currentPosition();
 
   void setPlaybackSpeed(double speed);
-
 }
