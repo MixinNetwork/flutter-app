@@ -36,11 +36,8 @@ class _ScrollerScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void pointerScroll(double delta) {
-    assert(delta != 0.0);
     final double scrollerScale;
-    if (defaultTargetPlatform == TargetPlatform.windows) {
-      scrollerScale = window.devicePixelRatio * 2;
-    } else if (defaultTargetPlatform == TargetPlatform.linux) {
+    if (defaultTargetPlatform == TargetPlatform.linux) {
       scrollerScale = window.devicePixelRatio;
     } else {
       scrollerScale = 1;
