@@ -1034,11 +1034,12 @@ packages:
   ogg_opus_player:
     dependency: "direct main"
     description:
-      name: ogg_opus_player
-      sha256: "9e9e6603a3372c40a2cd9519b064b6d91790fd8f01f6e4f2da07afd05e8d9c2a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.0"
+      path: "packages/ogg_opus_player"
+      ref: b1c8d5435bccea1ca792bb6f67f078b9abdd5ba6
+      resolved-ref: b1c8d5435bccea1ca792bb6f67f078b9abdd5ba6
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
+    version: "0.6.1"
   open_file:
     dependency: "direct main"
     description:

@@ -62,7 +62,7 @@ class AudioPlayerBar extends HookWidget {
             height: 48,
             child: Row(
               children: [
-                const SizedBox(width: 6),
+                const _PlaybackSpeedButton(),
                 ActionButton(
                   name: state.isPlaying
                       ? Resources.assetsImagesPlayerPauseSvg
@@ -105,13 +105,41 @@ class AudioPlayerBar extends HookWidget {
                     context.audioMessageService.stop();
                   },
                 ),
-                const SizedBox(width: 6),
               ],
             ),
           ),
           _ProgressBar(message: message),
         ],
       ),
+    );
+  }
+}
+
+class _PlaybackSpeedButton extends HookWidget {
+  const _PlaybackSpeedButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final speed = useAudioPlayerSpeed();
+    return ActionButton(
+      child: Center(
+        child: Text(
+          '2X',
+          style: TextStyle(
+            color:
+                speed == 2 ? context.theme.accent : context.theme.secondaryText,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      onTap: () {
+        if (speed == 1) {
+          context.audioMessageService.setPlaySpeed(2);
+        } else {
+          context.audioMessageService.setPlaySpeed(1);
+        }
+      },
     );
   }
 }
