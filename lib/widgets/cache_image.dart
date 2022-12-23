@@ -1,11 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:extended_image/extended_image.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http_client_helper/http_client_helper.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -37,20 +39,18 @@ class CacheImage extends StatelessWidget {
   final BoxFit fit;
 
   @override
-  Widget build(BuildContext context) => ExtendedImage(
-        image: MixinExtendedNetworkImageProvider(src, controller: controller),
+  Widget build(BuildContext context) => Image(
+        image: MixinNetworkImageProvider(src, controller: controller),
         width: width,
         height: height,
         fit: fit,
-        loadStateChanged: (state) {
-          switch (state.extendedImageLoadState) {
-            case LoadState.loading:
-              return placeholder?.call();
-            case LoadState.completed:
-              return null;
-            case LoadState.failed:
-              return errorWidget?.call();
+        errorBuilder: (context, error, stackTrace) =>
+            errorWidget?.call() ?? const SizedBox.shrink(),
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
           }
+          return placeholder?.call() ?? const SizedBox.shrink();
         },
       );
 }
@@ -321,15 +321,12 @@ class MixinFileImage extends FileImage {
   int get hashCode => Object.hash(super.hashCode, _lastModified);
 }
 
+const String cacheImageFolderName = 'cacheimage';
+
 @immutable
-class MixinExtendedNetworkImageProvider
-    extends ImageProvider<ExtendedNetworkImageProvider>
-    with ExtendedImageProvider<ExtendedNetworkImageProvider>
-    implements ExtendedNetworkImageProvider {
-  /// Creates an object that fetches the image at the given URL.
-  ///
-  /// The arguments must not be null.
-  MixinExtendedNetworkImageProvider(
+class MixinNetworkImageProvider
+    extends ImageProvider<MixinNetworkImageProvider> {
+  const MixinNetworkImageProvider(
     this.url, {
     this.scale = 1.0,
     this.headers,
@@ -339,7 +336,6 @@ class MixinExtendedNetworkImageProvider
     this.timeRetry = const Duration(milliseconds: 100),
     this.cacheKey,
     this.printError = true,
-    this.cacheRawData = false,
     this.cancelToken,
     this.imageCacheName,
     this.cacheMaxAge,
@@ -349,64 +345,45 @@ class MixinExtendedNetworkImageProvider
   final ValueNotifier<bool>? controller;
 
   /// The name of [ImageCache], you can define custom [ImageCache] to store this provider.
-  @override
   final String? imageCacheName;
 
-  /// Whether cache raw data if you need to get raw data directly.
-  /// For example, we need raw image data to edit,
-  /// but [ui.Image.toByteData()] is very slow. So we cache the image
-  /// data here.
-  @override
-  final bool cacheRawData;
-
   /// The time limit to request image
-  @override
   final Duration? timeLimit;
 
   /// The time to retry to request
-  @override
   final int retries;
 
   /// The time duration to retry to request
-  @override
   final Duration timeRetry;
 
   /// Whether cache image to local
-  @override
   final bool cache;
 
   /// The URL from which the image will be fetched.
-  @override
   final String url;
 
   /// The scale to place in the [ImageInfo] object of the image.
-  @override
   final double scale;
 
   /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network.
-  @override
   final Map<String, String>? headers;
 
   /// The token to cancel network request
-  @override
   final CancellationToken? cancelToken;
 
   /// Custom cache key
-  @override
   final String? cacheKey;
 
   /// print error
-  @override
   final bool printError;
 
   /// The max duration to cahce image.
   /// After this time the cache is expired and the image is reloaded.
-  @override
   final Duration? cacheMaxAge;
 
   @override
   ImageStreamCompleter loadBuffer(
-    ExtendedNetworkImageProvider key,
+    MixinNetworkImageProvider key,
     DecoderBufferCallback decode,
   ) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
@@ -420,19 +397,29 @@ class MixinExtendedNetworkImageProvider
       chunkEvents: chunkEvents.stream,
       informationCollector: () => <DiagnosticsNode>[
         DiagnosticsProperty<ImageProvider>('Image provider', this),
-        DiagnosticsProperty<ExtendedNetworkImageProvider>('Image key', key),
+        DiagnosticsProperty<MixinNetworkImageProvider>('Image key', key),
       ],
       controller: controller,
     );
   }
 
+  /// Override this method, so that you can handle raw image data,
+  /// for example, compress
+  Future<ui.Codec> instantiateImageCodec(
+    Uint8List data,
+    DecoderBufferCallback decode,
+  ) async {
+    final buffer = await ui.ImmutableBuffer.fromUint8List(data);
+    return decode(buffer);
+  }
+
   @override
-  Future<ExtendedNetworkImageProvider> obtainKey(
+  Future<MixinNetworkImageProvider> obtainKey(
           ImageConfiguration configuration) =>
-      SynchronousFuture<MixinExtendedNetworkImageProvider>(this);
+      SynchronousFuture<MixinNetworkImageProvider>(this);
 
   Future<ui.Codec> _loadAsync(
-    ExtendedNetworkImageProvider key,
+    MixinNetworkImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
     DecoderBufferCallback decode,
   ) async {
@@ -465,7 +452,7 @@ class MixinExtendedNetworkImageProvider
 
     //Failed to load
     if (result == null) {
-      //result = await ui.instantiateImageCodec(kTransparentImage);
+      // result = await ui.instantiateImageCodec(kTransparentImage);
       return Future<ui.Codec>.error(StateError('Failed to load $url.'));
     }
 
@@ -474,7 +461,7 @@ class MixinExtendedNetworkImageProvider
 
   /// Get the image from cache folder.
   Future<Uint8List?> _loadCache(
-    ExtendedNetworkImageProvider key,
+    MixinNetworkImageProvider key,
     StreamController<ImageChunkEvent>? chunkEvents,
     String md5Key,
   ) async {
@@ -489,6 +476,7 @@ class MixinExtendedNetworkImageProvider
           final now = DateTime.now();
           final fs = cacheFlie.statSync();
           if (now.subtract(key.cacheMaxAge!).isAfter(fs.changed)) {
+            i('cache expired, reload. $url');
             cacheFlie.deleteSync(recursive: true);
           } else {
             data = await cacheFlie.readAsBytes();
@@ -502,6 +490,7 @@ class MixinExtendedNetworkImageProvider
     else {
       await _cacheImagesDirectory.create();
     }
+
     // load from network
     if (data == null) {
       data = await _loadNetwork(
@@ -519,7 +508,7 @@ class MixinExtendedNetworkImageProvider
 
   /// Get the image from network.
   Future<Uint8List?> _loadNetwork(
-    ExtendedNetworkImageProvider key,
+    MixinNetworkImageProvider key,
     StreamController<ImageChunkEvent>? chunkEvents,
   ) async {
     try {
@@ -597,10 +586,9 @@ class MixinExtendedNetworkImageProvider
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MixinExtendedNetworkImageProvider &&
+    return other is MixinNetworkImageProvider &&
         url == other.url &&
         scale == other.scale &&
-        cacheRawData == other.cacheRawData &&
         timeLimit == other.timeLimit &&
         cancelToken == other.cancelToken &&
         timeRetry == other.timeRetry &&
@@ -618,7 +606,6 @@ class MixinExtendedNetworkImageProvider
         controller,
         url,
         scale,
-        cacheRawData,
         timeLimit,
         cancelToken,
         timeRetry,
@@ -633,8 +620,6 @@ class MixinExtendedNetworkImageProvider
   @override
   String toString() =>
       'MixinExtendedNetworkImageProvider("$url", scale: $scale)';
-
-  @override
 
   /// Get network image data from cached
   Future<Uint8List?> getNetworkImageData({
@@ -678,6 +663,9 @@ class MixinExtendedNetworkImageProvider
 /// download image from network to cache. return the cache image file.
 /// [url] is the image url.
 Future<Uint8List?> downloadImage(String url) async {
-  final imageProvider = MixinExtendedNetworkImageProvider(url);
+  final imageProvider = MixinNetworkImageProvider(url);
   return imageProvider._loadCache(imageProvider, null, keyToMd5(url));
 }
+
+/// get md5 from key
+String keyToMd5(String key) => md5.convert(utf8.encode(key)).toString();
