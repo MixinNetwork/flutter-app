@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:cross_file/cross_file.dart';
-import 'package:extended_image/extended_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
@@ -17,17 +17,16 @@ extension FileExtension on File {
         name: basename(path),
       );
 
-  Future<String?> encodeBlurHash() async {
-    final image = await _getSmallImage(path);
-    return BlurHash.encode(image).hash;
-  }
+  Future<String?> encodeBlurHash() async =>
+      compute<String, String?>(_encodeBlurHash, path);
 }
 
-Future<Image> _getSmallImage(String path) async {
+Future<String?> _encodeBlurHash(String path) async {
   final fileImage = FileImage(File(path));
-  final imageProvider = ExtendedResizeImage(fileImage, maxBytes: 128 << 10);
-  final image = await imageProvider.toImage();
-  return Image.fromBytes(image.width, image.height, (await image.toBytes())!);
+  final image = await fileImage.toImage();
+  final data =
+      Image.fromBytes(image.width, image.height, (await image.toBytes())!);
+  return BlurHash.encode(data).hash;
 }
 
 extension XFileExtension on XFile {
