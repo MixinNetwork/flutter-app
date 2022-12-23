@@ -14372,7 +14372,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
     return customSelect(
-        'SELECT COUNT(1) AS unseen_conversation_count, SUM(CASE WHEN(CASE WHEN conversation.category = \'GROUP\' THEN conversation.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(conversation.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_muted_conversation_count FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql} LIMIT 1',
+        'SELECT COUNT(1) AS unseen_conversation_count, IFNULL(SUM(CASE WHEN(CASE WHEN conversation.category = \'GROUP\' THEN conversation.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(conversation.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END), 0) AS unseen_muted_conversation_count FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql} LIMIT 1',
         variables: [
           ...generatedwhere.introducedVariables
         ],
