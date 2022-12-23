@@ -12740,7 +12740,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationCircleItem> allCircles() {
     return customSelect(
-        'SELECT ci.circle_id, ci.name, ci.created_at, ci.ordered_at, COUNT(c.conversation_id) AS count, SUM(CASE WHEN IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_conversation_count, SUM(CASE WHEN(CASE WHEN c.category = \'GROUP\' THEN c.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_muted_conversation_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id LEFT JOIN users AS owner ON owner.user_id = c.owner_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        'SELECT ci.circle_id, ci.name, ci.created_at, ci.ordered_at, COUNT(c.conversation_id) AS count, IFNULL(SUM(CASE WHEN IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END), 0) AS unseen_conversation_count, IFNULL(SUM(CASE WHEN(CASE WHEN c.category = \'GROUP\' THEN c.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END), 0) AS unseen_muted_conversation_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id LEFT JOIN users AS owner ON owner.user_id = c.owner_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
         variables: [],
         readsFrom: {
           circles,
@@ -14339,7 +14339,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<int?> baseUnseenMessageCount(BaseUnseenMessageCount$where where) {
+  Selectable<int> baseUnseenMessageCount(BaseUnseenMessageCount$where where) {
     var $arrayStartIndex = 1;
     final generatedwhere = $write(
         where(
@@ -14350,7 +14350,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
     return customSelect(
-        'SELECT SUM(unseen_message_count) AS _c0 FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id WHERE ${generatedwhere.sql} LIMIT 1',
+        'SELECT IFNULL(SUM(unseen_message_count), 0) AS _c0 FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id WHERE ${generatedwhere.sql} LIMIT 1',
         variables: [
           ...generatedwhere.introducedVariables
         ],
@@ -14359,7 +14359,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           users,
           circleConversations,
           ...generatedwhere.watchedTables,
-        }).map((QueryRow row) => row.readNullable<int>('_c0'));
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<BaseUnseenConversationCountResult> baseUnseenConversationCount(

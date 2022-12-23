@@ -80,9 +80,10 @@ LIMIT $limit;
 
 
 baseUnseenMessageCount:
-SELECT SUM(unseen_message_count) FROM conversations conversation
-  INNER JOIN users owner ON owner.user_id = conversation.owner_id
-  LEFT JOIN circle_conversations circleConversation ON conversation.conversation_id = circleConversation.conversation_id
+SELECT IFNULL(SUM(unseen_message_count), 0)
+FROM conversations conversation
+    INNER JOIN users owner ON owner.user_id = conversation.owner_id
+    LEFT JOIN circle_conversations circleConversation ON conversation.conversation_id = circleConversation.conversation_id
 WHERE $where
 LIMIT 1;
 
