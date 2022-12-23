@@ -491,11 +491,6 @@ class MixinNetworkImageProvider
       await _cacheImagesDirectory.create();
     }
 
-    assert(() {
-      d('image cache hit: $url');
-      return true;
-    }());
-
     // load from network
     if (data == null) {
       data = await _loadNetwork(
