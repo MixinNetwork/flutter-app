@@ -7,6 +7,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import '../../db/mixin_database.dart';
 import '../../utils/color_utils.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/hook.dart';
 import '../cache_image.dart';
 
 class ConversationAvatarWidget extends HookWidget {
@@ -43,24 +44,22 @@ class ConversationAvatarWidget extends HookWidget {
 
     final _userId = conversation?.ownerId ?? userId;
 
-    final list = useStream(
-          useMemoized(
-            () {
-              if (_category == ConversationCategory.group) {
-                return context.database.participantDao
-                    .participantsAvatar(_conversationId!)
-                    .watchThrottle(const Duration(minutes: 6))
-                    .map((event) => _category == ConversationCategory.contact
-                        ? event
-                            .where((element) =>
-                                element.relationship != UserRelationship.me)
-                            .toList()
-                        : event);
-              }
-              return const Stream<List<User>>.empty();
-            },
-            [_conversationId, _category],
-          ),
+    final list = useMemoizedStream(
+          () {
+            if (_category == ConversationCategory.group) {
+              return context.database.participantDao
+                  .participantsAvatar(_conversationId!)
+                  .watchThrottle(const Duration(minutes: 6))
+                  .map((event) => _category == ConversationCategory.contact
+                      ? event
+                          .where((element) =>
+                              element.relationship != UserRelationship.me)
+                          .toList()
+                      : event);
+            }
+            return const Stream<List<User>>.empty();
+          },
+          keys: [_conversationId, _category],
           initialData: <User>[],
         ).data ??
         <User>[];

@@ -37,11 +37,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         db.conversations,
         db.users,
       ]))
-      .asyncMap((event) => allUnseenIgnoreMuteMessageCount().getSingle())
-      .where((event) => event != null)
-      .map((event) => event!);
+      .asyncMap((event) => allUnseenIgnoreMuteMessageCount().getSingle());
 
-  Selectable<int?> allUnseenIgnoreMuteMessageCount() =>
+  Selectable<int> allUnseenIgnoreMuteMessageCount() =>
       db.baseUnseenMessageCount(
         (conversation, owner, __) {
           final now = const MillisDateConverter().toSql(DateTime.now());

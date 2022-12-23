@@ -6,6 +6,7 @@ import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/chat/chat_page.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/hook.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';
@@ -116,11 +117,11 @@ class _UserProfileLoader extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final accountServer = context.accountServer;
-    final user = useStream(useMemoized(
+    final user = useMemoizedStream(
         () => accountServer.database.userDao
             .userById(userId)
             .watchSingleOrNullThrottle(kDefaultThrottleDuration),
-        [userId])).data;
+        keys: [userId]).data;
 
     useEffect(() {
       if (refreshUser) {

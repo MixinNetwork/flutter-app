@@ -6,6 +6,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
@@ -32,12 +33,12 @@ class GroupParticipantsPage extends HookWidget {
       return conversationId!;
     });
 
-    final participants = useStream(useMemoized(() {
+    final participants = useMemoizedStream(() {
           final dao = context.database.participantDao;
           return dao
               .groupParticipantsByConversationId(conversationId)
               .watchThrottle(kSlowThrottleDuration);
-        }, [conversationId])).data ??
+        }, keys: [conversationId]).data ??
         const <ParticipantUser>[];
 
     // Find current user info to check if we have group manage permission.
