@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../utils/extension/extension.dart';
+import '../../../../utils/hook.dart';
 import '../../../../widgets/avatar_view/avatar_view.dart';
 import '../../../../widgets/buttons.dart';
 import '../../../../widgets/dialog.dart';
@@ -31,13 +32,14 @@ class _GroupInviteByLinkDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final conversation = useStream(
-      useMemoized(() {
+    final conversation = useMemoizedStream(
+      () {
         context.accountServer.refreshConversation(conversationId);
         return context.database.conversationDao
             .conversationById(conversationId)
             .watchSingleOrNullThrottle(kDefaultThrottleDuration);
-      }, [conversationId]),
+      },
+      keys: [conversationId],
     ).data;
     return Material(
         color: context.theme.popUp,

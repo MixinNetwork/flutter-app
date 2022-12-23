@@ -927,13 +927,11 @@ class _JumpMentionButton extends HookWidget {
       converter: (state) => state?.conversationId,
       when: (conversationId) => conversationId != null,
     )!;
-    final messageMentions = useStream(
-          useMemoized(
-              () => context.database.messageMentionDao
-                  .unreadMentionMessageByConversationId(conversationId)
-                  .watchThrottle(kSlowThrottleDuration),
-              [conversationId]),
-        ).data ??
+    final messageMentions = useMemoizedStream(
+            () => context.database.messageMentionDao
+                .unreadMentionMessageByConversationId(conversationId)
+                .watchThrottle(kSlowThrottleDuration),
+            keys: [conversationId]).data ??
         [];
 
     if (messageMentions.isEmpty) return const SizedBox();
