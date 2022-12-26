@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:cross_file/cross_file.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
@@ -17,8 +16,7 @@ extension FileExtension on File {
         name: basename(path),
       );
 
-  Future<String?> encodeBlurHash() async =>
-      compute<String, String?>(_encodeBlurHash, path);
+  Future<String?> encodeBlurHash() async => _encodeBlurHash(path);
 }
 
 Future<String?> _encodeBlurHash(String path) async {
