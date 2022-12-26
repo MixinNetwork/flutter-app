@@ -51,7 +51,7 @@ dependencies:
   flutter_app_icon_badge: ^2.0.0
   flutter_bloc: ^8.1.1
   flutter_hooks: ^0.18.5+1
-  flutter_local_notifications: ^12.0.4
+  flutter_local_notifications: ^13.0.0
   flutter_localizations:
     sdk: flutter
   flutter_portal: ^1.1.3
