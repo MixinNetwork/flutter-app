@@ -70,19 +70,23 @@ class MessagePost extends StatelessWidget {
                     constraints: BoxConstraints(
                       minHeight: showStatus ? 48 : 0,
                       minWidth: 128,
+                      maxHeight: 400,
                     ),
-                    child: IntrinsicWidth(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: MarkdownGenerator(
-                              data: postContent,
-                              styleConfig: buildMarkdownStyleConfig(
-                                context,
-                                context.brightnessValue != 0,
-                              ),
-                            ).widgets ??
-                            [],
+                    child: SingleChildScrollView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      child: IntrinsicWidth(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: MarkdownGenerator(
+                                data: postContent,
+                                styleConfig: buildMarkdownStyleConfig(
+                                  context,
+                                  context.brightnessValue != 0,
+                                ),
+                              ).widgets ??
+                              [],
+                        ),
                       ),
                     ),
                   );
