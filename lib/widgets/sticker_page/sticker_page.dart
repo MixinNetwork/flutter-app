@@ -11,7 +11,6 @@ import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../automatic_keep_alive_client_widget.dart';
-import '../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../hover_overlay.dart';
 import '../interactive_decorated_box.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
@@ -140,7 +139,7 @@ class _StickerAlbumPage extends HookWidget {
       bloc: stickerCubit,
       converter: (state) => state.length,
     );
-    final controller = useMemoized(ScrollerScrollController.new);
+    final controller = useMemoized(ScrollController.new);
     return BlocProvider.value(
       value: stickerCubit,
       child: GridView.builder(

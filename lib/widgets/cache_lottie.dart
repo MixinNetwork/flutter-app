@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:extended_image/extended_image.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lottie/lottie.dart';
 import 'package:lottie/src/providers/load_image.dart';
@@ -59,7 +58,7 @@ class CachedNetworkLottie extends LottieProvider {
     if (imageProvider == null) {
       final imageUrl = jsonUri
           .resolve(p.url.join(lottieImage.dirName, lottieImage.fileName));
-      imageProvider = MixinExtendedNetworkImageProvider(imageUrl.toString());
+      imageProvider = MixinNetworkImageProvider(imageUrl.toString());
     }
 
     return loadImage(composition, lottieImage, imageProvider);

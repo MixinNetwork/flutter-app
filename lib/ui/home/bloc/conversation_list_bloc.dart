@@ -95,16 +95,16 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   }
 
   Future<void> _initBadge() async {
-    Future<void> updateBadge(int? count) async {
+    Future<void> updateBadge(int count) async {
       if (!kPlatformIsDarwin) {
         // not work on other platform.
         return;
       }
-      if ((count ?? 0) == 0) {
+      if (count == 0) {
         await FlutterAppIconBadge.removeBadge();
         return;
       }
-      await FlutterAppIconBadge.updateBadge(count!);
+      await FlutterAppIconBadge.updateBadge(count);
     }
 
     final count = await database.conversationDao

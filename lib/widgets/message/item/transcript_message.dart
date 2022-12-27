@@ -19,7 +19,6 @@ import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/message_optimize.dart';
 import '../../action_button.dart';
-import '../../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../../dialog.dart';
 import '../../interactive_decorated_box.dart';
 import '../message.dart';
@@ -243,7 +242,7 @@ class TranscriptPage extends HookWidget {
       ),
     );
 
-    final scrollController = useMemoized(ScrollerScrollController.new);
+    final scrollController = useMemoized(ScrollController.new);
     final listKey =
         useMemoized(() => GlobalKey(debugLabel: 'transcript_list_key'));
 

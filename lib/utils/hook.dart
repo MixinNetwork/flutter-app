@@ -10,29 +10,40 @@ import 'package:tuple/tuple.dart';
 
 import '../app.dart';
 import 'app_lifecycle.dart';
+import 'logger.dart';
 
 AsyncSnapshot<T> useMemoizedFuture<T>(
   Future<T> Function() futureBuilder,
   T initialData, {
   List<Object?> keys = const <Object>[],
 }) =>
-    useFuture(
+    _logSnapshotError(useFuture(
       useMemoized(
         futureBuilder,
         keys,
       ),
       initialData: initialData,
-    );
+    ));
 
 AsyncSnapshot<T> useMemoizedStream<T>(
   Stream<T> Function() valueBuilder, {
   T? initialData,
   List<Object?> keys = const <Object>[],
 }) =>
-    useStream<T>(
+    _logSnapshotError(useStream<T>(
       useMemoized<Stream<T>>(valueBuilder, keys),
       initialData: initialData,
-    );
+    ));
+
+AsyncSnapshot<T> _logSnapshotError<T>(AsyncSnapshot<T> snapshot) {
+  useEffect(() {
+    if (snapshot.hasError) {
+      e('error: ${snapshot.error} ${snapshot.stackTrace}'
+          '\n call stack: \n ${StackTrace.current}');
+    }
+  }, [snapshot]);
+  return snapshot;
+}
 
 T useBloc<T extends BlocBase>(
   T Function() valueBuilder, {

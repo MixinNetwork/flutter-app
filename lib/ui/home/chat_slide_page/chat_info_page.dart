@@ -55,10 +55,11 @@ class ChatInfoPage extends HookWidget {
       accountServer.refreshUsers([userId], force: true);
     }, [userId]);
 
-    final announcement = useStream<String?>(
-      useMemoized(() => context.database.conversationDao
+    final announcement = useMemoizedStream<String?>(
+      () => context.database.conversationDao
           .announcement(conversationId)
-          .watchSingleThrottle(kVerySlowThrottleDuration)),
+          .watchSingleThrottle(kVerySlowThrottleDuration),
+      keys: [conversationId],
     ).data;
     if (!conversation.isLoaded) return const SizedBox();
 

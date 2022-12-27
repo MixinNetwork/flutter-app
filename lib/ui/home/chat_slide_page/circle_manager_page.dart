@@ -8,6 +8,7 @@ import '../../../db/mixin_database.dart';
 
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/dialog.dart';
@@ -26,23 +27,19 @@ class CircleManagerPage extends HookWidget {
       return conversationId;
     })!;
 
-    final circles = useStream<List<ConversationCircleManagerItem>>(
-          useMemoized(
-            () => context.database.circleDao
-                .circleByConversationId(conversationId)
-                .watchThrottle(kDefaultThrottleDuration),
-            [conversationId],
-          ),
+    final circles = useMemoizedStream<List<ConversationCircleManagerItem>>(
+          () => context.database.circleDao
+              .circleByConversationId(conversationId)
+              .watchThrottle(kDefaultThrottleDuration),
+          keys: [conversationId],
           initialData: [],
         ).data ??
         [];
-    final otherCircles = useStream<List<ConversationCircleManagerItem>>(
-          useMemoized(
-            () => context.database.circleDao
-                .otherCircleByConversationId(conversationId)
-                .watchThrottle(kDefaultThrottleDuration),
-            [conversationId],
-          ),
+    final otherCircles = useMemoizedStream<List<ConversationCircleManagerItem>>(
+          () => context.database.circleDao
+              .otherCircleByConversationId(conversationId)
+              .watchThrottle(kDefaultThrottleDuration),
+          keys: [conversationId],
           initialData: [],
         ).data ??
         [];

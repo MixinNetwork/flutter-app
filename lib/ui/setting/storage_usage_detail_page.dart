@@ -27,9 +27,9 @@ class StorageUsageDetailPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final watchEvent = useStream(
-      useMemoized(() => File(context.accountServer.getMediaFilePath())
-          .watch(recursive: true)),
+    final watchEvent = useMemoizedStream(
+      () =>
+          File(context.accountServer.getMediaFilePath()).watch(recursive: true),
       initialData: null,
     ).data;
 

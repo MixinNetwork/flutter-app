@@ -10,7 +10,6 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
-import '../clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../interactive_decorated_box.dart';
 
 class EmojiScrollOffsetCubit extends Cubit<double> {
@@ -243,7 +242,7 @@ class _AllEmojisPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = useMemoized(() => ScrollerScrollController(
+    final controller = useMemoized(() => ScrollController(
           initialScrollOffset: initialOffset,
         ));
 
