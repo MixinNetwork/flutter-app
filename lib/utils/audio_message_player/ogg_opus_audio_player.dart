@@ -18,8 +18,13 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
 
   final _playbackState = BehaviorSubject.seeded(PlaybackState.idle);
 
+  final _playbackSpeed = BehaviorSubject<double>.seeded(1);
+
   @override
   Stream<MessageMedia?> get currentStream => _currentPlaying.stream;
+
+  @override
+  Stream<double> get playbackSpeedStream => _playbackSpeed.stream;
 
   @override
   void dispose() {
@@ -35,10 +40,14 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
   MessageMedia? get current => _medias.getOrNull(_index);
 
   @override
-  void play(List<MessageMedia> media) {
+  void play(List<MessageMedia> media, {bool resetPlaySpeed = true}) {
     stop();
     _medias.clear();
     _index = -1;
+
+    if (resetPlaySpeed) {
+      _playbackSpeed.value = 1;
+    }
 
     if (media.isEmpty) {
       return;
@@ -65,7 +74,9 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
     assert(_player == null);
     _player = player;
     player.state.addListener(_handlePlayerState);
-    player.play();
+    player
+      ..play()
+      ..setPlaybackRate(_playbackSpeed.value);
     _currentPlaying.value = current;
   }
 
@@ -130,4 +141,10 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
   @override
   Duration currentPosition() =>
       Duration(milliseconds: ((_player?.currentPosition ?? 0) * 1000).toInt());
+
+  @override
+  void setPlaybackSpeed(double speed) {
+    _playbackSpeed.value = speed;
+    _player?.setPlaybackRate(speed);
+  }
 }
