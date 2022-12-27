@@ -37,6 +37,8 @@ abstract class AudioMessagePlayer {
 
   Stream<PlaybackState> get playbackStream;
 
+  Stream<double> get playbackSpeedStream;
+
   void dispose();
 
   void stop();
@@ -45,7 +47,9 @@ abstract class AudioMessagePlayer {
 
   void resume();
 
-  void play(List<MessageMedia> media);
+  void play(List<MessageMedia> media, {bool resetPlaySpeed = true});
 
   Duration currentPosition();
+
+  void setPlaybackSpeed(double speed);
 }

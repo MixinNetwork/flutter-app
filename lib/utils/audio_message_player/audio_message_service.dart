@@ -47,7 +47,7 @@ class AudioMessagePlayService {
         createdAt: currentMessage.createdAt,
       );
       if (message == null) return;
-      playAudioMessage(message);
+      playAudioMessage(message, resetPlaySpeed: false);
     }).listen((event) {});
   }
 
@@ -55,7 +55,7 @@ class AudioMessagePlayService {
     _player.dispose();
   }
 
-  void playAudioMessage(MessageItem message) {
+  void playAudioMessage(MessageItem message, {bool resetPlaySpeed = true}) {
     _player.stop();
     _isMediaList = false;
 
@@ -76,7 +76,7 @@ class AudioMessagePlayService {
         message,
         convertMessageAbsolutePath: _accountServer.convertMessageAbsolutePath,
       )
-    ]);
+    ], resetPlaySpeed: resetPlaySpeed);
   }
 
   void playMessages(
@@ -107,6 +107,10 @@ class AudioMessagePlayService {
 
   void resume() {
     _player.resume();
+  }
+
+  void setPlaySpeed(double speed) {
+    _player.setPlaybackSpeed(speed);
   }
 }
 
@@ -193,4 +197,18 @@ double useAudioPlayerPosition() {
   }, [ams, isImagePlay]);
 
   return position.value;
+}
+
+double useAudioPlayerSpeed() {
+  final context = useContext();
+  final ams = context.audioMessageService;
+  final speed = useState<double>(1);
+  useEffect(() {
+    final subscription = ams._player.playbackSpeedStream.listen((event) {
+      speed.value = event;
+    });
+    return subscription.cancel;
+  }, [ams]);
+
+  return speed.value;
 }
