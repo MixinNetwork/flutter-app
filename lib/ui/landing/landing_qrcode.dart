@@ -141,18 +141,25 @@ class _QrCode extends HookWidget {
             color: context.theme.text,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            context.l10n.loginByQrcodeTips,
-            textAlign: TextAlign.left,
+          child: DefaultTextStyle.merge(
             style: TextStyle(
               fontSize: 14,
               color: context.dynamicColor(
                 const Color.fromRGBO(187, 190, 195, 1),
                 darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
               ),
+            ),
+            textAlign: TextAlign.left,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('1. ${context.l10n.loginByQrcodeTips1}'),
+                const SizedBox(height: 4),
+                Text('2. ${context.l10n.loginByQrcodeTips2}'),
+              ],
             ),
           ),
         ),

@@ -225,6 +225,8 @@
 "loginAndAbortAccountDeletion" : "Continue to log in and abort account deletion",
 "loginByQrcode" : "Login to Mixin Messenger by QR Code",
 "loginByQrcodeTips" : "Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login.",
+"loginByQrcodeTips1" : "Open Mixin Messenger on your phone.",
+"loginByQrcodeTips2" : "Scan the QR Code on the screen and confirm your login.",
 "makeGroupAdmin" : "Make group admin",
 "media" : "Media",
 "memo" : "Memo",

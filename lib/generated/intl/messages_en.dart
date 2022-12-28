@@ -472,6 +472,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Login to Mixin Messenger by QR Code"),
         "loginByQrcodeTips": MessageLookupByLibrary.simpleMessage(
             "Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login."),
+        "loginByQrcodeTips1": MessageLookupByLibrary.simpleMessage(
+            "Open Mixin Messenger on your phone."),
+        "loginByQrcodeTips2": MessageLookupByLibrary.simpleMessage(
+            "Scan the QR Code on the screen and confirm your login."),
         "makeGroupAdmin":
             MessageLookupByLibrary.simpleMessage("Make group admin"),
         "media": MessageLookupByLibrary.simpleMessage("Media"),

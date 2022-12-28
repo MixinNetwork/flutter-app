@@ -416,6 +416,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("通过二维码登录 Mixin Messenger"),
         "loginByQrcodeTips": MessageLookupByLibrary.simpleMessage(
             "打开手机上的 Mixin Messenger，扫描屏幕上的二维码，确认登录。"),
+        "loginByQrcodeTips1":
+            MessageLookupByLibrary.simpleMessage("打开手机上的 Mixin Messenger。"),
+        "loginByQrcodeTips2":
+            MessageLookupByLibrary.simpleMessage("扫描屏幕上的二维码，确认登录。"),
         "makeGroupAdmin": MessageLookupByLibrary.simpleMessage("设定为群组管理员"),
         "media": MessageLookupByLibrary.simpleMessage("媒体"),
         "memo": MessageLookupByLibrary.simpleMessage("备注"),
