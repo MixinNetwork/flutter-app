@@ -2320,6 +2320,26 @@ class Localization {
     );
   }
 
+  /// `Open Mixin Messenger on your phone.`
+  String get loginByQrcodeTips1 {
+    return Intl.message(
+      'Open Mixin Messenger on your phone.',
+      name: 'loginByQrcodeTips1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan the QR Code on the screen and confirm your login.`
+  String get loginByQrcodeTips2 {
+    return Intl.message(
+      'Scan the QR Code on the screen and confirm your login.',
+      name: 'loginByQrcodeTips2',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Make group admin`
   String get makeGroupAdmin {
     return Intl.message(

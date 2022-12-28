@@ -212,6 +212,8 @@
 "loginAndAbortAccountDeletion" : "そのままログインし、アカウント削除をキャンセルします",
 "loginByQrcode" : "QRコードでMixinにログインする",
 "loginByQrcodeTips" : "携帯でMixinを開き、画面に表示されるQRコードを読み取り、ログインします",
+"loginByQrcodeTips1" : "携帯でMixinを開き。",
+"loginByQrcodeTips2" : "画面に表示されるQRコードを読み取り、ログインします",
 "makeGroupAdmin" : "管理者権限を付与",
 "media" : "メディア",
 "memo" : "メモ",

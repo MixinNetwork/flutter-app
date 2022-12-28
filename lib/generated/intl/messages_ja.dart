@@ -413,6 +413,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("QRコードでMixinにログインする"),
         "loginByQrcodeTips": MessageLookupByLibrary.simpleMessage(
             "携帯でMixinを開き、画面に表示されるQRコードを読み取り、ログインします"),
+        "loginByQrcodeTips1":
+            MessageLookupByLibrary.simpleMessage("携帯でMixinを開き。"),
+        "loginByQrcodeTips2":
+            MessageLookupByLibrary.simpleMessage("画面に表示されるQRコードを読み取り、ログインします"),
         "makeGroupAdmin": MessageLookupByLibrary.simpleMessage("管理者権限を付与"),
         "media": MessageLookupByLibrary.simpleMessage("メディア"),
         "memo": MessageLookupByLibrary.simpleMessage("メモ"),
