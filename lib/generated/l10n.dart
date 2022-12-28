@@ -1244,6 +1244,16 @@ class Localization {
     );
   }
 
+  /// `Edit Conversations`
+  String get editConversations {
+    return Intl.message(
+      'Edit Conversations',
+      name: 'editConversations',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Edit Group Description`
   String get editGroupDescription {
     return Intl.message(
@@ -2305,16 +2315,6 @@ class Localization {
     return Intl.message(
       'Login to Mixin Messenger by QR Code',
       name: 'loginByQrcode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login.`
-  String get loginByQrcodeTips {
-    return Intl.message(
-      'Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login.',
-      name: 'loginByQrcodeTips',
       desc: '',
       args: [],
     );
@@ -4091,16 +4091,6 @@ class Localization {
     return Intl.message(
       'Withdraw',
       name: 'withdrawal',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Write Circles`
-  String get writeCircles {
-    return Intl.message(
-      'Write Circles',
-      name: 'writeCircles',
       desc: '',
       args: [],
     );

@@ -118,6 +118,7 @@
 "durationIsTooShort" : "Duration is too short",
 "edit" : "Edit",
 "editCircleName" : "Edit Circle Name",
+"editConversations" : "Edit Conversations",
 "editGroupDescription" : "Edit Group Description",
 "editGroupName" : "Edit Group Name",
 "editImageClearWarning" : "All changes will be lost. Are you sure you want to exit?",
@@ -224,7 +225,6 @@
 "logIn" : "Log in",
 "loginAndAbortAccountDeletion" : "Continue to log in and abort account deletion",
 "loginByQrcode" : "Login to Mixin Messenger by QR Code",
-"loginByQrcodeTips" : "Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login.",
 "loginByQrcodeTips1" : "Open Mixin Messenger on your phone.",
 "loginByQrcodeTips2" : "Scan the QR Code on the screen and confirm your login.",
 "makeGroupAdmin" : "Make group admin",
@@ -401,7 +401,6 @@
 "whatsYourName" : "What's your name?",
 "window" : "Window",
 "withdrawal" : "Withdraw",
-"writeCircles" : "Write Circles",
 "you" : "You",
 "youDeletedThisMessage" : "You deleted this message",
 "zoom" : "Zoom"

@@ -302,6 +302,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "editCircleName":
             MessageLookupByLibrary.simpleMessage("Edit Circle Name"),
+        "editConversations":
+            MessageLookupByLibrary.simpleMessage("Edit Conversations"),
         "editGroupDescription":
             MessageLookupByLibrary.simpleMessage("Edit Group Description"),
         "editGroupName":
@@ -470,8 +472,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Continue to log in and abort account deletion"),
         "loginByQrcode": MessageLookupByLibrary.simpleMessage(
             "Login to Mixin Messenger by QR Code"),
-        "loginByQrcodeTips": MessageLookupByLibrary.simpleMessage(
-            "Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login."),
         "loginByQrcodeTips1": MessageLookupByLibrary.simpleMessage(
             "Open Mixin Messenger on your phone."),
         "loginByQrcodeTips2": MessageLookupByLibrary.simpleMessage(
@@ -707,7 +707,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("What\'s your name?"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),
         "withdrawal": MessageLookupByLibrary.simpleMessage("Withdraw"),
-        "writeCircles": MessageLookupByLibrary.simpleMessage("Write Circles"),
         "you": MessageLookupByLibrary.simpleMessage("You"),
         "youDeletedThisMessage":
             MessageLookupByLibrary.simpleMessage("You deleted this message"),

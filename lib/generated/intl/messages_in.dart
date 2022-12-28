@@ -150,6 +150,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Durasi terlalu pendek"),
         "editCircleName":
             MessageLookupByLibrary.simpleMessage("Edit Nama Lingkaran"),
+        "editConversations":
+            MessageLookupByLibrary.simpleMessage("Edit Percakapan"),
         "editGroupDescription":
             MessageLookupByLibrary.simpleMessage("Edit deskripsi grup"),
         "editGroupName": MessageLookupByLibrary.simpleMessage("Edit Nama"),

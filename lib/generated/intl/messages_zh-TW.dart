@@ -258,6 +258,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "durationIsTooShort": MessageLookupByLibrary.simpleMessage("時間太短"),
         "edit": MessageLookupByLibrary.simpleMessage("編輯"),
         "editCircleName": MessageLookupByLibrary.simpleMessage("編輯名稱"),
+        "editConversations": MessageLookupByLibrary.simpleMessage("管理圈子"),
         "editGroupDescription": MessageLookupByLibrary.simpleMessage("編輯群公告"),
         "editGroupName": MessageLookupByLibrary.simpleMessage("編輯名稱"),
         "editImageClearWarning":
@@ -401,8 +402,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("繼續登入並放棄刪除賬戶"),
         "loginByQrcode":
             MessageLookupByLibrary.simpleMessage("透過二維碼登入 Mixin Messenger"),
-        "loginByQrcodeTips": MessageLookupByLibrary.simpleMessage(
-            "開啟手機上的 Mixin Messenger，掃描螢幕上的二維碼，確認登入。"),
         "makeGroupAdmin": MessageLookupByLibrary.simpleMessage("設定為群組管理員"),
         "media": MessageLookupByLibrary.simpleMessage("媒體"),
         "memo": MessageLookupByLibrary.simpleMessage("備註"),
@@ -587,7 +586,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsYourName": MessageLookupByLibrary.simpleMessage("你的名字？"),
         "window": MessageLookupByLibrary.simpleMessage("視窗"),
         "withdrawal": MessageLookupByLibrary.simpleMessage("提現"),
-        "writeCircles": MessageLookupByLibrary.simpleMessage("管理圈子"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youDeletedThisMessage":
             MessageLookupByLibrary.simpleMessage("你撤回了一條訊息"),

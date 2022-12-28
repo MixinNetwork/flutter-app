@@ -52,6 +52,7 @@
 "done" : "Selesai",
 "durationIsTooShort" : "Jangka masa terlalu pendek",
 "editCircleName" : "Edit Nama Lingkaran",
+"editConversations" : "Edit Perbualan",
 "editGroupDescription" : "Edit keterangan kumpulan",
 "editGroupName" : "Edit Nama",
 "editName" : "Edit Nama",
@@ -216,7 +217,6 @@
 "videos" : "Video",
 "whatsYourName" : "Siapa nama awak?",
 "withdrawal" : "Pengeluaran",
-"writeCircles" : "Tulis Lingkaran",
 "you" : "Anda",
 "youDeletedThisMessage" : "Anda memadamkan mesej ini"
 }

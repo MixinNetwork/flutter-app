@@ -156,6 +156,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Jangka masa terlalu pendek"),
         "editCircleName":
             MessageLookupByLibrary.simpleMessage("Edit Nama Lingkaran"),
+        "editConversations":
+            MessageLookupByLibrary.simpleMessage("Edit Perbualan"),
         "editGroupDescription":
             MessageLookupByLibrary.simpleMessage("Edit keterangan kumpulan"),
         "editGroupName": MessageLookupByLibrary.simpleMessage("Edit Nama"),
@@ -391,7 +393,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsYourName":
             MessageLookupByLibrary.simpleMessage("Siapa nama awak?"),
         "withdrawal": MessageLookupByLibrary.simpleMessage("Pengeluaran"),
-        "writeCircles": MessageLookupByLibrary.simpleMessage("Tulis Lingkaran"),
         "you": MessageLookupByLibrary.simpleMessage("Anda"),
         "youDeletedThisMessage":
             MessageLookupByLibrary.simpleMessage("Anda memadamkan mesej ini")

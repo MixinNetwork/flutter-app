@@ -110,6 +110,7 @@
 "durationIsTooShort" : "Продолжительность слишком мала",
 "edit" : "Редактировать",
 "editCircleName" : "Изменить название круга",
+"editConversations" : "Редактировать беседы",
 "editGroupDescription" : "Изменить описание группы",
 "editGroupName" : "Изменить имя группы",
 "editImageClearWarning" : "Все изменения будут потеряны. Вы уверены, что хотите выйти?",
@@ -211,7 +212,6 @@
 "logIn" : "Авторизоваться",
 "loginAndAbortAccountDeletion" : "Продолжить вход и отменить удаление учетной записи",
 "loginByQrcode" : "Войдите в Mixin Messenger по QR-коду",
-"loginByQrcodeTips" : "Откройте Mixin Messenger на своем телефоне, отсканируйте QR-код на экране и подтвердите вход.",
 "makeGroupAdmin" : "Сделать администратором группы",
 "media" : "Медиа",
 "memo" : "Памятка",
@@ -380,7 +380,6 @@
 "whatsYourName" : "Как вас зовут?",
 "window" : "Окно",
 "withdrawal" : "Вывести",
-"writeCircles" : "Написать круги",
 "you" : "Вы",
 "youDeletedThisMessage" : "Вы удалили это сообщение"
 }

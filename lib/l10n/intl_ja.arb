@@ -110,6 +110,7 @@
 "durationIsTooShort" : "期間が短すぎます",
 "edit" : "編集",
 "editCircleName" : "グループリスト名を編集",
+"editConversations" : "チャットルームを編集",
 "editGroupDescription" : "グループアナウンスを編集",
 "editGroupName" : "グループ名を編集",
 "editImageClearWarning" : "すべての変更が失われます。本当に終了しますか？",
@@ -211,8 +212,7 @@
 "logIn" : "ログイン",
 "loginAndAbortAccountDeletion" : "そのままログインし、アカウント削除をキャンセルします",
 "loginByQrcode" : "QRコードでMixinにログインする",
-"loginByQrcodeTips" : "携帯でMixinを開き、画面に表示されるQRコードを読み取り、ログインします",
-"loginByQrcodeTips1" : "携帯でMixinを開き。",
+"loginByQrcodeTips1" : "携帯でMixinを開き",
 "loginByQrcodeTips2" : "画面に表示されるQRコードを読み取り、ログインします",
 "makeGroupAdmin" : "管理者権限を付与",
 "media" : "メディア",
@@ -379,7 +379,6 @@
 "whatsYourName" : "お名前は何ですか？",
 "window" : "Window",
 "withdrawal" : "出金",
-"writeCircles" : "グループリストの変更",
 "you" : "自分",
 "youDeletedThisMessage" : "このメッセージを削除しました。"
 }

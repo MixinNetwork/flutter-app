@@ -117,6 +117,7 @@
 "durationIsTooShort" : "时间太短",
 "edit" : "编辑",
 "editCircleName" : "编辑名称",
+"editConversations" : "管理圈子",
 "editGroupDescription" : "编辑群公告",
 "editGroupName" : "编辑名称",
 "editImageClearWarning" : "退出将会清除此次所有的改动。",
@@ -223,7 +224,6 @@
 "logIn" : "登录",
 "loginAndAbortAccountDeletion" : "继续登录并放弃删除账户",
 "loginByQrcode" : "通过二维码登录 Mixin Messenger",
-"loginByQrcodeTips" : "打开手机上的 Mixin Messenger，扫描屏幕上的二维码，确认登录。",
 "loginByQrcodeTips1" : "打开手机上的 Mixin Messenger。",
 "loginByQrcodeTips2" : "扫描屏幕上的二维码，确认登录。",
 "makeGroupAdmin" : "设定为群组管理员",
@@ -396,7 +396,6 @@
 "whatsYourName" : "你的名字？",
 "window" : "窗口",
 "withdrawal" : "提现",
-"writeCircles" : "管理圈子",
 "you" : "你",
 "youDeletedThisMessage" : "你撤回了一条消息",
 "zoom" : "缩放"
