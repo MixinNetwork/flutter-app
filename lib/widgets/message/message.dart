@@ -357,7 +357,7 @@ class MessageItemWidget extends HookWidget {
                         isCurrentUser &&
                         message.type.canRecall &&
                         DateTime.now().isBefore(
-                            message.createdAt.add(const Duration(minutes: 30))))
+                            message.createdAt.add(const Duration(minutes: 60))))
                       ContextMenu(
                         icon: Resources.assetsImagesContextMenuRecallSvg,
                         title: context.l10n.deleteForEveryone,
