@@ -392,7 +392,7 @@ class _QuoteMessageBase extends StatelessWidget {
         },
         behavior: HitTestBehavior.opaque,
         child: Container(
-          height: 50,
+          constraints: const BoxConstraints(minHeight: 50),
           color: inputMode ? null : const Color.fromRGBO(0, 0, 0, 0.04),
           child: Row(
             mainAxisSize: MainAxisSize.min,
