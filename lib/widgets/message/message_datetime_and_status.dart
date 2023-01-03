@@ -12,6 +12,7 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../message_status_icon.dart';
 import 'message.dart';
+import 'message_style.dart';
 
 bool _isRepresentative(
   MessageItem message,
@@ -139,7 +140,7 @@ class _MessageDatetime extends HookWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: MessageItemWidget.statusFontSize,
+        fontSize: context.messageStyle.statusFontSize,
         color: color ??
             context.dynamicColor(
               const Color.fromRGBO(131, 145, 158, 1),

@@ -14,6 +14,7 @@ import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
+import '../../message_style.dart';
 import '../unknown_message.dart';
 import 'action_card_data.dart';
 
@@ -89,7 +90,7 @@ class AppCardItem extends HookWidget {
                 data.title,
                 style: TextStyle(
                   color: context.theme.text,
-                  fontSize: MessageItemWidget.secondaryFontSize,
+                  fontSize: context.messageStyle.secondaryFontSize,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -99,7 +100,7 @@ class AppCardItem extends HookWidget {
                 maxLines: 1,
                 style: TextStyle(
                   color: context.theme.secondaryText,
-                  fontSize: MessageItemWidget.tertiaryFontSize,
+                  fontSize: context.messageStyle.tertiaryFontSize,
                 ),
               ),
             ],

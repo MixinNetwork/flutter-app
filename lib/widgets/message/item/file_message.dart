@@ -17,6 +17,7 @@ import '../../toast.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import '../message_style.dart';
 import 'transcript_message.dart';
 
 class FileMessage extends HookWidget {
@@ -143,7 +144,7 @@ class MessageFile extends HookWidget {
                 Text(
                   mediaName.overflow,
                   style: TextStyle(
-                    fontSize: MessageItemWidget.secondaryFontSize,
+                    fontSize: context.messageStyle.secondaryFontSize,
                     color: context.theme.text,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -152,7 +153,7 @@ class MessageFile extends HookWidget {
                 Text(
                   mediaSizeText,
                   style: TextStyle(
-                    fontSize: MessageItemWidget.tertiaryFontSize,
+                    fontSize: context.messageStyle.tertiaryFontSize,
                     color: context.theme.secondaryText,
                   ),
                   maxLines: 1,

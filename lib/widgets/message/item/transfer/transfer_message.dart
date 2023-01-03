@@ -8,6 +8,7 @@ import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
+import '../../message_style.dart';
 import 'transfer_page.dart';
 
 class TransferMessage extends HookWidget {
@@ -58,7 +59,7 @@ class TransferMessage extends HookWidget {
                           snapshotAmount!.numberFormat(),
                           style: TextStyle(
                             color: context.theme.text,
-                            fontSize: MessageItemWidget.secondaryFontSize,
+                            fontSize: context.messageStyle.secondaryFontSize,
                           ),
                         );
                       }),
@@ -69,7 +70,7 @@ class TransferMessage extends HookWidget {
                   assetSymbol,
                   style: TextStyle(
                     color: context.theme.secondaryText,
-                    fontSize: MessageItemWidget.tertiaryFontSize,
+                    fontSize: context.messageStyle.tertiaryFontSize,
                   ),
                 ),
               ],

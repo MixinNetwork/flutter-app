@@ -15,6 +15,7 @@ import '../../waveform_widget.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import '../message_style.dart';
 import 'transcript_message.dart';
 
 class AudioMessage extends HookWidget {
@@ -127,7 +128,7 @@ class AudioMessage extends HookWidget {
                   Text(
                     duration.asMinutesSeconds,
                     style: TextStyle(
-                      fontSize: MessageItemWidget.tertiaryFontSize,
+                      fontSize: context.messageStyle.tertiaryFontSize,
                       color: context.theme.secondaryText,
                     ),
                   ),

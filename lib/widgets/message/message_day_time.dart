@@ -10,6 +10,7 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
 import 'message.dart';
+import 'message_style.dart';
 
 class MessageDayTime extends HookWidget {
   const MessageDayTime({
@@ -62,8 +63,8 @@ class _MessageDayTimeWidget extends HookWidget {
           child: Text(
             dateTimeString,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: MessageItemWidget.secondaryFontSize,
+            style: TextStyle(
+              fontSize: context.messageStyle.secondaryFontSize,
             ),
           ),
         ),

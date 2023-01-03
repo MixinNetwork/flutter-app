@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,34 +28,10 @@ class MessageStyle {
   final double tertiaryFontSize;
   final double statusFontSize;
 
-  MessageStyle operator *(double factor) => MessageStyle(
-        primaryFontSize: primaryFontSize * factor,
-        secondaryFontSize: secondaryFontSize * factor,
-        tertiaryFontSize: tertiaryFontSize * factor,
-        statusFontSize: statusFontSize * factor,
-      );
-
   MessageStyle operator +(double delta) => MessageStyle(
         primaryFontSize: primaryFontSize + delta,
         secondaryFontSize: secondaryFontSize + delta,
         tertiaryFontSize: tertiaryFontSize + delta,
-        statusFontSize: statusFontSize + delta,
+        statusFontSize: statusFontSize,
       );
-}
-
-class MessageStyleCubit extends Cubit<MessageStyle> {
-  MessageStyleCubit(SettingCubit setting)
-      : super(MessageStyle.defaultStyle * setting.state.chatFontSize) {
-    _subscription = setting.stream.listen((state) {
-      emit(MessageStyle.defaultStyle * state.chatFontSize);
-    });
-  }
-
-  StreamSubscription? _subscription;
-
-  @override
-  Future<void> close() {
-    _subscription?.cancel();
-    return super.close();
-  }
 }

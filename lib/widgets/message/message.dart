@@ -63,6 +63,7 @@ import 'item/video_message.dart';
 import 'item/waiting_message.dart';
 import 'message_day_time.dart';
 import 'message_name.dart';
+import 'message_style.dart';
 
 class _MessageContextCubit extends SimpleCubit<_MessageContext> {
   _MessageContextCubit(super.initialState);
@@ -766,7 +767,7 @@ class _UnreadMessageBar extends StatelessWidget {
           context.l10n.unreadMessages,
           style: TextStyle(
             color: context.theme.secondaryText,
-            fontSize: MessageItemWidget.secondaryFontSize,
+            fontSize: context.messageStyle.secondaryFontSize,
           ),
         ),
       );

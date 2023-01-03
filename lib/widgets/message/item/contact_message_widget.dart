@@ -107,7 +107,7 @@ class ContactItem extends StatelessWidget {
                   identityNumber,
                   style: TextStyle(
                     color: context.theme.secondaryText,
-                    fontSize: MessageItemWidget.secondaryFontSize,
+                    fontSize: context.messageStyle.secondaryFontSize,
                   ),
                 ),
               ],

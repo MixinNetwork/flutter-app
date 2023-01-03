@@ -22,6 +22,7 @@ import '../../cache_image.dart';
 import '../../image.dart';
 import '../../sticker_page/sticker_item.dart';
 import '../message.dart';
+import '../message_style.dart';
 import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
 import 'text/mention_builder.dart';
@@ -424,7 +425,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                   name!,
                                   style: TextStyle(
                                     fontSize:
-                                        MessageItemWidget.secondaryFontSize,
+                                        context.messageStyle.secondaryFontSize,
                                     color: color,
                                     height: 1,
                                   ),
@@ -444,7 +445,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                     _description,
                                     style: TextStyle(
                                       fontSize:
-                                          MessageItemWidget.tertiaryFontSize,
+                                          context.messageStyle.tertiaryFontSize,
                                       color: context.theme.secondaryText,
                                     ),
                                     maxLines: 1,

@@ -166,7 +166,8 @@ class TranscriptMessageWidget extends HookWidget {
                                 text,
                                 style: TextStyle(
                                   color: context.theme.secondaryText,
-                                  fontSize: MessageItemWidget.tertiaryFontSize,
+                                  fontSize:
+                                      context.messageStyle.tertiaryFontSize,
                                 ),
                                 maxLines: 1,
                               ),

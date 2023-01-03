@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../../utils/color_utils.dart';
 import '../interactive_decorated_box.dart';
 import '../user/user_dialog.dart';
-import 'message.dart';
+import 'message_style.dart';
 
 class MessageName extends StatelessWidget {
   const MessageName({
@@ -29,7 +29,7 @@ class MessageName extends StatelessWidget {
             child: Text(
               userName,
               style: TextStyle(
-                fontSize: MessageItemWidget.secondaryFontSize,
+                fontSize: context.messageStyle.secondaryFontSize,
                 color: getNameColorById(userId),
               ),
             ),
