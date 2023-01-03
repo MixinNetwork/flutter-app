@@ -330,7 +330,7 @@ class ChatInfoPage extends HookWidget {
               ),
             CellGroup(
               child: CellItem(
-                title: Text(context.l10n.writeCircles),
+                title: Text(context.l10n.editCircleName),
                 onTap: () => context
                     .read<ChatSideCubit>()
                     .pushPage(ChatSideCubit.circles),
