@@ -7,6 +7,7 @@ import '../../../utils/web_view/web_view_interface.dart';
 import '../../interactive_decorated_box.dart';
 import '../../toast.dart';
 import '../message.dart';
+import '../message_style.dart';
 
 class StrangerMessage extends StatelessWidget {
   const StrangerMessage({super.key});
@@ -23,7 +24,7 @@ class StrangerMessage extends StatelessWidget {
               ? context.l10n.chatBotReceptionTitle
               : context.l10n.strangerHint,
           style: TextStyle(
-            fontSize: MessageItemWidget.primaryFontSize,
+            fontSize: context.messageStyle.primaryFontSize,
             color: context.theme.text,
           ),
         ),
@@ -103,7 +104,7 @@ class _StrangerButton extends StatelessWidget {
               child: Text(
                 text,
                 style: TextStyle(
-                  fontSize: MessageItemWidget.primaryFontSize,
+                  fontSize: context.messageStyle.primaryFontSize,
                   color: context.theme.accent,
                 ),
               ),

@@ -152,33 +152,39 @@ class _ChatTextSizeSetting extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sliderValue = useState<double>(1);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 10, bottom: 14, top: 22),
-          child: Text(
-            context.l10n.chatTextSize,
-            style: TextStyle(
-              color: context.theme.secondaryText,
-              fontSize: 14,
+    final fontSize = useBlocStateConverter<SettingCubit, SettingState, double>(
+      converter: (style) => style.chatFontSize,
+    );
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 600),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 10, bottom: 14, top: 22),
+            child: Text(
+              context.l10n.chatTextSize,
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: 14,
+              ),
             ),
           ),
-        ),
-        const _ChatTextSizePreview(),
-        const SizedBox(height: 10),
-        Slider(
-          value: sliderValue.value,
-          min: 0.8,
-          divisions: 5,
-          max: 2,
-          onChanged: (value) {
-            sliderValue.value = value;
-          },
-        ),
-      ],
+          const _ChatTextSizePreview(),
+          const SizedBox(height: 10),
+          Slider(
+            value: fontSize,
+            min: -2,
+            divisions: 6,
+            max: 4,
+            onChanged: (value) {
+              debugPrint('fontSize: $value');
+              context.settingCubit.chatFontSize = value;
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -230,7 +236,6 @@ class _ChatTextSizePreview extends HookWidget {
           margin: const EdgeInsets.symmetric(horizontal: 10),
           padding:
               const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-          constraints: const BoxConstraints(maxWidth: 600),
           decoration: BoxDecoration(
             color: context.theme.chatBackground,
             borderRadius: BorderRadius.circular(8),

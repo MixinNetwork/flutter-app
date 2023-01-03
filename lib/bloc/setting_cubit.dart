@@ -14,13 +14,15 @@ class SettingState extends Equatable {
     bool? videoAutoDownload,
     bool? fileAutoDownload,
     bool? collapsedSidebar,
+    double? chatFontSize,
   })  : _brightness = brightness,
         _messageShowAvatar = messageShowAvatar,
         _messagePreview = messagePreview,
         _photoAutoDownload = photoAutoDownload,
         _videoAutoDownload = videoAutoDownload,
         _fileAutoDownload = fileAutoDownload,
-        _collapsedSidebar = collapsedSidebar;
+        _collapsedSidebar = collapsedSidebar,
+        _chatFontSize = chatFontSize;
 
   factory SettingState.fromMap(Map<String, dynamic> map) => SettingState(
         brightness: map['brightness'] as int?,
@@ -30,6 +32,7 @@ class SettingState extends Equatable {
         videoAutoDownload: map['videoAutoDownload'] as bool?,
         fileAutoDownload: map['fileAutoDownload'] as bool?,
         collapsedSidebar: map['collapsedSidebar'] as bool?,
+        chatFontSize: map['chatFontSize'] as double?,
       );
 
   /// The brightness of theme.
@@ -49,6 +52,7 @@ class SettingState extends Equatable {
   final bool? _videoAutoDownload;
   final bool? _fileAutoDownload;
   final bool? _collapsedSidebar;
+  final double? _chatFontSize;
 
   int get brightness => _brightness ?? 0;
 
@@ -64,6 +68,8 @@ class SettingState extends Equatable {
 
   bool get collapsedSidebar => _collapsedSidebar ?? false;
 
+  double get chatFontSize => _chatFontSize ?? 0;
+
   @override
   List<Object?> get props => [
         _brightness,
@@ -73,6 +79,7 @@ class SettingState extends Equatable {
         _videoAutoDownload,
         _fileAutoDownload,
         _collapsedSidebar,
+        _chatFontSize,
       ];
 
   Map<String, dynamic> toMap() => {
@@ -83,6 +90,7 @@ class SettingState extends Equatable {
         'videoAutoDownload': _videoAutoDownload,
         'fileAutoDownload': _fileAutoDownload,
         'collapsedSidebar': _collapsedSidebar,
+        'chatFontSize': _chatFontSize,
       };
 
   SettingState copyWith({
@@ -93,6 +101,7 @@ class SettingState extends Equatable {
     bool? videoAutoDownload,
     bool? fileAutoDownload,
     bool? collapsedSidebar,
+    double? chatFontSize,
   }) =>
       SettingState(
         brightness: brightness ?? _brightness,
@@ -102,6 +111,7 @@ class SettingState extends Equatable {
         videoAutoDownload: videoAutoDownload ?? _videoAutoDownload,
         fileAutoDownload: fileAutoDownload ?? _fileAutoDownload,
         collapsedSidebar: collapsedSidebar ?? _collapsedSidebar,
+        chatFontSize: chatFontSize ?? _chatFontSize,
       );
 }
 
@@ -155,6 +165,8 @@ class SettingCubit extends HydratedCubit<SettingState> {
 
   set collapsedSidebar(bool? value) =>
       emit(state.copyWith(collapsedSidebar: value));
+
+  set chatFontSize(double? value) => emit(state.copyWith(chatFontSize: value));
 
   void migrate({
     bool? messagePreview,

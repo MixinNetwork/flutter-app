@@ -4,10 +4,10 @@ import 'package:flutter/widgets.dart';
 
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
-import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
+import '../message_style.dart';
 
 class UnknownMessage extends StatelessWidget {
   const UnknownMessage({super.key});
@@ -18,7 +18,7 @@ class UnknownMessage extends StatelessWidget {
       text: TextSpan(
         text: context.l10n.messageNotSupport,
         style: TextStyle(
-          fontSize: MessageItemWidget.primaryFontSize,
+          fontSize: context.messageStyle.primaryFontSize,
           color: context.theme.text,
         ),
         children: [
@@ -27,7 +27,7 @@ class UnknownMessage extends StatelessWidget {
             mouseCursor: SystemMouseCursors.click,
             text: context.l10n.learnMore,
             style: TextStyle(
-              fontSize: MessageItemWidget.primaryFontSize,
+              fontSize: context.messageStyle.primaryFontSize,
               color: context.theme.accent,
             ),
             recognizer: TapGestureRecognizer()

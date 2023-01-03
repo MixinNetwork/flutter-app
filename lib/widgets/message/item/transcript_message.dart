@@ -25,6 +25,7 @@ import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_day_time.dart';
+import '../message_style.dart';
 import 'audio_message.dart';
 import 'unknown_message.dart';
 
@@ -128,7 +129,7 @@ class TranscriptMessageWidget extends HookWidget {
                             context.l10n.transcript,
                             style: TextStyle(
                               color: context.theme.text,
-                              fontSize: MessageItemWidget.primaryFontSize,
+                              fontSize: context.messageStyle.primaryFontSize,
                             ),
                           ),
                           const Spacer(),

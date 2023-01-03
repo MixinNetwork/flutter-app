@@ -10,6 +10,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../message.dart';
 import '../message_bubble.dart';
+import '../message_style.dart';
 
 class RecallMessage extends HookWidget {
   const RecallMessage({super.key});
@@ -56,7 +57,7 @@ class RecallMessage extends HookWidget {
                       }),
             ]),
             style: TextStyle(
-              fontSize: MessageItemWidget.primaryFontSize,
+              fontSize: context.messageStyle.primaryFontSize,
               color: context.theme.text,
             ),
           ),
