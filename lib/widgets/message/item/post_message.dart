@@ -13,6 +13,7 @@ import '../../markdown.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import '../message_style.dart';
 
 const _decoration = BoxDecoration(
   borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -28,7 +29,10 @@ class PostMessage extends HookWidget {
         useMessageConverter(converter: (state) => state.content ?? '');
 
     return MessageBubble(
-      child: MessagePost(showStatus: true, content: content),
+      child: DefaultTextStyle.merge(
+        style: TextStyle(fontSize: context.messageStyle.primaryFontSize),
+        child: MessagePost(showStatus: true, content: content),
+      ),
     );
   }
 }
