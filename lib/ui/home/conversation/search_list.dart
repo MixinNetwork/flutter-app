@@ -680,8 +680,8 @@ class SearchMessageItem extends HookWidget {
     final isGroup = useMemoized(
         () =>
             message.category == ConversationCategory.group ||
-            message.userId != message.conversationOwnerId,
-        [message.category, message.userId, message.conversationOwnerId]);
+            message.senderId != message.ownerId,
+        [message.category, message.senderId, message.ownerId]);
 
     final icon = useMemoized(
         () => messagePreviewIcon(
@@ -703,44 +703,44 @@ class SearchMessageItem extends HookWidget {
             message.content,
             await mentionCache.checkMentionCache({message.content}),
           ),
-          message.userId == context.accountServer.userId,
+          message.senderId == context.accountServer.userId,
           isGroup,
-          message.userFullName);
+          message.senderFullName);
     }, null, keys: [
       message.status,
       message.type,
       message.content,
       isGroup,
-      message.userId,
-      message.userFullName
+      message.senderId,
+      message.senderFullName
     ]).data;
 
     final avatar = showSender
         ? AvatarWidget(
-            userId: message.userId,
-            avatarUrl: message.userAvatarUrl,
+            userId: message.senderId,
+            avatarUrl: message.senderAvatarUrl,
             size: ConversationPage.conversationItemAvatarSize,
-            name: message.userFullName,
+            name: message.senderFullName,
           )
         : ConversationAvatarWidget(
             conversationId: message.conversationId,
             fullName: conversationValidName(
               message.groupName,
-              message.userFullName,
+              message.ownerFullName,
             ),
             groupIconUrl: message.groupIconUrl,
-            avatarUrl: message.userAvatarUrl,
+            avatarUrl: message.ownerAvatarUrl,
             category: message.category,
             size: ConversationPage.conversationItemAvatarSize,
-            userId: message.userId,
+            userId: message.ownerId,
           );
     return SearchItem(
       avatar: avatar,
       name: showSender
-          ? message.userFullName ?? ''
+          ? message.senderFullName ?? ''
           : conversationValidName(
               message.groupName,
-              message.userFullName,
+              message.ownerFullName,
             ),
       trailing: VerifiedOrBotWidget(
         verified: message.verified,

@@ -956,7 +956,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       case null:
       case SlideCategoryType.chats:
         return db.fuzzySearchMessage(
-            query, (m, c, u) => unseenFilter(c), limit, offset);
+            query, (m, c, u, o) => unseenFilter(c), limit, offset);
       case SlideCategoryType.contacts:
         return db.fuzzySearchMessageWithConversationOwner(
             query,
@@ -970,7 +970,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       case SlideCategoryType.groups:
         return db.fuzzySearchMessage(
             query,
-            (m, c, u) =>
+            (m, c, u, o) =>
                 c.category.equalsValue(ConversationCategory.group) &
                 unseenFilter(c),
             limit,
@@ -998,13 +998,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         final circleId = category!.id!;
         return db.fuzzySearchMessageWithCircle(
             query,
-            (m, c, u, cc) => cc.circleId.equals(circleId) & unseenFilter(c),
+            (m, c, u, o, cc) => cc.circleId.equals(circleId) & unseenFilter(c),
             limit,
             offset);
       case SlideCategoryType.setting:
         assert(false, 'Setting category should not be searched');
         return db.fuzzySearchMessage(
-            query, (m, c, u) => ignoreWhere, limit, offset);
+            query, (m, c, u, o) => ignoreWhere, limit, offset);
     }
   }
 
@@ -1100,7 +1100,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           userId,
           categories,
           keywordFts5,
-          (_, __, ___) => Limit(limit, offset),
+          (_, __, ___, ____) => Limit(limit, offset),
         );
       }
 
@@ -1119,7 +1119,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           conversationId,
           categories,
           keywordFts5,
-          (_, __, ___) => Limit(limit, offset),
+          (_, __, ___, ____) => Limit(limit, offset),
         );
       }
 
@@ -1135,13 +1135,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       return db.fuzzySearchMessageByCategories(
         keywordFts5,
         categories,
-        (_, __, ___) => Limit(limit, offset),
+        (_, __, ___, ____) => Limit(limit, offset),
       );
     }
 
     return db.fuzzySearchMessage(
       keywordFts5,
-      (m, c, u) => ignoreWhere,
+      (m, c, u, o) => ignoreWhere,
       limit,
       offset,
     );
@@ -1233,14 +1233,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int offset = 0,
     List<String>? categories,
   }) =>
-      db.searchMessage((m, c, u) {
+      db.searchMessage((m, c, u, o) {
         var predicate =
             m.conversationId.equals(conversationId) & m.userId.equals(userId);
         if (categories?.isNotEmpty ?? false) {
           predicate = predicate & m.category.isIn(categories!);
         }
         return predicate;
-      }, (m, c, u) => Limit(limit, offset));
+      }, (m, c, u, o) => Limit(limit, offset));
 
   Selectable<SearchMessageDetailItem>
       fuzzySearchMessageByConversationIdAndUserId({
