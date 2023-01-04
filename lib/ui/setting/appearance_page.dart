@@ -153,7 +153,7 @@ class _ChatTextSizeSetting extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final fontSize = useBlocStateConverter<SettingCubit, SettingState, double>(
-      converter: (style) => style.chatFontSize,
+      converter: (style) => style.chatFontSizeDelta,
     );
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 600),
@@ -173,15 +173,48 @@ class _ChatTextSizeSetting extends HookWidget {
           ),
           const _ChatTextSizePreview(),
           const SizedBox(height: 10),
-          Slider(
-            value: fontSize,
-            min: -2,
-            divisions: 6,
-            max: 4,
-            onChanged: (value) {
-              debugPrint('fontSize: $value');
-              context.settingCubit.chatFontSize = value;
-            },
+          Row(
+            children: [
+              const SizedBox(width: 10),
+              Text(
+                'A',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.theme.text,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: SliderTheme(
+                  data: const SliderThemeData(
+                    trackHeight: 4,
+                    trackShape: RoundedRectSliderTrackShape(),
+                    overlayShape: RoundSliderOverlayShape(
+                      overlayRadius: 10,
+                    ),
+                  ),
+                  child: Slider(
+                    value: fontSize,
+                    min: -2,
+                    divisions: 6,
+                    max: 4,
+                    onChanged: (value) {
+                      debugPrint('fontSize: $value');
+                      context.settingCubit.chatFontSizeDelta = value;
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'A',
+                style: TextStyle(
+                  fontSize: 24,
+                  color: context.theme.text,
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
           ),
         ],
       ),

@@ -5,7 +5,7 @@ import '../../bloc/setting_cubit.dart';
 
 extension MessageStyleExt on BuildContext {
   MessageStyle get messageStyle =>
-      MessageStyle.defaultStyle + watch<SettingCubit>().state.chatFontSize;
+      MessageStyle.defaultStyle + watch<SettingCubit>().state.chatFontSizeDelta;
 }
 
 class MessageStyle {
