@@ -12845,7 +12845,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<User> fuzzySearchBotGroupUser(String conversationId,
       DateTime createdAt, String id, String username, String identityNumber) {
     return customSelect(
-        'SELECT u.* FROM users AS u WHERE(u.user_id IN (SELECT m.user_id FROM messages AS m WHERE conversation_id = ?1 AND m.created_at > ?2) OR u.user_id IN (SELECT f.user_id FROM users AS f WHERE relationship = \'FRIEND\'))AND u.user_id != ?3 AND(u.full_name LIKE \'%\' || ?4 || \'%\' ESCAPE \'\\\' OR u.identity_number LIKE \'%\' || ?5 || \'%\' ESCAPE \'\\\')ORDER BY CASE u.relationship WHEN \'FRIEND\' THEN 1 ELSE 2 END, u.relationship OR u.full_name = ?4 COLLATE NOCASE OR u.identity_number = ?5 COLLATE NOCASE DESC',
+        'SELECT u.* FROM users AS u WHERE(u.user_id IN (SELECT m.user_id FROM messages AS m WHERE conversation_id = ?1 AND m.created_at > ?2) OR u.user_id IN (SELECT f.user_id FROM users AS f WHERE relationship = \'FRIEND\'))AND u.user_id != ?3 AND u.identity_number != 0 AND(u.full_name LIKE \'%\' || ?4 || \'%\' ESCAPE \'\\\' OR u.identity_number LIKE \'%\' || ?5 || \'%\' ESCAPE \'\\\')ORDER BY CASE u.relationship WHEN \'FRIEND\' THEN 1 ELSE 2 END, u.relationship OR u.full_name = ?4 COLLATE NOCASE OR u.identity_number = ?5 COLLATE NOCASE DESC',
         variables: [
           Variable<String>(conversationId),
           Variable<int>(Messages.$converter2.toSql(createdAt)),
