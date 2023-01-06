@@ -29,9 +29,12 @@ class PostMessage extends HookWidget {
         useMessageConverter(converter: (state) => state.content ?? '');
 
     return MessageBubble(
-      child: DefaultTextStyle.merge(
-        style: TextStyle(fontSize: context.messageStyle.primaryFontSize),
-        child: MessagePost(showStatus: true, content: content),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: DefaultTextStyle.merge(
+          style: TextStyle(fontSize: context.messageStyle.primaryFontSize),
+          child: MessagePost(showStatus: true, content: content),
+        ),
       ),
     );
   }
