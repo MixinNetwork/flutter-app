@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../constants/resources.dart';
@@ -7,11 +8,13 @@ import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/chat/chat_page.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/logger.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';
 import '../conversation/verified_or_bot_widget.dart';
 import '../dialog.dart';
+import '../menu.dart';
 import '../more_extended_text.dart';
 import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
@@ -289,6 +292,23 @@ class _UserProfileButtonBar extends StatelessWidget {
             singleSelect: true,
             title: context.l10n.shareContact,
             onlyContact: false,
+            action: ContextMenuPortalEntry(
+              buildMenus: () => [
+                ContextMenu(
+                  icon: Resources.assetsImagesContextMenuCopySvg,
+                  title: context.l10n.copyInvite,
+                  onTap: () async {
+                    i('share contact ${user.userId} ${user.codeUrl}');
+                    await Clipboard.setData(ClipboardData(text: user.codeUrl));
+                  },
+                ),
+              ],
+              interactiveForTap: true,
+              child: const ActionButton(
+                name: Resources.assetsImagesInviteShareSvg,
+                interactive: false,
+              ),
+            ),
           );
 
           if (result == null || result.isEmpty) return;
