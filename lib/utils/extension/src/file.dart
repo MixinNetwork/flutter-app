@@ -20,7 +20,7 @@ extension FileExtension on File {
 }
 
 Future<String?> _encodeBlurHash(String path) async {
-  final fileImage = FileImage(File(path));
+  final fileImage = ResizeImage(FileImage(File(path)), width: 100, height: 100);
   final image = await fileImage.toImage();
   final data =
       Image.fromBytes(image.width, image.height, (await image.toBytes())!);
