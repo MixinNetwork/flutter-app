@@ -10,6 +10,7 @@ import '../../user/user_dialog.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import '../message_style.dart';
 
 class ContactMessageWidget extends HookWidget {
   const ContactMessageWidget({super.key});
@@ -90,7 +91,7 @@ class ContactItem extends StatelessWidget {
                         fullName?.overflow ?? '',
                         style: TextStyle(
                           color: context.theme.text,
-                          fontSize: MessageItemWidget.primaryFontSize,
+                          fontSize: context.messageStyle.primaryFontSize,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -106,7 +107,7 @@ class ContactItem extends StatelessWidget {
                   identityNumber,
                   style: TextStyle(
                     color: context.theme.secondaryText,
-                    fontSize: MessageItemWidget.secondaryFontSize,
+                    fontSize: context.messageStyle.secondaryFontSize,
                   ),
                 ),
               ],

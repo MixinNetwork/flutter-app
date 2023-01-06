@@ -10,6 +10,7 @@ import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
+import '../message_style.dart';
 
 class WaitingMessage extends HookWidget {
   const WaitingMessage({super.key});
@@ -29,7 +30,7 @@ class WaitingMessage extends HookWidget {
               : userFullName!,
         ),
         style: TextStyle(
-          fontSize: MessageItemWidget.primaryFontSize,
+          fontSize: context.messageStyle.primaryFontSize,
           color: context.theme.text,
         ),
         children: [
@@ -37,7 +38,7 @@ class WaitingMessage extends HookWidget {
             mouseCursor: SystemMouseCursors.click,
             text: context.l10n.learnMore,
             style: TextStyle(
-              fontSize: MessageItemWidget.primaryFontSize,
+              fontSize: context.messageStyle.primaryFontSize,
               color: context.theme.accent,
             ),
             recognizer: TapGestureRecognizer()

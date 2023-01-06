@@ -197,6 +197,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "chatNotSupportViewOnPhone":
             MessageLookupByLibrary.simpleMessage("不支持此类型消息，请在手机上查看。"),
         "chatPinMessage": m7,
+        "chatTextSize": MessageLookupByLibrary.simpleMessage("聊天字体大小"),
         "checkNewVersion": MessageLookupByLibrary.simpleMessage("检查新版本"),
         "circleSubtitle": m8,
         "circleTitle": m9,
@@ -264,6 +265,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "durationIsTooShort": MessageLookupByLibrary.simpleMessage("时间太短"),
         "edit": MessageLookupByLibrary.simpleMessage("编辑"),
         "editCircleName": MessageLookupByLibrary.simpleMessage("编辑名称"),
+        "editConversations": MessageLookupByLibrary.simpleMessage("管理圈子"),
         "editGroupDescription": MessageLookupByLibrary.simpleMessage("编辑群公告"),
         "editGroupName": MessageLookupByLibrary.simpleMessage("编辑名称"),
         "editImageClearWarning":
@@ -386,6 +388,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "helpCenter": MessageLookupByLibrary.simpleMessage("帮助中心"),
         "hideMixin": MessageLookupByLibrary.simpleMessage("隐藏 Mixin"),
         "hour": m25,
+        "howAreYou": MessageLookupByLibrary.simpleMessage("嗨，你好吗？"),
+        "iAmGood": MessageLookupByLibrary.simpleMessage("我很好。"),
         "ignoreThisVersion": MessageLookupByLibrary.simpleMessage("忽略这次版本更新"),
         "image": MessageLookupByLibrary.simpleMessage("图片"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("包括文件"),
@@ -414,8 +418,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("继续登录并放弃删除账户"),
         "loginByQrcode":
             MessageLookupByLibrary.simpleMessage("通过二维码登录 Mixin Messenger"),
-        "loginByQrcodeTips": MessageLookupByLibrary.simpleMessage(
-            "打开手机上的 Mixin Messenger，扫描屏幕上的二维码，确认登录。"),
         "loginByQrcodeTips1":
             MessageLookupByLibrary.simpleMessage("打开手机上的 Mixin Messenger。"),
         "loginByQrcodeTips2":
@@ -611,7 +613,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsYourName": MessageLookupByLibrary.simpleMessage("你的名字？"),
         "window": MessageLookupByLibrary.simpleMessage("窗口"),
         "withdrawal": MessageLookupByLibrary.simpleMessage("提现"),
-        "writeCircles": MessageLookupByLibrary.simpleMessage("管理圈子"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youDeletedThisMessage":
             MessageLookupByLibrary.simpleMessage("你撤回了一条消息"),

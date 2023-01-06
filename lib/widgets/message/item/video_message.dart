@@ -19,6 +19,7 @@ import '../../status.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import '../message_style.dart';
 import 'transcript_message.dart';
 
 const _kDefaultVideoSize = 200;
@@ -207,8 +208,8 @@ class _VideoMessageOverlayInfo extends HookWidget {
                   padding: const EdgeInsets.all(4),
                   child: Text(
                     durationText,
-                    style: const TextStyle(
-                      fontSize: MessageItemWidget.tertiaryFontSize,
+                    style: TextStyle(
+                      fontSize: context.messageStyle.tertiaryFontSize,
                       color: Colors.white,
                     ),
                   ),

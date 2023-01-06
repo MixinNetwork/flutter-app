@@ -10,6 +10,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
 import '../message.dart';
+import '../message_style.dart';
 import 'text/mention_builder.dart';
 
 class PinMessageWidget extends HookWidget {
@@ -88,7 +89,7 @@ class PinMessageWidget extends HookWidget {
               child: Text(
                 text,
                 style: TextStyle(
-                  fontSize: MessageItemWidget.secondaryFontSize,
+                  fontSize: context.messageStyle.secondaryFontSize,
                   color: context.dynamicColor(
                     const Color.fromRGBO(0, 0, 0, 1),
                   ),

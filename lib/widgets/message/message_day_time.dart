@@ -10,6 +10,7 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
 import 'message.dart';
+import 'message_style.dart';
 
 class MessageDayTime extends HookWidget {
   const MessageDayTime({
@@ -22,7 +23,7 @@ class MessageDayTime extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final hide =
-        useBlocStateConverter<_HiddenMessageDayTimeBloc, DateTime?, bool>(
+        useBlocStateConverter<HiddenMessageDayTimeBloc, DateTime?, bool>(
       converter: (state) => isSameDay(state, dateTime),
       keys: [dateTime],
     );
@@ -62,8 +63,8 @@ class _MessageDayTimeWidget extends HookWidget {
           child: Text(
             dateTimeString,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: MessageItemWidget.secondaryFontSize,
+            style: TextStyle(
+              fontSize: context.messageStyle.secondaryFontSize,
             ),
           ),
         ),
@@ -72,8 +73,8 @@ class _MessageDayTimeWidget extends HookWidget {
   }
 }
 
-class _HiddenMessageDayTimeBloc extends Cubit<DateTime?> {
-  _HiddenMessageDayTimeBloc() : super(null);
+class HiddenMessageDayTimeBloc extends Cubit<DateTime?> {
+  HiddenMessageDayTimeBloc() : super(null);
 
   void update(DateTime? dateTime) => emit(dateTime);
 }
@@ -184,7 +185,7 @@ class MessageDayTimeViewportWidget extends HookWidget {
     final dateTimeTopOffset = useState<double>(0);
 
     final bloc =
-        useBloc<_HiddenMessageDayTimeBloc>(_HiddenMessageDayTimeBloc.new);
+        useBloc<HiddenMessageDayTimeBloc>(HiddenMessageDayTimeBloc.new);
 
     void doTraversal() {
       final result = _traversalCurrentShowingMessageElements();

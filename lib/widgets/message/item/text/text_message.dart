@@ -18,6 +18,7 @@ import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import '../../message_layout.dart';
+import '../../message_style.dart';
 import 'mention_builder.dart';
 
 class TextMessage extends HookWidget {
@@ -150,7 +151,7 @@ class TextMessage extends HookWidget {
             ...mentionHighlightTextSpans,
           ],
           style: TextStyle(
-            fontSize: MessageItemWidget.primaryFontSize,
+            fontSize: context.messageStyle.primaryFontSize,
             color: context.theme.text,
           ),
         ),

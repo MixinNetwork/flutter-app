@@ -5,6 +5,7 @@ import '../../../enum/message_action.dart';
 import '../../../generated/l10n.dart';
 import '../../../utils/extension/extension.dart';
 import '../message.dart';
+import '../message_style.dart';
 
 class SystemMessage extends HookWidget {
   const SystemMessage({super.key});
@@ -53,7 +54,7 @@ class SystemMessage extends HookWidget {
                   expireIn: int.tryParse(content ?? '0'),
                 ),
                 style: TextStyle(
-                  fontSize: MessageItemWidget.secondaryFontSize,
+                  fontSize: context.messageStyle.secondaryFontSize,
                   color: context.dynamicColor(
                     const Color.fromRGBO(0, 0, 0, 1),
                   ),

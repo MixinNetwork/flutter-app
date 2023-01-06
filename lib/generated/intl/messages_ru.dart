@@ -299,6 +299,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "edit": MessageLookupByLibrary.simpleMessage("Редактировать"),
         "editCircleName":
             MessageLookupByLibrary.simpleMessage("Изменить название круга"),
+        "editConversations":
+            MessageLookupByLibrary.simpleMessage("Редактировать беседы"),
         "editGroupDescription":
             MessageLookupByLibrary.simpleMessage("Изменить описание группы"),
         "editGroupName":
@@ -431,6 +433,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "helpCenter": MessageLookupByLibrary.simpleMessage("Центр помощи"),
         "hideMixin": MessageLookupByLibrary.simpleMessage("Скрыть Mixin"),
         "hour": m25,
+        "howAreYou": MessageLookupByLibrary.simpleMessage("Привет, как дела?"),
+        "iAmGood": MessageLookupByLibrary.simpleMessage("Я в порядке."),
         "ignoreThisVersion":
             MessageLookupByLibrary.simpleMessage("Игнорировать новую версию"),
         "image": MessageLookupByLibrary.simpleMessage("изображение"),
@@ -462,8 +466,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Продолжить вход и отменить удаление учетной записи"),
         "loginByQrcode": MessageLookupByLibrary.simpleMessage(
             "Войдите в Mixin Messenger по QR-коду"),
-        "loginByQrcodeTips": MessageLookupByLibrary.simpleMessage(
-            "Откройте Mixin Messenger на своем телефоне, отсканируйте QR-код на экране и подтвердите вход."),
         "makeGroupAdmin": MessageLookupByLibrary.simpleMessage(
             "Сделать администратором группы"),
         "media": MessageLookupByLibrary.simpleMessage("Медиа"),
@@ -695,7 +697,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsYourName": MessageLookupByLibrary.simpleMessage("Как вас зовут?"),
         "window": MessageLookupByLibrary.simpleMessage("Окно"),
         "withdrawal": MessageLookupByLibrary.simpleMessage("Вывести"),
-        "writeCircles": MessageLookupByLibrary.simpleMessage("Написать круги"),
         "you": MessageLookupByLibrary.simpleMessage("Вы"),
         "youDeletedThisMessage":
             MessageLookupByLibrary.simpleMessage("Вы удалили это сообщение")

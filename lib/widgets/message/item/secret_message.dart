@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
 
-import '../message.dart';
+import '../message_style.dart';
 
 class SecretMessage extends StatelessWidget {
   const SecretMessage({super.key});
@@ -26,7 +26,7 @@ class SecretMessage extends StatelessWidget {
                   child: Text(
                     context.l10n.messageE2ee,
                     style: TextStyle(
-                      fontSize: MessageItemWidget.secondaryFontSize,
+                      fontSize: context.messageStyle.secondaryFontSize,
                       color: context.dynamicColor(
                         const Color.fromRGBO(0, 0, 0, 1),
                       ),

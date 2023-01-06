@@ -11,6 +11,7 @@ import '../../../../utils/uri_utils.dart';
 import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
+import '../../message_style.dart';
 import '../unknown_message.dart';
 import 'action_data.dart';
 
@@ -70,7 +71,7 @@ class ActionMessage extends HookWidget {
                         // ignore: avoid_dynamic_calls
                         e.label,
                         style: TextStyle(
-                          fontSize: MessageItemWidget.primaryFontSize,
+                          fontSize: context.messageStyle.primaryFontSize,
                           // ignore: avoid_dynamic_calls
                           color: colorHex(e.color) ?? Colors.black,
                           height: 1,

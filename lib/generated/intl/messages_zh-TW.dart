@@ -137,6 +137,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "about": MessageLookupByLibrary.simpleMessage("關於"),
         "accessDenied": MessageLookupByLibrary.simpleMessage("禁止訪問"),
         "account": MessageLookupByLibrary.simpleMessage("賬號"),
+        "activity": MessageLookupByLibrary.simpleMessage("活動"),
         "add": MessageLookupByLibrary.simpleMessage("新增"),
         "addBotWithPlus": MessageLookupByLibrary.simpleMessage("+ 新增機器人"),
         "addContact": MessageLookupByLibrary.simpleMessage("新增聯絡人"),
@@ -156,6 +157,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "alertKeyContactContactMessage":
             MessageLookupByLibrary.simpleMessage("分享了一個聯絡人"),
         "allChats": MessageLookupByLibrary.simpleMessage("全部聊天"),
+        "animalsAndNature": MessageLookupByLibrary.simpleMessage("動物與自然"),
         "appCardShareDisallow":
             MessageLookupByLibrary.simpleMessage("該連結已被設定為不允許分享"),
         "appearance": MessageLookupByLibrary.simpleMessage("外觀"),
@@ -201,6 +203,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("圈子"),
         "clear": MessageLookupByLibrary.simpleMessage("清理"),
         "clearChat": MessageLookupByLibrary.simpleMessage("清除聊天記錄"),
+        "clearFilter": MessageLookupByLibrary.simpleMessage("清除篩選條件"),
         "clickToReloadQrcode":
             MessageLookupByLibrary.simpleMessage("點選重新載入二維碼"),
         "close": MessageLookupByLibrary.simpleMessage("關閉"),
@@ -250,6 +253,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "disappearingMessage": MessageLookupByLibrary.simpleMessage("限時訊息"),
         "disappearingMessageHint": MessageLookupByLibrary.simpleMessage(
             "啟用後，在此聊天中傳送和接收的新資訊在被看到後會消失，閱讀檔案以**瞭解更多**。"),
+        "discard": MessageLookupByLibrary.simpleMessage("廢棄"),
+        "discardRecordingWarning":
+            MessageLookupByLibrary.simpleMessage("是否要停止並廢棄已錄製的語音訊息？"),
         "dismissAsAdmin": MessageLookupByLibrary.simpleMessage("撤銷管理員身份"),
         "done": MessageLookupByLibrary.simpleMessage("完成"),
         "download": MessageLookupByLibrary.simpleMessage("下載"),
@@ -258,6 +264,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "durationIsTooShort": MessageLookupByLibrary.simpleMessage("時間太短"),
         "edit": MessageLookupByLibrary.simpleMessage("編輯"),
         "editCircleName": MessageLookupByLibrary.simpleMessage("編輯名稱"),
+        "editConversations": MessageLookupByLibrary.simpleMessage("管理圈子"),
         "editGroupDescription": MessageLookupByLibrary.simpleMessage("編輯群公告"),
         "editGroupName": MessageLookupByLibrary.simpleMessage("編輯名稱"),
         "editImageClearWarning":
@@ -298,6 +305,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("錯誤 20118：PIN 格式不正確"),
         "errorNetworkTaskFailed":
             MessageLookupByLibrary.simpleMessage("網路連線失敗。檢查或切換網路，然後重試"),
+        "errorNoPinToken":
+            MessageLookupByLibrary.simpleMessage("缺少憑據，請重新登入之後再嘗試使用此功能。"),
         "errorNotFound":
             MessageLookupByLibrary.simpleMessage("錯誤 404：沒有找到相應的資訊"),
         "errorNotSupportedAudioFormat":
@@ -337,6 +346,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("無法找到能開啟該媒體的應用"),
         "errorUnknownWithCode": m21,
         "errorUnknownWithMessage": m22,
+        "errorUploadAttachmentFailed":
+            MessageLookupByLibrary.simpleMessage("訊息附件上傳失敗"),
         "errorUsedPhone":
             MessageLookupByLibrary.simpleMessage("錯誤 20122：電話號碼已經被佔用。"),
         "errorUserInvalidFormat":
@@ -352,11 +363,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "fileDoesNotExist": MessageLookupByLibrary.simpleMessage("檔案不存在"),
         "fileError": MessageLookupByLibrary.simpleMessage("檔案錯誤"),
         "files": MessageLookupByLibrary.simpleMessage("檔案"),
+        "flags": MessageLookupByLibrary.simpleMessage("旗幟"),
         "followSystem": MessageLookupByLibrary.simpleMessage("跟隨系統"),
         "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("關注我們的 Facebook"),
         "followUsOnTwitter":
             MessageLookupByLibrary.simpleMessage("關注我們的 Twitter"),
+        "foodAndDrink": MessageLookupByLibrary.simpleMessage("食物與飲料"),
         "formatNotSupported": MessageLookupByLibrary.simpleMessage("不支援該格式"),
         "forward": MessageLookupByLibrary.simpleMessage("轉發"),
         "from": MessageLookupByLibrary.simpleMessage("來自"),
@@ -374,6 +387,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "helpCenter": MessageLookupByLibrary.simpleMessage("幫助中心"),
         "hideMixin": MessageLookupByLibrary.simpleMessage("隱藏 Mixin"),
         "hour": m25,
+        "howAreYou": MessageLookupByLibrary.simpleMessage("嗨，你好嗎？"),
+        "iAmGood": MessageLookupByLibrary.simpleMessage("我很好。"),
         "ignoreThisVersion": MessageLookupByLibrary.simpleMessage("忽略這次版本更新"),
         "image": MessageLookupByLibrary.simpleMessage("圖片"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("包括檔案"),
@@ -390,6 +405,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "learnMore": MessageLookupByLibrary.simpleMessage("瞭解更多"),
         "less": MessageLookupByLibrary.simpleMessage("更少"),
         "light": MessageLookupByLibrary.simpleMessage("淺色"),
+        "linkedDevice": MessageLookupByLibrary.simpleMessage("連線的裝置"),
         "live": MessageLookupByLibrary.simpleMessage("直播"),
         "loading": MessageLookupByLibrary.simpleMessage("正在載入..."),
         "loadingTime":
@@ -401,8 +417,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("繼續登入並放棄刪除賬戶"),
         "loginByQrcode":
             MessageLookupByLibrary.simpleMessage("透過二維碼登入 Mixin Messenger"),
-        "loginByQrcodeTips": MessageLookupByLibrary.simpleMessage(
-            "開啟手機上的 Mixin Messenger，掃描螢幕上的二維碼，確認登入。"),
+        "loginByQrcodeTips1":
+            MessageLookupByLibrary.simpleMessage("開啟手機上的 Mixin Messenger。"),
+        "loginByQrcodeTips2":
+            MessageLookupByLibrary.simpleMessage("掃描螢幕上的二維碼，確認登入。"),
         "makeGroupAdmin": MessageLookupByLibrary.simpleMessage("設定為群組管理員"),
         "media": MessageLookupByLibrary.simpleMessage("媒體"),
         "memo": MessageLookupByLibrary.simpleMessage("備註"),
@@ -425,6 +443,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "myStickers": MessageLookupByLibrary.simpleMessage("我的表情"),
         "na": MessageLookupByLibrary.simpleMessage("暫無價格"),
         "name": MessageLookupByLibrary.simpleMessage("名稱"),
+        "networkConnectionFailed":
+            MessageLookupByLibrary.simpleMessage("網路連線失敗"),
         "networkError": MessageLookupByLibrary.simpleMessage("網路錯誤"),
         "newVersionAvailable": MessageLookupByLibrary.simpleMessage("發現新版本"),
         "newVersionDescription": m31,
@@ -446,6 +466,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("未允許通知，請到通知設定開啟。"),
         "notifications": MessageLookupByLibrary.simpleMessage("通知"),
         "nowAnAddmin": m32,
+        "objects": MessageLookupByLibrary.simpleMessage("物件"),
         "oneByOneForward": MessageLookupByLibrary.simpleMessage("逐條轉發"),
         "oneHour": MessageLookupByLibrary.simpleMessage("1 小時"),
         "oneWeek": MessageLookupByLibrary.simpleMessage("1 星期"),
@@ -504,6 +525,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPlaceholderNumber":
             MessageLookupByLibrary.simpleMessage("搜尋 Mixin ID 或手機號碼："),
         "searchRelatedMessage": m38,
+        "searchUnread": MessageLookupByLibrary.simpleMessage("搜尋未讀會話"),
         "select": MessageLookupByLibrary.simpleMessage("選擇"),
         "send": MessageLookupByLibrary.simpleMessage("傳送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 傳送"),
@@ -533,6 +555,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "signOut": MessageLookupByLibrary.simpleMessage("登出"),
         "signWithPhoneNumber": MessageLookupByLibrary.simpleMessage("透過手機號登入"),
         "signWithQrcode": MessageLookupByLibrary.simpleMessage("透過二維碼登入"),
+        "smileysAndPeople": MessageLookupByLibrary.simpleMessage("表情符號與人物"),
         "status": MessageLookupByLibrary.simpleMessage("交易狀態"),
         "sticker": MessageLookupByLibrary.simpleMessage("貼紙"),
         "stickerAlbumDetail": MessageLookupByLibrary.simpleMessage("表情詳情"),
@@ -543,6 +566,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "strangerHint": MessageLookupByLibrary.simpleMessage("對方不是你的聯絡人"),
         "strangers": MessageLookupByLibrary.simpleMessage("陌生人"),
         "successful": MessageLookupByLibrary.simpleMessage("成功"),
+        "symbols": MessageLookupByLibrary.simpleMessage("符號"),
         "termsOfService": MessageLookupByLibrary.simpleMessage("服務條款"),
         "text": MessageLookupByLibrary.simpleMessage("文字"),
         "theme": MessageLookupByLibrary.simpleMessage("主題"),
@@ -558,6 +582,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("轉賬記錄不會被刪除"),
         "transcript": MessageLookupByLibrary.simpleMessage("聊天記錄"),
         "transfer": MessageLookupByLibrary.simpleMessage("轉賬"),
+        "travelAndPlaces": MessageLookupByLibrary.simpleMessage("旅行與地點"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("開啟通知"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("輸入訊息"),
         "unableToOpenFile": m43,
@@ -587,7 +612,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsYourName": MessageLookupByLibrary.simpleMessage("你的名字？"),
         "window": MessageLookupByLibrary.simpleMessage("視窗"),
         "withdrawal": MessageLookupByLibrary.simpleMessage("提現"),
-        "writeCircles": MessageLookupByLibrary.simpleMessage("管理圈子"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youDeletedThisMessage":
             MessageLookupByLibrary.simpleMessage("你撤回了一條訊息"),

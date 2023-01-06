@@ -221,6 +221,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "chatNotSupportViewOnPhone": MessageLookupByLibrary.simpleMessage(
             "This type of message is not supported, please check on your phone."),
         "chatPinMessage": m7,
+        "chatTextSize": MessageLookupByLibrary.simpleMessage("Chat Text Size"),
         "checkNewVersion":
             MessageLookupByLibrary.simpleMessage("Check new version"),
         "circleSubtitle": m8,
@@ -302,6 +303,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "editCircleName":
             MessageLookupByLibrary.simpleMessage("Edit Circle Name"),
+        "editConversations":
+            MessageLookupByLibrary.simpleMessage("Edit Conversations"),
         "editGroupDescription":
             MessageLookupByLibrary.simpleMessage("Edit Group Description"),
         "editGroupName":
@@ -439,6 +442,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
         "hideMixin": MessageLookupByLibrary.simpleMessage("Hide Mixin"),
         "hour": m25,
+        "howAreYou": MessageLookupByLibrary.simpleMessage("Hi, how are you?"),
+        "iAmGood": MessageLookupByLibrary.simpleMessage("I’m good."),
         "ignoreThisVersion":
             MessageLookupByLibrary.simpleMessage("Ignore the new version"),
         "image": MessageLookupByLibrary.simpleMessage("image"),
@@ -470,8 +475,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Continue to log in and abort account deletion"),
         "loginByQrcode": MessageLookupByLibrary.simpleMessage(
             "Login to Mixin Messenger by QR Code"),
-        "loginByQrcodeTips": MessageLookupByLibrary.simpleMessage(
-            "Open Mixin Messenger on your phone, scan the QR Code on the screen and confirm your login."),
         "loginByQrcodeTips1": MessageLookupByLibrary.simpleMessage(
             "Open Mixin Messenger on your phone."),
         "loginByQrcodeTips2": MessageLookupByLibrary.simpleMessage(
@@ -707,7 +710,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("What\'s your name?"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),
         "withdrawal": MessageLookupByLibrary.simpleMessage("Withdraw"),
-        "writeCircles": MessageLookupByLibrary.simpleMessage("Write Circles"),
         "you": MessageLookupByLibrary.simpleMessage("You"),
         "youDeletedThisMessage":
             MessageLookupByLibrary.simpleMessage("You deleted this message"),

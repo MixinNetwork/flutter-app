@@ -262,6 +262,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "durationIsTooShort": MessageLookupByLibrary.simpleMessage("期間が短すぎます"),
         "edit": MessageLookupByLibrary.simpleMessage("編集"),
         "editCircleName": MessageLookupByLibrary.simpleMessage("グループリスト名を編集"),
+        "editConversations": MessageLookupByLibrary.simpleMessage("チャットルームを編集"),
         "editGroupDescription":
             MessageLookupByLibrary.simpleMessage("グループアナウンスを編集"),
         "editGroupName": MessageLookupByLibrary.simpleMessage("グループ名を編集"),
@@ -383,6 +384,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "helpCenter": MessageLookupByLibrary.simpleMessage("ヘルプセンター"),
         "hideMixin": MessageLookupByLibrary.simpleMessage("Mixinを非表示にする"),
         "hour": m25,
+        "howAreYou": MessageLookupByLibrary.simpleMessage("こんにちは、調子はどうですか"),
+        "iAmGood": MessageLookupByLibrary.simpleMessage("いい気分"),
         "ignoreThisVersion": MessageLookupByLibrary.simpleMessage("最新版を無視"),
         "image": MessageLookupByLibrary.simpleMessage("画像"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("ファイルが含まれています"),
@@ -411,10 +414,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("そのままログインし、アカウント削除をキャンセルします"),
         "loginByQrcode":
             MessageLookupByLibrary.simpleMessage("QRコードでMixinにログインする"),
-        "loginByQrcodeTips": MessageLookupByLibrary.simpleMessage(
-            "携帯でMixinを開き、画面に表示されるQRコードを読み取り、ログインします"),
         "loginByQrcodeTips1":
-            MessageLookupByLibrary.simpleMessage("携帯でMixinを開き。"),
+            MessageLookupByLibrary.simpleMessage("携帯でMixinを開き"),
         "loginByQrcodeTips2":
             MessageLookupByLibrary.simpleMessage("画面に表示されるQRコードを読み取り、ログインします"),
         "makeGroupAdmin": MessageLookupByLibrary.simpleMessage("管理者権限を付与"),
@@ -619,7 +620,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsYourName": MessageLookupByLibrary.simpleMessage("お名前は何ですか？"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),
         "withdrawal": MessageLookupByLibrary.simpleMessage("出金"),
-        "writeCircles": MessageLookupByLibrary.simpleMessage("グループリストの変更"),
         "you": MessageLookupByLibrary.simpleMessage("自分"),
         "youDeletedThisMessage":
             MessageLookupByLibrary.simpleMessage("このメッセージを削除しました。")
