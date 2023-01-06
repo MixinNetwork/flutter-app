@@ -27,8 +27,11 @@ class PostMessage extends HookWidget {
     final content =
         useMessageConverter(converter: (state) => state.content ?? '');
 
-    return MessageBubble(
-      child: MessagePost(showStatus: true, content: content),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 400),
+      child: MessageBubble(
+        child: MessagePost(showStatus: true, content: content),
+      ),
     );
   }
 }

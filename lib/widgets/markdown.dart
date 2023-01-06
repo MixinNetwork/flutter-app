@@ -19,10 +19,13 @@ StyleConfig buildMarkdownStyleConfig(BuildContext context, bool darkMode) =>
         }
         final imageUrl = url;
 
-        return CacheImage(
-          imageUrl,
-          width: width,
-          height: height,
+        return ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: CacheImage(
+            imageUrl,
+            width: width,
+            height: height,
+          ),
         );
       },
       pConfig: PConfig(
