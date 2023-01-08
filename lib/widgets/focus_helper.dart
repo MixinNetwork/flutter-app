@@ -44,6 +44,9 @@ void useDesktopLifecycleAutoFocus() {
 
 void _cleanSelection(BuildContext? context) {
   try {
+    if (context?.mounted != true) {
+      return;
+    }
     final editableText = context?.findAncestorWidgetOfExactType<EditableText>();
     if (editableText == null) {
       return;

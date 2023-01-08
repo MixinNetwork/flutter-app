@@ -95,6 +95,7 @@ Future<List<ConversationSelector>?> showConversationSelector({
   bool allowEmpty = false,
   List<ConversationSelector> initSelected = const [],
   String? confirmedText,
+  Widget? action,
 }) =>
     showMixinDialog<List<ConversationSelector>?>(
       context: context,
@@ -105,6 +106,7 @@ Future<List<ConversationSelector>?> showConversationSelector({
         initSelected: initSelected,
         allowEmpty: allowEmpty,
         confirmedText: confirmedText,
+        action: action,
       ),
     );
 
@@ -143,6 +145,7 @@ class _ConversationSelector extends HookWidget {
     this.initSelected = const [],
     this.allowEmpty = false,
     this.confirmedText,
+    this.action,
   });
 
   final String title;
@@ -151,6 +154,7 @@ class _ConversationSelector extends HookWidget {
   final List<ConversationSelector> initSelected;
   final bool allowEmpty;
   final String? confirmedText;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -267,8 +271,8 @@ class _ConversationSelector extends HookWidget {
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child:
-                          !singleSelect && (allowEmpty || selected.isNotEmpty)
+                      child: action ??
+                          (!singleSelect && (allowEmpty || selected.isNotEmpty)
                               ? MixinButton(
                                   backgroundTransparent: true,
                                   padding: const EdgeInsets.all(8),
@@ -288,7 +292,7 @@ class _ConversationSelector extends HookWidget {
                                     confirmedText ?? context.l10n.next,
                                   ),
                                 )
-                              : const SizedBox(),
+                              : const SizedBox()),
                     ),
                   ),
                 ],

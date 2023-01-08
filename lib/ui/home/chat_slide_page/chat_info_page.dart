@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -6,11 +7,13 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/logger.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/cell.dart';
 import '../../../widgets/conversation/mute_dialog.dart';
 import '../../../widgets/dialog.dart';
+import '../../../widgets/menu.dart';
 import '../../../widgets/more_extended_text.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
@@ -138,6 +141,39 @@ class ChatInfoPage extends HookWidget {
                       singleSelect: true,
                       title: context.l10n.shareContact,
                       onlyContact: false,
+                      action: ContextMenuPortalEntry(
+                        buildMenus: () => [
+                          ContextMenu(
+                            icon: Resources.assetsImagesContextMenuCopySvg,
+                            title: context.l10n.copyInvite,
+                            onTap: () async {
+                              final userId = conversation.userId;
+                              if (userId == null) {
+                                e('can not share contact, userId is null $conversation');
+                                return;
+                              }
+
+                              final user = await context.database.userDao
+                                  .userById(userId)
+                                  .getSingleOrNull();
+
+                              if (user == null) {
+                                e('can not find user $userId');
+                                return;
+                              }
+
+                              i('share contact ${user.userId} ${user.codeUrl}');
+                              await Clipboard.setData(
+                                  ClipboardData(text: user.codeUrl));
+                            },
+                          ),
+                        ],
+                        interactiveForTap: true,
+                        child: const ActionButton(
+                          name: Resources.assetsImagesInviteShareSvg,
+                          interactive: false,
+                        ),
+                      ),
                     );
 
                     if (result == null || result.isEmpty) return;
