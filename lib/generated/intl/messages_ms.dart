@@ -138,6 +138,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "conversation": MessageLookupByLibrary.simpleMessage("Perbualan"),
         "copy": MessageLookupByLibrary.simpleMessage("Salinan"),
         "copyInvite": MessageLookupByLibrary.simpleMessage("Salin pautan"),
+        "copyLink": MessageLookupByLibrary.simpleMessage("Salin pautan"),
         "create": MessageLookupByLibrary.simpleMessage("Buat"),
         "dataAndStorageUsage":
             MessageLookupByLibrary.simpleMessage("Penggunaan Data dan Storan"),

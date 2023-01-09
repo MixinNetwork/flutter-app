@@ -222,6 +222,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "conversationDeleteTitle": m11,
         "copy": MessageLookupByLibrary.simpleMessage("複製"),
         "copyInvite": MessageLookupByLibrary.simpleMessage("複製邀請鏈接"),
+        "copyLink": MessageLookupByLibrary.simpleMessage("複製鏈接"),
         "create": MessageLookupByLibrary.simpleMessage("創建"),
         "createCircle": MessageLookupByLibrary.simpleMessage("新建圈子"),
         "createConversation": MessageLookupByLibrary.simpleMessage("新建會話"),

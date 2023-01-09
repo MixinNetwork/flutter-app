@@ -82,6 +82,7 @@
 "conversationDeleteTitle" : "Delete chat: {arg0}",
 "copy" : "Copy",
 "copyInvite" : "Copy Invite Link",
+"copyLink" : "Copy Link",
 "create" : "Create",
 "createCircle" : "New Circle",
 "createConversation" : "New Conversation",
