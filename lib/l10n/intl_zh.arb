@@ -81,6 +81,7 @@
 "conversationDeleteTitle" : "删除会话：{arg0}",
 "copy" : "复制",
 "copyInvite" : "复制邀请链接",
+"copyLink" : "复制链接",
 "create" : "创建",
 "createCircle" : "新建圈子",
 "createConversation" : "新建会话",

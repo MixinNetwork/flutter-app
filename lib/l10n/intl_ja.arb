@@ -76,6 +76,7 @@
 "conversationDeleteTitle" : "チャットを削除する：{arg0}",
 "copy" : "コピー",
 "copyInvite" : "招待リンクをコピーする",
+"copyLink" : "リンクをコピー",
 "create" : "作成",
 "createCircle" : "新しいグループリスト",
 "createConversation" : "新しいチャットルーム",
