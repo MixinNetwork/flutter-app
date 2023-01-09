@@ -16,6 +16,7 @@ import '../../db/dao/transcript_message_dao.dart';
 import '../../db/mixin_database.dart';
 import '../../db/util/util.dart';
 import '../../enum/media_status.dart';
+import '../../widgets/message/send_message_dialog/attachment_extra.dart';
 import '../../widgets/toast.dart';
 import '../crypto_util.dart';
 import '../extension/extension.dart';
@@ -162,6 +163,17 @@ class AttachmentUtil extends ChangeNotifier {
       return;
     }
 
+    String attachmentId;
+
+    try {
+      final json = await jsonDecodeWithIsolate(content);
+      final attachmentExtra =
+          AttachmentExtra.fromJson(json as Map<String, dynamic>);
+      attachmentId = attachmentExtra.attachmentId;
+    } catch (e) {
+      attachmentId = content;
+    }
+
     final file = getAttachmentFile(
       category,
       conversationId,
@@ -176,7 +188,7 @@ class AttachmentUtil extends ChangeNotifier {
     if (file.existsSync()) await file.delete();
 
     try {
-      final response = await _client.attachmentApi.getAttachment(content);
+      final response = await _client.attachmentApi.getAttachment(attachmentId);
       d('download ${response.data.viewUrl}');
 
       if (await isNotPending(messageId)) return;
