@@ -253,107 +253,109 @@ class _TransactionDetailInfo extends StatelessWidget {
   final String? opponentFullName;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(left: 24, right: 24, top: 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+  Widget build(BuildContext context) {
+    final createdAt = snapshot.createdAt.toLocal();
+    return Padding(
+      padding: const EdgeInsets.only(left: 24, right: 24, top: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TransactionInfoTile(
+            title: Text(context.l10n.transactionId),
+            subtitle: SelectableText(snapshot.snapshotId),
+          ),
+          TransactionInfoTile(
+            title: Text(context.l10n.assetType),
+            subtitle: SelectableText(snapshot.symbolName ?? ''),
+          ),
+          TransactionInfoTile(
+            title: Text(context.l10n.transactionType),
+            subtitle: SelectableText(snapshot.l10nType(context)),
+          ),
+          if (snapshot.type == SnapshotType.deposit) ...[
             TransactionInfoTile(
-              title: Text(context.l10n.transactionId),
-              subtitle: SelectableText(snapshot.snapshotId),
+              title: Text(context.l10n.from),
+              subtitle: SelectableText(snapshot.sender ?? ''),
             ),
             TransactionInfoTile(
-              title: Text(context.l10n.assetType),
-              subtitle: SelectableText(snapshot.symbolName ?? ''),
+              title: Text(context.l10n.transactionHash),
+              subtitle: SelectableText(snapshot.transactionHash ?? ''),
             ),
+          ] else if (snapshot.type == SnapshotType.pending) ...[
             TransactionInfoTile(
-              title: Text(context.l10n.transactionType),
-              subtitle: SelectableText(snapshot.l10nType(context)),
-            ),
-            if (snapshot.type == SnapshotType.deposit) ...[
-              TransactionInfoTile(
-                title: Text(context.l10n.from),
-                subtitle: SelectableText(snapshot.sender ?? ''),
-              ),
-              TransactionInfoTile(
-                title: Text(context.l10n.transactionHash),
-                subtitle: SelectableText(snapshot.transactionHash ?? ''),
-              ),
-            ] else if (snapshot.type == SnapshotType.pending) ...[
-              TransactionInfoTile(
-                title: Text(context.l10n.status),
-                subtitle: SelectableText(
-                  context.l10n.pendingConfirmation(
-                    snapshot.confirmations ?? 0,
-                    snapshot.confirmations ?? 0,
-                    snapshot.assetConfirmations ?? 0,
-                  ),
+              title: Text(context.l10n.status),
+              subtitle: SelectableText(
+                context.l10n.pendingConfirmation(
+                  snapshot.confirmations ?? 0,
+                  snapshot.confirmations ?? 0,
+                  snapshot.assetConfirmations ?? 0,
                 ),
               ),
-              TransactionInfoTile(
-                title: Text(context.l10n.from),
-                subtitle: SelectableText(snapshot.sender ?? ''),
-              ),
-              TransactionInfoTile(
-                title: Text(context.l10n.transactionHash),
-                subtitle: SelectableText(snapshot.transactionHash ?? ''),
-              ),
-            ] else if (snapshot.type == SnapshotType.transfer) ...[
-              TransactionInfoTile(
-                title: Text(context.l10n.from),
-                subtitle: SelectableText((snapshot.isPositive
-                        ? opponentFullName
-                        : context.multiAuthState.currentUser?.fullName) ??
-                    ''),
-              ),
-              TransactionInfoTile(
-                title: Text(context.l10n.receiver),
-                subtitle: SelectableText((!snapshot.isPositive
-                        ? opponentFullName
-                        : context.multiAuthState.currentUser?.fullName) ??
-                    ''),
-              ),
-            ] else if (snapshot.tag?.isNotEmpty ?? false) ...[
-              TransactionInfoTile(
-                title: Text(context.l10n.transactionHash),
-                subtitle: SelectableText(snapshot.transactionHash ?? ''),
-              ),
-              TransactionInfoTile(
-                title: Text(context.l10n.address),
-                subtitle: SelectableText(snapshot.receiver ?? ''),
-              ),
-            ] else ...[
-              TransactionInfoTile(
-                title: Text(context.l10n.transactionHash),
-                subtitle: SelectableText(snapshot.transactionHash ?? ''),
-              ),
-              TransactionInfoTile(
-                title: Text(context.l10n.receiver),
-                subtitle: SelectableText(snapshot.receiver ?? ''),
-              ),
-            ],
-            if (snapshot.memo?.isNotEmpty ?? false)
-              TransactionInfoTile(
-                title: Text(context.l10n.memo),
-                subtitle: SelectableText(snapshot.memo!),
-              ),
-            TransactionInfoTile(
-              title: Text(context.l10n.time),
-              subtitle: SelectableText(
-                  '${DateFormat.yMMMMd().format(snapshot.createdAt)} '
-                  '${DateFormat.Hms().format(snapshot.createdAt)}'),
             ),
-            if (snapshot.type == SnapshotType.transfer &&
-                snapshot.traceId != null &&
-                snapshot.traceId!.isNotEmpty)
-              TransactionInfoTile(
-                title: Text(context.l10n.trace),
-                subtitle: SelectableText(snapshot.traceId ?? ''),
-              ),
+            TransactionInfoTile(
+              title: Text(context.l10n.from),
+              subtitle: SelectableText(snapshot.sender ?? ''),
+            ),
+            TransactionInfoTile(
+              title: Text(context.l10n.transactionHash),
+              subtitle: SelectableText(snapshot.transactionHash ?? ''),
+            ),
+          ] else if (snapshot.type == SnapshotType.transfer) ...[
+            TransactionInfoTile(
+              title: Text(context.l10n.from),
+              subtitle: SelectableText((snapshot.isPositive
+                      ? opponentFullName
+                      : context.multiAuthState.currentUser?.fullName) ??
+                  ''),
+            ),
+            TransactionInfoTile(
+              title: Text(context.l10n.receiver),
+              subtitle: SelectableText((!snapshot.isPositive
+                      ? opponentFullName
+                      : context.multiAuthState.currentUser?.fullName) ??
+                  ''),
+            ),
+          ] else if (snapshot.tag?.isNotEmpty ?? false) ...[
+            TransactionInfoTile(
+              title: Text(context.l10n.transactionHash),
+              subtitle: SelectableText(snapshot.transactionHash ?? ''),
+            ),
+            TransactionInfoTile(
+              title: Text(context.l10n.address),
+              subtitle: SelectableText(snapshot.receiver ?? ''),
+            ),
+          ] else ...[
+            TransactionInfoTile(
+              title: Text(context.l10n.transactionHash),
+              subtitle: SelectableText(snapshot.transactionHash ?? ''),
+            ),
+            TransactionInfoTile(
+              title: Text(context.l10n.receiver),
+              subtitle: SelectableText(snapshot.receiver ?? ''),
+            ),
           ],
-        ),
-      );
+          if (snapshot.memo?.isNotEmpty ?? false)
+            TransactionInfoTile(
+              title: Text(context.l10n.memo),
+              subtitle: SelectableText(snapshot.memo!),
+            ),
+          TransactionInfoTile(
+            title: Text(context.l10n.time),
+            subtitle: SelectableText('${DateFormat.yMMMMd().format(createdAt)}'
+                '${DateFormat.Hms().format(createdAt)}'),
+          ),
+          if (snapshot.type == SnapshotType.transfer &&
+              snapshot.traceId != null &&
+              snapshot.traceId!.isNotEmpty)
+            TransactionInfoTile(
+              title: Text(context.l10n.trace),
+              subtitle: SelectableText(snapshot.traceId ?? ''),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class TransactionInfoTile extends StatelessWidget {
