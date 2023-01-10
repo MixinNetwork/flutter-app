@@ -164,12 +164,14 @@ class AttachmentUtil extends ChangeNotifier {
     }
 
     String attachmentId;
+    bool? shareable;
 
     try {
       final json = await jsonDecodeWithIsolate(content);
       final attachmentExtra =
           AttachmentExtra.fromJson(json as Map<String, dynamic>);
       attachmentId = attachmentExtra.attachmentId;
+      shareable = attachmentExtra.shareable;
     } catch (e) {
       attachmentId = content;
     }
@@ -242,9 +244,14 @@ class AttachmentUtil extends ChangeNotifier {
         final fileSize = await file.length();
 
         if (attachmentMessage != null) {
-          attachmentMessage.createdAt = response.data.createdAt;
-          final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-          await _messageDao.updateMessageContent(messageId, encoded);
+          final content = await jsonEncodeWithIsolate(AttachmentExtra(
+            attachmentId: response.data.attachmentId,
+            messageId: messageId,
+            createdAt: response.data.createdAt,
+            shareable: shareable,
+          ).toJson());
+
+          await _messageDao.updateMessageContent(messageId, content);
         }
 
         if (message != null && transcriptMessage != null) {
