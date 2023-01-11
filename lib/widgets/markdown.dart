@@ -1,42 +1,43 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 
 import '../utils/uri_utils.dart';
 import 'cache_image.dart';
 
-StyleConfig buildMarkdownStyleConfig(BuildContext context, bool darkMode) =>
-    StyleConfig(
-      markdownTheme:
-          darkMode ? MarkdownTheme.darkTheme : MarkdownTheme.lightTheme,
-      imgBuilder: (url, attributes) {
-        double? width;
-        double? height;
-        if (attributes['width'] != null) {
-          width = double.parse(attributes['width']!);
-        }
-        if (attributes['height'] != null) {
-          height = double.parse(attributes['height']!);
-        }
-        final imageUrl = url;
-
-        return ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: CacheImage(
-            imageUrl,
-            width: width,
-            height: height,
-          ),
-        );
-      },
-      pConfig: PConfig(
-        onLinkTap: (href) {
-          if (href?.isEmpty ?? true) return;
-          openUri(context, href!);
-        },
-      ),
-      olConfig: OlConfig(selectable: false),
-      ulConfig: UlConfig(selectable: false),
-    );
+// StyleConfig buildMarkdownStyleConfig(BuildContext context, bool darkMode) =>
+//     StyleConfig(
+//       markdownTheme:
+//           darkMode ? MarkdownTheme.darkTheme : MarkdownTheme.lightTheme,
+//       imgBuilder: (url, attributes) {
+//         double? width;
+//         double? height;
+//         if (attributes['width'] != null) {
+//           width = double.parse(attributes['width']!);
+//         }
+//         if (attributes['height'] != null) {
+//           height = double.parse(attributes['height']!);
+//         }
+//         final imageUrl = url;
+//
+//         return ConstrainedBox(
+//           constraints: const BoxConstraints(maxWidth: 400),
+//           child: CacheImage(
+//             imageUrl,
+//             width: width,
+//             height: height,
+//           ),
+//         );
+//       },
+//       pConfig: PConfig(
+//         onLinkTap: (href) {
+//           if (href?.isEmpty ?? true) return;
+//           openUri(context, href!);
+//         },
+//       ),
+//       olConfig: OlConfig(selectable: false),
+//       ulConfig: UlConfig(selectable: false),
+//     );
 
 class Markdown extends StatelessWidget {
   const Markdown({
@@ -57,6 +58,8 @@ class Markdown extends StatelessWidget {
         data: data,
         padding: padding,
         physics: physics,
-        styleConfig: buildMarkdownStyleConfig(context, darkMode),
+        config:
+            darkMode ? MarkdownConfig.darkConfig : MarkdownConfig.defaultConfig,
+        markdownGeneratorConfig: MarkdownGeneratorConfig(generators: []),
       );
 }

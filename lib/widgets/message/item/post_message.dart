@@ -79,22 +79,11 @@ class MessagePost extends StatelessWidget {
                       minWidth: 128,
                       maxHeight: 400,
                     ),
-                    child: SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      child: IntrinsicWidth(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: MarkdownGenerator(
-                                data: postContent,
-                                styleConfig: buildMarkdownStyleConfig(
-                                  context,
-                                  context.brightnessValue != 0,
-                                ),
-                              ).widgets ??
-                              [],
-                        ),
-                      ),
+                    child: MarkdownWidget(
+                      data: postContent,
+                      config: context.brightness == Brightness.dark
+                          ? MarkdownConfig.darkConfig
+                          : MarkdownConfig.defaultConfig,
                     ),
                   );
                 }),
@@ -164,10 +153,8 @@ class PostPreview extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.theme.background,
-        ),
+  Widget build(BuildContext context) => Material(
+        color: context.theme.background,
         child: Column(
           children: [
             MixinAppBar(
