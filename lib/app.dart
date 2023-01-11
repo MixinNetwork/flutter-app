@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import 'account/account_key_value.dart';
 import 'account/account_server.dart';
 import 'account/notification_service.dart';
 import 'bloc/bloc_converter.dart';
@@ -29,6 +30,7 @@ import 'ui/landing/landing.dart';
 import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
+import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/system/text_input.dart';
 import 'utils/system/tray.dart';
@@ -261,6 +263,34 @@ class _Home extends HookWidget {
           ..refreshSticker()
           ..initCircles();
       }
+    }, [signed]);
+
+    useEffect(() {
+      Future<void> effect() async {
+        if (!signed || accountServer == null) return;
+
+        try {
+          final currentDeviceId = await getDeviceId();
+          if (currentDeviceId == 'unknown') return;
+
+          final deviceId = AccountKeyValue.instance.deviceId;
+
+          if (deviceId == null) {
+            await AccountKeyValue.instance.setDeviceId(currentDeviceId);
+            return;
+          }
+
+          if (deviceId != currentDeviceId) {
+            final multiAuthCubit = context.multiAuthCubit;
+            await accountServer.signOutAndClear();
+            multiAuthCubit.signOut();
+          }
+        } catch (e) {
+          w('checkDeviceId error: $e');
+        }
+      }
+
+      effect();
     }, [signed]);
 
     if (signed) {

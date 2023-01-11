@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:android_id/android_id.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:platform_device_id/platform_device_id.dart';
 import 'package:ui_device/ui_device.dart' as ui_device;
 
 import '../crypto/uuid/uuid.dart';
@@ -45,41 +45,14 @@ Future<String> getPlatformVersion() async {
 
 Future<String> getDeviceId() async {
   try {
-    final deviceInfo = DeviceInfoPlugin();
-    if (Platform.isIOS) {
-      final iosInfo = await deviceInfo.iosInfo;
-      final id = iosInfo.identifierForVendor;
-      if (id != null) {
-        return id;
-      }
-      e('failed to get iOS device id');
+    final id = (await PlatformDeviceId.getDeviceId)?.trim();
+    if (id == null || id.isEmpty)
+      throw Exception("${Platform.operatingSystem}'s device id is empty");
+    if (Platform.isAndroid || kIsWeb) {
+      return nameUuidFromBytes(utf8.encode(id)).uuid;
     }
-    if (Platform.isAndroid) {
-      final id = await const AndroidId().getId();
-      if (id != null) {
-        return nameUuidFromBytes(utf8.encode(id)).uuid;
-      }
-      e('failed to get Android device id');
-    }
-    if (Platform.isMacOS) {
-      final macOsInfo = await deviceInfo.macOsInfo;
-      final id = macOsInfo.systemGUID;
-      if (id != null) {
-        return nameUuidFromBytes(utf8.encode(id)).uuid;
-      }
-      e('failed to get MacOS device id');
-    }
-    if (Platform.isLinux) {
-      final linuxInfo = await deviceInfo.linuxInfo;
-      final id = linuxInfo.machineId;
-      if (id != null) {
-        return nameUuidFromBytes(utf8.encode(id)).uuid;
-      }
-      e('failed to get Linux device id');
-    }
-    if (Platform.isWindows) {
-      assert(false, 'Windows is not supported');
-    }
+
+    return id;
   } catch (error, stack) {
     e('failed to get device id. $error $stack');
   }
