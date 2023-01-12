@@ -36,6 +36,7 @@ import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/reg_exp_utils.dart';
+import '../widgets/message/send_message_dialog/attachment_extra.dart';
 import 'decrypt_message.dart';
 import 'isolate_event.dart';
 import 'sender.dart';
@@ -449,10 +450,25 @@ class _MessageProcessRunner {
 
       MessageResult? result;
       var content = message.content;
-      String? lengthLimitedContent;
+      String? sentContent;
       if (message.category.isPost || message.category.isText) {
         content = content?.substring(0, min(content.length, kMaxTextLength));
-        lengthLimitedContent = content;
+        sentContent = content;
+      } else if (message.category.isAttachment && content != null) {
+        try {
+          final attachment = AttachmentMessage.fromJson(
+              (await jsonBase64DecodeWithIsolate(content))
+                  as Map<String, dynamic>);
+          final attachmentExtra = AttachmentExtra(
+            attachmentId: attachment.attachmentId,
+            messageId: messageId,
+            createdAt: attachment.createdAt,
+          );
+
+          sentContent = await jsonEncodeWithIsolate(attachmentExtra);
+        } catch (error) {
+          e('Get sentContent error: $error');
+        }
       }
 
       final conversation = await database.conversationDao
@@ -544,7 +560,7 @@ class _MessageProcessRunner {
         if (result?.errorCode == null) {
           await database.messageDao.updateMessageContentAndStatus(
             message.messageId,
-            lengthLimitedContent,
+            sentContent,
             MessageStatus.sent,
           );
         }

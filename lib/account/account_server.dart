@@ -818,6 +818,14 @@ class AccountServer {
         message.messageId,
         message.type,
         File(convertMessageAbsolutePath(message)),
+        message.mediaName,
+        message.mediaMimeType!,
+        message.mediaSize!,
+        message.mediaWidth,
+        message.mediaHeight,
+        message.thumbImage,
+        message.mediaDuration,
+        message.mediaWaveform,
         message.content,
       );
 

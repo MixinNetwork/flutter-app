@@ -37,7 +37,7 @@ extension MessageItemExtension on MessageItem {
       }
     }
 
-    if (type.isAudio) {
+    if (type.isAudio && mediaStatus == MediaStatus.done) {
       try {
         return AttachmentExtra.fromJson(
                     jsonDecode(content!) as Map<String, dynamic>)

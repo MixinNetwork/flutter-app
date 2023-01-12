@@ -32,7 +32,6 @@ import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/cache_image.dart';
-import '../widgets/message/send_message_dialog/attachment_extra.dart';
 import 'show_pin_message_key_value.dart';
 
 const jpegMimeType = 'image/jpeg';
@@ -147,27 +146,29 @@ class SendMessageHelper {
     await attachment.writeAsBytes(_bytes.toList());
     final thumbImage = await attachment.encodeBlurHash();
 
+    final attachmentSize = await attachment.length();
     final quoteMessage =
         await _messageDao.findMessageItemByMessageId(quoteMessageId);
     final fileName = file?.name ?? '$messageId.png';
     final message = Message(
-        messageId: messageId,
-        conversationId: conversationId,
-        userId: senderId,
-        content: '',
-        category: category,
-        mediaUrl: attachment.pathBasename,
-        mediaMimeType: mimeType,
-        mediaSize: await attachment.length(),
-        mediaWidth: imageWidth,
-        mediaHeight: imageHeight,
-        name: fileName,
-        mediaStatus: MediaStatus.pending,
-        status: MessageStatus.sending,
-        createdAt: DateTime.now(),
-        quoteMessageId: quoteMessageId,
-        quoteContent: quoteMessage?.toJson(),
-        thumbImage: thumbImage);
+      messageId: messageId,
+      conversationId: conversationId,
+      userId: senderId,
+      content: '',
+      category: category,
+      mediaUrl: attachment.pathBasename,
+      mediaMimeType: mimeType,
+      mediaSize: attachmentSize,
+      mediaWidth: imageWidth,
+      mediaHeight: imageHeight,
+      name: fileName,
+      mediaStatus: MediaStatus.pending,
+      status: MessageStatus.sending,
+      createdAt: DateTime.now(),
+      quoteMessageId: quoteMessageId,
+      quoteContent: quoteMessage?.toJson(),
+      thumbImage: thumbImage,
+    );
     await _insertSendMessageToDb(message);
 
     if (await _attachmentUtil.isNotPending(messageId)) return;
@@ -176,16 +177,25 @@ class SendMessageHelper {
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
 
-    final attachmentExtra = AttachmentExtra(
-        attachmentId: attachmentResult.attachmentId,
-        messageId: messageId,
-        createdAt: attachmentResult.createdAt);
+    final attachmentMessage = AttachmentMessage(
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      mimeType,
+      attachmentSize,
+      null,
+      imageWidth,
+      imageHeight,
+      thumbImage,
+      null,
+      null,
+      null,
+      attachmentResult.createdAt,
+    );
 
-    final content = await jsonEncodeWithIsolate(attachmentExtra);
-
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messageDao.updateAttachmentMessageContentAndStatus(
-        messageId, content);
-
+        messageId, encoded);
     await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
@@ -212,6 +222,7 @@ class SendMessageHelper {
     );
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
+    final attachmentSize = await attachment.length();
     final quoteMessage =
         await _messageDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
@@ -222,7 +233,7 @@ class SendMessageHelper {
       category: category,
       mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
-      mediaSize: await attachment.length(),
+      mediaSize: attachmentSize,
       mediaWidth: mediaWidth,
       mediaHeight: mediaHeight,
       thumbImage: thumbImage,
@@ -240,16 +251,25 @@ class SendMessageHelper {
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
 
-    final attachmentExtra = AttachmentExtra(
-        attachmentId: attachmentResult.attachmentId,
-        messageId: messageId,
-        createdAt: attachmentResult.createdAt);
+    final attachmentMessage = AttachmentMessage(
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      mimeType,
+      attachmentSize,
+      file.name,
+      mediaWidth,
+      mediaHeight,
+      thumbImage,
+      mediaDuration == null ? null : int.tryParse(mediaDuration),
+      null,
+      null,
+      attachmentResult.createdAt,
+    );
 
-    final content = await jsonEncodeWithIsolate(attachmentExtra);
-
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messageDao.updateAttachmentMessageContentAndStatus(
-        messageId, content);
-
+        messageId, encoded);
     await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
@@ -297,6 +317,7 @@ class SendMessageHelper {
 
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
+    final attachmentSize = await attachment.length();
     final quoteMessage =
         await _messageDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
@@ -307,7 +328,7 @@ class SendMessageHelper {
       category: category,
       mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
-      mediaSize: await attachment.length(),
+      mediaSize: attachmentSize,
       name: name ?? file.name,
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.sending,
@@ -320,16 +341,26 @@ class SendMessageHelper {
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
-    final attachmentExtra = AttachmentExtra(
-        attachmentId: attachmentResult.attachmentId,
-        messageId: messageId,
-        createdAt: attachmentResult.createdAt);
 
-    final content = await jsonEncodeWithIsolate(attachmentExtra);
+    final attachmentMessage = AttachmentMessage(
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      mimeType,
+      attachmentSize,
+      name ?? file.name,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      attachmentResult.createdAt,
+    );
 
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messageDao.updateAttachmentMessageContentAndStatus(
-        messageId, content);
-
+        messageId, encoded);
     await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
@@ -386,6 +417,7 @@ class SendMessageHelper {
 
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
+    final attachmentSize = await attachment.length();
     final quoteMessage =
         await _messageDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
@@ -396,7 +428,7 @@ class SendMessageHelper {
       category: category,
       mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
-      mediaSize: await attachment.length(),
+      mediaSize: attachmentSize,
       mediaDuration: mediaDuration,
       mediaWaveform: mediaWaveform,
       name: file.name,
@@ -412,16 +444,25 @@ class SendMessageHelper {
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
 
-    final attachmentExtra = AttachmentExtra(
-        attachmentId: attachmentResult.attachmentId,
-        messageId: messageId,
-        createdAt: attachmentResult.createdAt);
+    final attachmentMessage = AttachmentMessage(
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      mimeType,
+      attachmentSize,
+      file.name,
+      null,
+      null,
+      null,
+      int.tryParse(mediaDuration ?? ''),
+      mediaWaveform,
+      null,
+      attachmentResult.createdAt,
+    );
 
-    final content = await jsonEncodeWithIsolate(attachmentExtra);
-
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messageDao.updateAttachmentMessageContentAndStatus(
-        messageId, content);
-
+        messageId, encoded);
     await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
@@ -936,6 +977,14 @@ class SendMessageHelper {
     String messageId,
     String category,
     File file,
+    String? name,
+    String mediaMimeType,
+    int mediaSize,
+    int? mediaWidth,
+    int? mediaHeight,
+    String? thumbImage,
+    String? mediaDuration,
+    dynamic mediaWaveform,
     String? content,
   ) async {
     AttachmentResult? attachmentResult;
@@ -945,17 +994,25 @@ class SendMessageHelper {
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(file, messageId, category);
     if (attachmentResult == null) return;
-
-    final attachmentExtra = AttachmentExtra(
-        attachmentId: attachmentResult.attachmentId,
-        messageId: messageId,
-        createdAt: attachmentResult.createdAt);
-
-    final attachmentExtraContent = await jsonEncodeWithIsolate(attachmentExtra);
-
+    final duration = mediaDuration != null ? int.parse(mediaDuration) : null;
+    final attachmentMessage = AttachmentMessage(
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      mediaMimeType,
+      mediaSize,
+      name,
+      mediaWidth,
+      mediaHeight,
+      thumbImage,
+      duration,
+      mediaWaveform,
+      null,
+      attachmentResult.createdAt,
+    );
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messageDao.updateAttachmentMessageContentAndStatus(
-        messageId, attachmentExtraContent);
-
+        messageId, encoded);
     await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
@@ -1133,16 +1190,24 @@ class SendMessageHelper {
     );
     if (attachmentResult == null) return;
 
-    final attachmentExtra = AttachmentExtra(
-        attachmentId: attachmentResult.attachmentId,
-        messageId: messageId,
-        createdAt: attachmentResult.createdAt);
-
-    final attachmentExtraContent = await jsonEncodeWithIsolate(attachmentExtra);
-
+    final attachmentMessage = AttachmentMessage(
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      defaultMimeType,
+      mediaSize,
+      null,
+      _width,
+      _height,
+      thumbImage,
+      null,
+      null,
+      null,
+      attachmentResult.createdAt,
+    );
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messageDao.updateAttachmentMessageContentAndStatus(
-        messageId, attachmentExtraContent);
-
+        messageId, encoded);
     await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
@@ -1194,16 +1259,24 @@ class SendMessageHelper {
     );
     if (attachmentResult == null) return;
 
-    final attachmentExtra = AttachmentExtra(
-        attachmentId: attachmentResult.attachmentId,
-        messageId: message.messageId,
-        createdAt: attachmentResult.createdAt);
-
-    final attachmentExtraContent = await jsonEncodeWithIsolate(attachmentExtra);
-
+    final attachmentMessage = AttachmentMessage(
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      message.mediaMimeType!,
+      mediaSize,
+      null,
+      message.mediaWidth,
+      message.mediaHeight,
+      thumbImage,
+      null,
+      null,
+      null,
+      attachmentResult.createdAt,
+    );
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messageDao.updateAttachmentMessageContentAndStatus(
-        message.messageId, attachmentExtraContent);
-
+        message.messageId, encoded);
     await _jobDao.insertSendingJob(message.messageId, message.conversationId);
   }
 }
