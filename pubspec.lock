@@ -270,10 +270,18 @@ packages:
     dependency: "direct dev"
     description:
       name: dart_code_metrics
-      sha256: "2089d4323d372397a8918636c911bbd140d6bc15c323393ae220fa29984ba990"
+      sha256: "95f22e95638c0dfb0cb4e3ba45e00bb06dd509c98f06d4c0fa45340b0a5392e0"
       url: "https://pub.dev"
     source: hosted
-    version: "5.3.0"
+    version: "5.4.0"
+  dart_code_metrics_presets:
+    dependency: transitive
+    description:
+      name: dart_code_metrics_presets
+      sha256: e19e41149806642574a2d35c3116349cb2270f42ca23c35b1ecc70d3b10188ae
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   dart_jsonwebtoken:
     dependency: transitive
     description:
@@ -1754,10 +1762,10 @@ packages:
     dependency: "direct main"
     description:
       name: window_manager
-      sha256: "5a7bda81b8b8e5feb733d07f4bd174e64dfb412031aff5314a375118e42b498e"
+      sha256: "5bdd29dc5f1f3185fc90696373a571d77968e03e5e820fb1ecdbdade3f5d8fff"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.8"
+    version: "0.3.0"
   window_size:
     dependency: "direct main"
     description:
