@@ -326,6 +326,20 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
             Limit(limit, null));
   }
 
+  Selectable<SearchConversationItem> searchConversationItemByIn(
+          List<String> ids) =>
+      db.searchConversationItemByIn(ids, (conversation, _, __, ___) {
+        if (ids.isEmpty) return ignoreOrderBy;
+
+        final conversationId =
+            '${conversation.aliasedName}.${conversation.conversationId.$name}';
+
+        return OrderBy([
+          OrderingTerm.asc(CustomExpression(
+              'CASE $conversationId ${ids.asMap().entries.map((e) => "WHEN '${e.value}' THEN ${e.key}").join(' ')} END'))
+        ]);
+      });
+
   Selectable<String?> announcement(String conversationId) =>
       (db.selectOnly(db.conversations)
             ..addColumns([db.conversations.announcement])
