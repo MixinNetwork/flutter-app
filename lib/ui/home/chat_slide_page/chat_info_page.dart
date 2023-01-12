@@ -145,7 +145,7 @@ class ChatInfoPage extends HookWidget {
                         buildMenus: () => [
                           ContextMenu(
                             icon: Resources.assetsImagesContextMenuCopySvg,
-                            title: context.l10n.copyInvite,
+                            title: context.l10n.copyLink,
                             onTap: () async {
                               final userId = conversation.userId;
                               if (userId == null) {
@@ -169,9 +169,10 @@ class ChatInfoPage extends HookWidget {
                           ),
                         ],
                         interactiveForTap: true,
-                        child: const ActionButton(
+                        child: ActionButton(
                           name: Resources.assetsImagesInviteShareSvg,
                           interactive: false,
+                          color: context.theme.icon,
                         ),
                       ),
                     );

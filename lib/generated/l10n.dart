@@ -884,6 +884,16 @@ class Localization {
     );
   }
 
+  /// `Copy Link`
+  String get copyLink {
+    return Intl.message(
+      'Copy Link',
+      name: 'copyLink',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Create`
   String get create {
     return Intl.message(

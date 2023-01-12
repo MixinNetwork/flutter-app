@@ -249,6 +249,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "copy": MessageLookupByLibrary.simpleMessage("Копировать"),
         "copyInvite": MessageLookupByLibrary.simpleMessage(
             "Скопировать пригласительную ссылку"),
+        "copyLink": MessageLookupByLibrary.simpleMessage("Копировать ссылку"),
         "create": MessageLookupByLibrary.simpleMessage("Создавать"),
         "createCircle": MessageLookupByLibrary.simpleMessage("Новый круг"),
         "createConversation":
