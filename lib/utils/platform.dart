@@ -46,8 +46,9 @@ Future<String> getPlatformVersion() async {
 Future<String> getDeviceId() async {
   try {
     final id = (await PlatformDeviceId.getDeviceId)?.trim();
-    if (id == null || id.isEmpty)
+    if (id == null || id.isEmpty) {
       throw Exception("${Platform.operatingSystem}'s device id is empty");
+    }
     if (Platform.isAndroid || kIsWeb) {
       return nameUuidFromBytes(utf8.encode(id)).uuid;
     }
