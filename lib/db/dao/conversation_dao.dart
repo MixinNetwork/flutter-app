@@ -335,7 +335,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
             '${conversation.aliasedName}.${conversation.conversationId.$name}';
 
         return OrderBy([
-          OrderingTerm.asc(CustomExpression(
+          OrderingTerm.desc(CustomExpression(
               'CASE $conversationId ${ids.asMap().entries.map((e) => "WHEN '${e.value}' THEN ${e.key}").join(' ')} END'))
         ]);
       });

@@ -105,10 +105,8 @@ class CommandPalettePage extends HookWidget {
         }, keys: [keyword]).data ??
         [];
 
-    final recentConversationIds = useBlocStateConverter<
-        RecentConversationCubit,
-        List<String>,
-        List<String>>(converter: (state) => state.reversed.toList());
+    final recentConversationIds =
+        useBlocState<RecentConversationCubit, List<String>>();
 
     final conversations = useMemoizedStream(() {
           if (keyword.trim().isEmpty) {
