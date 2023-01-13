@@ -176,16 +176,9 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      - name: Read App Version
-        id: read-app-version
-        uses: jbutcher5/read-yaml@1.6
-        with:
-          file: './pubspec.yaml'
-          key-path: '["version"]'
-
       - name: Build APP
         run: |
-          $version_str="${{ steps.read-app-version.outputs.value }}"
+          $version_str=$(gc .\pubspec.yaml | select-string '(?<=^version: ).*' -AllMatches | Select-Object -Expand Matches | %{$_.Value})
           $version=$version_str.Split("+")[0]
           $build_number=$version_str.Split("+")[1]
           flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
