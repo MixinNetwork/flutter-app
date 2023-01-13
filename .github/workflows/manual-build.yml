@@ -185,9 +185,10 @@ jobs:
 
       - name: Build APP
         run: |
-          set "version_str=${{ steps.read-app-version.outputs.value }}"
-          set "version=%version_str:+=" & set "build_number=%"
-          flutter build windows --dart-define="APP_VERSION=%version%" --dart-define="APP_BUILD_NUMBER=%build_number%"
+          $version_str="${{ steps.read-app-version.outputs.value }}"
+          $version=$version_str.Split("+")[0]
+          $build_number=$version_str.Split("+")[1]
+          flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
 
       - name: Build Installer
         run: |
