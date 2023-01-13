@@ -180,7 +180,7 @@ jobs:
         id: read-app-version
         uses: jbutcher5/read-yaml@1.6
         with:
-          path: pubspec.yaml
+          file: './pubspec.yaml'
           key-path: '["version"]'
 
       - name: Split version and build number
