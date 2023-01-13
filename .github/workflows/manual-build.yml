@@ -183,14 +183,6 @@ jobs:
           file: './pubspec.yaml'
           key-path: '["version"]'
 
-      - name: Split version and build number
-        id: app-version
-        run: |
-          set "version_str=${{ steps.read-app-version.outputs.value }}"
-          set "version=%version_str:+=" & set "build_number=%"
-          echo "::set-output name=version::%version%"
-          echo "::set-output name=build_number::%build_number%"
-
       - name: Build APP
         run: |
           set "version_str=${{ steps.read-app-version.outputs.value }}"
