@@ -12,6 +12,7 @@
 #include <file_selector_windows/file_selector_windows.h>
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
 #include <pasteboard/pasteboard_plugin.h>
+#include <platform_device_id_windows/platform_device_id_windows_plugin.h>
 #include <protocol_handler/protocol_handler_plugin.h>
 #include <quick_breakpad/quick_breakpad_plugin.h>
 #include <screen_retriever/screen_retriever_plugin.h>
@@ -35,6 +36,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FlutterAppIconBadgePlugin"));
   PasteboardPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("PasteboardPlugin"));
+  PlatformDeviceIdWindowsPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("PlatformDeviceIdWindowsPlugin"));
   ProtocolHandlerPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("ProtocolHandlerPlugin"));
   QuickBreakpadPluginRegisterWithRegistrar(

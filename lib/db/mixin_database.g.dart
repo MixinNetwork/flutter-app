@@ -12929,40 +12929,67 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.read<String>('user_id'));
   }
 
-  Selectable<User> fuzzySearchUser(String id, String username,
-      String identityNumber, FuzzySearchUser$filter filter) {
+  Selectable<User> fuzzySearchUser(
+      FuzzySearchUser$firstFilter firstFilter,
+      String id,
+      String username,
+      String identityNumber,
+      FuzzySearchUser$lastFilter lastFilter) {
     var $arrayStartIndex = 4;
-    final generatedfilter =
-        $write(filter(this.users), startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedfilter.amountOfVariables;
+    final generatedfirstFilter = $write(
+        firstFilter(this.users, this.conversations),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedfirstFilter.amountOfVariables;
+    final generatedlastFilter = $write(
+        lastFilter(this.users, this.conversations),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlastFilter.amountOfVariables;
     return customSelect(
-        'SELECT users.* FROM users WHERE user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \'%\' || ?3 || \'%\' ESCAPE \'\\\')AND ${generatedfilter.sql} ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
+        'SELECT users.* FROM users LEFT JOIN conversations ON conversations.owner_id = user_id WHERE ${generatedfirstFilter.sql} AND user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \' %\' || ?3 || \' %\' ESCAPE \'\\\')AND ${generatedlastFilter.sql} GROUP BY user_id ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(username),
           Variable<String>(identityNumber),
-          ...generatedfilter.introducedVariables
+          ...generatedfirstFilter.introducedVariables,
+          ...generatedlastFilter.introducedVariables
         ],
         readsFrom: {
           users,
-          ...generatedfilter.watchedTables,
+          conversations,
+          ...generatedfirstFilter.watchedTables,
+          ...generatedlastFilter.watchedTables,
         }).asyncMap(users.mapFromRow);
   }
 
   Selectable<User> fuzzySearchUserInCircle(
-      String id, String username, String identityNumber, String? circleId) {
+      FuzzySearchUserInCircle$filter filter,
+      String id,
+      String username,
+      String identityNumber,
+      String? circleId) {
+    var $arrayStartIndex = 5;
+    final generatedfilter = $write(
+        filter(this.users, this.conversations,
+            alias(this.circleConversations, 'circleConversation')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedfilter.amountOfVariables;
     return customSelect(
-        'SELECT user.* FROM users AS user LEFT JOIN conversations ON conversations.owner_id = user.user_id LEFT JOIN circle_conversations AS circleConversation ON user.user_id = circleConversation.user_id WHERE conversations.status IS NULL AND user.user_id != ?1 AND user.relationship = \'FRIEND\' AND(user.full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR user.identity_number LIKE \'%\' || ?3 || \'%\' ESCAPE \'\\\')AND circleConversation.circle_id = ?4 ORDER BY user.full_name = ?2 COLLATE nocase OR user.identity_number = ?3 COLLATE nocase DESC',
+        'SELECT users.* FROM users LEFT JOIN conversations ON conversations.owner_id = users.user_id LEFT JOIN circle_conversations AS circleConversation ON circleConversation.user_id = users.user_id WHERE ${generatedfilter.sql} AND users.user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \' %\' || ?3 || \' %\' ESCAPE \'\\\')AND circleConversation.circle_id = ?4 GROUP BY users.user_id ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(username),
           Variable<String>(identityNumber),
-          Variable<String>(circleId)
+          Variable<String>(circleId),
+          ...generatedfilter.introducedVariables
         ],
         readsFrom: {
           users,
           conversations,
           circleConversations,
+          ...generatedfilter.watchedTables,
         }).asyncMap(users.mapFromRow);
   }
 
@@ -14476,6 +14503,61 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<SearchConversationItem> searchConversationItemByIn(
+      List<String> ids, SearchConversationItemByIn$order order) {
+    var $arrayStartIndex = 1;
+    final expandedids = $expandVar($arrayStartIndex, ids.length);
+    $arrayStartIndex += ids.length;
+    final generatedorder = $write(
+        order?.call(
+                alias(this.conversations, 'conversation'),
+                alias(this.users, 'owner'),
+                alias(this.messages, 'message'),
+                alias(this.users, 'lastMessageSender')) ??
+            const OrderBy.nothing(),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedorder.amountOfVariables;
+    return customSelect(
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId, message.status AS messageStatus, message.content AS content, message.category AS contentType, message.user_id AS senderId, lastMessageSender.full_name AS senderFullName FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = message.user_id WHERE conversation.conversation_id IN ($expandedids) ${generatedorder.sql}',
+        variables: [
+          for (var $ in ids) Variable<String>($),
+          ...generatedorder.introducedVariables
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          ...generatedorder.watchedTables,
+        }).map((QueryRow row) {
+      return SearchConversationItem(
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.readNullable<String>('groupIconUrl'),
+        category: Conversations.$converter0
+            .fromSql(row.readNullable<String>('category')),
+        groupName: row.readNullable<String>('groupName'),
+        pinTime: NullAwareTypeConverter.wrapFromSql(
+            Conversations.$converter2, row.readNullable<int>('pinTime')),
+        muteUntil: NullAwareTypeConverter.wrapFromSql(
+            Conversations.$converter5, row.readNullable<int>('muteUntil')),
+        ownerId: row.readNullable<String>('ownerId'),
+        ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
+            Users.$converter2, row.readNullable<int>('ownerMuteUntil')),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
+        fullName: row.readNullable<String>('fullName'),
+        avatarUrl: row.readNullable<String>('avatarUrl'),
+        isVerified: row.readNullable<bool>('isVerified'),
+        appId: row.readNullable<String>('appId'),
+        messageStatus: NullAwareTypeConverter.wrapFromSql(
+            Messages.$converter1, row.readNullable<String>('messageStatus')),
+        content: row.readNullable<String>('content'),
+        contentType: row.readNullable<String>('contentType'),
+        senderId: row.readNullable<String>('senderId'),
+        senderFullName: row.readNullable<String>('senderFullName'),
+      );
+    });
+  }
+
   Selectable<SearchConversationItem> fuzzySearchConversationInCircle(
       String query,
       String? circleId,
@@ -15104,7 +15186,12 @@ class ConversationCircleManagerItem {
   }
 }
 
-typedef FuzzySearchUser$filter = Expression<bool> Function(Users users);
+typedef FuzzySearchUser$firstFilter = Expression<bool> Function(
+    Users users, Conversations conversations);
+typedef FuzzySearchUser$lastFilter = Expression<bool> Function(
+    Users users, Conversations conversations);
+typedef FuzzySearchUserInCircle$filter = Expression<bool> Function(Users users,
+    Conversations conversations, CircleConversations circleConversation);
 
 class MentionUser {
   final String userId;
@@ -16324,6 +16411,11 @@ typedef FuzzySearchConversation$where = Expression<bool> Function(
     Messages message,
     Users lastMessageSender);
 typedef FuzzySearchConversation$limit = Limit Function(
+    Conversations conversation,
+    Users owner,
+    Messages message,
+    Users lastMessageSender);
+typedef SearchConversationItemByIn$order = OrderBy Function(
     Conversations conversation,
     Users owner,
     Messages message,

@@ -4,11 +4,11 @@ name: Manual Build App
 # or API.
 on:
   workflow_dispatch:
-     inputs:
-       flutter_channel:
-         description: "run with flutter channel, eg: master, beta, stable"
-         required: true
-         default: "master"
+    inputs:
+      flutter_channel:
+        description: "run with flutter channel, eg: master, beta, stable"
+        required: true
+        default: "master"
   push:
     tags:
       - 'v*'
@@ -177,7 +177,11 @@ jobs:
         run: flutter test
 
       - name: Build APP
-        run: flutter build windows
+        run: |
+          $version_str=$(gc .\pubspec.yaml | select-string '(?<=^version: ).*' -AllMatches | Select-Object -Expand Matches | %{$_.Value})
+          $version=$version_str.Split("+")[0]
+          $build_number=$version_str.Split("+")[1]
+          flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
 
       - name: Build Installer
         run: |

@@ -102,35 +102,51 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     required String id,
     required String username,
     required String identityNumber,
+    bool isIncludeConversation = false,
     SlideCategoryState? category,
   }) {
     if (category?.type == SlideCategoryType.circle) {
       final circleId = category!.id;
-      return db.fuzzySearchUserInCircle(id, username, identityNumber, circleId);
+      return db.fuzzySearchUserInCircle((_, conversation, __) {
+        if (!isIncludeConversation) {
+          return conversation.status.isNull();
+        }
+        return const Constant(true);
+      }, id, username, identityNumber, circleId);
     }
     return db.fuzzySearchUser(
-        id, username.trim().escapeSql(), identityNumber.trim().escapeSql(),
-        (users) {
-      switch (category?.type) {
-        case null:
-        case SlideCategoryType.chats:
+        (_, conversation) {
+          if (!isIncludeConversation) {
+            return conversation.status.isNull();
+          }
           return const Constant(true);
-        case SlideCategoryType.contacts:
-          return users.relationship.equalsValue(sdk.UserRelationship.friend) &
-              users.appId.isNull();
-        case SlideCategoryType.groups:
-          return const Constant(false);
-        case SlideCategoryType.bots:
-          return users.appId.isNotNull();
-        case SlideCategoryType.strangers:
-          return users.relationship.equalsValue(sdk.UserRelationship.stranger) &
-              users.appId.isNull();
-        case SlideCategoryType.circle:
-        case SlideCategoryType.setting:
-          assert(false, 'Unsupported category: $category');
-          return const Constant(false);
-      }
-    });
+        },
+        id,
+        username.trim().escapeSql(),
+        identityNumber.trim().escapeSql(),
+        (users, _) {
+          switch (category?.type) {
+            case null:
+            case SlideCategoryType.chats:
+              return const Constant(true);
+            case SlideCategoryType.contacts:
+              return users.relationship
+                      .equalsValue(sdk.UserRelationship.friend) &
+                  users.appId.isNull();
+            case SlideCategoryType.groups:
+              return const Constant(false);
+            case SlideCategoryType.bots:
+              return users.appId.isNotNull();
+            case SlideCategoryType.strangers:
+              return users.relationship
+                      .equalsValue(sdk.UserRelationship.stranger) &
+                  users.appId.isNull();
+            case SlideCategoryType.circle:
+            case SlideCategoryType.setting:
+              assert(false, 'Unsupported category: $category');
+              return const Constant(false);
+          }
+        });
   }
 
   Selectable<String?> biography(String userId) =>

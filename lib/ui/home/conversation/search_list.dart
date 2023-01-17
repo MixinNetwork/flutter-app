@@ -95,6 +95,7 @@ class SearchList extends HookWidget {
                 username: keyword,
                 identityNumber: keyword,
                 category: slideCategoryState,
+                isIncludeConversation: true,
               )
               .watchThrottle(kSlowThrottleDuration);
         }, keys: [keyword, filterUnseen, slideCategoryState]).data ??

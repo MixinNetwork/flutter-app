@@ -13,6 +13,7 @@
 #include <file_selector_linux/file_selector_plugin.h>
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
 #include <pasteboard/pasteboard_plugin.h>
+#include <platform_device_id_linux/platform_device_id_linux_plugin.h>
 #include <screen_retriever/screen_retriever_plugin.h>
 #include <sqlite3_flutter_libs/sqlite3_flutter_libs_plugin.h>
 #include <url_launcher_linux/url_launcher_plugin.h>
@@ -41,6 +42,9 @@ void fl_register_plugins(FlPluginRegistry* registry) {
   g_autoptr(FlPluginRegistrar) pasteboard_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "PasteboardPlugin");
   pasteboard_plugin_register_with_registrar(pasteboard_registrar);
+  g_autoptr(FlPluginRegistrar) platform_device_id_linux_registrar =
+      fl_plugin_registry_get_registrar_for_plugin(registry, "PlatformDeviceIdLinuxPlugin");
+  platform_device_id_linux_plugin_register_with_registrar(platform_device_id_linux_registrar);
   g_autoptr(FlPluginRegistrar) screen_retriever_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "ScreenRetrieverPlugin");
   screen_retriever_plugin_register_with_registrar(screen_retriever_registrar);
