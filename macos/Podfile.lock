@@ -122,7 +122,7 @@ SPEC CHECKSUMS:
   ogg_opus_player: 67fc56771b16586b9b2478f848e632f751400604
   package_info_plus: 02d7a575e80f194102bef286361c6c326e4c29ce
   pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
-  path_provider_macos: 3c0c3b4b0d4a76d2bf989a913c2de869c5641a19
+  path_provider_macos: 05fb0ef0cedf3e5bd179b9e41a638682b37133ea
   protocol_handler: 587e1caf6c0b92ce351ab14081968dae49cb8cc6
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
   sqlite3: 88dd99ef4ac3945f5a15facdd752933c52fd93bf
