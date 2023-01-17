@@ -58,7 +58,7 @@ class SearchList extends HookWidget {
                 .map((event) => event.trim())
                 .distinct()
                 .throttleTime(
-                  const Duration(milliseconds: 150),
+                  const Duration(milliseconds: 300),
                   trailing: true,
                   leading: false,
                 );
