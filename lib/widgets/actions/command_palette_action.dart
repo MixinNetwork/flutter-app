@@ -10,6 +10,7 @@ import '../../constants/resources.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
+import '../../ui/home/bloc/recent_conversation_cubit.dart';
 import '../../ui/home/conversation/conversation_page.dart';
 import '../../ui/home/conversation/search_list.dart';
 import '../../ui/home/intent.dart';
@@ -104,14 +105,23 @@ class CommandPalettePage extends HookWidget {
         }, keys: [keyword]).data ??
         [];
 
+    final recentConversationIds =
+        useBlocState<RecentConversationCubit, List<String>>();
+
     final conversations = useMemoizedStream(() {
           if (keyword.trim().isEmpty) {
-            return Stream.value(<SearchConversationItem>[]);
+            if (recentConversationIds.isEmpty) {
+              return Stream.value(<SearchConversationItem>[]);
+            }
+
+            return context.database.conversationDao
+                .searchConversationItemByIn(recentConversationIds)
+                .watchThrottle(kSlowThrottleDuration);
           }
           return context.database.conversationDao
               .fuzzySearchConversation(keyword, 32)
               .watchThrottle(kSlowThrottleDuration);
-        }, keys: [keyword]).data ??
+        }, keys: [keyword, recentConversationIds]).data ??
         [];
 
     final selectedIndex = useState<int>(0);

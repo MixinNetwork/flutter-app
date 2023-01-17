@@ -17,6 +17,7 @@ import '../../../utils/local_notification_center.dart';
 import '../../../widgets/toast.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'conversation_list_bloc.dart';
+import 'recent_conversation_cubit.dart';
 
 class ConversationState extends Equatable {
   const ConversationState({
@@ -286,6 +287,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
         .pushPage(ResponsiveNavigatorCubit.chatPage);
 
     unawaited(dismissByConversationId(conversationId));
+    context.read<RecentConversationCubit>().add(conversationId);
   }
 
   static Future<void> selectUser(
