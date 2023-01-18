@@ -120,7 +120,7 @@ class ToastError extends Error {
         return context.l10n.failed;
       }
     } else if (error is MixinApiError) {
-      return (error.error as MixinError).toDisplayString(context);
+      return (error.error! as MixinError).toDisplayString(context);
     } else if (error is MixinError) {
       return error.toDisplayString(context);
     } else if (error is String) {

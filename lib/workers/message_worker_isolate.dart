@@ -4,12 +4,11 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 
-import 'package:dio/dio.dart';
+import 'package:diox/diox.dart';
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:equatable/equatable.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:uuid/uuid.dart';
@@ -50,7 +49,7 @@ class IsolateInitParams {
     required this.privateKey,
     required this.mixinDocumentDirectory,
     required this.primarySessionId,
-    required this.packageInfo,
+    required this.userAgent,
     required this.deviceId,
     required this.loginByPhoneNumber,
   });
@@ -62,7 +61,7 @@ class IsolateInitParams {
   final String privateKey;
   final String mixinDocumentDirectory;
   final String? primarySessionId;
-  final PackageInfo packageInfo;
+  final String? userAgent;
   final String? deviceId;
   final bool loginByPhoneNumber;
 }
@@ -146,7 +145,7 @@ class _MessageProcessRunner {
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKeyStr,
-      packageInfo: initParams.packageInfo,
+      userAgent: initParams.userAgent,
       deviceId: initParams.deviceId,
       interceptors: [
         InterceptorsWrapper(
@@ -169,7 +168,7 @@ class _MessageProcessRunner {
       privateKeyStr,
       database,
       client,
-      initParams.packageInfo,
+      initParams.userAgent,
     );
 
     blaze.connectedStateStream.listen((event) {

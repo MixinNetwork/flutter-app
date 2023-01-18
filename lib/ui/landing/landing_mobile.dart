@@ -120,7 +120,7 @@ class _PhoneNumberInputScene extends StatelessWidget {
                 );
               } on MixinApiError catch (error) {
                 e('Error requesting verification code: $error');
-                final mixinError = error.error as MixinError;
+                final mixinError = error.error! as MixinError;
                 showToastFailed(
                   ToastError(mixinError.toDisplayString(context)),
                 );
@@ -201,7 +201,7 @@ class _CodeInputScene extends HookWidget {
       } catch (error) {
         e('login account error: $error');
         if (error is MixinApiError) {
-          final mixinError = error.error as MixinError;
+          final mixinError = error.error! as MixinError;
           showToastFailed(
             ToastError(mixinError.toDisplayString(context)),
           );
@@ -285,7 +285,7 @@ class _CodeInputScene extends HookWidget {
                 return true;
               } on MixinApiError catch (error) {
                 e('Error requesting verification code: $error');
-                final mixinError = error.error as MixinError;
+                final mixinError = error.error! as MixinError;
                 showToastFailed(
                   ToastError(mixinError.toDisplayString(context)),
                 );
@@ -333,7 +333,7 @@ Future<VerificationResponse> _requestVerificationCode({
     final response = await cubit.client.accountApi.verification(request);
     return response.data;
   } on MixinApiError catch (error) {
-    final mixinError = error.error as MixinError;
+    final mixinError = error.error! as MixinError;
     if (mixinError.code == needCaptcha) {
       Toast.dismiss();
       final result = await showCaptchaWebViewDialog(context);

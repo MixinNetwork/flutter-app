@@ -105,7 +105,7 @@ Future<VerificationResponse> requestVerificationCode({
     final response = await api.verification(request);
     return response.data;
   } on MixinApiError catch (error) {
-    final mixinError = error.error as MixinError;
+    final mixinError = error.error! as MixinError;
     if (mixinError.code == needCaptcha) {
       Toast.dismiss();
       final result = await showCaptchaWebViewDialog(context);
@@ -204,7 +204,7 @@ class VerificationCodeInputLayout extends HookWidget {
               return true;
             } on MixinApiError catch (error) {
               e('Error requesting verification code: $error');
-              final mixinError = error.error as MixinError;
+              final mixinError = error.error! as MixinError;
               showToastFailed(
                 ToastError(mixinError.toDisplayString(context)),
               );

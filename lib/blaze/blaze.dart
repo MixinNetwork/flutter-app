@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -15,7 +14,6 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
-import '../utils/system/package_info.dart';
 import '../workers/message_worker_isolate.dart';
 import 'blaze_message.dart';
 import 'blaze_message_param_session.dart';
@@ -38,7 +36,7 @@ class Blaze {
     this.privateKey,
     this.database,
     this.client,
-    this.packageInfo,
+    this.userAgent,
   );
 
   final String userId;
@@ -47,7 +45,7 @@ class Blaze {
   final Database database;
   final Client client; // todo delete
 
-  final PackageInfo packageInfo;
+  final String? userAgent;
 
   String _host = _wsHost1;
   String? _token;
@@ -62,8 +60,6 @@ class Blaze {
   StreamSubscription? subscription;
 
   final transactions = <String, WebSocketTransaction>{};
-
-  String? _userAgent;
 
   ConnectedState get _connectedState => _connectedStateBehaviorSubject.value;
 
@@ -88,8 +84,7 @@ class Blaze {
       _token ??= signAuthTokenWithEdDSA(
           userId, sessionId, privateKey, scp, 'GET', '/', '');
       i('ws _token?.isNotEmpty == true: ${_token?.isNotEmpty == true}');
-      _userAgent ??= await generateUserAgent(packageInfo);
-      i('ws _userAgent: $_userAgent');
+      i('ws _userAgent: $userAgent');
       _connect(_token!);
       _checkTimeoutTimer = Timer(const Duration(seconds: 10), () {
         i('ws webSocket state: ${channel?.innerWebSocket?.readyState}');
@@ -116,7 +111,7 @@ class Blaze {
       _host,
       protocols: ['Mixin-Blaze-1'],
       headers: {
-        'User-Agent': _userAgent,
+        'User-Agent': userAgent,
         'Authorization': 'Bearer $token',
       },
       pingInterval: const Duration(seconds: 10),
@@ -314,7 +309,7 @@ class Blaze {
     } catch (e) {
       w('ws ping error: $e');
       if (e is MixinApiError &&
-          (e.error as MixinError).code == authentication) {
+          (e.error! as MixinError).code == authentication) {
         _connectedState = ConnectedState.disconnected;
         return;
       }
