@@ -53,7 +53,8 @@ import 'show_pin_message_key_value.dart';
 String? lastInitErrorMessage;
 
 class AccountServer {
-  AccountServer(this.multiAuthCubit, this.settingCubit);
+  AccountServer(this.multiAuthCubit, this.settingCubit,
+      {this.userAgent, this.deviceId});
 
   static String? sid;
 
@@ -66,6 +67,8 @@ class AccountServer {
 
   bool get _loginByPhoneNumber =>
       AccountKeyValue.instance.primarySessionId == null;
+  String? userAgent;
+  String? deviceId;
 
   Future<void> initServer(
     String userId,
@@ -82,12 +85,25 @@ class AccountServer {
     this.privateKey = privateKey;
 
     await initKeyValues(identityNumber);
+    try {
+      userAgent ??= await generateUserAgent(await getPackageInfo());
+    } catch (e) {
+      w('generateUserAgent error: $e');
+    }
+
+    try {
+      deviceId ??= await getDeviceId();
+    } catch (e) {
+      w('getDeviceId error: $e');
+    }
 
     client = createClient(
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKey,
       loginByPhoneNumber: _loginByPhoneNumber,
+      userAgent: userAgent,
+      deviceId: deviceId,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -210,8 +226,8 @@ class AccountServer {
         privateKey: privateKey,
         mixinDocumentDirectory: mixinDocumentsDirectory.path,
         primarySessionId: AccountKeyValue.instance.primarySessionId,
-        packageInfo: await getPackageInfo(),
-        deviceId: Platform.isIOS ? await getDeviceId() : null,
+        userAgent: userAgent,
+        deviceId: deviceId,
         loginByPhoneNumber: _loginByPhoneNumber,
       ),
       errorsAreFatal: false,
