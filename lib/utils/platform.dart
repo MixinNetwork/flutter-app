@@ -45,7 +45,12 @@ Future<String> getPlatformVersion() async {
 
 Future<String> getDeviceId() async {
   try {
-    final id = (await PlatformDeviceId.getDeviceId)?.trim();
+    final String? id;
+    if (Platform.isWindows) {
+      id = (await _getWindowsDeviceId())?.trim();
+    } else {
+      id = (await PlatformDeviceId.getDeviceId)?.trim();
+    }
     if (id == null || id.isEmpty) {
       throw Exception("${Platform.operatingSystem}'s device id is empty");
     }
@@ -58,4 +63,22 @@ Future<String> getDeviceId() async {
     e('failed to get device id. $error $stack');
   }
   return 'unknown';
+}
+
+// ref: https://github.com/BestBurning/platform_device_id/issues/15#issuecomment-1064081170
+Future<String?> _getWindowsDeviceId() async {
+  final process = await Process.start(
+    'wmic',
+    ['csproduct', 'get', 'UUID'],
+    mode: ProcessStartMode.detachedWithStdio,
+  );
+  final result = await process.stdout.transform(utf8.decoder).toList();
+  String? deviceID;
+  for (final element in result) {
+    final item = element.replaceAll(RegExp('\r|\n|\\s|UUID|uuid'), '');
+    if (item.isNotEmpty) {
+      deviceID = item;
+    }
+  }
+  return deviceID;
 }
