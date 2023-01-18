@@ -144,6 +144,7 @@ class SendMessageHelper {
     attachment = await attachment.create(recursive: true);
 
     await attachment.writeAsBytes(_bytes.toList());
+    final thumbImage = await attachment.encodeBlurHash();
 
     final attachmentSize = await attachment.length();
     final quoteMessage =
@@ -157,7 +158,7 @@ class SendMessageHelper {
       category: category,
       mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
-      mediaSize: await attachment.length(),
+      mediaSize: attachmentSize,
       mediaWidth: imageWidth,
       mediaHeight: imageHeight,
       name: fileName,
@@ -166,16 +167,16 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
+      thumbImage: thumbImage,
     );
     await _insertSendMessageToDb(message);
-
-    final thumbImage = await attachment.encodeBlurHash();
 
     if (await _attachmentUtil.isNotPending(messageId)) return;
 
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
+
     final attachmentMessage = AttachmentMessage(
       attachmentResult.keys,
       attachmentResult.digest,
@@ -232,7 +233,7 @@ class SendMessageHelper {
       category: category,
       mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
-      mediaSize: await attachment.length(),
+      mediaSize: attachmentSize,
       mediaWidth: mediaWidth,
       mediaHeight: mediaHeight,
       thumbImage: thumbImage,
@@ -249,6 +250,7 @@ class SendMessageHelper {
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
+
     final attachmentMessage = AttachmentMessage(
       attachmentResult.keys,
       attachmentResult.digest,
@@ -326,7 +328,7 @@ class SendMessageHelper {
       category: category,
       mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
-      mediaSize: await attachment.length(),
+      mediaSize: attachmentSize,
       name: name ?? file.name,
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.sending,
@@ -339,6 +341,7 @@ class SendMessageHelper {
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
+
     final attachmentMessage = AttachmentMessage(
       attachmentResult.keys,
       attachmentResult.digest,
@@ -425,7 +428,7 @@ class SendMessageHelper {
       category: category,
       mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
-      mediaSize: await attachment.length(),
+      mediaSize: attachmentSize,
       mediaDuration: mediaDuration,
       mediaWaveform: mediaWaveform,
       name: file.name,
@@ -440,6 +443,7 @@ class SendMessageHelper {
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
+
     final attachmentMessage = AttachmentMessage(
       attachmentResult.keys,
       attachmentResult.digest,
@@ -1185,6 +1189,7 @@ class SendMessageHelper {
       category,
     );
     if (attachmentResult == null) return;
+
     final attachmentMessage = AttachmentMessage(
       attachmentResult.keys,
       attachmentResult.digest,
@@ -1253,6 +1258,7 @@ class SendMessageHelper {
       message.type,
     );
     if (attachmentResult == null) return;
+
     final attachmentMessage = AttachmentMessage(
       attachmentResult.keys,
       attachmentResult.digest,
