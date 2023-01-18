@@ -267,8 +267,9 @@ class CommandPalettePage extends HookWidget {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 20),
                                 child: SearchItem(
-                                  padding: EdgeInsets.zero,
                                   selected: selectedIndex.value == index,
+                                  margin: EdgeInsets.zero,
+                                  padding: const EdgeInsets.all(16),
                                   avatar: AvatarWidget(
                                     name: user.fullName,
                                     userId: user.userId,
@@ -300,7 +301,8 @@ class CommandPalettePage extends HookWidget {
                                 child: SearchItem(
                                   selected: selectedIndex.value ==
                                       (users.length + index),
-                                  padding: EdgeInsets.zero,
+                                  margin: EdgeInsets.zero,
+                                  padding: const EdgeInsets.all(16),
                                   avatar: ConversationAvatarWidget(
                                     conversationId: conversation.conversationId,
                                     fullName: conversation.validName,
