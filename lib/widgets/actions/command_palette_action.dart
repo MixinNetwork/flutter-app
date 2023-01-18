@@ -212,9 +212,12 @@ class CommandPalettePage extends HookWidget {
           child: Column(
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20)
-                        .copyWith(bottom: 10),
+                padding: const EdgeInsets.only(
+                  right: 20,
+                  left: 20,
+                  top: 20,
+                  bottom: 10,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -264,6 +267,7 @@ class CommandPalettePage extends HookWidget {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 20),
                                 child: SearchItem(
+                                  padding: EdgeInsets.zero,
                                   selected: selectedIndex.value == index,
                                   avatar: AvatarWidget(
                                     name: user.fullName,
@@ -296,6 +300,7 @@ class CommandPalettePage extends HookWidget {
                                 child: SearchItem(
                                   selected: selectedIndex.value ==
                                       (users.length + index),
+                                  padding: EdgeInsets.zero,
                                   avatar: ConversationAvatarWidget(
                                     conversationId: conversation.conversationId,
                                     fullName: conversation.validName,

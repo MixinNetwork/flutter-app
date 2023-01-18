@@ -363,19 +363,21 @@ class SearchList extends HookWidget {
 }
 
 class SearchItem extends StatelessWidget {
-  const SearchItem(
-      {super.key,
-      this.avatar,
-      required this.name,
-      required this.keyword,
-      this.nameHighlight = true,
-      required this.onTap,
-      this.description,
-      this.descriptionIcon,
-      this.date,
-      this.trailing,
-      this.selected,
-      this.maxLines = false});
+  const SearchItem({
+    super.key,
+    this.avatar,
+    required this.name,
+    required this.keyword,
+    this.nameHighlight = true,
+    required this.onTap,
+    this.description,
+    this.descriptionIcon,
+    this.date,
+    this.trailing,
+    this.selected,
+    this.maxLines = false,
+    this.padding = const EdgeInsets.symmetric(horizontal: 6),
+  });
 
   final Widget? avatar;
   final Widget? trailing;
@@ -388,6 +390,7 @@ class SearchItem extends StatelessWidget {
   final DateTime? date;
   final bool? selected;
   final bool maxLines;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -396,7 +399,7 @@ class SearchItem extends StatelessWidget {
       color: context.theme.listSelected,
     );
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
+      padding: padding,
       child: InteractiveDecoratedBox(
         decoration:
             selected == true ? selectedDecoration : const BoxDecoration(),
