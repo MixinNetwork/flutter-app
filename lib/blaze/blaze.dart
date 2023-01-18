@@ -314,7 +314,7 @@ class Blaze {
     } catch (e) {
       w('ws ping error: $e');
       if (e is MixinApiError &&
-          (e.error as MixinError).code == authentication) {
+          (e.error! as MixinError).code == authentication) {
         _connectedState = ConnectedState.disconnected;
         return;
       }

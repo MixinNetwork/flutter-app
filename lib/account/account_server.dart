@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:cross_file/cross_file.dart';
-import 'package:dio/dio.dart';
+import 'package:diox/diox.dart';
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
@@ -126,7 +126,7 @@ class AccountServer {
   }
 
   Future<void> _onClientRequestError(DioError e) async {
-    if (e is MixinApiError && (e.error as MixinError).code == authentication) {
+    if (e is MixinApiError && (e.error! as MixinError).code == authentication) {
       final serverTime =
           int.tryParse(e.response?.headers.value('x-server-time') ?? '');
       if (serverTime != null) {
@@ -1049,7 +1049,7 @@ class AccountServer {
     try {
       await client.circleApi.deleteCircle(circleId);
     } catch (e) {
-      if (e is! MixinApiError || (e.error as MixinError).code != notFound) {
+      if (e is! MixinApiError || (e.error! as MixinError).code != notFound) {
         rethrow;
       }
     }

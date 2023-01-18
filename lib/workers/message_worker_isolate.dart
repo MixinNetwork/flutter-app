@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 
-import 'package:dio/dio.dart';
+import 'package:diox/diox.dart';
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:equatable/equatable.dart';

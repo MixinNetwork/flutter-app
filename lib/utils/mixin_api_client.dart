@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:dio/dio.dart';
+import 'package:diox/diox.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -12,7 +12,7 @@ import 'logger.dart';
 import 'platform.dart';
 import 'system/package_info.dart';
 
-final tenSecond = const Duration(seconds: 10).inMilliseconds;
+const tenSecond = Duration(seconds: 10);
 
 const kRequestTimeStampKey = 'requestTimeStamp';
 
@@ -37,6 +37,7 @@ Client createClient({
         sendTimeout: tenSecond,
         followRedirects: false,
       ),
+      httpLogLevel: HttpLogLevel.all,
       jsonDecodeCallback: jsonDecode,
       interceptors: [
         ...interceptors,
@@ -74,7 +75,6 @@ Client createClient({
             handler.next(options);
           }),
       ],
-      httpLogLevel: HttpLogLevel.none,
     );
 
 final _formatter = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');

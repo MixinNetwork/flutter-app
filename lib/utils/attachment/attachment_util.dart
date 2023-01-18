@@ -3,8 +3,8 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 
-import 'package:dio/adapter.dart';
-import 'package:dio/dio.dart';
+import 'package:diox/diox.dart';
+import 'package:diox/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
@@ -29,8 +29,8 @@ part 'attachment_download_job.dart';
 part 'attachment_upload_job.dart';
 
 final _dio = Dio(BaseOptions(
-  connectTimeout: 150 * 1000,
-  receiveTimeout: 150 * 1000,
+  connectTimeout: const Duration(milliseconds: 150 * 1000),
+  receiveTimeout: const Duration(milliseconds: 150 * 1000),
 ));
 
 // isolate kill message
@@ -60,7 +60,7 @@ class AttachmentUtil extends ChangeNotifier {
     this._transcriptMessageDao,
     this.mediaPath,
   ) {
-    (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+    (_dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
         (client) {
       client.badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
@@ -74,13 +74,6 @@ class AttachmentUtil extends ChangeNotifier {
   final MessageDao _messageDao;
   final TranscriptMessageDao _transcriptMessageDao;
   final Client _client;
-
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: 150 * 1000,
-      receiveTimeout: 150 * 1000,
-    ),
-  );
 
   final _attachmentJob = <String, _AttachmentJobBase>{};
 
