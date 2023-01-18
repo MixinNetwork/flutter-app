@@ -35,7 +35,9 @@ import '../enum/message_category.dart';
 import '../enum/system_circle_action.dart';
 import '../enum/system_user_action.dart';
 import '../utils/extension/extension.dart';
+import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
+import '../widgets/message/send_message_dialog/attachment_extra.dart';
 import 'injector.dart';
 import 'isolate_event.dart';
 import 'message_worker_isolate.dart';
@@ -542,6 +544,11 @@ class DecryptMessage extends Injector {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
+      final content = await jsonEncodeWithIsolate(AttachmentExtra(
+              attachmentId: attachment.attachmentId,
+              messageId: data.messageId,
+              shareable: attachment.shareable)
+          .toJson());
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -549,7 +556,7 @@ class DecryptMessage extends Injector {
               conversationId: data.conversationId,
               userId: data.senderId,
               category: data.category!,
-              content: attachment.attachmentId,
+              content: content,
               mediaMimeType: attachment.mimeType,
               mediaSize: attachment.size,
               mediaWidth: attachment.width,
@@ -569,6 +576,11 @@ class DecryptMessage extends Injector {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
+      final content = await jsonEncodeWithIsolate(AttachmentExtra(
+              attachmentId: attachment.attachmentId,
+              messageId: data.messageId,
+              shareable: attachment.shareable)
+          .toJson());
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -576,7 +588,7 @@ class DecryptMessage extends Injector {
               conversationId: data.conversationId,
               userId: data.senderId,
               category: data.category!,
-              content: attachment.attachmentId,
+              content: content,
               name: attachment.name,
               mediaMimeType: attachment.mimeType,
               mediaDuration: attachment.duration.toString(),
@@ -598,6 +610,11 @@ class DecryptMessage extends Injector {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
+      final content = await jsonEncodeWithIsolate(AttachmentExtra(
+              attachmentId: attachment.attachmentId,
+              messageId: data.messageId,
+              shareable: attachment.shareable)
+          .toJson());
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -605,7 +622,7 @@ class DecryptMessage extends Injector {
               conversationId: data.conversationId,
               userId: data.senderId,
               category: data.category!,
-              content: attachment.attachmentId,
+              content: content,
               name: attachment.name,
               mediaMimeType: attachment.mimeType,
               mediaSize: attachment.size,
@@ -623,6 +640,11 @@ class DecryptMessage extends Injector {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
+      final content = await jsonEncodeWithIsolate(AttachmentExtra(
+              attachmentId: attachment.attachmentId,
+              messageId: data.messageId,
+              shareable: attachment.shareable)
+          .toJson());
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -630,7 +652,7 @@ class DecryptMessage extends Injector {
               conversationId: data.conversationId,
               userId: data.senderId,
               category: data.category!,
-              content: attachment.attachmentId,
+              content: content,
               name: attachment.name,
               mediaMimeType: attachment.mimeType,
               mediaSize: attachment.size,
@@ -1017,9 +1039,14 @@ class DecryptMessage extends Injector {
         data.category == MessageCategory.signalAudio) {
       final attachment = AttachmentMessage.fromJson(
           _jsonDecode(plaintext) as Map<String, dynamic>);
+      final content = await jsonEncodeWithIsolate(AttachmentExtra(
+              attachmentId: attachment.attachmentId,
+              messageId: data.messageId,
+              shareable: attachment.shareable)
+          .toJson());
       final messagesCompanion = MessagesCompanion(
           status: Value(data.status),
-          content: Value(attachment.attachmentId),
+          content: Value(content),
           mediaMimeType: Value(attachment.mimeType),
           mediaSize: Value(attachment.size),
           mediaStatus: const Value(MediaStatus.canceled),
@@ -1033,6 +1060,14 @@ class DecryptMessage extends Injector {
           mediaDuration: Value(attachment.duration.toString()));
       await database.messageDao
           .updateAttachmentMessage(messageId, messagesCompanion);
+
+      final message =
+          await database.messageDao.findMessageByMessageId(messageId);
+
+      if (message != null) {
+        _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
+            AttachmentDownloadRequest(message));
+      }
     } else if (data.category == MessageCategory.signalSticker) {
       final plain = _decode(plaintext);
       final stickerMessage = StickerMessage.fromJson(
