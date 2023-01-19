@@ -847,6 +847,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.1"
+  intl_utils:
+    dependency: "direct dev"
+    description:
+      name: intl_utils
+      sha256: "413699c0f7a1123a9306c1f2f5ea8662677d25bdebf22ba4f3960e0069be3be2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.8.1"
   io:
     dependency: transitive
     description:

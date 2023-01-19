@@ -11,29 +11,30 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
 import 'package:intl/src/intl_helpers.dart';
 
-import 'messages_en.dart' deferred as messages_en;
-import 'messages_in.dart' deferred as messages_in;
-import 'messages_ja.dart' deferred as messages_ja;
-import 'messages_ms.dart' deferred as messages_ms;
-import 'messages_ru.dart' deferred as messages_ru;
-import 'messages_zh-HK.dart' deferred as messages_zh_hk;
-import 'messages_zh-TW.dart' deferred as messages_zh_tw;
-import 'messages_zh.dart' deferred as messages_zh;
+import 'messages_en.dart' as messages_en;
+import 'messages_in.dart' as messages_in;
+import 'messages_ja.dart' as messages_ja;
+import 'messages_ms.dart' as messages_ms;
+import 'messages_ru.dart' as messages_ru;
+import 'messages_zh-HK.dart' as messages_zh_hk;
+import 'messages_zh-TW.dart' as messages_zh_tw;
+import 'messages_zh.dart' as messages_zh;
 
 typedef Future<dynamic> LibraryLoader();
 Map<String, LibraryLoader> _deferredLibraries = {
-  'en': messages_en.loadLibrary,
-  'in': messages_in.loadLibrary,
-  'ja': messages_ja.loadLibrary,
-  'ms': messages_ms.loadLibrary,
-  'ru': messages_ru.loadLibrary,
-  'zh_HK': messages_zh_hk.loadLibrary,
-  'zh_TW': messages_zh_tw.loadLibrary,
-  'zh': messages_zh.loadLibrary,
+  'en': () => new SynchronousFuture(null),
+  'in': () => new SynchronousFuture(null),
+  'ja': () => new SynchronousFuture(null),
+  'ms': () => new SynchronousFuture(null),
+  'ru': () => new SynchronousFuture(null),
+  'zh_HK': () => new SynchronousFuture(null),
+  'zh_TW': () => new SynchronousFuture(null),
+  'zh': () => new SynchronousFuture(null),
 };
 
 MessageLookupByLibrary? _findExact(String localeName) {
@@ -60,18 +61,18 @@ MessageLookupByLibrary? _findExact(String localeName) {
 }
 
 /// User programs should call this before using [localeName] for messages.
-Future<bool> initializeMessages(String localeName) async {
+Future<bool> initializeMessages(String localeName) {
   var availableLocale = Intl.verifiedLocale(
       localeName, (locale) => _deferredLibraries[locale] != null,
       onFailure: (_) => null);
   if (availableLocale == null) {
-    return new Future.value(false);
+    return new SynchronousFuture(false);
   }
   var lib = _deferredLibraries[availableLocale];
-  await (lib == null ? new Future.value(false) : lib());
+  lib == null ? new SynchronousFuture(false) : lib();
   initializeInternalMessageLookup(() => new CompositeMessageLookup());
   messageLookup.addLocale(availableLocale, _findGeneratedMessagesFor);
-  return new Future.value(true);
+  return new SynchronousFuture(true);
 }
 
 bool _messagesExistFor(String locale) {
