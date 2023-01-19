@@ -375,7 +375,13 @@ class SearchItem extends StatelessWidget {
       this.date,
       this.trailing,
       this.selected,
-      this.maxLines = false});
+      this.maxLines = false,
+      this.margin = const EdgeInsets.symmetric(horizontal: 6),
+      this.padding = const EdgeInsets.symmetric(
+        horizontal: 6,
+        vertical: 12,
+      ),
+      this.nameFontSize = 16});
 
   final Widget? avatar;
   final Widget? trailing;
@@ -388,6 +394,9 @@ class SearchItem extends StatelessWidget {
   final DateTime? date;
   final bool? selected;
   final bool maxLines;
+  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry padding;
+  final double nameFontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -396,7 +405,7 @@ class SearchItem extends StatelessWidget {
       color: context.theme.listSelected,
     );
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
+      padding: margin,
       child: InteractiveDecoratedBox(
         decoration:
             selected == true ? selectedDecoration : const BoxDecoration(),
@@ -404,10 +413,7 @@ class SearchItem extends StatelessWidget {
         onTap: onTap,
         child: Container(
           constraints: const BoxConstraints(minHeight: 72),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 6,
-            vertical: 12,
-          ),
+          padding: padding,
           child: Row(
             children: [
               if (avatar != null)
@@ -435,7 +441,7 @@ class SearchItem extends StatelessWidget {
                                       maxLines ? null : TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: context.theme.text,
-                                    fontSize: 16,
+                                    fontSize: nameFontSize,
                                   ),
                                   highlightTextSpans: [
                                     if (nameHighlight)
