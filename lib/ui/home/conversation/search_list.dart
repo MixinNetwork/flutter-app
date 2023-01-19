@@ -363,25 +363,25 @@ class SearchList extends HookWidget {
 }
 
 class SearchItem extends StatelessWidget {
-  const SearchItem({
-    super.key,
-    this.avatar,
-    required this.name,
-    required this.keyword,
-    this.nameHighlight = true,
-    required this.onTap,
-    this.description,
-    this.descriptionIcon,
-    this.date,
-    this.trailing,
-    this.selected,
-    this.maxLines = false,
-    this.margin = const EdgeInsets.symmetric(horizontal: 6),
-    this.padding = const EdgeInsets.symmetric(
-      horizontal: 6,
-      vertical: 12,
-    ),
-  });
+  const SearchItem(
+      {super.key,
+      this.avatar,
+      required this.name,
+      required this.keyword,
+      this.nameHighlight = true,
+      required this.onTap,
+      this.description,
+      this.descriptionIcon,
+      this.date,
+      this.trailing,
+      this.selected,
+      this.maxLines = false,
+      this.margin = const EdgeInsets.symmetric(horizontal: 6),
+      this.padding = const EdgeInsets.symmetric(
+        horizontal: 6,
+        vertical: 12,
+      ),
+      this.nameFontSize = 16});
 
   final Widget? avatar;
   final Widget? trailing;
@@ -396,6 +396,7 @@ class SearchItem extends StatelessWidget {
   final bool maxLines;
   final EdgeInsetsGeometry margin;
   final EdgeInsetsGeometry padding;
+  final double nameFontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -440,7 +441,7 @@ class SearchItem extends StatelessWidget {
                                       maxLines ? null : TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: context.theme.text,
-                                    fontSize: 16,
+                                    fontSize: nameFontSize,
                                   ),
                                   highlightTextSpans: [
                                     if (nameHighlight)

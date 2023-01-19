@@ -11,7 +11,6 @@ import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/recent_conversation_cubit.dart';
-import '../../ui/home/conversation/conversation_page.dart';
 import '../../ui/home/conversation/search_list.dart';
 import '../../ui/home/intent.dart';
 import '../../utils/extension/extension.dart';
@@ -269,15 +268,15 @@ class CommandPalettePage extends HookWidget {
                                 child: SearchItem(
                                   selected: selectedIndex.value == index,
                                   margin: EdgeInsets.zero,
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(14),
                                   avatar: AvatarWidget(
                                     name: user.fullName,
                                     userId: user.userId,
-                                    size: ConversationPage
-                                        .conversationItemAvatarSize,
+                                    size: 40,
                                     avatarUrl: user.avatarUrl,
                                   ),
                                   name: user.fullName ?? '?',
+                                  nameFontSize: 14,
                                   trailing: VerifiedOrBotWidget(
                                     verified: user.isVerified,
                                     isBot: user.appId != null,
@@ -302,18 +301,18 @@ class CommandPalettePage extends HookWidget {
                                   selected: selectedIndex.value ==
                                       (users.length + index),
                                   margin: EdgeInsets.zero,
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(14),
                                   avatar: ConversationAvatarWidget(
                                     conversationId: conversation.conversationId,
                                     fullName: conversation.validName,
                                     groupIconUrl: conversation.groupIconUrl,
                                     avatarUrl: conversation.avatarUrl,
                                     category: conversation.category,
-                                    size: ConversationPage
-                                        .conversationItemAvatarSize,
+                                    size: 40,
                                     userId: conversation.ownerId,
                                   ),
                                   name: conversation.validName,
+                                  nameFontSize: 14,
                                   trailing: VerifiedOrBotWidget(
                                     verified: conversation.isVerified,
                                     isBot: conversation.appId != null,
