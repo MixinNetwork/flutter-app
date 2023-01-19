@@ -2,8 +2,5 @@
 
 part of 'message_history_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$MessageHistoryDaoMixin on DatabaseAccessor<MixinDatabase> {}
