@@ -2,5 +2,8 @@
 
 part of 'offset_dao.dart';
 
-// ignore_for_file: type=lint
+// **************************************************************************
+// DaoGenerator
+// **************************************************************************
+
 mixin _$OffsetDaoMixin on DatabaseAccessor<MixinDatabase> {}

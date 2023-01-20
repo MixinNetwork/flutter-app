@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:markdown_widget/scrollable_positioned_list/src/scrollable_positioned_list.dart';
 
 import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';

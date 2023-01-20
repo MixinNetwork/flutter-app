@@ -2,373 +2,11 @@
 
 part of 'signal_database.dart';
 
+// **************************************************************************
+// DriftDatabaseGenerator
+// **************************************************************************
+
 // ignore_for_file: type=lint
-class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  SenderKeys(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _groupIdMeta =
-      const VerificationMeta('groupId');
-  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
-      'group_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _senderIdMeta =
-      const VerificationMeta('senderId');
-  late final GeneratedColumn<String> senderId = GeneratedColumn<String>(
-      'sender_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _recordMeta = const VerificationMeta('record');
-  late final GeneratedColumn<Uint8List> record = GeneratedColumn<Uint8List>(
-      'record', aliasedName, false,
-      type: DriftSqlType.blob,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  @override
-  List<GeneratedColumn> get $columns => [groupId, senderId, record];
-  @override
-  String get aliasedName => _alias ?? 'sender_keys';
-  @override
-  String get actualTableName => 'sender_keys';
-  @override
-  VerificationContext validateIntegrity(Insertable<SenderKey> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('group_id')) {
-      context.handle(_groupIdMeta,
-          groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta));
-    } else if (isInserting) {
-      context.missing(_groupIdMeta);
-    }
-    if (data.containsKey('sender_id')) {
-      context.handle(_senderIdMeta,
-          senderId.isAcceptableOrUnknown(data['sender_id']!, _senderIdMeta));
-    } else if (isInserting) {
-      context.missing(_senderIdMeta);
-    }
-    if (data.containsKey('record')) {
-      context.handle(_recordMeta,
-          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
-    } else if (isInserting) {
-      context.missing(_recordMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {groupId, senderId};
-  @override
-  SenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return SenderKey(
-      groupId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}group_id'])!,
-      senderId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sender_id'])!,
-      record: attachedDatabase.typeMapping
-          .read(DriftSqlType.blob, data['${effectivePrefix}record'])!,
-    );
-  }
-
-  @override
-  SenderKeys createAlias(String alias) {
-    return SenderKeys(attachedDatabase, alias);
-  }
-
-  @override
-  List<String> get customConstraints =>
-      const ['PRIMARY KEY(group_id, sender_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class SenderKey extends DataClass implements Insertable<SenderKey> {
-  final String groupId;
-  final String senderId;
-  final Uint8List record;
-  const SenderKey(
-      {required this.groupId, required this.senderId, required this.record});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['group_id'] = Variable<String>(groupId);
-    map['sender_id'] = Variable<String>(senderId);
-    map['record'] = Variable<Uint8List>(record);
-    return map;
-  }
-
-  SenderKeysCompanion toCompanion(bool nullToAbsent) {
-    return SenderKeysCompanion(
-      groupId: Value(groupId),
-      senderId: Value(senderId),
-      record: Value(record),
-    );
-  }
-
-  factory SenderKey.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return SenderKey(
-      groupId: serializer.fromJson<String>(json['group_id']),
-      senderId: serializer.fromJson<String>(json['sender_id']),
-      record: serializer.fromJson<Uint8List>(json['record']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'group_id': serializer.toJson<String>(groupId),
-      'sender_id': serializer.toJson<String>(senderId),
-      'record': serializer.toJson<Uint8List>(record),
-    };
-  }
-
-  SenderKey copyWith({String? groupId, String? senderId, Uint8List? record}) =>
-      SenderKey(
-        groupId: groupId ?? this.groupId,
-        senderId: senderId ?? this.senderId,
-        record: record ?? this.record,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('SenderKey(')
-          ..write('groupId: $groupId, ')
-          ..write('senderId: $senderId, ')
-          ..write('record: $record')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(groupId, senderId, $driftBlobEquality.hash(record));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is SenderKey &&
-          other.groupId == this.groupId &&
-          other.senderId == this.senderId &&
-          $driftBlobEquality.equals(other.record, this.record));
-}
-
-class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
-  final Value<String> groupId;
-  final Value<String> senderId;
-  final Value<Uint8List> record;
-  const SenderKeysCompanion({
-    this.groupId = const Value.absent(),
-    this.senderId = const Value.absent(),
-    this.record = const Value.absent(),
-  });
-  SenderKeysCompanion.insert({
-    required String groupId,
-    required String senderId,
-    required Uint8List record,
-  })  : groupId = Value(groupId),
-        senderId = Value(senderId),
-        record = Value(record);
-  static Insertable<SenderKey> custom({
-    Expression<String>? groupId,
-    Expression<String>? senderId,
-    Expression<Uint8List>? record,
-  }) {
-    return RawValuesInsertable({
-      if (groupId != null) 'group_id': groupId,
-      if (senderId != null) 'sender_id': senderId,
-      if (record != null) 'record': record,
-    });
-  }
-
-  SenderKeysCompanion copyWith(
-      {Value<String>? groupId,
-      Value<String>? senderId,
-      Value<Uint8List>? record}) {
-    return SenderKeysCompanion(
-      groupId: groupId ?? this.groupId,
-      senderId: senderId ?? this.senderId,
-      record: record ?? this.record,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (groupId.present) {
-      map['group_id'] = Variable<String>(groupId.value);
-    }
-    if (senderId.present) {
-      map['sender_id'] = Variable<String>(senderId.value);
-    }
-    if (record.present) {
-      map['record'] = Variable<Uint8List>(record.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SenderKeysCompanion(')
-          ..write('groupId: $groupId, ')
-          ..write('senderId: $senderId, ')
-          ..write('record: $record')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class Identities extends Table with TableInfo<Identities, Identitie> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  Identities(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
-  static const VerificationMeta _addressMeta =
-      const VerificationMeta('address');
-  late final GeneratedColumn<String> address = GeneratedColumn<String>(
-      'address', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _registrationIdMeta =
-      const VerificationMeta('registrationId');
-  late final GeneratedColumn<int> registrationId = GeneratedColumn<int>(
-      'registration_id', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _publicKeyMeta =
-      const VerificationMeta('publicKey');
-  late final GeneratedColumn<Uint8List> publicKey = GeneratedColumn<Uint8List>(
-      'public_key', aliasedName, false,
-      type: DriftSqlType.blob,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _privateKeyMeta =
-      const VerificationMeta('privateKey');
-  late final GeneratedColumn<Uint8List> privateKey = GeneratedColumn<Uint8List>(
-      'private_key', aliasedName, true,
-      type: DriftSqlType.blob,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _nextPrekeyIdMeta =
-      const VerificationMeta('nextPrekeyId');
-  late final GeneratedColumn<int> nextPrekeyId = GeneratedColumn<int>(
-      'next_prekey_id', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _timestampMeta =
-      const VerificationMeta('timestamp');
-  late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
-      'timestamp', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  @override
-  List<GeneratedColumn> get $columns => [
-        id,
-        address,
-        registrationId,
-        publicKey,
-        privateKey,
-        nextPrekeyId,
-        timestamp
-      ];
-  @override
-  String get aliasedName => _alias ?? 'identities';
-  @override
-  String get actualTableName => 'identities';
-  @override
-  VerificationContext validateIntegrity(Insertable<Identitie> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('address')) {
-      context.handle(_addressMeta,
-          address.isAcceptableOrUnknown(data['address']!, _addressMeta));
-    } else if (isInserting) {
-      context.missing(_addressMeta);
-    }
-    if (data.containsKey('registration_id')) {
-      context.handle(
-          _registrationIdMeta,
-          registrationId.isAcceptableOrUnknown(
-              data['registration_id']!, _registrationIdMeta));
-    }
-    if (data.containsKey('public_key')) {
-      context.handle(_publicKeyMeta,
-          publicKey.isAcceptableOrUnknown(data['public_key']!, _publicKeyMeta));
-    } else if (isInserting) {
-      context.missing(_publicKeyMeta);
-    }
-    if (data.containsKey('private_key')) {
-      context.handle(
-          _privateKeyMeta,
-          privateKey.isAcceptableOrUnknown(
-              data['private_key']!, _privateKeyMeta));
-    }
-    if (data.containsKey('next_prekey_id')) {
-      context.handle(
-          _nextPrekeyIdMeta,
-          nextPrekeyId.isAcceptableOrUnknown(
-              data['next_prekey_id']!, _nextPrekeyIdMeta));
-    }
-    if (data.containsKey('timestamp')) {
-      context.handle(_timestampMeta,
-          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
-    } else if (isInserting) {
-      context.missing(_timestampMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  Identitie map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Identitie(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      address: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}address'])!,
-      registrationId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}registration_id']),
-      publicKey: attachedDatabase.typeMapping
-          .read(DriftSqlType.blob, data['${effectivePrefix}public_key'])!,
-      privateKey: attachedDatabase.typeMapping
-          .read(DriftSqlType.blob, data['${effectivePrefix}private_key']),
-      nextPrekeyId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}next_prekey_id']),
-      timestamp: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
-    );
-  }
-
-  @override
-  Identities createAlias(String alias) {
-    return Identities(attachedDatabase, alias);
-  }
-
-  @override
-  bool get dontWriteConstraints => true;
-}
-
 class Identitie extends DataClass implements Insertable<Identitie> {
   final int id;
   final String address;
@@ -613,56 +251,112 @@ class IdentitiesCompanion extends UpdateCompanion<Identitie> {
   }
 }
 
-class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
+class Identities extends Table with TableInfo<Identities, Identitie> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Prekeys(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  Identities(this.attachedDatabase, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      hasAutoIncrement: true,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
-  static const VerificationMeta _prekeyIdMeta =
-      const VerificationMeta('prekeyId');
-  late final GeneratedColumn<int> prekeyId = GeneratedColumn<int>(
-      'prekey_id', aliasedName, false,
-      type: DriftSqlType.int,
+  final VerificationMeta _addressMeta = const VerificationMeta('address');
+  late final GeneratedColumn<String> address = GeneratedColumn<String>(
+      'address', aliasedName, false,
+      type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  static const VerificationMeta _recordMeta = const VerificationMeta('record');
-  late final GeneratedColumn<Uint8List> record = GeneratedColumn<Uint8List>(
-      'record', aliasedName, false,
+  final VerificationMeta _registrationIdMeta =
+      const VerificationMeta('registrationId');
+  late final GeneratedColumn<int> registrationId = GeneratedColumn<int>(
+      'registration_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _publicKeyMeta = const VerificationMeta('publicKey');
+  late final GeneratedColumn<Uint8List> publicKey = GeneratedColumn<Uint8List>(
+      'public_key', aliasedName, false,
       type: DriftSqlType.blob,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
+  final VerificationMeta _privateKeyMeta = const VerificationMeta('privateKey');
+  late final GeneratedColumn<Uint8List> privateKey = GeneratedColumn<Uint8List>(
+      'private_key', aliasedName, true,
+      type: DriftSqlType.blob,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _nextPrekeyIdMeta =
+      const VerificationMeta('nextPrekeyId');
+  late final GeneratedColumn<int> nextPrekeyId = GeneratedColumn<int>(
+      'next_prekey_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
+  late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
-  List<GeneratedColumn> get $columns => [id, prekeyId, record];
+  List<GeneratedColumn> get $columns => [
+        id,
+        address,
+        registrationId,
+        publicKey,
+        privateKey,
+        nextPrekeyId,
+        timestamp
+      ];
   @override
-  String get aliasedName => _alias ?? 'prekeys';
+  String get aliasedName => _alias ?? 'identities';
   @override
-  String get actualTableName => 'prekeys';
+  String get actualTableName => 'identities';
   @override
-  VerificationContext validateIntegrity(Insertable<Prekey> instance,
+  VerificationContext validateIntegrity(Insertable<Identitie> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('prekey_id')) {
-      context.handle(_prekeyIdMeta,
-          prekeyId.isAcceptableOrUnknown(data['prekey_id']!, _prekeyIdMeta));
+    if (data.containsKey('address')) {
+      context.handle(_addressMeta,
+          address.isAcceptableOrUnknown(data['address']!, _addressMeta));
     } else if (isInserting) {
-      context.missing(_prekeyIdMeta);
+      context.missing(_addressMeta);
     }
-    if (data.containsKey('record')) {
-      context.handle(_recordMeta,
-          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
+    if (data.containsKey('registration_id')) {
+      context.handle(
+          _registrationIdMeta,
+          registrationId.isAcceptableOrUnknown(
+              data['registration_id']!, _registrationIdMeta));
+    }
+    if (data.containsKey('public_key')) {
+      context.handle(_publicKeyMeta,
+          publicKey.isAcceptableOrUnknown(data['public_key']!, _publicKeyMeta));
     } else if (isInserting) {
-      context.missing(_recordMeta);
+      context.missing(_publicKeyMeta);
+    }
+    if (data.containsKey('private_key')) {
+      context.handle(
+          _privateKeyMeta,
+          privateKey.isAcceptableOrUnknown(
+              data['private_key']!, _privateKeyMeta));
+    }
+    if (data.containsKey('next_prekey_id')) {
+      context.handle(
+          _nextPrekeyIdMeta,
+          nextPrekeyId.isAcceptableOrUnknown(
+              data['next_prekey_id']!, _nextPrekeyIdMeta));
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
     }
     return context;
   }
@@ -670,21 +364,29 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Prekey map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Identitie map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Prekey(
-      id: attachedDatabase.typeMapping
+    return Identitie(
+      id: attachedDatabase.options.types
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      prekeyId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}prekey_id'])!,
-      record: attachedDatabase.typeMapping
-          .read(DriftSqlType.blob, data['${effectivePrefix}record'])!,
+      address: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}address'])!,
+      registrationId: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}registration_id']),
+      publicKey: attachedDatabase.options.types
+          .read(DriftSqlType.blob, data['${effectivePrefix}public_key'])!,
+      privateKey: attachedDatabase.options.types
+          .read(DriftSqlType.blob, data['${effectivePrefix}private_key']),
+      nextPrekeyId: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}next_prekey_id']),
+      timestamp: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
     );
   }
 
   @override
-  Prekeys createAlias(String alias) {
-    return Prekeys(attachedDatabase, alias);
+  Identities createAlias(String alias) {
+    return Identities(attachedDatabase, alias);
   }
 
   @override
@@ -822,46 +524,37 @@ class PrekeysCompanion extends UpdateCompanion<Prekey> {
   }
 }
 
-class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
+class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  SignedPrekeys(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  Prekeys(this.attachedDatabase, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      hasAutoIncrement: true,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
-  static const VerificationMeta _prekeyIdMeta =
-      const VerificationMeta('prekeyId');
+  final VerificationMeta _prekeyIdMeta = const VerificationMeta('prekeyId');
   late final GeneratedColumn<int> prekeyId = GeneratedColumn<int>(
       'prekey_id', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  static const VerificationMeta _recordMeta = const VerificationMeta('record');
+  final VerificationMeta _recordMeta = const VerificationMeta('record');
   late final GeneratedColumn<Uint8List> record = GeneratedColumn<Uint8List>(
       'record', aliasedName, false,
       type: DriftSqlType.blob,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  static const VerificationMeta _timestampMeta =
-      const VerificationMeta('timestamp');
-  late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
-      'timestamp', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
   @override
-  List<GeneratedColumn> get $columns => [id, prekeyId, record, timestamp];
+  List<GeneratedColumn> get $columns => [id, prekeyId, record];
   @override
-  String get aliasedName => _alias ?? 'signed_prekeys';
+  String get aliasedName => _alias ?? 'prekeys';
   @override
-  String get actualTableName => 'signed_prekeys';
+  String get actualTableName => 'prekeys';
   @override
-  VerificationContext validateIntegrity(Insertable<SignedPrekey> instance,
+  VerificationContext validateIntegrity(Insertable<Prekey> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -880,35 +573,27 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
     } else if (isInserting) {
       context.missing(_recordMeta);
     }
-    if (data.containsKey('timestamp')) {
-      context.handle(_timestampMeta,
-          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
-    } else if (isInserting) {
-      context.missing(_timestampMeta);
-    }
     return context;
   }
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  SignedPrekey map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Prekey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return SignedPrekey(
-      id: attachedDatabase.typeMapping
+    return Prekey(
+      id: attachedDatabase.options.types
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      prekeyId: attachedDatabase.typeMapping
+      prekeyId: attachedDatabase.options.types
           .read(DriftSqlType.int, data['${effectivePrefix}prekey_id'])!,
-      record: attachedDatabase.typeMapping
+      record: attachedDatabase.options.types
           .read(DriftSqlType.blob, data['${effectivePrefix}record'])!,
-      timestamp: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
     );
   }
 
   @override
-  SignedPrekeys createAlias(String alias) {
-    return SignedPrekeys(attachedDatabase, alias);
+  Prekeys createAlias(String alias) {
+    return Prekeys(attachedDatabase, alias);
   }
 
   @override
@@ -1073,70 +758,54 @@ class SignedPrekeysCompanion extends UpdateCompanion<SignedPrekey> {
   }
 }
 
-class Sessions extends Table with TableInfo<Sessions, Session> {
+class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Sessions(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  SignedPrekeys(this.attachedDatabase, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      hasAutoIncrement: true,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
-  static const VerificationMeta _addressMeta =
-      const VerificationMeta('address');
-  late final GeneratedColumn<String> address = GeneratedColumn<String>(
-      'address', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _deviceMeta = const VerificationMeta('device');
-  late final GeneratedColumn<int> device = GeneratedColumn<int>(
-      'device', aliasedName, false,
+  final VerificationMeta _prekeyIdMeta = const VerificationMeta('prekeyId');
+  late final GeneratedColumn<int> prekeyId = GeneratedColumn<int>(
+      'prekey_id', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  static const VerificationMeta _recordMeta = const VerificationMeta('record');
+  final VerificationMeta _recordMeta = const VerificationMeta('record');
   late final GeneratedColumn<Uint8List> record = GeneratedColumn<Uint8List>(
       'record', aliasedName, false,
       type: DriftSqlType.blob,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  static const VerificationMeta _timestampMeta =
-      const VerificationMeta('timestamp');
+  final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
   late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
       'timestamp', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, address, device, record, timestamp];
+  List<GeneratedColumn> get $columns => [id, prekeyId, record, timestamp];
   @override
-  String get aliasedName => _alias ?? 'sessions';
+  String get aliasedName => _alias ?? 'signed_prekeys';
   @override
-  String get actualTableName => 'sessions';
+  String get actualTableName => 'signed_prekeys';
   @override
-  VerificationContext validateIntegrity(Insertable<Session> instance,
+  VerificationContext validateIntegrity(Insertable<SignedPrekey> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('address')) {
-      context.handle(_addressMeta,
-          address.isAcceptableOrUnknown(data['address']!, _addressMeta));
+    if (data.containsKey('prekey_id')) {
+      context.handle(_prekeyIdMeta,
+          prekeyId.isAcceptableOrUnknown(data['prekey_id']!, _prekeyIdMeta));
     } else if (isInserting) {
-      context.missing(_addressMeta);
-    }
-    if (data.containsKey('device')) {
-      context.handle(_deviceMeta,
-          device.isAcceptableOrUnknown(data['device']!, _deviceMeta));
-    } else if (isInserting) {
-      context.missing(_deviceMeta);
+      context.missing(_prekeyIdMeta);
     }
     if (data.containsKey('record')) {
       context.handle(_recordMeta,
@@ -1156,25 +825,23 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Session map(Map<String, dynamic> data, {String? tablePrefix}) {
+  SignedPrekey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Session(
-      id: attachedDatabase.typeMapping
+    return SignedPrekey(
+      id: attachedDatabase.options.types
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      address: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}address'])!,
-      device: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}device'])!,
-      record: attachedDatabase.typeMapping
+      prekeyId: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}prekey_id'])!,
+      record: attachedDatabase.options.types
           .read(DriftSqlType.blob, data['${effectivePrefix}record'])!,
-      timestamp: attachedDatabase.typeMapping
+      timestamp: attachedDatabase.options.types
           .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
     );
   }
 
   @override
-  Sessions createAlias(String alias) {
-    return Sessions(attachedDatabase, alias);
+  SignedPrekeys createAlias(String alias) {
+    return SignedPrekeys(attachedDatabase, alias);
   }
 
   @override
@@ -1364,55 +1031,277 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   }
 }
 
-class RatchetSenderKeys extends Table
-    with TableInfo<RatchetSenderKeys, RatchetSenderKey> {
+class Sessions extends Table with TableInfo<Sessions, Session> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  RatchetSenderKeys(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _groupIdMeta =
-      const VerificationMeta('groupId');
+  Sessions(this.attachedDatabase, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
+  final VerificationMeta _addressMeta = const VerificationMeta('address');
+  late final GeneratedColumn<String> address = GeneratedColumn<String>(
+      'address', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _deviceMeta = const VerificationMeta('device');
+  late final GeneratedColumn<int> device = GeneratedColumn<int>(
+      'device', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _recordMeta = const VerificationMeta('record');
+  late final GeneratedColumn<Uint8List> record = GeneratedColumn<Uint8List>(
+      'record', aliasedName, false,
+      type: DriftSqlType.blob,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
+  late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, address, device, record, timestamp];
+  @override
+  String get aliasedName => _alias ?? 'sessions';
+  @override
+  String get actualTableName => 'sessions';
+  @override
+  VerificationContext validateIntegrity(Insertable<Session> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('address')) {
+      context.handle(_addressMeta,
+          address.isAcceptableOrUnknown(data['address']!, _addressMeta));
+    } else if (isInserting) {
+      context.missing(_addressMeta);
+    }
+    if (data.containsKey('device')) {
+      context.handle(_deviceMeta,
+          device.isAcceptableOrUnknown(data['device']!, _deviceMeta));
+    } else if (isInserting) {
+      context.missing(_deviceMeta);
+    }
+    if (data.containsKey('record')) {
+      context.handle(_recordMeta,
+          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
+    } else if (isInserting) {
+      context.missing(_recordMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Session map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Session(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      address: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}address'])!,
+      device: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}device'])!,
+      record: attachedDatabase.options.types
+          .read(DriftSqlType.blob, data['${effectivePrefix}record'])!,
+      timestamp: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
+    );
+  }
+
+  @override
+  Sessions createAlias(String alias) {
+    return Sessions(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class SenderKey extends DataClass implements Insertable<SenderKey> {
+  final String groupId;
+  final String senderId;
+  final Uint8List record;
+  const SenderKey(
+      {required this.groupId, required this.senderId, required this.record});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['group_id'] = Variable<String>(groupId);
+    map['sender_id'] = Variable<String>(senderId);
+    map['record'] = Variable<Uint8List>(record);
+    return map;
+  }
+
+  SenderKeysCompanion toCompanion(bool nullToAbsent) {
+    return SenderKeysCompanion(
+      groupId: Value(groupId),
+      senderId: Value(senderId),
+      record: Value(record),
+    );
+  }
+
+  factory SenderKey.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SenderKey(
+      groupId: serializer.fromJson<String>(json['group_id']),
+      senderId: serializer.fromJson<String>(json['sender_id']),
+      record: serializer.fromJson<Uint8List>(json['record']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'group_id': serializer.toJson<String>(groupId),
+      'sender_id': serializer.toJson<String>(senderId),
+      'record': serializer.toJson<Uint8List>(record),
+    };
+  }
+
+  SenderKey copyWith({String? groupId, String? senderId, Uint8List? record}) =>
+      SenderKey(
+        groupId: groupId ?? this.groupId,
+        senderId: senderId ?? this.senderId,
+        record: record ?? this.record,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('SenderKey(')
+          ..write('groupId: $groupId, ')
+          ..write('senderId: $senderId, ')
+          ..write('record: $record')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(groupId, senderId, $driftBlobEquality.hash(record));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SenderKey &&
+          other.groupId == this.groupId &&
+          other.senderId == this.senderId &&
+          $driftBlobEquality.equals(other.record, this.record));
+}
+
+class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
+  final Value<String> groupId;
+  final Value<String> senderId;
+  final Value<Uint8List> record;
+  const SenderKeysCompanion({
+    this.groupId = const Value.absent(),
+    this.senderId = const Value.absent(),
+    this.record = const Value.absent(),
+  });
+  SenderKeysCompanion.insert({
+    required String groupId,
+    required String senderId,
+    required Uint8List record,
+  })  : groupId = Value(groupId),
+        senderId = Value(senderId),
+        record = Value(record);
+  static Insertable<SenderKey> custom({
+    Expression<String>? groupId,
+    Expression<String>? senderId,
+    Expression<Uint8List>? record,
+  }) {
+    return RawValuesInsertable({
+      if (groupId != null) 'group_id': groupId,
+      if (senderId != null) 'sender_id': senderId,
+      if (record != null) 'record': record,
+    });
+  }
+
+  SenderKeysCompanion copyWith(
+      {Value<String>? groupId,
+      Value<String>? senderId,
+      Value<Uint8List>? record}) {
+    return SenderKeysCompanion(
+      groupId: groupId ?? this.groupId,
+      senderId: senderId ?? this.senderId,
+      record: record ?? this.record,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (senderId.present) {
+      map['sender_id'] = Variable<String>(senderId.value);
+    }
+    if (record.present) {
+      map['record'] = Variable<Uint8List>(record.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SenderKeysCompanion(')
+          ..write('groupId: $groupId, ')
+          ..write('senderId: $senderId, ')
+          ..write('record: $record')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  SenderKeys(this.attachedDatabase, [this._alias]);
+  final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
   late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
       'group_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  static const VerificationMeta _senderIdMeta =
-      const VerificationMeta('senderId');
+  final VerificationMeta _senderIdMeta = const VerificationMeta('senderId');
   late final GeneratedColumn<String> senderId = GeneratedColumn<String>(
       'sender_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  static const VerificationMeta _statusMeta = const VerificationMeta('status');
-  late final GeneratedColumn<String> status = GeneratedColumn<String>(
-      'status', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _messageIdMeta =
-      const VerificationMeta('messageId');
-  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
-      'message_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.string,
+  final VerificationMeta _recordMeta = const VerificationMeta('record');
+  late final GeneratedColumn<Uint8List> record = GeneratedColumn<Uint8List>(
+      'record', aliasedName, false,
+      type: DriftSqlType.blob,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
-  List<GeneratedColumn> get $columns =>
-      [groupId, senderId, status, messageId, createdAt];
+  List<GeneratedColumn> get $columns => [groupId, senderId, record];
   @override
-  String get aliasedName => _alias ?? 'ratchet_sender_keys';
+  String get aliasedName => _alias ?? 'sender_keys';
   @override
-  String get actualTableName => 'ratchet_sender_keys';
+  String get actualTableName => 'sender_keys';
   @override
-  VerificationContext validateIntegrity(Insertable<RatchetSenderKey> instance,
+  VerificationContext validateIntegrity(Insertable<SenderKey> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -1428,21 +1317,11 @@ class RatchetSenderKeys extends Table
     } else if (isInserting) {
       context.missing(_senderIdMeta);
     }
-    if (data.containsKey('status')) {
-      context.handle(_statusMeta,
-          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    if (data.containsKey('record')) {
+      context.handle(_recordMeta,
+          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
     } else if (isInserting) {
-      context.missing(_statusMeta);
-    }
-    if (data.containsKey('message_id')) {
-      context.handle(_messageIdMeta,
-          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
+      context.missing(_recordMeta);
     }
     return context;
   }
@@ -1450,25 +1329,21 @@ class RatchetSenderKeys extends Table
   @override
   Set<GeneratedColumn> get $primaryKey => {groupId, senderId};
   @override
-  RatchetSenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
+  SenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return RatchetSenderKey(
-      groupId: attachedDatabase.typeMapping
+    return SenderKey(
+      groupId: attachedDatabase.options.types
           .read(DriftSqlType.string, data['${effectivePrefix}group_id'])!,
-      senderId: attachedDatabase.typeMapping
+      senderId: attachedDatabase.options.types
           .read(DriftSqlType.string, data['${effectivePrefix}sender_id'])!,
-      status: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
-      messageId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}message_id']),
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}created_at'])!,
+      record: attachedDatabase.options.types
+          .read(DriftSqlType.blob, data['${effectivePrefix}record'])!,
     );
   }
 
   @override
-  RatchetSenderKeys createAlias(String alias) {
-    return RatchetSenderKeys(attachedDatabase, alias);
+  SenderKeys createAlias(String alias) {
+    return SenderKeys(attachedDatabase, alias);
   }
 
   @override
@@ -1666,10 +1541,119 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
   }
 }
 
+class RatchetSenderKeys extends Table
+    with TableInfo<RatchetSenderKeys, RatchetSenderKey> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  RatchetSenderKeys(this.attachedDatabase, [this._alias]);
+  final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+      'group_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _senderIdMeta = const VerificationMeta('senderId');
+  late final GeneratedColumn<String> senderId = GeneratedColumn<String>(
+      'sender_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _statusMeta = const VerificationMeta('status');
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
+      'message_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  @override
+  List<GeneratedColumn> get $columns =>
+      [groupId, senderId, status, messageId, createdAt];
+  @override
+  String get aliasedName => _alias ?? 'ratchet_sender_keys';
+  @override
+  String get actualTableName => 'ratchet_sender_keys';
+  @override
+  VerificationContext validateIntegrity(Insertable<RatchetSenderKey> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('group_id')) {
+      context.handle(_groupIdMeta,
+          groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta));
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('sender_id')) {
+      context.handle(_senderIdMeta,
+          senderId.isAcceptableOrUnknown(data['sender_id']!, _senderIdMeta));
+    } else if (isInserting) {
+      context.missing(_senderIdMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {groupId, senderId};
+  @override
+  RatchetSenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RatchetSenderKey(
+      groupId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}group_id'])!,
+      senderId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_id'])!,
+      status: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      messageId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id']),
+      createdAt: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  RatchetSenderKeys createAlias(String alias) {
+    return RatchetSenderKeys(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints =>
+      const ['PRIMARY KEY(group_id, sender_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
 abstract class _$SignalDatabase extends GeneratedDatabase {
   _$SignalDatabase(QueryExecutor e) : super(e);
   _$SignalDatabase.connect(DatabaseConnection c) : super.connect(c);
-  late final SenderKeys senderKeys = SenderKeys(this);
   late final Identities identities = Identities(this);
   late final Index indexIdentitiesAddress = Index('index_identities_address',
       'CREATE UNIQUE INDEX IF NOT EXISTS index_identities_address ON identities (address)');
@@ -1684,6 +1668,7 @@ abstract class _$SignalDatabase extends GeneratedDatabase {
   late final Index indexSessionsAddressDevice = Index(
       'index_sessions_address_device',
       'CREATE UNIQUE INDEX IF NOT EXISTS index_sessions_address_device ON sessions (address, device)');
+  late final SenderKeys senderKeys = SenderKeys(this);
   late final RatchetSenderKeys ratchetSenderKeys = RatchetSenderKeys(this);
   late final IdentityDao identityDao = IdentityDao(this as SignalDatabase);
   late final PreKeyDao preKeyDao = PreKeyDao(this as SignalDatabase);
@@ -1694,11 +1679,10 @@ abstract class _$SignalDatabase extends GeneratedDatabase {
   late final RatchetSenderKeyDao ratchetSenderKeyDao =
       RatchetSenderKeyDao(this as SignalDatabase);
   @override
-  Iterable<TableInfo<Table, Object?>> get allTables =>
+  Iterable<TableInfo<Table, dynamic>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        senderKeys,
         identities,
         indexIdentitiesAddress,
         prekeys,
@@ -1707,6 +1691,7 @@ abstract class _$SignalDatabase extends GeneratedDatabase {
         indexSignedPrekeysPrekeyId,
         sessions,
         indexSessionsAddressDevice,
+        senderKeys,
         ratchetSenderKeys
       ];
 }

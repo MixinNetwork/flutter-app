@@ -2,5 +2,8 @@
 
 part of 'ratchet_sender_key_dao.dart';
 
-// ignore_for_file: type=lint
+// **************************************************************************
+// DaoGenerator
+// **************************************************************************
+
 mixin _$RatchetSenderKeyDaoMixin on DatabaseAccessor<SignalDatabase> {}

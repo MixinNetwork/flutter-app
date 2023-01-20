@@ -391,18 +391,18 @@ packages:
     dependency: "direct main"
     description:
       name: drift
-      sha256: b8465fb684bae76ac98e102d831625bff32c0e802db38d9edff0fe338d915fd4
+      sha256: f0af80cba8099d969bb79d527fbec0fc79226dff3a70e05485596de6e8fc2fcc
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.2"
+    version: "2.2.0"
   drift_dev:
     dependency: "direct dev"
     description:
       name: drift_dev
-      sha256: b237a939e9b4c55178187dacc78075e34184a0d6a3b2a7672fecc80a36dcf8f4
+      sha256: "94a6c2d1fd7ff97992f287dcbf181d6fff3bc34ca3212eb09c0d930a245a36f1"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.2.0+1"
   ecache:
     dependency: "direct main"
     description:
@@ -1498,10 +1498,10 @@ packages:
     dependency: transitive
     description:
       name: sqlparser
-      sha256: "39509210ce431433c2a3d1da0faaf3160853546e174696c2185569389151d4b7"
+      sha256: fa31ecfc6b6252e3a706168a482649142099caa65c126171e8a388bd5836d9ec
       url: "https://pub.dev"
     source: hosted
-    version: "0.26.0"
+    version: "0.23.3"
   stack_trace:
     dependency: transitive
     description:
