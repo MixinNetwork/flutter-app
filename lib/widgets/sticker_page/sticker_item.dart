@@ -71,6 +71,7 @@ class StickerItem extends HookWidget {
             height: height,
             width: width,
             fit: BoxFit.contain,
+            frameRate: FrameRate(50),
             onLoaded: (composition) {
               controller.duration = composition.duration;
               listener();
