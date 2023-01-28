@@ -34,6 +34,8 @@ jobs:
           sudo apt-get install libopus-dev libogg-dev
           flutter doctor
 
+      - run: flutter --version
+
       - run: flutter config --enable-linux-desktop
       - name: Run tests
         run: flutter test
@@ -168,7 +170,10 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: ${{ github.event.inputs.flutter_channel || 'master' }}
+          channel: ${{ github.event.inputs.flutter_channel || 'stable' }}
+
+      - run: flutter --version
+
       - run: flutter config --enable-windows-desktop
       # fix error when dump debug info: (msdia*.dll unregistered?)
       - run: regsvr32 "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\Remote Debugger\x64\msdia140.dll"
