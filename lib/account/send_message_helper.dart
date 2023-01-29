@@ -1006,7 +1006,7 @@ class SendMessageHelper {
   ) async {
     AttachmentResult? attachmentResult;
     if (content != null) {
-      attachmentResult = await _checkAttachment(content);
+      attachmentResult = await _checkAttachmentMessage(content);
     }
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(file, messageId, category);
@@ -1068,7 +1068,7 @@ class SendMessageHelper {
     return null;
   }
 
-  Future<AttachmentResult?> _checkAttachment(String content) async {
+  Future<AttachmentResult?> _checkAttachmentMessage(String content) async {
     AttachmentMessage? attachmentMessage;
     try {
       attachmentMessage = AttachmentMessage.fromJson(
