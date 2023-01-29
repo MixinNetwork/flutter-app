@@ -27,6 +27,11 @@ extension MessageItemExtension on MessageItem {
       (mediaStatus == MediaStatus.done || mediaStatus == MediaStatus.read);
 
   bool get canForward {
+    if (!const [MessageStatus.delivered, MessageStatus.read, MessageStatus.sent]
+        .contains(status)) {
+      return false;
+    }
+
     if (type == MessageCategory.appCard) {
       try {
         return AppCardData.fromJson(
