@@ -48,22 +48,24 @@ PODS:
     - Flutter
   - image_picker_ios (0.0.1):
     - Flutter
-  - libphonenumber (0.0.1):
-    - Flutter
-    - libPhoneNumber-iOS
-  - libPhoneNumber-iOS (0.9.15)
   - libphonenumber_plugin (0.0.1):
     - Flutter
-    - libphonenumber
-    - libPhoneNumber-iOS
+    - PhoneNumberKit
   - ogg_opus_player (0.0.1):
     - Flutter
   - open_file (0.0.1):
     - Flutter
   - package_info_plus (0.4.5):
     - Flutter
-  - path_provider_ios (0.0.1):
+  - path_provider_foundation (0.0.1):
     - Flutter
+    - FlutterMacOS
+  - PhoneNumberKit (3.3.4):
+    - PhoneNumberKit/PhoneNumberKitCore (= 3.3.4)
+    - PhoneNumberKit/UIKit (= 3.3.4)
+  - PhoneNumberKit/PhoneNumberKitCore (3.3.4)
+  - PhoneNumberKit/UIKit (3.3.4):
+    - PhoneNumberKit/PhoneNumberKitCore
   - platform_device_id (0.0.1):
     - Flutter
   - protocol_handler (0.0.1):
@@ -104,12 +106,11 @@ DEPENDENCIES:
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - gallery_saver (from `.symlinks/plugins/gallery_saver/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
-  - libphonenumber (from `.symlinks/plugins/libphonenumber/ios`)
   - libphonenumber_plugin (from `.symlinks/plugins/libphonenumber_plugin/ios`)
   - ogg_opus_player (from `.symlinks/plugins/ogg_opus_player/ios`)
   - open_file (from `.symlinks/plugins/open_file/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
-  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/ios`)
   - platform_device_id (from `.symlinks/plugins/platform_device_id/ios`)
   - protocol_handler (from `.symlinks/plugins/protocol_handler/ios`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
@@ -121,7 +122,7 @@ SPEC REPOS:
   trunk:
     - DKImagePickerController
     - DKPhotoGallery
-    - libPhoneNumber-iOS
+    - PhoneNumberKit
     - SDWebImage
     - sqlite3
     - SwiftyGif
@@ -145,8 +146,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/gallery_saver/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
-  libphonenumber:
-    :path: ".symlinks/plugins/libphonenumber/ios"
   libphonenumber_plugin:
     :path: ".symlinks/plugins/libphonenumber_plugin/ios"
   ogg_opus_player:
@@ -155,8 +154,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/open_file/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
-  path_provider_ios:
-    :path: ".symlinks/plugins/path_provider_ios/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/ios"
   platform_device_id:
     :path: ".symlinks/plugins/platform_device_id/ios"
   protocol_handler:
@@ -175,27 +174,26 @@ SPEC CHECKSUMS:
   device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
-  file_picker: 817ab1d8cd2da9d2da412a417162deee3500fc95
+  file_picker: ce3938a0df3cc1ef404671531facef740d03f920
   file_selector_ios: 6e9b6d7300556c730f224905726f0a2d5d874e51
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_app_icon_badge: 844847adbd7a1c6f325d6b41b942428981b839cc
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542
   image_picker_ios: b786a5dcf033a8336a657191401bfdf12017dabb
-  libphonenumber: bd14d5abfc5939ab0b0767234e2d8e2593af258e
-  libPhoneNumber-iOS: 0a32a9525cf8744fe02c5206eb30d571e38f7d75
-  libphonenumber_plugin: 7cf755ad1656145935d6c208173a476bd3f12898
+  libphonenumber_plugin: e8a7d64a6624a7c25f2c4ab0b7ead2a8e341e35e
   ogg_opus_player: eefeb790c75ae57dfabcbd1025cca9b332cd91a0
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
-  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
+  path_provider_foundation: 37748e03f12783f9de2cb2c4eadfaa25fe6d4852
+  PhoneNumberKit: 441e8b26ec88d598e3591de9061eff18f5dd12e8
   platform_device_id: 81b3e2993881f87d0c82ef151dc274df4869aef5
   protocol_handler: ae9efcf3b307f3fdffcd9d5252775b9f7d9f0d09
   SDWebImage: b9a731e1d6307f44ca703b3976d18c24ca561e84
   sqlite3: 88dd99ef4ac3945f5a15facdd752933c52fd93bf
   sqlite3_flutter_libs: c00751e981228acb63595236703da79d31282b63
   SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
-  url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
+  url_launcher_ios: ae1517e5e344f5544fb090b079e11f399dfbe4d2
   video_player_avfoundation: e489aac24ef5cf7af82702979ed16f2a5ef84cff
   webview_flutter_wkwebview: b7e70ef1ddded7e69c796c7390ee74180182971f
 
