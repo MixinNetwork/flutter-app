@@ -1052,7 +1052,7 @@ class SendMessageHelper {
     }
     final createdAt = attachmentExtra.createdAt;
     if (createdAt != null) {
-      final date = DateTime.tryParse(createdAt);
+      final date = DateTime.tryParse(createdAt)?.toLocal();
       final difference = date?.difference(DateTime.now());
       if (difference != null &&
           difference.inMilliseconds <
