@@ -153,225 +153,227 @@ class _Menus extends HookWidget {
 
     const methodChannel = MethodChannel('mixin_desktop/platform_menus');
 
-    return PlatformMenuBar(
-      menus: [
-        PlatformMenu(
-          label: 'Mixin',
-          menus: [
-            PlatformMenuItemGroup(members: [
-              PlatformMenuItem(
-                label: '${context.l10n.about} Mixin',
-                onSelected: () => methodChannel.invokeMethod('showAbout'),
-              ),
-            ]),
-            PlatformMenuItemGroup(members: [
-              PlatformMenuItem(
-                label: context.l10n.preferences,
-                shortcut: const SingleActivator(
-                  LogicalKeyboardKey.comma,
-                  meta: true,
-                ),
-                onSelected: signed
-                    ? () {
-                        windowManager.show();
-                        context
-                            .read<SlideCategoryCubit>()
-                            .select(SlideCategoryType.setting);
-                      }
-                    : null,
-              ),
-            ]),
-            PlatformMenuItemGroup(
-              members: [
-                PlatformMenuItem(
-                  label: context.l10n.quickSearch,
-                  shortcut: const SingleActivator(
-                    LogicalKeyboardKey.keyK,
-                    meta: true,
-                  ),
-                  onSelected: signed
-                      ? () {
-                          Actions.invoke<ToggleCommandPaletteIntent>(
-                            context,
-                            const ToggleCommandPaletteIntent(),
-                          );
-                        }
-                      : null,
-                ),
-                PlatformMenuItem(
-                  label: context.l10n.hideMixin,
-                  shortcut: const SingleActivator(
-                    LogicalKeyboardKey.keyH,
-                    meta: true,
-                  ),
-                  onSelected: windowManager.hide,
-                ),
-                PlatformMenuItem(
-                  label: context.l10n.showMixin,
-                  onSelected: windowManager.show,
-                ),
-              ],
-            ),
+    final menus = [
+      PlatformMenu(
+        label: 'Mixin',
+        menus: [
+          PlatformMenuItemGroup(members: [
             PlatformMenuItem(
-              label: context.l10n.quitMixin,
+              label: '${context.l10n.about} Mixin',
+              onSelected: () => methodChannel.invokeMethod('showAbout'),
+            ),
+          ]),
+          PlatformMenuItemGroup(members: [
+            PlatformMenuItem(
+              label: context.l10n.preferences,
               shortcut: const SingleActivator(
-                LogicalKeyboardKey.keyQ,
+                LogicalKeyboardKey.comma,
                 meta: true,
               ),
-              onSelected: () => exit(0),
+              onSelected: signed
+                  ? () {
+                      windowManager.show();
+                      context
+                          .read<SlideCategoryCubit>()
+                          .select(SlideCategoryType.setting);
+                    }
+                  : null,
             ),
-          ],
-        ),
-        PlatformMenu(
-          label: context.l10n.file,
-          menus: [
-            PlatformMenuItemGroup(members: [
+          ]),
+          PlatformMenuItemGroup(
+            members: [
               PlatformMenuItem(
-                label: context.l10n.createConversation,
+                label: context.l10n.quickSearch,
                 shortcut: const SingleActivator(
-                  LogicalKeyboardKey.keyN,
+                  LogicalKeyboardKey.keyK,
                   meta: true,
                 ),
                 onSelected: signed
                     ? () {
-                        windowManager.show();
-                        Actions.invoke<CreateConversationIntent>(
+                        Actions.invoke<ToggleCommandPaletteIntent>(
                           context,
-                          const CreateConversationIntent(),
+                          const ToggleCommandPaletteIntent(),
                         );
                       }
                     : null,
               ),
               PlatformMenuItem(
-                label: context.l10n.createGroup,
+                label: context.l10n.hideMixin,
                 shortcut: const SingleActivator(
-                  LogicalKeyboardKey.keyN,
-                  shift: true,
+                  LogicalKeyboardKey.keyH,
                   meta: true,
                 ),
-                onSelected: signed
-                    ? () {
-                        windowManager.show();
-                        Actions.invoke<CreateGroupConversationIntent>(
-                          context,
-                          const CreateGroupConversationIntent(),
-                        );
-                      }
-                    : null,
+                onSelected: windowManager.hide,
               ),
               PlatformMenuItem(
-                label: context.l10n.createCircle,
-                onSelected: signed
-                    ? () {
-                        windowManager.show();
-                        Actions.invoke<CreateCircleIntent>(
-                          context,
-                          const CreateCircleIntent(),
-                        );
-                      }
-                    : null,
+                label: context.l10n.showMixin,
+                onSelected: windowManager.show,
               ),
-              PlatformMenuItemGroup(members: [
-                PlatformMenuItem(
-                  label: context.l10n.closeWindow,
-                  onSelected: windowManager.close,
-                )
-              ]),
-            ]),
-          ],
-        ),
-        buildConversationMenu(),
-        PlatformMenu(
-          label: context.l10n.window,
-          menus: [
+            ],
+          ),
+          PlatformMenuItem(
+            label: context.l10n.quitMixin,
+            shortcut: const SingleActivator(
+              LogicalKeyboardKey.keyQ,
+              meta: true,
+            ),
+            onSelected: () => exit(0),
+          ),
+        ],
+      ),
+      PlatformMenu(
+        label: context.l10n.file,
+        menus: [
+          PlatformMenuItemGroup(members: [
             PlatformMenuItem(
-              label: context.l10n.minimize,
+              label: context.l10n.createConversation,
               shortcut: const SingleActivator(
-                LogicalKeyboardKey.keyM,
+                LogicalKeyboardKey.keyN,
                 meta: true,
               ),
-              onSelected: windowManager.minimize,
+              onSelected: signed
+                  ? () {
+                      windowManager.show();
+                      Actions.invoke<CreateConversationIntent>(
+                        context,
+                        const CreateConversationIntent(),
+                      );
+                    }
+                  : null,
             ),
             PlatformMenuItem(
-              label: context.l10n.zoom,
-              onSelected: () async => !await windowManager.isMaximized()
-                  ? windowManager.maximize()
-                  : windowManager.restore(),
+              label: context.l10n.createGroup,
+              shortcut: const SingleActivator(
+                LogicalKeyboardKey.keyN,
+                shift: true,
+                meta: true,
+              ),
+              onSelected: signed
+                  ? () {
+                      windowManager.show();
+                      Actions.invoke<CreateGroupConversationIntent>(
+                        context,
+                        const CreateGroupConversationIntent(),
+                      );
+                    }
+                  : null,
+            ),
+            PlatformMenuItem(
+              label: context.l10n.createCircle,
+              onSelected: signed
+                  ? () {
+                      windowManager.show();
+                      Actions.invoke<CreateCircleIntent>(
+                        context,
+                        const CreateCircleIntent(),
+                      );
+                    }
+                  : null,
             ),
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
-                label: context.l10n.previousConversation,
-                shortcut: const SingleActivator(
-                  LogicalKeyboardKey.arrowUp,
-                  meta: true,
-                ),
-                onSelected: signed
-                    ? () {
-                        Actions.maybeInvoke(
-                          context,
-                          const PreviousConversationIntent(),
-                        );
-                      }
-                    : null,
-              ),
-              PlatformMenuItem(
-                label: context.l10n.nextConversation,
-                shortcut: const SingleActivator(
-                  LogicalKeyboardKey.arrowDown,
-                  meta: true,
-                ),
-                onSelected: signed
-                    ? () {
-                        Actions.maybeInvoke(
-                            context, const NextConversationIntent());
-                      }
-                    : null,
-              ),
+                label: context.l10n.closeWindow,
+                onSelected: windowManager.close,
+              )
             ]),
-            PlatformMenuItemGroup(members: [
-              PlatformMenuItem(
-                label: 'Mixin',
-                shortcut: const SingleActivator(
-                  LogicalKeyboardKey.keyO,
-                  meta: true,
-                ),
-                onSelected: windowManager.show,
+          ]),
+        ],
+      ),
+      buildConversationMenu(),
+      PlatformMenu(
+        label: context.l10n.window,
+        menus: [
+          PlatformMenuItem(
+            label: context.l10n.minimize,
+            shortcut: const SingleActivator(
+              LogicalKeyboardKey.keyM,
+              meta: true,
+            ),
+            onSelected: windowManager.minimize,
+          ),
+          PlatformMenuItem(
+            label: context.l10n.zoom,
+            onSelected: () async => !await windowManager.isMaximized()
+                ? windowManager.maximize()
+                : windowManager.restore(),
+          ),
+          PlatformMenuItemGroup(members: [
+            PlatformMenuItem(
+              label: context.l10n.previousConversation,
+              shortcut: const SingleActivator(
+                LogicalKeyboardKey.arrowUp,
+                meta: true,
               ),
-            ]),
-            PlatformMenuItemGroup(members: [
-              PlatformMenuItem(
-                label: context.l10n.bringAllToFront,
-                onSelected: windowManager.show,
+              onSelected: signed
+                  ? () {
+                      Actions.maybeInvoke(
+                        context,
+                        const PreviousConversationIntent(),
+                      );
+                    }
+                  : null,
+            ),
+            PlatformMenuItem(
+              label: context.l10n.nextConversation,
+              shortcut: const SingleActivator(
+                LogicalKeyboardKey.arrowDown,
+                meta: true,
               ),
-            ]),
+              onSelected: signed
+                  ? () {
+                      Actions.maybeInvoke(
+                          context, const NextConversationIntent());
+                    }
+                  : null,
+            ),
+          ]),
+          PlatformMenuItemGroup(members: [
             PlatformMenuItem(
               label: 'Mixin',
+              shortcut: const SingleActivator(
+                LogicalKeyboardKey.keyO,
+                meta: true,
+              ),
               onSelected: windowManager.show,
             ),
-          ],
-        ),
-        PlatformMenu(
-          label: context.l10n.help,
-          menus: [
+          ]),
+          PlatformMenuItemGroup(members: [
             PlatformMenuItem(
-              label: context.l10n.helpCenter,
-              onSelected: () =>
-                  openUri(context, 'https://mixinmessenger.zendesk.com'),
+              label: context.l10n.bringAllToFront,
+              onSelected: windowManager.show,
             ),
-            PlatformMenuItem(
-              label: context.l10n.termsOfService,
-              onSelected: () =>
-                  openUri(context, 'https://mixin.one/pages/terms'),
-            ),
-            PlatformMenuItem(
-              label: context.l10n.privacyPolicy,
-              onSelected: () =>
-                  openUri(context, 'https://mixin.one/pages/privacy'),
-            ),
-          ],
-        ),
-      ],
-      child: BlocProvider.value(value: menuCubit, child: child),
-    );
+          ]),
+          PlatformMenuItem(
+            label: 'Mixin',
+            onSelected: windowManager.show,
+          ),
+        ],
+      ),
+      PlatformMenu(
+        label: context.l10n.help,
+        menus: [
+          PlatformMenuItem(
+            label: context.l10n.helpCenter,
+            onSelected: () =>
+                openUri(context, 'https://mixinmessenger.zendesk.com'),
+          ),
+          PlatformMenuItem(
+            label: context.l10n.termsOfService,
+            onSelected: () => openUri(context, 'https://mixin.one/pages/terms'),
+          ),
+          PlatformMenuItem(
+            label: context.l10n.privacyPolicy,
+            onSelected: () =>
+                openUri(context, 'https://mixin.one/pages/privacy'),
+          ),
+        ],
+      ),
+    ];
+
+    useEffect(() {
+      WidgetsBinding.instance.platformMenuDelegate.setMenus(menus);
+    }, [menus]);
+
+    return BlocProvider.value(value: menuCubit, child: child);
   }
 }
