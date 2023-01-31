@@ -314,6 +314,10 @@ class SearchList extends HookWidget {
                         conversation.isGroupConversation,
                         conversation.senderFullName);
                   }, null, keys: [
+                    conversation.actionName,
+                    conversation.participantUserId,
+                    context.accountServer.userId,
+                    conversation.participantFullName,
                     conversation.messageStatus,
                     conversation.contentType,
                     conversation.content,
