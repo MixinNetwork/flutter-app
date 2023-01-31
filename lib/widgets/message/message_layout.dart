@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -154,6 +155,20 @@ class _RenderMessageLayout extends RenderBox
     }
   }
 
+  double _calculateWidth(
+    double widthLimit,
+    double contentWidth,
+    double statusWidth,
+  ) {
+    if (widthLimit.isInfinite) {
+      return contentWidth + spacing + statusWidth;
+    } else if ((contentWidth + spacing + statusWidth) <= widthLimit) {
+      return contentWidth + spacing + statusWidth;
+    } else {
+      return contentWidth;
+    }
+  }
+
   @override
   void performLayout() {
     final constraints = this.constraints;
@@ -165,9 +180,11 @@ class _RenderMessageLayout extends RenderBox
     contentChild.layout(childConstraints, parentUsesSize: true);
     statusChild.layout(childConstraints, parentUsesSize: true);
 
+    final boxWidth = _calculateWidth(
+        widthLimit, contentChild.size.width, statusChild.size.width);
     final lastLineHasSpace =
-        _calculateRenderParagraphLastLineHasSpace(widthLimit) ||
-            _calculateRenderEditableLastLineHasSpace(widthLimit);
+        _calculateRenderParagraphLastLineHasSpace(boxWidth) ||
+            _calculateRenderEditableLastLineHasSpace(boxWidth);
 
     size = constraints.constrain(
       _calculateSize(
