@@ -9,12 +9,14 @@ import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../bloc/bloc_converter.dart';
 import '../../../bloc/keyword_cubit.dart';
 import '../../../bloc/minute_timer_cubit.dart';
 import '../../../bloc/paging/paging_bloc.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/mixin_database.dart';
+import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
@@ -24,6 +26,8 @@ import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
+import '../../../widgets/message/item/pin_message.dart';
+import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
@@ -267,6 +271,36 @@ class SearchList extends HookWidget {
                 return HookBuilder(builder: (context) {
                   final description = useMemoizedFuture(() async {
                     final mentionCache = context.read<MentionCache>();
+
+                    if (conversation.contentType ==
+                        MessageCategory.systemConversation) {
+                      return generateSystemText(
+                        actionName: conversation.actionName,
+                        participantUserId: conversation.participantUserId,
+                        senderId: conversation.senderId,
+                        currentUserId: context.accountServer.userId,
+                        participantFullName: conversation.participantFullName,
+                        senderFullName: conversation.senderFullName,
+                        expireIn: int.tryParse(conversation.content ?? '0'),
+                      );
+                    }
+
+                    if (conversation.contentType.isPin) {
+                      final pinMessageMinimal =
+                          PinMessageMinimal.fromJsonString(
+                              conversation.content ?? '');
+                      if (pinMessageMinimal == null) {
+                        return context.l10n.chatPinMessage(
+                            conversation.senderFullName ?? '',
+                            context.l10n.aMessage);
+                      }
+                      final preview = await generatePinPreviewText(
+                        pinMessageMinimal: pinMessageMinimal,
+                        mentionCache: context.read<MentionCache>(),
+                      );
+                      return context.l10n.chatPinMessage(
+                          conversation.senderFullName ?? '', preview);
+                    }
 
                     return messagePreviewOptimize(
                         conversation.messageStatus,
@@ -702,6 +736,33 @@ class SearchMessageItem extends HookWidget {
 
     final description = useMemoizedFuture(() async {
       final mentionCache = context.read<MentionCache>();
+
+      // if (message.type == MessageCategory.systemConversation) {
+      //   return generateSystemText(
+      //     actionName: message.actionName,
+      //     participantUserId: message.participantUserId,
+      //     senderId: message.senderId,
+      //     currentUserId: context.accountServer.userId,
+      //     participantFullName: message.participantFullName,
+      //     senderFullName: message.senderFullName,
+      //     expireIn: int.tryParse(message.content ?? '0'),
+      //   );
+      // }
+
+      if (message.type.isPin) {
+        final pinMessageMinimal =
+            PinMessageMinimal.fromJsonString(message.content ?? '');
+        if (pinMessageMinimal == null) {
+          return context.l10n.chatPinMessage(
+              message.senderFullName ?? '', context.l10n.aMessage);
+        }
+        final preview = await generatePinPreviewText(
+          pinMessageMinimal: pinMessageMinimal,
+          mentionCache: context.read<MentionCache>(),
+        );
+        return context.l10n
+            .chatPinMessage(message.senderFullName ?? '', preview);
+      }
 
       return messagePreviewOptimize(
           message.status,

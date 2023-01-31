@@ -127,11 +127,15 @@ SELECT conversation.conversation_id AS conversationId,
     message.content AS content,
     message.category AS contentType,
     message.user_id AS senderId,
-    lastMessageSender.full_name AS senderFullName
+    message.action AS actionName,
+    lastMessageSender.full_name AS senderFullName,
+    participant.user_id AS participantUserId,
+    participant.full_name AS participantFullName
 FROM conversations conversation
     INNER JOIN users owner ON owner.user_id = conversation.owner_id
     LEFT JOIN messages message ON conversation.last_message_id = message.message_id
     LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = message.user_id
+    LEFT JOIN users participant ON participant.user_id = message.participant_id
 WHERE (
         (
             conversation.category = 'GROUP'
@@ -166,11 +170,15 @@ SELECT conversation.conversation_id AS conversationId,
     message.content AS content,
     message.category AS contentType,
     message.user_id AS senderId,
-    lastMessageSender.full_name AS senderFullName
+    message.action AS actionName,
+    lastMessageSender.full_name AS senderFullName,
+    participant.user_id AS participantUserId,
+    participant.full_name AS participantFullName
 FROM conversations conversation
     INNER JOIN users owner ON owner.user_id = conversation.owner_id
     LEFT JOIN messages message ON conversation.last_message_id = message.message_id
     LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = message.user_id
+    LEFT JOIN users participant ON participant.user_id = message.participant_id
 WHERE conversation.conversation_id IN :ids
 ORDER BY $order;
 
@@ -192,12 +200,16 @@ SELECT conversation.conversation_id AS conversationId,
     message.content AS content,
     message.category AS contentType,
     message.user_id AS senderId,
-    lastMessageSender.full_name AS senderFullName
+    message.action AS actionName,
+    lastMessageSender.full_name AS senderFullName,
+    participant.user_id AS participantUserId,
+    participant.full_name AS participantFullName
 FROM conversations conversation
          INNER JOIN users owner ON owner.user_id = conversation.owner_id
          LEFT JOIN messages message ON conversation.last_message_id = message.message_id
          LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = message.user_id
          LEFT JOIN circle_conversations circleConversation ON conversation.conversation_id = circleConversation.conversation_id
+         LEFT JOIN users participant ON participant.user_id = message.participant_id
 WHERE ((conversation.category = 'GROUP' AND conversation.name LIKE '%' || :query || '%' ESCAPE '\') OR
             (conversation.category = 'CONTACT' AND
             (owner.full_name LIKE '%' || :query || '%' ESCAPE '\' OR
