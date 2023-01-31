@@ -737,33 +737,6 @@ class SearchMessageItem extends HookWidget {
     final description = useMemoizedFuture(() async {
       final mentionCache = context.read<MentionCache>();
 
-      // if (message.type == MessageCategory.systemConversation) {
-      //   return generateSystemText(
-      //     actionName: message.actionName,
-      //     participantUserId: message.participantUserId,
-      //     senderId: message.senderId,
-      //     currentUserId: context.accountServer.userId,
-      //     participantFullName: message.participantFullName,
-      //     senderFullName: message.senderFullName,
-      //     expireIn: int.tryParse(message.content ?? '0'),
-      //   );
-      // }
-
-      if (message.type.isPin) {
-        final pinMessageMinimal =
-            PinMessageMinimal.fromJsonString(message.content ?? '');
-        if (pinMessageMinimal == null) {
-          return context.l10n.chatPinMessage(
-              message.senderFullName ?? '', context.l10n.aMessage);
-        }
-        final preview = await generatePinPreviewText(
-          pinMessageMinimal: pinMessageMinimal,
-          mentionCache: context.read<MentionCache>(),
-        );
-        return context.l10n
-            .chatPinMessage(message.senderFullName ?? '', preview);
-      }
-
       return messagePreviewOptimize(
           message.status,
           message.type,
