@@ -14448,7 +14448,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.conversations, 'conversation'),
             alias(this.users, 'owner'),
             alias(this.messages, 'message'),
-            alias(this.users, 'lastMessageSender')),
+            alias(this.users, 'lastMessageSender'),
+            alias(this.users, 'participant')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
@@ -14457,12 +14458,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.conversations, 'conversation'),
             alias(this.users, 'owner'),
             alias(this.messages, 'message'),
-            alias(this.users, 'lastMessageSender')),
+            alias(this.users, 'lastMessageSender'),
+            alias(this.users, 'participant')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId, message.status AS messageStatus, message.content AS content, message.category AS contentType, message.user_id AS senderId, lastMessageSender.full_name AS senderFullName FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = message.user_id WHERE((conversation.category = \'GROUP\' AND conversation.name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')OR(conversation.category = \'CONTACT\' AND(owner.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' OR owner.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')))AND ${generatedwhere.sql} ORDER BY(conversation.category = \'GROUP\' AND conversation.name = ?1 COLLATE NOCASE)OR(conversation.category = \'CONTACT\' AND(owner.full_name = ?1 COLLATE NOCASE OR owner.identity_number = ?1 COLLATE NOCASE))DESC, conversation.pin_time DESC, message.created_at DESC ${generatedlimit.sql}',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId, message.status AS messageStatus, message.content AS content, message.category AS contentType, message.user_id AS senderId, message."action" AS actionName, lastMessageSender.full_name AS senderFullName, participant.user_id AS participantUserId, participant.full_name AS participantFullName FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = message.user_id LEFT JOIN users AS participant ON participant.user_id = message.participant_id WHERE((conversation.category = \'GROUP\' AND conversation.name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')OR(conversation.category = \'CONTACT\' AND(owner.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' OR owner.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')))AND ${generatedwhere.sql} ORDER BY(conversation.category = \'GROUP\' AND conversation.name = ?1 COLLATE NOCASE)OR(conversation.category = \'CONTACT\' AND(owner.full_name = ?1 COLLATE NOCASE OR owner.identity_number = ?1 COLLATE NOCASE))DESC, conversation.pin_time DESC, message.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
           ...generatedwhere.introducedVariables,
@@ -14498,7 +14500,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         content: row.readNullable<String>('content'),
         contentType: row.readNullable<String>('contentType'),
         senderId: row.readNullable<String>('senderId'),
+        actionName: row.readNullable<String>('actionName'),
         senderFullName: row.readNullable<String>('senderFullName'),
+        participantUserId: row.readNullable<String>('participantUserId'),
+        participantFullName: row.readNullable<String>('participantFullName'),
       );
     });
   }
@@ -14513,13 +14518,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
                 alias(this.conversations, 'conversation'),
                 alias(this.users, 'owner'),
                 alias(this.messages, 'message'),
-                alias(this.users, 'lastMessageSender')) ??
+                alias(this.users, 'lastMessageSender'),
+                alias(this.users, 'participant')) ??
             const OrderBy.nothing(),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedorder.amountOfVariables;
     return customSelect(
-        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId, message.status AS messageStatus, message.content AS content, message.category AS contentType, message.user_id AS senderId, lastMessageSender.full_name AS senderFullName FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = message.user_id WHERE conversation.conversation_id IN ($expandedids) ${generatedorder.sql}',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId, message.status AS messageStatus, message.content AS content, message.category AS contentType, message.user_id AS senderId, message."action" AS actionName, lastMessageSender.full_name AS senderFullName, participant.user_id AS participantUserId, participant.full_name AS participantFullName FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = message.user_id LEFT JOIN users AS participant ON participant.user_id = message.participant_id WHERE conversation.conversation_id IN ($expandedids) ${generatedorder.sql}',
         variables: [
           for (var $ in ids) Variable<String>($),
           ...generatedorder.introducedVariables
@@ -14553,7 +14559,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         content: row.readNullable<String>('content'),
         contentType: row.readNullable<String>('contentType'),
         senderId: row.readNullable<String>('senderId'),
+        actionName: row.readNullable<String>('actionName'),
         senderFullName: row.readNullable<String>('senderFullName'),
+        participantUserId: row.readNullable<String>('participantUserId'),
+        participantFullName: row.readNullable<String>('participantFullName'),
       );
     });
   }
@@ -14570,7 +14579,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'owner'),
             alias(this.messages, 'message'),
             alias(this.users, 'lastMessageSender'),
-            alias(this.circleConversations, 'circleConversation')),
+            alias(this.circleConversations, 'circleConversation'),
+            alias(this.users, 'participant')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
@@ -14580,12 +14590,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'owner'),
             alias(this.messages, 'message'),
             alias(this.users, 'lastMessageSender'),
-            alias(this.circleConversations, 'circleConversation')),
+            alias(this.circleConversations, 'circleConversation'),
+            alias(this.users, 'participant')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId, message.status AS messageStatus, message.content AS content, message.category AS contentType, message.user_id AS senderId, lastMessageSender.full_name AS senderFullName FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = message.user_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id WHERE((conversation.category = \'GROUP\' AND conversation.name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')OR(conversation.category = \'CONTACT\' AND(owner.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' OR owner.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')))AND circleConversation.circle_id = ?2 AND ${generatedwhere.sql} ORDER BY(conversation.category = \'GROUP\' AND conversation.name = ?1 COLLATE NOCASE)OR(conversation.category = \'CONTACT\' AND(owner.full_name = ?1 COLLATE NOCASE OR owner.identity_number = ?1 COLLATE NOCASE))DESC, conversation.pin_time DESC, message.created_at DESC ${generatedlimit.sql}',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId, message.status AS messageStatus, message.content AS content, message.category AS contentType, message.user_id AS senderId, message."action" AS actionName, lastMessageSender.full_name AS senderFullName, participant.user_id AS participantUserId, participant.full_name AS participantFullName FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = message.user_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id LEFT JOIN users AS participant ON participant.user_id = message.participant_id WHERE((conversation.category = \'GROUP\' AND conversation.name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')OR(conversation.category = \'CONTACT\' AND(owner.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' OR owner.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')))AND circleConversation.circle_id = ?2 AND ${generatedwhere.sql} ORDER BY(conversation.category = \'GROUP\' AND conversation.name = ?1 COLLATE NOCASE)OR(conversation.category = \'CONTACT\' AND(owner.full_name = ?1 COLLATE NOCASE OR owner.identity_number = ?1 COLLATE NOCASE))DESC, conversation.pin_time DESC, message.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
           Variable<String>(circleId),
@@ -14623,7 +14634,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         content: row.readNullable<String>('content'),
         contentType: row.readNullable<String>('contentType'),
         senderId: row.readNullable<String>('senderId'),
+        actionName: row.readNullable<String>('actionName'),
         senderFullName: row.readNullable<String>('senderFullName'),
+        participantUserId: row.readNullable<String>('participantUserId'),
+        participantFullName: row.readNullable<String>('participantFullName'),
       );
     });
   }
@@ -16316,7 +16330,10 @@ class SearchConversationItem {
   final String? content;
   final String? contentType;
   final String? senderId;
+  final String? actionName;
   final String? senderFullName;
+  final String? participantUserId;
+  final String? participantFullName;
   SearchConversationItem({
     required this.conversationId,
     this.groupIconUrl,
@@ -16335,28 +16352,35 @@ class SearchConversationItem {
     this.content,
     this.contentType,
     this.senderId,
+    this.actionName,
     this.senderFullName,
+    this.participantUserId,
+    this.participantFullName,
   });
   @override
-  int get hashCode => Object.hash(
-      conversationId,
-      groupIconUrl,
-      category,
-      groupName,
-      pinTime,
-      muteUntil,
-      ownerId,
-      ownerMuteUntil,
-      ownerIdentityNumber,
-      fullName,
-      avatarUrl,
-      isVerified,
-      appId,
-      messageStatus,
-      content,
-      contentType,
-      senderId,
-      senderFullName);
+  int get hashCode => Object.hashAll([
+        conversationId,
+        groupIconUrl,
+        category,
+        groupName,
+        pinTime,
+        muteUntil,
+        ownerId,
+        ownerMuteUntil,
+        ownerIdentityNumber,
+        fullName,
+        avatarUrl,
+        isVerified,
+        appId,
+        messageStatus,
+        content,
+        contentType,
+        senderId,
+        actionName,
+        senderFullName,
+        participantUserId,
+        participantFullName
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -16378,7 +16402,10 @@ class SearchConversationItem {
           other.content == this.content &&
           other.contentType == this.contentType &&
           other.senderId == this.senderId &&
-          other.senderFullName == this.senderFullName);
+          other.actionName == this.actionName &&
+          other.senderFullName == this.senderFullName &&
+          other.participantUserId == this.participantUserId &&
+          other.participantFullName == this.participantFullName);
   @override
   String toString() {
     return (StringBuffer('SearchConversationItem(')
@@ -16399,7 +16426,10 @@ class SearchConversationItem {
           ..write('content: $content, ')
           ..write('contentType: $contentType, ')
           ..write('senderId: $senderId, ')
-          ..write('senderFullName: $senderFullName')
+          ..write('actionName: $actionName, ')
+          ..write('senderFullName: $senderFullName, ')
+          ..write('participantUserId: $participantUserId, ')
+          ..write('participantFullName: $participantFullName')
           ..write(')'))
         .toString();
   }
@@ -16409,29 +16439,34 @@ typedef FuzzySearchConversation$where = Expression<bool> Function(
     Conversations conversation,
     Users owner,
     Messages message,
-    Users lastMessageSender);
+    Users lastMessageSender,
+    Users participant);
 typedef FuzzySearchConversation$limit = Limit Function(
     Conversations conversation,
     Users owner,
     Messages message,
-    Users lastMessageSender);
+    Users lastMessageSender,
+    Users participant);
 typedef SearchConversationItemByIn$order = OrderBy Function(
     Conversations conversation,
     Users owner,
     Messages message,
-    Users lastMessageSender);
+    Users lastMessageSender,
+    Users participant);
 typedef FuzzySearchConversationInCircle$where = Expression<bool> Function(
     Conversations conversation,
     Users owner,
     Messages message,
     Users lastMessageSender,
-    CircleConversations circleConversation);
+    CircleConversations circleConversation,
+    Users participant);
 typedef FuzzySearchConversationInCircle$limit = Limit Function(
     Conversations conversation,
     Users owner,
     Messages message,
     Users lastMessageSender,
-    CircleConversations circleConversation);
+    CircleConversations circleConversation,
+    Users participant);
 
 class ConversationStorageUsage {
   final String conversationId;

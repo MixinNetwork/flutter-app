@@ -286,10 +286,10 @@ packages:
     dependency: transitive
     description:
       name: dart_jsonwebtoken
-      sha256: "0aaa9b4960ef7561a78ebf18d13514fbd211033225167863245f89a3c4038fbc"
+      sha256: "2a42e97c0b8b4e9a42b24a71453635f445c7b66c7d7c81e3a429f37ead9fe778"
       url: "https://pub.dev"
     source: hosted
-    version: "2.6.4"
+    version: "2.7.1"
   dart_style:
     dependency: transitive
     description:
@@ -543,10 +543,10 @@ packages:
     dependency: transitive
     description:
       name: fixnum
-      sha256: "04be3e934c52e082558cc9ee21f42f5c1cd7a1262f4c63cd0357c08d5bba81ec"
+      sha256: "25517a4deb0c03aa0f32fd12db525856438902d9c16536311e76cdc57b31d7d1"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "1.1.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -1864,5 +1864,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.18.0 <4.0.0"
+  dart: ">=2.19.0 <4.0.0"
   flutter: ">=3.3.0"
