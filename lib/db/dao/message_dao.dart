@@ -599,7 +599,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<int> updateAttachmentMessageContentAndStatus(
-          String messageId, String content) =>
+          String messageId, String content, String? key, String? digest) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
         (db.update(db.messages)
@@ -607,6 +607,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             .write(MessagesCompanion(
           mediaStatus: const Value(MediaStatus.done),
           status: const Value(MessageStatus.sending),
+          mediaKey: key != null ? Value(key) : const Value.absent(),
+          mediaDigest: digest != null ? Value(digest) : const Value.absent(),
           content: Value(content),
         )),
       );
