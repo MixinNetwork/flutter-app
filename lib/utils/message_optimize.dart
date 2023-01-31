@@ -72,6 +72,9 @@ String? messagePreviewOptimize(
         '[${isCurrentUser ? Localization.current.youDeletedThisMessage : Localization.current.thisMessageWasDeleted}]';
   } else if (messageCategory.isTranscript) {
     _content = '[${Localization.current.transcript}]';
+  } else if (messageCategory.isPin) {
+    _content = Localization.current
+        .chatPinMessage(senderFullName ?? '', content ?? '');
   } else {
     _content = Localization.current.messageNotSupport;
   }

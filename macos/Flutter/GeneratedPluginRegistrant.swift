@@ -15,7 +15,7 @@ import flutter_local_notifications
 import ogg_opus_player
 import package_info_plus
 import pasteboard
-import path_provider_macos
+import path_provider_foundation
 import platform_device_id
 import platform_device_id_macos
 import protocol_handler
