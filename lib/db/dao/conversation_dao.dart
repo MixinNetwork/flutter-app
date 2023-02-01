@@ -63,7 +63,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   OrderBy _baseConversationItemOrder(Conversations conversation) => OrderBy(
         [
           OrderingTerm.desc(conversation.pinTime),
-          OrderingTerm.desc(conversation.draft.length.isBiggerThanValue(0)),
+          OrderingTerm.desc(
+              conversation.draft.trim().length.isBiggerThanValue(0)),
           OrderingTerm.desc(conversation.lastMessageCreatedAt),
           OrderingTerm.desc(conversation.createdAt),
         ],
