@@ -1224,6 +1224,16 @@ class Localization {
     );
   }
 
+  /// `Draft`
+  String get draft {
+    return Intl.message(
+      'Draft',
+      name: 'draft',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Drag and drop files here`
   String get dragAndDropFileHere {
     return Intl.message(

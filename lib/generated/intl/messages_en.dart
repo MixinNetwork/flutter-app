@@ -297,6 +297,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "done": MessageLookupByLibrary.simpleMessage("Done"),
         "download": MessageLookupByLibrary.simpleMessage("Download"),
         "downloadLink": MessageLookupByLibrary.simpleMessage("Download Link:"),
+        "draft": MessageLookupByLibrary.simpleMessage("Draft"),
         "dragAndDropFileHere":
             MessageLookupByLibrary.simpleMessage("Drag and drop files here"),
         "durationIsTooShort":

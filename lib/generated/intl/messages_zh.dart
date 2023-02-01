@@ -262,6 +262,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "done": MessageLookupByLibrary.simpleMessage("完成"),
         "download": MessageLookupByLibrary.simpleMessage("下载"),
         "downloadLink": MessageLookupByLibrary.simpleMessage("下载链接："),
+        "draft": MessageLookupByLibrary.simpleMessage("草稿"),
         "dragAndDropFileHere": MessageLookupByLibrary.simpleMessage("拖放文件到此处"),
         "durationIsTooShort": MessageLookupByLibrary.simpleMessage("时间太短"),
         "edit": MessageLookupByLibrary.simpleMessage("编辑"),

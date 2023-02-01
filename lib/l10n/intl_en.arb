@@ -116,6 +116,7 @@
 "done" : "Done",
 "download" : "Download",
 "downloadLink" : "Download Link:",
+"draft" : "Draft",
 "dragAndDropFileHere" : "Drag and drop files here",
 "durationIsTooShort" : "Duration is too short",
 "edit" : "Edit",

@@ -286,29 +286,36 @@ class _MessagePreview extends StatelessWidget {
   final ConversationItem conversation;
 
   @override
-  Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _MessageStatusIcon(conversation: conversation),
-          const SizedBox(width: 2),
-          Expanded(
-            child: _MessageContent(conversation: conversation),
-          ),
-        ],
-      );
+  Widget build(BuildContext context) {
+    final hasDraft = conversation.draft?.isNotEmpty ?? false;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (!hasDraft) _MessageStatusIcon(conversation: conversation),
+        if (!hasDraft) const SizedBox(width: 2),
+        Expanded(
+          child:
+              _MessageContent(conversation: conversation, hasDraft: hasDraft),
+        ),
+      ],
+    );
+  }
 }
 
 class _MessageContent extends HookWidget {
   const _MessageContent({
     required this.conversation,
+    required this.hasDraft,
   });
 
   final ConversationItem conversation;
+  final bool hasDraft;
 
   @override
   Widget build(BuildContext context) {
     final text = useMemoizedFuture(
       () async {
+        if (hasDraft) return conversation.draft?.trim();
         final isGroup = conversation.category == ConversationCategory.group ||
             conversation.senderId != conversation.ownerId;
         if (conversation.contentType == MessageCategory.systemConversation) {
@@ -362,6 +369,8 @@ class _MessageContent extends HookWidget {
         conversation.participantFullName,
         conversation.senderFullName,
         conversation.groupName,
+        conversation.draft,
+        hasDraft,
       ],
     ).data;
 
@@ -375,16 +384,24 @@ class _MessageContent extends HookWidget {
           conversation.contentType,
         ]);
 
-    if (conversation.contentType == null) return const SizedBox();
+    if (conversation.contentType == null && !hasDraft) return const SizedBox();
 
     final dynamicColor = context.theme.secondaryText;
 
     return Row(
       children: [
-        if (icon != null)
+        if (!hasDraft && icon != null)
           SvgPicture.asset(
             icon,
             color: dynamicColor,
+          ),
+        if (hasDraft)
+          Text(
+            '${context.l10n.draft}:',
+            style: TextStyle(
+              color: context.theme.red,
+              fontSize: 14,
+            ),
           ),
         if (text != null)
           Expanded(
