@@ -597,18 +597,41 @@ class _ImagePickButton extends StatelessWidget {
     }
     return Padding(
       padding: const EdgeInsets.only(left: 6),
-      child: ActionButton(
-        name: Resources.assetsImagesFilePreviewImagesSvg,
-        color: context.theme.icon,
-        onTap: () async {
-          final file =
-              await ImagePicker().pickImage(source: ImageSource.gallery);
-          if (file != null) {
-            // recreate the XFile to generate mimeType.
-            final xFile = File(file.path).xFile;
-            await showFilesPreviewDialog(context, [xFile]);
-          }
-        },
+      child: ContextMenuPortalEntry(
+        interactiveForTap: true,
+        buildMenus: () => [
+          ContextMenu(
+            icon: Resources.assetsImagesImageSvg,
+            title: context.l10n.image,
+            onTap: () async {
+              final file =
+                  await ImagePicker().pickImage(source: ImageSource.gallery);
+              if (file != null) {
+                // recreate the XFile to generate mimeType.
+                final xFile = File(file.path).xFile;
+                await showFilesPreviewDialog(context, [xFile]);
+              }
+            },
+          ),
+          ContextMenu(
+            icon: Resources.assetsImagesVideoSvg,
+            title: context.l10n.video,
+            onTap: () async {
+              final file =
+                  await ImagePicker().pickVideo(source: ImageSource.gallery);
+              if (file != null) {
+                // recreate the XFile to generate mimeType.
+                final xFile = File(file.path).xFile;
+                await showFilesPreviewDialog(context, [xFile]);
+              }
+            },
+          ),
+        ],
+        child: ActionButton(
+          name: Resources.assetsImagesFilePreviewImagesSvg,
+          color: context.theme.icon,
+          interactive: false,
+        ),
       ),
     );
   }
