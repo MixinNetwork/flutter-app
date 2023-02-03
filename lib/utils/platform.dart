@@ -5,6 +5,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:platform_device_id/platform_device_id.dart';
 import 'package:ui_device/ui_device.dart' as ui_device;
+import 'package:uuid/uuid.dart';
 
 import '../crypto/uuid/uuid.dart';
 import 'logger.dart';
@@ -48,6 +49,8 @@ Future<String> getDeviceId() async {
     final String? id;
     if (Platform.isWindows) {
       id = (await _getWindowsDeviceId())?.trim();
+    } else if (Platform.isMacOS) {
+      id = (await _getMacOSDeviceId())?.trim();
     } else {
       id = (await PlatformDeviceId.getDeviceId)?.trim();
     }
@@ -81,4 +84,35 @@ Future<String?> _getWindowsDeviceId() async {
     }
   }
   return deviceID;
+}
+
+// ref: https://github.com/BestBurning/platform_device_id/blob/master/platform_device_id_macos/macos/Classes/PlatformDeviceIdMacosPlugin.swift
+// since platform_device_id_macos would block UI thread,
+// so replace with dart implementation.
+Future<String?> _getMacOSDeviceId() async {
+  final process = await Process.run(
+    'ioreg',
+    ['-rd1', '-c', 'IOPlatformExpertDevice'],
+  );
+  if (process.stdout == null) {
+    return null;
+  }
+  final result = process.stdout.toString();
+
+  //    "IOPlatformUUID" = "U-U-I-D"
+  final matches =
+      RegExp(r'(?<=IOPlatformUUID"\s=\s").*(?=")').firstMatch(result);
+  if (matches == null) {
+    e('failed to get macos device id. $result');
+    return null;
+  }
+  final uuid = matches[0];
+  if (uuid == null) {
+    e('get macos device id: failed to get group. $matches');
+    return null;
+  }
+  if (!Uuid.isValidUUID(fromString: uuid)) {
+    e('get macos device id: invalid uuid. $uuid');
+  }
+  return uuid;
 }
