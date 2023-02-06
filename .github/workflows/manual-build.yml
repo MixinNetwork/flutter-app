@@ -182,11 +182,13 @@ jobs:
         run: flutter test
 
       - name: Build APP
+        id: build-app
         run: |
           $version_str=$(gc .\pubspec.yaml | select-string '(?<=^version: ).*' -AllMatches | Select-Object -Expand Matches | %{$_.Value})
           $version=$version_str.Split("+")[0]
           $build_number=$version_str.Split("+")[1]
           flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
+          echo "MSIX_PACKAGE_VERSION=$version.$build_number" >> $Env:GITHUB_OUTPUT
 
       - name: Build Installer
         run: |
@@ -200,7 +202,9 @@ jobs:
           path: build\mixin_setup.exe
 
       - name: Build msix
-        run: flutter pub run msix:create
+        run: |
+          echo "create msix. version: ${{ steps.build-app.outputs.MSIX_PACKAGE_VERSION }}"
+          flutter pub run msix:create --build-windows false --version ${{ steps.build-app.outputs.MSIX_PACKAGE_VERSION }}
 
       - name: Upload msix
         uses: actions/upload-artifact@v2
