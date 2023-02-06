@@ -634,8 +634,6 @@ class _MessageProcessRunner {
           .getParticipantSessionKeyWithoutSelf(message.conversationId, userId);
     }
 
-    throw _NoParticipantSessionKeyException(message.conversationId, userId);
-
     // Workaround no session key, can't encrypt message
     if (participantSessionKey == null ||
         participantSessionKey.publicKey.isNullOrBlank()) {
