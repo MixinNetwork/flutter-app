@@ -76,6 +76,8 @@ extension NullableStringExtension on String? {
     // this must be a valid uuid
     return Ulid.parse(this!).hashCode;
   }
+
+  bool isNullOrBlank() => this == null || this?.trim().isEmpty == true;
 }
 
 String minOf(String a, String b) => a.compareTo(b) < 0 ? a : b;
