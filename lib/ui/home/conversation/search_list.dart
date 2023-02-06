@@ -517,7 +517,10 @@ class SearchItem extends StatelessWidget {
                               padding: const EdgeInsets.only(right: 2),
                               child: SvgPicture.asset(
                                 descriptionIcon!,
-                                color: context.theme.secondaryText,
+                                colorFilter: ColorFilter.mode(
+                                  context.theme.secondaryText,
+                                  BlendMode.srcIn,
+                                ),
                               ),
                             ),
                           Expanded(

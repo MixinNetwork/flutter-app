@@ -734,7 +734,7 @@ class _JumpCurrentButton extends HookWidget {
           alignment: Alignment.center,
           child: SvgPicture.asset(
             Resources.assetsImagesJumpCurrentArrowSvg,
-            color: context.theme.text,
+            colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
           ),
         ),
       ),
@@ -790,7 +790,8 @@ class _BottomBanner extends HookWidget {
               ),
               child: SvgPicture.asset(
                 Resources.assetsImagesTriangleWarningSvg,
-                color: context.theme.red,
+                colorFilter:
+                    ColorFilter.mode(context.theme.red, BlendMode.srcIn),
                 width: 26,
                 height: 26,
               ),
@@ -905,7 +906,8 @@ class _PinMessagesBanner extends HookWidget {
                     Resources.assetsImagesChatPinSvg,
                     width: 34,
                     height: 34,
-                    color: context.theme.text,
+                    colorFilter:
+                        ColorFilter.mode(context.theme.text, BlendMode.srcIn),
                   ),
                 ),
               ),

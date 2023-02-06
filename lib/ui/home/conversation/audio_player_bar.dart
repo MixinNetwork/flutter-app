@@ -167,7 +167,8 @@ class _Icon extends StatelessWidget {
               alignment: Alignment.bottomRight,
               child: SvgPicture.asset(
                 Resources.assetsImagesAudioSvg,
-                color: context.theme.icon,
+                colorFilter:
+                    ColorFilter.mode(context.theme.icon, BlendMode.srcIn),
                 width: 16,
                 height: 16,
               ),

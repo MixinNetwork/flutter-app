@@ -320,7 +320,10 @@ class _ConversationSelector extends HookWidget {
                     padding: const EdgeInsetsDirectional.only(end: 8),
                     child: SvgPicture.asset(
                       Resources.assetsImagesIcSearchSmallSvg,
-                      color: context.theme.secondaryText,
+                      colorFilter: ColorFilter.mode(
+                        context.theme.secondaryText,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                   prefixIconConstraints: const BoxConstraints(
@@ -497,7 +500,10 @@ class _AvatarSmallCloseIcon extends StatelessWidget {
                 child: Center(
                   child: SvgPicture.asset(
                     Resources.assetsImagesSmallCloseSvg,
-                    color: Colors.white.withOpacity(0.9),
+                    colorFilter: ColorFilter.mode(
+                      Colors.white.withOpacity(0.9),
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ),

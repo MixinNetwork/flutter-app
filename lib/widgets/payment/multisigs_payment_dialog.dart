@@ -172,7 +172,8 @@ class _UsersLayout extends StatelessWidget {
             dimension: 24,
             child: SvgPicture.asset(
               Resources.assetsImagesIcArrowRightSvg,
-              color: context.theme.green,
+              colorFilter:
+                  ColorFilter.mode(context.theme.green, BlendMode.srcIn),
             ),
           ),
           _OverlappedUserAvatars(
@@ -319,7 +320,8 @@ class _DoneLayout extends StatelessWidget {
                 dimension: 60,
                 child: SvgPicture.asset(
                   Resources.assetsImagesCheckedSvg,
-                  color: context.theme.green,
+                  colorFilter:
+                      ColorFilter.mode(context.theme.green, BlendMode.srcIn),
                 ),
               ),
             ),
