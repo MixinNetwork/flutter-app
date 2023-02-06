@@ -492,9 +492,7 @@ class _MessageProcessRunner {
         rethrow;
       }
 
-      if (message.category.isPlain ||
-          message.category == MessageCategory.appCard ||
-          message.category.isPin) {
+      Future<MessageResult> _sendPlainMessage(SendingMessage message) {
         if (message.category == MessageCategory.appCard ||
             message.category.isPost ||
             message.category.isTranscript ||
@@ -511,42 +509,30 @@ class _MessageProcessRunner {
           silent: silent,
           expireIn: expireIn ?? 0,
         );
-        result = await _sender.deliver(blazeMessage);
-      } else if (message.category.isEncrypted) {
-        final participantSessionKey = await database.participantSessionDao
-            .getParticipantSessionKeyWithoutSelf(
-                message.conversationId, userId);
-        final otherSessionKey = await database.participantSessionDao
-            .getOtherParticipantSessionKey(
-                message.conversationId, userId, sessionId);
-        if (otherSessionKey == null ||
-            otherSessionKey.publicKey == null ||
-            participantSessionKey == null ||
-            participantSessionKey.publicKey == null) {
-          await _sender.checkConversation(message.conversationId);
-          return;
-        }
-        final plaintext = message.category.isAttachment ||
-                message.category.isSticker ||
-                message.category.isContact ||
-                message.category.isLive
-            ? base64Decode(message.content!)
-            : utf8.encode(message.content!);
-        final content = _encryptedProtocol.encryptMessage(
-            privateKey,
-            plaintext,
-            base64Decode(base64.normalize(participantSessionKey.publicKey!)),
-            participantSessionKey.sessionId,
-            base64Decode(base64.normalize(otherSessionKey.publicKey!)),
-            otherSessionKey.sessionId);
+        return _sender.deliver(blazeMessage);
+      }
 
-        final blazeMessage = _createBlazeMessage(
-          message,
-          base64Encode(content),
-          silent: silent,
-          expireIn: expireIn ?? 0,
-        );
-        result = await _sender.deliver(blazeMessage);
+      if (message.category.isPlain ||
+          message.category == MessageCategory.appCard ||
+          message.category.isPin) {
+        result = await _sendPlainMessage(message);
+      } else if (message.category.isEncrypted) {
+        try {
+          result = await _sendEncryptedMessage(
+            message,
+            silent: silent,
+            expireIn: expireIn ?? 0,
+          );
+        } on _NoParticipantSessionKeyException catch (error) {
+          e('No participant session key: $error');
+          // send plain directly if no participant session key.
+          message = message.copyWith(
+              category: message.category.replaceAll('ENCRYPTED_', 'PLAIN_'));
+          d('category: ${message.category}');
+          await database.messageDao
+              .updateCategoryById(messageId, message.category);
+          result = await _sendPlainMessage(message);
+        }
       } else if (message.category.isSignal) {
         result = await _sendSignalMessage(
           message,
@@ -631,6 +617,60 @@ class _MessageProcessRunner {
         w('Send pin error: $e, stack: $s');
       }
     });
+  }
+
+  Future<MessageResult> _sendEncryptedMessage(
+    SendingMessage message, {
+    bool silent = false,
+    required int expireIn,
+  }) async {
+    var participantSessionKey = await database.participantSessionDao
+        .getParticipantSessionKeyWithoutSelf(message.conversationId, userId);
+
+    if (participantSessionKey == null ||
+        participantSessionKey.publicKey.isNullOrBlank()) {
+      await _sender.syncConversation(message.conversationId);
+      participantSessionKey = await database.participantSessionDao
+          .getParticipantSessionKeyWithoutSelf(message.conversationId, userId);
+    }
+
+    throw _NoParticipantSessionKeyException(message.conversationId, userId);
+
+    // Workaround no session key, can't encrypt message
+    if (participantSessionKey == null ||
+        participantSessionKey.publicKey.isNullOrBlank()) {
+      throw _NoParticipantSessionKeyException(message.conversationId, userId);
+    }
+
+    final otherSessionKey = await database.participantSessionDao
+        .getOtherParticipantSessionKey(
+            message.conversationId, userId, sessionId);
+
+    final plaintext = message.category.isAttachment ||
+            message.category.isSticker ||
+            message.category.isContact ||
+            message.category.isLive
+        ? base64Decode(message.content!)
+        : utf8.encode(message.content!);
+
+    final content = _encryptedProtocol.encryptMessage(
+      privateKey,
+      plaintext,
+      base64Decode(base64.normalize(participantSessionKey.publicKey!)),
+      participantSessionKey.sessionId,
+      otherSessionKey?.publicKey == null
+          ? null
+          : base64Decode(base64.normalize(otherSessionKey!.publicKey!)),
+      otherSessionKey?.sessionId,
+    );
+
+    final blazeMessage = _createBlazeMessage(
+      message,
+      base64Encode(content),
+      silent: silent,
+      expireIn: expireIn,
+    );
+    return _sender.deliver(blazeMessage);
   }
 
   Future<MessageResult?> _sendSignalMessage(
@@ -806,4 +846,18 @@ class _MessageProcessRunner {
     database.dispose();
     jobSubscribers.forEach((subscription) => subscription.cancel());
   }
+}
+
+class _NoParticipantSessionKeyException implements Exception {
+  _NoParticipantSessionKeyException(
+    this.conversationId,
+    this.userId,
+  );
+
+  final String conversationId;
+  final String userId;
+
+  @override
+  String toString() =>
+      'No participant session key for conversation: $conversationId, user: $userId';
 }
