@@ -216,6 +216,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     String? initialChatSidePage,
     String? keyword,
     bool sync = false,
+    bool checkCurrentUserExist = false,
   }) async {
     final accountServer = context.accountServer;
     final database = context.database;
@@ -240,7 +241,10 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
     if (_conversation == null && sync) {
       showToastLoading();
-      await context.accountServer.refreshConversation(conversationId);
+      await context.accountServer.refreshConversation(
+        conversationId,
+        checkCurrentUserExist: checkCurrentUserExist,
+      );
       _conversation = await _conversationItem(context, conversationId);
     }
 

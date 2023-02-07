@@ -236,8 +236,12 @@ Future<bool> _selectConversation(
     }
   }
 
-  await ConversationCubit.selectConversation(context, conversationId,
-      sync: true);
+  await ConversationCubit.selectConversation(
+    context,
+    conversationId,
+    sync: true,
+    checkCurrentUserExist: true,
+  );
   return true;
 }
 
