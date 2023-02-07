@@ -77,10 +77,18 @@ Future<bool> openUri(
     }
 
     if (uri.appId != null) {
-      await context.accountServer.refreshUsers([uri.appId!]);
-      final app = await context.database.appDao.findAppById(uri.appId!);
-
       if (uri.actionIsOpen) {
+        App? app;
+
+        try {
+          showToastLoading();
+
+          await context.accountServer.refreshUsers([uri.appId!]);
+          app = await context.database.appDao.findAppById(uri.appId!);
+        } finally {
+          Toast.dismiss();
+        }
+
         var homeUri = Uri.tryParse(app?.homeUri ?? '');
 
         if (app == null || homeUri == null) {
