@@ -190,8 +190,13 @@ class AvatarWidget extends StatelessWidget {
     );
 
     final child = avatarUrl?.isNotEmpty == true
-        ? CacheImage(avatarUrl!,
-            width: size, height: size, placeholder: () => placeholder)
+        ? CacheImage(
+            avatarUrl!,
+            width: size,
+            height: size,
+            placeholder: () => placeholder,
+            errorWidget: () => placeholder,
+          )
         : placeholder;
 
     if (clipOval) return ClipOval(child: child);
