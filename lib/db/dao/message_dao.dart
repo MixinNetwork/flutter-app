@@ -1324,4 +1324,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         mediaSize: Value(mediaSize),
         thumbImage: Value(thumbImage),
       ));
+
+  Future<void> updateCategoryById(String messageId, String category) =>
+      (db.update(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
+          .write(MessagesCompanion(
+        category: Value(category),
+      ));
 }
