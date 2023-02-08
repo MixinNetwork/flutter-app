@@ -6,6 +6,7 @@ import 'dart:isolate';
 import 'package:cross_file/cross_file.dart';
 import 'package:diox/diox.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -39,8 +40,6 @@ import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
-import '../utils/platform.dart';
-import '../utils/system/package_info.dart';
 import '../utils/web_view/web_view_interface.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../workers/injector.dart';
@@ -85,25 +84,12 @@ class AccountServer {
     this.privateKey = privateKey;
 
     await initKeyValues(identityNumber);
-    try {
-      userAgent ??= await generateUserAgent(await getPackageInfo());
-    } catch (e) {
-      w('generateUserAgent error: $e');
-    }
-
-    try {
-      deviceId ??= await getDeviceId();
-    } catch (e) {
-      w('getDeviceId error: $e');
-    }
 
     client = createClient(
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKey,
       loginByPhoneNumber: _loginByPhoneNumber,
-      userAgent: userAgent,
-      deviceId: deviceId,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -226,9 +212,8 @@ class AccountServer {
         privateKey: privateKey,
         mixinDocumentDirectory: mixinDocumentsDirectory.path,
         primarySessionId: AccountKeyValue.instance.primarySessionId,
-        userAgent: userAgent,
-        deviceId: deviceId,
         loginByPhoneNumber: _loginByPhoneNumber,
+        rootIsolateToken: ServicesBinding.rootIsolateToken!,
       ),
       errorsAreFatal: false,
       onExit: exitReceivePort.sendPort,

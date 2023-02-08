@@ -7,19 +7,22 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../constants/constants.dart';
 import 'logger.dart';
+import 'platform.dart';
+import 'system/package_info.dart';
 
 const tenSecond = Duration(seconds: 10);
 
 const kRequestTimeStampKey = 'requestTimeStamp';
+
+Future<String?> _userAgent = generateUserAgent();
+Future<String?> _deviceId = getDeviceId();
 
 Client createClient({
   required String userId,
   required String sessionId,
   required String privateKey,
   List<Interceptor> interceptors = const [],
-  // remove this if https://github.com/flutter/flutter/issues/13937 fixed.
-  String? deviceId,
-  String? userAgent,
+  // Hive didn't support multi isolate.
   required bool loginByPhoneNumber,
 }) =>
     Client(
@@ -61,8 +64,8 @@ Client createClient({
           },
         ),
         InterceptorsWrapper(onRequest: (options, handler) async {
-          options.headers['User-Agent'] = userAgent;
-          options.headers['Mixin-Device-Id'] = deviceId;
+          options.headers['User-Agent'] = await _userAgent;
+          options.headers['Mixin-Device-Id'] = await _deviceId;
           options.headers['Accept-Language'] = window.locale.languageCode;
           handler.next(options);
         }),

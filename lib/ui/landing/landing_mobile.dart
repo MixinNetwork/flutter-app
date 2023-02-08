@@ -38,14 +38,8 @@ class LoginWithMobileWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final locale = useMemoized(() => Localizations.localeOf(context));
-    final userAgent = useMemoizedFuture(
-      () async => generateUserAgent(await getPackageInfo()),
-      null,
-    ).data;
-    final deviceId = useMemoizedFuture(
-      getDeviceId,
-      null,
-    ).data;
+    final userAgent = useMemoizedFuture(generateUserAgent, null).data;
+    final deviceId = useMemoizedFuture(getDeviceId, null).data;
 
     if (userAgent == null || deviceId == null) {
       return const Center(child: CircularProgressIndicator());
