@@ -399,9 +399,10 @@ class _Tab extends StatelessWidget {
                       ),
                       child: SvgPicture.asset(
                         assetName,
-                        color: selected
-                            ? context.theme.accent
-                            : context.theme.icon,
+                        colorFilter: ColorFilter.mode(
+                          selected ? context.theme.accent : context.theme.icon,
+                          BlendMode.srcIn,
+                        ),
                         width: 24,
                         height: 24,
                       )),

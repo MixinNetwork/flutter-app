@@ -32,7 +32,8 @@ class RecallMessage extends HookWidget {
       children: [
         SvgPicture.asset(
           Resources.assetsImagesRecallSvg,
-          color: context.theme.secondaryText,
+          colorFilter:
+              ColorFilter.mode(context.theme.secondaryText, BlendMode.srcIn),
           width: 16,
           height: 16,
         ),

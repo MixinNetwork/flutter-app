@@ -45,7 +45,7 @@ class MessageStatusIcon extends StatelessWidget {
     }
     return SvgPicture.asset(
       icon,
-      color: color,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     );
   }
 }

@@ -72,7 +72,7 @@ class StatusWarning extends StatelessWidget {
         child: Center(
           child: SvgPicture.asset(
             Resources.assetsImagesWarningSvg,
-            color: context.theme.text,
+            colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
           ),
         ),
       );
@@ -86,7 +86,8 @@ class StatusDownload extends StatelessWidget {
         child: Center(
           child: SvgPicture.asset(
             Resources.assetsImagesDownloadSvg,
-            color: context.theme.accent,
+            colorFilter:
+                ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
           ),
         ),
       );
@@ -100,7 +101,8 @@ class StatusUpload extends StatelessWidget {
         child: Center(
           child: SvgPicture.asset(
             Resources.assetsImagesUploadSvg,
-            color: context.theme.accent,
+            colorFilter:
+                ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
           ),
         ),
       );
@@ -112,10 +114,9 @@ class StatusAudioPlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _StatusLayout(
         child: Center(
-          child: SvgPicture.asset(
-            Resources.assetsImagesAudioPlaySvg,
-            color: context.theme.accent,
-          ),
+          child: SvgPicture.asset(Resources.assetsImagesAudioPlaySvg,
+              colorFilter:
+                  ColorFilter.mode(context.theme.accent, BlendMode.srcIn)),
         ),
       );
 }
@@ -128,7 +129,8 @@ class StatusAudioStop extends StatelessWidget {
         child: Center(
           child: SvgPicture.asset(
             Resources.assetsImagesAudioStopSvg,
-            color: context.theme.accent,
+            colorFilter:
+                ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
           ),
         ),
       );

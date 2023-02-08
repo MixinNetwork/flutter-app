@@ -356,7 +356,12 @@ class _StickerAlbumBarItem extends StatelessWidget {
                     if (index < presetStickerGroups.length) {
                       return SvgPicture.asset(
                         presetStickerAlbum[presetStickerGroups[index]]!,
-                        color: index != 0 ? context.theme.secondaryText : null,
+                        colorFilter: index != 0
+                            ? ColorFilter.mode(
+                                context.theme.secondaryText,
+                                BlendMode.srcIn,
+                              )
+                            : null,
                         width: 24,
                         height: 24,
                       );
