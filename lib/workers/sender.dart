@@ -56,7 +56,7 @@ class Sender {
         final cid = (blazeMessage.params as BlazeMessageParam).conversationId;
         i('checksum error: ${bm.error?.code}  cid:$cid');
         if (cid != null) {
-          await _syncConversation(cid);
+          await syncConversation(cid);
         }
         return MessageResult(false, true, bm.error?.code);
       } else if (bm.error?.code == forbidden) {
@@ -234,11 +234,11 @@ class Sender {
     if (conversation.status != ConversationStatus.success) {
       await checkConversationExists(conversation);
     } else {
-      await _syncConversation(conversationId);
+      await syncConversation(conversationId);
     }
   }
 
-  Future _syncConversation(String conversationId) async {
+  Future syncConversation(String conversationId) async {
     final res = await client.conversationApi.getConversation(conversationId);
     final conversation = res.data;
     final participants = <db.Participant>[];

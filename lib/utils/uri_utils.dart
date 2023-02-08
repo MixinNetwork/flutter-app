@@ -51,9 +51,8 @@ Future<bool> openUri(
   if (uri.scheme.isEmpty) return Future.value(false);
 
   if (uri.isMixin) {
-    final userId = uri.userId;
-    if (userId != null && userId.trim().isNotEmpty) {
-      await showUserDialog(context, userId);
+    if (uri.userId != null && uri.userId!.trim().isNotEmpty) {
+      await showUserDialog(context, uri.userId);
       return true;
     }
 
@@ -77,33 +76,47 @@ Future<bool> openUri(
           uri.conversationIdOfSend, uri.dataOfSend, app);
     }
 
-    if (uri.appId != null && uri.actionIsOpen) {
-      await context.accountServer.refreshUsers([uri.appId!]);
-      final app = await context.database.appDao.findAppById(uri.appId!);
-      var homeUri = Uri.tryParse(app?.homeUri ?? '');
+    if (uri.appId != null) {
+      if (uri.actionIsOpen) {
+        App? app;
 
-      if (app == null || homeUri == null) {
-        showToastFailed(
-          ToastError(
-            context.l10n.botNotFound,
-          ),
-        );
+        try {
+          showToastLoading();
+
+          await context.accountServer.refreshUsers([uri.appId!]);
+          app = await context.database.appDao.findAppById(uri.appId!);
+        } finally {
+          Toast.dismiss();
+        }
+
+        var homeUri = Uri.tryParse(app?.homeUri ?? '');
+
+        if (app == null || homeUri == null) {
+          showToastFailed(
+            ToastError(
+              context.l10n.botNotFound,
+            ),
+          );
+          return true;
+        }
+
+        final queryParameters = ({...homeUri.queryParameters})
+          ..addAll(({...uri.queryParameters})..remove('action'));
+
+        homeUri = homeUri.replace(queryParameters: queryParameters);
+        if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
+          await MixinWebView.instance.openWebViewWindowWithUrl(
+            context,
+            homeUri.toString(),
+            conversationId: conversationId,
+          );
+          return true;
+        }
+        return fallbackHandler(homeUri);
+      } else {
+        await showUserDialog(context, uri.appId);
         return true;
       }
-
-      final queryParameters = ({...homeUri.queryParameters})
-        ..addAll(({...uri.queryParameters})..remove('action'));
-
-      homeUri = homeUri.replace(queryParameters: queryParameters);
-      if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
-        await MixinWebView.instance.openWebViewWindowWithUrl(
-          context,
-          homeUri.toString(),
-          conversationId: conversationId,
-        );
-        return true;
-      }
-      return fallbackHandler(homeUri);
     }
 
     if (uri.isMixinScheme) {
@@ -223,8 +236,12 @@ Future<bool> _selectConversation(
     }
   }
 
-  await ConversationCubit.selectConversation(context, conversationId,
-      sync: true);
+  await ConversationCubit.selectConversation(
+    context,
+    conversationId,
+    sync: true,
+    checkCurrentUserExist: true,
+  );
   return true;
 }
 

@@ -1219,8 +1219,12 @@ class AccountServer {
   Future<List<db.User>?> refreshUsers(List<String> ids, {bool force = false}) =>
       _injector.refreshUsers(ids, force: force);
 
-  Future<void> refreshConversation(String conversationId) =>
-      _injector.refreshConversation(conversationId);
+  Future<void> refreshConversation(String conversationId,
+          {bool checkCurrentUserExist = false}) =>
+      _injector.refreshConversation(
+        conversationId,
+        checkCurrentUserExist: checkCurrentUserExist,
+      );
 
   Future<void> updateAccount({String? fullName, String? biography}) async {
     final user = await client.accountApi.update(AccountUpdateRequest(
