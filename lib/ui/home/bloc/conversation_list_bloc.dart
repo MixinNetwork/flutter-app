@@ -8,9 +8,12 @@ import '../../../bloc/paging/paging_bloc.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/database.dart';
 import '../../../db/mixin_database.dart';
+import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import 'slide_category_cubit.dart';
+
+const kDefaultLimit = 15;
 
 class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     with SubscribeMixin {
@@ -21,7 +24,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   ) : super(const PagingState<ConversationItem>()) {
     addSubscription(slideCategoryCubit.stream
         .distinct()
-        .listen((event) => _switchBloc(event, limit)));
+        .listen((event) => _switchBloc(event, _limit)));
     _initBadge();
   }
 
@@ -30,7 +33,28 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   final MentionCache mentionCache;
   final Map<SlideCategoryState, _ConversationListBloc> _map = {};
 
-  late int limit;
+  int? _limit;
+
+  int get limit {
+    if (_limit == null) {
+      w('conversation list bloc: limit is null');
+      return kDefaultLimit;
+    }
+    return _limit!;
+  }
+
+  set limit(int limit) {
+    if (limit <= 0) {
+      w('conversation list bloc: ignore limit <= 0');
+      return;
+    }
+
+    _limit = limit;
+    _map.values.forEach((element) {
+      element.limit = limit;
+    });
+  }
+
   StreamSubscription? streamSubscription;
 
   ItemPositionsListener itemPositionsListener(
@@ -41,11 +65,11 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
           SlideCategoryState slideCategoryState) =>
       _map[slideCategoryState]!.itemScrollController;
 
-  void init() => _switchBloc(slideCategoryCubit.state, limit);
+  void init() => _switchBloc(slideCategoryCubit.state, _limit);
 
   void _switchBloc(
     SlideCategoryState state,
-    int limit,
+    int? limit,
   ) {
     final dao = database.conversationDao;
     switch (state.type) {
@@ -55,7 +79,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       case SlideCategoryType.bots:
       case SlideCategoryType.strangers:
         _map[state] ??= _ConversationListBloc(
-          limit,
+          limit ?? kDefaultLimit,
           () => dao.conversationCountByCategory(state.type),
           (limit, offset) =>
               dao.conversationItemsByCategory(state.type, limit, offset),
@@ -66,7 +90,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
         break;
       case SlideCategoryType.circle:
         _map[state] ??= _ConversationListBloc(
-          limit,
+          limit ?? kDefaultLimit,
           () => database.conversationDao
               .conversationsCountByCircleId(state.id!)
               .getSingle(),
