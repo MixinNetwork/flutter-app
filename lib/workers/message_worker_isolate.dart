@@ -3,11 +3,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
+import 'dart:ui' as ui;
 
+import 'package:ansicolor/ansicolor.dart';
 import 'package:diox/diox.dart';
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -35,6 +38,7 @@ import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/reg_exp_utils.dart';
+import '../utils/system/package_info.dart';
 import '../widgets/message/send_message_dialog/attachment_extra.dart';
 import 'decrypt_message.dart';
 import 'isolate_event.dart';
@@ -49,9 +53,8 @@ class IsolateInitParams {
     required this.privateKey,
     required this.mixinDocumentDirectory,
     required this.primarySessionId,
-    required this.userAgent,
-    required this.deviceId,
     required this.loginByPhoneNumber,
+    required this.rootIsolateToken,
   });
 
   final SendPort sendPort;
@@ -61,14 +64,16 @@ class IsolateInitParams {
   final String privateKey;
   final String mixinDocumentDirectory;
   final String? primarySessionId;
-  final String? userAgent;
-  final String? deviceId;
+
   final bool loginByPhoneNumber;
+  final ui.RootIsolateToken rootIsolateToken;
 }
 
 Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
   EquatableConfig.stringify = true;
+  ansiColorDisabled = Platform.isIOS;
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
+  BackgroundIsolateBinaryMessenger.ensureInitialized(params.rootIsolateToken);
   final isolateChannel =
       IsolateChannel<IsolateEvent>.connectSend(params.sendPort);
   final runner = _MessageProcessRunner(
@@ -145,8 +150,6 @@ class _MessageProcessRunner {
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKeyStr,
-      userAgent: initParams.userAgent,
-      deviceId: initParams.deviceId,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -168,7 +171,7 @@ class _MessageProcessRunner {
       privateKeyStr,
       database,
       client,
-      initParams.userAgent,
+      await generateUserAgent(),
     );
 
     blaze.connectedStateStream.listen((event) {

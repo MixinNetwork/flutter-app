@@ -33,7 +33,16 @@ Future<PackageInfo> getPackageInfo() async {
   return _packageInfo;
 }
 
-Future<String> generateUserAgent(PackageInfo packageInfo) async {
+Future<String?> generateUserAgent() async {
+  try {
+    return await _generateUserAgent(await getPackageInfo());
+  } catch (error, stack) {
+    e('generate user agent failed. $error $stack');
+    return null;
+  }
+}
+
+Future<String> _generateUserAgent(PackageInfo packageInfo) async {
   String? systemAndVersion;
   if (Platform.isMacOS) {
     try {
