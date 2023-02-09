@@ -136,7 +136,8 @@ class _Button extends StatelessWidget {
               iconAssetName,
               width: 24,
               height: 24,
-              color: context.theme.icon,
+              colorFilter:
+                  ColorFilter.mode(context.theme.icon, BlendMode.srcIn),
             ),
             const SizedBox(height: 8),
             Text(

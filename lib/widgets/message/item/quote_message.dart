@@ -73,7 +73,7 @@ class QuoteMessage extends HookWidget {
           description: context.l10n.messageNotSupport,
           icon: SvgPicture.asset(
             Resources.assetsImagesRecallSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           inputMode: inputMode,
           onTap: () {},
@@ -127,7 +127,7 @@ class QuoteMessage extends HookWidget {
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesImageSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.image,
           inputMode: inputMode,
@@ -142,7 +142,7 @@ class QuoteMessage extends HookWidget {
           image: ImageByBlurHashOrBase64(imageData: thumbImage!),
           icon: SvgPicture.asset(
             Resources.assetsImagesVideoSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.video,
           inputMode: inputMode,
@@ -165,7 +165,7 @@ class QuoteMessage extends HookWidget {
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesLiveSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.live,
           inputMode: inputMode,
@@ -179,7 +179,7 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesFileSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: quote.mediaName as String? ?? context.l10n.file,
           inputMode: inputMode,
@@ -193,7 +193,7 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesFileSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.transcript,
           inputMode: inputMode,
@@ -207,7 +207,7 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesFileSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: (quote.content! as String).postOptimizeMarkdown,
           inputMode: inputMode,
@@ -221,7 +221,7 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesLocationSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.location,
           inputMode: inputMode,
@@ -235,7 +235,7 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesAudioSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.audio,
           inputMode: inputMode,
@@ -253,7 +253,7 @@ class QuoteMessage extends HookWidget {
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesStickerSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.sticker,
           inputMode: inputMode,
@@ -276,7 +276,7 @@ class QuoteMessage extends HookWidget {
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesContactSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: quote.sharedUserIdentityNumber as String,
           inputMode: inputMode,
@@ -308,7 +308,7 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesAppButtonSvg,
-            color: iconColor,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: description ?? context.l10n.bots,
           inputMode: inputMode,
@@ -325,7 +325,7 @@ class QuoteMessage extends HookWidget {
       description: context.l10n.messageNotFound,
       icon: SvgPicture.asset(
         Resources.assetsImagesRecallSvg,
-        color: iconColor,
+        colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
       ),
       inputMode: inputMode,
       onTap: () {},

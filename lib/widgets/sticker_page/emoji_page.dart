@@ -219,9 +219,12 @@ class _EmojiGroupIcon extends StatelessWidget {
             icon,
             width: 24,
             height: 24,
-            color: selectedIndex == index
-                ? context.theme.accent
-                : context.theme.secondaryText,
+            colorFilter: ColorFilter.mode(
+              selectedIndex == index
+                  ? context.theme.accent
+                  : context.theme.secondaryText,
+              BlendMode.srcIn,
+            ),
           ),
         ),
       );

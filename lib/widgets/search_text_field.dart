@@ -73,7 +73,7 @@ class SearchTextField extends HookWidget {
               padding: const EdgeInsets.only(left: 16, right: 8),
               child: SvgPicture.asset(
                 Resources.assetsImagesIcSearchSmallSvg,
-                color: hintColor,
+                colorFilter: ColorFilter.mode(hintColor, BlendMode.srcIn),
               ),
             ),
             if (leading != null) leading!,

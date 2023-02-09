@@ -239,7 +239,8 @@ class CommandPalettePage extends HookWidget {
                           Resources.assetsImagesEmptyFileSvg,
                           height: 80,
                           width: 80,
-                          color: context.theme.secondaryText,
+                          colorFilter: ColorFilter.mode(
+                              context.theme.secondaryText, BlendMode.srcIn),
                         ),
                         const SizedBox(height: 20),
                         Text(

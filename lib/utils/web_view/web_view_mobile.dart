@@ -214,7 +214,8 @@ class _WebViewActionDialog extends StatelessWidget {
                       Resources.assetsImagesInviteRefreshSvg,
                       width: 24,
                       height: 24,
-                      color: context.theme.text,
+                      colorFilter:
+                          ColorFilter.mode(context.theme.text, BlendMode.srcIn),
                     ),
                     trailing: null,
                     onTap: () {
@@ -249,7 +250,7 @@ class _ShareMenuItem extends StatelessWidget {
           Resources.assetsImagesShareSvg,
           width: 24,
           height: 24,
-          color: context.theme.text,
+          colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
         ),
         trailing: null,
         onTap: () async {

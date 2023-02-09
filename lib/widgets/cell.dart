@@ -139,7 +139,8 @@ class Arrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SvgPicture.asset(
         Resources.assetsImagesIcArrowRightSvg,
-        color: context.theme.secondaryText,
+        colorFilter:
+            ColorFilter.mode(context.theme.secondaryText, BlendMode.srcIn),
         width: 30,
         height: 30,
       );

@@ -115,11 +115,14 @@ class _ChatIcon extends StatelessWidget {
         assetName,
         width: 8,
         height: 8,
-        color: color ??
-            context.dynamicColor(
-              const Color.fromRGBO(131, 145, 158, 1),
-              darkColor: const Color.fromRGBO(128, 131, 134, 1),
-            ),
+        colorFilter: ColorFilter.mode(
+          color ??
+              context.dynamicColor(
+                const Color.fromRGBO(131, 145, 158, 1),
+                darkColor: const Color.fromRGBO(128, 131, 134, 1),
+              ),
+          BlendMode.srcIn,
+        ),
       );
 }
 
