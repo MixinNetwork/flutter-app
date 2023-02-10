@@ -24,6 +24,7 @@ import '../../../utils/platform.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/system/clipboard.dart';
 import '../../../widgets/action_button.dart';
+import '../../../widgets/actions/actions.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
@@ -480,7 +481,7 @@ class _SendTextField extends HookWidget {
             alt: !kPlatformIsDarwin,
           ): const _SendPostMessageIntent(),
           const SingleActivator(LogicalKeyboardKey.escape):
-              const _EscapeIntent(),
+              const EscapeIntent(),
         },
         actions: {
           _SendMessageIntent: CallbackAction<Intent>(
@@ -491,7 +492,7 @@ class _SendTextField extends HookWidget {
           _SendPostMessageIntent: CallbackAction<Intent>(
             onInvoke: (_) => _sendPostMessage(context, textEditingController),
           ),
-          _EscapeIntent: CallbackAction<Intent>(
+          EscapeIntent: CallbackAction<Intent>(
             onInvoke: (_) => context.read<QuoteMessageCubit>().emit(null),
           ),
         },
@@ -864,10 +865,6 @@ class _SendMessageIntent extends Intent {
 
 class _SendPostMessageIntent extends Intent {
   const _SendPostMessageIntent();
-}
-
-class _EscapeIntent extends Intent {
-  const _EscapeIntent();
 }
 
 class _PasteContextAction extends Action<PasteTextIntent> {
