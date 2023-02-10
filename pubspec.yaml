@@ -33,7 +33,7 @@ dependencies:
   decimal: ^2.3.2
   desktop_drop: ^0.4.0
   desktop_lifecycle: ^0.1.0
-  desktop_webview_window: ^0.1.6
+  desktop_webview_window: ^0.2.0
   device_info_plus: ^8.0.0
   diox: ^5.0.0-dev.3
   drift: 2.2.0
