@@ -24,7 +24,7 @@ AppDir:
       - sourceline: deb http://security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse
     include:
       - libgtk-3-0
-      - libwebkit2gtk-4.1-0
+      - webkit2gtk-4.1
       - libsdl2-2.0-0
       - libopus0
     exclude:
