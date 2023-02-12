@@ -279,7 +279,7 @@ class _CircleList extends HookWidget {
                           ContextMenu(
                             icon:
                                 Resources.assetsImagesContextMenuEditCircleSvg,
-                            title: context.l10n.editCircleName,
+                            title: context.l10n.editConversations,
                             onTap: () async {
                               final initSelected = (await context
                                       .database.circleConversationDao
