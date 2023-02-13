@@ -188,7 +188,7 @@ jobs:
           $version=$version_str.Split("+")[0]
           $build_number=$version_str.Split("+")[1]
           flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
-          echo "MSIX_PACKAGE_VERSION=$version.$build_number" >> $Env:GITHUB_OUTPUT
+          echo "MSIX_PACKAGE_VERSION=$version.0" >> $Env:GITHUB_OUTPUT
 
       - name: Build Installer
         run: |
