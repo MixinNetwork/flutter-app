@@ -1015,6 +1015,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.11"
+  mixin_logger:
+    dependency: "direct main"
+    description:
+      name: mixin_logger
+      sha256: e38acebd459fc90d2cdbe036b3d32af8511618be3dc8862d088e4bda55a58605
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   msix:
     dependency: "direct dev"
     description:
@@ -1880,5 +1888,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.19.0 <4.0.0"
+  dart: ">=2.19.0 <3.0.0"
   flutter: ">=3.7.0-0"
