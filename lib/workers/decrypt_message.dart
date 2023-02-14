@@ -462,33 +462,46 @@ class DecryptMessage extends Injector {
         RecallMessage.fromJson(_jsonDecode(data.data) as Map<String, dynamic>);
     final message = await database.messageDao
         .findMessageByMessageId(recallMessage.messageId);
-    if (message != null && message.category.isAttachment) {
-      _isolateEventSender(
-        WorkerIsolateEventType.requestDownloadAttachment,
-        AttachmentCancelRequest(
-          messageId: message.messageId,
-        ),
-      );
-      if (message.mediaUrl?.isNotEmpty ?? false) {
-        final file = File(message.mediaUrl!);
-        final exists = file.existsSync();
-        if (exists) {
-          await file.delete();
+
+    await database.messageDao.recallMessage(
+      recallMessage.messageId,
+      status: MessageStatus.delivered,
+    );
+
+    await Future.wait([
+      (() async {
+        if (message != null && message.category.isAttachment) {
+          _isolateEventSender(
+            WorkerIsolateEventType.requestDownloadAttachment,
+            AttachmentCancelRequest(
+              messageId: message.messageId,
+            ),
+          );
+          if (message.mediaUrl?.isNotEmpty ?? false) {
+            final file = File(message.mediaUrl!);
+            final exists = file.existsSync();
+            if (exists) {
+              await file.delete();
+            }
+          }
         }
-      }
-    }
-    await database.messageDao.recallMessage(recallMessage.messageId);
-    await database.messageMentionDao
-        .deleteMessageMentionByMessageId(recallMessage.messageId);
-    final quoteMessage = await database.messageDao
-        .findMessageItemById(data.conversationId, recallMessage.messageId);
-    if (quoteMessage != null) {
-      await database.messageDao.updateQuoteContentByQuoteId(
-          data.conversationId, recallMessage.messageId, quoteMessage.toJson());
-    }
-    await database.messageDao.deleteFtsByMessageId(recallMessage.messageId);
-    await database.messagesHistoryDao
-        .insert(MessagesHistoryData(messageId: data.messageId));
+      })(),
+      (() async {
+        final quoteMessage = await database.messageDao
+            .findMessageItemById(data.conversationId, recallMessage.messageId);
+        if (quoteMessage != null) {
+          await database.messageDao.updateQuoteContentByQuoteId(
+              data.conversationId,
+              recallMessage.messageId,
+              quoteMessage.toJson());
+        }
+      })(),
+      database.messageMentionDao
+          .deleteMessageMentionByMessageId(recallMessage.messageId),
+      database.messageDao.deleteFtsByMessageId(recallMessage.messageId),
+      database.messagesHistoryDao
+          .insert(MessagesHistoryData(messageId: data.messageId)),
+    ]);
   }
 
   Future<Message> _generateMessage(
