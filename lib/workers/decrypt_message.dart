@@ -463,10 +463,7 @@ class DecryptMessage extends Injector {
     final message = await database.messageDao
         .findMessageByMessageId(recallMessage.messageId);
 
-    await database.messageDao.recallMessage(
-      recallMessage.messageId,
-      status: MessageStatus.delivered,
-    );
+    await database.messageDao.recallMessage(recallMessage.messageId);
 
     await Future.wait([
       (() async {
