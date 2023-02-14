@@ -2,8 +2,5 @@
 
 part of 'session_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$SessionDaoMixin on DatabaseAccessor<SignalDatabase> {}

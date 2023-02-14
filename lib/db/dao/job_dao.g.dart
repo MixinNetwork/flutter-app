@@ -2,8 +2,5 @@
 
 part of 'job_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$JobDaoMixin on DatabaseAccessor<MixinDatabase> {}

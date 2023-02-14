@@ -2,45 +2,14 @@
 
 part of 'transcript_message_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
-  Conversations get conversations => attachedDatabase.conversations;
-  FloodMessages get floodMessages => attachedDatabase.floodMessages;
-  Jobs get jobs => attachedDatabase.jobs;
-  MessageMentions get messageMentions => attachedDatabase.messageMentions;
-  Messages get messages => attachedDatabase.messages;
-  Participants get participants => attachedDatabase.participants;
-  StickerAlbums get stickerAlbums => attachedDatabase.stickerAlbums;
-  PinMessages get pinMessages => attachedDatabase.pinMessages;
-  Users get users => attachedDatabase.users;
-  Addresses get addresses => attachedDatabase.addresses;
-  Apps get apps => attachedDatabase.apps;
-  Assets get assets => attachedDatabase.assets;
-  CircleConversations get circleConversations =>
-      attachedDatabase.circleConversations;
-  Circles get circles => attachedDatabase.circles;
-  Hyperlinks get hyperlinks => attachedDatabase.hyperlinks;
-  MessagesFts get messagesFts => attachedDatabase.messagesFts;
-  MessagesHistory get messagesHistory => attachedDatabase.messagesHistory;
-  Offsets get offsets => attachedDatabase.offsets;
-  ParticipantSession get participantSession =>
-      attachedDatabase.participantSession;
-  ResendSessionMessages get resendSessionMessages =>
-      attachedDatabase.resendSessionMessages;
-  SentSessionSenderKeys get sentSessionSenderKeys =>
-      attachedDatabase.sentSessionSenderKeys;
-  Snapshots get snapshots => attachedDatabase.snapshots;
-  StickerRelationships get stickerRelationships =>
-      attachedDatabase.stickerRelationships;
-  Stickers get stickers => attachedDatabase.stickers;
   TranscriptMessages get transcriptMessages =>
       attachedDatabase.transcriptMessages;
-  Fiats get fiats => attachedDatabase.fiats;
-  FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
-  ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
+  Conversations get conversations => attachedDatabase.conversations;
+  Messages get messages => attachedDatabase.messages;
+  Users get users => attachedDatabase.users;
+  Stickers get stickers => attachedDatabase.stickers;
   Selectable<TranscriptMessageItem> baseTranscriptMessageItem(
       BaseTranscriptMessageItem$where where,
       BaseTranscriptMessageItem$limit limit) {
@@ -85,10 +54,10 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         conversationId: row.read<String>('conversationId'),
         type: row.read<String>('type'),
         content: row.readNullable<String>('content'),
-        createdAt:
-            TranscriptMessages.$converter0.fromSql(row.read<int>('createdAt')),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        mediaStatus: TranscriptMessages.$converter1
+        createdAt: TranscriptMessages.$convertercreatedAt
+            .fromSql(row.read<int>('createdAt')),
+        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+        mediaStatus: TranscriptMessages.$convertermediaStatus
             .fromSql(row.readNullable<String>('mediaStatus')),
         mediaWaveform: row.readNullable<String>('mediaWaveform'),
         mediaName: row.readNullable<String>('mediaName'),
@@ -107,8 +76,8 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         userFullName: row.readNullable<String>('userFullName'),
         userIdentityNumber: row.readNullable<String>('userIdentityNumber'),
         appId: row.readNullable<String>('appId'),
-        relationship:
-            Users.$converter0.fromSql(row.readNullable<String>('relationship')),
+        relationship: Users.$converterrelationship
+            .fromSql(row.readNullable<String>('relationship')),
         avatarUrl: row.readNullable<String>('avatarUrl'),
         sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
         sharedUserIdentityNumber:
