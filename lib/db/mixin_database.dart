@@ -281,11 +281,9 @@ QueryExecutor _openConnection(File dbFile) {
 /// Connect to the database.
 Future<MixinDatabase> connectToDatabase(
   String identityNumber, {
-  // int readCount = 4,
   bool fromMainIsolate = false,
 }) async {
   final backgroundPortName = 'one_mixin_drift_background_$identityNumber';
-  // final foregroundPortName = 'one_mixin_drift_foreground_$identityNumber';
 
   final driftIsolate = await _crateIsolate(
     identityNumber,
