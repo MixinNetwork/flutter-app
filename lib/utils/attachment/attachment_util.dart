@@ -3,8 +3,8 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 
-import 'package:diox/diox.dart';
-import 'package:diox/io.dart';
+import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
@@ -61,11 +61,15 @@ class AttachmentUtil extends ChangeNotifier {
     this._transcriptMessageDao,
     this.mediaPath,
   ) {
-    (_dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
-        (client) {
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-    };
+    final httpClientAdapter = _dio.httpClientAdapter;
+    if (httpClientAdapter is IOHttpClientAdapter) {
+      httpClientAdapter.onHttpClientCreate = (client) {
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
+      };
+    } else {
+      w('httpClientAdapter is not IOHttpClientAdapter');
+    }
     transcriptPath = p.join(mediaPath, 'Transcripts');
     Directory(transcriptPath).create(recursive: true);
   }

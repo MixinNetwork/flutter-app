@@ -6,7 +6,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:diox/diox.dart';
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:equatable/equatable.dart';
