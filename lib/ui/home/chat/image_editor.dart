@@ -397,13 +397,17 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     if (bytes == null) {
       return null;
     }
-    var imgImage = img.Image.fromBytes(image.width, image.height, bytes);
+    var imgImage = img.Image.fromBytes(
+      width: image.width,
+      height: image.height,
+      bytes: bytes.buffer,
+    );
 
     if (state.flip) {
       img.flipHorizontal(imgImage);
     }
     if (state.rotate != ImageRotate.none) {
-      imgImage = img.copyRotate(imgImage, 360 - state.rotate.degree);
+      imgImage = img.copyRotate(imgImage, angle: 360 - state.rotate.degree);
     }
     final data = img.encodePng(imgImage);
     return Uint8List.fromList(data);
