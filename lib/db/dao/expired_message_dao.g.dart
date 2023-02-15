@@ -2,8 +2,5 @@
 
 part of 'expired_message_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$ExpiredMessageDaoMixin on DatabaseAccessor<MixinDatabase> {}

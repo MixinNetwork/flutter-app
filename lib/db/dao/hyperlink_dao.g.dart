@@ -2,8 +2,5 @@
 
 part of 'hyperlink_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$HyperlinkDaoMixin on DatabaseAccessor<MixinDatabase> {}
