@@ -578,8 +578,9 @@ class SendMessageHelper {
         }
       }
 
-      final futures = [
-        _messageDao.recallMessage(messageId),
+      await _messageDao.recallMessage(messageId);
+
+      await Future.wait([
         _messageDao.deleteFtsByMessageId(messageId),
         _messageMentionDao.deleteMessageMentionByMessageId(messageId),
         _jobDao.insert(Job(
@@ -591,17 +592,16 @@ class SendMessageHelper {
           createdAt: DateTime.now(),
           runCount: 0,
         )),
-      ];
+        (() async {
+          final quoteMessage =
+              await _messageDao.findMessageItemById(conversationId, messageId);
 
-      final quoteMessage =
-          await _messageDao.findMessageItemById(conversationId, messageId);
-
-      if (quoteMessage != null) {
-        futures.add(_messageDao.updateQuoteContentByQuoteId(
-            conversationId, messageId, quoteMessage.toJson()));
-      }
-
-      await Future.wait(futures);
+          if (quoteMessage != null) {
+            await _messageDao.updateQuoteContentByQuoteId(
+                conversationId, messageId, quoteMessage.toJson());
+          }
+        })(),
+      ]);
     });
   }
 
