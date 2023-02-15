@@ -22,8 +22,11 @@ extension FileExtension on File {
 Future<String?> _encodeBlurHash(String path) async {
   final fileImage = ResizeImage(FileImage(File(path)), width: 100, height: 100);
   final image = await fileImage.toImage();
-  final data =
-      Image.fromBytes(image.width, image.height, (await image.toBytes())!);
+  final data = Image.fromBytes(
+    width: image.width,
+    height: image.height,
+    bytes: (await image.toBytes())!.buffer,
+  );
   return BlurHash.encode(data).hash;
 }
 
