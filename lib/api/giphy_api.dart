@@ -11,7 +11,10 @@ class GiphyApi {
   GiphyApi(this.dio);
 
   static GiphyApi instance = GiphyApi(
-    Dio(BaseOptions(baseUrl: _giphyUrl))
+    Dio(BaseOptions(
+      baseUrl: _giphyUrl,
+      contentType: 'application/json; charset=utf-8',
+    ))
       ..interceptors.addAll([
         if (!kReleaseMode) MixinLogInterceptor(HttpLogLevel.none),
       ]),
