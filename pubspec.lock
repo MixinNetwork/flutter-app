@@ -379,14 +379,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.0"
-  diox:
+  dio:
     dependency: "direct main"
     description:
-      name: diox
-      sha256: "86fe403fb8feaad1e7f6c0ccdf5a29896873ae805804b62f48ed1f457886a8a2"
+      name: dio
+      sha256: "9fdbf71baeb250fc9da847f6cb2052196f62c19906a3657adfc18631a667d316"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.0-dev.3"
+    version: "5.0.0"
   drift:
     dependency: "direct main"
     description:
@@ -1011,10 +1011,10 @@ packages:
     dependency: "direct main"
     description:
       name: mixin_bot_sdk_dart
-      sha256: a18bb7fe316ff515170a420c898aa3f911e1f549263d3936811c5a3f867f0d15
+      sha256: "277a34724233ddd36ba238f488364ba4398e30c6b528dfed91aede792ee47f49"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.11"
+    version: "0.3.12"
   mixin_logger:
     dependency: "direct main"
     description:
@@ -1888,5 +1888,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.19.0 <4.0.0"
+  dart: ">=2.19.0 <3.0.0"
   flutter: ">=3.7.0-0"
