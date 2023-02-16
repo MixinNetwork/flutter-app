@@ -368,8 +368,14 @@ class _MessageProcessRunner {
         try {
           final a =
               (await client.assetApi.getAssetById(job.blazeMessage!)).data;
-          await database.assetDao.insertSdkAsset(a);
-          await database.jobDao.deleteJobById(job.jobId);
+          await Future.wait([
+            database.assetDao.insertSdkAsset(a),
+            database.jobDao.deleteJobById(job.jobId),
+            (() async {
+              if (a.chainId.isEmpty || a.assetId == a.chainId) return;
+              await database.jobDao.insertUpdateAssetJob(a.chainId);
+            })(),
+          ]);
         } catch (e, s) {
           w('Update asset job error: $e, stack: $s');
           await Future.delayed(const Duration(seconds: 1));

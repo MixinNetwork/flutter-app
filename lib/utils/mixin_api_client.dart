@@ -35,7 +35,6 @@ Client createClient({
         receiveTimeout: tenSecond,
         sendTimeout: tenSecond,
         followRedirects: false,
-        contentType: 'application/json; charset=utf-8',
       ),
       httpLogLevel: HttpLogLevel.none,
       jsonDecodeCallback: jsonDecode,
