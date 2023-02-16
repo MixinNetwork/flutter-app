@@ -3,227 +3,6 @@
 part of 'mixin_database.dart';
 
 // ignore_for_file: type=lint
-class ExpiredMessages extends Table
-    with TableInfo<ExpiredMessages, ExpiredMessage> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  ExpiredMessages(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _messageIdMeta =
-      const VerificationMeta('messageId');
-  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
-      'message_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _expireInMeta =
-      const VerificationMeta('expireIn');
-  late final GeneratedColumn<int> expireIn = GeneratedColumn<int>(
-      'expire_in', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _expireAtMeta =
-      const VerificationMeta('expireAt');
-  late final GeneratedColumn<int> expireAt = GeneratedColumn<int>(
-      'expire_at', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  @override
-  List<GeneratedColumn> get $columns => [messageId, expireIn, expireAt];
-  @override
-  String get aliasedName => _alias ?? 'expired_messages';
-  @override
-  String get actualTableName => 'expired_messages';
-  @override
-  VerificationContext validateIntegrity(Insertable<ExpiredMessage> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('message_id')) {
-      context.handle(_messageIdMeta,
-          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
-    }
-    if (data.containsKey('expire_in')) {
-      context.handle(_expireInMeta,
-          expireIn.isAcceptableOrUnknown(data['expire_in']!, _expireInMeta));
-    } else if (isInserting) {
-      context.missing(_expireInMeta);
-    }
-    if (data.containsKey('expire_at')) {
-      context.handle(_expireAtMeta,
-          expireAt.isAcceptableOrUnknown(data['expire_at']!, _expireAtMeta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {messageId};
-  @override
-  ExpiredMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ExpiredMessage(
-      messageId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
-      expireIn: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}expire_in'])!,
-      expireAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}expire_at']),
-    );
-  }
-
-  @override
-  ExpiredMessages createAlias(String alias) {
-    return ExpiredMessages(attachedDatabase, alias);
-  }
-
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class ExpiredMessage extends DataClass implements Insertable<ExpiredMessage> {
-  final String messageId;
-  final int expireIn;
-  final int? expireAt;
-  const ExpiredMessage(
-      {required this.messageId, required this.expireIn, this.expireAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['message_id'] = Variable<String>(messageId);
-    map['expire_in'] = Variable<int>(expireIn);
-    if (!nullToAbsent || expireAt != null) {
-      map['expire_at'] = Variable<int>(expireAt);
-    }
-    return map;
-  }
-
-  ExpiredMessagesCompanion toCompanion(bool nullToAbsent) {
-    return ExpiredMessagesCompanion(
-      messageId: Value(messageId),
-      expireIn: Value(expireIn),
-      expireAt: expireAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(expireAt),
-    );
-  }
-
-  factory ExpiredMessage.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ExpiredMessage(
-      messageId: serializer.fromJson<String>(json['message_id']),
-      expireIn: serializer.fromJson<int>(json['expire_in']),
-      expireAt: serializer.fromJson<int?>(json['expire_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'message_id': serializer.toJson<String>(messageId),
-      'expire_in': serializer.toJson<int>(expireIn),
-      'expire_at': serializer.toJson<int?>(expireAt),
-    };
-  }
-
-  ExpiredMessage copyWith(
-          {String? messageId,
-          int? expireIn,
-          Value<int?> expireAt = const Value.absent()}) =>
-      ExpiredMessage(
-        messageId: messageId ?? this.messageId,
-        expireIn: expireIn ?? this.expireIn,
-        expireAt: expireAt.present ? expireAt.value : this.expireAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('ExpiredMessage(')
-          ..write('messageId: $messageId, ')
-          ..write('expireIn: $expireIn, ')
-          ..write('expireAt: $expireAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(messageId, expireIn, expireAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ExpiredMessage &&
-          other.messageId == this.messageId &&
-          other.expireIn == this.expireIn &&
-          other.expireAt == this.expireAt);
-}
-
-class ExpiredMessagesCompanion extends UpdateCompanion<ExpiredMessage> {
-  final Value<String> messageId;
-  final Value<int> expireIn;
-  final Value<int?> expireAt;
-  const ExpiredMessagesCompanion({
-    this.messageId = const Value.absent(),
-    this.expireIn = const Value.absent(),
-    this.expireAt = const Value.absent(),
-  });
-  ExpiredMessagesCompanion.insert({
-    required String messageId,
-    required int expireIn,
-    this.expireAt = const Value.absent(),
-  })  : messageId = Value(messageId),
-        expireIn = Value(expireIn);
-  static Insertable<ExpiredMessage> custom({
-    Expression<String>? messageId,
-    Expression<int>? expireIn,
-    Expression<int>? expireAt,
-  }) {
-    return RawValuesInsertable({
-      if (messageId != null) 'message_id': messageId,
-      if (expireIn != null) 'expire_in': expireIn,
-      if (expireAt != null) 'expire_at': expireAt,
-    });
-  }
-
-  ExpiredMessagesCompanion copyWith(
-      {Value<String>? messageId, Value<int>? expireIn, Value<int?>? expireAt}) {
-    return ExpiredMessagesCompanion(
-      messageId: messageId ?? this.messageId,
-      expireIn: expireIn ?? this.expireIn,
-      expireAt: expireAt ?? this.expireAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (messageId.present) {
-      map['message_id'] = Variable<String>(messageId.value);
-    }
-    if (expireIn.present) {
-      map['expire_in'] = Variable<int>(expireIn.value);
-    }
-    if (expireAt.present) {
-      map['expire_at'] = Variable<int>(expireAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ExpiredMessagesCompanion(')
-          ..write('messageId: $messageId, ')
-          ..write('expireIn: $expireIn, ')
-          ..write('expireAt: $expireAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class FavoriteApps extends Table with TableInfo<FavoriteApps, FavoriteApp> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -7341,6 +7120,227 @@ class MessageMentionsCompanion extends UpdateCompanion<MessageMention> {
   }
 }
 
+class ExpiredMessages extends Table
+    with TableInfo<ExpiredMessages, ExpiredMessage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  ExpiredMessages(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _messageIdMeta =
+      const VerificationMeta('messageId');
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
+      'message_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _expireInMeta =
+      const VerificationMeta('expireIn');
+  late final GeneratedColumn<int> expireIn = GeneratedColumn<int>(
+      'expire_in', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _expireAtMeta =
+      const VerificationMeta('expireAt');
+  late final GeneratedColumn<int> expireAt = GeneratedColumn<int>(
+      'expire_at', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns => [messageId, expireIn, expireAt];
+  @override
+  String get aliasedName => _alias ?? 'expired_messages';
+  @override
+  String get actualTableName => 'expired_messages';
+  @override
+  VerificationContext validateIntegrity(Insertable<ExpiredMessage> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('expire_in')) {
+      context.handle(_expireInMeta,
+          expireIn.isAcceptableOrUnknown(data['expire_in']!, _expireInMeta));
+    } else if (isInserting) {
+      context.missing(_expireInMeta);
+    }
+    if (data.containsKey('expire_at')) {
+      context.handle(_expireAtMeta,
+          expireAt.isAcceptableOrUnknown(data['expire_at']!, _expireAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId};
+  @override
+  ExpiredMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExpiredMessage(
+      messageId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+      expireIn: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}expire_in'])!,
+      expireAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}expire_at']),
+    );
+  }
+
+  @override
+  ExpiredMessages createAlias(String alias) {
+    return ExpiredMessages(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class ExpiredMessage extends DataClass implements Insertable<ExpiredMessage> {
+  final String messageId;
+  final int expireIn;
+  final int? expireAt;
+  const ExpiredMessage(
+      {required this.messageId, required this.expireIn, this.expireAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['message_id'] = Variable<String>(messageId);
+    map['expire_in'] = Variable<int>(expireIn);
+    if (!nullToAbsent || expireAt != null) {
+      map['expire_at'] = Variable<int>(expireAt);
+    }
+    return map;
+  }
+
+  ExpiredMessagesCompanion toCompanion(bool nullToAbsent) {
+    return ExpiredMessagesCompanion(
+      messageId: Value(messageId),
+      expireIn: Value(expireIn),
+      expireAt: expireAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expireAt),
+    );
+  }
+
+  factory ExpiredMessage.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExpiredMessage(
+      messageId: serializer.fromJson<String>(json['message_id']),
+      expireIn: serializer.fromJson<int>(json['expire_in']),
+      expireAt: serializer.fromJson<int?>(json['expire_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'message_id': serializer.toJson<String>(messageId),
+      'expire_in': serializer.toJson<int>(expireIn),
+      'expire_at': serializer.toJson<int?>(expireAt),
+    };
+  }
+
+  ExpiredMessage copyWith(
+          {String? messageId,
+          int? expireIn,
+          Value<int?> expireAt = const Value.absent()}) =>
+      ExpiredMessage(
+        messageId: messageId ?? this.messageId,
+        expireIn: expireIn ?? this.expireIn,
+        expireAt: expireAt.present ? expireAt.value : this.expireAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('ExpiredMessage(')
+          ..write('messageId: $messageId, ')
+          ..write('expireIn: $expireIn, ')
+          ..write('expireAt: $expireAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(messageId, expireIn, expireAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExpiredMessage &&
+          other.messageId == this.messageId &&
+          other.expireIn == this.expireIn &&
+          other.expireAt == this.expireAt);
+}
+
+class ExpiredMessagesCompanion extends UpdateCompanion<ExpiredMessage> {
+  final Value<String> messageId;
+  final Value<int> expireIn;
+  final Value<int?> expireAt;
+  const ExpiredMessagesCompanion({
+    this.messageId = const Value.absent(),
+    this.expireIn = const Value.absent(),
+    this.expireAt = const Value.absent(),
+  });
+  ExpiredMessagesCompanion.insert({
+    required String messageId,
+    required int expireIn,
+    this.expireAt = const Value.absent(),
+  })  : messageId = Value(messageId),
+        expireIn = Value(expireIn);
+  static Insertable<ExpiredMessage> custom({
+    Expression<String>? messageId,
+    Expression<int>? expireIn,
+    Expression<int>? expireAt,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (expireIn != null) 'expire_in': expireIn,
+      if (expireAt != null) 'expire_at': expireAt,
+    });
+  }
+
+  ExpiredMessagesCompanion copyWith(
+      {Value<String>? messageId, Value<int>? expireIn, Value<int?>? expireAt}) {
+    return ExpiredMessagesCompanion(
+      messageId: messageId ?? this.messageId,
+      expireIn: expireIn ?? this.expireIn,
+      expireAt: expireAt ?? this.expireAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (expireIn.present) {
+      map['expire_in'] = Variable<int>(expireIn.value);
+    }
+    if (expireAt.present) {
+      map['expire_at'] = Variable<int>(expireAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpiredMessagesCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('expireIn: $expireIn, ')
+          ..write('expireAt: $expireAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -12547,7 +12547,6 @@ class FiatsCompanion extends UpdateCompanion<Fiat> {
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(e);
   _$MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
-  late final ExpiredMessages expiredMessages = ExpiredMessages(this);
   late final FavoriteApps favoriteApps = FavoriteApps(this);
   late final Apps apps = Apps(this);
   late final StickerRelationships stickerRelationships =
@@ -12562,6 +12561,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Stickers stickers = Stickers(this);
   late final Hyperlinks hyperlinks = Hyperlinks(this);
   late final MessageMentions messageMentions = MessageMentions(this);
+  late final ExpiredMessages expiredMessages = ExpiredMessages(this);
   late final FloodMessages floodMessages = FloodMessages(this);
   late final Circles circles = Circles(this);
   late final CircleConversations circleConversations =
@@ -12656,53 +12656,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       FavoriteAppDao(this as MixinDatabase);
   late final ExpiredMessageDao expiredMessageDao =
       ExpiredMessageDao(this as MixinDatabase);
-  Selectable<ExpiredMessage> getExpiredMessages(int? currentTime, int limit) {
-    return customSelect(
-        'SELECT * FROM expired_messages WHERE expire_at <= ?1 ORDER BY expire_at ASC LIMIT ?2',
-        variables: [
-          Variable<int>(currentTime),
-          Variable<int>(limit)
-        ],
-        readsFrom: {
-          expiredMessages,
-        }).asyncMap(expiredMessages.mapFromRow);
-  }
-
-  Selectable<ExpiredMessage> getFirstExpiredMessage() {
-    return customSelect(
-        'SELECT * FROM expired_messages WHERE expire_at IS NOT NULL ORDER BY expire_at ASC LIMIT 1',
-        variables: [],
-        readsFrom: {
-          expiredMessages,
-        }).asyncMap(expiredMessages.mapFromRow);
-  }
-
-  Future<int> updateExpiredMessage(int? expireAt, String messageId) {
-    return customUpdate(
-      'UPDATE expired_messages SET expire_at = ?1 WHERE expire_at > ?1 AND message_id = ?2',
-      variables: [Variable<int>(expireAt), Variable<String>(messageId)],
-      updates: {expiredMessages},
-      updateKind: UpdateKind.update,
-    );
-  }
-
-  Future<int> markExpiredMessageRead(
-      double currentTime, MarkExpiredMessageRead$where where) {
-    var $arrayStartIndex = 2;
-    final generatedwhere =
-        $write(where(this.expiredMessages), startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    return customUpdate(
-      'UPDATE expired_messages SET expire_at = CAST((?1 + expire_in)AS INTEGER) WHERE(expire_at >(?1 + expire_in)OR expire_at IS NULL)AND ${generatedwhere.sql}',
-      variables: [
-        Variable<double>(currentTime),
-        ...generatedwhere.introducedVariables
-      ],
-      updates: {expiredMessages},
-      updateKind: UpdateKind.update,
-    );
-  }
-
   Future<int> deleteFavoriteAppByAppIdAndUserId(String appId, String userId) {
     return customUpdate(
       'DELETE FROM favorite_apps WHERE app_id = ?1 AND user_id = ?2',
@@ -14907,7 +14860,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        expiredMessages,
         favoriteApps,
         apps,
         stickerRelationships,
@@ -14921,6 +14873,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         stickers,
         hyperlinks,
         messageMentions,
+        expiredMessages,
         floodMessages,
         circles,
         circleConversations,
@@ -14976,9 +14929,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
       );
 }
-
-typedef MarkExpiredMessageRead$where = Expression<bool> Function(
-    ExpiredMessages expired_messages);
 
 class MessageItem {
   final String messageId;
