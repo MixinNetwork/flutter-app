@@ -267,6 +267,7 @@ class _MessageProcessRunner {
             TableUpdateQuery.onTable(database.mixinDatabase.expiredMessages),
           )
           .asyncDropListen((event) => _scheduleExpiredJob()));
+    _scheduleExpiredJob();
   }
 
   void _sendEventToMainIsolate(WorkerIsolateEventType event,
