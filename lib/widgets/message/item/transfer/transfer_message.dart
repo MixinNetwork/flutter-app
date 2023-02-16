@@ -44,7 +44,6 @@ class TransferMessage extends HookWidget {
               ),
             if (assetIcon == null) const SizedBox(width: 40, height: 40),
             const SizedBox(width: 8),
-            const SizedBox(width: 8),
             Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
