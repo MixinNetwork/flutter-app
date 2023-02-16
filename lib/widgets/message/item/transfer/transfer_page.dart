@@ -125,7 +125,7 @@ class _SnapshotDetailHeader extends HookWidget {
             symbolUrl: snapshot.symbolIconUrl ?? '',
             chainUrl: snapshot.chainIconUrl,
             size: 58,
-            chainSize: 14,
+            chainSize: 16,
             chainBorder: const BorderSide(color: Colors.white, width: 2),
           ),
           const SizedBox(height: 16),
