@@ -302,8 +302,9 @@ class _MessageProcessRunner {
       }
     }
 
-    final firstExpiredMessage =
-        await database.mixinDatabase.getFirstExpiredMessage().getSingleOrNull();
+    final firstExpiredMessage = await database.expiredMessageDao
+        .getFirstExpiredMessage()
+        .getSingleOrNull();
     if (firstExpiredMessage == null) {
       _nextExpiredMessageRunner?.cancel();
       _nextExpiredMessageRunner = null;

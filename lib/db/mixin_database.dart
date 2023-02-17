@@ -64,7 +64,6 @@ part 'mixin_database.g.dart';
     'moor/dao/pin_message.drift',
     'moor/dao/sticker_relationship.drift',
     'moor/dao/favorite_app.drift',
-    'moor/dao/expired_message.drift',
   },
   daos: [
     AddressDao,

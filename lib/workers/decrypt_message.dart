@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze_message.dart';
@@ -27,8 +28,8 @@ import '../crypto/signal/signal_protocol.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
-import '../db/mixin_database.dart';
 import '../db/mixin_database.dart' as db;
+import '../db/mixin_database.dart';
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
@@ -95,7 +96,7 @@ class DecryptMessage extends Injector {
       final expiredAt =
           data.createdAt.millisecondsSinceEpoch ~/ 1000 + data.expireIn;
       await database.expiredMessageDao
-          .updateMessageExpireAt(message.messageId, expiredAt);
+          .updateMessageExpireAt(expiredAt, message.messageId);
     }
   }
 
@@ -964,19 +965,38 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
-    final messageIds = <String>[];
+    // key: messageId, value: message expired.
+    final messagesWithExpiredAt = <Tuple2<String, int?>>[];
     messages
         .where((m) => m.status == 'READ' || m.status == 'MENTION_READ')
         .forEach((m) async {
       if (m.status == 'MENTION_READ') {
         await database.messageMentionDao.markMentionRead(m.messageId);
       } else if (m.status == 'READ') {
-        messageIds.add(m.messageId);
+        messagesWithExpiredAt.add(Tuple2(m.messageId, m.expireAt));
       }
     });
 
-    if (messageIds.isNotEmpty) {
-      await database.messageDao.markMessageRead(messageIds);
+    if (messagesWithExpiredAt.isNotEmpty) {
+      final messageIds = messagesWithExpiredAt.map((e) => e.item1).toList();
+      await database.messageDao
+          .markMessageRead(messageIds, updateExpired: false);
+      for (final item in messagesWithExpiredAt) {
+        final messageId = item.item1;
+        final expireAt = item.item2;
+        if (expireAt != null && expireAt > 0) {
+          await database.expiredMessageDao
+              .updateMessageExpireAt(expireAt, messageId);
+        } else {
+          final expiredMessage = await database.expiredMessageDao
+              .getExpiredMessageById(messageId)
+              .getSingleOrNull();
+          if (expiredMessage != null) {
+            w('expireAt is null or 0. messageId: $messageId');
+            await database.expiredMessageDao.onMessageRead([messageId]);
+          }
+        }
+      }
       final conversationIds =
           await database.messageDao.findConversationIdsByMessages(messageIds);
       for (final cId in conversationIds) {

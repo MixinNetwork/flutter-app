@@ -441,8 +441,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<int> markMessageRead(
-    Iterable<String> messageIds,
-  ) async {
+    Iterable<String> messageIds, {
+    bool updateExpired = true,
+  }) async {
     final result = await (db.update(db.messages)
           ..where((tbl) =>
               tbl.messageId.isIn(messageIds) &
@@ -450,7 +451,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               tbl.status.equalsValue(MessageStatus.unknown).not()))
         .write(const MessagesCompanion(status: Value(MessageStatus.read)));
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
-    await db.expiredMessageDao.onMessageRead(messageIds);
+    if (updateExpired) {
+      await db.expiredMessageDao.onMessageRead(messageIds);
+    }
     return result;
   }
 
