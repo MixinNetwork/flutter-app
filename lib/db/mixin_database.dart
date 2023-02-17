@@ -270,18 +270,16 @@ class MixinDatabase extends _$MixinDatabase {
           .isNotEmpty;
 }
 
-QueryExecutor _openConnection(File dbFile) {
-  final vmDatabase = NativeDatabase(dbFile);
-  if (!kDebugMode) {
-    return vmDatabase;
-  }
-  return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
-}
+QueryExecutor _openConnection(File dbFile) => CustomVmDatabaseWrapper(
+      NativeDatabase(dbFile),
+      logStatements: true,
+      explain: kDebugMode,
+    );
 
 /// Connect to the database.
 Future<MixinDatabase> connectToDatabase(
   String identityNumber, {
-  bool fromMainIsolate = false,
+  bool fromMainIsolate = true,
 }) async {
   final backgroundPortName = 'one_mixin_drift_background_$identityNumber';
 
