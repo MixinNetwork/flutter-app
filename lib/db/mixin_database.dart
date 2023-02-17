@@ -108,13 +108,6 @@ class MixinDatabase extends _$MixinDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        beforeOpen: (_) async {
-          if (executor.dialect == SqlDialect.sqlite) {
-            await customStatement('PRAGMA journal_mode=WAL');
-            await customStatement('PRAGMA foreign_keys=ON');
-            await customStatement('PRAGMA synchronous=NORMAL');
-          }
-        },
         onUpgrade: (Migrator m, int from, int to) async {
           if (from <= 2) {
             await m.drop(Index(
@@ -271,7 +264,14 @@ class MixinDatabase extends _$MixinDatabase {
 }
 
 QueryExecutor _openConnection(File dbFile) => CustomVmDatabaseWrapper(
-      NativeDatabase(dbFile),
+      NativeDatabase(
+        dbFile,
+        setup: (rawDb) {
+          rawDb.execute('PRAGMA journal_mode=WAL;');
+          rawDb.execute('PRAGMA foreign_keys=ON;');
+          rawDb.execute('PRAGMA synchronous=NORMAL;');
+        },
+      ),
       logStatements: true,
       explain: kDebugMode,
     );
@@ -279,7 +279,7 @@ QueryExecutor _openConnection(File dbFile) => CustomVmDatabaseWrapper(
 /// Connect to the database.
 Future<MixinDatabase> connectToDatabase(
   String identityNumber, {
-  bool fromMainIsolate = true,
+  bool fromMainIsolate = false,
 }) async {
   final backgroundPortName = 'one_mixin_drift_background_$identityNumber';
 

@@ -152,7 +152,7 @@ class AccountServer {
   }
 
   Future<void> _initDatabase() async {
-    database = Database(await db.connectToDatabase(identityNumber));
+    database = Database(await db.connectToDatabase(identityNumber, fromMainIsolate: true));
 
     attachmentUtil = AttachmentUtil.init(
       client,
