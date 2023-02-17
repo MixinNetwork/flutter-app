@@ -102,7 +102,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(super.c) : super.connect();
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   final eventBus = DataBaseEventBus();
 
@@ -219,6 +219,9 @@ class MixinDatabase extends _$MixinDatabase {
             await _addColumnIfNotExists(m, users, users.codeUrl);
             await _addColumnIfNotExists(m, users, users.codeId);
           }
+          if (from <= 17) {
+            await m.createIndex(indexMessagesConversationIdQuoteMessageId);
+          }
         },
       );
 
@@ -267,9 +270,10 @@ QueryExecutor _openConnection(File dbFile) => CustomVmDatabaseWrapper(
       NativeDatabase(
         dbFile,
         setup: (rawDb) {
-          rawDb.execute('PRAGMA journal_mode=WAL;');
-          rawDb.execute('PRAGMA foreign_keys=ON;');
-          rawDb.execute('PRAGMA synchronous=NORMAL;');
+          rawDb
+            ..execute('PRAGMA journal_mode=WAL;')
+            ..execute('PRAGMA foreign_keys=ON;')
+            ..execute('PRAGMA synchronous=NORMAL;');
         },
       ),
       logStatements: true,

@@ -240,7 +240,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         updates: {db.messagesFts},
       );
 
-  Future<void> deleteMessage(String messageId) async {
+  Future<void> deleteMessage(String conversationId, String messageId) async {
     await db.transaction(() async {
       await Future.wait([
         (delete(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
@@ -251,7 +251,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         (delete(db.transcriptMessages)
               ..where((tbl) => tbl.transcriptId.equals(messageId)))
             .go(),
-        _recallPinMessage(messageId),
+        _recallPinMessage(conversationId, messageId),
         db.pinMessageDao.deleteByIds([messageId]),
         db.expiredMessageDao.deleteByMessageId(messageId),
       ]);
@@ -578,26 +578,26 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           .map((row) => row.read(db.messages.messageId.count())!)
           .getSingle();
 
-  Future<int> updateQuoteContentByQuoteId(
+  Future<void> updateQuoteContentByQuoteId(
       String conversationId, String quoteMessageId, String content) async {
-    final messageIds = await _findMessageIdByQuoteMessageId(quoteMessageId);
-    return _sendInsertOrReplaceEventWithFuture(
+    final messageIds = (await (db.selectOnly(db.messages, distinct: true)
+              ..addColumns([db.messages.messageId])
+              ..where(db.messages.conversationId.equals(conversationId) &
+                  db.messages.quoteMessageId.equals(quoteMessageId)))
+            .map((row) => row.read(db.messages.messageId))
+            .get())
+        .whereNotNull()
+        .toList();
+
+    if (messageIds.isEmpty) return;
+
+    await _sendInsertOrReplaceEventWithFuture(
         messageIds,
         (db.update(db.messages)
               ..where((tbl) =>
                   tbl.conversationId.equals(conversationId) &
                   tbl.quoteMessageId.equals(quoteMessageId)))
             .write(MessagesCompanion(quoteContent: Value(content))));
-  }
-
-  Future<List<String>> _findMessageIdByQuoteMessageId(
-      String quoteMessageId) async {
-    final future = await (db.selectOnly(db.messages, distinct: true)
-          ..addColumns([db.messages.messageId])
-          ..where(db.messages.quoteMessageId.equals(quoteMessageId)))
-        .map((row) => row.read(db.messages.messageId))
-        .get();
-    return future.whereNotNull().toList();
   }
 
   Future<int> updateAttachmentMessageContentAndStatus(
@@ -883,29 +883,36 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ).getSingleOrNull();
   }
 
-  Future<void> _recallPinMessage(String messageId) async {
-    final messageIds = (await (db.selectOnly(db.messages)
-              ..addColumns([db.messages.messageId])
-              ..where(db.messages.category.equals(MessageCategory.messagePin) &
-                  db.messages.quoteMessageId.equals(messageId)))
-            .map((row) => row.read(db.messages.messageId))
-            .get())
-        .whereNotNull();
+  Future<void> _recallPinMessage(
+      String conversationId, String messageId) async {
+    final messages = db.messages;
 
-    if (messageIds.isEmpty) return;
+    while (true) {
+      final messageIds = (await (db.selectOnly(messages)
+                ..addColumns([messages.messageId])
+                ..where(messages.conversationId.equals(conversationId) &
+                    messages.category.equals(MessageCategory.messagePin) &
+                    messages.quoteMessageId.equals(messageId))
+                ..limit(100))
+              .map((row) => row.read(messages.messageId))
+              .get())
+          .whereNotNull();
 
-    await (db.update(db.messages)
-          ..where(
-            (tbl) => tbl.messageId.isIn(messageIds),
-          ))
-        .write(const MessagesCompanion(
-      content: Value(null),
-    ));
+      if (messageIds.isEmpty) return;
 
-    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+      await (db.update(messages)
+            ..where(
+              (tbl) => tbl.messageId.isIn(messageIds),
+            ))
+          .write(const MessagesCompanion(
+        content: Value(null),
+      ));
+
+      db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+    }
   }
 
-  Future<void> recallMessage(String messageId) async {
+  Future<void> recallMessage(String conversationId, String messageId) async {
     await (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))
         .write(const MessagesCompanion(
@@ -935,7 +942,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       quoteContent: Value(null),
     ));
 
-    await _recallPinMessage(messageId);
+    await _recallPinMessage(conversationId, messageId);
 
     await db.pinMessageDao.deleteByIds([messageId]);
     await db.expiredMessageDao.deleteByMessageId(messageId);

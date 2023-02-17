@@ -568,19 +568,21 @@ class SendMessageHelper {
 
   Future<void> sendRecallMessage(
       String conversationId, List<String> messageIds) async {
-    messageIds.forEach((messageId) async {
+    await Future.wait(messageIds.map((messageId) async {
       final message = await _messageDao.findMessageByMessageId(messageId);
-      if (message?.category.isAttachment == true) {
-        final file = File(message!.mediaUrl!);
-        final exists = file.existsSync();
-        if (exists) {
-          await file.delete();
-        }
-      }
 
-      await _messageDao.recallMessage(messageId);
+      await _messageDao.recallMessage(conversationId, messageId);
 
       await Future.wait([
+        (() async {
+          if (message?.category.isAttachment == true) {
+            final file = File(message!.mediaUrl!);
+            final exists = file.existsSync();
+            if (exists) {
+              await file.delete();
+            }
+          }
+        })(),
         _messageDao.deleteFtsByMessageId(messageId),
         _messageMentionDao.deleteMessageMentionByMessageId(messageId),
         _jobDao.insert(Job(
@@ -598,11 +600,14 @@ class SendMessageHelper {
 
           if (quoteMessage != null) {
             await _messageDao.updateQuoteContentByQuoteId(
-                conversationId, messageId, quoteMessage.toJson());
+              conversationId,
+              messageId,
+              quoteMessage.toJson(),
+            );
           }
         })(),
       ]);
-    });
+    }));
   }
 
   Future<void> forwardMessage(
