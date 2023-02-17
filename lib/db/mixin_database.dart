@@ -102,19 +102,12 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(super.c) : super.connect();
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   final eventBus = DataBaseEventBus();
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        beforeOpen: (_) async {
-          if (executor.dialect == SqlDialect.sqlite) {
-            await customStatement('PRAGMA journal_mode=WAL');
-            await customStatement('PRAGMA foreign_keys=ON');
-            await customStatement('PRAGMA synchronous=NORMAL');
-          }
-        },
         onUpgrade: (Migrator m, int from, int to) async {
           if (from <= 2) {
             await m.drop(Index(
@@ -226,6 +219,9 @@ class MixinDatabase extends _$MixinDatabase {
             await _addColumnIfNotExists(m, users, users.codeUrl);
             await _addColumnIfNotExists(m, users, users.codeId);
           }
+          if (from <= 17) {
+            await m.createIndex(indexMessagesConversationIdQuoteMessageId);
+          }
         },
       );
 
@@ -270,13 +266,19 @@ class MixinDatabase extends _$MixinDatabase {
           .isNotEmpty;
 }
 
-QueryExecutor _openConnection(File dbFile) {
-  final vmDatabase = NativeDatabase(dbFile);
-  if (!kDebugMode) {
-    return vmDatabase;
-  }
-  return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
-}
+QueryExecutor _openConnection(File dbFile) => CustomVmDatabaseWrapper(
+      NativeDatabase(
+        dbFile,
+        setup: (rawDb) {
+          rawDb
+            ..execute('PRAGMA journal_mode=WAL;')
+            ..execute('PRAGMA foreign_keys=ON;')
+            ..execute('PRAGMA synchronous=NORMAL;');
+        },
+      ),
+      logStatements: true,
+      explain: kDebugMode,
+    );
 
 /// Connect to the database.
 Future<MixinDatabase> connectToDatabase(

@@ -291,7 +291,8 @@ class _MessageProcessRunner {
           e('message is null, messageId: ${em.messageId} ${em.expireAt}');
           continue;
         }
-        await database.messageDao.deleteMessage(em.messageId);
+        await database.messageDao
+            .deleteMessage(message.conversationId, em.messageId);
         if (message.category.isAttachment || message.category.isTranscript) {
           _sendEventToMainIsolate(
             WorkerIsolateEventType.requestDownloadAttachment,

@@ -12593,12 +12593,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexMessageMentionsConversationIdHasRead = Index(
       'index_message_mentions_conversation_id_has_read',
       'CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id_has_read ON message_mentions (conversation_id, has_read)');
-  late final Index indexMessagesConversationIdCreatedAt = Index(
-      'index_messages_conversation_id_created_at',
-      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at DESC)');
-  late final Index indexMessagesConversationIdCategoryCreatedAt = Index(
-      'index_messages_conversation_id_category_created_at',
-      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category_created_at ON messages (conversation_id, category, created_at DESC)');
   late final Index indexParticipantsConversationIdCreatedAt = Index(
       'index_participants_conversation_id_created_at',
       'CREATE INDEX IF NOT EXISTS index_participants_conversation_id_created_at ON participants (conversation_id, created_at)');
@@ -12608,12 +12602,21 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexPinMessagesConversationId = Index(
       'index_pin_messages_conversation_id',
       'CREATE INDEX IF NOT EXISTS index_pin_messages_conversation_id ON pin_messages (conversation_id)');
-  late final Index indexMessageConversationIdStatusUserId = Index(
-      'index_message_conversation_id_status_user_id',
-      'CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messages (conversation_id, status, user_id)');
   late final Index indexUsersIdentityNumber = Index(
       'index_users_identity_number',
       'CREATE INDEX IF NOT EXISTS index_users_identity_number ON users (identity_number)');
+  late final Index indexMessagesConversationIdCreatedAt = Index(
+      'index_messages_conversation_id_created_at',
+      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at DESC)');
+  late final Index indexMessagesConversationIdCategoryCreatedAt = Index(
+      'index_messages_conversation_id_category_created_at',
+      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category_created_at ON messages (conversation_id, category, created_at DESC)');
+  late final Index indexMessageConversationIdStatusUserId = Index(
+      'index_message_conversation_id_status_user_id',
+      'CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messages (conversation_id, status, user_id)');
+  late final Index indexMessagesConversationIdQuoteMessageId = Index(
+      'index_messages_conversation_id_quote_message_id',
+      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages (conversation_id, quote_message_id)');
   late final Trigger conversationLastMessageDelete = Trigger(
       'CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (SELECT message_id FROM messages WHERE conversation_id = old.conversation_id ORDER BY created_at DESC LIMIT 1) WHERE conversation_id = old.conversation_id;END',
       'conversation_last_message_delete');
@@ -14940,13 +14943,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         indexFloodMessagesCreatedAt,
         indexJobsAction,
         indexMessageMentionsConversationIdHasRead,
-        indexMessagesConversationIdCreatedAt,
-        indexMessagesConversationIdCategoryCreatedAt,
         indexParticipantsConversationIdCreatedAt,
         indexStickerAlbumsCategoryCreatedAt,
         indexPinMessagesConversationId,
-        indexMessageConversationIdStatusUserId,
         indexUsersIdentityNumber,
+        indexMessagesConversationIdCreatedAt,
+        indexMessagesConversationIdCategoryCreatedAt,
+        indexMessageConversationIdStatusUserId,
+        indexMessagesConversationIdQuoteMessageId,
         conversationLastMessageDelete
       ];
   @override

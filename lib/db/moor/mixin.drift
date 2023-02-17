@@ -71,12 +71,13 @@ CREATE INDEX IF NOT EXISTS index_conversations_mute_until ON conversations(mute_
 CREATE INDEX IF NOT EXISTS index_flood_messages_created_at ON flood_messages(created_at);
 CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs("action");
 CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id_has_read ON message_mentions(conversation_id, has_read);
-CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages(conversation_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category_created_at ON messages(conversation_id, category,created_at DESC);
 CREATE INDEX IF NOT EXISTS index_participants_conversation_id_created_at ON participants(conversation_id, created_at);
 CREATE INDEX IF NOT EXISTS index_sticker_albums_category_created_at ON sticker_albums(category, created_at DESC);
 CREATE INDEX IF NOT EXISTS index_pin_messages_conversation_id ON pin_messages(conversation_id);
-CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messages(conversation_id, status, user_id);
 CREATE INDEX IF NOT EXISTS index_users_identity_number ON users(identity_number);
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages(conversation_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category_created_at ON messages(conversation_id, category, created_at DESC);
+CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messages(conversation_id, status, user_id);
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages(conversation_id, quote_message_id);
 
 CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (select message_id from messages where conversation_id = old.conversation_id order by created_at DESC limit 1) WHERE conversation_id = old.conversation_id; END;
