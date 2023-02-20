@@ -458,6 +458,15 @@ class _SendTextField extends HookWidget {
       converter: (state) => state?.encryptCategory.isEncrypt == true,
     );
 
+    final hasInputText = useMemoizedStream(
+          () => textEditingValueStream
+              .map((event) => event.text.isNotEmpty)
+              .distinct(),
+          keys: [textEditingValueStream],
+          initialData: textEditingController.text.isNotEmpty,
+        ).data ??
+        false;
+
     return Container(
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
@@ -496,37 +505,50 @@ class _SendTextField extends HookWidget {
             onInvoke: (_) => context.read<QuoteMessageCubit>().emit(null),
           ),
         },
-        child: AnimatedSize(
-          curve: Curves.easeOut,
-          duration: const Duration(milliseconds: 200),
-          child: TextField(
-            maxLines: 7,
-            minLines: 1,
-            focusNode: focusNode,
-            controller: textEditingController,
-            style: TextStyle(
-              color: context.theme.text,
-              fontSize: 14,
-            ),
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: isEncryptConversation
-                  ? context.l10n.chatHintE2e
-                  : context.l10n.typeMessage,
-              hintStyle: TextStyle(
-                color: context.theme.secondaryText,
+        child: Stack(
+          children: [
+            TextField(
+              maxLines: 7,
+              minLines: 1,
+              focusNode: focusNode,
+              controller: textEditingController,
+              style: TextStyle(
+                color: context.theme.text,
                 fontSize: 14,
               ),
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: const EdgeInsets.only(
-                left: 8,
-                top: 8,
-                bottom: 8,
+              textAlignVertical: TextAlignVertical.center,
+              decoration: const InputDecoration(
+                isDense: true,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.only(
+                  left: 8,
+                  top: 8,
+                  bottom: 8,
+                ),
               ),
+              selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
             ),
-            selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
-          ),
+            if (!hasInputText)
+              Positioned.fill(
+                left: 8,
+                top: 7,
+                child: IgnorePointer(
+                  child: Text(
+                    isEncryptConversation
+                        ? context.l10n.chatHintE2e
+                        : context.l10n.typeMessage,
+                    style: TextStyle(
+                      color: context.theme.secondaryText,
+                      fontSize: 14,
+                      height: 1,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              )
+          ],
         ),
       ),
     );
