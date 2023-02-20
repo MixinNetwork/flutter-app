@@ -15,7 +15,6 @@ import 'package:rxdart/rxdart.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset;
-import '../../../enum/encrypt_category.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
@@ -452,12 +451,6 @@ class _SendTextField extends HookWidget {
       return subscription.cancel;
     }, [textEditingController]);
 
-    final isEncryptConversation =
-        useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
-      bloc: context.read<ConversationCubit>(),
-      converter: (state) => state?.encryptCategory.isEncrypt == true,
-    );
-
     return Container(
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
@@ -510,9 +503,6 @@ class _SendTextField extends HookWidget {
             ),
             decoration: InputDecoration(
               isDense: true,
-              hintText: isEncryptConversation
-                  ? context.l10n.chatHintE2e
-                  : context.l10n.typeMessage,
               hintStyle: TextStyle(
                 color: context.theme.secondaryText,
                 fontSize: 14,
