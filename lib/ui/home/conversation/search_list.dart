@@ -61,7 +61,7 @@ class SearchList extends HookWidget {
                 .merge(keywordCubit.stream)
                 .map((event) => event.trim())
                 .distinct()
-                .debounceTime(const Duration(milliseconds: 400));
+                .debounceTime(const Duration(milliseconds: 500));
           },
           initialData: null,
         ).data ??
