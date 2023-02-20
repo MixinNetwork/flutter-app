@@ -265,7 +265,7 @@ class _SearchMessageList extends HookWidget {
               .read<SearchConversationKeywordCubit>()
               .stream
               .map((event) => event.item2)
-              .throttleTime(const Duration(milliseconds: 400), trailing: true),
+              .debounceTime(const Duration(milliseconds: 400)),
         ).data ??
         initKeyword.item2;
 
