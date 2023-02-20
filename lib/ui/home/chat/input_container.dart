@@ -543,6 +543,8 @@ class _SendTextField extends HookWidget {
                       fontSize: 14,
                       height: 1,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               )
