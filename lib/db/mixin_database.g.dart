@@ -6121,6 +6121,302 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
   }
 }
 
+class Chains extends Table with TableInfo<Chains, Chain> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Chains(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _chainIdMeta =
+      const VerificationMeta('chainId');
+  late final GeneratedColumn<String> chainId = GeneratedColumn<String>(
+      'chain_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _symbolMeta = const VerificationMeta('symbol');
+  late final GeneratedColumn<String> symbol = GeneratedColumn<String>(
+      'symbol', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _iconUrlMeta =
+      const VerificationMeta('iconUrl');
+  late final GeneratedColumn<String> iconUrl = GeneratedColumn<String>(
+      'icon_url', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _thresholdMeta =
+      const VerificationMeta('threshold');
+  late final GeneratedColumn<int> threshold = GeneratedColumn<int>(
+      'threshold', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  @override
+  List<GeneratedColumn> get $columns =>
+      [chainId, name, symbol, iconUrl, threshold];
+  @override
+  String get aliasedName => _alias ?? 'chains';
+  @override
+  String get actualTableName => 'chains';
+  @override
+  VerificationContext validateIntegrity(Insertable<Chain> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('chain_id')) {
+      context.handle(_chainIdMeta,
+          chainId.isAcceptableOrUnknown(data['chain_id']!, _chainIdMeta));
+    } else if (isInserting) {
+      context.missing(_chainIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('symbol')) {
+      context.handle(_symbolMeta,
+          symbol.isAcceptableOrUnknown(data['symbol']!, _symbolMeta));
+    } else if (isInserting) {
+      context.missing(_symbolMeta);
+    }
+    if (data.containsKey('icon_url')) {
+      context.handle(_iconUrlMeta,
+          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
+    } else if (isInserting) {
+      context.missing(_iconUrlMeta);
+    }
+    if (data.containsKey('threshold')) {
+      context.handle(_thresholdMeta,
+          threshold.isAcceptableOrUnknown(data['threshold']!, _thresholdMeta));
+    } else if (isInserting) {
+      context.missing(_thresholdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {chainId};
+  @override
+  Chain map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Chain(
+      chainId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}chain_id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      symbol: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}symbol'])!,
+      iconUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}icon_url'])!,
+      threshold: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}threshold'])!,
+    );
+  }
+
+  @override
+  Chains createAlias(String alias) {
+    return Chains(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(chain_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class Chain extends DataClass implements Insertable<Chain> {
+  final String chainId;
+  final String name;
+  final String symbol;
+  final String iconUrl;
+  final int threshold;
+  const Chain(
+      {required this.chainId,
+      required this.name,
+      required this.symbol,
+      required this.iconUrl,
+      required this.threshold});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['chain_id'] = Variable<String>(chainId);
+    map['name'] = Variable<String>(name);
+    map['symbol'] = Variable<String>(symbol);
+    map['icon_url'] = Variable<String>(iconUrl);
+    map['threshold'] = Variable<int>(threshold);
+    return map;
+  }
+
+  ChainsCompanion toCompanion(bool nullToAbsent) {
+    return ChainsCompanion(
+      chainId: Value(chainId),
+      name: Value(name),
+      symbol: Value(symbol),
+      iconUrl: Value(iconUrl),
+      threshold: Value(threshold),
+    );
+  }
+
+  factory Chain.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Chain(
+      chainId: serializer.fromJson<String>(json['chain_id']),
+      name: serializer.fromJson<String>(json['name']),
+      symbol: serializer.fromJson<String>(json['symbol']),
+      iconUrl: serializer.fromJson<String>(json['icon_url']),
+      threshold: serializer.fromJson<int>(json['threshold']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'chain_id': serializer.toJson<String>(chainId),
+      'name': serializer.toJson<String>(name),
+      'symbol': serializer.toJson<String>(symbol),
+      'icon_url': serializer.toJson<String>(iconUrl),
+      'threshold': serializer.toJson<int>(threshold),
+    };
+  }
+
+  Chain copyWith(
+          {String? chainId,
+          String? name,
+          String? symbol,
+          String? iconUrl,
+          int? threshold}) =>
+      Chain(
+        chainId: chainId ?? this.chainId,
+        name: name ?? this.name,
+        symbol: symbol ?? this.symbol,
+        iconUrl: iconUrl ?? this.iconUrl,
+        threshold: threshold ?? this.threshold,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Chain(')
+          ..write('chainId: $chainId, ')
+          ..write('name: $name, ')
+          ..write('symbol: $symbol, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('threshold: $threshold')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(chainId, name, symbol, iconUrl, threshold);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Chain &&
+          other.chainId == this.chainId &&
+          other.name == this.name &&
+          other.symbol == this.symbol &&
+          other.iconUrl == this.iconUrl &&
+          other.threshold == this.threshold);
+}
+
+class ChainsCompanion extends UpdateCompanion<Chain> {
+  final Value<String> chainId;
+  final Value<String> name;
+  final Value<String> symbol;
+  final Value<String> iconUrl;
+  final Value<int> threshold;
+  const ChainsCompanion({
+    this.chainId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.symbol = const Value.absent(),
+    this.iconUrl = const Value.absent(),
+    this.threshold = const Value.absent(),
+  });
+  ChainsCompanion.insert({
+    required String chainId,
+    required String name,
+    required String symbol,
+    required String iconUrl,
+    required int threshold,
+  })  : chainId = Value(chainId),
+        name = Value(name),
+        symbol = Value(symbol),
+        iconUrl = Value(iconUrl),
+        threshold = Value(threshold);
+  static Insertable<Chain> custom({
+    Expression<String>? chainId,
+    Expression<String>? name,
+    Expression<String>? symbol,
+    Expression<String>? iconUrl,
+    Expression<int>? threshold,
+  }) {
+    return RawValuesInsertable({
+      if (chainId != null) 'chain_id': chainId,
+      if (name != null) 'name': name,
+      if (symbol != null) 'symbol': symbol,
+      if (iconUrl != null) 'icon_url': iconUrl,
+      if (threshold != null) 'threshold': threshold,
+    });
+  }
+
+  ChainsCompanion copyWith(
+      {Value<String>? chainId,
+      Value<String>? name,
+      Value<String>? symbol,
+      Value<String>? iconUrl,
+      Value<int>? threshold}) {
+    return ChainsCompanion(
+      chainId: chainId ?? this.chainId,
+      name: name ?? this.name,
+      symbol: symbol ?? this.symbol,
+      iconUrl: iconUrl ?? this.iconUrl,
+      threshold: threshold ?? this.threshold,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (chainId.present) {
+      map['chain_id'] = Variable<String>(chainId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (symbol.present) {
+      map['symbol'] = Variable<String>(symbol.value);
+    }
+    if (iconUrl.present) {
+      map['icon_url'] = Variable<String>(iconUrl.value);
+    }
+    if (threshold.present) {
+      map['threshold'] = Variable<int>(threshold.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChainsCompanion(')
+          ..write('chainId: $chainId, ')
+          ..write('name: $name, ')
+          ..write('symbol: $symbol, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('threshold: $threshold')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class Stickers extends Table with TableInfo<Stickers, Sticker> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -12558,6 +12854,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Users users = Users(this);
   late final Snapshots snapshots = Snapshots(this);
   late final Assets assets = Assets(this);
+  late final Chains chains = Chains(this);
   late final Stickers stickers = Stickers(this);
   late final Hyperlinks hyperlinks = Hyperlinks(this);
   late final MessageMentions messageMentions = MessageMentions(this);
@@ -12659,6 +12956,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       FavoriteAppDao(this as MixinDatabase);
   late final ExpiredMessageDao expiredMessageDao =
       ExpiredMessageDao(this as MixinDatabase);
+  late final ChainDao chainDao = ChainDao(this as MixinDatabase);
   Future<int> deleteFavoriteAppByAppIdAndUserId(String appId, String userId) {
     return customUpdate(
       'DELETE FROM favorite_apps WHERE app_id = ?1 AND user_id = ?2',
@@ -12724,7 +13022,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
                 alias(this.users, 'participant'),
                 alias(this.snapshots, 'snapshot'),
                 alias(this.assets, 'asset'),
-                alias(this.assets, 'chain'),
+                alias(this.chains, 'chain'),
                 alias(this.stickers, 'sticker'),
                 alias(this.hyperlinks, 'hyperlink'),
                 alias(this.users, 'sharedUser'),
@@ -12743,7 +13041,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'participant'),
             alias(this.snapshots, 'snapshot'),
             alias(this.assets, 'asset'),
-            alias(this.assets, 'chain'),
+            alias(this.chains, 'chain'),
             alias(this.stickers, 'sticker'),
             alias(this.hyperlinks, 'hyperlink'),
             alias(this.users, 'sharedUser'),
@@ -12754,7 +13052,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN assets AS chain ON asset.chain_id = chain.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           ...generatedorder.introducedVariables,
@@ -12767,6 +13065,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           stickers,
           snapshots,
           assets,
+          chains,
           hyperlinks,
           messageMentions,
           expiredMessages,
@@ -13319,7 +13618,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'participant'),
             alias(this.snapshots, 'snapshot'),
             alias(this.assets, 'asset'),
-            alias(this.assets, 'chain'),
+            alias(this.chains, 'chain'),
             alias(this.stickers, 'sticker'),
             alias(this.hyperlinks, 'hyperlink'),
             alias(this.users, 'sharedUser'),
@@ -13337,7 +13636,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
                 alias(this.users, 'participant'),
                 alias(this.snapshots, 'snapshot'),
                 alias(this.assets, 'asset'),
-                alias(this.assets, 'chain'),
+                alias(this.chains, 'chain'),
                 alias(this.stickers, 'sticker'),
                 alias(this.hyperlinks, 'hyperlink'),
                 alias(this.users, 'sharedUser'),
@@ -13356,7 +13655,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'participant'),
             alias(this.snapshots, 'snapshot'),
             alias(this.assets, 'asset'),
-            alias(this.assets, 'chain'),
+            alias(this.chains, 'chain'),
             alias(this.stickers, 'sticker'),
             alias(this.hyperlinks, 'hyperlink'),
             alias(this.users, 'sharedUser'),
@@ -13368,7 +13667,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.sticker_id AS stickerId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN assets AS chain ON asset.chain_id = chain.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.sticker_id AS stickerId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
@@ -13381,6 +13680,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           stickers,
           snapshots,
           assets,
+          chains,
           hyperlinks,
           messageMentions,
           expiredMessages,
@@ -14873,6 +15173,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         users,
         snapshots,
         assets,
+        chains,
         stickers,
         hyperlinks,
         messageMentions,
@@ -15244,7 +15545,7 @@ typedef BasePinMessageItems$order = OrderBy Function(
     Users participant,
     Snapshots snapshot,
     Assets asset,
-    Assets chain,
+    Chains chain,
     Stickers sticker,
     Hyperlinks hyperlink,
     Users sharedUser,
@@ -15258,7 +15559,7 @@ typedef BasePinMessageItems$limit = Limit Function(
     Users participant,
     Snapshots snapshot,
     Assets asset,
-    Assets chain,
+    Chains chain,
     Stickers sticker,
     Hyperlinks hyperlink,
     Users sharedUser,
@@ -15539,7 +15840,7 @@ typedef BaseMessageItems$where = Expression<bool> Function(
     Users participant,
     Snapshots snapshot,
     Assets asset,
-    Assets chain,
+    Chains chain,
     Stickers sticker,
     Hyperlinks hyperlink,
     Users sharedUser,
@@ -15553,7 +15854,7 @@ typedef BaseMessageItems$order = OrderBy Function(
     Users participant,
     Snapshots snapshot,
     Assets asset,
-    Assets chain,
+    Chains chain,
     Stickers sticker,
     Hyperlinks hyperlink,
     Users sharedUser,
@@ -15567,7 +15868,7 @@ typedef BaseMessageItems$limit = Limit Function(
     Users participant,
     Snapshots snapshot,
     Assets asset,
-    Assets chain,
+    Chains chain,
     Stickers sticker,
     Hyperlinks hyperlink,
     Users sharedUser,

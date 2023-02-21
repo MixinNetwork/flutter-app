@@ -64,12 +64,6 @@ class _TransferPage extends HookWidget {
       context.accountServer.updateAssetById(assetId: assetId);
     }, [snapshotItem?.assetId]);
 
-    useEffect(() {
-      final chainId = snapshotItem?.chainId;
-      if (chainId == null) return;
-      context.accountServer.updateAssetById(assetId: chainId);
-    }, [snapshotItem?.chainId]);
-
     if (snapshotItem == null) return const SizedBox();
     return SizedBox(
       width: 400,
@@ -425,26 +419,27 @@ class SymbolIconWithBorder extends StatelessWidget {
               padding: EdgeInsets.all(chainBorder.width),
               child: CacheImage(symbolUrl),
             ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.fromBorderSide(chainBorder),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(chainBorder.width),
-                  child: SizedBox.square(
-                    dimension: chainSize,
-                    child: CacheImage(
-                      chainUrl ?? '',
-                      width: chainSize,
-                      height: chainSize,
+            if (chainUrl != null && chainUrl != symbolUrl)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.fromBorderSide(chainBorder),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(chainBorder.width),
+                    child: SizedBox.square(
+                      dimension: chainSize,
+                      child: CacheImage(
+                        chainUrl ?? '',
+                        width: chainSize,
+                        height: chainSize,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       );

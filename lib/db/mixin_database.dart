@@ -22,6 +22,7 @@ import 'custom_vm_database_wrapper.dart';
 import 'dao/address_dao.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
+import 'dao/chain_dao.dart';
 import 'dao/circle_conversation_dao.dart';
 import 'dao/circle_dao.dart';
 import 'dao/conversation_dao.dart';
@@ -92,6 +93,7 @@ part 'mixin_database.g.dart';
     FiatDao,
     FavoriteAppDao,
     ExpiredMessageDao,
+    ChainDao,
   ],
   queries: {},
 )
@@ -101,7 +103,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(super.c) : super.connect();
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   final eventBus = DataBaseEventBus();
 
@@ -220,6 +222,9 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 17) {
             await m.createIndex(indexMessagesConversationIdQuoteMessageId);
+          }
+          if (from <= 18) {
+            await m.createTable(chains);
           }
         },
       );

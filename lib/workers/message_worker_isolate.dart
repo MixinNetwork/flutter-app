@@ -30,7 +30,7 @@ import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
 import '../db/extension/message.dart';
 import '../db/mixin_database.dart' as db;
-import '../db/mixin_database.dart';
+import '../db/mixin_database.dart' hide Chain;
 import '../enum/message_category.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
@@ -369,15 +369,23 @@ class _MessageProcessRunner {
 
       await Future.wait(jobs.map((db.Job job) async {
         try {
-          final a =
+          final asset =
               (await client.assetApi.getAssetById(job.blazeMessage!)).data;
+
+          Future<Chain?> getChain() async {
+            if (asset.chainId.isEmpty || asset.assetId == asset.chainId) {
+              return null;
+            }
+
+            return (await client.assetApi.getChain(asset.chainId)).data;
+          }
+
+          final chain = await getChain();
+
           await Future.wait([
-            database.assetDao.insertSdkAsset(a),
+            database.assetDao.insertSdkAsset(asset),
+            ...chain != null ? [database.chainDao.insertSdkChain(chain)] : [],
             database.jobDao.deleteJobById(job.jobId),
-            (() async {
-              if (a.chainId.isEmpty || a.assetId == a.chainId) return;
-              await database.jobDao.insertUpdateAssetJob(a.chainId);
-            })(),
           ]);
         } catch (e, s) {
           w('Update asset job error: $e, stack: $s');
