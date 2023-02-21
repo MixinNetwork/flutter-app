@@ -66,6 +66,8 @@ CREATE TABLE favorite_apps (app_id TEXT NOT NULL, user_id TEXT NOT NULL, created
 
 CREATE TABLE expired_messages (message_id TEXT NOT NULL, expire_in INTEGER NOT NULL, expire_at INTEGER, PRIMARY KEY(message_id));
 
+CREATE TABLE chains (chain_id TEXT NOT NULL, name TEXT NOT NULL, symbol TEXT NOT NULL, icon_url TEXT NOT NULL, threshold INTEGER NOT NULL, PRIMARY KEY(chain_id));
+
 CREATE INDEX IF NOT EXISTS index_conversations_category_status ON conversations(category, status);
 CREATE INDEX IF NOT EXISTS index_conversations_mute_until ON conversations(mute_until);
 CREATE INDEX IF NOT EXISTS index_flood_messages_created_at ON flood_messages(created_at);

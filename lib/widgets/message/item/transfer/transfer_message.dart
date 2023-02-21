@@ -15,6 +15,8 @@ class TransferMessage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final assetId = useMessageConverter(converter: (state) => state.assetId);
+
     final assetIcon =
         useMessageConverter(converter: (state) => state.assetIcon);
     final chainIcon =
@@ -23,6 +25,12 @@ class TransferMessage extends HookWidget {
         useMessageConverter(converter: (state) => state.snapshotAmount);
     final assetSymbol =
         useMessageConverter(converter: (state) => state.assetSymbol ?? '');
+
+    useEffect(() {
+      if (chainIcon != null && assetId != null) return;
+      context.accountServer.updateAssetById(assetId: assetId!);
+    }, [chainIcon, assetId]);
+
     return MessageBubble(
       outerTimeAndStatusWidget:
           const MessageDatetimeAndStatus(hideStatus: true),

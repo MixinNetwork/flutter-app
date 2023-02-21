@@ -128,7 +128,6 @@ class _MultisigsPaymentBody extends HookWidget {
           symbolUrl: asset.iconUrl,
           chainUrl: asset.chainIconUrl,
           chainSize: 14,
-          chainBorder: BorderSide(color: context.theme.popUp, width: 2),
         ),
         const SizedBox(height: 10),
         Text(
