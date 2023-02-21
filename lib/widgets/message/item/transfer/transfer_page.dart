@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
@@ -120,7 +121,6 @@ class _SnapshotDetailHeader extends HookWidget {
             chainUrl: snapshot.chainIconUrl,
             size: 58,
             chainSize: 16,
-            chainBorder: const BorderSide(color: Colors.white, width: 2),
           ),
           const SizedBox(height: 16),
           Padding(
@@ -397,50 +397,69 @@ class SymbolIconWithBorder extends StatelessWidget {
     super.key,
     required this.symbolUrl,
     this.chainUrl,
-    required this.size,
-    required this.chainSize,
-    this.chainBorder = const BorderSide(color: Colors.white),
+    this.size = 44,
+    this.chainSize = 10,
+    this.chainBorder = 2,
   });
 
   final String symbolUrl;
   final String? chainUrl;
   final double size;
   final double chainSize;
-
-  final BorderSide chainBorder;
+  final double chainBorder;
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(
-        dimension: size + chainBorder.width,
+  Widget build(BuildContext context) => SizedBox(
+        height: size,
+        width: size,
         child: Stack(
-          fit: StackFit.expand,
           children: [
-            Padding(
-              padding: EdgeInsets.all(chainBorder.width),
-              child: CacheImage(symbolUrl),
+            Positioned.fill(
+              child: ClipPath(
+                clipper: _SymbolCustomClipper(
+                  chainPlaceholderSize: chainSize + chainBorder,
+                ),
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                child: CacheImage(symbolUrl),
+              ),
             ),
-            if (chainUrl != null && chainUrl != symbolUrl)
-              Align(
-                alignment: Alignment.bottomRight,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.fromBorderSide(chainBorder),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(chainBorder.width),
-                    child: SizedBox.square(
-                      dimension: chainSize,
-                      child: CacheImage(
-                        chainUrl ?? '',
-                        width: chainSize,
-                        height: chainSize,
-                      ),
-                    ),
-                  ),
+            if (chainUrl != null)
+              Positioned(
+                right: chainBorder / 2,
+                bottom: chainBorder / 2,
+                child: CacheImage(
+                  chainUrl!,
+                  width: chainSize,
+                  height: chainSize,
                 ),
               ),
           ],
         ),
       );
+}
+
+class _SymbolCustomClipper extends CustomClipper<Path> with EquatableMixin {
+  _SymbolCustomClipper({this.chainPlaceholderSize = 12});
+
+  final double chainPlaceholderSize;
+
+  @override
+  Path getClip(Size size) {
+    assert(size.shortestSide > chainPlaceholderSize);
+
+    final symbol = Path()..addOval(Offset.zero & size);
+    final chain = Path()
+      ..addOval(Offset(size.width - chainPlaceholderSize,
+              size.height - chainPlaceholderSize) &
+          Size.square(chainPlaceholderSize));
+
+    return Path.combine(PathOperation.difference, symbol, chain);
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) =>
+      this != oldClipper;
+
+  @override
+  List<Object?> get props => [chainPlaceholderSize];
 }
