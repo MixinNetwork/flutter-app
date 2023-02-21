@@ -372,19 +372,11 @@ class _MessageProcessRunner {
           final asset =
               (await client.assetApi.getAssetById(job.blazeMessage!)).data;
 
-          Future<Chain?> getChain() async {
-            if (asset.chainId.isEmpty || asset.assetId == asset.chainId) {
-              return null;
-            }
-
-            return (await client.assetApi.getChain(asset.chainId)).data;
-          }
-
-          final chain = await getChain();
+          final chain = (await client.assetApi.getChain(asset.chainId)).data;
 
           await Future.wait([
             database.assetDao.insertSdkAsset(asset),
-            ...chain != null ? [database.chainDao.insertSdkChain(chain)] : [],
+            database.chainDao.insertSdkChain(chain),
             database.jobDao.deleteJobById(job.jobId),
           ]);
         } catch (e, s) {
