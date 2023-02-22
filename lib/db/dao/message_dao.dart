@@ -948,7 +948,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     await _recallPinMessage(conversationId, messageId);
 
     await db.pinMessageDao.deleteByIds([messageId]);
-    await db.expiredMessageDao.deleteByMessageId(messageId);
     // Maybe use another event
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
     db.eventBus.send(DatabaseEvent.notification, messageId);
