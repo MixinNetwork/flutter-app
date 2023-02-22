@@ -78,7 +78,7 @@ class _MessageDeleteEvent extends _MessageEvent {
 }
 
 class MessageState extends Equatable {
-  const MessageState({
+  MessageState({
     this.top = const [],
     this.center,
     this.bottom = const [],
@@ -87,7 +87,19 @@ class MessageState extends Equatable {
     this.isOldest = false,
     this.lastReadMessageId,
     this.refreshKey,
-  });
+  }) {
+    // check top, center, bottom didn't has same messageId
+    assert(() {
+      final ids = <String>{};
+      for (final item in list) {
+        if (ids.contains(item.messageId)) {
+          throw Exception('MessageState has same messageId: ${item.messageId}');
+        }
+        ids.add(item.messageId);
+      }
+      return true;
+    }());
+  }
 
   final String? conversationId;
   final List<MessageItem> top;
@@ -188,7 +200,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.database,
     required this.mentionCache,
     required this.accountServer,
-  }) : super(const MessageState()) {
+  }) : super(MessageState()) {
     on<_MessageEvent>((event, emit) => _lock.synchronized(
           () => _onEvent(event, emit),
         ));
