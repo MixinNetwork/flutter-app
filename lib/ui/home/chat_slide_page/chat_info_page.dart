@@ -529,7 +529,7 @@ class ChatInfoPage extends HookWidget {
                   },
                 ),
               ),
-            if (kDebugMode)
+            if (!kReleaseMode)
               CellGroup(
                 child: _DebugInsertTestMessage(
                   conversation: conversation,
