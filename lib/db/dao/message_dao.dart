@@ -141,7 +141,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   messageMention,
                   pinMessage,
                   em) ??
-              OrderBy([OrderingTerm.desc(message.createdAt)]),
+              OrderBy([
+                OrderingTerm.desc(message.createdAt),
+                OrderingTerm.desc(message.rowId)
+              ]),
           limit);
 
   Future<T> _sendInsertOrReplaceEventWithFuture<T>(
