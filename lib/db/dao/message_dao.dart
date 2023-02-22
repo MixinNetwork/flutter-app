@@ -259,7 +259,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           .get();
 
       if (lastTwo.isEmpty) return;
-      if(lastTwo.firstOrNull?.item1 != messageId) return;
+      if (lastTwo.firstOrNull?.item1 != messageId) return;
 
       final newLast = lastTwo.lastOrNull;
 
