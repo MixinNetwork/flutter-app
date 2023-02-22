@@ -12914,9 +12914,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexMessagesConversationIdQuoteMessageId = Index(
       'index_messages_conversation_id_quote_message_id',
       'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages (conversation_id, quote_message_id)');
-  late final Trigger conversationLastMessageDelete = Trigger(
-      'CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (SELECT message_id FROM messages WHERE conversation_id = old.conversation_id ORDER BY created_at DESC LIMIT 1) WHERE conversation_id = old.conversation_id;END',
-      'conversation_last_message_delete');
   late final AddressDao addressDao = AddressDao(this as MixinDatabase);
   late final AppDao appDao = AppDao(this as MixinDatabase);
   late final AssetDao assetDao = AssetDao(this as MixinDatabase);
@@ -15204,8 +15201,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         indexMessagesConversationIdCreatedAt,
         indexMessagesConversationIdCategoryCreatedAt,
         indexMessageConversationIdStatusUserId,
-        indexMessagesConversationIdQuoteMessageId,
-        conversationLastMessageDelete
+        indexMessagesConversationIdQuoteMessageId
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -15222,13 +15218,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('participants', kind: UpdateKind.delete),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('messages',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('conversations', kind: UpdateKind.update),
             ],
           ),
         ],

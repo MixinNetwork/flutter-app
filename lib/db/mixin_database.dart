@@ -103,7 +103,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(super.c) : super.connect();
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   final eventBus = DataBaseEventBus();
 
@@ -225,6 +225,9 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 18) {
             await m.createTable(chains);
+          }
+          if (from <= 19) {
+            await m.drop(Trigger('', 'conversation_last_message_delete'));
           }
         },
       );
