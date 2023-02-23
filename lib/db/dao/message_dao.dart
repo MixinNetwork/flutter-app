@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../constants/constants.dart';
 import '../../enum/media_status.dart';
@@ -243,7 +244,38 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         updates: {db.messagesFts},
       );
 
-  Future<void> deleteMessage(String conversationId, String messageId) async {
+  Future<void> deleteMessage(
+    String conversationId,
+    String messageId,
+  ) async {
+    Future<void> updateConversationLastMessageId() async {
+      final messages = db.messages;
+      final lastTwo = await (selectOnly(messages)
+            ..addColumns([messages.messageId, messages.createdAt])
+            ..where(messages.conversationId.equals(conversationId))
+            ..limit(2)
+            ..orderBy([OrderingTerm.desc(messages.createdAt)]))
+          .map((row) => Tuple2(
+              row.read(messages.messageId),
+              messages.createdAt.converter
+                  .fromSql(row.read(messages.createdAt))))
+          .get();
+
+      if (lastTwo.isEmpty) return;
+      if (lastTwo.firstOrNull?.item1 != messageId) return;
+
+      final newLast = lastTwo.lastOrNull;
+
+      await (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ConversationsCompanion(
+        lastMessageId: Value(newLast?.item1),
+        lastMessageCreatedAt: Value(newLast?.item2),
+      ));
+    }
+
+    await updateConversationLastMessageId();
+
     await db.transaction(() async {
       await Future.wait([
         (delete(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
