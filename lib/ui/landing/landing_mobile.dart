@@ -73,10 +73,7 @@ class _PhoneNumberInputScene extends StatelessWidget {
                 context.l10n.landingInvitationDialogContent(phoneNumber),
                 maxWidth: 440,
               );
-              if (!ret) {
-                return;
-              }
-
+              if (ret == null) return;
               showToastLoading();
               try {
                 final response = await _requestVerificationCode(
@@ -98,7 +95,7 @@ class _PhoneNumberInputScene extends StatelessWidget {
                     negativeText: context.l10n.cancel,
                     barrierDismissible: false,
                   );
-                  if (!continueLogin) {
+                  if (continueLogin == null) {
                     i('User canceled login and deactivatedAt is not empty');
                     return;
                   }

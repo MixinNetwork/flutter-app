@@ -10,6 +10,7 @@ import '../../../widgets/dialog.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
+import '../bloc/conversation_cubit.dart';
 import '../bloc/message_selection_cubit.dart';
 
 class SelectionBottomBar extends HookWidget {
@@ -92,14 +93,24 @@ class SelectionBottomBar extends HookWidget {
                 context.l10n.chatDeleteMessage(
                     messagesToDelete.length, messagesToDelete.length),
                 positiveText: context.l10n.delete,
+                neutralText: context.l10n.deleteForEveryone,
               );
-              if (!confirm) {
-                return;
-              }
+              if (confirm == null) return;
               d('messagesToDelete: $messagesToDelete');
               await runWithLoading(() async {
-                for (final id in messagesToDelete) {
-                  await context.accountServer.deleteMessage(id);
+                if (confirm == DialogEvent.positive) {
+                  for (final id in messagesToDelete) {
+                    await context.accountServer.deleteMessage(id);
+                  }
+                  return;
+                }
+
+                if (confirm == DialogEvent.neutral) {
+                  await context.accountServer.sendRecallMessage(
+                    messagesToDelete.toList(),
+                    conversationId:
+                        context.read<ConversationCubit>().state?.conversationId,
+                  );
                 }
               });
               cubit.clearSelection();

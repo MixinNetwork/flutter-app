@@ -345,7 +345,7 @@ class _CircleList extends HookWidget {
                               final result = await showConfirmMixinDialog(
                                   context,
                                   context.l10n.deleteTheCircle(circle.name));
-                              if (!result) return;
+                              if (result == null) return;
                               await runFutureWithToast(
                                 () async {
                                   await context.accountServer
