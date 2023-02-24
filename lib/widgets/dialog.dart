@@ -16,7 +16,7 @@ Future<T?> _showDialog<T>({
   RouteSettings? routeSettings,
   required RoutePageBuilder pageBuilder,
 }) =>
-    showGeneralDialog(
+    showGeneralDialog<T>(
       context: context,
       pageBuilder: (BuildContext buildContext, Animation<double> animation,
               Animation<double> secondaryAnimation) =>
@@ -46,7 +46,7 @@ Future<T?> showMixinDialog<T>({
   Color? backgroundColor,
   bool barrierDismissible = true,
 }) =>
-    _showDialog(
+    _showDialog<T>(
       barrierDismissible: barrierDismissible,
       context: context,
       routeSettings: routeSettings,
@@ -296,7 +296,12 @@ class DialogTextField extends HookWidget {
       );
 }
 
-Future<bool> showConfirmMixinDialog(
+enum DialogEvent {
+  positive,
+  neutral,
+}
+
+Future<DialogEvent?> showConfirmMixinDialog(
   BuildContext context,
   String content, {
   String? description,
@@ -304,8 +309,9 @@ Future<bool> showConfirmMixinDialog(
   bool barrierDismissible = true,
   String? positiveText,
   String? negativeText,
-}) async =>
-    await showMixinDialog<bool>(
+  String? neutralText,
+}) =>
+    showMixinDialog<DialogEvent>(
       context: context,
       barrierDismissible: barrierDismissible,
       child: Builder(
@@ -331,20 +337,26 @@ Future<bool> showConfirmMixinDialog(
             ],
           ),
           actions: [
+            if (neutralText != null) ...[
+              MixinButton(
+                onTap: () => Navigator.pop(context, DialogEvent.neutral),
+                child: Text(neutralText),
+              ),
+              const Spacer(),
+            ],
             MixinButton(
               backgroundTransparent: true,
-              onTap: () => Navigator.pop(context, false),
+              onTap: () => Navigator.pop(context, null),
               child: Text(negativeText ?? context.l10n.cancel),
             ),
             MixinButton(
-              onTap: () => Navigator.pop(context, true),
+              onTap: () => Navigator.pop(context, DialogEvent.positive),
               child: Text(positiveText ?? context.l10n.confirm),
             ),
           ],
         ),
       ),
-    ) ??
-    false;
+    );
 
 class EditDialog extends HookWidget {
   const EditDialog({

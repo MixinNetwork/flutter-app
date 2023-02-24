@@ -1429,9 +1429,7 @@ class _NormalOperationBar extends HookWidget {
                     context,
                     context.l10n.editImageClearWarning,
                   );
-                  if (!result) {
-                    return;
-                  }
+                  if (result == null) return;
                 }
                 await Navigator.maybePop(context);
               },
