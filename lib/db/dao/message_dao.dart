@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -11,6 +12,7 @@ import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/logger.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../database_event_bus.dart';
 import '../mixin_database.dart';
@@ -213,7 +215,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<void> _insertMessageFts(Message message) async {
+  String? _generateMessageFtsContent(Message message) {
     String? ftsContent;
     if (message.category.isText || message.category.isPost) {
       ftsContent = message.content;
@@ -226,6 +228,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           jsonDecode(message.content!) as Map<String, dynamic>);
       ftsContent = '${appCard.title} ${appCard.description}';
     }
+    return ftsContent;
+  }
+
+  Future<void> _insertMessageFts(Message message) async {
+    final ftsContent = _generateMessageFtsContent(message);
     if (ftsContent != null) {
       await insertFts(
         message.messageId,
@@ -246,8 +253,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   Future<void> deleteMessage(
     String conversationId,
-    String messageId,
-  ) async {
+    String messageId, {
+    required Message message,
+  }) async {
     Future<void> updateConversationLastMessageId() async {
       final messages = db.messages;
       final lastTwo = await (selectOnly(messages)
@@ -280,9 +288,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       await Future.wait([
         (delete(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
             .go(),
-        (delete(db.messagesFts)
-              ..where((tbl) => tbl.messageId.equals(messageId)))
-            .go(),
+        deleteMessageFts(message),
         (delete(db.transcriptMessages)
               ..where((tbl) => tbl.transcriptId.equals(messageId)))
             .go(),
@@ -1332,10 +1338,35 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         ..orderBy([OrderingTerm.desc(db.messages.createdAt)]))
       .map((row) => row.read(db.messages.rowId));
 
-  Future<int> deleteFtsByMessageId(String messageId) =>
-      (db.delete(db.messagesFts)
-            ..where((tbl) => tbl.messageId.equals(messageId)))
-          .go();
+  Future<void> deleteMessageFts(Message? message) async {
+    if (message == null) {
+      return;
+    }
+    final stopwatch = Stopwatch()..start();
+    final ftsContent = _generateMessageFtsContent(message);
+    if (ftsContent == null) {
+      w('MessageFts content is null, skip delete. ${message.messageId} ${message.category}');
+      return;
+    }
+    // take first 10 chars as keyword
+    final keyword = ftsContent
+        .substring(0, math.min(10, ftsContent.length))
+        .trim()
+        .escapeFts5();
+    i('Delete message fts: $keyword ${message.messageId}');
+
+    final rowId = await customSelect(
+            "select rowid from messages_fts where messages_fts match '$keyword' AND message_id = '${message.messageId}'")
+        .map((row) => row.read<int>('rowid'))
+        .getSingleOrNull();
+    if (rowId == null) {
+      e('can not find rowId with keyword($keyword), skip delete.'
+          ' ${message.messageId} ${message.category}');
+      return;
+    }
+    await customStatement('delete from messages_fts where rowid = $rowId');
+    d('deleted message fts: $keyword ${message.messageId} ${stopwatch.elapsed}');
+  }
 
   Future<int> updateTranscriptMessage(
     String? content,

@@ -583,7 +583,7 @@ class SendMessageHelper {
             }
           }
         })(),
-        _messageDao.deleteFtsByMessageId(messageId),
+        _messageDao.deleteMessageFts(message),
         _messageMentionDao.deleteMessageMentionByMessageId(messageId),
         _jobDao.insert(Job(
           conversationId: conversationId,

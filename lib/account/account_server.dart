@@ -1257,7 +1257,8 @@ class AccountServer {
   Future<void> deleteMessage(String messageId) async {
     final message = await database.messageDao.findMessageByMessageId(messageId);
     if (message == null) return;
-    await database.messageDao.deleteMessage(message.conversationId, messageId);
+    await database.messageDao
+        .deleteMessage(message.conversationId, messageId, message: message);
 
     unawaited(_deleteMessageAttachment(message));
   }

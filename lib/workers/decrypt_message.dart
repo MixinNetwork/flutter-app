@@ -497,7 +497,7 @@ class DecryptMessage extends Injector {
       })(),
       database.messageMentionDao
           .deleteMessageMentionByMessageId(recallMessage.messageId),
-      database.messageDao.deleteFtsByMessageId(recallMessage.messageId),
+      database.messageDao.deleteMessageFts(message),
       database.messagesHistoryDao
           .insert(MessagesHistoryData(messageId: data.messageId)),
     ]);
