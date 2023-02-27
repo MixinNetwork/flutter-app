@@ -6,6 +6,7 @@ import 'dart:isolate';
 import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -39,8 +40,6 @@ import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
-import '../utils/platform.dart';
-import '../utils/system/package_info.dart';
 import '../utils/web_view/web_view_interface.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../workers/injector.dart';
@@ -53,7 +52,8 @@ import 'show_pin_message_key_value.dart';
 String? lastInitErrorMessage;
 
 class AccountServer {
-  AccountServer(this.multiAuthCubit, this.settingCubit);
+  AccountServer(this.multiAuthCubit, this.settingCubit,
+      {this.userAgent, this.deviceId});
 
   static String? sid;
 
@@ -66,6 +66,8 @@ class AccountServer {
 
   bool get _loginByPhoneNumber =>
       AccountKeyValue.instance.primarySessionId == null;
+  String? userAgent;
+  String? deviceId;
 
   Future<void> initServer(
     String userId,
@@ -126,7 +128,7 @@ class AccountServer {
   }
 
   Future<void> _onClientRequestError(DioError e) async {
-    if (e is MixinApiError && (e.error as MixinError).code == authentication) {
+    if (e is MixinApiError && (e.error! as MixinError).code == authentication) {
       final serverTime =
           int.tryParse(e.response?.headers.value('x-server-time') ?? '');
       if (serverTime != null) {
@@ -210,9 +212,8 @@ class AccountServer {
         privateKey: privateKey,
         mixinDocumentDirectory: mixinDocumentsDirectory.path,
         primarySessionId: AccountKeyValue.instance.primarySessionId,
-        packageInfo: await getPackageInfo(),
-        deviceId: Platform.isIOS ? await getDeviceId() : null,
         loginByPhoneNumber: _loginByPhoneNumber,
+        rootIsolateToken: ServicesBinding.rootIsolateToken!,
       ),
       errorsAreFatal: false,
       onExit: exitReceivePort.sendPort,
@@ -1049,7 +1050,7 @@ class AccountServer {
     try {
       await client.circleApi.deleteCircle(circleId);
     } catch (e) {
-      if (e is! MixinApiError || (e.error as MixinError).code != notFound) {
+      if (e is! MixinApiError || (e.error! as MixinError).code != notFound) {
         rethrow;
       }
     }
@@ -1203,8 +1204,12 @@ class AccountServer {
   Future<List<db.User>?> refreshUsers(List<String> ids, {bool force = false}) =>
       _injector.refreshUsers(ids, force: force);
 
-  Future<void> refreshConversation(String conversationId) =>
-      _injector.refreshConversation(conversationId);
+  Future<void> refreshConversation(String conversationId,
+          {bool checkCurrentUserExist = false}) =>
+      _injector.refreshConversation(
+        conversationId,
+        checkCurrentUserExist: checkCurrentUserExist,
+      );
 
   Future<void> updateAccount({String? fullName, String? biography}) async {
     final user = await client.accountApi.update(AccountUpdateRequest(
@@ -1252,7 +1257,7 @@ class AccountServer {
   Future<void> deleteMessage(String messageId) async {
     final message = await database.messageDao.findMessageByMessageId(messageId);
     if (message == null) return;
-    await database.messageDao.deleteMessage(messageId);
+    await database.messageDao.deleteMessage(message.conversationId, messageId);
 
     unawaited(_deleteMessageAttachment(message));
   }

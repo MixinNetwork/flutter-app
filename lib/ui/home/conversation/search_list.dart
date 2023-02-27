@@ -9,12 +9,14 @@ import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../bloc/bloc_converter.dart';
 import '../../../bloc/keyword_cubit.dart';
 import '../../../bloc/minute_timer_cubit.dart';
 import '../../../bloc/paging/paging_bloc.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/mixin_database.dart';
+import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
@@ -24,6 +26,8 @@ import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
+import '../../../widgets/message/item/pin_message.dart';
+import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
@@ -57,11 +61,7 @@ class SearchList extends HookWidget {
                 .merge(keywordCubit.stream)
                 .map((event) => event.trim())
                 .distinct()
-                .throttleTime(
-                  const Duration(milliseconds: 150),
-                  trailing: true,
-                  leading: false,
-                );
+                .debounceTime(const Duration(milliseconds: 500));
           },
           initialData: null,
         ).data ??
@@ -95,6 +95,7 @@ class SearchList extends HookWidget {
                 username: keyword,
                 identityNumber: keyword,
                 category: slideCategoryState,
+                isIncludeConversation: true,
               )
               .watchThrottle(kSlowThrottleDuration);
         }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
@@ -267,6 +268,36 @@ class SearchList extends HookWidget {
                   final description = useMemoizedFuture(() async {
                     final mentionCache = context.read<MentionCache>();
 
+                    if (conversation.contentType ==
+                        MessageCategory.systemConversation) {
+                      return generateSystemText(
+                        actionName: conversation.actionName,
+                        participantUserId: conversation.participantUserId,
+                        senderId: conversation.senderId,
+                        currentUserId: context.accountServer.userId,
+                        participantFullName: conversation.participantFullName,
+                        senderFullName: conversation.senderFullName,
+                        expireIn: int.tryParse(conversation.content ?? '0'),
+                      );
+                    }
+
+                    if (conversation.contentType.isPin) {
+                      final pinMessageMinimal =
+                          PinMessageMinimal.fromJsonString(
+                              conversation.content ?? '');
+                      if (pinMessageMinimal == null) {
+                        return context.l10n.chatPinMessage(
+                            conversation.senderFullName ?? '',
+                            context.l10n.aMessage);
+                      }
+                      final preview = await generatePinPreviewText(
+                        pinMessageMinimal: pinMessageMinimal,
+                        mentionCache: context.read<MentionCache>(),
+                      );
+                      return context.l10n.chatPinMessage(
+                          conversation.senderFullName ?? '', preview);
+                    }
+
                     return messagePreviewOptimize(
                         conversation.messageStatus,
                         conversation.contentType,
@@ -279,6 +310,10 @@ class SearchList extends HookWidget {
                         conversation.isGroupConversation,
                         conversation.senderFullName);
                   }, null, keys: [
+                    conversation.actionName,
+                    conversation.participantUserId,
+                    context.accountServer.userId,
+                    conversation.participantFullName,
                     conversation.messageStatus,
                     conversation.contentType,
                     conversation.content,
@@ -374,7 +409,13 @@ class SearchItem extends StatelessWidget {
       this.date,
       this.trailing,
       this.selected,
-      this.maxLines = false});
+      this.maxLines = false,
+      this.margin = const EdgeInsets.symmetric(horizontal: 6),
+      this.padding = const EdgeInsets.symmetric(
+        horizontal: 6,
+        vertical: 12,
+      ),
+      this.nameFontSize = 16});
 
   final Widget? avatar;
   final Widget? trailing;
@@ -387,6 +428,9 @@ class SearchItem extends StatelessWidget {
   final DateTime? date;
   final bool? selected;
   final bool maxLines;
+  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry padding;
+  final double nameFontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -395,7 +439,7 @@ class SearchItem extends StatelessWidget {
       color: context.theme.listSelected,
     );
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
+      padding: margin,
       child: InteractiveDecoratedBox(
         decoration:
             selected == true ? selectedDecoration : const BoxDecoration(),
@@ -403,10 +447,7 @@ class SearchItem extends StatelessWidget {
         onTap: onTap,
         child: Container(
           constraints: const BoxConstraints(minHeight: 72),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 6,
-            vertical: 12,
-          ),
+          padding: padding,
           child: Row(
             children: [
               if (avatar != null)
@@ -434,7 +475,7 @@ class SearchItem extends StatelessWidget {
                                       maxLines ? null : TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: context.theme.text,
-                                    fontSize: 16,
+                                    fontSize: nameFontSize,
                                   ),
                                   highlightTextSpans: [
                                     if (nameHighlight)
@@ -472,7 +513,10 @@ class SearchItem extends StatelessWidget {
                               padding: const EdgeInsets.only(right: 2),
                               child: SvgPicture.asset(
                                 descriptionIcon!,
-                                color: context.theme.secondaryText,
+                                colorFilter: ColorFilter.mode(
+                                  context.theme.secondaryText,
+                                  BlendMode.srcIn,
+                                ),
                               ),
                             ),
                           Expanded(

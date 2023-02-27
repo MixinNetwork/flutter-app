@@ -195,10 +195,14 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
             final len = ciphertext.length;
             theirMac = ciphertext.sublist(len - _macSize, len);
             final nonMac = ciphertext.sublist(0, len - _macSize);
-            plaintext = _aesCipher.process(Uint8List.fromList(nonMac));
-            macSink.add(nonMac);
-            digestSink.add(nonMac);
-            iv = nonMac.sublist(nonMac.length - _cbcBlockSize, nonMac.length);
+            if (nonMac.isNotEmpty) {
+              plaintext = _aesCipher.process(Uint8List.fromList(nonMac));
+              macSink.add(nonMac);
+              digestSink.add(nonMac);
+              iv = nonMac.sublist(nonMac.length - _cbcBlockSize, nonMac.length);
+            } else {
+              plaintext = Uint8List.fromList([]);
+            }
           }
         }
 

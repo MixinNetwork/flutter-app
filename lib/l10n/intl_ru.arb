@@ -76,6 +76,7 @@
 "conversationDeleteTitle" : "Удалить чат: {arg0}",
 "copy" : "Копировать",
 "copyInvite" : "Скопировать пригласительную ссылку",
+"copyLink" : "Копировать ссылку",
 "create" : "Создавать",
 "createCircle" : "Новый круг",
 "createConversation" : "Новый разговор",

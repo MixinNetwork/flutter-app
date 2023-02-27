@@ -14,6 +14,11 @@ class AccountKeyValue extends HiveKeyValue {
   static const _primarySessionId = 'primarySessionId';
   static const _hasNewAlbum = 'hasNewAlbum';
   static const _keyRecentUsedEmoji = 'recentUsedEmoji';
+  static const _deviceId = 'deviceId';
+
+  String? get deviceId => box.get(_deviceId) as String?;
+
+  Future<void> setDeviceId(String value) => box.put(_deviceId, value);
 
   bool get hasSyncCircle =>
       box.get(_hasSyncCircle, defaultValue: false) as bool;

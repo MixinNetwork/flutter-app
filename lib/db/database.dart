@@ -1,5 +1,6 @@
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
+import 'dao/chain_dao.dart';
 import 'dao/circle_conversation_dao.dart';
 import 'dao/circle_dao.dart';
 import 'dao/conversation_dao.dart';
@@ -28,6 +29,7 @@ class Database {
   Database(this.mixinDatabase) {
     appDao = AppDao(mixinDatabase);
     assetDao = AssetDao(mixinDatabase);
+    chainDao = ChainDao(mixinDatabase);
     conversationDao = ConversationDao(mixinDatabase);
     circleDao = CircleDao(mixinDatabase);
     circleConversationDao = CircleConversationDao(mixinDatabase);
@@ -62,6 +64,8 @@ class Database {
   late final AppDao appDao;
 
   late final AssetDao assetDao;
+
+  late final ChainDao chainDao;
 
   late final MessageDao messageDao;
 

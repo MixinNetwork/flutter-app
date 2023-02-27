@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../db/dao/sticker_dao.dart';
 import '../../../db/mixin_database.dart';
@@ -79,13 +80,11 @@ Future<bool> showSendDialog(
         break;
       case _Category.sticker:
         {
-          final json =
-              await jsonDecodeWithIsolate(_data) as Map<String, dynamic>;
-          if (json['sticker_id'] == null ||
-              (json['sticker_id'] as String).isEmpty) {
+          if (!Uuid.isValidUUID(fromString: _data)) {
+            w('Invalid sticker id: $_data');
             return false;
           }
-          result = json['sticker_id'];
+          result = _data;
         }
         break;
       case _Category.app_card:

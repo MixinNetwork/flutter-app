@@ -110,7 +110,10 @@ class SlidePage extends StatelessWidget {
                                 : Resources.assetsImagesCollapseSvg,
                             width: 24,
                             height: 24,
-                            color: context.theme.text,
+                            colorFilter: ColorFilter.mode(
+                              context.theme.text,
+                              BlendMode.srcIn,
+                            ),
                           ),
                           title: Text(context.l10n.collapse),
                           onTap: () =>
@@ -276,7 +279,7 @@ class _CircleList extends HookWidget {
                           ContextMenu(
                             icon:
                                 Resources.assetsImagesContextMenuEditCircleSvg,
-                            title: context.l10n.editCircleName,
+                            title: context.l10n.editConversations,
                             onTap: () async {
                               final initSelected = (await context
                                       .database.circleConversationDao
@@ -342,7 +345,7 @@ class _CircleList extends HookWidget {
                               final result = await showConfirmMixinDialog(
                                   context,
                                   context.l10n.deleteTheCircle(circle.name));
-                              if (!result) return;
+                              if (result == null) return;
                               await runFutureWithToast(
                                 () async {
                                   await context.accountServer
@@ -362,7 +365,10 @@ class _CircleList extends HookWidget {
                               Resources.assetsImagesCircleSvg,
                               width: 24,
                               height: 24,
-                              color: getCircleColorById(circle.circleId),
+                              colorFilter: ColorFilter.mode(
+                                getCircleColorById(circle.circleId),
+                                BlendMode.srcIn,
+                              ),
                             ),
                             title: Text(circle.name),
                             onTap: () {
@@ -459,7 +465,7 @@ class _Item extends HookWidget {
           asset,
           width: 24,
           height: 24,
-          color: context.theme.text,
+          colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
         ),
         title: Text(title),
         onTap: () {

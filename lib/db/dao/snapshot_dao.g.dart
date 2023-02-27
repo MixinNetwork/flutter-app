@@ -2,45 +2,13 @@
 
 part of 'snapshot_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
-  Conversations get conversations => attachedDatabase.conversations;
-  FloodMessages get floodMessages => attachedDatabase.floodMessages;
-  Jobs get jobs => attachedDatabase.jobs;
-  MessageMentions get messageMentions => attachedDatabase.messageMentions;
-  Messages get messages => attachedDatabase.messages;
-  Participants get participants => attachedDatabase.participants;
-  StickerAlbums get stickerAlbums => attachedDatabase.stickerAlbums;
-  PinMessages get pinMessages => attachedDatabase.pinMessages;
-  Users get users => attachedDatabase.users;
-  Addresses get addresses => attachedDatabase.addresses;
-  Apps get apps => attachedDatabase.apps;
-  Assets get assets => attachedDatabase.assets;
-  CircleConversations get circleConversations =>
-      attachedDatabase.circleConversations;
-  Circles get circles => attachedDatabase.circles;
-  Hyperlinks get hyperlinks => attachedDatabase.hyperlinks;
-  MessagesFts get messagesFts => attachedDatabase.messagesFts;
-  MessagesHistory get messagesHistory => attachedDatabase.messagesHistory;
-  Offsets get offsets => attachedDatabase.offsets;
-  ParticipantSession get participantSession =>
-      attachedDatabase.participantSession;
-  ResendSessionMessages get resendSessionMessages =>
-      attachedDatabase.resendSessionMessages;
-  SentSessionSenderKeys get sentSessionSenderKeys =>
-      attachedDatabase.sentSessionSenderKeys;
   Snapshots get snapshots => attachedDatabase.snapshots;
-  StickerRelationships get stickerRelationships =>
-      attachedDatabase.stickerRelationships;
-  Stickers get stickers => attachedDatabase.stickers;
-  TranscriptMessages get transcriptMessages =>
-      attachedDatabase.transcriptMessages;
+  Users get users => attachedDatabase.users;
+  Assets get assets => attachedDatabase.assets;
+  Chains get chains => attachedDatabase.chains;
   Fiats get fiats => attachedDatabase.fiats;
-  FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
-  ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Selectable<SnapshotItem> snapshotItems(
       String currentFiat,
       SnapshotItems$where where,
@@ -52,7 +20,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
             alias(this.snapshots, 'snapshot'),
             alias(this.users, 'opponent'),
             alias(this.assets, 'asset'),
-            alias(this.assets, 'tempAsset'),
+            alias(this.chains, 'chain'),
             alias(this.fiats, 'fiat')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
@@ -62,7 +30,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
                 alias(this.snapshots, 'snapshot'),
                 alias(this.users, 'opponent'),
                 alias(this.assets, 'asset'),
-                alias(this.assets, 'tempAsset'),
+                alias(this.chains, 'chain'),
                 alias(this.fiats, 'fiat')) ??
             const OrderBy.nothing(),
         hasMultipleTables: true,
@@ -73,13 +41,13 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
             alias(this.snapshots, 'snapshot'),
             alias(this.users, 'opponent'),
             alias(this.assets, 'asset'),
-            alias(this.assets, 'tempAsset'),
+            alias(this.chains, 'chain'),
             alias(this.fiats, 'fiat')),
         hasMultipleTables: true,
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT snapshot.*, opponent.avatar_url, opponent.full_name AS opponent_ful_name, asset.price_usd, asset.chain_id, asset.symbol, asset.name AS symbolName, asset.tag, asset.confirmations AS asset_confirmations, asset.icon_url AS symbolIconUrl, tempAsset.icon_url AS chainIconUrl, fiat.rate AS fiatRate FROM snapshots AS snapshot LEFT JOIN users AS opponent ON opponent.user_id = snapshot.opponent_id LEFT JOIN assets AS asset ON asset.asset_id = snapshot.asset_id LEFT JOIN assets AS tempAsset ON asset.chain_id = tempAsset.asset_id LEFT JOIN fiats AS fiat ON fiat.code = ?1 WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT snapshot.*, opponent.avatar_url, opponent.full_name AS opponent_ful_name, asset.price_usd, asset.chain_id, asset.symbol, asset.name AS symbolName, asset.tag, asset.confirmations AS asset_confirmations, asset.icon_url AS symbolIconUrl, chain.icon_url AS chainIconUrl, fiat.rate AS fiatRate FROM snapshots AS snapshot LEFT JOIN users AS opponent ON opponent.user_id = snapshot.opponent_id LEFT JOIN assets AS asset ON asset.asset_id = snapshot.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN fiats AS fiat ON fiat.code = ?1 WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           Variable<String>(currentFiat),
           ...generatedwhere.introducedVariables,
@@ -89,6 +57,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         readsFrom: {
           users,
           assets,
+          chains,
           fiats,
           snapshots,
           ...generatedwhere.watchedTables,
@@ -101,7 +70,8 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         type: row.read<String>('type'),
         assetId: row.read<String>('asset_id'),
         amount: row.read<String>('amount'),
-        createdAt: Snapshots.$converter0.fromSql(row.read<int>('created_at')),
+        createdAt:
+            Snapshots.$convertercreatedAt.fromSql(row.read<int>('created_at')),
         opponentId: row.readNullable<String>('opponent_id'),
         transactionHash: row.readNullable<String>('transaction_hash'),
         sender: row.readNullable<String>('sender'),
@@ -257,9 +227,9 @@ class SnapshotItem {
   }
 }
 
-typedef SnapshotItems$where = Expression<bool> Function(Snapshots snapshot,
-    Users opponent, Assets asset, Assets tempAsset, Fiats fiat);
-typedef SnapshotItems$order = OrderBy Function(Snapshots snapshot,
-    Users opponent, Assets asset, Assets tempAsset, Fiats fiat);
-typedef SnapshotItems$limit = Limit Function(Snapshots snapshot, Users opponent,
-    Assets asset, Assets tempAsset, Fiats fiat);
+typedef SnapshotItems$where = Expression<bool> Function(
+    Snapshots snapshot, Users opponent, Assets asset, Chains chain, Fiats fiat);
+typedef SnapshotItems$order = OrderBy Function(
+    Snapshots snapshot, Users opponent, Assets asset, Chains chain, Fiats fiat);
+typedef SnapshotItems$limit = Limit Function(
+    Snapshots snapshot, Users opponent, Assets asset, Chains chain, Fiats fiat);

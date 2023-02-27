@@ -128,7 +128,6 @@ class _MultisigsPaymentBody extends HookWidget {
           symbolUrl: asset.iconUrl,
           chainUrl: asset.chainIconUrl,
           chainSize: 14,
-          chainBorder: BorderSide(color: context.theme.popUp, width: 2),
         ),
         const SizedBox(height: 10),
         Text(
@@ -172,7 +171,8 @@ class _UsersLayout extends StatelessWidget {
             dimension: 24,
             child: SvgPicture.asset(
               Resources.assetsImagesIcArrowRightSvg,
-              color: context.theme.green,
+              colorFilter:
+                  ColorFilter.mode(context.theme.green, BlendMode.srcIn),
             ),
           ),
           _OverlappedUserAvatars(
@@ -319,7 +319,8 @@ class _DoneLayout extends StatelessWidget {
                 dimension: 60,
                 child: SvgPicture.asset(
                   Resources.assetsImagesCheckedSvg,
-                  color: context.theme.green,
+                  colorFilter:
+                      ColorFilter.mode(context.theme.green, BlendMode.srcIn),
                 ),
               ),
             ),

@@ -10,7 +10,7 @@ import '../../constants/resources.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
-import '../../ui/home/conversation/conversation_page.dart';
+import '../../ui/home/bloc/recent_conversation_cubit.dart';
 import '../../ui/home/conversation/search_list.dart';
 import '../../ui/home/intent.dart';
 import '../../utils/extension/extension.dart';
@@ -104,14 +104,23 @@ class CommandPalettePage extends HookWidget {
         }, keys: [keyword]).data ??
         [];
 
+    final recentConversationIds =
+        useBlocState<RecentConversationCubit, List<String>>();
+
     final conversations = useMemoizedStream(() {
           if (keyword.trim().isEmpty) {
-            return Stream.value(<SearchConversationItem>[]);
+            if (recentConversationIds.isEmpty) {
+              return Stream.value(<SearchConversationItem>[]);
+            }
+
+            return context.database.conversationDao
+                .searchConversationItemByIn(recentConversationIds)
+                .watchThrottle(kSlowThrottleDuration);
           }
           return context.database.conversationDao
               .fuzzySearchConversation(keyword, 32)
               .watchThrottle(kSlowThrottleDuration);
-        }, keys: [keyword]).data ??
+        }, keys: [keyword, recentConversationIds]).data ??
         [];
 
     final selectedIndex = useState<int>(0);
@@ -202,9 +211,12 @@ class CommandPalettePage extends HookWidget {
           child: Column(
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 30)
-                        .copyWith(bottom: 10),
+                padding: const EdgeInsets.only(
+                  right: 20,
+                  left: 20,
+                  top: 20,
+                  bottom: 10,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -227,7 +239,8 @@ class CommandPalettePage extends HookWidget {
                           Resources.assetsImagesEmptyFileSvg,
                           height: 80,
                           width: 80,
-                          color: context.theme.secondaryText,
+                          colorFilter: ColorFilter.mode(
+                              context.theme.secondaryText, BlendMode.srcIn),
                         ),
                         const SizedBox(height: 20),
                         Text(
@@ -252,17 +265,19 @@ class CommandPalettePage extends HookWidget {
                               final user = users[index];
                               return Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(horizontal: 30),
+                                    const EdgeInsets.symmetric(horizontal: 20),
                                 child: SearchItem(
                                   selected: selectedIndex.value == index,
+                                  margin: EdgeInsets.zero,
+                                  padding: const EdgeInsets.all(14),
                                   avatar: AvatarWidget(
                                     name: user.fullName,
                                     userId: user.userId,
-                                    size: ConversationPage
-                                        .conversationItemAvatarSize,
+                                    size: 40,
                                     avatarUrl: user.avatarUrl,
                                   ),
                                   name: user.fullName ?? '?',
+                                  nameFontSize: 14,
                                   trailing: VerifiedOrBotWidget(
                                     verified: user.isVerified,
                                     isBot: user.appId != null,
@@ -282,21 +297,23 @@ class CommandPalettePage extends HookWidget {
                               final conversation = conversations[index];
                               return Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(horizontal: 30),
+                                    const EdgeInsets.symmetric(horizontal: 20),
                                 child: SearchItem(
                                   selected: selectedIndex.value ==
                                       (users.length + index),
+                                  margin: EdgeInsets.zero,
+                                  padding: const EdgeInsets.all(14),
                                   avatar: ConversationAvatarWidget(
                                     conversationId: conversation.conversationId,
                                     fullName: conversation.validName,
                                     groupIconUrl: conversation.groupIconUrl,
                                     avatarUrl: conversation.avatarUrl,
                                     category: conversation.category,
-                                    size: ConversationPage
-                                        .conversationItemAvatarSize,
+                                    size: 40,
                                     userId: conversation.ownerId,
                                   ),
                                   name: conversation.validName,
+                                  nameFontSize: 14,
                                   trailing: VerifiedOrBotWidget(
                                     verified: conversation.isVerified,
                                     isBot: conversation.appId != null,

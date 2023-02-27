@@ -291,14 +291,14 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       return db.fuzzySearchConversationInCircle(
         query.trim().escapeSql(),
         category!.id,
-        (conversation, owner, message, _, cc) => filterUnseen
+        (conversation, owner, message, _, cc, __) => filterUnseen
             ? conversation.unseenMessageCount.isBiggerThanValue(0)
             : ignoreWhere,
-        (conversation, owner, message, _, cc) => Limit(limit, null),
+        (conversation, owner, message, _, cc, __) => Limit(limit, null),
       );
     }
     return db.fuzzySearchConversation(query.trim().escapeSql(),
-        (Conversations conversation, Users owner, Messages message, _) {
+        (Conversations conversation, Users owner, Messages message, _, __) {
       Expression<bool> predicate = ignoreWhere;
       switch (category?.type) {
         case SlideCategoryType.contacts:
@@ -322,9 +322,23 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       }
       return predicate;
     },
-        (Conversations conversation, Users owner, Messages message, _) =>
+        (Conversations conversation, Users owner, Messages message, _, __) =>
             Limit(limit, null));
   }
+
+  Selectable<SearchConversationItem> searchConversationItemByIn(
+          List<String> ids) =>
+      db.searchConversationItemByIn(ids, (conversation, _, __, ___, ____) {
+        if (ids.isEmpty) return ignoreOrderBy;
+
+        final conversationId =
+            '${conversation.aliasedName}.${conversation.conversationId.$name}';
+
+        return OrderBy([
+          OrderingTerm.desc(CustomExpression(
+              'CASE $conversationId ${ids.asMap().entries.map((e) => "WHEN '${e.value}' THEN ${e.key}").join(' ')} END'))
+        ]);
+      });
 
   Selectable<String?> announcement(String conversationId) =>
       (db.selectOnly(db.conversations)

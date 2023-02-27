@@ -271,7 +271,7 @@ class _ChatTextSizePreview extends HookWidget {
               const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
           decoration: BoxDecoration(
             color: context.theme.chatBackground,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
             image: DecorationImage(
               image: const ExactAssetImage(
                 Resources.assetsImagesChatBackgroundPng,

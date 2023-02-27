@@ -3,13 +3,15 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
+import 'dart:ui' as ui;
 
+import 'package:ansicolor/ansicolor.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:uuid/uuid.dart';
@@ -28,7 +30,7 @@ import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
 import '../db/extension/message.dart';
 import '../db/mixin_database.dart' as db;
-import '../db/mixin_database.dart';
+import '../db/mixin_database.dart' hide Chain;
 import '../enum/message_category.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
@@ -36,6 +38,8 @@ import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/reg_exp_utils.dart';
+import '../utils/system/package_info.dart';
+import '../widgets/message/send_message_dialog/attachment_extra.dart';
 import 'decrypt_message.dart';
 import 'isolate_event.dart';
 import 'sender.dart';
@@ -49,9 +53,8 @@ class IsolateInitParams {
     required this.privateKey,
     required this.mixinDocumentDirectory,
     required this.primarySessionId,
-    required this.packageInfo,
-    required this.deviceId,
     required this.loginByPhoneNumber,
+    required this.rootIsolateToken,
   });
 
   final SendPort sendPort;
@@ -61,14 +64,16 @@ class IsolateInitParams {
   final String privateKey;
   final String mixinDocumentDirectory;
   final String? primarySessionId;
-  final PackageInfo packageInfo;
-  final String? deviceId;
+
   final bool loginByPhoneNumber;
+  final ui.RootIsolateToken rootIsolateToken;
 }
 
 Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
   EquatableConfig.stringify = true;
+  ansiColorDisabled = Platform.isIOS;
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
+  BackgroundIsolateBinaryMessenger.ensureInitialized(params.rootIsolateToken);
   final isolateChannel =
       IsolateChannel<IsolateEvent>.connectSend(params.sendPort);
   final runner = _MessageProcessRunner(
@@ -134,7 +139,7 @@ class _MessageProcessRunner {
   Timer? _nextExpiredMessageRunner;
 
   Future<void> init(IsolateInitParams initParams) async {
-    database = Database(await connectToDatabase(identityNumber, readCount: 2));
+    database = Database(await connectToDatabase(identityNumber));
     jobSubscribers.add(
       database.mixinDatabase.eventBus.stream.listen((event) {
         _sendEventToMainIsolate(WorkerIsolateEventType.onDbEvent, event);
@@ -145,8 +150,6 @@ class _MessageProcessRunner {
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKeyStr,
-      packageInfo: initParams.packageInfo,
-      deviceId: initParams.deviceId,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -168,7 +171,7 @@ class _MessageProcessRunner {
       privateKeyStr,
       database,
       client,
-      initParams.packageInfo,
+      await generateUserAgent(),
     );
 
     blaze.connectedStateStream.listen((event) {
@@ -264,6 +267,7 @@ class _MessageProcessRunner {
             TableUpdateQuery.onTable(database.mixinDatabase.expiredMessages),
           )
           .asyncDropListen((event) => _scheduleExpiredJob()));
+    _scheduleExpiredJob();
   }
 
   void _sendEventToMainIsolate(WorkerIsolateEventType event,
@@ -287,7 +291,8 @@ class _MessageProcessRunner {
           e('message is null, messageId: ${em.messageId} ${em.expireAt}');
           continue;
         }
-        await database.messageDao.deleteMessage(em.messageId);
+        await database.messageDao
+            .deleteMessage(message.conversationId, em.messageId);
         if (message.category.isAttachment || message.category.isTranscript) {
           _sendEventToMainIsolate(
             WorkerIsolateEventType.requestDownloadAttachment,
@@ -297,8 +302,9 @@ class _MessageProcessRunner {
       }
     }
 
-    final firstExpiredMessage =
-        await database.mixinDatabase.getFirstExpiredMessage().getSingleOrNull();
+    final firstExpiredMessage = await database.expiredMessageDao
+        .getFirstExpiredMessage()
+        .getSingleOrNull();
     if (firstExpiredMessage == null) {
       _nextExpiredMessageRunner?.cancel();
       _nextExpiredMessageRunner = null;
@@ -363,10 +369,16 @@ class _MessageProcessRunner {
 
       await Future.wait(jobs.map((db.Job job) async {
         try {
-          final a =
+          final asset =
               (await client.assetApi.getAssetById(job.blazeMessage!)).data;
-          await database.assetDao.insertSdkAsset(a);
-          await database.jobDao.deleteJobById(job.jobId);
+
+          final chain = (await client.assetApi.getChain(asset.chainId)).data;
+
+          await Future.wait([
+            database.assetDao.insertSdkAsset(asset),
+            database.chainDao.insertSdkChain(chain),
+            database.jobDao.deleteJobById(job.jobId),
+          ]);
         } catch (e, s) {
           w('Update asset job error: $e, stack: $s');
           await Future.delayed(const Duration(seconds: 1));
@@ -449,10 +461,25 @@ class _MessageProcessRunner {
 
       MessageResult? result;
       var content = message.content;
-      String? lengthLimitedContent;
+      String? sentContent;
       if (message.category.isPost || message.category.isText) {
         content = content?.substring(0, min(content.length, kMaxTextLength));
-        lengthLimitedContent = content;
+        sentContent = content;
+      } else if (message.category.isAttachment && content != null) {
+        try {
+          final attachment = AttachmentMessage.fromJson(
+              (await jsonBase64DecodeWithIsolate(content))
+                  as Map<String, dynamic>);
+          final attachmentExtra = AttachmentExtra(
+            attachmentId: attachment.attachmentId,
+            messageId: messageId,
+            createdAt: attachment.createdAt,
+          );
+
+          sentContent = await jsonEncodeWithIsolate(attachmentExtra);
+        } catch (error) {
+          e('Get sentContent error: $error');
+        }
       }
 
       final conversation = await database.conversationDao
@@ -477,9 +504,7 @@ class _MessageProcessRunner {
         rethrow;
       }
 
-      if (message.category.isPlain ||
-          message.category == MessageCategory.appCard ||
-          message.category.isPin) {
+      Future<MessageResult> _sendPlainMessage(SendingMessage message) {
         if (message.category == MessageCategory.appCard ||
             message.category.isPost ||
             message.category.isTranscript ||
@@ -496,42 +521,30 @@ class _MessageProcessRunner {
           silent: silent,
           expireIn: expireIn ?? 0,
         );
-        result = await _sender.deliver(blazeMessage);
-      } else if (message.category.isEncrypted) {
-        final participantSessionKey = await database.participantSessionDao
-            .getParticipantSessionKeyWithoutSelf(
-                message.conversationId, userId);
-        final otherSessionKey = await database.participantSessionDao
-            .getOtherParticipantSessionKey(
-                message.conversationId, userId, sessionId);
-        if (otherSessionKey == null ||
-            otherSessionKey.publicKey == null ||
-            participantSessionKey == null ||
-            participantSessionKey.publicKey == null) {
-          await _sender.checkConversation(message.conversationId);
-          return;
-        }
-        final plaintext = message.category.isAttachment ||
-                message.category.isSticker ||
-                message.category.isContact ||
-                message.category.isLive
-            ? base64Decode(message.content!)
-            : utf8.encode(message.content!);
-        final content = _encryptedProtocol.encryptMessage(
-            privateKey,
-            plaintext,
-            base64Decode(base64.normalize(participantSessionKey.publicKey!)),
-            participantSessionKey.sessionId,
-            base64Decode(base64.normalize(otherSessionKey.publicKey!)),
-            otherSessionKey.sessionId);
+        return _sender.deliver(blazeMessage);
+      }
 
-        final blazeMessage = _createBlazeMessage(
-          message,
-          base64Encode(content),
-          silent: silent,
-          expireIn: expireIn ?? 0,
-        );
-        result = await _sender.deliver(blazeMessage);
+      if (message.category.isPlain ||
+          message.category == MessageCategory.appCard ||
+          message.category.isPin) {
+        result = await _sendPlainMessage(message);
+      } else if (message.category.isEncrypted) {
+        try {
+          result = await _sendEncryptedMessage(
+            message,
+            silent: silent,
+            expireIn: expireIn ?? 0,
+          );
+        } on _NoParticipantSessionKeyException catch (error) {
+          e('No participant session key: $error');
+          // send plain directly if no participant session key.
+          message = message.copyWith(
+              category: message.category.replaceAll('ENCRYPTED_', 'PLAIN_'));
+          d('category: ${message.category}');
+          await database.messageDao
+              .updateCategoryById(messageId, message.category);
+          result = await _sendPlainMessage(message);
+        }
       } else if (message.category.isSignal) {
         result = await _sendSignalMessage(
           message,
@@ -544,7 +557,7 @@ class _MessageProcessRunner {
         if (result?.errorCode == null) {
           await database.messageDao.updateMessageContentAndStatus(
             message.messageId,
-            lengthLimitedContent,
+            sentContent,
             MessageStatus.sent,
           );
         }
@@ -616,6 +629,58 @@ class _MessageProcessRunner {
         w('Send pin error: $e, stack: $s');
       }
     });
+  }
+
+  Future<MessageResult> _sendEncryptedMessage(
+    SendingMessage message, {
+    bool silent = false,
+    required int expireIn,
+  }) async {
+    var participantSessionKey = await database.participantSessionDao
+        .getParticipantSessionKeyWithoutSelf(message.conversationId, userId);
+
+    if (participantSessionKey == null ||
+        participantSessionKey.publicKey.isNullOrBlank()) {
+      await _sender.syncConversation(message.conversationId);
+      participantSessionKey = await database.participantSessionDao
+          .getParticipantSessionKeyWithoutSelf(message.conversationId, userId);
+    }
+
+    // Workaround no session key, can't encrypt message
+    if (participantSessionKey == null ||
+        participantSessionKey.publicKey.isNullOrBlank()) {
+      throw _NoParticipantSessionKeyException(message.conversationId, userId);
+    }
+
+    final otherSessionKey = await database.participantSessionDao
+        .getOtherParticipantSessionKey(
+            message.conversationId, userId, sessionId);
+
+    final plaintext = message.category.isAttachment ||
+            message.category.isSticker ||
+            message.category.isContact ||
+            message.category.isLive
+        ? base64Decode(message.content!)
+        : utf8.encode(message.content!);
+
+    final content = _encryptedProtocol.encryptMessage(
+      privateKey,
+      plaintext,
+      base64Decode(base64.normalize(participantSessionKey.publicKey!)),
+      participantSessionKey.sessionId,
+      otherSessionKey?.publicKey == null
+          ? null
+          : base64Decode(base64.normalize(otherSessionKey!.publicKey!)),
+      otherSessionKey?.sessionId,
+    );
+
+    final blazeMessage = _createBlazeMessage(
+      message,
+      base64Encode(content),
+      silent: silent,
+      expireIn: expireIn,
+    );
+    return _sender.deliver(blazeMessage);
   }
 
   Future<MessageResult?> _sendSignalMessage(
@@ -791,4 +856,18 @@ class _MessageProcessRunner {
     database.dispose();
     jobSubscribers.forEach((subscription) => subscription.cancel());
   }
+}
+
+class _NoParticipantSessionKeyException implements Exception {
+  _NoParticipantSessionKeyException(
+    this.conversationId,
+    this.userId,
+  );
+
+  final String conversationId;
+  final String userId;
+
+  @override
+  String toString() =>
+      'No participant session key for conversation: $conversationId, user: $userId';
 }

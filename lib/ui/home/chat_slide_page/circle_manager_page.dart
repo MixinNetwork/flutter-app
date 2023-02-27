@@ -175,7 +175,10 @@ class _CircleManagerItem extends StatelessWidget {
                   Resources.assetsImagesCircleSvg,
                   width: 24,
                   height: 24,
-                  color: getCircleColorById(circleId),
+                  colorFilter: ColorFilter.mode(
+                    getCircleColorById(circleId),
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),

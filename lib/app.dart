@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import 'account/account_key_value.dart';
 import 'account/account_server.dart';
 import 'account/notification_service.dart';
 import 'bloc/bloc_converter.dart';
@@ -21,6 +22,7 @@ import 'ui/home/bloc/conversation_filter_unseen_cubit.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/bloc/multi_auth_cubit.dart';
 import 'ui/home/bloc/recall_message_bloc.dart';
+import 'ui/home/bloc/recent_conversation_cubit.dart';
 import 'ui/home/bloc/slide_category_cubit.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
@@ -29,6 +31,7 @@ import 'ui/landing/landing.dart';
 import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
+import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/system/text_input.dart';
 import 'utils/system/tray.dart';
@@ -153,6 +156,9 @@ class _Providers extends StatelessWidget {
                 create: (BuildContext context) => ResponsiveNavigatorCubit(),
               ),
               BlocProvider(
+                create: (BuildContext context) => RecentConversationCubit(),
+              ),
+              BlocProvider(
                 create: (BuildContext context) => ConversationCubit(
                   accountServer: accountServer,
                   responsiveNavigatorCubit:
@@ -261,6 +267,34 @@ class _Home extends HookWidget {
           ..refreshSticker()
           ..initCircles();
       }
+    }, [signed]);
+
+    useEffect(() {
+      Future<void> effect() async {
+        if (!signed || accountServer == null) return;
+
+        try {
+          final currentDeviceId = await getDeviceId();
+          if (currentDeviceId == 'unknown') return;
+
+          final deviceId = AccountKeyValue.instance.deviceId;
+
+          if (deviceId == null) {
+            await AccountKeyValue.instance.setDeviceId(currentDeviceId);
+            return;
+          }
+
+          if (deviceId != currentDeviceId) {
+            final multiAuthCubit = context.multiAuthCubit;
+            await accountServer.signOutAndClear();
+            multiAuthCubit.signOut();
+          }
+        } catch (e) {
+          w('checkDeviceId error: $e');
+        }
+      }
+
+      effect();
     }, [signed]);
 
     if (signed) {

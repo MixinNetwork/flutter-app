@@ -6,7 +6,12 @@ import '../mixin_database.dart';
 
 part 'expired_message_dao.g.dart';
 
-@DriftAccessor(tables: [ExpiredMessages])
+@DriftAccessor(
+  tables: [ExpiredMessages],
+  include: {
+    '../moor/dao/expired_message.drift',
+  },
+)
 class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$ExpiredMessageDaoMixin {
   ExpiredMessageDao(super.attachedDatabase);
@@ -34,25 +39,18 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
             ..where((tbl) => tbl.messageId.isIn(messageIds)))
           .go();
 
-  Future<List<ExpiredMessage>> getCurrentExpiredMessages() => db
-      .getExpiredMessages(DateTime.now().millisecondsSinceEpoch ~/ 1000, 20)
-      .get();
+  Future<List<ExpiredMessage>> getCurrentExpiredMessages() =>
+      getExpiredMessages(DateTime.now().millisecondsSinceEpoch ~/ 1000, 20)
+          .get();
 
   Future<void> onMessageRead(Iterable<String> messageIds) async {
     final chunkedMessageIds =
         messageIds.toList(growable: false).chunked(kMarkLimit);
     final now = DateTime.now().millisecondsSinceEpoch / 1000;
     for (final ids in chunkedMessageIds) {
-      await db.markExpiredMessageRead(now, (em) => em.messageId.isIn(ids));
+      await _markExpiredMessageRead(now, (em) => em.messageId.isIn(ids));
     }
   }
-
-  Future<int> updateMessageExpireAt(String messageId, int expiredAt) =>
-      (update(db.expiredMessages)
-            ..where((tbl) => tbl.messageId.equals(messageId)))
-          .write(
-        ExpiredMessagesCompanion(expireAt: Value(expiredAt)),
-      );
 
   Future<Map<String, int?>> getMessageExpireAt(List<String> messageIds) async {
     final messages = await (select(db.expiredMessages)

@@ -81,6 +81,7 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   SimpleSelectStatement<Jobs, Job> sessionAckJobs() => select(db.jobs)
     ..where((Jobs row) =>
         row.action.equals(kCreateMessage) & row.blazeMessage.isNotNull())
+    ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
     ..limit(100);
 
   Stream<bool> watchHasSendingJobs() =>

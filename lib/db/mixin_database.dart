@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:drift/drift.dart';
@@ -23,6 +22,7 @@ import 'custom_vm_database_wrapper.dart';
 import 'dao/address_dao.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
+import 'dao/chain_dao.dart';
 import 'dao/circle_conversation_dao.dart';
 import 'dao/circle_dao.dart';
 import 'dao/conversation_dao.dart';
@@ -65,7 +65,6 @@ part 'mixin_database.g.dart';
     'moor/dao/pin_message.drift',
     'moor/dao/sticker_relationship.drift',
     'moor/dao/favorite_app.drift',
-    'moor/dao/expired_message.drift',
   },
   daos: [
     AddressDao,
@@ -94,6 +93,7 @@ part 'mixin_database.g.dart';
     FiatDao,
     FavoriteAppDao,
     ExpiredMessageDao,
+    ChainDao,
   ],
   queries: {},
 )
@@ -103,19 +103,12 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(super.c) : super.connect();
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 20;
 
   final eventBus = DataBaseEventBus();
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        beforeOpen: (_) async {
-          if (executor.dialect == SqlDialect.sqlite) {
-            await customStatement('PRAGMA journal_mode=WAL');
-            await customStatement('PRAGMA foreign_keys=ON');
-            await customStatement('PRAGMA synchronous=NORMAL');
-          }
-        },
         onUpgrade: (Migrator m, int from, int to) async {
           if (from <= 2) {
             await m.drop(Index(
@@ -227,6 +220,15 @@ class MixinDatabase extends _$MixinDatabase {
             await _addColumnIfNotExists(m, users, users.codeUrl);
             await _addColumnIfNotExists(m, users, users.codeId);
           }
+          if (from <= 17) {
+            await m.createIndex(indexMessagesConversationIdQuoteMessageId);
+          }
+          if (from <= 18) {
+            await m.createTable(chains);
+          }
+          if (from <= 19) {
+            await m.drop(Trigger('', 'conversation_last_message_delete'));
+          }
         },
       );
 
@@ -271,44 +273,35 @@ class MixinDatabase extends _$MixinDatabase {
           .isNotEmpty;
 }
 
-QueryExecutor _openConnection(File dbFile) {
-  final vmDatabase = NativeDatabase(dbFile);
-  if (!kDebugMode) {
-    return vmDatabase;
-  }
-  return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
-}
+QueryExecutor _openConnection(File dbFile) => CustomVmDatabaseWrapper(
+      NativeDatabase(
+        dbFile,
+        setup: (rawDb) {
+          rawDb
+            ..execute('PRAGMA journal_mode=WAL;')
+            ..execute('PRAGMA foreign_keys=ON;')
+            ..execute('PRAGMA synchronous=NORMAL;');
+        },
+      ),
+      logStatements: true,
+      explain: kDebugMode,
+    );
 
 /// Connect to the database.
 Future<MixinDatabase> connectToDatabase(
   String identityNumber, {
-  int readCount = 4,
   bool fromMainIsolate = false,
 }) async {
   final backgroundPortName = 'one_mixin_drift_background_$identityNumber';
-  final foregroundPortName = 'one_mixin_drift_foreground_$identityNumber';
 
-  final writeIsolate = await _crateIsolate(
+  final driftIsolate = await _crateIsolate(
     identityNumber,
     backgroundPortName,
     fromMainIsolate: fromMainIsolate,
   );
 
-  final write = await writeIsolate.connect();
+  final connect = await driftIsolate.connect();
 
-  final reads = await Future.wait(List.generate(readCount, (i) async {
-    final isolate = await _crateIsolate(
-      identityNumber,
-      '${foregroundPortName}_$i',
-      fromMainIsolate: fromMainIsolate,
-    );
-    return isolate.connect();
-  }));
-
-  final connect = write.withExecutor(MultiExecutor.withReadPool(
-    reads: reads.map((e) => e.executor).toList(),
-    write: write.executor,
-  ));
   return MixinDatabase.connect(connect);
 }
 
@@ -322,36 +315,23 @@ Future<DriftIsolate> _crateIsolate(
     IsolateNameServer.removePortNameMapping(name);
   }
 
-  final existingIsolate = IsolateNameServer.lookupPortByName(name);
+  final existedSendPort = IsolateNameServer.lookupPortByName(name);
 
-  if (existingIsolate == null) {
+  if (existedSendPort == null) {
     assert(fromMainIsolate, 'Isolate should be created from main isolate');
+
     final dbFile =
         File(p.join(mixinDocumentsDirectory.path, identityNumber, 'mixin.db'));
-    final receivePort = ReceivePort();
-    await Isolate.spawn(
-      _startBackground,
-      _IsolateStartRequest(receivePort.sendPort, dbFile),
+
+    final driftIsolate = await DriftIsolate.spawn(
+      () => LazyDatabase(
+        () => _openConnection(dbFile),
+      ),
     );
-    final isolate = await receivePort.first as DriftIsolate;
-    IsolateNameServer.registerPortWithName(isolate.connectPort, name);
-    return isolate;
+
+    IsolateNameServer.registerPortWithName(driftIsolate.connectPort, name);
+    return driftIsolate;
   } else {
-    return DriftIsolate.fromConnectPort(existingIsolate, serialize: false);
+    return DriftIsolate.fromConnectPort(existedSendPort, serialize: false);
   }
-}
-
-void _startBackground(_IsolateStartRequest request) {
-  final executor = _openConnection(request.dbFile);
-  final isolate = DriftIsolate.inCurrent(
-    () => DatabaseConnection(executor),
-  );
-  request.sendMoorIsolate.send(isolate);
-}
-
-class _IsolateStartRequest {
-  _IsolateStartRequest(this.sendMoorIsolate, this.dbFile);
-
-  final SendPort sendMoorIsolate;
-  final File dbFile;
 }

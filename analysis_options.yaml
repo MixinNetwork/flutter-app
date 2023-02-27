@@ -77,7 +77,6 @@ linter:
 
 dart_code_metrics:
   rules:
-    - avoid-banned-imports
     - avoid-collection-methods-with-unrelated-types
     - avoid-duplicate-exports
     #    - avoid-dynamic
@@ -97,7 +96,6 @@ dart_code_metrics:
     - avoid-unnecessary-type-casts
     - avoid-unrelated-type-assertions
     - avoid-unused-parameters
-    - ban-name
     - binary-expression-operand-order
     - double-literal-format
     #    - format-comment

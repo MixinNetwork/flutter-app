@@ -27,7 +27,10 @@ class BackupPage extends HookWidget {
                 Resources.assetsImagesChatBackupSvg,
                 width: 88,
                 height: 58,
-                color: context.theme.secondaryText.withOpacity(0.4),
+                colorFilter: ColorFilter.mode(
+                  context.theme.secondaryText.withOpacity(0.4),
+                  BlendMode.srcIn,
+                ),
               ),
               const SizedBox(height: 20),
               SizedBox(

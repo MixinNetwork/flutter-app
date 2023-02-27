@@ -15,7 +15,9 @@ import flutter_local_notifications
 import ogg_opus_player
 import package_info_plus
 import pasteboard
-import path_provider_macos
+import path_provider_foundation
+import platform_device_id
+import platform_device_id_macos
 import protocol_handler
 import screen_retriever
 import sqlite3_flutter_libs
@@ -35,6 +37,8 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FLTPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FLTPackageInfoPlusPlugin"))
   PasteboardPlugin.register(with: registry.registrar(forPlugin: "PasteboardPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
+  PlatformDeviceIdMacosPlugin.register(with: registry.registrar(forPlugin: "PlatformDeviceIdMacosPlugin"))
+  PlatformDeviceIdMacosPlugin.register(with: registry.registrar(forPlugin: "PlatformDeviceIdMacosPlugin"))
   ProtocolHandlerPlugin.register(with: registry.registrar(forPlugin: "ProtocolHandlerPlugin"))
   ScreenRetrieverPlugin.register(with: registry.registrar(forPlugin: "ScreenRetrieverPlugin"))
   Sqlite3FlutterLibsPlugin.register(with: registry.registrar(forPlugin: "Sqlite3FlutterLibsPlugin"))

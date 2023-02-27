@@ -2,10 +2,11 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Mixin"
-#define MyAppVersion "0.37.8"
 #define MyAppPublisher "Mixin, Inc."
 #define MyAppURL "https://mixin.one/"
 #define MyAppExeName "mixin_desktop.exe"
+#define MyAppPath ".\build\windows\runner\Release\" + MyAppExeName
+#define MyAppVersion GetVersionNumbersString(MyAppPath)
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.

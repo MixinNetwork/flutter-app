@@ -146,7 +146,7 @@ extension _AttachmentDownloadExtension on Dio {
         cancelToken: cancelToken ?? CancelToken(),
       );
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response) {
+      if (e.type == DioErrorType.badResponse) {
         if (e.response!.requestOptions.receiveDataWhenStatusError) {
           final res = await transformer.transformResponse(
             e.response!.requestOptions..responseType = ResponseType.json,
@@ -208,7 +208,7 @@ extension _AttachmentDownloadExtension on Dio {
           if (cancelToken == null || !cancelToken.isCancelled) {
             subscription.resume();
           }
-        }).catchError((err, StackTrace? stackTrace) async {
+        }).catchError((Object err, StackTrace? stackTrace) async {
           try {
             await subscription.cancel();
           } finally {
@@ -223,21 +223,20 @@ extension _AttachmentDownloadExtension on Dio {
           closed = true;
           await raf.close();
           completer.complete(response);
-        } catch (e) {
+        } catch (e, stack) {
           completer.completeError(DioMixin.assureDioError(
             e,
             response.requestOptions,
+            stack,
           ));
         }
       },
-      onError: (e) async {
+      onError: (Object e, stack) async {
         try {
           await _closeAndDelete();
         } finally {
           completer.completeError(DioMixin.assureDioError(
-            e,
-            response.requestOptions,
-          ));
+              e, response.requestOptions, StackTrace.current));
         }
       },
       cancelOnError: true,
@@ -248,19 +247,21 @@ extension _AttachmentDownloadExtension on Dio {
       await _closeAndDelete();
     });
 
-    if (response.requestOptions.receiveTimeout > 0) {
+    final receiveTimeout =
+        response.requestOptions.receiveTimeout?.inMilliseconds;
+    if (receiveTimeout != null && receiveTimeout > 0) {
       future = future
           .timeout(Duration(
-        milliseconds: response.requestOptions.receiveTimeout,
+        milliseconds: receiveTimeout,
       ))
           .catchError((err, s) async {
         await subscription.cancel();
         await _closeAndDelete();
         if (err is TimeoutException) {
+          // ignore: only_throw_errors
           throw DioError(
             requestOptions: response.requestOptions,
-            error:
-                'Receiving data timeout[${response.requestOptions.receiveTimeout}ms]',
+            error: 'Receiving data timeout[${receiveTimeout}ms]',
             type: DioErrorType.receiveTimeout,
           );
         } else {

@@ -4,7 +4,9 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
+import '../../utils/logger.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
+import '../../widgets/message/send_message_dialog/attachment_extra.dart';
 import '../converter/media_status_type_converter.dart';
 import '../converter/message_status_type_converter.dart';
 import '../converter/millis_date_converter.dart';
@@ -24,18 +26,42 @@ extension MessageItemExtension on MessageItem {
       (type.isImage || type.isVideo || type.isAudio || type.isData) &&
       (mediaStatus == MediaStatus.done || mediaStatus == MediaStatus.read);
 
-  bool get canForward =>
-      type.isText ||
-      _isFinishedAttachment() ||
-      type.isSticker ||
-      type.isContact ||
-      type.isLive ||
-      type.isPost ||
-      type.isLocation ||
-      (type == MessageCategory.appCard &&
-          AppCardData.fromJson(jsonDecode(content!) as Map<String, dynamic>)
-              .shareable) ||
-      (type.isTranscript && mediaStatus == MediaStatus.done);
+  bool get canForward {
+    if (!const [MessageStatus.delivered, MessageStatus.read, MessageStatus.sent]
+        .contains(status)) {
+      return false;
+    }
+
+    if (type == MessageCategory.appCard) {
+      try {
+        return AppCardData.fromJson(
+                jsonDecode(content!) as Map<String, dynamic>)
+            .shareable;
+      } catch (e) {
+        w('AppCardData.fromJson error: $e');
+      }
+    }
+
+    if (type.isAudio && mediaStatus == MediaStatus.done) {
+      try {
+        return AttachmentExtra.fromJson(
+                    jsonDecode(content!) as Map<String, dynamic>)
+                .shareable ??
+            true;
+      } catch (e) {
+        d('AttachmentExtra.fromJson error: $e');
+      }
+    }
+
+    return type.isText ||
+        _isFinishedAttachment() ||
+        type.isSticker ||
+        type.isContact ||
+        type.isLive ||
+        type.isPost ||
+        type.isLocation ||
+        (type.isTranscript && mediaStatus == MediaStatus.done);
+  }
 }
 
 extension QuoteMessageItemExtension on QuoteMessageItem {

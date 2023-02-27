@@ -4,9 +4,14 @@ import 'package:drift/native.dart';
 import '../utils/logger.dart';
 
 class CustomVmDatabaseWrapper extends QueryExecutor {
-  CustomVmDatabaseWrapper(this.queryExecutor, {this.logStatements = false});
+  CustomVmDatabaseWrapper(
+    this.queryExecutor, {
+    this.logStatements = false,
+    required this.explain,
+  });
 
   final bool logStatements;
+  final bool explain;
 
   late final NativeDatabase queryExecutor;
 
@@ -82,25 +87,30 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
     }
     stopwatch?.stop();
 
-    if (stopwatch != null && stopwatch.elapsed.inMilliseconds > 5) {
-      final list = await queryExecutor.runSelect(
-          'EXPLAIN QUERY PLAN $statement', args ?? []);
+    if (stopwatch != null && stopwatch.elapsed.inMilliseconds > 15) {
+      Iterable<String>? details;
+      var needPrint = false;
 
-      final details = list.map((e) => e['detail']).whereType<String>();
+      if (explain) {
+        final list = await queryExecutor.runSelect(
+            'EXPLAIN QUERY PLAN $statement', args ?? []);
 
-      final needPrint = details
-          .where((String detail) =>
-              detail.startsWith('SCAN') || detail.startsWith('USE TEMP B-TREE'))
-          .isNotEmpty;
-      // if (needPrint) {
-      if (stopwatch.elapsed.inMilliseconds > 15) {
-        w('''
+        details = list.map((e) => e['detail']).whereType<String>();
+
+        needPrint = details
+            .where((String detail) =>
+                detail.startsWith('SCAN') ||
+                detail.startsWith('USE TEMP B-TREE'))
+            .isNotEmpty;
+      }
+
+      w('''
 execution time: ${stopwatch.elapsed.inMilliseconds} MS, args: $args, sql:
 $statement
-${needPrint ? 'details:\n${details.join('\n')}' : ''}
 ''');
+      if (needPrint && details != null) {
+        w('EXPLAIN QUERY PLAN: \n${details.join('\n')}');
       }
-      // }
     }
 
     return result;

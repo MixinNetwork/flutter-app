@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../constants/constants.dart';
 import '../../enum/media_status.dart';
@@ -57,10 +58,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       for (final ids in chunkedIds) {
         messages.addAll(await _baseMessageItems(
             (message, _, __, ___, ____, _____, ______, _______, ________,
-                    _________, __________, em) =>
+                    _________, __________, ___________, em) =>
                 message.messageId.isIn(ids),
             (_, __, ___, ____, _____, ______, _______, ________, _________,
-                    __________, ___________, em) =>
+                    __________, ___________, ____________, em) =>
                 Limit(ids.length, 0)).get());
       }
       return messages;
@@ -82,6 +83,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       Users participant,
       Snapshots snapshot,
       Assets asset,
+      Chains chain,
       Stickers sticker,
       Hyperlinks hyperlink,
       Users sharedUser,
@@ -97,6 +99,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       Users participant,
       Snapshots snapshot,
       Assets asset,
+      Chains chain,
       Stickers sticker,
       Hyperlinks hyperlink,
       Users sharedUser,
@@ -124,7 +127,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }) =>
       db.baseMessageItems(
           where,
-          (message, sender, participant, snapshot, asset, sticker, hyperlink,
+          (message, sender, participant, snapshot, asset, _, sticker, hyperlink,
                   sharedUser, conversation, messageMention, pinMessage, em) =>
               order?.call(
                   message,
@@ -139,7 +142,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   messageMention,
                   pinMessage,
                   em) ??
-              OrderBy([OrderingTerm.desc(message.createdAt)]),
+              OrderBy([
+                OrderingTerm.desc(message.createdAt),
+                OrderingTerm.desc(message.rowId)
+              ]),
           limit);
 
   Future<T> _sendInsertOrReplaceEventWithFuture<T>(
@@ -238,7 +244,38 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         updates: {db.messagesFts},
       );
 
-  Future<void> deleteMessage(String messageId) async {
+  Future<void> deleteMessage(
+    String conversationId,
+    String messageId,
+  ) async {
+    Future<void> updateConversationLastMessageId() async {
+      final messages = db.messages;
+      final lastTwo = await (selectOnly(messages)
+            ..addColumns([messages.messageId, messages.createdAt])
+            ..where(messages.conversationId.equals(conversationId))
+            ..limit(2)
+            ..orderBy([OrderingTerm.desc(messages.createdAt)]))
+          .map((row) => Tuple2(
+              row.read(messages.messageId),
+              messages.createdAt.converter
+                  .fromSql(row.read(messages.createdAt))))
+          .get();
+
+      if (lastTwo.isEmpty) return;
+      if (lastTwo.firstOrNull?.item1 != messageId) return;
+
+      final newLast = lastTwo.lastOrNull;
+
+      await (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ConversationsCompanion(
+        lastMessageId: Value(newLast?.item1),
+        lastMessageCreatedAt: Value(newLast?.item2),
+      ));
+    }
+
+    await updateConversationLastMessageId();
+
     await db.transaction(() async {
       await Future.wait([
         (delete(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
@@ -249,7 +286,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         (delete(db.transcriptMessages)
               ..where((tbl) => tbl.transcriptId.equals(messageId)))
             .go(),
-        _recallPinMessage(messageId),
+        _recallPinMessage(conversationId, messageId),
         db.pinMessageDao.deleteByIds([messageId]),
         db.expiredMessageDao.deleteByMessageId(messageId),
       ]);
@@ -439,8 +476,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<int> markMessageRead(
-    Iterable<String> messageIds,
-  ) async {
+    Iterable<String> messageIds, {
+    bool updateExpired = true,
+  }) async {
     final result = await (db.update(db.messages)
           ..where((tbl) =>
               tbl.messageId.isIn(messageIds) &
@@ -448,7 +486,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               tbl.status.equalsValue(MessageStatus.unknown).not()))
         .write(const MessagesCompanion(status: Value(MessageStatus.read)));
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
-    await db.expiredMessageDao.onMessageRead(messageIds);
+    if (updateExpired) {
+      await db.expiredMessageDao.onMessageRead(messageIds);
+    }
     return result;
   }
 
@@ -469,10 +509,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   ]) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
+                  _________, __________, ___________, em) =>
               message.conversationId.equals(conversationId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, em) =>
+                  __________, ___________, ____________, em) =>
               Limit(limit, offset));
 
   Selectable<int> messageCountByConversationId(String conversationId) {
@@ -576,10 +616,20 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           .map((row) => row.read(db.messages.messageId.count())!)
           .getSingle();
 
-  Future<int> updateQuoteContentByQuoteId(
+  Future<void> updateQuoteContentByQuoteId(
       String conversationId, String quoteMessageId, String content) async {
-    final messageIds = await _findMessageIdByQuoteMessageId(quoteMessageId);
-    return _sendInsertOrReplaceEventWithFuture(
+    final messageIds = (await (db.selectOnly(db.messages, distinct: true)
+              ..addColumns([db.messages.messageId])
+              ..where(db.messages.conversationId.equals(conversationId) &
+                  db.messages.quoteMessageId.equals(quoteMessageId)))
+            .map((row) => row.read(db.messages.messageId))
+            .get())
+        .whereNotNull()
+        .toList();
+
+    if (messageIds.isEmpty) return;
+
+    await _sendInsertOrReplaceEventWithFuture(
         messageIds,
         (db.update(db.messages)
               ..where((tbl) =>
@@ -588,18 +638,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             .write(MessagesCompanion(quoteContent: Value(content))));
   }
 
-  Future<List<String>> _findMessageIdByQuoteMessageId(
-      String quoteMessageId) async {
-    final future = await (db.selectOnly(db.messages, distinct: true)
-          ..addColumns([db.messages.messageId])
-          ..where(db.messages.quoteMessageId.equals(quoteMessageId)))
-        .map((row) => row.read(db.messages.messageId))
-        .get();
-    return future.whereNotNull().toList();
-  }
-
   Future<int> updateAttachmentMessageContentAndStatus(
-          String messageId, String content) =>
+          String messageId, String content, String? key, String? digest) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
         (db.update(db.messages)
@@ -607,6 +647,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             .write(MessagesCompanion(
           mediaStatus: const Value(MediaStatus.done),
           status: const Value(MessageStatus.sending),
+          mediaKey: key != null ? Value(key) : const Value.absent(),
+          mediaDigest: digest != null ? Value(digest) : const Value.absent(),
           content: Value(content),
         )),
       );
@@ -718,23 +760,23 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           String conversationId, int limit, int offset) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
+                  _________, __________, ___________, em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(_mediaMessageTypes),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, em) =>
+                  __________, ___________, ____________, em) =>
               Limit(limit, offset));
 
   Selectable<MessageItem> mediaMessagesBefore(
           int rowId, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________) =>
+                  _________, __________, ___________, ____________) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(_mediaMessageTypes) &
               message.rowId.isSmallerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________) =>
+                  __________, ___________, ____________, _____________) =>
               Limit(limit, 0),
           order: (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________, ___________) =>
@@ -744,12 +786,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           int rowId, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
+                  _________, __________, ___________, em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(_mediaMessageTypes) &
               message.rowId.isBiggerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________) =>
+                  __________, ___________, ____________, _____________) =>
               Limit(limit, 0),
           order: (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________, ___________) =>
@@ -759,57 +801,57 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           String conversationId, int limit, int offset) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
+                  _________, __________, ___________, em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, em) =>
+                  __________, ___________, ____________, em) =>
               Limit(limit, offset));
 
   Selectable<MessageItem> postMessagesBefore(
           int rowId, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
+                  _________, __________, ___________, em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']) &
               message.rowId.isSmallerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, em) =>
+                  __________, ___________, ____________, em) =>
               Limit(limit, 0));
 
   Selectable<MessageItem> fileMessages(
           String conversationId, int limit, int offset) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
+                  _________, __________, ___________, em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, em) =>
+                  __________, ___________, ____________, em) =>
               Limit(limit, offset));
 
   Selectable<MessageItem> fileMessagesBefore(
           int rowId, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
+                  _________, __________, ___________, em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']) &
               message.rowId.isSmallerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, em) =>
+                  __________, ___________, ____________, em) =>
               Limit(limit, 0));
 
   Selectable<MessageItem> beforeMessagesByConversationId(
           int rowId, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
+                  _________, __________, ___________, em) =>
               message.conversationId.equals(conversationId) &
               message.rowId.isSmallerThanValue(rowId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, em) =>
+                  __________, ___________, ____________, em) =>
               Limit(limit, 0));
 
   Selectable<MessageItem> afterMessagesByConversationId(
@@ -817,13 +859,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           {bool orEqual = false}) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
+                  _________, __________, ___________, em) =>
               message.conversationId.equals(conversationId) &
               (orEqual
                   ? message.rowId.isBiggerOrEqualValue(rowId)
                   : message.rowId.isBiggerThanValue(rowId)),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, em) =>
+                  __________, ___________, ____________, em) =>
               Limit(limit, 0),
           order: (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________, em) =>
@@ -833,19 +875,19 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           String messageId) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
+                  _________, __________, ___________, em) =>
               message.messageId.equals(messageId),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, em) =>
+                  __________, ___________, ____________, em) =>
               Limit(1, 0));
 
   Selectable<MessageItem> messageItemByMessageIds(List<String> messageIds) =>
       _baseMessageItems(
         (message, _, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, em) =>
+                __________, ___________, em) =>
             message.messageId.isIn(messageIds),
         (_, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, em) =>
+                __________, ___________, ____________, em) =>
             maxLimit,
         order: (message, _, __, ___, ____, _____, ______, _______, ________,
                 _________, __________, em) =>
@@ -859,8 +901,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }) async {
     final rowId = await messageRowId(messageId).getSingleOrNull() ?? -1;
     return _baseMessageItems(
-      (message, _, __, ___, ____, _____, ______, _______, conversation,
-              ________, _________, em) =>
+      (message, _, __, ___, ____, _____, ______, _______, ________,
+              conversation, _________, ___________, em) =>
           conversation.conversationId.equals(conversationId) &
           message.category.isIn([
             MessageCategory.signalAudio,
@@ -871,7 +913,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               message.createdAt.converter.toSql(createdAt)!) &
           message.rowId.isBiggerThanValue(rowId),
       (_, __, ___, ____, _____, ______, _______, ________, _________,
-              __________, ___________, em) =>
+              __________, ___________, ____________, em) =>
           Limit(1, 0),
       order: (message, _, __, ___, ____, _____, ______, _______, ________,
               _________, __________, em) =>
@@ -879,34 +921,40 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ).getSingleOrNull();
   }
 
-  Future<void> _recallPinMessage(String messageId) async {
-    final messageIds = (await (db.selectOnly(db.messages)
-              ..addColumns([db.messages.messageId])
-              ..where(db.messages.category.equals(MessageCategory.messagePin) &
-                  db.messages.quoteMessageId.equals(messageId)))
-            .map((row) => row.read(db.messages.messageId))
-            .get())
-        .whereNotNull();
+  Future<void> _recallPinMessage(
+      String conversationId, String messageId) async {
+    final messages = db.messages;
 
-    if (messageIds.isEmpty) return;
+    while (true) {
+      final messageIds = (await (db.selectOnly(messages)
+                ..addColumns([messages.messageId])
+                ..where(messages.conversationId.equals(conversationId) &
+                    messages.category.equals(MessageCategory.messagePin) &
+                    messages.quoteMessageId.equals(messageId))
+                ..limit(100))
+              .map((row) => row.read(messages.messageId))
+              .get())
+          .whereNotNull();
 
-    await (db.update(db.messages)
-          ..where(
-            (tbl) => tbl.messageId.isIn(messageIds),
-          ))
-        .write(const MessagesCompanion(
-      content: Value(null),
-    ));
+      if (messageIds.isEmpty) return;
 
-    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+      await (db.update(messages)
+            ..where(
+              (tbl) => tbl.messageId.isIn(messageIds),
+            ))
+          .write(const MessagesCompanion(
+        content: Value(null),
+      ));
+
+      db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+    }
   }
 
-  Future<void> recallMessage(String messageId) async {
+  Future<void> recallMessage(String conversationId, String messageId) async {
     await (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))
         .write(const MessagesCompanion(
       category: Value(MessageCategory.messageRecall),
-      status: Value(MessageStatus.read),
       content: Value(null),
       mediaUrl: Value(null),
       mediaMimeType: Value(null),
@@ -932,10 +980,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       quoteContent: Value(null),
     ));
 
-    await _recallPinMessage(messageId);
+    await _recallPinMessage(conversationId, messageId);
 
     await db.pinMessageDao.deleteByIds([messageId]);
-    await db.expiredMessageDao.deleteByMessageId(messageId);
     // Maybe use another event
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
     db.eventBus.send(DatabaseEvent.notification, messageId);
@@ -1321,5 +1368,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         mediaUrl: Value(mediaUrl),
         mediaSize: Value(mediaSize),
         thumbImage: Value(thumbImage),
+      ));
+
+  Future<void> updateCategoryById(String messageId, String category) =>
+      (db.update(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
+          .write(MessagesCompanion(
+        category: Value(category),
       ));
 }

@@ -17,6 +17,7 @@ import '../../../utils/local_notification_center.dart';
 import '../../../widgets/toast.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'conversation_list_bloc.dart';
+import 'recent_conversation_cubit.dart';
 
 class ConversationState extends Equatable {
   const ConversationState({
@@ -215,6 +216,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     String? initialChatSidePage,
     String? keyword,
     bool sync = false,
+    bool checkCurrentUserExist = false,
   }) async {
     final accountServer = context.accountServer;
     final database = context.database;
@@ -239,7 +241,10 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
     if (_conversation == null && sync) {
       showToastLoading();
-      await context.accountServer.refreshConversation(conversationId);
+      await context.accountServer.refreshConversation(
+        conversationId,
+        checkCurrentUserExist: checkCurrentUserExist,
+      );
       _conversation = await _conversationItem(context, conversationId);
     }
 
@@ -286,6 +291,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
         .pushPage(ResponsiveNavigatorCubit.chatPage);
 
     unawaited(dismissByConversationId(conversationId));
+    context.read<RecentConversationCubit>().add(conversationId);
   }
 
   static Future<void> selectUser(

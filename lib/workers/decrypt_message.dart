@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze_message.dart';
@@ -27,15 +28,17 @@ import '../crypto/signal/signal_protocol.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
-import '../db/mixin_database.dart';
 import '../db/mixin_database.dart' as db;
+import '../db/mixin_database.dart';
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
 import '../enum/system_circle_action.dart';
 import '../enum/system_user_action.dart';
 import '../utils/extension/extension.dart';
+import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
+import '../widgets/message/send_message_dialog/attachment_extra.dart';
 import 'injector.dart';
 import 'isolate_event.dart';
 import 'message_worker_isolate.dart';
@@ -93,7 +96,7 @@ class DecryptMessage extends Injector {
       final expiredAt =
           data.createdAt.millisecondsSinceEpoch ~/ 1000 + data.expireIn;
       await database.expiredMessageDao
-          .updateMessageExpireAt(message.messageId, expiredAt);
+          .updateMessageExpireAt(expiredAt, message.messageId);
     }
   }
 
@@ -460,33 +463,44 @@ class DecryptMessage extends Injector {
         RecallMessage.fromJson(_jsonDecode(data.data) as Map<String, dynamic>);
     final message = await database.messageDao
         .findMessageByMessageId(recallMessage.messageId);
-    if (message != null && message.category.isAttachment) {
-      _isolateEventSender(
-        WorkerIsolateEventType.requestDownloadAttachment,
-        AttachmentCancelRequest(
-          messageId: message.messageId,
-        ),
-      );
-      if (message.mediaUrl?.isNotEmpty ?? false) {
-        final file = File(message.mediaUrl!);
-        final exists = file.existsSync();
-        if (exists) {
-          await file.delete();
+
+    await database.messageDao
+        .recallMessage(data.conversationId, recallMessage.messageId);
+
+    await Future.wait([
+      (() async {
+        if (message != null && message.category.isAttachment) {
+          _isolateEventSender(
+            WorkerIsolateEventType.requestDownloadAttachment,
+            AttachmentCancelRequest(
+              messageId: message.messageId,
+            ),
+          );
+          if (message.mediaUrl?.isNotEmpty ?? false) {
+            final file = File(message.mediaUrl!);
+            final exists = file.existsSync();
+            if (exists) {
+              await file.delete();
+            }
+          }
         }
-      }
-    }
-    await database.messageDao.recallMessage(recallMessage.messageId);
-    await database.messageMentionDao
-        .deleteMessageMentionByMessageId(recallMessage.messageId);
-    final quoteMessage = await database.messageDao
-        .findMessageItemById(data.conversationId, recallMessage.messageId);
-    if (quoteMessage != null) {
-      await database.messageDao.updateQuoteContentByQuoteId(
-          data.conversationId, recallMessage.messageId, quoteMessage.toJson());
-    }
-    await database.messageDao.deleteFtsByMessageId(recallMessage.messageId);
-    await database.messagesHistoryDao
-        .insert(MessagesHistoryData(messageId: data.messageId));
+      })(),
+      (() async {
+        final quoteMessage = await database.messageDao
+            .findMessageItemById(data.conversationId, recallMessage.messageId);
+        if (quoteMessage != null) {
+          await database.messageDao.updateQuoteContentByQuoteId(
+              data.conversationId,
+              recallMessage.messageId,
+              quoteMessage.toJson());
+        }
+      })(),
+      database.messageMentionDao
+          .deleteMessageMentionByMessageId(recallMessage.messageId),
+      database.messageDao.deleteFtsByMessageId(recallMessage.messageId),
+      database.messagesHistoryDao
+          .insert(MessagesHistoryData(messageId: data.messageId)),
+    ]);
   }
 
   Future<Message> _generateMessage(
@@ -542,6 +556,11 @@ class DecryptMessage extends Injector {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
+      final content = await jsonEncodeWithIsolate(AttachmentExtra(
+              attachmentId: attachment.attachmentId,
+              messageId: data.messageId,
+              shareable: attachment.shareable)
+          .toJson());
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -549,7 +568,7 @@ class DecryptMessage extends Injector {
               conversationId: data.conversationId,
               userId: data.senderId,
               category: data.category!,
-              content: attachment.attachmentId,
+              content: content,
               mediaMimeType: attachment.mimeType,
               mediaSize: attachment.size,
               mediaWidth: attachment.width,
@@ -569,6 +588,11 @@ class DecryptMessage extends Injector {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
+      final content = await jsonEncodeWithIsolate(AttachmentExtra(
+              attachmentId: attachment.attachmentId,
+              messageId: data.messageId,
+              shareable: attachment.shareable)
+          .toJson());
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -576,7 +600,7 @@ class DecryptMessage extends Injector {
               conversationId: data.conversationId,
               userId: data.senderId,
               category: data.category!,
-              content: attachment.attachmentId,
+              content: content,
               name: attachment.name,
               mediaMimeType: attachment.mimeType,
               mediaDuration: attachment.duration.toString(),
@@ -598,6 +622,11 @@ class DecryptMessage extends Injector {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
+      final content = await jsonEncodeWithIsolate(AttachmentExtra(
+              attachmentId: attachment.attachmentId,
+              messageId: data.messageId,
+              shareable: attachment.shareable)
+          .toJson());
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -605,7 +634,7 @@ class DecryptMessage extends Injector {
               conversationId: data.conversationId,
               userId: data.senderId,
               category: data.category!,
-              content: attachment.attachmentId,
+              content: content,
               name: attachment.name,
               mediaMimeType: attachment.mimeType,
               mediaSize: attachment.size,
@@ -623,6 +652,11 @@ class DecryptMessage extends Injector {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
           await jsonDecode(plain) as Map<String, dynamic>);
+      final content = await jsonEncodeWithIsolate(AttachmentExtra(
+              attachmentId: attachment.attachmentId,
+              messageId: data.messageId,
+              shareable: attachment.shareable)
+          .toJson());
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -630,7 +664,7 @@ class DecryptMessage extends Injector {
               conversationId: data.conversationId,
               userId: data.senderId,
               category: data.category!,
-              content: attachment.attachmentId,
+              content: content,
               name: attachment.name,
               mediaMimeType: attachment.mimeType,
               mediaSize: attachment.size,
@@ -931,19 +965,38 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
-    final messageIds = <String>[];
+    // key: messageId, value: message expired.
+    final messagesWithExpiredAt = <Tuple2<String, int?>>[];
     messages
         .where((m) => m.status == 'READ' || m.status == 'MENTION_READ')
         .forEach((m) async {
       if (m.status == 'MENTION_READ') {
         await database.messageMentionDao.markMentionRead(m.messageId);
       } else if (m.status == 'READ') {
-        messageIds.add(m.messageId);
+        messagesWithExpiredAt.add(Tuple2(m.messageId, m.expireAt));
       }
     });
 
-    if (messageIds.isNotEmpty) {
-      await database.messageDao.markMessageRead(messageIds);
+    if (messagesWithExpiredAt.isNotEmpty) {
+      final messageIds = messagesWithExpiredAt.map((e) => e.item1).toList();
+      await database.messageDao
+          .markMessageRead(messageIds, updateExpired: false);
+      for (final item in messagesWithExpiredAt) {
+        final messageId = item.item1;
+        final expireAt = item.item2;
+        if (expireAt != null && expireAt > 0) {
+          await database.expiredMessageDao
+              .updateMessageExpireAt(expireAt, messageId);
+        } else {
+          final expiredMessage = await database.expiredMessageDao
+              .getExpiredMessageById(messageId)
+              .getSingleOrNull();
+          if (expiredMessage != null) {
+            w('expireAt is null or 0. messageId: $messageId');
+            await database.expiredMessageDao.onMessageRead([messageId]);
+          }
+        }
+      }
       final conversationIds =
           await database.messageDao.findConversationIdsByMessages(messageIds);
       for (final cId in conversationIds) {
@@ -1017,9 +1070,14 @@ class DecryptMessage extends Injector {
         data.category == MessageCategory.signalAudio) {
       final attachment = AttachmentMessage.fromJson(
           _jsonDecode(plaintext) as Map<String, dynamic>);
+      final content = await jsonEncodeWithIsolate(AttachmentExtra(
+              attachmentId: attachment.attachmentId,
+              messageId: data.messageId,
+              shareable: attachment.shareable)
+          .toJson());
       final messagesCompanion = MessagesCompanion(
           status: Value(data.status),
-          content: Value(attachment.attachmentId),
+          content: Value(content),
           mediaMimeType: Value(attachment.mimeType),
           mediaSize: Value(attachment.size),
           mediaStatus: const Value(MediaStatus.canceled),
@@ -1033,6 +1091,14 @@ class DecryptMessage extends Injector {
           mediaDuration: Value(attachment.duration.toString()));
       await database.messageDao
           .updateAttachmentMessage(messageId, messagesCompanion);
+
+      final message =
+          await database.messageDao.findMessageByMessageId(messageId);
+
+      if (message != null) {
+        _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
+            AttachmentDownloadRequest(message));
+      }
     } else if (data.category == MessageCategory.signalSticker) {
       final plain = _decode(plaintext);
       final stickerMessage = StickerMessage.fromJson(

@@ -9,6 +9,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   flutter_app_icon_badge
   pasteboard
+  platform_device_id_windows
   protocol_handler
   quick_breakpad
   screen_retriever

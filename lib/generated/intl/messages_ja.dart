@@ -220,6 +220,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "conversationDeleteTitle": m11,
         "copy": MessageLookupByLibrary.simpleMessage("コピー"),
         "copyInvite": MessageLookupByLibrary.simpleMessage("招待リンクをコピーする"),
+        "copyLink": MessageLookupByLibrary.simpleMessage("リンクをコピー"),
         "create": MessageLookupByLibrary.simpleMessage("作成"),
         "createCircle": MessageLookupByLibrary.simpleMessage("新しいグループリスト"),
         "createConversation":

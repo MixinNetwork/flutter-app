@@ -3,8 +3,8 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 
-import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
@@ -16,6 +16,7 @@ import '../../db/dao/transcript_message_dao.dart';
 import '../../db/mixin_database.dart';
 import '../../db/util/util.dart';
 import '../../enum/media_status.dart';
+import '../../widgets/message/send_message_dialog/attachment_extra.dart';
 import '../../widgets/toast.dart';
 import '../crypto_util.dart';
 import '../extension/extension.dart';
@@ -29,8 +30,8 @@ part 'attachment_download_job.dart';
 part 'attachment_upload_job.dart';
 
 final _dio = Dio(BaseOptions(
-  connectTimeout: 150 * 1000,
-  receiveTimeout: 150 * 1000,
+  connectTimeout: const Duration(milliseconds: 150 * 1000),
+  receiveTimeout: const Duration(milliseconds: 150 * 1000),
 ));
 
 // isolate kill message
@@ -60,11 +61,15 @@ class AttachmentUtil extends ChangeNotifier {
     this._transcriptMessageDao,
     this.mediaPath,
   ) {
-    (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
-        (client) {
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-    };
+    final httpClientAdapter = _dio.httpClientAdapter;
+    if (httpClientAdapter is IOHttpClientAdapter) {
+      httpClientAdapter.onHttpClientCreate = (client) {
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
+      };
+    } else {
+      w('httpClientAdapter is not IOHttpClientAdapter');
+    }
     transcriptPath = p.join(mediaPath, 'Transcripts');
     Directory(transcriptPath).create(recursive: true);
   }
@@ -74,13 +79,6 @@ class AttachmentUtil extends ChangeNotifier {
   final MessageDao _messageDao;
   final TranscriptMessageDao _transcriptMessageDao;
   final Client _client;
-
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: 150 * 1000,
-      receiveTimeout: 150 * 1000,
-    ),
-  );
 
   final _attachmentJob = <String, _AttachmentJobBase>{};
 
@@ -162,6 +160,19 @@ class AttachmentUtil extends ChangeNotifier {
       return;
     }
 
+    String attachmentId;
+    bool? shareable;
+
+    try {
+      final json = await jsonDecodeWithIsolate(content);
+      final attachmentExtra =
+          AttachmentExtra.fromJson(json as Map<String, dynamic>);
+      attachmentId = attachmentExtra.attachmentId;
+      shareable = attachmentExtra.shareable;
+    } catch (e) {
+      attachmentId = content;
+    }
+
     final file = getAttachmentFile(
       category,
       conversationId,
@@ -176,7 +187,7 @@ class AttachmentUtil extends ChangeNotifier {
     if (file.existsSync()) await file.delete();
 
     try {
-      final response = await _client.attachmentApi.getAttachment(content);
+      final response = await _client.attachmentApi.getAttachment(attachmentId);
       d('download ${response.data.viewUrl}');
 
       if (await isNotPending(messageId)) return;
@@ -230,9 +241,14 @@ class AttachmentUtil extends ChangeNotifier {
         final fileSize = await file.length();
 
         if (attachmentMessage != null) {
-          attachmentMessage.createdAt = response.data.createdAt;
-          final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-          await _messageDao.updateMessageContent(messageId, encoded);
+          final content = await jsonEncodeWithIsolate(AttachmentExtra(
+            attachmentId: response.data.attachmentId,
+            messageId: messageId,
+            createdAt: response.data.createdAt,
+            shareable: shareable,
+          ).toJson());
+
+          await _messageDao.updateMessageContent(messageId, content);
         }
 
         if (message != null && transcriptMessage != null) {

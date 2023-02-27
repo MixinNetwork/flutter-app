@@ -49,6 +49,7 @@ SELECT message.message_id AS messageId,
     snapshot.asset_id AS assetId,
     asset.symbol AS assetSymbol,
     asset.icon_url AS assetIcon,
+    chain.icon_url AS chainIcon,
     hyperlink.site_name AS siteName,
     hyperlink.site_title AS siteTitle,
     hyperlink.site_description AS siteDescription,
@@ -61,6 +62,7 @@ FROM messages message
          LEFT JOIN users participant ON message.participant_id = participant.user_id
          LEFT JOIN snapshots snapshot ON message.snapshot_id = snapshot.snapshot_id
          LEFT JOIN assets asset ON snapshot.asset_id = asset.asset_id
+         LEFT JOIN chains chain ON asset.chain_id = chain.chain_id
          LEFT JOIN stickers sticker ON sticker.sticker_id = message.sticker_id
          LEFT JOIN hyperlinks hyperlink ON message.hyperlink = hyperlink.hyperlink
          LEFT JOIN users sharedUser ON message.shared_user_id = sharedUser.user_id

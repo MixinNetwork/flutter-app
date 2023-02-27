@@ -296,7 +296,7 @@ class _UserProfileButtonBar extends StatelessWidget {
               buildMenus: () => [
                 ContextMenu(
                   icon: Resources.assetsImagesContextMenuCopySvg,
-                  title: context.l10n.copyInvite,
+                  title: context.l10n.copyLink,
                   onTap: () async {
                     i('share contact ${user.userId} ${user.codeUrl}');
                     await Clipboard.setData(ClipboardData(text: user.codeUrl));
@@ -304,9 +304,10 @@ class _UserProfileButtonBar extends StatelessWidget {
                 ),
               ],
               interactiveForTap: true,
-              child: const ActionButton(
+              child: ActionButton(
                 name: Resources.assetsImagesInviteShareSvg,
                 interactive: false,
+                color: context.theme.icon,
               ),
             ),
           );

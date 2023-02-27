@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:path/path.dart' as p;
 import 'package:protocol_handler/protocol_handler.dart';
@@ -23,7 +24,6 @@ import 'utils/app_lifecycle.dart';
 import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
-import 'utils/logger.dart';
 import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/web_view/web_view_desktop.dart';
@@ -59,7 +59,7 @@ Future<void> main(List<String> args) async {
     'crash',
   )));
 
-  unawaited(LogFileManager.init(mixinLogDirectory.path));
+  unawaited(initLogger(mixinLogDirectory.path));
 
   debugHighlightDeprecatedWidgets = true;
 

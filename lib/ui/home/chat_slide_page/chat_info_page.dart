@@ -145,7 +145,7 @@ class ChatInfoPage extends HookWidget {
                         buildMenus: () => [
                           ContextMenu(
                             icon: Resources.assetsImagesContextMenuCopySvg,
-                            title: context.l10n.copyInvite,
+                            title: context.l10n.copyLink,
                             onTap: () async {
                               final userId = conversation.userId;
                               if (userId == null) {
@@ -169,9 +169,10 @@ class ChatInfoPage extends HookWidget {
                           ),
                         ],
                         interactiveForTap: true,
-                        child: const ActionButton(
+                        child: ActionButton(
                           name: Resources.assetsImagesInviteShareSvg,
                           interactive: false,
+                          color: context.theme.icon,
                         ),
                       ),
                     );
@@ -386,8 +387,7 @@ class ChatInfoPage extends HookWidget {
                           context,
                           context.l10n.unblock,
                         );
-                        if (!result) return;
-
+                        if (result == null) return;
                         await runFutureWithToast(
                           accountServer.unblockUser(conversation.userId!),
                         );
@@ -407,8 +407,7 @@ class ChatInfoPage extends HookWidget {
                             context,
                             title,
                           );
-                          if (!result) return;
-
+                          if (result == null) return;
                           await runFutureWithToast(
                             accountServer.removeUser(conversation.userId!),
                           );
@@ -425,8 +424,7 @@ class ChatInfoPage extends HookWidget {
                           context,
                           context.l10n.block,
                         );
-                        if (!result) return;
-
+                        if (result == null) return;
                         await runFutureWithToast(
                           accountServer.blockUser(conversation.userId!),
                         );
@@ -441,8 +439,7 @@ class ChatInfoPage extends HookWidget {
                         context,
                         context.l10n.clearChat,
                       );
-                      if (!result) return;
-
+                      if (result == null) return;
                       await accountServer.database.messageDao
                           .deleteMessageByConversationId(conversationId);
                       context.read<MessageBloc>().reload();
@@ -459,8 +456,7 @@ class ChatInfoPage extends HookWidget {
                             context,
                             context.l10n.exitGroup,
                           );
-                          if (!result) return;
-
+                          if (result == null) return;
                           await runFutureWithToast(
                             accountServer.exitGroup(conversationId),
                           );
@@ -481,8 +477,7 @@ class ChatInfoPage extends HookWidget {
                             context,
                             context.l10n.deleteGroup,
                           );
-                          if (!result) return;
-
+                          if (result == null) return;
                           await context.database.messageDao
                               .deleteMessageByConversationId(conversationId);
                           await context.database.conversationDao
@@ -512,7 +507,7 @@ class ChatInfoPage extends HookWidget {
                       context,
                       context.l10n.reportAndBlock,
                     );
-                    if (!result) return;
+                    if (result == null) return;
                     final userId = conversation.userId;
                     if (userId == null) return;
 

@@ -5,13 +5,17 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../logger.dart';
 
-const kMixinVersion = '0.37.8';
+// auto added by .github/workflows/manual-build.yml
+const _kAppVersion =
+    String.fromEnvironment('APP_VERSION', defaultValue: '0.37.0');
+const _kAppBuildNumber =
+    String.fromEnvironment('APP_BUILD_NUMBER', defaultValue: '0');
 
 final _packageInfo = PackageInfo(
   appName: 'mixin',
   packageName: 'mixin_desktop',
-  version: kMixinVersion,
-  buildNumber: '',
+  version: _kAppVersion,
+  buildNumber: _kAppBuildNumber,
 );
 
 /// Returns the package info of the current app.
@@ -29,7 +33,16 @@ Future<PackageInfo> getPackageInfo() async {
   return _packageInfo;
 }
 
-Future<String> generateUserAgent(PackageInfo packageInfo) async {
+Future<String?> generateUserAgent() async {
+  try {
+    return await _generateUserAgent(await getPackageInfo());
+  } catch (error, stack) {
+    e('generate user agent failed. $error $stack');
+    return null;
+  }
+}
+
+Future<String> _generateUserAgent(PackageInfo packageInfo) async {
   String? systemAndVersion;
   if (Platform.isMacOS) {
     try {

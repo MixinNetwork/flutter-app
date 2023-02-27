@@ -146,7 +146,7 @@ class _SetupNameWidget extends HookWidget {
                     fullName: textEditingController.text.trim(),
                   );
                 } on MixinApiError catch (error) {
-                  final mixinError = error.error as MixinError;
+                  final mixinError = error.error! as MixinError;
                   showToastFailed(
                     ToastError(mixinError.toDisplayString(context)),
                   );
