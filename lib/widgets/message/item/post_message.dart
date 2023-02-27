@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:markdown_widget/markdown_widget.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
@@ -79,11 +78,9 @@ class MessagePost extends StatelessWidget {
                       minWidth: 128,
                       maxHeight: 400,
                     ),
-                    child: MarkdownWidget(
+                    child: Markdown(
                       data: postContent,
-                      config: context.brightness == Brightness.dark
-                          ? MarkdownConfig.darkConfig
-                          : MarkdownConfig.defaultConfig,
+                      physics: const NeverScrollableScrollPhysics(),
                     ),
                   );
                 }),
@@ -170,7 +167,6 @@ class PostPreview extends StatelessWidget {
                 data: message.content ?? '',
                 padding:
                     const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
-                darkMode: context.brightnessValue != 0,
               ),
             ),
           ],
