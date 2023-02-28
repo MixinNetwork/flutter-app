@@ -1302,10 +1302,10 @@ packages:
     dependency: "direct main"
     description:
       name: protocol_handler
-      sha256: "4ff265b97f95f3005dd4b78003fee296e2ed2d088c99f8cf65001378be43095a"
+      sha256: be85285f5cdc2541bb5ae5368f1c9924eeaae8d28e74c7235b7cd2c02521d760
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.4"
+    version: "0.1.5"
   provider:
     dependency: "direct main"
     description:
@@ -1810,10 +1810,10 @@ packages:
     dependency: "direct main"
     description:
       name: window_manager
-      sha256: "5bdd29dc5f1f3185fc90696373a571d77968e03e5e820fb1ecdbdade3f5d8fff"
+      sha256: "492806c69879f0d28e95472bbe5e8d5940ac8c6e99cc07052fe14946974555ba"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.3.1"
   window_size:
     dependency: "direct main"
     description:
