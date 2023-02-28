@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:drift/drift.dart';
@@ -290,18 +291,33 @@ QueryExecutor _openConnection(File dbFile) => CustomVmDatabaseWrapper(
 /// Connect to the database.
 Future<MixinDatabase> connectToDatabase(
   String identityNumber, {
+  int readCount = 4,
   bool fromMainIsolate = false,
 }) async {
   final backgroundPortName = 'one_mixin_drift_background_$identityNumber';
+  final foregroundPortName = 'one_mixin_drift_foreground_$identityNumber';
 
-  final driftIsolate = await _crateIsolate(
+  final writeIsolate = await _crateIsolate(
     identityNumber,
     backgroundPortName,
     fromMainIsolate: fromMainIsolate,
   );
 
-  final connect = await driftIsolate.connect();
+  final write = await writeIsolate.connect();
 
+  final reads = await Future.wait(List.generate(readCount, (i) async {
+    final isolate = await _crateIsolate(
+      identityNumber,
+      '${foregroundPortName}_$i',
+      fromMainIsolate: fromMainIsolate,
+    );
+    return isolate.connect();
+  }));
+
+  final connect = write.withExecutor(MultiExecutor.withReadPool(
+    reads: reads.map((e) => e.executor).toList(),
+    write: write.executor,
+  ));
   return MixinDatabase.connect(connect);
 }
 
@@ -315,23 +331,36 @@ Future<DriftIsolate> _crateIsolate(
     IsolateNameServer.removePortNameMapping(name);
   }
 
-  final existedSendPort = IsolateNameServer.lookupPortByName(name);
+  final existingIsolate = IsolateNameServer.lookupPortByName(name);
 
-  if (existedSendPort == null) {
+  if (existingIsolate == null) {
     assert(fromMainIsolate, 'Isolate should be created from main isolate');
-
     final dbFile =
         File(p.join(mixinDocumentsDirectory.path, identityNumber, 'mixin.db'));
-
-    final driftIsolate = await DriftIsolate.spawn(
-      () => LazyDatabase(
-        () => _openConnection(dbFile),
-      ),
+    final receivePort = ReceivePort();
+    await Isolate.spawn(
+      _startBackground,
+      _IsolateStartRequest(receivePort.sendPort, dbFile),
     );
-
-    IsolateNameServer.registerPortWithName(driftIsolate.connectPort, name);
-    return driftIsolate;
+    final isolate = await receivePort.first as DriftIsolate;
+    IsolateNameServer.registerPortWithName(isolate.connectPort, name);
+    return isolate;
   } else {
-    return DriftIsolate.fromConnectPort(existedSendPort, serialize: false);
+    return DriftIsolate.fromConnectPort(existingIsolate, serialize: false);
   }
+}
+
+void _startBackground(_IsolateStartRequest request) {
+  final executor = _openConnection(request.dbFile);
+  final isolate = DriftIsolate.inCurrent(
+    () => DatabaseConnection(executor),
+  );
+  request.sendMoorIsolate.send(isolate);
+}
+
+class _IsolateStartRequest {
+  _IsolateStartRequest(this.sendMoorIsolate, this.dbFile);
+
+  final SendPort sendMoorIsolate;
+  final File dbFile;
 }

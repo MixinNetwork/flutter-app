@@ -2,5 +2,8 @@
 
 part of 'pin_message_dao.dart';
 
-// ignore_for_file: type=lint
+// **************************************************************************
+// DaoGenerator
+// **************************************************************************
+
 mixin _$PinMessageDaoMixin on DatabaseAccessor<MixinDatabase> {}

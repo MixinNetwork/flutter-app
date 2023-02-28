@@ -2,5 +2,8 @@
 
 part of 'circle_conversation_dao.dart';
 
-// ignore_for_file: type=lint
+// **************************************************************************
+// DaoGenerator
+// **************************************************************************
+
 mixin _$CircleConversationDaoMixin on DatabaseAccessor<MixinDatabase> {}

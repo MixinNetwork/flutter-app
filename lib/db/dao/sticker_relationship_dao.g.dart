@@ -2,5 +2,8 @@
 
 part of 'sticker_relationship_dao.dart';
 
-// ignore_for_file: type=lint
+// **************************************************************************
+// DaoGenerator
+// **************************************************************************
+
 mixin _$StickerRelationshipDaoMixin on DatabaseAccessor<MixinDatabase> {}
