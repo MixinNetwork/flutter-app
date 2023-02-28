@@ -31,18 +31,18 @@ PODS:
     - FlutterMacOS
   - screen_retriever (0.0.1):
     - FlutterMacOS
-  - sqlite3 (3.40.0):
-    - sqlite3/common (= 3.40.0)
-  - sqlite3/common (3.40.0)
-  - sqlite3/fts5 (3.40.0):
+  - sqlite3 (3.41.0):
+    - sqlite3/common (= 3.41.0)
+  - sqlite3/common (3.41.0)
+  - sqlite3/fts5 (3.41.0):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.40.0):
+  - sqlite3/perf-threadsafe (3.41.0):
     - sqlite3/common
-  - sqlite3/rtree (3.40.0):
+  - sqlite3/rtree (3.41.0):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - FlutterMacOS
-    - sqlite3 (~> 3.40.0)
+    - sqlite3 (~> 3.41.0)
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
@@ -126,21 +126,21 @@ SPEC CHECKSUMS:
   desktop_lifecycle: a600c10e12fe033c7be9078f2e929b8241f2c1e3
   desktop_webview_window: d4365e71bcd4e1aa0c14cf0377aa24db0c16a7e2
   device_info_plus: 5401765fde0b8d062a2f8eb65510fb17e77cf07f
-  file_selector_macos: f1b08a781e66103e3ba279fd5d4024a2478b3af6
+  file_selector_macos: 0f85c1108e2fd597b58246bc0b0c1cb483d7593b
   flutter_app_icon_badge: 099b018a4b36109fb73874411fb4e8b5febac20e
   flutter_local_notifications: 3805ca215b2fb7f397d78b66db91f6a747af52e4
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   ogg_opus_player: 67fc56771b16586b9b2478f848e632f751400604
   package_info_plus: 02d7a575e80f194102bef286361c6c326e4c29ce
   pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
-  path_provider_foundation: 37748e03f12783f9de2cb2c4eadfaa25fe6d4852
+  path_provider_foundation: c68054786f1b4f3343858c1e1d0caaded73f0be9
   platform_device_id: 3e414428f45df149bbbfb623e2c0ca27c545b763
   platform_device_id_macos: f763bb55f088be804d61b96eb4710b8ab6598e94
   protocol_handler: 587e1caf6c0b92ce351ab14081968dae49cb8cc6
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
-  sqlite3: 88dd99ef4ac3945f5a15facdd752933c52fd93bf
-  sqlite3_flutter_libs: 7523e007b12584944a26feaa9975ea741eab136f
-  url_launcher_macos: c04e4fa86382d4f94f6b38f14625708be3ae52e2
+  sqlite3: d31b2b69d59bd1b4ab30e5c92eb18fd8e82fa392
+  sqlite3_flutter_libs: f20746e4a0245afbee4f20d9afc0072ebff7cc26
+  url_launcher_macos: 5335912b679c073563f29d89d33d10d459f95451
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
   window_size: 339dafa0b27a95a62a843042038fa6c3c48de195
 
