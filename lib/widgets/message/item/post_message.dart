@@ -78,7 +78,14 @@ class MessagePost extends StatelessWidget {
                       minWidth: 128,
                       maxHeight: 400,
                     ),
-                    child: MarkdownColumn(data: postContent),
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context)
+                          .copyWith(scrollbars: false),
+                      child: SingleChildScrollView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        child: MarkdownColumn(data: postContent),
+                      ),
+                    ),
                   );
                 }),
                 Positioned(

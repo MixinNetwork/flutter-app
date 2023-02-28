@@ -30,7 +30,8 @@ class MarkdownColumn extends StatelessWidget {
     return ClipRect(
       child: DefaultTextStyle.merge(
         style: TextStyle(color: context.theme.text),
-        child: Wrap(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: widgets,
         ),
       ),
