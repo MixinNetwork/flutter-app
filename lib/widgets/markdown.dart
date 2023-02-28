@@ -9,6 +9,35 @@ import '../utils/extension/extension.dart';
 import '../utils/uri_utils.dart';
 import 'cache_image.dart';
 
+class MarkdownColumn extends StatelessWidget {
+  const MarkdownColumn({super.key, required this.data});
+
+  final String data;
+
+  @override
+  Widget build(BuildContext context) {
+    final widgets = MarkdownGenerator(
+      config: _createMarkdownConfig(
+        context: context,
+        darkMode: context.brightness == Brightness.dark,
+      ),
+      textGenerator: (node, config, visitor) => CustomTextNode(
+        node.textContent,
+        config,
+        visitor,
+      ),
+    ).buildWidgets(data);
+    return ClipRect(
+      child: DefaultTextStyle.merge(
+        style: TextStyle(color: context.theme.text),
+        child: Wrap(
+          children: widgets,
+        ),
+      ),
+    );
+  }
+}
+
 class Markdown extends StatelessWidget {
   const Markdown({
     super.key,
@@ -117,34 +146,11 @@ class _MixinH1Config extends HeadingConfig {
   String get tag => MarkdownTag.h1.name;
 }
 
-///see this issue: https://github.com/dart-lang/markdown/issues/284#event-3216258013
-///use [htmlToMarkdown] to convert HTML in [m.Text] to [m.Node]
-void htmlToMarkdown(h.Node? node, int deep, List<m.Node> mNodes) {
-  if (node == null) return;
-  if (node is h.Text) {
-    mNodes.add(m.Text(node.text));
-  } else if (node is h.Element) {
-    final tag = node.localName;
-    final children = <m.Node>[];
-    node.children.forEach((e) {
-      htmlToMarkdown(e, deep + 1, children);
-    });
-    m.Element element;
-    if (tag == MarkdownTag.img.name || tag == 'video') {
-      element = m.Element(tag!, children);
-      element.attributes.addAll(node.attributes.cast());
-    } else {
-      element = m.Element(tag!, children);
-      element.attributes.addAll(node.attributes.cast());
-    }
-    mNodes.add(element);
-  }
-}
-
 final RegExp htmlRep = RegExp('<[^>]*>', multiLine: true);
 
-///parse [m.Node] to [h.Node]
-List<SpanNode> parseHtml(
+/// parse [m.Node] to [h.Node]
+/// https://github.com/asjqkkkk/markdown_widget/blob/1d549fd5c2d6b0172281d8bb66e367654b9d60f0/example/lib/markdown_custom/html_support.dart
+List<SpanNode> _parseHtml(
   m.Text node, {
   ValueCallback<dynamic>? onError,
   WidgetVisitor? visitor,
@@ -229,8 +235,8 @@ class CustomTextNode extends SpanNode {
     final textStyle = config.p.textStyle.merge(parentStyle);
     if (!text.contains(htmlRep)) return TextSpan(text: text, style: textStyle);
 
-    ///Do not pass [TextNodeGenerator] again!!!
-    final spans = parseHtml(
+    /// Do not pass [TextNodeGenerator] again!!!
+    final spans = _parseHtml(
       m.Text(text),
       visitor:
           WidgetVisitor(config: visitor.config, generators: visitor.generators),

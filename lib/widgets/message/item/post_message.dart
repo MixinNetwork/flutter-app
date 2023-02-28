@@ -78,10 +78,7 @@ class MessagePost extends StatelessWidget {
                       minWidth: 128,
                       maxHeight: 400,
                     ),
-                    child: Markdown(
-                      data: postContent,
-                      physics: const NeverScrollableScrollPhysics(),
-                    ),
+                    child: MarkdownColumn(data: postContent),
                   );
                 }),
                 Positioned(
