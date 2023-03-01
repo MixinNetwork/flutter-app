@@ -298,46 +298,7 @@ class _ConversationSelector extends HookWidget {
                 ],
               ),
             ),
-            Container(
-              height: 32,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              margin: const EdgeInsets.only(top: 8, right: 24, left: 24),
-              decoration: BoxDecoration(
-                color: context.theme.background,
-                borderRadius: const BorderRadius.all(Radius.circular(16)),
-              ),
-              alignment: Alignment.center,
-              child: TextField(
-                onChanged: (string) => conversationFilterCubit.keyword = string,
-                style: TextStyle(
-                  color: context.theme.text,
-                  fontSize: 14,
-                ),
-                autofocus: true,
-                scrollPadding: EdgeInsets.zero,
-                decoration: InputDecoration(
-                  prefixIcon: Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 8),
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesIcSearchSmallSvg,
-                      colorFilter: ColorFilter.mode(
-                        context.theme.secondaryText,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                  prefixIconConstraints: const BoxConstraints(
-                    minHeight: 16,
-                    minWidth: 16,
-                  ),
-                  isDense: true,
-                  hintText: context.l10n.search,
-                  hintStyle: TextStyle(color: context.theme.secondaryText),
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                ),
-              ),
-            ),
+            _FilterTextField(conversationFilterCubit: conversationFilterCubit),
             AnimatedSize(
               alignment: Alignment.topCenter,
               duration: const Duration(milliseconds: 200),
@@ -461,6 +422,83 @@ class _ConversationSelector extends HookWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _FilterTextField extends HookWidget {
+  const _FilterTextField({
+    required this.conversationFilterCubit,
+  });
+
+  final ConversationFilterCubit conversationFilterCubit;
+
+  @override
+  Widget build(BuildContext context) {
+    final isTextEmpty = useMemoizedStream(
+          () => conversationFilterCubit.stream
+              .map((event) => event.keyword?.isEmpty ?? true)
+              .distinct(),
+          keys: [conversationFilterCubit],
+        ).data ??
+        conversationFilterCubit.state.keyword?.isEmpty ??
+        true;
+    return Container(
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.only(top: 8, right: 24, left: 24),
+      decoration: BoxDecoration(
+        color: context.theme.background,
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
+      ),
+      alignment: Alignment.center,
+      child: Stack(
+        children: [
+          TextField(
+            onChanged: (string) => conversationFilterCubit.keyword = string,
+            style: TextStyle(
+              color: context.theme.text,
+              fontSize: 14,
+            ),
+            autofocus: true,
+            scrollPadding: EdgeInsets.zero,
+            decoration: InputDecoration(
+              prefixIcon: Padding(
+                padding: const EdgeInsetsDirectional.only(end: 8),
+                child: SvgPicture.asset(
+                  Resources.assetsImagesIcSearchSmallSvg,
+                  colorFilter: ColorFilter.mode(
+                    context.theme.secondaryText,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+              prefixIconConstraints: const BoxConstraints(
+                minHeight: 16,
+                minWidth: 16,
+              ),
+              isDense: true,
+              focusedBorder: InputBorder.none,
+              enabledBorder: InputBorder.none,
+            ),
+          ),
+          if (isTextEmpty)
+            IgnorePointer(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 24, top: 7),
+                child: Text(
+                  context.l10n.search,
+                  style: TextStyle(
+                    color: context.theme.secondaryText,
+                    height: 1,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
