@@ -5,7 +5,6 @@ import 'package:flutter_svg/svg.dart';
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
-import 'animated_visibility.dart';
 import 'interactive_decorated_box.dart';
 
 class SearchTextField extends HookWidget {
@@ -58,6 +57,12 @@ class SearchTextField extends HookWidget {
       };
     }, [controller, onChanged]);
 
+    final textStream = useValueNotifierConvertSteam(controller);
+    final hasText = useMemoizedStream(
+          () => textStream.map((event) => event.text.isNotEmpty).distinct(),
+        ).data ??
+        controller.text.isNotEmpty;
+
     return InteractiveDecoratedBox(
       decoration: ShapeDecoration(
         color: backgroundColor,
@@ -78,50 +83,56 @@ class SearchTextField extends HookWidget {
             ),
             if (leading != null) leading!,
             Expanded(
-              child: AnimatedSize(
-                duration: const Duration(milliseconds: 200),
-                alignment: Alignment.centerLeft,
-                child: TextField(
-                  focusNode: _focusNode,
-                  autofocus: autofocus,
-                  controller: controller,
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: fontSize,
-                  ),
-                  scrollPadding: EdgeInsets.zero,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    filled: true,
-                    hintText: hintText,
-                    border: InputBorder.none,
-                    fillColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    contentPadding: EdgeInsets.zero,
-                    hintStyle: TextStyle(
-                      color: hintColor,
-                      fontSize: fontSize,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextField(
+                      focusNode: _focusNode,
+                      autofocus: autofocus,
+                      controller: controller,
+                      style: TextStyle(
+                        color: context.theme.text,
+                        fontSize: fontSize,
+                      ),
+                      scrollPadding: EdgeInsets.zero,
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        filled: true,
+                        border: InputBorder.none,
+                        fillColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        contentPadding: EdgeInsets.zero,
+                      ),
                     ),
                   ),
-                ),
+                  if (hintText != null && !hasText)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IgnorePointer(
+                        child: Text(
+                          hintText!,
+                          style: TextStyle(
+                            color: hintColor,
+                            fontSize: fontSize,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-            HookBuilder(builder: (context) {
-              final stream = useValueNotifierConvertSteam(controller);
-              final isNotEmpty = useMemoizedStream(
-                () => stream.map((event) => event.text.trim().isNotEmpty),
-                initialData: showClear,
-              ).requireData;
-
-              return AnimatedVisibility(
-                visible: showClear || isNotEmpty,
-                child: _SearchClearIcon(onTap: () {
-                  controller.text = '';
-                  onTapClear?.call();
-                }),
-              );
-            }),
+            if (showClear || hasText)
+              _SearchClearIcon(onTap: () {
+                controller.text = '';
+                onTapClear?.call();
+              })
+            else
+              const SizedBox(width: 40),
           ],
         ),
       ),

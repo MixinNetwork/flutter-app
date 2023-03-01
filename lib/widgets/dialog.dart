@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../utils/extension/extension.dart';
+import '../utils/hook.dart';
 import 'disable.dart';
 import 'interactive_decorated_box.dart';
 
@@ -266,34 +267,55 @@ class DialogTextField extends HookWidget {
   final int? maxLines;
 
   @override
-  Widget build(BuildContext context) => Container(
-        constraints: const BoxConstraints(minHeight: 48),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          color: context.theme.background,
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
-        ),
-        alignment: Alignment.center,
-        child: TextField(
-          autofocus: true,
-          controller: textEditingController,
-          style: TextStyle(
-            color: context.theme.text,
+  Widget build(BuildContext context) {
+    final textStream = useValueNotifierConvertSteam(textEditingController);
+    final hasText = useMemoizedStream(
+          () => textStream.map((event) => event.text.isNotEmpty).distinct(),
+        ).data ??
+        textEditingController.text.isNotEmpty;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 48),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: context.theme.background,
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
+      ),
+      alignment: Alignment.center,
+      child: Stack(
+        children: [
+          TextField(
+            autofocus: true,
+            controller: textEditingController,
+            style: TextStyle(
+              color: context.theme.text,
+            ),
+            maxLines: maxLines ?? 1,
+            minLines: 1,
+            scrollPadding: EdgeInsets.zero,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.zero,
+              isDense: true,
+              focusedBorder: InputBorder.none,
+              enabledBorder: InputBorder.none,
+            ),
+            inputFormatters: inputFormatters,
           ),
-          maxLines: maxLines ?? 1,
-          minLines: 1,
-          scrollPadding: EdgeInsets.zero,
-          decoration: InputDecoration(
-            contentPadding: EdgeInsets.zero,
-            isDense: true,
-            hintText: hintText,
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
-            focusedBorder: InputBorder.none,
-            enabledBorder: InputBorder.none,
-          ),
-          inputFormatters: inputFormatters,
-        ),
-      );
+          if (hintText.isNotEmpty && !hasText)
+            IgnorePointer(
+              child: Text(
+                hintText,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.08),
+                  height: 1,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 enum DialogEvent {
