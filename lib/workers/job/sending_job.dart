@@ -53,31 +53,27 @@ class SendingJob extends JobQueue<Job> {
   Future<List<Job>> fetchJobs() => database.jobDao.sendingJobs().get();
 
   @override
-  Future<List<Job>?> run(List<Job> jobs) async {
-    final failedJobs = <Job>[];
-
+  Future<void> run(List<Job> jobs) async {
     for (final job in jobs) {
-      Job? failed;
-      switch (job.action) {
-        case kPinMessage:
-          failed = await _runPinJob(job);
-          break;
-        case kRecallMessage:
-          failed = await _runRecallJob(job);
-          break;
-        case kSendingMessage:
-          failed = await _runSendJob(job);
-          break;
-      }
-      if (failed != null) {
-        failedJobs.add(job);
+      try {
+        switch (job.action) {
+          case kPinMessage:
+            await _runPinJob(job);
+            break;
+          case kRecallMessage:
+            await _runRecallJob(job);
+            break;
+          case kSendingMessage:
+            await _runSendJob(job);
+            break;
+        }
+      } catch (e) {
         await Future.delayed(const Duration(seconds: 1));
       }
     }
-    return failedJobs;
   }
 
-  Future<Job?> _runPinJob(Job job) async {
+  Future<void> _runPinJob(Job job) async {
     final list = await utf8EncodeWithIsolate(job.blazeMessage!);
     final data = await base64EncodeWithIsolate(list);
 
@@ -96,11 +92,10 @@ class SendingJob extends JobQueue<Job> {
       }
     } catch (e, s) {
       w('Send pin error: $e, stack: $s');
-      return job;
     }
   }
 
-  Future<Job?> _runRecallJob(Job job) async {
+  Future<void> _runRecallJob(Job job) async {
     final list = await utf8EncodeWithIsolate(job.blazeMessage!);
     final data = await base64EncodeWithIsolate(list);
 
@@ -119,11 +114,10 @@ class SendingJob extends JobQueue<Job> {
       }
     } catch (e, s) {
       w('Send recall error: $e, stack: $s');
-      return job;
     }
   }
 
-  Future<Job?> _runSendJob(Job job) async {
+  Future<void> _runSendJob(Job job) async {
     assert(job.blazeMessage != null);
     String messageId;
     String? recipientId;
@@ -142,7 +136,7 @@ class SendingJob extends JobQueue<Job> {
     var message = await database.messageDao.sendingMessage(messageId);
     if (message == null) {
       await database.jobDao.deleteJobById(job.jobId);
-      return null;
+      return;
     }
 
     if (message.category.isTranscript) {
@@ -188,7 +182,7 @@ class SendingJob extends JobQueue<Job> {
         .getSingleOrNull();
     if (conversation == null) {
       e('Conversation not found');
-      return job;
+      return;
     }
 
     try {
@@ -200,9 +194,9 @@ class SendingJob extends JobQueue<Job> {
       // an invalid user(for example: network user).
       if (error is MixinError && error.code == badData) {
         await database.jobDao.deleteJobById(job.jobId);
-        return null;
+        return;
       }
-      return job;
+      rethrow;
     }
 
     Future<MessageResult> _sendPlainMessage(SendingMessage message) async {

@@ -24,7 +24,7 @@ class AckJob extends JobQueue<Job> {
   Future<List<Job>> fetchJobs() => database.jobDao.ackJobs().get();
 
   @override
-  Future<List<Job>?> run(List<Job> jobs) async {
+  Future<void> run(List<Job> jobs) async {
     final ack = await Future.wait(jobs.map(
       (e) async {
         final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
@@ -41,7 +41,6 @@ class AckJob extends JobQueue<Job> {
     } catch (e, s) {
       w('Send ack error: $e, stack: $s');
       await Future.delayed(const Duration(seconds: 1));
-      return jobs;
     }
   }
 }

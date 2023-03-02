@@ -18,7 +18,7 @@ abstract class JobQueue<T> {
 
   Future<List<T>> fetchJobs();
 
-  Future<List<T>?> run(List<T> jobs);
+  Future<void> run(List<T> jobs);
 
   Future<void> insertJob(T job);
 

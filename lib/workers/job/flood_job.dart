@@ -16,7 +16,8 @@ class FloodJob extends JobQueue<FloodMessage> {
       database.floodMessageDao.floodMessage().get();
 
   @override
-  Future<void> insertJob(FloodMessage job) => database.floodMessageDao.insert(job);
+  Future<void> insertJob(FloodMessage job) =>
+      database.floodMessageDao.insert(job);
 
   @override
   bool get enable => getProcessFloodJob() != null;
@@ -25,9 +26,9 @@ class FloodJob extends JobQueue<FloodMessage> {
   String get name => 'FloodJob';
 
   @override
-  Future<List<FloodMessage>?> run(List<FloodMessage> jobs) async {
+  Future<void> run(List<FloodMessage> jobs) async {
     final process = getProcessFloodJob();
-    if (process == null) return jobs;
+    if (process == null) return;
 
     final stopwatch = Stopwatch()..start();
     for (final message in jobs) {
