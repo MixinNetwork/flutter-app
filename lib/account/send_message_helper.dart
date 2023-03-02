@@ -590,7 +590,11 @@ class SendMessageHelper {
             }
           }
         })(),
-        _messageDao.deleteFtsByMessageId(messageId),
+        (() async {
+          if (message?.category.isText ?? false) {
+            await _messageDao.deleteFtsByMessageId(messageId);
+          }
+        })(),
         _messageMentionDao.deleteMessageMentionByMessageId(messageId),
         (() async => _addSendingJob(
             await createSendRecallJob(conversationId, messageId)))(),

@@ -509,7 +509,12 @@ class DecryptMessage extends Injector {
       })(),
       database.messageMentionDao
           .deleteMessageMentionByMessageId(recallMessage.messageId),
-      database.messageDao.deleteFtsByMessageId(recallMessage.messageId),
+      (() async {
+        if (message?.category.isText ?? false) {
+          await database.messageDao
+              .deleteFtsByMessageId(recallMessage.messageId);
+        }
+      })(),
       database.messagesHistoryDao
           .insert(MessagesHistoryData(messageId: data.messageId)),
     ]);

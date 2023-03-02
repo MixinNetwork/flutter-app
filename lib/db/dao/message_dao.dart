@@ -280,9 +280,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       await Future.wait([
         (delete(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
             .go(),
-        (delete(db.messagesFts)
-              ..where((tbl) => tbl.messageId.equals(messageId)))
-            .go(),
+        deleteFtsByMessageId(messageId),
         (delete(db.transcriptMessages)
               ..where((tbl) => tbl.transcriptId.equals(messageId)))
             .go(),
