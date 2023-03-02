@@ -591,7 +591,7 @@ class SendMessageHelper {
           }
         })(),
         (() async {
-          if (message?.category.isText ?? false) {
+          if (message?.category.isFts ?? false) {
             await _messageDao.deleteFtsByMessageId(messageId);
           }
         })(),

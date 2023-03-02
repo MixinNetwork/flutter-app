@@ -510,7 +510,7 @@ class DecryptMessage extends Injector {
       database.messageMentionDao
           .deleteMessageMentionByMessageId(recallMessage.messageId),
       (() async {
-        if (message?.category.isText ?? false) {
+        if (message?.category.isFts ?? false) {
           await database.messageDao
               .deleteFtsByMessageId(recallMessage.messageId);
         }
