@@ -18,11 +18,11 @@ class UpdateAssetJob extends JobQueue<Job> {
   String get name => 'UpdateAssetJob';
 
   @override
-  Future<List<Job>> initFetchJobs() => database.jobDao.updateAssetJobs().get();
+  Future<List<Job>> fetchJobs() => database.jobDao.updateAssetJobs().get();
 
   @override
-  Future<bool> insertJob(Job job) async {
-    if (job.blazeMessage == null) return false;
+  Future<void> insertJob(Job job) async {
+    if (job.blazeMessage == null) return;
 
     final jobs = database.mixinDatabase.jobs;
     final exists = await database.mixinDatabase.hasData(
@@ -32,11 +32,9 @@ class UpdateAssetJob extends JobQueue<Job> {
           jobs.blazeMessage.equals(job.blazeMessage!),
     );
 
-    if (exists) return false;
+    if (exists) return;
 
     await database.jobDao.insert(job);
-    queue.removeWhere((element) => element.blazeMessage == job.blazeMessage);
-    return true;
   }
 
   @override

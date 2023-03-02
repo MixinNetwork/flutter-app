@@ -12,15 +12,11 @@ class FloodJob extends JobQueue<FloodMessage> {
   Function(FloodMessage floodMessage)? Function() getProcessFloodJob;
 
   @override
-  Future<List<FloodMessage>> initFetchJobs() =>
+  Future<List<FloodMessage>> fetchJobs() =>
       database.floodMessageDao.floodMessage().get();
 
   @override
-  Future<bool> insertJob(FloodMessage job) async {
-    await database.floodMessageDao.insert(job);
-    queue.removeWhere((element) => element.messageId == job.messageId);
-    return true;
-  }
+  Future<void> insertJob(FloodMessage job) => database.floodMessageDao.insert(job);
 
   @override
   bool get enable => getProcessFloodJob() != null;

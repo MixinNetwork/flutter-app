@@ -18,14 +18,10 @@ class AckJob extends JobQueue<Job> {
   String get name => 'AckJob';
 
   @override
-  Future<bool> insertJob(Job job) async {
-    await database.jobDao.insert(job);
-    queue.removeWhere((element) => element.jobId == job.jobId);
-    return true;
-  }
+  Future<void> insertJob(Job job) => database.jobDao.insert(job);
 
   @override
-  Future<List<Job>> initFetchJobs() => database.jobDao.ackJobs().get();
+  Future<List<Job>> fetchJobs() => database.jobDao.ackJobs().get();
 
   @override
   Future<List<Job>?> run(List<Job> jobs) async {

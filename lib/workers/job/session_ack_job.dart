@@ -30,14 +30,10 @@ class SessionAckJob extends JobQueue<Job> {
   String get name => 'SessionAckJob';
 
   @override
-  Future<bool> insertJob(Job job) async {
-    await database.jobDao.insert(job);
-    queue.removeWhere((element) => element.jobId == job.jobId);
-    return true;
-  }
+  Future<void> insertJob(Job job) => database.jobDao.insert(job);
 
   @override
-  Future<List<Job>> initFetchJobs() => database.jobDao.sessionAckJobs().get();
+  Future<List<Job>> fetchJobs() => database.jobDao.sessionAckJobs().get();
 
   @override
   Future<List<Job>?> run(List<Job> jobs) async {
