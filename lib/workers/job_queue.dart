@@ -30,6 +30,7 @@ abstract class JobQueue<T> {
   }
 
   Future<void> _run() async {
+    if (!enable) return;
     if (isRunning) return;
     isRunning = true;
 
