@@ -41,6 +41,10 @@ import '../utils/logger.dart';
 import '../widgets/message/send_message_dialog/attachment_extra.dart';
 import 'injector.dart';
 import 'isolate_event.dart';
+import 'job/ack_job.dart';
+import 'job/sending_job.dart';
+import 'job/update_asset_job.dart';
+import 'job/update_sticker_job.dart';
 import 'message_worker_isolate.dart';
 import 'sender.dart';
 
@@ -55,6 +59,10 @@ class DecryptMessage extends Injector {
     this._privateKey,
     this._isolateEventSender,
     this.identityNumber,
+    this._ackJob,
+    this._sendingJob,
+    this._updateStickerJob,
+    this._updateAssetJob,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
@@ -70,6 +78,10 @@ class DecryptMessage extends Injector {
   late EncryptedProtocol _encryptedProtocol;
 
   final String identityNumber;
+  final AckJob _ackJob;
+  final SendingJob _sendingJob;
+  final UpdateStickerJob _updateStickerJob;
+  final UpdateAssetJob _updateAssetJob;
 
   final refreshKeyMap = <String, int?>{};
 
@@ -333,11 +345,11 @@ class DecryptMessage extends Injector {
           sessionId: data.sessionId,
           status: 1,
           createdAt: DateTime.now()));
-      await database.jobDao.insertSendingJob(
+      await _sendingJob.add(await database.jobDao.createSendingJob(
         id,
         data.conversationId,
         expireIn: data.expireIn,
-      );
+      ));
     }
   }
 
@@ -690,7 +702,8 @@ class DecryptMessage extends Injector {
       if (sticker == null ||
           (stickerMessage.albumId != null &&
               (sticker.albumId?.isEmpty ?? true))) {
-        await database.jobDao.insertUpdateStickerJob(stickerMessage.stickerId);
+        await _updateStickerJob
+            .add(createUpdateStickerJob(stickerMessage.stickerId));
       }
       final message = Message(
           messageId: data.messageId,
@@ -938,7 +951,7 @@ class DecryptMessage extends Injector {
       ),
     );
     await database.snapshotDao.insert(snapshot);
-    await database.jobDao.insertUpdateAssetJob(snapshotMessage.assetId);
+    await _updateAssetJob.add(createUpdateAssetJob(snapshotMessage.assetId));
     var status = data.status;
     if (_conversationId == data.conversationId && data.userId != accountId) {
       status = MessageStatus.read;
@@ -960,8 +973,8 @@ class DecryptMessage extends Injector {
     if (status != MessageStatus.delivered && status != MessageStatus.read) {
       return;
     }
-    await database.jobDao.insertNoReplace(
-        createAckJob(kAcknowledgeMessageReceipts, messageId, status));
+    await _ackJob
+        .add(createAckJob(kAcknowledgeMessageReceipts, messageId, status));
   }
 
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
@@ -1110,7 +1123,8 @@ class DecryptMessage extends Injector {
       if (sticker == null ||
           (stickerMessage.albumId != null &&
               (sticker.albumId?.isEmpty ?? true))) {
-        await database.jobDao.insertUpdateStickerJob(stickerMessage.stickerId);
+        await _updateStickerJob
+            .add(createUpdateStickerJob(stickerMessage.stickerId));
       }
       await database.messageDao.updateStickerMessage(
           messageId, data.status, stickerMessage.stickerId);
@@ -1281,7 +1295,8 @@ class DecryptMessage extends Injector {
           final hasSticker =
               await database.stickerDao.hasSticker(transcript.stickerId!);
           if (hasSticker) return;
-          await database.jobDao.insertUpdateStickerJob(transcript.stickerId!);
+          await _updateStickerJob
+              .add(createUpdateStickerJob(transcript.stickerId!));
         }));
 
     Future _refreshUser() => refreshUsers([

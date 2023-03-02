@@ -4,6 +4,11 @@ enum MainIsolateEventType {
   reconnectBlaze,
   disconnectBlazeWithTime,
   updateSelectedConversation,
+  addAckJob,
+  addSessionAckJob,
+  addSendingJob,
+  addUpdateAssetJob,
+  addUpdateStickerJob,
   exit,
 }
 
