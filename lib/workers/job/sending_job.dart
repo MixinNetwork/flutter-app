@@ -78,6 +78,7 @@ class SendingJob extends JobQueue<Job> {
         await Future.delayed(const Duration(seconds: 1));
       }
     }
+    return failedJobs;
   }
 
   Future<Job?> _runPinJob(Job job) async {
