@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:dio/dio.dart';
-import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/services.dart';
@@ -16,8 +15,7 @@ import 'package:stream_channel/isolate_channel.dart';
 import '../blaze/blaze.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../db/database.dart';
-import '../db/extension/message.dart';
-import '../db/mixin_database.dart' as db;
+import '../db/database_event_bus.dart';
 import '../db/mixin_database.dart' hide Chain;
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
