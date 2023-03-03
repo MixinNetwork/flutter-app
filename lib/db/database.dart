@@ -112,7 +112,6 @@ class Database {
   late final ExpiredMessageDao expiredMessageDao;
 
   Future<void> dispose() async {
-    await mixinDatabase.eventBus.dispose();
     await mixinDatabase.close();
     // dispose stream, https://github.com/simolus3/moor/issues/290
   }

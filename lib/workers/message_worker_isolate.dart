@@ -140,11 +140,6 @@ class _MessageProcessRunner {
 
   Future<void> init(IsolateInitParams initParams) async {
     database = Database(await connectToDatabase(identityNumber, readCount: 4));
-    jobSubscribers.add(
-      database.mixinDatabase.eventBus.stream.listen((event) {
-        _sendEventToMainIsolate(WorkerIsolateEventType.onDbEvent, event);
-      }),
-    );
 
     client = createClient(
       userId: userId,

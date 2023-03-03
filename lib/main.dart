@@ -21,6 +21,7 @@ import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
 import 'ui/home/home.dart';
 import 'utils/app_lifecycle.dart';
+import 'utils/event_bus.dart';
 import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
@@ -35,6 +36,7 @@ Future<void> main(List<String> args) async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
 
   WidgetsFlutterBinding.ensureInitialized();
+  EventBus.initialize();
 
   await loadFallbackFonts();
 
