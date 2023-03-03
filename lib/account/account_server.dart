@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
-import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze.dart';
@@ -25,7 +24,6 @@ import '../db/dao/asset_dao.dart';
 import '../db/dao/sticker_album_dao.dart';
 import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
-import '../db/database_event_bus.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
@@ -247,10 +245,6 @@ class AccountServer {
         break;
       case WorkerIsolateEventType.onBlazeConnectStateChanged:
         _connectedStateBehaviorSubject.add(event.argument as ConnectedState);
-        break;
-      case WorkerIsolateEventType.onDbEvent:
-        final args = event.argument as Tuple2<DatabaseEvent, dynamic>;
-        database.mixinDatabase.eventBus.send(args.item1, args.item2);
         break;
       case WorkerIsolateEventType.onApiRequestedError:
         _onClientRequestError(event.argument as DioError);

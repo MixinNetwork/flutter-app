@@ -23,9 +23,6 @@ enum WorkerIsolateEventType {
   /// args: ConnectedState
   onBlazeConnectStateChanged,
 
-  /// args: Tuple2<DatabaseEvent, dynamic>
-  onDbEvent,
-
   /// args: DioError
   onApiRequestedError,
 

@@ -16,6 +16,8 @@ import 'package:stream_channel/isolate_channel.dart';
 import '../blaze/blaze.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../db/database.dart';
+import '../db/extension/message.dart';
+import '../db/mixin_database.dart' as db;
 import '../db/mixin_database.dart' hide Chain;
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
@@ -133,11 +135,6 @@ class _MessageProcessRunner {
 
   Future<void> init(IsolateInitParams initParams) async {
     database = Database(await connectToDatabase(identityNumber, readCount: 4));
-    jobSubscribers.add(
-      database.mixinDatabase.eventBus.stream.listen((event) {
-        _sendEventToMainIsolate(WorkerIsolateEventType.onDbEvent, event);
-      }),
-    );
 
     client = createClient(
       userId: userId,
@@ -251,10 +248,8 @@ class _MessageProcessRunner {
           .listen((event) {
         _floodJob.start();
       }))
-      ..add(database.mixinDatabase
-          .tableUpdates(
-            TableUpdateQuery.onTable(database.mixinDatabase.expiredMessages),
-          )
+      ..add(DataBaseEventBus.instance
+          .watchEvent(DatabaseEvent.updateExpiredMessageTable)
           .asyncDropListen((event) => _scheduleExpiredJob()));
     _scheduleExpiredJob();
   }

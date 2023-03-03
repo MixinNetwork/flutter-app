@@ -106,7 +106,7 @@ class MixinDatabase extends _$MixinDatabase {
   @override
   int get schemaVersion => 20;
 
-  final eventBus = DataBaseEventBus();
+  final eventBus = DataBaseEventBus.instance;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
