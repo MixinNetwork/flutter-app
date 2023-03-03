@@ -74,6 +74,7 @@ class _MainEventBus implements EventBus {
         'main isolate event bus has been initialized. '
         '(if current is hot restarted, ignore it.) ${Isolate.current.debugName}',
       );
+      IsolateNameServer.removePortNameMapping(_eventBusPortName);
     }
 
     IsolateNameServer.registerPortWithName(
