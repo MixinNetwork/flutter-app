@@ -8,6 +8,7 @@ enum DatabaseEvent {
   notification,
   insertOrReplaceMessage,
   deleteMessage,
+  insertExpiredMessage,
 }
 
 class _DatabaseEventWrapper {

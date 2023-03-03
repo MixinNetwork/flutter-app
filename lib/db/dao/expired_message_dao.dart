@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../constants/constants.dart';
 import '../../utils/extension/extension.dart';
+import '../database_event_bus.dart';
 import '../mixin_database.dart';
 
 part 'expired_message_dao.g.dart';
@@ -16,18 +17,23 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$ExpiredMessageDaoMixin {
   ExpiredMessageDao(super.attachedDatabase);
 
-  Future<int> insert({
+  Future<void> insert({
     required String messageId,
     required int expireIn,
     int? expireAt,
-  }) =>
-      into(db.expiredMessages).insertOnConflictUpdate(
-        ExpiredMessagesCompanion.insert(
-          messageId: messageId,
-          expireIn: expireIn,
-          expireAt: Value(expireAt),
-        ),
-      );
+  }) async {
+    await into(db.expiredMessages).insertOnConflictUpdate(
+      ExpiredMessagesCompanion.insert(
+        messageId: messageId,
+        expireIn: expireIn,
+        expireAt: Value(expireAt),
+      ),
+    );
+    DataBaseEventBus.instance.send(
+      DatabaseEvent.insertExpiredMessage,
+      messageId,
+    );
+  }
 
   Future<void> deleteByMessageId(String messageId) =>
       (delete(db.expiredMessages)

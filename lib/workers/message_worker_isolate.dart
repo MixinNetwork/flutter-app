@@ -28,6 +28,7 @@ import '../db/converter/utc_value_serializer.dart';
 import '../db/dao/job_dao.dart';
 import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
+import '../db/database_event_bus.dart';
 import '../db/extension/message.dart';
 import '../db/mixin_database.dart' as db;
 import '../db/mixin_database.dart' hide Chain;
@@ -257,10 +258,8 @@ class _MessageProcessRunner {
       ..add(database.jobDao
           .watchHasUpdateStickerJobs()
           .asyncDropListen((_) => _runUpdateStickerJob()))
-      ..add(database.mixinDatabase
-          .tableUpdates(
-            TableUpdateQuery.onTable(database.mixinDatabase.expiredMessages),
-          )
+      ..add(DataBaseEventBus.instance
+          .watch<String>(DatabaseEvent.insertExpiredMessage)
           .asyncDropListen((event) => _scheduleExpiredJob()));
     _scheduleExpiredJob();
   }
