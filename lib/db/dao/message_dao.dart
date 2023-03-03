@@ -1337,16 +1337,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       .map((row) => row.read(db.messages.rowId));
 
   Future<void> deleteFtsByMessageId(String messageId) async {
-    final stopwatch = Stopwatch()..start();
-
     final rowId =
         await db.messageFtsRowIdByMessageId(messageId).getSingleOrNull();
 
     if (rowId == null) return;
 
-    stopwatch
-      ..reset()
-      ..start();
     await db.deleteMessageFtsByRowId(rowId);
   }
 

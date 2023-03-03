@@ -14405,7 +14405,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<int> messageFtsRowIdByMessageId(String messageId) {
     return customSelect(
-        'SELECT "rowid" FROM messages_fts WHERE message_id = ?1 LIMIT 1',
+        'SELECT "rowid" FROM messages_fts WHERE message_id = ?1 ORDER BY "rowid" DESC LIMIT 1',
         variables: [
           Variable<String>(messageId)
         ],
