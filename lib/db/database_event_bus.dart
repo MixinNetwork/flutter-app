@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../utils/event_bus.dart';
@@ -11,8 +12,9 @@ enum DatabaseEvent {
   updateExpiredMessageTable,
 }
 
+@immutable
 class _DatabaseEventWrapper {
-  _DatabaseEventWrapper(this.type, this.data);
+  const _DatabaseEventWrapper(this.type, this.data);
 
   final DatabaseEvent type;
   final dynamic data;

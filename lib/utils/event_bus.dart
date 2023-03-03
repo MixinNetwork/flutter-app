@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import 'logger.dart';
@@ -13,8 +14,9 @@ enum _EventType {
   event,
 }
 
+@immutable
 class _Event {
-  _Event({
+  const _Event({
     required this.data,
     required this.type,
   });
