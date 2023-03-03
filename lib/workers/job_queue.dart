@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import '../db/database.dart';
 import '../utils/logger.dart';
 
@@ -8,18 +10,25 @@ abstract class JobQueue<T> {
     start();
   }
 
+  @protected
   final Database database;
 
+  @protected
   bool isRunning = false;
 
+  @protected
   bool get enable => true;
 
+  @protected
   String get name;
 
+  @protected
   Future<List<T>> fetchJobs();
 
+  @protected
   Future<void> run(List<T> jobs);
 
+  @protected
   Future<void> insertJob(T job);
 
   void start() => unawaited(_run());
