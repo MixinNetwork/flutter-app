@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:uuid/uuid.dart';
+
 import 'logger.dart';
 
 const _eventBusPortName = 'mixin_global_isolate_event_bus';
@@ -9,7 +11,6 @@ const _eventBusPortName = 'mixin_global_isolate_event_bus';
 enum _EventType {
   register,
   event,
-  destroy,
 }
 
 class _Event {
@@ -49,8 +50,6 @@ abstract class EventBus {
   Stream get on;
 
   void fire(dynamic event);
-
-  void destroy();
 }
 
 class _DummyEventBus implements EventBus {
@@ -64,9 +63,6 @@ class _DummyEventBus implements EventBus {
     e('ignore dispatch event, because main event bus is not initialized.'
         ' ${Isolate.current.debugName}');
   }
-
-  @override
-  void destroy() {}
 }
 
 class _MainEventBus implements EventBus {
@@ -85,55 +81,53 @@ class _MainEventBus implements EventBus {
       _eventBusPortName,
     );
     receivePort.listen((event) {
-      if (event is! _Event) {
+      if (event is String) {
+        d('remove other isolate event bus. $event');
+        _ports.remove(event);
+      } else if (event is _Event) {
+        final type = event.type;
+        switch (type) {
+          case _EventType.register:
+            final data = event.data as List;
+            final uuid = data[0] as String;
+            d('register other isolate event bus. $uuid');
+            final port = data[1] as SendPort;
+            _ports[uuid] = port;
+            break;
+          case _EventType.event:
+            // event from other isolate will dispatch to all other isolate.
+            fire(event.data);
+            break;
+        }
+      } else {
         assert(false, 'Invalid event type. $event');
         return;
-      }
-      final type = event.type;
-      switch (type) {
-        case _EventType.register:
-          d('register other isolate event bus.');
-          final port = event.data as SendPort;
-          _ports.add(port);
-          break;
-        case _EventType.event:
-          // event from other isolate will dispatch to all other isolate.
-          fire(event.data);
-          break;
-        case _EventType.destroy:
-          d('destroy other isolate event bus.');
-          _ports.remove(event.data as SendPort);
-          break;
       }
     });
   }
 
   final _controller = StreamController.broadcast();
 
-  // other isolate send port.
-  final List<SendPort> _ports = [];
+// other isolate send port. key: bus uuid.
+  final Map<String, SendPort> _ports = {};
 
   @override
   void fire(dynamic event) {
     _controller.add(event);
-    for (final port in _ports) {
+    for (final port in _ports.values) {
       port.send(_Event(data: event, type: _EventType.event));
     }
   }
 
   @override
   Stream get on => _controller.stream;
-
-  @override
-  void destroy() {
-    // main event bus not support destroy.
-  }
 }
 
 class _OtherIsolateEventBus implements EventBus {
   _OtherIsolateEventBus._fromPort(this._mainBusPort) {
+    final busId = const Uuid().v4();
     _mainBusPort.send(_Event(
-      data: _receivePort.sendPort,
+      data: [busId, _receivePort.sendPort],
       type: _EventType.register,
     ));
     _receivePort.listen((event) {
@@ -149,11 +143,12 @@ class _OtherIsolateEventBus implements EventBus {
         case _EventType.event:
           _controller.add(event.data);
           break;
-        case _EventType.destroy:
-          _controller.close();
-          break;
       }
     });
+    Isolate.current.addOnExitListener(
+      _mainBusPort,
+      response: busId,
+    );
   }
 
   final _controller = StreamController.broadcast();
@@ -169,13 +164,4 @@ class _OtherIsolateEventBus implements EventBus {
 
   @override
   Stream get on => _controller.stream;
-
-  @override
-  void destroy() {
-    _mainBusPort.send(_Event(
-      data: _receivePort.sendPort,
-      type: _EventType.destroy,
-    ));
-    _receivePort.close();
-  }
 }
