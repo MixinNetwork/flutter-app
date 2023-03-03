@@ -29,10 +29,8 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
         expireAt: Value(expireAt),
       ),
     );
-    DataBaseEventBus.instance.send(
-      DatabaseEvent.insertExpiredMessage,
-      messageId,
-    );
+    DataBaseEventBus.instance
+        .sendEvent(DatabaseEvent.updateExpiredMessageTable);
   }
 
   Future<void> deleteByMessageId(String messageId) =>
@@ -56,6 +54,8 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
     for (final ids in chunkedMessageIds) {
       await _markExpiredMessageRead(now, (em) => em.messageId.isIn(ids));
     }
+    DataBaseEventBus.instance
+        .sendEvent(DatabaseEvent.updateExpiredMessageTable);
   }
 
   Future<Map<String, int?>> getMessageExpireAt(List<String> messageIds) async {

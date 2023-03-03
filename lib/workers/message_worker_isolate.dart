@@ -259,7 +259,7 @@ class _MessageProcessRunner {
           .watchHasUpdateStickerJobs()
           .asyncDropListen((_) => _runUpdateStickerJob()))
       ..add(DataBaseEventBus.instance
-          .watch<String>(DatabaseEvent.insertExpiredMessage)
+          .watchEvent(DatabaseEvent.updateExpiredMessageTable)
           .asyncDropListen((event) => _scheduleExpiredJob()));
     _scheduleExpiredJob();
   }

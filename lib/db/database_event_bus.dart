@@ -8,7 +8,7 @@ enum DatabaseEvent {
   notification,
   insertOrReplaceMessage,
   deleteMessage,
-  insertExpiredMessage,
+  updateExpiredMessageTable,
 }
 
 class _DatabaseEventWrapper {
@@ -35,4 +35,12 @@ class DataBaseEventBus {
 
   void send<T>(DatabaseEvent event, T value) =>
       EventBus.instance.fire(_DatabaseEventWrapper(event, value));
+
+  Stream<DatabaseEvent> watchEvent(DatabaseEvent event) => EventBus.instance.on
+      .whereType<_DatabaseEventWrapper>()
+      .map((e) => e.type)
+      .where((e) => e == event);
+
+  void sendEvent(DatabaseEvent event) =>
+      EventBus.instance.fire(_DatabaseEventWrapper(event, null));
 }
