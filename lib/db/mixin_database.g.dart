@@ -14403,6 +14403,26 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     );
   }
 
+  Selectable<int> messageFtsRowIdByMessageId(String messageId) {
+    return customSelect(
+        'SELECT "rowid" FROM messages_fts WHERE message_id = ?1 LIMIT 1',
+        variables: [
+          Variable<String>(messageId)
+        ],
+        readsFrom: {
+          messagesFts,
+        }).map((QueryRow row) => row.read<int>('rowid'));
+  }
+
+  Future<int> deleteMessageFtsByRowId(int rowId) {
+    return customUpdate(
+      'DELETE FROM messages_fts WHERE "rowid" = ?1',
+      variables: [Variable<int>(rowId)],
+      updates: {messagesFts},
+      updateKind: UpdateKind.delete,
+    );
+  }
+
   Selectable<int> baseConversationItemCount(
       BaseConversationItemCount$where where) {
     var $arrayStartIndex = 1;

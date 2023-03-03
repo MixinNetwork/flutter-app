@@ -320,3 +320,9 @@ UPDATE conversations SET unseen_message_count
     last_message_id = :lastMessageId,
     last_message_created_at = :lastMessageCreatedAt
     WHERE conversation_id = :conversationId;
+
+messageFtsRowIdByMessageId:
+SELECT rowid FROM messages_fts WHERE message_id = :messageId limit 1;
+
+deleteMessageFtsByRowId:
+DELETE FROM messages_fts WHERE rowid = :rowId;

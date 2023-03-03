@@ -276,12 +276,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     await updateConversationLastMessageId();
 
+    final message = await findMessageByMessageId(messageId);
+
     await db.transaction(() async {
       await Future.wait([
         (delete(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
             .go(),
         (() async {
-          final message = await findMessageByMessageId(messageId);
           if (message?.category.isFts ?? false) {
             await deleteFtsByMessageId(messageId);
           }
@@ -1335,10 +1336,19 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         ..orderBy([OrderingTerm.desc(db.messages.createdAt)]))
       .map((row) => row.read(db.messages.rowId));
 
-  Future<int> deleteFtsByMessageId(String messageId) =>
-      (db.delete(db.messagesFts)
-            ..where((tbl) => tbl.messageId.equals(messageId)))
-          .go();
+  Future<void> deleteFtsByMessageId(String messageId) async {
+    final stopwatch = Stopwatch()..start();
+
+    final rowId =
+        await db.messageFtsRowIdByMessageId(messageId).getSingleOrNull();
+
+    if (rowId == null) return;
+
+    stopwatch
+      ..reset()
+      ..start();
+    await db.deleteMessageFtsByRowId(rowId);
+  }
 
   Future<int> updateTranscriptMessage(
     String? content,
