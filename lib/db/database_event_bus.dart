@@ -1,29 +1,48 @@
 import 'dart:async';
 
-import 'package:tuple/tuple.dart';
+import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
+
+import '../utils/event_bus.dart';
 
 enum DatabaseEvent {
   notification,
   insertOrReplaceMessage,
-  delete,
+  deleteMessage,
+  updateExpiredMessageTable,
+}
+
+@immutable
+class _DatabaseEventWrapper {
+  const _DatabaseEventWrapper(this.type, this.data);
+
+  final DatabaseEvent type;
+  final dynamic data;
+
+  @override
+  String toString() => 'DatabaseEvent{type: $type, data: $data}';
 }
 
 class DataBaseEventBus {
-  final _streamController =
-      StreamController<Tuple2<DatabaseEvent, dynamic>>.broadcast();
+  const DataBaseEventBus._();
 
-  Stream<T> watch<T>(DatabaseEvent event, {bool nullable = false}) =>
-      _streamController.stream
-          .where((e) => event == e.item1)
-          .where((e) => nullable || e.item2 != null)
-          .where((e) => e.item2 is T)
-          .map((e) => e.item2)
-          .cast<T>();
+  static const DataBaseEventBus instance = DataBaseEventBus._();
 
-  Stream<Tuple2<DatabaseEvent, dynamic>> get stream => _streamController.stream;
+  Stream<T> watch<T>(DatabaseEvent event) => EventBus.instance.on
+      .whereType<_DatabaseEventWrapper>()
+      .where((e) => event == e.type)
+      .where((e) => e.data is T)
+      .map((e) => e.data)
+      .cast<T>();
 
   void send<T>(DatabaseEvent event, T value) =>
-      _streamController.add(Tuple2(event, value));
+      EventBus.instance.fire(_DatabaseEventWrapper(event, value));
 
-  Future dispose() => _streamController.close();
+  Stream<DatabaseEvent> watchEvent(DatabaseEvent event) => EventBus.instance.on
+      .whereType<_DatabaseEventWrapper>()
+      .map((e) => e.type)
+      .where((e) => e == event);
+
+  void sendEvent(DatabaseEvent event) =>
+      EventBus.instance.fire(_DatabaseEventWrapper(event, null));
 }

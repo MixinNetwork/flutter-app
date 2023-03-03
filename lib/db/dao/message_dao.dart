@@ -74,7 +74,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       .flatMapIterable(Stream.value);
 
   late Stream<String> deleteMessageIdStream =
-      db.eventBus.watch<String>(DatabaseEvent.delete);
+      db.eventBus.watch<String>(DatabaseEvent.deleteMessage);
 
   Selectable<MessageItem> _baseMessageItems(
     Expression<bool> Function(
@@ -291,7 +291,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         db.expiredMessageDao.deleteByMessageId(messageId),
       ]);
     });
-    db.eventBus.send(DatabaseEvent.delete, messageId);
+    db.eventBus.send(DatabaseEvent.deleteMessage, messageId);
   }
 
   Future<void> deleteMessageByConversationId(String conversationId) =>
