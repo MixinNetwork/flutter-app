@@ -11,9 +11,7 @@ import 'package:uuid/uuid.dart';
 
 import '../blaze/vo/pin_message_minimal.dart';
 import '../blaze/vo/pin_message_payload.dart';
-import '../blaze/vo/recall_message.dart';
 import '../blaze/vo/transcript_minimal.dart';
-import '../constants/constants.dart';
 import '../db/dao/job_dao.dart';
 import '../db/dao/message_dao.dart';
 import '../db/dao/message_mention_dao.dart';
@@ -22,6 +20,7 @@ import '../db/dao/pin_message_dao.dart';
 import '../db/dao/transcript_message_dao.dart';
 import '../db/dao/user_dao.dart';
 import '../db/database.dart';
+import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
 import '../enum/media_status.dart';
@@ -42,6 +41,7 @@ class SendMessageHelper {
   SendMessageHelper(
     this._database,
     this._attachmentUtil,
+    this._addSendingJob,
   );
 
   final Database _database;
@@ -54,6 +54,7 @@ class SendMessageHelper {
   late final TranscriptMessageDao _transcriptMessageDao =
       _database.transcriptMessageDao;
   final AttachmentUtil _attachmentUtil;
+  final Function(Job) _addSendingJob;
 
   Future<void> _insertSendMessageToDb(Message message) async {
     final conversationId = message.conversationId;
@@ -103,12 +104,12 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(
+    _addSendingJob(await _jobDao.createSendingJob(
       message.messageId,
       conversationId,
       recipientId: recipientId,
       silent: silent,
-    );
+    ));
   }
 
   Future<void> sendImageMessage({
@@ -201,7 +202,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<void> sendVideoMessage(
@@ -279,7 +280,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<void> sendStickerMessage(String conversationId, String senderId,
@@ -300,7 +301,8 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> sendDataMessage(
@@ -374,7 +376,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<void> sendContactMessage(
@@ -405,7 +407,8 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> sendAudioMessage(
@@ -480,7 +483,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<void> _sendLiveMessage(
@@ -509,7 +512,8 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> sendPostMessage(String conversationId, String senderId,
@@ -527,7 +531,8 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> _sendLocationMessage(String conversationId, String senderId,
@@ -545,7 +550,8 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> sendAppCardMessage(
@@ -563,7 +569,8 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> sendRecallMessage(
@@ -583,17 +590,14 @@ class SendMessageHelper {
             }
           }
         })(),
-        _messageDao.deleteFtsByMessageId(messageId),
+        (() async {
+          if (message?.category.isFts ?? false) {
+            await _messageDao.deleteFtsByMessageId(messageId);
+          }
+        })(),
         _messageMentionDao.deleteMessageMentionByMessageId(messageId),
-        _jobDao.insert(Job(
-          conversationId: conversationId,
-          jobId: const Uuid().v4(),
-          action: kRecallMessage,
-          priority: 5,
-          blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
-          createdAt: DateTime.now(),
-          runCount: 0,
-        )),
+        (() async => _addSendingJob(
+            await createSendRecallJob(conversationId, messageId)))(),
         (() async {
           final quoteMessage =
               await _messageDao.findMessageItemById(conversationId, messageId);
@@ -863,10 +867,10 @@ class SendMessageHelper {
     if (hasAttachments) {
       await reUploadTranscriptAttachment(message.messageId);
     } else {
-      await _jobDao.insertSendingJob(
+      _addSendingJob(await _jobDao.createSendingJob(
         message.messageId,
         conversationId,
-      );
+      ));
     }
   }
 
@@ -881,10 +885,10 @@ class SendMessageHelper {
         .get();
 
     if (!transcripts.any((element) => element.category.isAttachment)) {
-      await _jobDao.insertSendingJob(
+      _addSendingJob(await _jobDao.createSendingJob(
         message.messageId,
         message.conversationId,
-      );
+      ));
       return;
     }
 
@@ -982,10 +986,10 @@ class SendMessageHelper {
         message.messageId,
         MediaStatus.done,
       );
-      await _jobDao.insertSendingJob(
+      _addSendingJob(await _jobDao.createSendingJob(
         message.messageId,
         message.conversationId,
-      );
+      ));
     } catch (_) {
       await _messageDao.updateMediaStatus(
         message.messageId,
@@ -1039,7 +1043,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<AttachmentResult?> _checkAttachmentExtra(Message message) async {
@@ -1146,17 +1150,7 @@ class SendMessageHelper {
     _messageDao.notifyMessageInsertOrReplaced(
         pinMessageMinimals.map((e) => e.messageId));
 
-    await _jobDao.insert(
-      Job(
-        conversationId: conversationId,
-        jobId: const Uuid().v4(),
-        action: kPinMessage,
-        priority: 5,
-        blazeMessage: encoded,
-        createdAt: DateTime.now(),
-        runCount: 0,
-      ),
-    );
+    _addSendingJob(createSendPinJob(conversationId, encoded));
   }
 
   Future<void> sendImageMessageByUrl(
@@ -1269,7 +1263,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<void> reUploadGiphyGif(MessageItem message) async {
@@ -1342,6 +1336,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(message.messageId, message.conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(
+        message.messageId, message.conversationId));
   }
 }

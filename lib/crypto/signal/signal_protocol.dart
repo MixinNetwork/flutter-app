@@ -38,7 +38,7 @@ class SignalProtocol {
   static Future<int> initSignal(List<int>? private) =>
       generateSignalDatabaseIdentityKeyPair(SignalDatabase.get, private);
 
-  Future<void> init() async {
+  void init() {
     db = SignalDatabase.get;
     final preKeyStore = MixinPreKeyStore(db);
     final signedPreKeyStore = MixinPreKeyStore(db);

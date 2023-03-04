@@ -35,7 +35,6 @@ import '../utils/attachment/download_key_value.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
-import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/web_view/web_view_interface.dart';
@@ -159,7 +158,8 @@ class AccountServer {
       database.transcriptMessageDao,
       identityNumber,
     );
-    _sendMessageHelper = SendMessageHelper(database, attachmentUtil);
+    _sendMessageHelper =
+        SendMessageHelper(database, attachmentUtil, addSendingJob);
 
     _injector = Injector(userId, database, client);
   }
@@ -593,23 +593,63 @@ class AccountServer {
     );
   }
 
+  void addAckJob(db.Job job) {
+    assert(job.action == kAcknowledgeMessageReceipts);
+    _sendEventToWorkerIsolate(
+      MainIsolateEventType.addAckJob,
+      job,
+    );
+  }
+
+  void addSessionAckJob(db.Job job) {
+    assert(job.action == kCreateMessage);
+    _sendEventToWorkerIsolate(
+      MainIsolateEventType.addSessionAckJob,
+      job,
+    );
+  }
+
+  void addSendingJob(db.Job job) {
+    assert(job.action == kSendingMessage ||
+        job.action == kPinMessage ||
+        job.action == kRecallMessage);
+    _sendEventToWorkerIsolate(
+      MainIsolateEventType.addSendingJob,
+      job,
+    );
+  }
+
+  void addUpdateAssetJob(db.Job job) {
+    assert(job.action == kUpdateAsset);
+    _sendEventToWorkerIsolate(
+      MainIsolateEventType.addUpdateAssetJob,
+      job,
+    );
+  }
+
+  void addUpdateStickerJob(db.Job job) {
+    assert(job.action == kUpdateSticker);
+    _sendEventToWorkerIsolate(
+      MainIsolateEventType.addUpdateStickerJob,
+      job,
+    );
+  }
+
   Future<void> markRead(String conversationId) async {
     while (true) {
       final ids = await database.messageDao
           .getUnreadMessageIds(conversationId, userId, kMarkLimit);
       if (ids.isEmpty) return;
       final expireAt = await database.expiredMessageDao.getMessageExpireAt(ids);
-      final jobs = ids
-          .map(
-            (id) => createAckJob(
-              kAcknowledgeMessageReceipts,
-              id,
-              MessageStatus.read,
-              expireAt: expireAt[id],
-            ),
-          )
-          .toList();
-      await database.jobDao.insertAll(jobs);
+      ids.forEach(
+        (id) => addAckJob(createAckJob(
+          kAcknowledgeMessageReceipts,
+          id,
+          MessageStatus.read,
+          expireAt: expireAt[id],
+        )),
+      );
+
       await _createReadSessionMessage(ids, expireAt);
       if (ids.length < kMarkLimit) return;
     }
@@ -623,15 +663,12 @@ class AccountServer {
     if (primarySessionId == null) {
       return;
     }
-    final jobs = messageIds
-        .map((id) => createAckJob(
-              kCreateMessage,
-              id,
-              MessageStatus.read,
-              expireAt: messageExpireAt[id],
-            ))
-        .toList();
-    await database.jobDao.insertAll(jobs);
+    messageIds.forEach((id) => addSessionAckJob(createAckJob(
+          kCreateMessage,
+          id,
+          MessageStatus.read,
+          expireAt: messageExpireAt[id],
+        )));
   }
 
   Future<void> stop() async {
@@ -1178,20 +1215,8 @@ class AccountServer {
   Future<void> markMentionRead(String messageId, String conversationId) =>
       Future.wait([
         database.messageMentionDao.markMentionRead(messageId),
-        (() async => database.jobDao.insert(
-              db.Job(
-                jobId: const Uuid().v4(),
-                action: kCreateMessage,
-                createdAt: DateTime.now(),
-                conversationId: conversationId,
-                runCount: 0,
-                priority: 5,
-                blazeMessage: await jsonEncodeWithIsolate(BlazeAckMessage(
-                  messageId: messageId,
-                  status: 'MENTION_READ',
-                  expireAt: null,
-                )),
-              ),
+        (() async => addSessionAckJob(
+              await createMentionReadAckJob(conversationId, messageId),
             ))()
       ]);
 
@@ -1310,8 +1335,8 @@ class AccountServer {
     return snapshot;
   }
 
-  Future<void> updateAssetById({required String assetId}) =>
-      database.jobDao.insertUpdateAssetJob(assetId);
+  void updateAssetById({required String assetId}) =>
+      addUpdateAssetJob(createUpdateAssetJob(assetId));
 
   Future<AssetItem?> checkAsset({required String assetId}) async {
     final asset = await database.assetDao.findAssetById(assetId);

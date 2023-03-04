@@ -14,6 +14,8 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
+import '../workers/job/ack_job.dart';
+import '../workers/job/flood_job.dart';
 import '../workers/message_worker_isolate.dart';
 import 'blaze_message.dart';
 import 'blaze_message_param_session.dart';
@@ -37,6 +39,8 @@ class Blaze {
     this.database,
     this.client,
     this.userAgent,
+    this.ackJob,
+    this.floodJob,
   );
 
   final String userId;
@@ -44,6 +48,8 @@ class Blaze {
   final String privateKey;
   final Database database;
   final Client client; // todo delete
+  final AckJob ackJob;
+  final FloodJob floodJob;
 
   final String? userAgent;
 
@@ -188,19 +194,17 @@ class Blaze {
           (data.category == null || data.conversationId.isEmpty)) {
         await makeMessageStatus(data.messageId, data.status);
       } else {
-        await database.floodMessageDao.insert(FloodMessage(
+        await floodJob.add(FloodMessage(
             messageId: data.messageId,
             data: jsonEncode(data),
             createdAt: data.createdAt));
       }
     } else if (blazeMessage.action == kCreateCall ||
         blazeMessage.action == kCreateKraken) {
-      await database.jobDao.insertNoReplace(createAckJob(
+      await ackJob.add(createAckJob(
           kAcknowledgeMessageReceipts, data.messageId, MessageStatus.read));
     } else {
-      await database.jobDao.insertNoReplace(createAckJob(
-          kAcknowledgeMessageReceipts,
-          data.messageId,
+      await ackJob.add(createAckJob(kAcknowledgeMessageReceipts, data.messageId,
           MessageStatus.delivered));
     }
     if (stopwatch != null && stopwatch.elapsedMilliseconds > 5) {
