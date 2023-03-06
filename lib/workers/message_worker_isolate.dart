@@ -16,6 +16,7 @@ import '../blaze/blaze.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../db/database.dart';
 import '../db/database_event_bus.dart';
+import '../db/fts_database.dart';
 import '../db/mixin_database.dart' hide Chain;
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
@@ -132,7 +133,10 @@ class _MessageProcessRunner {
   Timer? _nextExpiredMessageRunner;
 
   Future<void> init(IsolateInitParams initParams) async {
-    database = Database(await connectToDatabase(identityNumber, readCount: 4));
+    database = Database(
+      await connectToDatabase(identityNumber, readCount: 4),
+      await FtsDatabase.connect(identityNumber),
+    );
 
     client = createClient(
       userId: userId,

@@ -25,6 +25,7 @@ import '../db/dao/sticker_album_dao.dart';
 import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
+import '../db/fts_database.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
@@ -150,7 +151,9 @@ class AccountServer {
 
   Future<void> _initDatabase() async {
     database = Database(
-        await db.connectToDatabase(identityNumber, fromMainIsolate: true));
+      await db.connectToDatabase(identityNumber, fromMainIsolate: true),
+      await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
+    );
 
     attachmentUtil = AttachmentUtil.init(
       client,

@@ -23,10 +23,11 @@ import 'dao/sticker_dao.dart';
 import 'dao/sticker_relationship_dao.dart';
 import 'dao/transcript_message_dao.dart';
 import 'dao/user_dao.dart';
+import 'fts_database.dart';
 import 'mixin_database.dart';
 
 class Database {
-  Database(this.mixinDatabase) {
+  Database(this.mixinDatabase, this.ftsDatabase) {
     appDao = AppDao(mixinDatabase);
     assetDao = AssetDao(mixinDatabase);
     chainDao = ChainDao(mixinDatabase);
@@ -60,6 +61,8 @@ class Database {
   // }
 
   final MixinDatabase mixinDatabase;
+
+  final FtsDatabase ftsDatabase;
 
   late final AppDao appDao;
 
