@@ -15,3 +15,9 @@ CREATE TABLE IF NOT EXISTS messages_metas (
 CREATE INDEX IF NOT EXISTS messages_metas_doc_id_created_at ON messages_metas (doc_id, created_at);
 CREATE INDEX IF NOT EXISTS messages_metas_conversation_id_user_id_category ON messages_metas (conversation_id, user_id, category);
 
+
+_deleteFtsByMessageId:
+DELETE FROM messages_fts WHERE rowid = (SELECT doc_id FROM messages_metas WHERE message_id = :messageId);
+
+_deleteMetasByMessageId:
+DELETE FROM messages_metas WHERE message_id = :messageId;

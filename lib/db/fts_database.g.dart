@@ -499,6 +499,24 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
       'messages_metas_conversation_id_user_id_category',
       'CREATE INDEX IF NOT EXISTS messages_metas_conversation_id_user_id_category ON messages_metas (conversation_id, user_id, category)');
   late final MessagesFts messagesFts = MessagesFts(this);
+  Future<int> _deleteFtsByMessageId(String messageId) {
+    return customUpdate(
+      'DELETE FROM messages_fts WHERE "rowid" = (SELECT doc_id FROM messages_metas WHERE message_id = ?1)',
+      variables: [Variable<String>(messageId)],
+      updates: {messagesFts},
+      updateKind: UpdateKind.delete,
+    );
+  }
+
+  Future<int> _deleteMetasByMessageId(String messageId) {
+    return customUpdate(
+      'DELETE FROM messages_metas WHERE message_id = ?1',
+      variables: [Variable<String>(messageId)],
+      updates: {messagesMetas},
+      updateKind: UpdateKind.delete,
+    );
+  }
+
   @override
   Iterable<TableInfo<Table, dynamic>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
