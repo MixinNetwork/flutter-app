@@ -233,6 +233,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage("資料與儲存空間"),
         "dataError": MessageLookupByLibrary.simpleMessage("資料錯誤"),
         "dataLoading": MessageLookupByLibrary.simpleMessage("資料載入中，請稍後"),
+        "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
+            "正在進行資料庫升級，可能需要幾分鐘，請不要強制關閉應用。"),
         "delete": MessageLookupByLibrary.simpleMessage("刪除"),
         "deleteAccountDetailHint":
             MessageLookupByLibrary.simpleMessage("本地訊息和 iCloud 備份不會被自動刪除"),
@@ -599,6 +601,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesConfirmation":
             MessageLookupByLibrary.simpleMessage("確定取消置頂所有訊息麼？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未讀訊息"),
+        "upgrading": MessageLookupByLibrary.simpleMessage("升級中..."),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到這個使用者"),
         "valueNow": m49,
         "valueThen": m50,

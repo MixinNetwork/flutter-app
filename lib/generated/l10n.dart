@@ -994,6 +994,16 @@ class Localization {
     );
   }
 
+  /// `The database is being upgraded, it may take several minutes, please do not close this App.`
+  String get databaseUpgradeTips {
+    return Intl.message(
+      'The database is being upgraded, it may take several minutes, please do not close this App.',
+      name: 'databaseUpgradeTips',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Delete`
   String get delete {
     return Intl.message(
@@ -1219,6 +1229,16 @@ class Localization {
     return Intl.message(
       'Download Link:',
       name: 'downloadLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Draft`
+  String get draft {
+    return Intl.message(
+      'Draft',
+      name: 'draft',
       desc: '',
       args: [],
     );
@@ -4011,6 +4031,16 @@ class Localization {
     return Intl.message(
       'Unread messages',
       name: 'unreadMessages',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upgrading`
+  String get upgrading {
+    return Intl.message(
+      'Upgrading',
+      name: 'upgrading',
       desc: '',
       args: [],
     );

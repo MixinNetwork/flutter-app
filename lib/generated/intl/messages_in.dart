@@ -137,6 +137,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage(
             "Penggunaan Data dan Penyimpanan"),
         "dataError": MessageLookupByLibrary.simpleMessage("Kesalahan data"),
+        "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
+            "Database sedang ditingkatkan, mungkin perlu beberapa menit, jangan tutup Aplikasi ini."),
         "deleteForEveryone":
             MessageLookupByLibrary.simpleMessage("Hapus untuk Semua Orang"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("Hapus untuk saya"),
@@ -377,6 +379,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Aktifkan Notifikasi"),
         "unblock": MessageLookupByLibrary.simpleMessage("Batal Blokir"),
         "unmute": MessageLookupByLibrary.simpleMessage("Suarakan"),
+        "upgrading": MessageLookupByLibrary.simpleMessage("Meningkatkan"),
         "userNotFound":
             MessageLookupByLibrary.simpleMessage("Pengguna tidak ditemukan"),
         "verifyPin": MessageLookupByLibrary.simpleMessage("Verifikasikan PIN"),

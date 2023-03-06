@@ -17,6 +17,7 @@ import '../../widgets/empty.dart';
 import '../../widgets/protocol_handler.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/window/menus.dart';
+import '../landing/landing_qrcode.dart';
 import '../setting/setting_page.dart';
 import 'bloc/conversation_cubit.dart';
 import 'bloc/multi_auth_cubit.dart';
@@ -58,19 +59,24 @@ class HomePage extends HookWidget {
             converter: (state) =>
                 state.current?.account.fullName?.isEmpty ?? true);
 
+    final isDatabaseUpgrading =
+        useMemoizedStream(() => context.accountServer.isDbUpdating).data ??
+            false;
+
     return CommandPaletteWrapper(
       child: MixinAppActions(
         child: ConversationHotKey(
           child: MacosMenuBar(
+            databaseUpgrading: isDatabaseUpgrading,
             child: Stack(
               fit: StackFit.expand,
               children: [
-                LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) =>
-                      _HomePage(
-                    constraints: constraints,
+                if (!isDatabaseUpgrading)
+                  LayoutBuilder(
+                    builder: (context, constraints) => _HomePage(
+                      constraints: constraints,
+                    ),
                   ),
-                ),
                 if (isEmptyUserName) const _SetupNameWidget(),
                 if (localTimeError)
                   HookBuilder(builder: (context) {
@@ -111,6 +117,7 @@ class HomePage extends HookWidget {
                       ),
                     );
                   }),
+                if (isDatabaseUpgrading) const _DatabaseUpgradeWidget(),
               ],
             ),
           ),
@@ -118,6 +125,21 @@ class HomePage extends HookWidget {
       ),
     );
   }
+}
+
+class _DatabaseUpgradeWidget extends StatelessWidget {
+  const _DatabaseUpgradeWidget();
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: context.theme.background,
+        child: Center(
+          child: Loading(
+            title: context.l10n.upgrading,
+            message: context.l10n.databaseUpgradeTips,
+          ),
+        ),
+      );
 }
 
 class _SetupNameWidget extends HookWidget {

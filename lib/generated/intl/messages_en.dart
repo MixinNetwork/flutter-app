@@ -265,6 +265,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataError": MessageLookupByLibrary.simpleMessage("Data error"),
         "dataLoading": MessageLookupByLibrary.simpleMessage(
             "Data loading, please wait..."),
+        "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
+            "The database is being upgraded, it may take several minutes, please do not close this App."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deleteAccountDetailHint": MessageLookupByLibrary.simpleMessage(
             "Local messages and iCloud Backups will not be deleted automatically"),
@@ -297,6 +299,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "done": MessageLookupByLibrary.simpleMessage("Done"),
         "download": MessageLookupByLibrary.simpleMessage("Download"),
         "downloadLink": MessageLookupByLibrary.simpleMessage("Download Link:"),
+        "draft": MessageLookupByLibrary.simpleMessage("Draft"),
         "dragAndDropFileHere":
             MessageLookupByLibrary.simpleMessage("Drag and drop files here"),
         "durationIsTooShort":
@@ -695,6 +698,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Are you sure you want to unpin all messages?"),
         "unreadMessages":
             MessageLookupByLibrary.simpleMessage("Unread messages"),
+        "upgrading": MessageLookupByLibrary.simpleMessage("Upgrading"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "valueNow": m49,
         "valueThen": m50,
