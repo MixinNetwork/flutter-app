@@ -532,19 +532,20 @@ class _SendTextField extends HookWidget {
             if (!hasInputText)
               Positioned.fill(
                 left: 8,
-                top: 7,
-                child: IgnorePointer(
-                  child: Text(
-                    isEncryptConversation
-                        ? context.l10n.chatHintE2e
-                        : context.l10n.typeMessage,
-                    style: TextStyle(
-                      color: context.theme.secondaryText,
-                      fontSize: 14,
-                      height: 1,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: IgnorePointer(
+                    child: Text(
+                      isEncryptConversation
+                          ? context.l10n.chatHintE2e
+                          : context.l10n.typeMessage,
+                      style: TextStyle(
+                        color: context.theme.secondaryText,
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               )
