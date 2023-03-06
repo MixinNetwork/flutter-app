@@ -116,6 +116,7 @@ class Database {
 
   Future<void> dispose() async {
     await mixinDatabase.close();
+    await ftsDatabase.close();
     // dispose stream, https://github.com/simolus3/moor/issues/290
   }
 
