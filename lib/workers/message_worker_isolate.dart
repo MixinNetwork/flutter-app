@@ -271,6 +271,7 @@ class _MessageProcessRunner {
             await database.messageDao.findMessageByMessageId(em.messageId);
         if (message == null) {
           e('message is null, messageId: ${em.messageId} ${em.expireAt}');
+          await database.expiredMessageDao.deleteByMessageId(em.messageId);
           continue;
         }
         await database.messageDao
