@@ -1383,4 +1383,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           .write(MessagesCompanion(
         category: Value(category),
       ));
+
+  Future<List<Message>> getMessages(int offset, int limit) async {
+    final messages = await (select(db.messages)
+          ..orderBy([
+            (tbl) => OrderingTerm.asc(tbl.rowId),
+          ])
+          ..limit(limit, offset: offset))
+        .get();
+    return messages;
+  }
 }

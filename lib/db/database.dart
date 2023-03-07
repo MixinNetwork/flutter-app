@@ -1,3 +1,4 @@
+import '../utils/logger.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
 import 'dao/chain_dao.dart';
@@ -23,6 +24,7 @@ import 'dao/sticker_dao.dart';
 import 'dao/sticker_relationship_dao.dart';
 import 'dao/transcript_message_dao.dart';
 import 'dao/user_dao.dart';
+import 'database_event_bus.dart';
 import 'fts_database.dart';
 import 'mixin_database.dart';
 
@@ -122,4 +124,28 @@ class Database {
 
   Future<T> transaction<T>(Future<T> Function() action) =>
       mixinDatabase.transaction<T>(action);
+
+  // migrate the messages_fts in mixinDatabase to new ftsDatabase
+  Future<void> migrateFtsDatabase() async {
+    DataBaseEventBus.instance.send(DatabaseEvent.upgradeDatabase, true);
+    try {
+      final stopwatch = Stopwatch()..start();
+      var offset = 0;
+      while (true) {
+        final messages = await messageDao.getMessages(offset, 1000);
+        if (messages.isEmpty) {
+          d('migrateFtsDatabase done');
+          break;
+        }
+        offset += messages.length;
+        for (final message in messages) {
+          await ftsDatabase.insertFts(message);
+        }
+        i('migrateFtsDatabase $offset ${stopwatch.elapsedMilliseconds}ms');
+        stopwatch.reset();
+      }
+    } finally {
+      DataBaseEventBus.instance.send(DatabaseEvent.upgradeDatabase, false);
+    }
+  }
 }

@@ -4,7 +4,6 @@ import 'package:drift/drift.dart';
 
 import '../enum/message_category.dart';
 import '../utils/extension/extension.dart';
-import '../utils/logger.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import 'converter/millis_date_converter.dart';
 import 'mixin_database.dart' show Message;
@@ -53,14 +52,21 @@ class FtsDatabase extends _$FtsDatabase {
     }
 
     if (content == null) {
-      d('skip insertFts: content is null. ${message.messageId} ${message.category}');
       return;
     }
-    final ftsContent =
-        content.joinWhiteSpace().escapeSqliteSingleQuotationMarks();
+
+    // check if the message is already in the fts table
+    final fts = await (select(messagesMetas)
+          ..where((tbl) => tbl.messageId.equals(message.messageId)))
+        .getSingleOrNull();
+    if (fts != null) {
+      // d('Message ${message.messageId} already in metas table');
+      return;
+    }
+
+    final ftsContent = content.joinWhiteSpace();
     final rowId =
         await into(messagesFts).insert(MessagesFt(content: ftsContent));
-    d('insertFts: $rowId ${message.messageId} ${message.category}');
     await into(messagesMetas).insert(
       MessagesMeta(
         docId: rowId,
