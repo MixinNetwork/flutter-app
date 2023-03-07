@@ -13728,308 +13728,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<int> fuzzySearchMessageCountByCategories(
-      String query, List<String> categories) {
-    var $arrayStartIndex = 2;
-    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
-    $arrayStartIndex += categories.length;
-    return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id',
-        variables: [
-          Variable<String>(query),
-          for (var $ in categories) Variable<String>($)
-        ],
-        readsFrom: {
-          messages,
-          messagesFts,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
-  Selectable<SearchMessageDetailItem> fuzzySearchMessageByCategories(
-      String query,
-      List<String> categories,
-      FuzzySearchMessageByCategories$limit limit) {
-    var $arrayStartIndex = 2;
-    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
-    $arrayStartIndex += categories.length;
-    final generatedlimit = $write(
-        limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
-            alias(this.users, 'u'), alias(this.users, 'owner')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedlimit.amountOfVariables;
-    return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.category IN ($expandedcategories) AND m.message_id = fts.message_id ORDER BY m.created_at DESC ${generatedlimit.sql}',
-        variables: [
-          Variable<String>(query),
-          for (var $ in categories) Variable<String>($),
-          ...generatedlimit.introducedVariables
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          messagesFts,
-          ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$converter0
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      );
-    });
-  }
-
-  Selectable<int> fuzzySearchMessageCount(String query) {
-    return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.message_id = fts.message_id',
-        variables: [
-          Variable<String>(query)
-        ],
-        readsFrom: {
-          messages,
-          messagesFts,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
-  Selectable<int> fuzzySearchMessageCountWithConversation(
-      String query, FuzzySearchMessageCountWithConversation$where where) {
-    var $arrayStartIndex = 2;
-    final generatedwhere = $write(
-        where(alias(this.messages, 'm'), alias(this.conversations, 'c')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql}',
-        variables: [
-          Variable<String>(query),
-          ...generatedwhere.introducedVariables
-        ],
-        readsFrom: {
-          messages,
-          messagesFts,
-          conversations,
-          ...generatedwhere.watchedTables,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
-  Selectable<int> fuzzySearchMessageCountWithConversationOwner(
-      String query, FuzzySearchMessageCountWithConversationOwner$where where) {
-    var $arrayStartIndex = 2;
-    final generatedwhere = $write(
-        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
-            alias(this.users, 'u')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON u.user_id = c.owner_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql}',
-        variables: [
-          Variable<String>(query),
-          ...generatedwhere.introducedVariables
-        ],
-        readsFrom: {
-          messages,
-          messagesFts,
-          conversations,
-          users,
-          ...generatedwhere.watchedTables,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
-  Selectable<int> fuzzySearchMessageCountWithCircle(
-      String query, FuzzySearchMessageCountWithCircle$where where) {
-    var $arrayStartIndex = 2;
-    final generatedwhere = $write(
-        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
-            alias(this.circleConversations, 'cc')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN circle_conversations AS cc ON cc.conversation_id = c.conversation_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql}',
-        variables: [
-          Variable<String>(query),
-          ...generatedwhere.introducedVariables
-        ],
-        readsFrom: {
-          messages,
-          messagesFts,
-          conversations,
-          circleConversations,
-          ...generatedwhere.watchedTables,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
-  Selectable<SearchMessageDetailItem> fuzzySearchMessage(
-      String query, FuzzySearchMessage$where where, int limit, int offset) {
-    var $arrayStartIndex = 4;
-    final generatedwhere = $write(
-        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
-            alias(this.users, 'u'), alias(this.users, 'owner')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql} ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
-        variables: [
-          Variable<String>(query),
-          Variable<int>(limit),
-          Variable<int>(offset),
-          ...generatedwhere.introducedVariables
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          messagesFts,
-          ...generatedwhere.watchedTables,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$converter0
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      );
-    });
-  }
-
-  Selectable<SearchMessageDetailItem> fuzzySearchMessageWithConversationOwner(
-      String query,
-      FuzzySearchMessageWithConversationOwner$where where,
-      int limit,
-      int offset) {
-    var $arrayStartIndex = 4;
-    final generatedwhere = $write(
-        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
-            alias(this.users, 'u'), alias(this.users, 'owner')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql} ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
-        variables: [
-          Variable<String>(query),
-          Variable<int>(limit),
-          Variable<int>(offset),
-          ...generatedwhere.introducedVariables
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          messagesFts,
-          ...generatedwhere.watchedTables,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$converter0
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      );
-    });
-  }
-
-  Selectable<SearchMessageDetailItem> fuzzySearchMessageWithCircle(String query,
-      FuzzySearchMessageWithCircle$where where, int limit, int offset) {
-    var $arrayStartIndex = 4;
-    final generatedwhere = $write(
-        where(
-            alias(this.messages, 'm'),
-            alias(this.conversations, 'c'),
-            alias(this.users, 'u'),
-            alias(this.users, 'owner'),
-            alias(this.circleConversations, 'cc')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id INNER JOIN circle_conversations AS cc ON cc.conversation_id = c.conversation_id WHERE m.message_id = fts.message_id AND ${generatedwhere.sql} ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
-        variables: [
-          Variable<String>(query),
-          Variable<int>(limit),
-          Variable<int>(offset),
-          ...generatedwhere.introducedVariables
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          messagesFts,
-          circleConversations,
-          ...generatedwhere.watchedTables,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$converter0
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      );
-    });
-  }
-
   Selectable<NotificationMessage> notificationMessage(List<String> messageId) {
     var $arrayStartIndex = 1;
     final expandedmessageId = $expandVar($arrayStartIndex, messageId.length);
@@ -14069,320 +13767,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Users.$converter0.fromSql(row.readNullable<String>('relationship')),
         participantFullName: row.readNullable<String>('participantFullName'),
         participantUserId: row.readNullable<String>('participantUserId'),
-      );
-    });
-  }
-
-  Selectable<int> fuzzySearchMessageCountByConversationId(
-      String conversationId, String query) {
-    return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2)',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(query)
-        ],
-        readsFrom: {
-          messages,
-          messagesFts,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
-  Selectable<int> fuzzySearchMessageCountByConversationIdAndCategories(
-      String conversationId, List<String> categories, String query) {
-    var $arrayStartIndex = 3;
-    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
-    $arrayStartIndex += categories.length;
-    return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2)',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(query),
-          for (var $ in categories) Variable<String>($)
-        ],
-        readsFrom: {
-          messages,
-          messagesFts,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
-  Selectable<int> fuzzySearchMessageCountByConversationIdAndUserId(
-      String conversationId, String userId, String query) {
-    return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3)',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(userId),
-          Variable<String>(query)
-        ],
-        readsFrom: {
-          messages,
-          messagesFts,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
-  Selectable<int> fuzzySearchMessageCountByConversationIdAndUserIdAndCategories(
-      String conversationId,
-      String userId,
-      List<String> categories,
-      String query) {
-    var $arrayStartIndex = 4;
-    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
-    $arrayStartIndex += categories.length;
-    return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3)',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(userId),
-          Variable<String>(query),
-          for (var $ in categories) Variable<String>($)
-        ],
-        readsFrom: {
-          messages,
-          messagesFts,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
-  Selectable<SearchMessageDetailItem>
-      fuzzySearchMessageByConversationIdAndCategories(
-          String conversationId,
-          List<String> categories,
-          String query,
-          FuzzySearchMessageByConversationIdAndCategories$limit limit) {
-    var $arrayStartIndex = 3;
-    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
-    $arrayStartIndex += categories.length;
-    final generatedlimit = $write(
-        limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
-            alias(this.users, 'u'), alias(this.users, 'owner')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedlimit.amountOfVariables;
-    return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.conversation_id = ?1 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) ORDER BY m.created_at DESC ${generatedlimit.sql}',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(query),
-          for (var $ in categories) Variable<String>($),
-          ...generatedlimit.introducedVariables
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          messagesFts,
-          ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$converter0
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      );
-    });
-  }
-
-  Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
-      String conversationId, String query, int limit, int offset) {
-    return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) ORDER BY m.created_at DESC LIMIT ?3 OFFSET ?4',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(query),
-          Variable<int>(limit),
-          Variable<int>(offset)
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          messagesFts,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$converter0
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      );
-    });
-  }
-
-  Selectable<SearchMessageDetailItem> searchMessage(
-      SearchMessage$where where, SearchMessage$limit limit) {
-    var $arrayStartIndex = 1;
-    final generatedwhere = $write(
-        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
-            alias(this.users, 'u'), alias(this.users, 'owner')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    final generatedlimit = $write(
-        limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
-            alias(this.users, 'u'), alias(this.users, 'owner')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedlimit.amountOfVariables;
-    return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC ${generatedlimit.sql}',
-        variables: [
-          ...generatedwhere.introducedVariables,
-          ...generatedlimit.introducedVariables
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          ...generatedwhere.watchedTables,
-          ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$converter0
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      );
-    });
-  }
-
-  Selectable<SearchMessageDetailItem>
-      fuzzySearchMessageByConversationIdAndUserIdAndCategories(
-          String conversationId,
-          String userId,
-          List<String> categories,
-          String query,
-          FuzzySearchMessageByConversationIdAndUserIdAndCategories$limit
-              limit) {
-    var $arrayStartIndex = 4;
-    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
-    $arrayStartIndex += categories.length;
-    final generatedlimit = $write(
-        limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
-            alias(this.users, 'u'), alias(this.users, 'owner')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedlimit.amountOfVariables;
-    return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.category IN ($expandedcategories) AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) ORDER BY m.created_at DESC ${generatedlimit.sql}',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(userId),
-          Variable<String>(query),
-          for (var $ in categories) Variable<String>($),
-          ...generatedlimit.introducedVariables
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          messagesFts,
-          ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$converter0
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      );
-    });
-  }
-
-  Selectable<SearchMessageDetailItem>
-      fuzzySearchMessageByConversationIdAndUserId(String conversationId,
-          String userId, String query, int limit, int offset) {
-    return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) ORDER BY m.created_at DESC LIMIT ?4 OFFSET ?5',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(userId),
-          Variable<String>(query),
-          Variable<int>(limit),
-          Variable<int>(offset)
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          messagesFts,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converter1.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$converter0
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
       );
     });
   }
@@ -16113,128 +15497,6 @@ class SendingMessage {
   }
 }
 
-class SearchMessageDetailItem {
-  final String messageId;
-  final String senderId;
-  final String? senderAvatarUrl;
-  final String? senderFullName;
-  final MessageStatus status;
-  final String type;
-  final String? content;
-  final DateTime createdAt;
-  final String? mediaName;
-  final String? appId;
-  final bool? verified;
-  final String? ownerId;
-  final String? groupIconUrl;
-  final ConversationCategory? category;
-  final String? groupName;
-  final String conversationId;
-  final String? ownerFullName;
-  final String? ownerAvatarUrl;
-  SearchMessageDetailItem({
-    required this.messageId,
-    required this.senderId,
-    this.senderAvatarUrl,
-    this.senderFullName,
-    required this.status,
-    required this.type,
-    this.content,
-    required this.createdAt,
-    this.mediaName,
-    this.appId,
-    this.verified,
-    this.ownerId,
-    this.groupIconUrl,
-    this.category,
-    this.groupName,
-    required this.conversationId,
-    this.ownerFullName,
-    this.ownerAvatarUrl,
-  });
-  @override
-  int get hashCode => Object.hash(
-      messageId,
-      senderId,
-      senderAvatarUrl,
-      senderFullName,
-      status,
-      type,
-      content,
-      createdAt,
-      mediaName,
-      appId,
-      verified,
-      ownerId,
-      groupIconUrl,
-      category,
-      groupName,
-      conversationId,
-      ownerFullName,
-      ownerAvatarUrl);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is SearchMessageDetailItem &&
-          other.messageId == this.messageId &&
-          other.senderId == this.senderId &&
-          other.senderAvatarUrl == this.senderAvatarUrl &&
-          other.senderFullName == this.senderFullName &&
-          other.status == this.status &&
-          other.type == this.type &&
-          other.content == this.content &&
-          other.createdAt == this.createdAt &&
-          other.mediaName == this.mediaName &&
-          other.appId == this.appId &&
-          other.verified == this.verified &&
-          other.ownerId == this.ownerId &&
-          other.groupIconUrl == this.groupIconUrl &&
-          other.category == this.category &&
-          other.groupName == this.groupName &&
-          other.conversationId == this.conversationId &&
-          other.ownerFullName == this.ownerFullName &&
-          other.ownerAvatarUrl == this.ownerAvatarUrl);
-  @override
-  String toString() {
-    return (StringBuffer('SearchMessageDetailItem(')
-          ..write('messageId: $messageId, ')
-          ..write('senderId: $senderId, ')
-          ..write('senderAvatarUrl: $senderAvatarUrl, ')
-          ..write('senderFullName: $senderFullName, ')
-          ..write('status: $status, ')
-          ..write('type: $type, ')
-          ..write('content: $content, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('mediaName: $mediaName, ')
-          ..write('appId: $appId, ')
-          ..write('verified: $verified, ')
-          ..write('ownerId: $ownerId, ')
-          ..write('groupIconUrl: $groupIconUrl, ')
-          ..write('category: $category, ')
-          ..write('groupName: $groupName, ')
-          ..write('conversationId: $conversationId, ')
-          ..write('ownerFullName: $ownerFullName, ')
-          ..write('ownerAvatarUrl: $ownerAvatarUrl')
-          ..write(')'))
-        .toString();
-  }
-}
-
-typedef FuzzySearchMessageByCategories$limit = Limit Function(
-    Messages m, Conversations c, Users u, Users owner);
-typedef FuzzySearchMessageCountWithConversation$where = Expression<bool>
-    Function(Messages m, Conversations c);
-typedef FuzzySearchMessageCountWithConversationOwner$where = Expression<bool>
-    Function(Messages m, Conversations c, Users u);
-typedef FuzzySearchMessageCountWithCircle$where = Expression<bool> Function(
-    Messages m, Conversations c, CircleConversations cc);
-typedef FuzzySearchMessage$where = Expression<bool> Function(
-    Messages m, Conversations c, Users u, Users owner);
-typedef FuzzySearchMessageWithConversationOwner$where = Expression<bool>
-    Function(Messages m, Conversations c, Users u, Users owner);
-typedef FuzzySearchMessageWithCircle$where = Expression<bool> Function(
-    Messages m, Conversations c, Users u, Users owner, CircleConversations cc);
-
 class NotificationMessage {
   final String messageId;
   final String conversationId;
@@ -16347,14 +15609,113 @@ class NotificationMessage {
   }
 }
 
-typedef FuzzySearchMessageByConversationIdAndCategories$limit = Limit Function(
-    Messages m, Conversations c, Users u, Users owner);
-typedef SearchMessage$where = Expression<bool> Function(
-    Messages m, Conversations c, Users u, Users owner);
-typedef SearchMessage$limit = Limit Function(
-    Messages m, Conversations c, Users u, Users owner);
-typedef FuzzySearchMessageByConversationIdAndUserIdAndCategories$limit = Limit
-    Function(Messages m, Conversations c, Users u, Users owner);
+class SearchMessageDetailItem {
+  final String messageId;
+  final String senderId;
+  final String? senderAvatarUrl;
+  final String? senderFullName;
+  final MessageStatus status;
+  final String type;
+  final String? content;
+  final DateTime createdAt;
+  final String? mediaName;
+  final String? appId;
+  final bool? verified;
+  final String? ownerId;
+  final String? groupIconUrl;
+  final ConversationCategory? category;
+  final String? groupName;
+  final String conversationId;
+  final String? ownerFullName;
+  final String? ownerAvatarUrl;
+  SearchMessageDetailItem({
+    required this.messageId,
+    required this.senderId,
+    this.senderAvatarUrl,
+    this.senderFullName,
+    required this.status,
+    required this.type,
+    this.content,
+    required this.createdAt,
+    this.mediaName,
+    this.appId,
+    this.verified,
+    this.ownerId,
+    this.groupIconUrl,
+    this.category,
+    this.groupName,
+    required this.conversationId,
+    this.ownerFullName,
+    this.ownerAvatarUrl,
+  });
+  @override
+  int get hashCode => Object.hash(
+      messageId,
+      senderId,
+      senderAvatarUrl,
+      senderFullName,
+      status,
+      type,
+      content,
+      createdAt,
+      mediaName,
+      appId,
+      verified,
+      ownerId,
+      groupIconUrl,
+      category,
+      groupName,
+      conversationId,
+      ownerFullName,
+      ownerAvatarUrl);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SearchMessageDetailItem &&
+          other.messageId == this.messageId &&
+          other.senderId == this.senderId &&
+          other.senderAvatarUrl == this.senderAvatarUrl &&
+          other.senderFullName == this.senderFullName &&
+          other.status == this.status &&
+          other.type == this.type &&
+          other.content == this.content &&
+          other.createdAt == this.createdAt &&
+          other.mediaName == this.mediaName &&
+          other.appId == this.appId &&
+          other.verified == this.verified &&
+          other.ownerId == this.ownerId &&
+          other.groupIconUrl == this.groupIconUrl &&
+          other.category == this.category &&
+          other.groupName == this.groupName &&
+          other.conversationId == this.conversationId &&
+          other.ownerFullName == this.ownerFullName &&
+          other.ownerAvatarUrl == this.ownerAvatarUrl);
+  @override
+  String toString() {
+    return (StringBuffer('SearchMessageDetailItem(')
+          ..write('messageId: $messageId, ')
+          ..write('senderId: $senderId, ')
+          ..write('senderAvatarUrl: $senderAvatarUrl, ')
+          ..write('senderFullName: $senderFullName, ')
+          ..write('status: $status, ')
+          ..write('type: $type, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('mediaName: $mediaName, ')
+          ..write('appId: $appId, ')
+          ..write('verified: $verified, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('groupIconUrl: $groupIconUrl, ')
+          ..write('category: $category, ')
+          ..write('groupName: $groupName, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('ownerFullName: $ownerFullName, ')
+          ..write('ownerAvatarUrl: $ownerAvatarUrl')
+          ..write(')'))
+        .toString();
+  }
+}
+
 typedef BaseConversationItemCount$where = Expression<bool> Function(
     Conversations conversation,
     Users owner,
