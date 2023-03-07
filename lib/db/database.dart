@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../ui/home/bloc/slide_category_cubit.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import 'dao/app_dao.dart';
@@ -152,10 +153,11 @@ class Database {
     }
   }
 
+  /// [conversationIds] empty to search all conversations.
   Future<List<SearchMessageDetailItem>> fuzzySearchMessage({
     required String query,
     required int limit,
-    String? conversationId,
+    List<String> conversationIds = const [],
     String? userId,
     List<String>? categories,
     String? anchorMessageId,
@@ -163,7 +165,7 @@ class Database {
     final messageIds = await ftsDatabase.fuzzySearchMessage(
       query: query,
       limit: limit,
-      conversationId: conversationId,
+      conversationIds: conversationIds,
       userId: userId,
       categories: categories,
       anchorMessageId: anchorMessageId,
@@ -184,5 +186,92 @@ class Database {
       }
     }
     return messages;
+  }
+
+  Future<List<SearchMessageDetailItem>> fuzzySearchMessageByCategory(
+    String keyword, {
+    required int limit,
+    required SlideCategoryState category,
+    bool unseenConversationOnly = false,
+    String? anchorMessageId,
+  }) async {
+    Future<List<String>> getConversationIds() async {
+      final List<String> conversations;
+      if (unseenConversationOnly) {
+        conversations = await conversationDao
+            .unseenConversationByCategory(category.type)
+            .map((item) => item.conversationId)
+            .get();
+      } else {
+        conversations = await conversationDao
+            .conversationItemsByCategory(category.type, 1000, 0)
+            .then((value) => value.map((e) => e.conversationId).toList());
+      }
+      return conversations;
+    }
+
+    switch (category.type) {
+      case SlideCategoryType.chats:
+        if (!unseenConversationOnly) {
+          return fuzzySearchMessage(
+            query: keyword,
+            limit: limit,
+            anchorMessageId: anchorMessageId,
+          );
+        }
+        final conversationIds = await getConversationIds();
+        if (conversationIds.isEmpty) {
+          i('fuzzySearchMessageByCategory $category $unseenConversationOnly no conversationIds');
+          return Future.value(const []);
+        }
+        return fuzzySearchMessage(
+          query: keyword,
+          limit: limit,
+          anchorMessageId: anchorMessageId,
+          conversationIds: conversationIds,
+        );
+      case SlideCategoryType.groups:
+      case SlideCategoryType.bots:
+      case SlideCategoryType.strangers:
+      case SlideCategoryType.contacts:
+        final conversationIds = await getConversationIds();
+        if (conversationIds.isEmpty) {
+          i('fuzzySearchMessageByCategory $category $unseenConversationOnly no conversationIds');
+          return Future.value(const []);
+        }
+        return fuzzySearchMessage(
+          query: keyword,
+          limit: limit,
+          anchorMessageId: anchorMessageId,
+          conversationIds: await getConversationIds(),
+        );
+      case SlideCategoryType.circle:
+        final circleId = category.id!;
+        final List<String> conversationIds;
+        if (unseenConversationOnly) {
+          conversationIds = await conversationDao
+              .unseenConversationsByCircleId(circleId)
+              .map((item) => item.conversationId)
+              .get();
+        } else {
+          conversationIds = await conversationDao
+              .conversationsByCircleId(circleId, 1000, 0)
+              .map((item) => item.conversationId)
+              .get();
+        }
+        if (conversationIds.isEmpty) {
+          i('fuzzySearchMessageByCategory $category $unseenConversationOnly no conversationIds');
+          return Future.value(const []);
+        }
+        return fuzzySearchMessage(
+          query: keyword,
+          limit: limit,
+          anchorMessageId: anchorMessageId,
+          conversationIds: conversationIds,
+        );
+      case SlideCategoryType.setting:
+        assert(false, 'should not search setting');
+        return Future.value(const []);
+    }
   }
 }

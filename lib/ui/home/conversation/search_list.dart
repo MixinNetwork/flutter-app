@@ -13,7 +13,6 @@ import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../bloc/bloc_converter.dart';
 import '../../../bloc/keyword_cubit.dart';
 import '../../../bloc/minute_timer_cubit.dart';
-import '../../../bloc/paging/paging_bloc.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
@@ -34,6 +33,7 @@ import '../../../widgets/user/user_dialog.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_filter_unseen_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
+import '../bloc/search_message_cubit.dart';
 import '../bloc/slide_category_cubit.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
@@ -116,17 +116,16 @@ class SearchList extends HookWidget {
         }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
         [];
 
-    final messages = useMemoizedStream(
+    final messages = useMemoizedFuture<List<SearchMessageDetailItem>>(
             () => messageKeyword.isEmpty
-                ? Stream.value(<SearchMessageDetailItem>[])
-                : accountServer.database.messageDao
-                    .fuzzySearchMessageByCategory(
-                      messageKeyword,
-                      limit: 4,
-                      unseenConversationOnly: filterUnseen,
-                      category: slideCategoryState,
-                    )
-                    .watchThrottle(kSlowThrottleDuration),
+                ? Future.value(<SearchMessageDetailItem>[])
+                : accountServer.database.fuzzySearchMessageByCategory(
+                    messageKeyword,
+                    limit: 4,
+                    unseenConversationOnly: filterUnseen,
+                    category: slideCategoryState,
+                  ),
+            [],
             keys: [messageKeyword, filterUnseen, slideCategoryState]).data ??
         [];
 
@@ -566,63 +565,38 @@ class _SearchMessageList extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final searchMessageBloc =
-        useBloc<AnonymousPagingBloc<SearchMessageDetailItem>>(
-      () => AnonymousPagingBloc<SearchMessageDetailItem>(
-        initState: const PagingState<SearchMessageDetailItem>(),
+    final searchMessageCubit = useBloc(
+      () => SearchMessageCubit.slideCategory(
+        database: context.database,
+        category: categoryState,
+        keyword: keyword,
         limit: context.read<ConversationListBloc>().limit,
-        queryCount: () =>
-            context.database.messageDao.fuzzySearchMessageCountByCategory(
-          keyword,
-          unseenConversationOnly: filterUnseen,
-          category: categoryState,
-        ),
-        queryRange: (int limit, int offset) async {
-          if (keyword.isEmpty) return [];
-          return context.database.messageDao
-              .fuzzySearchMessageByCategory(
-                keyword,
-                limit: limit,
-                offset: offset,
-                unseenConversationOnly: filterUnseen,
-                category: categoryState,
-              )
-              .get();
-        },
       ),
-      keys: [keyword, filterUnseen, categoryState],
+      keys: [keyword, categoryState],
     );
-    useEffect(
-      () => context.database.messageDao.searchMessageUpdateEvent
-          .listen((event) => searchMessageBloc.add(PagingUpdateEvent()))
-          .cancel,
-      [keyword],
-    );
-    final pageState = useBlocState<PagingBloc<SearchMessageDetailItem>,
-        PagingState<SearchMessageDetailItem>>(bloc: searchMessageBloc);
 
-    final child = !pageState.initialized
+    final pageState = useBlocState<SearchMessageCubit, SearchMessageState>(
+        bloc: searchMessageCubit);
+
+    final child = pageState.initializing
         ? Center(
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation(context.theme.accent),
             ),
           )
-        : pageState.count <= 0
+        : pageState.items.isEmpty
             ? const SearchEmptyWidget()
             : ScrollablePositionedList.builder(
-                itemPositionsListener: searchMessageBloc.itemPositionsListener,
-                itemCount: pageState.count,
+                itemPositionsListener: searchMessageCubit.itemPositionsListener,
+                itemCount: pageState.items.length,
                 itemBuilder: (context, index) {
-                  final message = pageState.map[index];
-                  if (message == null) {
-                    return const SizedBox(
-                        height: ConversationPage.conversationItemHeight);
-                  }
+                  final message = pageState.items[index];
                   return SearchMessageItem(
-                      message: message,
-                      keyword: keyword,
-                      onTap: _searchMessageItemOnTap(context, message));
+                    message: message,
+                    keyword: keyword,
+                    onTap: _searchMessageItemOnTap(context, message),
+                  );
                 });
 
     return Column(

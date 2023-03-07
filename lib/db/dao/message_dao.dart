@@ -1134,53 +1134,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     }
   }
 
-  Selectable<int> fuzzySearchMessageCount(
-    String keyword, {
-    String? conversationId,
-    String? userId,
-    List<String>? categories,
-  }) {
-    final keywordFts5 = keyword.trim().escapeFts5();
-
-    if (conversationId != null && userId != null) {
-      if (categories != null) {
-        return db.fuzzySearchMessageCountByConversationIdAndUserIdAndCategories(
-          conversationId,
-          userId,
-          categories,
-          keywordFts5,
-        );
-      }
-
-      return db.fuzzySearchMessageCountByConversationIdAndUserId(
-        conversationId,
-        userId,
-        keywordFts5,
-      );
-    }
-
-    // var $ in categories
-    if (conversationId != null) {
-      if (categories != null) {
-        return db.fuzzySearchMessageCountByConversationIdAndCategories(
-          conversationId,
-          categories,
-          keywordFts5,
-        );
-      }
-
-      return db.fuzzySearchMessageCountByConversationId(
-        conversationId,
-        keywordFts5,
-      );
-    }
-
-    if (categories != null) {
-      return db.fuzzySearchMessageCountByCategories(keywordFts5, categories);
-    }
-
-    return db.fuzzySearchMessageCount(keywordFts5);
-  }
 
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationAndUser({
     required String conversationId,

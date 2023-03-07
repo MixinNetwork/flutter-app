@@ -96,7 +96,7 @@ class FtsDatabase extends _$FtsDatabase {
   Future<List<String>> fuzzySearchMessage({
     required String query,
     required int limit,
-    String? conversationId,
+    required List<String> conversationIds,
     String? userId,
     List<String>? categories,
     String? anchorMessageId,
@@ -105,8 +105,8 @@ class FtsDatabase extends _$FtsDatabase {
 
     Expression<bool> where(MessagesMetas m) {
       Expression<bool> where = ignoreWhere;
-      if (conversationId != null) {
-        where = where & m.conversationId.equals(conversationId);
+      if (conversationIds.isNotEmpty) {
+        where = where & m.conversationId.isIn(conversationIds);
       }
       if (userId != null) {
         where = where & m.userId.equals(userId);

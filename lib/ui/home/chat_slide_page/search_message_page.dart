@@ -277,7 +277,7 @@ class _SearchMessageList extends HookWidget {
     });
 
     final searchMessageCubit = useBloc(
-      () => SearchMessageCubit(
+      () => SearchMessageCubit.conversation(
         database: context.database,
         keyword: keyword,
         limit: context.read<ConversationListBloc>().limit,
