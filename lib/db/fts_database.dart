@@ -8,6 +8,7 @@ import '../widgets/message/item/action_card/action_card_data.dart';
 import 'converter/millis_date_converter.dart';
 import 'mixin_database.dart' show Message;
 import 'util/open_database.dart';
+import 'util/util.dart';
 
 part 'fts_database.g.dart';
 
@@ -34,6 +35,9 @@ class FtsDatabase extends _$FtsDatabase {
     );
     return FtsDatabase._connect(connect);
   }
+
+  @override
+  int get schemaVersion => 1;
 
   Future<void> insertFts(Message message) async {
     String? content;
@@ -81,9 +85,47 @@ class FtsDatabase extends _$FtsDatabase {
 
   Future<void> deleteByMessageId(String messageId) async {
     await _deleteFtsByMessageId(messageId);
-    await _deleteMetasByMessageId(messageId);
+    await (delete(messagesMetas)
+          ..where((tbl) => tbl.messageId.equals(messageId)))
+        .go();
   }
 
-  @override
-  int get schemaVersion => 1;
+  /// query the fts table.
+  /// [anchorMessageId]. only return message after this message.
+  /// return messageId list.
+  Future<List<String>> fuzzySearchMessage({
+    required String query,
+    required int limit,
+    String? conversationId,
+    String? userId,
+    List<String>? categories,
+    String? anchorMessageId,
+  }) {
+    final keywordFts5 = query.trim().escapeFts5();
+
+    Expression<bool> where(MessagesMetas m) {
+      Expression<bool> where = ignoreWhere;
+      if (conversationId != null) {
+        where = where & m.conversationId.equals(conversationId);
+      }
+      if (userId != null) {
+        where = where & m.userId.equals(userId);
+      }
+      if (categories != null) {
+        where = where & m.category.isIn(categories);
+      }
+      return where;
+    }
+
+    if (anchorMessageId == null) {
+      return _fuzzySearchAllMessage(keywordFts5, where, limit).get();
+    } else {
+      return _fuzzySearchAllMessageWithAnchor(
+        query,
+        anchorMessageId,
+        where,
+        limit,
+      ).get();
+    }
+  }
 }

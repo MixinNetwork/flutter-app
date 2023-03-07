@@ -19,5 +19,19 @@ CREATE INDEX IF NOT EXISTS messages_metas_conversation_id_user_id_category ON me
 _deleteFtsByMessageId:
 DELETE FROM messages_fts WHERE rowid = (SELECT doc_id FROM messages_metas WHERE message_id = :messageId);
 
-_deleteMetasByMessageId:
-DELETE FROM messages_metas WHERE message_id = :messageId;
+_fuzzySearchAllMessage:
+SELECT m.message_id FROM
+  messages_metas m,
+  (SELECT rowid FROM messages_fts WHERE messages_fts MATCH :query) fts
+WHERE m.doc_id = fts.rowid AND $where
+ORDER BY m.created_at DESC, m.rowid DESC
+LIMIT :limit;
+
+_fuzzySearchAllMessageWithAnchor:
+SELECT m.message_id FROM
+  messages_metas m,
+  (SELECT rowid FROM messages_fts WHERE messages_fts MATCH :query) fts,
+  (SELECT created_at, rowid FROM messages_metas WHERE message_id = :anchorMessageId) anchor
+WHERE m.doc_id = fts.rowid AND (m.created_at < anchor.created_at OR (m.created_at = anchor.created_at AND m.rowid < anchor.rowid)) AND $where
+ORDER BY m.created_at DESC, m.rowid DESC
+LIMIT :limit;

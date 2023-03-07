@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
@@ -147,5 +150,39 @@ class Database {
     } finally {
       DataBaseEventBus.instance.send(DatabaseEvent.upgradeDatabase, false);
     }
+  }
+
+  Future<List<SearchMessageDetailItem>> fuzzySearchMessage({
+    required String query,
+    required int limit,
+    String? conversationId,
+    String? userId,
+    List<String>? categories,
+    String? anchorMessageId,
+  }) async {
+    final messageIds = await ftsDatabase.fuzzySearchMessage(
+      query: query,
+      limit: limit,
+      conversationId: conversationId,
+      userId: userId,
+      categories: categories,
+      anchorMessageId: anchorMessageId,
+    );
+    final messages =
+        await mixinDatabase.getSearchMessageByIds(messageIds).get();
+
+    final result = <SearchMessageDetailItem>[];
+
+    for (final messageId in messageIds) {
+      final message =
+          messages.firstWhereOrNull((m) => m.messageId == messageId);
+      if (message != null) {
+        result.add(message);
+      } else {
+        e('fuzzySearchMessage message not found $messageId');
+        unawaited(ftsDatabase.deleteByMessageId(messageId));
+      }
+    }
+    return messages;
   }
 }

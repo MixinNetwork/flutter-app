@@ -6,7 +6,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import '../../../bloc/paging/paging_bloc.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
@@ -20,6 +19,7 @@ import '../../../widgets/search_text_field.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
+import '../bloc/search_message_cubit.dart';
 import '../chat/chat_page.dart';
 import '../conversation/search_list.dart';
 
@@ -276,74 +276,26 @@ class _SearchMessageList extends HookWidget {
       return conversationId!;
     });
 
-    final searchMessageBloc =
-        useBloc<AnonymousPagingBloc<SearchMessageDetailItem>>(
-      () => AnonymousPagingBloc<SearchMessageDetailItem>(
-        initState: const PagingState<SearchMessageDetailItem>(),
+    final searchMessageCubit = useBloc(
+      () => SearchMessageCubit(
+        database: context.database,
+        keyword: keyword,
         limit: context.read<ConversationListBloc>().limit,
-        queryCount: () async {
-          if (keyword.trim().isEmpty) {
-            return selectedUserId != null
-                ? context.database.messageDao
-                    .messageCountByConversationAndUser(
-                        conversationId, selectedUserId!, categories)
-                    .getSingle()
-                : Future.value(0);
-          }
-
-          return context.database.messageDao
-              .fuzzySearchMessageCount(
-                keyword,
-                conversationId: conversationId,
-                userId: selectedUserId,
-                categories: categories,
-              )
-              .getSingle();
-        },
-        queryRange: (int limit, int offset) async {
-          if (keyword.trim().isEmpty) {
-            return selectedUserId != null
-                ? context.database.messageDao
-                    .messageByConversationAndUser(
-                        conversationId: conversationId,
-                        userId: selectedUserId!,
-                        limit: limit,
-                        offset: offset)
-                    .get()
-                : Future.value([]);
-          }
-
-          return context.database.messageDao
-              .fuzzySearchMessage(
-                conversationId: conversationId,
-                userId: selectedUserId,
-                query: keyword,
-                limit: limit,
-                offset: offset,
-                categories: categories,
-              )
-              .get();
-        },
+        categories: categories,
+        userId: selectedUserId,
+        conversationId: conversationId,
       ),
-      keys: [keyword, categories],
+      keys: [keyword, categories, selectedUserId, conversationId],
     );
 
-    useEffect(
-      () => context.database.messageDao.searchMessageUpdateEvent
-          .listen((event) => searchMessageBloc.add(PagingUpdateEvent()))
-          .cancel,
-      [keyword, categories],
-    );
-
-    final pageState = useBlocState<PagingBloc<SearchMessageDetailItem>,
-        PagingState<SearchMessageDetailItem>>(bloc: searchMessageBloc);
+    final pageState = useBlocState<SearchMessageCubit, SearchMessageState>(
+        bloc: searchMessageCubit);
 
     return ScrollablePositionedList.builder(
-      itemPositionsListener: searchMessageBloc.itemPositionsListener,
-      itemCount: pageState.count,
+      itemPositionsListener: searchMessageCubit.itemPositionsListener,
+      itemCount: pageState.items.length,
       itemBuilder: (context, index) {
-        final message = pageState.map[index];
-        if (message == null) return const SizedBox(height: 80);
+        final message = pageState.items[index];
         return SearchMessageItem(
           message: message,
           keyword: keyword,
