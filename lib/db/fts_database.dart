@@ -46,10 +46,10 @@ class FtsDatabase extends _$FtsDatabase {
       .map((e) => e.messageId)
       .get();
 
-  Future<void> insertFts(Message message, [String? content]) async {
+  Future<void> insertFts(Message message, [String? generatedContent]) async {
     String? content;
-    if (content != null) {
-      content = content;
+    if (generatedContent != null) {
+      content = generatedContent;
     } else if (message.category.isText || message.category.isPost) {
       content = message.content;
     } else if (message.category.isData) {
