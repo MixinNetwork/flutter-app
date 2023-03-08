@@ -279,6 +279,7 @@ class _MessageProcessRunner {
         }
         await database.messageDao
             .deleteMessage(message.conversationId, em.messageId);
+        unawaited(database.ftsDatabase.deleteByMessageId(em.messageId));
         if (message.category.isAttachment || message.category.isTranscript) {
           _sendEventToMainIsolate(
             WorkerIsolateEventType.requestDownloadAttachment,

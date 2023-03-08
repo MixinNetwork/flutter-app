@@ -23,7 +23,6 @@ mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
       attachedDatabase.circleConversations;
   Circles get circles => attachedDatabase.circles;
   Hyperlinks get hyperlinks => attachedDatabase.hyperlinks;
-  MessagesFts get messagesFts => attachedDatabase.messagesFts;
   MessagesHistory get messagesHistory => attachedDatabase.messagesHistory;
   Offsets get offsets => attachedDatabase.offsets;
   ParticipantSession get participantSession =>

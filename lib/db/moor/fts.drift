@@ -35,3 +35,6 @@ SELECT m.message_id FROM
 WHERE m.doc_id = fts.rowid AND (m.created_at < anchor.created_at OR (m.created_at = anchor.created_at AND m.rowid < anchor.rowid)) AND $where
 ORDER BY m.created_at DESC, m.rowid DESC
 LIMIT :limit;
+
+getAllMatchedMessageIds:
+SELECT message_id FROM messages_metas WHERE doc_id IN ( SELECT rowid FROM messages_fts where messages_fts MATCH :query) order by created_at desc, rowid desc;

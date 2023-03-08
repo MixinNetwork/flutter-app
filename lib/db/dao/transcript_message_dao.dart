@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../enum/media_status.dart';
+import '../../utils/extension/extension.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -79,6 +80,34 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
           mediaCreatedAt: Value(mediaCreatedAt),
         ),
       );
+
+  Future<String> generateTranscriptMessageFts5Content(
+    List<TranscriptMessage> transcriptMessages,
+  ) async {
+    final contents = await Future.wait(transcriptMessages.where((transcript) {
+      final category = transcript.category;
+      return category.isText ||
+          category.isPost ||
+          category.isData ||
+          category.isContact;
+    }).map((transcript) async {
+      final category = transcript.category;
+      if (category.isData) {
+        return transcript.mediaName;
+      }
+
+      if (category.isContact &&
+          (transcript.sharedUserId?.isNotEmpty ?? false)) {
+        return db.userDao
+            .userFullNameByUserId(transcript.sharedUserId!)
+            .getSingleOrNull();
+      }
+
+      return transcript.content;
+    }));
+
+    return contents.whereNotNull().join(' ');
+  }
 }
 
 extension TranscriptMessageItemExtension on TranscriptMessageItem {

@@ -54,13 +54,6 @@ extension MessageCategoryExtension on String? {
 
   bool get isAttachment => isData || isImage || isVideo || isAudio;
 
-  bool get isFts =>
-      isText ||
-      isPost ||
-      isData ||
-      isContact ||
-      this == MessageCategory.appCard;
-
   bool get isGroupCall => {
         MessageCategory.krakenEnd,
         MessageCategory.krakenDecline,

@@ -39,9 +39,18 @@ class FtsDatabase extends _$FtsDatabase {
   @override
   int get schemaVersion => 1;
 
-  Future<void> insertFts(Message message) async {
+  Future<List<String>> getAllMessageIds() => (select(messagesMetas)
+        ..orderBy([
+          (t) => OrderingTerm(expression: t.messageId, mode: OrderingMode.desc),
+        ]))
+      .map((e) => e.messageId)
+      .get();
+
+  Future<void> insertFts(Message message, [String? content]) async {
     String? content;
-    if (message.category.isText || message.category.isPost) {
+    if (content != null) {
+      content = content;
+    } else if (message.category.isText || message.category.isPost) {
       content = message.content;
     } else if (message.category.isData) {
       content = message.name;
@@ -51,11 +60,9 @@ class FtsDatabase extends _$FtsDatabase {
       final appCard = AppCardData.fromJson(
           jsonDecode(message.content!) as Map<String, dynamic>);
       content = '${appCard.title} ${appCard.description}';
-    } else {
-      // TODO(BIN): add transcript category.
     }
 
-    if (content == null) {
+    if (content == null || content.isEmpty) {
       return;
     }
 

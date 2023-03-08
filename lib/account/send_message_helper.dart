@@ -18,7 +18,6 @@ import '../db/dao/message_mention_dao.dart';
 import '../db/dao/participant_dao.dart';
 import '../db/dao/pin_message_dao.dart';
 import '../db/dao/transcript_message_dao.dart';
-import '../db/dao/user_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
@@ -50,13 +49,14 @@ class SendMessageHelper {
   late final ParticipantDao _participantDao = _database.participantDao;
   late final JobDao _jobDao = _database.jobDao;
   late final PinMessageDao _pinMessageDao = _database.pinMessageDao;
-  late final UserDao _userDao = _database.userDao;
+
   late final TranscriptMessageDao _transcriptMessageDao =
       _database.transcriptMessageDao;
   final AttachmentUtil _attachmentUtil;
   final Function(Job) _addSendingJob;
 
-  Future<void> _insertSendMessageToDb(Message message) async {
+  Future<void> _insertSendMessageToDb(Message message,
+      {String? ftsContent}) async {
     final conversationId = message.conversationId;
     final conversation = await _database.conversationDao
         .conversationItem(conversationId)
@@ -64,6 +64,7 @@ class SendMessageHelper {
     assert(conversation != null, 'no conversation');
     final expireIn = conversation?.expireIn ?? 0;
     await _messageDao.insert(message, message.userId, expireIn: expireIn);
+    unawaited(_database.ftsDatabase.insertFts(message, ftsContent));
   }
 
   Future<void> sendTextMessage(
@@ -580,6 +581,8 @@ class SendMessageHelper {
 
       await _messageDao.recallMessage(conversationId, messageId);
 
+      unawaited(_database.ftsDatabase.deleteByMessageId(messageId));
+
       await Future.wait([
         (() async {
           if (message?.category.isAttachment == true) {
@@ -588,11 +591,6 @@ class SendMessageHelper {
             if (exists) {
               await file.delete();
             }
-          }
-        })(),
-        (() async {
-          if (message?.category.isFts ?? false) {
-            await _messageDao.deleteFtsByMessageId(messageId);
           }
         })(),
         _messageMentionDao.deleteMessageMentionByMessageId(messageId),
@@ -825,43 +823,13 @@ class SendMessageHelper {
       mediaStatus: hasAttachments ? MediaStatus.canceled : MediaStatus.done,
     );
 
-    Future<void> insertFts() async {
-      final contents = await Future.wait(transcriptMessages.where((transcript) {
-        final category = transcript.category;
-        return category.isText ||
-            category.isPost ||
-            category.isData ||
-            category.isContact;
-      }).map((transcript) async {
-        final category = transcript.category;
-        if (category.isData) {
-          return transcript.mediaName;
-        }
-
-        if (category.isContact &&
-            (transcript.sharedUserId?.isNotEmpty ?? false)) {
-          return _userDao
-              .userFullNameByUserId(transcript.sharedUserId!)
-              .getSingleOrNull();
-        }
-
-        return transcript.content;
-      }));
-
-      final join = contents.whereNotNull().join(' ');
-      await _messageDao.insertFts(
-        messageId,
-        conversationId,
-        join,
-        DateTime.now(),
-        senderId,
-      );
-    }
-
     await Future.wait([
       _transcriptMessageDao.insertAll(transcriptMessages),
-      insertFts(),
-      _insertSendMessageToDb(message),
+      _insertSendMessageToDb(
+        message,
+        ftsContent: await _transcriptMessageDao
+            .generateTranscriptMessageFts5Content(transcriptMessages),
+      ),
     ]);
 
     if (hasAttachments) {

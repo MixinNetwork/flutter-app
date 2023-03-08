@@ -1297,6 +1297,7 @@ class AccountServer {
     if (message == null) return;
     await database.messageDao.deleteMessage(message.conversationId, messageId);
 
+    unawaited(database.ftsDatabase.deleteByMessageId(messageId));
     unawaited(_deleteMessageAttachment(message));
   }
 

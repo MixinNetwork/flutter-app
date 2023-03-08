@@ -104,6 +104,7 @@ class DecryptMessage extends Injector {
   Future<void> _insertMessage(Message message, BlazeMessageData data) async {
     await database.messageDao.insert(message, accountId,
         silent: data.silent, expireIn: data.expireIn);
+    unawaited(database.ftsDatabase.insertFts(message));
     if (data.expireIn > 0 && message.userId == accountId) {
       final expiredAt =
           data.createdAt.millisecondsSinceEpoch ~/ 1000 + data.expireIn;
@@ -479,6 +480,8 @@ class DecryptMessage extends Injector {
     await database.messageDao
         .recallMessage(data.conversationId, recallMessage.messageId);
 
+    unawaited(database.ftsDatabase.deleteByMessageId(recallMessage.messageId));
+
     await Future.wait([
       (() async {
         if (message != null && message.category.isAttachment) {
@@ -509,12 +512,6 @@ class DecryptMessage extends Injector {
       })(),
       database.messageMentionDao
           .deleteMessageMentionByMessageId(recallMessage.messageId),
-      (() async {
-        if (message?.category.isFts ?? false) {
-          await database.messageDao
-              .deleteFtsByMessageId(recallMessage.messageId);
-        }
-      })(),
       database.messagesHistoryDao
           .insert(MessagesHistoryData(messageId: data.messageId)),
     ]);
@@ -1264,34 +1261,6 @@ class DecryptMessage extends Injector {
       return null;
     }
 
-    Future<void> insertFts() async {
-      final contents = await Future.wait(transcripts.where((transcript) {
-        final category = transcript.category;
-        return category.isText ||
-            category.isPost ||
-            category.isData ||
-            category.isContact;
-      }).map((transcript) async {
-        final category = transcript.category;
-        if (category.isData) {
-          return transcript.mediaName;
-        }
-
-        if (category.isContact &&
-            (transcript.sharedUserId?.isNotEmpty ?? false)) {
-          return database.userDao
-              .userFullNameByUserId(transcript.sharedUserId!)
-              .getSingleOrNull();
-        }
-
-        return transcript.content;
-      }));
-
-      final join = contents.whereNotNull().join(' ');
-      await database.messageDao.insertFts(data.messageId, data.conversationId,
-          join, data.createdAt, data.userId);
-    }
-
     Future _refreshSticker() => Future.wait(transcripts
             .where((transcript) =>
                 transcript.category.isSticker &&
@@ -1323,7 +1292,6 @@ class DecryptMessage extends Injector {
             .toList());
 
     await Future.wait([
-      insertFts(),
       _refreshSticker(),
       _refreshUser(),
       insertAllTranscriptMessageFuture,
@@ -1356,7 +1324,7 @@ class DecryptMessage extends Injector {
       }
     });
 
-    return Message(
+    final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId,
       userId: data.senderId,
@@ -1367,6 +1335,14 @@ class DecryptMessage extends Injector {
       createdAt: data.createdAt,
       mediaStatus: mediaStatus,
     );
+
+    unawaited(Future.sync(() async {
+      final content = await database.transcriptMessageDao
+          .generateTranscriptMessageFts5Content(transcripts);
+      await database.ftsDatabase.insertFts(message, content);
+    }));
+
+    return message;
   }
 }
 

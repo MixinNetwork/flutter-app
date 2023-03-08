@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -10,7 +9,6 @@ import '../../constants/constants.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../utils/extension/extension.dart';
-import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../database_event_bus.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
@@ -34,17 +32,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       db.conversations,
     ]),
   );
-
-  late Stream<void> searchMessageUpdateEvent = db
-      .tableUpdates(
-        TableUpdateQuery.onAllTables([
-          db.messages,
-          db.users,
-          db.conversations,
-          db.messagesFts,
-        ]),
-      )
-      .throttleTime(kDefaultThrottleDuration, trailing: true);
 
   late Stream<List<MessageItem>> insertOrReplaceMessageStream = db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
@@ -195,7 +182,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }) async {
     final futures = <Future>[
       into(db.messages).insertOnConflictUpdate(message),
-      _insertMessageFts(message),
       if (expireIn > 0)
         db.expiredMessageDao
             .insert(messageId: message.messageId, expireIn: expireIn)
@@ -211,37 +197,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     return result;
   }
-
-  Future<void> _insertMessageFts(Message message) async {
-    String? ftsContent;
-    if (message.category.isText || message.category.isPost) {
-      ftsContent = message.content;
-    } else if (message.category.isData) {
-      ftsContent = message.name;
-    } else if (message.category.isContact) {
-      ftsContent = message.name;
-    } else if (message.category == MessageCategory.appCard) {
-      final appCard = AppCardData.fromJson(
-          jsonDecode(message.content!) as Map<String, dynamic>);
-      ftsContent = '${appCard.title} ${appCard.description}';
-    }
-    if (ftsContent != null) {
-      await insertFts(
-        message.messageId,
-        message.conversationId,
-        ftsContent.joinWhiteSpace(),
-        message.createdAt,
-        message.userId,
-      );
-    }
-  }
-
-  Future<int> insertFts(String messageId, String conversationId, String content,
-          DateTime createdAt, String userId) =>
-      db.customInsert(
-        "INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES ('$messageId', '$conversationId','${content.escapeSqliteSingleQuotationMarks()}', '${createdAt.millisecondsSinceEpoch}', '$userId')",
-        updates: {db.messagesFts},
-      );
 
   Future<void> deleteMessage(
     String conversationId,
@@ -275,17 +230,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     await updateConversationLastMessageId();
 
-    final message = await findMessageByMessageId(messageId);
-
     await db.transaction(() async {
       await Future.wait([
         (delete(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
             .go(),
-        (() async {
-          if (message?.category.isFts ?? false) {
-            await deleteFtsByMessageId(messageId);
-          }
-        })(),
         (delete(db.transcriptMessages)
               ..where((tbl) => tbl.transcriptId.equals(messageId)))
             .go(),
@@ -997,15 +945,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         ..limit(1)
         ..orderBy([OrderingTerm.desc(db.messages.createdAt)]))
       .map((row) => row.read(db.messages.rowId));
-
-  Future<void> deleteFtsByMessageId(String messageId) async {
-    final rowId =
-        await db.messageFtsRowIdByMessageId(messageId).getSingleOrNull();
-
-    if (rowId == null) return;
-
-    await db.deleteMessageFtsByRowId(rowId);
-  }
 
   Future<int> updateTranscriptMessage(
     String? content,

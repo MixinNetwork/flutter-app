@@ -552,6 +552,18 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.read<String>('message_id'));
   }
 
+  Selectable<String> getAllMatchedMessageIds(String query) {
+    return customSelect(
+        'SELECT message_id FROM messages_metas WHERE doc_id IN (SELECT "rowid" FROM messages_fts WHERE messages_fts MATCH ?1) ORDER BY created_at DESC, "rowid" DESC',
+        variables: [
+          Variable<String>(query)
+        ],
+        readsFrom: {
+          messagesMetas,
+          messagesFts,
+        }).map((QueryRow row) => row.read<String>('message_id'));
+  }
+
   @override
   Iterable<TableInfo<Table, dynamic>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();

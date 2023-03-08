@@ -156,21 +156,12 @@ WHERE  m.message_id in :messageId
 ORDER  BY m.created_at DESC;
 
 
-
-
 updateUnseenMessageCountAndLastMessageId:
 UPDATE conversations SET unseen_message_count
     = (SELECT count(1) FROM messages WHERE conversation_id = :conversationId AND status IN ('SENT', 'DELIVERED')  AND user_id != :userId),
     last_message_id = :lastMessageId,
     last_message_created_at = :lastMessageCreatedAt
     WHERE conversation_id = :conversationId;
-
-messageFtsRowIdByMessageId:
-SELECT rowid FROM messages_fts WHERE message_id = :messageId order by rowid desc limit 1;
-
-deleteMessageFtsByRowId:
-DELETE FROM messages_fts WHERE rowid = :rowId;
-
 
 getSearchMessageByIds AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName,
