@@ -73,6 +73,7 @@ class MigrateFtsJob extends JobQueue<Job> {
       final messages = await messageDao.getMessages(lastMessageRowId, 1000);
       if (messages.isEmpty) {
         d('migrateFtsDatabase done');
+        await database.jobDao.deleteJobByAction(kMigrateFts);
         break;
       }
       try {
