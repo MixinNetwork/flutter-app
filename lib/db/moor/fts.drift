@@ -38,3 +38,6 @@ LIMIT :limit;
 
 getAllMatchedMessageIds:
 SELECT message_id FROM messages_metas WHERE doc_id IN ( SELECT rowid FROM messages_fts where messages_fts MATCH :query) order by created_at desc, rowid desc;
+
+checkMessageMetaExists:
+SELECT EXISTS(SELECT 1 FROM messages_metas WHERE message_id = :messageId);

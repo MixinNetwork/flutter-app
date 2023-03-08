@@ -138,6 +138,8 @@ class _MessageProcessRunner {
       await FtsDatabase.connect(identityNumber),
     );
 
+    unawaited(database.migrateFtsDatabase());
+
     client = createClient(
       userId: userId,
       sessionId: sessionId,

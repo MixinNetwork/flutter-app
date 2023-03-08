@@ -564,6 +564,17 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.read<String>('message_id'));
   }
 
+  Selectable<bool> checkMessageMetaExists(String messageId) {
+    return customSelect(
+        'SELECT EXISTS (SELECT 1 AS _c1 FROM messages_metas WHERE message_id = ?1) AS _c0',
+        variables: [
+          Variable<String>(messageId)
+        ],
+        readsFrom: {
+          messagesMetas,
+        }).map((QueryRow row) => row.read<bool>('_c0'));
+  }
+
   @override
   Iterable<TableInfo<Table, dynamic>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();

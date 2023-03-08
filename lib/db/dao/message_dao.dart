@@ -985,13 +985,17 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         category: Value(category),
       ));
 
-  Future<List<Message>> getMessages(int offset, int limit) async {
-    final messages = await (select(db.messages)
-          ..orderBy([
-            (tbl) => OrderingTerm.asc(tbl.rowId),
-          ])
-          ..limit(limit, offset: offset))
-        .get();
-    return messages;
+  Future<List<Tuple2<int, Message>>> getMessages(int? rowid, int limit) async {
+    final messages = await customSelect(
+        'SELECT rowid, * FROM messages WHERE ${rowid == null ? '1' : 'rowid < $rowid'} '
+        'ORDER BY rowid DESC LIMIT $limit',
+        readsFrom: {db.messages}).map(
+      (row) async {
+        final message = await db.messages.mapFromRow(row);
+        final rowId = row.read<int>('rowid');
+        return Tuple2(rowId, message);
+      },
+    ).get();
+    return Future.wait(messages);
   }
 }

@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 
 import '../enum/message_category.dart';
 import '../utils/extension/extension.dart';
+import '../utils/logger.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import 'converter/millis_date_converter.dart';
 import 'mixin_database.dart' show Message;
@@ -46,7 +47,9 @@ class FtsDatabase extends _$FtsDatabase {
       .map((e) => e.messageId)
       .get();
 
-  Future<void> insertFts(Message message, [String? generatedContent]) async {
+  /// Insert a message fts content into the database.
+  /// return the row id of the inserted message. -1 if the message is not inserted.
+  Future<int> insertFtsOnly(Message message, [String? generatedContent]) async {
     String? content;
     if (generatedContent != null) {
       content = generatedContent;
@@ -63,21 +66,22 @@ class FtsDatabase extends _$FtsDatabase {
     }
 
     if (content == null || content.isEmpty) {
-      return;
+      return -1;
     }
-
-    // check if the message is already in the fts table
-    final fts = await (select(messagesMetas)
-          ..where((tbl) => tbl.messageId.equals(message.messageId)))
-        .getSingleOrNull();
-    if (fts != null) {
-      // d('Message ${message.messageId} already in metas table');
-      return;
-    }
-
     final ftsContent = content.joinWhiteSpace();
     final rowId =
         await into(messagesFts).insert(MessagesFt(content: ftsContent));
+    return rowId;
+  }
+
+  Future<void> insertFts(Message message, [String? generatedContent]) async {
+    // check if the message is already in the fts table
+    final existed = await checkMessageMetaExists(message.messageId).getSingle();
+    if (existed) {
+      d('Message ${message.messageId} already in metas table');
+      return;
+    }
+    final rowId = await insertFtsOnly(message, generatedContent);
     await into(messagesMetas).insert(
       MessagesMeta(
         docId: rowId,
