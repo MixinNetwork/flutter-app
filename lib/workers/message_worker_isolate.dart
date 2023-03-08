@@ -26,6 +26,7 @@ import '../utils/system/package_info.dart';
 import 'decrypt_message.dart';
 import 'isolate_event.dart';
 import 'job/ack_job.dart';
+import 'job/delete_old_fts_record_job.dart';
 import 'job/flood_job.dart';
 import 'job/migrate_fts_job.dart';
 import 'job/sending_job.dart';
@@ -225,6 +226,7 @@ class _MessageProcessRunner {
     );
 
     _ftsJob = MigrateFtsJob(database: database);
+    DeleteOldFtsRecordJob(database: database);
 
     _decryptMessage = DecryptMessage(
       userId,

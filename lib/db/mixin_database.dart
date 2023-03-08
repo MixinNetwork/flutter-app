@@ -227,6 +227,7 @@ class MixinDatabase extends _$MixinDatabase {
         beforeOpen: (details) async {
           if (details.hadUpgrade && details.versionBefore! <= 20) {
             await jobDao.insert(createMigrationFtsJob(null));
+            await jobDao.insert(createDeleteOldFtsRecordJob());
           }
         },
       );
