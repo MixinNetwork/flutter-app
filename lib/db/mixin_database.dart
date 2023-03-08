@@ -39,6 +39,7 @@ import 'dao/sticker_dao.dart';
 import 'dao/sticker_relationship_dao.dart';
 import 'dao/user_dao.dart';
 import 'database_event_bus.dart';
+import 'extension/job.dart';
 import 'util/open_database.dart';
 import 'util/util.dart';
 
@@ -96,7 +97,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(super.c) : super.connect();
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   final eventBus = DataBaseEventBus.instance;
 
@@ -221,6 +222,11 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 19) {
             await m.drop(Trigger('', 'conversation_last_message_delete'));
+          }
+        },
+        beforeOpen: (details) async {
+          if (details.hadUpgrade && details.versionBefore! <= 20) {
+            await jobDao.insert(createMigrationFtsJob(null));
           }
         },
       );

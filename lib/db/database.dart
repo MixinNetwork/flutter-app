@@ -30,7 +30,6 @@ import 'dao/transcript_message_dao.dart';
 import 'dao/user_dao.dart';
 import 'fts_database.dart';
 import 'mixin_database.dart';
-import 'util/util.dart';
 
 class Database {
   Database(this.mixinDatabase, this.ftsDatabase) {
@@ -128,74 +127,6 @@ class Database {
 
   Future<T> transaction<T>(Future<T> Function() action) =>
       mixinDatabase.transaction<T>(action);
-
-  // migrate the messages_fts in mixinDatabase to new ftsDatabase
-  Future<void> migrateFtsDatabase() async {
-    final stopwatch = Stopwatch()..start();
-    var offset = 0;
-    int? lastMessageRowId;
-    while (true) {
-      final messages = await messageDao.getMessages(lastMessageRowId, 1000);
-      if (messages.isEmpty) {
-        d('migrateFtsDatabase done');
-        break;
-      }
-      lastMessageRowId = messages.last.item1;
-      offset += messages.length;
-
-      // migration skip the messages already in ftsDatabase.
-      final messagesToMigrate = (await Future.wait(messages.map((e) async {
-        final exist = await ftsDatabase
-            .checkMessageMetaExists(e.item2.messageId)
-            .getSingle();
-        return exist ? null : e.item2;
-      })))
-          .whereNotNull();
-
-      final transcriptMessageFtsContent = <String, String>{};
-      for (final message in messagesToMigrate) {
-        if (!message.category.isTranscript) {
-          continue;
-        }
-        final transcripts = await transcriptMessageDao
-            .transcriptMessageByMessageId(message.messageId, maxLimit)
-            .get();
-        if (transcripts.isEmpty) {
-          e('transcriptMessageByMessageId empty ${message.messageId}');
-          continue;
-        }
-        final content = await transcriptMessageDao
-            .generateTranscriptMessageFts5Content(transcripts);
-        transcriptMessageFtsContent[message.messageId] = content;
-      }
-
-      // insert fts
-      final messageMeta = <int, Message>{};
-      for (final message in messagesToMigrate) {
-        final rowId = await ftsDatabase.insertFtsOnly(
-            message, transcriptMessageFtsContent[message.messageId]);
-        messageMeta[rowId] = message;
-      }
-
-      // insert metas
-      await ftsDatabase.batch((batch) {
-        batch.insertAll(ftsDatabase.messagesMetas, [
-          for (MapEntry<int, Message> entry in messageMeta.entries)
-            MessagesMeta(
-              docId: entry.key,
-              messageId: entry.value.messageId,
-              conversationId: entry.value.conversationId,
-              category: entry.value.category,
-              userId: entry.value.userId,
-              createdAt: entry.value.createdAt,
-            )
-        ]);
-      });
-
-      i('migrateFtsDatabase $offset ${stopwatch.elapsedMilliseconds}ms');
-      stopwatch.reset();
-    }
-  }
 
   /// [conversationIds] empty to search all conversations.
   Future<List<SearchMessageDetailItem>> fuzzySearchMessage({

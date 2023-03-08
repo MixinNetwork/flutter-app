@@ -58,6 +58,9 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   Future<void> deleteJobById(String jobId) => batch(
       (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId))});
 
+  Future<void> deleteJobByAction(String action) => batch(
+      (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.action.equals(action))});
+
   SimpleSelectStatement<Jobs, Job> ackJobs() => select(db.jobs)
     ..where((Jobs row) =>
         row.action.equals(kAcknowledgeMessageReceipts) &
@@ -84,6 +87,9 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   SimpleSelectStatement<Jobs, Job> updateStickerJobs() => select(db.jobs)
     ..where((Jobs row) => row.action.equals(kUpdateSticker))
     ..limit(100);
+
+  SimpleSelectStatement<Jobs, Job> migrateFtsJobs() =>
+      select(db.jobs)..where((Jobs row) => row.action.equals(kMigrateFts));
 
   Future<Job?> jobById(String jobId) =>
       (select(db.jobs)..where((tbl) => tbl.jobId.equals(jobId)))

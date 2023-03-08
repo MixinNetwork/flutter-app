@@ -27,6 +27,7 @@ import 'decrypt_message.dart';
 import 'isolate_event.dart';
 import 'job/ack_job.dart';
 import 'job/flood_job.dart';
+import 'job/migrate_fts_job.dart';
 import 'job/sending_job.dart';
 import 'job/session_ack_job.dart';
 import 'job/update_asset_job.dart';
@@ -128,6 +129,9 @@ class _MessageProcessRunner {
   late SessionAckJob _sessionAckJob;
   late FloodJob _floodJob;
 
+  // ignore: unused_field
+  late MigrateFtsJob _ftsJob;
+
   final jobSubscribers = <StreamSubscription>[];
 
   Timer? _nextExpiredMessageRunner;
@@ -137,8 +141,6 @@ class _MessageProcessRunner {
       await connectToDatabase(identityNumber, readCount: 4),
       await FtsDatabase.connect(identityNumber),
     );
-
-    unawaited(database.migrateFtsDatabase());
 
     client = createClient(
       userId: userId,
@@ -221,6 +223,8 @@ class _MessageProcessRunner {
       database: database,
       client: client,
     );
+
+    _ftsJob = MigrateFtsJob(database: database);
 
     _decryptMessage = DecryptMessage(
       userId,
