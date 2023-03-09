@@ -92,7 +92,7 @@ class _MainEventBus implements EventBus {
         switch (type) {
           case _EventType.register:
             final data = event.data as List;
-            final uuid = data[0] as String;
+            final uuid = data.first as String;
             d('register other isolate event bus. $uuid');
             final port = data[1] as SendPort;
             _ports[uuid] = port;

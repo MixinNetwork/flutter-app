@@ -1,0 +1,43 @@
+import '../converter/millis_date_converter.dart';
+
+CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING FTS5(content, tokenize="unicode61 remove_diacritics 2 categories 'Co L* N* S*'");
+
+CREATE TABLE IF NOT EXISTS messages_metas (
+    doc_id INTEGER NOT NULL,
+    message_id TEXT NOT NULL,
+    conversation_id TEXT NOT NULL,
+    category TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    PRIMARY KEY (message_id)
+);
+
+CREATE INDEX IF NOT EXISTS messages_metas_doc_id_created_at ON messages_metas (doc_id, created_at);
+CREATE INDEX IF NOT EXISTS messages_metas_conversation_id_user_id_category ON messages_metas (conversation_id, user_id, category);
+
+
+_deleteFtsByMessageId:
+DELETE FROM messages_fts WHERE rowid = (SELECT doc_id FROM messages_metas WHERE message_id = :messageId);
+
+_fuzzySearchAllMessage:
+SELECT m.message_id FROM
+  messages_metas m,
+  (SELECT rowid FROM messages_fts WHERE messages_fts MATCH :query) fts
+WHERE m.doc_id = fts.rowid AND $where
+ORDER BY m.created_at DESC, m.rowid DESC
+LIMIT :limit;
+
+_fuzzySearchAllMessageWithAnchor:
+SELECT m.message_id FROM
+  messages_metas m,
+  (SELECT rowid FROM messages_fts WHERE messages_fts MATCH :query) fts,
+  (SELECT created_at, rowid FROM messages_metas WHERE message_id = :anchorMessageId) anchor
+WHERE m.doc_id = fts.rowid AND (m.created_at < anchor.created_at OR (m.created_at = anchor.created_at AND m.rowid < anchor.rowid)) AND $where
+ORDER BY m.created_at DESC, m.rowid DESC
+LIMIT :limit;
+
+getAllMatchedMessageIds:
+SELECT message_id FROM messages_metas WHERE doc_id IN ( SELECT rowid FROM messages_fts where messages_fts MATCH :query) order by created_at desc, rowid desc;
+
+checkMessageMetaExists:
+SELECT EXISTS(SELECT 1 FROM messages_metas WHERE message_id = :messageId);

@@ -16,6 +16,7 @@ import '../blaze/blaze.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../db/database.dart';
 import '../db/database_event_bus.dart';
+import '../db/fts_database.dart';
 import '../db/mixin_database.dart' hide Chain;
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
@@ -25,7 +26,9 @@ import '../utils/system/package_info.dart';
 import 'decrypt_message.dart';
 import 'isolate_event.dart';
 import 'job/ack_job.dart';
+import 'job/delete_old_fts_record_job.dart';
 import 'job/flood_job.dart';
+import 'job/migrate_fts_job.dart';
 import 'job/sending_job.dart';
 import 'job/session_ack_job.dart';
 import 'job/update_asset_job.dart';
@@ -132,7 +135,10 @@ class _MessageProcessRunner {
   Timer? _nextExpiredMessageRunner;
 
   Future<void> init(IsolateInitParams initParams) async {
-    database = Database(await connectToDatabase(identityNumber, readCount: 4));
+    database = Database(
+      await connectToDatabase(identityNumber, readCount: 4),
+      await FtsDatabase.connect(identityNumber),
+    );
 
     client = createClient(
       userId: userId,
@@ -216,6 +222,9 @@ class _MessageProcessRunner {
       client: client,
     );
 
+    MigrateFtsJob(database: database);
+    DeleteOldFtsRecordJob(database: database);
+
     _decryptMessage = DecryptMessage(
       userId,
       database,
@@ -276,6 +285,7 @@ class _MessageProcessRunner {
         }
         await database.messageDao
             .deleteMessage(message.conversationId, em.messageId);
+        unawaited(database.ftsDatabase.deleteByMessageId(em.messageId));
         if (message.category.isAttachment || message.category.isTranscript) {
           _sendEventToMainIsolate(
             WorkerIsolateEventType.requestDownloadAttachment,

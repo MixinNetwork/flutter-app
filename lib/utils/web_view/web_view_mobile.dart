@@ -68,12 +68,9 @@ class _FullWindowInAppWebViewPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final webViewController = useMemoized(() {
-      final controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..loadRequest(Uri.parse(initialUrl));
-      return controller;
-    });
+    final webViewController = useMemoized(() => WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..loadRequest(Uri.parse(initialUrl)));
     return Material(
       color: context.theme.background,
       child: SafeArea(

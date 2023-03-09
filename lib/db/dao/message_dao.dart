@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -9,9 +8,7 @@ import 'package:tuple/tuple.dart';
 import '../../constants/constants.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
-import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../utils/extension/extension.dart';
-import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../database_event_bus.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
@@ -35,17 +32,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       db.conversations,
     ]),
   );
-
-  late Stream<void> searchMessageUpdateEvent = db
-      .tableUpdates(
-        TableUpdateQuery.onAllTables([
-          db.messages,
-          db.users,
-          db.conversations,
-          db.messagesFts,
-        ]),
-      )
-      .throttleTime(kDefaultThrottleDuration, trailing: true);
 
   late Stream<List<MessageItem>> insertOrReplaceMessageStream = db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
@@ -196,7 +182,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }) async {
     final futures = <Future>[
       into(db.messages).insertOnConflictUpdate(message),
-      _insertMessageFts(message),
       if (expireIn > 0)
         db.expiredMessageDao
             .insert(messageId: message.messageId, expireIn: expireIn)
@@ -212,37 +197,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     return result;
   }
-
-  Future<void> _insertMessageFts(Message message) async {
-    String? ftsContent;
-    if (message.category.isText || message.category.isPost) {
-      ftsContent = message.content;
-    } else if (message.category.isData) {
-      ftsContent = message.name;
-    } else if (message.category.isContact) {
-      ftsContent = message.name;
-    } else if (message.category == MessageCategory.appCard) {
-      final appCard = AppCardData.fromJson(
-          jsonDecode(message.content!) as Map<String, dynamic>);
-      ftsContent = '${appCard.title} ${appCard.description}';
-    }
-    if (ftsContent != null) {
-      await insertFts(
-        message.messageId,
-        message.conversationId,
-        ftsContent.joinWhiteSpace(),
-        message.createdAt,
-        message.userId,
-      );
-    }
-  }
-
-  Future<int> insertFts(String messageId, String conversationId, String content,
-          DateTime createdAt, String userId) =>
-      db.customInsert(
-        "INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES ('$messageId', '$conversationId','${content.escapeSqliteSingleQuotationMarks()}', '${createdAt.millisecondsSinceEpoch}', '$userId')",
-        updates: {db.messagesFts},
-      );
 
   Future<void> deleteMessage(
     String conversationId,
@@ -276,17 +230,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     await updateConversationLastMessageId();
 
-    final message = await findMessageByMessageId(messageId);
-
     await db.transaction(() async {
       await Future.wait([
         (delete(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
             .go(),
-        (() async {
-          if (message?.category.isFts ?? false) {
-            await deleteFtsByMessageId(messageId);
-          }
-        })(),
         (delete(db.transcriptMessages)
               ..where((tbl) => tbl.transcriptId.equals(messageId)))
             .go(),
@@ -992,358 +939,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     db.eventBus.send(DatabaseEvent.notification, messageId);
   }
 
-  Selectable<SearchMessageDetailItem> fuzzySearchMessageByCategory(
-    String keyword, {
-    required int limit,
-    SlideCategoryState? category,
-    int offset = 0,
-    bool unseenConversationOnly = false,
-  }) {
-    Expression<bool> unseenFilter(Conversations tbl) => unseenConversationOnly
-        ? tbl.unseenMessageCount.isBiggerThanValue(0)
-        : const Constant(true);
-    final query = keyword.trim().escapeFts5();
-    switch (category?.type) {
-      case null:
-      case SlideCategoryType.chats:
-        return db.fuzzySearchMessage(
-            query, (m, c, u, o) => unseenFilter(c), limit, offset);
-      case SlideCategoryType.contacts:
-        return db.fuzzySearchMessageWithConversationOwner(
-            query,
-            (m, c, u, owner) =>
-                c.category.equalsValue(ConversationCategory.contact) &
-                owner.relationship.equalsValue(UserRelationship.friend) &
-                owner.appId.isNull() &
-                unseenFilter(c),
-            limit,
-            offset);
-      case SlideCategoryType.groups:
-        return db.fuzzySearchMessage(
-            query,
-            (m, c, u, o) =>
-                c.category.equalsValue(ConversationCategory.group) &
-                unseenFilter(c),
-            limit,
-            offset);
-      case SlideCategoryType.bots:
-        return db.fuzzySearchMessageWithConversationOwner(
-            query,
-            (m, c, u, owner) =>
-                c.category.equalsValue(ConversationCategory.contact) &
-                owner.appId.isNotNull() &
-                unseenFilter(c),
-            limit,
-            offset);
-      case SlideCategoryType.strangers:
-        return db.fuzzySearchMessageWithConversationOwner(
-            query,
-            (m, c, u, owner) =>
-                c.category.equalsValue(ConversationCategory.contact) &
-                owner.relationship.equalsValue(UserRelationship.stranger) &
-                owner.appId.isNull() &
-                unseenFilter(c),
-            limit,
-            offset);
-      case SlideCategoryType.circle:
-        final circleId = category!.id!;
-        return db.fuzzySearchMessageWithCircle(
-            query,
-            (m, c, u, o, cc) => cc.circleId.equals(circleId) & unseenFilter(c),
-            limit,
-            offset);
-      case SlideCategoryType.setting:
-        assert(false, 'Setting category should not be searched');
-        return db.fuzzySearchMessage(
-            query, (m, c, u, o) => ignoreWhere, limit, offset);
-    }
-  }
-
-  Future<int> fuzzySearchMessageCountByCategory(
-    String keyword, {
-    SlideCategoryState? category,
-    bool unseenConversationOnly = false,
-  }) {
-    final query = keyword.trim().escapeFts5();
-    Expression<bool> unseenFilter(Conversations tbl) => unseenConversationOnly
-        ? tbl.unseenMessageCount.isBiggerThanValue(0)
-        : const Constant(true);
-    switch (category?.type) {
-      case null:
-      case SlideCategoryType.chats:
-        if (unseenConversationOnly) {
-          return db
-              .fuzzySearchMessageCountWithConversation(
-                  query, (m, c) => c.unseenMessageCount.isBiggerThanValue(0))
-              .getSingle();
-        } else {
-          return db.fuzzySearchMessageCount(query).getSingle();
-        }
-      case SlideCategoryType.contacts:
-        return db
-            .fuzzySearchMessageCountWithConversationOwner(
-              query,
-              (m, c, owner) =>
-                  c.category.equalsValue(ConversationCategory.contact) &
-                  owner.relationship.equalsValue(UserRelationship.friend) &
-                  owner.appId.isNull() &
-                  unseenFilter(c),
-            )
-            .getSingle();
-      case SlideCategoryType.groups:
-        return db
-            .fuzzySearchMessageCountWithConversation(
-              query,
-              (m, c) =>
-                  c.category.equalsValue(ConversationCategory.group) &
-                  unseenFilter(c),
-            )
-            .getSingle();
-      case SlideCategoryType.bots:
-        return db
-            .fuzzySearchMessageCountWithConversationOwner(
-              query,
-              (m, c, owner) =>
-                  c.category.equalsValue(ConversationCategory.contact) &
-                  owner.appId.isNotNull() &
-                  unseenFilter(c),
-            )
-            .getSingle();
-      case SlideCategoryType.strangers:
-        return db
-            .fuzzySearchMessageCountWithConversationOwner(
-              query,
-              (m, c, owner) =>
-                  c.category.equalsValue(ConversationCategory.contact) &
-                  owner.relationship.equalsValue(UserRelationship.stranger) &
-                  owner.appId.isNull() &
-                  unseenFilter(c),
-            )
-            .getSingle();
-      case SlideCategoryType.circle:
-        final circleId = category!.id!;
-        return db
-            .fuzzySearchMessageCountWithCircle(
-              query,
-              (m, c, cc) => cc.circleId.equals(circleId) & unseenFilter(c),
-            )
-            .getSingle();
-      case SlideCategoryType.setting:
-        assert(false, 'Setting category should not be searched');
-        return db.fuzzySearchMessageCount(query).getSingle();
-    }
-  }
-
-  Selectable<SearchMessageDetailItem> fuzzySearchMessage({
-    required String query,
-    required int limit,
-    int offset = 0,
-    String? conversationId,
-    String? userId,
-    List<String>? categories,
-  }) {
-    final keywordFts5 = query.trim().escapeFts5();
-
-    if (conversationId != null && userId != null) {
-      if (categories != null) {
-        return db.fuzzySearchMessageByConversationIdAndUserIdAndCategories(
-          conversationId,
-          userId,
-          categories,
-          keywordFts5,
-          (_, __, ___, ____) => Limit(limit, offset),
-        );
-      }
-
-      return db.fuzzySearchMessageByConversationIdAndUserId(
-        conversationId,
-        userId,
-        keywordFts5,
-        limit,
-        offset,
-      );
-    }
-
-    if (conversationId != null) {
-      if (categories != null) {
-        return db.fuzzySearchMessageByConversationIdAndCategories(
-          conversationId,
-          categories,
-          keywordFts5,
-          (_, __, ___, ____) => Limit(limit, offset),
-        );
-      }
-
-      return db.fuzzySearchMessageByConversationId(
-        conversationId,
-        keywordFts5,
-        limit,
-        offset,
-      );
-    }
-
-    if (categories != null) {
-      return db.fuzzySearchMessageByCategories(
-        keywordFts5,
-        categories,
-        (_, __, ___, ____) => Limit(limit, offset),
-      );
-    }
-
-    return db.fuzzySearchMessage(
-      keywordFts5,
-      (m, c, u, o) => ignoreWhere,
-      limit,
-      offset,
-    );
-  }
-
-  Selectable<int> fuzzySearchMessageCount(
-    String keyword, {
-    String? conversationId,
-    String? userId,
-    List<String>? categories,
-  }) {
-    final keywordFts5 = keyword.trim().escapeFts5();
-
-    if (conversationId != null && userId != null) {
-      if (categories != null) {
-        return db.fuzzySearchMessageCountByConversationIdAndUserIdAndCategories(
-          conversationId,
-          userId,
-          categories,
-          keywordFts5,
-        );
-      }
-
-      return db.fuzzySearchMessageCountByConversationIdAndUserId(
-        conversationId,
-        userId,
-        keywordFts5,
-      );
-    }
-
-    // var $ in categories
-    if (conversationId != null) {
-      if (categories != null) {
-        return db.fuzzySearchMessageCountByConversationIdAndCategories(
-          conversationId,
-          categories,
-          keywordFts5,
-        );
-      }
-
-      return db.fuzzySearchMessageCountByConversationId(
-        conversationId,
-        keywordFts5,
-      );
-    }
-
-    if (categories != null) {
-      return db.fuzzySearchMessageCountByCategories(keywordFts5, categories);
-    }
-
-    return db.fuzzySearchMessageCount(keywordFts5);
-  }
-
-  Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationAndUser({
-    required String conversationId,
-    required String userId,
-    required String query,
-    required int limit,
-    int offset = 0,
-  }) {
-    final keywordFts5 = query.trim().escapeFts5();
-
-    return db.fuzzySearchMessageByConversationIdAndUserId(
-      conversationId,
-      userId,
-      keywordFts5,
-      limit,
-      offset,
-    );
-  }
-
-  Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId({
-    required String conversationId,
-    required String query,
-    required int limit,
-    int offset = 0,
-  }) =>
-      db.fuzzySearchMessageByConversationId(
-        conversationId,
-        query.trim().escapeFts5(),
-        limit,
-        offset,
-      );
-
-  Selectable<SearchMessageDetailItem> messageByConversationAndUser({
-    required String conversationId,
-    required String userId,
-    required int limit,
-    int offset = 0,
-    List<String>? categories,
-  }) =>
-      db.searchMessage((m, c, u, o) {
-        var predicate =
-            m.conversationId.equals(conversationId) & m.userId.equals(userId);
-        if (categories?.isNotEmpty ?? false) {
-          predicate = predicate & m.category.isIn(categories!);
-        }
-        return predicate;
-      }, (m, c, u, o) => Limit(limit, offset));
-
-  Selectable<SearchMessageDetailItem>
-      fuzzySearchMessageByConversationIdAndUserId({
-    required String conversationId,
-    required String userId,
-    required String query,
-    required int limit,
-    int offset = 0,
-  }) =>
-          db.fuzzySearchMessageByConversationIdAndUserId(
-            conversationId,
-            userId,
-            query.trim().escapeFts5(),
-            limit,
-            offset,
-          );
-
-  Selectable<int> messageCountByConversationAndUser(
-    String conversationId,
-    String userId,
-    List<String>? categories,
-  ) {
-    final countExp = countAll();
-    final messages = db.messages;
-    var predicate = messages.conversationId.equals(conversationId) &
-        messages.userId.equals(userId);
-    if (categories?.isNotEmpty ?? false) {
-      predicate = predicate & messages.category.isIn(categories!);
-    }
-    return (db.selectOnly(messages)
-          ..addColumns([countExp])
-          ..where(predicate))
-        .map(
-      (row) => row.read(countExp)!,
-    );
-  }
-
   Selectable<int?> messageRowId(String messageId) => (selectOnly(db.messages)
         ..addColumns([db.messages.rowId])
         ..where(db.messages.messageId.equals(messageId))
         ..limit(1)
         ..orderBy([OrderingTerm.desc(db.messages.createdAt)]))
       .map((row) => row.read(db.messages.rowId));
-
-  Future<void> deleteFtsByMessageId(String messageId) async {
-    final rowId =
-        await db.messageFtsRowIdByMessageId(messageId).getSingleOrNull();
-
-    if (rowId == null) return;
-
-    await db.deleteMessageFtsByRowId(rowId);
-  }
 
   Future<int> updateTranscriptMessage(
     String? content,
@@ -1383,4 +984,18 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           .write(MessagesCompanion(
         category: Value(category),
       ));
+
+  Future<List<Tuple2<int, Message>>> getMessages(int? rowid, int limit) async {
+    final messages = await customSelect(
+        'SELECT rowid, * FROM messages WHERE ${rowid == null ? '1' : 'rowid < $rowid'} '
+        'ORDER BY rowid DESC LIMIT $limit',
+        readsFrom: {db.messages}).map(
+      (row) async {
+        final message = await db.messages.mapFromRow(row);
+        final rowId = row.read<int>('rowid');
+        return Tuple2(rowId, message);
+      },
+    ).get();
+    return Future.wait(messages);
+  }
 }

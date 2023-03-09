@@ -25,6 +25,7 @@ const kSyncSignalKeys = 'SYNC_SIGNAL_KEYS';
 // Only from local.
 const kUpdateAsset = 'LOCAL_UPDATE_ASSET';
 const kUpdateSticker = 'LOCAL_UPDATE_STICKER';
+const kMigrateFts = 'LOCAL_MIGRATE_FTS';
 
 const mixinScheme = 'mixin';
 const mixinHost = 'mixin.one';

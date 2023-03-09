@@ -53,9 +53,10 @@ extension StringExtension on String {
   String joinWithCharacter(String char) {
     assert(char.length == 1);
     final result = StringBuffer();
-    for (var i = 0; i < length; i++) {
-      final c = this[i];
-      final lookAhead = i < length - 1 ? this[i + 1] : char;
+    final characters = this.characters.toList();
+    for (var i = 0; i < characters.length; i++) {
+      final c = characters[i];
+      final lookAhead = i < characters.length - 1 ? characters[i + 1] : char;
       final isSameType = (c.isAlphabet() && lookAhead.isAlphabet()) ||
           (c.isNumeric() && lookAhead.isNumeric());
       final needSpace = !isSameType && c != ' ';
