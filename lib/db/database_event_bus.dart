@@ -10,7 +10,6 @@ enum DatabaseEvent {
   insertOrReplaceMessage,
   deleteMessage,
   updateExpiredMessageTable,
-  upgradeDatabase,
 }
 
 @immutable

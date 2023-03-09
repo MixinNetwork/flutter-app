@@ -65,32 +65,23 @@ class MacosMenuBar extends StatelessWidget {
   const MacosMenuBar({
     super.key,
     required this.child,
-    this.databaseUpgrading = false,
   });
 
   final Widget child;
-  final bool databaseUpgrading;
 
   @override
   Widget build(BuildContext context) {
     if (!Platform.isMacOS) {
       return child;
     }
-    return _Menus(
-      databaseUpgrading: databaseUpgrading,
-      child: child,
-    );
+    return _Menus(child: child);
   }
 }
 
 class _Menus extends HookWidget {
-  const _Menus({
-    required this.child,
-    required this.databaseUpgrading,
-  });
+  const _Menus({required this.child});
 
   final Widget child;
-  final bool databaseUpgrading;
 
   @override
   Widget build(BuildContext context) {
@@ -100,8 +91,7 @@ class _Menus extends HookWidget {
     try {
       accountServer = context.read<AccountServer?>();
     } catch (_) {}
-    final enableAccountMenu =
-        !databaseUpgrading && authAvailable && accountServer != null;
+    final signed = authAvailable && accountServer != null;
 
     final menuCubit = useBloc<MacMenuBarCubit>(MacMenuBarCubit.new);
 
@@ -180,7 +170,7 @@ class _Menus extends HookWidget {
                 LogicalKeyboardKey.comma,
                 meta: true,
               ),
-              onSelected: enableAccountMenu
+              onSelected: signed
                   ? () {
                       windowManager.show();
                       context
@@ -198,7 +188,7 @@ class _Menus extends HookWidget {
                   LogicalKeyboardKey.keyK,
                   meta: true,
                 ),
-                onSelected: enableAccountMenu
+                onSelected: signed
                     ? () {
                         Actions.invoke<ToggleCommandPaletteIntent>(
                           context,
@@ -241,7 +231,7 @@ class _Menus extends HookWidget {
                 LogicalKeyboardKey.keyN,
                 meta: true,
               ),
-              onSelected: enableAccountMenu
+              onSelected: signed
                   ? () {
                       windowManager.show();
                       Actions.invoke<CreateConversationIntent>(
@@ -258,7 +248,7 @@ class _Menus extends HookWidget {
                 shift: true,
                 meta: true,
               ),
-              onSelected: enableAccountMenu
+              onSelected: signed
                   ? () {
                       windowManager.show();
                       Actions.invoke<CreateGroupConversationIntent>(
@@ -270,7 +260,7 @@ class _Menus extends HookWidget {
             ),
             PlatformMenuItem(
               label: context.l10n.createCircle,
-              onSelected: enableAccountMenu
+              onSelected: signed
                   ? () {
                       windowManager.show();
                       Actions.invoke<CreateCircleIntent>(
@@ -314,7 +304,7 @@ class _Menus extends HookWidget {
                 LogicalKeyboardKey.arrowUp,
                 meta: true,
               ),
-              onSelected: enableAccountMenu
+              onSelected: signed
                   ? () {
                       Actions.maybeInvoke(
                         context,
@@ -329,7 +319,7 @@ class _Menus extends HookWidget {
                 LogicalKeyboardKey.arrowDown,
                 meta: true,
               ),
-              onSelected: enableAccountMenu
+              onSelected: signed
                   ? () {
                       Actions.maybeInvoke(
                           context, const NextConversationIntent());

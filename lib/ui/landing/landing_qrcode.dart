@@ -33,14 +33,14 @@ class LandingQrCodeWidget extends HookWidget {
     final Widget child;
     if (status == LandingStatus.init) {
       child = Center(
-        child: Loading(
+        child: _Loading(
           title: context.l10n.initializing,
           message: context.l10n.chatHintE2e,
         ),
       );
     } else if (status == LandingStatus.provisioning) {
       child = Center(
-        child: Loading(
+        child: _Loading(
           title: context.l10n.loading,
           message: context.l10n.chatHintE2e,
         ),
@@ -168,9 +168,8 @@ class _QrCode extends HookWidget {
   }
 }
 
-class Loading extends StatelessWidget {
-  const Loading({
-    super.key,
+class _Loading extends StatelessWidget {
+  const _Loading({
     required this.title,
     required this.message,
   });

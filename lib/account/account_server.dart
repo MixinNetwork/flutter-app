@@ -24,7 +24,6 @@ import '../db/dao/asset_dao.dart';
 import '../db/dao/sticker_album_dao.dart';
 import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
-import '../db/database_event_bus.dart';
 import '../db/extension/job.dart';
 import '../db/fts_database.dart';
 import '../db/mixin_database.dart' as db;
@@ -179,8 +178,6 @@ class AccountServer {
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil attachmentUtil;
 
-  final _isDbUpdating = BehaviorSubject<int>.seeded(0);
-
   IsolateChannel<dynamic>? _isolateChannel;
 
   final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
@@ -188,8 +185,6 @@ class AccountServer {
 
   ValueStream<ConnectedState> get connectedStateStream =>
       _connectedStateBehaviorSubject;
-
-  Stream<bool> get isDbUpdating => _isDbUpdating.map((event) => event > 0);
 
   Future<void> reconnectBlaze() async {
     _sendEventToWorkerIsolate(MainIsolateEventType.reconnectBlaze);
@@ -243,18 +238,7 @@ class AccountServer {
         } catch (error, stacktrace) {
           e('handle worker isolate event failed: $error, $stacktrace');
         }
-      }))
-      ..add(
-        DataBaseEventBus.instance
-            .watch<bool>(DatabaseEvent.upgradeDatabase)
-            .listen((event) {
-          if (event) {
-            _isDbUpdating.value++;
-          } else {
-            _isDbUpdating.value--;
-          }
-        }),
-      );
+      }));
   }
 
   void _handleWorkIsolateEvent(WorkerIsolateEvent event) {

@@ -234,8 +234,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage("数据与存储空间"),
         "dataError": MessageLookupByLibrary.simpleMessage("数据错误"),
         "dataLoading": MessageLookupByLibrary.simpleMessage("数据加载中，请稍后"),
-        "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
-            "正在进行数据库升级，可能需要几分钟，请不要强制关闭应用。"),
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
         "deleteAccountDetailHint":
             MessageLookupByLibrary.simpleMessage("本地消息和 iCloud 备份不会被自动删除"),
@@ -264,7 +262,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "done": MessageLookupByLibrary.simpleMessage("完成"),
         "download": MessageLookupByLibrary.simpleMessage("下载"),
         "downloadLink": MessageLookupByLibrary.simpleMessage("下载链接："),
-        "draft": MessageLookupByLibrary.simpleMessage("草稿"),
         "dragAndDropFileHere": MessageLookupByLibrary.simpleMessage("拖放文件到此处"),
         "durationIsTooShort": MessageLookupByLibrary.simpleMessage("时间太短"),
         "edit": MessageLookupByLibrary.simpleMessage("编辑"),
@@ -395,7 +392,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "howAreYou": MessageLookupByLibrary.simpleMessage("嗨，你好吗？"),
         "iAmGood": MessageLookupByLibrary.simpleMessage("我很好。"),
         "ignoreThisVersion": MessageLookupByLibrary.simpleMessage("忽略这次版本更新"),
-        "image": MessageLookupByLibrary.simpleMessage("图像"),
+        "image": MessageLookupByLibrary.simpleMessage("图片"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("包括文件"),
         "includeVideos": MessageLookupByLibrary.simpleMessage("包括视频"),
         "initializing": MessageLookupByLibrary.simpleMessage("初始化…"),
@@ -603,7 +600,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesConfirmation":
             MessageLookupByLibrary.simpleMessage("确定取消置顶所有消息么？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未读消息"),
-        "upgrading": MessageLookupByLibrary.simpleMessage("升级中..."),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到这个用户"),
         "valueNow": m49,
         "valueThen": m50,
