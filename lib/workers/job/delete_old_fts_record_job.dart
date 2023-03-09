@@ -1,17 +1,34 @@
 import '../../constants/constants.dart';
-import '../../db/mixin_database.dart';
 import '../../utils/logger.dart';
 import '../job_queue.dart';
 
-class DeleteOldFtsRecordJob extends JobQueue<Job> {
+class DeleteOldFtsRecordJob extends JobQueue<bool> {
   DeleteOldFtsRecordJob({required super.database});
 
   @override
-  Future<List<Job>> fetchJobs() =>
-      database.jobDao.deleteOldFtsRecordJobs().get();
+  Future<List<bool>> fetchJobs() async {
+    // check if messages_fts table exists in mixinDatabase
+    final exists = await database.mixinDatabase
+        .customSelect(
+        "select EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='messages_fts') as result")
+        .map((row) => row.read<bool>('result'))
+        .getSingle();
+    if (!exists) {
+      e('DeleteOldFtsRecordJob: messages_fts table not exists');
+      return [];
+    }
+
+    final hasRecord = await database.mixinDatabase
+        .customSelect(
+        'select EXISTS(select 1 from messages_fts limit 1) as result')
+        .map((row) => row.read<bool>('result'))
+        .getSingle();
+    if(hasRecord) return [hasRecord];
+    return [];
+  }
 
   @override
-  Future<void> insertJob(Job job) async {
+  Future<void> insertJob(bool job) async {
     assert(false, 'DeleteOldFtsRecordJob should not insert job');
   }
 
@@ -19,26 +36,14 @@ class DeleteOldFtsRecordJob extends JobQueue<Job> {
   String get name => 'DeleteOldFtsRecordJob';
 
   @override
-  Future<void> run(List<Job> jobs) async {
-    // check if messages_fts table exists in mixinDatabase
-    final exists = await database.mixinDatabase
-        .customSelect(
-            "select EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='messages_fts') as result")
-        .map((row) => row.read<bool>('result'))
-        .getSingle();
-    if (!exists) {
-      e('DeleteOldFtsRecordJob: messages_fts table not exists');
-      return;
-    }
+  Future<void> run(List<bool> jobs) async {
     final stopwatch = Stopwatch()..start();
     var deleted = 0;
     while (true) {
-      final hasRecord = await database.mixinDatabase
-          .customSelect(
-              'select EXISTS(select 1 from messages_fts limit 1) as result')
-          .map((row) => row.read<bool>('result'))
-          .getSingle();
-      if (!hasRecord) {
+      stopwatch.reset();
+
+      final list = await fetchJobs();
+      if (list.isEmpty) {
         i('delete old fts record job finished');
         await database.jobDao.deleteJobByAction(kDeleteOldFtsRecord);
         return;
@@ -47,13 +52,13 @@ class DeleteOldFtsRecordJob extends JobQueue<Job> {
       await database.mixinDatabase.customStatement(
         'DELETE FROM messages_fts WHERE rowid IN (SELECT rowid FROM messages_fts LIMIT 1000)',
       );
+
       deleted += 1000;
       if (deleted >= 5000) {
         i('DeleteOldFtsRecordJob: $deleted records deleted ${stopwatch.elapsed}');
         stopwatch.reset();
         deleted = 0;
       }
-
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
   }
