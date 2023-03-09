@@ -48,8 +48,9 @@ class FtsDatabase extends _$FtsDatabase {
       .get();
 
   /// Insert a message fts content into the database.
-  /// return the row id of the inserted message. -1 if the message is not inserted.
-  Future<int> insertFtsOnly(Message message, [String? generatedContent]) async {
+  /// return the row id of the inserted message. null if the message is not inserted.
+  Future<int?> insertFtsOnly(Message message,
+      [String? generatedContent]) async {
     String? content;
     if (generatedContent != null) {
       content = generatedContent;
@@ -66,7 +67,7 @@ class FtsDatabase extends _$FtsDatabase {
     }
 
     if (content == null || content.isEmpty) {
-      return -1;
+      return null;
     }
     final ftsContent = content.joinWhiteSpace();
     final rowId =
@@ -82,6 +83,9 @@ class FtsDatabase extends _$FtsDatabase {
       return;
     }
     final rowId = await insertFtsOnly(message, generatedContent);
+    if (rowId == null) {
+      return;
+    }
     await into(messagesMetas).insert(
       MessagesMeta(
         docId: rowId,

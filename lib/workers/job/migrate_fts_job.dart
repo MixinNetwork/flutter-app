@@ -6,10 +6,14 @@ import '../../db/dao/transcript_message_dao.dart';
 import '../../db/extension/job.dart';
 import '../../db/fts_database.dart';
 import '../../db/mixin_database.dart';
-import '../../db/util/util.dart';
 import '../../utils/extension/extension.dart';
 import '../job_queue.dart';
 
+/// The `MigrateFtsJob` class is responsible for migrating the old `messages_fts`
+/// table from the `mixinDatabase` to a new `fts.db` file.
+///
+/// The fist job is created by [MixinDatabase.migration].
+///
 class MigrateFtsJob extends JobQueue<Job> {
   MigrateFtsJob({required super.database})
       : messageDao = database.messageDao,
@@ -48,6 +52,8 @@ class MigrateFtsJob extends JobQueue<Job> {
   @override
   Future<void> run(List<Job> jobs) async {
     final Job job;
+
+    // ensure there is only one job
     if (jobs.length > 1) {
       e('MigrateFtsJob: ${jobs.length} jobs found, only latest job will be executed');
       job = jobs.reduce((value, element) =>
@@ -63,8 +69,7 @@ class MigrateFtsJob extends JobQueue<Job> {
       return;
     }
 
-    final anchorMessageId = job.blazeMessage;
-    i('$name startMigrate anchor: $anchorMessageId');
+    i('$name startMigrate anchor: ${job.blazeMessage}');
 
     final stopwatch = Stopwatch()..start();
     var lastMessageRowId =
@@ -94,7 +99,7 @@ class MigrateFtsJob extends JobQueue<Job> {
             continue;
           }
           final transcripts = await transcriptMessageDao
-              .transcriptMessageByMessageId(message.messageId, maxLimit)
+              .transcriptMessageByTranscriptId(message.messageId)
               .get();
           if (transcripts.isEmpty) {
             e('transcriptMessageByMessageId empty ${message.messageId}');
@@ -110,7 +115,9 @@ class MigrateFtsJob extends JobQueue<Job> {
         for (final message in messagesToMigrate) {
           final rowId = await ftsDatabase.insertFtsOnly(
               message, transcriptMessageFtsContent[message.messageId]);
-          messageMeta[rowId] = message;
+          if (rowId != null) {
+            messageMeta[rowId] = message;
+          }
         }
 
         // insert metas
