@@ -485,7 +485,8 @@ class MessagesFts extends Table
   @override
   bool get dontWriteConstraints => true;
   @override
-  String get moduleAndArgs => 'FTS5(content, tokenize=\'unicode61\')';
+  String get moduleAndArgs =>
+      'FTS5(content, tokenize="unicode61 remove_diacritics 2 categories \'Co L* N* S*\'")';
 }
 
 abstract class _$FtsDatabase extends GeneratedDatabase {

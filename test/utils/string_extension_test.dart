@@ -34,9 +34,11 @@ void main() {
   test('test join white space', () {
     const s1 = 'hello520你好';
     const s2 = 'a1b2c3哈4de哈*# ~6f';
+    const s3 = '😀😃😄😁😆😅😂🤣😊😇';
 
     expect(s1.joinWhiteSpace(), 'hello 520 你 好');
     expect(s2.joinWhiteSpace(), 'a 1 b 2 c 3 哈 4 de 哈 * #  ~ 6 f');
+    expect(s3.joinWhiteSpace(), '😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇');
   });
 
   test('tst escape fts5', () {

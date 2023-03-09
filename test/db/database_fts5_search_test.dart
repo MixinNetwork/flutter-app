@@ -14,6 +14,8 @@ const _testFts5Content = [
   'hello_[]()/*_star_*',
   'github.foo.com',
   '0xbc314bfa1e99fe0055a98105c6aff467',
+  '😀😃😄😁😆😅😂🤣😊😇',
+  '👨‍👨‍👧‍👧👩‍👩‍👦👩‍👩‍👧👩‍👩‍👧‍👧👨‍👨‍👧👨‍👧‍👦',
 ];
 
 void main() {
@@ -62,5 +64,12 @@ void main() {
 
     final ret8 = await search('0xbc314bfa1e99fe0055a98105c6aff467');
     expect(ret8, [9]);
+
+    final ret9 = await search('😁');
+    expect(ret9, [10]);
+
+    expect(await search('😇'), [10]);
+
+    expect(await search('👨‍👨‍👧‍'), [11]);
   });
 }

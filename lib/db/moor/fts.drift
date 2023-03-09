@@ -1,6 +1,6 @@
 import '../converter/millis_date_converter.dart';
 
-CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING FTS5(content, tokenize='unicode61');
+CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING FTS5(content, tokenize="unicode61 remove_diacritics 2 categories 'Co L* N* S*'");
 
 CREATE TABLE IF NOT EXISTS messages_metas (
     doc_id INTEGER NOT NULL,
