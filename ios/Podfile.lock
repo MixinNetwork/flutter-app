@@ -175,12 +175,12 @@ SPEC CHECKSUMS:
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
   file_picker: ce3938a0df3cc1ef404671531facef740d03f920
-  file_selector_ios: 16d57dbbbb03f717b5f930ba45eb099dd2174a1d
+  file_selector_ios: 8c25d700d625e1dcdd6599f2d927072f2254647b
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_app_icon_badge: 844847adbd7a1c6f325d6b41b942428981b839cc
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542
-  image_picker_ios: 58b9c4269cb176f89acea5e5d043c9358f2d25f8
+  image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
   libphonenumber_plugin: e8a7d64a6624a7c25f2c4ab0b7ead2a8e341e35e
   ogg_opus_player: 01dc6eaa63d1e061f0065f41845a0a9ea76b9396
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
@@ -194,8 +194,8 @@ SPEC CHECKSUMS:
   sqlite3_flutter_libs: 78f93cb854d4680595bc2c63c57209a104b2efb1
   SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
-  video_player_avfoundation: 6d971a232d72e6ee25368378d48a079dea01f1cf
-  webview_flutter_wkwebview: d08f59cde5e8402c345c0bdda35ac0031352dcae
+  video_player_avfoundation: 81e49bb3d9fb63dccf9fa0f6d877dc3ddbeac126
+  webview_flutter_wkwebview: 2e2d318f21a5e036e2c3f26171342e95908bd60a
 
 PODFILE CHECKSUM: c7cf6cd0af5391000f485bb7f6561b845e054d60
 
