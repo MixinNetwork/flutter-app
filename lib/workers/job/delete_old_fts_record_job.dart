@@ -31,6 +31,7 @@ class DeleteOldFtsRecordJob extends JobQueue<Job> {
       return;
     }
     final stopwatch = Stopwatch()..start();
+    var deleted = 0;
     while (true) {
       final hasRecord = await database.mixinDatabase
           .customSelect(
@@ -44,10 +45,16 @@ class DeleteOldFtsRecordJob extends JobQueue<Job> {
       }
 
       await database.mixinDatabase.customStatement(
-        'DELETE FROM messages_fts WHERE rowid = (SELECT rowid FROM messages_fts LIMIT 1000)',
+        'DELETE FROM messages_fts WHERE rowid IN (SELECT rowid FROM messages_fts LIMIT 1000)',
       );
+      deleted += 1000;
+      if (deleted >= 5000) {
+        i('DeleteOldFtsRecordJob: $deleted records deleted ${stopwatch.elapsed}');
+        stopwatch.reset();
+        deleted = 0;
+      }
+
       await Future<void>.delayed(const Duration(milliseconds: 100));
-      stopwatch.reset();
     }
   }
 }
