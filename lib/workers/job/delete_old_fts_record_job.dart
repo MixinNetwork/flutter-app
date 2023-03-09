@@ -39,6 +39,12 @@ class DeleteOldFtsRecordJob extends JobQueue<bool> {
     final stopwatch = Stopwatch()..start();
     var deleted = 0;
     while (true) {
+      if (deleted >= 5000) {
+        i('DeleteOldFtsRecordJob: $deleted records deleted ${stopwatch.elapsed}');
+        stopwatch.reset();
+        deleted = 0;
+      }
+
       final list = await fetchJobs();
       if (list.isEmpty) {
         i('delete old fts record job finished');
@@ -50,11 +56,6 @@ class DeleteOldFtsRecordJob extends JobQueue<bool> {
       );
 
       deleted += 1000;
-      if (deleted >= 5000) {
-        i('DeleteOldFtsRecordJob: $deleted records deleted ${stopwatch.elapsed}');
-        stopwatch.reset();
-        deleted = 0;
-      }
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
   }
