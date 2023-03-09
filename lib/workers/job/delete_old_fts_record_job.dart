@@ -39,8 +39,6 @@ class DeleteOldFtsRecordJob extends JobQueue<bool> {
     final stopwatch = Stopwatch()..start();
     var deleted = 0;
     while (true) {
-      stopwatch.reset();
-
       final list = await fetchJobs();
       if (list.isEmpty) {
         i('delete old fts record job finished');
