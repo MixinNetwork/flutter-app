@@ -130,9 +130,6 @@ class _MessageProcessRunner {
   late SessionAckJob _sessionAckJob;
   late FloodJob _floodJob;
 
-  // ignore: unused_field
-  late MigrateFtsJob _ftsJob;
-
   final jobSubscribers = <StreamSubscription>[];
 
   Timer? _nextExpiredMessageRunner;
@@ -225,7 +222,7 @@ class _MessageProcessRunner {
       client: client,
     );
 
-    _ftsJob = MigrateFtsJob(database: database);
+    MigrateFtsJob(database: database);
     DeleteOldFtsRecordJob(database: database);
 
     _decryptMessage = DecryptMessage(
