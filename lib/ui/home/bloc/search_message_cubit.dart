@@ -87,6 +87,7 @@ abstract class SearchMessageCubit extends Cubit<SearchMessageState> {
     try {
       final items = await _doFuzzySearch(lastMessageId);
       if (items.isEmpty) {
+        d('search message cubit: no more data $lastMessageId');
         _hasMore = false;
       }
       emit(SearchMessageState([

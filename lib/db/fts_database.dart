@@ -136,7 +136,7 @@ class FtsDatabase extends _$FtsDatabase {
       return _fuzzySearchAllMessage(keywordFts5, where, limit).get();
     } else {
       return _fuzzySearchAllMessageWithAnchor(
-        query,
+        keywordFts5,
         anchorMessageId,
         where,
         limit,
