@@ -26,7 +26,6 @@ const kSyncSignalKeys = 'SYNC_SIGNAL_KEYS';
 const kUpdateAsset = 'LOCAL_UPDATE_ASSET';
 const kUpdateSticker = 'LOCAL_UPDATE_STICKER';
 const kMigrateFts = 'LOCAL_MIGRATE_FTS';
-const kDeleteOldFtsRecord = 'LOCAL_DELETE_OLD_FTS_RECORD';
 
 const mixinScheme = 'mixin';
 const mixinHost = 'mixin.one';

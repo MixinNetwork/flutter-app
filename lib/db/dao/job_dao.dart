@@ -91,9 +91,6 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   SimpleSelectStatement<Jobs, Job> migrateFtsJobs() =>
       select(db.jobs)..where((Jobs row) => row.action.equals(kMigrateFts));
 
-  SimpleSelectStatement<Jobs, Job> deleteOldFtsRecordJobs() => select(db.jobs)
-    ..where((Jobs row) => row.action.equals(kDeleteOldFtsRecord));
-
   Future<Job?> jobById(String jobId) =>
       (select(db.jobs)..where((tbl) => tbl.jobId.equals(jobId)))
           .getSingleOrNull();

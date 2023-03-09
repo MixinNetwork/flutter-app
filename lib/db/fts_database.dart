@@ -70,9 +70,7 @@ class FtsDatabase extends _$FtsDatabase {
       return null;
     }
     final ftsContent = content.joinWhiteSpace();
-    final rowId =
-        await into(messagesFts).insert(MessagesFt(content: ftsContent));
-    return rowId;
+    return into(messagesFts).insert(MessagesFt(content: ftsContent));
   }
 
   Future<void> insertFts(Message message, [String? generatedContent]) async {

@@ -56,11 +56,8 @@ Future<DatabaseConnection> openDatabaseConnection({
     return isolate.connect();
   }));
 
-  final connect = write.withExecutor(MultiExecutor.withReadPool(
-    reads: reads.map((e) => e.executor).toList(),
-    write: write.executor,
-  ));
-  return connect;
+  return write.withExecutor(MultiExecutor.withReadPool(
+      reads: reads.map((e) => e.executor).toList(), write: write.executor));
 }
 
 Future<DriftIsolate> _crateIsolate({

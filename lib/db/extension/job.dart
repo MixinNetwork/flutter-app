@@ -95,11 +95,3 @@ Job createMigrationFtsJob(int? messageRowId) => Job(
       createdAt: DateTime.now(),
       blazeMessage: messageRowId?.toString(),
     );
-
-Job createDeleteOldFtsRecordJob() => Job(
-      jobId: const Uuid().v4(),
-      action: kDeleteOldFtsRecord,
-      priority: 5,
-      runCount: 0,
-      createdAt: DateTime.now(),
-    );

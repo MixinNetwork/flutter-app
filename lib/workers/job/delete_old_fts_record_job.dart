@@ -1,4 +1,3 @@
-import '../../constants/constants.dart';
 import '../../utils/logger.dart';
 import '../job_queue.dart';
 
@@ -10,7 +9,7 @@ class DeleteOldFtsRecordJob extends JobQueue<bool> {
     // check if messages_fts table exists in mixinDatabase
     final exists = await database.mixinDatabase
         .customSelect(
-        "select EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='messages_fts') as result")
+            "select EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='messages_fts') as result")
         .map((row) => row.read<bool>('result'))
         .getSingle();
     if (!exists) {
@@ -20,10 +19,10 @@ class DeleteOldFtsRecordJob extends JobQueue<bool> {
 
     final hasRecord = await database.mixinDatabase
         .customSelect(
-        'select EXISTS(select 1 from messages_fts limit 1) as result')
+            'select EXISTS(select 1 from messages_fts limit 1) as result')
         .map((row) => row.read<bool>('result'))
         .getSingle();
-    if(hasRecord) return [hasRecord];
+    if (hasRecord) return [hasRecord];
     return [];
   }
 
@@ -45,7 +44,6 @@ class DeleteOldFtsRecordJob extends JobQueue<bool> {
       final list = await fetchJobs();
       if (list.isEmpty) {
         i('delete old fts record job finished');
-        await database.jobDao.deleteJobByAction(kDeleteOldFtsRecord);
         return;
       }
 
