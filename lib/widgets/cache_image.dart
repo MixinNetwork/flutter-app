@@ -278,8 +278,9 @@ class MixinFileImage extends FileImage {
 
   @override
   ImageStreamCompleter loadBuffer(
-      // ignore: deprecated_member_use
-          FileImage key, DecoderBufferCallback decode) =>
+          FileImage key,
+          // ignore: deprecated_member_use
+          DecoderBufferCallback decode) =>
       _MultiFrameImageStreamCompleter(
         codec: _loadAsync(key, decode),
         scale: key.scale,
@@ -291,8 +292,9 @@ class MixinFileImage extends FileImage {
       );
 
   Future<ui.Codec> _loadAsync(
+      FileImage key,
       // ignore: deprecated_member_use
-      FileImage key, DecoderBufferCallback decode) async {
+      DecoderBufferCallback decode) async {
     assert(key == this);
 
     if (file.path.isEmpty) {
@@ -386,7 +388,7 @@ class MixinNetworkImageProvider
   @override
   ImageStreamCompleter loadBuffer(
     MixinNetworkImageProvider key,
-      // ignore: deprecated_member_use
+    // ignore: deprecated_member_use
     DecoderBufferCallback decode,
   ) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
@@ -410,7 +412,7 @@ class MixinNetworkImageProvider
   /// for example, compress
   Future<ui.Codec> instantiateImageCodec(
     Uint8List data,
-      // ignore: deprecated_member_use
+    // ignore: deprecated_member_use
     DecoderBufferCallback decode,
   ) async {
     final buffer = await ui.ImmutableBuffer.fromUint8List(data);
@@ -425,7 +427,7 @@ class MixinNetworkImageProvider
   Future<ui.Codec> _loadAsync(
     MixinNetworkImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
-      // ignore: deprecated_member_use
+    // ignore: deprecated_member_use
     DecoderBufferCallback decode,
   ) async {
     assert(key == this);
