@@ -77,8 +77,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       MessageMentions messageMention,
       PinMessages pinMessage,
       ExpiredMessages em,
-    )
-        where,
+    ) where,
     Limit Function(
       Messages message,
       Users sender,
@@ -93,8 +92,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       MessageMentions messageMention,
       PinMessages pinMessage,
       ExpiredMessages em,
-    )
-        limit, {
+    ) limit, {
     OrderBy Function(
       Messages message,
       Users sender,
@@ -108,8 +106,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       MessageMentions messageMention,
       PinMessages pinMessage,
       ExpiredMessages em,
-    )?
-        order,
+    )? order,
   }) =>
       db.baseMessageItems(
           where,

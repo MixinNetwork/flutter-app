@@ -115,7 +115,7 @@ class AttachmentUtil extends ChangeNotifier {
     final message = list.first as Message?;
     final transcriptMessage = list[1] as TranscriptMessage?;
 
-    if (message != null && attachmentMessage == null) {
+    if (message != null) {
       attachmentMessage = AttachmentMessage(
         message.mediaKey,
         message.mediaDigest,

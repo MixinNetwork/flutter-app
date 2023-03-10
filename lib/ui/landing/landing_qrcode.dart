@@ -49,8 +49,8 @@ class LandingQrCodeWidget extends HookWidget {
       child = Stack(
         fit: StackFit.expand,
         children: [
-          Column(
-            children: const [
+          const Column(
+            children: [
               Spacer(),
               _QrCode(),
               Spacer(),

@@ -64,7 +64,7 @@ dependencies:
   http_client_helper: ^2.0.3
   hydrated_bloc: ^9.0.0
   image_picker: ^0.8.6
-  intl: ^0.17.0
+  intl: ^0.18.0
   intl_phone_number_input: ^0.7.2
   isolate: ^2.1.0
   json_annotation: ^4.7.0

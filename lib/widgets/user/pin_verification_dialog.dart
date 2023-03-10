@@ -305,4 +305,9 @@ class _PinInputLayoutState extends State<PinInputLayout>
   void showToolbar() {
     // TODO: implement showToolbar
   }
+
+  @override
+  void insertContent(KeyboardInsertedContent content) {
+    // TODO: implement insertContent
+  }
 }

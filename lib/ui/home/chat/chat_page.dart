@@ -467,14 +467,14 @@ class ChatContainer extends HookWidget {
                                       ),
                                     ),
                                   ),
-                                  child: Stack(
+                                  child: const Stack(
                                     children: [
-                                      const RepaintBoundary(
+                                      RepaintBoundary(
                                         child: _NotificationListener(
                                           child: _List(),
                                         ),
                                       ),
-                                      const Positioned(
+                                      Positioned(
                                         left: 6,
                                         right: 6,
                                         bottom: 6,
@@ -485,13 +485,13 @@ class ChatContainer extends HookWidget {
                                         right: 16,
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
-                                          children: const [
+                                          children: [
                                             _JumpMentionButton(),
                                             _JumpCurrentButton(),
                                           ],
                                         ),
                                       ),
-                                      const _PinMessagesBanner(),
+                                      _PinMessagesBanner(),
                                     ],
                                   ),
                                 ),
