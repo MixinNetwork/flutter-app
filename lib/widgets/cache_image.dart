@@ -296,7 +296,7 @@ class MixinFileImage extends FileImage {
           FileImage key,
           // ignore: deprecated_member_use
           DecoderCallback decode) =>
-      MultiFrameImageStreamCompleter(
+      _MultiFrameImageStreamCompleter(
         codec: _loadAsync(key, decodeDeprecated: decode),
         scale: key.scale,
         debugLabel: key.file.path,
@@ -308,7 +308,7 @@ class MixinFileImage extends FileImage {
   @override
   @protected
   ImageStreamCompleter loadImage(FileImage key, ImageDecoderCallback decode) =>
-      MultiFrameImageStreamCompleter(
+      _MultiFrameImageStreamCompleter(
         codec: _loadAsync(key, decode: decode),
         scale: key.scale,
         debugLabel: key.file.path,
