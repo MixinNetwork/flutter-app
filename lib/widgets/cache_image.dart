@@ -277,21 +277,6 @@ class MixinFileImage extends FileImage {
   }
 
   @override
-  ImageStreamCompleter loadBuffer(
-          FileImage key,
-          // ignore: deprecated_member_use
-          DecoderBufferCallback decode) =>
-      _MultiFrameImageStreamCompleter(
-        codec: _loadAsync(key, decodeBufferDeprecated: decode),
-        scale: key.scale,
-        debugLabel: key.file.path,
-        informationCollector: () sync* {
-          yield ErrorDescription('Path: ${file.path}');
-        },
-        controller: controller,
-      );
-
-  @override
   ImageStreamCompleter load(
           FileImage key,
           // ignore: deprecated_member_use
@@ -423,29 +408,6 @@ class MixinNetworkImageProvider
   /// The max duration to cahce image.
   /// After this time the cache is expired and the image is reloaded.
   final Duration? cacheMaxAge;
-
-  @override
-  ImageStreamCompleter loadBuffer(
-    MixinNetworkImageProvider key,
-    // ignore: deprecated_member_use
-    DecoderBufferCallback decode,
-  ) {
-    // Ownership of this controller is handed off to [_loadAsync]; it is that
-    // method's responsibility to close the controller's stream when the image
-    // has been loaded or an error is thrown.
-    final chunkEvents = StreamController<ImageChunkEvent>();
-
-    return _MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, chunkEvents, decodeBufferDeprecated: decode),
-      scale: key.scale,
-      chunkEvents: chunkEvents.stream,
-      informationCollector: () => <DiagnosticsNode>[
-        DiagnosticsProperty<ImageProvider>('Image provider', this),
-        DiagnosticsProperty<MixinNetworkImageProvider>('Image key', key),
-      ],
-      controller: controller,
-    );
-  }
 
   @override
   ImageStreamCompleter load(
