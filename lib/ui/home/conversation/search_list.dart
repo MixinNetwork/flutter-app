@@ -61,19 +61,6 @@ class SearchList extends HookWidget {
                 .merge(keywordCubit.stream)
                 .map((event) => event.trim())
                 .distinct()
-                .debounceTime(const Duration(milliseconds: 500));
-          },
-          initialData: null,
-        ).data ??
-        '';
-
-    final messageKeyword = useMemoizedStream(
-          () {
-            final keywordCubit = context.read<KeywordCubit>();
-            return Stream.value(keywordCubit.state)
-                .merge(keywordCubit.stream)
-                .map((event) => event.trim())
-                .distinct()
                 .debounceTime(const Duration(milliseconds: 150));
           },
           initialData: null,
@@ -117,16 +104,16 @@ class SearchList extends HookWidget {
         [];
 
     final messages = useMemoizedFuture<List<SearchMessageDetailItem>>(
-            () => messageKeyword.isEmpty
+            () => keyword.isEmpty
                 ? Future.value(<SearchMessageDetailItem>[])
                 : accountServer.database.fuzzySearchMessageByCategory(
-                    messageKeyword,
+                    keyword,
                     limit: 4,
                     unseenConversationOnly: filterUnseen,
                     category: slideCategoryState,
                   ),
             [],
-            keys: [messageKeyword, filterUnseen, slideCategoryState]).data ??
+            keys: [keyword, filterUnseen, slideCategoryState]).data ??
         [];
 
     final isMixinNumber =
