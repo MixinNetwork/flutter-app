@@ -76,7 +76,10 @@ abstract class SearchMessageCubit extends Cubit<SearchMessageState> {
 
   @override
   void emit(SearchMessageState state) {
-    if (isClosed) return;
+    if (isClosed) {
+      i('search message cubit: closed, ignore');
+      return;
+    }
     super.emit(state);
   }
 
