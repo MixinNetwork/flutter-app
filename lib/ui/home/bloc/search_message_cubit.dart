@@ -74,6 +74,12 @@ abstract class SearchMessageCubit extends Cubit<SearchMessageState> {
 
   var _hasMore = true;
 
+  @override
+  void emit(SearchMessageState state) {
+    if (isClosed) return;
+    super.emit(state);
+  }
+
   Future<void> _load() async {
     if (state.loading) {
       w('search message cubit: loading, ignore');
