@@ -319,12 +319,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Future<MessageState> _before(String conversationId) async {
     final topMessageId = state.topMessage?.messageId;
     assert(topMessageId != null);
-    final list = await database.transaction(() async {
-      final rowId = await messageDao.messageRowId(topMessageId!).getSingle();
-      return messageDao
-          .beforeMessagesByConversationId(rowId!, conversationId, limit)
-          .get();
-    });
+    final rowId = await messageDao.messageRowId(topMessageId!).getSingle();
+    final list = await messageDao
+        .beforeMessagesByConversationId(rowId!, conversationId, limit)
+        .get();
 
     final isOldest = list.length < limit;
     return state
@@ -334,12 +332,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Future<MessageState> _after(String conversationId) async {
     final bottomMessageId = state.bottomMessage?.messageId;
     assert(bottomMessageId != null);
-    final list = await database.transaction(() async {
-      final rowId = await messageDao.messageRowId(bottomMessageId!).getSingle();
-      return messageDao
-          .afterMessagesByConversationId(rowId!, conversationId, limit)
-          .get();
-    });
+    final rowId = await messageDao.messageRowId(bottomMessageId!).getSingle();
+    final list = await messageDao
+        .afterMessagesByConversationId(rowId!, conversationId, limit)
+        .get();
 
     final isLatest = list.length < limit ? true : null;
     return state
