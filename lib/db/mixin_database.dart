@@ -245,19 +245,6 @@ class MixinDatabase extends _$MixinDatabase {
     return queryRow.read<bool>('CNTREC');
   }
 
-  Stream<bool> watchHasData<T extends HasResultSet, R>(
-    ResultSetImplementation<T, R> table, [
-    List<Join> joins = const [],
-    Expression<bool> predicate = ignoreWhere,
-  ]) =>
-      (selectOnly(table)
-            ..addColumns([const CustomExpression<String>('1')])
-            ..join(joins)
-            ..where(predicate)
-            ..limit(1))
-          .watch()
-          .map((event) => event.isNotEmpty);
-
   Future<bool> hasData<T extends HasResultSet, R>(
     ResultSetImplementation<T, R> table, [
     List<Join> joins = const [],

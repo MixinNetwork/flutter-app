@@ -28,7 +28,7 @@ class AudioPlayerBar extends HookWidget {
         }
         return context.database.conversationDao
             .conversationItem(message.conversationId)
-            .watchSingleOrNull();
+            .watchSingleOrNullThrottle(kSlowThrottleDuration);
       },
       keys: [message?.conversationId],
     ).data;

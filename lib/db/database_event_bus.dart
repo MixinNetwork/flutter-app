@@ -8,12 +8,13 @@ import '../utils/event_bus.dart';
 import '../utils/logger.dart';
 import 'mixin_database.dart';
 
-enum DatabaseEvent {
+enum _DatabaseEvent {
   notification,
   insertOrReplaceMessage,
   deleteMessage,
   updateExpiredMessageTable,
   insertOrReplaceConversation,
+  insertOrReplaceFavoriteApp,
 }
 
 class MiniNotificationMessage with EquatableMixin {
@@ -45,7 +46,7 @@ class MiniNotificationMessage with EquatableMixin {
 class _DatabaseEventWrapper {
   const _DatabaseEventWrapper(this.type, this.data);
 
-  final DatabaseEvent type;
+  final _DatabaseEvent type;
   final dynamic data;
 
   @override
@@ -57,40 +58,41 @@ class DataBaseEventBus {
 
   static DataBaseEventBus instance = DataBaseEventBus._();
 
-  Stream<T> watch<T>(DatabaseEvent event) => EventBus.instance.on
+  Stream<T> _watch<T>(_DatabaseEvent event) => EventBus.instance.on
       .whereType<_DatabaseEventWrapper>()
       .where((e) => event == e.type)
       .where((e) => e.data is T)
       .map((e) => e.data)
       .cast<T>();
 
-  void send<T>(DatabaseEvent event, T value) =>
+  void _send<T>(_DatabaseEvent event, T value) =>
       EventBus.instance.fire(_DatabaseEventWrapper(event, value));
 
-  Stream<DatabaseEvent> watchEvent(DatabaseEvent event) => EventBus.instance.on
-      .whereType<_DatabaseEventWrapper>()
-      .map((e) => e.type)
-      .where((e) => e == event);
+  Stream<_DatabaseEvent> _watchEvent(_DatabaseEvent event) =>
+      EventBus.instance.on
+          .whereType<_DatabaseEventWrapper>()
+          .map((e) => e.type)
+          .where((e) => e == event);
 
-  void sendEvent(DatabaseEvent event) =>
+  void _sendEvent(_DatabaseEvent event) =>
       EventBus.instance.fire(_DatabaseEventWrapper(event, null));
 
   // conversation
   late Stream<List<String>> insertOrReplaceConversationIdStream =
-      watch<List<String>>(DatabaseEvent.insertOrReplaceConversation);
+      _watch<List<String>>(_DatabaseEvent.insertOrReplaceConversation);
 
   void insertOrReplaceConversation(String conversationId) {
     if (conversationId.trim().isEmpty) {
       w('DatabaseEvent: insertOrReplaceConversation conversationId is empty');
       return;
     }
-    send(DatabaseEvent.insertOrReplaceConversation, [conversationId]);
+    _send(_DatabaseEvent.insertOrReplaceConversation, [conversationId]);
   }
 
   // message
 
   late Stream<List<MiniMessageItem>> insertOrReplaceMessageIdsStream =
-      watch<List<MiniMessageItem>>(DatabaseEvent.insertOrReplaceMessage);
+      _watch<List<MiniMessageItem>>(_DatabaseEvent.insertOrReplaceMessage);
 
   void insertOrReplaceMessages(Iterable<MiniMessageItem> messageEvents) {
     final newMessageEvents = messageEvents.where((event) {
@@ -104,22 +106,22 @@ class DataBaseEventBus {
       i('DatabaseEvent: insertOrReplaceMessages messageIds is empty');
       return;
     }
-    send(DatabaseEvent.insertOrReplaceMessage, newMessageEvents);
+    _send(_DatabaseEvent.insertOrReplaceMessage, newMessageEvents);
   }
 
   late Stream<List<String>> deleteMessageIdStream =
-      watch<List<String>>(DatabaseEvent.deleteMessage);
+      _watch<List<String>>(_DatabaseEvent.deleteMessage);
 
   void deleteMessage(String messageId) {
     if (messageId.trim().isEmpty) {
       w('DatabaseEvent: deleteMessage messageId is empty');
       return;
     }
-    send(DatabaseEvent.deleteMessage, [messageId]);
+    _send(_DatabaseEvent.deleteMessage, [messageId]);
   }
 
   late Stream<MiniNotificationMessage> notificationMessageStream =
-      watch<MiniNotificationMessage>(DatabaseEvent.notification);
+      _watch<MiniNotificationMessage>(_DatabaseEvent.notification);
 
   void notificationMessage(MiniNotificationMessage miniNotificationMessage) {
     if (miniNotificationMessage.messageId.trim().isEmpty ||
@@ -127,6 +129,26 @@ class DataBaseEventBus {
       w('DatabaseEvent: notificationMessage messageId is empty');
       return;
     }
-    send(DatabaseEvent.notification, miniNotificationMessage);
+    _send(_DatabaseEvent.notification, miniNotificationMessage);
+  }
+
+  // expiredMessage
+  late Stream<void> updateExpiredMessageTableStream =
+      _watchEvent(_DatabaseEvent.updateExpiredMessageTable);
+
+  void updateExpiredMessageTable() =>
+      _sendEvent(_DatabaseEvent.updateExpiredMessageTable);
+
+  // app
+  late Stream<List<String>> insertOrReplaceFavoriteAppIdStream =
+      _watch<List<String>>(_DatabaseEvent.insertOrReplaceFavoriteApp);
+
+  void insertOrReplaceFavoriteApp(Iterable<String> appIds) {
+    final newAppIds = appIds.where((element) => element.trim().isNotEmpty);
+    if (newAppIds.isEmpty) {
+      w('DatabaseEvent: insertOrReplaceFavoriteApp appIds is empty');
+      return;
+    }
+    _send(_DatabaseEvent.insertOrReplaceFavoriteApp, newAppIds);
   }
 }

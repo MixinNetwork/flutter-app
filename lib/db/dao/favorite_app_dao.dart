@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
+import '../database_event_bus.dart';
 import '../mixin_database.dart';
 
 part 'favorite_app_dao.g.dart';
@@ -26,8 +27,11 @@ class FavoriteAppDao extends DatabaseAccessor<MixinDatabase>
               createdAt: app.createdAt,
             ))
         .toList();
-    return batch(
+    await batch(
         (batch) => batch.insertAllOnConflictUpdate(db.favoriteApps, list));
+
+    DataBaseEventBus.instance
+        .insertOrReplaceFavoriteApp(apps.map((e) => e.appId));
   }
 
   Selectable<App> getFavoriteAppsByUserId(String userId) =>

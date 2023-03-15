@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
@@ -631,8 +632,10 @@ class _SharedApps extends HookWidget {
 
     final apps = useMemoizedStream(
         () => context.database.favoriteAppDao
-            .getFavoriteAppsByUserId(userId)
-            .watch(),
+                .getFavoriteAppsByUserId(userId)
+                .watchWithEvent(eventStreams: [
+              DataBaseEventBus.instance.insertOrReplaceFavoriteAppIdStream
+            ], duration: kVerySlowThrottleDuration),
         keys: [userId]);
 
     final data = apps.data ?? const [];

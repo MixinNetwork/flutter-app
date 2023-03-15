@@ -19,6 +19,36 @@ extension SelectedableThrottle<T> on Selectable<T> {
     Duration duration,
   ) =>
       watchSingleOrNull().throttled(duration);
+
+  Stream<List<T>> watchWithEvent({
+    required Iterable<Stream<dynamic>> eventStreams,
+    required Duration duration,
+    bool trailing = true,
+  }) =>
+      Rx.combineLatestList(eventStreams)
+          .startWith([])
+          .throttleTime(duration, trailing: trailing)
+          .asyncMap((_) => get());
+
+  Stream<T> watchSingleWithEvent({
+    required Iterable<Stream<dynamic>> eventStreams,
+    required Duration duration,
+    bool trailing = true,
+  }) =>
+      Rx.combineLatestList(eventStreams)
+          .startWith([])
+          .throttleTime(duration, trailing: trailing)
+          .asyncMap((_) => getSingle());
+
+  Stream<T?> watchSingleOrNullWithEvent({
+    required Iterable<Stream<dynamic>> eventStreams,
+    required Duration duration,
+    bool trailing = true,
+  }) =>
+      Rx.combineLatestList(eventStreams)
+          .startWith([])
+          .throttleTime(duration, trailing: trailing)
+          .asyncMap((_) => getSingleOrNull());
 }
 
 extension _ThrottleWithPause<T> on Stream<T> {

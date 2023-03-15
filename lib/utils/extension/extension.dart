@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:markdown/markdown.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:ulid/ulid.dart';
 import 'package:uuid/uuid.dart';
 

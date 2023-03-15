@@ -70,7 +70,7 @@ class StickerMessageWidget extends HookWidget {
           );
           return context.database.stickerDao
               .sticker(stickerId!)
-              .watchSingleOrNull()
+              .watchSingleOrNullThrottle(kDefaultThrottleDuration)
               .whereNotNull()
               .map(
                 (event) => _StickerData(
