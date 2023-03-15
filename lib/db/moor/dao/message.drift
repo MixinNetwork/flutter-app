@@ -173,3 +173,6 @@ SELECT m.message_id messageId, u.user_id AS senderId, u.avatar_url AS senderAvat
     INNER JOIN users owner ON c.owner_id = owner.user_id
     WHERE m.message_id IN :messageIds
     ORDER BY m.created_at DESC, m.rowid DESC;
+
+miniMessageByIds AS MiniMessageItem:
+SELECT conversation_id as conversationId, message_id as messageId FROM messages WHERE message_id IN :messageIds;

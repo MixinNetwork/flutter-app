@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, Conversation;
-import 'package:rxdart/rxdart.dart';
 
 import '../../enum/encrypt_category.dart';
 import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../converter/conversation_status_type_converter.dart';
 import '../converter/millis_date_converter.dart';
+import '../database_event_bus.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 import 'app_dao.dart';
@@ -21,22 +21,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationDaoMixin {
   ConversationDao(super.db);
 
-  late Stream<Set<TableUpdate>> updateEvent = db
-      .tableUpdates(TableUpdateQuery.onAllTables([
-        db.conversations,
-        db.users,
-        db.messages,
-        db.snapshots,
-        db.messageMentions,
-        db.circleConversations,
-      ]))
-      .throttleTime(kSlowThrottleDuration, trailing: true);
-
-  late Stream<int> allUnseenIgnoreMuteMessageCountEvent = db
-      .tableUpdates(TableUpdateQuery.onAllTables([
-        db.conversations,
-        db.users,
-      ]))
+  late Stream<int> allUnseenIgnoreMuteMessageCountEvent = DataBaseEventBus
+      .instance.insertOrReplaceConversationIdStream
       .asyncMap((event) => allUnseenIgnoreMuteMessageCount().getSingle());
 
   Selectable<int> allUnseenIgnoreMuteMessageCount() =>
@@ -53,8 +39,15 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         },
       );
 
-  Future<int> insert(Insertable<Conversation> conversation) =>
-      into(db.conversations).insertOnConflictUpdate(conversation);
+  Future<int> insert(Conversation conversation) =>
+      into(db.conversations).insertOnConflictUpdate(conversation).then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance
+              .insertOrReplaceConversation(conversation.conversationId);
+        }
+
+        return value;
+      });
 
   Selectable<Conversation?> conversationById(String conversationId) =>
       (select(db.conversations)
@@ -249,13 +242,25 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(
         ConversationsCompanion(pinTime: Value(DateTime.now())),
-      );
+      )
+          .then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+        }
+        return value;
+      });
 
-  Future<int> unpin(String conversationId) async => (update(db.conversations)
+  Future<int> unpin(String conversationId) => (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(
         const ConversationsCompanion(pinTime: Value(null)),
-      );
+      )
+          .then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+        }
+        return value;
+      });
 
   Future<int> deleteConversation(String conversationId) =>
       (delete(db.conversations)
@@ -278,7 +283,13 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
               tbl.status
                   .equals(const ConversationStatusTypeConverter().toSql(status))
                   .not()))
-        .write(ConversationsCompanion(status: Value(status)));
+        .write(ConversationsCompanion(status: Value(status)))
+        .then((value) {
+      if (value > 0) {
+        DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+      }
+      return value;
+    });
   }
 
   Selectable<SearchConversationItem> fuzzySearchConversation(
@@ -361,18 +372,18 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     return db.transaction(() async {
       await Future.wait([
         insert(
-          ConversationsCompanion(
-            conversationId: Value(conversation.conversationId),
-            ownerId: Value(ownerId),
-            category: Value(conversation.category),
-            name: Value(conversation.name),
-            iconUrl: Value(conversation.iconUrl),
-            announcement: Value(conversation.announcement),
-            codeUrl: Value(conversation.codeUrl),
-            createdAt: Value(conversation.createdAt),
-            status: const Value(ConversationStatus.success),
-            muteUntil: Value(DateTime.tryParse(conversation.muteUntil)),
-            expireIn: Value(conversation.expireIn),
+          Conversation(
+            conversationId: conversation.conversationId,
+            ownerId: ownerId,
+            category: conversation.category,
+            name: conversation.name,
+            iconUrl: conversation.iconUrl,
+            announcement: conversation.announcement,
+            codeUrl: conversation.codeUrl,
+            createdAt: conversation.createdAt,
+            status: ConversationStatus.success,
+            muteUntil: DateTime.tryParse(conversation.muteUntil),
+            expireIn: conversation.expireIn,
           ),
         ),
         ...conversation.participants.map(
@@ -407,14 +418,26 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     if (already) return -1;
     return (update(db.conversations)
           ..where((tbl) => tbl.conversationId.equals(conversationId)))
-        .write(ConversationsCompanion(codeUrl: Value(codeUrl)));
+        .write(ConversationsCompanion(codeUrl: Value(codeUrl)))
+        .then((value) {
+      if (value > 0) {
+        DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+      }
+      return value;
+    });
   }
 
   Future<int> updateMuteUntil(String conversationId, String muteUntil) =>
       (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(ConversationsCompanion(
-              muteUntil: Value(DateTime.tryParse(muteUntil))));
+              muteUntil: Value(DateTime.tryParse(muteUntil))))
+          .then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+        }
+        return value;
+      });
 
   Future<int> updateDraft(String conversationId, String draft) async {
     final already = await db.hasData(
@@ -427,7 +450,14 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
 
     return (update(db.conversations)
           ..where((tbl) => tbl.conversationId.equals(conversationId)))
-        .write(ConversationsCompanion(draft: Value(draft)));
+        .write(ConversationsCompanion(draft: Value(draft)))
+        .then((value) {
+      if (value > 0) {
+        DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+      }
+
+      return value;
+    });
   }
 
   Future<bool> hasConversation(String conversationId) => db.hasData(
@@ -443,7 +473,13 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Future<int> updateConversationExpireIn(String conversationId, int expireIn) =>
       (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .write(ConversationsCompanion(expireIn: Value(expireIn)));
+          .write(ConversationsCompanion(expireIn: Value(expireIn)))
+          .then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+        }
+        return value;
+      });
 
   Future<EncryptCategory> getEncryptCategory(
       String ownerId, bool isBotConversation) async {

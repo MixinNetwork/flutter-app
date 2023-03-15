@@ -13439,6 +13439,25 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<MiniMessageItem> miniMessageByIds(List<String> messageIds) {
+    var $arrayStartIndex = 1;
+    final expandedmessageIds = $expandVar($arrayStartIndex, messageIds.length);
+    $arrayStartIndex += messageIds.length;
+    return customSelect(
+        'SELECT conversation_id AS conversationId, message_id AS messageId FROM messages WHERE message_id IN ($expandedmessageIds)',
+        variables: [
+          for (var $ in messageIds) Variable<String>($)
+        ],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) {
+      return MiniMessageItem(
+        conversationId: row.read<String>('conversationId'),
+        messageId: row.read<String>('messageId'),
+      );
+    });
+  }
+
   Selectable<int> baseConversationItemCount(
       BaseConversationItemCount$where where) {
     var $arrayStartIndex = 1;
@@ -15303,6 +15322,31 @@ class SearchMessageDetailItem {
           ..write('conversationId: $conversationId, ')
           ..write('ownerFullName: $ownerFullName, ')
           ..write('ownerAvatarUrl: $ownerAvatarUrl')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class MiniMessageItem {
+  final String conversationId;
+  final String messageId;
+  MiniMessageItem({
+    required this.conversationId,
+    required this.messageId,
+  });
+  @override
+  int get hashCode => Object.hash(conversationId, messageId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MiniMessageItem &&
+          other.conversationId == this.conversationId &&
+          other.messageId == this.messageId);
+  @override
+  String toString() {
+    return (StringBuffer('MiniMessageItem(')
+          ..write('conversationId: $conversationId, ')
+          ..write('messageId: $messageId')
           ..write(')'))
         .toString();
   }

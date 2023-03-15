@@ -1115,9 +1115,6 @@ class SendMessageHelper {
           .deleteByIds(pinMessageMinimals.map((e) => e.messageId).toList());
     }
 
-    _messageDao.notifyMessageInsertOrReplaced(
-        pinMessageMinimals.map((e) => e.messageId));
-
     _addSendingJob(createSendPinJob(conversationId, encoded));
   }
 

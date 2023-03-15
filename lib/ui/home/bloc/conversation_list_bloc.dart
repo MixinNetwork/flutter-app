@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:flutter_app_icon_badge/flutter_app_icon_badge.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../bloc/paging/paging_bloc.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/database.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
@@ -72,6 +75,13 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     int? limit,
   ) {
     final dao = database.conversationDao;
+    final updateEvent = Rx.combineLatest2(
+            DataBaseEventBus.instance.insertOrReplaceConversationIdStream,
+            DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
+            (a, b) => null)
+        .throttleTime(kSlowThrottleDuration, trailing: true)
+        .asBroadcastStream();
+
     switch (state.type) {
       case SlideCategoryType.chats:
       case SlideCategoryType.contacts:
@@ -83,7 +93,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
           () => dao.conversationCountByCategory(state.type),
           (limit, offset) =>
               dao.conversationItemsByCategory(state.type, limit, offset),
-          database.conversationDao.updateEvent,
+          updateEvent,
           mentionCache,
           () => dao.conversationHasDataByCategory(state.type),
         );
@@ -97,7 +107,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
           (limit, offset) => database.conversationDao
               .conversationsByCircleId(state.id!, limit, offset)
               .get(),
-          database.conversationDao.updateEvent,
+          updateEvent,
           mentionCache,
           () =>
               database.conversationDao.conversationHasDataByCircleId(state.id!),

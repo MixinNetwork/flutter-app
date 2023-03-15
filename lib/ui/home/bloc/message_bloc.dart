@@ -4,12 +4,14 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../account/account_server.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/message_dao.dart';
 import '../../../db/database.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/app_lifecycle.dart';
@@ -229,12 +231,23 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
 
     addSubscription(
-      messageDao.insertOrReplaceMessageStream
-          .listen((state) => add(_MessageInsertOrReplaceEvent(state))),
+      conversationCubit.stream
+          .map((event) => event?.conversationId)
+          .distinct()
+          .switchMap((conversationId) {
+        if (conversationId == null) {
+          return const Stream<List<MessageItem>>.empty();
+        }
+        return messageDao.watchInsertOrReplaceMessageStream(conversationId);
+      }).listen((state) => add(_MessageInsertOrReplaceEvent(state))),
     );
 
-    addSubscription(messageDao.deleteMessageIdStream
-        .listen((messageId) => add(_MessageDeleteEvent(messageId))));
+    addSubscription(
+        DataBaseEventBus.instance.deleteMessageIdStream.listen((messageIds) {
+      messageIds.forEach((messageId) {
+        add(_MessageDeleteEvent(messageId));
+      });
+    }));
   }
 
   final ScrollController scrollController = ScrollController();

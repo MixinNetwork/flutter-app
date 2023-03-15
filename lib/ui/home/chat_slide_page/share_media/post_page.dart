@@ -52,15 +52,14 @@ class PostPage extends HookWidget {
       keys: [conversationId],
     );
     useEffect(
-      () => messageDao.insertOrReplaceMessageStream
+      () => messageDao
+          .watchInsertOrReplaceMessageStream(conversationId)
           .switchMap<MessageItem>((value) async* {
             for (final item in value) {
               yield item;
             }
           })
-          .where((event) =>
-              event.conversationId == conversationId &&
-              [
+          .where((event) => [
                 MessageCategory.plainPost,
                 MessageCategory.signalPost,
               ].contains(event.type))
