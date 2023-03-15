@@ -91,8 +91,15 @@ extension SqlStringExt on String {
   String escapeFts5() => replaceQuotationMark()._escapeFts5Symbols();
 
   String _escapeFts5Symbols() {
-    final result = joinWhiteSpace().split(' ');
-    return '${result.map((e) => '"$e"').join('*')}*';
+    final tokens = split(' ')
+        .map((e) => e.trim())
+        .where((element) => element.isNotEmpty)
+        .map((e) => e.joinWhiteSpace());
+    final result = StringBuffer();
+    for (final token in tokens) {
+      result.write('"$token"*');
+    }
+    return result.toString();
   }
 
   String joinStar() => joinWithCharacter('*');
