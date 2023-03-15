@@ -988,6 +988,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Future<List<Tuple2<int, Message>>> getMessages(int? rowid, int limit) async {
     final messages = await customSelect(
         'SELECT rowid, * FROM messages WHERE ${rowid == null ? '1' : 'rowid < $rowid'} '
+        "AND status != 'FAILED' AND status != 'UNKNOWN' "
         'ORDER BY rowid DESC LIMIT $limit',
         readsFrom: {db.messages}).map(
       (row) async {
