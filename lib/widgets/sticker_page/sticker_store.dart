@@ -405,7 +405,14 @@ class _StickerPage extends HookWidget {
         if (albumId == null) return Stream.value(null);
         return context.database.stickerAlbumDao
             .album(albumId!)
-            .watchSingleThrottle(kDefaultThrottleDuration);
+            .watchSingleWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance.watchUpdateStickerStream(
+              albumIds: [albumId!],
+            )
+          ],
+          duration: kDefaultThrottleDuration,
+        );
       },
       keys: [albumId],
     ).data;

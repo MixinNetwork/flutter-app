@@ -97,9 +97,24 @@ class DataBaseEventBus {
   }
 
   // participant
-
   late Stream<List<MiniParticipantItem>> updateParticipantIdStream =
       _watch<List<MiniParticipantItem>>(_DatabaseEvent.updateParticipant);
+
+  Stream<List<MiniParticipantItem>> watchUpdateParticipantStream({
+    List<String> conversationIds = const [],
+    List<String> userIds = const [],
+    bool and = false,
+  }) =>
+      updateParticipantIdStream.where((event) => event.any((element) {
+            bool isContainConversationId() =>
+                conversationIds.contains(element.conversationId);
+            bool isContainUserId() => userIds.contains(element.userId);
+            if (and) {
+              return isContainConversationId() && isContainUserId();
+            } else {
+              return isContainConversationId() || isContainUserId();
+            }
+          }));
 
   void updateParticipant(Iterable<MiniParticipantItem> participants) {
     final newParticipants = participants.where((participant) {

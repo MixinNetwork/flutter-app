@@ -13,6 +13,7 @@ import '../database_event_bus.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 import 'app_dao.dart';
+import 'participant_dao.dart';
 
 part 'conversation_dao.g.dart';
 
@@ -412,6 +413,11 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
                   ),
                 ))
       ]);
+    }).then((value) {
+      DataBaseEventBus.instance.updateConversation(conversation.conversationId);
+      DataBaseEventBus.instance.updateParticipant(conversation.participants.map(
+          (p) => MiniParticipantItem(
+              conversationId: conversation.conversationId, userId: p.userId)));
     });
   }
 

@@ -10,11 +10,6 @@ extension SelectedableThrottle<T> on Selectable<T> {
   ) =>
       watch().throttled(duration);
 
-  Stream<T> watchSingleThrottle(
-    Duration duration,
-  ) =>
-      watchSingle().throttled(duration);
-
   Stream<Value> _watchWithStream<Value>({
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,

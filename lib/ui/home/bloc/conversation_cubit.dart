@@ -186,12 +186,10 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
                   .participantById(conversationId!, accountServer.userId)
                   .watchSingleOrNullWithStream(
                 eventStreams: [
-                  DataBaseEventBus.instance.updateParticipantIdStream
-                      .where((event) => event.any(
-                            (element) =>
-                                element.conversationId == conversationId &&
-                                element.userId == accountServer.userId,
-                          ))
+                  DataBaseEventBus.instance.watchUpdateParticipantStream(
+                      conversationIds: [conversationId],
+                      userIds: [accountServer.userId],
+                      and: true)
                 ],
                 duration: kSlowThrottleDuration,
                 prepend: false,

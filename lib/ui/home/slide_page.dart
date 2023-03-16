@@ -9,6 +9,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../bloc/setting_cubit.dart';
 import '../../constants/resources.dart';
+import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../generated/l10n.dart';
 import '../../utils/color_utils.dart';
@@ -449,7 +450,12 @@ class _Item extends HookWidget {
           case SlideCategoryType.strangers:
             return dao
                 .unseenConversationCountByCategory(type)
-                .watchSingleThrottle(kDefaultThrottleDuration);
+                .watchSingleWithStream(
+              eventStreams: [
+                DataBaseEventBus.instance.updateConversationIdStream
+              ],
+              duration: kDefaultThrottleDuration,
+            );
           case SlideCategoryType.chats:
           case SlideCategoryType.circle:
           case SlideCategoryType.setting:

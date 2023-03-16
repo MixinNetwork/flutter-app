@@ -62,7 +62,13 @@ class ChatInfoPage extends HookWidget {
     final announcement = useMemoizedStream<String?>(
       () => context.database.conversationDao
           .announcement(conversationId)
-          .watchSingleThrottle(kVerySlowThrottleDuration),
+          .watchSingleWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance
+              .watchUpdateConversationStream([conversationId])
+        ],
+        duration: kVerySlowThrottleDuration,
+      ),
       keys: [conversationId],
     ).data;
     if (!conversation.isLoaded) return const SizedBox();
@@ -546,11 +552,20 @@ class ConversationBio extends HookWidget {
       if (isGroup) {
         return database.conversationDao
             .announcement(conversationId)
-            .watchSingleThrottle(kVerySlowThrottleDuration);
+            .watchSingleWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance
+                .watchUpdateConversationStream([conversationId])
+          ],
+          duration: kVerySlowThrottleDuration,
+        );
       }
-      return database.userDao
-          .biography(userId!)
-          .watchSingleThrottle(kVerySlowThrottleDuration);
+      return database.userDao.biography(userId!).watchSingleWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance.watchUpdateUserStream([userId!])
+        ],
+        duration: kVerySlowThrottleDuration,
+      );
     }, [
       conversationId,
       userId,
