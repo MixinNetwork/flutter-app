@@ -180,7 +180,6 @@ jobs:
 
       - name: Run tests
         run: flutter test
-        shell: cmd
 
       - name: Build APP
         id: build-app
