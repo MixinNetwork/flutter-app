@@ -172,12 +172,14 @@ class _List extends HookWidget {
   Widget build(BuildContext context) {
     final albums = useMemoizedStream(() => Rx.combineLatest2<List<StickerAlbum>,
                 List<Sticker>, List<_StickerAlbumItem>>(
-              context.database.stickerAlbumDao
-                  .systemAlbums()
-                  .watchThrottle(kSlowThrottleDuration),
-              context.database.stickerDao
-                  .systemStickers()
-                  .watchThrottle(kSlowThrottleDuration),
+              context.database.stickerAlbumDao.systemAlbums().watchWithStream(
+                eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+                duration: kSlowThrottleDuration,
+              ),
+              context.database.stickerDao.systemStickers().watchWithStream(
+                eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+                duration: kSlowThrottleDuration,
+              ),
               (albums, stickers) => albums.map(
                 (e) {
                   final _stickers = stickers
@@ -283,9 +285,11 @@ class _StickerAlbumManagePage extends HookWidget {
   Widget build(BuildContext context) {
     final controller = useScrollController();
 
-    final albums = useMemoizedStream(() => context.database.stickerAlbumDao
-        .systemAddedAlbums()
-        .watchThrottle(kSlowThrottleDuration)).data;
+    final albums = useMemoizedStream(() =>
+        context.database.stickerAlbumDao.systemAddedAlbums().watchWithStream(
+          eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+          duration: kSlowThrottleDuration,
+        )).data;
     final list = useState(albums ?? []);
     useEffect(() {
       list.value = albums ?? [];
@@ -421,7 +425,13 @@ class _StickerPage extends HookWidget {
           if (album == null) return Stream.value(<Sticker>[]);
           return context.database.stickerDao
               .stickerByAlbumId(album.albumId)
-              .watchThrottle(kDefaultThrottleDuration);
+              .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance
+                  .watchUpdateStickerStream(albumIds: [album.albumId])
+            ],
+            duration: kDefaultThrottleDuration,
+          );
         }, keys: [album?.albumId]).data ??
         [];
 

@@ -37,3 +37,19 @@ class MiniSticker with EquatableMixin {
   @override
   List<Object?> get props => [stickerId, albumId];
 }
+
+class MiniTranscriptMessage with EquatableMixin {
+  MiniTranscriptMessage({
+    required this.transcriptId,
+    this.messageId,
+  });
+
+  final String transcriptId;
+  final String? messageId;
+
+  @override
+  List<Object?> get props => [
+        transcriptId,
+        messageId,
+      ];
+}

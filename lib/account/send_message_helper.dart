@@ -593,7 +593,10 @@ class SendMessageHelper {
             }
           }
         })(),
-        _messageMentionDao.deleteMessageMentionByMessageId(messageId),
+        _messageMentionDao.deleteMessageMention(MessageMention(
+          messageId: messageId,
+          conversationId: conversationId,
+        )),
         (() async => _addSendingJob(
             await createSendRecallJob(conversationId, messageId)))(),
         (() async {

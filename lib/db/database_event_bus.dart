@@ -20,6 +20,11 @@ enum _DatabaseEvent {
   updateParticipant,
   updateSticker,
   updateSnapshot,
+  updateMessageMention,
+  updateCircle,
+  updateCircleConversation,
+  updatePinMessage,
+  updateTranscriptMessage
 }
 
 @immutable
@@ -78,6 +83,19 @@ class DataBaseEventBus {
 
     _send(_DatabaseEvent.updateUser, [newUserIds]);
   }
+
+  // circle
+  late Stream<void> updateCircleStream =
+      _watch<void>(_DatabaseEvent.updateCircle);
+
+  void updateCircle() => _sendEvent(_DatabaseEvent.updateCircle);
+
+  // circleConversation
+  late Stream<void> updateCircleConversationStream =
+      _watch<void>(_DatabaseEvent.updateCircleConversation);
+
+  void updateCircleConversation() =>
+      _sendEvent(_DatabaseEvent.updateCircleConversation);
 
   // conversation
   late final Stream<List<String>> updateConversationIdStream =
@@ -189,6 +207,110 @@ class DataBaseEventBus {
     _send(_DatabaseEvent.notification, miniNotificationMessage);
   }
 
+  late Stream<List<MiniMessageItem>> updateMessageMentionStream =
+      _watch<List<MiniMessageItem>>(_DatabaseEvent.updateMessageMention);
+
+  Stream<List<MiniMessageItem>> watchUpdateMessageMention({
+    List<String> conversationIds = const [],
+    List<String> messageIds = const [],
+    bool and = false,
+  }) =>
+      updateMessageMentionStream.where((event) => event.any((element) {
+            bool isContainConversationId() =>
+                conversationIds.contains(element.conversationId);
+            bool isContainMessageId() => messageIds.contains(element.messageId);
+            if (and) {
+              return isContainConversationId() && isContainMessageId();
+            } else {
+              return isContainConversationId() || isContainMessageId();
+            }
+          }));
+
+  void updateMessageMention(List<MiniMessageItem> messageEvents) {
+    final newMessageEvents = messageEvents.where((event) {
+      if (event.messageId.trim().isNotEmpty &&
+          event.conversationId.trim().isNotEmpty) return true;
+      i('DatabaseEvent: insertOrReplaceMessages messageId or conversationId is empty: $event');
+      return false;
+    }).toList();
+
+    if (newMessageEvents.isEmpty) {
+      i('DatabaseEvent: insertOrReplaceMessages messageIds is empty');
+      return;
+    }
+    _send(_DatabaseEvent.updateMessageMention, newMessageEvents);
+  }
+
+  // pinMessage
+  late Stream<List<MiniMessageItem>> updatePinMessageStream =
+      _watch<List<MiniMessageItem>>(_DatabaseEvent.updatePinMessage);
+
+  Stream<List<MiniMessageItem>> watchPinMessageStream({
+    List<String> conversationIds = const [],
+    List<String> messageIds = const [],
+    bool and = false,
+  }) =>
+      updatePinMessageStream.where((event) => event.any((element) {
+            bool isContainConversationId() =>
+                conversationIds.contains(element.conversationId);
+            bool isContainMessageId() => messageIds.contains(element.messageId);
+            if (and) {
+              return isContainConversationId() && isContainMessageId();
+            } else {
+              return isContainConversationId() || isContainMessageId();
+            }
+          }));
+
+  void updatePinMessage(Iterable<MiniMessageItem> messageEvent) {
+    final newMessageEvents = messageEvent.where((event) {
+      if (event.messageId.trim().isNotEmpty &&
+          event.conversationId.trim().isNotEmpty) return true;
+      i('DatabaseEvent: updatePinMessage messageId or conversationId is empty: $event');
+      return false;
+    }).toList();
+
+    if (newMessageEvents.isEmpty) {
+      i('DatabaseEvent: updatePinMessage messageIds is empty');
+      return;
+    }
+    _send(_DatabaseEvent.updatePinMessage, newMessageEvents);
+  }
+
+  // transcriptMessage
+  late Stream<List<MiniTranscriptMessage>> updateTranscriptMessageStream =
+      _watch<List<MiniTranscriptMessage>>(
+          _DatabaseEvent.updateTranscriptMessage);
+
+  Stream<List<MiniTranscriptMessage>> watchUpdateTranscriptMessageStream({
+    List<String> transcriptIds = const [],
+    List<String> messageIds = const [],
+    bool and = false,
+  }) =>
+      updateTranscriptMessageStream.where((event) => event.any((element) {
+            bool isContainTranscriptId() =>
+                transcriptIds.contains(element.transcriptId);
+            bool isContainMessageId() => messageIds.contains(element.messageId);
+            if (and) {
+              return isContainTranscriptId() && isContainMessageId();
+            } else {
+              return isContainTranscriptId() || isContainMessageId();
+            }
+          }));
+
+  void updateTranscriptMessage(Iterable<MiniTranscriptMessage> messageEvent) {
+    final newMessageEvents = messageEvent.where((event) {
+      if (event.transcriptId.trim().isNotEmpty) return true;
+      i('DatabaseEvent: updateTranscriptMessage transcriptId is empty: $event');
+      return false;
+    }).toList();
+
+    if (newMessageEvents.isEmpty) {
+      i('DatabaseEvent: updateTranscriptMessage is empty');
+      return;
+    }
+    _send(_DatabaseEvent.updateTranscriptMessage, newMessageEvents);
+  }
+
   // expiredMessage
   late Stream<void> updateExpiredMessageTableStream =
       _watchEvent(_DatabaseEvent.updateExpiredMessage);
@@ -241,7 +363,6 @@ class DataBaseEventBus {
   }
 
   // Snapshot
-
   late Stream<List<String>> updateSnapshotStream =
       _watch<List<String>>(_DatabaseEvent.updateSnapshot);
 

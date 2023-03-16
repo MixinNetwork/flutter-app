@@ -508,8 +508,10 @@ class DecryptMessage extends Injector {
               quoteMessage.toJson());
         }
       })(),
-      database.messageMentionDao
-          .deleteMessageMentionByMessageId(recallMessage.messageId),
+      database.messageMentionDao.deleteMessageMention(MessageMention(
+        messageId: recallMessage.messageId,
+        conversationId: data.conversationId,
+      )),
       database.messagesHistoryDao
           .insert(MessagesHistoryData(messageId: data.messageId)),
     ]);
@@ -930,7 +932,7 @@ class DecryptMessage extends Injector {
       final conversationId = systemMessage.conversationId ??
           generateConversationId(accountId, systemMessage.userId!);
       await database.circleConversationDao
-          .deleteByIds(conversationId, systemMessage.circleId);
+          .deleteById(conversationId, systemMessage.circleId);
     } else if (systemMessage.action == SystemCircleAction.delete) {
       await database.circleDao.deleteCircleById(systemMessage.circleId);
       await database.circleConversationDao

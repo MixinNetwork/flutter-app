@@ -3,6 +3,8 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../enum/media_status.dart';
 import '../../utils/extension/extension.dart';
+import '../database_event_bus.dart';
+import '../event.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -17,7 +19,14 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
 
   Future<void> insertAll(List<TranscriptMessage> transcripts) =>
       batch((batch) => batch.insertAll(db.transcriptMessages, transcripts,
-          mode: InsertMode.insertOrReplace));
+          mode: InsertMode.insertOrReplace)).then((value) {
+        DataBaseEventBus.instance.updateTranscriptMessage(
+            transcripts.map((e) => MiniTranscriptMessage(
+                  transcriptId: e.transcriptId,
+                  messageId: e.messageId,
+                )));
+        return value;
+      });
 
   Selectable<TranscriptMessageItem> transactionMessageItem(String messageId) =>
       baseTranscriptMessageItem(
@@ -79,7 +88,15 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
           content: Value(attachmentId),
           mediaCreatedAt: Value(mediaCreatedAt),
         ),
-      );
+      )
+          .then((value) {
+        DataBaseEventBus.instance.updateTranscriptMessage([
+          MiniTranscriptMessage(
+            transcriptId: transcriptId,
+            messageId: messageId,
+          )
+        ]);
+      });
 
   Future<String> generateTranscriptMessageFts5Content(
     List<TranscriptMessage> transcriptMessages,

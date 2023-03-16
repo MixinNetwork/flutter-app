@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../database_event_bus.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -11,16 +12,55 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
   PinMessageDao(super.attachedDatabase);
 
   Future<int> insert(PinMessage pinMessage) =>
-      into(db.pinMessages).insertOnConflictUpdate(pinMessage);
+      into(db.pinMessages).insertOnConflictUpdate(pinMessage).then((value) {
+        DataBaseEventBus.instance.updatePinMessage([
+          MiniMessageItem(
+            conversationId: pinMessage.conversationId,
+            messageId: pinMessage.messageId,
+          )
+        ]);
+        return value;
+      });
 
-  Future<int> deleteByIds(List<String> messageIds) =>
-      (delete(db.pinMessages)..where((tbl) => tbl.messageId.isIn(messageIds)))
-          .go();
+  Future<void> deleteByIds(List<String> messageIds) async {
+    final pinMessages = await (select(db.pinMessages)
+          ..where((tbl) => tbl.messageId.isIn(messageIds)))
+        .get();
+    if (pinMessages.isEmpty) return;
 
-  Future<int> deleteByConversationId(String conversationId) =>
-      (delete(db.pinMessages)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .go();
+    await (delete(db.pinMessages)
+          ..where((tbl) => tbl.messageId.isIn(messageIds)))
+        .go();
+
+    DataBaseEventBus.instance.updatePinMessage(
+      pinMessages.map(
+        (e) => MiniMessageItem(
+          conversationId: e.conversationId,
+          messageId: e.messageId,
+        ),
+      ),
+    );
+  }
+
+  Future<void> deleteByConversationId(String conversationId) async {
+    final pinMessages = await (select(db.pinMessages)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .get();
+    if (pinMessages.isEmpty) return;
+
+    await (delete(db.pinMessages)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .go();
+
+    DataBaseEventBus.instance.updatePinMessage(
+      pinMessages.map(
+        (e) => MiniMessageItem(
+          conversationId: e.conversationId,
+          messageId: e.messageId,
+        ),
+      ),
+    );
+  }
 
   Selectable<String?> getPinMessageIds(String conversationId) =>
       (selectOnly(db.pinMessages)

@@ -248,6 +248,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       ]);
     });
     DataBaseEventBus.instance.deleteMessage(messageId);
+    DataBaseEventBus.instance.updatePinMessage([
+      MiniMessageItem(conversationId: conversationId, messageId: messageId)
+    ]);
+
+    DataBaseEventBus.instance.updateTranscriptMessage(
+        [MiniTranscriptMessage(transcriptId: messageId)]);
   }
 
   Future<void> deleteMessageByConversationId(String conversationId) =>

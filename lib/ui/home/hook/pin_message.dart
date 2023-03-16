@@ -48,8 +48,14 @@ PinMessageState usePinMessageState() {
       if (conversationId == null) return Stream.value([]);
       return context.database.pinMessageDao
           .getPinMessageIds(conversationId)
-          .watchThrottle(kSlowThrottleDuration)
-          .map((event) => event.whereNotNull().toList());
+          .watchWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance.watchPinMessageStream(
+            conversationIds: [conversationId],
+          )
+        ],
+        duration: kSlowThrottleDuration,
+      ).map((event) => event.whereNotNull().toList());
     },
     initialData: [],
     keys: [conversationId],

@@ -195,9 +195,15 @@ class _CircleList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final circles = useMemoizedStream<List<ConversationCircleItem>>(
-      () => context.database.circleDao
-          .allCircles()
-          .watchThrottle(kDefaultThrottleDuration),
+      () => context.database.circleDao.allCircles().watchWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance.updateCircleStream,
+          DataBaseEventBus.instance.updateCircleConversationStream,
+          DataBaseEventBus.instance.updateUserIdsStream,
+          DataBaseEventBus.instance.updateConversationIdStream,
+        ],
+        duration: kDefaultThrottleDuration,
+      ),
       initialData: [],
     );
     final controller = useScrollController();
