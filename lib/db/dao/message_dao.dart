@@ -9,6 +9,7 @@ import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../utils/extension/extension.dart';
 import '../database_event_bus.dart';
+import '../event.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -176,11 +177,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     _updateConversationUnseenCount(message, currentUserId);
 
-    final miniMessageItem = MiniMessageItem(
-      messageId: message.messageId,
-      conversationId: message.conversationId,
-    );
-    DataBaseEventBus.instance.insertOrReplaceMessages([miniMessageItem]);
+    DataBaseEventBus.instance.insertOrReplaceMessages([
+      MiniMessageItem(
+        messageId: message.messageId,
+        conversationId: message.conversationId,
+      )
+    ]);
     if (!(silent ?? false)) {
       DataBaseEventBus.instance.notificationMessage(MiniNotificationMessage(
         messageId: message.messageId,
@@ -224,7 +226,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       ))
           .then((value) {
         if (value > 0) {
-          DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+          DataBaseEventBus.instance.updateConversation(conversationId);
         }
 
         return value;
@@ -436,7 +438,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ))
         .then((value) {
       if (value > 0) {
-        DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+        DataBaseEventBus.instance.updateConversation(conversationId);
       }
       return value;
     });

@@ -7,6 +7,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../db/dao/snapshot_dao.dart';
+import '../../../../db/database_event_bus.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
@@ -37,16 +38,29 @@ class _TransferPage extends HookWidget {
     }, []);
 
     final snapshotItem = useMemoizedStream(() => context.database.snapshotDao
-        .snapshotItemById(
-            snapshotId, context.multiAuthState.currentUser!.fiatCurrency)
-        .watchSingleOrNullThrottle(kDefaultThrottleDuration)).data;
+            .snapshotItemById(
+          snapshotId,
+          context.multiAuthState.currentUser!.fiatCurrency,
+        )
+            .watchSingleOrNullWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance.updateSnapshotStream.where(
+                (event) => event.any((element) => element.contains(snapshotId)))
+          ],
+          duration: kDefaultThrottleDuration,
+        )).data;
 
     final opponentFullName = useMemoizedStream<User?>(() {
       final opponentId = snapshotItem?.opponentId;
       if (opponentId != null && opponentId.trim().isNotEmpty) {
         final stream = context.database.userDao
             .userById(opponentId)
-            .watchSingleOrNullThrottle(kSlowThrottleDuration);
+            .watchSingleOrNullWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance.watchUpdateUserStream([opponentId])
+          ],
+          duration: kSlowThrottleDuration,
+        );
         return stream.doOnData((event) {
           if (event != null) return;
           context.accountServer.refreshUsers([opponentId]);

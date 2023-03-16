@@ -11,15 +11,12 @@ class FavoriteAppDao extends DatabaseAccessor<MixinDatabase>
     with _$FavoriteAppDaoMixin {
   FavoriteAppDao(super.db);
 
-  Future<void> deleteByAppIdAndUserId(String appId, String userId) =>
-      db.deleteFavoriteAppByAppIdAndUserId(appId, userId);
-
-  Future<void> deleteByUserId(String userId) =>
+  Future<void> _deleteByUserId(String userId) =>
       db.deleteFavoriteAppByUserId(userId);
 
   Future<void> insertFavoriteApps(
       String userId, List<sdk.FavoriteApp> apps) async {
-    await deleteByUserId(userId);
+    await _deleteByUserId(userId);
     final list = apps
         .map((app) => FavoriteAppsCompanion.insert(
               appId: app.appId,
@@ -30,8 +27,7 @@ class FavoriteAppDao extends DatabaseAccessor<MixinDatabase>
     await batch(
         (batch) => batch.insertAllOnConflictUpdate(db.favoriteApps, list));
 
-    DataBaseEventBus.instance
-        .insertOrReplaceFavoriteApp(apps.map((e) => e.appId));
+    DataBaseEventBus.instance.updateFavoriteApp(apps.map((e) => e.appId));
   }
 
   Selectable<App> getFavoriteAppsByUserId(String userId) =>

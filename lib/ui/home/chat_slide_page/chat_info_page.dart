@@ -632,10 +632,10 @@ class _SharedApps extends HookWidget {
 
     final apps = useMemoizedStream(
         () => context.database.favoriteAppDao
-                .getFavoriteAppsByUserId(userId)
-                .watchWithEvent(eventStreams: [
-              DataBaseEventBus.instance.insertOrReplaceFavoriteAppIdStream
-            ], duration: kVerySlowThrottleDuration),
+            .getFavoriteAppsByUserId(userId)
+            .watchWithStream(
+                eventStreams: [DataBaseEventBus.instance.updateAppIdStream],
+                duration: kVerySlowThrottleDuration),
         keys: [userId]);
 
     final data = apps.data ?? const [];

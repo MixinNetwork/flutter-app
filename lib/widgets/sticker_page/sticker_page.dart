@@ -204,8 +204,8 @@ class _StickerAlbumPageItem extends HookWidget {
 
         await Future.wait([
           if (updateUsedAt)
-            accountServer.database.stickerDao
-                .updateUsedAt(sticker.stickerId, DateTime.now()),
+            accountServer.database.stickerDao.updateUsedAt(
+                sticker.albumId, sticker.stickerId, DateTime.now()),
           accountServer.sendStickerMessage(
             sticker.stickerId,
             albumId,

@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
@@ -28,7 +29,13 @@ class AudioPlayerBar extends HookWidget {
         }
         return context.database.conversationDao
             .conversationItem(message.conversationId)
-            .watchSingleOrNullThrottle(kSlowThrottleDuration);
+            .watchSingleOrNullWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance
+                .watchUpdateConversationStream([message.conversationId]),
+          ],
+          duration: kSlowThrottleDuration,
+        );
       },
       keys: [message?.conversationId],
     ).data;

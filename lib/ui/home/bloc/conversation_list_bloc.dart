@@ -34,7 +34,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   final SlideCategoryCubit slideCategoryCubit;
   final Database database;
   final MentionCache mentionCache;
-  final Map<SlideCategoryState, _ConversationListBloc> _map = {};
+  final Map<SlideCategoryType, _ConversationListBloc> _map = {};
 
   int? _limit;
 
@@ -62,25 +62,24 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
 
   ItemPositionsListener itemPositionsListener(
           SlideCategoryState slideCategoryState) =>
-      _map[slideCategoryState]!.itemPositionsListener;
+      _map[slideCategoryState.type]!.itemPositionsListener;
 
   ItemScrollController itemScrollController(
           SlideCategoryState slideCategoryState) =>
-      _map[slideCategoryState]!.itemScrollController;
+      _map[slideCategoryState.type]!.itemScrollController;
 
   void init() => _switchBloc(slideCategoryCubit.state, _limit);
+
+  late Stream<void> updateEvent = Rx.merge([
+    DataBaseEventBus.instance.updateConversationIdStream,
+    DataBaseEventBus.instance.insertOrReplaceMessageIdsStream
+  ]).throttleTime(kDefaultThrottleDuration, trailing: true).asBroadcastStream();
 
   void _switchBloc(
     SlideCategoryState state,
     int? limit,
   ) {
     final dao = database.conversationDao;
-    final updateEvent = Rx.combineLatest2(
-            DataBaseEventBus.instance.insertOrReplaceConversationIdStream,
-            DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
-            (a, b) => null)
-        .throttleTime(kSlowThrottleDuration, trailing: true)
-        .asBroadcastStream();
 
     switch (state.type) {
       case SlideCategoryType.chats:
@@ -88,7 +87,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       case SlideCategoryType.groups:
       case SlideCategoryType.bots:
       case SlideCategoryType.strangers:
-        _map[state] ??= _ConversationListBloc(
+        _map[state.type] ??= _ConversationListBloc(
           limit ?? kDefaultLimit,
           () => dao.conversationCountByCategory(state.type),
           (limit, offset) =>
@@ -99,7 +98,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
         );
         break;
       case SlideCategoryType.circle:
-        _map[state] ??= _ConversationListBloc(
+        _map[state.type] ??= _ConversationListBloc(
           limit ?? kDefaultLimit,
           () => database.conversationDao
               .conversationsCountByCircleId(state.id!)
@@ -116,7 +115,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       case SlideCategoryType.setting:
         return;
     }
-    final bloc = _map[state];
+    final bloc = _map[state.type];
     emit(bloc!.state);
     streamSubscription?.cancel();
     streamSubscription = bloc.stream.listen(emit);

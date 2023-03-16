@@ -22,7 +22,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   ConversationDao(super.db);
 
   late Stream<int> allUnseenIgnoreMuteMessageCountEvent = DataBaseEventBus
-      .instance.insertOrReplaceConversationIdStream
+      .instance.updateConversationIdStream
       .asyncMap((event) => allUnseenIgnoreMuteMessageCount().getSingle());
 
   Selectable<int> allUnseenIgnoreMuteMessageCount() =>
@@ -43,7 +43,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       into(db.conversations).insertOnConflictUpdate(conversation).then((value) {
         if (value > 0) {
           DataBaseEventBus.instance
-              .insertOrReplaceConversation(conversation.conversationId);
+              .updateConversation(conversation.conversationId);
         }
 
         return value;
@@ -245,7 +245,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       )
           .then((value) {
         if (value > 0) {
-          DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+          DataBaseEventBus.instance.updateConversation(conversationId);
         }
         return value;
       });
@@ -257,7 +257,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       )
           .then((value) {
         if (value > 0) {
-          DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+          DataBaseEventBus.instance.updateConversation(conversationId);
         }
         return value;
       });
@@ -265,7 +265,13 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Future<int> deleteConversation(String conversationId) =>
       (delete(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .go();
+          .go()
+          .then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.updateConversation(conversationId);
+        }
+        return value;
+      });
 
   Future<int> updateConversationStatusById(
       String conversationId, ConversationStatus status) async {
@@ -286,7 +292,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         .write(ConversationsCompanion(status: Value(status)))
         .then((value) {
       if (value > 0) {
-        DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+        DataBaseEventBus.instance.updateConversation(conversationId);
       }
       return value;
     });
@@ -421,7 +427,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         .write(ConversationsCompanion(codeUrl: Value(codeUrl)))
         .then((value) {
       if (value > 0) {
-        DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+        DataBaseEventBus.instance.updateConversation(conversationId);
       }
       return value;
     });
@@ -434,7 +440,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
               muteUntil: Value(DateTime.tryParse(muteUntil))))
           .then((value) {
         if (value > 0) {
-          DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+          DataBaseEventBus.instance.updateConversation(conversationId);
         }
         return value;
       });
@@ -453,7 +459,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         .write(ConversationsCompanion(draft: Value(draft)))
         .then((value) {
       if (value > 0) {
-        DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+        DataBaseEventBus.instance.updateConversation(conversationId);
       }
 
       return value;
@@ -476,7 +482,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           .write(ConversationsCompanion(expireIn: Value(expireIn)))
           .then((value) {
         if (value > 0) {
-          DataBaseEventBus.instance.insertOrReplaceConversation(conversationId);
+          DataBaseEventBus.instance.updateConversation(conversationId);
         }
         return value;
       });

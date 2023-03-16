@@ -102,7 +102,9 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     double alignment = 0,
     required PagingState<T> initState,
   }) : super(initState) {
-    on<PagingEvent>(_onEvent);
+    on<PagingEvent>((event, emit) async {
+      await _onEvent(event, emit);
+    });
     itemPositionsListener.itemPositions.addListener(onItemPositions);
     add(PagingInitEvent(
       offset: offset,

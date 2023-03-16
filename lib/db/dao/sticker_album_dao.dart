@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
+import '../database_event_bus.dart';
+import '../event.dart';
 import '../mixin_database.dart';
 
 part 'sticker_album_dao.g.dart';
@@ -27,10 +29,20 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
   StickerAlbumDao(super.db);
 
   Future<int> insert(StickerAlbumsCompanion stickerAlbum) =>
-      into(db.stickerAlbums).insertOnConflictUpdate(stickerAlbum);
+      into(db.stickerAlbums).insertOnConflictUpdate(stickerAlbum).then((value) {
+        DataBaseEventBus.instance
+            .updateSticker([MiniSticker(albumId: stickerAlbum.albumId.value)]);
+
+        return value;
+      });
 
   Future<int> deleteStickerAlbum(StickerAlbum stickerAlbum) =>
-      delete(db.stickerAlbums).delete(stickerAlbum);
+      delete(db.stickerAlbums).delete(stickerAlbum).then((value) {
+        DataBaseEventBus.instance
+            .updateSticker([MiniSticker(albumId: stickerAlbum.albumId)]);
+
+        return value;
+      });
 
   SimpleSelectStatement<StickerAlbums, StickerAlbum> systemAlbums() =>
       select(db.stickerAlbums)
@@ -63,7 +75,13 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
           added: Value(added),
           orderedAt: !added ? const Value(0) : const Value.absent(),
         ),
-      );
+      )
+          .then((value) {
+        DataBaseEventBus.instance
+            .updateSticker([MiniSticker(albumId: albumId)]);
+
+        return value;
+      });
 
   Future<void> updateOrders(List<StickerAlbum> value) {
     final newList = value.asMap().entries.map((e) {
@@ -71,8 +89,13 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
       final album = e.value;
       return album.copyWith(orderedAt: index);
     });
-    return batch(
-        (batch) => batch.insertAllOnConflictUpdate(db.stickerAlbums, newList));
+    return batch((batch) =>
+            batch.insertAllOnConflictUpdate(db.stickerAlbums, newList))
+        .then((value) {
+      DataBaseEventBus.instance
+          .updateSticker(newList.map((e) => MiniSticker(albumId: e.albumId)));
+      return value;
+    });
   }
 
   Selectable<DateTime?> latestCreatedAt() => (selectOnly(db.stickerAlbums)

@@ -6,6 +6,7 @@ import 'package:tuple/tuple.dart';
 
 import '../../constants/resources.dart';
 import '../../db/dao/sticker_album_dao.dart';
+import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -73,9 +74,15 @@ Future<void> showStickerPageDialog(
         ),
         child: HookBuilder(builder: (context) {
           final album = useMemoizedStream(() => context
-                  .database.stickerRelationshipDao
-                  .stickerSystemAlbum(stickerId)
-                  .watchSingleOrNullThrottle(kSlowThrottleDuration)).data ??
+                      .database.stickerRelationshipDao
+                      .stickerSystemAlbum(stickerId)
+                      .watchSingleOrNullWithStream(
+                    eventStreams: [
+                      DataBaseEventBus.instance
+                          .watchUpdateStickerStream(stickerIds: [stickerId])
+                    ],
+                    duration: kSlowThrottleDuration,
+                  )).data ??
               a;
 
           useEffect(() {

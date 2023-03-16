@@ -15,40 +15,61 @@ extension SelectedableThrottle<T> on Selectable<T> {
   ) =>
       watchSingle().throttled(duration);
 
-  Stream<T?> watchSingleOrNullThrottle(
-    Duration duration,
-  ) =>
-      watchSingleOrNull().throttled(duration);
-
-  Stream<List<T>> watchWithEvent({
+  Stream<Value> _watchWithStream<Value>({
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,
-    bool trailing = true,
-  }) =>
-      Rx.combineLatestList(eventStreams)
-          .startWith([])
-          .throttleTime(duration, trailing: trailing)
-          .asyncMap((_) => get());
+    required Future<Value> Function() fetch,
+    bool trailing = false,
+    bool prepend = true,
+  }) {
+    var stream = Rx.merge(eventStreams);
+    if (prepend) stream = stream.startWith([]);
+    return stream
+        .throttleTime(duration, trailing: trailing)
+        .asyncBufferMap((_) => fetch());
+  }
 
-  Stream<T> watchSingleWithEvent({
+  Stream<List<T>> watchWithStream({
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,
-    bool trailing = true,
+    bool trailing = false,
+    bool prepend = true,
   }) =>
-      Rx.combineLatestList(eventStreams)
-          .startWith([])
-          .throttleTime(duration, trailing: trailing)
-          .asyncMap((_) => getSingle());
+      _watchWithStream(
+        eventStreams: eventStreams,
+        duration: duration,
+        trailing: trailing,
+        prepend: prepend,
+        fetch: get,
+      );
 
-  Stream<T?> watchSingleOrNullWithEvent({
+  Stream<T> watchSingleWithStream({
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,
-    bool trailing = true,
+    bool trailing = false,
+    bool prepend = true,
   }) =>
-      Rx.combineLatestList(eventStreams)
-          .startWith([])
-          .throttleTime(duration, trailing: trailing)
-          .asyncMap((_) => getSingleOrNull());
+      _watchWithStream(
+        eventStreams: eventStreams,
+        duration: duration,
+        trailing: trailing,
+        prepend: prepend,
+        fetch: getSingle,
+      );
+
+  Stream<T?> watchSingleOrNullWithStream({
+    required Iterable<Stream<dynamic>> eventStreams,
+    required Duration duration,
+    bool trailing = false,
+    bool prepend = true,
+  }) =>
+      _watchWithStream(
+        eventStreams: eventStreams,
+        duration: duration,
+        trailing: trailing,
+        prepend: prepend,
+        fetch: getSingleOrNull,
+      );
 }
 
 extension _ThrottleWithPause<T> on Stream<T> {

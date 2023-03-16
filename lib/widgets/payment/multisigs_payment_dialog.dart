@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../constants/resources.dart';
 import '../../db/dao/asset_dao.dart';
+import '../../db/database_event_bus.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../avatar_view/avatar_view.dart';
@@ -246,8 +247,13 @@ class _UserIcon extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final user = useMemoizedStream(() => context.accountServer.database.userDao
-        .userById(userId)
-        .watchSingleOrNullThrottle(kDefaultThrottleDuration)).data;
+            .userById(userId)
+            .watchSingleOrNullWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance.watchUpdateUserStream([userId])
+          ],
+          duration: kDefaultThrottleDuration,
+        )).data;
 
     final Widget child;
 
