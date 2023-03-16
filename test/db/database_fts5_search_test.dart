@@ -60,7 +60,9 @@ void main() {
     expect(ret6, [7]);
 
     final ret7 = await search('github.com');
-    expect(ret7, [2, 4, 8]);
+    expect(ret7, [2]);
+
+    expect(await search('github com'), [2, 4, 8]);
 
     final ret8 = await search('0xbc314bfa1e99fe0055a98105c6aff467');
     expect(ret8, [9]);
