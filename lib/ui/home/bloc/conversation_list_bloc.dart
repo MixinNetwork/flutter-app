@@ -34,7 +34,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   final SlideCategoryCubit slideCategoryCubit;
   final Database database;
   final MentionCache mentionCache;
-  final Map<SlideCategoryType, _ConversationListBloc> _map = {};
+  final Map<SlideCategoryState, _ConversationListBloc> _map = {};
 
   int? _limit;
 
@@ -62,11 +62,11 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
 
   ItemPositionsListener itemPositionsListener(
           SlideCategoryState slideCategoryState) =>
-      _map[slideCategoryState.type]!.itemPositionsListener;
+      _map[slideCategoryState]!.itemPositionsListener;
 
   ItemScrollController itemScrollController(
           SlideCategoryState slideCategoryState) =>
-      _map[slideCategoryState.type]!.itemScrollController;
+      _map[slideCategoryState]!.itemScrollController;
 
   void init() => _switchBloc(slideCategoryCubit.state, _limit);
 
@@ -90,7 +90,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       case SlideCategoryType.groups:
       case SlideCategoryType.bots:
       case SlideCategoryType.strangers:
-        _map[state.type] ??= _ConversationListBloc(
+        _map[state] ??= _ConversationListBloc(
           limit ?? kDefaultLimit,
           () => dao.conversationCountByCategory(state.type),
           (limit, offset) =>
@@ -101,7 +101,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
         );
         break;
       case SlideCategoryType.circle:
-        _map[state.type] ??= _ConversationListBloc(
+        _map[state] ??= _ConversationListBloc(
           limit ?? kDefaultLimit,
           () => database.conversationDao
               .conversationsCountByCircleId(state.id!)
@@ -118,7 +118,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       case SlideCategoryType.setting:
         return;
     }
-    final bloc = _map[state.type];
+    final bloc = _map[state];
     emit(bloc!.state);
     streamSubscription?.cancel();
     streamSubscription = bloc.stream.listen(emit);
