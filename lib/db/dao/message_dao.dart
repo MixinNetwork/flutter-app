@@ -134,17 +134,36 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<void> _updateConversationUnseenCount(
+  final Map<String, void Function()> _conversationUnseenTaskRunner = {};
+
+  void _updateConversationUnseenCount(
     Message message,
     String currentUserId,
-  ) async {
-    await db.updateUnseenMessageCountAndLastMessageId(
-      message.conversationId,
-      currentUserId,
-      message.messageId,
-      message.createdAt,
-    );
-    DataBaseEventBus.instance.updateConversation(message.conversationId);
+  ) {
+    Future<void> _update(Message message) async {
+      await db.updateUnseenMessageCountAndLastMessageId(
+        message.conversationId,
+        currentUserId,
+        message.messageId,
+        message.createdAt,
+      );
+
+      DataBaseEventBus.instance.updateConversation(message.conversationId);
+    }
+
+    if (_conversationUnseenTaskRunner[message.conversationId] != null) {
+      _conversationUnseenTaskRunner[message.conversationId] =
+          () => _update(message);
+      return;
+    } else {
+      _conversationUnseenTaskRunner[message.conversationId] =
+          () => _update(message);
+      Future.delayed(kDefaultThrottleDuration ~/ 5).then((value) {
+        final runner =
+            _conversationUnseenTaskRunner.remove(message.conversationId);
+        runner?.call();
+      });
+    }
   }
 
   Future<int> insert(
@@ -161,7 +180,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ];
     final result = (await Future.wait(futures)).first as int;
 
-    await _updateConversationUnseenCount(message, currentUserId);
+    _updateConversationUnseenCount(message, currentUserId);
 
     DataBaseEventBus.instance.insertOrReplaceMessages([
       MiniMessageItem(
