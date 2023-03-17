@@ -1522,8 +1522,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/string_tokenizer"
-      ref: "7d6b7f81cc96510befbe5b20949f7ef421f8fa67"
-      resolved-ref: "7d6b7f81cc96510befbe5b20949f7ef421f8fa67"
+      ref: "0334bbaa7293c72398eaf4571ba7ba2b5df2302d"
+      resolved-ref: "0334bbaa7293c72398eaf4571ba7ba2b5df2302d"
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "0.0.1"

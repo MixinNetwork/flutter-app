@@ -111,7 +111,7 @@ dependencies:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       path: packages/string_tokenizer
-      ref: 7d6b7f81cc96510befbe5b20949f7ef421f8fa67
+      ref: 0334bbaa7293c72398eaf4571ba7ba2b5df2302d
   system_tray:
     path: third_party/system_tray
   tuple: ^2.0.1
