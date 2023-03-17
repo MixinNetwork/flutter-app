@@ -12689,15 +12689,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     );
   }
 
-  Future<int> deleteCircleById(String circleId) {
-    return customUpdate(
-      'DELETE FROM circles WHERE circle_id = ?1',
-      variables: [Variable<String>(circleId)],
-      updates: {circles},
-      updateKind: UpdateKind.delete,
-    );
-  }
-
   Future<int> deleteByIds(String conversationId, String circleId) {
     return customUpdate(
       'DELETE FROM circle_conversations WHERE conversation_id = ?1 AND circle_id = ?2',
