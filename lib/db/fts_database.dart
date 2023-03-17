@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../enum/message_category.dart';
 import '../utils/extension/extension.dart';
@@ -51,6 +52,12 @@ class FtsDatabase extends _$FtsDatabase {
   /// return the row id of the inserted message. null if the message is not inserted.
   Future<int?> insertFtsOnly(Message message,
       [String? generatedContent]) async {
+    if (message.status == MessageStatus.unknown ||
+        message.status == MessageStatus.failed) {
+      e('Message ${message.messageId} status is ${message.status}');
+      return null;
+    }
+
     String? content;
     if (generatedContent != null) {
       content = generatedContent;
