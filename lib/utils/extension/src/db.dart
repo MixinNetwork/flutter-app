@@ -13,11 +13,10 @@ extension SelectedableThrottle<T> on Selectable<T> {
     bool leading = false,
     bool prepend = true,
   }) {
-    var stream = Rx.merge(eventStreams);
+    var stream = Rx.merge(eventStreams)
+        .throttleTime(duration, leading: leading, trailing: trailing);
     if (prepend) stream = stream.startWith([]);
-    return stream
-        .throttleTime(duration, leading: leading, trailing: trailing)
-        .asyncBufferMap((_) => fetch());
+    return stream.asyncBufferMap((_) => fetch());
   }
 
   Stream<List<T>> watchWithStream({
