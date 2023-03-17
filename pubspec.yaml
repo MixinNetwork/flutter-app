@@ -107,6 +107,11 @@ dependencies:
   sliver_tools: ^0.2.9
   sqlite3_flutter_libs: ^0.5.12
   stream_transform: ^2.1.0
+  string_tokenizer:
+    git:
+      url: https://github.com/MixinNetwork/flutter-plugins.git
+      path: packages/string_tokenizer
+      ref: 0334bbaa7293c72398eaf4571ba7ba2b5df2302d
   system_tray:
     path: third_party/system_tray
   tuple: ^2.0.1

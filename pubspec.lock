@@ -1518,6 +1518,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  string_tokenizer:
+    dependency: "direct main"
+    description:
+      path: "packages/string_tokenizer"
+      ref: "0334bbaa7293c72398eaf4571ba7ba2b5df2302d"
+      resolved-ref: "0334bbaa7293c72398eaf4571ba7ba2b5df2302d"
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
+    version: "0.0.1"
   synchronized:
     dependency: transitive
     description:

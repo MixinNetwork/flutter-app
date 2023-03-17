@@ -109,7 +109,7 @@ class TextMessage extends HookWidget {
                 ...botNumberHighlightTextSpans
               ].fold<Set<HighlightTextSpan>>({}, (previousValue, element) {
                 element.text.splitMapJoin(
-                  RegExp(keyword, caseSensitive: false),
+                  RegExp(RegExp.escape(keyword), caseSensitive: false),
                   onMatch: (match) {
                     previousValue.add(
                       HighlightTextSpan(
