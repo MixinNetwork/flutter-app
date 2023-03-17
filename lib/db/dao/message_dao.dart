@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../constants/constants.dart';
@@ -22,7 +23,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   Stream<List<MessageItem>> watchInsertOrReplaceMessageStream(
           String conversationId) =>
-      DataBaseEventBus.instance.insertOrReplaceMessageIdsStream
+      Rx.merge([
+        DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
+        DataBaseEventBus.instance.updateMessageMentionStream
+      ])
           .map((event) => event
               .where((element) => element.conversationId == conversationId))
           .where((event) => event.isNotEmpty)
