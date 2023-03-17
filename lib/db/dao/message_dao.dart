@@ -25,7 +25,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           String conversationId) =>
       Rx.merge([
         DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
-        DataBaseEventBus.instance.updateMessageMentionStream
+        DataBaseEventBus.instance.updateMessageMentionStream,
+        DataBaseEventBus.instance.updatePinMessageStream
       ])
           .map((event) => event
               .where((element) => element.conversationId == conversationId))
