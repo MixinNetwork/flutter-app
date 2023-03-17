@@ -948,7 +948,6 @@ class _JumpMentionButton extends HookWidget {
                     )
                   ],
                   duration: kSlowThrottleDuration,
-                  trailing: true,
                 ),
             keys: [conversationId]).data ??
         [];
