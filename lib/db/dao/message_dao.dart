@@ -159,7 +159,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     } else {
       _conversationUnseenTaskRunner[message.conversationId] =
           () => _update(message);
-      Future.delayed(kDefaultThrottleDuration ~/ 5).then((value) {
+      Future.delayed(kDefaultThrottleDuration).then((value) {
         final runner =
             _conversationUnseenTaskRunner.remove(message.conversationId);
         runner?.call();
