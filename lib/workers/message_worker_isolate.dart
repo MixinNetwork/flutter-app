@@ -255,8 +255,7 @@ class _MessageProcessRunner {
           .listen((event) {
         _floodJob.start();
       }))
-      ..add(DataBaseEventBus.instance
-          .watchEvent(DatabaseEvent.updateExpiredMessageTable)
+      ..add(DataBaseEventBus.instance.updateExpiredMessageTableStream
           .asyncDropListen((event) => _scheduleExpiredJob()));
     _scheduleExpiredJob();
   }

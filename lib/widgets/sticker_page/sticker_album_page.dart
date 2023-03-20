@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -27,7 +28,14 @@ class StickerAlbumPage extends HookWidget {
     final album = useMemoizedStream(
           () => context.database.stickerAlbumDao
               .album(albumId)
-              .watchSingleThrottle(kVerySlowThrottleDuration),
+              .watchSingleWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateStickerStream(
+                albumIds: [albumId],
+              )
+            ],
+            duration: kVerySlowThrottleDuration,
+          ),
           keys: [albumId],
         ).data ??
         this.album;

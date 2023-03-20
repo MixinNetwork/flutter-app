@@ -139,7 +139,7 @@ extension StringListExtension on List<String> {
       final isAlphabetDigitsOnly = current.isAlphabetDigitsOnly();
 
       if (lastIsAlphabetDigitsOnly && isAlphabetDigitsOnly) {
-        result[result.length - 1] += current;
+        result.last += current;
       } else {
         result.add(current);
       }

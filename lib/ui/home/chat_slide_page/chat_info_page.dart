@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
@@ -61,7 +62,13 @@ class ChatInfoPage extends HookWidget {
     final announcement = useMemoizedStream<String?>(
       () => context.database.conversationDao
           .announcement(conversationId)
-          .watchSingleThrottle(kVerySlowThrottleDuration),
+          .watchSingleWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance
+              .watchUpdateConversationStream([conversationId])
+        ],
+        duration: kVerySlowThrottleDuration,
+      ),
       keys: [conversationId],
     ).data;
     if (!conversation.isLoaded) return const SizedBox();
@@ -367,7 +374,7 @@ class ChatInfoPage extends HookWidget {
               ),
             CellGroup(
               child: CellItem(
-                title: Text(context.l10n.editCircleName),
+                title: Text(context.l10n.editConversations),
                 onTap: () => context
                     .read<ChatSideCubit>()
                     .pushPage(ChatSideCubit.circles),
@@ -545,11 +552,20 @@ class ConversationBio extends HookWidget {
       if (isGroup) {
         return database.conversationDao
             .announcement(conversationId)
-            .watchSingleThrottle(kVerySlowThrottleDuration);
+            .watchSingleWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance
+                .watchUpdateConversationStream([conversationId])
+          ],
+          duration: kVerySlowThrottleDuration,
+        );
       }
-      return database.userDao
-          .biography(userId!)
-          .watchSingleThrottle(kVerySlowThrottleDuration);
+      return database.userDao.biography(userId!).watchSingleWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance.watchUpdateUserStream([userId!])
+        ],
+        duration: kVerySlowThrottleDuration,
+      );
     }, [
       conversationId,
       userId,
@@ -632,7 +648,9 @@ class _SharedApps extends HookWidget {
     final apps = useMemoizedStream(
         () => context.database.favoriteAppDao
             .getFavoriteAppsByUserId(userId)
-            .watch(),
+            .watchWithStream(
+                eventStreams: [DataBaseEventBus.instance.updateAppIdStream],
+                duration: kVerySlowThrottleDuration),
         keys: [userId]);
 
     final data = apps.data ?? const [];

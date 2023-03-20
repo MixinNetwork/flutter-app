@@ -14,6 +14,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../constants/constants.dart';
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/app_lifecycle.dart';
@@ -692,9 +693,11 @@ class _StickerButton extends HookWidget {
     final key = useMemoized(GlobalKey.new);
 
     final stickerAlbumsCubit = useBloc(
-      () => StickerAlbumsCubit(context.database.stickerAlbumDao
-          .systemAddedAlbums()
-          .watchThrottle(kVerySlowThrottleDuration)),
+      () => StickerAlbumsCubit(
+          context.database.stickerAlbumDao.systemAddedAlbums().watchWithStream(
+        eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+        duration: kVerySlowThrottleDuration,
+      )),
     );
 
     final presetStickerGroups = useMemoized(

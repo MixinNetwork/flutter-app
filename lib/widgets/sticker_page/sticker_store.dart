@@ -6,6 +6,7 @@ import 'package:tuple/tuple.dart';
 
 import '../../constants/resources.dart';
 import '../../db/dao/sticker_album_dao.dart';
+import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -73,9 +74,15 @@ Future<void> showStickerPageDialog(
         ),
         child: HookBuilder(builder: (context) {
           final album = useMemoizedStream(() => context
-                  .database.stickerRelationshipDao
-                  .stickerSystemAlbum(stickerId)
-                  .watchSingleOrNullThrottle(kSlowThrottleDuration)).data ??
+                      .database.stickerRelationshipDao
+                      .stickerSystemAlbum(stickerId)
+                      .watchSingleOrNullWithStream(
+                    eventStreams: [
+                      DataBaseEventBus.instance
+                          .watchUpdateStickerStream(stickerIds: [stickerId])
+                    ],
+                    duration: kSlowThrottleDuration,
+                  )).data ??
               a;
 
           useEffect(() {
@@ -165,12 +172,14 @@ class _List extends HookWidget {
   Widget build(BuildContext context) {
     final albums = useMemoizedStream(() => Rx.combineLatest2<List<StickerAlbum>,
                 List<Sticker>, List<_StickerAlbumItem>>(
-              context.database.stickerAlbumDao
-                  .systemAlbums()
-                  .watchThrottle(kSlowThrottleDuration),
-              context.database.stickerDao
-                  .systemStickers()
-                  .watchThrottle(kSlowThrottleDuration),
+              context.database.stickerAlbumDao.systemAlbums().watchWithStream(
+                eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+                duration: kSlowThrottleDuration,
+              ),
+              context.database.stickerDao.systemStickers().watchWithStream(
+                eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+                duration: kSlowThrottleDuration,
+              ),
               (albums, stickers) => albums.map(
                 (e) {
                   final _stickers = stickers
@@ -276,9 +285,11 @@ class _StickerAlbumManagePage extends HookWidget {
   Widget build(BuildContext context) {
     final controller = useScrollController();
 
-    final albums = useMemoizedStream(() => context.database.stickerAlbumDao
-        .systemAddedAlbums()
-        .watchThrottle(kSlowThrottleDuration)).data;
+    final albums = useMemoizedStream(() =>
+        context.database.stickerAlbumDao.systemAddedAlbums().watchWithStream(
+          eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+          duration: kSlowThrottleDuration,
+        )).data;
     final list = useState(albums ?? []);
     useEffect(() {
       list.value = albums ?? [];
@@ -398,7 +409,14 @@ class _StickerPage extends HookWidget {
         if (albumId == null) return Stream.value(null);
         return context.database.stickerAlbumDao
             .album(albumId!)
-            .watchSingleThrottle(kDefaultThrottleDuration);
+            .watchSingleWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance.watchUpdateStickerStream(
+              albumIds: [albumId!],
+            )
+          ],
+          duration: kDefaultThrottleDuration,
+        );
       },
       keys: [albumId],
     ).data;
@@ -407,7 +425,13 @@ class _StickerPage extends HookWidget {
           if (album == null) return Stream.value(<Sticker>[]);
           return context.database.stickerDao
               .stickerByAlbumId(album.albumId)
-              .watchThrottle(kDefaultThrottleDuration);
+              .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance
+                  .watchUpdateStickerStream(albumIds: [album.albumId])
+            ],
+            duration: kDefaultThrottleDuration,
+          );
         }, keys: [album?.albumId]).data ??
         [];
 

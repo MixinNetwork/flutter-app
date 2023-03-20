@@ -13,6 +13,7 @@ import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../bloc/bloc_converter.dart';
 import '../../../bloc/keyword_cubit.dart';
 import '../../../bloc/minute_timer_cubit.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
@@ -78,13 +79,19 @@ class SearchList extends HookWidget {
           }
           return accountServer.database.userDao
               .fuzzySearchUser(
-                id: accountServer.userId,
-                username: keyword,
-                identityNumber: keyword,
-                category: slideCategoryState,
-                isIncludeConversation: true,
-              )
-              .watchThrottle(kSlowThrottleDuration);
+            id: accountServer.userId,
+            username: keyword,
+            identityNumber: keyword,
+            category: slideCategoryState,
+            isIncludeConversation: true,
+          )
+              .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.updateConversationIdStream,
+              DataBaseEventBus.instance.updateUserIdsStream,
+            ],
+            duration: kSlowThrottleDuration,
+          );
         }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
         [];
 
@@ -94,12 +101,18 @@ class SearchList extends HookWidget {
           }
           return accountServer.database.conversationDao
               .fuzzySearchConversation(
-                keyword,
-                32,
-                filterUnseen: filterUnseen,
-                category: slideCategoryState,
-              )
-              .watchThrottle(kSlowThrottleDuration);
+            keyword,
+            32,
+            filterUnseen: filterUnseen,
+            category: slideCategoryState,
+          )
+              .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.updateConversationIdStream,
+              DataBaseEventBus.instance.updateUserIdsStream,
+            ],
+            duration: kSlowThrottleDuration,
+          );
         }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
         [];
 

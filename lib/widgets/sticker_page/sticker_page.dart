@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import '../../account/account_key_value.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
+import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
@@ -79,14 +80,26 @@ class StickerPage extends StatelessWidget {
                               return _StickerAlbumPage(
                                 getStickers: () => context.database.stickerDao
                                     .recentUsedStickers()
-                                    .watchThrottle(kVerySlowThrottleDuration),
+                                    .watchWithStream(
+                                  eventStreams: [
+                                    DataBaseEventBus
+                                        .instance.updateStickerStream
+                                  ],
+                                  duration: kVerySlowThrottleDuration,
+                                ),
                                 updateUsedAt: false,
                               );
                             case PresetStickerGroup.favorite:
                               return _StickerAlbumPage(
                                 getStickers: () => context.database.stickerDao
                                     .personalStickers()
-                                    .watchThrottle(kVerySlowThrottleDuration),
+                                    .watchWithStream(
+                                  eventStreams: [
+                                    DataBaseEventBus
+                                        .instance.updateStickerStream
+                                  ],
+                                  duration: kVerySlowThrottleDuration,
+                                ),
                                 rightClickDelete: true,
                               );
                             case PresetStickerGroup.gif:
@@ -96,12 +109,22 @@ class StickerPage extends StatelessWidget {
                           }
                         }
                         return _StickerAlbumPage(
-                          getStickers: () => context.database.stickerDao
-                              .stickerByAlbumId(
-                                  BlocProvider.of<StickerAlbumsCubit>(context)
-                                      .state[index - presetStickerGroups.length]
-                                      .albumId)
-                              .watchThrottle(kVerySlowThrottleDuration),
+                          getStickers: () {
+                            final albumId =
+                                BlocProvider.of<StickerAlbumsCubit>(context)
+                                    .state[index - presetStickerGroups.length]
+                                    .albumId;
+                            return context.database.stickerDao
+                                .stickerByAlbumId(albumId)
+                                .watchWithStream(
+                              eventStreams: [
+                                DataBaseEventBus.instance
+                                    .watchUpdateStickerStream(
+                                        albumIds: [albumId])
+                              ],
+                              duration: kVerySlowThrottleDuration,
+                            );
+                          },
                         );
                       },
                     ),
@@ -204,8 +227,8 @@ class _StickerAlbumPageItem extends HookWidget {
 
         await Future.wait([
           if (updateUsedAt)
-            accountServer.database.stickerDao
-                .updateUsedAt(sticker.stickerId, DateTime.now()),
+            accountServer.database.stickerDao.updateUsedAt(
+                sticker.albumId, sticker.stickerId, DateTime.now()),
           accountServer.sendStickerMessage(
             sticker.stickerId,
             albumId,

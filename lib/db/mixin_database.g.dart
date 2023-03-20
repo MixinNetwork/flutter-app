@@ -12689,15 +12689,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     );
   }
 
-  Future<int> deleteCircleById(String circleId) {
-    return customUpdate(
-      'DELETE FROM circles WHERE circle_id = ?1',
-      variables: [Variable<String>(circleId)],
-      updates: {circles},
-      updateKind: UpdateKind.delete,
-    );
-  }
-
   Future<int> deleteByIds(String conversationId, String circleId) {
     return customUpdate(
       'DELETE FROM circle_conversations WHERE conversation_id = ?1 AND circle_id = ?2',
@@ -13435,6 +13426,25 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         conversationId: row.read<String>('conversationId'),
         ownerFullName: row.readNullable<String>('ownerFullName'),
         ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
+      );
+    });
+  }
+
+  Selectable<MiniMessageItem> miniMessageByIds(List<String> messageIds) {
+    var $arrayStartIndex = 1;
+    final expandedmessageIds = $expandVar($arrayStartIndex, messageIds.length);
+    $arrayStartIndex += messageIds.length;
+    return customSelect(
+        'SELECT conversation_id AS conversationId, message_id AS messageId FROM messages WHERE message_id IN ($expandedmessageIds)',
+        variables: [
+          for (var $ in messageIds) Variable<String>($)
+        ],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) {
+      return MiniMessageItem(
+        conversationId: row.read<String>('conversationId'),
+        messageId: row.read<String>('messageId'),
       );
     });
   }
@@ -15303,6 +15313,31 @@ class SearchMessageDetailItem {
           ..write('conversationId: $conversationId, ')
           ..write('ownerFullName: $ownerFullName, ')
           ..write('ownerAvatarUrl: $ownerAvatarUrl')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class MiniMessageItem {
+  final String conversationId;
+  final String messageId;
+  MiniMessageItem({
+    required this.conversationId,
+    required this.messageId,
+  });
+  @override
+  int get hashCode => Object.hash(conversationId, messageId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MiniMessageItem &&
+          other.conversationId == this.conversationId &&
+          other.messageId == this.messageId);
+  @override
+  String toString() {
+    return (StringBuffer('MiniMessageItem(')
+          ..write('conversationId: $conversationId, ')
+          ..write('messageId: $messageId')
           ..write(')'))
         .toString();
   }

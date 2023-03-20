@@ -7,6 +7,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
@@ -342,7 +343,12 @@ class _SearchParticipantList extends HookWidget {
 
               if (state?.isBot ?? false) {
                 return value.isEmpty
-                    ? userDao.friends().watchThrottle(kSlowThrottleDuration)
+                    ? userDao.friends().watchWithStream(
+                        eventStreams: [
+                          DataBaseEventBus.instance.updateUserIdsStream
+                        ],
+                        duration: kSlowThrottleDuration,
+                      )
                     : userDao
                         .fuzzySearchBotGroupUser(
                             currentUserId:
@@ -350,21 +356,43 @@ class _SearchParticipantList extends HookWidget {
                                     '',
                             conversationId: conversationId,
                             keyword: value)
-                        .watchThrottle(kVerySlowThrottleDuration);
+                        .watchWithStream(
+                        eventStreams: [
+                          DataBaseEventBus
+                              .instance.insertOrReplaceMessageIdsStream,
+                          DataBaseEventBus.instance.deleteMessageIdStream,
+                          DataBaseEventBus.instance.updateUserIdsStream,
+                        ],
+                        duration: kVerySlowThrottleDuration,
+                      );
               }
 
               if (value.isEmpty) {
                 return userDao
                     .groupParticipants(conversationId: conversationId)
-                    .watchThrottle(kSlowThrottleDuration);
+                    .watchWithStream(
+                  eventStreams: [
+                    DataBaseEventBus.instance.watchUpdateParticipantStream(
+                      conversationIds: [conversationId],
+                    )
+                  ],
+                  duration: kSlowThrottleDuration,
+                );
               }
               return userDao
                   .fuzzySearchGroupUser(
-                    currentUserId: context.multiAuthState.currentUserId ?? '',
-                    conversationId: conversationId,
-                    keyword: value,
+                currentUserId: context.multiAuthState.currentUserId ?? '',
+                conversationId: conversationId,
+                keyword: value,
+              )
+                  .watchWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance.watchUpdateParticipantStream(
+                    conversationIds: [conversationId],
                   )
-                  .watchThrottle(kSlowThrottleDuration);
+                ],
+                duration: kSlowThrottleDuration,
+              );
             })).data ??
         [];
 

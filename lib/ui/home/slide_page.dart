@@ -9,6 +9,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../bloc/setting_cubit.dart';
 import '../../constants/resources.dart';
+import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../generated/l10n.dart';
 import '../../utils/color_utils.dart';
@@ -194,9 +195,15 @@ class _CircleList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final circles = useMemoizedStream<List<ConversationCircleItem>>(
-      () => context.database.circleDao
-          .allCircles()
-          .watchThrottle(kDefaultThrottleDuration),
+      () => context.database.circleDao.allCircles().watchWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance.updateCircleStream,
+          DataBaseEventBus.instance.updateCircleConversationStream,
+          DataBaseEventBus.instance.updateUserIdsStream,
+          DataBaseEventBus.instance.updateConversationIdStream,
+        ],
+        duration: kDefaultThrottleDuration,
+      ),
       initialData: [],
     );
     final controller = useScrollController();
@@ -449,7 +456,12 @@ class _Item extends HookWidget {
           case SlideCategoryType.strangers:
             return dao
                 .unseenConversationCountByCategory(type)
-                .watchSingleThrottle(kDefaultThrottleDuration);
+                .watchSingleWithStream(
+              eventStreams: [
+                DataBaseEventBus.instance.updateConversationIdStream
+              ],
+              duration: kDefaultThrottleDuration,
+            );
           case SlideCategoryType.chats:
           case SlideCategoryType.circle:
           case SlideCategoryType.setting:

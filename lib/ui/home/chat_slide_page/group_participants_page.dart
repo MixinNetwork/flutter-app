@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -37,7 +38,13 @@ class GroupParticipantsPage extends HookWidget {
           final dao = context.database.participantDao;
           return dao
               .groupParticipantsByConversationId(conversationId)
-              .watchThrottle(kSlowThrottleDuration);
+              .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateParticipantStream(
+                  conversationIds: [conversationId])
+            ],
+            duration: kSlowThrottleDuration,
+          );
         }, keys: [conversationId]).data ??
         const <ParticipantUser>[];
 

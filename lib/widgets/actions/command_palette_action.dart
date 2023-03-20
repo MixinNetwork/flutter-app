@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../constants/resources.dart';
+import '../../db/database_event_bus.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
@@ -100,7 +101,10 @@ class CommandPalettePage extends HookWidget {
                   id: context.accountServer.userId,
                   username: keyword,
                   identityNumber: keyword)
-              .watchThrottle(kSlowThrottleDuration);
+              .watchWithStream(
+            eventStreams: [DataBaseEventBus.instance.updateUserIdsStream],
+            duration: kVerySlowThrottleDuration,
+          );
         }, keys: [keyword]).data ??
         [];
 
@@ -115,11 +119,22 @@ class CommandPalettePage extends HookWidget {
 
             return context.database.conversationDao
                 .searchConversationItemByIn(recentConversationIds)
-                .watchThrottle(kSlowThrottleDuration);
+                .watchWithStream(
+              eventStreams: [
+                DataBaseEventBus.instance
+                    .watchUpdateConversationStream(recentConversationIds)
+              ],
+              duration: kSlowThrottleDuration,
+            );
           }
           return context.database.conversationDao
               .fuzzySearchConversation(keyword, 32)
-              .watchThrottle(kSlowThrottleDuration);
+              .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.updateConversationIdStream
+            ],
+            duration: kSlowThrottleDuration,
+          );
         }, keys: [keyword, recentConversationIds]).data ??
         [];
 

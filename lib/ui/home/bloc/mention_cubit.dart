@@ -10,6 +10,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/user_dao.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/reg_exp_utils.dart';
@@ -76,17 +77,22 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
       }
       if (keyword.isEmpty) {
         if (conversationState.isBot ?? false) {
-          return userDao
-              .friends()
-              .watchThrottle(kVerySlowThrottleDuration)
-              .map((value) => _resultToMentionState(keyword, value));
+          return userDao.friends().watchWithStream(
+            eventStreams: [DataBaseEventBus.instance.updateUserIdsStream],
+            duration: kVerySlowThrottleDuration,
+          ).map((value) => _resultToMentionState(keyword, value));
         }
         if (conversationState.isGroup ?? false) {
           return userDao
               .groupParticipants(
                   conversationId: conversationState.conversationId)
-              .watchThrottle(kVerySlowThrottleDuration)
-              .map((value) => _resultToMentionState(
+              .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateParticipantStream(
+                  conversationIds: [conversationState.conversationId])
+            ],
+            duration: kVerySlowThrottleDuration,
+          ).map((value) => _resultToMentionState(
                   keyword,
                   value
                     ..removeWhere(
@@ -99,22 +105,33 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
       if (conversationState.isBot ?? false) {
         return userDao
             .fuzzySearchBotGroupUser(
-              currentUserId: multiAuthCubit.state.currentUserId ?? '',
-              conversationId: conversationState.conversationId,
-              keyword: keyword,
-            )
-            .watchThrottle(kVerySlowThrottleDuration)
-            .map((value) => _resultToMentionState(keyword, value));
+          currentUserId: multiAuthCubit.state.currentUserId ?? '',
+          conversationId: conversationState.conversationId,
+          keyword: keyword,
+        )
+            .watchWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance.updateUserIdsStream,
+            DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
+            DataBaseEventBus.instance.deleteMessageIdStream,
+          ],
+          duration: kVerySlowThrottleDuration,
+        ).map((value) => _resultToMentionState(keyword, value));
       }
       if (conversationState.isGroup ?? false) {
         return userDao
             .fuzzySearchGroupUser(
-              currentUserId: multiAuthCubit.state.currentUserId ?? '',
-              conversationId: conversationState.conversationId,
-              keyword: keyword,
-            )
-            .watchThrottle(kVerySlowThrottleDuration)
-            .map((value) => _resultToMentionState(keyword, value));
+          currentUserId: multiAuthCubit.state.currentUserId ?? '',
+          conversationId: conversationState.conversationId,
+          keyword: keyword,
+        )
+            .watchWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance.watchUpdateParticipantStream(
+                conversationIds: [conversationState.conversationId])
+          ],
+          duration: kVerySlowThrottleDuration,
+        ).map((value) => _resultToMentionState(keyword, value));
       }
       return Stream.value(MentionState(text: keyword));
     }).listen(emit));
