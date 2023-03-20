@@ -170,22 +170,29 @@ class MessageState extends Equatable {
 
   MessageState removeMessage(String messageId) {
     if (center?.messageId == messageId) {
-      return copyWith();
-    }
-
-    var message =
-        top.firstWhereOrNull((message) => message.messageId == messageId);
-    if (message != null) {
-      return copyWith(
-        top: top.toList()..remove(message),
+      return MessageState(
+        conversationId: conversationId,
+        top: top,
+        bottom: bottom,
+        isLatest: isLatest,
+        isOldest: isOldest,
+        lastReadMessageId: lastReadMessageId,
+        refreshKey: refreshKey,
       );
     }
 
-    message =
-        bottom.firstWhereOrNull((message) => message.messageId == messageId);
-    if (message != null) {
+    bool include(MessageItem message) => message.messageId == messageId;
+    bool exclusive(MessageItem message) => message.messageId != messageId;
+
+    if (top.any(include)) {
       return copyWith(
-        top: bottom.toList()..remove(message),
+        top: top.where(exclusive).toList(),
+      );
+    }
+
+    if (bottom.any(include)) {
+      return copyWith(
+        bottom: bottom.where(exclusive).toList(),
       );
     }
 

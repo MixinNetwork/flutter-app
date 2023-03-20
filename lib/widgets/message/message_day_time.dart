@@ -132,8 +132,11 @@ class MessageDayTimeViewportWidget extends HookWidget {
           topKey.currentContext!.visitChildElements(
               (e) => result.dumpKeyedSubtree(e, reverse: true));
 
-          if (center != null) {
-            result.dumpKeyedSubtree(centerKey!.currentContext! as Element);
+          final centerContext = centerKey?.currentContext;
+          if (center != null &&
+              centerContext != null &&
+              centerContext is Element) {
+            result.dumpKeyedSubtree(centerContext);
           }
 
           bottomKey.currentContext!.visitChildElements(result.dumpKeyedSubtree);
