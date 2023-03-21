@@ -42,7 +42,7 @@ jobs:
 
       # Consider passing '--fatal-infos' for slightly stricter analysis.
       - name: Analyze project source
-        run: flutter analyze
+        run: dart analyze .
 
       # dart_code_metrics
       - name: Run dart_code_metrics
