@@ -147,15 +147,33 @@ class _ConversationSearchMessageCubit extends SearchMessageCubit {
   @override
   Future<List<SearchMessageDetailItem>> _doFuzzySearch(
     String? anchorMessageId,
-  ) =>
-      database.fuzzySearchMessage(
-        query: keyword,
-        limit: limit,
-        conversationIds: [conversationId],
-        userId: userId,
-        categories: categories,
-        anchorMessageId: anchorMessageId,
-      );
+  ) {
+    if (keyword.isEmpty) {
+      return _loadUserMessages(anchorMessageId);
+    }
+    return database.fuzzySearchMessage(
+      query: keyword,
+      limit: limit,
+      conversationIds: [conversationId],
+      userId: userId,
+      categories: categories,
+      anchorMessageId: anchorMessageId,
+    );
+  }
+
+  Future<List<SearchMessageDetailItem>> _loadUserMessages(
+    String? anchorMessageId,
+  ) {
+    if (userId == null) {
+      return Future.value([]);
+    }
+    return database.messageDao.messageByConversationAndUser(
+      userId: userId!,
+      limit: limit,
+      anchorMessageId: anchorMessageId,
+      conversationId: conversationId,
+    );
+  }
 }
 
 class _SlideCategorySearchMessageCubit extends SearchMessageCubit {

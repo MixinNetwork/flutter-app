@@ -13449,6 +13449,58 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<SearchMessageDetailItem> searchMessage(
+      SearchMessage$where where, SearchMessage$limit limit) {
+    var $arrayStartIndex = 1;
+    final generatedwhere = $write(
+        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u'), alias(this.users, 'owner')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    final generatedlimit = $write(
+        limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u'), alias(this.users, 'owner')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
+    return customSelect(
+        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC ${generatedlimit.sql}',
+        variables: [
+          ...generatedwhere.introducedVariables,
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          ...generatedwhere.watchedTables,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.read<String>('messageId'),
+        senderId: row.read<String>('senderId'),
+        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
+        senderFullName: row.readNullable<String>('senderFullName'),
+        status: Messages.$converter1.fromSql(row.read<String>('status')),
+        type: row.read<String>('type'),
+        content: row.readNullable<String>('content'),
+        createdAt: Messages.$converter2.fromSql(row.read<int>('createdAt')),
+        mediaName: row.readNullable<String>('mediaName'),
+        appId: row.readNullable<String>('appId'),
+        verified: row.readNullable<bool>('verified'),
+        ownerId: row.readNullable<String>('ownerId'),
+        groupIconUrl: row.readNullable<String>('groupIconUrl'),
+        category: Conversations.$converter0
+            .fromSql(row.readNullable<String>('category')),
+        groupName: row.readNullable<String>('groupName'),
+        conversationId: row.read<String>('conversationId'),
+        ownerFullName: row.readNullable<String>('ownerFullName'),
+        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
+      );
+    });
+  }
+
   Selectable<int> baseConversationItemCount(
       BaseConversationItemCount$where where) {
     var $arrayStartIndex = 1;
@@ -15343,6 +15395,10 @@ class MiniMessageItem {
   }
 }
 
+typedef SearchMessage$where = Expression<bool> Function(
+    Messages m, Conversations c, Users u, Users owner);
+typedef SearchMessage$limit = Limit Function(
+    Messages m, Conversations c, Users u, Users owner);
 typedef BaseConversationItemCount$where = Expression<bool> Function(
     Conversations conversation,
     Users owner,

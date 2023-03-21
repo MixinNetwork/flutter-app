@@ -1051,4 +1051,40 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ).get();
     return Future.wait(messages);
   }
+
+  Future<List<SearchMessageDetailItem>> messageByConversationAndUser({
+    required String conversationId,
+    required String userId,
+    required int limit,
+    String? anchorMessageId,
+    List<String>? categories,
+  }) async {
+    // item1: created_at, item2: row_id
+    Tuple2<int, int>? anchor;
+    if (anchorMessageId != null) {
+      anchor = await (selectOnly(db.messages)
+            ..addColumns([db.messages.createdAt, db.messages.rowId])
+            ..where(db.messages.messageId.equals(anchorMessageId))
+            ..limit(1))
+          .map((row) => Tuple2(
+                row.read(db.messages.createdAt)!,
+                row.read(db.messages.rowId)!,
+              ))
+          .getSingleOrNull();
+    }
+    return db.searchMessage((m, c, u, o) {
+      var predicate =
+          m.conversationId.equals(conversationId) & m.userId.equals(userId);
+      if (categories?.isNotEmpty ?? false) {
+        predicate = predicate & m.category.isIn(categories!);
+      }
+      if (anchor != null) {
+        predicate = predicate &
+            (m.createdAt.isSmallerThanValue(anchor.item1) |
+                (m.createdAt.equals(anchor.item1) &
+                    m.rowId.isSmallerThanValue(anchor.item2)));
+      }
+      return predicate;
+    }, (m, c, u, o) => Limit(limit, null)).get();
+  }
 }
