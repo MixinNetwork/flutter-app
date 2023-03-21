@@ -172,6 +172,7 @@ class _ConversationSearchMessageCubit extends SearchMessageCubit {
       limit: limit,
       anchorMessageId: anchorMessageId,
       conversationId: conversationId,
+      categories: categories,
     );
   }
 }
