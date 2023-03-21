@@ -465,8 +465,6 @@ class DecryptMessage extends Injector {
       await database.pinMessageDao.deleteByIds(pinMessage.messageIds);
     }
 
-    database.messageDao.notifyMessageInsertOrReplaced(pinMessage.messageIds);
-
     await database.messagesHistoryDao
         .insert(MessagesHistoryData(messageId: data.messageId));
   }
@@ -510,8 +508,10 @@ class DecryptMessage extends Injector {
               quoteMessage.toJson());
         }
       })(),
-      database.messageMentionDao
-          .deleteMessageMentionByMessageId(recallMessage.messageId),
+      database.messageMentionDao.deleteMessageMention(MessageMention(
+        messageId: recallMessage.messageId,
+        conversationId: data.conversationId,
+      )),
       database.messagesHistoryDao
           .insert(MessagesHistoryData(messageId: data.messageId)),
     ]);
@@ -932,7 +932,7 @@ class DecryptMessage extends Injector {
       final conversationId = systemMessage.conversationId ??
           generateConversationId(accountId, systemMessage.userId!);
       await database.circleConversationDao
-          .deleteByIds(conversationId, systemMessage.circleId);
+          .deleteById(conversationId, systemMessage.circleId);
     } else if (systemMessage.action == SystemCircleAction.delete) {
       await database.circleDao.deleteCircleById(systemMessage.circleId);
       await database.circleConversationDao
@@ -994,8 +994,9 @@ class DecryptMessage extends Injector {
 
     if (messagesWithExpiredAt.isNotEmpty) {
       final messageIds = messagesWithExpiredAt.map((e) => e.item1).toList();
-      await database.messageDao
-          .markMessageRead(messageIds, updateExpired: false);
+      final list = await database.messageDao.miniMessageByIds(messageIds).get();
+
+      await database.messageDao.markMessageRead(list, updateExpired: false);
       for (final item in messagesWithExpiredAt) {
         final messageId = item.item1;
         final expireAt = item.item2;
@@ -1012,9 +1013,8 @@ class DecryptMessage extends Injector {
           }
         }
       }
-      final conversationIds =
-          await database.messageDao.findConversationIdsByMessages(messageIds);
-      for (final cId in conversationIds) {
+      final set = list.map((e) => e.conversationId).toSet();
+      for (final cId in set) {
         await database.messageDao.takeUnseen(accountId, cId);
       }
     }

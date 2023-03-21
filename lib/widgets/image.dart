@@ -5,6 +5,8 @@ import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../utils/logger.dart';
+
 class _ImageByBase64 extends HookWidget {
   const _ImageByBase64(
     this.base64String, {
@@ -16,11 +18,18 @@ class _ImageByBase64 extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bytes = useMemoized(() => base64Decode(base64String), [base64String]);
-    return Image.memory(
-      bytes,
-      fit: fit,
-    );
+    final bytes = useMemoized(() {
+      try {
+        return base64Decode(base64String);
+      } catch (error, stacktrace) {
+        e('Failed to decode base64 string: $base64String', error, stacktrace);
+        return null;
+      }
+    }, [base64String]);
+    if (bytes == null) {
+      return const SizedBox();
+    }
+    return Image.memory(bytes, fit: fit);
   }
 }
 

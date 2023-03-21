@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../constants/resources.dart';
+import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/chat/chat_page.dart';
@@ -122,8 +123,10 @@ class _UserProfileLoader extends HookWidget {
     final accountServer = context.accountServer;
     final user = useMemoizedStream(
         () => accountServer.database.userDao
-            .userById(userId)
-            .watchSingleOrNullThrottle(kDefaultThrottleDuration),
+                .userById(userId)
+                .watchSingleOrNullWithStream(eventStreams: [
+              DataBaseEventBus.instance.watchUpdateUserStream([userId])
+            ], duration: kDefaultThrottleDuration),
         keys: [userId]).data;
 
     useEffect(() {

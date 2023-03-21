@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../constants/resources.dart';
+import '../../../../db/database_event_bus.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
@@ -37,7 +38,13 @@ class _GroupInviteByLinkDialog extends HookWidget {
         context.accountServer.refreshConversation(conversationId);
         return context.database.conversationDao
             .conversationById(conversationId)
-            .watchSingleOrNullThrottle(kDefaultThrottleDuration);
+            .watchSingleOrNullWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance
+                .watchUpdateConversationStream([conversationId]),
+          ],
+          duration: kDefaultThrottleDuration,
+        );
       },
       keys: [conversationId],
     ).data;

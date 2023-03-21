@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -23,7 +24,9 @@ class SharedAppsPage extends HookWidget {
     final apps = useMemoizedStream(
             () => context.database.favoriteAppDao
                 .getFavoriteAppsByUserId(userId)
-                .watch(),
+                .watchWithStream(
+                    eventStreams: [DataBaseEventBus.instance.updateAppIdStream],
+                    duration: kVerySlowThrottleDuration),
             keys: [userId]).data ??
         const [];
 

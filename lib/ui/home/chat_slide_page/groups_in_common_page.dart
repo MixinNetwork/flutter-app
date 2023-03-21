@@ -42,12 +42,12 @@ class _ConversationList extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final conversationList = useMemoizedStream(() {
+    final conversationList = useMemoizedFuture(() {
       final selfId = context.accountServer.userId;
       return context.accountServer.database.conversationDao
           .findTheSameConversations(selfId, userId)
-          .watch();
-    }, keys: [userId]).data;
+          .get();
+    }, <GroupMinimal>[], keys: [userId]).data;
 
     if (conversationList == null) {
       return const Center(

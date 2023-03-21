@@ -143,15 +143,14 @@ class ImagePreviewPage extends HookWidget {
     }, [_messageId.value]);
 
     useEffect(
-      () => context.database.messageDao.insertOrReplaceMessageStream
+      () => context.database.messageDao
+          .watchInsertOrReplaceMessageStream(conversationId)
           .switchMap<MessageItem>((value) async* {
             for (final item in value) {
               yield item;
             }
           })
-          .where((event) =>
-              event.conversationId == conversationId &&
-              [
+          .where((event) => [
                 MessageCategory.plainImage,
                 MessageCategory.signalImage,
               ].contains(event.type))

@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -31,7 +32,14 @@ class PinMessagesPage extends HookWidget {
     final rawList = useMemoizedStream<List<MessageItem>>(
       () => context.database.pinMessageDao
           .messageItems(conversationId)
-          .watchThrottle(kDefaultThrottleDuration),
+          .watchWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance.watchPinMessageStream(
+            conversationIds: [conversationId],
+          )
+        ],
+        duration: kSlowThrottleDuration,
+      ),
       keys: [conversationId],
     ).data;
 

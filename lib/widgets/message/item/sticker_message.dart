@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../interactive_decorated_box.dart';
@@ -68,9 +69,13 @@ class StickerMessageWidget extends HookWidget {
             stickerId != null,
             'stickerId is null. ${context.message.messageId}',
           );
+          if (stickerId == null) return const Stream<_StickerData?>.empty();
           return context.database.stickerDao
-              .sticker(stickerId!)
-              .watchSingleOrNull()
+              .sticker(stickerId)
+              .watchSingleOrNullWithStream(eventStreams: [
+                DataBaseEventBus.instance
+                    .watchUpdateStickerStream(stickerIds: [stickerId])
+              ], duration: kDefaultThrottleDuration)
               .whereNotNull()
               .map(
                 (event) => _StickerData(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/web_view/web_view_interface.dart';
@@ -178,7 +179,13 @@ class ConversationIDOrCount extends HookWidget {
         if (isGroup) {
           return context.database.participantDao
               .conversationParticipantsCount(conversationState!.conversationId)
-              .watchSingleThrottle(kVerySlowThrottleDuration);
+              .watchSingleWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateParticipantStream(
+                  conversationIds: [conversationState!.conversationId])
+            ],
+            duration: kVerySlowThrottleDuration,
+          );
         }
 
         return const Stream<int>.empty();

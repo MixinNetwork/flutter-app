@@ -1045,7 +1045,7 @@ class AccountServer {
           conversationId: conversationId,
           userId: userId)
     ]);
-    await database.circleConversationDao.deleteByIds(conversationId, circleId);
+    await database.circleConversationDao.deleteById(conversationId, circleId);
   }
 
   Future<void> editCircleConversation(

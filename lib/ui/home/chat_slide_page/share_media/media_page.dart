@@ -56,15 +56,14 @@ class MediaPage extends HookWidget {
       keys: [conversationId],
     );
     useEffect(
-      () => messageDao.insertOrReplaceMessageStream
+      () => messageDao
+          .watchInsertOrReplaceMessageStream(conversationId)
           .switchMap<MessageItem>((value) async* {
             for (final item in value) {
               yield item;
             }
           })
-          .where((event) =>
-              event.conversationId == conversationId &&
-              [
+          .where((event) => [
                 MessageCategory.plainImage,
                 MessageCategory.signalImage,
                 MessageCategory.plainVideo,

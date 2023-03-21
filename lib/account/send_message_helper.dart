@@ -593,7 +593,10 @@ class SendMessageHelper {
             }
           }
         })(),
-        _messageMentionDao.deleteMessageMentionByMessageId(messageId),
+        _messageMentionDao.deleteMessageMention(MessageMention(
+          messageId: messageId,
+          conversationId: conversationId,
+        )),
         (() async => _addSendingJob(
             await createSendRecallJob(conversationId, messageId)))(),
         (() async {
@@ -1114,9 +1117,6 @@ class SendMessageHelper {
       await _pinMessageDao
           .deleteByIds(pinMessageMinimals.map((e) => e.messageId).toList());
     }
-
-    _messageDao.notifyMessageInsertOrReplaced(
-        pinMessageMinimals.map((e) => e.messageId));
 
     _addSendingJob(createSendPinJob(conversationId, encoded));
   }

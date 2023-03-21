@@ -14,6 +14,7 @@ import '../../../account/show_pin_message_key_value.dart';
 import '../../../bloc/simple_cubit.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
@@ -939,8 +940,15 @@ class _JumpMentionButton extends HookWidget {
     )!;
     final messageMentions = useMemoizedStream(
             () => context.database.messageMentionDao
-                .unreadMentionMessageByConversationId(conversationId)
-                .watchThrottle(kSlowThrottleDuration),
+                    .unreadMentionMessageByConversationId(conversationId)
+                    .watchWithStream(
+                  eventStreams: [
+                    DataBaseEventBus.instance.watchUpdateMessageMention(
+                      conversationIds: [conversationId],
+                    )
+                  ],
+                  duration: kSlowThrottleDuration,
+                ),
             keys: [conversationId]).data ??
         [];
 

@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../../blaze/vo/transcript_minimal.dart';
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../ui/home/bloc/blink_cubit.dart';
 import '../../../ui/home/bloc/message_selection_cubit.dart';
@@ -221,13 +222,19 @@ class TranscriptPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    Stream<List<MessageItem>> watchMessages() => context
-        .database.transcriptMessageDao
-        .transactionMessageItem(transcriptMessage.messageId)
-        .watchThrottle(kDefaultThrottleDuration)
-        .map((list) => list
-            .map((transcriptMessageItem) => transcriptMessageItem.messageItem)
-            .toList());
+    Stream<List<MessageItem>> watchMessages() =>
+        context.database.transcriptMessageDao
+            .transactionMessageItem(transcriptMessage.messageId)
+            .watchWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance.watchUpdateTranscriptMessageStream(
+                transcriptIds: [transcriptMessage.messageId])
+          ],
+          duration: kDefaultThrottleDuration,
+        ).map((list) => list
+                .map((transcriptMessageItem) =>
+                    transcriptMessageItem.messageItem)
+                .toList());
 
     final list = useMemoizedStream(watchMessages).data ?? <MessageItem>[];
 

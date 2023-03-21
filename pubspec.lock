@@ -386,7 +386,7 @@ packages:
       sha256: "2644a9e0965a7aa3deb09cb8ce4081db4450c178f472818c8cd34216a3070d7b"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.2"
+    version: "5.0.3"
   drift:
     dependency: "direct main"
     description:
@@ -644,7 +644,7 @@ packages:
       sha256: "017cb37b3e9bee44cc800e35469f295d537484602f02ce6ceb5876236cc7e1fe"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -686,7 +686,7 @@ packages:
       sha256: "5658b01529dc9078f7d2b8b48abd01fee75ff87626c98b5596b9bf5517b8f431"
       url: "https://pub.dev"
     source: hosted
-    version: "9.10.1"
+    version: "9.11.0"
   glob:
     dependency: transitive
     description:
@@ -806,7 +806,7 @@ packages:
       sha256: "420ed22d2c9ce767ed96df723aaebfeb20ce92dfda8665cd2ba72d72a51ae669"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.6+1"
+    version: "0.8.6+5"
   image_picker_for_web:
     dependency: transitive
     description:
@@ -902,7 +902,7 @@ packages:
       sha256: "0ec744cc1bcf20eeb4fac8c081864d55c988474eec6ae5d55cf866312fc7dfb4"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.0"
+    version: "0.2.1"
   libphonenumber_platform_interface:
     dependency: transitive
     description:
@@ -950,7 +950,7 @@ packages:
       sha256: "49bbc544e44bf0c734ccda29b182e3516a12f5021ea98b206cf31a168b0f97da"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.3.0"
   map:
     dependency: "direct main"
     description:
@@ -958,7 +958,7 @@ packages:
       sha256: "5aab3e9f0a5ba19eacfcc0b36bc9830a1c2ec1bba7ed03919b4a844d99a3634a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.5+1"
+    version: "1.4.1"
   markdown:
     dependency: transitive
     description:
@@ -1152,7 +1152,7 @@ packages:
       sha256: "026b97a6c29da75181a37aae2eba9227f5fe13cb2838c6b975ce209328b8ab4e"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.3"
+    version: "2.2.0"
   path_provider_linux:
     dependency: transitive
     description:
@@ -1273,7 +1273,7 @@ packages:
       sha256: db7306cf0249f838d1a24af52b5a5887c5bf7f31d8bb4e827d071dc0939ad346
       url: "https://pub.dev"
     source: hosted
-    version: "3.6.2"
+    version: "3.7.0"
   pool:
     dependency: transitive
     description:
@@ -1469,7 +1469,7 @@ packages:
       sha256: "0a9f8fe561aad15b94549c98d55dee6825a401efec83bf92956e337e35e68ae5"
       url: "https://pub.dev"
     source: hosted
-    version: "1.9.3"
+    version: "1.10.0"
   sqlite3_flutter_libs:
     dependency: "direct main"
     description:
@@ -1518,6 +1518,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  string_tokenizer:
+    dependency: "direct main"
+    description:
+      path: "packages/string_tokenizer"
+      ref: "0334bbaa7293c72398eaf4571ba7ba2b5df2302d"
+      resolved-ref: "0334bbaa7293c72398eaf4571ba7ba2b5df2302d"
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
+    version: "0.0.1"
   synchronized:
     dependency: transitive
     description:
@@ -1629,7 +1638,7 @@ packages:
       sha256: "7ab1e5b646623d6a2537aa59d5d039f90eebef75a7c25e105f6f75de1f7750c3"
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.2"
+    version: "6.1.3"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -1685,7 +1694,7 @@ packages:
       sha256: "2f317d969a9f1eb59d1890643107da749698b7c08c4b0532fc95c8a7130d2803"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.3"
+    version: "1.1.4"
   vector_graphics_codec:
     dependency: transitive
     description:
@@ -1693,7 +1702,7 @@ packages:
       sha256: "13cccfda2dd61232a19dfb769b7a907e2ab23aabfebb9053c81e29c6c11b1766"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.3"
+    version: "1.1.4"
   vector_graphics_compiler:
     dependency: transitive
     description:
@@ -1701,7 +1710,7 @@ packages:
       sha256: "524c9889a1327401124fe068840a8867f0d57987c1219a2a696ade629ec2bec3"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.3"
+    version: "1.1.4"
   vector_math:
     dependency: transitive
     description:
@@ -1741,7 +1750,7 @@ packages:
       sha256: "9d8585be0d63943f0dc46e0aed6697a715f64d7faab39b6053ecf9b6da3ca01d"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   video_player_platform_interface:
     dependency: transitive
     description:
@@ -1749,7 +1758,7 @@ packages:
       sha256: "72ba04ad0eff76123c6d782ac46621cb8be476a89c33c89173fce982b6ec049b"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.2"
+    version: "6.1.0"
   video_player_web:
     dependency: transitive
     description:
@@ -1789,7 +1798,7 @@ packages:
       sha256: b6cd42db3ced5411f3d01599906156885b18e4188f7065a8a351eb84bee347e0
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.6"
+    version: "4.0.7"
   webview_flutter_android:
     dependency: transitive
     description:
@@ -1797,7 +1806,7 @@ packages:
       sha256: c849dcb6bf7367f696869006fb9575c15bdc6a1d624ae13f12de5a147a740b12
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.2"
+    version: "3.4.3"
   webview_flutter_platform_interface:
     dependency: transitive
     description:
