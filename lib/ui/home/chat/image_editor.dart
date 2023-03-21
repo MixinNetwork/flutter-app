@@ -401,6 +401,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
       width: image.width,
       height: image.height,
       bytes: bytes.buffer,
+      order: img.ChannelOrder.rgba,
     );
 
     if (state.flip) {
