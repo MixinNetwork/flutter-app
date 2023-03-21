@@ -264,6 +264,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataError": MessageLookupByLibrary.simpleMessage("Ошибка данных"),
         "dataLoading": MessageLookupByLibrary.simpleMessage(
             "Загрузка данных, пожалуйста, подождите..."),
+        "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
+            "База данных обновляется, это может занять несколько минут, пожалуйста, не закрывайте это приложение."),
         "delete": MessageLookupByLibrary.simpleMessage("Удалить"),
         "deleteAccountDetailHint": MessageLookupByLibrary.simpleMessage(
             "Локальные сообщения и резервные копии iCloud не будут удаляться автоматически"),
@@ -681,6 +683,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Вы уверены, что хотите открепить все сообщения?"),
         "unreadMessages":
             MessageLookupByLibrary.simpleMessage("Непрочитанные сообщения"),
+        "upgrading": MessageLookupByLibrary.simpleMessage("Обновление"),
         "userNotFound":
             MessageLookupByLibrary.simpleMessage("Пользователь не найден"),
         "valueNow": m49,

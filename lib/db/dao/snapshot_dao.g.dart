@@ -109,6 +109,9 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         receiver: row.readNullable<String>('receiver'),
         memo: row.readNullable<String>('memo'),
         confirmations: row.readNullable<int>('confirmations'),
+        snapshotHash: row.readNullable<String>('snapshot_hash'),
+        openingBalance: row.readNullable<String>('opening_balance'),
+        closingBalance: row.readNullable<String>('closing_balance'),
         avatarUrl: row.readNullable<String>('avatar_url'),
         opponentFulName: row.readNullable<String>('opponent_ful_name'),
         priceUsd: row.readNullable<String>('price_usd'),
@@ -138,6 +141,9 @@ class SnapshotItem {
   final String? receiver;
   final String? memo;
   final int? confirmations;
+  final String? snapshotHash;
+  final String? openingBalance;
+  final String? closingBalance;
   final String? avatarUrl;
   final String? opponentFulName;
   final String? priceUsd;
@@ -162,6 +168,9 @@ class SnapshotItem {
     this.receiver,
     this.memo,
     this.confirmations,
+    this.snapshotHash,
+    this.openingBalance,
+    this.closingBalance,
     this.avatarUrl,
     this.opponentFulName,
     this.priceUsd,
@@ -188,6 +197,9 @@ class SnapshotItem {
         receiver,
         memo,
         confirmations,
+        snapshotHash,
+        openingBalance,
+        closingBalance,
         avatarUrl,
         opponentFulName,
         priceUsd,
@@ -216,6 +228,9 @@ class SnapshotItem {
           other.receiver == this.receiver &&
           other.memo == this.memo &&
           other.confirmations == this.confirmations &&
+          other.snapshotHash == this.snapshotHash &&
+          other.openingBalance == this.openingBalance &&
+          other.closingBalance == this.closingBalance &&
           other.avatarUrl == this.avatarUrl &&
           other.opponentFulName == this.opponentFulName &&
           other.priceUsd == this.priceUsd &&
@@ -242,6 +257,9 @@ class SnapshotItem {
           ..write('receiver: $receiver, ')
           ..write('memo: $memo, ')
           ..write('confirmations: $confirmations, ')
+          ..write('snapshotHash: $snapshotHash, ')
+          ..write('openingBalance: $openingBalance, ')
+          ..write('closingBalance: $closingBalance, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('opponentFulName: $opponentFulName, ')
           ..write('priceUsd: $priceUsd, ')

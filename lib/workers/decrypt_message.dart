@@ -370,6 +370,8 @@ class DecryptMessage extends Injector {
     } else if (data.category == MessageCategory.systemAccountSnapshot) {
       final systemSnapshot = SnapshotMessage.fromJson(
           _jsonDecode(data.data) as Map<String, dynamic>);
+      print(
+          'fuck systemSnapshot: ${data.toJson()}, ${systemSnapshot.toJson()}');
       await _processSystemSnapshotMessage(data, systemSnapshot);
     }
   }
@@ -951,6 +953,9 @@ class DecryptMessage extends Injector {
       createdAt: DateTime.parse(
         snapshotMessage.createdAt,
       ),
+      snapshotHash: snapshotMessage.snapshotHash,
+      openingBalance: snapshotMessage.openingBalance,
+      closingBalance: snapshotMessage.closingBalance,
     );
     await database.snapshotDao.insert(snapshot);
     await _updateAssetJob.add(createUpdateAssetJob(snapshotMessage.assetId));

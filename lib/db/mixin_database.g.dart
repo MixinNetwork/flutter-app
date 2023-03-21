@@ -8945,6 +8945,9 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
   final String? receiver;
   final String? memo;
   final int? confirmations;
+  final String? snapshotHash;
+  final String? openingBalance;
+  final String? closingBalance;
   const Snapshot(
       {required this.snapshotId,
       this.traceId,
@@ -8957,7 +8960,10 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
       this.sender,
       this.receiver,
       this.memo,
-      this.confirmations});
+      this.confirmations,
+      this.snapshotHash,
+      this.openingBalance,
+      this.closingBalance});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -8990,6 +8996,15 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
     if (!nullToAbsent || confirmations != null) {
       map['confirmations'] = Variable<int>(confirmations);
     }
+    if (!nullToAbsent || snapshotHash != null) {
+      map['snapshot_hash'] = Variable<String>(snapshotHash);
+    }
+    if (!nullToAbsent || openingBalance != null) {
+      map['opening_balance'] = Variable<String>(openingBalance);
+    }
+    if (!nullToAbsent || closingBalance != null) {
+      map['closing_balance'] = Variable<String>(closingBalance);
+    }
     return map;
   }
 
@@ -9018,6 +9033,15 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
       confirmations: confirmations == null && nullToAbsent
           ? const Value.absent()
           : Value(confirmations),
+      snapshotHash: snapshotHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(snapshotHash),
+      openingBalance: openingBalance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(openingBalance),
+      closingBalance: closingBalance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closingBalance),
     );
   }
 
@@ -9037,6 +9061,9 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
       receiver: serializer.fromJson<String?>(json['receiver']),
       memo: serializer.fromJson<String?>(json['memo']),
       confirmations: serializer.fromJson<int?>(json['confirmations']),
+      snapshotHash: serializer.fromJson<String?>(json['snapshot_hash']),
+      openingBalance: serializer.fromJson<String?>(json['opening_balance']),
+      closingBalance: serializer.fromJson<String?>(json['closing_balance']),
     );
   }
   @override
@@ -9055,6 +9082,9 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
       'receiver': serializer.toJson<String?>(receiver),
       'memo': serializer.toJson<String?>(memo),
       'confirmations': serializer.toJson<int?>(confirmations),
+      'snapshot_hash': serializer.toJson<String?>(snapshotHash),
+      'opening_balance': serializer.toJson<String?>(openingBalance),
+      'closing_balance': serializer.toJson<String?>(closingBalance),
     };
   }
 
@@ -9070,7 +9100,10 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
           Value<String?> sender = const Value.absent(),
           Value<String?> receiver = const Value.absent(),
           Value<String?> memo = const Value.absent(),
-          Value<int?> confirmations = const Value.absent()}) =>
+          Value<int?> confirmations = const Value.absent(),
+          Value<String?> snapshotHash = const Value.absent(),
+          Value<String?> openingBalance = const Value.absent(),
+          Value<String?> closingBalance = const Value.absent()}) =>
       Snapshot(
         snapshotId: snapshotId ?? this.snapshotId,
         traceId: traceId.present ? traceId.value : this.traceId,
@@ -9087,6 +9120,12 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
         memo: memo.present ? memo.value : this.memo,
         confirmations:
             confirmations.present ? confirmations.value : this.confirmations,
+        snapshotHash:
+            snapshotHash.present ? snapshotHash.value : this.snapshotHash,
+        openingBalance:
+            openingBalance.present ? openingBalance.value : this.openingBalance,
+        closingBalance:
+            closingBalance.present ? closingBalance.value : this.closingBalance,
       );
   @override
   String toString() {
@@ -9102,7 +9141,10 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
           ..write('sender: $sender, ')
           ..write('receiver: $receiver, ')
           ..write('memo: $memo, ')
-          ..write('confirmations: $confirmations')
+          ..write('confirmations: $confirmations, ')
+          ..write('snapshotHash: $snapshotHash, ')
+          ..write('openingBalance: $openingBalance, ')
+          ..write('closingBalance: $closingBalance')
           ..write(')'))
         .toString();
   }
@@ -9120,7 +9162,10 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
       sender,
       receiver,
       memo,
-      confirmations);
+      confirmations,
+      snapshotHash,
+      openingBalance,
+      closingBalance);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -9136,7 +9181,10 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
           other.sender == this.sender &&
           other.receiver == this.receiver &&
           other.memo == this.memo &&
-          other.confirmations == this.confirmations);
+          other.confirmations == this.confirmations &&
+          other.snapshotHash == this.snapshotHash &&
+          other.openingBalance == this.openingBalance &&
+          other.closingBalance == this.closingBalance);
 }
 
 class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
@@ -9152,6 +9200,9 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
   final Value<String?> receiver;
   final Value<String?> memo;
   final Value<int?> confirmations;
+  final Value<String?> snapshotHash;
+  final Value<String?> openingBalance;
+  final Value<String?> closingBalance;
   const SnapshotsCompanion({
     this.snapshotId = const Value.absent(),
     this.traceId = const Value.absent(),
@@ -9165,6 +9216,9 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
     this.receiver = const Value.absent(),
     this.memo = const Value.absent(),
     this.confirmations = const Value.absent(),
+    this.snapshotHash = const Value.absent(),
+    this.openingBalance = const Value.absent(),
+    this.closingBalance = const Value.absent(),
   });
   SnapshotsCompanion.insert({
     required String snapshotId,
@@ -9179,6 +9233,9 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
     this.receiver = const Value.absent(),
     this.memo = const Value.absent(),
     this.confirmations = const Value.absent(),
+    this.snapshotHash = const Value.absent(),
+    this.openingBalance = const Value.absent(),
+    this.closingBalance = const Value.absent(),
   })  : snapshotId = Value(snapshotId),
         type = Value(type),
         assetId = Value(assetId),
@@ -9197,6 +9254,9 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
     Expression<String>? receiver,
     Expression<String>? memo,
     Expression<int>? confirmations,
+    Expression<String>? snapshotHash,
+    Expression<String>? openingBalance,
+    Expression<String>? closingBalance,
   }) {
     return RawValuesInsertable({
       if (snapshotId != null) 'snapshot_id': snapshotId,
@@ -9211,6 +9271,9 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
       if (receiver != null) 'receiver': receiver,
       if (memo != null) 'memo': memo,
       if (confirmations != null) 'confirmations': confirmations,
+      if (snapshotHash != null) 'snapshot_hash': snapshotHash,
+      if (openingBalance != null) 'opening_balance': openingBalance,
+      if (closingBalance != null) 'closing_balance': closingBalance,
     });
   }
 
@@ -9226,7 +9289,10 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
       Value<String?>? sender,
       Value<String?>? receiver,
       Value<String?>? memo,
-      Value<int?>? confirmations}) {
+      Value<int?>? confirmations,
+      Value<String?>? snapshotHash,
+      Value<String?>? openingBalance,
+      Value<String?>? closingBalance}) {
     return SnapshotsCompanion(
       snapshotId: snapshotId ?? this.snapshotId,
       traceId: traceId ?? this.traceId,
@@ -9240,6 +9306,9 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
       receiver: receiver ?? this.receiver,
       memo: memo ?? this.memo,
       confirmations: confirmations ?? this.confirmations,
+      snapshotHash: snapshotHash ?? this.snapshotHash,
+      openingBalance: openingBalance ?? this.openingBalance,
+      closingBalance: closingBalance ?? this.closingBalance,
     );
   }
 
@@ -9283,6 +9352,15 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
     if (confirmations.present) {
       map['confirmations'] = Variable<int>(confirmations.value);
     }
+    if (snapshotHash.present) {
+      map['snapshot_hash'] = Variable<String>(snapshotHash.value);
+    }
+    if (openingBalance.present) {
+      map['opening_balance'] = Variable<String>(openingBalance.value);
+    }
+    if (closingBalance.present) {
+      map['closing_balance'] = Variable<String>(closingBalance.value);
+    }
     return map;
   }
 
@@ -9300,7 +9378,10 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
           ..write('sender: $sender, ')
           ..write('receiver: $receiver, ')
           ..write('memo: $memo, ')
-          ..write('confirmations: $confirmations')
+          ..write('confirmations: $confirmations, ')
+          ..write('snapshotHash: $snapshotHash, ')
+          ..write('openingBalance: $openingBalance, ')
+          ..write('closingBalance: $closingBalance')
           ..write(')'))
         .toString();
   }
@@ -9386,6 +9467,27 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       $customConstraints: '');
+  final VerificationMeta _snapshotHashMeta =
+      const VerificationMeta('snapshotHash');
+  late final GeneratedColumn<String> snapshotHash = GeneratedColumn<String>(
+      'snapshot_hash', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _openingBalanceMeta =
+      const VerificationMeta('openingBalance');
+  late final GeneratedColumn<String> openingBalance = GeneratedColumn<String>(
+      'opening_balance', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  final VerificationMeta _closingBalanceMeta =
+      const VerificationMeta('closingBalance');
+  late final GeneratedColumn<String> closingBalance = GeneratedColumn<String>(
+      'closing_balance', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         snapshotId,
@@ -9399,7 +9501,10 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
         sender,
         receiver,
         memo,
-        confirmations
+        confirmations,
+        snapshotHash,
+        openingBalance,
+        closingBalance
       ];
   @override
   String get aliasedName => _alias ?? 'snapshots';
@@ -9471,6 +9576,24 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
           confirmations.isAcceptableOrUnknown(
               data['confirmations']!, _confirmationsMeta));
     }
+    if (data.containsKey('snapshot_hash')) {
+      context.handle(
+          _snapshotHashMeta,
+          snapshotHash.isAcceptableOrUnknown(
+              data['snapshot_hash']!, _snapshotHashMeta));
+    }
+    if (data.containsKey('opening_balance')) {
+      context.handle(
+          _openingBalanceMeta,
+          openingBalance.isAcceptableOrUnknown(
+              data['opening_balance']!, _openingBalanceMeta));
+    }
+    if (data.containsKey('closing_balance')) {
+      context.handle(
+          _closingBalanceMeta,
+          closingBalance.isAcceptableOrUnknown(
+              data['closing_balance']!, _closingBalanceMeta));
+    }
     return context;
   }
 
@@ -9504,6 +9627,12 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
           .read(DriftSqlType.string, data['${effectivePrefix}memo']),
       confirmations: attachedDatabase.options.types
           .read(DriftSqlType.int, data['${effectivePrefix}confirmations']),
+      snapshotHash: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}snapshot_hash']),
+      openingBalance: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}opening_balance']),
+      closingBalance: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}closing_balance']),
     );
   }
 
