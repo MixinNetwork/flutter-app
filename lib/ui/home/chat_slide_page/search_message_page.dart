@@ -265,10 +265,10 @@ class _SearchMessageList extends HookWidget {
           () => context
               .read<SearchConversationKeywordCubit>()
               .stream
-              .map((event) => event.item2)
+              .map((event) => event.item2.trim())
               .debounceTime(const Duration(milliseconds: 150)),
         ).data ??
-        initKeyword.item2;
+        initKeyword.item2.trim();
 
     final conversationId = useMemoized(() {
       final conversationId =
