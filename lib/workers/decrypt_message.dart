@@ -370,8 +370,6 @@ class DecryptMessage extends Injector {
     } else if (data.category == MessageCategory.systemAccountSnapshot) {
       final systemSnapshot = SnapshotMessage.fromJson(
           _jsonDecode(data.data) as Map<String, dynamic>);
-      print(
-          'fuck systemSnapshot: ${data.toJson()}, ${systemSnapshot.toJson()}');
       await _processSystemSnapshotMessage(data, systemSnapshot);
     }
   }
