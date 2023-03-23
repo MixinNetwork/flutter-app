@@ -2,8 +2,5 @@
 
 part of 'resend_session_message_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$ResendSessionMessageDaoMixin on DatabaseAccessor<MixinDatabase> {}

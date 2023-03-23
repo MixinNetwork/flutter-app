@@ -2,8 +2,5 @@
 
 part of 'identity_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$IdentityDaoMixin on DatabaseAccessor<SignalDatabase> {}

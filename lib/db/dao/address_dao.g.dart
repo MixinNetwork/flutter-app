@@ -2,8 +2,5 @@
 
 part of 'address_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$AddressDaoMixin on DatabaseAccessor<MixinDatabase> {}
