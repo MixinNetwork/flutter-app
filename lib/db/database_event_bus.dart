@@ -46,6 +46,14 @@ class DataBaseEventBus {
   Stream<T> _watch<T>(_DatabaseEvent event) => EventBus.instance.on
       .whereType<_DatabaseEventWrapper>()
       .where((e) => event == e.type)
+      .doOnData((e) {
+        if (kDebugMode) {
+          if (e.data is! T) {
+            // ignore: avoid_dynamic_calls
+            w('DatabaseEvent: event type is not match: ${e.data.runtimeType} != $T');
+          }
+        }
+      })
       .where((e) => e.data is T)
       .map((e) => e.data)
       .cast<T>();
@@ -81,7 +89,7 @@ class DataBaseEventBus {
       return;
     }
 
-    _send(_DatabaseEvent.updateUser, [newUserIds]);
+    _send(_DatabaseEvent.updateUser, newUserIds);
   }
 
   // circle
