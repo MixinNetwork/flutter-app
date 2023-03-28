@@ -1,6 +1,7 @@
 // ignore_for_file: implementation_imports
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -64,9 +65,8 @@ class _PhoneNumberInputScene extends HookWidget {
         [countries]);
     final defaultCountry = useMemoized(
       () {
-        i('locale: ${WidgetsBinding.instance.window.locale.countryCode}');
-        return countryMap[WidgetsBinding.instance.window.locale.countryCode] ??
-            countries.first;
+        i('locale: ${window.locale.countryCode}');
+        return countryMap[window.locale.countryCode] ?? countries.first;
       },
     );
     final selectedCountry = useState<Country>(defaultCountry);

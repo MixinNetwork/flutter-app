@@ -301,8 +301,13 @@ class _UserProfileButtonBar extends StatelessWidget {
                   icon: Resources.assetsImagesContextMenuCopySvg,
                   title: context.l10n.copyLink,
                   onTap: () async {
-                    i('share contact ${user.userId} ${user.codeUrl}');
-                    await Clipboard.setData(ClipboardData(text: user.codeUrl));
+                    final codeUrl = user.codeUrl;
+                    if( codeUrl == null) {
+                      e('codeUrl is null: $user');
+                      return;
+                    }
+                    i('share contact ${user.userId} $codeUrl');
+                    await Clipboard.setData(ClipboardData(text: codeUrl));
                   },
                 ),
               ],

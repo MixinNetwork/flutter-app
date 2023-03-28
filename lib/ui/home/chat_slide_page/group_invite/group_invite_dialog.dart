@@ -173,12 +173,14 @@ class _ActionButtons extends StatelessWidget {
               ));
             },
           ),
+          if (conversation.codeUrl != null)
           _IconButton(
             label: context.l10n.copyInvite,
             iconAssetName: Resources.assetsImagesInviteCopySvg,
             onTap: () async {
+              final codeUrl = conversation.codeUrl;
               await Clipboard.setData(
-                  ClipboardData(text: conversation.codeUrl));
+                  ClipboardData(text: codeUrl!));
               showToastSuccessful();
             },
           ),
