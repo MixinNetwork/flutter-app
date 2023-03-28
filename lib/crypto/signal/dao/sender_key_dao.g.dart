@@ -2,8 +2,5 @@
 
 part of 'sender_key_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$SenderKeyDaoMixin on DatabaseAccessor<SignalDatabase> {}

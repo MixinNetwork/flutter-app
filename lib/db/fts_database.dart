@@ -22,20 +22,18 @@ part 'fts_database.g.dart';
 class FtsDatabase extends _$FtsDatabase {
   FtsDatabase(super.e);
 
-  FtsDatabase._connect(super.c) : super.connect();
-
   /// Connect to the database.
   static Future<FtsDatabase> connect(
     String identityNumber, {
     bool fromMainIsolate = false,
   }) async {
-    final connect = await openDatabaseConnection(
+    final queryExecutor = await openQueryExecutor(
       identityNumber: identityNumber,
       dbName: 'fts',
       readCount: 4,
       fromMainIsolate: fromMainIsolate,
     );
-    return FtsDatabase._connect(connect);
+    return FtsDatabase(queryExecutor);
   }
 
   @override

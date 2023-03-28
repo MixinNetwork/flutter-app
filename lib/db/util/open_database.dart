@@ -26,7 +26,7 @@ QueryExecutor _openDatabase(File dbFile) => CustomVmDatabaseWrapper(
     );
 
 /// Connect to the database.
-Future<DatabaseConnection> openDatabaseConnection({
+Future<QueryExecutor> openQueryExecutor({
   required String identityNumber,
   required String dbName,
   required bool fromMainIsolate,
@@ -56,8 +56,10 @@ Future<DatabaseConnection> openDatabaseConnection({
     return isolate.connect();
   }));
 
-  return write.withExecutor(MultiExecutor.withReadPool(
-      reads: reads.map((e) => e.executor).toList(), write: write.executor));
+  return MultiExecutor.withReadPool(
+    reads: reads.map((e) => e.executor).toList(),
+    write: write.executor,
+  );
 }
 
 Future<DriftIsolate> _crateIsolate({
