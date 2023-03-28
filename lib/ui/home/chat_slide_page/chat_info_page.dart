@@ -170,7 +170,7 @@ class ChatInfoPage extends HookWidget {
                               }
 
                               final codeUrl = user.codeUrl;
-                              if(codeUrl == null) {
+                              if (codeUrl == null) {
                                 e('can not find codeUrl $codeUrl');
                                 return;
                               }

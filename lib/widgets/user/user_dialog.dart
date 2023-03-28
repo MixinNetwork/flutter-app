@@ -302,7 +302,7 @@ class _UserProfileButtonBar extends StatelessWidget {
                   title: context.l10n.copyLink,
                   onTap: () async {
                     final codeUrl = user.codeUrl;
-                    if( codeUrl == null) {
+                    if (codeUrl == null) {
                       e('codeUrl is null: $user');
                       return;
                     }
