@@ -2,8 +2,5 @@
 
 part of 'sticker_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$StickerDaoMixin on DatabaseAccessor<MixinDatabase> {}
