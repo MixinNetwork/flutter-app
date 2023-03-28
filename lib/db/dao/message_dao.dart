@@ -1087,4 +1087,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       return predicate;
     }, (m, c, u, o) => Limit(limit, null)).get();
   }
+
+  Future<List<Message>> getMessagesByConversationId(String conversationId) =>
+      (select(db.messages)
+            ..where((tbl) => tbl.conversationId.equals(conversationId))
+            ..limit(100))
+          .get();
 }

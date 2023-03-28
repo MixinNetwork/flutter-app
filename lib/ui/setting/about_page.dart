@@ -1,8 +1,16 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../constants/resources.dart';
+import '../../utils/device_transfer/transfer_conversation_data.dart';
+import '../../utils/device_transfer/transfer_data.dart';
+import '../../utils/device_transfer/transfer_data_json_wrapper.dart';
+import '../../utils/device_transfer/transfer_message_data.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/system/package_info.dart';
@@ -87,6 +95,7 @@ class AboutPage extends HookWidget {
                       title: Text(context.l10n.checkNewVersion),
                       onTap: () => openCheckUpdate(context),
                     ),
+                    const _BackupItem(),
                   ],
                 ),
               ),
@@ -108,5 +117,112 @@ class AboutPage extends HookWidget {
       openUri(context,
           'https://apps.microsoft.com/store/detail/mixin-desktop/9NQ6HF99B8NJ');
     }
+  }
+}
+
+class _BackupItem extends HookWidget {
+  const _BackupItem();
+
+  @override
+  Widget build(BuildContext context) {
+    final serverSocketRef = useRef<ServerSocket?>(null);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CellItem(
+          title: const Text('backup'),
+          onTap: () async {
+            // 创建服务器
+            final serverSocket =
+                await ServerSocket.bind(InternetAddress.anyIPv4, 8888);
+            if (serverSocketRef.value == null) {
+              serverSocketRef.value = serverSocket;
+              i('server: transfer server start');
+            }
+            serverSocket.listen((socket) async {
+              i('client connected: ${socket.remoteAddress.address}:${socket.remotePort}');
+
+              // 监听客户端发来的消息
+              socket.listen((data) async {
+                i('server: message from client ${utf8.decode(data).trim()}');
+              }, onError: (error) {
+                i('server: error: $error');
+                socket.destroy();
+              }, onDone: () {
+                i('server: done');
+                socket.destroy();
+              });
+
+              // send conversation list
+              final conversations =
+                  await context.database.conversationDao.getConversations();
+              for (final conversation in conversations) {
+                await socket.addConversation(
+                  TransferConversationData.fromDbConversation(conversation),
+                );
+              }
+
+              // send messages
+              for (final conversation in conversations) {
+                final messages = await context.database.messageDao
+                    .getMessagesByConversationId(conversation.conversationId);
+                for (final message in messages) {
+                  await socket
+                      .addMessage(TransferMessageData.fromDbMessage(message));
+                }
+              }
+            });
+          },
+        ),
+        CellItem(
+          title: const Text('read'),
+          onTap: () async {
+            const host = '192.168.98.29';
+            // const host = 'localhost';
+            final socket = await Socket.connect(host, 8888);
+            i('client: connected to server');
+
+            socket.transform(const TransferProtocolTransform()).listen(
+                (data) async {
+              final type = data.type;
+              switch (data.type) {
+                case kTypeJson:
+                  _handleJsonMessage(await data.body);
+                  break;
+                case kTypeFile:
+                  throw UnimplementedError('file transfer not implemented');
+                default:
+                  throw Exception('unknown type: $type');
+              }
+            }, onError: (error) {
+              i('client: error $error');
+              socket.destroy();
+            }, onDone: () {
+              i('client: done');
+              socket.destroy();
+            });
+          },
+        ),
+      ],
+    );
+  }
+}
+
+void _handleJsonMessage(Uint8List bytes) {
+  final data = TransferDataJsonWrapper.fromJson(
+      jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>);
+  i('client: message: ${data.data}');
+  return;
+  switch (data.type) {
+    case kTypeConversation:
+      final conversation = TransferConversationData.fromJson(data.data);
+      i('client: conversation: $conversation');
+      break;
+    case kTypeMessage:
+      final message = TransferMessageData.fromJson(data.data);
+      i('client: message: $message');
+      break;
+    default:
+      throw Exception('unknown type: ${data.type}');
   }
 }

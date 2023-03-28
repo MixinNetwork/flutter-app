@@ -49,6 +49,8 @@ abstract class TransferProtocolWriter extends TransferProtocol {
 
 class TransferProtocolTransform
     extends StreamTransformerBase<Uint8List, TransferProtocol> {
+  const TransferProtocolTransform();
+
   @override
   Stream<TransferProtocol> bind(Stream<Uint8List> stream) =>
       Stream<TransferProtocol>.eventTransformed(
@@ -91,8 +93,10 @@ class _TransferProtocolSink extends EventSink<Uint8List> {
       return;
     }
 
-    if (data.length < bodyEnd + 4 /* crc */) {
-      d('no enough data. ${data.length} < ${bodyEnd + 4}');
+    final packetEnd = bodyEnd + 8 /* crc */;
+
+    if (data.length < packetEnd) {
+      d('no enough data. ${data.length} < $packetEnd');
       _carry = data;
       return;
     }
@@ -107,8 +111,8 @@ class _TransferProtocolSink extends EventSink<Uint8List> {
     }
 
     _sink.add(_ByteTransferProtocol(body, type));
-    if (data.length > bodyEnd) {
-      add(data.sublist(bodyEnd));
+    if (data.length > packetEnd) {
+      add(data.sublist(packetEnd));
     }
   }
 
