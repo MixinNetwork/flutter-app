@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter_app/utils/device_transfer/transfer_data_user.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'transfer_data_asset.dart';
@@ -8,6 +7,7 @@ import 'transfer_data_conversation.dart';
 import 'transfer_data_message.dart';
 import 'transfer_data_snapshot.dart';
 import 'transfer_data_sticker.dart';
+import 'transfer_data_user.dart';
 import 'transfer_protocol.dart';
 
 part 'transfer_data_json_wrapper.g.dart';

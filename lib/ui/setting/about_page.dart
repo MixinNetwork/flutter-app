@@ -276,7 +276,7 @@ void _handleJsonMessage(TransferDataJsonWrapper data) {
         break;
       case kTypeMessage:
         final message = TransferDataMessage.fromJson(data.data);
-        // i('client: message: ${message.messageId}');
+        i('client: message: ${message.messageId}');
         break;
       case kTypeAsset:
         final asset = TransferDataAsset.fromJson(data.data);
