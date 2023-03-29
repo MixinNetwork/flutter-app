@@ -647,7 +647,6 @@ class AccountServer {
     final chunked = ids.chunked(kMarkLimit);
 
     for (final ids in chunked) {
-
       final expireAt = await database.expiredMessageDao.getMessageExpireAt(ids);
       ids.forEach(
         (id) => addAckJob(createAckJob(
