@@ -13,6 +13,7 @@ import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/logger.dart';
 import '../../utils/uri_utils.dart';
 import '../actions/actions.dart';
 
@@ -270,6 +271,17 @@ class _Menus extends HookWidget {
                     }
                   : null,
             ),
+            PlatformMenuItemGroup(members: [
+              PlatformMenuItem(
+                label: '迁移和备份',
+                onSelected: signed
+                    ? () {
+                        final database = context.database;
+                        d('database: $database');
+                      }
+                    : null,
+              )
+            ]),
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
                 label: context.l10n.closeWindow,

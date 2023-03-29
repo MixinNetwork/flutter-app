@@ -266,6 +266,8 @@ class DecryptMessage extends Injector {
           unawaited(_sender.sendProcessSignalKey(
               data, ProcessSignalKeyAction.resendKey));
         }
+      } else if (plainJsonMessage.action == kDeviceTransfer) {
+        i('receive device transfer message. ${plainJsonMessage.content}');
       }
       await database.messagesHistoryDao
           .insert(MessagesHistoryData(messageId: data.messageId));
