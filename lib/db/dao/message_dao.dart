@@ -924,7 +924,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                 ..addColumns([messages.messageId])
                 ..where(messages.conversationId.equals(conversationId) &
                     messages.category.equals(MessageCategory.messagePin) &
-                    messages.quoteMessageId.equals(messageId))
+                    messages.quoteMessageId.equals(messageId) &
+                    messages.content.isNotNull())
                 ..limit(100))
               .map((row) => row.read(messages.messageId))
               .get())
