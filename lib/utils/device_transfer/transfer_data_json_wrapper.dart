@@ -2,17 +2,21 @@ import 'dart:io';
 
 import 'package:json_annotation/json_annotation.dart';
 
-import 'transfer_conversation_data.dart';
+import 'transfer_data_conversation.dart';
 import 'transfer_data.dart';
-import 'transfer_message_data.dart';
+import 'transfer_data_message.dart';
 
 part 'transfer_data_json_wrapper.g.dart';
 
 const kTypeConversation = 'conversation';
 const kTypeMessage = 'message';
+const kTypeSticker = 'sticker';
+const kTypeAsset = 'asset';
+const kTypeSnapshot = 'snapshot';
+const kTypeUser = 'user';
 
 extension SocketExtension on Socket {
-  Future<void> addConversation(TransferConversationData conversation) {
+  Future<void> addConversation(TransferDataConversation conversation) {
     final wrapper = TransferDataJsonWrapper(
       data: conversation.toJson(),
       type: kTypeConversation,
@@ -20,7 +24,7 @@ extension SocketExtension on Socket {
     return _addTransferJson(wrapper);
   }
 
-  Future<void> addMessage(TransferMessageData message) {
+  Future<void> addMessage(TransferDataMessage message) {
     final wrapper = TransferDataJsonWrapper(
       data: message.toJson(),
       type: kTypeMessage,

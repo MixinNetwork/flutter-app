@@ -8,10 +8,10 @@ import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
-import '../../utils/device_transfer/transfer_conversation_data.dart';
+import '../../utils/device_transfer/transfer_data_conversation.dart';
 import '../../utils/device_transfer/transfer_data.dart';
 import '../../utils/device_transfer/transfer_data_json_wrapper.dart';
-import '../../utils/device_transfer/transfer_message_data.dart';
+import '../../utils/device_transfer/transfer_data_message.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/system/package_info.dart';
@@ -158,9 +158,9 @@ class _BackupItem extends HookWidget {
               final conversations =
                   await context.database.conversationDao.getConversations();
               for (final conversation in conversations) {
-                // await socket.addConversation(
-                //   TransferConversationData.fromDbConversation(conversation),
-                // );
+                await socket.addConversation(
+                  TransferDataConversation.fromDbConversation(conversation),
+                );
               }
 
               final attachmentMessage = <Message>[];
@@ -169,8 +169,8 @@ class _BackupItem extends HookWidget {
                 final messages = await context.database.messageDao
                     .getMessagesByConversationId(conversation.conversationId);
                 for (final message in messages) {
-                  // await socket
-                  //     .addMessage(TransferMessageData.fromDbMessage(message));
+                  await socket
+                      .addMessage(TransferDataMessage.fromDbMessage(message));
                   if (message.category.isAttachment) {
                     attachmentMessage.add(message);
                   }
@@ -192,7 +192,7 @@ class _BackupItem extends HookWidget {
                   continue;
                 }
                 d('send attachment ${message.messageId} $path ${File(path).lengthSync()}');
-                await socket.addAttachment(message.messageId, path);
+                // await socket.addAttachment(message.messageId, path);
               }
             });
           },
@@ -231,18 +231,21 @@ void _handleAttachmentMessage(TransferAttachmentPacket packet) {
 }
 
 void _handleJsonMessage(TransferDataJsonWrapper data) {
-  i('client: message: ${data.data}');
-  return;
-  switch (data.type) {
-    case kTypeConversation:
-      final conversation = TransferConversationData.fromJson(data.data);
-      i('client: conversation: $conversation');
-      break;
-    case kTypeMessage:
-      final message = TransferMessageData.fromJson(data.data);
-      i('client: message: $message');
-      break;
-    default:
-      throw Exception('unknown type: ${data.type}');
+  try {
+    switch (data.type) {
+      case kTypeConversation:
+        final conversation = TransferDataConversation.fromJson(data.data);
+        i('client: conversation: $conversation');
+        break;
+      case kTypeMessage:
+        final message = TransferDataMessage.fromJson(data.data);
+        i('client: message: ${message.messageId}');
+        break;
+      default:
+        i('unknown type: ${data.type}');
+    }
+  } catch (error, stacktrace) {
+    e('error: $error $stacktrace');
+    e('raw data: ${data.type} ${data.data}');
   }
 }

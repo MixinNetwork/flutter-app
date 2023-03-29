@@ -3,13 +3,13 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../db/mixin_database.dart' as db;
 
-part 'transfer_conversation_data.g.dart';
+part 'transfer_data_conversation.g.dart';
 
 @JsonSerializable()
 @ConversationCategoryJsonConverter()
 @ConversationStatusJsonConverter()
-class TransferConversationData {
-  TransferConversationData({
+class TransferDataConversation {
+  TransferDataConversation({
     required this.conversationId,
     required this.createdAt,
     required this.status,
@@ -29,8 +29,8 @@ class TransferConversationData {
     this.expireIn,
   });
 
-  factory TransferConversationData.fromDbConversation(db.Conversation c) =>
-      TransferConversationData(
+  factory TransferDataConversation.fromDbConversation(db.Conversation c) =>
+      TransferDataConversation(
         conversationId: c.conversationId,
         ownerId: c.ownerId,
         category: c.category,
@@ -50,8 +50,8 @@ class TransferConversationData {
         expireIn: c.expireIn,
       );
 
-  factory TransferConversationData.fromJson(Map<String, dynamic> json) =>
-      _$TransferConversationDataFromJson(json);
+  factory TransferDataConversation.fromJson(Map<String, dynamic> json) =>
+      _$TransferDataConversationFromJson(json);
 
   @JsonKey(name: 'conversation_id')
   final String conversationId;
@@ -104,7 +104,7 @@ class TransferConversationData {
   @JsonKey(name: 'expire_in')
   final int? expireIn;
 
-  Map<String, dynamic> toJson() => _$TransferConversationDataToJson(this);
+  Map<String, dynamic> toJson() => _$TransferDataConversationToJson(this);
 
   db.Conversation toDbConversation() => db.Conversation(
         conversationId: conversationId,

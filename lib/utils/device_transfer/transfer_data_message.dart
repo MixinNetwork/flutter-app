@@ -5,12 +5,12 @@ import '../../db/converter/media_status_type_converter.dart';
 import '../../db/mixin_database.dart' as db;
 import '../../enum/media_status.dart';
 
-part 'transfer_message_data.g.dart';
+part 'transfer_data_message.g.dart';
 
 @JsonSerializable()
 @MediaStatusTypeConverter()
-class TransferMessageData {
-  TransferMessageData({
+class TransferDataMessage {
+  TransferDataMessage({
     required this.messageId,
     required this.conversationId,
     required this.userId,
@@ -44,11 +44,11 @@ class TransferMessageData {
     this.caption,
   });
 
-  factory TransferMessageData.fromJson(Map<String, dynamic> json) =>
-      _$TransferMessageDataFromJson(json);
+  factory TransferDataMessage.fromJson(Map<String, dynamic> json) =>
+      _$TransferDataMessageFromJson(json);
 
-  factory TransferMessageData.fromDbMessage(db.Message data) =>
-      TransferMessageData(
+  factory TransferDataMessage.fromDbMessage(db.Message data) =>
+      TransferDataMessage(
         messageId: data.messageId,
         conversationId: data.conversationId,
         userId: data.userId,
@@ -145,7 +145,7 @@ class TransferMessageData {
   @JsonKey(name: 'caption')
   final String? caption;
 
-  Map<String, dynamic> toJson() => _$TransferMessageDataToJson(this);
+  Map<String, dynamic> toJson() => _$TransferDataMessageToJson(this);
 
   db.Message toDbMessage() => db.Message(
         messageId: messageId,

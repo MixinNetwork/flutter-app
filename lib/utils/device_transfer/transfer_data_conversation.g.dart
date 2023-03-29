@@ -1,14 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'transfer_conversation_data.dart';
+part of 'transfer_data_conversation.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-TransferConversationData _$TransferConversationDataFromJson(
+TransferDataConversation _$TransferDataConversationFromJson(
         Map<String, dynamic> json) =>
-    TransferConversationData(
+    TransferDataConversation(
       conversationId: json['conversation_id'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       status: const ConversationStatusJsonConverter()
@@ -36,8 +36,8 @@ TransferConversationData _$TransferConversationDataFromJson(
       expireIn: json['expire_in'] as int?,
     );
 
-Map<String, dynamic> _$TransferConversationDataToJson(
-        TransferConversationData instance) =>
+Map<String, dynamic> _$TransferDataConversationToJson(
+        TransferDataConversation instance) =>
     <String, dynamic>{
       'conversation_id': instance.conversationId,
       'owner_id': instance.ownerId,

@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'transfer_message_data.dart';
+part of 'transfer_data_message.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-TransferMessageData _$TransferMessageDataFromJson(Map<String, dynamic> json) =>
-    TransferMessageData(
+TransferDataMessage _$TransferDataMessageFromJson(Map<String, dynamic> json) =>
+    TransferDataMessage(
       messageId: json['message_id'] as String,
       conversationId: json['conversation_id'] as String,
       userId: json['user_id'] as String,
@@ -42,8 +42,8 @@ TransferMessageData _$TransferMessageDataFromJson(Map<String, dynamic> json) =>
       caption: json['caption'] as String?,
     );
 
-Map<String, dynamic> _$TransferMessageDataToJson(
-        TransferMessageData instance) =>
+Map<String, dynamic> _$TransferDataMessageToJson(
+        TransferDataMessage instance) =>
     <String, dynamic>{
       'message_id': instance.messageId,
       'conversation_id': instance.conversationId,

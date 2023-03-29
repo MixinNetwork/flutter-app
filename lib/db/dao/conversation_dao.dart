@@ -503,7 +503,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<List<Conversation>> getConversations() => (select(db.conversations)
-        ..limit(10)
         ..orderBy([
           (c) => OrderingTerm.desc(c.lastMessageCreatedAt),
         ]))
