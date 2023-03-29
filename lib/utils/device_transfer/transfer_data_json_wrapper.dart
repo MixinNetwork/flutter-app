@@ -29,7 +29,7 @@ extension SocketExtension on Socket {
   }
 
   Future<void> _addTransferJson(TransferDataJsonWrapper data) =>
-      TransferProtocolWriter.json(data.toJson()).write(this);
+      writePacketToSink(this, TransferJsonPacket(data));
 }
 
 @JsonSerializable()

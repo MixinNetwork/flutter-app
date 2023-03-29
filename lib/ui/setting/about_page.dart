@@ -177,22 +177,17 @@ class _BackupItem extends HookWidget {
         CellItem(
           title: const Text('read'),
           onTap: () async {
-            const host = '192.168.98.29';
+            const host = '192.168.98.118';
             // const host = 'localhost';
             final socket = await Socket.connect(host, 8888);
             i('client: connected to server');
 
             socket.transform(const TransferProtocolTransform()).listen(
                 (data) async {
-              final type = data.type;
-              switch (data.type) {
-                case kTypeJson:
-                  _handleJsonMessage(await data.body);
-                  break;
-                case kTypeFile:
-                  throw UnimplementedError('file transfer not implemented');
-                default:
-                  throw Exception('unknown type: $type');
+              if (data is TransferJsonPacket) {
+                _handleJsonMessage(data.json);
+              } else if (data is TransferAttachmentPacket) {
+                _handleAttachmentMessage(data);
               }
             }, onError: (error) {
               i('client: error $error');
@@ -208,9 +203,11 @@ class _BackupItem extends HookWidget {
   }
 }
 
-void _handleJsonMessage(Uint8List bytes) {
-  final data = TransferDataJsonWrapper.fromJson(
-      jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>);
+void _handleAttachmentMessage(TransferAttachmentPacket packet) {
+  d('client: attachment: ${packet.messageId} ${packet.path}');
+}
+
+void _handleJsonMessage(TransferDataJsonWrapper data) {
   i('client: message: ${data.data}');
   return;
   switch (data.type) {

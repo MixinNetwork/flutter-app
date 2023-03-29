@@ -4,15 +4,21 @@ import 'dart:typed_data';
 
 import 'package:flutter_app/utils/device_transfer/crc.dart';
 import 'package:flutter_app/utils/device_transfer/transfer_data.dart';
+import 'package:flutter_app/utils/device_transfer/transfer_data_json_wrapper.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:uuid/uuid.dart';
 
 void main() {
   test('transfer writer', () async {
     final sink = _BytesStreamSink();
 
-    Future<void> writeJson(Map<String, dynamic> json) =>
-        TransferProtocolWriter.json(json).write(sink);
+    Future<void> writeJson(Map<String, dynamic> json) => writePacketToSink(
+        sink,
+        TransferJsonPacket(TransferDataJsonWrapper(
+          type: 'test',
+          data: json,
+        )));
     await writeJson({'abc': 1});
     await writeJson({'bdfasf': 2124124});
     await writeJson({'bdfasf': 2124124});
@@ -25,11 +31,27 @@ void main() {
     final data = await stream.toList();
     expect(data.length, 5);
 
-    final protocol = data.first;
-    expect(protocol.type, kTypeJson);
-    final body = await protocol.body;
-    expect(utf8.decode(body), jsonEncode({'abc': 1}));
-    d('utf8.decode(body): ${utf8.decode(body)}');
+    final packet = data.first as TransferJsonPacket;
+    final body = packet.json.data;
+    expect(body, equals({'abc': 1}));
+    d('utf8.decode(body): $body');
+  });
+
+  test('write file', () async {
+    final sink = _BytesStreamSink();
+    final messageId = const Uuid().v4();
+    await writePacketToSink(
+      sink,
+      TransferAttachmentPacket(messageId: messageId, path: './LICENSE'),
+    );
+    final bytes = Uint8List.fromList(sink.data);
+    final stream = Stream.value(Uint8List.fromList(bytes))
+        .transform(const TransferProtocolTransform());
+    final data = await stream.toList();
+    expect(data.length, 1);
+    final packet = data.first as TransferAttachmentPacket;
+    expect(packet.messageId, messageId);
+    d('packet.path: ${packet.path}');
   });
 
   test('crc test', () {
