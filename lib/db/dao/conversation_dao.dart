@@ -502,6 +502,10 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     return isBotConversation ? EncryptCategory.plain : EncryptCategory.signal;
   }
 
-  Future<List<Conversation>> getConversations() =>
-      select(db.conversations).get();
+  Future<List<Conversation>> getConversations() => (select(db.conversations)
+        ..limit(10)
+        ..orderBy([
+          (c) => OrderingTerm.desc(c.lastMessageCreatedAt),
+        ]))
+      .get();
 }

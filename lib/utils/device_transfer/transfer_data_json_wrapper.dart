@@ -28,6 +28,11 @@ extension SocketExtension on Socket {
     return _addTransferJson(wrapper);
   }
 
+  Future<void> addAttachment(String messageId, String path) {
+    final packet = TransferAttachmentPacket(messageId: messageId, path: path);
+    return writePacketToSink(this, packet);
+  }
+
   Future<void> _addTransferJson(TransferDataJsonWrapper data) =>
       writePacketToSink(this, TransferJsonPacket(data));
 }

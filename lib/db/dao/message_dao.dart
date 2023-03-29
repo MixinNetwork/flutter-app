@@ -1091,6 +1091,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Future<List<Message>> getMessagesByConversationId(String conversationId) =>
       (select(db.messages)
             ..where((tbl) => tbl.conversationId.equals(conversationId))
+            ..orderBy([
+              (m) => OrderingTerm(
+                  expression: m.createdAt, mode: OrderingMode.desc),
+            ])
             ..limit(100))
           .get();
 }

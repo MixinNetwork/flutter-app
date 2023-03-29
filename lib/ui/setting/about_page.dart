@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../constants/resources.dart';
+import '../../db/mixin_database.dart';
 import '../../utils/device_transfer/transfer_conversation_data.dart';
 import '../../utils/device_transfer/transfer_data.dart';
 import '../../utils/device_transfer/transfer_data_json_wrapper.dart';
@@ -157,19 +158,41 @@ class _BackupItem extends HookWidget {
               final conversations =
                   await context.database.conversationDao.getConversations();
               for (final conversation in conversations) {
-                await socket.addConversation(
-                  TransferConversationData.fromDbConversation(conversation),
-                );
+                // await socket.addConversation(
+                //   TransferConversationData.fromDbConversation(conversation),
+                // );
               }
 
+              final attachmentMessage = <Message>[];
               // send messages
               for (final conversation in conversations) {
                 final messages = await context.database.messageDao
                     .getMessagesByConversationId(conversation.conversationId);
                 for (final message in messages) {
-                  await socket
-                      .addMessage(TransferMessageData.fromDbMessage(message));
+                  // await socket
+                  //     .addMessage(TransferMessageData.fromDbMessage(message));
+                  if (message.category.isAttachment) {
+                    attachmentMessage.add(message);
+                  }
                 }
+              }
+
+              d('send attachment count ${attachmentMessage.length}');
+
+              // send attachment
+              for (final message in attachmentMessage.take(10)) {
+                final path =
+                    context.accountServer.attachmentUtil.convertAbsolutePath(
+                  fileName: message.mediaUrl,
+                  conversationId: message.conversationId,
+                  category: message.category,
+                );
+                if (!File(path).existsSync()) {
+                  w('attachment not exist $path');
+                  continue;
+                }
+                d('send attachment ${message.messageId} $path ${File(path).lengthSync()}');
+                await socket.addAttachment(message.messageId, path);
               }
             });
           },
@@ -177,7 +200,7 @@ class _BackupItem extends HookWidget {
         CellItem(
           title: const Text('read'),
           onTap: () async {
-            const host = '192.168.98.118';
+            const host = '192.168.98.29';
             // const host = 'localhost';
             final socket = await Socket.connect(host, 8888);
             i('client: connected to server');

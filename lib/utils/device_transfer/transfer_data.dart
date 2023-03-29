@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../file.dart';
 import '../logger.dart';
 import 'crc.dart';
 import 'transfer_data_json_wrapper.dart';
@@ -190,15 +191,15 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
       final messageIdBytes = bytes.sublist(0, _kUUIDBytesCount);
       final messageId = Uuid.unparse(messageIdBytes);
       _messageId = messageId;
-      final path = '/tmp/$messageId';
+      final path = '${mixinDocumentsDirectory.path}/tmp/$messageId';
       final file = File(path);
       _file = file;
       if (file.existsSync()) {
-        file
-          ..delete()
-          ..create();
+        file.delete();
       }
-      file.writeAsBytes(bytes.sublist(_kUUIDBytesCount), flush: true);
+      file
+        ..createSync(recursive: true)
+        ..writeAsBytes(bytes.sublist(_kUUIDBytesCount), flush: true);
     } else {
       _file!.writeAsBytes(bytes, mode: FileMode.append, flush: true);
     }
