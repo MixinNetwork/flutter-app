@@ -5,12 +5,11 @@ part of 'expired_message_dao.dart';
 // ignore_for_file: type=lint
 mixin _$ExpiredMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
-  Selectable<ExpiredMessage> getExpiredMessages(int? currentTime, int limit) {
+  Selectable<ExpiredMessage> getExpiredMessages(int? currentTime) {
     return customSelect(
-        'SELECT * FROM expired_messages WHERE expire_at <= ?1 ORDER BY expire_at ASC LIMIT ?2',
+        'SELECT * FROM expired_messages WHERE expire_at <= ?1 ORDER BY expire_at ASC',
         variables: [
-          Variable<int>(currentTime),
-          Variable<int>(limit)
+          Variable<int>(currentTime)
         ],
         readsFrom: {
           expiredMessages,

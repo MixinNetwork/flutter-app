@@ -509,13 +509,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<List<String>> getUnreadMessageIds(
-      String conversationId, String userId, int limit) async {
+      String conversationId, String userId) async {
     final list = await (db.selectOnly(db.messages)
           ..addColumns([db.messages.messageId])
           ..where(db.messages.conversationId.equals(conversationId) &
               db.messages.userId.equals(userId).not() &
-              db.messages.status.isIn(['SENT', 'DELIVERED']))
-          ..limit(limit))
+              db.messages.status.isIn(['SENT', 'DELIVERED'])))
         .map((row) => row.read(db.messages.messageId))
         .get();
     final ids = list.whereNotNull().toList();
@@ -919,34 +918,37 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       String conversationId, String messageId) async {
     final messages = db.messages;
 
-    while (true) {
-      final messageIds = (await (db.selectOnly(messages)
-                ..addColumns([messages.messageId])
-                ..where(messages.conversationId.equals(conversationId) &
-                    messages.category.equals(MessageCategory.messagePin) &
-                    messages.quoteMessageId.equals(messageId) &
-                    messages.content.isNotNull())
-                ..limit(100))
-              .map((row) => row.read(messages.messageId))
-              .get())
-          .whereNotNull();
+    final messageIds = (await (db.selectOnly(messages)
+              ..addColumns([messages.messageId])
+              ..where(messages.conversationId.equals(conversationId) &
+                  messages.category.equals(MessageCategory.messagePin) &
+                  messages.quoteMessageId.equals(messageId) &
+                  messages.content.isNotNull()))
+            .map((row) => row.read(messages.messageId))
+            .get())
+        .whereNotNull();
 
-      if (messageIds.isEmpty) return;
+    if (messageIds.isEmpty) return;
+
+    final chunked = messageIds.toList().chunked(kMarkLimit);
+
+    for (final ids in chunked) {
+      if (ids.isEmpty) return;
 
       await (db.update(messages)
             ..where(
-              (tbl) => tbl.messageId.isIn(messageIds),
+              (tbl) => tbl.messageId.isIn(ids),
             ))
           .write(const MessagesCompanion(
         content: Value(null),
       ));
-
-      DataBaseEventBus.instance
-          .insertOrReplaceMessages(messageIds.map((e) => MiniMessageItem(
-                messageId: e,
-                conversationId: conversationId,
-              )));
     }
+
+    DataBaseEventBus.instance
+        .insertOrReplaceMessages(messageIds.map((e) => MiniMessageItem(
+              messageId: e,
+              conversationId: conversationId,
+            )));
   }
 
   Future<void> recallMessage(String conversationId, String messageId) async {
