@@ -23,6 +23,7 @@ dependencies:
   archive: ^3.3.2
   async: ^2.8.1
   bloc: ^8.1.0
+  bloc_concurrency: ^0.2.1
   blurhash_dart: ^1.0.2
   bring_window_to_front:
     git:
