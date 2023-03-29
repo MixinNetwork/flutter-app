@@ -1,6 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import '../../db/mixin_database.dart' as db;
+
 part 'transfer_data_user.g.dart';
 
 @JsonSerializable()
@@ -26,6 +28,24 @@ class TransferDataUser {
 
   factory TransferDataUser.fromJson(Map<String, dynamic> json) =>
       _$TransferDataUserFromJson(json);
+
+  factory TransferDataUser.fromDbUser(db.User user) => TransferDataUser(
+        userId: user.userId,
+        identityNumber: user.identityNumber,
+        relationship: user.relationship,
+        fullName: user.fullName,
+        avatarUrl: user.avatarUrl,
+        phone: user.phone,
+        isVerified: user.isVerified,
+        createdAt: user.createdAt,
+        muteUntil: user.muteUntil,
+        hasPin: user.hasPin,
+        appId: user.appId,
+        biography: user.biography,
+        isScam: user.isScam,
+        codeUrl: user.codeUrl,
+        codeId: user.codeId,
+      );
 
   @JsonKey(name: 'user_id')
   final String userId;
@@ -71,6 +91,24 @@ class TransferDataUser {
   final String? codeId;
 
   Map<String, dynamic> toJson() => _$TransferDataUserToJson(this);
+
+  db.User toDbUser() => db.User(
+        userId: userId,
+        identityNumber: identityNumber,
+        relationship: relationship,
+        fullName: fullName,
+        avatarUrl: avatarUrl,
+        phone: phone,
+        isVerified: isVerified,
+        createdAt: createdAt,
+        muteUntil: muteUntil,
+        hasPin: hasPin,
+        appId: appId,
+        biography: biography,
+        isScam: isScam,
+        codeUrl: codeUrl,
+        codeId: codeId,
+      );
 
   @override
   String toString() => 'TransferDataUser($userId)';

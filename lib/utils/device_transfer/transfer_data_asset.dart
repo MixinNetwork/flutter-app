@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../db/mixin_database.dart' as db;
+
 part 'transfer_data_asset.g.dart';
 
 @JsonSerializable()
@@ -24,6 +26,24 @@ class TransferDataAsset {
 
   factory TransferDataAsset.fromJson(Map<String, dynamic> json) =>
       _$TransferDataAssetFromJson(json);
+
+  factory TransferDataAsset.fromDbAsset(db.Asset a) => TransferDataAsset(
+        assetId: a.assetId,
+        symbol: a.symbol,
+        name: a.name,
+        iconUrl: a.iconUrl,
+        balance: a.balance,
+        destination: a.destination,
+        priceBtc: a.priceBtc,
+        priceUsd: a.priceUsd,
+        chainId: a.chainId,
+        changeUsd: a.changeUsd,
+        changeBtc: a.changeBtc,
+        confirmations: a.confirmations,
+        tag: a.tag,
+        assetKey: a.assetKey,
+        reserve: a.reserve,
+      );
 
   @JsonKey(name: 'asset_id')
   final String assetId;
@@ -62,6 +82,24 @@ class TransferDataAsset {
   final String? reserve;
 
   Map<String, dynamic> toJson() => _$TransferDataAssetToJson(this);
+
+  db.Asset toDbAsset() => db.Asset(
+        assetId: assetId,
+        symbol: symbol,
+        name: name,
+        iconUrl: iconUrl,
+        balance: balance,
+        destination: destination,
+        priceBtc: priceBtc,
+        priceUsd: priceUsd,
+        chainId: chainId,
+        changeUsd: changeUsd,
+        changeBtc: changeBtc,
+        confirmations: confirmations,
+        tag: tag,
+        assetKey: assetKey,
+        reserve: reserve,
+      );
 
   @override
   String toString() => 'TransferDataAsset(assetId: $assetId)';
