@@ -647,7 +647,6 @@ class AccountServer {
     final chunked = ids.chunked(kMarkLimit);
 
     for (final ids in chunked) {
-      if (ids.isEmpty) return;
 
       final expireAt = await database.expiredMessageDao.getMessageExpireAt(ids);
       ids.forEach(

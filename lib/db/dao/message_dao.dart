@@ -933,7 +933,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     final chunked = messageIds.toList().chunked(kMarkLimit);
 
     for (final ids in chunked) {
-      if (ids.isEmpty) return;
 
       await (db.update(messages)
             ..where(
