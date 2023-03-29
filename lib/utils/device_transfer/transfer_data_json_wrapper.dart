@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'transfer_data_conversation.dart';
-import 'transfer_data.dart';
 import 'transfer_data_message.dart';
+import 'transfer_protocol.dart';
 
 part 'transfer_data_json_wrapper.g.dart';
 
