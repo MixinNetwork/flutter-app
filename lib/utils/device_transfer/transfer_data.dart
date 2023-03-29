@@ -245,7 +245,7 @@ class _TransferProtocolSink extends EventSink<Uint8List> {
 
   @override
   void add(Uint8List event) {
-    final Uint8List data;
+    Uint8List data;
     final carry = _carry;
     if (carry != null) {
       data = Uint8List.fromList(carry + event);
@@ -254,58 +254,59 @@ class _TransferProtocolSink extends EventSink<Uint8List> {
       data = event;
     }
 
-    if (_builder == null) {
-      if (data.length < 5) {
-        _carry = data;
-        return;
-      }
-      final bytes = data.buffer.asByteData();
-      final type = bytes.getInt8(0);
-      final bodyLength = bytes.getInt32(1);
-      switch (type) {
-        case kTypeJson:
-          _builder = _TransferJsonPacketBuilder(bodyLength);
-          break;
-        case kTypeFile:
-          _builder = _TransferAttachmentPacketBuilder(bodyLength);
-          break;
-        default:
-          _sink.addError('unknown type: $type', StackTrace.current);
+    while (true) {
+      if (_builder == null) {
+        if (data.length < 5) {
+          _carry = data;
           return;
-      }
-      add(data.sublist(5));
-      return;
-    }
+        }
+        final bytes = data.buffer.asByteData();
+        final type = bytes.getInt8(0);
+        final bodyLength = bytes.getInt32(1);
+        switch (type) {
+          case kTypeJson:
+            _builder = _TransferJsonPacketBuilder(bodyLength);
+            break;
+          case kTypeFile:
+            _builder = _TransferAttachmentPacketBuilder(bodyLength);
+            break;
+          default:
+            _sink.addError('unknown type: $type', StackTrace.current);
+            return;
+        }
+        data = data.sublist(5);
+      } else {
+        final builder = _builder!;
+        final need = builder.expectedBodyLength - builder._writeBodyLength;
+        if (data.length < need) {
+          final write = builder.writeBody(data);
+          if (!write) {
+            _carry = data;
+          }
+          return;
+        } else {
+          final write = builder.writeBody(data.sublist(0, need));
+          assert(write,
+              'data length larger than expected, this should not be happen.');
 
-    final builder = _builder!;
-    final need = builder.expectedBodyLength - builder._writeBodyLength;
-    if (data.length < need) {
-      final write = builder.writeBody(data);
-      if (!write) {
-        _carry = data;
+          final left = data.sublist(need);
+          // check if left is enough for crc
+          if (left.length < 8) {
+            _carry = left;
+            return;
+          }
+          // check crc
+          final crc = left.buffer.asByteData().getUint64(0);
+          if (crc != builder.bodyCrc) {
+            _sink.addError('crc not match', StackTrace.current);
+            return;
+          }
+          final packet = builder.build();
+          _sink.add(packet);
+          _builder = null;
+          data = left.sublist(8);
+        }
       }
-      return;
-    } else {
-      final write = builder.writeBody(data.sublist(0, need));
-      assert(write,
-          'data length larger than expected, this should not be happen.');
-
-      final left = data.sublist(need);
-      // check if left is enough for crc
-      if (left.length < 8) {
-        _carry = left;
-        return;
-      }
-      // check crc
-      final crc = left.buffer.asByteData().getUint64(0);
-      if (crc != builder.bodyCrc) {
-        _sink.addError('crc not match', StackTrace.current);
-        return;
-      }
-      final packet = builder.build();
-      _sink.add(packet);
-      _builder = null;
-      add(left.sublist(8));
     }
   }
 
