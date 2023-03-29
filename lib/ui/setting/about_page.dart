@@ -8,9 +8,13 @@ import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
+import '../../utils/device_transfer/transfer_data_asset.dart';
 import '../../utils/device_transfer/transfer_data_conversation.dart';
 import '../../utils/device_transfer/transfer_data_json_wrapper.dart';
 import '../../utils/device_transfer/transfer_data_message.dart';
+import '../../utils/device_transfer/transfer_data_snapshot.dart';
+import '../../utils/device_transfer/transfer_data_sticker.dart';
+import '../../utils/device_transfer/transfer_data_user.dart';
 import '../../utils/device_transfer/transfer_protocol.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -179,6 +183,39 @@ class _BackupItem extends HookWidget {
 
               d('send attachment count ${attachmentMessage.length}');
 
+              // send sticker
+              final stickers = await context.database.stickerDao.getStickers();
+              for (final sticker in stickers) {
+                await socket.addSticker(
+                  TransferDataSticker.fromDbSticker(sticker),
+                );
+              }
+
+              // send user
+              final users = await context.database.userDao.getUsers();
+              for (final user in users) {
+                await socket.addUser(
+                  TransferDataUser.fromDbUser(user),
+                );
+              }
+
+              // send asset
+              final assets = await context.database.assetDao.getAssets();
+              for (final asset in assets) {
+                await socket.addAsset(
+                  TransferDataAsset.fromDbAsset(asset),
+                );
+              }
+
+              // send snapshot
+              final snapshots =
+                  await context.database.snapshotDao.getSnapshots();
+              for (final snapshot in snapshots) {
+                await socket.addSnapshot(
+                  TransferDataSnapshot.fromDbSnapshot(snapshot),
+                );
+              }
+
               // send attachment
               for (final message in attachmentMessage.take(10)) {
                 final path =
@@ -239,7 +276,23 @@ void _handleJsonMessage(TransferDataJsonWrapper data) {
         break;
       case kTypeMessage:
         final message = TransferDataMessage.fromJson(data.data);
-        i('client: message: ${message.messageId}');
+        // i('client: message: ${message.messageId}');
+        break;
+      case kTypeAsset:
+        final asset = TransferDataAsset.fromJson(data.data);
+        i('client: asset: $asset');
+        break;
+      case kTypeUser:
+        final user = TransferDataUser.fromJson(data.data);
+        i('client: user: $user');
+        break;
+      case kTypeSticker:
+        final sticker = TransferDataSticker.fromJson(data.data);
+        i('client: sticker: $sticker');
+        break;
+      case kTypeSnapshot:
+        final snapshot = TransferDataSnapshot.fromJson(data.data);
+        i('client: snapshot: $snapshot');
         break;
       default:
         i('unknown type: ${data.type}');

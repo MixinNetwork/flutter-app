@@ -22,10 +22,10 @@ TransferDataUser _$TransferDataUserFromJson(Map<String, dynamic> json) =>
       muteUntil: json['mute_until'] == null
           ? null
           : DateTime.parse(json['mute_until'] as String),
-      hasPin: json['has_pin'] as int?,
+      hasPin: json['has_pin'] as bool?,
       appId: json['app_id'] as String?,
       biography: json['biography'] as String?,
-      isScam: json['is_scam'] as int?,
+      isScam: json['is_scam'] as bool?,
       codeUrl: json['code_url'] as String?,
       codeId: json['code_id'] as String?,
     );

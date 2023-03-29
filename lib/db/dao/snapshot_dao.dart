@@ -78,4 +78,13 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
             ..where(db.snapshots.traceId.equals(traceId))
             ..limit(1))
           .map((row) => row.read(db.snapshots.snapshotId));
+
+  Future<List<Snapshot>> getSnapshots() => (select(db.snapshots)
+        ..orderBy([
+          (t) => OrderingTerm(
+                expression: t.createdAt,
+                mode: OrderingMode.desc,
+              )
+        ]))
+      .get();
 }

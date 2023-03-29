@@ -39,10 +39,10 @@ class TransferDataUser {
         isVerified: user.isVerified,
         createdAt: user.createdAt,
         muteUntil: user.muteUntil,
-        hasPin: user.hasPin,
+        hasPin: user.hasPin == 1,
         appId: user.appId,
         biography: user.biography,
-        isScam: user.isScam,
+        isScam: user.isScam == 1,
         codeUrl: user.codeUrl,
         codeId: user.codeId,
       );
@@ -74,7 +74,7 @@ class TransferDataUser {
   final DateTime? muteUntil;
 
   @JsonKey(name: 'has_pin')
-  final int? hasPin;
+  final bool? hasPin;
 
   @JsonKey(name: 'app_id')
   final String? appId;
@@ -82,7 +82,7 @@ class TransferDataUser {
   final String? biography;
 
   @JsonKey(name: 'is_scam')
-  final int? isScam;
+  final bool? isScam;
 
   @JsonKey(name: 'code_url')
   final String? codeUrl;
@@ -102,10 +102,10 @@ class TransferDataUser {
         isVerified: isVerified,
         createdAt: createdAt,
         muteUntil: muteUntil,
-        hasPin: hasPin,
+        hasPin: hasPin == true ? 1 : 0,
         appId: appId,
         biography: biography,
-        isScam: isScam,
+        isScam: isScam == true ? 1 : 0,
         codeUrl: codeUrl,
         codeId: codeId,
       );

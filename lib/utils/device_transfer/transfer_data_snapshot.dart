@@ -40,13 +40,24 @@ class TransferDataSnapshot {
         confirmations: s.confirmations,
       );
 
+  @JsonKey(name: 'snapshot_id')
   final String snapshotId;
+
+  @JsonKey(name: 'trace_id')
   final String? traceId;
   final String type;
+
+  @JsonKey(name: 'asset_id')
   final String assetId;
   final String amount;
+
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
+
+  @JsonKey(name: 'opponent_id')
   final String? opponentId;
+
+  @JsonKey(name: 'transaction_hash')
   final String? transactionHash;
   final String? sender;
   final String? receiver;

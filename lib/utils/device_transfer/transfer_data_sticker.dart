@@ -33,14 +33,31 @@ class TransferDataSticker {
         lastUseAt: s.lastUseAt,
       );
 
+  @JsonKey(name: 'sticker_id')
   final String stickerId;
+
+  @JsonKey(name: 'album_id')
   final String? albumId;
+
+  @JsonKey(name: 'name')
   final String name;
+
+  @JsonKey(name: 'asset_url')
   final String assetUrl;
+
+  @JsonKey(name: 'asset_type')
   final String assetType;
+
+  @JsonKey(name: 'asset_width')
   final int assetWidth;
+
+  @JsonKey(name: 'asset_height')
   final int assetHeight;
+
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
+
+  @JsonKey(name: 'last_use_at')
   final DateTime? lastUseAt;
 
   Map<String, dynamic> toJson() => _$TransferDataStickerToJson(this);
