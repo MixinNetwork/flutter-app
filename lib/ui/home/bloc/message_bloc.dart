@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -16,7 +17,6 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/synchronized.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import 'conversation_cubit.dart';
 
@@ -210,9 +210,12 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.mentionCache,
     required this.accountServer,
   }) : super(MessageState()) {
-    on<_MessageEvent>((event, emit) => _lock.synchronized(
-          () => _onEvent(event, emit),
-        ));
+    on<_MessageEvent>(
+      (event, emit) async {
+        await _onEvent(event, emit);
+      },
+      transformer: sequential(),
+    );
 
     add(_MessageInitEvent(
       centerMessageId: conversationCubit.state?.initIndexMessageId,
@@ -263,8 +266,6 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   final MentionCache mentionCache;
   final AccountServer accountServer;
   int limit;
-
-  final _lock = Lock();
 
   MessageDao get messageDao => database.messageDao;
 
