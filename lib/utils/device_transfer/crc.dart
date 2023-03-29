@@ -18,12 +18,24 @@ void _initCrcTable() {
 }
 
 int calculateCrc32(Uint8List bytes) {
-  if (_crcTable[1] == 0) {
-    _initCrcTable();
+  final calculator = CrcCalculator()..addBytes(bytes);
+  return calculator.result;
+}
+
+class CrcCalculator {
+  CrcCalculator() {
+    if (_crcTable[1] == 0) {
+      _initCrcTable();
+    }
   }
-  var crc = 0xFFFFFFFF;
-  for (final b in bytes) {
-    crc = _crcTable[(crc ^ b) & 0xFF] ^ (crc >> 8);
+
+  var _crc = 0xFFFFFFFF;
+
+  void addBytes(Uint8List bytes) {
+    for (final b in bytes) {
+      _crc = _crcTable[(_crc ^ b) & 0xFF] ^ (_crc >> 8);
+    }
   }
-  return crc ^ 0xFFFFFFFF;
+
+  int get result => _crc ^ 0xFFFFFFFF;
 }
