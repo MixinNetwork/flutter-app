@@ -35,10 +35,12 @@ import '../enum/message_action.dart';
 import '../enum/message_category.dart';
 import '../enum/system_circle_action.dart';
 import '../enum/system_user_action.dart';
+import '../utils/device_transfer/transfer_data_command.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../widgets/message/send_message_dialog/attachment_extra.dart';
+import 'device_transfer.dart';
 import 'injector.dart';
 import 'isolate_event.dart';
 import 'job/ack_job.dart';
@@ -63,6 +65,7 @@ class DecryptMessage extends Injector {
     this._sendingJob,
     this._updateStickerJob,
     this._updateAssetJob,
+    this._deviceTransfer,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
@@ -82,6 +85,7 @@ class DecryptMessage extends Injector {
   final SendingJob _sendingJob;
   final UpdateStickerJob _updateStickerJob;
   final UpdateAssetJob _updateAssetJob;
+  final DeviceTransfer _deviceTransfer;
 
   final refreshKeyMap = <String, int?>{};
 
@@ -267,7 +271,10 @@ class DecryptMessage extends Injector {
               data, ProcessSignalKeyAction.resendKey));
         }
       } else if (plainJsonMessage.action == kDeviceTransfer) {
-        i('receive device transfer message. ${plainJsonMessage.content}');
+        final json =
+            jsonDecode(plainJsonMessage.content!) as Map<String, dynamic>;
+        final command = TransferDataCommand.fromJson(json);
+        _deviceTransfer.handleRemoteCommand(command);
       }
       await database.messagesHistoryDao
           .insert(MessagesHistoryData(messageId: data.messageId));

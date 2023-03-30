@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   file_selector_windows
   flutter_app_icon_badge
+  network_info_plus
   pasteboard
   platform_device_id_windows
   protocol_handler

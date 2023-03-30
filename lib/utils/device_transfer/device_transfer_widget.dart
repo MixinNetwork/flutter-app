@@ -7,26 +7,17 @@ import '../../widgets/cell.dart';
 import '../event_bus.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
-import 'device_transfer_link_info.dart';
 
-abstract class DeviceTransferEvent {}
-
-/// The request which send to remote
-class DeviceTransferRequestEvent extends DeviceTransferEvent {
-  DeviceTransferRequestEvent({
-    this.linkInfo,
-  });
-
-  final DeviceTransferLinkInfo? linkInfo;
+enum DeviceTransferEventAction {
+  pullToRemote,
+  pushToRemote,
 }
 
-/// The request which from remote
-class DeviceTransferRemoteRequestEvent extends DeviceTransferEvent {
-  DeviceTransferRemoteRequestEvent({
-    required this.linkInfo,
-  });
+class DeviceTransferEvent {
+  DeviceTransferEvent(this.action, [this.payload]);
 
-  final DeviceTransferLinkInfo? linkInfo;
+  final DeviceTransferEventAction action;
+  final dynamic payload;
 }
 
 class DeviceTransferEventBus {
@@ -36,10 +27,15 @@ class DeviceTransferEventBus {
 
   final _eventBus = EventBus.instance;
 
-  Stream<T> on<T extends DeviceTransferEvent>() => _eventBus.on.whereType<T>();
+  Stream<DeviceTransferEvent> on(DeviceTransferEventAction action) =>
+      _eventBus.on
+          .whereType<DeviceTransferEvent>()
+          .where((event) => event.action == action);
 
-  void fire<T extends DeviceTransferEvent>(T event) {
-    _eventBus.fire(event);
+  Stream<DeviceTransferEvent> events() => _eventBus.on.whereType();
+
+  void fire(DeviceTransferEventAction action, [dynamic payload]) {
+    _eventBus.fire(DeviceTransferEvent(action, payload));
   }
 }
 
@@ -56,7 +52,7 @@ class DeviceTransferHandlerWidget extends HookWidget {
     useEffect(
       () {
         final subscription = DeviceTransferEventBus.instance
-            .on<DeviceTransferRemoteRequestEvent>()
+            .on(DeviceTransferEventAction.pullToRemote)
             .listen((event) {
           d('DeviceTransferRemoteRequestEvent: $event');
         });
@@ -92,13 +88,21 @@ class DeviceTransferDialog extends StatelessWidget {
                   const SizedBox(height: 20),
                   CellGroup(
                     child: CellItem(
-                      title:
-                          const Text('Restore chat history from other device'),
+                      title: const Text('Pull'),
                       trailing: null,
                       onTap: () {
-                        DeviceTransferEventBus.instance.fire(
-                          DeviceTransferRequestEvent(),
-                        );
+                        DeviceTransferEventBus.instance
+                            .fire(DeviceTransferEventAction.pullToRemote);
+                      },
+                    ),
+                  ),
+                  CellGroup(
+                    child: CellItem(
+                      title: const Text('Push'),
+                      trailing: null,
+                      onTap: () {
+                        DeviceTransferEventBus.instance
+                            .fire(DeviceTransferEventAction.pushToRemote);
                       },
                     ),
                   ),

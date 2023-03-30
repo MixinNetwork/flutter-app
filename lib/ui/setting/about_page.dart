@@ -22,6 +22,7 @@ import '../../utils/system/package_info.dart';
 import '../../utils/uri_utils.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
+import '../../workers/device_transfer.dart';
 
 class AboutPage extends HookWidget {
   const AboutPage({super.key});
