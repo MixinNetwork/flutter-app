@@ -239,13 +239,88 @@ class DeviceTransfer {
 
   Future<void> _handleRemotePushCommand(String ip, int port, int code) async {
     d('_handleRemotePushCommand: $ip:$port ($code)');
-    final socket = await Socket.connect(ip, port);
-    socket.transform(const TransferProtocolTransform()).listen((event) {
-      d('receive data: $event');
-    });
-    await socket.addCommand(
-      TransferDataCommand.connect(code: code, deviceId: await getDeviceId()),
+    try {
+      final socket = await Socket.connect(ip, port);
+      socket.transform(const TransferProtocolTransform()).listen((packet) {
+        d('receive data: $packet');
+        if (packet is TransferJsonPacket) {
+          _processReceivedJsonPacket(packet.json);
+        } else if (packet is TransferAttachmentPacket) {
+          _processReceivedAttachmentPacket(packet);
+        } else {
+          e('unknown packet: $packet');
+        }
+      });
+      await socket.addCommand(
+        TransferDataCommand.connect(code: code, deviceId: await getDeviceId()),
+      );
+    } catch (error, stacktrace) {
+      e('_handleRemotePushCommand: $error $stacktrace');
+    }
+  }
+
+  Future<void> _processReceivedJsonPacket(TransferDataJsonWrapper data) async {
+    switch (data.type) {
+      case kTypeConversation:
+        final conversation = TransferDataConversation.fromJson(data.data);
+        d('client: conversation: $conversation');
+        await database.conversationDao.insert(conversation.toDbConversation());
+        break;
+      case kTypeMessage:
+        final message = TransferDataMessage.fromJson(data.data);
+        d('client: message: ${message.messageId}');
+        await database.messageDao.insert(message.toDbMessage(), userId);
+        break;
+      case kTypeAsset:
+        final asset = TransferDataAsset.fromJson(data.data);
+        d('client: asset: $asset');
+        await database.assetDao.insertAsset(asset.toDbAsset());
+        break;
+      case kTypeUser:
+        final user = TransferDataUser.fromJson(data.data);
+        d('client: user: $user');
+        await database.userDao.insert(user.toDbUser());
+        break;
+      case kTypeSticker:
+        final sticker = TransferDataSticker.fromJson(data.data);
+        d('client: sticker: $sticker');
+        await database.stickerDao.insertSticker(sticker.toDbSticker());
+        break;
+      case kTypeSnapshot:
+        final snapshot = TransferDataSnapshot.fromJson(data.data);
+        d('client: snapshot: $snapshot');
+        await database.snapshotDao.insert(snapshot.toDbSnapshot());
+        break;
+      default:
+        i('unknown type: ${data.type}');
+    }
+  }
+
+  Future<void> _processReceivedAttachmentPacket(
+      TransferAttachmentPacket packet) async {
+    d('_processReceivedAttachmentPacket: ${packet.messageId} ${packet.path}');
+    final message =
+        await database.messageDao.findMessageByMessageId(packet.messageId);
+    if (message == null) {
+      e('_processReceivedAttachmentPacket: message not found');
+      return;
+    }
+    final path = attachmentUtil.convertAbsolutePath(
+      category: message.category,
+      conversationId: message.conversationId,
+      fileName: message.mediaUrl,
     );
+    final file = File(path);
+    if (file.existsSync()) {
+      // already exist
+      i('_processReceivedAttachmentPacket: already exist');
+      return;
+    }
+    try {
+      File(packet.path).renameSync(file.path);
+    } catch (error, stacktrace) {
+      e('_processReceivedAttachmentPacket: $error $stacktrace');
+    }
   }
 
   void dispose() {

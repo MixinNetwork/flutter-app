@@ -35,6 +35,9 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
         return value;
       });
 
+  Future<void> insertSticker(Sticker sticker) =>
+      into(db.stickers).insert(sticker, mode: InsertMode.insertOrIgnore);
+
   Future<void> insertAll(Iterable<StickersCompanion> stickers) =>
       batch((batch) => batch.insertAllOnConflictUpdate(db.stickers, stickers))
           .then((value) {

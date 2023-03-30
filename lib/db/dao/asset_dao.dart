@@ -39,6 +39,9 @@ class AssetDao extends DatabaseAccessor<MixinDatabase> with _$AssetDaoMixin {
   Future<int> insertSdkAsset(sdk.Asset asset) =>
       into(db.assets).insertOnConflictUpdate(asset.asAssetsCompanion);
 
+  Future<int> insertAsset(Asset asset) =>
+      into(db.assets).insert(asset, mode: InsertMode.insertOrIgnore);
+
   Future deleteAsset(Asset asset) => delete(db.assets).delete(asset);
 
   Future<Asset?> findAssetById(String assetId) =>
