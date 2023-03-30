@@ -13,13 +13,18 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../blaze/blaze.dart';
+import '../blaze/blaze_message.dart';
+import '../blaze/vo/plain_json_message.dart';
+import '../constants/constants.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../db/database.dart';
 import '../db/database_event_bus.dart';
 import '../db/fts_database.dart';
 import '../db/mixin_database.dart' hide Chain;
+import '../utils/device_transfer/device_transfer_widget.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
+import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/system/package_info.dart';
@@ -256,13 +261,48 @@ class _MessageProcessRunner {
         _floodJob.start();
       }))
       ..add(DataBaseEventBus.instance.updateExpiredMessageTableStream
-          .asyncDropListen((event) => _scheduleExpiredJob()));
+          .asyncDropListen((event) => _scheduleExpiredJob()))
+      ..add(DeviceTransferEventBus.instance
+          .on<DeviceTransferRequestEvent>()
+          .listen(_sendDeviceTransferToOtherSession));
     _scheduleExpiredJob();
   }
 
   void _sendEventToMainIsolate(WorkerIsolateEventType event,
       [dynamic argument]) {
     eventSink.add(event.toEvent(argument));
+  }
+
+  Future<void> _sendDeviceTransferToOtherSession(
+      DeviceTransferRequestEvent event) async {
+    final conversationId =
+        await database.participantDao.findJoinedConversationId(userId);
+    if (conversationId == null) {
+      e('_sendDeviceTransferToOtherSession: conversationId is null');
+      return;
+    }
+
+    final linkInfo = event.linkInfo;
+    final content = linkInfo == null
+        ? null
+        : await jsonEncodeWithIsolate(linkInfo.toJson());
+    final plainText = PlainJsonMessage.create(
+      action: kDeviceTransfer,
+      content: content,
+    );
+    final encoded = await base64EncodeWithIsolate(
+        await utf8EncodeWithIsolate(await jsonEncodeWithIsolate(plainText)));
+    final param = createPlainJsonParam(
+      conversationId,
+      userId,
+      encoded,
+      sessionId: primarySessionId,
+    );
+    final bm = createParamBlazeMessage(param);
+    final result = await _sender.deliver(bm);
+    if (!result.success) {
+      e('_sendDeviceTransferToOtherSession: ${result.errorCode}');
+    }
   }
 
   Future<void> _scheduleExpiredJob() async {

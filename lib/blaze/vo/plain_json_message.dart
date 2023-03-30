@@ -15,6 +15,25 @@ class PlainJsonMessage {
     this.content,
   });
 
+  factory PlainJsonMessage.create({
+    required String action,
+    List<String>? messages,
+    String? userId,
+    String? messageId,
+    String? sessionId,
+    List<BlazeAckMessage>? ackMessages,
+    String? content,
+  }) =>
+      PlainJsonMessage(
+        action,
+        messages,
+        userId,
+        messageId,
+        sessionId,
+        ackMessages,
+        content: content,
+      );
+
   factory PlainJsonMessage.fromJson(Map<String, dynamic> json) =>
       _$PlainJsonMessageFromJson(json);
 

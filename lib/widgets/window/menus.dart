@@ -11,11 +11,12 @@ import '../../account/account_server.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
+import '../../utils/device_transfer/device_transfer_widget.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../../utils/logger.dart';
 import '../../utils/uri_utils.dart';
 import '../actions/actions.dart';
+import '../dialog.dart';
 
 abstract class ConversationMenuHandle {
   Stream<bool> get isMuted;
@@ -273,11 +274,14 @@ class _Menus extends HookWidget {
             ),
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
-                label: '迁移和备份',
+                // TODO(BIN): i18n
+                label: 'Restore Chat History',
                 onSelected: signed
                     ? () {
-                        final database = context.database;
-                        d('database: $database');
+                        showMixinDialog(
+                          context: context,
+                          child: const DeviceTransferDialog(),
+                        );
                       }
                     : null,
               )
