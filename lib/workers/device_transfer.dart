@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 
 import '../blaze/blaze_message.dart';
@@ -160,27 +161,18 @@ class DeviceTransfer {
     }
 
     final attachmentMessage = <Message>[];
-    // send messages
-    for (final conversation in conversations) {
-      final messages = await database.messageDao
-          .getMessagesByConversationId(conversation.conversationId);
-      for (final message in messages) {
-        await socket.addMessage(TransferDataMessage.fromDbMessage(message));
-        if (message.category.isAttachment) {
-          attachmentMessage.add(message);
-        }
-      }
-    }
 
     d('send attachment count ${attachmentMessage.length}');
 
     // send sticker
     final stickers = await database.stickerDao.getStickers();
-    for (final sticker in stickers) {
-      await socket.addSticker(
-        TransferDataSticker.fromDbSticker(sticker),
-      );
-    }
+    // for (final sticker in stickers) {
+    //   await socket.addSticker(
+    //     TransferDataSticker.fromDbSticker(sticker),
+    //   );
+    // }
+
+    d('send sticker count ${stickers.length}');
 
     // send user
     final users = await database.userDao.getUsers();
@@ -189,6 +181,8 @@ class DeviceTransfer {
         TransferDataUser.fromDbUser(user),
       );
     }
+
+    d('send user count ${users.length}');
 
     // send asset
     final assets = await database.assetDao.getAssets();
@@ -204,6 +198,19 @@ class DeviceTransfer {
       await socket.addSnapshot(
         TransferDataSnapshot.fromDbSnapshot(snapshot),
       );
+    }
+
+    // send messages
+    for (final conversation in conversations) {
+      final messages = await database.messageDao
+          .getMessagesByConversationId(conversation.conversationId);
+      for (final message in messages) {
+        await socket.addMessage(TransferDataMessage.fromDbMessage(message));
+        if (message.category.isAttachment) {
+          attachmentMessage.add(message);
+        }
+      }
+      d('send message count ${messages.length}');
     }
 
     // send attachment
@@ -240,9 +247,9 @@ class DeviceTransfer {
   Future<void> _handleRemotePushCommand(String ip, int port, int code) async {
     d('_handleRemotePushCommand: $ip:$port ($code)');
     try {
+      d('connect to $ip:$port');
       final socket = await Socket.connect(ip, port);
       socket.transform(const TransferProtocolTransform()).listen((packet) {
-        d('receive data: $packet');
         if (packet is TransferJsonPacket) {
           _processReceivedJsonPacket(packet.json);
         } else if (packet is TransferAttachmentPacket) {
@@ -260,39 +267,54 @@ class DeviceTransfer {
   }
 
   Future<void> _processReceivedJsonPacket(TransferDataJsonWrapper data) async {
-    switch (data.type) {
-      case kTypeConversation:
-        final conversation = TransferDataConversation.fromJson(data.data);
-        d('client: conversation: $conversation');
-        await database.conversationDao.insert(conversation.toDbConversation());
-        break;
-      case kTypeMessage:
-        final message = TransferDataMessage.fromJson(data.data);
-        d('client: message: ${message.messageId}');
-        await database.messageDao.insert(message.toDbMessage(), userId);
-        break;
-      case kTypeAsset:
-        final asset = TransferDataAsset.fromJson(data.data);
-        d('client: asset: $asset');
-        await database.assetDao.insertAsset(asset.toDbAsset());
-        break;
-      case kTypeUser:
-        final user = TransferDataUser.fromJson(data.data);
-        d('client: user: $user');
-        await database.userDao.insert(user.toDbUser());
-        break;
-      case kTypeSticker:
-        final sticker = TransferDataSticker.fromJson(data.data);
-        d('client: sticker: $sticker');
-        await database.stickerDao.insertSticker(sticker.toDbSticker());
-        break;
-      case kTypeSnapshot:
-        final snapshot = TransferDataSnapshot.fromJson(data.data);
-        d('client: snapshot: $snapshot');
-        await database.snapshotDao.insert(snapshot.toDbSnapshot());
-        break;
-      default:
-        i('unknown type: ${data.type}');
+    try {
+      switch (data.type) {
+        case kTypeConversation:
+          final conversation = TransferDataConversation.fromJson(data.data);
+          d('client: conversation: $conversation');
+          final local = await database.conversationDao
+              .conversationById(conversation.conversationId)
+              .getSingleOrNull();
+          if (local != null) {
+            i('conversation already exist: ${conversation.conversationId}');
+            return;
+          }
+          await database.conversationDao
+              .insert(conversation.toDbConversation());
+          break;
+        case kTypeMessage:
+          final message = TransferDataMessage.fromJson(data.data);
+          d('client: message: ${data.data}');
+          await database.messageDao.insert(
+              message.toDbMessage().copyWith(status: MessageStatus.read),
+              userId);
+          break;
+        case kTypeAsset:
+          final asset = TransferDataAsset.fromJson(data.data);
+          d('client: asset: $asset');
+          await database.assetDao.insertAsset(asset.toDbAsset());
+          break;
+        case kTypeUser:
+          final user = TransferDataUser.fromJson(data.data);
+          d('client: user: $user');
+          await database.userDao.insert(user.toDbUser());
+          break;
+        case kTypeSticker:
+          final sticker = TransferDataSticker.fromJson(data.data);
+          d('client: sticker: $sticker');
+          await database.stickerDao.insertSticker(sticker.toDbSticker());
+          break;
+        case kTypeSnapshot:
+          final snapshot = TransferDataSnapshot.fromJson(data.data);
+          d('client: snapshot: $snapshot');
+          await database.snapshotDao.insert(snapshot.toDbSnapshot());
+          break;
+        default:
+          i('unknown type: ${data.type}');
+          break;
+      }
+    } catch (error, stacktrace) {
+      e('_processReceivedJsonPacket: ${data.data} \n $error $stacktrace');
     }
   }
 
@@ -302,7 +324,7 @@ class DeviceTransfer {
     final message =
         await database.messageDao.findMessageByMessageId(packet.messageId);
     if (message == null) {
-      e('_processReceivedAttachmentPacket: message not found');
+      e('_processReceivedAttachmentPacket: message not found ${packet.messageId}');
       return;
     }
     final path = attachmentUtil.convertAbsolutePath(
@@ -316,6 +338,12 @@ class DeviceTransfer {
       i('_processReceivedAttachmentPacket: already exist');
       return;
     }
+    // check file parent folder
+    final parent = file.parent;
+    if (!parent.existsSync()) {
+      parent.createSync(recursive: true);
+    }
+
     try {
       File(packet.path).renameSync(file.path);
     } catch (error, stacktrace) {

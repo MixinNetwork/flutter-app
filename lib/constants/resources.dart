@@ -74,6 +74,9 @@ class Resources {
   static const String assetsImagesCircleRemoveSvg =
       'assets/images/circle_remove.svg';
 
+  /// {@macro assets_generator.assetsImagesClockSvg.preview}
+  static const String assetsImagesClockSvg = 'assets/images/clock.svg';
+
   /// {@macro assets_generator.assetsImagesCloseOvalSvg.preview}
   static const String assetsImagesCloseOvalSvg = 'assets/images/close_oval.svg';
 

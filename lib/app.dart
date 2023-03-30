@@ -28,6 +28,7 @@ import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
+import 'utils/device_transfer/device_transfer_widget.dart';
 import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';

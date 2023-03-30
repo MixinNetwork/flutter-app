@@ -25,8 +25,8 @@ TransferDataMessage _$TransferDataMessageFromJson(Map<String, dynamic> json) =>
       thumbImage: json['thumb_image'] as String?,
       mediaKey: json['media_key'] as String?,
       mediaDigest: json['media_digest'] as String?,
-      mediaStatus:
-          $enumDecodeNullable(_$MediaStatusEnumMap, json['media_status']),
+      mediaStatus: const MediaStatusJsonConverter()
+          .fromJson(json['media_status'] as String?),
       action: json['action'] as String?,
       participantId: json['participant_id'] as String?,
       snapshotId: json['snapshot_id'] as String?,
@@ -60,7 +60,8 @@ Map<String, dynamic> _$TransferDataMessageToJson(
       'thumb_image': instance.thumbImage,
       'media_key': instance.mediaKey,
       'media_digest': instance.mediaDigest,
-      'media_status': _$MediaStatusEnumMap[instance.mediaStatus],
+      'media_status':
+          const MediaStatusJsonConverter().toJson(instance.mediaStatus),
       'status': _$MessageStatusEnumMap[instance.status]!,
       'created_at': instance.createdAt.toIso8601String(),
       'action': instance.action,
@@ -85,12 +86,4 @@ const _$MessageStatusEnumMap = {
   MessageStatus.sent: 'SENT',
   MessageStatus.delivered: 'DELIVERED',
   MessageStatus.read: 'READ',
-};
-
-const _$MediaStatusEnumMap = {
-  MediaStatus.pending: 'pending',
-  MediaStatus.done: 'done',
-  MediaStatus.canceled: 'canceled',
-  MediaStatus.expired: 'expired',
-  MediaStatus.read: 'read',
 };

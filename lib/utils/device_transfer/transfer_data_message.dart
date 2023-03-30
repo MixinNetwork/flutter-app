@@ -1,14 +1,20 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../db/converter/media_status_type_converter.dart';
 import '../../db/mixin_database.dart' as db;
 import '../../enum/media_status.dart';
 
 part 'transfer_data_message.g.dart';
 
+class MediaStatusJsonConverter extends EnumJsonConverter<MediaStatus> {
+  const MediaStatusJsonConverter();
+
+  @override
+  List<MediaStatus> enumValues() => MediaStatus.values;
+}
+
 @JsonSerializable()
-@MediaStatusTypeConverter()
+@MediaStatusJsonConverter()
 class TransferDataMessage {
   TransferDataMessage({
     required this.messageId,

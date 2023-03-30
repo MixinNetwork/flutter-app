@@ -8,6 +8,7 @@ import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
+import '../../utils/device_transfer/device_transfer_widget.dart';
 import '../../utils/device_transfer/transfer_data_asset.dart';
 import '../../utils/device_transfer/transfer_data_conversation.dart';
 import '../../utils/device_transfer/transfer_data_json_wrapper.dart';
@@ -135,6 +136,13 @@ class _BackupItem extends HookWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        CellItem(
+          title: const Text('send'),
+          onTap: () {
+            DeviceTransferEventBus.instance
+                .fire(DeviceTransferEventAction.onRestoreStart);
+          },
+        ),
         CellItem(
           title: const Text('backup'),
           onTap: () async {
