@@ -273,6 +273,11 @@ class _TransactionDetailInfo extends StatelessWidget {
             title: Text(context.l10n.transactionId),
             subtitle: SelectableText(snapshot.snapshotId),
           ),
+          if (snapshot.snapshotHash?.isNotEmpty ?? false)
+            TransactionInfoTile(
+              title: Text(context.l10n.snapshotHash),
+              subtitle: SelectableText(snapshot.snapshotHash!),
+            ),
           TransactionInfoTile(
             title: Text(context.l10n.assetType),
             subtitle: SelectableText(snapshot.symbolName ?? ''),
@@ -347,6 +352,20 @@ class _TransactionDetailInfo extends StatelessWidget {
             TransactionInfoTile(
               title: Text(context.l10n.memo),
               subtitle: SelectableText(snapshot.memo!),
+            ),
+          if ((snapshot.openingBalance?.isNotEmpty ?? false) &&
+              (snapshot.symbol?.isNotEmpty ?? false))
+            TransactionInfoTile(
+              title: Text(context.l10n.openingBalance),
+              subtitle: SelectableText(
+                  '${snapshot.openingBalance!} ${snapshot.symbol!}'),
+            ),
+          if ((snapshot.closingBalance?.isNotEmpty ?? false) &&
+              (snapshot.symbol?.isNotEmpty ?? false))
+            TransactionInfoTile(
+              title: Text(context.l10n.closingBalance),
+              subtitle: SelectableText(
+                  '${snapshot.closingBalance ?? ''} ${snapshot.symbol ?? ''}'),
             ),
           TransactionInfoTile(
             title: Text(context.l10n.time),

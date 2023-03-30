@@ -744,6 +744,16 @@ class Localization {
     );
   }
 
+  /// `Closing Balance`
+  String get closingBalance {
+    return Intl.message(
+      'Closing Balance',
+      name: 'closingBalance',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Collapse`
   String get collapse {
     return Intl.message(
@@ -994,6 +1004,16 @@ class Localization {
     );
   }
 
+  /// `The database is being upgraded, it may take several minutes, please do not close this App.`
+  String get databaseUpgradeTips {
+    return Intl.message(
+      'The database is being upgraded, it may take several minutes, please do not close this App.',
+      name: 'databaseUpgradeTips',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Delete`
   String get delete {
     return Intl.message(
@@ -1219,6 +1239,16 @@ class Localization {
     return Intl.message(
       'Download Link:',
       name: 'downloadLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Draft`
+  String get draft {
+    return Intl.message(
+      'Draft',
+      name: 'draft',
       desc: '',
       args: [],
     );
@@ -2840,6 +2870,16 @@ class Localization {
     );
   }
 
+  /// `Opening Balance`
+  String get openingBalance {
+    return Intl.message(
+      'Opening Balance',
+      name: 'openingBalance',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Original`
   String get originalImage {
     return Intl.message(
@@ -3606,6 +3646,16 @@ class Localization {
     );
   }
 
+  /// `Snapshot Hash`
+  String get snapshotHash {
+    return Intl.message(
+      'Snapshot Hash',
+      name: 'snapshotHash',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Status`
   String get status {
     return Intl.message(
@@ -4011,6 +4061,16 @@ class Localization {
     return Intl.message(
       'Unread messages',
       name: 'unreadMessages',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upgrading`
+  String get upgrading {
+    return Intl.message(
+      'Upgrading',
+      name: 'upgrading',
       desc: '',
       args: [],
     );
