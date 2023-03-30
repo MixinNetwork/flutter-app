@@ -20,6 +20,9 @@ SnapshotMessage _$SnapshotMessageFromJson(Map<String, dynamic> json) =>
       json['receiver'] as String?,
       json['memo'] as String?,
       json['confirmations'] as int?,
+      json['snapshot_hash'] as String?,
+      json['opening_balance'] as String?,
+      json['closing_balance'] as String?,
     );
 
 Map<String, dynamic> _$SnapshotMessageToJson(SnapshotMessage instance) =>
@@ -36,4 +39,7 @@ Map<String, dynamic> _$SnapshotMessageToJson(SnapshotMessage instance) =>
       'receiver': instance.receiver,
       'memo': instance.memo,
       'confirmations': instance.confirmations,
+      'snapshot_hash': instance.snapshotHash,
+      'opening_balance': instance.openingBalance,
+      'closing_balance': instance.closingBalance,
     };
