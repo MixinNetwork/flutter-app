@@ -170,7 +170,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           eventStreams: [
             DataBaseEventBus.instance.watchUpdateUserStream([userId])
           ],
-          duration: kSlowThrottleDuration,
+          duration: kDefaultThrottleDuration,
           prepend: false,
         );
       }).listen((event) => emit(

@@ -42,20 +42,18 @@ class SignalDatabase extends _$SignalDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(beforeOpen: (_) async {
-        // if (executor.dialect == SqlDialect.sqlite) {
-        //   await customStatement('PRAGMA journal_mode=WAL');
-        //   await customStatement('PRAGMA foreign_keys=ON');
-        // }
+        if (executor.dialect == SqlDialect.sqlite) {
+          await customStatement('PRAGMA journal_mode=WAL');
+          await customStatement('PRAGMA foreign_keys=ON');
+        }
       });
 
-  Future<void> clear() async {}
-
-  // => transaction(() async {
-  //       await customStatement('PRAGMA wal_checkpoint(FULL)');
-  //       for (final table in allTables) {
-  //         await delete(table).go();
-  //       }
-  //     });
+  Future<void> clear() => transaction(() async {
+        await customStatement('PRAGMA wal_checkpoint(FULL)');
+        for (final table in allTables) {
+          await delete(table).go();
+        }
+      });
 }
 
 LazyDatabase _openConnection() => LazyDatabase(() {

@@ -94,8 +94,6 @@ part 'mixin_database.g.dart';
 class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);
 
-  MixinDatabase.connect(super.c) : super.connect();
-
   @override
   int get schemaVersion => 22;
 
@@ -270,11 +268,11 @@ Future<MixinDatabase> connectToDatabase(
   int readCount = 8,
   bool fromMainIsolate = false,
 }) async {
-  final connect = await openDatabaseConnection(
+  final queryExecutor = await openQueryExecutor(
     identityNumber: identityNumber,
     dbName: 'mixin',
     readCount: readCount,
     fromMainIsolate: fromMainIsolate,
   );
-  return MixinDatabase.connect(connect);
+  return MixinDatabase(queryExecutor);
 }

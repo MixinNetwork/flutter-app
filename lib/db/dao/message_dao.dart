@@ -509,13 +509,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<List<String>> getUnreadMessageIds(
-      String conversationId, String userId, int limit) async {
+      String conversationId, String userId) async {
     final list = await (db.selectOnly(db.messages)
           ..addColumns([db.messages.messageId])
           ..where(db.messages.conversationId.equals(conversationId) &
               db.messages.userId.equals(userId).not() &
-              db.messages.status.isIn(['SENT', 'DELIVERED']))
-          ..limit(limit))
+              db.messages.status.isIn(['SENT', 'DELIVERED'])))
         .map((row) => row.read(db.messages.messageId))
         .get();
     final ids = list.whereNotNull().toList();
@@ -919,33 +918,35 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       String conversationId, String messageId) async {
     final messages = db.messages;
 
-    while (true) {
-      final messageIds = (await (db.selectOnly(messages)
-                ..addColumns([messages.messageId])
-                ..where(messages.conversationId.equals(conversationId) &
-                    messages.category.equals(MessageCategory.messagePin) &
-                    messages.quoteMessageId.equals(messageId))
-                ..limit(100))
-              .map((row) => row.read(messages.messageId))
-              .get())
-          .whereNotNull();
+    final messageIds = (await (db.selectOnly(messages)
+              ..addColumns([messages.messageId])
+              ..where(messages.conversationId.equals(conversationId) &
+                  messages.category.equals(MessageCategory.messagePin) &
+                  messages.quoteMessageId.equals(messageId) &
+                  messages.content.isNotNull()))
+            .map((row) => row.read(messages.messageId))
+            .get())
+        .whereNotNull();
 
-      if (messageIds.isEmpty) return;
+    if (messageIds.isEmpty) return;
 
+    final chunked = messageIds.toList().chunked(kMarkLimit);
+
+    for (final ids in chunked) {
       await (db.update(messages)
             ..where(
-              (tbl) => tbl.messageId.isIn(messageIds),
+              (tbl) => tbl.messageId.isIn(ids),
             ))
           .write(const MessagesCompanion(
         content: Value(null),
       ));
-
-      DataBaseEventBus.instance
-          .insertOrReplaceMessages(messageIds.map((e) => MiniMessageItem(
-                messageId: e,
-                conversationId: conversationId,
-              )));
     }
+
+    DataBaseEventBus.instance
+        .insertOrReplaceMessages(messageIds.map((e) => MiniMessageItem(
+              messageId: e,
+              conversationId: conversationId,
+            )));
   }
 
   Future<void> recallMessage(String conversationId, String messageId) async {
@@ -1050,5 +1051,41 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       },
     ).get();
     return Future.wait(messages);
+  }
+
+  Future<List<SearchMessageDetailItem>> messageByConversationAndUser({
+    required String conversationId,
+    required String userId,
+    required int limit,
+    String? anchorMessageId,
+    List<String>? categories,
+  }) async {
+    // item1: created_at, item2: row_id
+    Tuple2<int, int>? anchor;
+    if (anchorMessageId != null) {
+      anchor = await (selectOnly(db.messages)
+            ..addColumns([db.messages.createdAt, db.messages.rowId])
+            ..where(db.messages.messageId.equals(anchorMessageId))
+            ..limit(1))
+          .map((row) => Tuple2(
+                row.read(db.messages.createdAt)!,
+                row.read(db.messages.rowId)!,
+              ))
+          .getSingleOrNull();
+    }
+    return db.searchMessage((m, c, u, o) {
+      var predicate =
+          m.conversationId.equals(conversationId) & m.userId.equals(userId);
+      if (categories?.isNotEmpty ?? false) {
+        predicate = predicate & m.category.isIn(categories!);
+      }
+      if (anchor != null) {
+        predicate = predicate &
+            (m.createdAt.isSmallerThanValue(anchor.item1) |
+                (m.createdAt.equals(anchor.item1) &
+                    m.rowId.isSmallerThanValue(anchor.item2)));
+      }
+      return predicate;
+    }, (m, c, u, o) => Limit(limit, null)).get();
   }
 }

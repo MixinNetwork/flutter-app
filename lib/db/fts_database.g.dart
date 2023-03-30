@@ -2,11 +2,294 @@
 
 part of 'fts_database.dart';
 
-// **************************************************************************
-// DriftDatabaseGenerator
-// **************************************************************************
-
 // ignore_for_file: type=lint
+class MessagesFts extends Table
+    with
+        TableInfo<MessagesFts, MessagesFt>,
+        VirtualTableInfo<MessagesFts, MessagesFt> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  MessagesFts(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _contentMeta =
+      const VerificationMeta('content');
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+      'content', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns => [content];
+  @override
+  String get aliasedName => _alias ?? 'messages_fts';
+  @override
+  String get actualTableName => 'messages_fts';
+  @override
+  VerificationContext validateIntegrity(Insertable<MessagesFt> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('content')) {
+      context.handle(_contentMeta,
+          content.isAcceptableOrUnknown(data['content']!, _contentMeta));
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  MessagesFt map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MessagesFt(
+      content: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+    );
+  }
+
+  @override
+  MessagesFts createAlias(String alias) {
+    return MessagesFts(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+  @override
+  String get moduleAndArgs =>
+      'FTS5(content, tokenize="unicode61 remove_diacritics 2 categories \'Co L* N* S*\'")';
+}
+
+class MessagesFt extends DataClass implements Insertable<MessagesFt> {
+  final String content;
+  const MessagesFt({required this.content});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['content'] = Variable<String>(content);
+    return map;
+  }
+
+  MessagesFtsCompanion toCompanion(bool nullToAbsent) {
+    return MessagesFtsCompanion(
+      content: Value(content),
+    );
+  }
+
+  factory MessagesFt.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MessagesFt(
+      content: serializer.fromJson<String>(json['content']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'content': serializer.toJson<String>(content),
+    };
+  }
+
+  MessagesFt copyWith({String? content}) => MessagesFt(
+        content: content ?? this.content,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('MessagesFt(')
+          ..write('content: $content')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => content.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MessagesFt && other.content == this.content);
+}
+
+class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
+  final Value<String> content;
+  final Value<int> rowid;
+  const MessagesFtsCompanion({
+    this.content = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MessagesFtsCompanion.insert({
+    required String content,
+    this.rowid = const Value.absent(),
+  }) : content = Value(content);
+  static Insertable<MessagesFt> custom({
+    Expression<String>? content,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (content != null) 'content': content,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MessagesFtsCompanion copyWith({Value<String>? content, Value<int>? rowid}) {
+    return MessagesFtsCompanion(
+      content: content ?? this.content,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MessagesFtsCompanion(')
+          ..write('content: $content, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class MessagesMetas extends Table with TableInfo<MessagesMetas, MessagesMeta> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  MessagesMetas(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _docIdMeta = const VerificationMeta('docId');
+  late final GeneratedColumn<int> docId = GeneratedColumn<int>(
+      'doc_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _messageIdMeta =
+      const VerificationMeta('messageId');
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
+      'message_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+      'conversation_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _categoryMeta =
+      const VerificationMeta('category');
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+      'category', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(MessagesMetas.$convertercreatedAt);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [docId, messageId, conversationId, category, userId, createdAt];
+  @override
+  String get aliasedName => _alias ?? 'messages_metas';
+  @override
+  String get actualTableName => 'messages_metas';
+  @override
+  VerificationContext validateIntegrity(Insertable<MessagesMeta> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('doc_id')) {
+      context.handle(
+          _docIdMeta, docId.isAcceptableOrUnknown(data['doc_id']!, _docIdMeta));
+    } else if (isInserting) {
+      context.missing(_docIdMeta);
+    }
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId};
+  @override
+  MessagesMeta map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MessagesMeta(
+      docId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}doc_id'])!,
+      messageId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+      conversationId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
+      category: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      createdAt: MessagesMetas.$convertercreatedAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+    );
+  }
+
+  @override
+  MessagesMetas createAlias(String alias) {
+    return MessagesMetas(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
 class MessagesMeta extends DataClass implements Insertable<MessagesMeta> {
   final int docId;
   final String messageId;
@@ -30,7 +313,7 @@ class MessagesMeta extends DataClass implements Insertable<MessagesMeta> {
     map['category'] = Variable<String>(category);
     map['user_id'] = Variable<String>(userId);
     {
-      final converter = MessagesMetas.$converter0;
+      final converter = MessagesMetas.$convertercreatedAt;
       map['created_at'] = Variable<int>(converter.toSql(createdAt));
     }
     return map;
@@ -122,6 +405,7 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
   final Value<String> category;
   final Value<String> userId;
   final Value<DateTime> createdAt;
+  final Value<int> rowid;
   const MessagesMetasCompanion({
     this.docId = const Value.absent(),
     this.messageId = const Value.absent(),
@@ -129,6 +413,7 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
     this.category = const Value.absent(),
     this.userId = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   MessagesMetasCompanion.insert({
     required int docId,
@@ -137,6 +422,7 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
     required String category,
     required String userId,
     required DateTime createdAt,
+    this.rowid = const Value.absent(),
   })  : docId = Value(docId),
         messageId = Value(messageId),
         conversationId = Value(conversationId),
@@ -150,6 +436,7 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
     Expression<String>? category,
     Expression<String>? userId,
     Expression<int>? createdAt,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (docId != null) 'doc_id': docId,
@@ -158,6 +445,7 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
       if (category != null) 'category': category,
       if (userId != null) 'user_id': userId,
       if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -167,7 +455,8 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
       Value<String>? conversationId,
       Value<String>? category,
       Value<String>? userId,
-      Value<DateTime>? createdAt}) {
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
     return MessagesMetasCompanion(
       docId: docId ?? this.docId,
       messageId: messageId ?? this.messageId,
@@ -175,6 +464,7 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
       category: category ?? this.category,
       userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -197,8 +487,11 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (createdAt.present) {
-      final converter = MessagesMetas.$converter0;
+      final converter = MessagesMetas.$convertercreatedAt;
       map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
     }
     return map;
   }
@@ -211,287 +504,17 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
           ..write('conversationId: $conversationId, ')
           ..write('category: $category, ')
           ..write('userId: $userId, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
-}
-
-class MessagesMetas extends Table with TableInfo<MessagesMetas, MessagesMeta> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  MessagesMetas(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _docIdMeta = const VerificationMeta('docId');
-  late final GeneratedColumn<int> docId = GeneratedColumn<int>(
-      'doc_id', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
-      'message_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _conversationIdMeta =
-      const VerificationMeta('conversationId');
-  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
-      'conversation_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _categoryMeta = const VerificationMeta('category');
-  late final GeneratedColumn<String> category = GeneratedColumn<String>(
-      'category', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(MessagesMetas.$converter0);
-  @override
-  List<GeneratedColumn> get $columns =>
-      [docId, messageId, conversationId, category, userId, createdAt];
-  @override
-  String get aliasedName => _alias ?? 'messages_metas';
-  @override
-  String get actualTableName => 'messages_metas';
-  @override
-  VerificationContext validateIntegrity(Insertable<MessagesMeta> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('doc_id')) {
-      context.handle(
-          _docIdMeta, docId.isAcceptableOrUnknown(data['doc_id']!, _docIdMeta));
-    } else if (isInserting) {
-      context.missing(_docIdMeta);
-    }
-    if (data.containsKey('message_id')) {
-      context.handle(_messageIdMeta,
-          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
-    }
-    if (data.containsKey('conversation_id')) {
-      context.handle(
-          _conversationIdMeta,
-          conversationId.isAcceptableOrUnknown(
-              data['conversation_id']!, _conversationIdMeta));
-    } else if (isInserting) {
-      context.missing(_conversationIdMeta);
-    }
-    if (data.containsKey('category')) {
-      context.handle(_categoryMeta,
-          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
-    } else if (isInserting) {
-      context.missing(_categoryMeta);
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {messageId};
-  @override
-  MessagesMeta map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return MessagesMeta(
-      docId: attachedDatabase.options.types
-          .read(DriftSqlType.int, data['${effectivePrefix}doc_id'])!,
-      messageId: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
-      conversationId: attachedDatabase.options.types.read(
-          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
-      category: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}category'])!,
-      userId: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
-      createdAt: MessagesMetas.$converter0.fromSql(attachedDatabase
-          .options.types
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-    );
-  }
-
-  @override
-  MessagesMetas createAlias(String alias) {
-    return MessagesMetas(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY (message_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class MessagesFt extends DataClass implements Insertable<MessagesFt> {
-  final String content;
-  const MessagesFt({required this.content});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['content'] = Variable<String>(content);
-    return map;
-  }
-
-  MessagesFtsCompanion toCompanion(bool nullToAbsent) {
-    return MessagesFtsCompanion(
-      content: Value(content),
-    );
-  }
-
-  factory MessagesFt.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return MessagesFt(
-      content: serializer.fromJson<String>(json['content']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'content': serializer.toJson<String>(content),
-    };
-  }
-
-  MessagesFt copyWith({String? content}) => MessagesFt(
-        content: content ?? this.content,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('MessagesFt(')
-          ..write('content: $content')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => content.hashCode;
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is MessagesFt && other.content == this.content);
-}
-
-class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
-  final Value<String> content;
-  const MessagesFtsCompanion({
-    this.content = const Value.absent(),
-  });
-  MessagesFtsCompanion.insert({
-    required String content,
-  }) : content = Value(content);
-  static Insertable<MessagesFt> custom({
-    Expression<String>? content,
-  }) {
-    return RawValuesInsertable({
-      if (content != null) 'content': content,
-    });
-  }
-
-  MessagesFtsCompanion copyWith({Value<String>? content}) {
-    return MessagesFtsCompanion(
-      content: content ?? this.content,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (content.present) {
-      map['content'] = Variable<String>(content.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('MessagesFtsCompanion(')
-          ..write('content: $content')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class MessagesFts extends Table
-    with
-        TableInfo<MessagesFts, MessagesFt>,
-        VirtualTableInfo<MessagesFts, MessagesFt> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  MessagesFts(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _contentMeta = const VerificationMeta('content');
-  late final GeneratedColumn<String> content = GeneratedColumn<String>(
-      'content', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: '');
-  @override
-  List<GeneratedColumn> get $columns => [content];
-  @override
-  String get aliasedName => _alias ?? 'messages_fts';
-  @override
-  String get actualTableName => 'messages_fts';
-  @override
-  VerificationContext validateIntegrity(Insertable<MessagesFt> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('content')) {
-      context.handle(_contentMeta,
-          content.isAcceptableOrUnknown(data['content']!, _contentMeta));
-    } else if (isInserting) {
-      context.missing(_contentMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => <GeneratedColumn>{};
-  @override
-  MessagesFt map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return MessagesFt(
-      content: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
-    );
-  }
-
-  @override
-  MessagesFts createAlias(String alias) {
-    return MessagesFts(attachedDatabase, alias);
-  }
-
-  @override
-  bool get dontWriteConstraints => true;
-  @override
-  String get moduleAndArgs =>
-      'FTS5(content, tokenize="unicode61 remove_diacritics 2 categories \'Co L* N* S*\'")';
 }
 
 abstract class _$FtsDatabase extends GeneratedDatabase {
   _$FtsDatabase(QueryExecutor e) : super(e);
   _$FtsDatabase.connect(DatabaseConnection c) : super.connect(c);
+  late final MessagesFts messagesFts = MessagesFts(this);
   late final MessagesMetas messagesMetas = MessagesMetas(this);
   late final Index messagesMetasDocIdCreatedAt = Index(
       'messages_metas_doc_id_created_at',
@@ -499,7 +522,6 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
   late final Index messagesMetasConversationIdUserIdCategory = Index(
       'messages_metas_conversation_id_user_id_category',
       'CREATE INDEX IF NOT EXISTS messages_metas_conversation_id_user_id_category ON messages_metas (conversation_id, user_id, category)');
-  late final MessagesFts messagesFts = MessagesFts(this);
   Future<int> _deleteFtsByMessageId(String messageId) {
     return customUpdate(
       'DELETE FROM messages_fts WHERE "rowid" = (SELECT doc_id FROM messages_metas WHERE message_id = ?1)',
@@ -577,14 +599,14 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
   }
 
   @override
-  Iterable<TableInfo<Table, dynamic>> get allTables =>
+  Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+        messagesFts,
         messagesMetas,
         messagesMetasDocIdCreatedAt,
-        messagesMetasConversationIdUserIdCategory,
-        messagesFts
+        messagesMetasConversationIdUserIdCategory
       ];
 }
 
