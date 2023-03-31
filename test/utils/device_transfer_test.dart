@@ -73,6 +73,13 @@ void main() {
     expect(calculateCrc32(Uint8List.fromList(utf8.encode('A2kDlTjRgM'))),
         69700325);
   });
+
+  test('device transfer', () {
+
+    
+
+  });
+
 }
 
 class _BytesStreamSink extends EventSink<List<int>> {

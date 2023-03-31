@@ -4,6 +4,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, transaction;
 
 import '../database_event_bus.dart';
+import '../extension/db.dart';
 import '../mixin_database.dart';
 
 part 'participant_dao.g.dart';
@@ -29,8 +30,13 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantDaoMixin {
   ParticipantDao(super.db);
 
-  Future<int> insert(Participant participant) =>
-      into(db.participants).insertOnConflictUpdate(participant).then((value) {
+  Future<int> insert(
+    Participant participant, {
+    bool updateIfConflict = true,
+  }) =>
+      into(db.participants)
+          .simpleInsert(participant, updateIfConflict: updateIfConflict)
+          .then((value) {
         DataBaseEventBus.instance.updateParticipant([
           MiniParticipantItem(
               conversationId: participant.conversationId,

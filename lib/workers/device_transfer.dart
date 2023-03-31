@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:path/path.dart' as p;
@@ -143,10 +144,18 @@ class DeviceTransfer {
     final transform = await _getProtocolTransform();
     serverSocket.listen((socket) async {
       i('client connected: ${socket.remoteAddress.address}:${socket.remotePort}');
+
+      final subscription = DeviceTransferEventBus.instance
+          .on(DeviceTransferEventAction.cancelBackup)
+          .listen((event) {
+        serverSocket.close();
+      });
+
       // listen for data
       var isClientVerified = false;
       socket.transform(transform).listen((event) {
         d('receive data: $event');
+
         if (event is TransferJsonPacket) {
           final data = event.json;
           switch (data.type) {
@@ -191,10 +200,12 @@ class DeviceTransfer {
         }
         DeviceTransferEventBus.instance
             .fire(DeviceTransferEventAction.onBackupSucceed);
+        subscription.cancel();
       }, onError: (error, stacktrace) {
         e('client(${socket.remoteAddress.address}:${socket.remotePort}) error: $error $stacktrace');
         DeviceTransferEventBus.instance
             .fire(DeviceTransferEventAction.onBackupFailed);
+        subscription.cancel();
       });
     });
     await _sendCommandAsPlainJson(command);
@@ -216,9 +227,9 @@ class DeviceTransfer {
     await runWithLog(_processTransferSticker, 'sticker');
     await runWithLog(_processTransferAsset, 'asset');
     await runWithLog(_processTransferSnapshot, 'snapshot');
-    await runWithLog(_processTransferMessage, 'message');
     await runWithLog(_processTransferTranscriptMessage, 'transcriptMessage');
     await runWithLog(_processTransferPinMessage, 'pinMessage');
+    await runWithLog(_processTransferMessage, 'message');
     await runWithLog(_processTransferExpiredMessage, 'expiredMessage');
     await runWithLog(_processTransferAttachment, 'attachment');
   }
@@ -514,9 +525,16 @@ class DeviceTransfer {
         case JsonTransferDataType.message:
           final message = TransferDataMessage.fromJson(data.data);
           d('client: message: ${data.data}');
-          await database.messageDao.insert(
-              message.toDbMessage().copyWith(status: MessageStatus.read),
-              userId);
+          final local = await database.messageDao
+              .findMessageByMessageId(message.messageId);
+          if (local != null) {
+            d('message already exist: ${message.messageId}');
+            return;
+          }
+          final dbMessage =
+              message.toDbMessage().copyWith(status: MessageStatus.read);
+          await database.messageDao.insert(dbMessage, userId);
+          await database.ftsDatabase.insertFts(dbMessage);
           break;
         case JsonTransferDataType.asset:
           final asset = TransferDataAsset.fromJson(data.data);
@@ -526,7 +544,8 @@ class DeviceTransfer {
         case JsonTransferDataType.user:
           final user = TransferDataUser.fromJson(data.data);
           d('client: user: $user');
-          await database.userDao.insert(user.toDbUser());
+          await database.userDao
+              .insert(user.toDbUser(), updateIfConflict: false);
           break;
         case JsonTransferDataType.sticker:
           final sticker = TransferDataSticker.fromJson(data.data);
@@ -536,7 +555,8 @@ class DeviceTransfer {
         case JsonTransferDataType.snapshot:
           final snapshot = TransferDataSnapshot.fromJson(data.data);
           d('client: snapshot: $snapshot');
-          await database.snapshotDao.insert(snapshot.toDbSnapshot());
+          await database.snapshotDao
+              .insert(snapshot.toDbSnapshot(), updateIfConflict: false);
           break;
         case JsonTransferDataType.command:
           final command = TransferDataCommand.fromJson(data.data);
@@ -549,24 +569,33 @@ class DeviceTransfer {
             messageId: expiredMessage.messageId,
             expireIn: expiredMessage.expireIn,
             expireAt: expiredMessage.expireAt,
+            updateIfConflict: false,
           );
           break;
         case JsonTransferDataType.transcriptMessage:
           final transcriptMessage =
               TransferDataTranscriptMessage.fromJson(data.data);
           d('client: transcriptMessage: $transcriptMessage');
-          await database.transcriptMessageDao
-              .insertAll([transcriptMessage.toDbTranscriptMessage()]);
+          await database.transcriptMessageDao.insertAll(
+            [transcriptMessage.toDbTranscriptMessage()],
+            mode: InsertMode.insertOrIgnore,
+          );
           break;
         case JsonTransferDataType.participant:
           final participant = TransferDataParticipant.fromJson(data.data);
           d('client: participant: $participant');
-          await database.participantDao.insert(participant.toDbParticipant());
+          await database.participantDao.insert(
+            participant.toDbParticipant(),
+            updateIfConflict: false,
+          );
           break;
         case JsonTransferDataType.pinMessage:
           final pinMessage = TransferDataPinMessage.fromJson(data.data);
           d('client: pinMessage: $pinMessage');
-          await database.pinMessageDao.insert(pinMessage.toDbPinMessage());
+          await database.pinMessageDao.insert(
+            pinMessage.toDbPinMessage(),
+            updateIfConflict: false,
+          );
           break;
         case JsonTransferDataType.unknown:
           i('unknown type: ${data.type}');
@@ -582,8 +611,18 @@ class DeviceTransfer {
     d('_processReceivedAttachmentPacket: ${packet.messageId} ${packet.path}');
     final message =
         await database.messageDao.findMessageByMessageId(packet.messageId);
+
+    Future<void> deletePacketFile() async {
+      try {
+        await File(packet.path).delete();
+      } catch (error, stacktrace) {
+        e('_processReceivedAttachmentPacket: $error $stacktrace');
+      }
+    }
+
     if (message == null) {
       e('_processReceivedAttachmentPacket: message not found ${packet.messageId}');
+      await deletePacketFile();
       return;
     }
     final path = attachmentUtil.convertAbsolutePath(
@@ -595,6 +634,7 @@ class DeviceTransfer {
     if (file.existsSync()) {
       // already exist
       i('_processReceivedAttachmentPacket: already exist');
+      await deletePacketFile();
       return;
     }
     // check file parent folder

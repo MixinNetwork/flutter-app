@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../constants/constants.dart';
 import '../../utils/extension/extension.dart';
 import '../database_event_bus.dart';
+import '../extension/db.dart';
 import '../mixin_database.dart';
 
 part 'expired_message_dao.g.dart';
@@ -21,13 +22,15 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
     required String messageId,
     required int expireIn,
     int? expireAt,
+    bool updateIfConflict = true,
   }) async {
-    await into(db.expiredMessages).insertOnConflictUpdate(
+    await into(db.expiredMessages).simpleInsert(
       ExpiredMessagesCompanion.insert(
         messageId: messageId,
         expireIn: expireIn,
         expireAt: Value(expireAt),
       ),
+      updateIfConflict: updateIfConflict,
     );
     DataBaseEventBus.instance.updateExpiredMessageTable();
   }

@@ -4,6 +4,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
 import '../../utils/extension/extension.dart';
 import '../database_event_bus.dart';
+import '../extension/db.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -43,8 +44,10 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
     with _$SnapshotDaoMixin {
   SnapshotDao(super.db);
 
-  Future<int> insert(Snapshot snapshot) =>
-      into(db.snapshots).insertOnConflictUpdate(snapshot).then((value) {
+  Future<int> insert(Snapshot snapshot, {bool updateIfConflict = true}) =>
+      into(db.snapshots)
+          .simpleInsert(snapshot, updateIfConflict: updateIfConflict)
+          .then((value) {
         DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
         return value;
       });
