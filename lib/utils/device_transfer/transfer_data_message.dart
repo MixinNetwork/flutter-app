@@ -6,13 +6,6 @@ import '../../enum/media_status.dart';
 
 part 'transfer_data_message.g.dart';
 
-class MediaStatusJsonConverter extends EnumJsonConverter<MediaStatus> {
-  const MediaStatusJsonConverter();
-
-  @override
-  List<MediaStatus> enumValues() => MediaStatus.values;
-}
-
 @JsonSerializable()
 @MediaStatusJsonConverter()
 class TransferDataMessage {

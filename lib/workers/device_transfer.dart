@@ -166,11 +166,11 @@ class DeviceTransfer {
 
     // send sticker
     final stickers = await database.stickerDao.getStickers();
-    // for (final sticker in stickers) {
-    //   await socket.addSticker(
-    //     TransferDataSticker.fromDbSticker(sticker),
-    //   );
-    // }
+    for (final sticker in stickers) {
+      await socket.addSticker(
+        TransferDataSticker.fromDbSticker(sticker),
+      );
+    }
 
     d('send sticker count ${stickers.length}');
 
