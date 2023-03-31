@@ -12593,6 +12593,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<int> countPinMessages() {
+    return customSelect('SELECT COUNT(1) AS _c0 FROM pin_messages',
+        variables: [],
+        readsFrom: {
+          pinMessages,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
   Selectable<DateTime> getLastBlazeMessageCreatedAt() {
     return customSelect(
         'SELECT created_at FROM flood_messages ORDER BY created_at DESC LIMIT 1',
@@ -12879,6 +12887,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<int> countUsers() {
+    return customSelect('SELECT COUNT(*) AS _c0 FROM users',
+        variables: [],
+        readsFrom: {
+          users,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
   Selectable<Sticker> recentUsedStickers() {
     return customSelect(
         'SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20',
@@ -12899,6 +12915,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           stickerRelationships,
           stickers,
         }).asyncMap(stickers.mapFromRow);
+  }
+
+  Selectable<int> countStickers() {
+    return customSelect('SELECT COUNT(1) AS _c0 FROM stickers',
+        variables: [],
+        readsFrom: {
+          stickers,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<User> participantsAvatar(String conversationId) {
@@ -13029,6 +13053,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           users,
           participants,
         }).map((QueryRow row) => row.read<String>('user_id'));
+  }
+
+  Selectable<int> countParticipants() {
+    return customSelect('SELECT COUNT(1) AS _c0 FROM participants',
+        variables: [],
+        readsFrom: {
+          participants,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<MessageItem> baseMessageItems(BaseMessageItems$where where,
@@ -13499,6 +13531,23 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
       );
     });
+  }
+
+  Selectable<int> countMessages() {
+    return customSelect('SELECT count(1) AS _c0 FROM messages',
+        variables: [],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
+  Selectable<int> countMediaMessages() {
+    return customSelect(
+        'SELECT count(1) AS _c0 FROM messages WHERE category IN (\'SIGNAL_IMAGE\', \'SIGNAL_VIDEO\', \'SIGNAL_DATA\', \'SIGNAL_AUDIO\', \'PLAIN_IMAGE\', \'PLAIN_VIDEO\', \'PLAIN_DATA\', \'PLAIN_AUDIO\', \'ENCRYPTED_IMAGE\', \'ENCRYPTED_VIDEO\', \'ENCRYPTED_DATA\', \'ENCRYPTED_AUDIO\')',
+        variables: [],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<int> baseConversationItemCount(
@@ -14049,6 +14098,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         memberCount: row.read<int>('memberCount'),
       );
     });
+  }
+
+  Selectable<int> countConversations() {
+    return customSelect('SELECT COUNT(1) AS _c0 FROM conversations',
+        variables: [],
+        readsFrom: {
+          conversations,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   @override

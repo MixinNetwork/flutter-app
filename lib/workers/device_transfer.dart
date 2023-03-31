@@ -221,6 +221,29 @@ class DeviceTransfer {
       i('_processTransfer end $name, count: $count cost: ${stopwatch.elapsed}');
     }
 
+    // send total count
+    await runWithLog((socket) async {
+      final db = database.mixinDatabase;
+      final count = await db.countMediaMessages().getSingle() +
+          await db.countMessages().getSingle() +
+          await db.countStickers().getSingle() +
+          await db.assetDao.countAssets().getSingle() +
+          await db.snapshotDao.countSnapshots().getSingle() +
+          await db.countUsers().getSingle() +
+          await db.countConversations().getSingle() +
+          await db.countParticipants().getSingle() +
+          await db.countPinMessages().getSingle() +
+          await database.transcriptMessageDao
+              .countTranscriptMessages()
+              .getSingle() +
+          await database.expiredMessageDao.countExpiredMessages().getSingle();
+      await socket.addCommand(TransferDataCommand.start(
+        deviceId: await getDeviceId(),
+        total: count,
+      ));
+      return count;
+    }, 'send_total_count');
+
     await runWithLog(_processTransferConversation, 'conversation');
     await runWithLog(_processTransferUser, 'user');
     await runWithLog(_processTransferParticipant, 'participant');

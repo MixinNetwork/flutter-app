@@ -123,6 +123,14 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
       );
     });
   }
+
+  Selectable<int> countSnapshots() {
+    return customSelect('SELECT COUNT(1) AS _c0 FROM snapshots',
+        variables: [],
+        readsFrom: {
+          snapshots,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
 }
 
 class SnapshotItem {

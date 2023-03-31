@@ -2,9 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:drift/native.dart';
+import 'package:flutter_app/blaze/vo/message_result.dart';
+import 'package:flutter_app/db/database.dart';
+import 'package:flutter_app/db/fts_database.dart';
+import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/utils/device_transfer/crc.dart';
 import 'package:flutter_app/utils/device_transfer/json_transfer_data.dart';
+import 'package:flutter_app/utils/device_transfer/transfer_data_command.dart';
 import 'package:flutter_app/utils/device_transfer/transfer_protocol.dart';
+import 'package:flutter_app/workers/device_transfer.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:uuid/uuid.dart';
@@ -75,11 +82,29 @@ void main() {
   });
 
   test('device transfer', () {
-
-    
-
+    final database = Database(
+      MixinDatabase(NativeDatabase.memory()),
+      FtsDatabase(NativeDatabase.memory()),
+    );
+    final transfer = DeviceTransfer(
+      database: database,
+      userId: '111111-1111',
+      messageDeliver: (message) async {
+        d('message: $message');
+        return MessageResult(true, false);
+      },
+      primarySessionId: '00000-0000',
+      identityNumber: '00000',
+    );
+    d('transfer: $transfer');
+    transfer.handleRemoteCommand(
+      TransferDataCommand(
+        deviceId: 'device_id',
+        action: kTransferCommandActionPull,
+        version: 1,
+      ),
+    );
   });
-
 }
 
 class _BytesStreamSink extends EventSink<List<int>> {

@@ -17,3 +17,6 @@ SELECT * FROM expired_messages WHERE message_id = :messageId;
 
 getAllExpiredMessages:
 SELECT * FROM expired_messages ORDER BY rowid ASC LIMIT :limit OFFSET :offset;
+
+countExpiredMessages:
+SELECT COUNT(1) FROM expired_messages;

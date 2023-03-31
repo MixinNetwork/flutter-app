@@ -16,6 +16,7 @@ TransferDataCommand _$TransferDataCommandFromJson(Map<String, dynamic> json) =>
       secretKey: json['secret_key'] as String?,
       platform: json['platform'] as String? ?? 'desktop',
       code: json['code'] as int?,
+      total: json['total'] as int?,
     );
 
 Map<String, dynamic> _$TransferDataCommandToJson(
@@ -29,4 +30,5 @@ Map<String, dynamic> _$TransferDataCommandToJson(
       'secret_key': instance.secretKey,
       'platform': instance.platform,
       'code': instance.code,
+      'total': instance.total,
     };

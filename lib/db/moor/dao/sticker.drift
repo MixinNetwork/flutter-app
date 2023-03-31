@@ -12,3 +12,6 @@ FROM   sticker_albums sa
                ON sr.sticker_id = s.sticker_id
 WHERE  sa.category = :category
 ORDER  BY s.created_at DESC;
+
+countStickers:
+SELECT COUNT(1) FROM stickers;

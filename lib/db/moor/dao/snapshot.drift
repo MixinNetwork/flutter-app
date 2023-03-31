@@ -22,3 +22,7 @@ FROM snapshots snapshot
 WHERE $where
 ORDER BY $order
 LIMIT $limit;
+
+
+countSnapshots:
+SELECT COUNT(1) FROM snapshots;

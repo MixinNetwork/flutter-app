@@ -7,6 +7,7 @@ const kTransferCommandActionPull = 'pull';
 const kTransferCommandActionPush = 'push';
 const kTransferCommandActionFinish = 'finish';
 const kTransferCommandActionConnect = 'connect';
+const kTransferCommandActionStart = 'start';
 
 const _kVersion = 1;
 
@@ -21,6 +22,7 @@ class TransferDataCommand with EquatableMixin {
     this.secretKey,
     this.platform = 'desktop',
     this.code,
+    this.total,
   });
 
   factory TransferDataCommand.fromJson(Map<String, dynamic> json) =>
@@ -61,6 +63,17 @@ class TransferDataCommand with EquatableMixin {
         code: code,
       );
 
+  factory TransferDataCommand.start({
+    required String deviceId,
+    required int total,
+  }) =>
+      TransferDataCommand(
+        deviceId: deviceId,
+        action: kTransferCommandActionStart,
+        version: _kVersion,
+        total: total,
+      );
+
   @JsonKey(name: 'device_id')
   final String deviceId;
   final String action;
@@ -73,8 +86,10 @@ class TransferDataCommand with EquatableMixin {
   @JsonKey(name: 'platform')
   final String platform;
 
-  // number: 1 - 10000
+  // verification number: 1 - 10000
   final int? code;
+
+  final int? total;
 
   Map<String, dynamic> toJson() => _$TransferDataCommandToJson(this);
 
@@ -90,5 +105,6 @@ class TransferDataCommand with EquatableMixin {
         secretKey,
         code,
         platform,
+        total,
       ];
 }
