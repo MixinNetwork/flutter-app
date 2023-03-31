@@ -208,6 +208,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
       (select(db.users)
             ..orderBy([
               (tbl) => OrderingTerm.asc(tbl.rowId),
-            ]))
+            ])
+            ..limit(limit, offset: offset))
           .get();
 }

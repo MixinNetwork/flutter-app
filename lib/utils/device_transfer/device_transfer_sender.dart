@@ -35,19 +35,19 @@ class DeviceTransferSender {
     required this.attachmentUtil,
     required this.protocolTransform,
     required this.deviceId,
-    this.onProgressUpdate,
-    this.onSendStart,
-    this.onSendSucceed,
-    this.onSendFailed,
+    this.onSenderProgressUpdate,
+    this.onSenderStart,
+    this.onSenderSucceed,
+    this.onSenderFailed,
   });
 
   final Database database;
   final AttachmentUtilBase attachmentUtil;
   final TransferProtocolTransform protocolTransform;
-  final OnSendProgressUpdate? onProgressUpdate;
-  final OnSendStart? onSendStart;
-  final OnSendSucceed? onSendSucceed;
-  final OnSendFailed? onSendFailed;
+  final OnSendProgressUpdate? onSenderProgressUpdate;
+  final OnSendStart? onSenderStart;
+  final OnSendSucceed? onSenderSucceed;
+  final OnSendFailed? onSenderFailed;
   final String deviceId;
 
   ServerSocket? _socket;
@@ -67,7 +67,7 @@ class DeviceTransferSender {
     final progress = _totalCount == 0
         ? 0.0
         : (_progress / _totalCount * 100).clamp(0.0, 100.0);
-    onProgressUpdate?.call(progress);
+    onSenderProgressUpdate?.call(progress);
   }
 
   Future<int> startServerSocket(int verificationCode) async {
@@ -112,7 +112,7 @@ class DeviceTransferSender {
                     for (final s in _pendingVerificationSockets) {
                       s.destroy();
                     }
-                    onSendStart?.call();
+                    onSenderStart?.call();
                     _processTransfer(socket);
                   } else {
                     e('code not match');
@@ -143,10 +143,12 @@ class DeviceTransferSender {
           }
         }
       }, onDone: () {
-        onSendSucceed?.call();
+        i('transfer done');
+        onSenderSucceed?.call();
         subscription.cancel();
       }, onError: (error, stacktrace) {
-        onSendFailed?.call();
+        e('error: $error, stacktrace: $stacktrace');
+        onSenderFailed?.call();
         subscription.cancel();
         close();
       });
@@ -188,7 +190,7 @@ class DeviceTransferSender {
       return count;
     }, 'send_total_count');
 
-    onProgressUpdate?.call(0);
+    onSenderProgressUpdate?.call(0);
 
     await runWithLog(_processTransferConversation, 'conversation');
     await runWithLog(_processTransferUser, 'user');
@@ -203,7 +205,7 @@ class DeviceTransferSender {
     await runWithLog(_processTransferAttachment, 'attachment');
 
     _progress = _totalCount;
-    onProgressUpdate?.call(100);
+    onSenderProgressUpdate?.call(100);
 
     await socket.addCommand(TransferDataCommand.simple(
       deviceId: deviceId,
@@ -433,6 +435,7 @@ class DeviceTransferSender {
   }
 
   void close() {
+    i('sender: close transfer server');
     _clientSocket?.destroy();
     _clientSocket = null;
     _socket?.close();

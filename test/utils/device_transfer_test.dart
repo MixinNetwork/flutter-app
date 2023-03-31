@@ -175,16 +175,16 @@ void main() {
       attachmentUtil: AttachmentUtilBase.of(identifyNumber),
       protocolTransform: const TransferProtocolTransform(fileFolder: ''),
       deviceId: senderDeviceId,
-      onSendStart: () {
+      onSenderStart: () {
         senderStartCount++;
       },
-      onSendSucceed: () {
+      onSenderSucceed: () {
         senderSucceedCount++;
       },
-      onSendFailed: () {
+      onSenderFailed: () {
         senderFailedCount++;
       },
-      onProgressUpdate: (progress) {
+      onSenderProgressUpdate: (progress) {
         d('progress: $progress');
         senderProgress.add(progress);
       },
