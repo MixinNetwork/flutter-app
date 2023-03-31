@@ -513,7 +513,6 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
 
 abstract class _$FtsDatabase extends GeneratedDatabase {
   _$FtsDatabase(QueryExecutor e) : super(e);
-  _$FtsDatabase.connect(DatabaseConnection c) : super.connect(c);
   late final MessagesFts messagesFts = MessagesFts(this);
   late final MessagesMetas messagesMetas = MessagesMetas(this);
   late final Index messagesMetasDocIdCreatedAt = Index(

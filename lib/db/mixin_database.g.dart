@@ -12891,7 +12891,6 @@ class FiatsCompanion extends UpdateCompanion<Fiat> {
 
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(e);
-  _$MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
   late final FavoriteApps favoriteApps = FavoriteApps(this);
   late final Apps apps = Apps(this);
   late final StickerRelationships stickerRelationships =

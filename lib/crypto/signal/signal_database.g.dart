@@ -1690,7 +1690,6 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
 
 abstract class _$SignalDatabase extends GeneratedDatabase {
   _$SignalDatabase(QueryExecutor e) : super(e);
-  _$SignalDatabase.connect(DatabaseConnection c) : super.connect(c);
   late final SenderKeys senderKeys = SenderKeys(this);
   late final Identities identities = Identities(this);
   late final Index indexIdentitiesAddress = Index('index_identities_address',
