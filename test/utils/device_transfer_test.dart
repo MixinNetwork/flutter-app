@@ -27,7 +27,7 @@ void main() {
 
     final bytes = Uint8List.fromList(sink.data);
     final stream = Stream.value(Uint8List.fromList(bytes))
-        .transform(const TransferProtocolTransform());
+        .transform(const TransferProtocolTransform(fileFolder: ''));
     final data = await stream.toList();
     expect(data.length, 5);
 
@@ -46,7 +46,7 @@ void main() {
     );
     final bytes = Uint8List.fromList(sink.data);
     final stream = Stream.value(Uint8List.fromList(bytes))
-        .transform(const TransferProtocolTransform());
+        .transform(const TransferProtocolTransform(fileFolder: ''));
     final data = await stream.toList();
     expect(data.length, 1);
     final packet = data.first as TransferAttachmentPacket;

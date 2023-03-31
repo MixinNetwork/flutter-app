@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
-import '../file.dart';
 import '../logger.dart';
 import 'crc.dart';
 import 'json_transfer_data.dart';
@@ -171,12 +171,20 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
   @override
   TransferJsonPacket build() {
     assert(_writeBodyLength == expectedBodyLength);
-    return TransferJsonPacket._fromData(Uint8List.fromList(_body));
+    final json = Uint8List.fromList(_body);
+    try {
+      return TransferJsonPacket._fromData(json);
+    } catch (error, stacktrace) {
+      e('_TransferJsonPacketBuilder#build: $error, $stacktrace \ncontent: $json');
+      rethrow;
+    }
   }
 }
 
 class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
-  _TransferAttachmentPacketBuilder(super.expectedBodyLength);
+  _TransferAttachmentPacketBuilder(super.expectedBodyLength, this.folder);
+
+  final String folder;
 
   File? _file;
   String? _messageId;
@@ -191,8 +199,7 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
       final messageIdBytes = bytes.sublist(0, _kUUIDBytesCount);
       final messageId = Uuid.unparse(messageIdBytes);
       _messageId = messageId;
-      final path = '${mixinDocumentsDirectory.path}/tmp/$messageId';
-      final file = File(path);
+      final file = File(p.join(folder, messageId));
       _file = file;
       if (file.existsSync()) {
         file.delete();
@@ -223,20 +230,26 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
 
 class TransferProtocolTransform
     extends StreamTransformerBase<Uint8List, TransferPacket> {
-  const TransferProtocolTransform();
+  const TransferProtocolTransform({
+    required this.fileFolder,
+  });
+
+  /// the file folder to save attachment.
+  final String fileFolder;
 
   @override
   Stream<TransferPacket> bind(Stream<Uint8List> stream) =>
       Stream<TransferPacket>.eventTransformed(
         stream,
-        _TransferProtocolSink.new,
+        (sink) => _TransferProtocolSink(sink, fileFolder),
       );
 }
 
 class _TransferProtocolSink extends EventSink<Uint8List> {
-  _TransferProtocolSink(this._sink);
+  _TransferProtocolSink(this._sink, this.folder);
 
   final EventSink<TransferPacket> _sink;
+  final String folder;
 
   /// The carry-over from the previous chunk.
   Uint8List? _carry;
@@ -268,7 +281,7 @@ class _TransferProtocolSink extends EventSink<Uint8List> {
             _builder = _TransferJsonPacketBuilder(bodyLength);
             break;
           case kTypeFile:
-            _builder = _TransferAttachmentPacketBuilder(bodyLength);
+            _builder = _TransferAttachmentPacketBuilder(bodyLength, folder);
             break;
           default:
             _sink.addError('unknown type: $type', StackTrace.current);

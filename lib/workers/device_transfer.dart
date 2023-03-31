@@ -4,6 +4,8 @@ import 'dart:math';
 
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import '../blaze/blaze_message.dart';
 import '../blaze/vo/message_result.dart';
@@ -101,6 +103,17 @@ class DeviceTransfer {
     await _sendCommandAsPlainJson(command);
   }
 
+  Future<TransferProtocolTransform> _getProtocolTransform() async {
+    final fileFolder = await getTemporaryDirectory();
+    final folder = p.join(fileFolder.path, 'mixin_transfer');
+    try {
+      await Directory(folder).create(recursive: true);
+    } catch (error, stacktrace) {
+      e('create folder error: $error $stacktrace');
+    }
+    return TransferProtocolTransform(fileFolder: folder);
+  }
+
   Future<void> _sendPushToOtherSession() async {
     if (_socket != null) {
       await _socket!.close();
@@ -127,44 +140,57 @@ class DeviceTransfer {
 
     i('_sendPushToOtherSession: server $ipAddress:${serverSocket.port}');
 
+    final transform = await _getProtocolTransform();
     serverSocket.listen((socket) async {
       i('client connected: ${socket.remoteAddress.address}:${socket.remotePort}');
       // listen for data
-      socket.transform(const TransferProtocolTransform()).listen((event) {
-        d('receive data: $event');
-        if (event is TransferJsonPacket) {
-          final data = event.json;
-          switch (data.type) {
-            case JsonTransferDataType.command:
-              final command = TransferDataCommand.fromJson(data.data);
-              switch (command.action) {
-                case kTransferCommandActionConnect:
-                  if (command.code == code) {
-                    _processTransfer(socket);
-                  } else {
-                    e('code not match');
-                    socket.close();
-                  }
-                  break;
-              }
-              break;
-            case JsonTransferDataType.conversation:
-            case JsonTransferDataType.message:
-            case JsonTransferDataType.sticker:
-            case JsonTransferDataType.asset:
-            case JsonTransferDataType.snapshot:
-            case JsonTransferDataType.user:
-            case JsonTransferDataType.expiredMessage:
-            case JsonTransferDataType.transcriptMessage:
-            case JsonTransferDataType.participant:
-            case JsonTransferDataType.pinMessage:
-            case JsonTransferDataType.unknown:
-              e('unknown type: ${data.type}');
-              d('data: $data');
-              break;
+      var isClientVerified = false;
+      socket.transform(transform).listen(
+        (event) {
+          d('receive data: $event');
+          if (event is TransferJsonPacket) {
+            final data = event.json;
+            switch (data.type) {
+              case JsonTransferDataType.command:
+                final command = TransferDataCommand.fromJson(data.data);
+                switch (command.action) {
+                  case kTransferCommandActionConnect:
+                    if (command.code == code) {
+                      isClientVerified = true;
+                      _processTransfer(socket);
+                    } else {
+                      e('code not match');
+                      socket.close();
+                    }
+                    break;
+                }
+                break;
+              case JsonTransferDataType.conversation:
+              case JsonTransferDataType.message:
+              case JsonTransferDataType.sticker:
+              case JsonTransferDataType.asset:
+              case JsonTransferDataType.snapshot:
+              case JsonTransferDataType.user:
+              case JsonTransferDataType.expiredMessage:
+              case JsonTransferDataType.transcriptMessage:
+              case JsonTransferDataType.participant:
+              case JsonTransferDataType.pinMessage:
+              case JsonTransferDataType.unknown:
+                e('unknown type: ${data.type}');
+                d('data: $data');
+                break;
+            }
           }
-        }
-      });
+        },
+        onDone: () {
+          i('client(${socket.remoteAddress.address}:${socket.remotePort}) disconnected');
+          if (isClientVerified) {
+            i('verified client exit, close server socket($ipAddress:${serverSocket.port})');
+            serverSocket.close();
+            _socket = null;
+          }
+        },
+      );
     });
     await _sendCommandAsPlainJson(command);
   }
@@ -265,9 +291,10 @@ class DeviceTransfer {
   Future<void> _handleRemotePushCommand(String ip, int port, int code) async {
     d('_handleRemotePushCommand: $ip:$port ($code)');
     try {
+      final transform = await _getProtocolTransform();
       d('connect to $ip:$port');
       final socket = await Socket.connect(ip, port);
-      socket.transform(const TransferProtocolTransform()).listen((packet) {
+      socket.transform(transform).listen((packet) {
         if (packet is TransferJsonPacket) {
           _processReceivedJsonPacket(packet.json);
         } else if (packet is TransferAttachmentPacket) {
