@@ -6,6 +6,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 
 import '../blaze/blaze_message.dart';
+import '../blaze/vo/message_result.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../constants/constants.dart';
 import '../db/database.dart';
@@ -13,10 +14,10 @@ import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/device_transfer/device_transfer_widget.dart';
+import '../utils/device_transfer/json_transfer_data.dart';
 import '../utils/device_transfer/transfer_data_asset.dart';
 import '../utils/device_transfer/transfer_data_command.dart';
 import '../utils/device_transfer/transfer_data_conversation.dart';
-import '../utils/device_transfer/transfer_data_json_wrapper.dart';
 import '../utils/device_transfer/transfer_data_message.dart';
 import '../utils/device_transfer/transfer_data_snapshot.dart';
 import '../utils/device_transfer/transfer_data_sticker.dart';
@@ -25,14 +26,16 @@ import '../utils/device_transfer/transfer_protocol.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/platform.dart';
-import 'sender.dart';
+
+typedef MessageDeliver = Future<MessageResult> Function(
+    BlazeMessage blazeMessage);
 
 // TODO(BIN): check has primary session
 class DeviceTransfer {
   DeviceTransfer({
     required this.database,
     required this.userId,
-    required this.sender,
+    required this.messageDeliver,
     required this.primarySessionId,
     required this.identityNumber,
   }) : attachmentUtil = AttachmentUtilBase.of(identityNumber) {
@@ -52,7 +55,7 @@ class DeviceTransfer {
   final Database database;
   final String userId;
   final String identityNumber;
-  final Sender sender;
+  final MessageDeliver messageDeliver;
   final String? primarySessionId;
 
   final AttachmentUtilBase attachmentUtil;
@@ -83,7 +86,7 @@ class DeviceTransfer {
       sessionId: primarySessionId,
     );
     final bm = createParamBlazeMessage(param);
-    final result = await sender.deliver(bm);
+    final result = await messageDeliver(bm);
     if (!result.success) {
       e('_sendDeviceTransferToOtherSession: ${result.errorCode}');
     }
@@ -266,7 +269,7 @@ class DeviceTransfer {
     }
   }
 
-  Future<void> _processReceivedJsonPacket(TransferDataJsonWrapper data) async {
+  Future<void> _processReceivedJsonPacket(JsonTransferData data) async {
     try {
       switch (data.type) {
         case kTypeConversation:
@@ -359,7 +362,7 @@ class DeviceTransfer {
 
 extension SocketExtension on Socket {
   Future<void> addConversation(TransferDataConversation conversation) {
-    final wrapper = TransferDataJsonWrapper(
+    final wrapper = JsonTransferData(
       data: conversation.toJson(),
       type: kTypeConversation,
     );
@@ -367,7 +370,7 @@ extension SocketExtension on Socket {
   }
 
   Future<void> addMessage(TransferDataMessage message) {
-    final wrapper = TransferDataJsonWrapper(
+    final wrapper = JsonTransferData(
       data: message.toJson(),
       type: kTypeMessage,
     );
@@ -380,7 +383,7 @@ extension SocketExtension on Socket {
   }
 
   Future<void> addSticker(TransferDataSticker sticker) {
-    final wrapper = TransferDataJsonWrapper(
+    final wrapper = JsonTransferData(
       data: sticker.toJson(),
       type: kTypeSticker,
     );
@@ -388,7 +391,7 @@ extension SocketExtension on Socket {
   }
 
   Future<void> addUser(TransferDataUser user) {
-    final wrapper = TransferDataJsonWrapper(
+    final wrapper = JsonTransferData(
       data: user.toJson(),
       type: kTypeUser,
     );
@@ -396,7 +399,7 @@ extension SocketExtension on Socket {
   }
 
   Future<void> addAsset(TransferDataAsset asset) {
-    final wrapper = TransferDataJsonWrapper(
+    final wrapper = JsonTransferData(
       data: asset.toJson(),
       type: kTypeAsset,
     );
@@ -404,7 +407,7 @@ extension SocketExtension on Socket {
   }
 
   Future<void> addSnapshot(TransferDataSnapshot snapshot) {
-    final wrapper = TransferDataJsonWrapper(
+    final wrapper = JsonTransferData(
       data: snapshot.toJson(),
       type: kTypeSnapshot,
     );
@@ -412,13 +415,13 @@ extension SocketExtension on Socket {
   }
 
   Future<void> addCommand(TransferDataCommand command) {
-    final wrapper = TransferDataJsonWrapper(
+    final wrapper = JsonTransferData(
       data: command.toJson(),
       type: kTypeCommand,
     );
     return _addTransferJson(wrapper);
   }
 
-  Future<void> _addTransferJson(TransferDataJsonWrapper data) =>
+  Future<void> _addTransferJson(JsonTransferData data) =>
       writePacketToSink(this, TransferJsonPacket(data));
 }

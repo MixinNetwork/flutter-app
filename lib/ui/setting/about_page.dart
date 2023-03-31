@@ -9,9 +9,9 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/device_transfer/device_transfer_widget.dart';
+import '../../utils/device_transfer/json_transfer_data.dart';
 import '../../utils/device_transfer/transfer_data_asset.dart';
 import '../../utils/device_transfer/transfer_data_conversation.dart';
-import '../../utils/device_transfer/transfer_data_json_wrapper.dart';
 import '../../utils/device_transfer/transfer_data_message.dart';
 import '../../utils/device_transfer/transfer_data_snapshot.dart';
 import '../../utils/device_transfer/transfer_data_sticker.dart';
@@ -276,7 +276,7 @@ void _handleAttachmentMessage(TransferAttachmentPacket packet) {
   d('client: attachment: ${packet.messageId} ${packet.path}');
 }
 
-void _handleJsonMessage(TransferDataJsonWrapper data) {
+void _handleJsonMessage(JsonTransferData data) {
   try {
     switch (data.type) {
       case kTypeConversation:

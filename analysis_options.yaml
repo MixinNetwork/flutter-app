@@ -33,6 +33,7 @@ analyzer:
     - '**.g.dart'
     #    - 'editable/**'
     - 'third_party/**'
+    - 'lib/constants/resources.preview.dart'
 
 linter:
   rules:

@@ -8,7 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../file.dart';
 import '../logger.dart';
 import 'crc.dart';
-import 'transfer_data_json_wrapper.dart';
+import 'json_transfer_data.dart';
 
 const kTypeJson = 1;
 const kTypeFile = 2;
@@ -31,7 +31,7 @@ class TransferJsonPacket extends TransferPacket {
       : _data = Uint8List.fromList(utf8.encode(jsonEncode(json.toJson())));
 
   TransferJsonPacket._fromData(this._data)
-      : json = TransferDataJsonWrapper.fromJson(
+      : json = JsonTransferData.fromJson(
             jsonDecode(utf8.decode(_data)) as Map<String, dynamic>);
 
   final Uint8List _data;
@@ -39,7 +39,7 @@ class TransferJsonPacket extends TransferPacket {
   @override
   int get _type => kTypeJson;
 
-  final TransferDataJsonWrapper json;
+  final JsonTransferData json;
 
   @override
   Future<int> get _bodyLength => Future.value(_data.length);

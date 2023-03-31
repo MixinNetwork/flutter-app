@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_app/utils/device_transfer/crc.dart';
-import 'package:flutter_app/utils/device_transfer/transfer_data_json_wrapper.dart';
+import 'package:flutter_app/utils/device_transfer/json_transfer_data.dart';
 import 'package:flutter_app/utils/device_transfer/transfer_protocol.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_logger/mixin_logger.dart';
@@ -15,7 +15,7 @@ void main() {
 
     Future<void> writeJson(Map<String, dynamic> json) => writePacketToSink(
         sink,
-        TransferJsonPacket(TransferDataJsonWrapper(
+        TransferJsonPacket(JsonTransferData(
           type: 'test',
           data: json,
         )));

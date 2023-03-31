@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'transfer_data_json_wrapper.g.dart';
+part 'json_transfer_data.g.dart';
 
 const kTypeConversation = 'conversation';
 const kTypeMessage = 'message';
@@ -10,19 +10,18 @@ const kTypeSnapshot = 'snapshot';
 const kTypeUser = 'user';
 const kTypeCommand = 'command';
 
-
 @JsonSerializable()
-class TransferDataJsonWrapper {
-  TransferDataJsonWrapper({
+class JsonTransferData {
+  JsonTransferData({
     required this.data,
     required this.type,
   });
 
-  factory TransferDataJsonWrapper.fromJson(Map<String, dynamic> json) =>
-      _$TransferDataJsonWrapperFromJson(json);
+  factory JsonTransferData.fromJson(Map<String, dynamic> json) =>
+      _$JsonTransferDataFromJson(json);
 
   final Map<String, dynamic> data;
   final String type;
 
-  Map<String, dynamic> toJson() => _$TransferDataJsonWrapperToJson(this);
+  Map<String, dynamic> toJson() => _$JsonTransferDataToJson(this);
 }

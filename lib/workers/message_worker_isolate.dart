@@ -230,7 +230,7 @@ class _MessageProcessRunner {
     _deviceTransfer = DeviceTransfer(
       database: database,
       userId: userId,
-      sender: _sender,
+      messageDeliver: _sender.deliver,
       primarySessionId: primarySessionId,
       identityNumber: identityNumber,
     );
