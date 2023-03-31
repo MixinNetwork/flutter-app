@@ -1,128 +1,224 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:io';
 
+import 'package:ansicolor/ansicolor.dart';
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:flutter_app/blaze/vo/message_result.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/fts_database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/utils/device_transfer/crc.dart';
-import 'package:flutter_app/utils/device_transfer/json_transfer_data.dart';
-import 'package:flutter_app/utils/device_transfer/transfer_data_command.dart';
+import 'package:flutter_app/enum/media_status.dart';
+import 'package:flutter_app/utils/attachment/attachment_util.dart';
+import 'package:flutter_app/utils/device_transfer/device_transfer_receiver.dart';
+import 'package:flutter_app/utils/device_transfer/device_transfer_sender.dart';
 import 'package:flutter_app/utils/device_transfer/transfer_protocol.dart';
-import 'package:flutter_app/workers/device_transfer.dart';
+import 'package:flutter_app/utils/event_bus.dart';
+import 'package:flutter_app/utils/file.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
+const List<Asset> assets = [
+  Asset(
+    assetId: 'BTC',
+    symbol: 'BTC',
+    name: 'Bitcoin',
+    iconUrl: 'https://example.com/btc.png',
+    balance: '2.5',
+    destination: '15sYbVpRh6dyWycZMwPdxJWD4xbfxReeHe',
+    priceBtc: '1.0',
+    priceUsd: '32000.00',
+    chainId: 'BTC',
+    changeUsd: '1.0',
+    changeBtc: '0.1',
+    confirmations: 3,
+  ),
+  Asset(
+    assetId: 'ETH',
+    symbol: 'ETH',
+    name: 'Ethereum',
+    iconUrl: 'https://example.com/eth.png',
+    balance: '10.0',
+    destination: '0x1abc...',
+    priceBtc: '0.05',
+    priceUsd: '2500.00',
+    chainId: 'ETH',
+    changeUsd: '0.5',
+    changeBtc: '0.01',
+    confirmations: 12,
+  ),
+  Asset(
+    assetId: 'DOGE',
+    symbol: 'DOGE',
+    name: 'Dogecoin',
+    iconUrl: 'https://example.com/doge.png',
+    balance: '100000.0',
+    destination: 'DTqYmyq2dKjMw1WWniuqcMSeLThpRc1ZbD',
+    priceBtc: '0.000001',
+    priceUsd: '0.30',
+    chainId: 'DOGE',
+    changeUsd: '-0.1',
+    changeBtc: '-0.000001',
+    confirmations: 6,
+  )
+];
+
+final List<Message> messages = [
+  Message(
+    messageId: '1',
+    conversationId: '1001',
+    userId: 'user1',
+    category: 'text',
+    content: 'Hello, how are you?',
+    status: sdk.MessageStatus.sent,
+    createdAt: DateTime.now(),
+  ),
+  Message(
+    messageId: '2',
+    conversationId: '1002',
+    userId: 'user2',
+    category: 'image',
+    mediaUrl: 'https://example.com/image.jpg',
+    mediaMimeType: 'image/jpeg',
+    mediaSize: 1024 * 1024,
+    mediaWidth: 640,
+    mediaHeight: 480,
+    mediaStatus: MediaStatus.done,
+    status: sdk.MessageStatus.sending,
+    createdAt: DateTime.now(),
+    caption: 'A beautiful sunset',
+  ),
+  Message(
+    messageId: '3',
+    conversationId: '1003',
+    userId: 'user1',
+    category: 'quote',
+    status: sdk.MessageStatus.read,
+    createdAt: DateTime.now(),
+    quoteMessageId: '2',
+    quoteContent: 'A beautiful sunset',
+  ),
+];
+
+extension _DatabasePreset on Database {
+  void addTestData(String currentUserId) {
+    for (final asset in assets) {
+      assetDao.insertAsset(asset);
+    }
+    for (final message in messages) {
+      messageDao.insert(message, currentUserId);
+    }
+  }
+}
+
 void main() {
-  test('transfer writer', () async {
-    final sink = _BytesStreamSink();
-
-    Future<void> writeJson(Map<String, dynamic> json) => writePacketToSink(
-        sink,
-        TransferJsonPacket(JsonTransferData(
-          type: JsonTransferDataType.command,
-          data: json,
-        )));
-    await writeJson({'abc': 1});
-    await writeJson({'bdfasf': 2124124});
-    await writeJson({'bdfasf': 2124124});
-    await writeJson({'bdfasf': 2124124});
-    await writeJson({'bdfasf': 2124124});
-
-    final bytes = Uint8List.fromList(sink.data);
-    final stream = Stream.value(Uint8List.fromList(bytes))
-        .transform(const TransferProtocolTransform(fileFolder: ''));
-    final data = await stream.toList();
-    expect(data.length, 5);
-
-    final packet = data.first as TransferJsonPacket;
-    final body = packet.json.data;
-    expect(body, equals({'abc': 1}));
-    d('utf8.decode(body): $body');
-  });
-
-  test('write file', () async {
-    final sink = _BytesStreamSink();
-    final messageId = const Uuid().v4();
-    await writePacketToSink(
-      sink,
-      TransferAttachmentPacket(messageId: messageId, path: './LICENSE'),
+  setUpAll(() {
+    mixinDocumentsDirectory = Directory(
+      p.join(Directory.systemTemp.path, 'test'),
     );
-    final bytes = Uint8List.fromList(sink.data);
-    final stream = Stream.value(Uint8List.fromList(bytes))
-        .transform(const TransferProtocolTransform(fileFolder: ''));
-    final data = await stream.toList();
-    expect(data.length, 1);
-    final packet = data.first as TransferAttachmentPacket;
-    expect(packet.messageId, messageId);
-    d('packet.path: ${packet.path}');
+    EventBus.initialize();
+    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+    ansiColorDisabled = false;
   });
 
-  test('crc test', () {
-    expect(
-        calculateCrc32(Uint8List.fromList(utf8.encode('abcdefg'))), 824863398);
-    expect(calculateCrc32(Uint8List.fromList(utf8.encode('yHm7QnW2Rp'))),
-        3806008316);
-    final calculator = CrcCalculator()
-      ..addBytes(Uint8List.fromList(utf8.encode('yHm7Qn')))
-      ..addBytes(Uint8List.fromList(utf8.encode('W2Rp')));
-    expect(calculator.result, 3806008316);
-
-    expect(calculateCrc32(Uint8List.fromList(utf8.encode('4fEwLdG8tK'))),
-        2006416362);
-    expect(calculateCrc32(Uint8List.fromList(utf8.encode('J9uX6vZpNc'))),
-        4072379794);
-    expect(calculateCrc32(Uint8List.fromList(utf8.encode('5VhQxPbUaS'))),
-        1074432487);
-    expect(calculateCrc32(Uint8List.fromList(utf8.encode('A2kDlTjRgM'))),
-        69700325);
-  });
-
-  test('device transfer', () {
-    final database = Database(
+  test('test receiver', () async {
+    final receiverDatabase = Database(
       MixinDatabase(NativeDatabase.memory()),
       FtsDatabase(NativeDatabase.memory()),
     );
-    final transfer = DeviceTransfer(
-      database: database,
-      userId: '111111-1111',
-      messageDeliver: (message) async {
-        d('message: $message');
-        return MessageResult(true, false);
-      },
-      primarySessionId: '00000-0000',
-      identityNumber: '00000',
-    );
-    d('transfer: $transfer');
-    transfer.handleRemoteCommand(
-      TransferDataCommand(
-        deviceId: 'device_id',
-        action: kTransferCommandActionPull,
-        version: 1,
+    final userId = const Uuid().v4();
+    const identifyNumber = '10000';
+    final receiverDeviceId = const Uuid().v4();
+
+    var receiverStartCount = 0;
+    var receiverSucceedCount = 0;
+    var receiverFailedCount = 0;
+    final receiverProgress = <double>[];
+
+    final receiver = DeviceTransferReceiver(
+      userId: userId,
+      database: receiverDatabase,
+      attachmentUtil: AttachmentUtilBase.of(identifyNumber),
+      protocolTransform: TransferProtocolTransform(
+        fileFolder: p.join(mixinDocumentsDirectory.path, 'receive_temp'),
       ),
+      deviceId: receiverDeviceId,
+      onReceiverStart: () {
+        receiverStartCount++;
+      },
+      onReceiverSucceed: () {
+        receiverSucceedCount++;
+      },
+      onReceiverFailed: () {
+        receiverFailedCount++;
+      },
+      onReceiverProgressUpdate: (progress) {
+        d('progress: $progress');
+        receiverProgress.add(progress);
+      },
     );
+
+    final senderDatabase = Database(
+      MixinDatabase(NativeDatabase.memory()),
+      FtsDatabase(NativeDatabase.memory()),
+    )..addTestData(userId);
+    final senderDeviceId = const Uuid().v4();
+
+    var senderStartCount = 0;
+    var senderSucceedCount = 0;
+    var senderFailedCount = 0;
+    final senderProgress = <double>[];
+
+    final sender = DeviceTransferSender(
+      database: senderDatabase,
+      attachmentUtil: AttachmentUtilBase.of(identifyNumber),
+      protocolTransform: const TransferProtocolTransform(fileFolder: ''),
+      deviceId: senderDeviceId,
+      onSendStart: () {
+        senderStartCount++;
+      },
+      onSendSucceed: () {
+        senderSucceedCount++;
+      },
+      onSendFailed: () {
+        senderFailedCount++;
+      },
+      onProgressUpdate: (progress) {
+        d('progress: $progress');
+        senderProgress.add(progress);
+      },
+    );
+
+    const verificationCode = 1234;
+    final port = await sender.startServerSocket(verificationCode);
+    d('startServerSocket: $port');
+    expect(senderStartCount, 0);
+    await receiver.connectToServer('localhost', port, verificationCode);
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    expect(senderStartCount, 1);
+    expect(senderFailedCount, 0);
+    expect(senderSucceedCount, 0);
+
+    expect(receiverStartCount, 1);
+    expect(receiverFailedCount, 0);
+    expect(receiverSucceedCount, 0);
+
+    await Future.delayed(const Duration(milliseconds: 200));
+    expect(senderStartCount, 1);
+    expect(senderFailedCount, 0);
+    expect(senderSucceedCount, 1);
+    expect(senderProgress.first, 0);
+    expect(senderProgress.last, 100);
+
+    expect(receiverStartCount, 1);
+    expect(receiverFailedCount, 0);
+    expect(receiverSucceedCount, 1);
+    expect(receiverProgress.first, 0);
+    expect(receiverProgress.last, 100);
+
+    d('senderProgress: $senderProgress');
+    d('receiverProgress: $receiverProgress');
   });
-}
-
-class _BytesStreamSink extends EventSink<List<int>> {
-  final data = <int>[];
-
-  Object? error;
-
-  @override
-  void add(List<int> event) {
-    data.addAll(event);
-  }
-
-  @override
-  void addError(Object error, [StackTrace? stackTrace]) {
-    this.error = error;
-    e('error: $error, stackTrace: $stackTrace');
-  }
-
-  @override
-  void close() {}
 }

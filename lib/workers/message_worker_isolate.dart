@@ -227,7 +227,7 @@ class _MessageProcessRunner {
     MigrateFtsJob(database: database);
     DeleteOldFtsRecordJob(database: database);
 
-    _deviceTransfer = DeviceTransfer(
+    _deviceTransfer = await DeviceTransfer.create(
       database: database,
       userId: userId,
       messageDeliver: _sender.deliver,

@@ -8,6 +8,7 @@ const kTransferCommandActionPush = 'push';
 const kTransferCommandActionFinish = 'finish';
 const kTransferCommandActionConnect = 'connect';
 const kTransferCommandActionStart = 'start';
+const kTransferCommandActionClose = 'close';
 
 const _kVersion = 1;
 
@@ -28,13 +29,22 @@ class TransferDataCommand with EquatableMixin {
   factory TransferDataCommand.fromJson(Map<String, dynamic> json) =>
       _$TransferDataCommandFromJson(json);
 
-  factory TransferDataCommand.pull({
+  factory TransferDataCommand.simple({
     required String deviceId,
+    required String action,
   }) =>
       TransferDataCommand(
         deviceId: deviceId,
-        action: kTransferCommandActionPull,
+        action: action,
         version: _kVersion,
+      );
+
+  factory TransferDataCommand.pull({
+    required String deviceId,
+  }) =>
+      TransferDataCommand.simple(
+        deviceId: deviceId,
+        action: kTransferCommandActionPull,
       );
 
   factory TransferDataCommand.push({

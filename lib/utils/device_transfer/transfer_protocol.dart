@@ -175,7 +175,7 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
     try {
       return TransferJsonPacket._fromData(json);
     } catch (error, stacktrace) {
-      e('_TransferJsonPacketBuilder#build: $error, $stacktrace \ncontent: $json');
+      e('_TransferJsonPacketBuilder#build: $error, $stacktrace \ncontent: ${utf8.decode(json, allowMalformed: true)}');
       rethrow;
     }
   }
