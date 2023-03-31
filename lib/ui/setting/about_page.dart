@@ -1,29 +1,17 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../constants/resources.dart';
-import '../../db/mixin_database.dart';
 import '../../utils/device_transfer/device_transfer_widget.dart';
-import '../../utils/device_transfer/json_transfer_data.dart';
-import '../../utils/device_transfer/transfer_data_asset.dart';
-import '../../utils/device_transfer/transfer_data_conversation.dart';
-import '../../utils/device_transfer/transfer_data_message.dart';
-import '../../utils/device_transfer/transfer_data_snapshot.dart';
-import '../../utils/device_transfer/transfer_data_sticker.dart';
-import '../../utils/device_transfer/transfer_data_user.dart';
-import '../../utils/device_transfer/transfer_protocol.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/system/package_info.dart';
 import '../../utils/uri_utils.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
-import '../../workers/device_transfer.dart';
 
 class AboutPage extends HookWidget {
   const AboutPage({super.key});
@@ -143,171 +131,7 @@ class _BackupItem extends HookWidget {
                 .fire(DeviceTransferEventAction.onRestoreStart);
           },
         ),
-        CellItem(
-          title: const Text('backup'),
-          onTap: () async {
-            // 创建服务器
-            final serverSocket =
-                await ServerSocket.bind(InternetAddress.anyIPv4, 8888);
-            if (serverSocketRef.value == null) {
-              serverSocketRef.value = serverSocket;
-              i('server: transfer server start');
-            }
-            serverSocket.listen((socket) async {
-              i('client connected: ${socket.remoteAddress.address}:${socket.remotePort}');
-
-              // 监听客户端发来的消息
-              socket.listen((data) async {
-                i('server: message from client ${utf8.decode(data).trim()}');
-              }, onError: (error) {
-                i('server: error: $error');
-                socket.destroy();
-              }, onDone: () {
-                i('server: done');
-                socket.destroy();
-              });
-
-              // send conversation list
-              final conversations =
-                  await context.database.conversationDao.getConversations();
-              for (final conversation in conversations) {
-                await socket.addConversation(
-                  TransferDataConversation.fromDbConversation(conversation),
-                );
-              }
-
-              final attachmentMessage = <Message>[];
-              // send messages
-              for (final conversation in conversations) {
-                final messages = await context.database.messageDao
-                    .getMessagesByConversationId(conversation.conversationId);
-                for (final message in messages) {
-                  await socket
-                      .addMessage(TransferDataMessage.fromDbMessage(message));
-                  if (message.category.isAttachment) {
-                    attachmentMessage.add(message);
-                  }
-                }
-              }
-
-              d('send attachment count ${attachmentMessage.length}');
-
-              // send sticker
-              final stickers = await context.database.stickerDao.getStickers();
-              for (final sticker in stickers) {
-                await socket.addSticker(
-                  TransferDataSticker.fromDbSticker(sticker),
-                );
-              }
-
-              // send user
-              final users = await context.database.userDao.getUsers();
-              for (final user in users) {
-                await socket.addUser(
-                  TransferDataUser.fromDbUser(user),
-                );
-              }
-
-              // send asset
-              final assets = await context.database.assetDao.getAssets();
-              for (final asset in assets) {
-                await socket.addAsset(
-                  TransferDataAsset.fromDbAsset(asset),
-                );
-              }
-
-              // send snapshot
-              final snapshots =
-                  await context.database.snapshotDao.getSnapshots();
-              for (final snapshot in snapshots) {
-                await socket.addSnapshot(
-                  TransferDataSnapshot.fromDbSnapshot(snapshot),
-                );
-              }
-
-              // send attachment
-              for (final message in attachmentMessage.take(10)) {
-                final path =
-                    context.accountServer.attachmentUtil.convertAbsolutePath(
-                  fileName: message.mediaUrl,
-                  conversationId: message.conversationId,
-                  category: message.category,
-                );
-                if (!File(path).existsSync()) {
-                  w('attachment not exist $path');
-                  continue;
-                }
-                d('send attachment ${message.messageId} $path ${File(path).lengthSync()}');
-                // await socket.addAttachment(message.messageId, path);
-              }
-            });
-          },
-        ),
-        CellItem(
-          title: const Text('read'),
-          onTap: () async {
-            const host = '192.168.98.29';
-            // const host = 'localhost';
-            final socket = await Socket.connect(host, 8888);
-            i('client: connected to server');
-
-            socket.transform(const TransferProtocolTransform()).listen(
-                (data) async {
-              if (data is TransferJsonPacket) {
-                _handleJsonMessage(data.json);
-              } else if (data is TransferAttachmentPacket) {
-                _handleAttachmentMessage(data);
-              }
-            }, onError: (error) {
-              i('client: error $error');
-              socket.destroy();
-            }, onDone: () {
-              i('client: done');
-              socket.destroy();
-            });
-          },
-        ),
       ],
     );
-  }
-}
-
-void _handleAttachmentMessage(TransferAttachmentPacket packet) {
-  d('client: attachment: ${packet.messageId} ${packet.path}');
-}
-
-void _handleJsonMessage(JsonTransferData data) {
-  try {
-    switch (data.type) {
-      case kTypeConversation:
-        final conversation = TransferDataConversation.fromJson(data.data);
-        i('client: conversation: $conversation');
-        break;
-      case kTypeMessage:
-        final message = TransferDataMessage.fromJson(data.data);
-        i('client: message: ${message.messageId}');
-        break;
-      case kTypeAsset:
-        final asset = TransferDataAsset.fromJson(data.data);
-        i('client: asset: $asset');
-        break;
-      case kTypeUser:
-        final user = TransferDataUser.fromJson(data.data);
-        i('client: user: $user');
-        break;
-      case kTypeSticker:
-        final sticker = TransferDataSticker.fromJson(data.data);
-        i('client: sticker: $sticker');
-        break;
-      case kTypeSnapshot:
-        final snapshot = TransferDataSnapshot.fromJson(data.data);
-        i('client: snapshot: $snapshot');
-        break;
-      default:
-        i('unknown type: ${data.type}');
-    }
-  } catch (error, stacktrace) {
-    e('error: $error $stacktrace');
-    e('raw data: ${data.type} ${data.data}');
   }
 }

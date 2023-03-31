@@ -2,13 +2,21 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'json_transfer_data.g.dart';
 
-const kTypeConversation = 'conversation';
-const kTypeMessage = 'message';
-const kTypeSticker = 'sticker';
-const kTypeAsset = 'asset';
-const kTypeSnapshot = 'snapshot';
-const kTypeUser = 'user';
-const kTypeCommand = 'command';
+@JsonEnum(fieldRename: FieldRename.snake)
+enum JsonTransferDataType {
+  conversation,
+  message,
+  sticker,
+  asset,
+  snapshot,
+  user,
+  command,
+  expiredMessage,
+  transcriptMessage,
+  participant,
+  pinMessage,
+  unknown;
+}
 
 @JsonSerializable()
 class JsonTransferData {
@@ -21,7 +29,9 @@ class JsonTransferData {
       _$JsonTransferDataFromJson(json);
 
   final Map<String, dynamic> data;
-  final String type;
+
+  @JsonKey(unknownEnumValue: JsonTransferDataType.unknown)
+  final JsonTransferDataType type;
 
   Map<String, dynamic> toJson() => _$JsonTransferDataToJson(this);
 }

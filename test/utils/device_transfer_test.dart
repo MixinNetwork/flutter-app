@@ -16,7 +16,7 @@ void main() {
     Future<void> writeJson(Map<String, dynamic> json) => writePacketToSink(
         sink,
         TransferJsonPacket(JsonTransferData(
-          type: 'test',
+          type: JsonTransferDataType.command,
           data: json,
         )));
     await writeJson({'abc': 1});

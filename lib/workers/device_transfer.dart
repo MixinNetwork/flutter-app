@@ -18,9 +18,13 @@ import '../utils/device_transfer/json_transfer_data.dart';
 import '../utils/device_transfer/transfer_data_asset.dart';
 import '../utils/device_transfer/transfer_data_command.dart';
 import '../utils/device_transfer/transfer_data_conversation.dart';
+import '../utils/device_transfer/transfer_data_expired_message.dart';
 import '../utils/device_transfer/transfer_data_message.dart';
+import '../utils/device_transfer/transfer_data_participant.dart';
+import '../utils/device_transfer/transfer_data_pin_message.dart';
 import '../utils/device_transfer/transfer_data_snapshot.dart';
 import '../utils/device_transfer/transfer_data_sticker.dart';
+import '../utils/device_transfer/transfer_data_transcript_message.dart';
 import '../utils/device_transfer/transfer_data_user.dart';
 import '../utils/device_transfer/transfer_protocol.dart';
 import '../utils/load_balancer_utils.dart';
@@ -131,7 +135,7 @@ class DeviceTransfer {
         if (event is TransferJsonPacket) {
           final data = event.json;
           switch (data.type) {
-            case kTypeCommand:
+            case JsonTransferDataType.command:
               final command = TransferDataCommand.fromJson(data.data);
               switch (command.action) {
                 case kTransferCommandActionConnect:
@@ -144,8 +148,19 @@ class DeviceTransfer {
                   break;
               }
               break;
-            default:
-              e('server mode can not handle other event : $event');
+            case JsonTransferDataType.conversation:
+            case JsonTransferDataType.message:
+            case JsonTransferDataType.sticker:
+            case JsonTransferDataType.asset:
+            case JsonTransferDataType.snapshot:
+            case JsonTransferDataType.user:
+            case JsonTransferDataType.expiredMessage:
+            case JsonTransferDataType.transcriptMessage:
+            case JsonTransferDataType.participant:
+            case JsonTransferDataType.pinMessage:
+            case JsonTransferDataType.unknown:
+              e('unknown type: ${data.type}');
+              d('data: $data');
               break;
           }
         }
@@ -272,7 +287,7 @@ class DeviceTransfer {
   Future<void> _processReceivedJsonPacket(JsonTransferData data) async {
     try {
       switch (data.type) {
-        case kTypeConversation:
+        case JsonTransferDataType.conversation:
           final conversation = TransferDataConversation.fromJson(data.data);
           d('client: conversation: $conversation');
           final local = await database.conversationDao
@@ -285,34 +300,64 @@ class DeviceTransfer {
           await database.conversationDao
               .insert(conversation.toDbConversation());
           break;
-        case kTypeMessage:
+        case JsonTransferDataType.message:
           final message = TransferDataMessage.fromJson(data.data);
           d('client: message: ${data.data}');
           await database.messageDao.insert(
               message.toDbMessage().copyWith(status: MessageStatus.read),
               userId);
           break;
-        case kTypeAsset:
+        case JsonTransferDataType.asset:
           final asset = TransferDataAsset.fromJson(data.data);
           d('client: asset: $asset');
           await database.assetDao.insertAsset(asset.toDbAsset());
           break;
-        case kTypeUser:
+        case JsonTransferDataType.user:
           final user = TransferDataUser.fromJson(data.data);
           d('client: user: $user');
           await database.userDao.insert(user.toDbUser());
           break;
-        case kTypeSticker:
+        case JsonTransferDataType.sticker:
           final sticker = TransferDataSticker.fromJson(data.data);
           d('client: sticker: $sticker');
           await database.stickerDao.insertSticker(sticker.toDbSticker());
           break;
-        case kTypeSnapshot:
+        case JsonTransferDataType.snapshot:
           final snapshot = TransferDataSnapshot.fromJson(data.data);
           d('client: snapshot: $snapshot');
           await database.snapshotDao.insert(snapshot.toDbSnapshot());
           break;
-        default:
+        case JsonTransferDataType.command:
+          final command = TransferDataCommand.fromJson(data.data);
+          d('client: command: $command');
+          break;
+        case JsonTransferDataType.expiredMessage:
+          final expiredMessage = TransferDataExpiredMessage.fromJson(data.data);
+          d('client: expiredMessage: $expiredMessage');
+          await database.expiredMessageDao.insert(
+            messageId: expiredMessage.messageId,
+            expireIn: expiredMessage.expireIn,
+            expireAt: expiredMessage.expireAt,
+          );
+          break;
+        case JsonTransferDataType.transcriptMessage:
+          final transcriptMessage =
+              TransferDataTranscriptMessage.fromJson(data.data);
+          d('client: transcriptMessage: $transcriptMessage');
+          await database.transcriptMessageDao
+              .insertAll([transcriptMessage.toDbTranscriptMessage()]);
+          break;
+        case JsonTransferDataType.participant:
+          final participant = TransferDataParticipant.fromJson(data.data);
+          d('client: participant: $participant');
+          await database.participantDao.insert(participant.toDbParticipant());
+          break;
+        case JsonTransferDataType.pinMessage:
+          final pinMessage = TransferDataPinMessage.fromJson(data.data);
+          d('client: pinMessage: $pinMessage');
+          await database.pinMessageDao.insert(pinMessage.toDbPinMessage());
+          break;
+        case JsonTransferDataType.unknown:
           i('unknown type: ${data.type}');
           break;
       }
@@ -364,7 +409,7 @@ extension SocketExtension on Socket {
   Future<void> addConversation(TransferDataConversation conversation) {
     final wrapper = JsonTransferData(
       data: conversation.toJson(),
-      type: kTypeConversation,
+      type: JsonTransferDataType.conversation,
     );
     return _addTransferJson(wrapper);
   }
@@ -372,7 +417,7 @@ extension SocketExtension on Socket {
   Future<void> addMessage(TransferDataMessage message) {
     final wrapper = JsonTransferData(
       data: message.toJson(),
-      type: kTypeMessage,
+      type: JsonTransferDataType.message,
     );
     return _addTransferJson(wrapper);
   }
@@ -385,7 +430,7 @@ extension SocketExtension on Socket {
   Future<void> addSticker(TransferDataSticker sticker) {
     final wrapper = JsonTransferData(
       data: sticker.toJson(),
-      type: kTypeSticker,
+      type: JsonTransferDataType.sticker,
     );
     return _addTransferJson(wrapper);
   }
@@ -393,7 +438,7 @@ extension SocketExtension on Socket {
   Future<void> addUser(TransferDataUser user) {
     final wrapper = JsonTransferData(
       data: user.toJson(),
-      type: kTypeUser,
+      type: JsonTransferDataType.user,
     );
     return _addTransferJson(wrapper);
   }
@@ -401,7 +446,7 @@ extension SocketExtension on Socket {
   Future<void> addAsset(TransferDataAsset asset) {
     final wrapper = JsonTransferData(
       data: asset.toJson(),
-      type: kTypeAsset,
+      type: JsonTransferDataType.asset,
     );
     return _addTransferJson(wrapper);
   }
@@ -409,7 +454,7 @@ extension SocketExtension on Socket {
   Future<void> addSnapshot(TransferDataSnapshot snapshot) {
     final wrapper = JsonTransferData(
       data: snapshot.toJson(),
-      type: kTypeSnapshot,
+      type: JsonTransferDataType.snapshot,
     );
     return _addTransferJson(wrapper);
   }
@@ -417,7 +462,7 @@ extension SocketExtension on Socket {
   Future<void> addCommand(TransferDataCommand command) {
     final wrapper = JsonTransferData(
       data: command.toJson(),
-      type: kTypeCommand,
+      type: JsonTransferDataType.command,
     );
     return _addTransferJson(wrapper);
   }
