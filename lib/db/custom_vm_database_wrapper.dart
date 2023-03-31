@@ -87,7 +87,7 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
     }
     stopwatch?.stop();
 
-    if (stopwatch != null && stopwatch.elapsed.inMilliseconds > 15) {
+    if (stopwatch != null && stopwatch.elapsed.inMilliseconds > 25) {
       Iterable<String>? details;
       var needPrint = false;
 
