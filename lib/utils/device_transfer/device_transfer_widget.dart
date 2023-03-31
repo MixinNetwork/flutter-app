@@ -136,46 +136,61 @@ class TransferProcessDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        width: 320,
-        child: Material(
-          color: Colors.transparent,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 40),
-              SvgPicture.asset(
-                Resources.assetsImagesClockSvg,
-                width: 72,
-                height: 72,
-              ),
-              const SizedBox(height: 38),
-              // TODO: i18n
-              Text(
-                'Transferring...',
-                style: TextStyle(
-                  color: context.theme.text,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 18),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  DeviceTransferEventBus.instance
-                      .fire(DeviceTransferEventAction.cancelRestore);
-                },
-                child: Text(
-                  context.l10n.cancel,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                    color: context.theme.accent,
+        width: 420,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 40),
+                SvgPicture.asset(
+                  Resources.assetsImagesClockSvg,
+                  width: 72,
+                  height: 72,
+                  colorFilter: ColorFilter.mode(
+                    context.theme.secondaryText,
+                    BlendMode.srcIn,
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-            ],
+                const SizedBox(height: 38),
+                // TODO: i18n
+                Text(
+                  'Transferring...',
+                  style: TextStyle(
+                    color: context.theme.text,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '从其他设备恢复聊天记录不会覆盖本地记录，只会增量同步，恢复时请不要关闭屏幕并保持 Mixin 在前台运行。',
+                  style: TextStyle(
+                    color: context.theme.secondaryText,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    DeviceTransferEventBus.instance
+                        .fire(DeviceTransferEventAction.cancelRestore);
+                  },
+                  child: Text(
+                    context.l10n.cancel,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                      color: context.theme.accent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
