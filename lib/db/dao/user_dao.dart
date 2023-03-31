@@ -198,10 +198,13 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
       db.users.userId.equals(userIdOrIdentityNumber) |
           db.users.identityNumber.equals(userIdOrIdentityNumber));
 
-  Future<List<User>> getUsers() => (select(db.users)
-          ..orderBy([
-            (tbl) => OrderingTerm.asc(tbl.fullName),
-            (tbl) => OrderingTerm.asc(tbl.userId),
-          ]))
-        .get();
+  Future<List<User>> getUsers({
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.users)
+            ..orderBy([
+              (tbl) => OrderingTerm.asc(tbl.rowId),
+            ]))
+          .get();
 }

@@ -12,8 +12,6 @@ import '../blaze/vo/message_result.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../constants/constants.dart';
 import '../db/database.dart';
-import '../db/extension/message_category.dart';
-import '../db/mixin_database.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/device_transfer/device_transfer_widget.dart';
 import '../utils/device_transfer/json_transfer_data.dart';
@@ -35,6 +33,8 @@ import '../utils/platform.dart';
 
 typedef MessageDeliver = Future<MessageResult> Function(
     BlazeMessage blazeMessage);
+
+const _kQueryLimit = 100;
 
 // TODO(BIN): check has primary session
 class DeviceTransfer {
@@ -195,82 +195,237 @@ class DeviceTransfer {
     await _sendCommandAsPlainJson(command);
   }
 
+  /// transfer data to client.
   Future<void> _processTransfer(Socket socket) async {
-    // send conversation list
-    final conversations = await database.conversationDao.getConversations();
-    for (final conversation in conversations) {
-      await socket.addConversation(
-        TransferDataConversation.fromDbConversation(conversation),
-      );
+    Future<void> runWithLog(
+        Future<int> Function(Socket) process, String name) async {
+      final stopwatch = Stopwatch()..start();
+      i('_processTransfer start $name');
+      final count = await process(socket);
+      i('_processTransfer end $name, count: $count cost: ${stopwatch.elapsed}');
     }
 
-    final attachmentMessage = <Message>[];
+    await runWithLog(_processTransferConversation, 'conversation');
+    await runWithLog(_processTransferUser, 'user');
+    await runWithLog(_processTransferParticipant, 'participant');
+    await runWithLog(_processTransferSticker, 'sticker');
+    await runWithLog(_processTransferAsset, 'asset');
+    await runWithLog(_processTransferSnapshot, 'snapshot');
+    await runWithLog(_processTransferMessage, 'message');
+    await runWithLog(_processTransferTranscriptMessage, 'transcriptMessage');
+    await runWithLog(_processTransferPinMessage, 'pinMessage');
+    await runWithLog(_processTransferExpiredMessage, 'expiredMessage');
+    await runWithLog(_processTransferAttachment, 'attachment');
+  }
 
-    d('send attachment count ${attachmentMessage.length}');
-
-    // send sticker
-    final stickers = await database.stickerDao.getStickers();
-    for (final sticker in stickers) {
-      await socket.addSticker(
-        TransferDataSticker.fromDbSticker(sticker),
+  Future<int> _processTransferConversation(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final conversations = await database.conversationDao.getConversations(
+        limit: _kQueryLimit,
+        offset: offset,
       );
+      offset += conversations.length;
+      for (final conversation in conversations) {
+        await socket.addConversation(
+          TransferDataConversation.fromDbConversation(conversation),
+        );
+      }
+      if (conversations.length < _kQueryLimit) {
+        break;
+      }
     }
+    return offset;
+  }
 
-    d('send sticker count ${stickers.length}');
+  Future<int> _processTransferUser(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final users =
+          await database.userDao.getUsers(limit: _kQueryLimit, offset: offset);
+      offset += users.length;
+      for (final user in users) {
+        await socket.addUser(
+          TransferDataUser.fromDbUser(user),
+        );
+      }
+      if (users.length < _kQueryLimit) {
+        break;
+      }
+    }
+    return offset;
+  }
 
-    // send user
-    final users = await database.userDao.getUsers();
-    for (final user in users) {
-      await socket.addUser(
-        TransferDataUser.fromDbUser(user),
+  Future<int> _processTransferParticipant(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final participants = await database.participantDao.getAllParticipants(
+        limit: _kQueryLimit,
+        offset: offset,
       );
+      offset += participants.length;
+      for (final participant in participants) {
+        await socket.addParticipant(
+          TransferDataParticipant.fromDbParticipant(participant),
+        );
+      }
+      if (participants.length < _kQueryLimit) {
+        break;
+      }
     }
+    return offset;
+  }
 
-    d('send user count ${users.length}');
+  Future<int> _processTransferSticker(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final stickers = await database.stickerDao.getStickers(
+        limit: _kQueryLimit,
+        offset: offset,
+      );
+      offset += stickers.length;
+      for (final sticker in stickers) {
+        await socket.addSticker(
+          TransferDataSticker.fromDbSticker(sticker),
+        );
+      }
+      if (stickers.length < _kQueryLimit) {
+        break;
+      }
+    }
+    return offset;
+  }
 
-    // send asset
+  Future<int> _processTransferAsset(Socket socket) async {
     final assets = await database.assetDao.getAssets();
     for (final asset in assets) {
       await socket.addAsset(
         TransferDataAsset.fromDbAsset(asset),
       );
     }
+    return assets.length;
+  }
 
-    // send snapshot
-    final snapshots = await database.snapshotDao.getSnapshots();
-    for (final snapshot in snapshots) {
-      await socket.addSnapshot(
-        TransferDataSnapshot.fromDbSnapshot(snapshot),
+  Future<int> _processTransferSnapshot(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final snapshots = await database.snapshotDao.getSnapshots(
+        limit: _kQueryLimit,
+        offset: offset,
       );
+      offset += snapshots.length;
+      for (final snapshot in snapshots) {
+        await socket.addSnapshot(
+          TransferDataSnapshot.fromDbSnapshot(snapshot),
+        );
+      }
+      if (snapshots.length < _kQueryLimit) {
+        break;
+      }
     }
+    return offset;
+  }
 
-    // send messages
-    for (final conversation in conversations) {
-      final messages = await database.messageDao
-          .getMessagesByConversationId(conversation.conversationId);
+  Future<int> _processTransferMessage(Socket socket) async {
+    int? lastMessageRowId;
+    var count = 0;
+    while (true) {
+      final messages =
+          await database.messageDao.getMessages(lastMessageRowId, _kQueryLimit);
+      if (messages.isEmpty) {
+        break;
+      }
+      count = messages.length;
+      lastMessageRowId = messages.last.item1;
       for (final message in messages) {
-        await socket.addMessage(TransferDataMessage.fromDbMessage(message));
-        if (message.category.isAttachment) {
-          attachmentMessage.add(message);
-        }
+        await socket.addMessage(
+          TransferDataMessage.fromDbMessage(message.item2),
+        );
       }
-      d('send message count ${messages.length}');
     }
+    return count;
+  }
 
-    // send attachment
-    for (final message in attachmentMessage.take(10)) {
-      final path = attachmentUtil.convertAbsolutePath(
-        fileName: message.mediaUrl,
-        conversationId: message.conversationId,
-        category: message.category,
+  Future<int> _processTransferTranscriptMessage(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final messages =
+          await database.transcriptMessageDao.getTranscriptMessages(
+        limit: _kQueryLimit,
+        offset: offset,
       );
-      if (!File(path).existsSync()) {
-        w('attachment not exist $path');
-        continue;
+      offset += messages.length;
+      for (final message in messages) {
+        await socket.addTranscriptMessage(
+          TransferDataTranscriptMessage.fromDbTranscriptMessage(message),
+        );
       }
-      d('send attachment ${message.messageId} $path ${File(path).lengthSync()}');
-      await socket.addAttachment(message.messageId, path);
+      if (messages.length < _kQueryLimit) {
+        break;
+      }
     }
+    return offset;
+  }
+
+  Future<int> _processTransferExpiredMessage(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final messages = await database.expiredMessageDao
+          .getAllExpiredMessages(
+            _kQueryLimit,
+            offset,
+          )
+          .get();
+      offset += messages.length;
+      for (final message in messages) {
+        await socket.addExpiredMessage(
+          TransferDataExpiredMessage.fromDbExpiredMessage(message),
+        );
+      }
+      if (messages.length < _kQueryLimit) {
+        break;
+      }
+    }
+    return offset;
+  }
+
+  Future<int> _processTransferPinMessage(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final messages = await database.pinMessageDao.getPinMessages(
+        limit: _kQueryLimit,
+        offset: offset,
+      );
+      offset += messages.length;
+      for (final message in messages) {
+        await socket.addPinMessage(
+          TransferDataPinMessage.fromDbPinMessage(message),
+        );
+      }
+      if (messages.length < _kQueryLimit) {
+        break;
+      }
+    }
+    return offset;
+  }
+
+  Future<int> _processTransferAttachment(Socket socket) async {
+    final folder = attachmentUtil.mediaPath;
+    // send all files in media folder
+    final files = Directory(folder).listSync(recursive: true);
+    for (final file in files) {
+      if (file is File) {
+        final messageId = p.basenameWithoutExtension(file.path);
+        final message =
+            await database.messageDao.findMessageByMessageId(messageId);
+        if (message == null) {
+          d('attachment message not found ${file.path}');
+          continue;
+        }
+        await socket.addAttachment(message.messageId, file.path);
+      }
+    }
+    return files.length;
   }
 
   void handleRemoteCommand(TransferDataCommand command) {
@@ -293,7 +448,11 @@ class DeviceTransfer {
     try {
       final transform = await _getProtocolTransform();
       d('connect to $ip:$port');
-      final socket = await Socket.connect(ip, port);
+      final socket = await Socket.connect(
+        ip,
+        port,
+        timeout: const Duration(seconds: 10),
+      );
       socket.transform(transform).listen((packet) {
         if (packet is TransferJsonPacket) {
           _processReceivedJsonPacket(packet.json);
@@ -490,6 +649,39 @@ extension SocketExtension on Socket {
     final wrapper = JsonTransferData(
       data: command.toJson(),
       type: JsonTransferDataType.command,
+    );
+    return _addTransferJson(wrapper);
+  }
+
+  Future<void> addTranscriptMessage(
+      TransferDataTranscriptMessage transcriptMessage) {
+    final wrapper = JsonTransferData(
+      data: transcriptMessage.toJson(),
+      type: JsonTransferDataType.transcriptMessage,
+    );
+    return _addTransferJson(wrapper);
+  }
+
+  Future<void> addParticipant(TransferDataParticipant participant) {
+    final wrapper = JsonTransferData(
+      data: participant.toJson(),
+      type: JsonTransferDataType.participant,
+    );
+    return _addTransferJson(wrapper);
+  }
+
+  Future<void> addPinMessage(TransferDataPinMessage pinMessage) {
+    final wrapper = JsonTransferData(
+      data: pinMessage.toJson(),
+      type: JsonTransferDataType.pinMessage,
+    );
+    return _addTransferJson(wrapper);
+  }
+
+  Future<void> addExpiredMessage(TransferDataExpiredMessage expiredMessage) {
+    final wrapper = JsonTransferData(
+      data: expiredMessage.toJson(),
+      type: JsonTransferDataType.expiredMessage,
     );
     return _addTransferJson(wrapper);
   }

@@ -92,5 +92,12 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
   Future<bool> hasSticker(String stickerId) async => db.hasData(
       db.stickers, const [], db.stickers.stickerId.equals(stickerId));
 
-  Future<List<Sticker>> getStickers() => select(db.stickers).get();
+  Future<List<Sticker>> getStickers({
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.stickers)
+            ..orderBy([(tbl) => OrderingTerm.asc(tbl.rowId)])
+            ..limit(limit, offset: offset))
+          .get();
 }

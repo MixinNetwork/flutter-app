@@ -14,3 +14,6 @@ UPDATE expired_messages SET expire_at = CAST((:currentTime + expire_in) AS INTEG
 
 getExpiredMessageById:
 SELECT * FROM expired_messages WHERE message_id = :messageId;
+
+getAllExpiredMessages:
+SELECT * FROM expired_messages ORDER BY rowid ASC LIMIT :limit OFFSET :offset;

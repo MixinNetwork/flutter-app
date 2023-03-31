@@ -125,6 +125,15 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
 
     return contents.whereNotNull().join(' ');
   }
+
+  Future<List<TranscriptMessage>> getTranscriptMessages({
+    required int limit,
+    required int offset,
+  }) =>
+      (db.select(db.transcriptMessages)
+            ..orderBy([(t) => OrderingTerm.desc(t.rowId)])
+            ..limit(limit, offset: offset))
+          .get();
 }
 
 extension TranscriptMessageItemExtension on TranscriptMessageItem {

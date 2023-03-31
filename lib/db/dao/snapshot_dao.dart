@@ -79,12 +79,12 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
             ..limit(1))
           .map((row) => row.read(db.snapshots.snapshotId));
 
-  Future<List<Snapshot>> getSnapshots() => (select(db.snapshots)
-        ..orderBy([
-          (t) => OrderingTerm(
-                expression: t.createdAt,
-                mode: OrderingMode.desc,
-              )
-        ]))
-      .get();
+  Future<List<Snapshot>> getSnapshots({
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.snapshots)
+            ..orderBy([(t) => OrderingTerm.asc(t.rowId)])
+            ..limit(limit, offset: offset))
+          .get();
 }

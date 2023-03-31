@@ -76,9 +76,6 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
                 userId: participant.userId,
               ))));
 
-  Future<List<Participant>> getAllParticipants() async =>
-      select(db.participants).get();
-
   Future<void> deleteAll(Iterable<Participant> remove) async {
     remove.forEach((element) async {
       await deleteParticipant(element);
@@ -158,4 +155,16 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
         ..where((tbl) =>
             tbl.conversationId.equals(conversationId) &
             tbl.userId.equals(userId)));
+
+  Future<List<Participant>> getAllParticipants({
+    required int limit,
+    required int offset,
+  }) async {
+    final query = select(db.participants)
+      ..orderBy([
+        (t) => OrderingTerm.asc(t.rowId),
+      ])
+      ..limit(limit, offset: offset);
+    return query.get();
+  }
 }
