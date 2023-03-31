@@ -145,52 +145,57 @@ class DeviceTransfer {
       i('client connected: ${socket.remoteAddress.address}:${socket.remotePort}');
       // listen for data
       var isClientVerified = false;
-      socket.transform(transform).listen(
-        (event) {
-          d('receive data: $event');
-          if (event is TransferJsonPacket) {
-            final data = event.json;
-            switch (data.type) {
-              case JsonTransferDataType.command:
-                final command = TransferDataCommand.fromJson(data.data);
-                switch (command.action) {
-                  case kTransferCommandActionConnect:
-                    if (command.code == code) {
-                      isClientVerified = true;
-                      _processTransfer(socket);
-                    } else {
-                      e('code not match');
-                      socket.close();
-                    }
-                    break;
-                }
-                break;
-              case JsonTransferDataType.conversation:
-              case JsonTransferDataType.message:
-              case JsonTransferDataType.sticker:
-              case JsonTransferDataType.asset:
-              case JsonTransferDataType.snapshot:
-              case JsonTransferDataType.user:
-              case JsonTransferDataType.expiredMessage:
-              case JsonTransferDataType.transcriptMessage:
-              case JsonTransferDataType.participant:
-              case JsonTransferDataType.pinMessage:
-              case JsonTransferDataType.unknown:
-                e('unknown type: ${data.type}');
-                d('data: $data');
-                break;
-            }
+      socket.transform(transform).listen((event) {
+        d('receive data: $event');
+        if (event is TransferJsonPacket) {
+          final data = event.json;
+          switch (data.type) {
+            case JsonTransferDataType.command:
+              final command = TransferDataCommand.fromJson(data.data);
+              switch (command.action) {
+                case kTransferCommandActionConnect:
+                  if (command.code == code) {
+                    isClientVerified = true;
+                    DeviceTransferEventBus.instance
+                        .fire(DeviceTransferEventAction.onBackupStart);
+                    _processTransfer(socket);
+                  } else {
+                    e('code not match');
+                    socket.close();
+                  }
+                  break;
+              }
+              break;
+            case JsonTransferDataType.conversation:
+            case JsonTransferDataType.message:
+            case JsonTransferDataType.sticker:
+            case JsonTransferDataType.asset:
+            case JsonTransferDataType.snapshot:
+            case JsonTransferDataType.user:
+            case JsonTransferDataType.expiredMessage:
+            case JsonTransferDataType.transcriptMessage:
+            case JsonTransferDataType.participant:
+            case JsonTransferDataType.pinMessage:
+            case JsonTransferDataType.unknown:
+              e('unknown type: ${data.type}');
+              d('data: $data');
+              break;
           }
-        },
-        onDone: () {
-          i('client(${socket.remoteAddress.address}:${socket.remotePort}) disconnected');
-          if (isClientVerified) {
-            i('verified client exit, close server socket($ipAddress:${serverSocket.port})');
-            serverSocket.close();
-            _socket = null;
-          }
-        },
-      );
+        }
+      }, onDone: () {
+        i('client(${socket.remoteAddress.address}:${socket.remotePort}) disconnected');
+        if (isClientVerified) {
+          i('verified client exit, close server socket($ipAddress:${serverSocket.port})');
+          serverSocket.close();
+          _socket = null;
+        }
+        DeviceTransferEventBus.instance
+            .fire(DeviceTransferEventAction.onBackupSucceed);
+      }, onError: (error, stacktrace) {
+        e('client(${socket.remoteAddress.address}:${socket.remotePort}) error: $error $stacktrace');
+        DeviceTransferEventBus.instance
+            .fire(DeviceTransferEventAction.onBackupFailed);
+      });
     });
     await _sendCommandAsPlainJson(command);
   }
@@ -453,18 +458,38 @@ class DeviceTransfer {
         port,
         timeout: const Duration(seconds: 10),
       );
-      socket.transform(transform).listen((packet) {
-        if (packet is TransferJsonPacket) {
-          _processReceivedJsonPacket(packet.json);
-        } else if (packet is TransferAttachmentPacket) {
-          _processReceivedAttachmentPacket(packet);
-        } else {
-          e('unknown packet: $packet');
-        }
+      final subscription = DeviceTransferEventBus.instance
+          .on(DeviceTransferEventAction.cancelRestore)
+          .listen((event) {
+        socket.close();
       });
+      socket.transform(transform).listen(
+        (packet) {
+          if (packet is TransferJsonPacket) {
+            _processReceivedJsonPacket(packet.json);
+          } else if (packet is TransferAttachmentPacket) {
+            _processReceivedAttachmentPacket(packet);
+          } else {
+            e('unknown packet: $packet');
+          }
+        },
+        onDone: () {
+          DeviceTransferEventBus.instance
+              .fire(DeviceTransferEventAction.onRestoreSucceed);
+          subscription.cancel();
+        },
+        onError: (error, stacktrace) {
+          e('_handleRemotePushCommand: $error $stacktrace');
+          DeviceTransferEventBus.instance
+              .fire(DeviceTransferEventAction.onRestoreFailed);
+          subscription.cancel();
+        },
+      );
       await socket.addCommand(
         TransferDataCommand.connect(code: code, deviceId: await getDeviceId()),
       );
+      DeviceTransferEventBus.instance
+          .fire(DeviceTransferEventAction.onBackupStart);
     } catch (error, stacktrace) {
       e('_handleRemotePushCommand: $error $stacktrace');
     }

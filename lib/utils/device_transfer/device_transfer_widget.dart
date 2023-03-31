@@ -16,6 +16,12 @@ enum DeviceTransferEventAction {
   pushToRemote,
   onRestoreStart,
   cancelRestore,
+  onRestoreSucceed,
+  onRestoreFailed,
+  onBackupStart,
+  cancelBackup,
+  onBackupSucceed,
+  onBackupFailed,
 }
 
 class DeviceTransferEvent {
