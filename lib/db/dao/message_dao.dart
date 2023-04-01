@@ -1088,5 +1088,4 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       return predicate;
     }, (m, c, u, o) => Limit(limit, null)).get();
   }
-
 }
