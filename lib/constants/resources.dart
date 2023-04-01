@@ -187,6 +187,10 @@ class Resources {
   /// {@macro assets_generator.assetsImagesDeliveredSvg.preview}
   static const String assetsImagesDeliveredSvg = 'assets/images/delivered.svg';
 
+  /// {@macro assets_generator.assetsImagesDeviceTransferSvg.preview}
+  static const String assetsImagesDeviceTransferSvg =
+      'assets/images/device_transfer.svg';
+
   /// {@macro assets_generator.assetsImagesDisappearingMessageSvg.preview}
   static const String assetsImagesDisappearingMessageSvg =
       'assets/images/disappearing_message.svg';

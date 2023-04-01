@@ -4225,6 +4225,116 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Backing up chat`
+  String get backingUpChat {
+    return Intl.message(
+      'Backing up chat',
+      name: 'backingUpChat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup Chat`
+  String get backupChat {
+    return Intl.message(
+      'Backup Chat',
+      name: 'backupChat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please wait patiently, it may take a few minutes.`
+  String get backingUpChatTips {
+    return Intl.message(
+      'Please wait patiently, it may take a few minutes.',
+      name: 'backingUpChatTips',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore Chat`
+  String get restoreChat {
+    return Intl.message(
+      'Restore Chat',
+      name: 'restoreChat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restoring chat records from other devices will not overwrite local records, only incremental synchronization, please do not turn off the screen and keep Mixin running in the foreground when restoring.`
+  String get restoreChatTips {
+    return Intl.message(
+      'Restoring chat records from other devices will not overwrite local records, only incremental synchronization, please do not turn off the screen and keep Mixin running in the foreground when restoring.',
+      name: 'restoreChatTips',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restoring chat`
+  String get restoringChat {
+    return Intl.message(
+      'Restoring chat',
+      name: 'restoringChat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore from other device`
+  String get restoreFromOtherDevice {
+    return Intl.message(
+      'Restore from other device',
+      name: 'restoreFromOtherDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transfer your message history from your old iOS device.`
+  String get restoreFromOtherDeviceDescription {
+    return Intl.message(
+      'Transfer your message history from your old iOS device.',
+      name: 'restoreFromOtherDeviceDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup to other device`
+  String get backupToOtherDevice {
+    return Intl.message(
+      'Backup to other device',
+      name: 'backupToOtherDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Make sure both devices are connected to the same Wi-Fi or hotspot`
+  String get backupToOtherDeviceTips {
+    return Intl.message(
+      'Make sure both devices are connected to the same Wi-Fi or hotspot',
+      name: 'backupToOtherDeviceTips',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chat Backup and Restore`
+  String get chatBackupAndRestore {
+    return Intl.message(
+      'Chat Backup and Restore',
+      name: 'chatBackupAndRestore',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

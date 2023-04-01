@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../blaze/blaze_message.dart';
 import '../blaze/vo/message_result.dart';
@@ -17,6 +18,7 @@ import '../utils/device_transfer/device_transfer_sender.dart';
 import '../utils/device_transfer/device_transfer_widget.dart';
 import '../utils/device_transfer/transfer_data_command.dart';
 import '../utils/device_transfer/transfer_protocol.dart';
+import '../utils/event_bus.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/platform.dart';
@@ -35,43 +37,23 @@ class DeviceTransfer {
     required this.sender,
     required this.receiver,
   }) {
-    _subscriptions
-      ..add(DeviceTransferEventBus.instance
-          .on(DeviceTransferEventAction.pushToRemote)
-          .listen(
-            (event) => _sendPushToOtherSession(),
-          ))
-      ..add(DeviceTransferEventBus.instance
-          .on(DeviceTransferEventAction.pullToRemote)
-          .listen(
-            (event) => _sendPullToOtherSession(),
-          ))
-      ..add(DeviceTransferEventBus.instance.events().listen((event) {
-        switch (event.action) {
-          case DeviceTransferEventAction.pullToRemote:
-            _sendPullToOtherSession();
-            break;
-          case DeviceTransferEventAction.pushToRemote:
-            _sendPushToOtherSession();
-            break;
-          case DeviceTransferEventAction.cancelRestore:
-            receiver.close();
-            break;
-          case DeviceTransferEventAction.cancelBackup:
-            sender.close();
-            break;
-          case DeviceTransferEventAction.onRestoreStart:
-          case DeviceTransferEventAction.onRestoreSucceed:
-          case DeviceTransferEventAction.onRestoreFailed:
-          case DeviceTransferEventAction.onBackupStart:
-          case DeviceTransferEventAction.onBackupSucceed:
-          case DeviceTransferEventAction.onBackupFailed:
-          case DeviceTransferEventAction.onRestoreProgress:
-          case DeviceTransferEventAction.onBackupProgress:
-            // ignore.
-            break;
-        }
-      }));
+    _subscriptions.add(
+        EventBus.instance.on.whereType<DeviceTransferCommand>().listen((event) {
+      switch (event) {
+        case DeviceTransferCommand.pullToRemote:
+          _sendPullToOtherSession();
+          break;
+        case DeviceTransferCommand.pushToRemote:
+          _sendPushToOtherSession();
+          break;
+        case DeviceTransferCommand.cancelRestore:
+          receiver.close();
+          break;
+        case DeviceTransferCommand.cancelBackup:
+          sender.close();
+          break;
+      }
+    }));
   }
 
   static Future<DeviceTransfer> create({
@@ -91,19 +73,19 @@ class DeviceTransfer {
       deviceId: deviceId,
       onSenderStart: () {
         DeviceTransferEventBus.instance
-            .fire(DeviceTransferEventAction.onBackupStart);
+            .fire(DeviceTransferCallbackType.onBackupStart);
       },
       onSenderSucceed: () {
         DeviceTransferEventBus.instance
-            .fire(DeviceTransferEventAction.onBackupSucceed);
+            .fire(DeviceTransferCallbackType.onBackupSucceed);
       },
       onSenderFailed: () {
         DeviceTransferEventBus.instance
-            .fire(DeviceTransferEventAction.onBackupFailed);
+            .fire(DeviceTransferCallbackType.onBackupFailed);
       },
       onSenderProgressUpdate: (progress) {
         DeviceTransferEventBus.instance.fire(
-          DeviceTransferEventAction.onBackupProgress,
+          DeviceTransferCallbackType.onBackupProgress,
           progress,
         );
       },
@@ -116,19 +98,19 @@ class DeviceTransfer {
       deviceId: deviceId,
       onReceiverStart: () {
         DeviceTransferEventBus.instance
-            .fire(DeviceTransferEventAction.onRestoreStart);
+            .fire(DeviceTransferCallbackType.onRestoreStart);
       },
       onReceiverSucceed: () {
         DeviceTransferEventBus.instance
-            .fire(DeviceTransferEventAction.onRestoreSucceed);
+            .fire(DeviceTransferCallbackType.onRestoreSucceed);
       },
       onReceiverFailed: () {
         DeviceTransferEventBus.instance
-            .fire(DeviceTransferEventAction.onRestoreFailed);
+            .fire(DeviceTransferCallbackType.onRestoreFailed);
       },
       onReceiverProgressUpdate: (progress) {
         DeviceTransferEventBus.instance.fire(
-          DeviceTransferEventAction.onRestoreProgress,
+          DeviceTransferCallbackType.onRestoreProgress,
           progress,
         );
       },

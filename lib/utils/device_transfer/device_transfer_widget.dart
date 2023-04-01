@@ -4,32 +4,33 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../constants/resources.dart';
-import '../../widgets/buttons.dart';
-import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
 import '../event_bus.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
 
-enum DeviceTransferEventAction {
+enum DeviceTransferCommand {
   pullToRemote,
   pushToRemote,
-  onRestoreStart,
   cancelRestore,
+  cancelBackup,
+}
+
+enum DeviceTransferCallbackType {
+  onRestoreStart,
   onRestoreSucceed,
   onRestoreFailed,
   onBackupStart,
-  cancelBackup,
   onBackupSucceed,
   onBackupFailed,
   onRestoreProgress,
   onBackupProgress,
 }
 
-class DeviceTransferEvent {
-  DeviceTransferEvent(this.action, [this.payload]);
+class DeviceTransferCallbackEvent {
+  DeviceTransferCallbackEvent(this.action, [this.payload]);
 
-  final DeviceTransferEventAction action;
+  final DeviceTransferCallbackType action;
   final dynamic payload;
 }
 
@@ -40,15 +41,15 @@ class DeviceTransferEventBus {
 
   final _eventBus = EventBus.instance;
 
-  Stream<DeviceTransferEvent> on(DeviceTransferEventAction action) =>
+  Stream<DeviceTransferCallbackEvent> on(DeviceTransferCallbackType action) =>
       _eventBus.on
-          .whereType<DeviceTransferEvent>()
+          .whereType<DeviceTransferCallbackEvent>()
           .where((event) => event.action == action);
 
-  Stream<DeviceTransferEvent> events() => _eventBus.on.whereType();
+  Stream<DeviceTransferCallbackEvent> events() => _eventBus.on.whereType();
 
-  void fire(DeviceTransferEventAction action, [dynamic payload]) {
-    _eventBus.fire(DeviceTransferEvent(action, payload));
+  void fire(DeviceTransferCallbackType action, [dynamic payload]) {
+    _eventBus.fire(DeviceTransferCallbackEvent(action, payload));
   }
 }
 
@@ -61,11 +62,11 @@ enum _Status {
 final _backupBehavior = () {
   final subject = BehaviorSubject<_Status>();
   DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferEventAction.onBackupStart) {
+    if (event.action == DeviceTransferCallbackType.onBackupStart) {
       subject.add(_Status.start);
-    } else if (event.action == DeviceTransferEventAction.onBackupSucceed) {
+    } else if (event.action == DeviceTransferCallbackType.onBackupSucceed) {
       subject.add(_Status.succeed);
-    } else if (event.action == DeviceTransferEventAction.onBackupFailed) {
+    } else if (event.action == DeviceTransferCallbackType.onBackupFailed) {
       subject.add(_Status.failed);
     }
   });
@@ -75,11 +76,11 @@ final _backupBehavior = () {
 final _restoreBehavior = () {
   final subject = BehaviorSubject<_Status>();
   DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferEventAction.onRestoreStart) {
+    if (event.action == DeviceTransferCallbackType.onRestoreStart) {
       subject.add(_Status.start);
-    } else if (event.action == DeviceTransferEventAction.onRestoreSucceed) {
+    } else if (event.action == DeviceTransferCallbackType.onRestoreSucceed) {
       subject.add(_Status.succeed);
-    } else if (event.action == DeviceTransferEventAction.onRestoreFailed) {
+    } else if (event.action == DeviceTransferCallbackType.onRestoreFailed) {
       subject.add(_Status.failed);
     }
   });
@@ -89,7 +90,7 @@ final _restoreBehavior = () {
 final _backupProgressBehavior = () {
   final subject = PublishSubject<double>();
   DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferEventAction.onBackupProgress) {
+    if (event.action == DeviceTransferCallbackType.onBackupProgress) {
       subject.add(event.payload as double);
     }
   });
@@ -99,7 +100,7 @@ final _backupProgressBehavior = () {
 final _restoreProgressBehavior = () {
   final subject = PublishSubject<double>();
   DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferEventAction.onRestoreProgress) {
+    if (event.action == DeviceTransferCallbackType.onRestoreProgress) {
       subject.add(event.payload as double);
     }
   });
@@ -198,63 +199,6 @@ class _ConfirmDialog extends StatelessWidget {
       );
 }
 
-class DeviceTransferDialog extends StatelessWidget {
-  const DeviceTransferDialog({super.key});
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-        width: 400,
-        child: Material(
-          color: Colors.transparent,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Column(
-                children: [
-                  const SizedBox(height: 40),
-                  Text(
-                    'Device Transfer',
-                    style: TextStyle(
-                      color: context.theme.text,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  CellGroup(
-                    child: CellItem(
-                      title: const Text('Pull'),
-                      trailing: null,
-                      onTap: () {
-                        DeviceTransferEventBus.instance
-                            .fire(DeviceTransferEventAction.pullToRemote);
-                      },
-                    ),
-                  ),
-                  CellGroup(
-                    child: CellItem(
-                      title: const Text('Push'),
-                      trailing: null,
-                      onTap: () {
-                        DeviceTransferEventBus.instance
-                            .fire(DeviceTransferEventAction.pushToRemote);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const Align(
-                alignment: Alignment.topRight,
-                child: Padding(
-                  padding: EdgeInsets.all(22),
-                  child: MixinCloseButton(),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-}
-
 class _RestoreProcessingDialog extends StatelessWidget {
   const _RestoreProcessingDialog();
 
@@ -262,8 +206,7 @@ class _RestoreProcessingDialog extends StatelessWidget {
   Widget build(BuildContext context) => _TransferProcessDialog(
         title: const Text('Transferring...'),
         onCancelTapped: () {
-          DeviceTransferEventBus.instance
-              .fire(DeviceTransferEventAction.cancelRestore);
+          EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
           Navigator.pop(context);
         },
         tips: const Text(
@@ -281,8 +224,7 @@ class _BackupProcessingDialog extends StatelessWidget {
   Widget build(BuildContext context) => _TransferProcessDialog(
         title: const Text('Transferring...'),
         onCancelTapped: () {
-          DeviceTransferEventBus.instance
-              .fire(DeviceTransferEventAction.cancelBackup);
+          EventBus.instance.fire(DeviceTransferCommand.cancelBackup);
           Navigator.pop(context);
         },
         tips: const Text(

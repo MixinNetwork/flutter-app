@@ -186,7 +186,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "audios": MessageLookupByLibrary.simpleMessage("Audios"),
         "autoBackup": MessageLookupByLibrary.simpleMessage("Auto Backup"),
         "avatar": MessageLookupByLibrary.simpleMessage("Avatar"),
+        "backingUpChat":
+            MessageLookupByLibrary.simpleMessage("Backing up chat"),
+        "backingUpChatTips": MessageLookupByLibrary.simpleMessage(
+            "Please wait patiently, it may take a few minutes."),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
+        "backupChat": MessageLookupByLibrary.simpleMessage("Backup Chat"),
+        "backupToOtherDevice":
+            MessageLookupByLibrary.simpleMessage("Backup to other device"),
+        "backupToOtherDeviceTips": MessageLookupByLibrary.simpleMessage(
+            "Make sure both devices are connected to the same Wi-Fi or hotspot"),
         "biography": MessageLookupByLibrary.simpleMessage("Biography"),
         "block": MessageLookupByLibrary.simpleMessage("Block"),
         "botNotFound": MessageLookupByLibrary.simpleMessage("Bot not found"),
@@ -204,6 +213,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Change Number Instead"),
         "changedDisappearingMessageSettings": m0,
         "chatBackup": MessageLookupByLibrary.simpleMessage("Chat Backup"),
+        "chatBackupAndRestore":
+            MessageLookupByLibrary.simpleMessage("Chat Backup and Restore"),
         "chatBotReceptionTitle": MessageLookupByLibrary.simpleMessage(
             "Tap the button to interact with the bot"),
         "chatDecryptionFailedHint": m1,
@@ -588,6 +599,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "resendCodeIn": m37,
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "resetLink": MessageLookupByLibrary.simpleMessage("Reset Link"),
+        "restoreChat": MessageLookupByLibrary.simpleMessage("Restore Chat"),
+        "restoreChatTips": MessageLookupByLibrary.simpleMessage(
+            "Restoring chat records from other devices will not overwrite local records, only incremental synchronization, please do not turn off the screen and keep Mixin running in the foreground when restoring."),
+        "restoreFromOtherDevice":
+            MessageLookupByLibrary.simpleMessage("Restore from other device"),
+        "restoreFromOtherDeviceDescription":
+            MessageLookupByLibrary.simpleMessage(
+                "Transfer your message history from your old iOS device."),
+        "restoringChat": MessageLookupByLibrary.simpleMessage("Restoring chat"),
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("Retry upload failed."),
         "revokeMultisigTransaction":
