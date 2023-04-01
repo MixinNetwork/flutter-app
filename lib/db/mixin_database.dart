@@ -94,10 +94,8 @@ part 'mixin_database.g.dart';
 class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);
 
-  MixinDatabase.connect(super.c) : super.connect();
-
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   final eventBus = DataBaseEventBus.instance;
 
@@ -223,6 +221,11 @@ class MixinDatabase extends _$MixinDatabase {
           if (from <= 19) {
             await m.drop(Trigger('', 'conversation_last_message_delete'));
           }
+          if (from <= 21) {
+            await _addColumnIfNotExists(m, snapshots, snapshots.snapshotHash);
+            await _addColumnIfNotExists(m, snapshots, snapshots.openingBalance);
+            await _addColumnIfNotExists(m, snapshots, snapshots.closingBalance);
+          }
         },
         beforeOpen: (details) async {
           if (details.hadUpgrade && details.versionBefore! <= 20) {
@@ -265,11 +268,11 @@ Future<MixinDatabase> connectToDatabase(
   int readCount = 8,
   bool fromMainIsolate = false,
 }) async {
-  final connect = await openDatabaseConnection(
+  final queryExecutor = await openQueryExecutor(
     identityNumber: identityNumber,
     dbName: 'mixin',
     readCount: readCount,
     fromMainIsolate: fromMainIsolate,
   );
-  return MixinDatabase.connect(connect);
+  return MixinDatabase(queryExecutor);
 }

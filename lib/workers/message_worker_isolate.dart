@@ -10,6 +10,7 @@ import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../blaze/blaze.dart';
@@ -267,8 +268,9 @@ class _MessageProcessRunner {
         _floodJob.start();
       }))
       ..add(DataBaseEventBus.instance.updateExpiredMessageTableStream
-          .asyncDropListen((event) => _scheduleExpiredJob()));
-    _scheduleExpiredJob();
+          .startWith(null)
+          .asyncBufferMap((event) => _scheduleExpiredJob())
+          .listen((_) {}));
   }
 
   void _sendEventToMainIsolate(WorkerIsolateEventType event,
@@ -278,30 +280,27 @@ class _MessageProcessRunner {
 
   Future<void> _scheduleExpiredJob() async {
     d('_scheduleExpiredJob');
-    while (true) {
-      final messages =
-          await database.expiredMessageDao.getCurrentExpiredMessages();
-      if (messages.isEmpty) {
-        break;
+    final messages =
+        await database.expiredMessageDao.getCurrentExpiredMessages();
+    if (messages.isEmpty) return;
+
+    for (final em in messages) {
+      // cancel attachment download.
+      final message =
+          await database.messageDao.findMessageByMessageId(em.messageId);
+      if (message == null) {
+        e('message is null, messageId: ${em.messageId} ${em.expireAt}');
+        await database.expiredMessageDao.deleteByMessageId(em.messageId);
+        continue;
       }
-      for (final em in messages) {
-        // cancel attachment download.
-        final message =
-            await database.messageDao.findMessageByMessageId(em.messageId);
-        if (message == null) {
-          e('message is null, messageId: ${em.messageId} ${em.expireAt}');
-          await database.expiredMessageDao.deleteByMessageId(em.messageId);
-          continue;
-        }
-        await database.messageDao
-            .deleteMessage(message.conversationId, em.messageId);
-        unawaited(database.ftsDatabase.deleteByMessageId(em.messageId));
-        if (message.category.isAttachment || message.category.isTranscript) {
-          _sendEventToMainIsolate(
-            WorkerIsolateEventType.requestDownloadAttachment,
-            AttachmentDeleteRequest(message: message),
-          );
-        }
+      await database.messageDao
+          .deleteMessage(message.conversationId, em.messageId);
+      unawaited(database.ftsDatabase.deleteByMessageId(em.messageId));
+      if (message.category.isAttachment || message.category.isTranscript) {
+        _sendEventToMainIsolate(
+          WorkerIsolateEventType.requestDownloadAttachment,
+          AttachmentDeleteRequest(message: message),
+        );
       }
     }
 

@@ -46,8 +46,7 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
           .go();
 
   Future<List<ExpiredMessage>> getCurrentExpiredMessages() =>
-      getExpiredMessages(DateTime.now().millisecondsSinceEpoch ~/ 1000, 20)
-          .get();
+      getExpiredMessages(DateTime.now().millisecondsSinceEpoch ~/ 1000).get();
 
   Future<void> onMessageRead(Iterable<String> messageIds) async {
     final chunkedMessageIds =

@@ -2,8 +2,5 @@
 
 part of 'flood_message_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$FloodMessageDaoMixin on DatabaseAccessor<MixinDatabase> {}

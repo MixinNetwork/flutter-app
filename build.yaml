@@ -5,7 +5,6 @@ targets:
         options:
           mutable_classes: false
           apply_converters_on_variables: true
-          generate_connect_constructor: true
           generate_values_in_copy_with: true
           override_hash_and_equals_in_result_sets: true
           scoped_dart_components: true

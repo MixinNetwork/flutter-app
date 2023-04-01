@@ -960,6 +960,9 @@ class DecryptMessage extends Injector {
       createdAt: DateTime.parse(
         snapshotMessage.createdAt,
       ),
+      snapshotHash: snapshotMessage.snapshotHash,
+      openingBalance: snapshotMessage.openingBalance,
+      closingBalance: snapshotMessage.closingBalance,
     );
     await database.snapshotDao.insert(snapshot);
     await _updateAssetJob.add(createUpdateAssetJob(snapshotMessage.assetId));

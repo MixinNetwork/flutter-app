@@ -232,6 +232,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage("ストレージ使用率"),
         "dataError": MessageLookupByLibrary.simpleMessage("データエラー"),
         "dataLoading": MessageLookupByLibrary.simpleMessage("ロード中..."),
+        "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
+            "データベースをアップグレードしています。アプリを閉じないでください。"),
         "delete": MessageLookupByLibrary.simpleMessage("削除"),
         "deleteAccountDetailHint": MessageLookupByLibrary.simpleMessage(
             "ローカルメッセージとiCloudにバックアップされた内容は削除されません"),
@@ -606,6 +608,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesConfirmation":
             MessageLookupByLibrary.simpleMessage("全てのメッセージのピン留めを解除しますか？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("新しいメッセージ"),
+        "upgrading": MessageLookupByLibrary.simpleMessage("アップデート中"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("ユーザーが見つかりませんでした"),
         "valueNow": m49,
         "valueThen": m50,

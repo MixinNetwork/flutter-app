@@ -639,10 +639,14 @@ class AccountServer {
   }
 
   Future<void> markRead(String conversationId) async {
-    while (true) {
-      final ids = await database.messageDao
-          .getUnreadMessageIds(conversationId, userId, kMarkLimit);
-      if (ids.isEmpty) return;
+    final ids =
+        await database.messageDao.getUnreadMessageIds(conversationId, userId);
+
+    if (ids.isEmpty) return;
+
+    final chunked = ids.chunked(kMarkLimit);
+
+    for (final ids in chunked) {
       final expireAt = await database.expiredMessageDao.getMessageExpireAt(ids);
       ids.forEach(
         (id) => addAckJob(createAckJob(
@@ -654,7 +658,6 @@ class AccountServer {
       );
 
       await _createReadSessionMessage(ids, expireAt);
-      if (ids.length < kMarkLimit) return;
     }
   }
 
