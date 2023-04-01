@@ -1,12 +1,13 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart' as p;
 
 import '../../db/database.dart';
 import '../attachment/attachment_util.dart';
 import '../logger.dart';
 import '../platform.dart';
-import 'device_transfer_widget.dart';
 import 'json_transfer_data.dart';
 import 'transfer_data_asset.dart';
 import 'transfer_data_command.dart';
@@ -60,8 +61,18 @@ class DeviceTransferSender {
 
   var _totalCount = 0;
   var _progress = 0;
+  var _finished = false;
 
-  void _notifyProgressUpdate() {
+  void resetTransferStates() {
+    _totalCount = 0;
+    _progress = 0;
+    _finished = false;
+  }
+
+  @visibleForTesting
+  @mustCallSuper
+  FutureOr<void> onPacketSend() {
+    // notify the progress
     _progress++;
     assert(_totalCount != 0, 'total count is 0');
     final progress = _totalCount == 0
@@ -77,6 +88,7 @@ class DeviceTransferSender {
       w('startServerSocket: already started');
       return _socket!.port;
     }
+    resetTransferStates();
     _debugStarting = true;
     final serverSocket = await ServerSocket.bind(InternetAddress.anyIPv4, 0);
     _socket = serverSocket;
@@ -90,11 +102,6 @@ class DeviceTransferSender {
       }
       _pendingVerificationSockets.add(socket);
       i('client connected: ${socket.remoteAddress.address}:${socket.remotePort}');
-      final subscription = DeviceTransferEventBus.instance
-          .on(DeviceTransferEventAction.cancelBackup)
-          .listen((event) {
-        close();
-      });
 
       socket.transform(protocolTransform).listen((event) {
         d('receive data: $event');
@@ -119,9 +126,13 @@ class DeviceTransferSender {
                     socket.close();
                   }
                   break;
-                case kTransferCommandActionClose:
                 case kTransferCommandActionFinish:
-                  i('client(${socket.remoteAddress.address}:${socket.remotePort}) close connection');
+                  i('client finished. close connection');
+                  _finished = true;
+                  close();
+                  break;
+                case kTransferCommandActionClose:
+                  w('client closed. close connection');
                   close();
                   break;
               }
@@ -143,13 +154,15 @@ class DeviceTransferSender {
           }
         }
       }, onDone: () {
-        i('transfer done');
-        onSenderSucceed?.call();
-        subscription.cancel();
+        i('transfer done. finished: $_finished');
+        if (_finished) {
+          onSenderSucceed?.call();
+        } else {
+          onSenderFailed?.call();
+        }
       }, onError: (error, stacktrace) {
         e('error: $error, stacktrace: $stacktrace');
         onSenderFailed?.call();
-        subscription.cancel();
         close();
       });
     });
@@ -225,7 +238,7 @@ class DeviceTransferSender {
         await socket.addConversation(
           TransferDataConversation.fromDbConversation(conversation),
         );
-        _notifyProgressUpdate();
+        await onPacketSend();
       }
       if (conversations.length < _kQueryLimit) {
         break;
@@ -242,7 +255,7 @@ class DeviceTransferSender {
       offset += users.length;
       for (final user in users) {
         await socket.addUser(TransferDataUser.fromDbUser(user));
-        _notifyProgressUpdate();
+        await onPacketSend();
       }
       if (users.length < _kQueryLimit) {
         break;
@@ -263,7 +276,7 @@ class DeviceTransferSender {
         await socket.addParticipant(
           TransferDataParticipant.fromDbParticipant(participant),
         );
-        _notifyProgressUpdate();
+        await onPacketSend();
       }
       if (participants.length < _kQueryLimit) {
         break;
@@ -284,7 +297,7 @@ class DeviceTransferSender {
         await socket.addSticker(
           TransferDataSticker.fromDbSticker(sticker),
         );
-        _notifyProgressUpdate();
+        await onPacketSend();
       }
       if (stickers.length < _kQueryLimit) {
         break;
@@ -299,7 +312,7 @@ class DeviceTransferSender {
       await socket.addAsset(
         TransferDataAsset.fromDbAsset(asset),
       );
-      _notifyProgressUpdate();
+      await onPacketSend();
     }
     return assets.length;
   }
@@ -316,7 +329,7 @@ class DeviceTransferSender {
         await socket.addSnapshot(
           TransferDataSnapshot.fromDbSnapshot(snapshot),
         );
-        _notifyProgressUpdate();
+        await onPacketSend();
       }
       if (snapshots.length < _kQueryLimit) {
         break;
@@ -340,7 +353,7 @@ class DeviceTransferSender {
         await socket.addMessage(
           TransferDataMessage.fromDbMessage(message.item2),
         );
-        _notifyProgressUpdate();
+        await onPacketSend();
       }
     }
     return count;
@@ -359,7 +372,7 @@ class DeviceTransferSender {
         await socket.addTranscriptMessage(
           TransferDataTranscriptMessage.fromDbTranscriptMessage(message),
         );
-        _notifyProgressUpdate();
+        await onPacketSend();
       }
       if (messages.length < _kQueryLimit) {
         break;
@@ -382,7 +395,7 @@ class DeviceTransferSender {
         await socket.addExpiredMessage(
           TransferDataExpiredMessage.fromDbExpiredMessage(message),
         );
-        _notifyProgressUpdate();
+        await onPacketSend();
       }
       if (messages.length < _kQueryLimit) {
         break;
@@ -403,7 +416,7 @@ class DeviceTransferSender {
         await socket.addPinMessage(
           TransferDataPinMessage.fromDbPinMessage(message),
         );
-        _notifyProgressUpdate();
+        await onPacketSend();
       }
       if (messages.length < _kQueryLimit) {
         break;
@@ -428,7 +441,7 @@ class DeviceTransferSender {
         }
         await socket.addAttachment(message.messageId, file.path);
         count++;
-        _notifyProgressUpdate();
+        await onPacketSend();
       }
     }
     return count;

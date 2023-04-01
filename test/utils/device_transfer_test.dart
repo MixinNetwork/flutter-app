@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
@@ -112,6 +113,25 @@ extension _DatabasePreset on Database {
   }
 }
 
+class _SlowDeviceTransferSender extends DeviceTransferSender {
+  _SlowDeviceTransferSender({
+    required super.database,
+    required super.attachmentUtil,
+    required super.protocolTransform,
+    required super.deviceId,
+    super.onSenderProgressUpdate,
+    super.onSenderStart,
+    super.onSenderSucceed,
+    super.onSenderFailed,
+  });
+
+  @override
+  Future<void> onPacketSend() {
+    super.onPacketSend();
+    return Future.delayed(const Duration(milliseconds: 200));
+  }
+}
+
 void main() {
   setUpAll(() {
     mixinDocumentsDirectory = Directory(
@@ -122,21 +142,39 @@ void main() {
     ansiColorDisabled = false;
   });
 
-  test('test receiver', () async {
-    final receiverDatabase = Database(
+  late Database receiverDatabase;
+  late Database senderDatabase;
+
+  var receiverStartCount = 0;
+  var receiverSucceedCount = 0;
+  var receiverFailedCount = 0;
+  var senderStartCount = 0;
+  var senderSucceedCount = 0;
+  var senderFailedCount = 0;
+
+  late DeviceTransferReceiver receiver;
+  late DeviceTransferSender sender;
+
+  final receiverProgress = <double>[];
+  final senderProgress = <double>[];
+
+  late Completer<void> receiverCompleter;
+  late Completer<void> senderCompleter;
+
+  setUp(() {
+    receiverDatabase = Database(
       MixinDatabase(NativeDatabase.memory()),
       FtsDatabase(NativeDatabase.memory()),
     );
+
     final userId = const Uuid().v4();
     const identifyNumber = '10000';
     final receiverDeviceId = const Uuid().v4();
 
-    var receiverStartCount = 0;
-    var receiverSucceedCount = 0;
-    var receiverFailedCount = 0;
-    final receiverProgress = <double>[];
+    receiverCompleter = Completer();
+    senderCompleter = Completer();
 
-    final receiver = DeviceTransferReceiver(
+    receiver = DeviceTransferReceiver(
       userId: userId,
       database: receiverDatabase,
       attachmentUtil: AttachmentUtilBase.of(identifyNumber),
@@ -149,28 +187,22 @@ void main() {
       },
       onReceiverSucceed: () {
         receiverSucceedCount++;
+        receiverCompleter.complete();
       },
       onReceiverFailed: () {
         receiverFailedCount++;
+        receiverCompleter.complete();
       },
-      onReceiverProgressUpdate: (progress) {
-        d('progress: $progress');
-        receiverProgress.add(progress);
-      },
+      onReceiverProgressUpdate: receiverProgress.add,
     );
 
-    final senderDatabase = Database(
+    senderDatabase = Database(
       MixinDatabase(NativeDatabase.memory()),
       FtsDatabase(NativeDatabase.memory()),
     )..addTestData(userId);
     final senderDeviceId = const Uuid().v4();
 
-    var senderStartCount = 0;
-    var senderSucceedCount = 0;
-    var senderFailedCount = 0;
-    final senderProgress = <double>[];
-
-    final sender = DeviceTransferSender(
+    sender = _SlowDeviceTransferSender(
       database: senderDatabase,
       attachmentUtil: AttachmentUtilBase.of(identifyNumber),
       protocolTransform: const TransferProtocolTransform(fileFolder: ''),
@@ -180,16 +212,33 @@ void main() {
       },
       onSenderSucceed: () {
         senderSucceedCount++;
+        senderCompleter.complete();
       },
       onSenderFailed: () {
         senderFailedCount++;
+        senderCompleter.complete();
       },
-      onSenderProgressUpdate: (progress) {
-        d('progress: $progress');
-        senderProgress.add(progress);
-      },
+      onSenderProgressUpdate: senderProgress.add,
     );
+  });
 
+  tearDown(() async {
+    receiver.close();
+    sender.close();
+    await receiverDatabase.dispose();
+    await senderDatabase.dispose();
+    receiverProgress.clear();
+    senderProgress.clear();
+    receiverStartCount = 0;
+    receiverSucceedCount = 0;
+    receiverFailedCount = 0;
+    senderStartCount = 0;
+    senderSucceedCount = 0;
+    senderFailedCount = 0;
+  });
+
+  test('test receiver', () async {
+    e('test receiver start');
     const verificationCode = 1234;
     final port = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
@@ -205,13 +254,14 @@ void main() {
     expect(receiverFailedCount, 0);
     expect(receiverSucceedCount, 0);
 
-    await Future.delayed(const Duration(milliseconds: 200));
+    await senderCompleter.future;
     expect(senderStartCount, 1);
     expect(senderFailedCount, 0);
     expect(senderSucceedCount, 1);
     expect(senderProgress.first, 0);
     expect(senderProgress.last, 100);
 
+    await receiverCompleter.future;
     expect(receiverStartCount, 1);
     expect(receiverFailedCount, 0);
     expect(receiverSucceedCount, 1);
@@ -220,5 +270,88 @@ void main() {
 
     d('senderProgress: $senderProgress');
     d('receiverProgress: $receiverProgress');
+    e('test receiver end');
+  });
+
+  test('connect with wrong verification code', () async {
+    e('test connect with wrong verification code start');
+    const verificationCode = 1234;
+    final port = await sender.startServerSocket(verificationCode);
+    d('startServerSocket: $port');
+    expect(senderStartCount, 0);
+    await receiver.connectToServer('localhost', port, verificationCode + 1);
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    expect(senderStartCount, 0);
+    expect(senderFailedCount, 0);
+    expect(senderSucceedCount, 0);
+
+    expect(receiverStartCount, 0);
+    expect(receiverFailedCount, 1);
+    expect(receiverSucceedCount, 0);
+
+    e('test connect with wrong verification code end');
+  });
+
+  test('connected but sender close', () async {
+    e('test connected but sender close start');
+    const verificationCode = 1234;
+    final port = await sender.startServerSocket(verificationCode);
+    d('startServerSocket: $port');
+    expect(senderStartCount, 0);
+    await receiver.connectToServer('localhost', port, verificationCode);
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    expect(senderStartCount, 1);
+    expect(senderFailedCount, 0);
+    expect(senderSucceedCount, 0);
+
+    expect(receiverStartCount, 1);
+    expect(receiverFailedCount, 0);
+    expect(receiverSucceedCount, 0);
+
+    sender.close();
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    expect(senderStartCount, 1);
+    expect(senderFailedCount, 1);
+    expect(senderSucceedCount, 0);
+
+    expect(receiverStartCount, 1);
+    expect(receiverFailedCount, 1);
+    expect(receiverSucceedCount, 0);
+
+    e('test connected but sender close end');
+  });
+
+  test('connected but receiver close', () async {
+    e('test connected but receiver close start');
+    const verificationCode = 1234;
+    final port = await sender.startServerSocket(verificationCode);
+    d('startServerSocket: $port');
+    expect(senderStartCount, 0);
+    await receiver.connectToServer('localhost', port, verificationCode);
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    expect(senderStartCount, 1);
+    expect(senderFailedCount, 0);
+    expect(senderSucceedCount, 0);
+
+    expect(receiverStartCount, 1);
+    expect(receiverFailedCount, 0);
+    expect(receiverSucceedCount, 0);
+
+    receiver.close();
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    expect(senderStartCount, 1);
+    expect(senderFailedCount, 1);
+    expect(senderSucceedCount, 0);
+
+    expect(receiverStartCount, 1);
+    expect(receiverFailedCount, 1);
+    expect(receiverSucceedCount, 0);
+
+    e('test connected but receiver close end');
   });
 }

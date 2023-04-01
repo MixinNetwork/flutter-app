@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -55,6 +56,14 @@ class DeviceTransferReceiver {
   int _total = 0;
   int _progress = 0;
 
+  var _finished = false;
+
+  void _resetTransferStates() {
+    _total = 0;
+    _progress = 0;
+    _finished = false;
+  }
+
   void _notifyProgressUpdate() {
     _progress++;
     final progress =
@@ -66,32 +75,48 @@ class DeviceTransferReceiver {
     d('connect to $ip:$port');
     if (_socket != null) {
       w('socket is not null, close it first');
-      _socket?.destroy();
+      close();
     }
+    _finished = false;
     final socket = await Socket.connect(
       ip,
       port,
       timeout: const Duration(seconds: 10),
     );
+    _resetTransferStates();
     _socket = socket;
     d('connected to $ip:$port');
     socket.transform(protocolTransform).listen(
-      (packet) {
-        if (packet is TransferJsonPacket) {
-          if (packet.json.type != JsonTransferDataType.command) {
-            // notify progress, command is not counted.
+      (packet) async {
+        try {
+          if (packet is TransferJsonPacket) {
+            if (packet.json.type != JsonTransferDataType.command) {
+              // notify progress, command is not counted.
+              _notifyProgressUpdate();
+            }
+            await _processReceivedJsonPacket(packet.json);
+          } else if (packet is TransferAttachmentPacket) {
+            await _processReceivedAttachmentPacket(packet);
             _notifyProgressUpdate();
+          } else {
+            e('unknown packet: $packet');
           }
-          _processReceivedJsonPacket(packet.json);
-        } else if (packet is TransferAttachmentPacket) {
-          _processReceivedAttachmentPacket(packet);
-          _notifyProgressUpdate();
-        } else {
-          e('unknown packet: $packet');
+        } catch (error, stacktrace) {
+          if (_socket == null) {
+            e('socket is null, ignore error $error');
+            return;
+          }
+          e('process packet error: $error $stacktrace');
+          close();
         }
       },
       onDone: () {
-        onReceiverSucceed?.call();
+        d('receiver: socket done. finished: $_finished');
+        if (_finished) {
+          onReceiverSucceed?.call();
+        } else {
+          onReceiverFailed?.call();
+        }
       },
       onError: (error, stacktrace) {
         e('_handleRemotePushCommand: $error $stacktrace');
@@ -162,6 +187,7 @@ class DeviceTransferReceiver {
             case kTransferCommandActionFinish:
               i('${command.action} command: finish receiver socket');
               onReceiverProgressUpdate?.call(100);
+              _finished = true;
               await _socket?.addCommand(TransferDataCommand.simple(
                   deviceId: deviceId, action: kTransferCommandActionFinish));
               break;
@@ -172,7 +198,6 @@ class DeviceTransferReceiver {
             case kTransferCommandActionStart:
               i('${command.action} command: start receiver');
               _total = command.total!;
-              _progress = 0;
               onReceiverStart?.call();
               onReceiverProgressUpdate?.call(0);
               break;
