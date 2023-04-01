@@ -9,6 +9,7 @@ import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
 import '../event_bus.dart';
 import '../extension/extension.dart';
+import '../logger.dart';
 
 enum DeviceTransferEventAction {
   pullToRemote,
@@ -86,7 +87,7 @@ final _restoreBehavior = () {
 }();
 
 final _backupProgressBehavior = () {
-  final subject = BehaviorSubject<double>();
+  final subject = PublishSubject<double>();
   DeviceTransferEventBus.instance.events().listen((event) {
     if (event.action == DeviceTransferEventAction.onBackupProgress) {
       subject.add(event.payload as double);
@@ -96,7 +97,7 @@ final _backupProgressBehavior = () {
 }();
 
 final _restoreProgressBehavior = () {
-  final subject = BehaviorSubject<double>();
+  final subject = PublishSubject<double>();
   DeviceTransferEventBus.instance.events().listen((event) {
     if (event.action == DeviceTransferEventAction.onRestoreProgress) {
       subject.add(event.payload as double);
@@ -104,6 +105,46 @@ final _restoreProgressBehavior = () {
   });
   return subject;
 }();
+
+void _useTransferStatus(
+  Stream<_Status> stream, {
+  required WidgetBuilder progressBuilder,
+  required WidgetBuilder succeedBuilder,
+  required WidgetBuilder failedBuilder,
+}) {
+  final context = useContext();
+  useEffect(() {
+    var isProgressShowing = false;
+    final subscription = stream.listen((status) async {
+      if (status == _Status.start) {
+        isProgressShowing = true;
+        await showMixinDialog(
+          context: context,
+          child: progressBuilder(context),
+        );
+        isProgressShowing = false;
+      } else {
+        if (isProgressShowing) {
+          Navigator.of(context).pop();
+          isProgressShowing = false;
+        }
+        if (status == _Status.succeed) {
+          d('restore succeed');
+          await showMixinDialog(
+            context: context,
+            child: succeedBuilder(context),
+          );
+        } else if (status == _Status.failed) {
+          await showMixinDialog(
+            context: context,
+            child: failedBuilder(context),
+          );
+        }
+      }
+    });
+    return subscription.cancel;
+  }, [stream]);
+}
 
 class DeviceTransferHandlerWidget extends HookWidget {
   const DeviceTransferHandlerWidget({
@@ -115,36 +156,46 @@ class DeviceTransferHandlerWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    useEffect(
-      () {
-        final subscription = _backupBehavior.listen((status) {
-          if (status == _Status.start) {
-            showMixinDialog(
-              context: context,
-              child: const _BackupProcessingDialog(),
-            );
-          }
-        });
-        return subscription.cancel;
-      },
-      [],
+    _useTransferStatus(
+      _restoreBehavior,
+      progressBuilder: (context) => const _RestoreProcessingDialog(),
+      succeedBuilder: (context) => const _ConfirmDialog(
+        message: 'restore succeed',
+      ),
+      failedBuilder: (context) => const _ConfirmDialog(
+        message: 'backup failed',
+      ),
     );
-    useEffect(
-      () {
-        final subscription = _restoreBehavior.listen((status) {
-          if (status == _Status.start) {
-            showMixinDialog(
-              context: context,
-              child: const _RestoreProcessingDialog(),
-            );
-          }
-        });
-        return subscription.cancel;
-      },
-      [],
+    _useTransferStatus(
+      _backupBehavior,
+      progressBuilder: (context) => const _BackupProcessingDialog(),
+      succeedBuilder: (context) => const _ConfirmDialog(
+        message: 'backupSuccess',
+      ),
+      failedBuilder: (context) => const _ConfirmDialog(
+        message: 'backup failed',
+      ),
     );
     return child;
   }
+}
+
+class _ConfirmDialog extends StatelessWidget {
+  const _ConfirmDialog({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => AlertDialogLayout(
+        content: Text(message),
+        title: Text(context.l10n.confirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(context.l10n.confirm),
+          ),
+        ],
+      );
 }
 
 class DeviceTransferDialog extends StatelessWidget {
@@ -217,10 +268,6 @@ class _RestoreProcessingDialog extends StatelessWidget {
         },
         tips: const Text(
           'Please do not turn off your phone or disconnect the USB cable during the transfer.',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-          ),
         ),
         statusBehavior: _restoreBehavior,
         progressBehavior: _restoreProgressBehavior,
@@ -240,10 +287,6 @@ class _BackupProcessingDialog extends StatelessWidget {
         },
         tips: const Text(
           'Please do not turn off your phone or disconnect the USB cable during the transfer.',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-          ),
         ),
         statusBehavior: _backupBehavior,
         progressBehavior: _backupProgressBehavior,
@@ -263,8 +306,8 @@ class _TransferProcessDialog extends HookWidget {
   final VoidCallback onCancelTapped;
   final Widget tips;
 
-  final BehaviorSubject<_Status> statusBehavior;
-  final BehaviorSubject<double> progressBehavior;
+  final Stream<_Status> statusBehavior;
+  final Stream<double> progressBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -296,18 +339,12 @@ class _TransferProcessDialog extends HookWidget {
                   fontWeight: FontWeight.w600,
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     title,
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 2),
                     if (progress.data != null && progress.data! > 0)
-                      Text(
-                        '${progress.data!.toStringAsFixed(0)}%',
-                        style: TextStyle(
-                          color: context.theme.accent,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      Text('(${progress.data!.toStringAsFixed(0)}%)'),
                   ],
                 ),
               ),
