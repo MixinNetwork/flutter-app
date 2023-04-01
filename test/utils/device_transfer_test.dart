@@ -225,8 +225,8 @@ void main() {
   tearDown(() async {
     receiver.close();
     sender.close();
-    await receiverDatabase.dispose();
-    await senderDatabase.dispose();
+    await receiverCompleter.future;
+    await senderCompleter.future;
     receiverProgress.clear();
     senderProgress.clear();
     receiverStartCount = 0;
@@ -238,7 +238,6 @@ void main() {
   });
 
   test('test receiver', () async {
-    e('test receiver start');
     const verificationCode = 1234;
     final port = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
@@ -270,11 +269,9 @@ void main() {
 
     d('senderProgress: $senderProgress');
     d('receiverProgress: $receiverProgress');
-    e('test receiver end');
   });
 
   test('connect with wrong verification code', () async {
-    e('test connect with wrong verification code start');
     const verificationCode = 1234;
     final port = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
@@ -290,11 +287,10 @@ void main() {
     expect(receiverFailedCount, 1);
     expect(receiverSucceedCount, 0);
 
-    e('test connect with wrong verification code end');
+    await Future.delayed(const Duration(milliseconds: 50));
   });
 
   test('connected but sender close', () async {
-    e('test connected but sender close start');
     const verificationCode = 1234;
     final port = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
@@ -320,12 +316,9 @@ void main() {
     expect(receiverStartCount, 1);
     expect(receiverFailedCount, 1);
     expect(receiverSucceedCount, 0);
-
-    e('test connected but sender close end');
   });
 
   test('connected but receiver close', () async {
-    e('test connected but receiver close start');
     const verificationCode = 1234;
     final port = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
@@ -351,7 +344,5 @@ void main() {
     expect(receiverStartCount, 1);
     expect(receiverFailedCount, 1);
     expect(receiverSucceedCount, 0);
-
-    e('test connected but receiver close end');
   });
 }
