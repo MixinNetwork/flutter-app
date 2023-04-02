@@ -140,8 +140,10 @@ class _DialogBackButton extends HookWidget {
             converter: (state) => state.pages.length > 1);
     return !canPopup
         ? const SizedBox.shrink()
-        : MixinBackButton(
-            onTap: () => context.read<_NavigatorCubit>().pop(),
+        : Center(
+            child: MixinBackButton(
+              onTap: () => context.read<_NavigatorCubit>().pop(),
+            ),
           );
   }
 }
