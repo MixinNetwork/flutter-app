@@ -7,12 +7,14 @@ import '../../constants/resources.dart';
 import '../../widgets/dialog.dart';
 import '../event_bus.dart';
 import '../extension/extension.dart';
+import '../logger.dart';
 
 enum DeviceTransferCommand {
   pullToRemote,
   pushToRemote,
   cancelRestore,
   cancelBackup,
+  confirmRestore,
 }
 
 enum DeviceTransferCallbackType {
@@ -24,6 +26,9 @@ enum DeviceTransferCallbackType {
   onBackupFailed,
   onRestoreProgress,
   onBackupProgress,
+
+  /// a push event from other device.
+  onRestoreReceived,
 }
 
 class DeviceTransferCallbackEvent {
@@ -129,6 +134,7 @@ void _useTransferStatus(
           isProgressShowing = false;
         }
         if (status == _Status.succeed) {
+          d('restore succeed');
           await showMixinDialog(
             context: context,
             child: succeedBuilder(context),
@@ -143,6 +149,17 @@ void _useTransferStatus(
     });
     return subscription.cancel;
   }, [stream]);
+}
+
+void _useOnTransferEventType(
+  DeviceTransferCallbackType type,
+  VoidCallback callback,
+) {
+  useEffect(() {
+    final subscription =
+        DeviceTransferEventBus.instance.on(type).listen((event) => callback());
+    return subscription.cancel;
+  }, [type]);
 }
 
 class DeviceTransferHandlerWidget extends HookWidget {
@@ -175,14 +192,31 @@ class DeviceTransferHandlerWidget extends HookWidget {
         message: 'backup failed',
       ),
     );
+    _useOnTransferEventType(
+      DeviceTransferCallbackType.onRestoreReceived,
+      () => showMixinDialog(
+        context: context,
+        child: _ConfirmDialog(
+          message: 'restore from remote',
+          onConfirmed: () {
+            EventBus.instance.fire(DeviceTransferCommand.confirmRestore);
+          },
+        ),
+      ),
+    );
     return child;
   }
 }
 
 class _ConfirmDialog extends StatelessWidget {
-  const _ConfirmDialog({required this.message});
+  const _ConfirmDialog({
+    required this.message,
+    this.onConfirmed,
+  });
 
   final String message;
+
+  final VoidCallback? onConfirmed;
 
   @override
   Widget build(BuildContext context) => AlertDialogLayout(
@@ -191,6 +225,7 @@ class _ConfirmDialog extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
+              onConfirmed?.call();
               Navigator.of(context).pop(false);
             },
             child: Text(context.l10n.confirm),

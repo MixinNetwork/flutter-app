@@ -53,6 +53,15 @@ class DeviceTransfer {
         case DeviceTransferCommand.cancelBackup:
           sender.close();
           break;
+        case DeviceTransferCommand.confirmRestore:
+          final data = _remotePushData;
+          if (data == null) {
+            e('confirm restore but no data.');
+            return;
+          }
+          _remotePushData = null;
+          await receiver.connectToServer(data.ip, data.port, data.code);
+          break;
       }
     }));
   }
@@ -137,6 +146,12 @@ class DeviceTransfer {
 
   final List<StreamSubscription> _subscriptions = [];
 
+  _RemotePushData? _remotePushData;
+
+  // Current device already sent a pull event to remote.
+  // If remote device is online, it will send a push event to current device.
+  var _waitingForRemotePush = false;
+
   Future<void> _sendCommandAsPlainJson(TransferDataCommand command) async {
     final conversationId =
         await database.participantDao.findJoinedConversationId(userId);
@@ -166,6 +181,7 @@ class DeviceTransfer {
   }
 
   Future<void> _sendPullToOtherSession() async {
+    _waitingForRemotePush = true;
     final command = TransferDataCommand.pull(deviceId: await getDeviceId());
     await _sendCommandAsPlainJson(command);
   }
@@ -229,15 +245,35 @@ class DeviceTransfer {
 
   Future<void> _handleRemotePushCommand(String ip, int port, int code) async {
     d('_handleRemotePushCommand: $ip:$port ($code)');
-    await receiver.connectToServer(ip, port, code);
+    if (_waitingForRemotePush) {
+      _waitingForRemotePush = false;
+      await receiver.connectToServer(ip, port, code);
+    } else {
+      _remotePushData = _RemotePushData(ip: ip, port: port, code: code);
+      DeviceTransferEventBus.instance
+          .fire(DeviceTransferCallbackType.onRestoreReceived);
+    }
   }
 
   void dispose() {
     d('dispose: device transfer');
+    _remotePushData = null;
     _subscriptions
       ..forEach((s) => s.cancel())
       ..clear();
     sender.close();
     receiver.close();
   }
+}
+
+class _RemotePushData {
+  _RemotePushData({
+    required this.ip,
+    required this.port,
+    required this.code,
+  });
+
+  final String ip;
+  final int port;
+  final int code;
 }
