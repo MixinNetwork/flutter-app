@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -68,7 +70,7 @@ enum _Status {
 }
 
 final _backupBehavior = () {
-  final subject = BehaviorSubject<_Status>();
+  final subject = StreamController<_Status>();
   DeviceTransferEventBus.instance.events().listen((event) {
     if (event.action == DeviceTransferCallbackType.onBackupStart) {
       subject.add(_Status.start);
@@ -82,7 +84,7 @@ final _backupBehavior = () {
 }();
 
 final _restoreBehavior = () {
-  final subject = BehaviorSubject<_Status>();
+  final subject = StreamController<_Status>();
   DeviceTransferEventBus.instance.events().listen((event) {
     if (event.action == DeviceTransferCallbackType.onRestoreStart) {
       subject.add(_Status.start);
@@ -116,12 +118,13 @@ final _restoreProgressBehavior = () {
 }();
 
 void _useTransferStatus(
-  Stream<_Status> stream, {
+  Stream<_Status> Function() streamBuilder, {
   required WidgetBuilder progressBuilder,
   required WidgetBuilder succeedBuilder,
   required WidgetBuilder failedBuilder,
 }) {
   final context = useContext();
+  final stream = useMemoized(streamBuilder);
   useEffect(() {
     var isProgressShowing = false;
     final subscription = stream.listen((status) async {
@@ -133,6 +136,9 @@ void _useTransferStatus(
         );
         isProgressShowing = false;
       } else {
+        if (!isProgressShowing) {
+          return;
+        }
         if (isProgressShowing) {
           Navigator.of(context).pop();
           isProgressShowing = false;
@@ -177,7 +183,7 @@ class DeviceTransferHandlerWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     _useTransferStatus(
-      _restoreBehavior,
+      () => _restoreBehavior.stream,
       progressBuilder: (context) => const _RestoreProcessingDialog(),
       succeedBuilder: (context) => const _ConfirmDialog(
         message: 'restore succeed',
@@ -187,7 +193,7 @@ class DeviceTransferHandlerWidget extends HookWidget {
       ),
     );
     _useTransferStatus(
-      _backupBehavior,
+      () => _backupBehavior.stream,
       progressBuilder: (context) => const _BackupProcessingDialog(),
       succeedBuilder: (context) => const _ConfirmDialog(
         message: 'backupSuccess',
@@ -263,7 +269,6 @@ class _RestoreProcessingDialog extends StatelessWidget {
         tips: const Text(
           'Please do not turn off your phone or disconnect the USB cable during the transfer.',
         ),
-        statusBehavior: _restoreBehavior,
         progressBehavior: _restoreProgressBehavior,
       );
 }
@@ -281,7 +286,6 @@ class _BackupProcessingDialog extends StatelessWidget {
         tips: const Text(
           'Please do not turn off your phone or disconnect the USB cable during the transfer.',
         ),
-        statusBehavior: _backupBehavior,
         progressBehavior: _backupProgressBehavior,
       );
 }
@@ -291,7 +295,6 @@ class _TransferProcessDialog extends HookWidget {
     required this.title,
     required this.onCancelTapped,
     required this.tips,
-    required this.statusBehavior,
     required this.progressBehavior,
   });
 
@@ -299,7 +302,6 @@ class _TransferProcessDialog extends HookWidget {
   final VoidCallback onCancelTapped;
   final Widget tips;
 
-  final Stream<_Status> statusBehavior;
   final Stream<double> progressBehavior;
 
   @override
