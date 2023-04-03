@@ -607,6 +607,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "restoreFromOtherDeviceDescription":
             MessageLookupByLibrary.simpleMessage(
                 "Transfer your message history from your old iOS device."),
+        "restoreWaitingOtherDeviceTips": MessageLookupByLibrary.simpleMessage(
+            "Waiting for confirmation of the backup request on the other device. Please do not close the app and make sure that both devices are connected to the same Wi-Fi network."),
         "restoringChat": MessageLookupByLibrary.simpleMessage("Restoring chat"),
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("Retry upload failed."),

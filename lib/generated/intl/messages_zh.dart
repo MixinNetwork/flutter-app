@@ -516,6 +516,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "resendCodeIn": m37,
         "reset": MessageLookupByLibrary.simpleMessage("重置"),
         "resetLink": MessageLookupByLibrary.simpleMessage("重置邀请链接"),
+        "restoreWaitingOtherDeviceTips": MessageLookupByLibrary.simpleMessage(
+            "等待其他设备确认备份请求，请不要关闭应用并确保设备保持在同一 Wi-Fi 网络下。"),
         "retryUploadFailed": MessageLookupByLibrary.simpleMessage("重新上传失败。"),
         "revokeMultisigTransaction":
             MessageLookupByLibrary.simpleMessage("撤销多重签名交易"),

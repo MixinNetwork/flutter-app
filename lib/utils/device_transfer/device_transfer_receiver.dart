@@ -117,10 +117,12 @@ class DeviceTransferReceiver {
         } else {
           onReceiverFailed?.call();
         }
+        close();
       },
       onError: (error, stacktrace) {
         e('_handleRemotePushCommand: $error $stacktrace');
         onReceiverFailed?.call();
+        close();
       },
     );
     await socket.addCommand(

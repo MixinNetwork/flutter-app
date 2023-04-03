@@ -4335,6 +4335,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Waiting for confirmation of the backup request on the other device. Please do not close the app and make sure that both devices are connected to the same Wi-Fi network.`
+  String get restoreWaitingOtherDeviceTips {
+    return Intl.message(
+      'Waiting for confirmation of the backup request on the other device. Please do not close the app and make sure that both devices are connected to the same Wi-Fi network.',
+      name: 'restoreWaitingOtherDeviceTips',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:json_annotation/json_annotation.dart';
 
+import '../logger.dart';
 import 'transfer_data_asset.dart';
 import 'transfer_data_command.dart';
 import 'transfer_data_conversation.dart';
@@ -106,6 +107,7 @@ extension SocketExtension on Socket {
   }
 
   Future<void> addCommand(TransferDataCommand command) {
+    d('send command to remote: $command');
     final wrapper = JsonTransferData(
       data: command.toJson(),
       type: JsonTransferDataType.command,

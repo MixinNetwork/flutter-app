@@ -424,5 +424,6 @@
   "restoreFromOtherDeviceDescription": "Transfer your message history from your old iOS device.",
   "backupToOtherDevice": "Backup to other device",
   "backupToOtherDeviceTips": "Make sure both devices are connected to the same Wi-Fi or hotspot",
-  "chatBackupAndRestore": "Chat Backup and Restore"
+  "chatBackupAndRestore": "Chat Backup and Restore",
+  "restoreWaitingOtherDeviceTips": "Waiting for confirmation of the backup request on the other device. Please do not close the app and make sure that both devices are connected to the same Wi-Fi network."
 }

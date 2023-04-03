@@ -37,14 +37,15 @@ class DeviceTransfer {
     required this.sender,
     required this.receiver,
   }) {
-    _subscriptions.add(
-        EventBus.instance.on.whereType<DeviceTransferCommand>().listen((event) {
+    _subscriptions.add(EventBus.instance.on
+        .whereType<DeviceTransferCommand>()
+        .listen((event) async {
       switch (event) {
         case DeviceTransferCommand.pullToRemote:
-          _sendPullToOtherSession();
+          await _sendPullToOtherSession();
           break;
         case DeviceTransferCommand.pushToRemote:
-          _sendPushToOtherSession();
+          await _sendPushToOtherSession();
           break;
         case DeviceTransferCommand.cancelRestore:
           receiver.close();
@@ -134,8 +135,6 @@ class DeviceTransfer {
   final DeviceTransferSender sender;
   final DeviceTransferReceiver receiver;
 
-  ServerSocket? _socket;
-
   final List<StreamSubscription> _subscriptions = [];
 
   Future<void> _sendCommandAsPlainJson(TransferDataCommand command) async {
@@ -183,11 +182,6 @@ class DeviceTransfer {
   }
 
   Future<void> _sendPushToOtherSession() async {
-    if (_socket != null) {
-      await _socket!.close();
-      _socket = null;
-    }
-
     String? ipAddress;
     try {
       ipAddress = await NetworkInfo().getWifiIP();
@@ -240,6 +234,10 @@ class DeviceTransfer {
 
   void dispose() {
     d('dispose: device transfer');
-    _socket?.close();
+    _subscriptions
+      ..forEach((s) => s.cancel())
+      ..clear();
+    sender.close();
+    receiver.close();
   }
 }

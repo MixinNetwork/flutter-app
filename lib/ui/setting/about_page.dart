@@ -125,18 +125,7 @@ class _BackupItem extends HookWidget {
           CellItem(
             title: const Text('send'),
             onTap: () async {
-              DeviceTransferEventBus.instance
-                  .fire(DeviceTransferCallbackType.onRestoreStart);
-              await Future.delayed(const Duration(milliseconds: 200));
-              for (var i = 0; i <= 100; i++) {
-                DeviceTransferEventBus.instance.fire(
-                  DeviceTransferCallbackType.onRestoreProgress,
-                  i.toDouble(),
-                );
-                await Future.delayed(const Duration(milliseconds: 20));
-              }
-              DeviceTransferEventBus.instance
-                  .fire(DeviceTransferCallbackType.onRestoreFailed);
+
             },
           ),
         ],

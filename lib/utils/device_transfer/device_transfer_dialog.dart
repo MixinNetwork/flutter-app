@@ -32,7 +32,8 @@ Future<void> showDeviceTransferDialog(
 enum _DeviceTransferPageType {
   deviceTransfer,
   restore,
-  backup;
+  backup,
+  restoreWaitingConnect;
 
   Widget build(BuildContext context) {
     switch (this) {
@@ -42,6 +43,8 @@ enum _DeviceTransferPageType {
         return const _RestorePage();
       case _DeviceTransferPageType.backup:
         return const _BackupPage();
+      case _DeviceTransferPageType.restoreWaitingConnect:
+        return const _RestoreWaitingConnectPage();
     }
   }
 }
@@ -105,7 +108,9 @@ class _DeviceTransferPage extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 20),
           CellGroup(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: CellItem(
               title: Text(context.l10n.restoreFromOtherDevice),
               onTap: () {
@@ -115,7 +120,9 @@ class _DeviceTransferPage extends StatelessWidget {
               },
             ),
           ),
+          const SizedBox(height: 16),
           CellGroup(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: CellItem(
               title: Text(context.l10n.backupToOtherDevice),
               onTap: () {
@@ -131,7 +138,9 @@ class _DeviceTransferPage extends StatelessWidget {
 }
 
 class _DialogBackButton extends HookWidget {
-  const _DialogBackButton();
+  const _DialogBackButton({this.onTapped});
+
+  final VoidCallback? onTapped;
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +151,10 @@ class _DialogBackButton extends HookWidget {
         ? const SizedBox.shrink()
         : Center(
             child: MixinBackButton(
-              onTap: () => context.read<_NavigatorCubit>().pop(),
+              onTap: () {
+                onTapped?.call();
+                context.read<_NavigatorCubit>().pop();
+              },
             ),
           );
   }
@@ -189,8 +201,62 @@ class _RestorePage extends StatelessWidget {
               trailing: null,
               onTap: () {
                 EventBus.instance.fire(DeviceTransferCommand.pullToRemote);
+                context
+                    .read<_NavigatorCubit>()
+                    .push(_DeviceTransferPageType.restoreWaitingConnect);
               },
             ),
+          ),
+          const SizedBox(height: 40),
+        ],
+      );
+}
+
+class _RestoreWaitingConnectPage extends StatelessWidget {
+  const _RestoreWaitingConnectPage();
+
+  @override
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          MixinAppBar(
+            backgroundColor: Colors.transparent,
+            title: Text(context.l10n.restoreFromOtherDevice),
+            leading: _DialogBackButton(
+              onTapped: () {
+                EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
+              },
+            ),
+            actions: [
+              MixinCloseButton(
+                onTap: () {
+                  Navigator.maybeOf(context, rootNavigator: true)?.pop();
+                  EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          SvgPicture.asset(Resources.assetsImagesClockSvg),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 36),
+            child: Text(
+              context.l10n.restoreWaitingOtherDeviceTips,
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 40),
+          TextButton(
+            onPressed: () {
+              Navigator.maybeOf(context, rootNavigator: true)?.pop();
+              EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
+            },
+            child: Text(context.l10n.cancel),
           ),
           const SizedBox(height: 40),
         ],

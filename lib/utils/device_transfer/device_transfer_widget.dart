@@ -7,7 +7,6 @@ import '../../constants/resources.dart';
 import '../../widgets/dialog.dart';
 import '../event_bus.dart';
 import '../extension/extension.dart';
-import '../logger.dart';
 
 enum DeviceTransferCommand {
   pullToRemote,
@@ -130,7 +129,6 @@ void _useTransferStatus(
           isProgressShowing = false;
         }
         if (status == _Status.succeed) {
-          d('restore succeed');
           await showMixinDialog(
             context: context,
             child: succeedBuilder(context),
@@ -192,7 +190,9 @@ class _ConfirmDialog extends StatelessWidget {
         title: Text(context.l10n.confirm),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
             child: Text(context.l10n.confirm),
           ),
         ],
