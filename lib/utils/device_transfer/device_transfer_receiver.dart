@@ -124,7 +124,11 @@ class DeviceTransferReceiver {
       },
     );
     await socket.addCommand(
-      TransferDataCommand.connect(code: code, deviceId: deviceId),
+      TransferDataCommand.connect(
+        code: code,
+        deviceId: deviceId,
+        userId: userId,
+      ),
     );
   }
 

@@ -24,6 +24,7 @@ class TransferDataCommand with EquatableMixin {
     this.platform = 'desktop',
     this.code,
     this.total,
+    this.userId,
   });
 
   factory TransferDataCommand.fromJson(Map<String, dynamic> json) =>
@@ -65,12 +66,14 @@ class TransferDataCommand with EquatableMixin {
   factory TransferDataCommand.connect({
     required String deviceId,
     required int code,
+    required String userId,
   }) =>
       TransferDataCommand(
         deviceId: deviceId,
         action: kTransferCommandActionConnect,
         version: _kVersion,
         code: code,
+        userId: userId,
       );
 
   factory TransferDataCommand.start({
@@ -101,6 +104,9 @@ class TransferDataCommand with EquatableMixin {
 
   final int? total;
 
+  @JsonKey(name: 'user_id')
+  final String? userId;
+
   Map<String, dynamic> toJson() => _$TransferDataCommandToJson(this);
 
   bool get isPull => action == kTransferCommandActionPull;
@@ -116,5 +122,6 @@ class TransferDataCommand with EquatableMixin {
         code,
         platform,
         total,
+        userId,
       ];
 }
