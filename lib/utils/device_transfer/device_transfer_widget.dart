@@ -31,10 +31,10 @@ enum DeviceTransferCallbackType {
   onBackupProgress,
 
   /// a push event from other device.
-  onRestoreReceived,
+  onBackupRequestReceived,
 
   /// a pull event from other device.
-  onBackupReceived,
+  onRestoreRequestReceived,
 }
 
 class DeviceTransferCallbackEvent {
@@ -185,42 +185,48 @@ class DeviceTransferHandlerWidget extends HookWidget {
     _useTransferStatus(
       () => _restoreBehavior.stream,
       progressBuilder: (context) => const _RestoreProcessingDialog(),
-      succeedBuilder: (context) => const _ConfirmDialog(
-        message: 'restore succeed',
+      succeedBuilder: (context) => _ConfirmDialog(
+        message: context.l10n.restoreSucceed,
+        title: context.l10n.restoreFromOtherDevice,
       ),
-      failedBuilder: (context) => const _ConfirmDialog(
-        message: 'backup failed',
+      failedBuilder: (context) => _ConfirmDialog(
+        message: context.l10n.restoreFailed,
+        title: context.l10n.restoreFromOtherDevice,
       ),
     );
     _useTransferStatus(
       () => _backupBehavior.stream,
       progressBuilder: (context) => const _BackupProcessingDialog(),
-      succeedBuilder: (context) => const _ConfirmDialog(
-        message: 'backupSuccess',
+      succeedBuilder: (context) => _ConfirmDialog(
+        message: context.l10n.backupSucceed,
+        title: context.l10n.backupToOtherDevice,
       ),
-      failedBuilder: (context) => const _ConfirmDialog(
-        message: 'backup failed',
+      failedBuilder: (context) => _ConfirmDialog(
+        message: context.l10n.backupFailed,
+        title: context.l10n.backupToOtherDevice,
       ),
     );
     useOnTransferEventType(
-      DeviceTransferCallbackType.onRestoreReceived,
+      DeviceTransferCallbackType.onBackupRequestReceived,
       () => showMixinDialog(
         context: context,
-        child: _ConfirmDialog(
-          message: 'restore from remote',
-          onConfirmed: () {
+        child: _ApproveDialog(
+          message: context.l10n.warningRemoteDeviceBackupRequest,
+          title: context.l10n.backupToOtherDevice,
+          onApproved: () {
             EventBus.instance.fire(DeviceTransferCommand.confirmRestore);
           },
         ),
       ),
     );
     useOnTransferEventType(
-      DeviceTransferCallbackType.onBackupReceived,
+      DeviceTransferCallbackType.onRestoreRequestReceived,
       () => showMixinDialog(
         context: context,
-        child: _ConfirmDialog(
-          message: 'backup from remote',
-          onConfirmed: () {
+        child: _ApproveDialog(
+          message: context.l10n.warningRemoteDeviceRestoreRequest,
+          title: context.l10n.restoreFromOtherDevice,
+          onApproved: () {
             EventBus.instance.fire(DeviceTransferCommand.confirmBackup);
           },
         ),
@@ -233,21 +239,46 @@ class DeviceTransferHandlerWidget extends HookWidget {
 class _ConfirmDialog extends StatelessWidget {
   const _ConfirmDialog({
     required this.message,
-    this.onConfirmed,
+    required this.title,
   });
 
   final String message;
-
-  final VoidCallback? onConfirmed;
+  final String title;
 
   @override
   Widget build(BuildContext context) => AlertDialogLayout(
         content: Text(message),
-        title: Text(context.l10n.confirm),
+        title: Text(title),
         actions: [
           TextButton(
             onPressed: () {
-              onConfirmed?.call();
+              Navigator.of(context).pop(false);
+            },
+            child: Text(context.l10n.confirm),
+          ),
+        ],
+      );
+}
+
+class _ApproveDialog extends StatelessWidget {
+  const _ApproveDialog({
+    required this.title,
+    required this.message,
+    required this.onApproved,
+  });
+
+  final String title;
+  final String message;
+  final VoidCallback onApproved;
+
+  @override
+  Widget build(BuildContext context) => AlertDialogLayout(
+        content: Text(message),
+        title: Text(title),
+        actions: [
+          TextButton(
+            onPressed: () {
+              onApproved.call();
               Navigator.of(context).pop(false);
             },
             child: Text(context.l10n.confirm),

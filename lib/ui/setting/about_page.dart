@@ -127,7 +127,7 @@ class _BackupItem extends HookWidget {
             title: const Text('send'),
             onTap: () async {
               DeviceTransferEventBus.instance
-                  .fire(DeviceTransferCallbackType.onRestoreReceived);
+                  .fire(DeviceTransferCallbackType.onBackupRequestReceived);
             },
           ),
         ],

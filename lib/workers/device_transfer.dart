@@ -239,7 +239,7 @@ class DeviceTransfer {
         break;
       case kTransferCommandActionPull:
         DeviceTransferEventBus.instance
-            .fire(DeviceTransferCallbackType.onBackupReceived);
+            .fire(DeviceTransferCallbackType.onRestoreRequestReceived);
         break;
       default:
         e('handleRemoteCommand: unknown action ${command.action}');
@@ -255,7 +255,7 @@ class DeviceTransfer {
     } else {
       _remotePushData = _RemotePushData(ip: ip, port: port, code: code);
       DeviceTransferEventBus.instance
-          .fire(DeviceTransferCallbackType.onRestoreReceived);
+          .fire(DeviceTransferCallbackType.onBackupRequestReceived);
     }
   }
 

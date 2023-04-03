@@ -179,6 +179,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "appCardShareDisallow": MessageLookupByLibrary.simpleMessage(
             "Disallow sharing of this URL"),
         "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
+        "approve": MessageLookupByLibrary.simpleMessage("Approve"),
         "archivedFolder":
             MessageLookupByLibrary.simpleMessage("archived folder"),
         "assetType": MessageLookupByLibrary.simpleMessage("Asset Type"),
@@ -192,6 +193,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please wait patiently, it may take a few minutes."),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
         "backupChat": MessageLookupByLibrary.simpleMessage("Backup Chat"),
+        "backupFailed": MessageLookupByLibrary.simpleMessage("Backup failed"),
+        "backupSucceed": MessageLookupByLibrary.simpleMessage("Backup succeed"),
         "backupToOtherDevice":
             MessageLookupByLibrary.simpleMessage("Backup to other device"),
         "backupToOtherDeviceTips": MessageLookupByLibrary.simpleMessage(
@@ -585,6 +588,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "recentChats": MessageLookupByLibrary.simpleMessage("CHATS"),
         "reedit": MessageLookupByLibrary.simpleMessage("Re-edit"),
         "refresh": MessageLookupByLibrary.simpleMessage("Refresh"),
+        "reject": MessageLookupByLibrary.simpleMessage("Reject"),
         "removeBot": MessageLookupByLibrary.simpleMessage("Remove Bot"),
         "removeChatFromCircle":
             MessageLookupByLibrary.simpleMessage("Remove Chat from circle"),
@@ -602,11 +606,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "restoreChat": MessageLookupByLibrary.simpleMessage("Restore Chat"),
         "restoreChatTips": MessageLookupByLibrary.simpleMessage(
             "Restoring chat records from other devices will not overwrite local records, only incremental synchronization, please do not turn off the screen and keep Mixin running in the foreground when restoring."),
+        "restoreFailed": MessageLookupByLibrary.simpleMessage("Restore failed"),
         "restoreFromOtherDevice":
             MessageLookupByLibrary.simpleMessage("Restore from other device"),
         "restoreFromOtherDeviceDescription":
             MessageLookupByLibrary.simpleMessage(
                 "Transfer your message history from your old iOS device."),
+        "restoreSucceed":
+            MessageLookupByLibrary.simpleMessage("Restore succeed"),
         "restoreWaitingOtherDeviceTips": MessageLookupByLibrary.simpleMessage(
             "Waiting for confirmation of the backup request on the other device. Please do not close the app and make sure that both devices are connected to the same Wi-Fi network."),
         "restoringChat": MessageLookupByLibrary.simpleMessage("Restoring chat"),
@@ -734,6 +741,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("Waiting for this message."),
+        "warningRemoteDeviceBackupRequest": MessageLookupByLibrary.simpleMessage(
+            "A remote device wants to backup your chat history to this device. Do you want to allow it?"),
+        "warningRemoteDeviceRestoreRequest": MessageLookupByLibrary.simpleMessage(
+            "A remote device wants to restore your chat history from this device. Do you want to allow it?"),
         "webview2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
             "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
         "webviewRuntimeUnavailable": MessageLookupByLibrary.simpleMessage(

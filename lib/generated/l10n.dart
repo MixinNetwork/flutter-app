@@ -4345,6 +4345,86 @@ class Localization {
       args: [],
     );
   }
+
+  /// `A remote device wants to backup your chat history to this device. Do you want to allow it?`
+  String get warningRemoteDeviceBackupRequest {
+    return Intl.message(
+      'A remote device wants to backup your chat history to this device. Do you want to allow it?',
+      name: 'warningRemoteDeviceBackupRequest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A remote device wants to restore your chat history from this device. Do you want to allow it?`
+  String get warningRemoteDeviceRestoreRequest {
+    return Intl.message(
+      'A remote device wants to restore your chat history from this device. Do you want to allow it?',
+      name: 'warningRemoteDeviceRestoreRequest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Approve`
+  String get approve {
+    return Intl.message(
+      'Approve',
+      name: 'approve',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reject`
+  String get reject {
+    return Intl.message(
+      'Reject',
+      name: 'reject',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore succeed`
+  String get restoreSucceed {
+    return Intl.message(
+      'Restore succeed',
+      name: 'restoreSucceed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore failed`
+  String get restoreFailed {
+    return Intl.message(
+      'Restore failed',
+      name: 'restoreFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup succeed`
+  String get backupSucceed {
+    return Intl.message(
+      'Backup succeed',
+      name: 'backupSucceed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup failed`
+  String get backupFailed {
+    return Intl.message(
+      'Backup failed',
+      name: 'backupFailed',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
