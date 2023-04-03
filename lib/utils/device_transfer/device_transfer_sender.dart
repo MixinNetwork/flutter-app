@@ -205,9 +205,9 @@ class DeviceTransferSender {
 
     onSenderProgressUpdate?.call(0);
 
+    await runWithLog(_processTransferParticipant, 'participant');
     await runWithLog(_processTransferConversation, 'conversation');
     await runWithLog(_processTransferUser, 'user');
-    await runWithLog(_processTransferParticipant, 'participant');
     await runWithLog(_processTransferSticker, 'sticker');
     await runWithLog(_processTransferAsset, 'asset');
     await runWithLog(_processTransferSnapshot, 'snapshot');
