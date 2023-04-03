@@ -12,6 +12,7 @@ import '../../widgets/dialog.dart';
 import '../event_bus.dart';
 import '../extension/extension.dart';
 import '../hook.dart';
+import '../logger.dart';
 import 'device_transfer_widget.dart';
 
 Future<void> showDeviceTransferDialog(
@@ -33,7 +34,8 @@ enum _DeviceTransferPageType {
   deviceTransfer,
   restore,
   backup,
-  restoreWaitingConnect;
+  restoreWaitingConnect,
+  backupWaitingConnect;
 
   Widget build(BuildContext context) {
     switch (this) {
@@ -45,6 +47,8 @@ enum _DeviceTransferPageType {
         return const _BackupPage();
       case _DeviceTransferPageType.restoreWaitingConnect:
         return const _RestoreWaitingConnectPage();
+      case _DeviceTransferPageType.backupWaitingConnect:
+        return const _BackupWaitingConnectPage();
     }
   }
 }
@@ -212,55 +216,61 @@ class _RestorePage extends StatelessWidget {
       );
 }
 
-class _RestoreWaitingConnectPage extends StatelessWidget {
+class _RestoreWaitingConnectPage extends HookWidget {
   const _RestoreWaitingConnectPage();
 
   @override
-  Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          MixinAppBar(
-            backgroundColor: Colors.transparent,
-            title: Text(context.l10n.restoreFromOtherDevice),
-            leading: _DialogBackButton(
-              onTapped: () {
+  Widget build(BuildContext context) {
+    useOnTransferEventType(DeviceTransferCallbackType.onRestoreStart, () {
+      i('_RestoreWaitingConnectPage: onRestoreStart, closing dialog');
+      Navigator.maybeOf(context, rootNavigator: true)?.pop();
+    });
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        MixinAppBar(
+          backgroundColor: Colors.transparent,
+          title: Text(context.l10n.restoreFromOtherDevice),
+          leading: _DialogBackButton(
+            onTapped: () {
+              EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
+            },
+          ),
+          actions: [
+            MixinCloseButton(
+              onTap: () {
+                Navigator.maybeOf(context, rootNavigator: true)?.pop();
                 EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
               },
             ),
-            actions: [
-              MixinCloseButton(
-                onTap: () {
-                  Navigator.maybeOf(context, rootNavigator: true)?.pop();
-                  EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          SvgPicture.asset(Resources.assetsImagesClockSvg),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: Text(
-              context.l10n.restoreWaitingOtherDeviceTips,
-              style: TextStyle(
-                color: context.theme.secondaryText,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
+          ],
+        ),
+        const SizedBox(height: 32),
+        SvgPicture.asset(Resources.assetsImagesClockSvg),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 36),
+          child: Text(
+            context.l10n.restoreWaitingOtherDeviceTips,
+            style: TextStyle(
+              color: context.theme.secondaryText,
+              fontSize: 14,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 40),
-          TextButton(
-            onPressed: () {
-              Navigator.maybeOf(context, rootNavigator: true)?.pop();
-              EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
-            },
-            child: Text(context.l10n.cancel),
-          ),
-          const SizedBox(height: 40),
-        ],
-      );
+        ),
+        const SizedBox(height: 40),
+        TextButton(
+          onPressed: () {
+            Navigator.maybeOf(context, rootNavigator: true)?.pop();
+            EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
+          },
+          child: Text(context.l10n.cancel),
+        ),
+        const SizedBox(height: 40),
+      ],
+    );
+  }
 }
 
 class _BackupPage extends StatelessWidget {
@@ -310,10 +320,70 @@ class _BackupPage extends StatelessWidget {
               trailing: null,
               onTap: () {
                 EventBus.instance.fire(DeviceTransferCommand.pushToRemote);
+                context
+                    .read<_NavigatorCubit>()
+                    .push(_DeviceTransferPageType.backupWaitingConnect);
               },
             ),
           ),
           const SizedBox(height: 40),
         ],
       );
+}
+
+class _BackupWaitingConnectPage extends HookWidget {
+  const _BackupWaitingConnectPage();
+
+  @override
+  Widget build(BuildContext context) {
+    useOnTransferEventType(DeviceTransferCallbackType.onBackupStart, () {
+      i('_BackupWaitingConnectPage: onBackupStart, closing dialog');
+      Navigator.maybeOf(context, rootNavigator: true)?.pop();
+    });
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        MixinAppBar(
+          backgroundColor: Colors.transparent,
+          title: Text(context.l10n.backupToOtherDevice),
+          leading: _DialogBackButton(
+            onTapped: () {
+              EventBus.instance.fire(DeviceTransferCommand.cancelBackup);
+            },
+          ),
+          actions: [
+            MixinCloseButton(
+              onTap: () {
+                Navigator.maybeOf(context, rootNavigator: true)?.pop();
+                EventBus.instance.fire(DeviceTransferCommand.cancelBackup);
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        SvgPicture.asset(Resources.assetsImagesClockSvg),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 36),
+          child: Text(
+            context.l10n.restoreWaitingOtherDeviceTips,
+            style: TextStyle(
+              color: context.theme.secondaryText,
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: 40),
+        TextButton(
+          onPressed: () {
+            Navigator.maybeOf(context, rootNavigator: true)?.pop();
+            EventBus.instance.fire(DeviceTransferCommand.cancelBackup);
+          },
+          child: Text(context.l10n.cancel),
+        ),
+        const SizedBox(height: 40),
+      ],
+    );
+  }
 }

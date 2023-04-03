@@ -15,6 +15,7 @@ enum DeviceTransferCommand {
   cancelRestore,
   cancelBackup,
   confirmRestore,
+  confirmBackup,
 }
 
 enum DeviceTransferCallbackType {
@@ -29,6 +30,8 @@ enum DeviceTransferCallbackType {
 
   /// a push event from other device.
   onRestoreReceived,
+  /// a pull event from other device.
+  onBackupReceived,
 }
 
 class DeviceTransferCallbackEvent {
@@ -151,7 +154,7 @@ void _useTransferStatus(
   }, [stream]);
 }
 
-void _useOnTransferEventType(
+void useOnTransferEventType(
   DeviceTransferCallbackType type,
   VoidCallback callback,
 ) {
@@ -192,7 +195,7 @@ class DeviceTransferHandlerWidget extends HookWidget {
         message: 'backup failed',
       ),
     );
-    _useOnTransferEventType(
+    useOnTransferEventType(
       DeviceTransferCallbackType.onRestoreReceived,
       () => showMixinDialog(
         context: context,
@@ -200,6 +203,18 @@ class DeviceTransferHandlerWidget extends HookWidget {
           message: 'restore from remote',
           onConfirmed: () {
             EventBus.instance.fire(DeviceTransferCommand.confirmRestore);
+          },
+        ),
+      ),
+    );
+    useOnTransferEventType(
+      DeviceTransferCallbackType.onBackupReceived,
+      () => showMixinDialog(
+        context: context,
+        child: _ConfirmDialog(
+          message: 'backup from remote',
+          onConfirmed: () {
+            EventBus.instance.fire(DeviceTransferCommand.confirmBackup);
           },
         ),
       ),

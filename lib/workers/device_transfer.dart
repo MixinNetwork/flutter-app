@@ -62,6 +62,9 @@ class DeviceTransfer {
           _remotePushData = null;
           await receiver.connectToServer(data.ip, data.port, data.code);
           break;
+        case DeviceTransferCommand.confirmBackup:
+          await _sendPushToOtherSession();
+          break;
       }
     }));
   }
@@ -235,7 +238,8 @@ class DeviceTransfer {
         _handleRemotePushCommand(command.ip!, command.port!, command.code!);
         break;
       case kTransferCommandActionPull:
-        _sendPushToOtherSession();
+        DeviceTransferEventBus.instance
+            .fire(DeviceTransferCallbackType.onBackupReceived);
         break;
       default:
         e('handleRemoteCommand: unknown action ${command.action}');
