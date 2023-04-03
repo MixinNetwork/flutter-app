@@ -9,10 +9,11 @@ const kTransferCommandActionFinish = 'finish';
 const kTransferCommandActionConnect = 'connect';
 const kTransferCommandActionStart = 'start';
 const kTransferCommandActionClose = 'close';
+const kTransferCommandActionProgress = 'progress';
 
 const _kVersion = 1;
 
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class TransferDataCommand with EquatableMixin {
   TransferDataCommand({
     required this.deviceId,
@@ -25,6 +26,7 @@ class TransferDataCommand with EquatableMixin {
     this.code,
     this.total,
     this.userId,
+    this.progress,
   });
 
   factory TransferDataCommand.fromJson(Map<String, dynamic> json) =>
@@ -87,6 +89,17 @@ class TransferDataCommand with EquatableMixin {
         total: total,
       );
 
+  factory TransferDataCommand.progress({
+    required String deviceId,
+    required double progress,
+  }) =>
+      TransferDataCommand(
+        deviceId: deviceId,
+        action: kTransferCommandActionProgress,
+        version: _kVersion,
+        progress: progress,
+      );
+
   @JsonKey(name: 'device_id')
   final String deviceId;
   final String action;
@@ -107,6 +120,9 @@ class TransferDataCommand with EquatableMixin {
   @JsonKey(name: 'user_id')
   final String? userId;
 
+  @JsonKey(name: 'progress')
+  final double? progress;
+
   Map<String, dynamic> toJson() => _$TransferDataCommandToJson(this);
 
   bool get isPull => action == kTransferCommandActionPull;
@@ -123,5 +139,6 @@ class TransferDataCommand with EquatableMixin {
         platform,
         total,
         userId,
+        progress,
       ];
 }

@@ -64,11 +64,14 @@ class DeviceTransferReceiver {
     _finished = false;
   }
 
-  void _notifyProgressUpdate() {
+  void _notifyProgressUpdate(Socket socket) {
     _progress++;
     final progress =
         _total == 0 ? 0.0 : (_progress / _total * 100.0).clamp(0.0, 100.0);
     onReceiverProgressUpdate?.call(progress);
+    socket.addCommand(
+      TransferDataCommand.progress(deviceId: deviceId, progress: progress),
+    );
   }
 
   Future<void> connectToServer(String ip, int port, int code) async {
@@ -92,12 +95,12 @@ class DeviceTransferReceiver {
           if (packet is TransferJsonPacket) {
             if (packet.json.type != JsonTransferDataType.command) {
               // notify progress, command is not counted.
-              _notifyProgressUpdate();
+              _notifyProgressUpdate(socket);
             }
             await _processReceivedJsonPacket(packet.json);
           } else if (packet is TransferAttachmentPacket) {
             await _processReceivedAttachmentPacket(packet);
-            _notifyProgressUpdate();
+            _notifyProgressUpdate(socket);
           } else {
             e('unknown packet: $packet');
           }
@@ -132,6 +135,8 @@ class DeviceTransferReceiver {
         userId: userId,
       ),
     );
+    _notifyProgressUpdate(socket);
+    _notifyProgressUpdate(socket);
   }
 
   Future<void> _processReceivedJsonPacket(JsonTransferData data) async {

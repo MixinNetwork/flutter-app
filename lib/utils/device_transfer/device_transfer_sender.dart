@@ -59,31 +59,22 @@ class DeviceTransferSender {
 
   var _debugStarting = false;
 
-  var _totalCount = 0;
-  var _progress = 0;
   var _finished = false;
 
   void resetTransferStates() {
-    _totalCount = 0;
-    _progress = 0;
     _finished = false;
   }
 
   @visibleForTesting
   @mustCallSuper
-  FutureOr<void> onPacketSend() {
-    // notify the progress
-    _progress++;
-    assert(_totalCount != 0, 'total count is 0');
-    final progress = _totalCount == 0
-        ? 0.0
-        : (_progress / _totalCount * 100).clamp(0.0, 100.0);
+  FutureOr<void> onPacketSend() {}
+
+  void _notifyProgressUpdate(double progress) {
     onSenderProgressUpdate?.call(progress);
   }
 
   Future<int> startServerSocket(int verificationCode) async {
     assert(!_debugStarting, 'server socket starting');
-    _totalCount = 0;
     if (_socket != null) {
       w('startServerSocket: already started');
       return _socket!.port;
@@ -134,6 +125,11 @@ class DeviceTransferSender {
                 case kTransferCommandActionClose:
                   w('client closed. close connection');
                   close();
+                  break;
+                case kTransferCommandActionProgress:
+                  final progress = command.progress!;
+                  d('${command.action} command: progress $progress');
+                  _notifyProgressUpdate(progress);
                   break;
               }
               break;
@@ -199,11 +195,10 @@ class DeviceTransferSender {
         deviceId: await getDeviceId(),
         total: count,
       ));
-      _totalCount = count;
       return count;
     }, 'send_total_count');
 
-    onSenderProgressUpdate?.call(0);
+    _notifyProgressUpdate(0);
 
     await runWithLog(_processTransferParticipant, 'participant');
     await runWithLog(_processTransferConversation, 'conversation');
@@ -216,9 +211,6 @@ class DeviceTransferSender {
     await runWithLog(_processTransferMessage, 'message');
     await runWithLog(_processTransferExpiredMessage, 'expiredMessage');
     await runWithLog(_processTransferAttachment, 'attachment');
-
-    _progress = _totalCount;
-    onSenderProgressUpdate?.call(100);
 
     await socket.addCommand(TransferDataCommand.simple(
       deviceId: deviceId,
@@ -453,6 +445,5 @@ class DeviceTransferSender {
     _clientSocket = null;
     _socket?.close();
     _socket = null;
-    _totalCount = 0;
   }
 }
