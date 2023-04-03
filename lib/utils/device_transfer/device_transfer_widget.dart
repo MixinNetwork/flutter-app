@@ -30,6 +30,7 @@ enum DeviceTransferCallbackType {
 
   /// a push event from other device.
   onRestoreReceived,
+
   /// a pull event from other device.
   onBackupReceived,
 }
