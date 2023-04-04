@@ -752,7 +752,7 @@ packages:
       name: intl_phone_number_input
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.2"
+    version: "0.7.3+1"
   intl_utils:
     dependency: "direct dev"
     description:
@@ -808,21 +808,21 @@ packages:
       name: libphonenumber_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.1"
+    version: "0.4.0"
   libphonenumber_plugin:
     dependency: transitive
     description:
       name: libphonenumber_plugin
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.5"
+    version: "0.3.1"
   libphonenumber_web:
     dependency: transitive
     description:
       name: libphonenumber_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.0+1"
+    version: "0.3.0"
   libsignal_protocol_dart:
     dependency: "direct main"
     description:
