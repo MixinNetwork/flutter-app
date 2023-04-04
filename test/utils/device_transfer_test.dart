@@ -162,6 +162,9 @@ void main() {
   late Completer<void> receiverCompleter;
   late Completer<void> senderCompleter;
 
+  late Completer<void> receiverStartCompleter;
+  late Completer<void> senderStartCompleter;
+
   setUp(() {
     receiverDatabase = Database(
       MixinDatabase(NativeDatabase.memory()),
@@ -175,6 +178,9 @@ void main() {
     receiverCompleter = Completer();
     senderCompleter = Completer();
 
+    receiverStartCompleter = Completer();
+    senderStartCompleter = Completer();
+
     receiver = DeviceTransferReceiver(
       userId: userId,
       database: receiverDatabase,
@@ -185,6 +191,7 @@ void main() {
       deviceId: receiverDeviceId,
       onReceiverStart: () {
         receiverStartCount++;
+        receiverStartCompleter.complete();
       },
       onReceiverSucceed: () {
         receiverSucceedCount++;
@@ -210,6 +217,7 @@ void main() {
       deviceId: senderDeviceId,
       onSenderStart: () {
         senderStartCount++;
+        senderStartCompleter.complete();
       },
       onSenderSucceed: () {
         senderSucceedCount++;
@@ -244,12 +252,13 @@ void main() {
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
     await receiver.connectToServer('localhost', port, verificationCode);
-    await Future.delayed(const Duration(milliseconds: 100));
 
+    await senderStartCompleter.future;
     expect(senderStartCount, 1);
     expect(senderFailedCount, 0);
     expect(senderSucceedCount, 0);
 
+    await receiverStartCompleter.future;
     expect(receiverStartCount, 1);
     expect(receiverFailedCount, 0);
     expect(receiverSucceedCount, 0);
@@ -326,12 +335,13 @@ void main() {
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
     await receiver.connectToServer('localhost', port, verificationCode);
-    await Future.delayed(const Duration(milliseconds: 50));
 
+    await senderStartCompleter.future;
     expect(senderStartCount, 1);
     expect(senderFailedCount, 0);
     expect(senderSucceedCount, 0);
 
+    await receiverStartCompleter.future;
     expect(receiverStartCount, 1);
     expect(receiverFailedCount, 0);
     expect(receiverSucceedCount, 0);
