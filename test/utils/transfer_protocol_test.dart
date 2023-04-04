@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter_app/utils/device_transfer/json_transfer_data.dart';
+import 'package:flutter_app/utils/device_transfer/transfer_data_command.dart';
 import 'package:flutter_app/utils/device_transfer/transfer_protocol.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_logger/mixin_logger.dart';
@@ -50,6 +51,57 @@ void main() {
     final packet = data.first as TransferAttachmentPacket;
     expect(packet.messageId, messageId);
     d('packet.path: ${packet.path}');
+  });
+
+  test('write command and data', () async {
+    final sink = _BytesStreamSink();
+    final deviceId = const Uuid().v4();
+    await sink.addCommand(
+      TransferDataCommand.connect(
+        deviceId: deviceId,
+        code: 1244,
+        userId: deviceId,
+      ),
+    );
+    await sink.addCommand(
+      TransferDataCommand.progress(
+        deviceId: deviceId,
+        progress: 0,
+      ),
+    );
+    await sink.addCommand(
+      TransferDataCommand.progress(
+        deviceId: deviceId,
+        progress: 0,
+      ),
+    );
+    await sink.addCommand(
+      TransferDataCommand.progress(
+        deviceId: deviceId,
+        progress: 0,
+      ),
+    );
+    await sink.addCommand(
+      TransferDataCommand.progress(
+        deviceId: deviceId,
+        progress: 1,
+      ),
+    );
+    await sink.addCommand(
+      TransferDataCommand.progress(
+        deviceId: deviceId,
+        progress: 1,
+      ),
+    );
+
+    final bytes = Uint8List.fromList(sink.data);
+    final stream = Stream.value(Uint8List.fromList(bytes))
+        .transform(const TransferProtocolTransform(fileFolder: ''));
+    final data = await stream.toList();
+    expect(data.length, 6);
+    final packet = data.first as TransferJsonPacket;
+    final body = packet.json.data;
+    d('utf8.decode(body): $body');
   });
 }
 

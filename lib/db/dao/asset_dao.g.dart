@@ -5,6 +5,7 @@ part of 'asset_dao.dart';
 // ignore_for_file: type=lint
 mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
   Assets get assets => attachedDatabase.assets;
+
   Selectable<AssetItem> _assetItems(AssetItems$where where,
       AssetItems$orderBy orderBy, AssetItems$limit limit) {
     var $arrayStartIndex = 1;
@@ -118,6 +119,7 @@ class AssetItem {
   final String? chainSymbol;
   final String? chainIconUrl;
   final String? chainName;
+
   AssetItem({
     required this.assetId,
     required this.symbol,
@@ -138,6 +140,7 @@ class AssetItem {
     this.chainIconUrl,
     this.chainName,
   });
+
   @override
   int get hashCode => Object.hash(
       assetId,
@@ -158,6 +161,7 @@ class AssetItem {
       chainSymbol,
       chainIconUrl,
       chainName);
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -180,6 +184,7 @@ class AssetItem {
           other.chainSymbol == this.chainSymbol &&
           other.chainIconUrl == this.chainIconUrl &&
           other.chainName == this.chainName);
+
   @override
   String toString() {
     return (StringBuffer('AssetItem(')

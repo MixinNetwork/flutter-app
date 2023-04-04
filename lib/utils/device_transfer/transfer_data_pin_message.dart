@@ -22,8 +22,13 @@ class TransferDataPinMessage {
         createdAt: data.createdAt,
       );
 
+  @JsonKey(name: 'message_id')
   final String messageId;
+
+  @JsonKey(name: 'conversation_id')
   final String conversationId;
+
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
   db.PinMessage toDbPinMessage() => db.PinMessage(

@@ -9,15 +9,15 @@ part of 'transfer_data_pin_message.dart';
 TransferDataPinMessage _$TransferDataPinMessageFromJson(
         Map<String, dynamic> json) =>
     TransferDataPinMessage(
-      messageId: json['messageId'] as String,
-      conversationId: json['conversationId'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      messageId: json['message_id'] as String,
+      conversationId: json['conversation_id'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
 
 Map<String, dynamic> _$TransferDataPinMessageToJson(
         TransferDataPinMessage instance) =>
     <String, dynamic>{
-      'messageId': instance.messageId,
-      'conversationId': instance.conversationId,
-      'createdAt': instance.createdAt.toIso8601String(),
+      'message_id': instance.messageId,
+      'conversation_id': instance.conversationId,
+      'created_at': instance.createdAt.toIso8601String(),
     };

@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:async';
 
 import 'package:json_annotation/json_annotation.dart';
 
@@ -52,7 +52,7 @@ class JsonTransferData {
   Map<String, dynamic> toJson() => _$JsonTransferDataToJson(this);
 }
 
-extension SocketExtension on Socket {
+extension SocketExtension on EventSink<List<int>> {
   Future<void> addConversation(TransferDataConversation conversation) {
     final wrapper = JsonTransferData(
       data: conversation.toJson(),
