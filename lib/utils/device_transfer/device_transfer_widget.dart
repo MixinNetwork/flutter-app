@@ -70,7 +70,7 @@ enum _Status {
 }
 
 final _backupBehavior = () {
-  final subject = StreamController<_Status>();
+  final subject = StreamController<_Status>.broadcast();
   DeviceTransferEventBus.instance.events().listen((event) {
     if (event.action == DeviceTransferCallbackType.onBackupStart) {
       subject.add(_Status.start);
@@ -84,7 +84,7 @@ final _backupBehavior = () {
 }();
 
 final _restoreBehavior = () {
-  final subject = StreamController<_Status>();
+  final subject = StreamController<_Status>.broadcast();
   DeviceTransferEventBus.instance.events().listen((event) {
     if (event.action == DeviceTransferCallbackType.onRestoreStart) {
       subject.add(_Status.start);
