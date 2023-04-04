@@ -247,7 +247,10 @@ class _ConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AlertDialogLayout(
-        content: Text(message),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Text(message),
+        ),
         title: Text(title),
         actions: [
           TextButton(
@@ -273,7 +276,10 @@ class _ApproveDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AlertDialogLayout(
-        content: Text(message),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Text(message),
+        ),
         title: Text(title),
         actions: [
           TextButton(

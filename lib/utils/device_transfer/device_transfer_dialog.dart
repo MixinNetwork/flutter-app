@@ -15,10 +15,7 @@ import '../hook.dart';
 import '../logger.dart';
 import 'device_transfer_widget.dart';
 
-Future<void> showDeviceTransferDialog(
-  BuildContext context, {
-  bool showRestore = true,
-}) async =>
+Future<void> showDeviceTransferDialog(BuildContext context) async =>
     showMixinDialog(
       context: context,
       child: ConstrainedBox(

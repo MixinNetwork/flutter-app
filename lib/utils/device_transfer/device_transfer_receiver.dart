@@ -197,6 +197,7 @@ class DeviceTransferReceiver {
               i('${command.action} command: finish receiver socket');
               onReceiverProgressUpdate?.call(100);
               _finished = true;
+              assert(_socket != null, 'socket is null');
               await _socket?.addCommand(TransferDataCommand.simple(
                   deviceId: deviceId, action: kTransferCommandActionFinish));
               break;
@@ -252,7 +253,8 @@ class DeviceTransferReceiver {
           break;
       }
     } catch (error, stacktrace) {
-      e('_processReceivedJsonPacket: ${data.data} \n $error $stacktrace');
+      e('_processReceivedJsonPacket: ${data.data}');
+      e('_processReceivedJsonPacket', error, stacktrace);
     }
   }
 
