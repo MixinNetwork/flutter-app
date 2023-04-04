@@ -135,8 +135,6 @@ class DeviceTransferReceiver {
         userId: userId,
       ),
     );
-    _notifyProgressUpdate(socket);
-    _notifyProgressUpdate(socket);
   }
 
   Future<void> _processReceivedJsonPacket(JsonTransferData data) async {

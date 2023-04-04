@@ -277,10 +277,12 @@ void main() {
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
     await receiver.connectToServer('localhost', port, verificationCode + 1);
-    await Future.delayed(const Duration(milliseconds: 50));
+
+    await receiverCompleter.future;
+    await senderCompleter.future;
 
     expect(senderStartCount, 0);
-    expect(senderFailedCount, 0);
+    expect(senderFailedCount, 1);
     expect(senderSucceedCount, 0);
 
     expect(receiverStartCount, 0);
@@ -288,7 +290,7 @@ void main() {
     expect(receiverSucceedCount, 0);
 
     await Future.delayed(const Duration(milliseconds: 50));
-  });
+  }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('connected but sender close', () async {
     const verificationCode = 1234;

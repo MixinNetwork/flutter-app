@@ -311,7 +311,10 @@ class _TransferProtocolSink extends EventSink<Uint8List> {
           // check crc
           final crc = left.buffer.asByteData().getUint64(0);
           if (crc != builder.bodyCrc) {
-            _sink.addError('crc not match', StackTrace.current);
+            _sink.addError(
+              'crc not match. expected $crc, actually ${builder.bodyCrc}',
+              StackTrace.current,
+            );
             return;
           }
           final packet = builder.build();

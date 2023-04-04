@@ -13,7 +13,7 @@ const kTransferCommandActionProgress = 'progress';
 
 const _kVersion = 1;
 
-@JsonSerializable(includeIfNull: false)
+@JsonSerializable()
 class TransferDataCommand with EquatableMixin {
   TransferDataCommand({
     required this.deviceId,

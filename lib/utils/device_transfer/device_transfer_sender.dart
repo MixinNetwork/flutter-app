@@ -113,8 +113,10 @@ class DeviceTransferSender {
                     onSenderStart?.call();
                     _processTransfer(socket);
                   } else {
-                    e('code not match');
+                    e('sender verify code failed. except $verificationCode, '
+                        'but got ${command.code}');
                     socket.close();
+                    close();
                   }
                   break;
                 case kTransferCommandActionFinish:
@@ -150,7 +152,7 @@ class DeviceTransferSender {
           }
         }
       }, onDone: () {
-        i('transfer done. finished: $_finished');
+        i('sender transfer done. finished: $_finished');
         if (_finished) {
           onSenderSucceed?.call();
         } else {

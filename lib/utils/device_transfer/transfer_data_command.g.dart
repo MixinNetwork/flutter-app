@@ -21,26 +21,18 @@ TransferDataCommand _$TransferDataCommandFromJson(Map<String, dynamic> json) =>
       progress: (json['progress'] as num?)?.toDouble(),
     );
 
-Map<String, dynamic> _$TransferDataCommandToJson(TransferDataCommand instance) {
-  final val = <String, dynamic>{
-    'device_id': instance.deviceId,
-    'action': instance.action,
-    'version': instance.version,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('ip', instance.ip);
-  writeNotNull('port', instance.port);
-  writeNotNull('secret_key', instance.secretKey);
-  val['platform'] = instance.platform;
-  writeNotNull('code', instance.code);
-  writeNotNull('total', instance.total);
-  writeNotNull('user_id', instance.userId);
-  writeNotNull('progress', instance.progress);
-  return val;
-}
+Map<String, dynamic> _$TransferDataCommandToJson(
+        TransferDataCommand instance) =>
+    <String, dynamic>{
+      'device_id': instance.deviceId,
+      'action': instance.action,
+      'version': instance.version,
+      'ip': instance.ip,
+      'port': instance.port,
+      'secret_key': instance.secretKey,
+      'platform': instance.platform,
+      'code': instance.code,
+      'total': instance.total,
+      'user_id': instance.userId,
+      'progress': instance.progress,
+    };
