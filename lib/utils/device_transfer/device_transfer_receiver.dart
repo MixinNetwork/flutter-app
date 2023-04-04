@@ -55,6 +55,7 @@ class DeviceTransferReceiver {
   Socket? _socket;
   int _total = 0;
   int _progress = 0;
+  var _lastProgressNotifyTime = DateTime(0);
 
   var _finished = false;
 
@@ -69,9 +70,13 @@ class DeviceTransferReceiver {
     final progress =
         _total == 0 ? 0.0 : (_progress / _total * 100.0).clamp(0.0, 100.0);
     onReceiverProgressUpdate?.call(progress);
-    socket.addCommand(
-      TransferDataCommand.progress(deviceId: deviceId, progress: progress),
-    );
+    if (DateTime.now().difference(_lastProgressNotifyTime) >
+        const Duration(seconds: 1)) {
+      _lastProgressNotifyTime = DateTime.now();
+      socket.addCommand(
+        TransferDataCommand.progress(deviceId: deviceId, progress: progress),
+      );
+    }
   }
 
   Future<void> connectToServer(String ip, int port, int code) async {

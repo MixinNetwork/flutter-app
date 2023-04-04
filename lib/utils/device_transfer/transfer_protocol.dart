@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 import '../logger.dart';
+import '../synchronized.dart';
 import 'crc.dart';
 import 'json_transfer_data.dart';
 
@@ -104,28 +105,31 @@ class TransferAttachmentPacket extends TransferPacket {
   }
 }
 
+final _lock = Lock();
+
 Future<void> writePacketToSink(
   EventSink<List<int>> sink,
   TransferPacket packet,
-) async {
-  final bodyLength = await packet._bodyLength;
+) =>
+    _lock.synchronized(() async {
+      final bodyLength = await packet._bodyLength;
 
-  if (bodyLength == 0) {
-    w('bodyLength is 0, skip write');
-    return;
-  }
+      if (bodyLength == 0) {
+        w('bodyLength is 0, skip write');
+        return;
+      }
 
-  final header = ByteData(5)
-    ..setInt8(0, packet._type)
-    ..setInt32(1, bodyLength);
-  sink.add(header.buffer.asUint8List());
+      final header = ByteData(5)
+        ..setInt8(0, packet._type)
+        ..setInt32(1, bodyLength);
+      sink.add(header.buffer.asUint8List());
 
-  final checkSum = await packet._writeBodyToSink(sink);
+      final checkSum = await packet._writeBodyToSink(sink);
 
-  final checkSumByte = Uint8List(8);
-  checkSumByte.buffer.asByteData().setUint64(0, checkSum);
-  sink.add(checkSumByte);
-}
+      final checkSumByte = Uint8List(8);
+      checkSumByte.buffer.asByteData().setUint64(0, checkSum);
+      sink.add(checkSumByte);
+    });
 
 abstract class _TransferPacketBuilder {
   _TransferPacketBuilder(this.expectedBodyLength);

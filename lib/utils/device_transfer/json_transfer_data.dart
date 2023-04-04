@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:json_annotation/json_annotation.dart';
 
@@ -52,7 +53,7 @@ class JsonTransferData {
   Map<String, dynamic> toJson() => _$JsonTransferDataToJson(this);
 }
 
-extension SocketExtension on EventSink<List<int>> {
+extension SocketExtension on IOSink {
   Future<void> addConversation(TransferDataConversation conversation) {
     final wrapper = JsonTransferData(
       data: conversation.toJson(),
@@ -106,13 +107,13 @@ extension SocketExtension on EventSink<List<int>> {
     return _addTransferJson(wrapper);
   }
 
-  Future<void> addCommand(TransferDataCommand command) {
+  Future<void> addCommand(TransferDataCommand command) async {
     d('send command to remote: $command');
     final wrapper = JsonTransferData(
       data: command.toJson(),
       type: JsonTransferDataType.command,
     );
-    return _addTransferJson(wrapper);
+    await _addTransferJson(wrapper);
   }
 
   Future<void> addTranscriptMessage(

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_app/utils/device_transfer/json_transfer_data.dart';
@@ -55,18 +57,11 @@ void main() {
 
   test('write command and data', () async {
     final sink = _BytesStreamSink();
-    final deviceId = const Uuid().v4();
-    await sink.addCommand(
-      TransferDataCommand.connect(
-        deviceId: deviceId,
-        code: 1244,
-        userId: deviceId,
-      ),
-    );
+    const deviceId = '82525DEB-C242-57A2-9A14-8C473C2B1300';
     await sink.addCommand(
       TransferDataCommand.progress(
         deviceId: deviceId,
-        progress: 0,
+        progress: 1 / 3,
       ),
     );
     await sink.addCommand(
@@ -98,14 +93,14 @@ void main() {
     final stream = Stream.value(Uint8List.fromList(bytes))
         .transform(const TransferProtocolTransform(fileFolder: ''));
     final data = await stream.toList();
-    expect(data.length, 6);
+    expect(data.length, 5);
     final packet = data.first as TransferJsonPacket;
     final body = packet.json.data;
     d('utf8.decode(body): $body');
   });
 }
 
-class _BytesStreamSink extends EventSink<List<int>> {
+class _BytesStreamSink implements IOSink {
   final data = <int>[];
 
   Object? error;
@@ -122,5 +117,30 @@ class _BytesStreamSink extends EventSink<List<int>> {
   }
 
   @override
-  void close() {}
+  Future addStream(Stream<List<int>> stream) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future get done => throw UnimplementedError();
+
+  @override
+  Future flush() async {}
+
+  @override
+  void write(Object? object) {}
+
+  @override
+  void writeAll(Iterable<dynamic> objects, [String separator = '']) {}
+
+  @override
+  void writeCharCode(int charCode) {}
+
+  @override
+  void writeln([Object? object = '']) {}
+  @override
+  Encoding encoding = utf8;
+
+  @override
+  Future close() async {}
 }
