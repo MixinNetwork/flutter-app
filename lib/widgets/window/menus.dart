@@ -11,7 +11,6 @@ import '../../account/account_server.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
-import '../../utils/device_transfer/device_transfer_dialog.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
@@ -271,16 +270,6 @@ class _Menus extends HookWidget {
                     }
                   : null,
             ),
-            PlatformMenuItemGroup(members: [
-              PlatformMenuItem(
-                label: context.l10n.chatBackupAndRestore,
-                onSelected: signed
-                    ? () {
-                        showDeviceTransferDialog(context);
-                      }
-                    : null,
-              )
-            ]),
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
                 label: context.l10n.closeWindow,

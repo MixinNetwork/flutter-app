@@ -784,6 +784,26 @@ class Localization {
     );
   }
 
+  /// `Are you sure to sync the chat history from the phone?`
+  String get confirmSyncChatsFromPhone {
+    return Intl.message(
+      'Are you sure to sync the chat history from the phone?',
+      name: 'confirmSyncChatsFromPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure to sync the chat history to the phone?`
+  String get confirmSyncChatsToPhone {
+    return Intl.message(
+      'Are you sure to sync the chat history to the phone?',
+      name: 'confirmSyncChatsToPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Contact`
   String get contact {
     return Intl.message(
@@ -3906,6 +3926,46 @@ class Localization {
     );
   }
 
+  /// `Transfer completed`
+  String get transferCompleted {
+    return Intl.message(
+      'Transfer completed',
+      name: 'transferCompleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transfer failed`
+  String get transferFailed {
+    return Intl.message(
+      'Transfer failed',
+      name: 'transferFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transferring Chat`
+  String get transferringChats {
+    return Intl.message(
+      'Transferring Chat',
+      name: 'transferringChats',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please do not turn off the screen and keep the Mixin running in the foreground while syncing.`
+  String get transferringChatsTips {
+    return Intl.message(
+      'Please do not turn off the screen and keep the Mixin running in the foreground while syncing.',
+      name: 'transferringChatsTips',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Travel & Places`
   String get travelAndPlaces {
     return Intl.message(
@@ -4225,206 +4285,6 @@ class Localization {
       args: [],
     );
   }
-
-  /// `Backing up chat`
-  String get backingUpChat {
-    return Intl.message(
-      'Backing up chat',
-      name: 'backingUpChat',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Backup Chat`
-  String get backupChat {
-    return Intl.message(
-      'Backup Chat',
-      name: 'backupChat',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please wait patiently, it may take a few minutes.`
-  String get backingUpChatTips {
-    return Intl.message(
-      'Please wait patiently, it may take a few minutes.',
-      name: 'backingUpChatTips',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore Chat`
-  String get restoreChat {
-    return Intl.message(
-      'Restore Chat',
-      name: 'restoreChat',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restoring chat records from other devices will not overwrite local records, only incremental synchronization, please do not turn off the screen and keep Mixin running in the foreground when restoring.`
-  String get restoreChatTips {
-    return Intl.message(
-      'Restoring chat records from other devices will not overwrite local records, only incremental synchronization, please do not turn off the screen and keep Mixin running in the foreground when restoring.',
-      name: 'restoreChatTips',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restoring chat`
-  String get restoringChat {
-    return Intl.message(
-      'Restoring chat',
-      name: 'restoringChat',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore from other device`
-  String get restoreFromOtherDevice {
-    return Intl.message(
-      'Restore from other device',
-      name: 'restoreFromOtherDevice',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Transfer your message history from your old iOS device.`
-  String get restoreFromOtherDeviceDescription {
-    return Intl.message(
-      'Transfer your message history from your old iOS device.',
-      name: 'restoreFromOtherDeviceDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Backup to other device`
-  String get backupToOtherDevice {
-    return Intl.message(
-      'Backup to other device',
-      name: 'backupToOtherDevice',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Make sure both devices are connected to the same Wi-Fi or hotspot`
-  String get backupToOtherDeviceTips {
-    return Intl.message(
-      'Make sure both devices are connected to the same Wi-Fi or hotspot',
-      name: 'backupToOtherDeviceTips',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Chat Backup and Restore`
-  String get chatBackupAndRestore {
-    return Intl.message(
-      'Chat Backup and Restore',
-      name: 'chatBackupAndRestore',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Waiting for confirmation of the backup request on the other device. Please do not close the app and make sure that both devices are connected to the same Wi-Fi network.`
-  String get restoreWaitingOtherDeviceTips {
-    return Intl.message(
-      'Waiting for confirmation of the backup request on the other device. Please do not close the app and make sure that both devices are connected to the same Wi-Fi network.',
-      name: 'restoreWaitingOtherDeviceTips',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `A remote device wants to backup your chat history to this device. Do you want to allow it?`
-  String get warningRemoteDeviceBackupRequest {
-    return Intl.message(
-      'A remote device wants to backup your chat history to this device. Do you want to allow it?',
-      name: 'warningRemoteDeviceBackupRequest',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `A remote device wants to restore your chat history from this device. Do you want to allow it?`
-  String get warningRemoteDeviceRestoreRequest {
-    return Intl.message(
-      'A remote device wants to restore your chat history from this device. Do you want to allow it?',
-      name: 'warningRemoteDeviceRestoreRequest',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Approve`
-  String get approve {
-    return Intl.message(
-      'Approve',
-      name: 'approve',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Reject`
-  String get reject {
-    return Intl.message(
-      'Reject',
-      name: 'reject',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore succeed`
-  String get restoreSucceed {
-    return Intl.message(
-      'Restore succeed',
-      name: 'restoreSucceed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore failed`
-  String get restoreFailed {
-    return Intl.message(
-      'Restore failed',
-      name: 'restoreFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Backup succeed`
-  String get backupSucceed {
-    return Intl.message(
-      'Backup succeed',
-      name: 'backupSucceed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Backup failed`
-  String get backupFailed {
-    return Intl.message(
-      'Backup failed',
-      name: 'backupFailed',
-      desc: '',
-      args: [],
-    );
-  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
@@ -4433,6 +4293,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'es'),
       Locale.fromSubtags(languageCode: 'in'),
       Locale.fromSubtags(languageCode: 'ja'),
       Locale.fromSubtags(languageCode: 'ms'),

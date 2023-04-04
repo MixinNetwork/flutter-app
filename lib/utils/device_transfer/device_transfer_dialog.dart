@@ -99,7 +99,7 @@ class _DeviceTransferPage extends StatelessWidget {
         children: [
           MixinAppBar(
             backgroundColor: Colors.transparent,
-            title: Text(context.l10n.chatBackupAndRestore),
+            title: const Text('Chat Backup and Restore'),
             leading: const SizedBox.shrink(),
             actions: [
               MixinCloseButton(
@@ -112,7 +112,7 @@ class _DeviceTransferPage extends StatelessWidget {
           CellGroup(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: CellItem(
-              title: Text(context.l10n.restoreFromOtherDevice),
+              title: const Text('sync from other device'),
               onTap: () {
                 context
                     .read<_NavigatorCubit>()
@@ -124,7 +124,7 @@ class _DeviceTransferPage extends StatelessWidget {
           CellGroup(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: CellItem(
-              title: Text(context.l10n.backupToOtherDevice),
+              title: const Text('sync to other device'),
               onTap: () {
                 context
                     .read<_NavigatorCubit>()
@@ -169,7 +169,7 @@ class _RestorePage extends StatelessWidget {
         children: [
           MixinAppBar(
             backgroundColor: Colors.transparent,
-            title: Text(context.l10n.restoreFromOtherDevice),
+            title: const Text('sync from other device'),
             leading: const _DialogBackButton(),
             actions: [
               MixinCloseButton(
@@ -184,7 +184,7 @@ class _RestorePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 36),
             child: Text(
-              context.l10n.restoreChatTips,
+              'restore chat tip',
               style: TextStyle(
                 color: context.theme.secondaryText,
                 fontSize: 14,
@@ -196,7 +196,7 @@ class _RestorePage extends StatelessWidget {
           CellGroup(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: CellItem(
-              title: Text(context.l10n.restoreChat),
+              title: const Text('restore chat'),
               color: context.theme.accent,
               trailing: null,
               onTap: () {
@@ -226,7 +226,7 @@ class _RestoreWaitingConnectPage extends HookWidget {
       children: [
         MixinAppBar(
           backgroundColor: Colors.transparent,
-          title: Text(context.l10n.restoreFromOtherDevice),
+          title: const Text('restore from other device'),
           leading: _DialogBackButton(
             onTapped: () {
               EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
@@ -242,12 +242,12 @@ class _RestoreWaitingConnectPage extends HookWidget {
           ],
         ),
         const SizedBox(height: 32),
-        SvgPicture.asset(Resources.assetsImagesClockSvg),
+        SvgPicture.asset(Resources.assetsImagesTransferFromPhoneSvg),
         const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 36),
           child: Text(
-            context.l10n.restoreWaitingOtherDeviceTips,
+            'waiting other device connection',
             style: TextStyle(
               color: context.theme.secondaryText,
               fontSize: 14,
@@ -278,7 +278,7 @@ class _BackupPage extends StatelessWidget {
         children: [
           MixinAppBar(
             backgroundColor: Colors.transparent,
-            title: Text(context.l10n.backupToOtherDevice),
+            title: const Text('backup to other device'),
             leading: const _DialogBackButton(),
             actions: [
               MixinCloseButton(
@@ -299,7 +299,7 @@ class _BackupPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 36),
             child: Text(
-              context.l10n.backupToOtherDeviceTips,
+              'tips for backup to other device',
               style: TextStyle(
                 color: context.theme.secondaryText,
                 fontSize: 14,
@@ -311,7 +311,7 @@ class _BackupPage extends StatelessWidget {
           CellGroup(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: CellItem(
-              title: Text(context.l10n.backupChat),
+              title: const Text('backup chat'),
               color: context.theme.accent,
               trailing: null,
               onTap: () {
@@ -341,7 +341,7 @@ class _BackupWaitingConnectPage extends HookWidget {
       children: [
         MixinAppBar(
           backgroundColor: Colors.transparent,
-          title: Text(context.l10n.backupToOtherDevice),
+          title: const Text('backup to other device'),
           leading: _DialogBackButton(
             onTapped: () {
               EventBus.instance.fire(DeviceTransferCommand.cancelBackup);
@@ -357,12 +357,12 @@ class _BackupWaitingConnectPage extends HookWidget {
           ],
         ),
         const SizedBox(height: 32),
-        SvgPicture.asset(Resources.assetsImagesClockSvg),
+        SvgPicture.asset(Resources.assetsImagesTransferToPhoneSvg),
         const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 36),
           child: Text(
-            context.l10n.restoreWaitingOtherDeviceTips,
+            'restore waiting other device',
             style: TextStyle(
               color: context.theme.secondaryText,
               fontSize: 14,

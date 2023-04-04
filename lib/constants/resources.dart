@@ -74,9 +74,6 @@ class Resources {
   static const String assetsImagesCircleRemoveSvg =
       'assets/images/circle_remove.svg';
 
-  /// {@macro assets_generator.assetsImagesClockSvg.preview}
-  static const String assetsImagesClockSvg = 'assets/images/clock.svg';
-
   /// {@macro assets_generator.assetsImagesCloseOvalSvg.preview}
   static const String assetsImagesCloseOvalSvg = 'assets/images/close_oval.svg';
 
@@ -569,6 +566,14 @@ class Resources {
 
   /// {@macro assets_generator.assetsImagesTransferSvg.preview}
   static const String assetsImagesTransferSvg = 'assets/images/transfer.svg';
+
+  /// {@macro assets_generator.assetsImagesTransferFromPhoneSvg.preview}
+  static const String assetsImagesTransferFromPhoneSvg =
+      'assets/images/transfer_from_phone.svg';
+
+  /// {@macro assets_generator.assetsImagesTransferToPhoneSvg.preview}
+  static const String assetsImagesTransferToPhoneSvg =
+      'assets/images/transfer_to_phone.svg';
 
   /// {@macro assets_generator.assetsImagesTriangleWarningSvg.preview}
   static const String assetsImagesTriangleWarningSvg =

@@ -213,6 +213,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "collapse": MessageLookupByLibrary.simpleMessage("摺疊"),
         "combineAndForward": MessageLookupByLibrary.simpleMessage("合併轉發"),
         "confirm": MessageLookupByLibrary.simpleMessage("確認"),
+        "confirmSyncChatsFromPhone":
+            MessageLookupByLibrary.simpleMessage("確認從手機端同步聊天記錄嗎？"),
+        "confirmSyncChatsToPhone":
+            MessageLookupByLibrary.simpleMessage("確認同步聊天記錄到手機端嗎？"),
         "contact": MessageLookupByLibrary.simpleMessage("聯絡人"),
         "contactMixinId": m10,
         "contactMuteTitle": MessageLookupByLibrary.simpleMessage("靜音通知"),
@@ -590,6 +594,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("轉賬記錄不會被刪除"),
         "transcript": MessageLookupByLibrary.simpleMessage("聊天記錄"),
         "transfer": MessageLookupByLibrary.simpleMessage("轉賬"),
+        "transferCompleted": MessageLookupByLibrary.simpleMessage("同步完成"),
+        "transferFailed": MessageLookupByLibrary.simpleMessage("同步失敗"),
+        "transferringChats": MessageLookupByLibrary.simpleMessage("同步聊天記錄中"),
+        "transferringChatsTips":
+            MessageLookupByLibrary.simpleMessage("同步時請不要關閉螢幕並保持 Mixin 在前臺執行。"),
         "travelAndPlaces": MessageLookupByLibrary.simpleMessage("旅行與地點"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("開啟通知"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("輸入訊息"),

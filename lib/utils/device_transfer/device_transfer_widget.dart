@@ -186,24 +186,20 @@ class DeviceTransferHandlerWidget extends HookWidget {
       () => _restoreBehavior.stream,
       progressBuilder: (context) => const _RestoreProcessingDialog(),
       succeedBuilder: (context) => _ConfirmDialog(
-        message: context.l10n.restoreSucceed,
-        title: context.l10n.restoreFromOtherDevice,
+        message: context.l10n.transferCompleted,
       ),
       failedBuilder: (context) => _ConfirmDialog(
-        message: context.l10n.restoreFailed,
-        title: context.l10n.restoreFromOtherDevice,
+        message: context.l10n.transferFailed,
       ),
     );
     _useTransferStatus(
       () => _backupBehavior.stream,
       progressBuilder: (context) => const _BackupProcessingDialog(),
       succeedBuilder: (context) => _ConfirmDialog(
-        message: context.l10n.backupSucceed,
-        title: context.l10n.backupToOtherDevice,
+        message: context.l10n.transferCompleted,
       ),
       failedBuilder: (context) => _ConfirmDialog(
-        message: context.l10n.backupFailed,
-        title: context.l10n.backupToOtherDevice,
+        message: context.l10n.transferFailed,
       ),
     );
     useOnTransferEventType(
@@ -211,8 +207,7 @@ class DeviceTransferHandlerWidget extends HookWidget {
       () => showMixinDialog(
         context: context,
         child: _ApproveDialog(
-          message: context.l10n.warningRemoteDeviceBackupRequest,
-          title: context.l10n.backupToOtherDevice,
+          message: context.l10n.confirmSyncChatsFromPhone,
           onApproved: () {
             EventBus.instance.fire(DeviceTransferCommand.confirmRestore);
           },
@@ -224,8 +219,7 @@ class DeviceTransferHandlerWidget extends HookWidget {
       () => showMixinDialog(
         context: context,
         child: _ApproveDialog(
-          message: context.l10n.warningRemoteDeviceRestoreRequest,
-          title: context.l10n.restoreFromOtherDevice,
+          message: context.l10n.confirmSyncChatsToPhone,
           onApproved: () {
             EventBus.instance.fire(DeviceTransferCommand.confirmBackup);
           },
@@ -239,11 +233,9 @@ class DeviceTransferHandlerWidget extends HookWidget {
 class _ConfirmDialog extends StatelessWidget {
   const _ConfirmDialog({
     required this.message,
-    required this.title,
   });
 
   final String message;
-  final String title;
 
   @override
   Widget build(BuildContext context) => AlertDialogLayout(
@@ -251,7 +243,6 @@ class _ConfirmDialog extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 420),
           child: Text(message),
         ),
-        title: Text(title),
         actions: [
           TextButton(
             onPressed: () {
@@ -265,12 +256,10 @@ class _ConfirmDialog extends StatelessWidget {
 
 class _ApproveDialog extends StatelessWidget {
   const _ApproveDialog({
-    required this.title,
     required this.message,
     required this.onApproved,
   });
 
-  final String title;
   final String message;
   final VoidCallback onApproved;
 
@@ -280,25 +269,24 @@ class _ApproveDialog extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 420),
           child: Text(message),
         ),
-        title: Text(title),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(false);
             },
             child: Text(
-              context.l10n.reject,
+              context.l10n.cancel,
               style: TextStyle(
                 color: context.theme.secondaryText,
               ),
             ),
           ),
-          TextButton(
-            onPressed: () {
+          MixinButton(
+            onTap: () {
               onApproved.call();
               Navigator.of(context).pop(true);
             },
-            child: Text(context.l10n.approve),
+            child: Text(context.l10n.confirm),
           ),
         ],
       );
@@ -309,14 +297,11 @@ class _RestoreProcessingDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _TransferProcessDialog(
-        title: const Text('Transferring...'),
         onCancelTapped: () {
           EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
           Navigator.pop(context);
         },
-        tips: const Text(
-          'Please do not turn off your phone or disconnect the USB cable during the transfer.',
-        ),
+        iconAssetName: Resources.assetsImagesTransferFromPhoneSvg,
         progressBehavior: _restoreProgressBehavior,
       );
 }
@@ -326,31 +311,26 @@ class _BackupProcessingDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _TransferProcessDialog(
-        title: const Text('Transferring...'),
         onCancelTapped: () {
           EventBus.instance.fire(DeviceTransferCommand.cancelBackup);
           Navigator.pop(context);
         },
-        tips: const Text(
-          'Please do not turn off your phone or disconnect the USB cable during the transfer.',
-        ),
+        iconAssetName: Resources.assetsImagesTransferToPhoneSvg,
         progressBehavior: _backupProgressBehavior,
       );
 }
 
 class _TransferProcessDialog extends HookWidget {
   const _TransferProcessDialog({
-    required this.title,
     required this.onCancelTapped,
-    required this.tips,
     required this.progressBehavior,
+    required this.iconAssetName,
   });
 
-  final Widget title;
   final VoidCallback onCancelTapped;
-  final Widget tips;
-
   final Stream<double> progressBehavior;
+
+  final String iconAssetName;
 
   @override
   Widget build(BuildContext context) {
@@ -366,7 +346,7 @@ class _TransferProcessDialog extends HookWidget {
             children: [
               const SizedBox(height: 40),
               SvgPicture.asset(
-                Resources.assetsImagesClockSvg,
+                iconAssetName,
                 width: 72,
                 height: 72,
                 colorFilter: ColorFilter.mode(
@@ -379,12 +359,11 @@ class _TransferProcessDialog extends HookWidget {
                 style: TextStyle(
                   color: context.theme.text,
                   fontSize: 18,
-                  fontWeight: FontWeight.w600,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    title,
+                    Text(context.l10n.transferringChats),
                     const SizedBox(width: 2),
                     if (progress.data != null && progress.data! > 0)
                       Text('(${progress.data!.toStringAsFixed(0)}%)'),
@@ -398,7 +377,7 @@ class _TransferProcessDialog extends HookWidget {
                   fontSize: 14,
                 ),
                 textAlign: TextAlign.center,
-                child: tips,
+                child: Text(context.l10n.transferringChatsTips),
               ),
               const SizedBox(height: 32),
               TextButton(
