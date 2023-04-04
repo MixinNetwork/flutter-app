@@ -34,7 +34,7 @@ enum _DeviceTransferPageType {
   restoreWaitingConnect,
   backupWaitingConnect;
 
-  Widget build(BuildContext context) {
+  Widget build() {
     switch (this) {
       case _DeviceTransferPageType.deviceTransfer:
         return const _DeviceTransferPage();
@@ -84,8 +84,7 @@ class _Navigator extends HookWidget {
       child: AnimatedSize(
         duration: const Duration(milliseconds: 150),
         alignment: Alignment.topCenter,
-        child:
-            pages.pages.lastOrNull?.build(context) ?? const SizedBox.shrink(),
+        child: pages.pages.lastOrNull?.build() ?? const SizedBox.shrink(),
       ),
     );
   }
