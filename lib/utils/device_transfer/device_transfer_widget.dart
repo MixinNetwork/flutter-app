@@ -284,10 +284,21 @@ class _ApproveDialog extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              onApproved.call();
               Navigator.of(context).pop(false);
             },
-            child: Text(context.l10n.confirm),
+            child: Text(
+              context.l10n.reject,
+              style: TextStyle(
+                color: context.theme.secondaryText,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              onApproved.call();
+              Navigator.of(context).pop(true);
+            },
+            child: Text(context.l10n.approve),
           ),
         ],
       );

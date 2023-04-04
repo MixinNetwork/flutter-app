@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../constants/resources.dart';
-import '../../utils/device_transfer/device_transfer_widget.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/system/package_info.dart';
@@ -91,7 +90,6 @@ class AboutPage extends HookWidget {
                         title: Text(context.l10n.checkNewVersion),
                         onTap: () => openCheckUpdate(context),
                       ),
-                    const _BackupItem(),
                   ],
                 ),
               ),
@@ -114,22 +112,4 @@ class AboutPage extends HookWidget {
           'https://apps.microsoft.com/store/detail/mixin-desktop/9NQ6HF99B8NJ');
     }
   }
-}
-
-class _BackupItem extends HookWidget {
-  const _BackupItem();
-
-  @override
-  Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CellItem(
-            title: const Text('send'),
-            onTap: () async {
-              DeviceTransferEventBus.instance
-                  .fire(DeviceTransferCallbackType.onBackupRequestReceived);
-            },
-          ),
-        ],
-      );
 }
