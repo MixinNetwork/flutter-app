@@ -66,7 +66,7 @@ class DeviceTransferReceiver {
     _lastProgressNotifyTime = DateTime(0);
   }
 
-  void _notifyProgressUpdate(Socket socket) {
+  Future<void> _notifyProgressUpdate() async {
     _progress++;
     final progress =
         _total == 0 ? 0.0 : (_progress / _total * 100.0).clamp(0.0, 100.0);
@@ -74,10 +74,19 @@ class DeviceTransferReceiver {
     if (DateTime.now().difference(_lastProgressNotifyTime) >
         const Duration(milliseconds: 200)) {
       _lastProgressNotifyTime = DateTime.now();
-      socket.addCommand(
+      assert(_socket != null, 'socket is null');
+      await _socket?.addCommand(
         TransferDataCommand.progress(deviceId: deviceId, progress: progress),
       );
     }
+  }
+
+  Future<void> _notifyProgressComplete() async {
+    assert(_socket != null, 'socket is null');
+    onReceiverProgressUpdate?.call(100);
+    await _socket?.addCommand(
+      TransferDataCommand.progress(deviceId: deviceId, progress: 100),
+    );
   }
 
   Future<void> connectToServer(String ip, int port, int code) async {
@@ -101,12 +110,12 @@ class DeviceTransferReceiver {
           if (packet is TransferJsonPacket) {
             if (packet.json.type != JsonTransferDataType.command) {
               // notify progress, command is not counted.
-              _notifyProgressUpdate(socket);
+              await _notifyProgressUpdate();
             }
             await _processReceivedJsonPacket(packet.json);
           } else if (packet is TransferAttachmentPacket) {
             await _processReceivedAttachmentPacket(packet);
-            _notifyProgressUpdate(socket);
+            await _notifyProgressUpdate();
           } else {
             e('unknown packet: $packet');
           }
@@ -204,6 +213,7 @@ class DeviceTransferReceiver {
               onReceiverProgressUpdate?.call(100);
               _finished = true;
               assert(_socket != null, 'socket is null');
+              await _notifyProgressComplete();
               await _socket?.addCommand(TransferDataCommand.simple(
                   deviceId: deviceId, action: kTransferCommandActionFinish));
               break;
