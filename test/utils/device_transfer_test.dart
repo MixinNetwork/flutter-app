@@ -288,7 +288,6 @@ void main() {
     expect(receiverStartCount, 0);
     expect(receiverFailedCount, 1);
     expect(receiverSucceedCount, 0);
-
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('connected but sender close', () async {
