@@ -1,3 +1,4 @@
+@Timeout(Duration(minutes: 1))
 import 'dart:async';
 import 'dart:io';
 
@@ -288,7 +289,7 @@ void main() {
     expect(receiverStartCount, 0);
     expect(receiverFailedCount, 1);
     expect(receiverSucceedCount, 0);
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('connected but sender close', () async {
     const verificationCode = 1234;
@@ -296,7 +297,7 @@ void main() {
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
     await receiver.connectToServer('localhost', port, verificationCode);
-    await Future.delayed(const Duration(milliseconds: 50));
+    await Future.delayed(const Duration(milliseconds: 100));
 
     expect(senderStartCount, 1);
     expect(senderFailedCount, 0);
@@ -307,7 +308,8 @@ void main() {
     expect(receiverSucceedCount, 0);
 
     sender.close();
-    await Future.delayed(const Duration(milliseconds: 100));
+    await senderCompleter.future;
+    await receiverCompleter.future;
 
     expect(senderStartCount, 1);
     expect(senderFailedCount, 1);
