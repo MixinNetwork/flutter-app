@@ -63,6 +63,7 @@ class DeviceTransferReceiver {
     _total = 0;
     _progress = 0;
     _finished = false;
+    _lastProgressNotifyTime = DateTime(0);
   }
 
   void _notifyProgressUpdate(Socket socket) {
@@ -71,7 +72,7 @@ class DeviceTransferReceiver {
         _total == 0 ? 0.0 : (_progress / _total * 100.0).clamp(0.0, 100.0);
     onReceiverProgressUpdate?.call(progress);
     if (DateTime.now().difference(_lastProgressNotifyTime) >
-        const Duration(seconds: 1)) {
+        const Duration(milliseconds: 200)) {
       _lastProgressNotifyTime = DateTime.now();
       socket.addCommand(
         TransferDataCommand.progress(deviceId: deviceId, progress: progress),
