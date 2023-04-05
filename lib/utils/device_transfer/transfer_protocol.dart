@@ -192,6 +192,7 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
 
   File? _file;
   String? _messageId;
+  int _bytes = 0;
 
   @override
   bool doWriteBody(Uint8List bytes) {
@@ -204,15 +205,18 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
       final messageId = Uuid.unparse(messageIdBytes);
       _messageId = messageId;
       final file = File(p.join(folder, messageId));
+      d('write attachment to: ${file.path}');
       _file = file;
       if (file.existsSync()) {
         file.delete();
       }
       file
         ..createSync(recursive: true)
-        ..writeAsBytes(bytes.sublist(_kUUIDBytesCount), flush: true);
+        ..writeAsBytesSync(bytes.sublist(_kUUIDBytesCount), flush: true);
+      _bytes += bytes.length - _kUUIDBytesCount;
     } else {
-      _file!.writeAsBytes(bytes, mode: FileMode.append, flush: true);
+      _file!.writeAsBytesSync(bytes, mode: FileMode.append, flush: true);
+      _bytes += bytes.length;
     }
     return true;
   }
@@ -225,6 +229,7 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
       e('_TransferAttachmentPacketBuilder#build: file or messageId is null');
       throw Exception('file or messageId is null');
     }
+    d('write attachment done, bytes: $_bytes');
     return TransferAttachmentPacket(
       messageId: _messageId!,
       path: _file!.path,

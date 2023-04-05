@@ -299,6 +299,17 @@ class DeviceTransferReceiver {
       conversationId: message.conversationId,
       fileName: message.mediaUrl,
     );
+
+    assert(
+        path.isNotEmpty,
+        'path is empty. ${message.category} ${message.mediaUrl} '
+        '${message.conversationId}');
+
+    if (path.isEmpty) {
+      e('_processReceivedAttachmentPacket: path is empty');
+      return;
+    }
+
     final file = File(path);
     if (file.existsSync()) {
       // already exist
