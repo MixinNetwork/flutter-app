@@ -133,6 +133,7 @@ void _useTransferStatus(
         await showMixinDialog(
           context: context,
           child: progressBuilder(context),
+          barrierDismissible: false,
         );
         isProgressShowing = false;
       } else {
@@ -148,11 +149,13 @@ void _useTransferStatus(
           await showMixinDialog(
             context: context,
             child: succeedBuilder(context),
+            barrierDismissible: false,
           );
         } else if (status == _Status.failed) {
           await showMixinDialog(
             context: context,
             child: failedBuilder(context),
+            barrierDismissible: false,
           );
         }
       }
@@ -366,7 +369,7 @@ class _TransferProcessDialog extends HookWidget {
                     Text(context.l10n.transferringChats),
                     const SizedBox(width: 2),
                     if (progress.data != null && progress.data! > 0)
-                      Text('(${progress.data!.toStringAsFixed(0)}%)'),
+                      Text('(${progress.data!.toStringAsFixed(1)}%)'),
                   ],
                 ),
               ),

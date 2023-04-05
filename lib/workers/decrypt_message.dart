@@ -85,7 +85,7 @@ class DecryptMessage extends Injector {
   final SendingJob _sendingJob;
   final UpdateStickerJob _updateStickerJob;
   final UpdateAssetJob _updateAssetJob;
-  final DeviceTransfer _deviceTransfer;
+  final DeviceTransferIsolateController _deviceTransfer;
 
   final refreshKeyMap = <String, int?>{};
 

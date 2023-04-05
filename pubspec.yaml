@@ -114,6 +114,7 @@ dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       path: packages/string_tokenizer
       ref: 0334bbaa7293c72398eaf4571ba7ba2b5df2302d
+  synchronized: ^3.0.1
   system_tray:
     path: third_party/system_tray
   tuple: ^2.0.1

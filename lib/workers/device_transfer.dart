@@ -1,17 +1,24 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math';
+import 'dart:ui' as ui;
 
+import 'package:ansicolor/ansicolor.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_channel/isolate_channel.dart';
 
 import '../blaze/blaze_message.dart';
-import '../blaze/vo/message_result.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../constants/constants.dart';
 import '../db/database.dart';
+import '../db/fts_database.dart';
+import '../db/mixin_database.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/device_transfer/device_transfer_receiver.dart';
 import '../utils/device_transfer/device_transfer_sender.dart';
@@ -19,13 +26,148 @@ import '../utils/device_transfer/device_transfer_widget.dart';
 import '../utils/device_transfer/transfer_data_command.dart';
 import '../utils/device_transfer/transfer_protocol.dart';
 import '../utils/event_bus.dart';
+import '../utils/file.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/platform.dart';
 
-typedef MessageDeliver = Future<MessageResult> Function(
-  BlazeMessage blazeMessage,
-);
+typedef MessageDeliver = void Function(BlazeMessage blazeMessage);
+
+class DeviceTransferStartParams {
+  DeviceTransferStartParams({
+    required this.identityNumber,
+    required this.userId,
+    required this.primarySessionId,
+    required this.rootIsolateToken,
+    required this.mixinDocumentDirectory,
+    required this.sendPort,
+  });
+
+  final String identityNumber;
+  final String userId;
+  final String? primarySessionId;
+  final ui.RootIsolateToken rootIsolateToken;
+  final String mixinDocumentDirectory;
+  final SendPort sendPort;
+}
+
+class DeviceTransferIsolateMessage {}
+
+class DeviceTransferIsolateDeliverMessage
+    implements DeviceTransferIsolateMessage {
+  DeviceTransferIsolateDeliverMessage(this.message);
+
+  final BlazeMessage message;
+}
+
+class DeviceTransferIsolateDestroy implements DeviceTransferIsolateMessage {}
+
+class DeviceTransferIsolateHandleCommand
+    implements DeviceTransferIsolateMessage {
+  DeviceTransferIsolateHandleCommand(this.command);
+
+  final TransferDataCommand command;
+}
+
+class DeviceTransferIsolateController {
+  DeviceTransferIsolateController({
+    required this.dispose,
+    required this.handleRemoteCommand,
+  });
+
+  final void Function() dispose;
+
+  final void Function(TransferDataCommand command) handleRemoteCommand;
+}
+
+Future<DeviceTransferIsolateController> startTransferIsolate({
+  required String identityNumber,
+  required String userId,
+  required String? primarySessionId,
+  required ui.RootIsolateToken rootIsolateToken,
+  required MessageDeliver messageDeliver,
+  required String mixinDocumentDirectory,
+}) async {
+  final receivePort = ReceivePort();
+  final isolateChannel = IsolateChannel<dynamic>.connectReceive(receivePort);
+  final exitReceivePort = ReceivePort();
+  final errorReceivePort = ReceivePort();
+  await Isolate.spawn(
+    _deviceTransferIsolateEntryPoint,
+    DeviceTransferStartParams(
+      identityNumber: identityNumber,
+      userId: userId,
+      primarySessionId: primarySessionId,
+      rootIsolateToken: rootIsolateToken,
+      mixinDocumentDirectory: mixinDocumentDirectory,
+      sendPort: receivePort.sendPort,
+    ),
+    debugName: 'device_transfer',
+    errorsAreFatal: false,
+    onExit: exitReceivePort.sendPort,
+    onError: errorReceivePort.sendPort,
+  );
+  final jobSubscribers = <StreamSubscription>{}
+    ..add(exitReceivePort.listen((message) {
+      w('device transfer isolate exit: $message');
+    }))
+    ..add(errorReceivePort.listen((message) {
+      w('device transfer isolate error: $message');
+    }))
+    ..add(isolateChannel.stream.listen((message) {
+      if (message is DeviceTransferIsolateDeliverMessage) {
+        messageDeliver(message.message);
+      }
+    }));
+
+  return DeviceTransferIsolateController(
+    dispose: () {
+      isolateChannel.sink.add(DeviceTransferIsolateDestroy());
+      jobSubscribers.forEach((element) => element.cancel());
+      receivePort.close();
+      exitReceivePort.close();
+      errorReceivePort.close();
+    },
+    handleRemoteCommand: (command) {
+      isolateChannel.sink.add(DeviceTransferIsolateHandleCommand(command));
+    },
+  );
+}
+
+Future<void> _deviceTransferIsolateEntryPoint(
+    DeviceTransferStartParams params) async {
+  EquatableConfig.stringify = true;
+  ansiColorDisabled = Platform.isIOS;
+  mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
+  BackgroundIsolateBinaryMessenger.ensureInitialized(params.rootIsolateToken);
+
+  final isolateChannel =
+      IsolateChannel<DeviceTransferIsolateMessage>.connectSend(params.sendPort);
+
+  final database = Database(
+    await connectToDatabase(params.identityNumber, readCount: 1),
+    await FtsDatabase.connect(params.identityNumber),
+  );
+  final deviceTransfer = await DeviceTransfer.create(
+    database: database,
+    userId: params.userId,
+    messageDeliver: (message) async {
+      isolateChannel.sink.add(DeviceTransferIsolateDeliverMessage(message));
+    },
+    primarySessionId: params.primarySessionId,
+    identityNumber: params.identityNumber,
+  );
+
+  isolateChannel.stream.listen((event) {
+    i('device transfer isolate receive event: $event');
+    if (event is DeviceTransferIsolateDestroy) {
+      deviceTransfer.dispose();
+      Isolate.exit();
+    } else if (event is DeviceTransferIsolateHandleCommand) {
+      deviceTransfer.handleRemoteCommand(event.command);
+    }
+  });
+}
 
 // TODO(BIN): check has primary session
 class DeviceTransfer {
@@ -177,10 +319,7 @@ class DeviceTransfer {
       sessionId: primarySessionId,
     );
     final bm = createParamBlazeMessage(param);
-    final result = await messageDeliver(bm);
-    if (!result.success) {
-      e('_sendDeviceTransferToOtherSession: ${result.errorCode}');
-    }
+    messageDeliver(bm);
   }
 
   Future<void> _sendPullToOtherSession() async {

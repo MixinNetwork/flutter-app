@@ -4,10 +4,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
+import 'package:synchronized/synchronized.dart';
 import 'package:uuid/uuid.dart';
 
 import '../logger.dart';
-import '../synchronized.dart';
 import 'crc.dart';
 import 'json_transfer_data.dart';
 
@@ -105,7 +105,7 @@ class TransferAttachmentPacket extends TransferPacket {
   }
 }
 
-final _lock = Lock();
+var _lock = Lock(reentrant: true);
 
 Future<void> writePacketToSink(
   EventSink<List<int>> sink,

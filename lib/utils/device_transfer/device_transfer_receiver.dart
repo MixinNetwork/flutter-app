@@ -78,6 +78,7 @@ class DeviceTransferReceiver {
       await _socket?.addCommand(
         TransferDataCommand.progress(deviceId: deviceId, progress: progress),
       );
+      d('progress: $progress');
     }
   }
 
@@ -103,7 +104,7 @@ class DeviceTransferReceiver {
     );
     _resetTransferStates();
     _socket = socket;
-    d('connected to $ip:$port');
+    d('connected to $ip:$port. my port: ${socket.port}');
     socket.transform(protocolTransform).listen(
       (packet) async {
         try {
