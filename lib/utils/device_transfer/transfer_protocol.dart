@@ -11,8 +11,9 @@ import '../logger.dart';
 import 'crc.dart';
 import 'json_transfer_data.dart';
 
-const kTypeJson = 1;
-const kTypeFile = 2;
+const kTypeCommand = 1;
+const kTypeJson = 2;
+const kTypeFile = 3;
 
 /// -----------------------------------------------------------------
 /// | type (1 byte) | body_length（4 bytes） | body | crc（8 bytes） |
@@ -50,6 +51,13 @@ class TransferJsonPacket extends TransferPacket {
     sink.add(_data);
     return calculateCrc32(_data);
   }
+}
+
+class TransferCommandPacket extends TransferJsonPacket {
+  TransferCommandPacket(super.json);
+
+  @override
+  int get _type => kTypeCommand;
 }
 
 const _kUUIDBytesCount = 16;
@@ -286,6 +294,7 @@ class _TransferProtocolSink extends EventSink<Uint8List> {
         final type = bytes.getInt8(0);
         final bodyLength = bytes.getInt32(1);
         switch (type) {
+          case kTypeCommand:
           case kTypeJson:
             _builder = _TransferJsonPacketBuilder(bodyLength);
             break;

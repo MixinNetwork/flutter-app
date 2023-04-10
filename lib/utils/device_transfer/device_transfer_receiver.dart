@@ -74,7 +74,6 @@ class DeviceTransferReceiver {
     if (DateTime.now().difference(_lastProgressNotifyTime) >
         const Duration(milliseconds: 200)) {
       _lastProgressNotifyTime = DateTime.now();
-      assert(_socket != null, 'socket is null');
       await _socket?.addCommand(
         TransferDataCommand.progress(deviceId: deviceId, progress: progress),
       );
@@ -83,7 +82,6 @@ class DeviceTransferReceiver {
   }
 
   Future<void> _notifyProgressComplete() async {
-    assert(_socket != null, 'socket is null');
     onReceiverProgressUpdate?.call(100);
     await _socket?.addCommand(
       TransferDataCommand.progress(deviceId: deviceId, progress: 100),
@@ -171,7 +169,7 @@ class DeviceTransferReceiver {
           break;
         case JsonTransferDataType.message:
           final message = TransferDataMessage.fromJson(data.data);
-          d('client: message: ${data.data}');
+          d('client: message: $message');
           final local = await database.messageDao
               .findMessageByMessageId(message.messageId);
           if (local != null) {
@@ -284,8 +282,8 @@ class DeviceTransferReceiver {
     Future<void> deletePacketFile() async {
       try {
         await File(packet.path).delete();
-      } catch (error, stacktrace) {
-        e('_processReceivedAttachmentPacket: $error $stacktrace');
+      } catch (error) {
+        e('_processReceivedAttachmentPacket: deletePacketFile', error);
       }
     }
 
@@ -300,13 +298,9 @@ class DeviceTransferReceiver {
       fileName: message.mediaUrl,
     );
 
-    assert(
-        path.isNotEmpty,
-        'path is empty. ${message.category} ${message.mediaUrl} '
-        '${message.conversationId}');
-
     if (path.isEmpty) {
       e('_processReceivedAttachmentPacket: path is empty');
+      await deletePacketFile();
       return;
     }
 

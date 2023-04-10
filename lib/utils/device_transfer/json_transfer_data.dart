@@ -109,11 +109,11 @@ extension SocketExtension on IOSink {
 
   Future<void> addCommand(TransferDataCommand command) async {
     d('send command to remote: $command');
-    final wrapper = JsonTransferData(
+    final data = JsonTransferData(
       data: command.toJson(),
       type: JsonTransferDataType.command,
     );
-    await _addTransferJson(wrapper);
+    await writePacketToSink(this, TransferCommandPacket(data));
   }
 
   Future<void> addTranscriptMessage(
