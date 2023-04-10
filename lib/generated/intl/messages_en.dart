@@ -691,6 +691,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Transfer completed"),
         "transferFailed":
             MessageLookupByLibrary.simpleMessage("Transfer failed"),
+        "transferProtocolVersionNotMatched": MessageLookupByLibrary.simpleMessage(
+            "Protocol version does not match, transfer failed. Please upgrade the application first."),
         "transferringChats":
             MessageLookupByLibrary.simpleMessage("Transferring Chat"),
         "transferringChatsTips": MessageLookupByLibrary.simpleMessage(

@@ -596,6 +596,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "transfer": MessageLookupByLibrary.simpleMessage("轉賬"),
         "transferCompleted": MessageLookupByLibrary.simpleMessage("同步完成"),
         "transferFailed": MessageLookupByLibrary.simpleMessage("同步失敗"),
+        "transferProtocolVersionNotMatched":
+            MessageLookupByLibrary.simpleMessage("版本不匹配，無法同步數據，請先升級應用。"),
         "transferringChats": MessageLookupByLibrary.simpleMessage("同步聊天記錄中"),
         "transferringChatsTips":
             MessageLookupByLibrary.simpleMessage("同步時請不要關閉屏幕並保持 Mixin 在前台運行。"),

@@ -11,7 +11,7 @@ const kTransferCommandActionStart = 'start';
 const kTransferCommandActionClose = 'close';
 const kTransferCommandActionProgress = 'progress';
 
-const _kVersion = 1;
+const kDeviceTransferProtocolVersion = 1;
 
 @JsonSerializable()
 class TransferDataCommand with EquatableMixin {
@@ -39,7 +39,7 @@ class TransferDataCommand with EquatableMixin {
       TransferDataCommand(
         deviceId: deviceId,
         action: action,
-        version: _kVersion,
+        version: kDeviceTransferProtocolVersion,
       );
 
   factory TransferDataCommand.pull({
@@ -59,7 +59,7 @@ class TransferDataCommand with EquatableMixin {
       TransferDataCommand(
         deviceId: deviceId,
         action: kTransferCommandActionPush,
-        version: _kVersion,
+        version: kDeviceTransferProtocolVersion,
         ip: ip,
         port: port,
         code: code,
@@ -73,7 +73,7 @@ class TransferDataCommand with EquatableMixin {
       TransferDataCommand(
         deviceId: deviceId,
         action: kTransferCommandActionConnect,
-        version: _kVersion,
+        version: kDeviceTransferProtocolVersion,
         code: code,
         userId: userId,
       );
@@ -85,7 +85,7 @@ class TransferDataCommand with EquatableMixin {
       TransferDataCommand(
         deviceId: deviceId,
         action: kTransferCommandActionStart,
-        version: _kVersion,
+        version: kDeviceTransferProtocolVersion,
         total: total,
       );
 
@@ -96,7 +96,7 @@ class TransferDataCommand with EquatableMixin {
       TransferDataCommand(
         deviceId: deviceId,
         action: kTransferCommandActionProgress,
-        version: _kVersion,
+        version: kDeviceTransferProtocolVersion,
         progress: progress,
       );
 

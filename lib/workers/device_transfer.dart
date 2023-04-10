@@ -371,6 +371,14 @@ class DeviceTransfer {
 
   void handleRemoteCommand(TransferDataCommand command) {
     d('handleRemoteCommand: $command');
+    if (command.version != kDeviceTransferProtocolVersion) {
+      e('command version not matched');
+      DeviceTransferEventBus.instance.fire(
+        DeviceTransferCallbackType.onCommandVersionNotMatched,
+        command.version,
+      );
+      return;
+    }
     switch (command.action) {
       case kTransferCommandActionPush:
         _handleRemotePushCommand(command.ip!, command.port!, command.code!);

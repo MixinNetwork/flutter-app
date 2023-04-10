@@ -3946,6 +3946,16 @@ class Localization {
     );
   }
 
+  /// `Protocol version does not match, transfer failed. Please upgrade the application first.`
+  String get transferProtocolVersionNotMatched {
+    return Intl.message(
+      'Protocol version does not match, transfer failed. Please upgrade the application first.',
+      name: 'transferProtocolVersionNotMatched',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Transferring Chat`
   String get transferringChats {
     return Intl.message(

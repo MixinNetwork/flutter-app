@@ -387,6 +387,7 @@
 "transfer" : "Transfer",
 "transferCompleted" : "Transfer completed",
 "transferFailed" : "Transfer failed",
+"transferProtocolVersionNotMatched" : "Protocol version does not match, transfer failed. Please upgrade the application first.",
 "transferringChats" : "Transferring Chat",
 "transferringChatsTips" : "Please do not turn off the screen and keep the Mixin running in the foreground while syncing.",
 "travelAndPlaces" : "Travel & Places",

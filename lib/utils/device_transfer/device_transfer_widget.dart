@@ -35,6 +35,7 @@ enum DeviceTransferCallbackType {
 
   /// a pull event from other device.
   onRestoreRequestReceived,
+  onCommandVersionNotMatched,
 }
 
 class DeviceTransferCallbackEvent {
@@ -229,6 +230,17 @@ class DeviceTransferHandlerWidget extends HookWidget {
         ),
       ),
     );
+
+    useOnTransferEventType(
+      DeviceTransferCallbackType.onCommandVersionNotMatched,
+      () => showMixinDialog(
+        context: context,
+        child: _ConfirmDialog(
+          message: context.l10n.transferProtocolVersionNotMatched,
+        ),
+      ),
+    );
+
     return child;
   }
 }

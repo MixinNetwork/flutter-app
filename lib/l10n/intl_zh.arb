@@ -383,6 +383,7 @@
 "transfer" : "转账",
 "transferCompleted" : "同步完成",
 "transferFailed" : "同步失败",
+"transferProtocolVersionNotMatched" : "版本不匹配，无法同步数据，请先升级应用。",
 "transferringChats" : "同步聊天记录中",
 "transferringChatsTips" : "同步时请不要关闭屏幕并保持 Mixin 在前台运行。",
 "travelAndPlaces" : "旅行与地点",
