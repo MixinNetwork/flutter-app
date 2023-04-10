@@ -200,7 +200,6 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
 
   File? _file;
   String? _messageId;
-  int _bytes = 0;
 
   @override
   bool doWriteBody(Uint8List bytes) {
@@ -212,19 +211,18 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
       final messageIdBytes = bytes.sublist(0, _kUUIDBytesCount);
       final messageId = Uuid.unparse(messageIdBytes);
       _messageId = messageId;
-      final file = File(p.join(folder, messageId));
-      d('write attachment to: ${file.path}');
+      final tempFileName = const Uuid().v4();
+      final file = File(p.join(folder, tempFileName));
+      d('write $messageId attachment to: ${file.path}');
       _file = file;
       if (file.existsSync()) {
-        file.delete();
+        file.deleteSync();
       }
       file
         ..createSync(recursive: true)
         ..writeAsBytesSync(bytes.sublist(_kUUIDBytesCount), flush: true);
-      _bytes += bytes.length - _kUUIDBytesCount;
     } else {
       _file!.writeAsBytesSync(bytes, mode: FileMode.append, flush: true);
-      _bytes += bytes.length;
     }
     return true;
   }
@@ -237,7 +235,11 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
       e('_TransferAttachmentPacketBuilder#build: file or messageId is null');
       throw Exception('file or messageId is null');
     }
-    d('write attachment done, bytes: $_bytes');
+    assert(
+      _file!.lengthSync() == _writeBodyLength - _kUUIDBytesCount,
+      'file length != writeBodyLength',
+    );
+    d('write $_messageId attachment done, bytes: ${_writeBodyLength - _kUUIDBytesCount}');
     return TransferAttachmentPacket(
       messageId: _messageId!,
       path: _file!.path,

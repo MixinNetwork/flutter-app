@@ -280,9 +280,9 @@ class DeviceTransferReceiver {
     final message =
         await database.messageDao.findMessageByMessageId(packet.messageId);
 
-    Future<void> deletePacketFile() async {
+    void deletePacketFile() {
       try {
-        await File(packet.path).delete();
+        File(packet.path).deleteSync();
       } catch (error) {
         e('_processReceivedAttachmentPacket: deletePacketFile', error);
       }
@@ -290,7 +290,7 @@ class DeviceTransferReceiver {
 
     if (message == null) {
       e('_processReceivedAttachmentPacket: message not found ${packet.messageId}');
-      await deletePacketFile();
+      deletePacketFile();
       return;
     }
     final path = attachmentUtil.convertAbsolutePath(
@@ -301,7 +301,7 @@ class DeviceTransferReceiver {
 
     if (path.isEmpty) {
       e('_processReceivedAttachmentPacket: path is empty');
-      await deletePacketFile();
+      deletePacketFile();
       return;
     }
 
@@ -309,7 +309,7 @@ class DeviceTransferReceiver {
     if (file.existsSync()) {
       // already exist
       i('_processReceivedAttachmentPacket: already exist');
-      await deletePacketFile();
+      deletePacketFile();
       return;
     }
     // check file parent folder
