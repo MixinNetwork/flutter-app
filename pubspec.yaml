@@ -36,7 +36,7 @@ dependencies:
   desktop_lifecycle: ^0.1.0
   desktop_webview_window: ^0.2.0
   device_info_plus: ^8.0.0
-  dio: ^5.0.0
+  dio: ^5.1.1
   drift: ^2.6.0
   ecache: ^2.0.2
   emojis: ^0.9.9
@@ -66,7 +66,7 @@ dependencies:
   hydrated_bloc: ^9.0.0
   image_picker: ^0.8.7
   intl: ^0.17.0
-  intl_phone_number_input: ^0.7.2
+  intl_phone_number_input: ^0.7.3+1
   isolate: ^2.1.0
   json_annotation: ^4.8.0
   libsignal_protocol_dart: ^0.6.5

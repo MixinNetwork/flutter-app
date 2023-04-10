@@ -391,10 +391,10 @@ packages:
     dependency: "direct main"
     description:
       name: dio
-      sha256: f7c26ddb3a10ff033cf1bfbf2c668feb3472327f48385775f7cf25b104f8bfce
+      sha256: "0894a098594263fe1caaba3520e3016d8a855caeb010a882273189cca10f11e9"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.0"
+    version: "5.1.1"
   drift:
     dependency: "direct main"
     description:
@@ -851,10 +851,10 @@ packages:
     dependency: "direct main"
     description:
       name: intl_phone_number_input
-      sha256: da894a842bb240ad9ed8ba9dcc2c78e2a5553a4e1d3444baa06482486541eac2
+      sha256: b812c6e3924e56e65b9684076ccd8eb24126abe0c84091d35d75a25e613a1793
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.2"
+    version: "0.7.3+1"
   intl_utils:
     dependency: "direct dev"
     description:
@@ -915,26 +915,26 @@ packages:
     dependency: transitive
     description:
       name: libphonenumber_platform_interface
-      sha256: "977834b022bcc25e6e68bd86f977f10bbf20eec6bfab1ae7a151e51868ab91cf"
+      sha256: cdd1230aad1d8e12fb4d9752d67ed2361b1cbb26fc8d202a9990c218553b3963
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.1"
+    version: "0.4.0"
   libphonenumber_plugin:
     dependency: transitive
     description:
       name: libphonenumber_plugin
-      sha256: "3e27d29cb6adbe5ca2571f327afa8893036249c22ce5a700eb9f56e32c68c09a"
+      sha256: "1be7c9de4beaed6dffdaf4a3d87758ef9b259c1111283736faef2179919e3ca2"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.5"
+    version: "0.3.1"
   libphonenumber_web:
     dependency: transitive
     description:
       name: libphonenumber_web
-      sha256: f938f3d21d2d208897a361b8ca9052dfd29f956a30ced76fda8b45744dad20cb
+      sha256: "35a106149d2f7a05a670d02be2f4ea288258d7bca2f8bdda8a96617151dfa5b9"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.0+1"
+    version: "0.3.0"
   libsignal_protocol_dart:
     dependency: "direct main"
     description:
