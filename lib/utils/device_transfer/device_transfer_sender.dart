@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 
 import '../../db/database.dart';
 import '../attachment/attachment_util.dart';
+import '../extension/extension.dart';
 import '../logger.dart';
 import '../platform.dart';
 import 'json_transfer_data.dart';
@@ -94,7 +95,7 @@ class DeviceTransferSender {
       _pendingVerificationSockets.add(socket);
       i('client connected: ${socket.remoteAddress.address}:${socket.remotePort}');
 
-      socket.transform(protocolTransform).listen((event) {
+      socket.transform(protocolTransform).asyncListen((event) {
         d('receive data: $event');
 
         if (event is TransferJsonPacket) {

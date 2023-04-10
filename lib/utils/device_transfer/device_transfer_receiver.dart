@@ -6,6 +6,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../db/database.dart';
 import '../attachment/attachment_util.dart';
+import '../extension/extension.dart';
 import '../logger.dart';
 import 'json_transfer_data.dart';
 import 'transfer_data_asset.dart';
@@ -103,7 +104,7 @@ class DeviceTransferReceiver {
     _resetTransferStates();
     _socket = socket;
     d('connected to $ip:$port. my port: ${socket.port}');
-    socket.transform(protocolTransform).listen(
+    socket.transform(protocolTransform).asyncListen(
       (packet) async {
         try {
           if (packet is TransferJsonPacket) {
