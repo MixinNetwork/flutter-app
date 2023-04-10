@@ -22,7 +22,7 @@ TransferDataTranscriptMessage _$TransferDataTranscriptMessageFromJson(
       mediaWidth: json['media_width'] as int?,
       mediaHeight: json['media_height'] as int?,
       mediaMimeType: json['media_mime_type'] as String?,
-      mediaDuration: json['media_duration'] as String?,
+      mediaDuration: json['media_duration'] as int?,
       mediaStatus: const MediaStatusJsonConverter()
           .fromJson(json['media_status'] as String?),
       mediaWaveform: json['media_waveform'] as String?,

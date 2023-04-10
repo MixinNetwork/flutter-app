@@ -57,7 +57,9 @@ class TransferDataTranscriptMessage {
         mediaWidth: data.mediaWidth,
         mediaHeight: data.mediaHeight,
         mediaMimeType: data.mediaMimeType,
-        mediaDuration: data.mediaDuration,
+        mediaDuration: data.mediaDuration == null
+            ? null
+            : int.tryParse(data.mediaDuration!),
         mediaStatus: data.mediaStatus,
         mediaWaveform: data.mediaWaveform,
         thumbImage: data.thumbImage,
@@ -113,7 +115,7 @@ class TransferDataTranscriptMessage {
   final String? mediaMimeType;
 
   @JsonKey(name: 'media_duration')
-  final String? mediaDuration;
+  final int? mediaDuration;
 
   @JsonKey(name: 'media_status')
   final MediaStatus? mediaStatus;
@@ -170,7 +172,7 @@ class TransferDataTranscriptMessage {
         mediaWidth: mediaWidth,
         mediaHeight: mediaHeight,
         mediaMimeType: mediaMimeType,
-        mediaDuration: mediaDuration,
+        mediaDuration: mediaDuration?.toString(),
         mediaStatus: mediaStatus,
         mediaWaveform: mediaWaveform,
         thumbImage: thumbImage,
