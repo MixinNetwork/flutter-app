@@ -85,7 +85,7 @@ class DecryptMessage extends Injector {
   final SendingJob _sendingJob;
   final UpdateStickerJob _updateStickerJob;
   final UpdateAssetJob _updateAssetJob;
-  final DeviceTransferIsolateController _deviceTransfer;
+  final DeviceTransferIsolateController? _deviceTransfer;
 
   final refreshKeyMap = <String, int?>{};
 
@@ -274,7 +274,10 @@ class DecryptMessage extends Injector {
         final json =
             jsonDecode(plainJsonMessage.content!) as Map<String, dynamic>;
         final command = TransferDataCommand.fromJson(json);
-        _deviceTransfer.handleRemoteCommand(command);
+        if (_deviceTransfer == null) {
+          e('DeviceTransfer is null, but received command $command');
+        }
+        _deviceTransfer?.handleRemoteCommand(command);
       }
       await database.messagesHistoryDao
           .insert(MessagesHistoryData(messageId: data.messageId));

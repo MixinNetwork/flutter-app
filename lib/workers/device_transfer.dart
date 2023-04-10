@@ -83,7 +83,7 @@ class DeviceTransferIsolateController {
 Future<DeviceTransferIsolateController> startTransferIsolate({
   required String identityNumber,
   required String userId,
-  required String? primarySessionId,
+  required String primarySessionId,
   required ui.RootIsolateToken rootIsolateToken,
   required MessageDeliver messageDeliver,
   required String mixinDocumentDirectory,
@@ -169,7 +169,6 @@ Future<void> _deviceTransferIsolateEntryPoint(
   });
 }
 
-// TODO(BIN): check has primary session
 class DeviceTransfer {
   DeviceTransfer({
     required this.database,

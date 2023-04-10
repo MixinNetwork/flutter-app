@@ -131,7 +131,7 @@ class _MessageProcessRunner {
   late UpdateStickerJob _updateStickerJob;
   late SessionAckJob _sessionAckJob;
   late FloodJob _floodJob;
-  late DeviceTransferIsolateController _deviceTransfer;
+  DeviceTransferIsolateController? _deviceTransfer;
 
   final jobSubscribers = <StreamSubscription>[];
 
@@ -228,22 +228,26 @@ class _MessageProcessRunner {
     MigrateFtsJob(database: database);
     DeleteOldFtsRecordJob(database: database);
 
-    _deviceTransfer = await startTransferIsolate(
-      userId: userId,
-      messageDeliver: (message) async {
-        d('device_transfer: send message: $message');
-        final result = await _sender.deliver(message);
-        if (!result.success) {
-          w('device_transfer: send message failed: $result');
-        } else {
-          d('device_transfer: send message success: $result');
-        }
-      },
-      primarySessionId: primarySessionId,
-      identityNumber: identityNumber,
-      rootIsolateToken: initParams.rootIsolateToken,
-      mixinDocumentDirectory: initParams.mixinDocumentDirectory,
-    );
+    if (primarySessionId != null) {
+      _deviceTransfer = await startTransferIsolate(
+        userId: userId,
+        messageDeliver: (message) async {
+          d('device_transfer: send message: $message');
+          final result = await _sender.deliver(message);
+          if (!result.success) {
+            w('device_transfer: send message failed: $result');
+          } else {
+            d('device_transfer: send message success: $result');
+          }
+        },
+        primarySessionId: primarySessionId!,
+        identityNumber: identityNumber,
+        rootIsolateToken: initParams.rootIsolateToken,
+        mixinDocumentDirectory: initParams.mixinDocumentDirectory,
+      );
+    } else {
+      e('device_transfer: primarySessionId is null, device transfer is disabled');
+    }
 
     _decryptMessage = DecryptMessage(
       userId,
@@ -367,6 +371,6 @@ class _MessageProcessRunner {
     blaze.dispose();
     database.dispose();
     jobSubscribers.forEach((subscription) => subscription.cancel());
-    _deviceTransfer.dispose();
+    _deviceTransfer?.dispose();
   }
 }
