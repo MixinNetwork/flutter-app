@@ -75,7 +75,7 @@ dependencies:
   markdown_widget: ^1.3.0+1
   mime: ^1.0.2
   mixin_bot_sdk_dart: ^0.3.16
-  mixin_logger: ^0.0.3
+  mixin_logger: ^0.0.4
   network_info_plus: ^3.0.2
   octo_image: ^1.0.2
   ogg_opus_player: ^0.7.0

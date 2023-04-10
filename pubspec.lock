@@ -1027,10 +1027,10 @@ packages:
     dependency: "direct main"
     description:
       name: mixin_logger
-      sha256: e38acebd459fc90d2cdbe036b3d32af8511618be3dc8862d088e4bda55a58605
+      sha256: baae58603018c840e1dd72bee3c8478fe92437179547b20479ac500a0e57bcfa
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.3"
+    version: "0.0.4"
   msix:
     dependency: "direct dev"
     description:
