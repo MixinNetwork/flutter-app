@@ -94,6 +94,14 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
       );
     });
   }
+
+  Selectable<int> countTranscriptMessages() {
+    return customSelect('SELECT COUNT(1) AS _c0 FROM transcript_messages',
+        variables: [],
+        readsFrom: {
+          transcriptMessages,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
 }
 
 class TranscriptMessageItem {

@@ -60,6 +60,26 @@ mixin _$ExpiredMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           expiredMessages,
         }).asyncMap(expiredMessages.mapFromRow);
   }
+
+  Selectable<ExpiredMessage> getAllExpiredMessages(int limit, int offset) {
+    return customSelect(
+        'SELECT * FROM expired_messages ORDER BY "rowid" ASC LIMIT ?1 OFFSET ?2',
+        variables: [
+          Variable<int>(limit),
+          Variable<int>(offset)
+        ],
+        readsFrom: {
+          expiredMessages,
+        }).asyncMap(expiredMessages.mapFromRow);
+  }
+
+  Selectable<int> countExpiredMessages() {
+    return customSelect('SELECT COUNT(1) AS _c0 FROM expired_messages',
+        variables: [],
+        readsFrom: {
+          expiredMessages,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
 }
 typedef MarkExpiredMessageRead$where = Expression<bool> Function(
     ExpiredMessages expired_messages);

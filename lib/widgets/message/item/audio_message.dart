@@ -192,9 +192,9 @@ class _AnimatedWave extends HookWidget {
 
 class AudioMessagesPlayAgent {
   AudioMessagesPlayAgent(
-    this._list,
+    List<MessageItem> list,
     this.convertMessageAbsolutePath,
-  );
+  ) : _list = list.where((e) => e.type.isAudio).toList();
 
   final List<MessageItem> _list;
   final String Function(MessageItem? messageItem) convertMessageAbsolutePath;

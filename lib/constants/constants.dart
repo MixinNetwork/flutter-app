@@ -6,6 +6,7 @@ const scpFull = 'FULL';
 
 const kAcknowledgeMessageReceipt = 'ACKNOWLEDGE_MESSAGE_RECEIPT';
 const kAcknowledgeMessageReceipts = 'ACKNOWLEDGE_MESSAGE_RECEIPTS';
+const kDeviceTransfer = 'DEVICE_TRANSFER';
 const kSendingMessage = 'SENDING_MESSAGE';
 const kRecallMessage = 'RECALL_MESSAGE';
 const kPinMessage = 'PIN_MESSAGE';

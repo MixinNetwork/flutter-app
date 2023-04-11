@@ -35,10 +35,12 @@ import '../enum/message_action.dart';
 import '../enum/message_category.dart';
 import '../enum/system_circle_action.dart';
 import '../enum/system_user_action.dart';
+import '../utils/device_transfer/transfer_data_command.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../widgets/message/send_message_dialog/attachment_extra.dart';
+import 'device_transfer.dart';
 import 'injector.dart';
 import 'isolate_event.dart';
 import 'job/ack_job.dart';
@@ -63,6 +65,7 @@ class DecryptMessage extends Injector {
     this._sendingJob,
     this._updateStickerJob,
     this._updateAssetJob,
+    this._deviceTransfer,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
@@ -82,6 +85,7 @@ class DecryptMessage extends Injector {
   final SendingJob _sendingJob;
   final UpdateStickerJob _updateStickerJob;
   final UpdateAssetJob _updateAssetJob;
+  final DeviceTransferIsolateController? _deviceTransfer;
 
   final refreshKeyMap = <String, int?>{};
 
@@ -266,6 +270,14 @@ class DecryptMessage extends Injector {
           unawaited(_sender.sendProcessSignalKey(
               data, ProcessSignalKeyAction.resendKey));
         }
+      } else if (plainJsonMessage.action == kDeviceTransfer) {
+        final json =
+            jsonDecode(plainJsonMessage.content!) as Map<String, dynamic>;
+        final command = TransferDataCommand.fromJson(json);
+        if (_deviceTransfer == null) {
+          e('DeviceTransfer is null, but received command $command');
+        }
+        _deviceTransfer?.handleRemoteCommand(command);
       }
       await database.messagesHistoryDao
           .insert(MessagesHistoryData(messageId: data.messageId));
@@ -429,7 +441,8 @@ class DecryptMessage extends Injector {
         _jsonDecode(data.data) as Map<String, dynamic>);
 
     if (pinMessage.action == PinMessagePayloadAction.pin) {
-      await Future.forEach<String>(pinMessage.messageIds, (messageId) async {
+      await futureForEachIndexed(pinMessage.messageIds,
+          (index, messageId) async {
         final message =
             await database.messageDao.findMessageByMessageId(messageId);
         if (message == null) return;
@@ -445,7 +458,7 @@ class DecryptMessage extends Injector {
         ));
         await database.messageDao.insert(
           Message(
-            messageId: const Uuid().v4(),
+            messageId: index == 0 ? data.messageId : const Uuid().v4(),
             conversationId: data.conversationId,
             quoteMessageId: message.messageId,
             userId: data.userId,

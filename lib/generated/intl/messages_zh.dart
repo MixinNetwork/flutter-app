@@ -213,6 +213,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "collapse": MessageLookupByLibrary.simpleMessage("折叠"),
         "combineAndForward": MessageLookupByLibrary.simpleMessage("合并转发"),
         "confirm": MessageLookupByLibrary.simpleMessage("确认"),
+        "confirmSyncChatsFromPhone":
+            MessageLookupByLibrary.simpleMessage("确认从手机端同步聊天记录吗？"),
+        "confirmSyncChatsToPhone":
+            MessageLookupByLibrary.simpleMessage("确认同步聊天记录到手机端吗？"),
         "contact": MessageLookupByLibrary.simpleMessage("联系人"),
         "contactMixinId": m10,
         "contactMuteTitle": MessageLookupByLibrary.simpleMessage("静音通知"),
@@ -590,6 +594,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("转账记录不会被删除"),
         "transcript": MessageLookupByLibrary.simpleMessage("聊天记录"),
         "transfer": MessageLookupByLibrary.simpleMessage("转账"),
+        "transferCompleted": MessageLookupByLibrary.simpleMessage("同步完成"),
+        "transferFailed": MessageLookupByLibrary.simpleMessage("同步失败"),
+        "transferProtocolVersionNotMatched":
+            MessageLookupByLibrary.simpleMessage("版本不匹配，无法同步数据，请先升级应用。"),
+        "transferringChats": MessageLookupByLibrary.simpleMessage("同步聊天记录中"),
+        "transferringChatsTips":
+            MessageLookupByLibrary.simpleMessage("同步时请不要关闭屏幕并保持 Mixin 在前台运行。"),
         "travelAndPlaces": MessageLookupByLibrary.simpleMessage("旅行与地点"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("打开通知"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("输入消息"),

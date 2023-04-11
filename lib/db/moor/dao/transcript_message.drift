@@ -48,3 +48,6 @@ FROM transcript_messages transcript
 WHERE $where
 ORDER BY transcript.created_at, transcript.rowid
 LIMIT $limit;
+
+countTranscriptMessages:
+SELECT COUNT(1) from transcript_messages;

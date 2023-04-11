@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +12,7 @@ import '../../account/account_server.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
+import '../../utils/device_transfer/device_transfer_dialog.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
@@ -258,6 +260,17 @@ class _Menus extends HookWidget {
                     }
                   : null,
             ),
+            if (kDebugMode)
+              PlatformMenuItemGroup(members: [
+                PlatformMenuItem(
+                  label: 'chat backup and restore',
+                  onSelected: signed
+                      ? () {
+                          showDeviceTransferDialog(context);
+                        }
+                      : null,
+                )
+              ]),
             PlatformMenuItem(
               label: context.l10n.createCircle,
               onSelected: signed

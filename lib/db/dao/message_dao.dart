@@ -9,12 +9,20 @@ import '../../constants/constants.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/logger.dart';
 import '../database_event_bus.dart';
 import '../event.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
 part 'message_dao.g.dart';
+
+class MessageOrderInfo {
+  MessageOrderInfo({required this.rowId, required this.createdAt});
+
+  final int rowId;
+  final int createdAt;
+}
 
 @DriftAccessor(tables: [Messages])
 class MessageDao extends DatabaseAccessor<MixinDatabase>
@@ -135,30 +143,35 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   final Map<String, void Function()> _conversationUnseenTaskRunner = {};
 
   void _updateConversationUnseenCount(
-    Message message,
+    String conversationId,
     String currentUserId,
   ) {
-    Future<void> _update(Message message) async {
+    Future<void> _update(String conversationId) async {
+      final latest =
+          await messagesByConversationId(conversationId, 1).getSingleOrNull();
+      if (latest == null) {
+        e('failed to update conversation last message, latest message is null $conversationId');
+        return;
+      }
       await db.updateUnseenMessageCountAndLastMessageId(
-        message.conversationId,
+        conversationId,
         currentUserId,
-        message.messageId,
-        message.createdAt,
+        latest.messageId,
+        latest.createdAt,
       );
 
-      DataBaseEventBus.instance.updateConversation(message.conversationId);
+      DataBaseEventBus.instance.updateConversation(conversationId);
     }
 
-    if (_conversationUnseenTaskRunner[message.conversationId] != null) {
-      _conversationUnseenTaskRunner[message.conversationId] =
-          () => _update(message);
+    if (_conversationUnseenTaskRunner[conversationId] != null) {
+      _conversationUnseenTaskRunner[conversationId] =
+          () => _update(conversationId);
       return;
     } else {
-      _conversationUnseenTaskRunner[message.conversationId] =
-          () => _update(message);
+      _conversationUnseenTaskRunner[conversationId] =
+          () => _update(conversationId);
       Future.delayed(kDefaultThrottleDuration).then((value) {
-        final runner =
-            _conversationUnseenTaskRunner.remove(message.conversationId);
+        final runner = _conversationUnseenTaskRunner.remove(conversationId);
         runner?.call();
       });
     }
@@ -178,7 +191,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ];
     final result = (await Future.wait(futures)).first as int;
 
-    _updateConversationUnseenCount(message, currentUserId);
+    _updateConversationUnseenCount(message.conversationId, currentUserId);
 
     DataBaseEventBus.instance.insertOrReplaceMessages([
       MiniMessageItem(
@@ -758,34 +771,46 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               Limit(limit, offset));
 
   Selectable<MessageItem> mediaMessagesBefore(
-          int rowId, String conversationId, int limit) =>
+          MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________, ____________) =>
-              message.conversationId.equals(conversationId) &
-              message.category.isIn(_mediaMessageTypes) &
-              message.rowId.isSmallerThanValue(rowId),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________, _____________) =>
-              Limit(limit, 0),
-          order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________) =>
-              OrderBy([OrderingTerm.desc(message.createdAt)]));
+        (message, _, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________, ____________) =>
+            message.conversationId.equals(conversationId) &
+            message.category.isIn(_mediaMessageTypes) &
+            (message.createdAt.isSmallerThanValue(anchor.createdAt) |
+                (message.createdAt.equals(anchor.createdAt) &
+                    message.rowId.isSmallerThanValue(anchor.rowId))),
+        (_, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________, ____________, _____________) =>
+            Limit(limit, 0),
+        order: (message, _, __, ___, ____, _____, ______, _______, ________,
+                _________, __________, ___________) =>
+            OrderBy([
+          OrderingTerm.desc(message.createdAt),
+          OrderingTerm.desc(message.rowId)
+        ]),
+      );
 
   Selectable<MessageItem> mediaMessagesAfter(
-          int rowId, String conversationId, int limit) =>
+          MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________, em) =>
-              message.conversationId.equals(conversationId) &
-              message.category.isIn(_mediaMessageTypes) &
-              message.rowId.isBiggerThanValue(rowId),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________, _____________) =>
-              Limit(limit, 0),
-          order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________) =>
-              OrderBy([OrderingTerm.asc(message.createdAt)]));
+        (message, _, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________, em) =>
+            message.conversationId.equals(conversationId) &
+            message.category.isIn(_mediaMessageTypes) &
+            (message.createdAt.isBiggerThanValue(anchor.createdAt) |
+                (message.createdAt.equals(anchor.createdAt) &
+                    message.rowId.isBiggerThanValue(anchor.rowId))),
+        (_, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________, ____________, _____________) =>
+            Limit(limit, 0),
+        order: (message, _, __, ___, ____, _____, ______, _______, ________,
+                _________, __________, ___________) =>
+            OrderBy([
+          OrderingTerm.asc(message.createdAt),
+          OrderingTerm.asc(message.rowId)
+        ]),
+      );
 
   Selectable<MessageItem> postMessages(
           String conversationId, int limit, int offset) =>
@@ -799,16 +824,25 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               Limit(limit, offset));
 
   Selectable<MessageItem> postMessagesBefore(
-          int rowId, String conversationId, int limit) =>
+          MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________, em) =>
-              message.conversationId.equals(conversationId) &
-              message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']) &
-              message.rowId.isSmallerThanValue(rowId),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________, em) =>
-              Limit(limit, 0));
+        (message, _, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________, em) =>
+            message.conversationId.equals(conversationId) &
+            message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']) &
+            (message.createdAt.isSmallerThanValue(anchor.createdAt) |
+                (message.createdAt.equals(anchor.createdAt) &
+                    message.rowId.isSmallerThanValue(anchor.rowId))),
+        (_, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________, ____________, em) =>
+            Limit(limit, 0),
+        order: (message, _, __, ___, ____, _____, ______, _______, ________,
+                _________, __________, ___________) =>
+            OrderBy([
+          OrderingTerm.desc(message.createdAt),
+          OrderingTerm.desc(message.rowId)
+        ]),
+      );
 
   Selectable<MessageItem> fileMessages(
           String conversationId, int limit, int offset) =>
@@ -822,44 +856,66 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               Limit(limit, offset));
 
   Selectable<MessageItem> fileMessagesBefore(
-          int rowId, String conversationId, int limit) =>
+          MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________, em) =>
-              message.conversationId.equals(conversationId) &
-              message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']) &
-              message.rowId.isSmallerThanValue(rowId),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________, em) =>
-              Limit(limit, 0));
+        (message, _, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________, em) =>
+            message.conversationId.equals(conversationId) &
+            message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']) &
+            (message.createdAt.isSmallerThanValue(anchor.createdAt) |
+                message.createdAt.equals(anchor.createdAt) &
+                    message.rowId.isSmallerThanValue(anchor.rowId)),
+        (_, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________, ____________, em) =>
+            Limit(limit, 0),
+        order: (message, _, __, ___, ____, _____, ______, _______, ________,
+                _________, __________, ___________) =>
+            OrderBy([
+          OrderingTerm.desc(message.createdAt),
+          OrderingTerm.desc(message.rowId)
+        ]),
+      );
 
   Selectable<MessageItem> beforeMessagesByConversationId(
-          int rowId, String conversationId, int limit) =>
+          MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
           (message, _, __, ___, ____, _____, ______, _______, ________,
                   _________, __________, ___________, em) =>
               message.conversationId.equals(conversationId) &
-              message.rowId.isSmallerThanValue(rowId),
+              (message.createdAt.isSmallerThanValue(anchor.createdAt) |
+                  (message.createdAt.equals(anchor.createdAt) &
+                      message.rowId.isSmallerThanValue(anchor.rowId))),
+          order: (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________, __________, em) =>
+              OrderBy([
+                OrderingTerm.desc(message.createdAt),
+                OrderingTerm.desc(message.rowId),
+              ]),
           (_, __, ___, ____, _____, ______, _______, ________, _________,
                   __________, ___________, ____________, em) =>
               Limit(limit, 0));
 
   Selectable<MessageItem> afterMessagesByConversationId(
-          int rowId, String conversationId, int limit,
-          {bool orEqual = false}) =>
+          MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________, em) =>
-              message.conversationId.equals(conversationId) &
-              (orEqual
-                  ? message.rowId.isBiggerOrEqualValue(rowId)
-                  : message.rowId.isBiggerThanValue(rowId)),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________, em) =>
-              Limit(limit, 0),
-          order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
-              OrderBy([OrderingTerm.asc(message.createdAt)]));
+        (message, _, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________, em) =>
+            message.conversationId.equals(conversationId) &
+            (message.createdAt.isBiggerThanValue(anchor.createdAt) |
+                (message.createdAt.equals(anchor.createdAt) &
+                    message.rowId.isBiggerThanValue(anchor.rowId))),
+        (_, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________, ____________, em) =>
+            Limit(limit, 0),
+        order: (message, _, __, ___, ____, _____, ______, _______, ________,
+                _________, __________, em) =>
+            OrderBy(
+          [
+            OrderingTerm.asc(message.createdAt),
+            OrderingTerm.asc(message.rowId),
+          ],
+        ),
+      );
 
   Selectable<MessageItem> messageItemByMessageId(
           String messageId) =>
@@ -887,9 +943,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Future<MessageItem?> findNextAudioMessageItem({
     required String conversationId,
     required String messageId,
-    required DateTime createdAt,
   }) async {
-    final rowId = await messageRowId(messageId).getSingleOrNull() ?? -1;
+    final info = await messageOrderInfo(messageId);
+    if (info == null) {
+      e('findNextAudioMessageItem: message not found: $messageId');
+      return null;
+    }
     return _baseMessageItems(
       (message, _, __, ___, ____, _____, ______, _______, ________,
               conversation, _________, ___________, em) =>
@@ -899,15 +958,18 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             MessageCategory.plainAudio,
             MessageCategory.encryptedAudio
           ]) &
-          message.createdAt.isBiggerOrEqualValue(
-              message.createdAt.converter.toSql(createdAt)!) &
-          message.rowId.isBiggerThanValue(rowId),
+          (message.createdAt.isBiggerThanValue(info.createdAt) |
+              (message.createdAt.equals(info.createdAt) &
+                  message.rowId.isBiggerThanValue(info.rowId))),
       (_, __, ___, ____, _____, ______, _______, ________, _________,
               __________, ___________, ____________, em) =>
           Limit(1, 0),
       order: (message, _, __, ___, ____, _____, ______, _______, ________,
               _________, __________, em) =>
-          OrderBy([OrderingTerm.asc(message.createdAt)]),
+          OrderBy([
+        OrderingTerm.asc(message.createdAt),
+        OrderingTerm.asc(message.rowId)
+      ]),
     ).getSingleOrNull();
   }
 
@@ -992,12 +1054,21 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ));
   }
 
-  Selectable<int?> messageRowId(String messageId) => (selectOnly(db.messages)
-        ..addColumns([db.messages.rowId])
-        ..where(db.messages.messageId.equals(messageId))
-        ..limit(1)
-        ..orderBy([OrderingTerm.desc(db.messages.createdAt)]))
-      .map((row) => row.read(db.messages.rowId));
+  Future<MessageOrderInfo?> messageOrderInfo(String messageId) async {
+    final row = await (selectOnly(db.messages)
+          ..addColumns([db.messages.rowId, db.messages.createdAt])
+          ..where(db.messages.messageId.equals(messageId))
+          ..limit(1)
+          ..orderBy([OrderingTerm.desc(db.messages.createdAt)]))
+        .getSingleOrNull();
+    if (row == null) {
+      return null;
+    }
+    return MessageOrderInfo(
+      rowId: row.read(db.messages.rowId)!,
+      createdAt: row.read(db.messages.createdAt)!,
+    );
+  }
 
   Future<int> updateTranscriptMessage(
     String? content,

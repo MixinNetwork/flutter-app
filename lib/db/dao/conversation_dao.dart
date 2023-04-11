@@ -501,4 +501,15 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     }
     return isBotConversation ? EncryptCategory.plain : EncryptCategory.signal;
   }
+
+  Future<List<Conversation>> getConversations({
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.conversations)
+            ..orderBy([
+              (c) => OrderingTerm.asc(c.rowId),
+            ])
+            ..limit(limit, offset: offset))
+          .get();
 }

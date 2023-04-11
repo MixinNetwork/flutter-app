@@ -31,8 +31,10 @@ extension StreamExtension<T> on Stream<T> {
     });
   }
 
-  StreamSubscription asyncListen<E>(FutureOr<E> Function(T event) convert) =>
-      asyncMap((e) => convert(e)).listen((_) {});
+  StreamSubscription asyncListen<E>(FutureOr<E> Function(T event) convert,
+          {Function? onError, void Function()? onDone, bool? cancelOnError}) =>
+      asyncMap((e) => convert(e)).listen((_) {},
+          onError: onError, onDone: onDone, cancelOnError: cancelOnError);
 
   Stream<E> asyncBufferMap<E>(FutureOr<E> Function(List<T> event) convert) {
     StreamController<E> controller;

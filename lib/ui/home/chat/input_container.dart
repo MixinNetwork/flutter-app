@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide StickerAlbum;
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -59,6 +60,10 @@ class InputContainer extends HookWidget {
         useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
       converter: (state) {
         if (state?.conversation == null) return true;
+        if (state?.conversation?.category == ConversationCategory.contact) {
+          return true;
+        }
+
         return state?.participant != null;
       },
     );

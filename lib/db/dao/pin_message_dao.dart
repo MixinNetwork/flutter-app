@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../database_event_bus.dart';
+import '../extension/db.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -11,8 +12,13 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$PinMessageDaoMixin {
   PinMessageDao(super.attachedDatabase);
 
-  Future<int> insert(PinMessage pinMessage) =>
-      into(db.pinMessages).insertOnConflictUpdate(pinMessage).then((value) {
+  Future<int> insert(
+    PinMessage pinMessage, {
+    bool updateIfConflict = true,
+  }) =>
+      into(db.pinMessages)
+          .simpleInsert(pinMessage, updateIfConflict: updateIfConflict)
+          .then((value) {
         DataBaseEventBus.instance.updatePinMessage([
           MiniMessageItem(
             conversationId: pinMessage.conversationId,
@@ -83,4 +89,13 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
                 __________, ___________, ____________, em) =>
             maxLimit,
       );
+
+  Future<List<PinMessage>> getPinMessages({
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.pinMessages)
+            ..orderBy([(tbl) => OrderingTerm.asc(tbl.rowId)])
+            ..limit(limit, offset: offset))
+          .get();
 }
