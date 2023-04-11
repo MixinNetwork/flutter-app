@@ -16,6 +16,7 @@ PlainJsonMessage _$PlainJsonMessageFromJson(Map<String, dynamic> json) =>
       (json['ack_messages'] as List<dynamic>?)
           ?.map((e) => BlazeAckMessage.fromJson(e as Map<String, dynamic>))
           .toList(),
+      content: json['content'] as String?,
     );
 
 Map<String, dynamic> _$PlainJsonMessageToJson(PlainJsonMessage instance) =>
@@ -26,4 +27,5 @@ Map<String, dynamic> _$PlainJsonMessageToJson(PlainJsonMessage instance) =>
       'message_id': instance.messageId,
       'session_id': instance.sessionId,
       'ack_messages': instance.ackMessages?.map((e) => e.toJson()).toList(),
+      'content': instance.content,
     };

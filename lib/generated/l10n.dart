@@ -784,6 +784,26 @@ class Localization {
     );
   }
 
+  /// `Are you sure to sync the chat history from the phone?`
+  String get confirmSyncChatsFromPhone {
+    return Intl.message(
+      'Are you sure to sync the chat history from the phone?',
+      name: 'confirmSyncChatsFromPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure to sync the chat history to the phone?`
+  String get confirmSyncChatsToPhone {
+    return Intl.message(
+      'Are you sure to sync the chat history to the phone?',
+      name: 'confirmSyncChatsToPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Contact`
   String get contact {
     return Intl.message(
@@ -3906,6 +3926,56 @@ class Localization {
     );
   }
 
+  /// `Transfer completed`
+  String get transferCompleted {
+    return Intl.message(
+      'Transfer completed',
+      name: 'transferCompleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transfer failed`
+  String get transferFailed {
+    return Intl.message(
+      'Transfer failed',
+      name: 'transferFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protocol version does not match, transfer failed. Please upgrade the application first.`
+  String get transferProtocolVersionNotMatched {
+    return Intl.message(
+      'Protocol version does not match, transfer failed. Please upgrade the application first.',
+      name: 'transferProtocolVersionNotMatched',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transferring Chat`
+  String get transferringChats {
+    return Intl.message(
+      'Transferring Chat',
+      name: 'transferringChats',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please do not turn off the screen and keep the Mixin running in the foreground while syncing.`
+  String get transferringChatsTips {
+    return Intl.message(
+      'Please do not turn off the screen and keep the Mixin running in the foreground while syncing.',
+      name: 'transferringChatsTips',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Travel & Places`
   String get travelAndPlaces {
     return Intl.message(
@@ -4233,6 +4303,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'es'),
       Locale.fromSubtags(languageCode: 'in'),
       Locale.fromSubtags(languageCode: 'ja'),
       Locale.fromSubtags(languageCode: 'ms'),

@@ -240,6 +240,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "combineAndForward":
             MessageLookupByLibrary.simpleMessage("Combine and forward"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
+        "confirmSyncChatsFromPhone": MessageLookupByLibrary.simpleMessage(
+            "Are you sure to sync the chat history from the phone?"),
+        "confirmSyncChatsToPhone": MessageLookupByLibrary.simpleMessage(
+            "Are you sure to sync the chat history to the phone?"),
         "contact": MessageLookupByLibrary.simpleMessage("Contact"),
         "contactMixinId": m10,
         "contactMuteTitle":
@@ -683,6 +687,16 @@ class MessageLookup extends MessageLookupByLibrary {
             "Transactions CANNOT be deleted"),
         "transcript": MessageLookupByLibrary.simpleMessage("Transcript"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
+        "transferCompleted":
+            MessageLookupByLibrary.simpleMessage("Transfer completed"),
+        "transferFailed":
+            MessageLookupByLibrary.simpleMessage("Transfer failed"),
+        "transferProtocolVersionNotMatched": MessageLookupByLibrary.simpleMessage(
+            "Protocol version does not match, transfer failed. Please upgrade the application first."),
+        "transferringChats":
+            MessageLookupByLibrary.simpleMessage("Transferring Chat"),
+        "transferringChatsTips": MessageLookupByLibrary.simpleMessage(
+            "Please do not turn off the screen and keep the Mixin running in the foreground while syncing."),
         "travelAndPlaces":
             MessageLookupByLibrary.simpleMessage("Travel & Places"),
         "turnOnNotifications":

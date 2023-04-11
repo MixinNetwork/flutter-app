@@ -188,3 +188,9 @@ SELECT m.message_id messageId, u.user_id AS senderId, u.avatar_url AS senderAvat
     WHERE $where
     ORDER BY m.created_at DESC, m.rowid DESC
     LIMIT $limit;
+
+countMessages:
+SELECT count(1) FROM messages;
+
+countMediaMessages:
+SELECT count(1) FROM messages WHERE category IN ('SIGNAL_IMAGE', 'SIGNAL_VIDEO', 'SIGNAL_DATA', 'SIGNAL_AUDIO', 'PLAIN_IMAGE', 'PLAIN_VIDEO', 'PLAIN_DATA', 'PLAIN_AUDIO', 'ENCRYPTED_IMAGE', 'ENCRYPTED_VIDEO', 'ENCRYPTED_DATA', 'ENCRYPTED_AUDIO');

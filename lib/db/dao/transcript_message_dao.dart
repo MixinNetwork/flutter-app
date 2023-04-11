@@ -17,9 +17,13 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$TranscriptMessageDaoMixin {
   TranscriptMessageDao(super.db);
 
-  Future<void> insertAll(List<TranscriptMessage> transcripts) =>
-      batch((batch) => batch.insertAll(db.transcriptMessages, transcripts,
-          mode: InsertMode.insertOrReplace)).then((value) {
+  Future<void> insertAll(
+    List<TranscriptMessage> transcripts, {
+    InsertMode mode = InsertMode.insertOrReplace,
+  }) =>
+      batch((batch) =>
+              batch.insertAll(db.transcriptMessages, transcripts, mode: mode))
+          .then((value) {
         DataBaseEventBus.instance.updateTranscriptMessage(
             transcripts.map((e) => MiniTranscriptMessage(
                   transcriptId: e.transcriptId,
@@ -125,6 +129,15 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
 
     return contents.whereNotNull().join(' ');
   }
+
+  Future<List<TranscriptMessage>> getTranscriptMessages({
+    required int limit,
+    required int offset,
+  }) =>
+      (db.select(db.transcriptMessages)
+            ..orderBy([(t) => OrderingTerm.desc(t.rowId)])
+            ..limit(limit, offset: offset))
+          .get();
 }
 
 extension TranscriptMessageItemExtension on TranscriptMessageItem {

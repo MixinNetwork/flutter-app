@@ -44,7 +44,6 @@ class AudioMessagePlayService {
           await _accountServer.database.messageDao.findNextAudioMessageItem(
         conversationId: currentMessage.conversationId,
         messageId: currentMessage.messageId,
-        createdAt: currentMessage.createdAt,
       );
       if (message == null) return;
       playAudioMessage(message, resetPlaySpeed: false);

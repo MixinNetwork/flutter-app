@@ -39,11 +39,10 @@ class PostPage extends HookWidget {
         loadMoreData: (list) async {
           if (list.isEmpty) return [];
           final last = list.last;
-          final rowId =
-              await messageDao.messageRowId(last.messageId).getSingleOrNull();
-          if (rowId == null) return [];
+          final info = await messageDao.messageOrderInfo(last.messageId);
+          if (info == null) return [];
           final items = await messageDao
-              .postMessagesBefore(rowId, conversationId, size)
+              .postMessagesBefore(info, conversationId, size)
               .get();
           return [...list, ...items];
         },

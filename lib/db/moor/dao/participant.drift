@@ -33,3 +33,6 @@ ORDER BY p.created_at DESC;
 userIdByIdentityNumber:
 SELECT u.user_id FROM users u INNER JOIN participants p ON p.user_id = u.user_id
         WHERE p.conversation_id = :conversationId AND u.identity_number = :identityNumber;
+
+countParticipants:
+SELECT COUNT(1) FROM participants;

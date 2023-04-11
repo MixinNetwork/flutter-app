@@ -85,3 +85,6 @@ FROM messages message
 WHERE message.conversation_id = :conversationId AND message.category = 'MESSAGE_PIN' AND message.quote_message_id = :messageId
 ORDER BY message.created_at DESC
 LIMIT 1;
+
+countPinMessages:
+SELECT COUNT(1) FROM pin_messages;

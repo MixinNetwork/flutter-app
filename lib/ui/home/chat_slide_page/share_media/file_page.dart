@@ -38,11 +38,10 @@ class FilePage extends HookWidget {
         loadMoreData: (list) async {
           if (list.isEmpty) return [];
           final last = list.last;
-          final rowId =
-              await messageDao.messageRowId(last.messageId).getSingleOrNull();
-          if (rowId == null) return [];
+          final info = await messageDao.messageOrderInfo(last.messageId);
+          if (info == null) return [];
           final items = await messageDao
-              .fileMessagesBefore(rowId, conversationId, size)
+              .fileMessagesBefore(info, conversationId, size)
               .get();
           return [...list, ...items];
         },

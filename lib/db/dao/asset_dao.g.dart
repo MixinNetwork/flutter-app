@@ -89,6 +89,14 @@ mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
       );
     });
   }
+
+  Selectable<int> countAssets() {
+    return customSelect('SELECT COUNT(1) AS _c0 FROM assets',
+        variables: [],
+        readsFrom: {
+          assets,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
 }
 
 class AssetItem {

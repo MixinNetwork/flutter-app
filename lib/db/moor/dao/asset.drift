@@ -20,3 +20,6 @@ FROM assets asset
 LEFT JOIN assets tempAsset ON asset.chain_id = tempAsset.asset_id
 WHERE asset.asset_id = :assetId
 LIMIT 1;
+
+countAssets:
+SELECT COUNT(1) FROM assets;

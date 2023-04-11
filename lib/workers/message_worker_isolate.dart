@@ -25,6 +25,7 @@ import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/system/package_info.dart';
 import 'decrypt_message.dart';
+import 'device_transfer.dart';
 import 'isolate_event.dart';
 import 'job/ack_job.dart';
 import 'job/delete_old_fts_record_job.dart';
@@ -130,6 +131,7 @@ class _MessageProcessRunner {
   late UpdateStickerJob _updateStickerJob;
   late SessionAckJob _sessionAckJob;
   late FloodJob _floodJob;
+  DeviceTransferIsolateController? _deviceTransfer;
 
   final jobSubscribers = <StreamSubscription>[];
 
@@ -226,6 +228,27 @@ class _MessageProcessRunner {
     MigrateFtsJob(database: database);
     DeleteOldFtsRecordJob(database: database);
 
+    if (primarySessionId != null) {
+      _deviceTransfer = await startTransferIsolate(
+        userId: userId,
+        messageDeliver: (message) async {
+          d('device_transfer: send message: $message');
+          final result = await _sender.deliver(message);
+          if (!result.success) {
+            w('device_transfer: send message failed: $result');
+          } else {
+            d('device_transfer: send message success: $result');
+          }
+        },
+        primarySessionId: primarySessionId!,
+        identityNumber: identityNumber,
+        rootIsolateToken: initParams.rootIsolateToken,
+        mixinDocumentDirectory: initParams.mixinDocumentDirectory,
+      );
+    } else {
+      e('device_transfer: primarySessionId is null, device transfer is disabled');
+    }
+
     _decryptMessage = DecryptMessage(
       userId,
       database,
@@ -240,6 +263,7 @@ class _MessageProcessRunner {
       _sendingJob,
       _updateStickerJob,
       _updateAssetJob,
+      _deviceTransfer,
     );
     _floodJob.start();
   }
@@ -347,5 +371,6 @@ class _MessageProcessRunner {
     blaze.dispose();
     database.dispose();
     jobSubscribers.forEach((subscription) => subscription.cancel());
+    _deviceTransfer?.dispose();
   }
 }

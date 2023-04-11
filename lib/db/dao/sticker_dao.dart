@@ -35,6 +35,9 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
         return value;
       });
 
+  Future<void> insertSticker(Sticker sticker) =>
+      into(db.stickers).insert(sticker, mode: InsertMode.insertOrIgnore);
+
   Future<void> insertAll(Iterable<StickersCompanion> stickers) =>
       batch((batch) => batch.insertAllOnConflictUpdate(db.stickers, stickers))
           .then((value) {
@@ -88,4 +91,13 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
 
   Future<bool> hasSticker(String stickerId) async => db.hasData(
       db.stickers, const [], db.stickers.stickerId.equals(stickerId));
+
+  Future<List<Sticker>> getStickers({
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.stickers)
+            ..orderBy([(tbl) => OrderingTerm.asc(tbl.rowId)])
+            ..limit(limit, offset: offset))
+          .get();
 }
