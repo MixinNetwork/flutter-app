@@ -210,10 +210,9 @@ class DeviceTransferReceiver {
           switch (command.action) {
             case kTransferCommandActionFinish:
               i('${command.action} command: finish receiver socket');
-              onReceiverProgressUpdate?.call(100);
               _finished = true;
-              assert(_socket != null, 'socket is null');
               await _notifyProgressComplete();
+              assert(_socket != null, 'socket is null');
               await _socket?.addCommand(TransferDataCommand.simple(
                   deviceId: deviceId, action: kTransferCommandActionFinish));
               break;

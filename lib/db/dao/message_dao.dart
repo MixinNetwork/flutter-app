@@ -146,30 +146,35 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   final Map<String, void Function()> _conversationUnseenTaskRunner = {};
 
   void _updateConversationUnseenCount(
-    Message message,
+    String conversationId,
     String currentUserId,
   ) {
-    Future<void> _update(Message message) async {
+    Future<void> _update(String conversationId) async {
+      final latest =
+          await messagesByConversationId(conversationId, 1).getSingleOrNull();
+      if (latest == null) {
+        e('failed to update conversation last message, latest message is null $conversationId');
+        return;
+      }
       await db.updateUnseenMessageCountAndLastMessageId(
-        message.conversationId,
+        conversationId,
         currentUserId,
-        message.messageId,
-        message.createdAt,
+        latest.messageId,
+        latest.createdAt,
       );
 
-      DataBaseEventBus.instance.updateConversation(message.conversationId);
+      DataBaseEventBus.instance.updateConversation(conversationId);
     }
 
-    if (_conversationUnseenTaskRunner[message.conversationId] != null) {
-      _conversationUnseenTaskRunner[message.conversationId] =
-          () => _update(message);
+    if (_conversationUnseenTaskRunner[conversationId] != null) {
+      _conversationUnseenTaskRunner[conversationId] =
+          () => _update(conversationId);
       return;
     } else {
-      _conversationUnseenTaskRunner[message.conversationId] =
-          () => _update(message);
+      _conversationUnseenTaskRunner[conversationId] =
+          () => _update(conversationId);
       Future.delayed(kDefaultThrottleDuration).then((value) {
-        final runner =
-            _conversationUnseenTaskRunner.remove(message.conversationId);
+        final runner = _conversationUnseenTaskRunner.remove(conversationId);
         runner?.call();
       });
     }
@@ -189,7 +194,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ];
     final result = (await Future.wait(futures)).first as int;
 
-    _updateConversationUnseenCount(message, currentUserId);
+    _updateConversationUnseenCount(message.conversationId, currentUserId);
 
     DataBaseEventBus.instance.insertOrReplaceMessages([
       MiniMessageItem(
