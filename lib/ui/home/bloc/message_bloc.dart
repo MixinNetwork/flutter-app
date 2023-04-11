@@ -5,6 +5,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
@@ -95,7 +96,7 @@ class MessageState extends Equatable {
       final ids = <String>{};
       for (final item in list) {
         if (ids.contains(item.messageId)) {
-          throw Exception('MessageState has same messageId: ${item.messageId}');
+          e('MessageState has same messageId: ${item.messageId}');
         }
         ids.add(item.messageId);
       }
@@ -340,9 +341,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Future<MessageState> _before(String conversationId) async {
     final topMessageId = state.topMessage?.messageId;
     assert(topMessageId != null);
-    final rowId = await messageDao.messageRowId(topMessageId!).getSingle();
+    final info = await messageDao.messageOrderInfo(topMessageId!);
     final list = await messageDao
-        .beforeMessagesByConversationId(rowId!, conversationId, limit)
+        .beforeMessagesByConversationId(info!, conversationId, limit)
         .get();
 
     final isOldest = list.length < limit;
@@ -353,9 +354,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Future<MessageState> _after(String conversationId) async {
     final bottomMessageId = state.bottomMessage?.messageId;
     assert(bottomMessageId != null);
-    final rowId = await messageDao.messageRowId(bottomMessageId!).getSingle();
+    final info = await messageDao.messageOrderInfo(bottomMessageId!);
     final list = await messageDao
-        .afterMessagesByConversationId(rowId!, conversationId, limit)
+        .afterMessagesByConversationId(info!, conversationId, limit)
         .get();
 
     final isLatest = list.length < limit ? true : null;
@@ -410,38 +411,29 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     if (centerMessageId == null) return recentMessages();
 
     return database.transaction(() async {
-      final rowId =
-          await messageDao.messageRowId(centerMessageId).getSingleOrNull();
-      if (rowId == null) {
+      final info = await messageDao.messageOrderInfo(centerMessageId);
+      if (info == null) {
         return recentMessages();
       }
       final _limit = limit ~/ 2;
-      var bottomList = await messageDao
-          .afterMessagesByConversationId(rowId, conversationId, _limit + 1,
-              orEqual: true)
+      final bottomList = await messageDao
+          .afterMessagesByConversationId(info, conversationId, _limit)
           .get();
       var topList = (await messageDao
-              .beforeMessagesByConversationId(rowId, conversationId, _limit)
+              .beforeMessagesByConversationId(info, conversationId, _limit)
               .get())
           .reversed
           .toList();
 
-      final isLatest = bottomList.length < _limit + 1;
+      final isLatest = bottomList.length < _limit;
       final isOldest = topList.length < _limit;
 
-      MessageItem? center;
-
-      bottomList = bottomList.fold(<MessageItem>[], (previousValue, element) {
-        if (center == null && element.messageId == centerMessageId) {
-          center = element;
-        } else {
-          previousValue.add(element);
-        }
-        return previousValue;
-      });
+      var center = await messageDao
+          .messageItemByMessageId(centerMessageId)
+          .getSingleOrNull();
 
       if (bottomList.isEmpty && center != null) {
-        topList = [...topList, center!];
+        topList = [...topList, center];
         center = null;
       }
 
