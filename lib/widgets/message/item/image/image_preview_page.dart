@@ -107,8 +107,7 @@ class ImagePreviewPage extends HookWidget {
 
       final messageDao = context.database.messageDao;
       () async {
-        final info =
-            await messageDao.messageOrderInfo(_messageId.value);
+        final info = await messageDao.messageOrderInfo(_messageId.value);
         if (info == null) return;
 
         await Future.wait([

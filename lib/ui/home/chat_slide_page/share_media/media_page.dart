@@ -43,8 +43,7 @@ class MediaPage extends HookWidget {
         loadMoreData: (list) async {
           if (list.isEmpty) return [];
           final last = list.last;
-          final info =
-              await messageDao.messageOrderInfo(last.messageId);
+          final info = await messageDao.messageOrderInfo(last.messageId);
           if (info == null) return [];
           final items = await messageDao
               .mediaMessagesBefore(info, conversationId, size)
