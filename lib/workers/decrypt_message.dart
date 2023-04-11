@@ -441,7 +441,8 @@ class DecryptMessage extends Injector {
         _jsonDecode(data.data) as Map<String, dynamic>);
 
     if (pinMessage.action == PinMessagePayloadAction.pin) {
-      await Future.forEach<String>(pinMessage.messageIds, (messageId) async {
+      await futureForEachIndexed(pinMessage.messageIds,
+          (index, messageId) async {
         final message =
             await database.messageDao.findMessageByMessageId(messageId);
         if (message == null) return;
@@ -457,7 +458,7 @@ class DecryptMessage extends Injector {
         ));
         await database.messageDao.insert(
           Message(
-            messageId: const Uuid().v4(),
+            messageId: index == 0 ? data.messageId : const Uuid().v4(),
             conversationId: data.conversationId,
             quoteMessageId: message.messageId,
             userId: data.userId,
