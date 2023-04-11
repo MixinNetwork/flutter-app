@@ -276,8 +276,6 @@ class DeviceTransferReceiver {
   Future<void> _processReceivedAttachmentPacket(
       TransferAttachmentPacket packet) async {
     d('_processReceivedAttachmentPacket: ${packet.messageId} ${packet.path}');
-    final message =
-        await database.messageDao.findMessageByMessageId(packet.messageId);
 
     void deletePacketFile() {
       try {
@@ -287,16 +285,30 @@ class DeviceTransferReceiver {
       }
     }
 
-    if (message == null) {
-      e('_processReceivedAttachmentPacket: message not found ${packet.messageId}');
-      deletePacketFile();
-      return;
+    String? path;
+    final message =
+        await database.messageDao.findMessageByMessageId(packet.messageId);
+    if (message != null) {
+      path = attachmentUtil.convertAbsolutePath(
+        category: message.category,
+        conversationId: message.conversationId,
+        fileName: message.mediaUrl,
+      );
+    } else {
+      final tm = await database.transcriptMessageDao
+          .transcriptMessageByMessageId(packet.messageId)
+          .getSingleOrNull();
+      if (tm == null) {
+        e('_processReceivedAttachmentPacket: message not found ${packet.messageId}');
+        deletePacketFile();
+        return;
+      }
+      path = attachmentUtil.convertAbsolutePath(
+        category: tm.category,
+        fileName: tm.mediaUrl,
+        isTranscript: true,
+      );
     }
-    final path = attachmentUtil.convertAbsolutePath(
-      category: message.category,
-      conversationId: message.conversationId,
-      fileName: message.mediaUrl,
-    );
 
     if (path.isEmpty) {
       e('_processReceivedAttachmentPacket: path is empty');
