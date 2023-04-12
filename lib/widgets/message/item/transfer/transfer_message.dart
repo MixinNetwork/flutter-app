@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../../../utils/extension/extension.dart';
 import '../../../interactive_decorated_box.dart';
@@ -28,7 +29,11 @@ class TransferMessage extends HookWidget {
 
     useEffect(() {
       if (chainIcon != null && assetId != null) return;
-      context.accountServer.updateAssetById(assetId: assetId!);
+      if (assetId == null) {
+        e('${context.message.snapshotId}: assetId is null');
+        return;
+      }
+      context.accountServer.updateAssetById(assetId: assetId);
     }, [chainIcon, assetId]);
 
     return MessageBubble(
