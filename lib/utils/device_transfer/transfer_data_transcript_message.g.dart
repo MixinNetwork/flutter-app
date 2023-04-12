@@ -30,9 +30,8 @@ TransferDataTranscriptMessage _$TransferDataTranscriptMessageFromJson(
       thumbUrl: json['thumb_url'] as String?,
       mediaKey: json['media_key'] as String?,
       mediaDigest: json['media_digest'] as String?,
-      mediaCreatedAt: json['media_created_at'] == null
-          ? null
-          : DateTime.parse(json['media_created_at'] as String),
+      mediaCreatedAt:
+          _safeDateTimeFromJson(json['media_created_at'] as String?),
       stickerId: json['sticker_id'] as String?,
       sharedUserId: json['shared_user_id'] as String?,
       mentions: json['mentions'] as String?,
