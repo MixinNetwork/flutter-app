@@ -5,6 +5,13 @@ import '../../enum/media_status.dart';
 
 part 'transfer_data_transcript_message.g.dart';
 
+DateTime? _safeDateTimeFromJson(String? json) {
+  if (json == null) {
+    return null;
+  }
+  return DateTime.tryParse(json);
+}
+
 @JsonSerializable()
 @MediaStatusJsonConverter()
 class TransferDataTranscriptMessage {
@@ -135,7 +142,7 @@ class TransferDataTranscriptMessage {
   @JsonKey(name: 'media_digest')
   final String? mediaDigest;
 
-  @JsonKey(name: 'media_created_at')
+  @JsonKey(name: 'media_created_at', fromJson: _safeDateTimeFromJson)
   final DateTime? mediaCreatedAt;
 
   @JsonKey(name: 'sticker_id')
