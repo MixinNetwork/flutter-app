@@ -354,7 +354,7 @@ class DataBaseEventBus {
       w('DatabaseEvent: updateSticker miniStickers is empty');
       return;
     }
-    _send(_DatabaseEvent.updateSticker, newMiniStickers);
+    _send(_DatabaseEvent.updateSticker, newMiniStickers.toList());
   }
 
   // app
