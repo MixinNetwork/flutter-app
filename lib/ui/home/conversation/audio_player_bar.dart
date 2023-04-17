@@ -165,10 +165,12 @@ class _Icon extends StatelessWidget {
           children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: ConversationAvatarWidget(
-                conversation: conversation,
-                size: 32,
-              ),
+              child: conversation == null
+                  ? const SizedBox.square(dimension: 32)
+                  : ConversationAvatarWidget(
+                      conversation: conversation,
+                      size: 32,
+                    ),
             ),
             Align(
               alignment: Alignment.bottomRight,

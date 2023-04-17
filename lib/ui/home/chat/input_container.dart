@@ -73,7 +73,7 @@ class InputContainer extends HookWidget {
     }, [conversationId]);
 
     final voiceRecorderCubit = useBloc(
-      VoiceRecorderCubit.new,
+      () => VoiceRecorderCubit(context.audioMessageService),
       keys: [conversationId],
     );
 
