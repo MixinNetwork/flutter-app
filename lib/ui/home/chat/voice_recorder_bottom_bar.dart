@@ -8,11 +8,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ogg_opus_player/ogg_opus_player.dart';
 
 import '../../../constants/resources.dart';
+import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
+import '../../../utils/system/audio_session.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/toast.dart';
@@ -55,13 +57,15 @@ class RecordedData with EquatableMixin {
 }
 
 class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
-  VoiceRecorderCubit()
+  VoiceRecorderCubit(this.audioMessagePlayService)
       : super(const VoiceRecorderCubitState(
           state: RecorderState.idle,
         ));
 
   OggOpusRecorder? _recorder;
   String? _recorderFilePath;
+
+  final AudioMessagePlayService audioMessagePlayService;
 
   Completer<void>? _startingCompleter;
 
@@ -73,6 +77,7 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
       return;
     }
     assert(_recorder == null, 'Recorder already started');
+    audioMessagePlayService.stop();
     _startingCompleter = Completer();
     final path = await generateTempFilePath(TempFileType.voiceRecord);
     _recorderFilePath = path;
@@ -83,6 +88,7 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
     }
     await file.create(recursive: true);
     d('start recode voice, path : $path');
+    await AudioSession.instance.activeRecord();
     _recorder = OggOpusRecorder(path);
     _recorder?.start();
     _timer = Timer(const Duration(seconds: 60), stopRecording);
@@ -118,6 +124,7 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
     }
 
     recorder?.dispose();
+    await AudioSession.instance.deactivate();
 
     final recodeData = RecordedData(
       waveform ?? const [],
@@ -369,12 +376,16 @@ class VoiceRecorderBottomBar extends HookWidget {
       final audioFile = File(recordedResult.path);
       if (!audioFile.existsSync()) {
         e('audio file does not exist.');
-        showToastFailed(null);
+        scheduleMicrotask(() {
+          showToastFailed(null);
+        });
         return;
       }
       if (audioFile.lengthSync() == 0) {
         e('audio file is empty.');
-        showToastFailed(null);
+        scheduleMicrotask(() {
+          showToastFailed(null);
+        });
         return;
       }
     }, [recordedResult]);
@@ -502,7 +513,8 @@ class _Player {
 
   OggOpusPlayer? _player;
 
-  void start() {
+  Future<void> start() async {
+    await AudioSession.instance.activePlayback();
     final player = OggOpusPlayer(path);
     player.state.addListener(() {
       final state = player.state.value;
@@ -515,10 +527,11 @@ class _Player {
     _player = player;
   }
 
-  void stop() {
+  Future<void> stop() async {
     _player?.pause();
     _player?.dispose();
     _player = null;
+    await AudioSession.instance.deactivate();
     isPlaying.value = false;
   }
 

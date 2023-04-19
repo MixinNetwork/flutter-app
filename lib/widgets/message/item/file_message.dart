@@ -208,6 +208,7 @@ bool _shouldOpenDirectly(String mediaName) {
     '.txt',
     '.rtf',
     '.csv',
+    '.log',
   };
   return allowList.contains(extension);
 }
