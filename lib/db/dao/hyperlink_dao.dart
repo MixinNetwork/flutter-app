@@ -4,7 +4,7 @@ import '../mixin_database.dart';
 
 part 'hyperlink_dao.g.dart';
 
-@DriftAccessor(tables: [Hyperlinks])
+@DriftAccessor()
 class HyperlinkDao extends DatabaseAccessor<MixinDatabase>
     with _$HyperlinkDaoMixin {
   HyperlinkDao(super.db);

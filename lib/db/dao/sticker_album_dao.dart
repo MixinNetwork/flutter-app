@@ -23,7 +23,7 @@ extension StickerAlbumsCompanionExtension on sdk.StickerAlbum {
       );
 }
 
-@DriftAccessor(tables: [StickerAlbums])
+@DriftAccessor()
 class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerAlbumDaoMixin {
   StickerAlbumDao(super.db);

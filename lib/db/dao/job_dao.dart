@@ -9,7 +9,7 @@ import '../mixin_database.dart';
 
 part 'job_dao.g.dart';
 
-@DriftAccessor(tables: [MessagesHistory])
+@DriftAccessor()
 class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   JobDao(super.db);
 

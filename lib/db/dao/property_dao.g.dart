@@ -1,9 +1,9 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'chain_dao.dart';
+part of 'property_dao.dart';
 
 // ignore_for_file: type=lint
-mixin _$ChainDaoMixin on DatabaseAccessor<MixinDatabase> {
+mixin _$PropertyDaoMixin on DatabaseAccessor<MixinDatabase> {
   Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;

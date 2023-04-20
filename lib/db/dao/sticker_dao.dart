@@ -20,7 +20,7 @@ extension StickerConverter on sdk.Sticker {
       );
 }
 
-@DriftAccessor(tables: [Sticker])
+@DriftAccessor()
 class StickerDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerDaoMixin {
   StickerDao(super.db);

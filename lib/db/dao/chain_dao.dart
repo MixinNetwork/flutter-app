@@ -15,7 +15,7 @@ extension ChainConverter on sdk.Chain {
       );
 }
 
-@DriftAccessor(tables: [Chains], include: {'../moor/dao/chain.drift'})
+@DriftAccessor(include: {'../moor/dao/chain.drift'})
 class ChainDao extends DatabaseAccessor<MixinDatabase> with _$ChainDaoMixin {
   ChainDao(super.db);
 

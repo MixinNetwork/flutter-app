@@ -5,7 +5,7 @@ import '../signal_database.dart';
 
 part 'session_dao.g.dart';
 
-@DriftAccessor(tables: [Sessions])
+@DriftAccessor()
 class SessionDao extends DatabaseAccessor<SignalDatabase>
     with _$SessionDaoMixin {
   SessionDao(super.db);

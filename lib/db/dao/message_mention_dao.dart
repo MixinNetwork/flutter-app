@@ -7,7 +7,7 @@ import '../mixin_database.dart';
 
 part 'message_mention_dao.g.dart';
 
-@DriftAccessor(tables: [MessageMentions])
+@DriftAccessor()
 class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageMentionDaoMixin {
   MessageMentionDao(super.db);

@@ -10,9 +10,7 @@ import '../util/util.dart';
 
 part 'transcript_message_dao.g.dart';
 
-@DriftAccessor(
-    tables: [TranscriptMessages],
-    include: {'../moor/dao/transcript_message.drift'})
+@DriftAccessor(include: {'../moor/dao/transcript_message.drift'})
 class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$TranscriptMessageDaoMixin {
   TranscriptMessageDao(super.db);
