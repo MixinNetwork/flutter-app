@@ -187,8 +187,16 @@ class Blaze {
     }
     if (blazeMessage.action == kAcknowledgeMessageReceipt) {
       await makeMessageStatus(data.messageId, data.status);
-      await database.offsetDao.insert(Offset(
-          key: statusOffset, timestamp: data.updatedAt.toIso8601String()));
+
+      final offset =
+      await database.offsetDao.findStatusOffset().getSingleOrNull();
+      final timestamp = data.updatedAt.toIso8601String();
+
+      if (offset == null || offset != timestamp) {
+        await database.offsetDao.insert(
+          Offset(key: statusOffset, timestamp: timestamp),
+        );
+      }
     } else if (blazeMessage.action == kCreateMessage) {
       if (data.userId == userId &&
           (data.category == null || data.conversationId.isEmpty)) {
