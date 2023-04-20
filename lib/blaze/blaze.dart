@@ -189,7 +189,7 @@ class Blaze {
       await makeMessageStatus(data.messageId, data.status);
 
       final offset =
-      await database.offsetDao.findStatusOffset().getSingleOrNull();
+          await database.offsetDao.findStatusOffset().getSingleOrNull();
       final timestamp = data.updatedAt.toIso8601String();
 
       if (offset == null || offset != timestamp) {
