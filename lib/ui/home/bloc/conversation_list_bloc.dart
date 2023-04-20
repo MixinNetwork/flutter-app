@@ -75,7 +75,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
     DataBaseEventBus.instance.updateMessageMentionStream,
   ])
-      .throttleTime(kDefaultThrottleDuration ~/ 10, trailing: true)
+      .throttleTime(kDefaultThrottleDuration, trailing: true)
       .asBroadcastStream();
 
   void _switchBloc(
