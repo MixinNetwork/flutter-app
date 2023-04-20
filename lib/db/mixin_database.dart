@@ -11,6 +11,7 @@ import 'converter/media_status_type_converter.dart';
 import 'converter/message_status_type_converter.dart';
 import 'converter/millis_date_converter.dart';
 import 'converter/participant_role_converter.dart';
+import 'converter/property_group_converter.dart';
 import 'converter/user_relationship_converter.dart';
 import 'dao/address_dao.dart';
 import 'dao/app_dao.dart';
