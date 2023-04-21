@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../logger.dart';
 import 'crc.dart';
 import 'json_transfer_data.dart';
+import 'transfer_data_command.dart';
 
 const kTypeCommand = 1;
 const kTypeJson = 2;
@@ -28,20 +29,16 @@ abstract class TransferPacket {
   Future<int> _writeBodyToSink(EventSink<List<int>> sink);
 }
 
-class TransferJsonPacket extends TransferPacket {
-  TransferJsonPacket(this.json)
-      : _data = Uint8List.fromList(utf8.encode(jsonEncode(json.toJson())));
+abstract class _TransferJsonPacket extends TransferPacket {
+  _TransferJsonPacket(Map<String, dynamic> json)
+      : _data = Uint8List.fromList(utf8.encode(jsonEncode(json)));
 
-  TransferJsonPacket._fromData(this._data)
-      : json = JsonTransferData.fromJson(
-            jsonDecode(utf8.decode(_data)) as Map<String, dynamic>);
+  _TransferJsonPacket._fromData(this._data);
 
   final Uint8List _data;
 
   @override
   int get _type => kTypeJson;
-
-  final JsonTransferData json;
 
   @override
   Future<int> get _bodyLength => Future.value(_data.length);
@@ -53,8 +50,29 @@ class TransferJsonPacket extends TransferPacket {
   }
 }
 
-class TransferCommandPacket extends TransferJsonPacket {
-  TransferCommandPacket(super.json);
+class TransferDataPacket extends _TransferJsonPacket {
+  TransferDataPacket(this.data) : super(data.toJson());
+
+  TransferDataPacket._fromData(super.data)
+      : data = JsonTransferData.fromJson(
+            jsonDecode(utf8.decode(data)) as Map<String, dynamic>),
+        super._fromData();
+
+  final JsonTransferData data;
+
+  @override
+  int get _type => kTypeJson;
+}
+
+class TransferCommandPacket extends _TransferJsonPacket {
+  TransferCommandPacket(this.command) : super(command.toJson());
+
+  TransferCommandPacket._fromData(super.data)
+      : command = TransferDataCommand.fromJson(
+            jsonDecode(utf8.decode(data)) as Map<String, dynamic>),
+        super._fromData();
+
+  final TransferDataCommand command;
 
   @override
   int get _type => kTypeCommand;
@@ -170,9 +188,10 @@ abstract class _TransferPacketBuilder {
 }
 
 class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
-  _TransferJsonPacketBuilder(super.expectedBodyLength);
+  _TransferJsonPacketBuilder(super.expectedBodyLength, this.creator);
 
   final _body = <int>[];
+  final _TransferJsonPacket Function(Uint8List jsonBytes) creator;
 
   @override
   bool doWriteBody(Uint8List bytes) {
@@ -181,11 +200,11 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
   }
 
   @override
-  TransferJsonPacket build() {
+  _TransferJsonPacket build() {
     assert(_writeBodyLength == expectedBodyLength);
     final json = Uint8List.fromList(_body);
     try {
-      return TransferJsonPacket._fromData(json);
+      return creator(json);
     } catch (error, stacktrace) {
       e('_TransferJsonPacketBuilder#build: $error, $stacktrace \ncontent: ${utf8.decode(json, allowMalformed: true)}');
       rethrow;
@@ -297,8 +316,16 @@ class _TransferProtocolSink extends EventSink<Uint8List> {
         final bodyLength = bytes.getInt32(1);
         switch (type) {
           case kTypeCommand:
+            _builder = _TransferJsonPacketBuilder(
+              bodyLength,
+              TransferCommandPacket._fromData,
+            );
+            break;
           case kTypeJson:
-            _builder = _TransferJsonPacketBuilder(bodyLength);
+            _builder = _TransferJsonPacketBuilder(
+              bodyLength,
+              TransferDataPacket._fromData,
+            );
             break;
           case kTypeFile:
             _builder = _TransferAttachmentPacketBuilder(bodyLength, folder);
