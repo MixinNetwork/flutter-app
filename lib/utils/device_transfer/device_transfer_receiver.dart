@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../db/database.dart';
+import '../../db/mixin_database.dart';
 import '../attachment/attachment_util.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
@@ -260,6 +261,14 @@ class DeviceTransferReceiver {
           d('client: pinMessage: $pinMessage');
           await database.pinMessageDao.insert(
             pinMessage.toDbPinMessage(),
+            updateIfConflict: false,
+          );
+          break;
+        case JsonTransferDataType.messageMention:
+          final messageMention = MessageMention.fromJson(data.data);
+          d('client: messageMention: $messageMention');
+          await database.messageMentionDao.insert(
+            messageMention,
             updateIfConflict: false,
           );
           break;

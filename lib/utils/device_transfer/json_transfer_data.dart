@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:drift/drift.dart' hide JsonKey;
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../db/mixin_database.dart';
 import '../logger.dart';
 import 'transfer_data_asset.dart';
 import 'transfer_data_command.dart';
@@ -32,6 +34,7 @@ enum JsonTransferDataType {
   transcriptMessage,
   participant,
   pinMessage,
+  messageMention,
   unknown;
 }
 
@@ -145,6 +148,18 @@ extension SocketExtension on IOSink {
     final wrapper = JsonTransferData(
       data: expiredMessage.toJson(),
       type: JsonTransferDataType.expiredMessage,
+    );
+    return _addTransferJson(wrapper);
+  }
+
+  Future<void> addMessageMention(MessageMention messageMention) {
+    var data = messageMention;
+    if (messageMention.hasRead == null) {
+      data = data.copyWith(hasRead: const Value(false));
+    }
+    final wrapper = JsonTransferData(
+      data: data.toJson(),
+      type: JsonTransferDataType.messageMention,
     );
     return _addTransferJson(wrapper);
   }

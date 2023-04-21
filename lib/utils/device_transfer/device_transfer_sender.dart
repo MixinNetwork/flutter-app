@@ -147,6 +147,7 @@ class DeviceTransferSender {
             case JsonTransferDataType.participant:
             case JsonTransferDataType.pinMessage:
             case JsonTransferDataType.unknown:
+            case JsonTransferDataType.messageMention:
               e('unknown type: ${data.type}');
               d('data: $data');
               break;
@@ -193,7 +194,8 @@ class DeviceTransferSender {
           await database.transcriptMessageDao
               .countTranscriptMessages()
               .getSingle() +
-          await database.expiredMessageDao.countExpiredMessages().getSingle();
+          await database.expiredMessageDao.countExpiredMessages().getSingle() +
+          await database.messageMentionDao.getMessageMentionsCount();
       await socket.addCommand(TransferDataCommand.start(
         deviceId: await getDeviceId(),
         total: count,
@@ -212,6 +214,7 @@ class DeviceTransferSender {
     await runWithLog(_processTransferTranscriptMessage, 'transcriptMessage');
     await runWithLog(_processTransferPinMessage, 'pinMessage');
     await runWithLog(_processTransferMessage, 'message');
+    await runWithLog(_processTransferMessageMention, 'messageMention');
     await runWithLog(_processTransferExpiredMessage, 'expiredMessage');
     await runWithLog(_processTransferAttachment, 'attachment');
 
@@ -352,6 +355,23 @@ class DeviceTransferSender {
       }
     }
     return count;
+  }
+
+  Future<int> _processTransferMessageMention(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final messages = await database.messageMentionDao
+          .getMessageMentions(_kQueryLimit, offset);
+      offset += messages.length;
+      for (final message in messages) {
+        await socket.addMessageMention(message);
+        await onPacketSend();
+      }
+      if (messages.length < _kQueryLimit) {
+        break;
+      }
+    }
+    return offset;
   }
 
   Future<int> _processTransferTranscriptMessage(Socket socket) async {
