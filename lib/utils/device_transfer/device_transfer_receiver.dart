@@ -10,6 +10,7 @@ import '../attachment/attachment_util.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
 import 'json_transfer_data.dart';
+import 'transfer_data_app.dart';
 import 'transfer_data_asset.dart';
 import 'transfer_data_command.dart';
 import 'transfer_data_conversation.dart';
@@ -269,6 +270,14 @@ class DeviceTransferReceiver {
           d('client: messageMention: $messageMention');
           await database.messageMentionDao.insert(
             messageMention,
+            updateIfConflict: false,
+          );
+          break;
+        case JsonTransferDataType.app:
+          final app = TransferDataApp.fromJson(data.data);
+          d('client: app: $app');
+          await database.appDao.insert(
+            app.toDbApp(),
             updateIfConflict: false,
           );
           break;

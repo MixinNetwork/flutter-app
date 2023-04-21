@@ -10,6 +10,7 @@ import '../extension/extension.dart';
 import '../logger.dart';
 import '../platform.dart';
 import 'json_transfer_data.dart';
+import 'transfer_data_app.dart';
 import 'transfer_data_asset.dart';
 import 'transfer_data_command.dart';
 import 'transfer_data_conversation.dart';
@@ -148,6 +149,7 @@ class DeviceTransferSender {
             case JsonTransferDataType.pinMessage:
             case JsonTransferDataType.unknown:
             case JsonTransferDataType.messageMention:
+            case JsonTransferDataType.app:
               e('unknown type: ${data.type}');
               d('data: $data');
               break;
@@ -195,7 +197,8 @@ class DeviceTransferSender {
               .countTranscriptMessages()
               .getSingle() +
           await database.expiredMessageDao.countExpiredMessages().getSingle() +
-          await database.messageMentionDao.getMessageMentionsCount();
+          await database.messageMentionDao.getMessageMentionsCount() +
+          await database.appDao.getAppsCount();
       await socket.addCommand(TransferDataCommand.start(
         deviceId: await getDeviceId(),
         total: count,
@@ -208,6 +211,7 @@ class DeviceTransferSender {
     await runWithLog(_processTransferConversation, 'conversation');
     await runWithLog(_processTransferParticipant, 'participant');
     await runWithLog(_processTransferUser, 'user');
+    await runWithLog(_processTransferApp, 'app');
     await runWithLog(_processTransferSticker, 'sticker');
     await runWithLog(_processTransferAsset, 'asset');
     await runWithLog(_processTransferSnapshot, 'snapshot');
@@ -256,6 +260,23 @@ class DeviceTransferSender {
         await onPacketSend();
       }
       if (users.length < _kQueryLimit) {
+        break;
+      }
+    }
+    return offset;
+  }
+
+  Future<int> _processTransferApp(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final apps =
+          await database.appDao.getApps(limit: _kQueryLimit, offset: offset);
+      offset += apps.length;
+      for (final app in apps) {
+        await socket.addApp(TransferDataApp.fromDbApp(app));
+        await onPacketSend();
+      }
+      if (apps.length < _kQueryLimit) {
         break;
       }
     }

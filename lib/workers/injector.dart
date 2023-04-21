@@ -180,9 +180,9 @@ class Injector {
             category: app.category,
             description: app.description,
             appSecret: app.category,
-            capabilities: app.capabilites.toString(),
+            capabilities: app.capabilites?.toString(),
             creatorId: app.creatorId,
-            resourcePatterns: app.resourcePatterns.toString(),
+            resourcePatterns: app.resourcePatterns?.toString(),
             updatedAt: app.updatedAt,
           ),
         );
