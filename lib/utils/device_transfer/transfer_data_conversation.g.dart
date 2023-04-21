@@ -17,7 +17,6 @@ TransferDataConversation _$TransferDataConversationFromJson(
       category: const ConversationCategoryJsonConverter()
           .fromJson(json['category'] as String?),
       name: json['name'] as String?,
-      iconUrl: json['icon_url'] as String?,
       announcement: json['announcement'] as String?,
       codeUrl: json['code_url'] as String?,
       payType: json['pay_type'] as String?,
@@ -44,7 +43,6 @@ Map<String, dynamic> _$TransferDataConversationToJson(
       'category':
           const ConversationCategoryJsonConverter().toJson(instance.category),
       'name': instance.name,
-      'icon_url': instance.iconUrl,
       'announcement': instance.announcement,
       'code_url': instance.codeUrl,
       'pay_type': instance.payType,
