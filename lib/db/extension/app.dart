@@ -14,7 +14,12 @@ List<String>? _parseFromString(String? content) {
     if (str.endsWith(']')) {
       str = str.substring(0, str.length - 1);
     }
-    return str.trim().split(',');
+    return str
+        .trim()
+        .split(',')
+        .map((e) => e.trim())
+        .where((element) => element.isNotEmpty)
+        .toList();
   } catch (error, stacktrace) {
     e('parseFromString error: $error, stacktrace: $stacktrace');
     return null;
