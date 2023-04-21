@@ -201,7 +201,7 @@ class SendingJob extends JobQueue<Job> {
     }
 
     Future<MessageResult> _sendPlainMessage(SendingMessage message) async {
-      var content = sentContent;
+      var content = message.content;
       if (message.category == MessageCategory.appCard ||
           message.category.isPost ||
           message.category.isTranscript ||
