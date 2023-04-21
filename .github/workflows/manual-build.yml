@@ -8,7 +8,7 @@ on:
       flutter_channel:
         description: "run with flutter channel, eg: master, beta, stable"
         required: true
-        default: "master"
+        default: "beta"
   push:
     tags:
       - 'v*'
