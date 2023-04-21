@@ -132,6 +132,7 @@
 "editName" : "Edit Name",
 "editProfile" : "Edit Profile",
 "enterPinToDeleteAccount" : "Enter your PIN to delete your account",
+"enterToSend" : "Return/Enter ⏎ to Send",
 "enterYourPhoneNumber" : "Enter your phone number",
 "enterYourPinToContinue" : "Enter your PIN to continue",
 "errorAddressExists" : "The address does not exist, please make sure that the address is added successfully",
