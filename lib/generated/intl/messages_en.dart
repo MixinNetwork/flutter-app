@@ -325,6 +325,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
         "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
             "Enter your PIN to delete your account"),
+        "enterToSend":
+            MessageLookupByLibrary.simpleMessage("Return/Enter ⏎ to Send"),
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("Enter your phone number"),
         "enterYourPinToContinue":

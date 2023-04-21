@@ -250,9 +250,11 @@ class _FilesPreviewDialog extends HookWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Align(
-                    child: Text('Return/Enter ⏎ to Send',
-                        style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Align(
+                    child: Text(
+                      context.l10n.enterToSend,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                   ),
                   const SizedBox(height: 24),
                 ],

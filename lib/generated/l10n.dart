@@ -1384,6 +1384,16 @@ class Localization {
     );
   }
 
+  /// `Return/Enter ⏎ to Send`
+  String get enterToSend {
+    return Intl.message(
+      'Return/Enter ⏎ to Send',
+      name: 'enterToSend',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Enter your phone number`
   String get enterYourPhoneNumber {
     return Intl.message(
