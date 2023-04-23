@@ -26,7 +26,6 @@ const _$JsonTransferDataTypeEnumMap = {
   JsonTransferDataType.asset: 'asset',
   JsonTransferDataType.snapshot: 'snapshot',
   JsonTransferDataType.user: 'user',
-  JsonTransferDataType.command: 'command',
   JsonTransferDataType.expiredMessage: 'expired_message',
   JsonTransferDataType.transcriptMessage: 'transcript_message',
   JsonTransferDataType.participant: 'participant',

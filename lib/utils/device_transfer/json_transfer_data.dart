@@ -30,7 +30,6 @@ enum JsonTransferDataType {
   asset,
   snapshot,
   user,
-  command,
   expiredMessage,
   transcriptMessage,
   participant,
@@ -114,11 +113,7 @@ extension SocketExtension on IOSink {
 
   Future<void> addCommand(TransferDataCommand command) async {
     d('send command to remote: $command');
-    final data = JsonTransferData(
-      data: command.toJson(),
-      type: JsonTransferDataType.command,
-    );
-    await writePacketToSink(this, TransferCommandPacket(data));
+    await writePacketToSink(this, TransferCommandPacket(command));
   }
 
   Future<void> addTranscriptMessage(
@@ -175,5 +170,5 @@ extension SocketExtension on IOSink {
   }
 
   Future<void> _addTransferJson(JsonTransferData data) =>
-      writePacketToSink(this, TransferJsonPacket(data));
+      writePacketToSink(this, TransferDataPacket(data));
 }

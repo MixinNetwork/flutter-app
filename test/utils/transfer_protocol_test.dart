@@ -16,8 +16,8 @@ void main() {
 
     Future<void> writeJson(Map<String, dynamic> json) => writePacketToSink(
         sink,
-        TransferJsonPacket(JsonTransferData(
-          type: JsonTransferDataType.command,
+        TransferDataPacket(JsonTransferData(
+          type: JsonTransferDataType.message,
           data: json,
         )));
     await writeJson({'abc': 1});
@@ -32,8 +32,8 @@ void main() {
     final data = await stream.toList();
     expect(data.length, 5);
 
-    final packet = data.first as TransferJsonPacket;
-    final body = packet.json.data;
+    final packet = data.first as TransferDataPacket;
+    final body = packet.data.data;
     expect(body, equals({'abc': 1}));
     d('utf8.decode(body): $body');
   });
@@ -95,9 +95,11 @@ void main() {
         .transform(const TransferProtocolTransform(fileFolder: ''));
     final data = await stream.toList();
     expect(data.length, 5);
-    final packet = data.first as TransferJsonPacket;
-    final body = packet.json.data;
-    d('utf8.decode(body): $body');
+    for (final command in data) {
+      expect(command, isA<TransferCommandPacket>());
+    }
+    final packet = data.first as TransferCommandPacket;
+    d('utf8.decode(body): ${packet.command}');
   });
 }
 
