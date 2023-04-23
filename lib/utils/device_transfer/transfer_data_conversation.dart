@@ -16,7 +16,6 @@ class TransferDataConversation {
     this.ownerId,
     this.category,
     this.name,
-    this.iconUrl,
     this.announcement,
     this.codeUrl,
     this.payType,
@@ -35,7 +34,6 @@ class TransferDataConversation {
         ownerId: c.ownerId,
         category: c.category,
         name: c.name,
-        iconUrl: c.iconUrl,
         announcement: c.announcement,
         codeUrl: c.codeUrl,
         payType: c.payType,
@@ -64,9 +62,6 @@ class TransferDataConversation {
 
   @JsonKey(name: 'name')
   final String? name;
-
-  @JsonKey(name: 'icon_url')
-  final String? iconUrl;
 
   @JsonKey(name: 'announcement')
   final String? announcement;
@@ -111,7 +106,6 @@ class TransferDataConversation {
         ownerId: ownerId,
         category: category,
         name: name,
-        iconUrl: iconUrl,
         announcement: announcement,
         codeUrl: codeUrl,
         payType: payType,

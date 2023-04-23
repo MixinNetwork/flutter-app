@@ -160,6 +160,7 @@ class SendingJob extends JobQueue<Job> {
     if (message.category.isPost || message.category.isText) {
       content = content?.substring(0, min(content.length, kMaxTextLength));
       sentContent = content;
+      message = message.copyWith(content: content);
     } else if (message.category.isAttachment && content != null) {
       try {
         final attachment = AttachmentMessage.fromJson(
@@ -200,6 +201,7 @@ class SendingJob extends JobQueue<Job> {
     }
 
     Future<MessageResult> _sendPlainMessage(SendingMessage message) async {
+      var content = message.content;
       if (message.category == MessageCategory.appCard ||
           message.category.isPost ||
           message.category.isTranscript ||

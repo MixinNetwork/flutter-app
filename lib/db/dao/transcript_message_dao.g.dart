@@ -10,6 +10,34 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   Messages get messages => attachedDatabase.messages;
   Users get users => attachedDatabase.users;
   Stickers get stickers => attachedDatabase.stickers;
+  Addresses get addresses => attachedDatabase.addresses;
+  Apps get apps => attachedDatabase.apps;
+  Assets get assets => attachedDatabase.assets;
+  CircleConversations get circleConversations =>
+      attachedDatabase.circleConversations;
+  Circles get circles => attachedDatabase.circles;
+  FloodMessages get floodMessages => attachedDatabase.floodMessages;
+  Hyperlinks get hyperlinks => attachedDatabase.hyperlinks;
+  Jobs get jobs => attachedDatabase.jobs;
+  MessageMentions get messageMentions => attachedDatabase.messageMentions;
+  MessagesHistory get messagesHistory => attachedDatabase.messagesHistory;
+  Offsets get offsets => attachedDatabase.offsets;
+  ParticipantSession get participantSession =>
+      attachedDatabase.participantSession;
+  Participants get participants => attachedDatabase.participants;
+  ResendSessionMessages get resendSessionMessages =>
+      attachedDatabase.resendSessionMessages;
+  SentSessionSenderKeys get sentSessionSenderKeys =>
+      attachedDatabase.sentSessionSenderKeys;
+  Snapshots get snapshots => attachedDatabase.snapshots;
+  StickerAlbums get stickerAlbums => attachedDatabase.stickerAlbums;
+  StickerRelationships get stickerRelationships =>
+      attachedDatabase.stickerRelationships;
+  PinMessages get pinMessages => attachedDatabase.pinMessages;
+  Fiats get fiats => attachedDatabase.fiats;
+  FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
+  ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
+  Chains get chains => attachedDatabase.chains;
   Selectable<TranscriptMessageItem> baseTranscriptMessageItem(
       BaseTranscriptMessageItem$where where,
       BaseTranscriptMessageItem$limit limit) {

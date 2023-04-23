@@ -131,6 +131,7 @@
 "editName" : "修改暱稱",
 "editProfile" : "編輯資料",
 "enterPinToDeleteAccount" : "輸入你的 PIN 以註銷你的賬户",
+"enterToSend" : "按下回車 ⏎ 發送",
 "enterYourPhoneNumber" : "輸入你的手機號碼",
 "enterYourPinToContinue" : "輸入你的 PIN 以繼續",
 "errorAddressExists" : "地址不存在，請確保地址是否添加成功",

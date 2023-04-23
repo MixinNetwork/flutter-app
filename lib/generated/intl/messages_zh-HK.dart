@@ -283,6 +283,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "editProfile": MessageLookupByLibrary.simpleMessage("編輯資料"),
         "enterPinToDeleteAccount":
             MessageLookupByLibrary.simpleMessage("輸入你的 PIN 以註銷你的賬户"),
+        "enterToSend": MessageLookupByLibrary.simpleMessage("按下回車 ⏎ 發送"),
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("輸入你的手機號碼"),
         "enterYourPinToContinue":
