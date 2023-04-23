@@ -158,7 +158,8 @@ List<SpanNode> _parseHtml(
   TextStyle? parentStyle,
 }) {
   try {
-    final text = node.textContent;
+    final text =
+        node.textContent.replaceAll(RegExp(r'(\r?\n)|(\r?\t)|(\r)'), '');
     if (!text.contains(htmlRep)) return [TextNode(text: node.text)];
     final document = parseFragment(text);
     return HtmlToSpanVisitor(visitor: visitor, parentStyle: parentStyle)
@@ -167,6 +168,13 @@ List<SpanNode> _parseHtml(
     onError?.call(e);
     return [TextNode(text: node.text)];
   }
+}
+
+class HtmlElement extends m.Element {
+  HtmlElement(super.tag, super.children, this.textContent);
+
+  @override
+  final String textContent;
 }
 
 class HtmlToSpanVisitor extends TreeVisitor {
@@ -181,7 +189,7 @@ class HtmlToSpanVisitor extends TreeVisitor {
   List<SpanNode> toVisit(List<h.Node> nodes) {
     _spans.clear();
     for (final node in nodes) {
-      final emptyNode = ConcreteElementNode();
+      final emptyNode = ConcreteElementNode(style: parentStyle);
       _spans.add(emptyNode);
       _spansStack.add(emptyNode);
       visit(node);
@@ -224,7 +232,7 @@ class HtmlToSpanVisitor extends TreeVisitor {
   }
 }
 
-class CustomTextNode extends SpanNode {
+class CustomTextNode extends ElementNode {
   CustomTextNode(this.text, this.config, this.visitor);
 
   final String text;
@@ -232,28 +240,18 @@ class CustomTextNode extends SpanNode {
   final WidgetVisitor visitor;
 
   @override
-  InlineSpan build() {
+  void onAccepted(SpanNode parent) {
     final textStyle = config.p.textStyle.merge(parentStyle);
-    if (!text.contains(htmlRep)) return TextSpan(text: text, style: textStyle);
-
-    /// Do not pass [TextNodeGenerator] again!!!
-    final spans = _parseHtml(
+    children.clear();
+    if (!text.contains(htmlRep)) {
+      accept(TextNode(text: text, style: textStyle));
+      return;
+    }
+    _parseHtml(
       m.Text(text),
       visitor:
           WidgetVisitor(config: visitor.config, generators: visitor.generators),
-      parentStyle: textStyle,
-    );
-    final tempNode = _TempNode(textStyle);
-    spans.forEach(tempNode.accept);
-    return tempNode.build();
+      parentStyle: parentStyle,
+    ).forEach(accept);
   }
-}
-
-class _TempNode extends ElementNode {
-  _TempNode(TextStyle style) {
-    super.style = style;
-  }
-
-  @override
-  InlineSpan build() => childrenSpan;
 }
