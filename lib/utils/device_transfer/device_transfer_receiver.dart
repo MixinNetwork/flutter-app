@@ -109,12 +109,11 @@ class DeviceTransferReceiver {
     socket.transform(protocolTransform).asyncListen(
       (packet) async {
         try {
-          if (packet is TransferJsonPacket) {
-            if (packet.json.type != JsonTransferDataType.command) {
-              // notify progress, command is not counted.
-              await _notifyProgressUpdate();
-            }
-            await _processReceivedJsonPacket(packet.json);
+          if (packet is TransferDataPacket) {
+            await _notifyProgressUpdate();
+            await _processReceivedJsonPacket(packet.data);
+          } else if (packet is TransferCommandPacket) {
+            await _processReceivedCommand(packet.command);
           } else if (packet is TransferAttachmentPacket) {
             await _processReceivedAttachmentPacket(packet);
             await _notifyProgressUpdate();
@@ -152,6 +151,30 @@ class DeviceTransferReceiver {
         userId: userId,
       ),
     );
+  }
+
+  Future<void> _processReceivedCommand(TransferDataCommand command) async {
+    d('client: command: $command');
+    switch (command.action) {
+      case kTransferCommandActionFinish:
+        i('${command.action} command: finish receiver socket');
+        _finished = true;
+        await _notifyProgressComplete();
+        assert(_socket != null, 'socket is null');
+        await _socket?.addCommand(TransferDataCommand.simple(
+            deviceId: deviceId, action: kTransferCommandActionFinish));
+        break;
+      case kTransferCommandActionClose:
+        i('${command.action} command: close receiver socket');
+        close();
+        break;
+      case kTransferCommandActionStart:
+        i('${command.action} command: start receiver');
+        _total = command.total!;
+        onReceiverStart?.call();
+        onReceiverProgressUpdate?.call(0);
+        break;
+    }
   }
 
   Future<void> _processReceivedJsonPacket(JsonTransferData data) async {
@@ -205,30 +228,6 @@ class DeviceTransferReceiver {
           d('client: snapshot: $snapshot');
           await database.snapshotDao
               .insert(snapshot.toDbSnapshot(), updateIfConflict: false);
-          break;
-        case JsonTransferDataType.command:
-          final command = TransferDataCommand.fromJson(data.data);
-          d('client: command: $command');
-          switch (command.action) {
-            case kTransferCommandActionFinish:
-              i('${command.action} command: finish receiver socket');
-              _finished = true;
-              await _notifyProgressComplete();
-              assert(_socket != null, 'socket is null');
-              await _socket?.addCommand(TransferDataCommand.simple(
-                  deviceId: deviceId, action: kTransferCommandActionFinish));
-              break;
-            case kTransferCommandActionClose:
-              i('${command.action} command: close receiver socket');
-              close();
-              break;
-            case kTransferCommandActionStart:
-              i('${command.action} command: start receiver');
-              _total = command.total!;
-              onReceiverStart?.call();
-              onReceiverProgressUpdate?.call(0);
-              break;
-          }
           break;
         case JsonTransferDataType.expiredMessage:
           final expiredMessage = TransferDataExpiredMessage.fromJson(data.data);

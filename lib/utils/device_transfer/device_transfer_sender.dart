@@ -99,59 +99,38 @@ class DeviceTransferSender {
       socket.transform(protocolTransform).asyncListen((event) {
         d('receive data: $event');
 
-        if (event is TransferJsonPacket) {
-          final data = event.json;
-          switch (data.type) {
-            case JsonTransferDataType.command:
-              final command = TransferDataCommand.fromJson(data.data);
-              switch (command.action) {
-                case kTransferCommandActionConnect:
-                  if (command.code == verificationCode) {
-                    _clientSocket = socket;
-                    _pendingVerificationSockets.remove(socket);
-                    for (final s in _pendingVerificationSockets) {
-                      s.destroy();
-                    }
-                    onSenderStart?.call();
-                    _processTransfer(socket);
-                  } else {
-                    e('sender verify code failed. except $verificationCode, '
-                        'but got ${command.code}');
-                    socket.close();
-                    close();
-                  }
-                  break;
-                case kTransferCommandActionFinish:
-                  i('client finished. close connection');
-                  _finished = true;
-                  close();
-                  break;
-                case kTransferCommandActionClose:
-                  w('client closed. close connection');
-                  close();
-                  break;
-                case kTransferCommandActionProgress:
-                  final progress = command.progress!;
-                  d('${command.action} command: progress $progress');
-                  _notifyProgressUpdate(progress);
-                  break;
+        if (event is TransferCommandPacket) {
+          final command = event.command;
+          switch (command.action) {
+            case kTransferCommandActionConnect:
+              if (command.code == verificationCode) {
+                _clientSocket = socket;
+                _pendingVerificationSockets.remove(socket);
+                for (final s in _pendingVerificationSockets) {
+                  s.destroy();
+                }
+                onSenderStart?.call();
+                _processTransfer(socket);
+              } else {
+                e('sender verify code failed. except $verificationCode, '
+                    'but got ${command.code}');
+                socket.close();
+                close();
               }
               break;
-            case JsonTransferDataType.conversation:
-            case JsonTransferDataType.message:
-            case JsonTransferDataType.sticker:
-            case JsonTransferDataType.asset:
-            case JsonTransferDataType.snapshot:
-            case JsonTransferDataType.user:
-            case JsonTransferDataType.expiredMessage:
-            case JsonTransferDataType.transcriptMessage:
-            case JsonTransferDataType.participant:
-            case JsonTransferDataType.pinMessage:
-            case JsonTransferDataType.unknown:
-            case JsonTransferDataType.messageMention:
-            case JsonTransferDataType.app:
-              e('unknown type: ${data.type}');
-              d('data: $data');
+            case kTransferCommandActionFinish:
+              i('client finished. close connection');
+              _finished = true;
+              close();
+              break;
+            case kTransferCommandActionClose:
+              w('client closed. close connection');
+              close();
+              break;
+            case kTransferCommandActionProgress:
+              final progress = command.progress!;
+              d('${command.action} command: progress $progress');
+              _notifyProgressUpdate(progress);
               break;
           }
         }
