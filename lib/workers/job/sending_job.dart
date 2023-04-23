@@ -200,31 +200,15 @@ class SendingJob extends JobQueue<Job> {
       rethrow;
     }
 
-    Future<MessageResult> _sendPlainMessage(SendingMessage message) async {
-      var content = message.content;
-      if (message.category == MessageCategory.appCard ||
-          message.category.isPost ||
-          message.category.isTranscript ||
-          message.category.isText ||
-          message.category.isLive ||
-          message.category.isLocation) {
-        final list = await utf8EncodeWithIsolate(content!);
-        content = await base64EncodeWithIsolate(list);
-      }
-      final blazeMessage = _createBlazeMessage(
-        message,
-        content!,
-        recipientId: recipientId,
-        silent: silent,
-        expireIn: expireIn ?? 0,
-      );
-      return sender.deliver(blazeMessage);
-    }
-
     if (message.category.isPlain ||
         message.category == MessageCategory.appCard ||
         message.category.isPin) {
-      result = await _sendPlainMessage(message);
+      result = await _sendPlainMessage(
+        message,
+        recipientId: recipientId,
+        silent: silent,
+        expireIn: expireIn,
+      );
     } else if (message.category.isEncrypted) {
       try {
         result = await _sendEncryptedMessage(
@@ -240,7 +224,12 @@ class SendingJob extends JobQueue<Job> {
         d('category: ${message.category}');
         await database.messageDao
             .updateCategoryById(messageId, message.category);
-        result = await _sendPlainMessage(message);
+        result = await _sendPlainMessage(
+          message,
+          recipientId: recipientId,
+          silent: silent,
+          expireIn: expireIn,
+        );
       }
     } else if (message.category.isSignal) {
       result = await _sendSignalMessage(
@@ -332,6 +321,32 @@ class SendingJob extends JobQueue<Job> {
       silent: silent,
       expireIn: expireIn,
     );
+  }
+
+  Future<MessageResult> _sendPlainMessage(
+    SendingMessage message, {
+    String? recipientId,
+    bool silent = false,
+    int? expireIn,
+  }) async {
+    var content = message.content;
+    if (message.category == MessageCategory.appCard ||
+        message.category.isPost ||
+        message.category.isTranscript ||
+        message.category.isText ||
+        message.category.isLive ||
+        message.category.isLocation) {
+      final list = await utf8EncodeWithIsolate(content!);
+      content = await base64EncodeWithIsolate(list);
+    }
+    final blazeMessage = _createBlazeMessage(
+      message,
+      content!,
+      recipientId: recipientId,
+      silent: silent,
+      expireIn: expireIn ?? 0,
+    );
+    return sender.deliver(blazeMessage);
   }
 
   Future<MessageResult> _sendEncryptedMessage(
