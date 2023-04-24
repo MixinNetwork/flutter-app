@@ -338,10 +338,22 @@ class DeviceTransfer {
     return TransferProtocolTransform(fileFolder: folder);
   }
 
+  Future<String?> getFirstIpv4Address() async {
+    for (final interface in await NetworkInterface.list()) {
+      for (final address in interface.addresses) {
+        if (address.type == InternetAddressType.IPv4 && !address.isLoopback) {
+          return address.address;
+        }
+      }
+    }
+    return null;
+  }
+
   Future<void> _sendPushToOtherSession() async {
     String? ipAddress;
     try {
       ipAddress = await NetworkInfo().getWifiIP();
+      ipAddress ??= await getFirstIpv4Address();
     } catch (error) {
       assert(() {
         // for test
