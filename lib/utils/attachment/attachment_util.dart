@@ -55,7 +55,7 @@ abstract class _AttachmentJobBase {
 
 class AttachmentUtilBase {
   AttachmentUtilBase(this.mediaPath)
-      : transcriptPath = p.join(mediaPath, 'transcript') {
+      : transcriptPath = p.join(mediaPath, 'Transcripts') {
     Directory(transcriptPath).create(recursive: true);
   }
 
