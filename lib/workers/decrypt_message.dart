@@ -1301,11 +1301,15 @@ class DecryptMessage extends Injector {
     final attachmentTranscript =
         transcripts.where((transcript) => transcript.category.isAttachment);
 
-    final insertAllTranscriptMessageFuture = database.transcriptMessageDao
-        .insertAll(transcripts
-            .map((transcript) => transcript.copyWith(
-                mediaStatus: const Value(MediaStatus.canceled)))
-            .toList());
+    final insertAllTranscriptMessageFuture =
+        database.transcriptMessageDao.insertAll(transcripts.map((transcript) {
+      if (transcript.category.isAttachment) {
+        return transcript.copyWith(
+          mediaStatus: const Value(MediaStatus.canceled),
+        );
+      }
+      return transcript;
+    }).toList());
 
     await Future.wait([
       _refreshSticker(),
