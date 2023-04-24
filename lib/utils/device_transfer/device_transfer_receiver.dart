@@ -195,6 +195,12 @@ class DeviceTransferReceiver {
           break;
         case JsonTransferDataType.message:
           final message = TransferDataMessage.fromJson(data.data);
+
+          if (message.category.isCall) {
+            i('ignore kraken message: ${message.messageId}');
+            return;
+          }
+
           d('client: message: $message');
           final local = await database.messageDao
               .findMessageByMessageId(message.messageId);
