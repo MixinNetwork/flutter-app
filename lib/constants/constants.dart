@@ -28,6 +28,8 @@ const kUpdateAsset = 'LOCAL_UPDATE_ASSET';
 const kUpdateSticker = 'LOCAL_UPDATE_STICKER';
 const kMigrateFts = 'LOCAL_MIGRATE_FTS';
 
+const kTeamMixinUserId = '773e5e77-4107-45c2-b648-8fc722ed77f5';
+
 const mixinScheme = 'mixin';
 const mixinHost = 'mixin.one';
 
