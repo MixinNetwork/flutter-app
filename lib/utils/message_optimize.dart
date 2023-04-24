@@ -60,8 +60,7 @@ String? messagePreviewOptimize(
     _content = '[${Localization.current.card}]';
     try {
       _content =
-          AppCardData.fromJson(jsonDecode(trimContent!) as Map<String, dynamic>)
-              .title;
+          '[${AppCardData.fromJson(jsonDecode(trimContent!) as Map<String, dynamic>).title}]';
     } catch (_) {}
   } else if (messageCategory.isContact) {
     _content = '[${Localization.current.contact}]';

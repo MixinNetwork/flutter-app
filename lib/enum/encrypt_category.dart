@@ -62,12 +62,15 @@ extension EncryptCategoryExtension on EncryptCategory {
       return toCategory(MessageCategory.plainContact,
           MessageCategory.signalContact, MessageCategory.encryptedContact);
     }
-    if (category.isContact) {
-      return toCategory(MessageCategory.plainContact,
-          MessageCategory.signalContact, MessageCategory.encryptedContact);
+    if (category.isAppCard) {
+      return MessageCategory.appCard;
     }
 
-    throw ArgumentError('Unknown type');
+    if (category.isAppButtonGroup) {
+      return MessageCategory.appButtonGroup;
+    }
+
+    throw ArgumentError('Unknown type. $category');
   }
 
   bool get isEncrypt => this != EncryptCategory.plain;
