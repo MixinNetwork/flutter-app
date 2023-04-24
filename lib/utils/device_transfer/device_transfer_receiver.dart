@@ -302,30 +302,44 @@ class DeviceTransferReceiver {
       }
     }
 
-    String? path;
-    final message =
-        await database.messageDao.findMessageByMessageId(packet.messageId);
-    if (message != null) {
-      path = attachmentUtil.convertAbsolutePath(
-        category: message.category,
-        conversationId: message.conversationId,
-        fileName: message.mediaUrl,
-      );
-    } else {
-      final tm = await database.transcriptMessageDao
-          .transcriptMessageByMessageId(packet.messageId)
-          .getSingleOrNull();
-      if (tm == null) {
-        e('_processReceivedAttachmentPacket: message not found ${packet.messageId}');
-        deletePacketFile();
-        return;
-      }
-      path = attachmentUtil.convertAbsolutePath(
+    final tm = await database.transcriptMessageDao
+        .transcriptMessageByMessageId(packet.messageId)
+        .getSingleOrNull();
+    if (tm != null) {
+      final path = attachmentUtil.convertAbsolutePath(
         category: tm.category,
         fileName: tm.mediaUrl,
         isTranscript: true,
       );
+      try {
+        final target = File(path);
+        if (!target.parent.existsSync()) {
+          target.parent.createSync(recursive: true);
+        }
+        if (!target.existsSync()) {
+          File(packet.path).copySync(path);
+        } else {
+          e('transcript message found, but file already exits: $path');
+        }
+      } catch (error, stacktrace) {
+        e('_processReceivedAttachmentPacket: $error $stacktrace');
+      }
     }
+
+    final message =
+        await database.messageDao.findMessageByMessageId(packet.messageId);
+
+    if (message == null) {
+      e('_processReceivedAttachmentPacket: message is null ${packet.messageId}');
+      deletePacketFile();
+      return;
+    }
+
+    final path = attachmentUtil.convertAbsolutePath(
+      category: message.category,
+      conversationId: message.conversationId,
+      fileName: message.mediaUrl,
+    );
 
     if (path.isEmpty) {
       e('_processReceivedAttachmentPacket: path is empty');
@@ -336,7 +350,7 @@ class DeviceTransferReceiver {
     final file = File(path);
     if (file.existsSync()) {
       // already exist
-      i('_processReceivedAttachmentPacket: already exist');
+      i('_processReceivedAttachmentPacket: already exist. ${file.path}');
       deletePacketFile();
       return;
     }
