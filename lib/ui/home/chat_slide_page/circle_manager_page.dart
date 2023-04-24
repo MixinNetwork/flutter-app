@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 
 import '../../../utils/color_utils.dart';
@@ -30,7 +31,12 @@ class CircleManagerPage extends HookWidget {
     final circles = useMemoizedStream<List<ConversationCircleManagerItem>>(
           () => context.database.circleDao
               .circleByConversationId(conversationId)
-              .watchThrottle(kDefaultThrottleDuration),
+              .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.updateCircleConversationStream
+            ],
+            duration: kDefaultThrottleDuration,
+          ),
           keys: [conversationId],
           initialData: [],
         ).data ??
@@ -38,7 +44,12 @@ class CircleManagerPage extends HookWidget {
     final otherCircles = useMemoizedStream<List<ConversationCircleManagerItem>>(
           () => context.database.circleDao
               .otherCircleByConversationId(conversationId)
-              .watchThrottle(kDefaultThrottleDuration),
+              .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.updateCircleConversationStream
+            ],
+            duration: kDefaultThrottleDuration,
+          ),
           keys: [conversationId],
           initialData: [],
         ).data ??
@@ -175,7 +186,10 @@ class _CircleManagerItem extends StatelessWidget {
                   Resources.assetsImagesCircleSvg,
                   width: 24,
                   height: 24,
-                  color: getCircleColorById(circleId),
+                  colorFilter: ColorFilter.mode(
+                    getCircleColorById(circleId),
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),

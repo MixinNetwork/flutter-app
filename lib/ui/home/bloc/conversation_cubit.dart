@@ -9,6 +9,7 @@ import '../../../account/account_server.dart';
 import '../../../bloc/simple_cubit.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/uuid/uuid.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/app_lifecycle.dart';
@@ -139,9 +140,16 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           .map((event) => event?.conversationId)
           .where((event) => event != null)
           .distinct()
-          .switchMap((event) => database.conversationDao
-              .conversationItem(event!)
-              .watchSingleOrNullThrottle(kSlowThrottleDuration))
+          .switchMap((conversationId) => database.conversationDao
+                  .conversationItem(conversationId!)
+                  .watchSingleOrNullWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance
+                      .watchUpdateConversationStream([conversationId])
+                ],
+                duration: kSlowThrottleDuration,
+                prepend: false,
+              ))
           .listen((event) {
         String? userId;
         if (event != null && !event.isGroupConversation) {
@@ -158,9 +166,13 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     addSubscription(
       stream.map((event) => event?.userId).distinct().switchMap((userId) {
         if (userId == null) return Stream.value(null);
-        return database.userDao
-            .userById(userId)
-            .watchSingleOrNullThrottle(kSlowThrottleDuration);
+        return database.userDao.userById(userId).watchSingleOrNullWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance.watchUpdateUserStream([userId])
+          ],
+          duration: kDefaultThrottleDuration,
+          prepend: false,
+        );
       }).listen((event) => emit(
             state?.copyWith(user: event),
           )),
@@ -170,9 +182,18 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           .map((event) => event?.conversationId)
           .where((event) => event != null)
           .distinct()
-          .switchMap((event) => database.participantDao
-              .participantById(event!, accountServer.userId)
-              .watchSingleOrNullThrottle(kSlowThrottleDuration))
+          .switchMap((conversationId) => database.participantDao
+                  .participantById(conversationId!, accountServer.userId)
+                  .watchSingleOrNullWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance.watchUpdateParticipantStream(
+                      conversationIds: [conversationId],
+                      userIds: [accountServer.userId],
+                      and: true)
+                ],
+                duration: kSlowThrottleDuration,
+                prepend: false,
+              ))
           .listen((Participant? event) {
         emit(
           state?.copyWith(
@@ -216,6 +237,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     String? initialChatSidePage,
     String? keyword,
     bool sync = false,
+    bool checkCurrentUserExist = false,
   }) async {
     final accountServer = context.accountServer;
     final database = context.database;
@@ -240,7 +262,10 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
     if (_conversation == null && sync) {
       showToastLoading();
-      await context.accountServer.refreshConversation(conversationId);
+      await context.accountServer.refreshConversation(
+        conversationId,
+        checkCurrentUserExist: checkCurrentUserExist,
+      );
       _conversation = await _conversationItem(context, conversationId);
     }
 

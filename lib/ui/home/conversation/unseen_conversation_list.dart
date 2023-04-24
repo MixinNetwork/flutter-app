@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:markdown_widget/scrollable_positioned_list/src/scrollable_positioned_list.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -63,6 +65,11 @@ class UnseenConversationList extends HookWidget {
     }, [slideCategoryState]);
 
     useEffect(() {
+      final updateEvent = Rx.merge([
+        DataBaseEventBus.instance.updateConversationIdStream,
+        DataBaseEventBus.instance.insertOrReplaceMessageIdsStream
+      ]);
+
       final Stream<List<ConversationItem>> unseenConversations;
       switch (slideCategoryState.type) {
         case SlideCategoryType.chats:
@@ -72,12 +79,18 @@ class UnseenConversationList extends HookWidget {
         case SlideCategoryType.strangers:
           unseenConversations = context.accountServer.database.conversationDao
               .unseenConversationByCategory(slideCategoryState.type)
-              .watchThrottle(kSlowThrottleDuration);
+              .watchWithStream(
+            eventStreams: [updateEvent],
+            duration: kSlowThrottleDuration,
+          );
           break;
         case SlideCategoryType.circle:
           unseenConversations = context.database.conversationDao
               .unseenConversationsByCircleId(slideCategoryState.id!)
-              .watchThrottle(kSlowThrottleDuration);
+              .watchWithStream(
+            eventStreams: [updateEvent],
+            duration: kSlowThrottleDuration,
+          );
           break;
         case SlideCategoryType.setting:
           unseenConversations = const Stream.empty();

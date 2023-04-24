@@ -67,7 +67,10 @@ class AppCardItem extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final playing = useImagePlaying(context);
-
+    final description = useMemoized(
+      () => const LineSplitter().convert(data.description).firstOrNull ?? '',
+      [data.description],
+    );
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -96,7 +99,7 @@ class AppCardItem extends HookWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                data.description,
+                description,
                 maxLines: 1,
                 style: TextStyle(
                   color: context.theme.secondaryText,

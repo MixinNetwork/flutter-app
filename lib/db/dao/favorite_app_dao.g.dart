@@ -2,8 +2,5 @@
 
 part of 'favorite_app_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$FavoriteAppDaoMixin on DatabaseAccessor<MixinDatabase> {}

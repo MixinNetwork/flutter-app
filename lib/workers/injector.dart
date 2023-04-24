@@ -37,18 +37,32 @@ class Injector {
     }
   }
 
-  Future<void> refreshConversation(String conversationId) async {
+  Future<void> refreshConversation(
+    String conversationId, {
+    bool checkCurrentUserExist = false,
+  }) async {
     try {
       final response =
           await client.conversationApi.getConversation(conversationId);
       var ownerId = response.data.creatorId;
       if (response.data.category == ConversationCategory.contact) {
+        final legal =
+            response.data.participants.any((item) => item.userId == accountId);
+        if (!legal) throw Exception('Conversation is not legal');
+
         response.data.participants.forEach((item) {
           if (item.userId != accountId) {
             ownerId = item.userId;
           }
         });
       } else if (response.data.category == ConversationCategory.group) {
+        if (checkCurrentUserExist) {
+          final existed = response.data.participants
+              .any((item) => item.userId == accountId);
+          if (!existed) {
+            throw Exception('The group is not include current user');
+          }
+        }
         await refreshUsers(<String>[ownerId]);
       }
       final status = response.data.participants
@@ -166,9 +180,9 @@ class Injector {
             category: app.category,
             description: app.description,
             appSecret: app.category,
-            capabilities: app.capabilites.toString(),
+            capabilities: app.capabilites?.toString(),
             creatorId: app.creatorId,
-            resourcePatterns: app.resourcePatterns.toString(),
+            resourcePatterns: app.resourcePatterns?.toString(),
             updatedAt: app.updatedAt,
           ),
         );

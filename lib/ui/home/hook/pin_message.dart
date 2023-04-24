@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../account/show_pin_message_key_value.dart';
 import '../../../blaze/vo/pin_message_minimal.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/message/item/pin_message.dart';
@@ -47,8 +48,14 @@ PinMessageState usePinMessageState() {
       if (conversationId == null) return Stream.value([]);
       return context.database.pinMessageDao
           .getPinMessageIds(conversationId)
-          .watchThrottle(kSlowThrottleDuration)
-          .map((event) => event.whereNotNull().toList());
+          .watchWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance.watchPinMessageStream(
+            conversationIds: [conversationId],
+          )
+        ],
+        duration: kSlowThrottleDuration,
+      ).map((event) => event.whereNotNull().toList());
     },
     initialData: [],
     keys: [conversationId],
@@ -70,10 +77,16 @@ PinMessageState usePinMessageState() {
           pinMessageIds.firstOrNull == null) {
         return Stream.value(null);
       }
+      final messageId = pinMessageIds.first;
+
       return context.database.pinMessageDao
-          .pinMessageItem(conversationId, pinMessageIds.first)
-          .watchSingleOrNullThrottle(kSlowThrottleDuration)
-          .asyncMap((message) async {
+          .pinMessageItem(conversationId, messageId)
+          .watchSingleOrNullWithStream(eventStreams: [
+        DataBaseEventBus.instance
+            .watchInsertOrReplaceMessageIdsStream(messageIds: [messageId]),
+        DataBaseEventBus.instance.deleteMessageIdStream.where(
+            (event) => event.any((element) => element.contains(messageId)))
+      ], duration: kSlowThrottleDuration).asyncMap((message) async {
         if (message == null) return null;
 
         final pinMessageMinimal =

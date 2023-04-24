@@ -297,8 +297,12 @@ class ContextMenu extends StatelessWidget {
               if (icon != null)
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: SvgPicture.asset(icon!,
-                      color: color, width: 20, height: 20),
+                  child: SvgPicture.asset(
+                    icon!,
+                    colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                    width: 20,
+                    height: 20,
+                  ),
                 ),
               Expanded(
                 child: Text(
@@ -314,7 +318,10 @@ class ContextMenu extends StatelessWidget {
                   Resources.assetsImagesIcArrowRightSvg,
                   width: 20,
                   height: 20,
-                  color: context.theme.secondaryText,
+                  colorFilter: ColorFilter.mode(
+                    context.theme.secondaryText,
+                    BlendMode.srcIn,
+                  ),
                 ),
             ],
           ),

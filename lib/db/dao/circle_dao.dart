@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../database_event_bus.dart';
 import '../mixin_database.dart';
 
 part 'circle_dao.g.dart';
@@ -17,10 +18,16 @@ class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
           ? into(db.circles).insert(circle)
           : into(db.circles).insertOnConflictUpdate(circle);
     });
+    DataBaseEventBus.instance.updateCircle();
   }
 
-  Future<int> deleteCircle(String circleId) =>
-      (delete(db.circles)..where((tbl) => tbl.circleId.equals(circleId))).go();
+  Future<int> deleteCircleById(String circleId) =>
+      (delete(db.circles)..where((tbl) => tbl.circleId.equals(circleId)))
+          .go()
+          .then((value) {
+        DataBaseEventBus.instance.updateCircle();
+        return value;
+      });
 
   Selectable<ConversationCircleItem> allCircles() => db.allCircles();
 
@@ -39,9 +46,6 @@ class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
   Selectable<String> circlesNameByConversationId(String conversationId) =>
       db.circlesNameByConversationId(conversationId);
 
-  Future<int> deleteCircleById(String circleId) =>
-      db.deleteCircleById(circleId);
-
   Future<void> updateOrders(List<ConversationCircleItem> value) {
     final now = DateTime.now();
     final newCircles = value.asMap().entries.map((e) {
@@ -55,6 +59,10 @@ class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
       );
     });
     return batch(
-        (batch) => batch.insertAllOnConflictUpdate(db.circles, newCircles));
+            (batch) => batch.insertAllOnConflictUpdate(db.circles, newCircles))
+        .then((value) {
+      DataBaseEventBus.instance.updateCircle();
+      return value;
+    });
   }
 }

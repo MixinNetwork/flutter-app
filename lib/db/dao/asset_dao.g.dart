@@ -2,45 +2,42 @@
 
 part of 'asset_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
-  Conversations get conversations => attachedDatabase.conversations;
-  FloodMessages get floodMessages => attachedDatabase.floodMessages;
-  Jobs get jobs => attachedDatabase.jobs;
-  MessageMentions get messageMentions => attachedDatabase.messageMentions;
-  Messages get messages => attachedDatabase.messages;
-  Participants get participants => attachedDatabase.participants;
-  StickerAlbums get stickerAlbums => attachedDatabase.stickerAlbums;
-  PinMessages get pinMessages => attachedDatabase.pinMessages;
-  Users get users => attachedDatabase.users;
+  Assets get assets => attachedDatabase.assets;
   Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
-  Assets get assets => attachedDatabase.assets;
   CircleConversations get circleConversations =>
       attachedDatabase.circleConversations;
   Circles get circles => attachedDatabase.circles;
+  Conversations get conversations => attachedDatabase.conversations;
+  FloodMessages get floodMessages => attachedDatabase.floodMessages;
   Hyperlinks get hyperlinks => attachedDatabase.hyperlinks;
-  MessagesFts get messagesFts => attachedDatabase.messagesFts;
+  Jobs get jobs => attachedDatabase.jobs;
+  MessageMentions get messageMentions => attachedDatabase.messageMentions;
+  Messages get messages => attachedDatabase.messages;
   MessagesHistory get messagesHistory => attachedDatabase.messagesHistory;
   Offsets get offsets => attachedDatabase.offsets;
   ParticipantSession get participantSession =>
       attachedDatabase.participantSession;
+  Participants get participants => attachedDatabase.participants;
   ResendSessionMessages get resendSessionMessages =>
       attachedDatabase.resendSessionMessages;
   SentSessionSenderKeys get sentSessionSenderKeys =>
       attachedDatabase.sentSessionSenderKeys;
   Snapshots get snapshots => attachedDatabase.snapshots;
+  StickerAlbums get stickerAlbums => attachedDatabase.stickerAlbums;
   StickerRelationships get stickerRelationships =>
       attachedDatabase.stickerRelationships;
   Stickers get stickers => attachedDatabase.stickers;
+  Users get users => attachedDatabase.users;
   TranscriptMessages get transcriptMessages =>
       attachedDatabase.transcriptMessages;
+  PinMessages get pinMessages => attachedDatabase.pinMessages;
   Fiats get fiats => attachedDatabase.fiats;
   FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
+  Chains get chains => attachedDatabase.chains;
   Selectable<AssetItem> _assetItems(AssetItems$where where,
       AssetItems$orderBy orderBy, AssetItems$limit limit) {
     var $arrayStartIndex = 1;
@@ -124,6 +121,14 @@ mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
         chainName: row.readNullable<String>('chainName'),
       );
     });
+  }
+
+  Selectable<int> countAssets() {
+    return customSelect('SELECT COUNT(1) AS _c0 FROM assets',
+        variables: [],
+        readsFrom: {
+          assets,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 }
 

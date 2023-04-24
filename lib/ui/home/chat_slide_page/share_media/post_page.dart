@@ -39,11 +39,10 @@ class PostPage extends HookWidget {
         loadMoreData: (list) async {
           if (list.isEmpty) return [];
           final last = list.last;
-          final rowId =
-              await messageDao.messageRowId(last.messageId).getSingleOrNull();
-          if (rowId == null) return [];
+          final info = await messageDao.messageOrderInfo(last.messageId);
+          if (info == null) return [];
           final items = await messageDao
-              .postMessagesBefore(rowId, conversationId, size)
+              .postMessagesBefore(info, conversationId, size)
               .get();
           return [...list, ...items];
         },
@@ -52,15 +51,14 @@ class PostPage extends HookWidget {
       keys: [conversationId],
     );
     useEffect(
-      () => messageDao.insertOrReplaceMessageStream
+      () => messageDao
+          .watchInsertOrReplaceMessageStream(conversationId)
           .switchMap<MessageItem>((value) async* {
             for (final item in value) {
               yield item;
             }
           })
-          .where((event) =>
-              event.conversationId == conversationId &&
-              [
+          .where((event) => [
                 MessageCategory.plainPost,
                 MessageCategory.signalPost,
               ].contains(event.type))
@@ -89,7 +87,10 @@ class PostPage extends HookWidget {
           children: [
             SvgPicture.asset(
               Resources.assetsImagesEmptyFileSvg,
-              color: context.theme.secondaryText.withOpacity(0.4),
+              colorFilter: ColorFilter.mode(
+                context.theme.secondaryText.withOpacity(0.4),
+                BlendMode.srcIn,
+              ),
             ),
             const SizedBox(height: 24),
             Text(

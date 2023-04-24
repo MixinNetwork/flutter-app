@@ -234,10 +234,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Click to reload QR code"),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
         "closeWindow": MessageLookupByLibrary.simpleMessage("Close window"),
+        "closingBalance":
+            MessageLookupByLibrary.simpleMessage("Closing Balance"),
         "collapse": MessageLookupByLibrary.simpleMessage("Collapse"),
         "combineAndForward":
             MessageLookupByLibrary.simpleMessage("Combine and forward"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
+        "confirmSyncChatsFromPhone": MessageLookupByLibrary.simpleMessage(
+            "Are you sure to sync the chat history from the phone?"),
+        "confirmSyncChatsToPhone": MessageLookupByLibrary.simpleMessage(
+            "Are you sure to sync the chat history to the phone?"),
         "contact": MessageLookupByLibrary.simpleMessage("Contact"),
         "contactMixinId": m10,
         "contactMuteTitle":
@@ -265,6 +271,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataError": MessageLookupByLibrary.simpleMessage("Data error"),
         "dataLoading": MessageLookupByLibrary.simpleMessage(
             "Data loading, please wait..."),
+        "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
+            "The database is being upgraded, it may take several minutes, please do not close this App."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deleteAccountDetailHint": MessageLookupByLibrary.simpleMessage(
             "Local messages and iCloud Backups will not be deleted automatically"),
@@ -317,6 +325,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
         "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
             "Enter your PIN to delete your account"),
+        "enterToSend":
+            MessageLookupByLibrary.simpleMessage("Return/Enter ⏎ to Send"),
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("Enter your phone number"),
         "enterYourPinToContinue":
@@ -543,6 +553,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "openLink": m33,
         "openLogDirectory":
             MessageLookupByLibrary.simpleMessage("open log directory"),
+        "openingBalance":
+            MessageLookupByLibrary.simpleMessage("Opening Balance"),
         "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
         "owner": MessageLookupByLibrary.simpleMessage("Owner"),
         "participantsCount": m34,
@@ -642,6 +654,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sign in with QR code"),
         "smileysAndPeople":
             MessageLookupByLibrary.simpleMessage("Smileys & People"),
+        "snapshotHash": MessageLookupByLibrary.simpleMessage("Snapshot Hash"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
         "sticker": MessageLookupByLibrary.simpleMessage("Sticker"),
         "stickerAlbumDetail":
@@ -676,6 +689,16 @@ class MessageLookup extends MessageLookupByLibrary {
             "Transactions CANNOT be deleted"),
         "transcript": MessageLookupByLibrary.simpleMessage("Transcript"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
+        "transferCompleted":
+            MessageLookupByLibrary.simpleMessage("Transfer completed"),
+        "transferFailed":
+            MessageLookupByLibrary.simpleMessage("Transfer failed"),
+        "transferProtocolVersionNotMatched": MessageLookupByLibrary.simpleMessage(
+            "Protocol version does not match, transfer failed. Please upgrade the application first."),
+        "transferringChats":
+            MessageLookupByLibrary.simpleMessage("Transferring Chat"),
+        "transferringChatsTips": MessageLookupByLibrary.simpleMessage(
+            "Please do not turn off the screen and keep the Mixin running in the foreground while syncing."),
         "travelAndPlaces":
             MessageLookupByLibrary.simpleMessage("Travel & Places"),
         "turnOnNotifications":
@@ -696,6 +719,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Are you sure you want to unpin all messages?"),
         "unreadMessages":
             MessageLookupByLibrary.simpleMessage("Unread messages"),
+        "upgrading": MessageLookupByLibrary.simpleMessage("Upgrading"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "valueNow": m49,
         "valueThen": m50,

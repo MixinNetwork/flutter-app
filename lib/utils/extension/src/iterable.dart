@@ -74,3 +74,14 @@ extension ListExtension<T> on List<T> {
     return result;
   }
 }
+
+Future<void> futureForEachIndexed<T>(
+  Iterable<T> iterable,
+  FutureOr<void> Function(int index, T element) action,
+) async {
+  var index = 0;
+  for (final element in iterable) {
+    await action(index, element);
+    index++;
+  }
+}

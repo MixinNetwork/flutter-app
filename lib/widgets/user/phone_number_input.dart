@@ -244,7 +244,10 @@ class _MobileInput extends HookWidget {
                     Resources.assetsImagesIcArrowRightSvg,
                     width: 30,
                     height: 30,
-                    color: context.theme.secondaryText,
+                    colorFilter: ColorFilter.mode(
+                      context.theme.secondaryText,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 20),

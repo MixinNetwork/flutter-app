@@ -137,9 +137,7 @@ class ConversationMenuWrapper extends StatelessWidget {
               context.l10n.conversationDeleteTitle(name),
               description: context.l10n.deleteChatDescription,
             );
-            if (!ret) {
-              return;
-            }
+            if (ret == null) return;
             await context.database.conversationDao
                 .deleteConversation(conversationId);
             await context.database.pinMessageDao

@@ -2,6 +2,9 @@ import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../enum/media_status.dart';
+import '../../utils/extension/extension.dart';
+import '../database_event_bus.dart';
+import '../event.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -14,9 +17,20 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$TranscriptMessageDaoMixin {
   TranscriptMessageDao(super.db);
 
-  Future<void> insertAll(List<TranscriptMessage> transcripts) =>
-      batch((batch) => batch.insertAll(db.transcriptMessages, transcripts,
-          mode: InsertMode.insertOrReplace));
+  Future<void> insertAll(
+    List<TranscriptMessage> transcripts, {
+    InsertMode mode = InsertMode.insertOrReplace,
+  }) =>
+      batch((batch) =>
+              batch.insertAll(db.transcriptMessages, transcripts, mode: mode))
+          .then((value) {
+        DataBaseEventBus.instance.updateTranscriptMessage(
+            transcripts.map((e) => MiniTranscriptMessage(
+                  transcriptId: e.transcriptId,
+                  messageId: e.messageId,
+                )));
+        return value;
+      });
 
   Selectable<TranscriptMessageItem> transactionMessageItem(String messageId) =>
       baseTranscriptMessageItem(
@@ -78,7 +92,52 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
           content: Value(attachmentId),
           mediaCreatedAt: Value(mediaCreatedAt),
         ),
-      );
+      )
+          .then((value) {
+        DataBaseEventBus.instance.updateTranscriptMessage([
+          MiniTranscriptMessage(
+            transcriptId: transcriptId,
+            messageId: messageId,
+          )
+        ]);
+      });
+
+  Future<String> generateTranscriptMessageFts5Content(
+    List<TranscriptMessage> transcriptMessages,
+  ) async {
+    final contents = await Future.wait(transcriptMessages.where((transcript) {
+      final category = transcript.category;
+      return category.isText ||
+          category.isPost ||
+          category.isData ||
+          category.isContact;
+    }).map((transcript) async {
+      final category = transcript.category;
+      if (category.isData) {
+        return transcript.mediaName;
+      }
+
+      if (category.isContact &&
+          (transcript.sharedUserId?.isNotEmpty ?? false)) {
+        return db.userDao
+            .userFullNameByUserId(transcript.sharedUserId!)
+            .getSingleOrNull();
+      }
+
+      return transcript.content;
+    }));
+
+    return contents.whereNotNull().join(' ');
+  }
+
+  Future<List<TranscriptMessage>> getTranscriptMessages({
+    required int limit,
+    required int offset,
+  }) =>
+      (db.select(db.transcriptMessages)
+            ..orderBy([(t) => OrderingTerm.desc(t.rowId)])
+            ..limit(limit, offset: offset))
+          .get();
 }
 
 extension TranscriptMessageItemExtension on TranscriptMessageItem {

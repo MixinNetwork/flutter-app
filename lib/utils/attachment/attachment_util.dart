@@ -3,8 +3,8 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 
-import 'package:diox/diox.dart';
-import 'package:diox/io.dart';
+import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
@@ -26,7 +26,6 @@ import '../logger.dart';
 import 'download_key_value.dart';
 
 part 'attachment_download_job.dart';
-
 part 'attachment_upload_job.dart';
 
 final _dio = Dio(BaseOptions(
@@ -54,24 +53,92 @@ abstract class _AttachmentJobBase {
   }
 }
 
-class AttachmentUtil extends ChangeNotifier {
+class AttachmentUtilBase {
+  AttachmentUtilBase(this.mediaPath)
+      : transcriptPath = p.join(mediaPath, 'Transcripts') {
+    Directory(transcriptPath).create(recursive: true);
+  }
+
+  factory AttachmentUtilBase.of(String identityNumber) {
+    final mediaPath =
+        p.join(mixinDocumentsDirectory.path, identityNumber, 'Media');
+    return AttachmentUtilBase(mediaPath);
+  }
+
+  final String transcriptPath;
+  final String mediaPath;
+
+  String convertAbsolutePath({
+    String? category,
+    required String? fileName,
+    String? conversationId,
+    String? messageId,
+    bool isTranscript = false,
+  }) {
+    if (fileName?.trim().isEmpty ?? true) return '';
+    if (isTranscript) {
+      var name = '$messageId${fileName!.fileExtension}';
+      if (messageId == null) {
+        name = fileName;
+      }
+      return p.join(transcriptPath, name);
+    }
+    if (fileName?.startsWith(mixinDocumentsDirectory.path) == true) {
+      return fileName!;
+    }
+    assert(conversationId != null);
+    assert(category != null);
+    return p.join(
+        getAttachmentDirectoryPath(category!, conversationId!), fileName);
+  }
+
+  String getAttachmentDirectoryPath(String category, String conversationId) {
+    assert(category.isAttachment);
+    String path;
+    if (category.isImage) {
+      path = getImagesPath(conversationId);
+    } else if (category.isVideo) {
+      path = getVideosPath(conversationId);
+    } else if (category.isAudio) {
+      path = getAudiosPath(conversationId);
+    } else {
+      path = getFilesPath(conversationId);
+    }
+    return path;
+  }
+
+  String getImagesPath(String conversationId) =>
+      p.join(mediaPath, 'Images', conversationId);
+
+  String getVideosPath(String conversationId) =>
+      p.join(mediaPath, 'Videos', conversationId);
+
+  String getAudiosPath(String conversationId) =>
+      p.join(mediaPath, 'Audios', conversationId);
+
+  String getFilesPath(String conversationId) =>
+      p.join(mediaPath, 'Files', conversationId);
+}
+
+class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   AttachmentUtil(
     this._client,
     this._messageDao,
     this._transcriptMessageDao,
-    this.mediaPath,
+    super.mediaPath,
   ) {
-    (_dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
-        (client) {
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-    };
-    transcriptPath = p.join(mediaPath, 'Transcripts');
+    final httpClientAdapter = _dio.httpClientAdapter;
+    if (httpClientAdapter is IOHttpClientAdapter) {
+      httpClientAdapter.onHttpClientCreate = (client) {
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
+      };
+    } else {
+      w('httpClientAdapter is not IOHttpClientAdapter');
+    }
     Directory(transcriptPath).create(recursive: true);
   }
 
-  final String mediaPath;
-  late final String transcriptPath;
   final MessageDao _messageDao;
   final TranscriptMessageDao _transcriptMessageDao;
   final Client _client;
@@ -333,45 +400,6 @@ class AttachmentUtil extends ChangeNotifier {
   Future<bool> isNotPending(String messageId) =>
       _messageDao.hasMediaStatus(messageId, MediaStatus.pending, true);
 
-  String getAttachmentDirectoryPath(String category, String conversationId) {
-    assert(category.isAttachment);
-    String path;
-    if (category.isImage) {
-      path = getImagesPath(conversationId);
-    } else if (category.isVideo) {
-      path = getVideosPath(conversationId);
-    } else if (category.isAudio) {
-      path = getAudiosPath(conversationId);
-    } else {
-      path = getFilesPath(conversationId);
-    }
-    return path;
-  }
-
-  String convertAbsolutePath({
-    String? category,
-    required String? fileName,
-    String? conversationId,
-    String? messageId,
-    bool isTranscript = false,
-  }) {
-    if (fileName?.trim().isEmpty ?? true) return '';
-    if (isTranscript) {
-      var name = '$messageId${fileName!.fileExtension}';
-      if (messageId == null) {
-        name = fileName;
-      }
-      return p.join(transcriptPath, name);
-    }
-    if (fileName?.startsWith(mixinDocumentsDirectory.path) == true) {
-      return fileName!;
-    }
-    assert(conversationId != null);
-    assert(category != null);
-    return p.join(
-        getAttachmentDirectoryPath(category!, conversationId!), fileName);
-  }
-
   File getAttachmentFile(
     String category,
     String? conversationId,
@@ -406,18 +434,6 @@ class AttachmentUtil extends ChangeNotifier {
 
   bool _equalsIgnoreCase(String? string1, String? string2) =>
       string1?.toLowerCase() == string2?.toLowerCase();
-
-  String getImagesPath(String conversationId) =>
-      p.join(mediaPath, 'Images', conversationId);
-
-  String getVideosPath(String conversationId) =>
-      p.join(mediaPath, 'Videos', conversationId);
-
-  String getAudiosPath(String conversationId) =>
-      p.join(mediaPath, 'Audios', conversationId);
-
-  String getFilesPath(String conversationId) =>
-      p.join(mediaPath, 'Files', conversationId);
 
   static AttachmentUtil init(
     Client client,

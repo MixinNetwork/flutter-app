@@ -30,16 +30,15 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y ninja-build libgtk-3-dev
           sudo apt-get install libsdl2-dev
-          sudo apt-get install webkit2gtk-4.0
+          sudo apt-get install webkit2gtk-4.1
           sudo apt-get install libopus-dev libogg-dev
           flutter doctor
 
       - name: Install dependencies
         run: flutter pub get
 
-      # verify the use of 'dart format' on each commit.
       - name: Verify formatting
-        run: flutter format --set-exit-if-changed .
+        run: dart format --set-exit-if-changed .
 
       # Consider passing '--fatal-infos' for slightly stricter analysis.
       - name: Analyze project source

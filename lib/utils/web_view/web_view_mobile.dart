@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../constants/resources.dart';
+import '../../db/extension/app.dart';
 import '../../db/mixin_database.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/cell.dart';
@@ -68,12 +69,9 @@ class _FullWindowInAppWebViewPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final webViewController = useMemoized(() {
-      final controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..loadRequest(Uri.parse(initialUrl));
-      return controller;
-    });
+    final webViewController = useMemoized(() => WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..loadRequest(Uri.parse(initialUrl)));
     return Material(
       color: context.theme.background,
       child: SafeArea(
@@ -214,7 +212,8 @@ class _WebViewActionDialog extends StatelessWidget {
                       Resources.assetsImagesInviteRefreshSvg,
                       width: 24,
                       height: 24,
-                      color: context.theme.text,
+                      colorFilter:
+                          ColorFilter.mode(context.theme.text, BlendMode.srcIn),
                     ),
                     trailing: null,
                     onTap: () {
@@ -249,7 +248,7 @@ class _ShareMenuItem extends StatelessWidget {
           Resources.assetsImagesShareSvg,
           width: 24,
           height: 24,
-          color: context.theme.text,
+          colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
         ),
         trailing: null,
         onTap: () async {
@@ -328,18 +327,10 @@ bool _matchResourcePattern(String url, App app) {
 
   final uri = toSchemeHostOrNull(url);
 
-  var patterns = app.resourcePatterns;
+  final patterns = app.resourcePatternsList;
   if (patterns == null) return false;
-
   try {
-    if (patterns.startsWith('[')) {
-      patterns = patterns.substring(1);
-    }
-    if (patterns.endsWith(']')) {
-      patterns = patterns.substring(0, patterns.length - 1);
-    }
-    final list = patterns.trim().split(',');
-    return list.any((element) => toSchemeHostOrNull(element.trim()) == uri);
+    return patterns.any((element) => toSchemeHostOrNull(element.trim()) == uri);
   } catch (error, stacktrace) {
     e('decode resource patterns error: $error, $stacktrace');
     return false;

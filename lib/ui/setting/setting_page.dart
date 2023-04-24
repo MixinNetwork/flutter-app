@@ -93,7 +93,8 @@ class SettingPage extends HookWidget {
                                     padding: const EdgeInsets.all(4),
                                     child: SvgPicture.asset(
                                       Resources.assetsImagesTriangleWarningSvg,
-                                      color: context.theme.red,
+                                      colorFilter: ColorFilter.mode(
+                                          context.theme.red, BlendMode.srcIn),
                                       width: 22,
                                       height: 22,
                                     ),
@@ -176,7 +177,8 @@ class _Item extends StatelessWidget {
             assetName,
             width: 24,
             height: 24,
-            color: color ?? context.theme.text,
+            colorFilter:
+                ColorFilter.mode(color ?? context.theme.text, BlendMode.srcIn),
           ),
           title: Text(title),
           color: color ?? context.theme.text,

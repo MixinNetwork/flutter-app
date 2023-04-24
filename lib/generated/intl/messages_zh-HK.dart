@@ -197,6 +197,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "chatNotSupportViewOnPhone":
             MessageLookupByLibrary.simpleMessage("不支持此類型消息，請在手機上查看。"),
         "chatPinMessage": m7,
+        "chatTextSize": MessageLookupByLibrary.simpleMessage("聊天字體大小"),
         "checkNewVersion": MessageLookupByLibrary.simpleMessage("檢查新版本"),
         "circleSubtitle": m8,
         "circleTitle": m9,
@@ -208,9 +209,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("點擊重新加載二維碼"),
         "close": MessageLookupByLibrary.simpleMessage("關閉"),
         "closeWindow": MessageLookupByLibrary.simpleMessage("關閉窗口"),
+        "closingBalance": MessageLookupByLibrary.simpleMessage("期末餘額"),
         "collapse": MessageLookupByLibrary.simpleMessage("摺疊"),
         "combineAndForward": MessageLookupByLibrary.simpleMessage("合併轉發"),
         "confirm": MessageLookupByLibrary.simpleMessage("確認"),
+        "confirmSyncChatsFromPhone":
+            MessageLookupByLibrary.simpleMessage("確認從手機端同步聊天記錄嗎？"),
+        "confirmSyncChatsToPhone":
+            MessageLookupByLibrary.simpleMessage("確認同步聊天記錄到手機端嗎？"),
         "contact": MessageLookupByLibrary.simpleMessage("聯繫人"),
         "contactMixinId": m10,
         "contactMuteTitle": MessageLookupByLibrary.simpleMessage("靜音通知"),
@@ -233,6 +239,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage("數據與存儲空間"),
         "dataError": MessageLookupByLibrary.simpleMessage("數據錯誤"),
         "dataLoading": MessageLookupByLibrary.simpleMessage("數據加載中，請稍後"),
+        "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
+            "正在進行數據庫升級，可能需要幾分鐘，請不要強制關閉應用。"),
         "delete": MessageLookupByLibrary.simpleMessage("刪除"),
         "deleteAccountDetailHint":
             MessageLookupByLibrary.simpleMessage("本地消息和 iCloud 備份不會被自動刪除"),
@@ -261,6 +269,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "done": MessageLookupByLibrary.simpleMessage("完成"),
         "download": MessageLookupByLibrary.simpleMessage("下載"),
         "downloadLink": MessageLookupByLibrary.simpleMessage("下載鏈接："),
+        "draft": MessageLookupByLibrary.simpleMessage("草稿"),
         "dragAndDropFileHere": MessageLookupByLibrary.simpleMessage("拖放檔案到此處"),
         "durationIsTooShort": MessageLookupByLibrary.simpleMessage("時間太短"),
         "edit": MessageLookupByLibrary.simpleMessage("編輯"),
@@ -274,6 +283,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "editProfile": MessageLookupByLibrary.simpleMessage("編輯資料"),
         "enterPinToDeleteAccount":
             MessageLookupByLibrary.simpleMessage("輸入你的 PIN 以註銷你的賬户"),
+        "enterToSend": MessageLookupByLibrary.simpleMessage("按下回車 ⏎ 發送"),
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("輸入你的手機號碼"),
         "enterYourPinToContinue":
@@ -391,7 +401,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "howAreYou": MessageLookupByLibrary.simpleMessage("嗨，你好嗎？"),
         "iAmGood": MessageLookupByLibrary.simpleMessage("我很好。"),
         "ignoreThisVersion": MessageLookupByLibrary.simpleMessage("忽略這次版本更新"),
-        "image": MessageLookupByLibrary.simpleMessage("圖片"),
+        "image": MessageLookupByLibrary.simpleMessage("圖像"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("包括檔案"),
         "includeVideos": MessageLookupByLibrary.simpleMessage("包括視頻"),
         "initializing": MessageLookupByLibrary.simpleMessage("初始化…"),
@@ -475,6 +485,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "openHomePage": MessageLookupByLibrary.simpleMessage("打開主頁"),
         "openLink": m33,
         "openLogDirectory": MessageLookupByLibrary.simpleMessage("打開日誌檔案夾"),
+        "openingBalance": MessageLookupByLibrary.simpleMessage("期初餘額"),
         "originalImage": MessageLookupByLibrary.simpleMessage("原圖"),
         "owner": MessageLookupByLibrary.simpleMessage("羣主"),
         "participantsCount": m34,
@@ -557,6 +568,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "signWithPhoneNumber": MessageLookupByLibrary.simpleMessage("通過手機號登錄"),
         "signWithQrcode": MessageLookupByLibrary.simpleMessage("通過二維碼登錄"),
         "smileysAndPeople": MessageLookupByLibrary.simpleMessage("表情符號與人物"),
+        "snapshotHash": MessageLookupByLibrary.simpleMessage("快照哈希"),
         "status": MessageLookupByLibrary.simpleMessage("交易狀態"),
         "sticker": MessageLookupByLibrary.simpleMessage("貼紙"),
         "stickerAlbumDetail": MessageLookupByLibrary.simpleMessage("表情詳情"),
@@ -583,6 +595,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("轉賬記錄不會被刪除"),
         "transcript": MessageLookupByLibrary.simpleMessage("聊天記錄"),
         "transfer": MessageLookupByLibrary.simpleMessage("轉賬"),
+        "transferCompleted": MessageLookupByLibrary.simpleMessage("同步完成"),
+        "transferFailed": MessageLookupByLibrary.simpleMessage("同步失敗"),
+        "transferProtocolVersionNotMatched":
+            MessageLookupByLibrary.simpleMessage("版本不匹配，無法同步數據，請先升級應用。"),
+        "transferringChats": MessageLookupByLibrary.simpleMessage("同步聊天記錄中"),
+        "transferringChatsTips":
+            MessageLookupByLibrary.simpleMessage("同步時請不要關閉屏幕並保持 Mixin 在前台運行。"),
         "travelAndPlaces": MessageLookupByLibrary.simpleMessage("旅行與地點"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("打開通知"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("輸入消息"),
@@ -599,6 +618,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesConfirmation":
             MessageLookupByLibrary.simpleMessage("確定取消置頂所有消息麼？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未讀消息"),
+        "upgrading": MessageLookupByLibrary.simpleMessage("升級中..."),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到這個用户"),
         "valueNow": m49,
         "valueThen": m50,

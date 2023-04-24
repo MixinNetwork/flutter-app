@@ -14,9 +14,11 @@ import '../../../account/show_pin_message_key_value.dart';
 import '../../../bloc/simple_cubit.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
+import '../../../widgets/actions/actions.dart';
 import '../../../widgets/animated_visibility.dart';
 import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../../widgets/conversation/mute_dialog.dart';
@@ -262,17 +264,28 @@ class ChatPage extends HookWidget {
                       width: 1,
                       color: context.theme.divider,
                     ),
-                  _SideRouter(
-                    chatSideCubit: chatSideCubit,
-                    constraints: boxConstraints,
-                    onPopPage: (Route<dynamic> route, dynamic result) {
-                      chatSideCubit.onPopPage();
-                      return route.didPop(result);
+                  FocusableActionDetector(
+                    shortcuts: const {
+                      SingleActivator(LogicalKeyboardKey.escape):
+                          EscapeIntent(),
                     },
-                    pages: [
-                      if (routeMode) chatContainerPage,
-                      ...navigatorState.pages,
-                    ],
+                    actions: {
+                      EscapeIntent: CallbackAction<EscapeIntent>(
+                        onInvoke: (intent) => chatSideCubit.pop(),
+                      )
+                    },
+                    child: _SideRouter(
+                      chatSideCubit: chatSideCubit,
+                      constraints: boxConstraints,
+                      onPopPage: (Route<dynamic> route, dynamic result) {
+                        chatSideCubit.onPopPage();
+                        return route.didPop(result);
+                      },
+                      pages: [
+                        if (routeMode) chatContainerPage,
+                        ...navigatorState.pages,
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -398,10 +411,10 @@ class ChatContainer extends HookWidget {
           shortcuts: {
             if (inMultiSelectMode)
               const SingleActivator(LogicalKeyboardKey.escape):
-                  const _ExitSelectionModeIntent(),
+                  const EscapeIntent(),
           },
           actions: {
-            _ExitSelectionModeIntent: CallbackAction<_ExitSelectionModeIntent>(
+            EscapeIntent: CallbackAction<EscapeIntent>(
               onInvoke: (intent) {
                 context.read<MessageSelectionCubit>().clearSelection();
               },
@@ -506,10 +519,6 @@ class ChatContainer extends HookWidget {
       ),
     );
   }
-}
-
-class _ExitSelectionModeIntent extends Intent {
-  const _ExitSelectionModeIntent();
 }
 
 class _NotificationListener extends StatelessWidget {
@@ -734,7 +743,7 @@ class _JumpCurrentButton extends HookWidget {
           alignment: Alignment.center,
           child: SvgPicture.asset(
             Resources.assetsImagesJumpCurrentArrowSvg,
-            color: context.theme.text,
+            colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
           ),
         ),
       ),
@@ -790,7 +799,8 @@ class _BottomBanner extends HookWidget {
               ),
               child: SvgPicture.asset(
                 Resources.assetsImagesTriangleWarningSvg,
-                color: context.theme.red,
+                colorFilter:
+                    ColorFilter.mode(context.theme.red, BlendMode.srcIn),
                 width: 26,
                 height: 26,
               ),
@@ -905,7 +915,8 @@ class _PinMessagesBanner extends HookWidget {
                     Resources.assetsImagesChatPinSvg,
                     width: 34,
                     height: 34,
-                    color: context.theme.text,
+                    colorFilter:
+                        ColorFilter.mode(context.theme.text, BlendMode.srcIn),
                   ),
                 ),
               ),
@@ -929,8 +940,15 @@ class _JumpMentionButton extends HookWidget {
     )!;
     final messageMentions = useMemoizedStream(
             () => context.database.messageMentionDao
-                .unreadMentionMessageByConversationId(conversationId)
-                .watchThrottle(kSlowThrottleDuration),
+                    .unreadMentionMessageByConversationId(conversationId)
+                    .watchWithStream(
+                  eventStreams: [
+                    DataBaseEventBus.instance.watchUpdateMessageMention(
+                      conversationIds: [conversationId],
+                    )
+                  ],
+                  duration: kSlowThrottleDuration,
+                ),
             keys: [conversationId]).data ??
         [];
 
@@ -1120,9 +1138,7 @@ class _ConversationHandle extends ConversationMenuHandle {
       context.l10n.conversationDeleteTitle(name),
       description: context.l10n.deleteChatDescription,
     );
-    if (!ret) {
-      return;
-    }
+    if (ret == null) return;
     await context.database.conversationDao.deleteConversation(conversationId);
     await context.database.pinMessageDao.deleteByConversationId(conversationId);
     if (context.read<ConversationCubit>().state?.conversationId ==

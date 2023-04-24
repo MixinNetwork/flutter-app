@@ -3,6 +3,8 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
 import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../utils/extension/extension.dart';
+import '../database_event_bus.dart';
+import '../extension/db.dart';
 import '../mixin_database.dart';
 
 part 'user_dao.g.dart';
@@ -31,21 +33,45 @@ extension UserExtension on sdk.User {
 class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   UserDao(super.db);
 
-  Future<int> insert(User user) => into(db.users).insertOnConflictUpdate(user);
+  Future<int> insert(User user, {bool updateIfConflict = true}) =>
+      into(db.users)
+          .simpleInsert(user, updateIfConflict: updateIfConflict)
+          .then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.updateUsers([user.userId]);
+        }
+        return value;
+      });
 
   Future<int> insertSdkUser(sdk.User user) =>
-      into(db.users).insertOnConflictUpdate(user.asDbUser);
+      into(db.users).insertOnConflictUpdate(user.asDbUser).then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.updateUsers([user.userId]);
+        }
+        return value;
+      });
 
   Future<void> insertAll(List<User> users) async => batch((batch) {
         batch.insertAllOnConflictUpdate(db.users, users);
+      }).then((value) {
+        DataBaseEventBus.instance.updateUsers(users.map((e) => e.userId));
+        return value;
       });
 
   Future<void> insertAllSdkUser(List<sdk.User> users) async => batch((batch) {
         batch.insertAllOnConflictUpdate(
             db.users, users.map((e) => e.asDbUser).toList());
+      }).then((value) {
+        DataBaseEventBus.instance.updateUsers(users.map((e) => e.userId));
+        return value;
       });
 
-  Future deleteUser(User user) => delete(db.users).delete(user);
+  Future deleteUser(User user) => delete(db.users).delete(user).then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.updateUsers([user.userId]);
+        }
+        return value;
+      });
 
   SimpleSelectStatement<Users, User> userById(String userId) => select(db.users)
     ..where((tbl) => tbl.userId.equals(userId))
@@ -155,6 +181,8 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   Future updateMuteUntil(String userId, String muteUntil) async {
     await (update(db.users)..where((tbl) => tbl.userId.equals(userId)))
         .write(UsersCompanion(muteUntil: Value(DateTime.tryParse(muteUntil))));
+
+    DataBaseEventBus.instance.updateUsers([userId]);
   }
 
   Future<List<String>> findMultiUserIdsByIdentityNumbers(
@@ -172,4 +200,15 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
       [],
       db.users.userId.equals(userIdOrIdentityNumber) |
           db.users.identityNumber.equals(userIdOrIdentityNumber));
+
+  Future<List<User>> getUsers({
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.users)
+            ..orderBy([
+              (tbl) => OrderingTerm.asc(tbl.rowId),
+            ])
+            ..limit(limit, offset: offset))
+          .get();
 }

@@ -4,6 +4,11 @@ enum MainIsolateEventType {
   reconnectBlaze,
   disconnectBlazeWithTime,
   updateSelectedConversation,
+  addAckJob,
+  addSessionAckJob,
+  addSendingJob,
+  addUpdateAssetJob,
+  addUpdateStickerJob,
   exit,
 }
 
@@ -17,9 +22,6 @@ enum WorkerIsolateEventType {
 
   /// args: ConnectedState
   onBlazeConnectStateChanged,
-
-  /// args: Tuple2<DatabaseEvent, dynamic>
-  onDbEvent,
 
   /// args: DioError
   onApiRequestedError,

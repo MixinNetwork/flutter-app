@@ -12,13 +12,17 @@ SELECT
   asset.tag,
   asset.confirmations AS asset_confirmations,
   asset.icon_url AS symbolIconUrl,
-  tempAsset.icon_url AS chainIconUrl,
+  chain.icon_url AS chainIconUrl,
   fiat.rate AS fiatRate
 FROM snapshots snapshot
   LEFT JOIN users opponent ON opponent.user_id = snapshot.opponent_id
   LEFT JOIN assets asset ON asset.asset_id = snapshot.asset_id
-  LEFT JOIN assets tempAsset ON asset.chain_id = tempAsset.asset_id
+  LEFT JOIN chains chain ON asset.chain_id = chain.chain_id
   LEFT JOIN fiats fiat ON fiat.code = :currentFiat
 WHERE $where
 ORDER BY $order
 LIMIT $limit;
+
+
+countSnapshots:
+SELECT COUNT(1) FROM snapshots;

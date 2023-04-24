@@ -2,6 +2,8 @@ import 'package:drift/drift.dart';
 
 import '../../utils/extension/extension.dart';
 import '../../utils/reg_exp_utils.dart';
+import '../database_event_bus.dart';
+import '../extension/db.dart';
 import '../mixin_database.dart';
 
 part 'message_mention_dao.g.dart';
@@ -11,16 +13,33 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageMentionDaoMixin {
   MessageMentionDao(super.db);
 
-  Future<int> insert(MessageMention messageMention) =>
-      into(db.messageMentions).insertOnConflictUpdate(messageMention);
+  Future<int> insert(
+    MessageMention messageMention, {
+    bool updateIfConflict = true,
+  }) =>
+      into(db.messageMentions)
+          .simpleInsert(messageMention, updateIfConflict: updateIfConflict)
+          .then((value) {
+        DataBaseEventBus.instance.updateMessageMention([
+          MiniMessageItem(
+              conversationId: messageMention.conversationId,
+              messageId: messageMention.messageId)
+        ]);
+        return value;
+      });
 
   Future deleteMessageMention(MessageMention messageMention) =>
-      delete(db.messageMentions).delete(messageMention);
-
-  Future<int> deleteMessageMentionByMessageId(String messageId) =>
-      (db.delete(db.messageMentions)
-            ..where((tbl) => tbl.messageId.equals(messageId)))
-          .go();
+      (delete(db.messageMentions)
+            ..where((tbl) => tbl.messageId.equals(messageMention.messageId)))
+          .go()
+          .then((value) {
+        DataBaseEventBus.instance.updateMessageMention([
+          MiniMessageItem(
+              conversationId: messageMention.conversationId,
+              messageId: messageMention.messageId)
+        ]);
+        return value;
+      });
 
   Future<void> parseMentionData(
     String? content,
@@ -63,16 +82,38 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
                 tbl.hasRead.equals(false)));
 
   Future<void> markMentionRead(String messageId) async {
-    final already = await db.hasData(
-        db.messageMentions,
-        [],
-        db.messageMentions.messageId.equals(messageId) &
-            db.messageMentions.hasRead.equals(true));
+    final messageMention = await (db.select(db.messageMentions)
+          ..where((tbl) => tbl.messageId.equals(messageId)))
+        .getSingleOrNull();
 
-    if (already) return;
+    if (messageMention == null) return;
+    if (messageMention.hasRead ?? false) return;
 
     await (db.update(db.messageMentions)
           ..where((tbl) => tbl.messageId.equals(messageId)))
-        .write(const MessageMentionsCompanion(hasRead: Value(true)));
+        .write(const MessageMentionsCompanion(hasRead: Value(true)))
+        .then((value) {
+      DataBaseEventBus.instance.updateMessageMention([
+        MiniMessageItem(
+          conversationId: messageMention.conversationId,
+          messageId: messageId,
+        )
+      ]);
+      return value;
+    });
   }
+
+  Future<List<MessageMention>> getMessageMentions(
+          int kQueryLimit, int offset) =>
+      (db.select(db.messageMentions)
+            ..orderBy([
+              (t) => OrderingTerm(expression: t.rowId, mode: OrderingMode.desc)
+            ])
+            ..limit(kQueryLimit, offset: offset))
+          .get();
+
+  Future<int> getMessageMentionsCount() => db
+      .customSelect('SELECT COUNT(1) as _result FROM message_mentions')
+      .map((p0) => p0.read<int>('_result'))
+      .getSingle();
 }

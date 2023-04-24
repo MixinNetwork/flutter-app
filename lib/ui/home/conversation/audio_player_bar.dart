@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
@@ -28,7 +29,13 @@ class AudioPlayerBar extends HookWidget {
         }
         return context.database.conversationDao
             .conversationItem(message.conversationId)
-            .watchSingleOrNull();
+            .watchSingleOrNullWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance
+                .watchUpdateConversationStream([message.conversationId]),
+          ],
+          duration: kSlowThrottleDuration,
+        );
       },
       keys: [message?.conversationId],
     ).data;
@@ -158,16 +165,19 @@ class _Icon extends StatelessWidget {
           children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: ConversationAvatarWidget(
-                conversation: conversation,
-                size: 32,
-              ),
+              child: conversation == null
+                  ? const SizedBox.square(dimension: 32)
+                  : ConversationAvatarWidget(
+                      conversation: conversation,
+                      size: 32,
+                    ),
             ),
             Align(
               alignment: Alignment.bottomRight,
               child: SvgPicture.asset(
                 Resources.assetsImagesAudioSvg,
-                color: context.theme.icon,
+                colorFilter:
+                    ColorFilter.mode(context.theme.icon, BlendMode.srcIn),
                 width: 16,
                 height: 16,
               ),

@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
+import '../database_event_bus.dart';
+import '../event.dart';
 import '../mixin_database.dart';
 
 part 'sticker_dao.g.dart';
@@ -24,13 +26,37 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
   StickerDao(super.db);
 
   Future<int> insert(StickersCompanion sticker) =>
-      into(db.stickers).insertOnConflictUpdate(sticker);
+      into(db.stickers).insertOnConflictUpdate(sticker).then((value) {
+        DataBaseEventBus.instance.updateSticker([
+          MiniSticker(
+              stickerId: sticker.stickerId.value,
+              albumId: sticker.albumId.value)
+        ]);
+        return value;
+      });
+
+  Future<void> insertSticker(Sticker sticker) =>
+      into(db.stickers).insert(sticker, mode: InsertMode.insertOrIgnore);
 
   Future<void> insertAll(Iterable<StickersCompanion> stickers) =>
-      batch((batch) => batch.insertAllOnConflictUpdate(db.stickers, stickers));
+      batch((batch) => batch.insertAllOnConflictUpdate(db.stickers, stickers))
+          .then((value) {
+        DataBaseEventBus.instance.updateSticker(stickers.map((sticker) =>
+            MiniSticker(
+                stickerId: sticker.stickerId.value,
+                albumId: sticker.albumId.value)));
+
+        return value;
+      });
 
   Future<int> deleteSticker(Sticker sticker) =>
-      delete(db.stickers).delete(sticker);
+      delete(db.stickers).delete(sticker).then((value) {
+        DataBaseEventBus.instance.updateSticker([
+          MiniSticker(stickerId: sticker.stickerId, albumId: sticker.albumId)
+        ]);
+
+        return value;
+      });
 
   Selectable<Sticker> recentUsedStickers() => db.recentUsedStickers();
 
@@ -49,14 +75,29 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<Sticker> systemStickers() => db.stickersByCategory('SYSTEM');
 
-  Future<int> updateUsedAt(String stickerId, DateTime dateTime) =>
+  Future<int> updateUsedAt(
+          String? albumId, String stickerId, DateTime dateTime) =>
       (update(db.stickers)..where((tbl) => tbl.stickerId.equals(stickerId)))
           .write(
         StickersCompanion(
           lastUseAt: Value(dateTime),
         ),
-      );
+      )
+          .then((value) {
+        DataBaseEventBus.instance.updateSticker(
+            [MiniSticker(stickerId: stickerId, albumId: albumId)]);
+        return value;
+      });
 
   Future<bool> hasSticker(String stickerId) async => db.hasData(
       db.stickers, const [], db.stickers.stickerId.equals(stickerId));
+
+  Future<List<Sticker>> getStickers({
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.stickers)
+            ..orderBy([(tbl) => OrderingTerm.asc(tbl.rowId)])
+            ..limit(limit, offset: offset))
+          .get();
 }

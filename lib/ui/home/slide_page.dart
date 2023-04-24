@@ -9,6 +9,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../bloc/setting_cubit.dart';
 import '../../constants/resources.dart';
+import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../generated/l10n.dart';
 import '../../utils/color_utils.dart';
@@ -110,7 +111,10 @@ class SlidePage extends StatelessWidget {
                                 : Resources.assetsImagesCollapseSvg,
                             width: 24,
                             height: 24,
-                            color: context.theme.text,
+                            colorFilter: ColorFilter.mode(
+                              context.theme.text,
+                              BlendMode.srcIn,
+                            ),
                           ),
                           title: Text(context.l10n.collapse),
                           onTap: () =>
@@ -191,9 +195,15 @@ class _CircleList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final circles = useMemoizedStream<List<ConversationCircleItem>>(
-      () => context.database.circleDao
-          .allCircles()
-          .watchThrottle(kDefaultThrottleDuration),
+      () => context.database.circleDao.allCircles().watchWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance.updateCircleStream,
+          DataBaseEventBus.instance.updateCircleConversationStream,
+          DataBaseEventBus.instance.updateUserIdsStream,
+          DataBaseEventBus.instance.updateConversationIdStream,
+        ],
+        duration: kDefaultThrottleDuration,
+      ),
       initialData: [],
     );
     final controller = useScrollController();
@@ -276,7 +286,7 @@ class _CircleList extends HookWidget {
                           ContextMenu(
                             icon:
                                 Resources.assetsImagesContextMenuEditCircleSvg,
-                            title: context.l10n.editCircleName,
+                            title: context.l10n.editConversations,
                             onTap: () async {
                               final initSelected = (await context
                                       .database.circleConversationDao
@@ -342,7 +352,7 @@ class _CircleList extends HookWidget {
                               final result = await showConfirmMixinDialog(
                                   context,
                                   context.l10n.deleteTheCircle(circle.name));
-                              if (!result) return;
+                              if (result == null) return;
                               await runFutureWithToast(
                                 () async {
                                   await context.accountServer
@@ -362,7 +372,10 @@ class _CircleList extends HookWidget {
                               Resources.assetsImagesCircleSvg,
                               width: 24,
                               height: 24,
-                              color: getCircleColorById(circle.circleId),
+                              colorFilter: ColorFilter.mode(
+                                getCircleColorById(circle.circleId),
+                                BlendMode.srcIn,
+                              ),
                             ),
                             title: Text(circle.name),
                             onTap: () {
@@ -443,7 +456,12 @@ class _Item extends HookWidget {
           case SlideCategoryType.strangers:
             return dao
                 .unseenConversationCountByCategory(type)
-                .watchSingleThrottle(kDefaultThrottleDuration);
+                .watchSingleWithStream(
+              eventStreams: [
+                DataBaseEventBus.instance.updateConversationIdStream
+              ],
+              duration: kDefaultThrottleDuration,
+            );
           case SlideCategoryType.chats:
           case SlideCategoryType.circle:
           case SlideCategoryType.setting:
@@ -459,7 +477,7 @@ class _Item extends HookWidget {
           asset,
           width: 24,
           height: 24,
-          color: context.theme.text,
+          colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
         ),
         title: Text(title),
         onTap: () {

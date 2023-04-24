@@ -54,14 +54,29 @@ class SearchBar extends HookWidget {
             ),
             Expanded(
               child: MoveWindowBarrier(
-                child: SearchTextField(
-                  focusNode: context.read<FocusNode>(),
-                  controller: context.read<TextEditingController>(),
-                  onChanged: (keyword) =>
-                      context.read<KeywordCubit>().emit(keyword),
-                  hintText: filterUnseen
-                      ? context.l10n.searchUnread
-                      : context.l10n.search,
+                child: FocusableActionDetector(
+                  shortcuts: const {
+                    SingleActivator(LogicalKeyboardKey.escape): EscapeIntent(),
+                  },
+                  actions: {
+                    EscapeIntent: CallbackAction<EscapeIntent>(
+                      onInvoke: (intent) {
+                        context.read<KeywordCubit>().emit('');
+                        context.read<TextEditingController>().text = '';
+                        context.read<FocusNode>().unfocus();
+                      },
+                    )
+                  },
+                  child: Builder(
+                      builder: (context) => SearchTextField(
+                            focusNode: context.read<FocusNode>(),
+                            controller: context.read<TextEditingController>(),
+                            onChanged: (keyword) =>
+                                context.read<KeywordCubit>().emit(keyword),
+                            hintText: filterUnseen
+                                ? context.l10n.searchUnread
+                                : context.l10n.search,
+                          )),
                 ),
               ),
             ),

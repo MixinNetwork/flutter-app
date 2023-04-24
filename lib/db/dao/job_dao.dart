@@ -20,7 +20,7 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
 
   Future<int> insert(Job job) => into(db.jobs).insertOnConflictUpdate(job);
 
-  Future<int> insertSendingJob(
+  Future<Job> createSendingJob(
     String messageId,
     String conversationId, {
     String? recipientId,
@@ -36,25 +36,21 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
 
     d('insertSendingJob: ${expireIn ?? (await getConversationExpireIn())}');
 
-    return insert(
-      Job(
-        jobId: const Uuid().v4(),
-        action: kSendingMessage,
-        priority: 5,
-        blazeMessage: jsonEncode({
-          messageIdKey: messageId,
-          recipientIdKey: recipientId,
-          silentKey: silent,
-          expireInKey: expireIn ?? (await getConversationExpireIn()),
-        }),
-        conversationId: conversationId,
-        createdAt: DateTime.now(),
-        runCount: 0,
-      ),
+    return Job(
+      jobId: const Uuid().v4(),
+      action: kSendingMessage,
+      priority: 5,
+      blazeMessage: jsonEncode({
+        messageIdKey: messageId,
+        recipientIdKey: recipientId,
+        silentKey: silent,
+        expireInKey: expireIn ?? (await getConversationExpireIn()),
+      }),
+      conversationId: conversationId,
+      createdAt: DateTime.now(),
+      runCount: 0,
     );
   }
-
-  Future deleteJob(Job job) => delete(db.jobs).delete(job);
 
   Future<void> deleteJobs(List<String> jobIds) => batch(
       (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.isIn(jobIds))});
@@ -62,13 +58,8 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   Future<void> deleteJobById(String jobId) => batch(
       (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId))});
 
-  Stream<bool> _watchHasJobs(List<String> actions) => db
-      .watchHasData(db.jobs, [],
-          db.jobs.action.isIn(actions) & db.jobs.blazeMessage.isNotNull())
-      .where((event) => event);
-
-  Stream<bool> watchHasAckJobs() =>
-      _watchHasJobs([kAcknowledgeMessageReceipts]);
+  Future<void> deleteJobByAction(String action) => batch(
+      (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.action.equals(action))});
 
   SimpleSelectStatement<Jobs, Job> ackJobs() => select(db.jobs)
     ..where((Jobs row) =>
@@ -76,15 +67,11 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
         row.blazeMessage.isNotNull())
     ..limit(100);
 
-  Stream<bool> watchHasSessionAckJobs() => _watchHasJobs([kCreateMessage]);
-
   SimpleSelectStatement<Jobs, Job> sessionAckJobs() => select(db.jobs)
     ..where((Jobs row) =>
         row.action.equals(kCreateMessage) & row.blazeMessage.isNotNull())
+    ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
     ..limit(100);
-
-  Stream<bool> watchHasSendingJobs() =>
-      _watchHasJobs([kSendingMessage, kPinMessage, kRecallMessage]);
 
   SimpleSelectStatement<Jobs, Job> sendingJobs() => select(db.jobs)
     ..where((Jobs row) =>
@@ -92,20 +79,19 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
         row.blazeMessage.isNotNull())
     ..limit(100);
 
-  Stream<bool> watchHasUpdateAssetJobs() => _watchHasJobs([kUpdateAsset]);
-
   SimpleSelectStatement<Jobs, Job> updateAssetJobs() => select(db.jobs)
     ..where((Jobs row) =>
         row.action.equals(kUpdateAsset) & row.blazeMessage.isNotNull())
     ..limit(100);
 
-  Stream<bool> watchHasUpdateStickerJobs() => _watchHasJobs([kUpdateSticker]);
-
   SimpleSelectStatement<Jobs, Job> updateStickerJobs() => select(db.jobs)
     ..where((Jobs row) => row.action.equals(kUpdateSticker))
     ..limit(100);
 
-  Future<Job?> ackJobById(String jobId) =>
+  SimpleSelectStatement<Jobs, Job> migrateFtsJobs() =>
+      select(db.jobs)..where((Jobs row) => row.action.equals(kMigrateFts));
+
+  Future<Job?> jobById(String jobId) =>
       (select(db.jobs)..where((tbl) => tbl.jobId.equals(jobId)))
           .getSingleOrNull();
 
@@ -114,43 +100,9 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
       });
 
   Future<void> insertNoReplace(Job job) async {
-    final exists = await ackJobById(job.jobId);
+    final exists = await jobById(job.jobId);
     if (exists == null) {
       await insert(job);
     }
-  }
-
-  Future<void> insertUpdateAssetJob(String assetId) async {
-    final exists = await db.hasData(
-        db.jobs,
-        [],
-        db.jobs.action.equals(kUpdateAsset) &
-            db.jobs.blazeMessage.equals(assetId));
-    if (exists) return;
-    await insert(Job(
-      jobId: const Uuid().v4(),
-      action: kUpdateAsset,
-      priority: 5,
-      runCount: 0,
-      createdAt: DateTime.now(),
-      blazeMessage: assetId,
-    ));
-  }
-
-  Future<void> insertUpdateStickerJob(String stickerId) async {
-    final exists = await db.hasData(
-        db.jobs,
-        [],
-        db.jobs.action.equals(kUpdateSticker) &
-            db.jobs.blazeMessage.equals(stickerId));
-    if (exists) return;
-    await insert(Job(
-      jobId: const Uuid().v4(),
-      action: kUpdateSticker,
-      priority: 5,
-      runCount: 0,
-      createdAt: DateTime.now(),
-      blazeMessage: stickerId,
-    ));
   }
 }

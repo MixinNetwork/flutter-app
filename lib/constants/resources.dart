@@ -184,6 +184,10 @@ class Resources {
   /// {@macro assets_generator.assetsImagesDeliveredSvg.preview}
   static const String assetsImagesDeliveredSvg = 'assets/images/delivered.svg';
 
+  /// {@macro assets_generator.assetsImagesDeviceTransferSvg.preview}
+  static const String assetsImagesDeviceTransferSvg =
+      'assets/images/device_transfer.svg';
+
   /// {@macro assets_generator.assetsImagesDisappearingMessageSvg.preview}
   static const String assetsImagesDisappearingMessageSvg =
       'assets/images/disappearing_message.svg';
@@ -562,6 +566,14 @@ class Resources {
 
   /// {@macro assets_generator.assetsImagesTransferSvg.preview}
   static const String assetsImagesTransferSvg = 'assets/images/transfer.svg';
+
+  /// {@macro assets_generator.assetsImagesTransferFromPhoneSvg.preview}
+  static const String assetsImagesTransferFromPhoneSvg =
+      'assets/images/transfer_from_phone.svg';
+
+  /// {@macro assets_generator.assetsImagesTransferToPhoneSvg.preview}
+  static const String assetsImagesTransferToPhoneSvg =
+      'assets/images/transfer_to_phone.svg';
 
   /// {@macro assets_generator.assetsImagesTriangleWarningSvg.preview}
   static const String assetsImagesTriangleWarningSvg =

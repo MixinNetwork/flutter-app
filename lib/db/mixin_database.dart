@@ -1,17 +1,9 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:isolate';
-import 'dart:ui';
 
 import 'package:drift/drift.dart';
-import 'package:drift/isolate.dart';
-import 'package:drift/native.dart';
-import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:path/path.dart' as p;
 
 import '../enum/media_status.dart';
-import '../utils/file.dart';
 import 'converter/conversation_category_type_converter.dart';
 import 'converter/conversation_status_type_converter.dart';
 import 'converter/media_status_type_converter.dart';
@@ -19,10 +11,10 @@ import 'converter/message_status_type_converter.dart';
 import 'converter/millis_date_converter.dart';
 import 'converter/participant_role_converter.dart';
 import 'converter/user_relationship_converter.dart';
-import 'custom_vm_database_wrapper.dart';
 import 'dao/address_dao.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
+import 'dao/chain_dao.dart';
 import 'dao/circle_conversation_dao.dart';
 import 'dao/circle_dao.dart';
 import 'dao/conversation_dao.dart';
@@ -47,6 +39,8 @@ import 'dao/sticker_dao.dart';
 import 'dao/sticker_relationship_dao.dart';
 import 'dao/user_dao.dart';
 import 'database_event_bus.dart';
+import 'extension/job.dart';
+import 'util/open_database.dart';
 import 'util/util.dart';
 
 part 'mixin_database.g.dart';
@@ -65,7 +59,6 @@ part 'mixin_database.g.dart';
     'moor/dao/pin_message.drift',
     'moor/dao/sticker_relationship.drift',
     'moor/dao/favorite_app.drift',
-    'moor/dao/expired_message.drift',
   },
   daos: [
     AddressDao,
@@ -94,28 +87,20 @@ part 'mixin_database.g.dart';
     FiatDao,
     FavoriteAppDao,
     ExpiredMessageDao,
+    ChainDao,
   ],
   queries: {},
 )
 class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);
 
-  MixinDatabase.connect(super.c) : super.connect();
-
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 22;
 
-  final eventBus = DataBaseEventBus();
+  final eventBus = DataBaseEventBus.instance;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        beforeOpen: (_) async {
-          if (executor.dialect == SqlDialect.sqlite) {
-            await customStatement('PRAGMA journal_mode=WAL');
-            await customStatement('PRAGMA foreign_keys=ON');
-            await customStatement('PRAGMA synchronous=NORMAL');
-          }
-        },
         onUpgrade: (Migrator m, int from, int to) async {
           if (from <= 2) {
             await m.drop(Index(
@@ -227,6 +212,25 @@ class MixinDatabase extends _$MixinDatabase {
             await _addColumnIfNotExists(m, users, users.codeUrl);
             await _addColumnIfNotExists(m, users, users.codeId);
           }
+          if (from <= 17) {
+            await m.createIndex(indexMessagesConversationIdQuoteMessageId);
+          }
+          if (from <= 18) {
+            await m.createTable(chains);
+          }
+          if (from <= 19) {
+            await m.drop(Trigger('', 'conversation_last_message_delete'));
+          }
+          if (from <= 21) {
+            await _addColumnIfNotExists(m, snapshots, snapshots.snapshotHash);
+            await _addColumnIfNotExists(m, snapshots, snapshots.openingBalance);
+            await _addColumnIfNotExists(m, snapshots, snapshots.closingBalance);
+          }
+        },
+        beforeOpen: (details) async {
+          if (details.hadUpgrade && details.versionBefore! <= 20) {
+            await jobDao.insert(createMigrationFtsJob(null));
+          }
         },
       );
 
@@ -244,19 +248,6 @@ class MixinDatabase extends _$MixinDatabase {
     return queryRow.read<bool>('CNTREC');
   }
 
-  Stream<bool> watchHasData<T extends HasResultSet, R>(
-    ResultSetImplementation<T, R> table, [
-    List<Join> joins = const [],
-    Expression<bool> predicate = ignoreWhere,
-  ]) =>
-      (selectOnly(table)
-            ..addColumns([const CustomExpression<String>('1')])
-            ..join(joins)
-            ..where(predicate)
-            ..limit(1))
-          .watch()
-          .map((event) => event.isNotEmpty);
-
   Future<bool> hasData<T extends HasResultSet, R>(
     ResultSetImplementation<T, R> table, [
     List<Join> joins = const [],
@@ -271,87 +262,17 @@ class MixinDatabase extends _$MixinDatabase {
           .isNotEmpty;
 }
 
-QueryExecutor _openConnection(File dbFile) {
-  final vmDatabase = NativeDatabase(dbFile);
-  if (!kDebugMode) {
-    return vmDatabase;
-  }
-  return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
-}
-
 /// Connect to the database.
 Future<MixinDatabase> connectToDatabase(
   String identityNumber, {
-  int readCount = 4,
+  int readCount = 8,
   bool fromMainIsolate = false,
 }) async {
-  final backgroundPortName = 'one_mixin_drift_background_$identityNumber';
-  final foregroundPortName = 'one_mixin_drift_foreground_$identityNumber';
-
-  final writeIsolate = await _crateIsolate(
-    identityNumber,
-    backgroundPortName,
+  final queryExecutor = await openQueryExecutor(
+    identityNumber: identityNumber,
+    dbName: 'mixin',
+    readCount: readCount,
     fromMainIsolate: fromMainIsolate,
   );
-
-  final write = await writeIsolate.connect();
-
-  final reads = await Future.wait(List.generate(readCount, (i) async {
-    final isolate = await _crateIsolate(
-      identityNumber,
-      '${foregroundPortName}_$i',
-      fromMainIsolate: fromMainIsolate,
-    );
-    return isolate.connect();
-  }));
-
-  final connect = write.withExecutor(MultiExecutor.withReadPool(
-    reads: reads.map((e) => e.executor).toList(),
-    write: write.executor,
-  ));
-  return MixinDatabase.connect(connect);
-}
-
-Future<DriftIsolate> _crateIsolate(
-  String identityNumber,
-  String name, {
-  bool fromMainIsolate = false,
-}) async {
-  if (fromMainIsolate) {
-    // Remove port if it exists. to avoid port leak on hot reload.
-    IsolateNameServer.removePortNameMapping(name);
-  }
-
-  final existingIsolate = IsolateNameServer.lookupPortByName(name);
-
-  if (existingIsolate == null) {
-    assert(fromMainIsolate, 'Isolate should be created from main isolate');
-    final dbFile =
-        File(p.join(mixinDocumentsDirectory.path, identityNumber, 'mixin.db'));
-    final receivePort = ReceivePort();
-    await Isolate.spawn(
-      _startBackground,
-      _IsolateStartRequest(receivePort.sendPort, dbFile),
-    );
-    final isolate = await receivePort.first as DriftIsolate;
-    IsolateNameServer.registerPortWithName(isolate.connectPort, name);
-    return isolate;
-  } else {
-    return DriftIsolate.fromConnectPort(existingIsolate, serialize: false);
-  }
-}
-
-void _startBackground(_IsolateStartRequest request) {
-  final executor = _openConnection(request.dbFile);
-  final isolate = DriftIsolate.inCurrent(
-    () => DatabaseConnection(executor),
-  );
-  request.sendMoorIsolate.send(isolate);
-}
-
-class _IsolateStartRequest {
-  _IsolateStartRequest(this.sendMoorIsolate, this.dbFile);
-
-  final SendPort sendMoorIsolate;
-  final File dbFile;
+  return MixinDatabase(queryExecutor);
 }

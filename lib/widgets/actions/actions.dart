@@ -5,6 +5,10 @@ import 'create_circle_action.dart';
 import 'create_conversation_action.dart';
 import 'create_group_conversation_action.dart';
 
+class EscapeIntent extends Intent {
+  const EscapeIntent();
+}
+
 class CreateConversationIntent extends Intent {
   const CreateConversationIntent();
 }

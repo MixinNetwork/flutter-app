@@ -1,4 +1,4 @@
-import 'package:diox/diox.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -11,7 +11,10 @@ class GiphyApi {
   GiphyApi(this.dio);
 
   static GiphyApi instance = GiphyApi(
-    Dio(BaseOptions(baseUrl: _giphyUrl))
+    Dio(BaseOptions(
+      baseUrl: _giphyUrl,
+      contentType: 'application/json; charset=utf-8',
+    ))
       ..interceptors.addAll([
         if (!kReleaseMode) MixinLogInterceptor(HttpLogLevel.none),
       ]),

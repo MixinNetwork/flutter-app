@@ -744,6 +744,16 @@ class Localization {
     );
   }
 
+  /// `Closing Balance`
+  String get closingBalance {
+    return Intl.message(
+      'Closing Balance',
+      name: 'closingBalance',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Collapse`
   String get collapse {
     return Intl.message(
@@ -769,6 +779,26 @@ class Localization {
     return Intl.message(
       'Confirm',
       name: 'confirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure to sync the chat history from the phone?`
+  String get confirmSyncChatsFromPhone {
+    return Intl.message(
+      'Are you sure to sync the chat history from the phone?',
+      name: 'confirmSyncChatsFromPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure to sync the chat history to the phone?`
+  String get confirmSyncChatsToPhone {
+    return Intl.message(
+      'Are you sure to sync the chat history to the phone?',
+      name: 'confirmSyncChatsToPhone',
       desc: '',
       args: [],
     );
@@ -989,6 +1019,16 @@ class Localization {
     return Intl.message(
       'Data loading, please wait...',
       name: 'dataLoading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The database is being upgraded, it may take several minutes, please do not close this App.`
+  String get databaseUpgradeTips {
+    return Intl.message(
+      'The database is being upgraded, it may take several minutes, please do not close this App.',
+      name: 'databaseUpgradeTips',
       desc: '',
       args: [],
     );
@@ -1339,6 +1379,16 @@ class Localization {
     return Intl.message(
       'Enter your PIN to delete your account',
       name: 'enterPinToDeleteAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Return/Enter ⏎ to Send`
+  String get enterToSend {
+    return Intl.message(
+      'Return/Enter ⏎ to Send',
+      name: 'enterToSend',
       desc: '',
       args: [],
     );
@@ -2850,6 +2900,16 @@ class Localization {
     );
   }
 
+  /// `Opening Balance`
+  String get openingBalance {
+    return Intl.message(
+      'Opening Balance',
+      name: 'openingBalance',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Original`
   String get originalImage {
     return Intl.message(
@@ -3616,6 +3676,16 @@ class Localization {
     );
   }
 
+  /// `Snapshot Hash`
+  String get snapshotHash {
+    return Intl.message(
+      'Snapshot Hash',
+      name: 'snapshotHash',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Status`
   String get status {
     return Intl.message(
@@ -3866,6 +3936,56 @@ class Localization {
     );
   }
 
+  /// `Transfer completed`
+  String get transferCompleted {
+    return Intl.message(
+      'Transfer completed',
+      name: 'transferCompleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transfer failed`
+  String get transferFailed {
+    return Intl.message(
+      'Transfer failed',
+      name: 'transferFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protocol version does not match, transfer failed. Please upgrade the application first.`
+  String get transferProtocolVersionNotMatched {
+    return Intl.message(
+      'Protocol version does not match, transfer failed. Please upgrade the application first.',
+      name: 'transferProtocolVersionNotMatched',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transferring Chat`
+  String get transferringChats {
+    return Intl.message(
+      'Transferring Chat',
+      name: 'transferringChats',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please do not turn off the screen and keep the Mixin running in the foreground while syncing.`
+  String get transferringChatsTips {
+    return Intl.message(
+      'Please do not turn off the screen and keep the Mixin running in the foreground while syncing.',
+      name: 'transferringChatsTips',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Travel & Places`
   String get travelAndPlaces {
     return Intl.message(
@@ -4021,6 +4141,16 @@ class Localization {
     return Intl.message(
       'Unread messages',
       name: 'unreadMessages',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upgrading`
+  String get upgrading {
+    return Intl.message(
+      'Upgrading',
+      name: 'upgrading',
       desc: '',
       args: [],
     );
@@ -4183,6 +4313,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'es'),
       Locale.fromSubtags(languageCode: 'in'),
       Locale.fromSubtags(languageCode: 'ja'),
       Locale.fromSubtags(languageCode: 'ms'),

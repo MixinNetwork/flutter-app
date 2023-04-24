@@ -128,6 +128,29 @@ class _FilesPreviewDialog extends HookWidget {
       showAsBigImage.value = hasImage && currentTab.value == _TabType.image;
     }, [hasImage, currentTab.value]);
 
+    Future<void> send() async {
+      if (currentTab.value != _TabType.zip) {
+        for (final file in files.value) {
+          unawaited(
+              _sendFile(context, file, quoteMessageCubit?.state?.messageId));
+        }
+        quoteMessageCubit?.emit(null);
+        Navigator.pop(context);
+      } else {
+        final zipFilePath = await runLoadBalancer(_archiveFiles, [
+          (await getTemporaryDirectory()).path,
+          ...files.value.map((e) => e.path),
+        ]);
+        unawaited(_sendFile(
+          context,
+          await _File.createFromPath(zipFilePath),
+          quoteMessageCubit?.state?.messageId,
+        ));
+        quoteMessageCubit?.emit(null);
+        Navigator.pop(context);
+      }
+    }
+
     return Material(
       child: Container(
           width: 480,
@@ -170,6 +193,7 @@ class _FilesPreviewDialog extends HookWidget {
                   const SizedBox(height: 4),
                   Expanded(
                     child: _FileInputOverlay(
+                      onSend: send,
                       onFileAdded: (fileAdded) {
                         final currentFiles =
                             files.value.map((e) => e.path).toSet();
@@ -216,29 +240,7 @@ class _FilesPreviewDialog extends HookWidget {
                   const SizedBox(height: 32),
                   Align(
                     child: ElevatedButton(
-                      onPressed: () async {
-                        if (currentTab.value != _TabType.zip) {
-                          for (final file in files.value) {
-                            unawaited(_sendFile(context, file,
-                                quoteMessageCubit?.state?.messageId));
-                          }
-                          quoteMessageCubit?.emit(null);
-                          Navigator.pop(context);
-                        } else {
-                          final zipFilePath =
-                              await runLoadBalancer(_archiveFiles, [
-                            (await getTemporaryDirectory()).path,
-                            ...files.value.map((e) => e.path),
-                          ]);
-                          unawaited(_sendFile(
-                            context,
-                            await _File.createFromPath(zipFilePath),
-                            quoteMessageCubit?.state?.messageId,
-                          ));
-                          quoteMessageCubit?.emit(null);
-                          Navigator.pop(context);
-                        }
-                      },
+                      onPressed: send,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.only(
                             left: 32, top: 18, bottom: 18, right: 32),
@@ -247,7 +249,14 @@ class _FilesPreviewDialog extends HookWidget {
                       child: Text(context.l10n.send.toUpperCase()),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
+                  Align(
+                    child: Text(
+                      context.l10n.enterToSend,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
               const Align(
@@ -399,9 +408,10 @@ class _Tab extends StatelessWidget {
                       ),
                       child: SvgPicture.asset(
                         assetName,
-                        color: selected
-                            ? context.theme.accent
-                            : context.theme.icon,
+                        colorFilter: ColorFilter.mode(
+                          selected ? context.theme.accent : context.theme.icon,
+                          BlendMode.srcIn,
+                        ),
                         width: 24,
                         height: 24,
                       )),
@@ -696,11 +706,13 @@ class _FileInputOverlay extends HookWidget {
   const _FileInputOverlay({
     required this.child,
     required this.onFileAdded,
+    required this.onSend,
   });
 
   final Widget child;
 
   final void Function(List<_File>) onFileAdded;
+  final void Function() onSend;
 
   @override
   Widget build(BuildContext context) {
@@ -713,12 +725,18 @@ class _FileInputOverlay extends HookWidget {
           meta: kPlatformIsDarwin,
           control: !kPlatformIsDarwin,
         ): const _PasteFileOrImageIntent(),
+        const SingleActivator(
+          LogicalKeyboardKey.enter,
+        ): const _SendFilesIntent(),
       },
       actions: {
         _PasteFileOrImageIntent: CallbackAction<Intent>(onInvoke: (_) async {
           final files = await getClipboardFiles();
           onFileAdded(await Future.wait(files.map(_File.createFromFile)));
-        })
+        }),
+        _SendFilesIntent: CallbackAction<Intent>(onInvoke: (_) {
+          onSend();
+        }),
       },
       child: DropTarget(
         onDragEntered: (_) => dragging.value = true,
@@ -749,6 +767,10 @@ class _FileInputOverlay extends HookWidget {
 
 class _PasteFileOrImageIntent extends Intent {
   const _PasteFileOrImageIntent();
+}
+
+class _SendFilesIntent extends Intent {
+  const _SendFilesIntent();
 }
 
 class _ChatDragIndicator extends StatelessWidget {

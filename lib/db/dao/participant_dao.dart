@@ -1,21 +1,60 @@
 import 'package:drift/drift.dart';
+import 'package:equatable/equatable.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, transaction;
 
+import '../database_event_bus.dart';
+import '../extension/db.dart';
 import '../mixin_database.dart';
 
 part 'participant_dao.g.dart';
+
+class MiniParticipantItem with EquatableMixin {
+  MiniParticipantItem({
+    required this.conversationId,
+    required this.userId,
+  });
+
+  final String conversationId;
+  final String userId;
+
+  @override
+  List<Object?> get props => [
+        conversationId,
+        userId,
+      ];
+}
 
 @DriftAccessor(tables: [Participants])
 class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantDaoMixin {
   ParticipantDao(super.db);
 
-  Future<int> insert(Participant participant) =>
-      into(db.participants).insertOnConflictUpdate(participant);
+  Future<int> insert(
+    Participant participant, {
+    bool updateIfConflict = true,
+  }) =>
+      into(db.participants)
+          .simpleInsert(participant, updateIfConflict: updateIfConflict)
+          .then((value) {
+        DataBaseEventBus.instance.updateParticipant([
+          MiniParticipantItem(
+              conversationId: participant.conversationId,
+              userId: participant.userId)
+        ]);
+        return value;
+      });
 
   Future<int> deleteParticipant(Participant participant) =>
-      delete(db.participants).delete(participant);
+      delete(db.participants).delete(participant).then((value) {
+        DataBaseEventBus.instance.updateParticipant([
+          MiniParticipantItem(
+            conversationId: participant.conversationId,
+            userId: participant.userId,
+          )
+        ]);
+        return value;
+      });
 
   Future<List<Participant>> getParticipants(String conversationId) async {
     final query = select(db.participants)
@@ -37,10 +76,11 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
 
   Future<void> insertAll(List<Participant> add) => batch((batch) {
         batch.insertAllOnConflictUpdate(db.participants, add);
-      });
-
-  Future<List<Participant>> getAllParticipants() async =>
-      select(db.participants).get();
+      }).then((value) => DataBaseEventBus.instance
+          .updateParticipant(add.map((participant) => MiniParticipantItem(
+                conversationId: participant.conversationId,
+                userId: participant.userId,
+              ))));
 
   Future<void> deleteAll(Iterable<Participant> remove) async {
     remove.forEach((element) async {
@@ -53,7 +93,8 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> updateParticipantRole(
           String conversationId, String participantId, ParticipantRole? role) =>
-      db.customUpdate(
+      db
+          .customUpdate(
         'UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
         variables: [
           Variable<String>(const ParticipantRoleJsonConverter().toJson(role)),
@@ -62,15 +103,30 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
         ],
         updates: {db.participants},
         updateKind: UpdateKind.update,
-      );
+      )
+          .then((value) {
+        DataBaseEventBus.instance.updateParticipant([
+          MiniParticipantItem(
+            conversationId: conversationId,
+            userId: participantId,
+          )
+        ]);
+        return value;
+      });
 
   Future replaceAll(String conversationId, List<Participant> list) async =>
       transaction(() async {
-        await deleteByConversationId(conversationId);
+        await _deleteByConversationId(conversationId);
         await insertAll(list);
+      }).then((value) {
+        DataBaseEventBus.instance
+            .updateParticipant(list.map((participant) => MiniParticipantItem(
+                  conversationId: participant.conversationId,
+                  userId: participant.userId,
+                )));
       });
 
-  Future deleteByConversationId(String conversationId) async {
+  Future _deleteByConversationId(String conversationId) async {
     await (delete(db.participants)
           ..where((tbl) => tbl.conversationId.equals(conversationId)))
         .go();
@@ -81,7 +137,16 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
             ..where((tbl) =>
                 tbl.conversationId.equals(conversationId) &
                 tbl.userId.equals(participantId)))
-          .go();
+          .go()
+          .then((value) {
+        DataBaseEventBus.instance.updateParticipant([
+          MiniParticipantItem(
+            conversationId: conversationId,
+            userId: participantId,
+          )
+        ]);
+        return value;
+      });
 
   Selectable<String> userIdByIdentityNumber(
           String conversationId, String identityNumber) =>
@@ -96,4 +161,16 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
         ..where((tbl) =>
             tbl.conversationId.equals(conversationId) &
             tbl.userId.equals(userId)));
+
+  Future<List<Participant>> getAllParticipants({
+    required int limit,
+    required int offset,
+  }) async {
+    final query = select(db.participants)
+      ..orderBy([
+        (t) => OrderingTerm.asc(t.rowId),
+      ])
+      ..limit(limit, offset: offset);
+    return query.get();
+  }
 }

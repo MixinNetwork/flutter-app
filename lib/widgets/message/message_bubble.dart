@@ -63,6 +63,8 @@ class MessageBubble extends HookWidget {
     final bubbleColor =
         context.messageBubbleColor(forceIsCurrentUserColor ?? isCurrentUser);
 
+    final messageType = useMessageConverter(converter: (state) => state.type);
+
     var _child = child;
 
     if (!includeNip) {
@@ -78,26 +80,33 @@ class MessageBubble extends HookWidget {
     );
 
     if (hasQuoteMessage) {
+      final constraintQuoteWidthToMessage =
+          messageType.isVideo || messageType.isImage || messageType.isLive;
       _child = IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _MessageBubbleNipPadding(
-              currentUser: isCurrentUser,
-              child: HookBuilder(builder: (context) {
-                final quoteContent = useMessageConverter(
-                    converter: (state) => state.quoteContent);
-                final messageId =
-                    useMessageConverter(converter: (state) => state.messageId);
+            SizedBox(
+              // constraint width to 0, the ancestor IntrinsicWidth will relayout
+              // and get the correct width.
+              width: constraintQuoteWidthToMessage ? 0 : null,
+              child: _MessageBubbleNipPadding(
+                currentUser: isCurrentUser,
+                child: HookBuilder(builder: (context) {
+                  final quoteContent = useMessageConverter(
+                      converter: (state) => state.quoteContent);
+                  final messageId = useMessageConverter(
+                      converter: (state) => state.messageId);
 
-                return QuoteMessage(
-                  messageId: messageId,
-                  quoteMessageId: quoteId,
-                  content: quoteContent,
-                  isTranscriptPage: isTranscriptPage,
-                );
-              }),
+                  return QuoteMessage(
+                    messageId: messageId,
+                    quoteMessageId: quoteId,
+                    content: quoteContent,
+                    isTranscriptPage: isTranscriptPage,
+                  );
+                }),
+              ),
             ),
             _child,
           ],

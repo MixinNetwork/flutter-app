@@ -6,6 +6,7 @@ const scpFull = 'FULL';
 
 const kAcknowledgeMessageReceipt = 'ACKNOWLEDGE_MESSAGE_RECEIPT';
 const kAcknowledgeMessageReceipts = 'ACKNOWLEDGE_MESSAGE_RECEIPTS';
+const kDeviceTransfer = 'DEVICE_TRANSFER';
 const kSendingMessage = 'SENDING_MESSAGE';
 const kRecallMessage = 'RECALL_MESSAGE';
 const kPinMessage = 'PIN_MESSAGE';
@@ -25,6 +26,7 @@ const kSyncSignalKeys = 'SYNC_SIGNAL_KEYS';
 // Only from local.
 const kUpdateAsset = 'LOCAL_UPDATE_ASSET';
 const kUpdateSticker = 'LOCAL_UPDATE_STICKER';
+const kMigrateFts = 'LOCAL_MIGRATE_FTS';
 
 const mixinScheme = 'mixin';
 const mixinHost = 'mixin.one';

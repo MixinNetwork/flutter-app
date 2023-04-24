@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../db/dao/snapshot_dao.dart';
+import '../../../../db/database_event_bus.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
@@ -36,16 +38,29 @@ class _TransferPage extends HookWidget {
     }, []);
 
     final snapshotItem = useMemoizedStream(() => context.database.snapshotDao
-        .snapshotItemById(
-            snapshotId, context.multiAuthState.currentUser!.fiatCurrency)
-        .watchSingleOrNullThrottle(kDefaultThrottleDuration)).data;
+            .snapshotItemById(
+          snapshotId,
+          context.multiAuthState.currentUser!.fiatCurrency,
+        )
+            .watchSingleOrNullWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance.updateSnapshotStream.where(
+                (event) => event.any((element) => element.contains(snapshotId)))
+          ],
+          duration: kDefaultThrottleDuration,
+        )).data;
 
     final opponentFullName = useMemoizedStream<User?>(() {
       final opponentId = snapshotItem?.opponentId;
       if (opponentId != null && opponentId.trim().isNotEmpty) {
         final stream = context.database.userDao
             .userById(opponentId)
-            .watchSingleOrNullThrottle(kSlowThrottleDuration);
+            .watchSingleOrNullWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance.watchUpdateUserStream([opponentId])
+          ],
+          duration: kSlowThrottleDuration,
+        );
         return stream.doOnData((event) {
           if (event != null) return;
           context.accountServer.refreshUsers([opponentId]);
@@ -63,12 +78,6 @@ class _TransferPage extends HookWidget {
       if (assetId == null) return;
       context.accountServer.updateAssetById(assetId: assetId);
     }, [snapshotItem?.assetId]);
-
-    useEffect(() {
-      final chainId = snapshotItem?.chainId;
-      if (chainId == null) return;
-      context.accountServer.updateAssetById(assetId: chainId);
-    }, [snapshotItem?.chainId]);
 
     if (snapshotItem == null) return const SizedBox();
     return SizedBox(
@@ -125,8 +134,7 @@ class _SnapshotDetailHeader extends HookWidget {
             symbolUrl: snapshot.symbolIconUrl ?? '',
             chainUrl: snapshot.chainIconUrl,
             size: 58,
-            chainSize: 14,
-            chainBorder: const BorderSide(color: Colors.white, width: 2),
+            chainSize: 16,
           ),
           const SizedBox(height: 16),
           Padding(
@@ -265,6 +273,11 @@ class _TransactionDetailInfo extends StatelessWidget {
             title: Text(context.l10n.transactionId),
             subtitle: SelectableText(snapshot.snapshotId),
           ),
+          if (snapshot.snapshotHash?.isNotEmpty ?? false)
+            TransactionInfoTile(
+              title: Text(context.l10n.snapshotHash),
+              subtitle: SelectableText(snapshot.snapshotHash!),
+            ),
           TransactionInfoTile(
             title: Text(context.l10n.assetType),
             subtitle: SelectableText(snapshot.symbolName ?? ''),
@@ -340,6 +353,20 @@ class _TransactionDetailInfo extends StatelessWidget {
               title: Text(context.l10n.memo),
               subtitle: SelectableText(snapshot.memo!),
             ),
+          if ((snapshot.openingBalance?.isNotEmpty ?? false) &&
+              (snapshot.symbol?.isNotEmpty ?? false))
+            TransactionInfoTile(
+              title: Text(context.l10n.openingBalance),
+              subtitle: SelectableText(
+                  '${snapshot.openingBalance!} ${snapshot.symbol!}'),
+            ),
+          if ((snapshot.closingBalance?.isNotEmpty ?? false) &&
+              (snapshot.symbol?.isNotEmpty ?? false))
+            TransactionInfoTile(
+              title: Text(context.l10n.closingBalance),
+              subtitle: SelectableText(
+                  '${snapshot.closingBalance ?? ''} ${snapshot.symbol ?? ''}'),
+            ),
           TransactionInfoTile(
             title: Text(context.l10n.time),
             subtitle: SelectableText('${DateFormat.yMMMMd().format(createdAt)}'
@@ -403,49 +430,69 @@ class SymbolIconWithBorder extends StatelessWidget {
     super.key,
     required this.symbolUrl,
     this.chainUrl,
-    required this.size,
-    required this.chainSize,
-    this.chainBorder = const BorderSide(color: Colors.white),
+    this.size = 44,
+    this.chainSize = 10,
+    this.chainBorder = 2,
   });
 
   final String symbolUrl;
   final String? chainUrl;
   final double size;
   final double chainSize;
-
-  final BorderSide chainBorder;
+  final double chainBorder;
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(
-        dimension: size + chainBorder.width,
+  Widget build(BuildContext context) => SizedBox(
+        height: size,
+        width: size,
         child: Stack(
-          fit: StackFit.expand,
           children: [
-            Padding(
-              padding: EdgeInsets.all(chainBorder.width),
-              child: CacheImage(symbolUrl),
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.fromBorderSide(chainBorder),
+            Positioned.fill(
+              child: ClipPath(
+                clipper: _SymbolCustomClipper(
+                  chainPlaceholderSize: chainSize + chainBorder,
                 ),
-                child: Padding(
-                  padding: EdgeInsets.all(chainBorder.width),
-                  child: SizedBox.square(
-                    dimension: chainSize,
-                    child: CacheImage(
-                      chainUrl ?? '',
-                      width: chainSize,
-                      height: chainSize,
-                    ),
-                  ),
-                ),
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                child: CacheImage(symbolUrl),
               ),
             ),
+            if (chainUrl != null)
+              Positioned(
+                right: chainBorder / 2,
+                bottom: chainBorder / 2,
+                child: CacheImage(
+                  chainUrl!,
+                  width: chainSize,
+                  height: chainSize,
+                ),
+              ),
           ],
         ),
       );
+}
+
+class _SymbolCustomClipper extends CustomClipper<Path> with EquatableMixin {
+  _SymbolCustomClipper({this.chainPlaceholderSize = 12});
+
+  final double chainPlaceholderSize;
+
+  @override
+  Path getClip(Size size) {
+    assert(size.shortestSide > chainPlaceholderSize);
+
+    final symbol = Path()..addOval(Offset.zero & size);
+    final chain = Path()
+      ..addOval(Offset(size.width - chainPlaceholderSize,
+              size.height - chainPlaceholderSize) &
+          Size.square(chainPlaceholderSize));
+
+    return Path.combine(PathOperation.difference, symbol, chain);
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) =>
+      this != oldClipper;
+
+  @override
+  List<Object?> get props => [chainPlaceholderSize];
 }

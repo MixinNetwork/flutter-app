@@ -9,11 +9,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide StickerAlbum;
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../constants/constants.dart';
 import '../../../constants/resources.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/app_lifecycle.dart';
@@ -24,6 +26,7 @@ import '../../../utils/platform.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/system/clipboard.dart';
 import '../../../widgets/action_button.dart';
+import '../../../widgets/actions/actions.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
@@ -57,6 +60,10 @@ class InputContainer extends HookWidget {
         useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
       converter: (state) {
         if (state?.conversation == null) return true;
+        if (state?.conversation?.category == ConversationCategory.contact) {
+          return true;
+        }
+
         return state?.participant != null;
       },
     );
@@ -66,7 +73,7 @@ class InputContainer extends HookWidget {
     }, [conversationId]);
 
     final voiceRecorderCubit = useBloc(
-      VoiceRecorderCubit.new,
+      () => VoiceRecorderCubit(context.audioMessageService),
       keys: [conversationId],
     );
 
@@ -457,6 +464,15 @@ class _SendTextField extends HookWidget {
       converter: (state) => state?.encryptCategory.isEncrypt == true,
     );
 
+    final hasInputText = useMemoizedStream(
+          () => textEditingValueStream
+              .map((event) => event.text.isNotEmpty)
+              .distinct(),
+          keys: [textEditingValueStream],
+          initialData: textEditingController.text.isNotEmpty,
+        ).data ??
+        false;
+
     return Container(
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
@@ -480,7 +496,7 @@ class _SendTextField extends HookWidget {
             alt: !kPlatformIsDarwin,
           ): const _SendPostMessageIntent(),
           const SingleActivator(LogicalKeyboardKey.escape):
-              const _EscapeIntent(),
+              const EscapeIntent(),
         },
         actions: {
           _SendMessageIntent: CallbackAction<Intent>(
@@ -491,41 +507,55 @@ class _SendTextField extends HookWidget {
           _SendPostMessageIntent: CallbackAction<Intent>(
             onInvoke: (_) => _sendPostMessage(context, textEditingController),
           ),
-          _EscapeIntent: CallbackAction<Intent>(
+          EscapeIntent: CallbackAction<Intent>(
             onInvoke: (_) => context.read<QuoteMessageCubit>().emit(null),
           ),
         },
-        child: AnimatedSize(
-          curve: Curves.easeOut,
-          duration: const Duration(milliseconds: 200),
-          child: TextField(
-            maxLines: 7,
-            minLines: 1,
-            focusNode: focusNode,
-            controller: textEditingController,
-            style: TextStyle(
-              color: context.theme.text,
-              fontSize: 14,
-            ),
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: isEncryptConversation
-                  ? context.l10n.chatHintE2e
-                  : context.l10n.typeMessage,
-              hintStyle: TextStyle(
-                color: context.theme.secondaryText,
+        child: Stack(
+          children: [
+            TextField(
+              maxLines: 7,
+              minLines: 1,
+              focusNode: focusNode,
+              controller: textEditingController,
+              style: TextStyle(
+                color: context.theme.text,
                 fontSize: 14,
               ),
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: const EdgeInsets.only(
-                left: 8,
-                top: 8,
-                bottom: 8,
+              textAlignVertical: TextAlignVertical.center,
+              decoration: const InputDecoration(
+                isDense: true,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.only(
+                  left: 8,
+                  top: 8,
+                  bottom: 8,
+                ),
               ),
+              selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
             ),
-            selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
-          ),
+            if (!hasInputText)
+              Positioned.fill(
+                left: 8,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: IgnorePointer(
+                    child: Text(
+                      isEncryptConversation
+                          ? context.l10n.chatHintE2e
+                          : context.l10n.typeMessage,
+                      style: TextStyle(
+                        color: context.theme.secondaryText,
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              )
+          ],
         ),
       ),
     );
@@ -597,18 +627,41 @@ class _ImagePickButton extends StatelessWidget {
     }
     return Padding(
       padding: const EdgeInsets.only(left: 6),
-      child: ActionButton(
-        name: Resources.assetsImagesFilePreviewImagesSvg,
-        color: context.theme.icon,
-        onTap: () async {
-          final file =
-              await ImagePicker().pickImage(source: ImageSource.gallery);
-          if (file != null) {
-            // recreate the XFile to generate mimeType.
-            final xFile = File(file.path).xFile;
-            await showFilesPreviewDialog(context, [xFile]);
-          }
-        },
+      child: ContextMenuPortalEntry(
+        interactiveForTap: true,
+        buildMenus: () => [
+          ContextMenu(
+            icon: Resources.assetsImagesImageSvg,
+            title: context.l10n.image,
+            onTap: () async {
+              final file =
+                  await ImagePicker().pickImage(source: ImageSource.gallery);
+              if (file != null) {
+                // recreate the XFile to generate mimeType.
+                final xFile = File(file.path).xFile;
+                await showFilesPreviewDialog(context, [xFile]);
+              }
+            },
+          ),
+          ContextMenu(
+            icon: Resources.assetsImagesVideoSvg,
+            title: context.l10n.video,
+            onTap: () async {
+              final file =
+                  await ImagePicker().pickVideo(source: ImageSource.gallery);
+              if (file != null) {
+                // recreate the XFile to generate mimeType.
+                final xFile = File(file.path).xFile;
+                await showFilesPreviewDialog(context, [xFile]);
+              }
+            },
+          ),
+        ],
+        child: ActionButton(
+          name: Resources.assetsImagesFilePreviewImagesSvg,
+          color: context.theme.icon,
+          interactive: false,
+        ),
       ),
     );
   }
@@ -645,9 +698,11 @@ class _StickerButton extends HookWidget {
     final key = useMemoized(GlobalKey.new);
 
     final stickerAlbumsCubit = useBloc(
-      () => StickerAlbumsCubit(context.database.stickerAlbumDao
-          .systemAddedAlbums()
-          .watchThrottle(kVerySlowThrottleDuration)),
+      () => StickerAlbumsCubit(
+          context.database.stickerAlbumDao.systemAddedAlbums().watchWithStream(
+        eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+        duration: kVerySlowThrottleDuration,
+      )),
     );
 
     final presetStickerGroups = useMemoized(
@@ -841,10 +896,6 @@ class _SendMessageIntent extends Intent {
 
 class _SendPostMessageIntent extends Intent {
   const _SendPostMessageIntent();
-}
-
-class _EscapeIntent extends Intent {
-  const _EscapeIntent();
 }
 
 class _PasteContextAction extends Action<PasteTextIntent> {

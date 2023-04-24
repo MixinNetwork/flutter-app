@@ -31,7 +31,6 @@ class Toast {
         child: builder(context),
       ),
       duration: duration ?? Duration.zero,
-      key: const ValueKey('toast'),
     );
   }
 

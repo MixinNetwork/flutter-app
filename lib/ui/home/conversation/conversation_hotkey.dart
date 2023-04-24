@@ -105,8 +105,12 @@ void _navigationConversation(
       break;
     }
   }
-  conversationListBloc.itemScrollController(category).jumpTo(
-        index: nextConversationIndex,
-        alignment: forward ? trailingEdge : 0,
-      );
+  final itemScrollController =
+      conversationListBloc.itemScrollController(category);
+  if (itemScrollController.isAttached) {
+    itemScrollController.jumpTo(
+      index: nextConversationIndex,
+      alignment: forward ? trailingEdge : 0,
+    );
+  }
 }

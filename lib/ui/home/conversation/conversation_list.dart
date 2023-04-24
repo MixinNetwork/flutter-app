@@ -121,7 +121,7 @@ class _Empty extends StatelessWidget {
           Resources.assetsImagesEmptyFileSvg,
           height: 78,
           width: 58,
-          color: dynamicColor,
+          colorFilter: ColorFilter.mode(dynamicColor, BlendMode.srcIn),
         ),
         const SizedBox(height: 24),
         Text(
@@ -393,7 +393,7 @@ class _MessageContent extends HookWidget {
         if (!hasDraft && icon != null)
           SvgPicture.asset(
             icon,
-            color: dynamicColor,
+            colorFilter: ColorFilter.mode(dynamicColor, BlendMode.srcIn),
           ),
         if (hasDraft)
           Text(
@@ -458,12 +458,16 @@ class _StatusRow extends StatelessWidget {
           if (conversation.isMute)
             SvgPicture.asset(
               Resources.assetsImagesMuteSvg,
-              color: context.theme.secondaryText,
+              colorFilter: ColorFilter.mode(
+                context.theme.secondaryText,
+                BlendMode.srcIn,
+              ),
             ),
           if (conversation.pinTime != null)
             SvgPicture.asset(
               Resources.assetsImagesPinSvg,
-              color: context.theme.secondaryText,
+              colorFilter: ColorFilter.mode(
+                  context.theme.secondaryText, BlendMode.srcIn),
             ),
         ].joinList(const SizedBox(width: 4)),
       );

@@ -1,20 +1,23 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_logger/mixin_logger.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../account/account_server.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/message_dao.dart';
 import '../../../db/database.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/synchronized.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import 'conversation_cubit.dart';
 
@@ -78,7 +81,7 @@ class _MessageDeleteEvent extends _MessageEvent {
 }
 
 class MessageState extends Equatable {
-  const MessageState({
+  MessageState({
     this.top = const [],
     this.center,
     this.bottom = const [],
@@ -87,7 +90,19 @@ class MessageState extends Equatable {
     this.isOldest = false,
     this.lastReadMessageId,
     this.refreshKey,
-  });
+  }) {
+    // check top, center, bottom didn't has same messageId
+    assert(() {
+      final ids = <String>{};
+      for (final item in list) {
+        if (ids.contains(item.messageId)) {
+          e('MessageState has same messageId: ${item.messageId}');
+        }
+        ids.add(item.messageId);
+      }
+      return true;
+    }());
+  }
 
   final String? conversationId;
   final List<MessageItem> top;
@@ -156,22 +171,29 @@ class MessageState extends Equatable {
 
   MessageState removeMessage(String messageId) {
     if (center?.messageId == messageId) {
-      return copyWith();
-    }
-
-    var message =
-        top.firstWhereOrNull((message) => message.messageId == messageId);
-    if (message != null) {
-      return copyWith(
-        top: top.toList()..remove(message),
+      return MessageState(
+        conversationId: conversationId,
+        top: top,
+        bottom: bottom,
+        isLatest: isLatest,
+        isOldest: isOldest,
+        lastReadMessageId: lastReadMessageId,
+        refreshKey: refreshKey,
       );
     }
 
-    message =
-        bottom.firstWhereOrNull((message) => message.messageId == messageId);
-    if (message != null) {
+    bool include(MessageItem message) => message.messageId == messageId;
+    bool exclusive(MessageItem message) => message.messageId != messageId;
+
+    if (top.any(include)) {
       return copyWith(
-        top: bottom.toList()..remove(message),
+        top: top.where(exclusive).toList(),
+      );
+    }
+
+    if (bottom.any(include)) {
+      return copyWith(
+        bottom: bottom.where(exclusive).toList(),
       );
     }
 
@@ -188,10 +210,13 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.database,
     required this.mentionCache,
     required this.accountServer,
-  }) : super(const MessageState()) {
-    on<_MessageEvent>((event, emit) => _lock.synchronized(
-          () => _onEvent(event, emit),
-        ));
+  }) : super(MessageState()) {
+    on<_MessageEvent>(
+      (event, emit) async {
+        await _onEvent(event, emit);
+      },
+      transformer: sequential(),
+    );
 
     add(_MessageInitEvent(
       centerMessageId: conversationCubit.state?.initIndexMessageId,
@@ -217,12 +242,23 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
 
     addSubscription(
-      messageDao.insertOrReplaceMessageStream
-          .listen((state) => add(_MessageInsertOrReplaceEvent(state))),
+      conversationCubit.stream
+          .map((event) => event?.conversationId)
+          .distinct()
+          .switchMap((conversationId) {
+        if (conversationId == null) {
+          return const Stream<List<MessageItem>>.empty();
+        }
+        return messageDao.watchInsertOrReplaceMessageStream(conversationId);
+      }).listen((state) => add(_MessageInsertOrReplaceEvent(state))),
     );
 
-    addSubscription(messageDao.deleteMessageIdStream
-        .listen((messageId) => add(_MessageDeleteEvent(messageId))));
+    addSubscription(
+        DataBaseEventBus.instance.deleteMessageIdStream.listen((messageIds) {
+      messageIds.forEach((messageId) {
+        add(_MessageDeleteEvent(messageId));
+      });
+    }));
   }
 
   final ScrollController scrollController = ScrollController();
@@ -231,8 +267,6 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   final MentionCache mentionCache;
   final AccountServer accountServer;
   int limit;
-
-  final _lock = Lock();
 
   MessageDao get messageDao => database.messageDao;
 
@@ -307,12 +341,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Future<MessageState> _before(String conversationId) async {
     final topMessageId = state.topMessage?.messageId;
     assert(topMessageId != null);
-    final list = await database.transaction(() async {
-      final rowId = await messageDao.messageRowId(topMessageId!).getSingle();
-      return messageDao
-          .beforeMessagesByConversationId(rowId!, conversationId, limit)
-          .get();
-    });
+    final info = await messageDao.messageOrderInfo(topMessageId!);
+    final list = await messageDao
+        .beforeMessagesByConversationId(info!, conversationId, limit)
+        .get();
 
     final isOldest = list.length < limit;
     return state
@@ -322,12 +354,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Future<MessageState> _after(String conversationId) async {
     final bottomMessageId = state.bottomMessage?.messageId;
     assert(bottomMessageId != null);
-    final list = await database.transaction(() async {
-      final rowId = await messageDao.messageRowId(bottomMessageId!).getSingle();
-      return messageDao
-          .afterMessagesByConversationId(rowId!, conversationId, limit)
-          .get();
-    });
+    final info = await messageDao.messageOrderInfo(bottomMessageId!);
+    final list = await messageDao
+        .afterMessagesByConversationId(info!, conversationId, limit)
+        .get();
 
     final isLatest = list.length < limit ? true : null;
     return state
@@ -381,38 +411,29 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     if (centerMessageId == null) return recentMessages();
 
     return database.transaction(() async {
-      final rowId =
-          await messageDao.messageRowId(centerMessageId).getSingleOrNull();
-      if (rowId == null) {
+      final info = await messageDao.messageOrderInfo(centerMessageId);
+      if (info == null) {
         return recentMessages();
       }
       final _limit = limit ~/ 2;
-      var bottomList = await messageDao
-          .afterMessagesByConversationId(rowId, conversationId, _limit + 1,
-              orEqual: true)
+      final bottomList = await messageDao
+          .afterMessagesByConversationId(info, conversationId, _limit)
           .get();
       var topList = (await messageDao
-              .beforeMessagesByConversationId(rowId, conversationId, _limit)
+              .beforeMessagesByConversationId(info, conversationId, _limit)
               .get())
           .reversed
           .toList();
 
-      final isLatest = bottomList.length < _limit + 1;
+      final isLatest = bottomList.length < _limit;
       final isOldest = topList.length < _limit;
 
-      MessageItem? center;
-
-      bottomList = bottomList.fold(<MessageItem>[], (previousValue, element) {
-        if (center == null && element.messageId == centerMessageId) {
-          center = element;
-        } else {
-          previousValue.add(element);
-        }
-        return previousValue;
-      });
+      var center = await messageDao
+          .messageItemByMessageId(centerMessageId)
+          .getSingleOrNull();
 
       if (bottomList.isEmpty && center != null) {
-        topList = [...topList, center!];
+        topList = [...topList, center];
         center = null;
       }
 

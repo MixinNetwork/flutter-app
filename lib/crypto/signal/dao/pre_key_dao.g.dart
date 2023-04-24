@@ -2,8 +2,5 @@
 
 part of 'pre_key_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$PreKeyDaoMixin on DatabaseAccessor<SignalDatabase> {}

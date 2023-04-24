@@ -15,7 +15,7 @@ class FloodMessageDao extends DatabaseAccessor<MixinDatabase>
   Future deleteFloodMessage(FloodMessage message) =>
       delete(db.floodMessages).delete(message);
 
-  SimpleSelectStatement<FloodMessages, FloodMessage> findFloodMessage() =>
+  SimpleSelectStatement<FloodMessages, FloodMessage> floodMessage() =>
       select(db.floodMessages)
         ..orderBy([(u) => OrderingTerm(expression: u.createdAt)])
         ..limit(10);

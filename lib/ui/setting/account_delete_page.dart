@@ -73,9 +73,7 @@ class AccountDeletePage extends StatelessWidget {
                           maxWidth: 440,
                           positiveText: context.l10n.continueText,
                         );
-                        if (!confirmed) {
-                          return;
-                        }
+                        if (confirmed == null) return;
                         showToastLoading();
                         VerificationResponse? verificationResponse;
 

@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
 import '../../utils/extension/extension.dart';
+import '../database_event_bus.dart';
+import '../extension/db.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -42,14 +44,26 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
     with _$SnapshotDaoMixin {
   SnapshotDao(super.db);
 
-  Future<int> insert(Snapshot snapshot) =>
-      into(db.snapshots).insertOnConflictUpdate(snapshot);
+  Future<int> insert(Snapshot snapshot, {bool updateIfConflict = true}) =>
+      into(db.snapshots)
+          .simpleInsert(snapshot, updateIfConflict: updateIfConflict)
+          .then((value) {
+        DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
+        return value;
+      });
 
-  Future<int> insertSdkSnapshot(sdk.Snapshot snapshot) =>
-      into(db.snapshots).insertOnConflictUpdate(snapshot.asDbSnapshotObject);
+  Future<int> insertSdkSnapshot(sdk.Snapshot snapshot) => into(db.snapshots)
+          .insertOnConflictUpdate(snapshot.asDbSnapshotObject)
+          .then((value) {
+        DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
+        return value;
+      });
 
   Future deleteSnapshot(Snapshot snapshot) =>
-      delete(db.snapshots).delete(snapshot);
+      delete(db.snapshots).delete(snapshot).then((value) {
+        DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
+        return value;
+      });
 
   Selectable<SnapshotItem> snapshotItemById(
           String snapshotId, String currentFiat) =>
@@ -67,4 +81,13 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
             ..where(db.snapshots.traceId.equals(traceId))
             ..limit(1))
           .map((row) => row.read(db.snapshots.snapshotId));
+
+  Future<List<Snapshot>> getSnapshots({
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.snapshots)
+            ..orderBy([(t) => OrderingTerm.asc(t.rowId)])
+            ..limit(limit, offset: offset))
+          .get();
 }

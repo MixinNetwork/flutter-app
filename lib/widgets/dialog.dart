@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../utils/extension/extension.dart';
+import '../utils/hook.dart';
 import 'disable.dart';
 import 'interactive_decorated_box.dart';
 
@@ -16,7 +17,7 @@ Future<T?> _showDialog<T>({
   RouteSettings? routeSettings,
   required RoutePageBuilder pageBuilder,
 }) =>
-    showGeneralDialog(
+    showGeneralDialog<T>(
       context: context,
       pageBuilder: (BuildContext buildContext, Animation<double> animation,
               Animation<double> secondaryAnimation) =>
@@ -46,7 +47,7 @@ Future<T?> showMixinDialog<T>({
   Color? backgroundColor,
   bool barrierDismissible = true,
 }) =>
-    _showDialog(
+    _showDialog<T>(
       barrierDismissible: barrierDismissible,
       context: context,
       routeSettings: routeSettings,
@@ -266,37 +267,63 @@ class DialogTextField extends HookWidget {
   final int? maxLines;
 
   @override
-  Widget build(BuildContext context) => Container(
-        constraints: const BoxConstraints(minHeight: 48),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          color: context.theme.background,
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
-        ),
-        alignment: Alignment.center,
-        child: TextField(
-          autofocus: true,
-          controller: textEditingController,
-          style: TextStyle(
-            color: context.theme.text,
+  Widget build(BuildContext context) {
+    final textStream = useValueNotifierConvertSteam(textEditingController);
+    final hasText = useMemoizedStream(
+          () => textStream.map((event) => event.text.isNotEmpty).distinct(),
+        ).data ??
+        textEditingController.text.isNotEmpty;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 48),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: context.theme.background,
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
+      ),
+      alignment: Alignment.center,
+      child: Stack(
+        children: [
+          TextField(
+            autofocus: true,
+            controller: textEditingController,
+            style: TextStyle(
+              color: context.theme.text,
+            ),
+            maxLines: maxLines ?? 1,
+            minLines: 1,
+            scrollPadding: EdgeInsets.zero,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.zero,
+              isDense: true,
+              focusedBorder: InputBorder.none,
+              enabledBorder: InputBorder.none,
+            ),
+            inputFormatters: inputFormatters,
           ),
-          maxLines: maxLines ?? 1,
-          minLines: 1,
-          scrollPadding: EdgeInsets.zero,
-          decoration: InputDecoration(
-            contentPadding: EdgeInsets.zero,
-            isDense: true,
-            hintText: hintText,
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
-            focusedBorder: InputBorder.none,
-            enabledBorder: InputBorder.none,
-          ),
-          inputFormatters: inputFormatters,
-        ),
-      );
+          if (hintText.isNotEmpty && !hasText)
+            IgnorePointer(
+              child: Text(
+                hintText,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.08),
+                  height: 1,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
-Future<bool> showConfirmMixinDialog(
+enum DialogEvent {
+  positive,
+  neutral,
+}
+
+Future<DialogEvent?> showConfirmMixinDialog(
   BuildContext context,
   String content, {
   String? description,
@@ -304,8 +331,9 @@ Future<bool> showConfirmMixinDialog(
   bool barrierDismissible = true,
   String? positiveText,
   String? negativeText,
-}) async =>
-    await showMixinDialog<bool>(
+  String? neutralText,
+}) =>
+    showMixinDialog<DialogEvent>(
       context: context,
       barrierDismissible: barrierDismissible,
       child: Builder(
@@ -331,20 +359,26 @@ Future<bool> showConfirmMixinDialog(
             ],
           ),
           actions: [
+            if (neutralText != null) ...[
+              MixinButton(
+                onTap: () => Navigator.pop(context, DialogEvent.neutral),
+                child: Text(neutralText),
+              ),
+              const Spacer(),
+            ],
             MixinButton(
               backgroundTransparent: true,
-              onTap: () => Navigator.pop(context, false),
+              onTap: () => Navigator.pop(context, null),
               child: Text(negativeText ?? context.l10n.cancel),
             ),
             MixinButton(
-              onTap: () => Navigator.pop(context, true),
+              onTap: () => Navigator.pop(context, DialogEvent.positive),
               child: Text(positiveText ?? context.l10n.confirm),
             ),
           ],
         ),
       ),
-    ) ??
-    false;
+    );
 
 class EditDialog extends HookWidget {
   const EditDialog({

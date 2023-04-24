@@ -5,8 +5,34 @@ part 'plain_json_message.g.dart';
 
 @JsonSerializable()
 class PlainJsonMessage {
-  PlainJsonMessage(this.action, this.messages, this.userId, this.messageId,
-      this.sessionId, this.ackMessages);
+  PlainJsonMessage(
+    this.action,
+    this.messages,
+    this.userId,
+    this.messageId,
+    this.sessionId,
+    this.ackMessages, {
+    this.content,
+  });
+
+  factory PlainJsonMessage.create({
+    required String action,
+    List<String>? messages,
+    String? userId,
+    String? messageId,
+    String? sessionId,
+    List<BlazeAckMessage>? ackMessages,
+    String? content,
+  }) =>
+      PlainJsonMessage(
+        action,
+        messages,
+        userId,
+        messageId,
+        sessionId,
+        ackMessages,
+        content: content,
+      );
 
   factory PlainJsonMessage.fromJson(Map<String, dynamic> json) =>
       _$PlainJsonMessageFromJson(json);
@@ -23,6 +49,9 @@ class PlainJsonMessage {
   String? sessionId;
   @JsonKey(name: 'ack_messages')
   List<BlazeAckMessage>? ackMessages;
+
+  @JsonKey(name: 'content')
+  String? content;
 
   Map<String, dynamic> toJson() => _$PlainJsonMessageToJson(this);
 }

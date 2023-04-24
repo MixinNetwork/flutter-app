@@ -11,17 +11,15 @@ import 'package:uuid/uuid.dart';
 
 import '../blaze/vo/pin_message_minimal.dart';
 import '../blaze/vo/pin_message_payload.dart';
-import '../blaze/vo/recall_message.dart';
 import '../blaze/vo/transcript_minimal.dart';
-import '../constants/constants.dart';
 import '../db/dao/job_dao.dart';
 import '../db/dao/message_dao.dart';
 import '../db/dao/message_mention_dao.dart';
 import '../db/dao/participant_dao.dart';
 import '../db/dao/pin_message_dao.dart';
 import '../db/dao/transcript_message_dao.dart';
-import '../db/dao/user_dao.dart';
 import '../db/database.dart';
+import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
 import '../enum/media_status.dart';
@@ -42,6 +40,7 @@ class SendMessageHelper {
   SendMessageHelper(
     this._database,
     this._attachmentUtil,
+    this._addSendingJob,
   );
 
   final Database _database;
@@ -50,12 +49,14 @@ class SendMessageHelper {
   late final ParticipantDao _participantDao = _database.participantDao;
   late final JobDao _jobDao = _database.jobDao;
   late final PinMessageDao _pinMessageDao = _database.pinMessageDao;
-  late final UserDao _userDao = _database.userDao;
+
   late final TranscriptMessageDao _transcriptMessageDao =
       _database.transcriptMessageDao;
   final AttachmentUtil _attachmentUtil;
+  final Function(Job) _addSendingJob;
 
-  Future<void> _insertSendMessageToDb(Message message) async {
+  Future<void> _insertSendMessageToDb(Message message,
+      {String? ftsContent}) async {
     final conversationId = message.conversationId;
     final conversation = await _database.conversationDao
         .conversationItem(conversationId)
@@ -63,6 +64,7 @@ class SendMessageHelper {
     assert(conversation != null, 'no conversation');
     final expireIn = conversation?.expireIn ?? 0;
     await _messageDao.insert(message, message.userId, expireIn: expireIn);
+    unawaited(_database.ftsDatabase.insertFts(message, ftsContent));
   }
 
   Future<void> sendTextMessage(
@@ -103,12 +105,12 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(
+    _addSendingJob(await _jobDao.createSendingJob(
       message.messageId,
       conversationId,
       recipientId: recipientId,
       silent: silent,
-    );
+    ));
   }
 
   Future<void> sendImageMessage({
@@ -201,7 +203,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<void> sendVideoMessage(
@@ -279,7 +281,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<void> sendStickerMessage(String conversationId, String senderId,
@@ -300,7 +302,8 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> sendDataMessage(
@@ -374,7 +377,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<void> sendContactMessage(
@@ -405,7 +408,8 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> sendAudioMessage(
@@ -480,7 +484,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<void> _sendLiveMessage(
@@ -509,7 +513,8 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> sendPostMessage(String conversationId, String senderId,
@@ -527,7 +532,8 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> _sendLocationMessage(String conversationId, String senderId,
@@ -545,7 +551,8 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> sendAppCardMessage(
@@ -563,46 +570,49 @@ class SendMessageHelper {
     );
 
     await _insertSendMessageToDb(message);
-    await _jobDao.insertSendingJob(message.messageId, conversationId);
+    _addSendingJob(
+        await _jobDao.createSendingJob(message.messageId, conversationId));
   }
 
   Future<void> sendRecallMessage(
       String conversationId, List<String> messageIds) async {
-    messageIds.forEach((messageId) async {
+    await Future.wait(messageIds.map((messageId) async {
       final message = await _messageDao.findMessageByMessageId(messageId);
-      if (message?.category.isAttachment == true) {
-        final file = File(message!.mediaUrl!);
-        final exists = file.existsSync();
-        if (exists) {
-          await file.delete();
-        }
-      }
 
-      final futures = [
-        _messageDao.recallMessage(messageId),
-        _messageDao.deleteFtsByMessageId(messageId),
-        _messageMentionDao.deleteMessageMentionByMessageId(messageId),
-        _jobDao.insert(Job(
+      await _messageDao.recallMessage(conversationId, messageId);
+
+      unawaited(_database.ftsDatabase.deleteByMessageId(messageId));
+
+      await Future.wait([
+        (() async {
+          if (message?.category.isAttachment == true) {
+            final file = File(message!.mediaUrl!);
+            final exists = file.existsSync();
+            if (exists) {
+              await file.delete();
+            }
+          }
+        })(),
+        _messageMentionDao.deleteMessageMention(MessageMention(
+          messageId: messageId,
           conversationId: conversationId,
-          jobId: const Uuid().v4(),
-          action: kRecallMessage,
-          priority: 5,
-          blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
-          createdAt: DateTime.now(),
-          runCount: 0,
         )),
-      ];
+        (() async => _addSendingJob(
+            await createSendRecallJob(conversationId, messageId)))(),
+        (() async {
+          final quoteMessage =
+              await _messageDao.findMessageItemById(conversationId, messageId);
 
-      final quoteMessage =
-          await _messageDao.findMessageItemById(conversationId, messageId);
-
-      if (quoteMessage != null) {
-        futures.add(_messageDao.updateQuoteContentByQuoteId(
-            conversationId, messageId, quoteMessage.toJson()));
-      }
-
-      await Future.wait(futures);
-    });
+          if (quoteMessage != null) {
+            await _messageDao.updateQuoteContentByQuoteId(
+              conversationId,
+              messageId,
+              quoteMessage.toJson(),
+            );
+          }
+        })(),
+      ]);
+    }));
   }
 
   Future<void> forwardMessage(
@@ -816,52 +826,22 @@ class SendMessageHelper {
       mediaStatus: hasAttachments ? MediaStatus.canceled : MediaStatus.done,
     );
 
-    Future<void> insertFts() async {
-      final contents = await Future.wait(transcriptMessages.where((transcript) {
-        final category = transcript.category;
-        return category.isText ||
-            category.isPost ||
-            category.isData ||
-            category.isContact;
-      }).map((transcript) async {
-        final category = transcript.category;
-        if (category.isData) {
-          return transcript.mediaName;
-        }
-
-        if (category.isContact &&
-            (transcript.sharedUserId?.isNotEmpty ?? false)) {
-          return _userDao
-              .userFullNameByUserId(transcript.sharedUserId!)
-              .getSingleOrNull();
-        }
-
-        return transcript.content;
-      }));
-
-      final join = contents.whereNotNull().join(' ');
-      await _messageDao.insertFts(
-        messageId,
-        conversationId,
-        join,
-        DateTime.now(),
-        senderId,
-      );
-    }
-
     await Future.wait([
       _transcriptMessageDao.insertAll(transcriptMessages),
-      insertFts(),
-      _insertSendMessageToDb(message),
+      _insertSendMessageToDb(
+        message,
+        ftsContent: await _transcriptMessageDao
+            .generateTranscriptMessageFts5Content(transcriptMessages),
+      ),
     ]);
 
     if (hasAttachments) {
       await reUploadTranscriptAttachment(message.messageId);
     } else {
-      await _jobDao.insertSendingJob(
+      _addSendingJob(await _jobDao.createSendingJob(
         message.messageId,
         conversationId,
-      );
+      ));
     }
   }
 
@@ -876,10 +856,10 @@ class SendMessageHelper {
         .get();
 
     if (!transcripts.any((element) => element.category.isAttachment)) {
-      await _jobDao.insertSendingJob(
+      _addSendingJob(await _jobDao.createSendingJob(
         message.messageId,
         message.conversationId,
-      );
+      ));
       return;
     }
 
@@ -977,10 +957,10 @@ class SendMessageHelper {
         message.messageId,
         MediaStatus.done,
       );
-      await _jobDao.insertSendingJob(
+      _addSendingJob(await _jobDao.createSendingJob(
         message.messageId,
         message.conversationId,
-      );
+      ));
     } catch (_) {
       await _messageDao.updateMediaStatus(
         message.messageId,
@@ -1034,7 +1014,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<AttachmentResult?> _checkAttachmentExtra(Message message) async {
@@ -1138,20 +1118,7 @@ class SendMessageHelper {
           .deleteByIds(pinMessageMinimals.map((e) => e.messageId).toList());
     }
 
-    _messageDao.notifyMessageInsertOrReplaced(
-        pinMessageMinimals.map((e) => e.messageId));
-
-    await _jobDao.insert(
-      Job(
-        conversationId: conversationId,
-        jobId: const Uuid().v4(),
-        action: kPinMessage,
-        priority: 5,
-        blazeMessage: encoded,
-        createdAt: DateTime.now(),
-        runCount: 0,
-      ),
-    );
+    _addSendingJob(createSendPinJob(conversationId, encoded));
   }
 
   Future<void> sendImageMessageByUrl(
@@ -1264,7 +1231,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(messageId, conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
   }
 
   Future<void> reUploadGiphyGif(MessageItem message) async {
@@ -1337,6 +1304,7 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    await _jobDao.insertSendingJob(message.messageId, message.conversationId);
+    _addSendingJob(await _jobDao.createSendingJob(
+        message.messageId, message.conversationId));
   }
 }

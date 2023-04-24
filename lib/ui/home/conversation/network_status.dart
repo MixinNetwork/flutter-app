@@ -84,7 +84,10 @@ class _NetworkNotConnect extends StatelessWidget {
                           height: 10,
                           child: SvgPicture.asset(
                               Resources.assetsImagesExclamationMarkSvg,
-                              color: Colors.white,
+                              colorFilter: const ColorFilter.mode(
+                                Colors.white,
+                                BlendMode.srcIn,
+                              ),
                               width: 2,
                               height: 10)))),
               const SizedBox(width: 12),
