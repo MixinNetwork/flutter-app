@@ -47,7 +47,7 @@ jobs:
         run: tar -C build/linux/x64/release/bundle -cvf mixin-desktop-linux-portable.tar.gz .
 
       - name: Upload app archive for next steps
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: mixin-desktop-linux-portable-archive
           path: mixin-desktop-linux-portable.tar.gz
@@ -56,7 +56,7 @@ jobs:
         run: ./dist/linux_deb.sh
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: mixin_desktop_amd64.deb.zip
           path: build/mixin_desktop_amd64.deb
@@ -148,7 +148,7 @@ jobs:
           args: --recipe ./AppImageBuilder.yml --skip-test
 
       - name: Upload AppImage Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: AppImage
           path: './*.AppImage*'
@@ -196,7 +196,7 @@ jobs:
         shell: cmd
 
       - name: Upload Installer
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: mixin_setup.exe.zip
           path: build\mixin_setup.exe
@@ -207,7 +207,7 @@ jobs:
           flutter pub run msix:create --build-windows false --version ${{ steps.build-app.outputs.MSIX_PACKAGE_VERSION }}
 
       - name: Upload msix
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: flutter_app.msix.zip
           path: build\windows\runner\Release\flutter_app.msix
@@ -216,7 +216,7 @@ jobs:
         run: flutter pub run debug_info_collector
 
       - name: Upload debug info
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: windows_debug_info
           path: build\syms
