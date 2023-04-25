@@ -3,7 +3,9 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../constants/constants.dart';
+import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
+import '../../utils/extension/extension.dart';
 import '../job_queue.dart';
 
 class UpdateAssetJob extends JobQueue<Job> {
@@ -38,8 +40,8 @@ class UpdateAssetJob extends JobQueue<Job> {
   }
 
   @override
-  Future<List<Job>?> run(List<Job> jobs) async {
-    final list = await Future.wait<Job?>(jobs.map((Job job) async {
+  Future<void> run(List<Job> jobs) async {
+    final assetIds = await Future.wait<String?>(jobs.map((Job job) async {
       try {
         final asset =
             (await client.assetApi.getAssetById(job.blazeMessage!)).data;
@@ -51,12 +53,13 @@ class UpdateAssetJob extends JobQueue<Job> {
           database.chainDao.insertSdkChain(chain),
           database.jobDao.deleteJobById(job.jobId),
         ]);
+        return asset.assetId;
       } catch (e, s) {
         w('Update asset job error: $e, stack: $s');
         await Future.delayed(const Duration(seconds: 1));
-        return job;
       }
     }));
-    return list.where((element) => element != null).cast<Job>().toList();
+
+    DataBaseEventBus.instance.updateAsset(assetIds.whereNotNull());
   }
 }
