@@ -287,7 +287,9 @@ class _MessagePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasDraft = conversation.draft?.trim().isNotEmpty ?? false;
+    final quited = conversation.status == ConversationStatus.quit;
+    final hasDraft =
+        !quited && (conversation.draft?.trim().isNotEmpty ?? false);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
