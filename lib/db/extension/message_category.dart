@@ -50,6 +50,10 @@ extension MessageCategoryExtension on String? {
 
   bool get isTranscript => this?.endsWith('_TRANSCRIPT') ?? false;
 
+  bool get isAppCard => this == MessageCategory.appCard;
+
+  bool get isAppButtonGroup => this == MessageCategory.appButtonGroup;
+
   bool get isMedia => isData || isImage || isVideo;
 
   bool get isAttachment => isData || isImage || isVideo || isAudio;

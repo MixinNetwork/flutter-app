@@ -41,7 +41,7 @@ class TransferDataUser {
         muteUntil: user.muteUntil,
         hasPin: user.hasPin == 1,
         appId: user.appId,
-        biography: user.biography,
+        biography: user.biography ?? '',
         isScam: user.isScam == 1,
         codeUrl: user.codeUrl,
         codeId: user.codeId,

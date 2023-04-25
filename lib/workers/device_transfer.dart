@@ -16,6 +16,7 @@ import 'package:stream_channel/isolate_channel.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../constants/constants.dart';
+import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/fts_database.dart';
 import '../db/mixin_database.dart';
@@ -298,11 +299,8 @@ class DeviceTransfer {
 
   Future<void> _sendCommandAsPlainJson(TransferDataCommand command) async {
     final conversationId =
-        await database.participantDao.findJoinedConversationId(userId);
-    if (conversationId == null) {
-      e('_sendDeviceTransferToOtherSession: conversationId is null');
-      return;
-    }
+        await database.participantDao.findJoinedConversationId(userId) ??
+            generateConversationId(userId, kTeamMixinUserId);
 
     final content = await jsonEncodeWithIsolate(command.toJson());
     final plainText = PlainJsonMessage.create(
@@ -338,10 +336,22 @@ class DeviceTransfer {
     return TransferProtocolTransform(fileFolder: folder);
   }
 
+  Future<String?> getFirstIpv4Address() async {
+    for (final interface in await NetworkInterface.list()) {
+      for (final address in interface.addresses) {
+        if (address.type == InternetAddressType.IPv4 && !address.isLoopback) {
+          return address.address;
+        }
+      }
+    }
+    return null;
+  }
+
   Future<void> _sendPushToOtherSession() async {
     String? ipAddress;
     try {
       ipAddress = await NetworkInfo().getWifiIP();
+      ipAddress ??= await getFirstIpv4Address();
     } catch (error) {
       assert(() {
         // for test

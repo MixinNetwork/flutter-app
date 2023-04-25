@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:drift/drift.dart' hide JsonKey;
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../db/mixin_database.dart';
 import '../logger.dart';
+import 'transfer_data_app.dart';
 import 'transfer_data_asset.dart';
 import 'transfer_data_command.dart';
 import 'transfer_data_conversation.dart';
@@ -27,11 +30,12 @@ enum JsonTransferDataType {
   asset,
   snapshot,
   user,
-  command,
   expiredMessage,
   transcriptMessage,
   participant,
   pinMessage,
+  messageMention,
+  app,
   unknown;
 }
 
@@ -109,11 +113,7 @@ extension SocketExtension on IOSink {
 
   Future<void> addCommand(TransferDataCommand command) async {
     d('send command to remote: $command');
-    final data = JsonTransferData(
-      data: command.toJson(),
-      type: JsonTransferDataType.command,
-    );
-    await writePacketToSink(this, TransferCommandPacket(data));
+    await writePacketToSink(this, TransferCommandPacket(command));
   }
 
   Future<void> addTranscriptMessage(
@@ -149,6 +149,26 @@ extension SocketExtension on IOSink {
     return _addTransferJson(wrapper);
   }
 
+  Future<void> addMessageMention(MessageMention messageMention) {
+    var data = messageMention;
+    if (messageMention.hasRead == null) {
+      data = data.copyWith(hasRead: const Value(false));
+    }
+    final wrapper = JsonTransferData(
+      data: data.toJson(),
+      type: JsonTransferDataType.messageMention,
+    );
+    return _addTransferJson(wrapper);
+  }
+
+  Future<void> addApp(TransferDataApp app) {
+    final wrapper = JsonTransferData(
+      data: app.toJson(),
+      type: JsonTransferDataType.app,
+    );
+    return _addTransferJson(wrapper);
+  }
+
   Future<void> _addTransferJson(JsonTransferData data) =>
-      writePacketToSink(this, TransferJsonPacket(data));
+      writePacketToSink(this, TransferDataPacket(data));
 }

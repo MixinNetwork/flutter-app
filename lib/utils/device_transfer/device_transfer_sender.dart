@@ -10,6 +10,7 @@ import '../extension/extension.dart';
 import '../logger.dart';
 import '../platform.dart';
 import 'json_transfer_data.dart';
+import 'transfer_data_app.dart';
 import 'transfer_data_asset.dart';
 import 'transfer_data_command.dart';
 import 'transfer_data_conversation.dart';
@@ -98,57 +99,38 @@ class DeviceTransferSender {
       socket.transform(protocolTransform).asyncListen((event) {
         d('receive data: $event');
 
-        if (event is TransferJsonPacket) {
-          final data = event.json;
-          switch (data.type) {
-            case JsonTransferDataType.command:
-              final command = TransferDataCommand.fromJson(data.data);
-              switch (command.action) {
-                case kTransferCommandActionConnect:
-                  if (command.code == verificationCode) {
-                    _clientSocket = socket;
-                    _pendingVerificationSockets.remove(socket);
-                    for (final s in _pendingVerificationSockets) {
-                      s.destroy();
-                    }
-                    onSenderStart?.call();
-                    _processTransfer(socket);
-                  } else {
-                    e('sender verify code failed. except $verificationCode, '
-                        'but got ${command.code}');
-                    socket.close();
-                    close();
-                  }
-                  break;
-                case kTransferCommandActionFinish:
-                  i('client finished. close connection');
-                  _finished = true;
-                  close();
-                  break;
-                case kTransferCommandActionClose:
-                  w('client closed. close connection');
-                  close();
-                  break;
-                case kTransferCommandActionProgress:
-                  final progress = command.progress!;
-                  d('${command.action} command: progress $progress');
-                  _notifyProgressUpdate(progress);
-                  break;
+        if (event is TransferCommandPacket) {
+          final command = event.command;
+          switch (command.action) {
+            case kTransferCommandActionConnect:
+              if (command.code == verificationCode) {
+                _clientSocket = socket;
+                _pendingVerificationSockets.remove(socket);
+                for (final s in _pendingVerificationSockets) {
+                  s.destroy();
+                }
+                onSenderStart?.call();
+                _processTransfer(socket);
+              } else {
+                e('sender verify code failed. except $verificationCode, '
+                    'but got ${command.code}');
+                socket.close();
+                close();
               }
               break;
-            case JsonTransferDataType.conversation:
-            case JsonTransferDataType.message:
-            case JsonTransferDataType.sticker:
-            case JsonTransferDataType.asset:
-            case JsonTransferDataType.snapshot:
-            case JsonTransferDataType.user:
-            case JsonTransferDataType.expiredMessage:
-            case JsonTransferDataType.transcriptMessage:
-            case JsonTransferDataType.participant:
-            case JsonTransferDataType.pinMessage:
-            case JsonTransferDataType.unknown:
-              e('unknown type: ${data.type}');
-              d('data: $data');
+            case kTransferCommandActionFinish:
+              i('client finished. close connection');
+              _finished = true;
+              close();
+              break;
+            case kTransferCommandActionClose:
+              w('client closed. close connection');
+              close();
+              break;
+            case kTransferCommandActionProgress:
+              final progress = command.progress!;
+              d('${command.action} command: progress $progress');
+              _notifyProgressUpdate(progress);
               break;
           }
         }
@@ -193,7 +175,9 @@ class DeviceTransferSender {
           await database.transcriptMessageDao
               .countTranscriptMessages()
               .getSingle() +
-          await database.expiredMessageDao.countExpiredMessages().getSingle();
+          await database.expiredMessageDao.countExpiredMessages().getSingle() +
+          await database.messageMentionDao.getMessageMentionsCount() +
+          await database.appDao.getAppsCount();
       await socket.addCommand(TransferDataCommand.start(
         deviceId: await getDeviceId(),
         total: count,
@@ -206,12 +190,14 @@ class DeviceTransferSender {
     await runWithLog(_processTransferConversation, 'conversation');
     await runWithLog(_processTransferParticipant, 'participant');
     await runWithLog(_processTransferUser, 'user');
+    await runWithLog(_processTransferApp, 'app');
     await runWithLog(_processTransferSticker, 'sticker');
     await runWithLog(_processTransferAsset, 'asset');
     await runWithLog(_processTransferSnapshot, 'snapshot');
     await runWithLog(_processTransferTranscriptMessage, 'transcriptMessage');
     await runWithLog(_processTransferPinMessage, 'pinMessage');
     await runWithLog(_processTransferMessage, 'message');
+    await runWithLog(_processTransferMessageMention, 'messageMention');
     await runWithLog(_processTransferExpiredMessage, 'expiredMessage');
     await runWithLog(_processTransferAttachment, 'attachment');
 
@@ -253,6 +239,23 @@ class DeviceTransferSender {
         await onPacketSend();
       }
       if (users.length < _kQueryLimit) {
+        break;
+      }
+    }
+    return offset;
+  }
+
+  Future<int> _processTransferApp(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final apps =
+          await database.appDao.getApps(limit: _kQueryLimit, offset: offset);
+      offset += apps.length;
+      for (final app in apps) {
+        await socket.addApp(TransferDataApp.fromDbApp(app));
+        await onPacketSend();
+      }
+      if (apps.length < _kQueryLimit) {
         break;
       }
     }
@@ -352,6 +355,23 @@ class DeviceTransferSender {
       }
     }
     return count;
+  }
+
+  Future<int> _processTransferMessageMention(Socket socket) async {
+    var offset = 0;
+    while (true) {
+      final messages = await database.messageMentionDao
+          .getMessageMentions(_kQueryLimit, offset);
+      offset += messages.length;
+      for (final message in messages) {
+        await socket.addMessageMention(message);
+        await onPacketSend();
+      }
+      if (messages.length < _kQueryLimit) {
+        break;
+      }
+    }
+    return offset;
   }
 
   Future<int> _processTransferTranscriptMessage(Socket socket) async {

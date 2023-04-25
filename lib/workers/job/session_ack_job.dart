@@ -6,6 +6,7 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../blaze/blaze_message.dart';
 import '../../blaze/vo/plain_json_message.dart';
 import '../../constants/constants.dart';
+import '../../crypto/uuid/uuid.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/load_balancer_utils.dart';
 import '../job_queue.dart';
@@ -40,8 +41,8 @@ class SessionAckJob extends JobQueue<Job> {
     if (primarySessionId == null) return jobs;
 
     final conversationId =
-        await database.participantDao.findJoinedConversationId(userId);
-    if (conversationId == null) return jobs;
+        await database.participantDao.findJoinedConversationId(userId) ??
+            generateConversationId(userId, kTeamMixinUserId);
 
     final ack = await Future.wait(jobs.map(
       (e) async {
