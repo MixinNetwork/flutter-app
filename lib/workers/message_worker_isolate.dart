@@ -160,7 +160,7 @@ class _MessageProcessRunner {
         ),
       ],
       loginByPhoneNumber: initParams.loginByPhoneNumber,
-    );
+    )..configProxySetting(database.settingProperties);
 
     _ackJob = AckJob(
       database: database,

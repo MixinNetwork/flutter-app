@@ -83,23 +83,6 @@ class AccountServer {
 
     await initKeyValues(identityNumber);
 
-    client = createClient(
-      userId: userId,
-      sessionId: sessionId,
-      privateKey: privateKey,
-      loginByPhoneNumber: _loginByPhoneNumber,
-      interceptors: [
-        InterceptorsWrapper(
-          onError: (
-            DioError e,
-            ErrorInterceptorHandler handler,
-          ) async {
-            await _onClientRequestError(e);
-            handler.next(e);
-          },
-        ),
-      ],
-    );
     await _initDatabase();
 
     checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
@@ -154,6 +137,24 @@ class AccountServer {
       await db.connectToDatabase(identityNumber, fromMainIsolate: true),
       await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
     );
+
+    client = createClient(
+      userId: userId,
+      sessionId: sessionId,
+      privateKey: privateKey,
+      loginByPhoneNumber: _loginByPhoneNumber,
+      interceptors: [
+        InterceptorsWrapper(
+          onError: (
+            DioError e,
+            ErrorInterceptorHandler handler,
+          ) async {
+            await _onClientRequestError(e);
+            handler.next(e);
+          },
+        ),
+      ],
+    )..configProxySetting(database.settingProperties);
 
     attachmentUtil = AttachmentUtil.init(
       client,
