@@ -18,7 +18,7 @@ class SettingPropertyStorage extends PropertyStorage {
 
   set selectedProxy(int value) => set(_kSelectedProxyKey, value);
 
-  List<String> get proxyList => get(_kProxyListKey) ?? [];
+  List<String> get proxyList => getList(_kProxyListKey) ?? [];
 
   String? get activatedProxyUrl {
     if (!enableProxy) {
@@ -29,5 +29,21 @@ class SettingPropertyStorage extends PropertyStorage {
       return null;
     }
     return list.getOrNull(selectedProxy) ?? list.first;
+  }
+
+  void addProxy(String proxyUrl) {
+    final list = proxyList;
+    if (list.contains(proxyUrl)) {
+      return;
+    }
+    list.add(proxyUrl);
+    notifyListeners();
+    set(_kProxyListKey, list);
+  }
+
+  void removeProxy(String proxy) {
+    final list = proxyList..remove(proxy);
+    notifyListeners();
+    set(_kProxyListKey, list);
   }
 }
