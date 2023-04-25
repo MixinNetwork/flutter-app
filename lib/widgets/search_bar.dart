@@ -77,7 +77,7 @@ class SearchBar extends HookWidget {
                             hintText: filterUnseen
                                 ? context.l10n.searchUnread
                                 // ignore: avoid-non-ascii-symbols
-                                : '${context.l10n.search} (${Platform.isMacOS || Platform.isIOS ? '⌘' : 'Ctrl'}K)',
+                                : '${context.l10n.search} (${Platform.isMacOS || Platform.isIOS ? '⌘' : 'Ctrl '}K)',
                           )),
                 ),
               ),
