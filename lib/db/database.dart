@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import '../enum/property_group.dart';
 import '../ui/home/bloc/slide_category_cubit.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
+import '../utils/property/setting_property.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
 import 'dao/chain_dao.dart';
@@ -31,7 +31,6 @@ import 'dao/transcript_message_dao.dart';
 import 'dao/user_dao.dart';
 import 'fts_database.dart';
 import 'mixin_database.dart';
-import 'util/property_storage.dart';
 
 class Database {
   Database(this.mixinDatabase, this.ftsDatabase) {
@@ -60,8 +59,7 @@ class Database {
     fiatDao = FiatDao(mixinDatabase);
     favoriteAppDao = FavoriteAppDao(mixinDatabase);
     expiredMessageDao = ExpiredMessageDao(mixinDatabase);
-    settingProperties =
-        PropertyStorage(PropertyGroup.setting, mixinDatabase.propertyDao);
+    settingProperties = SettingPropertyStorage(mixinDatabase.propertyDao);
   }
 
   // static MixinDatabase _database;
@@ -123,7 +121,7 @@ class Database {
 
   late final ExpiredMessageDao expiredMessageDao;
 
-  late final PropertyStorage settingProperties;
+  late final SettingPropertyStorage settingProperties;
 
   Future<void> dispose() async {
     await mixinDatabase.close();

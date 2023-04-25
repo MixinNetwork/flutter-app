@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -15,33 +16,48 @@ class _PropertyChangedEvent {
 
 class PropertyStorage extends ChangeNotifier {
   PropertyStorage(this.group, this.dao) {
+    _loadProperties();
     EventBus.instance.on
         .where((event) => event is _PropertyChangedEvent)
         .cast<_PropertyChangedEvent>()
         .listen((event) {
       if (event.group == group) {
-        notifyListeners();
+        _loadProperties();
       }
     });
   }
+
+  Future<void> _loadProperties() async {
+    final properties = await dao.getProperties(group);
+    _data.addAll(properties);
+    notifyListeners();
+  }
+
+  final Map<String, String> _data = {};
 
   final PropertyGroup group;
 
   final PropertyDao dao;
 
-  Future<void> clear() async {
-    await dao.clearProperties(group);
-    EventBus.instance.fire(_PropertyChangedEvent(group));
+  void clear() {
+    _data.clear();
+    notifyListeners();
+    dao.clearProperties(group).whenComplete(() {
+      EventBus.instance.fire(_PropertyChangedEvent(group));
+    });
   }
 
-  Future<void> remove(String key) async {
-    await dao.removeProperty(group, key);
-    EventBus.instance.fire(_PropertyChangedEvent(group));
+  void remove(String key) {
+    _data.remove(key);
+    notifyListeners();
+    dao.removeProperty(group, key).whenComplete(() {
+      EventBus.instance.fire(_PropertyChangedEvent(group));
+    });
   }
 
-  Future<void> set<T>(String key, T? value) async {
+  void set<T>(String key, T? value) {
     if (value == null) {
-      await remove(key);
+      remove(key);
       return;
     }
     final String save;
@@ -50,12 +66,17 @@ class PropertyStorage extends ChangeNotifier {
     } else {
       save = value is String ? value : value.toString();
     }
-    await dao.setProperty(group, key, save);
-    EventBus.instance.fire(_PropertyChangedEvent(group));
+    _data[key] = save;
+    notifyListeners();
+
+    dao.setProperty(group, key, save).whenComplete(() {
+      EventBus.instance.fire(_PropertyChangedEvent(group));
+    });
+
   }
 
-  Future<T?> get<T>(String key) async {
-    final value = await dao.getProperty(group, key);
+  T? get<T>(String key) {
+    final value = _data[key];
     if (value == null) {
       return null;
     }
@@ -81,8 +102,8 @@ class PropertyStorage extends ChangeNotifier {
     }
   }
 
-  Future<List<T>?> getList<T>(String key) async {
-    final value = await dao.getProperty(group, key);
+  List<T>? getList<T>(String key) {
+    final value = _data[key];
     if (value == null) {
       return null;
     }
@@ -95,8 +116,8 @@ class PropertyStorage extends ChangeNotifier {
     }
   }
 
-  Future<Map<K, V>?> getMap<K, V>(String key) async {
-    final value = await dao.getProperty(group, key);
+  Map<K, V>? getMap<K, V>(String key) {
+    final value = _data[key];
     if (value == null) {
       return null;
     }

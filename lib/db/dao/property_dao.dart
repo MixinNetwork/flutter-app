@@ -19,6 +19,13 @@ class PropertyDao extends DatabaseAccessor<MixinDatabase>
     return result?.value;
   }
 
+  Future<Map<String, String>> getProperties(PropertyGroup group) async {
+    final result = await (select(properties)
+          ..where((tbl) => tbl.group.equalsValue(group)))
+        .get();
+    return Map.fromEntries(result.map((e) => MapEntry(e.key, e.value)));
+  }
+
   Future<void> removeProperty(PropertyGroup group, String key) async {
     await (delete(properties)
           ..where((tbl) => tbl.group.equalsValue(group) & tbl.key.equals(key)))
