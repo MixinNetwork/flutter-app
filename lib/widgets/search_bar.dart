@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -75,7 +76,8 @@ class SearchBar extends HookWidget {
                                 context.read<KeywordCubit>().emit(keyword),
                             hintText: filterUnseen
                                 ? context.l10n.searchUnread
-                                : context.l10n.search,
+                                // ignore: avoid-non-ascii-symbols
+                                : '${context.l10n.search} (${Platform.isMacOS || Platform.isIOS ? '⌘' : 'Ctrl '}K)',
                           )),
                 ),
               ),
@@ -211,7 +213,6 @@ class _SearchUserDialog extends HookWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       FocusableActionDetector(
-                        autofocus: true,
                         shortcuts: {
                           if (searchable)
                             const SingleActivator(LogicalKeyboardKey.enter):
