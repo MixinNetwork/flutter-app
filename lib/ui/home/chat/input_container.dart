@@ -63,7 +63,9 @@ class InputContainer extends HookWidget {
         if (state?.conversation?.category == ConversationCategory.contact) {
           return true;
         }
-
+        if (state?.conversation?.status == ConversationStatus.quit) {
+          return false;
+        }
         return state?.participant != null;
       },
     );
