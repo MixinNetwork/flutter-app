@@ -10,6 +10,7 @@ const kTransferCommandActionConnect = 'connect';
 const kTransferCommandActionStart = 'start';
 const kTransferCommandActionClose = 'close';
 const kTransferCommandActionProgress = 'progress';
+const kTransferCommandActionCancel = 'cancel';
 
 const kDeviceTransferProtocolVersion = 1;
 
@@ -98,6 +99,15 @@ class TransferDataCommand with EquatableMixin {
         action: kTransferCommandActionProgress,
         version: kDeviceTransferProtocolVersion,
         progress: progress,
+      );
+
+  factory TransferDataCommand.cancel({
+    required String deviceId,
+  }) =>
+      TransferDataCommand(
+        deviceId: deviceId,
+        action: kTransferCommandActionCancel,
+        version: kDeviceTransferProtocolVersion,
       );
 
   @JsonKey(name: 'device_id')

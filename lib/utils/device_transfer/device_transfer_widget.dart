@@ -16,6 +16,8 @@ enum DeviceTransferCommand {
   pushToRemote,
   cancelRestore,
   cancelBackup,
+  cancelBackupRequest,
+  cancelRestoreRequest,
   confirmRestore,
   confirmBackup,
 }
@@ -208,27 +210,35 @@ class DeviceTransferHandlerWidget extends HookWidget {
     );
     useOnTransferEventType(
       DeviceTransferCallbackType.onBackupRequestReceived,
-      () => showMixinDialog(
-        context: context,
-        child: _ApproveDialog(
-          message: context.l10n.confirmSyncChatsFromPhone,
-          onApproved: () {
-            EventBus.instance.fire(DeviceTransferCommand.confirmRestore);
-          },
-        ),
-      ),
+      () async {
+        final approved = await showMixinDialog<bool>(
+          context: context,
+          child: _ApproveDialog(
+            message: context.l10n.confirmSyncChatsFromPhone,
+          ),
+        );
+        if (approved == true) {
+          EventBus.instance.fire(DeviceTransferCommand.confirmRestore);
+        } else {
+          EventBus.instance.fire(DeviceTransferCommand.cancelRestoreRequest);
+        }
+      },
     );
     useOnTransferEventType(
       DeviceTransferCallbackType.onRestoreRequestReceived,
-      () => showMixinDialog(
-        context: context,
-        child: _ApproveDialog(
-          message: context.l10n.confirmSyncChatsToPhone,
-          onApproved: () {
-            EventBus.instance.fire(DeviceTransferCommand.confirmBackup);
-          },
-        ),
-      ),
+      () async {
+        final approved = await showMixinDialog<bool>(
+          context: context,
+          child: _ApproveDialog(
+            message: context.l10n.confirmSyncChatsToPhone,
+          ),
+        );
+        if (approved == true) {
+          EventBus.instance.fire(DeviceTransferCommand.confirmBackup);
+        } else {
+          EventBus.instance.fire(DeviceTransferCommand.cancelBackupRequest);
+        }
+      },
     );
 
     useOnTransferEventType(
@@ -270,13 +280,9 @@ class _ConfirmDialog extends StatelessWidget {
 }
 
 class _ApproveDialog extends StatelessWidget {
-  const _ApproveDialog({
-    required this.message,
-    required this.onApproved,
-  });
+  const _ApproveDialog({required this.message});
 
   final String message;
-  final VoidCallback onApproved;
 
   @override
   Widget build(BuildContext context) => AlertDialogLayout(
@@ -298,7 +304,6 @@ class _ApproveDialog extends StatelessWidget {
           ),
           MixinButton(
             onTap: () {
-              onApproved.call();
               Navigator.of(context).pop(true);
             },
             child: Text(context.l10n.confirm),

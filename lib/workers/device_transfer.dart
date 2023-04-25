@@ -178,6 +178,7 @@ class DeviceTransfer {
     required this.primarySessionId,
     required this.sender,
     required this.receiver,
+    required this.deviceId,
   }) {
     _subscriptions.add(EventBus.instance.on
         .whereType<DeviceTransferCommand>()
@@ -206,6 +207,16 @@ class DeviceTransfer {
           break;
         case DeviceTransferCommand.confirmBackup:
           await _sendPushToOtherSession();
+          break;
+        case DeviceTransferCommand.cancelBackupRequest:
+          await _sendCommandAsPlainJson(
+            TransferDataCommand.cancel(deviceId: deviceId),
+          );
+          break;
+        case DeviceTransferCommand.cancelRestoreRequest:
+          await _sendCommandAsPlainJson(
+            TransferDataCommand.cancel(deviceId: deviceId),
+          );
           break;
       }
     }));
@@ -278,6 +289,7 @@ class DeviceTransfer {
       primarySessionId: primarySessionId,
       sender: sender,
       receiver: receiver,
+      deviceId: deviceId,
     );
   }
 
@@ -285,6 +297,7 @@ class DeviceTransfer {
   final String userId;
   final MessageDeliver messageDeliver;
   final String? primarySessionId;
+  final String deviceId;
 
   final DeviceTransferSender sender;
   final DeviceTransferReceiver receiver;
@@ -321,7 +334,7 @@ class DeviceTransfer {
 
   Future<void> _sendPullToOtherSession() async {
     _waitingForRemotePush = true;
-    final command = TransferDataCommand.pull(deviceId: await getDeviceId());
+    final command = TransferDataCommand.pull(deviceId: deviceId);
     await _sendCommandAsPlainJson(command);
   }
 
@@ -372,7 +385,7 @@ class DeviceTransfer {
     final command = TransferDataCommand.push(
       ip: ipAddress!,
       port: port,
-      deviceId: await getDeviceId(),
+      deviceId: deviceId,
       code: code,
     );
 
