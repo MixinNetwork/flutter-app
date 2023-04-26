@@ -81,8 +81,8 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
         status: LandingStatus.ready,
       ));
 
-      streamSubscription = Stream.periodic(
-              const Duration(seconds: 1), (i) => Tuple2(i, rsp.data.deviceId))
+      streamSubscription = Stream.periodic(const Duration(milliseconds: 1500),
+              (i) => Tuple2(i, rsp.data.deviceId))
           .listen(periodicStreamController.add);
       addSubscription(streamSubscription);
     } catch (error, stack) {
