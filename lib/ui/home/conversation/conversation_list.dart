@@ -288,8 +288,7 @@ class _MessagePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final quited = conversation.status == ConversationStatus.quit;
-    final hasDraft =
-        !quited && (conversation.draft?.trim().isNotEmpty ?? false);
+    final hasDraft = !quited && (conversation.draft?.isNotEmpty ?? false);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -317,7 +316,7 @@ class _MessageContent extends HookWidget {
   Widget build(BuildContext context) {
     final text = useMemoizedFuture(
       () async {
-        if (hasDraft) return conversation.draft?.trim();
+        if (hasDraft) return conversation.draft;
         final isGroup = conversation.category == ConversationCategory.group ||
             conversation.senderId != conversation.ownerId;
         if (conversation.contentType == MessageCategory.systemConversation) {

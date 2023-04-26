@@ -58,7 +58,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         [
           OrderingTerm.desc(conversation.pinTime),
           OrderingTerm.desc(
-              conversation.draft.trim().length.isBiggerThanValue(0)),
+              conversation.status.equalsValue(ConversationStatus.quit).not() &
+                  conversation.draft.isNotNull() &
+                  conversation.draft.length.isBiggerThanValue(0)),
           OrderingTerm.desc(conversation.lastMessageCreatedAt),
           OrderingTerm.desc(conversation.createdAt),
         ],
