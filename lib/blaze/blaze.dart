@@ -121,6 +121,7 @@ class Blaze {
         'Authorization': 'Bearer $token',
       },
       pingInterval: const Duration(seconds: 10),
+      customClient: HttpClient(),
     );
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(

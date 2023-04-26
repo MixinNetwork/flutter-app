@@ -99,20 +99,25 @@ extension ClientExt on Client {
       i('apply client proxy $proxyUrl');
       dio.httpClientAdapter = IOHttpClientAdapter();
       (dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
-          (client) => client
-            ..findProxy = (url) => HttpClient.findProxyFromEnvironment(
-                  url,
-                  environment: {
-                    if (proxyUrl.startsWith('http')) ...{
-                      'https_proxy': proxyUrl,
-                      'http_proxy': proxyUrl,
-                    },
-                    if (proxyUrl.startsWith('socks5')) 'socks_proxy': proxyUrl,
-                  },
-                );
+          (client) => client..setProxy(proxyUrl);
     } else {
       i('remove client proxy');
       dio.httpClientAdapter = IOHttpClientAdapter();
     }
+  }
+}
+
+extension HttpClientProxy on HttpClient {
+  void setProxy(String proxyUrl) {
+    findProxy = (url) => HttpClient.findProxyFromEnvironment(
+          url,
+          environment: {
+            if (proxyUrl.startsWith('http')) ...{
+              'https_proxy': proxyUrl,
+              'http_proxy': proxyUrl,
+            },
+            if (proxyUrl.startsWith('socks5')) 'socks_proxy': proxyUrl,
+          },
+        );
   }
 }
