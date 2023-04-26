@@ -318,15 +318,12 @@ class _CenterPage extends StatelessWidget {
               converter: (state) => state.type == SlideCategoryType.setting,
               builder: (context, isSetting) => IndexedStack(
                 index: isSetting ? 1 : 0,
+                sizing: StackFit.expand,
                 children: const [
-                  Positioned.fill(
-                    child: AutomaticKeepAliveClientWidget(
-                      child: ConversationPage(),
-                    ),
+                  AutomaticKeepAliveClientWidget(
+                    child: ConversationPage(),
                   ),
-                  Positioned.fill(
-                      child:
-                          AutomaticKeepAliveClientWidget(child: SettingPage())),
+                  AutomaticKeepAliveClientWidget(child: SettingPage()),
                 ],
               ),
             ),

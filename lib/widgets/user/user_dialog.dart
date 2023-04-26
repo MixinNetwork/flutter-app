@@ -92,8 +92,8 @@ class UserDialog extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Spacer(),
                     Padding(
                       padding: EdgeInsets.only(right: 12, top: 12),
@@ -301,8 +301,13 @@ class _UserProfileButtonBar extends StatelessWidget {
                   icon: Resources.assetsImagesContextMenuCopySvg,
                   title: context.l10n.copyLink,
                   onTap: () async {
-                    i('share contact ${user.userId} ${user.codeUrl}');
-                    await Clipboard.setData(ClipboardData(text: user.codeUrl));
+                    final codeUrl = user.codeUrl;
+                    if (codeUrl == null) {
+                      e('codeUrl is null: $user');
+                      return;
+                    }
+                    i('share contact ${user.userId} $codeUrl');
+                    await Clipboard.setData(ClipboardData(text: codeUrl));
                   },
                 ),
               ],

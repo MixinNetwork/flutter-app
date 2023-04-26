@@ -169,9 +169,15 @@ class ChatInfoPage extends HookWidget {
                                 return;
                               }
 
-                              i('share contact ${user.userId} ${user.codeUrl}');
+                              final codeUrl = user.codeUrl;
+                              if (codeUrl == null) {
+                                e('can not find codeUrl $codeUrl');
+                                return;
+                              }
+
+                              i('share contact ${user.userId} $codeUrl');
                               await Clipboard.setData(
-                                  ClipboardData(text: user.codeUrl));
+                                  ClipboardData(text: codeUrl));
                             },
                           ),
                         ],

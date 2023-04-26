@@ -86,8 +86,8 @@ class _TransferPage extends HookWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Spacer(),
               Padding(
                 padding: EdgeInsets.only(right: 12, top: 12),

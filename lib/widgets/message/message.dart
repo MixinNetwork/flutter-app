@@ -324,7 +324,7 @@ class MessageItemWidget extends HookWidget {
                             return;
                           }
                           Clipboard.setData(
-                              ClipboardData(text: message.content));
+                              ClipboardData(text: message.content ?? ''));
                         },
                       ),
                     if (kPlatformIsMobile &&
