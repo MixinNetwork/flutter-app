@@ -5,6 +5,7 @@ part of 'asset_dao.dart';
 // ignore_for_file: type=lint
 mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
   Assets get assets => attachedDatabase.assets;
+  Chains get chains => attachedDatabase.chains;
   Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   CircleConversations get circleConversations =>
@@ -37,67 +38,14 @@ mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
   Fiats get fiats => attachedDatabase.fiats;
   FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
-  Chains get chains => attachedDatabase.chains;
-  Selectable<AssetItem> _assetItems(AssetItems$where where,
-      AssetItems$orderBy orderBy, AssetItems$limit limit) {
-    var $arrayStartIndex = 1;
-    final generatedwhere = $write(
-        where(alias(this.assets, 'asset'), alias(this.assets, 'tempAsset')),
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    final generatedorderBy = $write(
-        orderBy?.call(
-                alias(this.assets, 'asset'), alias(this.assets, 'tempAsset')) ??
-            const OrderBy.nothing(),
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedorderBy.amountOfVariables;
-    final generatedlimit = $write(
-        limit(alias(this.assets, 'asset'), alias(this.assets, 'tempAsset')),
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedlimit.amountOfVariables;
-    return customSelect(
-        'SELECT asset.*, tempAsset.symbol AS chainSymbol, tempAsset.icon_url AS chainIconUrl, tempAsset.name AS chainName FROM assets AS asset LEFT JOIN assets AS tempAsset ON asset.chain_id = tempAsset.asset_id WHERE ${generatedwhere.sql} ${generatedorderBy.sql} ${generatedlimit.sql}',
-        variables: [
-          ...generatedwhere.introducedVariables,
-          ...generatedorderBy.introducedVariables,
-          ...generatedlimit.introducedVariables
-        ],
-        readsFrom: {
-          assets,
-          ...generatedwhere.watchedTables,
-          ...generatedorderBy.watchedTables,
-          ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return AssetItem(
-        assetId: row.read<String>('asset_id'),
-        symbol: row.read<String>('symbol'),
-        name: row.read<String>('name'),
-        iconUrl: row.read<String>('icon_url'),
-        balance: row.read<String>('balance'),
-        destination: row.read<String>('destination'),
-        tag: row.readNullable<String>('tag'),
-        priceBtc: row.read<String>('price_btc'),
-        priceUsd: row.read<String>('price_usd'),
-        chainId: row.read<String>('chain_id'),
-        changeUsd: row.read<String>('change_usd'),
-        changeBtc: row.read<String>('change_btc'),
-        confirmations: row.read<int>('confirmations'),
-        assetKey: row.readNullable<String>('asset_key'),
-        reserve: row.readNullable<String>('reserve'),
-        chainSymbol: row.readNullable<String>('chainSymbol'),
-        chainIconUrl: row.readNullable<String>('chainIconUrl'),
-        chainName: row.readNullable<String>('chainName'),
-      );
-    });
-  }
-
   Selectable<AssetItem> assetItem(String assetId) {
     return customSelect(
-        'SELECT asset.*, tempAsset.symbol AS chainSymbol, tempAsset.icon_url AS chainIconUrl, tempAsset.name AS chainName FROM assets AS asset LEFT JOIN assets AS tempAsset ON asset.chain_id = tempAsset.asset_id WHERE asset.asset_id = ?1 LIMIT 1',
+        'SELECT asset.*, chain.symbol AS chainSymbol, chain.icon_url AS chainIconUrl, chain.name AS chainName, chain.threshold AS chainThreshold FROM assets AS asset LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id WHERE asset.asset_id = ?1 LIMIT 1',
         variables: [
           Variable<String>(assetId)
         ],
         readsFrom: {
+          chains,
           assets,
         }).map((QueryRow row) {
       return AssetItem(
@@ -119,6 +67,7 @@ mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
         chainSymbol: row.readNullable<String>('chainSymbol'),
         chainIconUrl: row.readNullable<String>('chainIconUrl'),
         chainName: row.readNullable<String>('chainName'),
+        chainThreshold: row.readNullable<int>('chainThreshold'),
       );
     });
   }
@@ -151,6 +100,7 @@ class AssetItem {
   final String? chainSymbol;
   final String? chainIconUrl;
   final String? chainName;
+  final int? chainThreshold;
   AssetItem({
     required this.assetId,
     required this.symbol,
@@ -170,6 +120,7 @@ class AssetItem {
     this.chainSymbol,
     this.chainIconUrl,
     this.chainName,
+    this.chainThreshold,
   });
   @override
   int get hashCode => Object.hash(
@@ -190,7 +141,8 @@ class AssetItem {
       reserve,
       chainSymbol,
       chainIconUrl,
-      chainName);
+      chainName,
+      chainThreshold);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -212,7 +164,8 @@ class AssetItem {
           other.reserve == this.reserve &&
           other.chainSymbol == this.chainSymbol &&
           other.chainIconUrl == this.chainIconUrl &&
-          other.chainName == this.chainName);
+          other.chainName == this.chainName &&
+          other.chainThreshold == this.chainThreshold);
   @override
   String toString() {
     return (StringBuffer('AssetItem(')
@@ -233,13 +186,9 @@ class AssetItem {
           ..write('reserve: $reserve, ')
           ..write('chainSymbol: $chainSymbol, ')
           ..write('chainIconUrl: $chainIconUrl, ')
-          ..write('chainName: $chainName')
+          ..write('chainName: $chainName, ')
+          ..write('chainThreshold: $chainThreshold')
           ..write(')'))
         .toString();
   }
 }
-
-typedef AssetItems$where = Expression<bool> Function(
-    Assets asset, Assets tempAsset);
-typedef AssetItems$orderBy = OrderBy Function(Assets asset, Assets tempAsset);
-typedef AssetItems$limit = Limit Function(Assets asset, Assets tempAsset);

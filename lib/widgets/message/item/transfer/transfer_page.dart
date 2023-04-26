@@ -44,8 +44,9 @@ class _TransferPage extends HookWidget {
         )
             .watchSingleOrNullWithStream(
           eventStreams: [
-            DataBaseEventBus.instance.updateSnapshotStream.where(
-                (event) => event.any((element) => element.contains(snapshotId)))
+            DataBaseEventBus.instance.updateSnapshotStream.where((event) =>
+                event.any((element) => element.contains(snapshotId))),
+            DataBaseEventBus.instance.updateAssetStream,
           ],
           duration: kDefaultThrottleDuration,
         )).data;
