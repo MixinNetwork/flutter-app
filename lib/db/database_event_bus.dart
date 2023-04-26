@@ -48,11 +48,9 @@ class DataBaseEventBus {
       .whereType<_DatabaseEventWrapper>()
       .where((e) => event == e.type)
       .doOnData((e) {
-        if (kDebugMode) {
-          if (e.data is! T) {
-            // ignore: avoid_dynamic_calls
-            w('DatabaseEvent: event type is not match: ${e.data.runtimeType} != $T');
-          }
+        if (kDebugMode && e.data is! T) {
+          // ignore: avoid_dynamic_calls
+          w('DatabaseEvent: event type is not match: ${e.data.runtimeType} != $T');
         }
       })
       .where((e) => e.data is T)
@@ -60,7 +58,7 @@ class DataBaseEventBus {
       .cast<T>();
 
   void _send<T>(_DatabaseEvent event, T value) {
-    if (T.toString().startsWith('Iterable')) {
+    if (kDebugMode && T.toString().startsWith('Iterable')) {
       w('DatabaseEvent: send iterable is not safe: $T');
     }
     EventBus.instance.fire(_DatabaseEventWrapper(event, value));
