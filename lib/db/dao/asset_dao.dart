@@ -53,5 +53,5 @@ class AssetDao extends DatabaseAccessor<MixinDatabase> with _$AssetDaoMixin {
         ..where((t) => t.assetId.equals(assetId))
         ..limit(1);
 
-  Future<List<Asset>> getAssets() => (select(db.assets)).get();
+  Future<List<Asset>> getAssets() => select(db.assets).get();
 }

@@ -66,7 +66,8 @@ Client createClient({
         InterceptorsWrapper(onRequest: (options, handler) async {
           options.headers['User-Agent'] = await _userAgent;
           options.headers['Mixin-Device-Id'] = await _deviceId;
-          options.headers['Accept-Language'] = window.locale.languageCode;
+          options.headers['Accept-Language'] =
+              PlatformDispatcher.instance.locale.languageCode;
           handler.next(options);
         }),
       ],

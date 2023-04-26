@@ -65,8 +65,9 @@ class _PhoneNumberInputScene extends HookWidget {
         [countries]);
     final defaultCountry = useMemoized(
       () {
-        i('locale: ${window.locale.countryCode}');
-        return countryMap[window.locale.countryCode] ?? countries.first;
+        i('locale: ${PlatformDispatcher.instance.locale.countryCode}');
+        return countryMap[PlatformDispatcher.instance.locale.countryCode] ??
+            countries.first;
       },
     );
     final selectedCountry = useState<Country>(defaultCountry);
