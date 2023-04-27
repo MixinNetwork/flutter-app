@@ -23,9 +23,11 @@ enum DeviceTransferCommand {
 }
 
 enum DeviceTransferCallbackType {
+  onRestoreConnected,
   onRestoreStart,
   onRestoreSucceed,
   onRestoreFailed,
+  onBackupServerCreated,
   onBackupStart,
   onBackupSucceed,
   onBackupFailed,
@@ -75,7 +77,7 @@ enum _Status {
 final _backupBehavior = () {
   final subject = StreamController<_Status>.broadcast();
   DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferCallbackType.onBackupStart) {
+    if (event.action == DeviceTransferCallbackType.onBackupServerCreated) {
       subject.add(_Status.start);
     } else if (event.action == DeviceTransferCallbackType.onBackupSucceed) {
       subject.add(_Status.succeed);
@@ -89,7 +91,7 @@ final _backupBehavior = () {
 final _restoreBehavior = () {
   final subject = StreamController<_Status>.broadcast();
   DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferCallbackType.onRestoreStart) {
+    if (event.action == DeviceTransferCallbackType.onRestoreConnected) {
       subject.add(_Status.start);
     } else if (event.action == DeviceTransferCallbackType.onRestoreSucceed) {
       subject.add(_Status.succeed);
@@ -132,6 +134,9 @@ void _useTransferStatus(
     var isProgressShowing = false;
     final subscription = stream.listen((status) async {
       if (status == _Status.start) {
+        if (isProgressShowing) {
+          return;
+        }
         isProgressShowing = true;
         await showMixinDialog(
           context: context,
