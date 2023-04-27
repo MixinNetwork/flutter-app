@@ -125,6 +125,10 @@ class _InputContainer extends HookWidget {
           (state?.isLoaded ?? false) ? state?.conversationId : null,
     );
 
+    final originalDraft = useMemoized(
+        () => context.read<ConversationCubit>().state?.conversation?.draft,
+        [conversationId]);
+
     final quoteMessageId =
         useBlocStateConverter<QuoteMessageCubit, MessageItem?, String?>(
       converter: (state) => state?.messageId,
@@ -159,6 +163,8 @@ class _InputContainer extends HookWidget {
       final updateDraft = context.database.conversationDao.updateDraft;
       return () {
         if (conversationId == null) return;
+        if (textEditingController.text == originalDraft) return;
+
         updateDraft(
           conversationId,
           textEditingController.text,

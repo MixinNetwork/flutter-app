@@ -58,7 +58,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         [
           OrderingTerm.desc(conversation.pinTime),
           OrderingTerm.desc(
-              conversation.draft.trim().length.isBiggerThanValue(0)),
+              conversation.status.equalsValue(ConversationStatus.quit).not() &
+                  conversation.draft.isNotNull() &
+                  conversation.draft.length.isBiggerThanValue(0)),
           OrderingTerm.desc(conversation.lastMessageCreatedAt),
           OrderingTerm.desc(conversation.createdAt),
         ],
@@ -514,4 +516,43 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
             ])
             ..limit(limit, offset: offset))
           .get();
+
+  Future<int> updateLastSentMessage(
+    String conversationId,
+    String messageId,
+    DateTime createdAt,
+  ) =>
+      (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ConversationsCompanion(
+        lastMessageId: Value(messageId),
+        lastMessageCreatedAt: Value(createdAt),
+        draft: const Value(''),
+      ))
+          .then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.updateConversation(conversationId);
+        }
+        return value;
+      });
+
+  Future<int> updateUnseenMessageCountAndLastMessageId(
+    String conversationId,
+    String userId,
+    String? lastMessageId,
+    DateTime? lastMessageCreatedAt,
+  ) =>
+      db
+          .updateUnseenMessageCountAndLastMessageId(
+        conversationId,
+        userId,
+        lastMessageId,
+        lastMessageCreatedAt,
+      )
+          .then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.updateConversation(conversationId);
+        }
+        return value;
+      });
 }
