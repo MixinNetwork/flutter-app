@@ -143,9 +143,20 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   final Map<String, void Function()> _conversationUnseenTaskRunner = {};
 
   void _updateConversationUnseenCount(
-    String conversationId,
+    Message message,
     String currentUserId,
   ) {
+    final conversationId = message.conversationId;
+
+    if (message.userId == currentUserId) {
+      db.conversationDao.updateLastSentMessage(
+        conversationId,
+        message.messageId,
+        message.createdAt,
+      );
+      return;
+    }
+
     Future<void> _update(String conversationId) async {
       final latest =
           await messagesByConversationId(conversationId, 1).getSingleOrNull();
@@ -153,14 +164,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         e('failed to update conversation last message, latest message is null $conversationId');
         return;
       }
-      await db.updateUnseenMessageCountAndLastMessageId(
+
+      await db.conversationDao.updateUnseenMessageCountAndLastMessageId(
         conversationId,
         currentUserId,
         latest.messageId,
         latest.createdAt,
       );
-
-      DataBaseEventBus.instance.updateConversation(conversationId);
     }
 
     if (_conversationUnseenTaskRunner[conversationId] != null) {
@@ -191,7 +201,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ];
     final result = (await Future.wait(futures)).first as int;
 
-    _updateConversationUnseenCount(message.conversationId, currentUserId);
+    _updateConversationUnseenCount(message, currentUserId);
 
     DataBaseEventBus.instance.insertOrReplaceMessages([
       MiniMessageItem(
