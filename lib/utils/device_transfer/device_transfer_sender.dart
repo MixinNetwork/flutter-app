@@ -340,11 +340,11 @@ class DeviceTransferSender {
   }
 
   Future<int> _processTransferMessage(Socket socket) async {
-    int? lastMessageRowId;
+    var lastMessageRowId = -1;
     var count = 0;
     while (true) {
-      final messages =
-          await database.messageDao.getMessages(lastMessageRowId, _kQueryLimit);
+      final messages = await database.messageDao
+          .getDeviceTransferMessages(lastMessageRowId, _kQueryLimit);
       if (messages.isEmpty) {
         break;
       }
