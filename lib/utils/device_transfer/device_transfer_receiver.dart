@@ -42,6 +42,7 @@ class DeviceTransferReceiver {
     this.onReceiverSucceed,
     this.onReceiverFailed,
     this.onReceiverProgressUpdate,
+    this.onConnectedToServer,
   });
 
   final Database database;
@@ -54,6 +55,7 @@ class DeviceTransferReceiver {
   final OnReceiverSucceed? onReceiverSucceed;
   final OnReceiverFailed? onReceiverFailed;
   final OnReceiverProgressUpdate? onReceiverProgressUpdate;
+  final OnReceiverStart? onConnectedToServer;
 
   Socket? _socket;
   int _total = 0;
@@ -151,6 +153,7 @@ class DeviceTransferReceiver {
         userId: userId,
       ),
     );
+    onConnectedToServer?.call();
   }
 
   Future<void> _processReceivedCommand(TransferDataCommand command) async {

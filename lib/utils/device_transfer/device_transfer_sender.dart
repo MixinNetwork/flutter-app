@@ -42,6 +42,7 @@ class DeviceTransferSender {
     this.onSenderStart,
     this.onSenderSucceed,
     this.onSenderFailed,
+    this.onSenderServerCreated,
   });
 
   final Database database;
@@ -51,6 +52,7 @@ class DeviceTransferSender {
   final OnSendStart? onSenderStart;
   final OnSendSucceed? onSenderSucceed;
   final OnSendFailed? onSenderFailed;
+  final OnSendStart? onSenderServerCreated;
   final String deviceId;
 
   ServerSocket? _socket;
@@ -147,6 +149,7 @@ class DeviceTransferSender {
         close();
       });
     });
+    onSenderServerCreated?.call();
     return serverSocket.port;
   }
 

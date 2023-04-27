@@ -255,6 +255,10 @@ class DeviceTransfer {
           progress,
         );
       },
+      onSenderServerCreated: () {
+        DeviceTransferEventBus.instance
+            .fire(DeviceTransferCallbackType.onBackupServerCreated);
+      },
     );
     final receiver = DeviceTransferReceiver(
       database: database,
@@ -279,6 +283,10 @@ class DeviceTransfer {
           DeviceTransferCallbackType.onRestoreProgress,
           progress,
         );
+      },
+      onConnectedToServer: () {
+        DeviceTransferEventBus.instance
+            .fire(DeviceTransferCallbackType.onRestoreConnected);
       },
     );
 
