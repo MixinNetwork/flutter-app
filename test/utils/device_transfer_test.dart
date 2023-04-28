@@ -1,4 +1,5 @@
 @Timeout(Duration(minutes: 1))
+@TestOn('linux || mac-os')
 import 'dart:async';
 import 'dart:io';
 
