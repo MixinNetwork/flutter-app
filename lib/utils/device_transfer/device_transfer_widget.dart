@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:desktop_keep_screen_on/desktop_keep_screen_on.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -360,6 +361,10 @@ class _TransferProcessDialog extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final progress = useStream<double>(progressBehavior, initialData: 0);
+    useEffect(() {
+      DesktopKeepScreenOn.setPreventSleep(true);
+      return () => DesktopKeepScreenOn.setPreventSleep(false);
+    }, []);
     return SizedBox(
       width: 420,
       child: Padding(
