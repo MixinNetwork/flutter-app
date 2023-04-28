@@ -34,6 +34,7 @@ dependencies:
   dbus: ^0.7.8
   decimal: ^2.3.2
   desktop_drop: ^0.4.1
+  desktop_keep_screen_on: ^0.0.2
   desktop_lifecycle: ^0.1.1
   desktop_webview_window: ^0.2.0
   device_info_plus: ^8.0.0
