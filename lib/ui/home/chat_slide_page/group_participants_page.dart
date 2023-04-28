@@ -43,7 +43,7 @@ class GroupParticipantsPage extends HookWidget {
               DataBaseEventBus.instance.watchUpdateParticipantStream(
                   conversationIds: [conversationId])
             ],
-            duration: kSlowThrottleDuration,
+            duration: kDefaultThrottleDuration,
           );
         }, keys: [conversationId]).data ??
         const <ParticipantUser>[];
