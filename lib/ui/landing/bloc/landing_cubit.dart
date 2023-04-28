@@ -106,17 +106,16 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
                 .secret)
         .handleError((e) => null)
         .where((secret) => secret.isNotEmpty)
-        .doOnData((secret) {
+        .map((secret) {
           streamSubscription?.cancel();
           emit(state.copyWith(
             status: LandingStatus.provisioning,
           ));
+          return secret;
         })
         .asyncMap(_verify)
-        .doOnError((error, stacktrace) {
-          emit(state.needReload('Failed to verify: $error'));
-        })
         .handleError((error, stack) {
+          emit(state.needReload('Failed to verify: $error'));
           e('_verify: $error $stack');
           return null;
         })

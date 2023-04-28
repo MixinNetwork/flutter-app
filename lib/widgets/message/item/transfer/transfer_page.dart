@@ -4,7 +4,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide Snapshot, Asset, User;
-import 'package:rxdart/rxdart.dart';
 
 import '../../../../db/dao/snapshot_dao.dart';
 import '../../../../db/database_event_bus.dart';
@@ -62,9 +61,9 @@ class _TransferPage extends HookWidget {
           ],
           duration: kSlowThrottleDuration,
         );
-        return stream.doOnData((event) {
-          if (event != null) return;
-          context.accountServer.refreshUsers([opponentId]);
+        return stream.map((event) {
+          if (event == null) context.accountServer.refreshUsers([opponentId]);
+          return event;
         });
       }
       return Stream.value(null);
