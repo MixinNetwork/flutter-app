@@ -26,7 +26,7 @@ abstract class TransferPacket {
 
   /// return: body check sum
   @protected
-  Future<int> _writeBodyToSink(EventSink<List<int>> sink);
+  Future<int> _writeBodyToSink(IOSink sink);
 }
 
 abstract class _TransferJsonPacket extends TransferPacket {
@@ -44,7 +44,7 @@ abstract class _TransferJsonPacket extends TransferPacket {
   Future<int> get _bodyLength => Future.value(_data.length);
 
   @override
-  Future<int> _writeBodyToSink(EventSink<List<int>> sink) async {
+  Future<int> _writeBodyToSink(IOSink sink) async {
     sink.add(_data);
     return calculateCrc32(_data);
   }
@@ -104,7 +104,7 @@ class TransferAttachmentPacket extends TransferPacket {
   }
 
   @override
-  Future<int> _writeBodyToSink(EventSink<List<int>> sink) async {
+  Future<int> _writeBodyToSink(IOSink sink) async {
     final crc = CrcCalculator();
 
     // first 16 bytes, messageId (uuid)
@@ -125,6 +125,7 @@ class TransferAttachmentPacket extends TransferPacket {
     await for (final bytes in fileStream) {
       sink.add(bytes);
       crc.addBytes(Uint8List.fromList(bytes));
+      await sink.flush();
     }
 
     return crc.result;
@@ -133,10 +134,7 @@ class TransferAttachmentPacket extends TransferPacket {
 
 var _lock = Lock(reentrant: true);
 
-Future<void> writePacketToSink(
-  EventSink<List<int>> sink,
-  TransferPacket packet,
-) =>
+Future<void> writePacketToSink(IOSink sink, TransferPacket packet) =>
     _lock.synchronized(() async {
       final bodyLength = await packet._bodyLength;
 
@@ -155,6 +153,7 @@ Future<void> writePacketToSink(
       final checkSumByte = Uint8List(8);
       checkSumByte.buffer.asByteData().setUint64(0, checkSum);
       sink.add(checkSumByte);
+      await sink.flush();
     });
 
 abstract class _TransferPacketBuilder {
