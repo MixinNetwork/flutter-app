@@ -76,6 +76,14 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     DataBaseEventBus.instance.updateMessageMentionStream,
   ]).throttleTime(kDefaultThrottleDuration, trailing: true).asBroadcastStream();
 
+  late Stream<void> circleUpdateEvent = Rx.merge([
+    DataBaseEventBus.instance.updateConversationIdStream,
+    DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
+    DataBaseEventBus.instance.updateMessageMentionStream,
+    DataBaseEventBus.instance.updateCircleStream,
+    DataBaseEventBus.instance.updateCircleConversationStream,
+  ]).throttleTime(kDefaultThrottleDuration, trailing: true).asBroadcastStream();
+
   void _switchBloc(
     SlideCategoryState state,
     int? limit,
@@ -107,7 +115,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
           (limit, offset) => database.conversationDao
               .conversationsByCircleId(state.id!, limit, offset)
               .get(),
-          updateEvent,
+          circleUpdateEvent,
           mentionCache,
           () =>
               database.conversationDao.conversationHasDataByCircleId(state.id!),
