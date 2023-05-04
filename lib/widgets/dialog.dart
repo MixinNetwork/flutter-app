@@ -44,6 +44,9 @@ Future<T?> showMixinDialog<T>({
   RouteSettings? routeSettings,
   required Widget child,
   EdgeInsets? padding = const EdgeInsets.all(32),
+  BoxConstraints? constraints = const BoxConstraints(
+    maxWidth: 600,
+  ),
   Color? backgroundColor,
   bool barrierDismissible = true,
 }) =>
@@ -60,6 +63,7 @@ Future<T?> showMixinDialog<T>({
         Center(
           child: _DialogPage(
             padding: padding,
+            constraints: constraints,
             backgroundColor: backgroundColor,
             child: child,
           ),
@@ -140,11 +144,13 @@ class _DialogPage extends StatelessWidget {
   const _DialogPage({
     required this.child,
     this.padding,
+    this.constraints,
     this.backgroundColor,
   });
 
   final Widget child;
   final EdgeInsets? padding;
+  final BoxConstraints? constraints;
   final Color? backgroundColor;
 
   @override
@@ -153,29 +159,32 @@ class _DialogPage extends StatelessWidget {
         MediaQuery.of(context).viewInsets + (padding ?? EdgeInsets.zero);
     return Padding(
       padding: effectivePadding,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(11)),
-          border: Border.all(
-            color: const Color.fromRGBO(255, 255, 255, 0.08),
+      child: ConstrainedBox(
+        constraints: constraints ?? const BoxConstraints(),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
+            border: Border.all(
+              color: const Color.fromRGBO(255, 255, 255, 0.08),
+            ),
+            boxShadow: [
+              const BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.15),
+                offset: Offset(0, 8),
+                blurRadius: 40,
+              ),
+              BoxShadow(
+                color: const Color.fromRGBO(0, 0, 0, 0.07),
+                offset: const Offset(0, 4),
+                blurRadius: lerpDouble(16, 6, context.brightnessValue)!,
+              ),
+            ],
+            color: backgroundColor ?? context.theme.popUp,
           ),
-          boxShadow: [
-            const BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.15),
-              offset: Offset(0, 8),
-              blurRadius: 40,
-            ),
-            BoxShadow(
-              color: const Color.fromRGBO(0, 0, 0, 0.07),
-              offset: const Offset(0, 4),
-              blurRadius: lerpDouble(16, 6, context.brightnessValue)!,
-            ),
-          ],
-          color: backgroundColor ?? context.theme.popUp,
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(11)),
-          child: child,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.all(Radius.circular(11)),
+            child: child,
+          ),
         ),
       ),
     );
