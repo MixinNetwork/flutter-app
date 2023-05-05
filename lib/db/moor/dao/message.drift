@@ -88,7 +88,6 @@ SELECT message.message_id AS messageId, message.conversation_id AS conversationI
     message.media_width AS mediaWidth, message.media_height AS mediaHeight,
     message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl,
     message.media_duration AS mediaDuration,
-    message.quote_message_id AS quoteId, message.quote_content AS quoteContent,
     message.sticker_id AS stickerId,
     sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth,
     sticker.asset_height AS assetHeight,
