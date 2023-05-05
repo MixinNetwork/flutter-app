@@ -131,7 +131,7 @@ class DeviceTransferSender {
               break;
             case kTransferCommandActionProgress:
               final progress = command.progress!;
-              d('${command.action} command: progress $progress');
+              i('remote progress command: progress $progress');
               _notifyProgressUpdate(progress);
               break;
           }
@@ -348,7 +348,7 @@ class DeviceTransferSender {
       if (messages.isEmpty) {
         break;
       }
-      count = messages.length;
+      count += messages.length;
       lastMessageRowId = messages.last.item1;
       for (final message in messages) {
         await socket.addMessage(
