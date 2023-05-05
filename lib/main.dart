@@ -36,7 +36,6 @@ Future<void> main(List<String> args) async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
 
   WidgetsFlutterBinding.ensureInitialized();
-  EventBus.initialize();
 
   await loadFallbackFonts();
 
@@ -45,6 +44,7 @@ Future<void> main(List<String> args) async {
     return;
   }
 
+  EventBus.initialize();
   initAppLifecycleObserver();
 
   final result = await Future.wait<dynamic>([
