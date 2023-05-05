@@ -94,7 +94,7 @@ class DeviceTransferReceiver {
   }
 
   Future<void> connectToServer(String ip, int port, int code) async {
-    d('connect to $ip:$port');
+    i('receiver connect to $ip:$port');
     if (_socket != null) {
       w('socket is not null, close it first');
       close();

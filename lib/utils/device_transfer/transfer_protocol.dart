@@ -60,6 +60,8 @@ class TransferDataPacket extends _TransferJsonPacket {
 
   final JsonTransferData data;
 
+  Uint8List get bytes => _data;
+
   @override
   int get _type => kTypeJson;
 }
