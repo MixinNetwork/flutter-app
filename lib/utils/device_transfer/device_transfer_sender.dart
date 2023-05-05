@@ -451,13 +451,25 @@ class DeviceTransferSender {
     await for (final file in files) {
       if (file is File) {
         final messageId = p.basenameWithoutExtension(file.path);
-        final message =
-            await database.messageDao.findMessageByMessageId(messageId);
-        if (message == null) {
-          d('attachment message not found ${file.path}');
-          continue;
+
+        if (p.basename(file.parent.path) == 'Transcripts') {
+          final tm = await database.transcriptMessageDao
+              .transcriptMessageByMessageId(messageId)
+              .getSingleOrNull();
+          if (tm == null) {
+            d('attachment transcript message not found ${file.path}');
+            continue;
+          }
+        } else {
+          final message =
+              await database.messageDao.findMessageByMessageId(messageId);
+          if (message == null) {
+            d('attachment message not found ${file.path}');
+            continue;
+          }
         }
-        await socket.addAttachment(message.messageId, file.path);
+
+        await socket.addAttachment(messageId, file.path);
         count++;
         await onPacketSend();
       }
