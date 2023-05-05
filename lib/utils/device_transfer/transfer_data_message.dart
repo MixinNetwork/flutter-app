@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 
+import '../../db/converter/millis_date_converter.dart';
 import '../../db/mixin_database.dart' as db;
 import '../../enum/media_status.dart';
 
@@ -46,40 +50,56 @@ class TransferDataMessage {
   factory TransferDataMessage.fromJson(Map<String, dynamic> json) =>
       _$TransferDataMessageFromJson(json);
 
-  factory TransferDataMessage.fromDbMessage(db.Message data) =>
-      TransferDataMessage(
-        messageId: data.messageId,
-        conversationId: data.conversationId,
-        userId: data.userId,
-        category: data.category,
-        createdAt: data.createdAt,
-        status: data.status,
-        content: data.content,
-        mediaUrl: data.mediaUrl,
-        mediaMimeType: data.mediaMimeType,
-        mediaSize: data.mediaSize,
-        mediaDuration: data.mediaDuration,
-        mediaWidth: data.mediaWidth,
-        mediaHeight: data.mediaHeight,
-        mediaHash: data.mediaHash,
-        thumbImage: data.thumbImage,
-        mediaKey: data.mediaKey,
-        mediaDigest: data.mediaDigest,
-        mediaStatus: data.mediaStatus,
-        action: data.action,
-        participantId: data.participantId,
-        snapshotId: data.snapshotId,
-        hyperlink: data.hyperlink,
-        name: data.name,
-        albumId: data.albumId,
-        stickerId: data.stickerId,
-        sharedUserId: data.sharedUserId,
-        mediaWaveform: data.mediaWaveform,
-        quoteMessageId: data.quoteMessageId,
-        quoteContent: data.quoteContent,
-        thumbUrl: data.thumbUrl,
-        caption: data.caption,
-      );
+  factory TransferDataMessage.fromDbMessage(db.Message data) {
+    var quoteContent = data.quoteContent;
+    if (quoteContent != null) {
+      try {
+        final map = jsonDecode(quoteContent) as Map<String, dynamic>;
+        final createdAtJson = map['created_at'] ?? map['createdAt'];
+        final createdAt = createdAtJson is String
+            ? DateTime.parse(createdAtJson)
+            : const MillisDateConverter().fromSql(createdAtJson as int);
+        map['created_at'] = createdAt.toIso8601String();
+        map['createdAt'] = createdAt.toIso8601String();
+        quoteContent = jsonEncode(map);
+      } catch (error, stacktrace) {
+        e('failed to parse quote content: $error, stacktrace: $stacktrace');
+      }
+    }
+    return TransferDataMessage(
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: data.userId,
+      category: data.category,
+      createdAt: data.createdAt,
+      status: data.status,
+      content: data.content,
+      mediaUrl: data.mediaUrl,
+      mediaMimeType: data.mediaMimeType,
+      mediaSize: data.mediaSize,
+      mediaDuration: data.mediaDuration,
+      mediaWidth: data.mediaWidth,
+      mediaHeight: data.mediaHeight,
+      mediaHash: data.mediaHash,
+      thumbImage: data.thumbImage,
+      mediaKey: data.mediaKey,
+      mediaDigest: data.mediaDigest,
+      mediaStatus: data.mediaStatus,
+      action: data.action,
+      participantId: data.participantId,
+      snapshotId: data.snapshotId,
+      hyperlink: data.hyperlink,
+      name: data.name,
+      albumId: data.albumId,
+      stickerId: data.stickerId,
+      sharedUserId: data.sharedUserId,
+      mediaWaveform: data.mediaWaveform,
+      quoteMessageId: data.quoteMessageId,
+      quoteContent: quoteContent,
+      thumbUrl: data.thumbUrl,
+      caption: data.caption,
+    );
+  }
 
   @JsonKey(name: 'message_id')
   final String messageId;
