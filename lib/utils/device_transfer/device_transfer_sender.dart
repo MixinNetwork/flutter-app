@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart' as p;
 
+import '../../constants/constants.dart';
 import '../../db/database.dart';
 import '../attachment/attachment_util.dart';
 import '../extension/extension.dart';
@@ -340,6 +341,16 @@ class DeviceTransferSender {
   }
 
   Future<int> _processTransferMessage(Socket socket) async {
+    // check cleanup_quote_content_job finished before transfer message
+    while (true) {
+      final jobs =
+          await database.jobDao.jobByAction(kCleanupQuoteContent).get();
+      if (jobs.isEmpty) {
+        break;
+      }
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+
     var lastMessageRowId = -1;
     var count = 0;
     while (true) {
