@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_app/utils/reg_exp_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,7 +22,9 @@ void main() {
       expect(timer.elapsedMilliseconds, lessThan(30));
       expect(matches, <RegExpMatch>[]);
 
-      print('uri match large text: ${timer.elapsedMilliseconds}ms');
+      if (kDebugMode) {
+        print('uri match large text: ${timer.elapsedMilliseconds}ms');
+      }
     });
 
     const uris = [
@@ -79,7 +82,9 @@ void main() {
       expect(timer.elapsedMilliseconds, lessThan(10));
       expect(matches, <RegExpMatch>[]);
 
-      print('bot number match large text: ${timer.elapsedMilliseconds}ms');
+      if (kDebugMode) {
+        print('bot number match large text: ${timer.elapsedMilliseconds}ms');
+      }
     });
 
     const botNumber = 7000123456;
@@ -106,7 +111,9 @@ void main() {
       expect(timer.elapsedMilliseconds, lessThan(20));
       expect(matches, <RegExpMatch>[]);
 
-      print('mail match large text: ${timer.elapsedMilliseconds}ms');
+      if (kDebugMode) {
+        print('mail match large text: ${timer.elapsedMilliseconds}ms');
+      }
     });
 
     final mails = [
