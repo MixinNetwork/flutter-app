@@ -15,6 +15,7 @@ class AccountKeyValue extends HiveKeyValue {
   static const _hasNewAlbum = 'hasNewAlbum';
   static const _keyRecentUsedEmoji = 'recentUsedEmoji';
   static const _deviceId = 'deviceId';
+  static const _alreadyCleanupQuoteContent = 'alreadyCleanupQuoteContent';
 
   String? get deviceId => box.get(_deviceId) as String?;
 
@@ -44,6 +45,12 @@ class AccountKeyValue extends HiveKeyValue {
 
   List<String> get recentUsedEmoji => _recentUsedEmoji ??=
       (box.get(_keyRecentUsedEmoji, defaultValue: []) as List).cast<String>();
+
+  bool get alreadyCleanupQuoteContent =>
+      box.get(_alreadyCleanupQuoteContent, defaultValue: false) as bool;
+
+  set alreadyCleanupQuoteContent(bool value) =>
+      box.put(_alreadyCleanupQuoteContent, value);
 
   void onEmojiUsed(String emoji) {
     if (recentUsedEmoji.firstOrNull == emoji) {

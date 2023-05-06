@@ -1,13 +1,31 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:equatable/equatable.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../constants/constants.dart';
 import '../../utils/logger.dart';
+import '../database_event_bus.dart';
 import '../mixin_database.dart';
 
 part 'job_dao.g.dart';
+
+class MiniJobItem with EquatableMixin {
+  const MiniJobItem({
+    required this.jobId,
+    required this.action,
+  });
+
+  final String jobId;
+  final String action;
+
+  @override
+  List<Object?> get props => [
+        jobId,
+        action,
+      ];
+}
 
 @DriftAccessor(tables: [MessagesHistory])
 class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
@@ -18,7 +36,12 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   static const silentKey = 'silent';
   static const expireInKey = 'expireIn';
 
-  Future<int> insert(Job job) => into(db.jobs).insertOnConflictUpdate(job);
+  Future<int> insert(Job job) =>
+      into(db.jobs).insertOnConflictUpdate(job).whenComplete(
+            () => DataBaseEventBus.instance.addJob(
+              MiniJobItem(jobId: job.jobId, action: job.action),
+            ),
+          );
 
   Future<Job> createSendingJob(
     String messageId,
@@ -91,12 +114,21 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   SimpleSelectStatement<Jobs, Job> migrateFtsJobs() =>
       select(db.jobs)..where((Jobs row) => row.action.equals(kMigrateFts));
 
+  SimpleSelectStatement<Jobs, Job> jobByAction(String action) =>
+      select(db.jobs)..where((Jobs row) => row.action.equals(action));
+
   Future<Job?> jobById(String jobId) =>
       (select(db.jobs)..where((tbl) => tbl.jobId.equals(jobId)))
           .getSingleOrNull();
 
   Future<void> insertAll(List<Job> jobs) => batch((batch) {
         batch.insertAllOnConflictUpdate(db.jobs, jobs);
+      }).whenComplete(() {
+        for (final job in jobs) {
+          DataBaseEventBus.instance.addJob(
+            MiniJobItem(jobId: job.jobId, action: job.action),
+          );
+        }
       });
 
   Future<void> insertNoReplace(Job job) async {
