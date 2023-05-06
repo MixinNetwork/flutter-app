@@ -14167,6 +14167,24 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
+  Selectable<QuoteMinimal> findBigQuoteMessage(int rowId, int limit) {
+    return customSelect(
+        'SELECT "rowid", conversation_id, quote_message_id FROM messages WHERE "rowid" > ?1 AND quote_message_id IS NOT NULL AND quote_message_id != \'\' AND length(quote_content) > 10240 GROUP BY quote_message_id ORDER BY "rowid" ASC LIMIT ?2',
+        variables: [
+          Variable<int>(rowId),
+          Variable<int>(limit)
+        ],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) {
+      return QuoteMinimal(
+        rowid: row.read<int>('rowid'),
+        conversationId: row.read<String>('conversation_id'),
+        quoteMessageId: row.readNullable<String>('quote_message_id'),
+      );
+    });
+  }
+
   Selectable<int> baseConversationItemCount(
       BaseConversationItemCount$where where) {
     var $arrayStartIndex = 1;
@@ -16073,6 +16091,36 @@ typedef SearchMessage$where = Expression<bool> Function(
     Messages m, Conversations c, Users u, Users owner);
 typedef SearchMessage$limit = Limit Function(
     Messages m, Conversations c, Users u, Users owner);
+
+class QuoteMinimal {
+  final int rowid;
+  final String conversationId;
+  final String? quoteMessageId;
+  QuoteMinimal({
+    required this.rowid,
+    required this.conversationId,
+    this.quoteMessageId,
+  });
+  @override
+  int get hashCode => Object.hash(rowid, conversationId, quoteMessageId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuoteMinimal &&
+          other.rowid == this.rowid &&
+          other.conversationId == this.conversationId &&
+          other.quoteMessageId == this.quoteMessageId);
+  @override
+  String toString() {
+    return (StringBuffer('QuoteMinimal(')
+          ..write('rowid: $rowid, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('quoteMessageId: $quoteMessageId')
+          ..write(')'))
+        .toString();
+  }
+}
+
 typedef BaseConversationItemCount$where = Expression<bool> Function(
     Conversations conversation,
     Users owner,
