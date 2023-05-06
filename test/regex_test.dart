@@ -13,7 +13,7 @@ void match(RegExp regExp, String text, String uri) {
 void main() {
   final bigText = List.generate(1024 * 64, (index) => 'a').join();
 
-  group('mail', () {
+  group('uri', () {
     test('speed', () {
       final timer = Stopwatch()..start();
       final matches = uriRegExp.allMatches(bigText).toList();
