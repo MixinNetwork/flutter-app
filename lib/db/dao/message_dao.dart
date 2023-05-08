@@ -575,6 +575,16 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         .getSingleOrNull();
   }
 
+  Selectable<QuoteMinimal> findBigQuoteMessage(int rowId, int limit) =>
+      db.findBigQuoteMessage(rowId, limit);
+
+  Future<int> updateMessageQuoteContent(
+          String messageId, String? quoteContent) =>
+      (update(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
+          .write(MessagesCompanion(
+        quoteContent: Value(quoteContent),
+      ));
+
   Selectable<MiniMessageItem> miniMessageByIds(List<String> messageIds) =>
       db.miniMessageByIds(messageIds);
 
@@ -630,7 +640,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           .getSingle();
 
   Future<void> updateQuoteContentByQuoteId(
-      String conversationId, String quoteMessageId, String content) async {
+      String conversationId, String quoteMessageId, String? content) async {
     final messageIds = (await (db.selectOnly(db.messages, distinct: true)
               ..addColumns([db.messages.messageId])
               ..where(db.messages.conversationId.equals(conversationId) &

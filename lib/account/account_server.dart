@@ -794,6 +794,19 @@ class AccountServer {
     AccountKeyValue.instance.hasSyncCircle = true;
   }
 
+  Future<void> _cleanupQuoteContent() async {
+    final clean = AccountKeyValue.instance.alreadyCleanupQuoteContent;
+    if (clean) {
+      return;
+    }
+    await database.jobDao.insert(createCleanupQuoteContentJob());
+    AccountKeyValue.instance.alreadyCleanupQuoteContent = true;
+  }
+
+  Future<void> checkMigration() async {
+    await _cleanupQuoteContent();
+  }
+
   Future<void> handleCircle(CircleResponse circle, {int? offset}) async {
     final ccList =
         (await client.circleApi.getCircleConversations(circle.circleId)).data;

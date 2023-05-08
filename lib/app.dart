@@ -265,7 +265,8 @@ class _Home extends HookWidget {
           ..refreshSelf()
           ..refreshFriends()
           ..refreshSticker()
-          ..initCircles();
+          ..initCircles()
+          ..checkMigration();
       }
     }, [signed]);
 

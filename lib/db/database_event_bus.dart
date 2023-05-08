@@ -5,6 +5,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../utils/event_bus.dart';
 import '../utils/logger.dart';
+import 'dao/job_dao.dart';
 import 'dao/participant_dao.dart';
 import 'event.dart';
 import 'mixin_database.dart';
@@ -25,7 +26,8 @@ enum _DatabaseEvent {
   updateCircleConversation,
   updatePinMessage,
   updateTranscriptMessage,
-  updateAsset
+  updateAsset,
+  addJob,
 }
 
 @immutable
@@ -399,5 +401,13 @@ class DataBaseEventBus {
       return;
     }
     _send(_DatabaseEvent.updateAsset, newAssetIds.toList());
+  }
+
+  // Job
+  late Stream<MiniJobItem> addJobStream =
+      _watch<MiniJobItem>(_DatabaseEvent.addJob);
+
+  void addJob(MiniJobItem job) {
+    _send(_DatabaseEvent.addJob, job);
   }
 }

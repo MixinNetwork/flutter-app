@@ -95,3 +95,11 @@ Job createMigrationFtsJob(int? messageRowId) => Job(
       createdAt: DateTime.now(),
       blazeMessage: messageRowId?.toString(),
     );
+
+Job createCleanupQuoteContentJob() => Job(
+      jobId: const Uuid().v4(),
+      action: kCleanupQuoteContent,
+      priority: 5,
+      runCount: 0,
+      createdAt: DateTime.now(),
+    );
