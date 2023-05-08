@@ -201,16 +201,16 @@ jobs:
           name: mixin_setup.exe.zip
           path: build\mixin_setup.exe
 
-      # - name: Build msix
-      #   run: |
-      #     echo "create msix. version: ${{ steps.build-app.outputs.MSIX_PACKAGE_VERSION }}"
-      #     flutter pub run msix:create --build-windows false --version ${{ steps.build-app.outputs.MSIX_PACKAGE_VERSION }}
+      - name: Build msix
+        run: |
+          echo "create msix. version: ${{ steps.build-app.outputs.MSIX_PACKAGE_VERSION }}"
+          flutter pub run msix:create --build-windows false --version ${{ steps.build-app.outputs.MSIX_PACKAGE_VERSION }}
 
-      # - name: Upload msix
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: flutter_app.msix.zip
-      #     path: build\windows\runner\Release\flutter_app.msix
+      - name: Upload msix
+        uses: actions/upload-artifact@v3
+        with:
+          name: flutter_app.msix.zip
+          path: build\windows\runner\Release\flutter_app.msix
 
       - name: collect debug info
         run: flutter pub run debug_info_collector
