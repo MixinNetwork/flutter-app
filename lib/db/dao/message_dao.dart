@@ -476,23 +476,26 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     });
   }
 
-  Future<int> markMessageRead(
+  Future<void> markMessageRead(
     Iterable<MiniMessageItem> miniMessageItems, {
     bool updateExpired = true,
   }) async {
     final messageIds = miniMessageItems.map((e) => e.messageId);
-    final result = await (db.update(db.messages)
-          ..where((tbl) =>
-              tbl.messageId.isIn(messageIds) &
-              tbl.status.equalsValue(MessageStatus.failed).not() &
-              tbl.status.equalsValue(MessageStatus.unknown).not()))
-        .write(const MessagesCompanion(status: Value(MessageStatus.read)));
+    final chunked = messageIds.toList().chunked(kMarkLimit);
+
+    for (final messageIds in chunked) {
+      await (db.update(db.messages)
+            ..where((tbl) =>
+                tbl.messageId.isIn(messageIds) &
+                tbl.status.equalsValue(MessageStatus.failed).not() &
+                tbl.status.equalsValue(MessageStatus.unknown).not()))
+          .write(const MessagesCompanion(status: Value(MessageStatus.read)));
+    }
 
     DataBaseEventBus.instance.insertOrReplaceMessages(miniMessageItems);
     if (updateExpired) {
       await db.expiredMessageDao.onMessageRead(messageIds);
     }
-    return result;
   }
 
   Future<List<String>> findConversationIdsByMessages(
@@ -538,12 +541,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         .map((row) => row.read(db.messages.messageId))
         .get();
     final ids = list.whereNotNull().toList();
-    final chunked = ids.chunked(kMarkLimit);
-    if (chunked.isNotEmpty) {
-      for (final ids in chunked) {
-        await markMessageRead(ids.map((e) =>
-            MiniMessageItem(conversationId: conversationId, messageId: e)));
-      }
+    if (ids.isNotEmpty) {
+      await markMessageRead(ids.map((e) =>
+          MiniMessageItem(conversationId: conversationId, messageId: e)));
     }
     await takeUnseen(userId, conversationId);
     return ids;
