@@ -538,9 +538,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         .map((row) => row.read(db.messages.messageId))
         .get();
     final ids = list.whereNotNull().toList();
-    if (ids.isNotEmpty) {
-      await markMessageRead(ids.map((e) =>
-          MiniMessageItem(conversationId: conversationId, messageId: e)));
+    final chunked = ids.chunked(kMarkLimit);
+    if (chunked.isNotEmpty) {
+      for (final ids in chunked) {
+        await markMessageRead(ids.map((e) =>
+            MiniMessageItem(conversationId: conversationId, messageId: e)));
+      }
     }
     await takeUnseen(userId, conversationId);
     return ids;
