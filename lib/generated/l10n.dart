@@ -964,6 +964,16 @@ class Localization {
     );
   }
 
+  /// `Created {arg0}`
+  String created(Object arg0) {
+    return Intl.message(
+      'Created $arg0',
+      name: 'created',
+      desc: '',
+      args: [arg0],
+    );
+  }
+
   /// `{arg0} created this group`
   String createdThisGroup(Object arg0) {
     return Intl.message(
@@ -2260,10 +2270,10 @@ class Localization {
     );
   }
 
-  /// `Joined in {arg0}`
+  /// `Joined on {arg0}`
   String joinedIn(Object arg0) {
     return Intl.message(
-      'Joined in $arg0',
+      'Joined on $arg0',
       name: 'joinedIn',
       desc: '',
       args: [arg0],
