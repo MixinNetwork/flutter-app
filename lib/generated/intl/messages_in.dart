@@ -39,46 +39,46 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(arg0) => "Mixin ID: ${arg0}";
 
-  static String m18(arg0) =>
+  static String m19(arg0) =>
       "KESALAHAN 10006: Harap perbarui Mixin(${arg0}) untuk terus menggunakan layanan.";
 
-  static String m19(count, arg0) =>
+  static String m20(count, arg0) =>
       "${Intl.plural(count, one: 'null', other: 'KESALAHAN 20119: PIN salah. Anda masih memiliki ${arg0} kesempatan. Harap tunggu 24 jam untuk mencoba lagi nanti.')}";
 
-  static String m20(arg0) => "Server sedang dalam pemeliharaan: ${arg0}";
-
-  static String m21(arg0) => "KESALAHAN: ${arg0}";
+  static String m21(arg0) => "Server sedang dalam pemeliharaan: ${arg0}";
 
   static String m22(arg0) => "KESALAHAN: ${arg0}";
 
-  static String m23(arg0) => "Kirim pesan ke ${arg0}";
+  static String m23(arg0) => "KESALAHAN: ${arg0}";
 
-  static String m24(arg0) => "Hapus ${arg0}";
+  static String m24(arg0) => "Kirim pesan ke ${arg0}";
 
-  static String m25(count, arg0) =>
+  static String m25(arg0) => "Hapus ${arg0}";
+
+  static String m26(count, arg0) =>
       "${Intl.plural(count, one: 'null', other: '${arg0} Jam')}";
 
-  static String m26(arg0) => "Bergabung di ${arg0}";
-
-  static String m28(arg0) =>
-      "Kami akan mengirim kode 4 digit ke nomor telepon Anda ${arg0}, harap masukkan kode tersebut pada layar berikutnya.";
+  static String m27(arg0) => "Bergabung di ${arg0}";
 
   static String m29(arg0) =>
+      "Kami akan mengirim kode 4 digit ke nomor telepon Anda ${arg0}, harap masukkan kode tersebut pada layar berikutnya.";
+
+  static String m30(arg0) =>
       "Masukkan kode 4 digit yang dikirim kepada Anda di ${arg0}";
 
-  static String m30(arg0) => "ID Mixin saya: ${arg0}";
+  static String m31(arg0) => "ID Mixin saya: ${arg0}";
 
-  static String m35(count, arg0, arg1) =>
+  static String m36(count, arg0, arg1) =>
       "${Intl.plural(count, one: 'null', other: '${arg0}/${arg1} konfirmasi')}";
 
-  static String m37(arg0) => "Kirim ulang kode dalam ${arg0} d";
+  static String m38(arg0) => "Kirim ulang kode dalam ${arg0} d";
 
-  static String m38(count, arg0) =>
+  static String m39(count, arg0) =>
       "${Intl.plural(count, one: 'null', other: '${arg0} pesan terkait')}";
 
-  static String m41(arg0, arg1) => "Yakin ingin mengirim ${arg0} dari ${arg1}?";
+  static String m42(arg0, arg1) => "Yakin ingin mengirim ${arg0} dari ${arg1}?";
 
-  static String m42(arg0) => "Yakin ingin mengirim ${arg0}?";
+  static String m43(arg0) => "Yakin ingin mengirim ${arg0}?";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -186,7 +186,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tidak mendukung format audio, harap buka dengan aplikasi lain."),
         "errorNumberReachedLimit": MessageLookupByLibrary.simpleMessage(
             "KESALAHAN 20132: Jumlahnya telah mencapai batas."),
-        "errorOldVersion": m18,
+        "errorOldVersion": m19,
         "errorOpenLocation": MessageLookupByLibrary.simpleMessage(
             "Tidak dapat menemukan aplikasi peta"),
         "errorPermission": MessageLookupByLibrary.simpleMessage(
@@ -205,10 +205,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Anda telah mencoba lebih dari 5 kali, harap tunggu setidaknya 24 jam untuk mencoba lagi."),
         "errorPinIncorrect":
             MessageLookupByLibrary.simpleMessage("KESALAHAN 20119: PIN salah"),
-        "errorPinIncorrectWithTimes": m19,
+        "errorPinIncorrectWithTimes": m20,
         "errorRecaptchaIsInvalid": MessageLookupByLibrary.simpleMessage(
             "KESALAHAN 10004: Recaptcha tidak valid"),
-        "errorServer5xxCode": m20,
+        "errorServer5xxCode": m21,
         "errorTooManyRequest": MessageLookupByLibrary.simpleMessage(
             "KESALAHAN 429: Batas nilai terlampaui"),
         "errorTooManyStickers": MessageLookupByLibrary.simpleMessage(
@@ -219,8 +219,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "KESALAHAN 20127: Jumlah penarikan dana terlalu kecil"),
         "errorUnableToOpenMedia": MessageLookupByLibrary.simpleMessage(
             "Tidak dapat menemukan aplikasi yang dapat membuka media ini."),
-        "errorUnknownWithCode": m21,
-        "errorUnknownWithMessage": m22,
+        "errorUnknownWithCode": m22,
+        "errorUnknownWithMessage": m23,
         "errorUsedPhone": MessageLookupByLibrary.simpleMessage(
             "KESALAHAN 20122: Ponsel digunakan oleh orang lain."),
         "errorUserInvalidFormat":
@@ -251,18 +251,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupCantSend": MessageLookupByLibrary.simpleMessage(
             "Anda tidak dapat mengirim pesan ke grup ini karena Anda bukan lagi peserta."),
         "groupName": MessageLookupByLibrary.simpleMessage("Nama Grup"),
-        "groupPopMenuMessage": m23,
-        "groupPopMenuRemove": m24,
+        "groupPopMenuMessage": m24,
+        "groupPopMenuRemove": m25,
         "helpCenter": MessageLookupByLibrary.simpleMessage("Pusat bantuan"),
-        "hour": m25,
+        "hour": m26,
         "initializing": MessageLookupByLibrary.simpleMessage("Memulai..."),
         "inviteInfo": MessageLookupByLibrary.simpleMessage(
             "Siapapun yang memiliki Mixin dapat mengikuti tautan ini untuk bergabung dengan grup ini. Hanya bagikan dengan orang yang Anda percaya."),
         "inviteToGroupViaLink": MessageLookupByLibrary.simpleMessage(
             "Undang ke Grup melalui Tautan"),
-        "joinedIn": m26,
-        "landingInvitationDialogContent": m28,
-        "landingValidationTitle": m29,
+        "joinedIn": m27,
+        "landingInvitationDialogContent": m29,
+        "landingValidationTitle": m30,
         "learnMore":
             MessageLookupByLibrary.simpleMessage("Pelajari Selengkapnya"),
         "live": MessageLookupByLibrary.simpleMessage("Siaran Langsung"),
@@ -285,7 +285,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "more": MessageLookupByLibrary.simpleMessage("Lebih banyak"),
         "multisigTransaction":
             MessageLookupByLibrary.simpleMessage("Transaksi Multisig"),
-        "myMixinId": m30,
+        "myMixinId": m31,
         "na": MessageLookupByLibrary.simpleMessage("N/A"),
         "name": MessageLookupByLibrary.simpleMessage("Nama"),
         "networkError":
@@ -309,7 +309,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "oneYear": MessageLookupByLibrary.simpleMessage("1 Tahun"),
         "openHomePage": MessageLookupByLibrary.simpleMessage("Buka Beranda"),
         "owner": MessageLookupByLibrary.simpleMessage("pemilik"),
-        "pendingConfirmation": m35,
+        "pendingConfirmation": m36,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Nomor Telepon"),
         "photos": MessageLookupByLibrary.simpleMessage("Foto"),
         "post": MessageLookupByLibrary.simpleMessage("Postingan"),
@@ -326,7 +326,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeContact": MessageLookupByLibrary.simpleMessage("Hapus kontak"),
         "report": MessageLookupByLibrary.simpleMessage("Laporkan"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Kirim ulang kode"),
-        "resendCodeIn": m37,
+        "resendCodeIn": m38,
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("Unggahan ulang gagal."),
         "revokeMultisigTransaction":
@@ -338,7 +338,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "search": MessageLookupByLibrary.simpleMessage("Cari"),
         "searchConversation":
             MessageLookupByLibrary.simpleMessage("Cari Percakapan"),
-        "searchRelatedMessage": m38,
+        "searchRelatedMessage": m39,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
         "select": MessageLookupByLibrary.simpleMessage("Pilih"),
@@ -349,8 +349,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareError":
             MessageLookupByLibrary.simpleMessage("Bagikan kesalahan."),
         "shareLink": MessageLookupByLibrary.simpleMessage("Bagikan Tautan"),
-        "shareMessageDescription": m41,
-        "shareMessageDescriptionEmpty": m42,
+        "shareMessageDescription": m42,
+        "shareMessageDescriptionEmpty": m43,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Media Bersama"),
         "show": MessageLookupByLibrary.simpleMessage("Tampilkan"),
         "signIn": MessageLookupByLibrary.simpleMessage("Masuk"),

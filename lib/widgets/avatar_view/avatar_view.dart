@@ -56,12 +56,7 @@ class ConversationAvatarWidget extends HookWidget {
                       conversationIds: [_conversationId])
                 ],
                 duration: kVerySlowThrottleDuration * 2,
-              ).map((event) => _category == ConversationCategory.contact
-                      ? event
-                          .where((element) =>
-                              element.relationship != UserRelationship.me)
-                          .toList()
-                      : event);
+              );
             }
             return const Stream<List<User>>.empty();
           },
@@ -70,18 +65,16 @@ class ConversationAvatarWidget extends HookWidget {
         ).data ??
         <User>[];
 
-    final child = _category == ConversationCategory.contact
-        ? AvatarWidget(
-            userId: _userId,
-            name: _name,
-            avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
-            size: size)
-        : AvatarPuzzlesWidget(list, size);
-
     return SizedBox.fromSize(
       size: Size.square(size),
       child: ClipOval(
-        child: child,
+        child: _category == ConversationCategory.contact
+            ? AvatarWidget(
+                userId: _userId,
+                name: _name,
+                avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
+                size: size)
+            : AvatarPuzzlesWidget(list, size),
       ),
     );
   }
