@@ -11,7 +11,9 @@ import 'package:http_client_helper/http_client_helper.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
+import '../utils/mixin_api_client.dart';
 
 typedef PlaceholderWidgetBuilder = Widget Function();
 
@@ -39,20 +41,27 @@ class CacheImage extends StatelessWidget {
   final BoxFit fit;
 
   @override
-  Widget build(BuildContext context) => Image(
-        image: MixinNetworkImageProvider(src, controller: controller),
-        width: width,
-        height: height,
-        fit: fit,
-        errorBuilder: (context, error, stackTrace) =>
-            errorWidget?.call() ?? const SizedBox.shrink(),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) {
-            return child;
-          }
-          return placeholder?.call() ?? const SizedBox.shrink();
-        },
-      );
+  Widget build(BuildContext context) {
+    final proxyUrl = context.database.settingProperties.activatedProxyUrl;
+    return Image(
+      image: MixinNetworkImageProvider(
+        src,
+        controller: controller,
+        proxyUrl: proxyUrl,
+      ),
+      width: width,
+      height: height,
+      fit: fit,
+      errorBuilder: (context, error, stackTrace) =>
+          errorWidget?.call() ?? const SizedBox.shrink(),
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        }
+        return placeholder?.call() ?? const SizedBox.shrink();
+      },
+    );
+  }
 }
 
 // min frameDuration
@@ -368,6 +377,7 @@ class MixinNetworkImageProvider
     this.imageCacheName,
     this.cacheMaxAge,
     this.controller,
+    this.proxyUrl,
   });
 
   final ValueNotifier<bool>? controller;
@@ -389,6 +399,8 @@ class MixinNetworkImageProvider
 
   /// The URL from which the image will be fetched.
   final String url;
+
+  final String? proxyUrl;
 
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
@@ -575,7 +587,7 @@ class MixinNetworkImageProvider
   ) async {
     try {
       final resolved = Uri.base.resolve(key.url);
-      final response = await _tryGetResponse(resolved);
+      final response = await _tryGetResponse(resolved, key.proxyUrl);
       if (response == null || response.statusCode != HttpStatus.ok) {
         return null;
       }
@@ -613,7 +625,9 @@ class MixinNetworkImageProvider
     return null;
   }
 
-  Future<HttpClientResponse> _getResponse(Uri resolved) async {
+  Future<HttpClientResponse> _getResponse(
+      Uri resolved, String? proxyUrl) async {
+    httpClient.setProxy(proxyUrl);
     final request = await httpClient.getUrl(resolved);
     headers?.forEach((String name, String value) {
       request.headers.add(name, value);
@@ -630,12 +644,13 @@ class MixinNetworkImageProvider
   // Http get with cancel, delay try again
   Future<HttpClientResponse?> _tryGetResponse(
     Uri resolved,
+    String? proxyUrl,
   ) async {
     cancelToken?.throwIfCancellationRequested();
     return RetryHelper.tryRun<HttpClientResponse>(
       () => CancellationTokenSource.register(
         cancelToken,
-        _getResponse(resolved),
+        _getResponse(resolved, proxyUrl),
       ),
       cancelToken: cancelToken,
       timeRetry: timeRetry,
