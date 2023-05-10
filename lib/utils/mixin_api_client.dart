@@ -109,16 +109,20 @@ extension ClientExt on Client {
 }
 
 extension HttpClientProxy on HttpClient {
-  void setProxy(String proxyUrl) {
-    findProxy = (url) => HttpClient.findProxyFromEnvironment(
-          url,
-          environment: {
-            if (proxyUrl.startsWith('http')) ...{
-              'https_proxy': proxyUrl,
-              'http_proxy': proxyUrl,
+  void setProxy(String? proxyUrl) {
+    if (proxyUrl == null || proxyUrl.isEmpty) {
+      findProxy = null;
+    } else {
+      findProxy = (url) => HttpClient.findProxyFromEnvironment(
+            url,
+            environment: {
+              if (proxyUrl.startsWith('http')) ...{
+                'https_proxy': proxyUrl,
+                'http_proxy': proxyUrl,
+              },
+              if (proxyUrl.startsWith('socks5')) 'socks_proxy': proxyUrl,
             },
-            if (proxyUrl.startsWith('socks5')) 'socks_proxy': proxyUrl,
-          },
-        );
+          );
+    }
   }
 }
