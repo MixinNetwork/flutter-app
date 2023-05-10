@@ -14090,7 +14090,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message.sticker_id AS stickerId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, message.shared_user_id AS sharedUserId, shareUser.full_name AS sharedUserFullName, shareUser.identity_number AS sharedUserIdentityNumber, shareUser.avatar_url AS sharedUserAvatarUrl, shareUser.is_verified AS sharedUserIsVerified, shareUser.app_id AS sharedUserAppId FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN users AS shareUser ON message.shared_user_id = shareUser.user_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.sticker_id AS stickerId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, message.shared_user_id AS sharedUserId, shareUser.full_name AS sharedUserFullName, shareUser.identity_number AS sharedUserIdentityNumber, shareUser.avatar_url AS sharedUserAvatarUrl, shareUser.is_verified AS sharedUserIsVerified, shareUser.app_id AS sharedUserAppId FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN users AS shareUser ON message.shared_user_id = shareUser.user_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
@@ -14129,8 +14129,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         thumbUrl: row.readNullable<String>('thumbUrl'),
         mediaUrl: row.readNullable<String>('mediaUrl'),
         mediaDuration: row.readNullable<String>('mediaDuration'),
-        quoteId: row.readNullable<String>('quoteId'),
-        quoteContent: row.readNullable<String>('quoteContent'),
         stickerId: row.readNullable<String>('stickerId'),
         assetUrl: row.readNullable<String>('assetUrl'),
         assetWidth: row.readNullable<int>('assetWidth'),
@@ -14397,6 +14395,24 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {
           messages,
         }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
+  Selectable<QuoteMinimal> findBigQuoteMessage(int rowId, int limit) {
+    return customSelect(
+        'SELECT "rowid", conversation_id, quote_message_id FROM messages WHERE "rowid" > ?1 AND quote_message_id IS NOT NULL AND quote_message_id != \'\' AND length(quote_content) > 10240 GROUP BY quote_message_id ORDER BY "rowid" ASC LIMIT ?2',
+        variables: [
+          Variable<int>(rowId),
+          Variable<int>(limit)
+        ],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) {
+      return QuoteMinimal(
+        rowid: row.read<int>('rowid'),
+        conversationId: row.read<String>('conversation_id'),
+        quoteMessageId: row.readNullable<String>('quote_message_id'),
+      );
+    });
   }
 
   Selectable<int> baseConversationItemCount(
@@ -15700,8 +15716,6 @@ class QuoteMessageItem {
   final String? thumbUrl;
   final String? mediaUrl;
   final String? mediaDuration;
-  final String? quoteId;
-  final String? quoteContent;
   final String? stickerId;
   final String? assetUrl;
   final int? assetWidth;
@@ -15736,8 +15750,6 @@ class QuoteMessageItem {
     this.thumbUrl,
     this.mediaUrl,
     this.mediaDuration,
-    this.quoteId,
-    this.quoteContent,
     this.stickerId,
     this.assetUrl,
     this.assetWidth,
@@ -15774,8 +15786,6 @@ class QuoteMessageItem {
         thumbUrl,
         mediaUrl,
         mediaDuration,
-        quoteId,
-        quoteContent,
         stickerId,
         assetUrl,
         assetWidth,
@@ -15814,8 +15824,6 @@ class QuoteMessageItem {
           other.thumbUrl == this.thumbUrl &&
           other.mediaUrl == this.mediaUrl &&
           other.mediaDuration == this.mediaDuration &&
-          other.quoteId == this.quoteId &&
-          other.quoteContent == this.quoteContent &&
           other.stickerId == this.stickerId &&
           other.assetUrl == this.assetUrl &&
           other.assetWidth == this.assetWidth &&
@@ -15852,8 +15860,6 @@ class QuoteMessageItem {
           ..write('thumbUrl: $thumbUrl, ')
           ..write('mediaUrl: $mediaUrl, ')
           ..write('mediaDuration: $mediaDuration, ')
-          ..write('quoteId: $quoteId, ')
-          ..write('quoteContent: $quoteContent, ')
           ..write('stickerId: $stickerId, ')
           ..write('assetUrl: $assetUrl, ')
           ..write('assetWidth: $assetWidth, ')
@@ -16316,6 +16322,36 @@ typedef SearchMessage$where = Expression<bool> Function(
     Messages m, Conversations c, Users u, Users owner);
 typedef SearchMessage$limit = Limit Function(
     Messages m, Conversations c, Users u, Users owner);
+
+class QuoteMinimal {
+  final int rowid;
+  final String conversationId;
+  final String? quoteMessageId;
+  QuoteMinimal({
+    required this.rowid,
+    required this.conversationId,
+    this.quoteMessageId,
+  });
+  @override
+  int get hashCode => Object.hash(rowid, conversationId, quoteMessageId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuoteMinimal &&
+          other.rowid == this.rowid &&
+          other.conversationId == this.conversationId &&
+          other.quoteMessageId == this.quoteMessageId);
+  @override
+  String toString() {
+    return (StringBuffer('QuoteMinimal(')
+          ..write('rowid: $rowid, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('quoteMessageId: $quoteMessageId')
+          ..write(')'))
+        .toString();
+  }
+}
+
 typedef BaseConversationItemCount$where = Expression<bool> Function(
     Conversations conversation,
     Users owner,

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart' as p;
 
+import '../../constants/constants.dart';
 import '../../db/database.dart';
 import '../attachment/attachment_util.dart';
 import '../extension/extension.dart';
@@ -42,6 +43,7 @@ class DeviceTransferSender {
     this.onSenderStart,
     this.onSenderSucceed,
     this.onSenderFailed,
+    this.onSenderServerCreated,
   });
 
   final Database database;
@@ -51,6 +53,7 @@ class DeviceTransferSender {
   final OnSendStart? onSenderStart;
   final OnSendSucceed? onSenderSucceed;
   final OnSendFailed? onSenderFailed;
+  final OnSendStart? onSenderServerCreated;
   final String deviceId;
 
   ServerSocket? _socket;
@@ -129,7 +132,7 @@ class DeviceTransferSender {
               break;
             case kTransferCommandActionProgress:
               final progress = command.progress!;
-              d('${command.action} command: progress $progress');
+              i('remote progress command: progress $progress');
               _notifyProgressUpdate(progress);
               break;
           }
@@ -147,6 +150,7 @@ class DeviceTransferSender {
         close();
       });
     });
+    onSenderServerCreated?.call();
     return serverSocket.port;
   }
 
@@ -337,15 +341,25 @@ class DeviceTransferSender {
   }
 
   Future<int> _processTransferMessage(Socket socket) async {
-    int? lastMessageRowId;
+    // check cleanup_quote_content_job finished before transfer message
+    while (true) {
+      final jobs =
+          await database.jobDao.jobByAction(kCleanupQuoteContent).get();
+      if (jobs.isEmpty) {
+        break;
+      }
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+
+    var lastMessageRowId = -1;
     var count = 0;
     while (true) {
-      final messages =
-          await database.messageDao.getMessages(lastMessageRowId, _kQueryLimit);
+      final messages = await database.messageDao
+          .getDeviceTransferMessages(lastMessageRowId, _kQueryLimit);
       if (messages.isEmpty) {
         break;
       }
-      count = messages.length;
+      count += messages.length;
       lastMessageRowId = messages.last.item1;
       for (final message in messages) {
         await socket.addMessage(
@@ -448,13 +462,25 @@ class DeviceTransferSender {
     await for (final file in files) {
       if (file is File) {
         final messageId = p.basenameWithoutExtension(file.path);
-        final message =
-            await database.messageDao.findMessageByMessageId(messageId);
-        if (message == null) {
-          d('attachment message not found ${file.path}');
-          continue;
+
+        if (p.basename(file.parent.path) == 'Transcripts') {
+          final tm = await database.transcriptMessageDao
+              .transcriptMessageByMessageId(messageId)
+              .getSingleOrNull();
+          if (tm == null) {
+            d('attachment transcript message not found ${file.path}');
+            continue;
+          }
+        } else {
+          final message =
+              await database.messageDao.findMessageByMessageId(messageId);
+          if (message == null) {
+            d('attachment message not found ${file.path}');
+            continue;
+          }
         }
-        await socket.addAttachment(message.messageId, file.path);
+
+        await socket.addAttachment(messageId, file.path);
         count++;
         await onPacketSend();
       }

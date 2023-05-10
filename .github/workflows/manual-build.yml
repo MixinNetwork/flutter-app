@@ -8,7 +8,7 @@ on:
       flutter_channel:
         description: "run with flutter channel, eg: master, beta, stable"
         required: true
-        default: "stable"
+        default: "beta"
   push:
     tags:
       - 'v*'
@@ -204,7 +204,7 @@ jobs:
       - name: Build msix
         run: |
           echo "create msix. version: ${{ steps.build-app.outputs.MSIX_PACKAGE_VERSION }}"
-          flutter pub run msix:create --build-windows false --version ${{ steps.build-app.outputs.MSIX_PACKAGE_VERSION }}
+          flutter pub run msix:create --build-windows false --version ${{ steps.build-app.outputs.MSIX_PACKAGE_VERSION }} -v
 
       - name: Upload msix
         uses: actions/upload-artifact@v3

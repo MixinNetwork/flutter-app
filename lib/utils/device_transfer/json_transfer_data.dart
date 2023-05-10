@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart' hide JsonKey;
@@ -169,6 +170,17 @@ extension SocketExtension on IOSink {
     return _addTransferJson(wrapper);
   }
 
-  Future<void> _addTransferJson(JsonTransferData data) =>
-      writePacketToSink(this, TransferDataPacket(data));
+  Future<void> _addTransferJson(JsonTransferData data) {
+    final packet = TransferDataPacket(data);
+    // skip large packet
+    if (packet.bytes.length > 500 * 1024) {
+      w('packet size is too large: ${data.type} ${packet.bytes.length} bytes');
+      data.data.forEach((key, value) {
+        final str = jsonEncode(value);
+        w('packet data: $key ${str.length}');
+      });
+      return Future<void>.value();
+    }
+    return writePacketToSink(this, packet);
+  }
 }

@@ -46,90 +46,92 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m11(arg0) => "刪除會話：${arg0}";
 
-  static String m12(arg0) => "${arg0}創建了這個羣組";
+  static String m12(arg0) => "創建於 ${arg0}";
 
-  static String m13(arg0) => "確定刪除${arg0}圈子嗎？";
+  static String m13(arg0) => "${arg0}創建了這個羣組";
 
-  static String m14(arg0) => "${arg0}禁用了限時消息";
+  static String m14(arg0) => "確定刪除${arg0}圈子嗎？";
 
-  static String m15(arg0) => "最高設置 ${arg0}";
+  static String m15(arg0) => "${arg0}禁用了限時消息";
 
-  static String m16(arg0) => "錯誤 20124：手續費不足。請確保錢包至少有 ${arg0} 當作手續費。";
+  static String m16(arg0) => "最高設置 ${arg0}";
 
-  static String m17(arg0, arg1) =>
+  static String m17(arg0) => "錯誤 20124：手續費不足。請確保錢包至少有 ${arg0} 當作手續費。";
+
+  static String m18(arg0, arg1) =>
       "錯誤 30102：地址格式錯誤。請輸入正確的 ${arg0} ${arg1} 的地址！";
 
-  static String m18(arg0) => "錯誤 10006：請更新 Mixin（${arg0}） 至最新版。";
+  static String m19(arg0) => "錯誤 10006：請更新 Mixin（${arg0}） 至最新版。";
 
-  static String m19(count, arg0) =>
+  static String m20(count, arg0) =>
       "${Intl.plural(count, one: '錯誤 20119：PIN 不正確。你還有 ${arg0} 次機會，使用完需等待 24 小時後再次嘗試。', other: '錯誤 20119：PIN 不正確。你還有 ${arg0} 次機會，使用完需等待 24 小時後再次嘗試。')}";
 
-  static String m20(arg0) => "服務器出錯，請稍後重試：${arg0}";
-
-  static String m21(arg0) => "錯誤：${arg0}";
+  static String m21(arg0) => "服務器出錯，請稍後重試：${arg0}";
 
   static String m22(arg0) => "錯誤：${arg0}";
 
-  static String m23(arg0) => "發送消息至 ${arg0}";
+  static String m23(arg0) => "錯誤：${arg0}";
 
-  static String m24(arg0) => "移除 ${arg0}";
+  static String m24(arg0) => "發送消息至 ${arg0}";
 
-  static String m25(count, arg0) =>
+  static String m25(arg0) => "移除 ${arg0}";
+
+  static String m26(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} 小時', other: '${arg0} 小時')}";
 
-  static String m26(arg0) => "${arg0} 加入";
+  static String m27(arg0) => "${arg0} 加入";
 
-  static String m27(arg0) => "您的賬户將於 ${arg0} 被刪除，如果您繼續登錄，刪除您賬户的請求將被取消。";
+  static String m28(arg0) => "您的賬户將於 ${arg0} 被刪除，如果您繼續登錄，刪除您賬户的請求將被取消。";
 
-  static String m28(arg0) => "我們將發送4位驗證碼到手機 ${arg0}, 請在下一個頁面輸入";
+  static String m29(arg0) => "我們將發送4位驗證碼到手機 ${arg0}, 請在下一個頁面輸入";
 
-  static String m29(arg0) => "請輸入發送至以下號碼的 4 位驗證碼：${arg0}";
+  static String m30(arg0) => "請輸入發送至以下號碼的 4 位驗證碼：${arg0}";
 
-  static String m30(arg0) => "我的 Mixin ID：${arg0}";
+  static String m31(arg0) => "我的 Mixin ID：${arg0}";
 
-  static String m31(arg0, arg1) =>
+  static String m32(arg0, arg1) =>
       "發現新版本 Mixin Messenger ${arg0}，當前版本為 ${arg1}。是否要下載最新的版本？";
 
-  static String m32(arg0) => "${arg0}現在是管理員";
+  static String m33(arg0) => "${arg0}現在是管理員";
 
-  static String m33(arg0) => "打開鏈接：${arg0}";
+  static String m34(arg0) => "打開鏈接：${arg0}";
 
-  static String m34(arg0) => "${arg0} 位羣組成員";
+  static String m35(arg0) => "${arg0} 位羣組成員";
 
-  static String m35(count, arg0, arg1) =>
+  static String m36(count, arg0, arg1) =>
       "${Intl.plural(count, one: '${arg0}/${arg1} 區塊確認數', other: '${arg0}/${arg1} 區塊確認數')}";
 
-  static String m36(count, arg0) =>
+  static String m37(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} 條置頂消息', other: '${arg0} 條置頂消息')}";
 
-  static String m37(arg0) => "${arg0} 秒後重新發送驗證碼";
+  static String m38(arg0) => "${arg0} 秒後重新發送驗證碼";
 
-  static String m38(count, arg0) =>
+  static String m39(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} 條相關的消息', other: '${arg0} 條相關的消息')}";
 
-  static String m39(arg0, arg1) => "${arg0}將限時消息設置為 ${arg1}";
+  static String m40(arg0, arg1) => "${arg0}將限時消息設置為 ${arg1}";
 
-  static String m40(arg0) => "如果您繼續，您的個人資料和賬户信息將在${arg0}被刪除。閲讀我們的文檔以**瞭解更多**。";
+  static String m41(arg0) => "如果您繼續，您的個人資料和賬户信息將在${arg0}被刪除。閲讀我們的文檔以**瞭解更多**。";
 
-  static String m41(arg0, arg1) => "你確定要發送來自${arg0}的${arg1}？";
+  static String m42(arg0, arg1) => "你確定要發送來自${arg0}的${arg1}？";
 
-  static String m42(arg0) => "你確定要發送該${arg0}？";
+  static String m43(arg0) => "你確定要發送該${arg0}？";
 
-  static String m43(arg0) => "無法打開檔案：${arg0}";
+  static String m44(arg0) => "無法打開檔案：${arg0}";
 
-  static String m44(count) => "${Intl.plural(count, one: '天', other: '天')}";
+  static String m45(count) => "${Intl.plural(count, one: '天', other: '天')}";
 
-  static String m45(count) => "${Intl.plural(count, one: '小時', other: '小時')}";
+  static String m46(count) => "${Intl.plural(count, one: '小時', other: '小時')}";
 
-  static String m46(count) => "${Intl.plural(count, one: '分', other: '分')}";
+  static String m47(count) => "${Intl.plural(count, one: '分', other: '分')}";
 
-  static String m47(count) => "${Intl.plural(count, one: '秒', other: '秒')}";
+  static String m48(count) => "${Intl.plural(count, one: '秒', other: '秒')}";
 
-  static String m48(count) => "${Intl.plural(count, one: '週', other: '週')}";
+  static String m49(count) => "${Intl.plural(count, one: '週', other: '週')}";
 
-  static String m49(arg0) => "價值 ${arg0}";
+  static String m50(arg0) => "價值 ${arg0}";
 
-  static String m50(arg0) => "當時價值 ${arg0}";
+  static String m51(arg0) => "當時價值 ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -233,7 +235,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "createCircle": MessageLookupByLibrary.simpleMessage("新建圈子"),
         "createConversation": MessageLookupByLibrary.simpleMessage("新建會話"),
         "createGroup": MessageLookupByLibrary.simpleMessage("新建羣組"),
-        "createdThisGroup": m12,
+        "created": m12,
+        "createdThisGroup": m13,
         "customTime": MessageLookupByLibrary.simpleMessage("自定義時間"),
         "dark": MessageLookupByLibrary.simpleMessage("深色"),
         "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage("數據與存儲空間"),
@@ -254,11 +257,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteForMe": MessageLookupByLibrary.simpleMessage("刪除"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("刪除羣組"),
         "deleteMyAccount": MessageLookupByLibrary.simpleMessage("註銷賬户"),
-        "deleteTheCircle": m13,
+        "deleteTheCircle": m14,
         "deposit": MessageLookupByLibrary.simpleMessage("充值"),
         "developer": MessageLookupByLibrary.simpleMessage("開發者"),
-        "disableDisappearingMessage": m14,
-        "disappearingCustomTimeMaxWarning": m15,
+        "disableDisappearingMessage": m15,
+        "disappearingCustomTimeMaxWarning": m16,
         "disappearingMessage": MessageLookupByLibrary.simpleMessage("限時消息"),
         "disappearingMessageHint": MessageLookupByLibrary.simpleMessage(
             "啓用後，在此聊天中發送和接收的新信息在被看到後會消失，閲讀文檔以**瞭解更多**。"),
@@ -304,8 +307,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "errorFullGroup": MessageLookupByLibrary.simpleMessage("錯誤 20116：羣組已滿"),
         "errorInsufficientBalance":
             MessageLookupByLibrary.simpleMessage("錯誤 20117：餘額不足"),
-        "errorInsufficientTransactionFeeWithAmount": m16,
-        "errorInvalidAddress": m17,
+        "errorInsufficientTransactionFeeWithAmount": m17,
+        "errorInvalidAddress": m18,
         "errorInvalidAddressPlain":
             MessageLookupByLibrary.simpleMessage("錯誤 30102：地址格式錯誤。"),
         "errorInvalidCodeTooFrequent":
@@ -324,7 +327,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("不支持的音頻格式，請用其他app打開。"),
         "errorNumberReachedLimit":
             MessageLookupByLibrary.simpleMessage("錯誤 20132： 已達到上限"),
-        "errorOldVersion": m18,
+        "errorOldVersion": m19,
         "errorOpenLocation": MessageLookupByLibrary.simpleMessage("無法找到地圖應用"),
         "errorPermission": MessageLookupByLibrary.simpleMessage("請開啓相關權限"),
         "errorPhoneInvalidFormat":
@@ -339,10 +342,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "你已經嘗試了超過 5 次，請等待 24 小時後再次嘗試。"),
         "errorPinIncorrect":
             MessageLookupByLibrary.simpleMessage("錯誤 20119：PIN 不正確"),
-        "errorPinIncorrectWithTimes": m19,
+        "errorPinIncorrectWithTimes": m20,
         "errorRecaptchaIsInvalid":
             MessageLookupByLibrary.simpleMessage("錯誤 10004：驗證失敗"),
-        "errorServer5xxCode": m20,
+        "errorServer5xxCode": m21,
         "errorTooManyRequest":
             MessageLookupByLibrary.simpleMessage("錯誤 429：請求過於頻繁"),
         "errorTooManyStickers":
@@ -355,8 +358,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("請在所有附件下載完成之後再轉發"),
         "errorUnableToOpenMedia":
             MessageLookupByLibrary.simpleMessage("無法找到能打開該媒體的應用"),
-        "errorUnknownWithCode": m21,
-        "errorUnknownWithMessage": m22,
+        "errorUnknownWithCode": m22,
+        "errorUnknownWithMessage": m23,
         "errorUploadAttachmentFailed":
             MessageLookupByLibrary.simpleMessage("消息附件上傳失敗"),
         "errorUsedPhone":
@@ -390,14 +393,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("您不能發送消息，因為您已經不再是此羣組成員。"),
         "groupName": MessageLookupByLibrary.simpleMessage("羣組名稱"),
         "groupParticipants": MessageLookupByLibrary.simpleMessage("羣成員"),
-        "groupPopMenuMessage": m23,
-        "groupPopMenuRemove": m24,
+        "groupPopMenuMessage": m24,
+        "groupPopMenuRemove": m25,
         "groups": MessageLookupByLibrary.simpleMessage("羣組"),
         "groupsInCommon": MessageLookupByLibrary.simpleMessage("共同羣組"),
         "help": MessageLookupByLibrary.simpleMessage("幫助"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("幫助中心"),
         "hideMixin": MessageLookupByLibrary.simpleMessage("隱藏 Mixin"),
-        "hour": m25,
+        "hour": m26,
         "howAreYou": MessageLookupByLibrary.simpleMessage("嗨，你好嗎？"),
         "iAmGood": MessageLookupByLibrary.simpleMessage("我很好。"),
         "ignoreThisVersion": MessageLookupByLibrary.simpleMessage("忽略這次版本更新"),
@@ -409,10 +412,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Mixin 使用者可以使用此鏈接加入這個羣組，請只跟您信任的人共享鏈接。"),
         "inviteToGroupViaLink": MessageLookupByLibrary.simpleMessage("羣邀請鏈接"),
         "joinGroupWithPlus": MessageLookupByLibrary.simpleMessage("+ 加入羣組"),
-        "joinedIn": m26,
-        "landingDeleteContent": m27,
-        "landingInvitationDialogContent": m28,
-        "landingValidationTitle": m29,
+        "joinedIn": m27,
+        "landingDeleteContent": m28,
+        "landingInvitationDialogContent": m29,
+        "landingValidationTitle": m30,
         "learnMore": MessageLookupByLibrary.simpleMessage("瞭解更多"),
         "less": MessageLookupByLibrary.simpleMessage("更少"),
         "light": MessageLookupByLibrary.simpleMessage("淺色"),
@@ -450,7 +453,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "more": MessageLookupByLibrary.simpleMessage("更多"),
         "multisigTransaction": MessageLookupByLibrary.simpleMessage("多重簽名交易"),
         "mute": MessageLookupByLibrary.simpleMessage("靜音"),
-        "myMixinId": m30,
+        "myMixinId": m31,
         "myStickers": MessageLookupByLibrary.simpleMessage("我的表情"),
         "na": MessageLookupByLibrary.simpleMessage("暫無價格"),
         "name": MessageLookupByLibrary.simpleMessage("名稱"),
@@ -458,7 +461,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("網絡連接失敗"),
         "networkError": MessageLookupByLibrary.simpleMessage("網絡錯誤"),
         "newVersionAvailable": MessageLookupByLibrary.simpleMessage("發現新版本"),
-        "newVersionDescription": m31,
+        "newVersionDescription": m32,
         "next": MessageLookupByLibrary.simpleMessage("下一步"),
         "nextConversation": MessageLookupByLibrary.simpleMessage("下一個會話"),
         "noAudio": MessageLookupByLibrary.simpleMessage("沒有音頻"),
@@ -476,26 +479,26 @@ class MessageLookup extends MessageLookupByLibrary {
         "notificationPermissionManually":
             MessageLookupByLibrary.simpleMessage("未允許通知，請到通知設置開啓。"),
         "notifications": MessageLookupByLibrary.simpleMessage("通知"),
-        "nowAnAddmin": m32,
+        "nowAnAddmin": m33,
         "objects": MessageLookupByLibrary.simpleMessage("物件"),
         "oneByOneForward": MessageLookupByLibrary.simpleMessage("逐條轉發"),
         "oneHour": MessageLookupByLibrary.simpleMessage("1 小時"),
         "oneWeek": MessageLookupByLibrary.simpleMessage("1 星期"),
         "oneYear": MessageLookupByLibrary.simpleMessage("1 年"),
         "openHomePage": MessageLookupByLibrary.simpleMessage("打開主頁"),
-        "openLink": m33,
+        "openLink": m34,
         "openLogDirectory": MessageLookupByLibrary.simpleMessage("打開日誌檔案夾"),
         "openingBalance": MessageLookupByLibrary.simpleMessage("期初餘額"),
         "originalImage": MessageLookupByLibrary.simpleMessage("原圖"),
         "owner": MessageLookupByLibrary.simpleMessage("羣主"),
-        "participantsCount": m34,
-        "pendingConfirmation": m35,
+        "participantsCount": m35,
+        "pendingConfirmation": m36,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("手機號碼"),
         "photos": MessageLookupByLibrary.simpleMessage("照片"),
         "pickAConversation":
             MessageLookupByLibrary.simpleMessage("選擇一個對話，開始發送信息"),
         "pinTitle": MessageLookupByLibrary.simpleMessage("置頂"),
-        "pinnedMessageTitle": m36,
+        "pinnedMessageTitle": m37,
         "post": MessageLookupByLibrary.simpleMessage("文章"),
         "preferences": MessageLookupByLibrary.simpleMessage("偏好設置"),
         "previousConversation": MessageLookupByLibrary.simpleMessage("上一個會話"),
@@ -518,7 +521,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "report": MessageLookupByLibrary.simpleMessage("舉報"),
         "reportAndBlock": MessageLookupByLibrary.simpleMessage("舉報並屏蔽？"),
         "resendCode": MessageLookupByLibrary.simpleMessage("重發驗證碼"),
-        "resendCodeIn": m37,
+        "resendCodeIn": m38,
         "reset": MessageLookupByLibrary.simpleMessage("重置"),
         "resetLink": MessageLookupByLibrary.simpleMessage("重置邀請鏈接"),
         "retryUploadFailed": MessageLookupByLibrary.simpleMessage("重新上傳失敗。"),
@@ -536,7 +539,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到聯繫人或消息。"),
         "searchPlaceholderNumber":
             MessageLookupByLibrary.simpleMessage("搜索 Mixin ID 或手機號碼："),
-        "searchRelatedMessage": m38,
+        "searchRelatedMessage": m39,
         "searchUnread": MessageLookupByLibrary.simpleMessage("搜索未讀會話"),
         "select": MessageLookupByLibrary.simpleMessage("選擇"),
         "send": MessageLookupByLibrary.simpleMessage("發送"),
@@ -546,19 +549,19 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("發送原始檔案"),
         "sendWithoutSound": MessageLookupByLibrary.simpleMessage("靜音發送"),
         "set": MessageLookupByLibrary.simpleMessage("設置"),
-        "setDisappearingMessageTimeTo": m39,
+        "setDisappearingMessageTimeTo": m40,
         "settingAuthSearchHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID, 暱稱"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
             "備份你的聊天記錄到 iCloud。如果你丟失或者更換手機，你可以在重新安裝 Mixin Messenger 時恢復你的聊天記錄。注意備份到 iCloud 中的聊天記錄不受端對端加密保護！"),
-        "settingDeleteAccountPinContent": m40,
+        "settingDeleteAccountPinContent": m41,
         "share": MessageLookupByLibrary.simpleMessage("分享"),
         "shareApps": MessageLookupByLibrary.simpleMessage("分享的應用"),
         "shareContact": MessageLookupByLibrary.simpleMessage("分享聯繫人"),
         "shareError": MessageLookupByLibrary.simpleMessage("分享出錯"),
         "shareLink": MessageLookupByLibrary.simpleMessage("分享邀請鏈接"),
-        "shareMessageDescription": m41,
-        "shareMessageDescriptionEmpty": m42,
+        "shareMessageDescription": m42,
+        "shareMessageDescriptionEmpty": m43,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("媒體內容"),
         "show": MessageLookupByLibrary.simpleMessage("顯示"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("顯示頭像"),
@@ -605,13 +608,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "travelAndPlaces": MessageLookupByLibrary.simpleMessage("旅行與地點"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("打開通知"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("輸入消息"),
-        "unableToOpenFile": m43,
+        "unableToOpenFile": m44,
         "unblock": MessageLookupByLibrary.simpleMessage("解除屏蔽"),
-        "unitDay": m44,
-        "unitHour": m45,
-        "unitMinute": m46,
-        "unitSecond": m47,
-        "unitWeek": m48,
+        "unitDay": m45,
+        "unitHour": m46,
+        "unitMinute": m47,
+        "unitSecond": m48,
+        "unitWeek": m49,
         "unmute": MessageLookupByLibrary.simpleMessage("取消靜音"),
         "unpin": MessageLookupByLibrary.simpleMessage("取消置頂"),
         "unpinAllMessages": MessageLookupByLibrary.simpleMessage("取消所有置頂消息"),
@@ -620,8 +623,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未讀消息"),
         "upgrading": MessageLookupByLibrary.simpleMessage("升級中..."),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到這個用户"),
-        "valueNow": m49,
-        "valueThen": m50,
+        "valueNow": m50,
+        "valueThen": m51,
         "verifyPin": MessageLookupByLibrary.simpleMessage("驗證 PIN"),
         "video": MessageLookupByLibrary.simpleMessage("視頻"),
         "videos": MessageLookupByLibrary.simpleMessage("視頻"),

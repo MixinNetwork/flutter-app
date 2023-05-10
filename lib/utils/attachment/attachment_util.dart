@@ -8,7 +8,6 @@ import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
-import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../db/dao/message_dao.dart';
@@ -178,7 +177,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     final message = list.first as Message?;
     final transcriptMessage = list[1] as TranscriptMessage?;
 
-    if (message != null && attachmentMessage == null) {
+    if (message != null) {
       attachmentMessage = AttachmentMessage(
         message.mediaKey,
         message.mediaDigest,

@@ -62,11 +62,10 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
     requestAuthUrl();
   }
 
-  final StreamController<int> periodicStreamController =
-      StreamController<int>();
-  StreamSubscription<int>? streamSubscription;
+  final StreamController<Tuple2<int, String>> periodicStreamController =
+      StreamController<Tuple2<int, String>>();
+  StreamSubscription? streamSubscription;
   late signal.ECKeyPair keyPair;
-  String? deviceId;
 
   Future<void> requestAuthUrl() async {
     await streamSubscription?.cancel();
@@ -82,8 +81,8 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
         status: LandingStatus.ready,
       ));
 
-      deviceId = rsp.data.deviceId;
-      streamSubscription = Stream.periodic(const Duration(seconds: 1), (i) => i)
+      streamSubscription = Stream.periodic(const Duration(milliseconds: 1500),
+              (i) => Tuple2(i, rsp.data.deviceId))
           .listen(periodicStreamController.add);
       addSubscription(streamSubscription);
     } catch (error, stack) {
@@ -94,29 +93,29 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
 
   void _initLandingListen() {
     final subscription = periodicStreamController.stream
-        .doOnData((event) {
-          if (event < 60) return;
+        .where((event) {
+          if (event.item1 < 60) return true;
           streamSubscription?.cancel();
           emit(state.needReload('qrcode display timeout.'));
+          return false;
         })
-        .where((_) => deviceId != null)
-        .asyncMap((event) async =>
-            (await client.provisioningApi.getProvisioning(deviceId!))
+        .map((event) => event.item2)
+        .asyncMap((deviceId) async =>
+            (await client.provisioningApi.getProvisioning(deviceId))
                 .data
                 .secret)
         .handleError((e) => null)
         .where((secret) => secret.isNotEmpty)
-        .doOnData((secret) {
+        .map((secret) {
           streamSubscription?.cancel();
           emit(state.copyWith(
             status: LandingStatus.provisioning,
           ));
+          return secret;
         })
         .asyncMap(_verify)
-        .doOnError((error, stacktrace) {
-          emit(state.needReload('Failed to verify: $error'));
-        })
         .handleError((error, stack) {
+          emit(state.needReload('Failed to verify: $error'));
           e('_verify: $error $stack');
           return null;
         })

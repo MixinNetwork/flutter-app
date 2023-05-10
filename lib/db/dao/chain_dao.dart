@@ -21,4 +21,9 @@ class ChainDao extends DatabaseAccessor<MixinDatabase> with _$ChainDaoMixin {
 
   Future<int> insertSdkChain(sdk.Chain chain) =>
       into(db.chains).insertOnConflictUpdate(chain.asChainsCompanion);
+
+  SimpleSelectStatement<Chains, Chain> chain(String chainId) =>
+      select(db.chains)
+        ..where((t) => t.chainId.equals(chainId))
+        ..limit(1);
 }

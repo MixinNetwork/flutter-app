@@ -28,6 +28,7 @@ import 'decrypt_message.dart';
 import 'device_transfer.dart';
 import 'isolate_event.dart';
 import 'job/ack_job.dart';
+import 'job/cleanup_quote_content_job.dart';
 import 'job/delete_old_fts_record_job.dart';
 import 'job/flood_job.dart';
 import 'job/migrate_fts_job.dart';
@@ -227,6 +228,7 @@ class _MessageProcessRunner {
 
     MigrateFtsJob(database: database);
     DeleteOldFtsRecordJob(database: database);
+    CleanupQuoteContentJob(database: database);
 
     if (primarySessionId != null) {
       _deviceTransfer = await startTransferIsolate(

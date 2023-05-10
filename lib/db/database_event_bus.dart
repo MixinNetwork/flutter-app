@@ -5,6 +5,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../utils/event_bus.dart';
 import '../utils/logger.dart';
+import 'dao/job_dao.dart';
 import 'dao/participant_dao.dart';
 import 'event.dart';
 import 'mixin_database.dart';
@@ -24,7 +25,9 @@ enum _DatabaseEvent {
   updateCircle,
   updateCircleConversation,
   updatePinMessage,
-  updateTranscriptMessage
+  updateTranscriptMessage,
+  updateAsset,
+  addJob,
 }
 
 @immutable
@@ -46,20 +49,23 @@ class DataBaseEventBus {
   Stream<T> _watch<T>(_DatabaseEvent event) => EventBus.instance.on
       .whereType<_DatabaseEventWrapper>()
       .where((e) => event == e.type)
-      .doOnData((e) {
-        if (kDebugMode) {
-          if (e.data is! T) {
-            // ignore: avoid_dynamic_calls
-            w('DatabaseEvent: event type is not match: ${e.data.runtimeType} != $T');
-          }
+      .map((e) {
+        if (kDebugMode && e.data is! T) {
+          // ignore: avoid_dynamic_calls
+          w('DatabaseEvent: event type is not match: ${e.data.runtimeType} != $T');
         }
+        return e;
       })
       .where((e) => e.data is T)
       .map((e) => e.data)
       .cast<T>();
 
-  void _send<T>(_DatabaseEvent event, T value) =>
-      EventBus.instance.fire(_DatabaseEventWrapper(event, value));
+  void _send<T>(_DatabaseEvent event, T value) {
+    if (kDebugMode && T.toString().startsWith('Iterable')) {
+      w('DatabaseEvent: send iterable is not safe: $T');
+    }
+    EventBus.instance.fire(_DatabaseEventWrapper(event, value));
+  }
 
   Stream<_DatabaseEvent> _watchEvent(_DatabaseEvent event) =>
       EventBus.instance.on
@@ -74,7 +80,7 @@ class DataBaseEventBus {
   late Stream<List<String>> updateUserIdsStream =
       _watch<List<String>>(_DatabaseEvent.updateUser);
 
-  Stream<List<String>> watchUpdateUserStream(List<String> userIds) =>
+  Stream<List<String>> watchUpdateUserStream(Iterable<String> userIds) =>
       updateUserIdsStream.where((event) => event.any(userIds.contains));
 
   void updateUsers(Iterable<String> userIds) {
@@ -82,14 +88,14 @@ class DataBaseEventBus {
       if (id.trim().isNotEmpty) return true;
       i('DatabaseEvent: insertOrReplaceUsers userId is empty: $id');
       return false;
-    }).toList();
+    });
 
     if (newUserIds.isEmpty) {
       w('DatabaseEvent: insertOrReplaceUsers userIds is empty');
       return;
     }
 
-    _send(_DatabaseEvent.updateUser, newUserIds);
+    _send(_DatabaseEvent.updateUser, newUserIds.toList());
   }
 
   // circle
@@ -110,7 +116,7 @@ class DataBaseEventBus {
       _watch<List<String>>(_DatabaseEvent.updateConversation);
 
   Stream<List<String>> watchUpdateConversationStream(
-          List<String> conversationIds) =>
+          Iterable<String> conversationIds) =>
       updateConversationIdStream
           .where((event) => event.any(conversationIds.contains));
 
@@ -127,8 +133,8 @@ class DataBaseEventBus {
       _watch<List<MiniParticipantItem>>(_DatabaseEvent.updateParticipant);
 
   Stream<List<MiniParticipantItem>> watchUpdateParticipantStream({
-    List<String> conversationIds = const [],
-    List<String> userIds = const [],
+    Iterable<String> conversationIds = const [],
+    Iterable<String> userIds = const [],
     bool and = false,
   }) =>
       updateParticipantIdStream.where((event) => event.any((element) {
@@ -148,13 +154,13 @@ class DataBaseEventBus {
           participant.userId.trim().isNotEmpty) return true;
       i('DatabaseEvent: updateParticipant participantId is empty');
       return false;
-    }).toList();
+    });
 
     if (newParticipants.isEmpty) {
       w('DatabaseEvent: updateParticipant participantIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updateParticipant, newParticipants);
+    _send(_DatabaseEvent.updateParticipant, newParticipants.toList());
   }
 
   // message
@@ -162,8 +168,8 @@ class DataBaseEventBus {
       _watch<List<MiniMessageItem>>(_DatabaseEvent.insertOrReplaceMessage);
 
   Stream<List<MiniMessageItem>> watchInsertOrReplaceMessageIdsStream({
-    List<String> conversationIds = const [],
-    List<String> messageIds = const [],
+    Iterable<String> conversationIds = const [],
+    Iterable<String> messageIds = const [],
     bool and = false,
   }) =>
       insertOrReplaceMessageIdsStream.where((event) => event.any((element) {
@@ -183,13 +189,13 @@ class DataBaseEventBus {
           event.conversationId.trim().isNotEmpty) return true;
       i('DatabaseEvent: insertOrReplaceMessages messageId or conversationId is empty: $event');
       return false;
-    }).toList();
+    });
 
     if (newMessageEvents.isEmpty) {
       i('DatabaseEvent: insertOrReplaceMessages messageIds is empty');
       return;
     }
-    _send(_DatabaseEvent.insertOrReplaceMessage, newMessageEvents);
+    _send(_DatabaseEvent.insertOrReplaceMessage, newMessageEvents.toList());
   }
 
   late Stream<List<String>> deleteMessageIdStream =
@@ -219,8 +225,8 @@ class DataBaseEventBus {
       _watch<List<MiniMessageItem>>(_DatabaseEvent.updateMessageMention);
 
   Stream<List<MiniMessageItem>> watchUpdateMessageMention({
-    List<String> conversationIds = const [],
-    List<String> messageIds = const [],
+    Iterable<String> conversationIds = const [],
+    Iterable<String> messageIds = const [],
     bool and = false,
   }) =>
       updateMessageMentionStream.where((event) => event.any((element) {
@@ -234,19 +240,19 @@ class DataBaseEventBus {
             }
           }));
 
-  void updateMessageMention(List<MiniMessageItem> messageEvents) {
+  void updateMessageMention(Iterable<MiniMessageItem> messageEvents) {
     final newMessageEvents = messageEvents.where((event) {
       if (event.messageId.trim().isNotEmpty &&
           event.conversationId.trim().isNotEmpty) return true;
       i('DatabaseEvent: insertOrReplaceMessages messageId or conversationId is empty: $event');
       return false;
-    }).toList();
+    });
 
     if (newMessageEvents.isEmpty) {
       i('DatabaseEvent: insertOrReplaceMessages messageIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updateMessageMention, newMessageEvents);
+    _send(_DatabaseEvent.updateMessageMention, newMessageEvents.toList());
   }
 
   // pinMessage
@@ -254,8 +260,8 @@ class DataBaseEventBus {
       _watch<List<MiniMessageItem>>(_DatabaseEvent.updatePinMessage);
 
   Stream<List<MiniMessageItem>> watchPinMessageStream({
-    List<String> conversationIds = const [],
-    List<String> messageIds = const [],
+    Iterable<String> conversationIds = const [],
+    Iterable<String> messageIds = const [],
     bool and = false,
   }) =>
       updatePinMessageStream.where((event) => event.any((element) {
@@ -275,13 +281,13 @@ class DataBaseEventBus {
           event.conversationId.trim().isNotEmpty) return true;
       i('DatabaseEvent: updatePinMessage messageId or conversationId is empty: $event');
       return false;
-    }).toList();
+    });
 
     if (newMessageEvents.isEmpty) {
       i('DatabaseEvent: updatePinMessage messageIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updatePinMessage, newMessageEvents);
+    _send(_DatabaseEvent.updatePinMessage, newMessageEvents.toList());
   }
 
   // transcriptMessage
@@ -290,8 +296,8 @@ class DataBaseEventBus {
           _DatabaseEvent.updateTranscriptMessage);
 
   Stream<List<MiniTranscriptMessage>> watchUpdateTranscriptMessageStream({
-    List<String> transcriptIds = const [],
-    List<String> messageIds = const [],
+    Iterable<String> transcriptIds = const [],
+    Iterable<String> messageIds = const [],
     bool and = false,
   }) =>
       updateTranscriptMessageStream.where((event) => event.any((element) {
@@ -310,13 +316,13 @@ class DataBaseEventBus {
       if (event.transcriptId.trim().isNotEmpty) return true;
       i('DatabaseEvent: updateTranscriptMessage transcriptId is empty: $event');
       return false;
-    }).toList();
+    });
 
     if (newMessageEvents.isEmpty) {
       i('DatabaseEvent: updateTranscriptMessage is empty');
       return;
     }
-    _send(_DatabaseEvent.updateTranscriptMessage, newMessageEvents);
+    _send(_DatabaseEvent.updateTranscriptMessage, newMessageEvents.toList());
   }
 
   // expiredMessage
@@ -332,8 +338,8 @@ class DataBaseEventBus {
       _watch<List<MiniSticker>>(_DatabaseEvent.updateSticker);
 
   Stream<List<MiniSticker>> watchUpdateStickerStream({
-    List<String> stickerIds = const [],
-    List<String> albumIds = const [],
+    Iterable<String> stickerIds = const [],
+    Iterable<String> albumIds = const [],
     bool and = false,
   }) =>
       updateStickerStream.where((event) => event.any((element) {
@@ -367,7 +373,7 @@ class DataBaseEventBus {
       w('DatabaseEvent: insertOrReplaceFavoriteApp appIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updateFavoriteApp, newAppIds);
+    _send(_DatabaseEvent.updateFavoriteApp, newAppIds.toList());
   }
 
   // Snapshot
@@ -381,6 +387,27 @@ class DataBaseEventBus {
       w('DatabaseEvent: updateSnapshot snapshotIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updateSnapshot, newSnapshotIds);
+    _send(_DatabaseEvent.updateSnapshot, newSnapshotIds.toList());
+  }
+
+  // Asset
+  late Stream<List<String>> updateAssetStream =
+      _watch<List<String>>(_DatabaseEvent.updateAsset);
+
+  void updateAsset(Iterable<String> assetIds) {
+    final newAssetIds = assetIds.where((element) => element.trim().isNotEmpty);
+    if (newAssetIds.isEmpty) {
+      w('DatabaseEvent: updateAsset assetIds is empty');
+      return;
+    }
+    _send(_DatabaseEvent.updateAsset, newAssetIds.toList());
+  }
+
+  // Job
+  late Stream<MiniJobItem> addJobStream =
+      _watch<MiniJobItem>(_DatabaseEvent.addJob);
+
+  void addJob(MiniJobItem job) {
+    _send(_DatabaseEvent.addJob, job);
   }
 }

@@ -89,6 +89,7 @@
 "createCircle" : "新建圈子",
 "createConversation" : "新建會話",
 "createGroup" : "新建群組",
+"created" : "創建於 {arg0}",
 "createdThisGroup" : "{arg0}建立了這個群組",
 "customTime" : "自定義時間",
 "dark" : "深色",

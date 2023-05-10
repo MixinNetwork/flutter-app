@@ -795,6 +795,19 @@ class AccountServer {
     AccountKeyValue.instance.hasSyncCircle = true;
   }
 
+  Future<void> _cleanupQuoteContent() async {
+    final clean = AccountKeyValue.instance.alreadyCleanupQuoteContent;
+    if (clean) {
+      return;
+    }
+    await database.jobDao.insert(createCleanupQuoteContentJob());
+    AccountKeyValue.instance.alreadyCleanupQuoteContent = true;
+  }
+
+  Future<void> checkMigration() async {
+    await _cleanupQuoteContent();
+  }
+
   Future<void> handleCircle(CircleResponse circle, {int? offset}) async {
     final ccList =
         (await client.circleApi.getCircleConversations(circle.circleId)).data;
@@ -1346,18 +1359,27 @@ class AccountServer {
   void updateAssetById({required String assetId}) =>
       addUpdateAssetJob(createUpdateAssetJob(assetId));
 
-  Future<AssetItem?> checkAsset({required String assetId}) async {
+  Future<AssetItem?> checkAsset(
+      {required String assetId, bool force = false}) async {
     final asset = await database.assetDao.findAssetById(assetId);
-    if (asset == null) {
+    if (force || asset == null) {
       try {
         final a = (await client.assetApi.getAssetById(assetId)).data;
-        await database.assetDao.insertSdkAsset(a);
-        await checkAsset(assetId: a.chainId);
+        final chain = (await client.assetApi.getChain(a.chainId)).data;
+
+        await Future.wait([
+          database.assetDao.insertSdkAsset(a),
+          database.chainDao.insertSdkChain(chain),
+        ]);
       } catch (error, stacktrace) {
         e('checkAsset: $error $stacktrace');
       }
-    } else if (assetId != asset.chainId) {
-      await checkAsset(assetId: asset.chainId);
+    } else {
+      final chain =
+          await database.chainDao.chain(asset.chainId).getSingleOrNull();
+      if (chain == null) {
+        await checkAsset(assetId: assetId, force: true);
+      }
     }
     return database.assetDao.assetItem(assetId).getSingleOrNull();
   }

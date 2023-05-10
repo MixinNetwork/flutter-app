@@ -49,8 +49,8 @@ class _ImageEditorDialog extends HookWidget {
     final image = useMemoizedFuture<ui.Image?>(() async {
       final bytes = File(path).readAsBytesSync();
       final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-      final codec = await PaintingBinding.instance
-          .instantiateImageCodecFromBuffer(buffer);
+      final codec =
+          await PaintingBinding.instance.instantiateImageCodecWithSize(buffer);
       final frame = await codec.getNextFrame();
       return frame.image;
     }, null, keys: [path]);

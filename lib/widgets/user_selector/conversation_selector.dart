@@ -14,6 +14,7 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
+import '../conversation/verified_or_bot_widget.dart';
 import '../dialog.dart';
 import '../high_light_text.dart';
 import '../interactive_decorated_box.dart';
@@ -364,6 +365,8 @@ class _ConversationSelector extends HookWidget {
                               keyword: conversationFilterState.keyword,
                               avatar: item.avatarWidget,
                               title: item.validName,
+                              verified: item.ownerVerified,
+                              isBot: item.isBotConversation,
                               selected: selected.any((element) =>
                                   _getConversationId(element, context) ==
                                   _getConversationId(item, context)),
@@ -386,6 +389,8 @@ class _ConversationSelector extends HookWidget {
                               keyword: conversationFilterState.keyword,
                               avatar: item.avatarWidget,
                               title: item.fullName ?? '',
+                              verified: item.isVerified,
+                              isBot: item.appId != null,
                               showSelector: !singleSelect,
                               selected: selected.any((element) =>
                                   _getConversationId(element, context) ==
@@ -408,6 +413,8 @@ class _ConversationSelector extends HookWidget {
                               keyword: conversationFilterState.keyword,
                               avatar: item.avatarWidget,
                               title: item.fullName!,
+                              verified: item.isVerified,
+                              isBot: item.appId != null,
                               showSelector: !singleSelect,
                               selected: selected.any((element) =>
                                   _getConversationId(element, context) ==
@@ -597,6 +604,8 @@ class _BaseItem extends StatelessWidget {
     required this.keyword,
     required this.title,
     required this.avatar,
+    required this.verified,
+    required this.isBot,
     this.showSelector = false,
     this.selected = false,
   });
@@ -606,6 +615,9 @@ class _BaseItem extends StatelessWidget {
   final String? keyword;
   final bool showSelector;
   final bool selected;
+
+  final bool? verified;
+  final bool isBot;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -634,21 +646,31 @@ class _BaseItem extends StatelessWidget {
             avatar,
             const SizedBox(width: 16),
             Expanded(
-              child: HighlightText(
-                title.overflow,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                highlightTextSpans: [
-                  if (keyword != null)
-                    HighlightTextSpan(
-                      keyword!.overflow,
-                      style: TextStyle(color: context.theme.accent),
-                    )
+              child: Row(
+                children: [
+                  Flexible(
+                    child: HighlightText(
+                      title.overflow,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      highlightTextSpans: [
+                        if (keyword != null)
+                          HighlightTextSpan(
+                            keyword!.overflow,
+                            style: TextStyle(color: context.theme.accent),
+                          )
+                      ],
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: context.theme.text,
+                      ),
+                    ),
+                  ),
+                  VerifiedOrBotWidget(
+                    verified: verified,
+                    isBot: isBot,
+                  ),
                 ],
-                style: TextStyle(
-                  fontSize: 16,
-                  color: context.theme.text,
-                ),
               ),
             ),
           ],

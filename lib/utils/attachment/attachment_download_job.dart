@@ -101,9 +101,10 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
         if (options.keys != null && options.digest != null) {
           _stream = _stream.decrypt(options.keys!, options.digest!, total);
         }
-        return _stream.doOnData((event) {
+        return _stream.map((event) {
           received += event.length;
           options.sendPort.send(Tuple2(received, total));
+          return event;
         });
       },
       cancelToken: cancelToken,

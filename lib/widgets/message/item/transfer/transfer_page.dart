@@ -4,7 +4,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide Snapshot, Asset, User;
-import 'package:rxdart/rxdart.dart';
 
 import '../../../../db/dao/snapshot_dao.dart';
 import '../../../../db/database_event_bus.dart';
@@ -44,8 +43,9 @@ class _TransferPage extends HookWidget {
         )
             .watchSingleOrNullWithStream(
           eventStreams: [
-            DataBaseEventBus.instance.updateSnapshotStream.where(
-                (event) => event.any((element) => element.contains(snapshotId)))
+            DataBaseEventBus.instance.updateSnapshotStream.where((event) =>
+                event.any((element) => element.contains(snapshotId))),
+            DataBaseEventBus.instance.updateAssetStream,
           ],
           duration: kDefaultThrottleDuration,
         )).data;
@@ -61,9 +61,9 @@ class _TransferPage extends HookWidget {
           ],
           duration: kSlowThrottleDuration,
         );
-        return stream.doOnData((event) {
-          if (event != null) return;
-          context.accountServer.refreshUsers([opponentId]);
+        return stream.map((event) {
+          if (event == null) context.accountServer.refreshUsers([opponentId]);
+          return event;
         });
       }
       return Stream.value(null);
@@ -85,8 +85,8 @@ class _TransferPage extends HookWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Spacer(),
               Padding(
                 padding: EdgeInsets.only(right: 12, top: 12),

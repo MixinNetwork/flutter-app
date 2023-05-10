@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
+  desktop_keep_screen_on
   desktop_lifecycle
   desktop_webview_window
   file_selector_windows

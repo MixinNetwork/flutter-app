@@ -76,8 +76,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       MessageMentions messageMention,
       PinMessages pinMessage,
       ExpiredMessages em,
-    )
-        where,
+    ) where,
     Limit Function(
       Messages message,
       Users sender,
@@ -92,8 +91,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       MessageMentions messageMention,
       PinMessages pinMessage,
       ExpiredMessages em,
-    )
-        limit, {
+    ) limit, {
     OrderBy Function(
       Messages message,
       Users sender,
@@ -107,8 +105,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       MessageMentions messageMention,
       PinMessages pinMessage,
       ExpiredMessages em,
-    )?
-        order,
+    )? order,
   }) =>
       db.baseMessageItems(
           where,
@@ -146,9 +143,20 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   final Map<String, void Function()> _conversationUnseenTaskRunner = {};
 
   void _updateConversationUnseenCount(
-    String conversationId,
+    Message message,
     String currentUserId,
   ) {
+    final conversationId = message.conversationId;
+
+    if (message.userId == currentUserId) {
+      db.conversationDao.updateLastSentMessage(
+        conversationId,
+        message.messageId,
+        message.createdAt,
+      );
+      return;
+    }
+
     Future<void> _update(String conversationId) async {
       final latest =
           await messagesByConversationId(conversationId, 1).getSingleOrNull();
@@ -156,14 +164,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         e('failed to update conversation last message, latest message is null $conversationId');
         return;
       }
-      await db.updateUnseenMessageCountAndLastMessageId(
+
+      await db.conversationDao.updateUnseenMessageCountAndLastMessageId(
         conversationId,
         currentUserId,
         latest.messageId,
         latest.createdAt,
       );
-
-      DataBaseEventBus.instance.updateConversation(conversationId);
     }
 
     if (_conversationUnseenTaskRunner[conversationId] != null) {
@@ -194,7 +201,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ];
     final result = (await Future.wait(futures)).first as int;
 
-    _updateConversationUnseenCount(message.conversationId, currentUserId);
+    _updateConversationUnseenCount(message, currentUserId);
 
     DataBaseEventBus.instance.insertOrReplaceMessages([
       MiniMessageItem(
@@ -469,23 +476,26 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     });
   }
 
-  Future<int> markMessageRead(
+  Future<void> markMessageRead(
     Iterable<MiniMessageItem> miniMessageItems, {
     bool updateExpired = true,
   }) async {
     final messageIds = miniMessageItems.map((e) => e.messageId);
-    final result = await (db.update(db.messages)
-          ..where((tbl) =>
-              tbl.messageId.isIn(messageIds) &
-              tbl.status.equalsValue(MessageStatus.failed).not() &
-              tbl.status.equalsValue(MessageStatus.unknown).not()))
-        .write(const MessagesCompanion(status: Value(MessageStatus.read)));
+    final chunked = messageIds.toList().chunked(kMarkLimit);
+
+    for (final messageIds in chunked) {
+      await (db.update(db.messages)
+            ..where((tbl) =>
+                tbl.messageId.isIn(messageIds) &
+                tbl.status.equalsValue(MessageStatus.failed).not() &
+                tbl.status.equalsValue(MessageStatus.unknown).not()))
+          .write(const MessagesCompanion(status: Value(MessageStatus.read)));
+    }
 
     DataBaseEventBus.instance.insertOrReplaceMessages(miniMessageItems);
     if (updateExpired) {
       await db.expiredMessageDao.onMessageRead(messageIds);
     }
-    return result;
   }
 
   Future<List<String>> findConversationIdsByMessages(
@@ -568,6 +578,16 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         .getSingleOrNull();
   }
 
+  Selectable<QuoteMinimal> findBigQuoteMessage(int rowId, int limit) =>
+      db.findBigQuoteMessage(rowId, limit);
+
+  Future<int> updateMessageQuoteContent(
+          String messageId, String? quoteContent) =>
+      (update(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
+          .write(MessagesCompanion(
+        quoteContent: Value(quoteContent),
+      ));
+
   Selectable<MiniMessageItem> miniMessageByIds(List<String> messageIds) =>
       db.miniMessageByIds(messageIds);
 
@@ -623,7 +643,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           .getSingle();
 
   Future<void> updateQuoteContentByQuoteId(
-      String conversationId, String quoteMessageId, String content) async {
+      String conversationId, String quoteMessageId, String? content) async {
     final messageIds = (await (db.selectOnly(db.messages, distinct: true)
               ..addColumns([db.messages.messageId])
               ..where(db.messages.conversationId.equals(conversationId) &
@@ -1122,6 +1142,22 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       },
     ).get();
     return Future.wait(messages);
+  }
+
+  Future<List<Tuple2<int, Message>>> getDeviceTransferMessages(
+      int rowid, int limit) async {
+    final messages = customSelect(
+        'SELECT rowid, * FROM messages WHERE rowid > $rowid '
+        "AND status != 'FAILED' AND status != 'UNKNOWN' "
+        'ORDER BY rowid ASC LIMIT $limit',
+        readsFrom: {db.messages}).asyncMap(
+      (row) async {
+        final message = await db.messages.mapFromRow(row);
+        final rowId = row.read<int>('rowid');
+        return Tuple2(rowId, message);
+      },
+    );
+    return messages.get();
   }
 
   Future<List<SearchMessageDetailItem>> messageByConversationAndUser({
