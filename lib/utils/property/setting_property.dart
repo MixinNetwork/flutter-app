@@ -1,7 +1,12 @@
+import 'dart:convert';
+
+import 'package:mixin_logger/mixin_logger.dart';
+
 import '../../db/dao/property_dao.dart';
 import '../../db/util/property_storage.dart';
 import '../../enum/property_group.dart';
 import '../extension/extension.dart';
+import '../proxy.dart';
 
 const _kEnableProxyKey = 'enable_proxy';
 const _kSelectedProxyKey = 'selected_proxy';
@@ -14,11 +19,26 @@ class SettingPropertyStorage extends PropertyStorage {
 
   set enableProxy(bool value) => set(_kEnableProxyKey, value);
 
-  int get selectedProxy => get(_kSelectedProxyKey) ?? 0;
+  String? get selectedProxyId => get(_kSelectedProxyKey);
 
-  set selectedProxy(int value) => set(_kSelectedProxyKey, value);
+  set selectedProxyId(String? value) => set(_kSelectedProxyKey, value);
 
-  List<String> get proxyList => getList(_kProxyListKey) ?? [];
+  List<ProxyConfig> get proxyList {
+    final json = get<String>(_kProxyListKey);
+    if (json == null || json.isEmpty) {
+      return [];
+    }
+    try {
+      final list = jsonDecode(json) as List;
+      return list
+          .cast<Map<String, dynamic>>()
+          .map(ProxyConfig.fromJson)
+          .toList();
+    } catch (error, stacktrace) {
+      e('load proxyList error: $error, $stacktrace');
+    }
+    return [];
+  }
 
   String? get activatedProxyUrl {
     if (!enableProxy) {
@@ -28,22 +48,21 @@ class SettingPropertyStorage extends PropertyStorage {
     if (list.isEmpty) {
       return null;
     }
-    return list.getOrNull(selectedProxy) ?? list.first;
-  }
-
-  void addProxy(String proxyUrl) {
-    final list = proxyList;
-    if (list.contains(proxyUrl)) {
-      return;
+    if (selectedProxyId == null) {
+      return list.first.toUri();
     }
-    list.add(proxyUrl);
-    notifyListeners();
-    set(_kProxyListKey, list);
+    return list
+        .firstWhereOrNull((element) => element.id == selectedProxyId)
+        ?.toUri();
   }
 
-  void removeProxy(String proxy) {
-    final list = proxyList..remove(proxy);
-    notifyListeners();
-    set(_kProxyListKey, list);
+  void addProxy(ProxyConfig config) {
+    final list = [...proxyList, config];
+    set(_kProxyListKey, jsonEncode(list));
+  }
+
+  void removeProxy(String id) {
+    final list = proxyList.where((element) => element.id != id).toList();
+    set(_kProxyListKey, jsonEncode(list));
   }
 }

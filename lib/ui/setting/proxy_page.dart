@@ -2,10 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/logger.dart';
+import '../../utils/proxy.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
@@ -22,9 +25,9 @@ class ProxyPage extends StatelessWidget {
         ),
         body: ConstrainedBox(
           constraints: const BoxConstraints.expand(),
-          child: SingleChildScrollView(
+          child: const SingleChildScrollView(
             child: Column(
-              children: const [
+              children: [
                 SizedBox(height: 40),
                 _ProxySettingWidget(),
               ],
@@ -88,7 +91,7 @@ class _ProxySettingWidget extends HookWidget {
                 },
               ),
               Divider(height: 0.5, indent: 56, color: context.theme.divider),
-              const _ProxyListItem(),
+              const _ProxyItemList(),
             ],
           ),
         ),
@@ -97,8 +100,8 @@ class _ProxySettingWidget extends HookWidget {
   }
 }
 
-class _ProxyListItem extends HookWidget {
-  const _ProxyListItem();
+class _ProxyItemList extends HookWidget {
+  const _ProxyItemList();
 
   @override
   Widget build(BuildContext context) {
@@ -107,22 +110,17 @@ class _ProxyListItem extends HookWidget {
           converter: (settingProperties) => settingProperties.proxyList,
         ).data ??
         const [];
+    final selectedProxyId = useListenableConverter(
+          context.database.settingProperties,
+          converter: (settingProperties) => settingProperties.selectedProxyId,
+        ).data ??
+        proxyList.firstOrNull?.id;
     return Column(
       children: proxyList
           .map(
-            (proxy) => CellItem(
-              title: Text(proxy),
-              leading: const Icon(
-                Icons.check,
-                color: Colors.green,
-              ),
-              trailing: ActionButton(
-                name: Resources.assetsImagesDeleteSvg,
-                onTap: () {
-                  context.database.settingProperties.removeProxy(proxy);
-                },
-              ),
-              onTap: () {},
+            (proxy) => _ProxyItemWidget(
+              proxy: proxy,
+              selected: selectedProxyId == proxy.id,
             ),
           )
           .toList(),
@@ -130,9 +128,53 @@ class _ProxyListItem extends HookWidget {
   }
 }
 
-enum _ProxyType {
-  http,
-  socks5,
+class _ProxyItemWidget extends StatelessWidget {
+  const _ProxyItemWidget({
+    required this.proxy,
+    required this.selected,
+  });
+
+  final ProxyConfig proxy;
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: context.theme.listSelected,
+        child: ListTile(
+          leading: selected
+              ? Icon(
+                  Icons.check,
+                  color: context.theme.icon,
+                  size: 20,
+                )
+              : const SizedBox.shrink(),
+          title: Text(
+            '${proxy.host}:${proxy.port}',
+            style: TextStyle(
+              fontSize: 16,
+              color: context.theme.text,
+            ),
+          ),
+          subtitle: Text(
+            proxy.type.name,
+            style: TextStyle(
+              fontSize: 14,
+              color: context.theme.secondaryText,
+            ),
+          ),
+          trailing: ActionButton(
+            name: Resources.assetsImagesDeleteSvg,
+            onTap: () {
+              context.database.settingProperties.removeProxy(proxy.id);
+              if (selected) {
+                context.database.settingProperties.selectedProxyId = null;
+              }
+            },
+          ),
+          onTap: () {},
+        ),
+      );
 }
 
 class _ProxyAddDialog extends HookWidget {
@@ -140,7 +182,7 @@ class _ProxyAddDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final proxyType = useState<_ProxyType>(_ProxyType.http);
+    final proxyType = useState<ProxyType>(ProxyType.http);
     final proxyHostController = useTextEditingController();
     final proxyPortController = useTextEditingController();
     final proxyUsernameController = useTextEditingController();
@@ -208,16 +250,20 @@ class _ProxyAddDialog extends HookWidget {
         MixinButton(
           onTap: () {
             final proxyHost = proxyHostController.text;
-            final proxyPort = proxyPortController.text;
-            var proxyUrl = proxyType.value == _ProxyType.http
-                ? 'http://$proxyHost:$proxyPort'
-                : 'socks5://$proxyHost:$proxyPort';
-            final proxyUsername = proxyUsernameController.text;
-            final proxyPassword = proxyPasswordController.text;
-            if (proxyUsername.isNotEmpty && proxyPassword.isNotEmpty) {
-              proxyUrl = '$proxyUrl@$proxyUsername:$proxyPassword';
+            final proxyPort = int.tryParse(proxyPortController.text);
+
+            if (proxyPort == null) {
+              return;
             }
-            context.database.settingProperties.addProxy(proxyUrl);
+            final id = const Uuid().v4();
+            final config = ProxyConfig(
+              type: proxyType.value,
+              host: proxyHost,
+              port: proxyPort,
+              id: id,
+            );
+            i('add proxy config: ${config.type} ${config.host}:${config.port}');
+            context.database.settingProperties.addProxy(config);
             Navigator.pop(context);
           },
           child: Text(context.l10n.add),
@@ -230,7 +276,7 @@ class _ProxyAddDialog extends HookWidget {
 class _ProxyTypeWidget extends StatelessWidget {
   const _ProxyTypeWidget({required this.proxyType});
 
-  final ValueNotifier<_ProxyType> proxyType;
+  final ValueNotifier<ProxyType> proxyType;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -245,26 +291,26 @@ class _ProxyTypeWidget extends StatelessWidget {
             children: [
               ListTile(
                 title: const Text('HTTP'),
-                trailing: proxyType.value == _ProxyType.http
+                trailing: proxyType.value == ProxyType.http
                     ? SvgPicture.asset(
                         Resources.assetsImagesCheckedSvg,
                         width: 24,
                         height: 24,
                       )
                     : null,
-                onTap: () => proxyType.value = _ProxyType.http,
+                onTap: () => proxyType.value = ProxyType.http,
               ),
               Divider(height: 1, color: context.theme.divider),
               ListTile(
                 title: const Text('SOCKS5'),
-                trailing: proxyType.value == _ProxyType.socks5
+                trailing: proxyType.value == ProxyType.socks5
                     ? SvgPicture.asset(
                         Resources.assetsImagesCheckedSvg,
                         width: 24,
                         height: 24,
                       )
                     : null,
-                onTap: () => proxyType.value = _ProxyType.socks5,
+                onTap: () => proxyType.value = ProxyType.socks5,
               ),
             ],
           ),

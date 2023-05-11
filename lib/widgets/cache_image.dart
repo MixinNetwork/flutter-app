@@ -13,7 +13,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
-import '../utils/mixin_api_client.dart';
+import '../utils/proxy.dart';
 
 typedef PlaceholderWidgetBuilder = Widget Function();
 

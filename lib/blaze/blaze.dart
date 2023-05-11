@@ -14,7 +14,7 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
-import '../utils/mixin_api_client.dart';
+import '../utils/proxy.dart';
 import '../workers/job/ack_job.dart';
 import '../workers/job/flood_job.dart';
 import '../workers/message_worker_isolate.dart';

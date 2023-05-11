@@ -31,7 +31,12 @@ class PropertyStorage extends ChangeNotifier {
     final properties = await dao.getProperties(group);
     _data.addAll(properties);
     notifyListeners();
+    await onPropertiesLoaded();
   }
+
+  @protected
+  @mustCallSuper
+  Future<void> onPropertiesLoaded() async {}
 
   final Map<String, String> _data = {};
 
@@ -45,7 +50,12 @@ class PropertyStorage extends ChangeNotifier {
     dao.clearProperties(group).whenComplete(() {
       EventBus.instance.fire(_PropertyChangedEvent(group));
     });
+    onPropertiesClear();
   }
+
+  @protected
+  @mustCallSuper
+  Future<void> onPropertiesClear() async {}
 
   void remove(String key) {
     _data.remove(key);
@@ -72,7 +82,6 @@ class PropertyStorage extends ChangeNotifier {
     dao.setProperty(group, key, save).whenComplete(() {
       EventBus.instance.fire(_PropertyChangedEvent(group));
     });
-
   }
 
   T? get<T>(String key) {
