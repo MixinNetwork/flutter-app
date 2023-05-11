@@ -47,6 +47,12 @@ class _ProxySettingWidget extends HookWidget {
           converter: (settingProperties) => settingProperties.enableProxy,
         ).data ??
         false;
+    final hasProxyConfig = useListenableConverter(
+          context.database.settingProperties,
+          converter: (settingProperties) =>
+              settingProperties.proxyList.isNotEmpty,
+        ).data ??
+        false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -67,9 +73,11 @@ class _ProxySettingWidget extends HookWidget {
                 scale: 0.7,
                 child: CupertinoSwitch(
                   activeColor: context.theme.accent,
-                  value: enableProxy,
-                  onChanged: (bool value) =>
-                      context.database.settingProperties.enableProxy = value,
+                  value: hasProxyConfig && enableProxy,
+                  onChanged: !hasProxyConfig
+                      ? null
+                      : (bool value) => context
+                          .database.settingProperties.enableProxy = value,
                 )),
           ),
         ),
@@ -142,13 +150,18 @@ class _ProxyItemWidget extends StatelessWidget {
   Widget build(BuildContext context) => Material(
         color: context.theme.listSelected,
         child: ListTile(
-          leading: selected
-              ? Icon(
-                  Icons.check,
-                  color: context.theme.icon,
-                  size: 20,
-                )
-              : const SizedBox.shrink(),
+          leading: SizedBox(
+            height: double.infinity,
+            width: 20,
+            child: selected
+                ? Icon(
+                    Icons.check,
+                    color: context.theme.icon,
+                    size: 20,
+                  )
+                : null,
+          ),
+          minLeadingWidth: 0,
           title: Text(
             '${proxy.host}:${proxy.port}',
             style: TextStyle(
@@ -169,10 +182,16 @@ class _ProxyItemWidget extends StatelessWidget {
               context.database.settingProperties.removeProxy(proxy.id);
               if (selected) {
                 context.database.settingProperties.selectedProxyId = null;
+                context.database.settingProperties.enableProxy = false;
               }
             },
           ),
-          onTap: () {},
+          onTap: () {
+            if (selected) {
+              return;
+            }
+            context.database.settingProperties.selectedProxyId = proxy.id;
+          },
         ),
       );
 }
