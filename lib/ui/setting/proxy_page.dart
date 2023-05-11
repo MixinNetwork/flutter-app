@@ -20,8 +20,8 @@ class ProxyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: context.theme.background,
-        appBar: const MixinAppBar(
-          title: Text('Proxy'),
+        appBar: MixinAppBar(
+          title: Text(context.l10n.proxy),
         ),
         body: ConstrainedBox(
           constraints: const BoxConstraints.expand(),
@@ -56,19 +56,9 @@ class _ProxySettingWidget extends HookWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
-          child: Text(
-            'Proxy',
-            style: TextStyle(
-              color: context.theme.secondaryText,
-              fontSize: 14,
-            ),
-          ),
-        ),
         CellGroup(
           child: CellItem(
-            title: const Text('enable proxy'),
+            title: Text(context.l10n.proxy),
             trailing: Transform.scale(
                 scale: 0.7,
                 child: CupertinoSwitch(
@@ -85,7 +75,7 @@ class _ProxySettingWidget extends HookWidget {
           child: Column(
             children: [
               CellItem(
-                title: const Text('Add Proxy'),
+                title: Text(context.l10n.addProxy),
                 leading: Icon(
                   Icons.add,
                   color: context.theme.icon,
@@ -207,7 +197,7 @@ class _ProxyAddDialog extends HookWidget {
     final proxyUsernameController = useTextEditingController();
     final proxyPasswordController = useTextEditingController();
     return AlertDialogLayout(
-      title: const Text('Add Proxy'),
+      title: Text(context.l10n.addProxy),
       titleMarginBottom: 24,
       content: DefaultTextStyle.merge(
         style: TextStyle(
@@ -219,7 +209,7 @@ class _ProxyAddDialog extends HookWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Proxy type',
+              context.l10n.proxyType,
               style: TextStyle(
                 color: context.theme.secondaryText,
                 fontSize: 14,
@@ -229,7 +219,7 @@ class _ProxyAddDialog extends HookWidget {
             _ProxyTypeWidget(proxyType: proxyType),
             const SizedBox(height: 16),
             Text(
-              'Connection',
+              context.l10n.proxyConnection,
               style: TextStyle(
                 color: context.theme.secondaryText,
                 fontSize: 14,
@@ -239,12 +229,12 @@ class _ProxyAddDialog extends HookWidget {
             _ProxyInputWidget(
               firstController: proxyHostController,
               secondController: proxyPortController,
-              firstHintText: 'Host',
-              secondHintText: 'Port',
+              firstHintText: context.l10n.host,
+              secondHintText: context.l10n.port,
             ),
             const SizedBox(height: 16),
             Text(
-              'Authentication (optional)',
+              context.l10n.proxyAuth,
               style: TextStyle(
                 color: context.theme.secondaryText,
                 fontSize: 14,
@@ -254,8 +244,8 @@ class _ProxyAddDialog extends HookWidget {
             _ProxyInputWidget(
               firstController: proxyUsernameController,
               secondController: proxyPasswordController,
-              firstHintText: 'Username',
-              secondHintText: 'Password',
+              firstHintText: context.l10n.username,
+              secondHintText: context.l10n.password,
             ),
           ],
         ),

@@ -117,7 +117,7 @@ class SettingPage extends HookWidget {
                           if (kDebugMode)
                             _Item(
                               pageName: ResponsiveNavigatorCubit.proxyPage,
-                              title: 'Proxy',
+                              title: context.l10n.proxy,
                               leading: Icon(
                                 Icons.shield_outlined,
                                 size: 24,
