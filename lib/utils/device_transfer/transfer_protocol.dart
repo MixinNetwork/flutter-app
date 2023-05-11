@@ -284,7 +284,7 @@ class TransferProtocolTransform
       );
 }
 
-class _TransferProtocolSink extends EventSink<Uint8List> {
+class _TransferProtocolSink implements EventSink<Uint8List> {
   _TransferProtocolSink(this._sink, this.folder);
 
   final EventSink<TransferPacket> _sink;
