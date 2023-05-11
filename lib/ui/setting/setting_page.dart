@@ -69,7 +69,7 @@ class SettingPage extends HookWidget {
                   children: [
                     CellGroup(
                       child: _Item(
-                        assetName: Resources.assetsImagesIcProfileSvg,
+                        leadingAssetName: Resources.assetsImagesIcProfileSvg,
                         pageName: ResponsiveNavigatorCubit.editProfilePage,
                         title: context.l10n.editProfile,
                       ),
@@ -81,12 +81,14 @@ class SettingPage extends HookWidget {
                               userHasPin &&
                               AccountKeyValue.instance.primarySessionId == null)
                             _Item(
-                              assetName: Resources.assetsImagesAccountSvg,
+                              leadingAssetName:
+                                  Resources.assetsImagesAccountSvg,
                               pageName: ResponsiveNavigatorCubit.accountPage,
                               title: context.l10n.account,
                             ),
                           _Item(
-                            assetName: Resources.assetsImagesIcNotificationSvg,
+                            leadingAssetName:
+                                Resources.assetsImagesIcNotificationSvg,
                             pageName: ResponsiveNavigatorCubit.notificationPage,
                             title: context.l10n.notifications,
                             trailing: hasNotificationPermission == false
@@ -106,25 +108,30 @@ class SettingPage extends HookWidget {
                                 : context.theme.text,
                           ),
                           _Item(
-                            assetName: Resources.assetsImagesIcStorageUsageSvg,
+                            leadingAssetName:
+                                Resources.assetsImagesIcStorageUsageSvg,
                             pageName: ResponsiveNavigatorCubit
                                 .dataAndStorageUsagePage,
                             title: context.l10n.dataAndStorageUsage,
                           ),
                           if (kDebugMode)
-                            const _Item(
-                              assetName:
-                                  Resources.assetsImagesIcStorageUsageSvg,
+                            _Item(
                               pageName: ResponsiveNavigatorCubit.proxyPage,
                               title: 'Proxy',
+                              leading: Icon(
+                                Icons.shield_outlined,
+                                size: 24,
+                                color: context.theme.icon,
+                              ),
                             ),
                           _Item(
-                            assetName: Resources.assetsImagesIcAppearanceSvg,
+                            leadingAssetName:
+                                Resources.assetsImagesIcAppearanceSvg,
                             pageName: ResponsiveNavigatorCubit.appearancePage,
                             title: context.l10n.appearance,
                           ),
                           _Item(
-                            assetName: Resources.assetsImagesIcAboutSvg,
+                            leadingAssetName: Resources.assetsImagesIcAboutSvg,
                             pageName: ResponsiveNavigatorCubit.aboutPage,
                             title: context.l10n.about,
                           ),
@@ -135,7 +142,7 @@ class SettingPage extends HookWidget {
                 ),
                 CellGroup(
                   child: _Item(
-                    assetName: Resources.assetsImagesIcSignOutSvg,
+                    leadingAssetName: Resources.assetsImagesIcSignOutSvg,
                     title: context.l10n.signOut,
                     onTap: () async {
                       final succeed = await runFutureWithToast(
@@ -159,15 +166,17 @@ class SettingPage extends HookWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    required this.assetName,
+    this.leadingAssetName,
     required this.title,
     this.pageName,
     this.color,
     this.onTap,
     this.trailing = const Arrow(),
+    this.leading,
   });
 
-  final String assetName;
+  final String? leadingAssetName;
+  final Widget? leading;
   final String title;
   final String? pageName;
   final Color? color;
@@ -181,13 +190,16 @@ class _Item extends StatelessWidget {
             !state.routeMode &&
             state.pages.any((element) => pageName == element.name),
         builder: (context, selected) => CellItem(
-          leading: SvgPicture.asset(
-            assetName,
-            width: 24,
-            height: 24,
-            colorFilter:
-                ColorFilter.mode(color ?? context.theme.text, BlendMode.srcIn),
-          ),
+          leading: leading ??
+              (leadingAssetName != null
+                  ? SvgPicture.asset(
+                      leadingAssetName!,
+                      width: 24,
+                      height: 24,
+                      colorFilter: ColorFilter.mode(
+                          color ?? context.theme.text, BlendMode.srcIn),
+                    )
+                  : null),
           title: Text(title),
           color: color ?? context.theme.text,
           selected: selected,
