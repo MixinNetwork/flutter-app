@@ -149,8 +149,8 @@ class DeviceTransferSender {
           }
         }
       }, onDone: () {
-        if (_clientSocket != transferSocket) {
-          i('connection done, but not the verified client. ignore.');
+        if (_clientSocket != null && _clientSocket != transferSocket) {
+          w('connection done, but not the verified client. ignore.');
           return;
         }
         w('sender: client connected done. $_finished');
@@ -161,7 +161,7 @@ class DeviceTransferSender {
         }
         close(debugReason: 'client connected done');
       }, onError: (error, stacktrace) {
-        if (_clientSocket != transferSocket) {
+        if (_clientSocket != null && _clientSocket != transferSocket) {
           i('connection error, but not the verified client. ignore.');
           return;
         }
