@@ -360,6 +360,5 @@ void main() {
     expect(senderStartCount, 1);
     expect(senderFailedCount, 1);
     expect(senderSucceedCount, 0);
-
   });
 }
