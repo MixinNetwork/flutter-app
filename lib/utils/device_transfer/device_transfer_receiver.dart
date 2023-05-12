@@ -83,7 +83,7 @@ class DeviceTransferReceiver {
       await _socket?.addCommand(
         TransferDataCommand.progress(deviceId: deviceId, progress: progress),
       );
-      d('progress: $progress');
+      i('device transfer receiver: progress: $progress $_progress/$_total');
     }
   }
 
