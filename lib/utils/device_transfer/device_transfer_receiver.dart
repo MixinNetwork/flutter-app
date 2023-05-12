@@ -9,6 +9,7 @@ import '../../db/mixin_database.dart';
 import '../attachment/attachment_util.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
+import '../system/memory.dart';
 import 'json_transfer_data.dart';
 import 'socket_wrapper.dart';
 import 'transfer_data_app.dart';
@@ -84,6 +85,7 @@ class DeviceTransferReceiver {
         TransferDataCommand.progress(deviceId: deviceId, progress: progress),
       );
       i('device transfer receiver: progress: $progress $_progress/$_total');
+      dumpFreeDiskSpace();
     }
   }
 
