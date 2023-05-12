@@ -10,6 +10,7 @@ import '../attachment/attachment_util.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
 import 'json_transfer_data.dart';
+import 'socket_wrapper.dart';
 import 'transfer_data_app.dart';
 import 'transfer_data_asset.dart';
 import 'transfer_data_command.dart';
@@ -57,7 +58,7 @@ class DeviceTransferReceiver {
   final OnReceiverProgressUpdate? onReceiverProgressUpdate;
   final OnReceiverStart? onConnectedToServer;
 
-  Socket? _socket;
+  TransferSocket? _socket;
   int _total = 0;
   int _progress = 0;
   var _lastProgressNotifyTime = DateTime(0);
@@ -106,7 +107,7 @@ class DeviceTransferReceiver {
       timeout: const Duration(seconds: 10),
     );
     _resetTransferStates();
-    _socket = socket;
+    _socket = TransferSocket(socket);
     d('connected to $ip:$port. my port: ${socket.port}');
     socket.transform(protocolTransform).asyncListen(
       (packet) async {
@@ -146,7 +147,7 @@ class DeviceTransferReceiver {
         close();
       },
     );
-    await socket.addCommand(
+    await _socket?.addCommand(
       TransferDataCommand.connect(
         code: code,
         deviceId: deviceId,
@@ -377,6 +378,11 @@ class DeviceTransferReceiver {
   }
 
   void close() {
+    i('receiver closing');
+    if (_socket == null) {
+      e('receiver closing, but socket is null');
+    }
+    _socket?.close();
     _socket?.destroy();
     _socket = null;
   }

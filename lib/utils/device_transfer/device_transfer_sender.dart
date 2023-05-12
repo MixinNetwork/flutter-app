@@ -9,8 +9,7 @@ import '../../db/database.dart';
 import '../attachment/attachment_util.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
-import '../platform.dart';
-import 'json_transfer_data.dart';
+import 'socket_wrapper.dart';
 import 'transfer_data_app.dart';
 import 'transfer_data_asset.dart';
 import 'transfer_data_command.dart';
@@ -58,7 +57,7 @@ class DeviceTransferSender {
 
   ServerSocket? _socket;
 
-  Socket? _clientSocket;
+  TransferSocket? _clientSocket;
 
   final _pendingVerificationSockets = <Socket>[];
 
@@ -99,6 +98,7 @@ class DeviceTransferSender {
       _pendingVerificationSockets.add(socket);
       i('client connected: ${socket.remoteAddress.address}:${socket.remotePort}');
 
+      final transferSocket = TransferSocket(socket);
       socket.transform(protocolTransform).asyncListen((event) {
         d('receive data: $event');
 
@@ -107,18 +107,29 @@ class DeviceTransferSender {
           switch (command.action) {
             case kTransferCommandActionConnect:
               if (command.code == verificationCode) {
-                _clientSocket = socket;
+                i('sender verify code success. start transfer ${socket.remoteAddress.address}:${socket.remotePort}');
+                _clientSocket = transferSocket;
                 _pendingVerificationSockets.remove(socket);
                 for (final s in _pendingVerificationSockets) {
-                  s.destroy();
+                  s
+                    ..close()
+                    ..destroy();
                 }
+                _pendingVerificationSockets.clear();
                 onSenderStart?.call();
-                _processTransfer(socket);
+                _processTransfer(transferSocket).onError((error, stacktrace) {
+                  e('sender: process transfer error: $error $stacktrace');
+                });
               } else {
                 e('sender verify code failed. except $verificationCode, '
                     'but got ${command.code}');
-                socket.close();
-                close();
+                for (final s in _pendingVerificationSockets) {
+                  s
+                    ..close()
+                    ..destroy();
+                }
+                _pendingVerificationSockets.clear();
+                close(debugReason: 'verify code failed');
               }
               break;
             case kTransferCommandActionFinish:
@@ -138,16 +149,25 @@ class DeviceTransferSender {
           }
         }
       }, onDone: () {
-        i('sender transfer done. finished: $_finished');
+        if (_clientSocket != transferSocket) {
+          i('connection done, but not the verified client. ignore.');
+          return;
+        }
+        w('sender: client connected done. $_finished');
         if (_finished) {
           onSenderSucceed?.call();
         } else {
           onSenderFailed?.call();
         }
+        close(debugReason: 'client connected done');
       }, onError: (error, stacktrace) {
-        e('error: $error, stacktrace: $stacktrace');
+        if (_clientSocket != transferSocket) {
+          i('connection error, but not the verified client. ignore.');
+          return;
+        }
         onSenderFailed?.call();
-        close();
+        e('sender: server socket error: $error $stacktrace');
+        close(debugReason: 'socket error');
       });
     });
     onSenderServerCreated?.call();
@@ -155,9 +175,9 @@ class DeviceTransferSender {
   }
 
   /// transfer data to client.
-  Future<void> _processTransfer(Socket socket) async {
+  Future<void> _processTransfer(TransferSocket socket) async {
     Future<void> runWithLog(
-        Future<int> Function(Socket) process, String name) async {
+        Future<int> Function(TransferSocket) process, String name) async {
       final stopwatch = Stopwatch()..start();
       i('_processTransfer start $name');
       final count = await process(socket);
@@ -183,7 +203,7 @@ class DeviceTransferSender {
           await database.messageMentionDao.getMessageMentionsCount() +
           await database.appDao.getAppsCount();
       await socket.addCommand(TransferDataCommand.start(
-        deviceId: await getDeviceId(),
+        deviceId: deviceId,
         total: count,
       ));
       return count;
@@ -211,7 +231,7 @@ class DeviceTransferSender {
     ));
   }
 
-  Future<int> _processTransferConversation(Socket socket) async {
+  Future<int> _processTransferConversation(TransferSocket socket) async {
     var offset = 0;
     while (true) {
       final conversations = await database.conversationDao.getConversations(
@@ -232,7 +252,7 @@ class DeviceTransferSender {
     return offset;
   }
 
-  Future<int> _processTransferUser(Socket socket) async {
+  Future<int> _processTransferUser(TransferSocket socket) async {
     var offset = 0;
     while (true) {
       final users =
@@ -249,7 +269,7 @@ class DeviceTransferSender {
     return offset;
   }
 
-  Future<int> _processTransferApp(Socket socket) async {
+  Future<int> _processTransferApp(TransferSocket socket) async {
     var offset = 0;
     while (true) {
       final apps =
@@ -266,7 +286,7 @@ class DeviceTransferSender {
     return offset;
   }
 
-  Future<int> _processTransferParticipant(Socket socket) async {
+  Future<int> _processTransferParticipant(TransferSocket socket) async {
     var offset = 0;
     while (true) {
       final participants = await database.participantDao.getAllParticipants(
@@ -287,7 +307,7 @@ class DeviceTransferSender {
     return offset;
   }
 
-  Future<int> _processTransferSticker(Socket socket) async {
+  Future<int> _processTransferSticker(TransferSocket socket) async {
     var offset = 0;
     while (true) {
       final stickers = await database.stickerDao.getStickers(
@@ -308,7 +328,7 @@ class DeviceTransferSender {
     return offset;
   }
 
-  Future<int> _processTransferAsset(Socket socket) async {
+  Future<int> _processTransferAsset(TransferSocket socket) async {
     final assets = await database.assetDao.getAssets();
     for (final asset in assets) {
       await socket.addAsset(
@@ -319,7 +339,7 @@ class DeviceTransferSender {
     return assets.length;
   }
 
-  Future<int> _processTransferSnapshot(Socket socket) async {
+  Future<int> _processTransferSnapshot(TransferSocket socket) async {
     var offset = 0;
     while (true) {
       final snapshots = await database.snapshotDao.getSnapshots(
@@ -340,7 +360,7 @@ class DeviceTransferSender {
     return offset;
   }
 
-  Future<int> _processTransferMessage(Socket socket) async {
+  Future<int> _processTransferMessage(TransferSocket socket) async {
     // check cleanup_quote_content_job finished before transfer message
     while (true) {
       final jobs =
@@ -371,7 +391,7 @@ class DeviceTransferSender {
     return count;
   }
 
-  Future<int> _processTransferMessageMention(Socket socket) async {
+  Future<int> _processTransferMessageMention(TransferSocket socket) async {
     var offset = 0;
     while (true) {
       final messages = await database.messageMentionDao
@@ -388,7 +408,7 @@ class DeviceTransferSender {
     return offset;
   }
 
-  Future<int> _processTransferTranscriptMessage(Socket socket) async {
+  Future<int> _processTransferTranscriptMessage(TransferSocket socket) async {
     var offset = 0;
     while (true) {
       final messages =
@@ -410,7 +430,7 @@ class DeviceTransferSender {
     return offset;
   }
 
-  Future<int> _processTransferExpiredMessage(Socket socket) async {
+  Future<int> _processTransferExpiredMessage(TransferSocket socket) async {
     var offset = 0;
     while (true) {
       final messages = await database.expiredMessageDao
@@ -433,7 +453,7 @@ class DeviceTransferSender {
     return offset;
   }
 
-  Future<int> _processTransferPinMessage(Socket socket) async {
+  Future<int> _processTransferPinMessage(TransferSocket socket) async {
     var offset = 0;
     while (true) {
       final messages = await database.pinMessageDao.getPinMessages(
@@ -454,7 +474,7 @@ class DeviceTransferSender {
     return offset;
   }
 
-  Future<int> _processTransferAttachment(Socket socket) async {
+  Future<int> _processTransferAttachment(TransferSocket socket) async {
     final folder = attachmentUtil.mediaPath;
     // send all files in media folder
     final files = Directory(folder).list(recursive: true);
@@ -488,11 +508,13 @@ class DeviceTransferSender {
     return count;
   }
 
-  void close() {
-    i('sender: close transfer server');
+  Future<void> close({String? debugReason}) async {
+    i('sender: closing transfer server. $debugReason');
+    await _clientSocket?.close();
     _clientSocket?.destroy();
     _clientSocket = null;
-    _socket?.close();
+    await _socket?.close();
     _socket = null;
+    i('sender: transfer server closed');
   }
 }

@@ -348,14 +348,18 @@ void main() {
     expect(receiverSucceedCount, 0);
 
     receiver.close();
-    await Future.delayed(const Duration(milliseconds: 100));
+
+    await receiverCompleter.future;
+
+    expect(receiverStartCount, 1);
+    expect(receiverFailedCount, 1);
+    expect(receiverSucceedCount, 0);
+
+    await senderCompleter.future;
 
     expect(senderStartCount, 1);
     expect(senderFailedCount, 1);
     expect(senderSucceedCount, 0);
 
-    expect(receiverStartCount, 1);
-    expect(receiverFailedCount, 1);
-    expect(receiverSucceedCount, 0);
   });
 }
