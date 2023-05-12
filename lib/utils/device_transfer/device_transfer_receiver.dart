@@ -352,7 +352,7 @@ class DeviceTransferReceiver {
     );
 
     if (path.isEmpty) {
-      e('_processReceivedAttachmentPacket: path is empty');
+      e('_processReceivedAttachmentPacket: path is empty. ${message.messageId} ${message.category} ${message.mediaUrl}');
       deletePacketFile();
       return;
     }
