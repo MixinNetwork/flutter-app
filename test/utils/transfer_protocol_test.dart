@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_app/utils/device_transfer/json_transfer_data.dart';
+import 'package:flutter_app/utils/device_transfer/socket_wrapper.dart';
 import 'package:flutter_app/utils/device_transfer/transfer_data_command.dart';
 import 'package:flutter_app/utils/device_transfer/transfer_protocol.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,10 +13,10 @@ import 'package:uuid/uuid.dart';
 
 void main() {
   test('transfer writer', () async {
-    final sink = _BytesStreamSink();
+    final socket = MockTransferSocket();
 
     Future<void> writeJson(Map<String, dynamic> json) => writePacketToSink(
-        sink,
+        socket,
         TransferDataPacket(JsonTransferData(
           type: JsonTransferDataType.message,
           data: json,
@@ -26,7 +27,7 @@ void main() {
     await writeJson({'bdfasf': 2124124});
     await writeJson({'bdfasf': 2124124});
 
-    final bytes = Uint8List.fromList(sink.data);
+    final bytes = Uint8List.fromList(socket.sink.data);
     final stream = Stream.value(Uint8List.fromList(bytes))
         .transform(const TransferProtocolTransform(fileFolder: ''));
     final data = await stream.toList();
@@ -39,14 +40,14 @@ void main() {
   });
 
   test('write file', () async {
-    final sink = _BytesStreamSink();
+    final socket = MockTransferSocket();
     final messageId = const Uuid().v4();
     await writePacketToSink(
-      sink,
+      socket,
       TransferAttachmentPacket(messageId: messageId, path: './LICENSE'),
     );
 
-    final bytes = Uint8List.fromList(sink.data);
+    final bytes = Uint8List.fromList(socket.sink.data);
     final stream = Stream.value(Uint8List.fromList(bytes)).transform(
         TransferProtocolTransform(fileFolder: Directory.systemTemp.path));
     final data = await stream.toList();
@@ -57,40 +58,40 @@ void main() {
   });
 
   test('write command and data', () async {
-    final sink = _BytesStreamSink();
+    final socket = MockTransferSocket();
     const deviceId = '82525DEB-C242-57A2-9A14-8C473C2B1300';
-    await sink.addCommand(
+    await socket.addCommand(
       TransferDataCommand.progress(
         deviceId: deviceId,
         progress: 1 / 3,
       ),
     );
-    await sink.addCommand(
+    await socket.addCommand(
       TransferDataCommand.progress(
         deviceId: deviceId,
         progress: 0,
       ),
     );
-    await sink.addCommand(
+    await socket.addCommand(
       TransferDataCommand.progress(
         deviceId: deviceId,
         progress: 0,
       ),
     );
-    await sink.addCommand(
+    await socket.addCommand(
       TransferDataCommand.progress(
         deviceId: deviceId,
         progress: 1,
       ),
     );
-    await sink.addCommand(
+    await socket.addCommand(
       TransferDataCommand.progress(
         deviceId: deviceId,
         progress: 1,
       ),
     );
 
-    final bytes = Uint8List.fromList(sink.data);
+    final bytes = Uint8List.fromList(socket.sink.data);
     final stream = Stream.value(Uint8List.fromList(bytes))
         .transform(const TransferProtocolTransform(fileFolder: ''));
     final data = await stream.toList();
@@ -101,6 +102,24 @@ void main() {
     final packet = data.first as TransferCommandPacket;
     d('utf8.decode(body): ${packet.command}');
   });
+}
+
+class MockTransferSocket extends TransferSocket {
+  MockTransferSocket() : super.create();
+
+  final sink = _BytesStreamSink();
+
+  @override
+  void add(List<int> data) => sink.add(data);
+
+  @override
+  Future<void> close() => sink.close();
+
+  @override
+  void destroy() {}
+
+  @override
+  Future<void> flush() => sink.flush();
 }
 
 class _BytesStreamSink implements IOSink {
