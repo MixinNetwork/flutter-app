@@ -45,7 +45,6 @@ class ProxyConfig {
   }
 
   Map<String, dynamic> toJson() => _$ProxyConfigToJson(this);
-
 }
 
 extension ClientExt on Client {
