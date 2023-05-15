@@ -106,7 +106,7 @@ class DeviceTransferReceiver {
     final socket = await Socket.connect(
       ip,
       port,
-      timeout: const Duration(seconds: 10),
+      timeout: const Duration(minutes: 1),
     );
     _resetTransferStates();
     _socket = TransferSocket(socket);
