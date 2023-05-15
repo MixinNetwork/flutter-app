@@ -121,7 +121,6 @@ class DeviceTransferReceiver {
             await _processReceivedCommand(packet.command);
           } else if (packet is TransferAttachmentPacket) {
             await _processReceivedAttachmentPacket(packet);
-            await _notifyProgressUpdate();
           } else {
             e('unknown packet: $packet');
           }
