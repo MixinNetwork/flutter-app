@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../logger.dart';
 import 'crc.dart';
 import 'json_transfer_data.dart';
+import 'socket_wrapper.dart';
 import 'transfer_data_command.dart';
 
 const kTypeCommand = 1;
@@ -26,7 +27,7 @@ abstract class TransferPacket {
 
   /// return: body check sum
   @protected
-  Future<int> _writeBodyToSink(IOSink sink);
+  Future<int> _writeBodyToSink(TransferSocket sink);
 }
 
 abstract class _TransferJsonPacket extends TransferPacket {
@@ -44,7 +45,7 @@ abstract class _TransferJsonPacket extends TransferPacket {
   Future<int> get _bodyLength => Future.value(_data.length);
 
   @override
-  Future<int> _writeBodyToSink(IOSink sink) async {
+  Future<int> _writeBodyToSink(TransferSocket sink) async {
     sink.add(_data);
     return calculateCrc32(_data);
   }
@@ -106,7 +107,7 @@ class TransferAttachmentPacket extends TransferPacket {
   }
 
   @override
-  Future<int> _writeBodyToSink(IOSink sink) async {
+  Future<int> _writeBodyToSink(TransferSocket sink) async {
     final crc = CrcCalculator();
 
     // first 16 bytes, messageId (uuid)
@@ -136,7 +137,7 @@ class TransferAttachmentPacket extends TransferPacket {
 
 var _lock = Lock(reentrant: true);
 
-Future<void> writePacketToSink(IOSink sink, TransferPacket packet) =>
+Future<void> writePacketToSink(TransferSocket sink, TransferPacket packet) =>
     _lock.synchronized(() async {
       final bodyLength = await packet._bodyLength;
 
@@ -284,7 +285,7 @@ class TransferProtocolTransform
       );
 }
 
-class _TransferProtocolSink extends EventSink<Uint8List> {
+class _TransferProtocolSink implements EventSink<Uint8List> {
   _TransferProtocolSink(this._sink, this.folder);
 
   final EventSink<TransferPacket> _sink;

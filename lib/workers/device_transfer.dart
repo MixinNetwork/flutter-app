@@ -442,7 +442,7 @@ class DeviceTransfer {
     _subscriptions
       ..forEach((s) => s.cancel())
       ..clear();
-    sender.close();
+    sender.close(debugReason: 'dispose');
     receiver.close();
   }
 }

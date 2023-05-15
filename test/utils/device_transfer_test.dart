@@ -234,7 +234,7 @@ void main() {
 
   tearDown(() async {
     receiver.close();
-    sender.close();
+    await sender.close();
     await receiverCompleter.future;
     await senderCompleter.future;
     receiverProgress.clear();
@@ -317,7 +317,7 @@ void main() {
     expect(receiverFailedCount, 0);
     expect(receiverSucceedCount, 0);
 
-    sender.close();
+    await sender.close();
     await senderCompleter.future;
     await receiverCompleter.future;
 
@@ -348,14 +348,17 @@ void main() {
     expect(receiverSucceedCount, 0);
 
     receiver.close();
-    await Future.delayed(const Duration(milliseconds: 100));
 
-    expect(senderStartCount, 1);
-    expect(senderFailedCount, 1);
-    expect(senderSucceedCount, 0);
+    await receiverCompleter.future;
 
     expect(receiverStartCount, 1);
     expect(receiverFailedCount, 1);
     expect(receiverSucceedCount, 0);
+
+    await senderCompleter.future;
+
+    expect(senderStartCount, 1);
+    expect(senderFailedCount, 1);
+    expect(senderSucceedCount, 0);
   });
 }
