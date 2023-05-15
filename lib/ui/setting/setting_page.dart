@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -114,16 +113,15 @@ class SettingPage extends HookWidget {
                                 .dataAndStorageUsagePage,
                             title: context.l10n.dataAndStorageUsage,
                           ),
-                          if (kDebugMode)
-                            _Item(
-                              pageName: ResponsiveNavigatorCubit.proxyPage,
-                              title: context.l10n.proxy,
-                              leading: Icon(
-                                Icons.shield_outlined,
-                                size: 24,
-                                color: context.theme.icon,
-                              ),
+                          _Item(
+                            pageName: ResponsiveNavigatorCubit.proxyPage,
+                            title: context.l10n.proxy,
+                            leading: Icon(
+                              Icons.shield_outlined,
+                              size: 24,
+                              color: context.theme.icon,
                             ),
+                          ),
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcAppearanceSvg,
