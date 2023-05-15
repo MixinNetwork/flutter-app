@@ -1144,7 +1144,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return Future.wait(messages);
   }
 
-  Future<List<Tuple2<int, Message>>> getDeviceTransferMessages(
+  Future<List<(int, Message)>> getDeviceTransferMessages(
       int rowid, int limit) async {
     final messages = customSelect(
         'SELECT rowid, * FROM messages WHERE rowid > $rowid '
@@ -1154,7 +1154,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       (row) async {
         final message = await db.messages.mapFromRow(row);
         final rowId = row.read<int>('rowid');
-        return Tuple2(rowId, message);
+        return (rowId, message);
       },
     );
     return messages.get();
