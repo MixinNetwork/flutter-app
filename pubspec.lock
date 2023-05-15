@@ -551,10 +551,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_selector_windows
-      sha256: "92f1d84f070405506ee4564eec848a0ad5576d7fe6388227ec237c97f5330dac"
+      sha256: ef246380b66d1fb9089fc65622c387bf3780bca79f533424c31d07f12c2c7fd8
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.1+7"
+    version: "0.9.2"
   filesize:
     dependency: "direct main"
     description:
