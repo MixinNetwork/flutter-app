@@ -194,7 +194,7 @@ class DeviceTransfer {
           receiver.close();
           break;
         case DeviceTransferCommand.cancelBackup:
-          sender.close();
+          await sender.close();
           break;
         case DeviceTransferCommand.confirmRestore:
           final data = _remotePushData;
