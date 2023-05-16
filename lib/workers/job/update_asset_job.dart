@@ -23,7 +23,7 @@ class UpdateAssetJob extends JobQueue<Job, List<Job>> {
   Future<List<Job>> fetchJobs() => database.jobDao.updateAssetJobs().get();
 
   @override
-  bool isValid(List<Job> job) => job.isNotEmpty;
+  bool isValid(List<Job> jobs) => jobs.isNotEmpty;
 
   @override
   Future<void> insertJob(Job job) async {
@@ -43,18 +43,18 @@ class UpdateAssetJob extends JobQueue<Job, List<Job>> {
   }
 
   @override
-  Future<void> run(List<Job> job) async {
-    final assetIds = await Future.wait<String?>(job.map((Job _job) async {
+  Future<void> run(List<Job> jobs) async {
+    final assetIds = await Future.wait<String?>(jobs.map((Job job) async {
       try {
         final asset =
-            (await client.assetApi.getAssetById(_job.blazeMessage!)).data;
+            (await client.assetApi.getAssetById(job.blazeMessage!)).data;
 
         final chain = (await client.assetApi.getChain(asset.chainId)).data;
 
         await Future.wait([
           database.assetDao.insertSdkAsset(asset),
           database.chainDao.insertSdkChain(chain),
-          database.jobDao.deleteJobById(_job.jobId),
+          database.jobDao.deleteJobById(job.jobId),
         ]);
         return asset.assetId;
       } catch (e, s) {

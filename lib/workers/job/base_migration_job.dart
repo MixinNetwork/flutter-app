@@ -42,20 +42,20 @@ abstract class BaseMigrationJob extends JobQueue<Job, List<Job>> {
   String get name => 'MigrationJob($action)';
 
   @override
-  Future<void> run(List<Job> job) async {
-    assert(job.length == 1,
-        'BaseMigrationJob $action should only have one job, but got ${job.length}');
-    if (job.isEmpty) {
+  Future<void> run(List<Job> jobs) async {
+    assert(jobs.length == 1,
+        'BaseMigrationJob $action should only have one job, but got ${jobs.length}');
+    if (jobs.isEmpty) {
       return;
     }
-    final _job = job.first;
-    assert(_job.action == action,
-        'BaseMigrationJob mismatch, expect $action, but got ${_job.action}');
+    final job = jobs.first;
+    assert(job.action == action,
+        'BaseMigrationJob mismatch, expect $action, but got ${job.action}');
     try {
       i('BaseMigrationJob $action start');
-      await migration(_job);
+      await migration(job);
       i('BaseMigrationJob $action success');
-      await onMigrationSuccess(_job);
+      await onMigrationSuccess(job);
     } catch (error, stacktrace) {
       e('BaseMigrationJob $action error: $error, stacktrace: $stacktrace');
       await Future<void>.delayed(const Duration(seconds: 1));
@@ -69,5 +69,5 @@ abstract class BaseMigrationJob extends JobQueue<Job, List<Job>> {
   }
 
   @override
-  bool isValid(List<Job> job) => job.isNotEmpty;
+  bool isValid(List<Job> jobs) => jobs.isNotEmpty;
 }

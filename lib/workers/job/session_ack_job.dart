@@ -31,23 +31,23 @@ class SessionAckJob extends JobQueue<List<Job>, List<Job>> {
   String get name => 'SessionAckJob';
 
   @override
-  Future<void> insertJob(List<Job> job) => database.jobDao.insertAll(job);
+  Future<void> insertJob(List<Job> jobs) => database.jobDao.insertAll(jobs);
 
   @override
   Future<List<Job>> fetchJobs() => database.jobDao.sessionAckJobs().get();
 
   @override
-  bool isValid(List<Job> job) => job.isNotEmpty;
+  bool isValid(List<Job> jobs) => jobs.isNotEmpty;
 
   @override
-  Future<List<Job>?> run(List<Job> job) async {
-    if (primarySessionId == null) return job;
+  Future<List<Job>?> run(List<Job> jobs) async {
+    if (primarySessionId == null) return jobs;
 
     final conversationId =
         await database.participantDao.findJoinedConversationId(userId) ??
             generateConversationId(userId, kTeamMixinUserId);
 
-    final ack = await Future.wait(job.map(
+    final ack = await Future.wait(jobs.map(
       (e) async {
         final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
         return BlazeAckMessage.fromJson(map);
@@ -56,7 +56,7 @@ class SessionAckJob extends JobQueue<List<Job>, List<Job>> {
 
     final stopwatch = Stopwatch()..start();
 
-    final jobIds = job.map((e) => e.jobId).toList();
+    final jobIds = jobs.map((e) => e.jobId).toList();
 
     final plainText = PlainJsonMessage(
         kAcknowledgeMessageReceipts, null, null, null, null, ack);
@@ -73,7 +73,7 @@ class SessionAckJob extends JobQueue<List<Job>, List<Job>> {
     if (result.success || result.errorCode == badData) {
       await database.jobDao.deleteJobs(jobIds);
     } else {
-      return job;
+      return jobs;
     }
   }
 }

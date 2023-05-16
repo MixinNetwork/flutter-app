@@ -26,15 +26,15 @@ class FloodJob extends JobQueue<FloodMessage, List<FloodMessage>> {
   String get name => 'FloodJob';
 
   @override
-  Future<void> run(List<FloodMessage> job) async {
+  Future<void> run(List<FloodMessage> jobs) async {
     final process = getProcessFloodJob();
     if (process == null) return;
 
     final stopwatch = Stopwatch()..start();
-    for (final message in job) {
+    for (final message in jobs) {
       await process(message);
     }
-    i('processMessage(${job.length}): ${stopwatch.elapsed}');
+    i('processMessage(${jobs.length}): ${stopwatch.elapsed}');
   }
 
   @override

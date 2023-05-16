@@ -53,21 +53,21 @@ class SendingJob extends JobQueue<Job, List<Job>> {
   Future<List<Job>> fetchJobs() => database.jobDao.sendingJobs().get();
 
   @override
-  bool isValid(List<Job> job) => job.isNotEmpty;
+  bool isValid(List<Job> jobs) => jobs.isNotEmpty;
 
   @override
-  Future<void> run(List<Job> job) async {
-    for (final _job in job) {
+  Future<void> run(List<Job> jobs) async {
+    for (final job in jobs) {
       try {
-        switch (_job.action) {
+        switch (job.action) {
           case kPinMessage:
-            await _runPinJob(_job);
+            await _runPinJob(job);
             break;
           case kRecallMessage:
-            await _runRecallJob(_job);
+            await _runRecallJob(job);
             break;
           case kSendingMessage:
-            await _runSendJob(_job);
+            await _runSendJob(job);
             break;
         }
       } catch (e) {
