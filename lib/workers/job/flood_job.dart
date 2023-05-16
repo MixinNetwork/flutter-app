@@ -38,5 +38,5 @@ class FloodJob extends JobQueue<FloodMessage, List<FloodMessage>> {
   }
 
   @override
-  bool isValid(List<FloodMessage> job) => job.isNotEmpty;
+  bool isValid(List<FloodMessage> jobs) => jobs.isNotEmpty;
 }
