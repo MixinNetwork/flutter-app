@@ -7,7 +7,7 @@ import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart';
 import '../job_queue.dart';
 
-class UpdateStickerJob extends JobQueue<Job> {
+class UpdateStickerJob extends JobQueue<Job, List<Job>> {
   UpdateStickerJob({
     required super.database,
     required this.client,
@@ -20,6 +20,9 @@ class UpdateStickerJob extends JobQueue<Job> {
 
   @override
   Future<List<Job>> fetchJobs() => database.jobDao.updateStickerJobs().get();
+
+  @override
+  bool isValid(List<Job> l) => l.isNotEmpty;
 
   @override
   Future<void> insertJob(Job job) async {

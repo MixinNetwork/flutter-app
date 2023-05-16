@@ -992,7 +992,7 @@ class DecryptMessage extends Injector {
       return;
     }
     await _ackJob
-        .add(createAckJob(kAcknowledgeMessageReceipts, messageId, status));
+        .add([createAckJob(kAcknowledgeMessageReceipts, messageId, status)]);
   }
 
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {

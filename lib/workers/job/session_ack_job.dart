@@ -12,7 +12,7 @@ import '../../utils/load_balancer_utils.dart';
 import '../job_queue.dart';
 import '../sender.dart';
 
-class SessionAckJob extends JobQueue<Job> {
+class SessionAckJob extends JobQueue<List<Job>, List<Job>> {
   SessionAckJob({
     required super.database,
     required this.userId,
@@ -31,10 +31,13 @@ class SessionAckJob extends JobQueue<Job> {
   String get name => 'SessionAckJob';
 
   @override
-  Future<void> insertJob(Job job) => database.jobDao.insert(job);
+  Future<void> insertJob(List<Job> job) => database.jobDao.insertAll(job);
 
   @override
   Future<List<Job>> fetchJobs() => database.jobDao.sessionAckJobs().get();
+
+  @override
+  bool isValid(List<Job> l) => l.isNotEmpty;
 
   @override
   Future<List<Job>?> run(List<Job> jobs) async {

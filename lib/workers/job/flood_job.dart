@@ -3,7 +3,7 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../db/mixin_database.dart';
 import '../job_queue.dart';
 
-class FloodJob extends JobQueue<FloodMessage> {
+class FloodJob extends JobQueue<FloodMessage, List<FloodMessage>> {
   FloodJob({
     required super.database,
     required this.getProcessFloodJob,
@@ -36,4 +36,7 @@ class FloodJob extends JobQueue<FloodMessage> {
     }
     i('processMessage(${jobs.length}): ${stopwatch.elapsed}');
   }
+
+  @override
+  bool isValid(List<FloodMessage> l) => l.isNotEmpty;
 }
