@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../constants/resources.dart';
@@ -35,13 +36,20 @@ class AboutPage extends HookWidget {
                 height: 60,
               ),
               const SizedBox(height: 24),
-              Text(
-                context.l10n.mixinMessengerDesktop,
-                style: TextStyle(
-                  color: context.theme.text,
-                  fontSize: 18,
+              Animate(
+                effects: [
+                  FadeEffect(duration: 1000.ms),
+                  ScaleEffect(duration: 1000.ms)
+                ],
+                child: Text(
+                  context.l10n.mixinMessengerDesktop,
+                  style: TextStyle(
+                    color: context.theme.text,
+                    fontSize: 18,
+                  ),
                 ),
               ),
+
               // SignalDatabase.get
               const SizedBox(height: 8),
               SelectableText(

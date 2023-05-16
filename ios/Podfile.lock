@@ -192,7 +192,7 @@ SPEC CHECKSUMS:
   ogg_opus_player: 01dc6eaa63d1e061f0065f41845a0a9ea76b9396
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
-  path_provider_foundation: c68054786f1b4f3343858c1e1d0caaded73f0be9
+  path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
   PhoneNumberKit: 441e8b26ec88d598e3591de9061eff18f5dd12e8
   platform_device_id: 81b3e2993881f87d0c82ef151dc274df4869aef5
   protocol_handler: ae9efcf3b307f3fdffcd9d5252775b9f7d9f0d09
@@ -205,4 +205,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: c7cf6cd0af5391000f485bb7f6561b845e054d60
 
-COCOAPODS: 1.12.0
+COCOAPODS: 1.12.1
