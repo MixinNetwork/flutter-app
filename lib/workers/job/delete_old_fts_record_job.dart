@@ -35,7 +35,7 @@ class DeleteOldFtsRecordJob extends JobQueue<bool, List<bool>> {
   String get name => 'DeleteOldFtsRecordJob';
 
   @override
-  Future<void> run(List<bool> job) async {
+  Future<void> run(List<bool> jobs) async {
     final stopwatch = Stopwatch()..start();
     var deleted = 0;
     while (true) {
@@ -61,5 +61,5 @@ class DeleteOldFtsRecordJob extends JobQueue<bool, List<bool>> {
   }
 
   @override
-  bool isValid(List<bool> job) => job.isNotEmpty;
+  bool isValid(List<bool> jobs) => jobs.isNotEmpty;
 }
