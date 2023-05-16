@@ -596,19 +596,19 @@ class AccountServer {
     );
   }
 
-  void addAckJob(db.Job job) {
-    assert(job.action == kAcknowledgeMessageReceipts);
+  void addAckJob(List<db.Job> jobs) {
+    assert(jobs.every((job) => job.action == kAcknowledgeMessageReceipts));
     _sendEventToWorkerIsolate(
-      MainIsolateEventType.addAckJob,
-      job,
+      MainIsolateEventType.addAckJobs,
+      jobs,
     );
   }
 
-  void addSessionAckJob(db.Job job) {
-    assert(job.action == kCreateMessage);
+  void addSessionAckJob(List<db.Job> jobs) {
+    assert(jobs.every((job) => job.action == kCreateMessage));
     _sendEventToWorkerIsolate(
-      MainIsolateEventType.addSessionAckJob,
-      job,
+      MainIsolateEventType.addSessionAckJobs,
+      jobs,
     );
   }
 
@@ -648,14 +648,14 @@ class AccountServer {
 
     for (final ids in chunked) {
       final expireAt = await database.expiredMessageDao.getMessageExpireAt(ids);
-      ids.forEach(
-        (id) => addAckJob(createAckJob(
-          kAcknowledgeMessageReceipts,
-          id,
-          MessageStatus.read,
-          expireAt: expireAt[id],
-        )),
-      );
+      addAckJob(ids
+          .map((id) => createAckJob(
+                kAcknowledgeMessageReceipts,
+                id,
+                MessageStatus.read,
+                expireAt: expireAt[id],
+              ))
+          .toList());
 
       await _createReadSessionMessage(ids, expireAt);
     }
@@ -669,12 +669,15 @@ class AccountServer {
     if (primarySessionId == null) {
       return;
     }
-    messageIds.forEach((id) => addSessionAckJob(createAckJob(
-          kCreateMessage,
-          id,
-          MessageStatus.read,
-          expireAt: messageExpireAt[id],
-        )));
+
+    addSessionAckJob(messageIds
+        .map((id) => createAckJob(
+              kCreateMessage,
+              id,
+              MessageStatus.read,
+              expireAt: messageExpireAt[id],
+            ))
+        .toList());
   }
 
   Future<void> stop() async {
@@ -1235,8 +1238,7 @@ class AccountServer {
       Future.wait([
         database.messageMentionDao.markMentionRead(messageId),
         (() async => addSessionAckJob(
-              await createMentionReadAckJob(conversationId, messageId),
-            ))()
+            [await createMentionReadAckJob(conversationId, messageId)]))()
       ]);
 
   Future<List<db.User>?> refreshUsers(List<String> ids, {bool force = false}) =>

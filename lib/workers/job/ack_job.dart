@@ -6,7 +6,7 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../db/mixin_database.dart';
 import '../job_queue.dart';
 
-class AckJob extends JobQueue<Job> {
+class AckJob extends JobQueue<List<Job>, List<Job>> {
   AckJob({
     required super.database,
     required this.client,
@@ -18,10 +18,13 @@ class AckJob extends JobQueue<Job> {
   String get name => 'AckJob';
 
   @override
-  Future<void> insertJob(Job job) => database.jobDao.insert(job);
+  Future<void> insertJob(List<Job> jobs) => database.jobDao.insertAll(jobs);
 
   @override
   Future<List<Job>> fetchJobs() => database.jobDao.ackJobs().get();
+
+  @override
+  bool isValid(List<Job> jobs) => jobs.isNotEmpty;
 
   @override
   Future<void> run(List<Job> jobs) async {

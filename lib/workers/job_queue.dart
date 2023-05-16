@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../db/database.dart';
 import '../utils/logger.dart';
 
-abstract class JobQueue<T> {
+abstract class JobQueue<AddType, RunType> {
   JobQueue({required this.database}) {
     start();
   }
@@ -23,17 +23,20 @@ abstract class JobQueue<T> {
   String get name;
 
   @protected
-  Future<List<T>> fetchJobs();
+  Future<RunType> fetchJobs();
 
   @protected
-  Future<void> run(List<T> jobs);
+  Future<void> run(RunType job);
 
   @protected
-  Future<void> insertJob(T job);
+  Future<void> insertJob(AddType job);
+
+  @protected
+  bool isValid(RunType job);
 
   void start() => unawaited(_run());
 
-  Future<void> add(T job) async {
+  Future<void> add(AddType job) async {
     await insertJob(job);
     unawaited(_run());
   }
@@ -45,7 +48,7 @@ abstract class JobQueue<T> {
 
     while (true) {
       final list = await fetchJobs();
-      if (list.isEmpty) break;
+      if (!isValid(list)) break;
       try {
         await run(list);
       } catch (err) {

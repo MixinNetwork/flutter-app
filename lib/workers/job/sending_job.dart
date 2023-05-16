@@ -25,7 +25,7 @@ import '../../widgets/message/send_message_dialog/attachment_extra.dart';
 import '../job_queue.dart';
 import '../sender.dart';
 
-class SendingJob extends JobQueue<Job> {
+class SendingJob extends JobQueue<Job, List<Job>> {
   SendingJob({
     required super.database,
     required this.sender,
@@ -51,6 +51,9 @@ class SendingJob extends JobQueue<Job> {
 
   @override
   Future<List<Job>> fetchJobs() => database.jobDao.sendingJobs().get();
+
+  @override
+  bool isValid(List<Job> jobs) => jobs.isNotEmpty;
 
   @override
   Future<void> run(List<Job> jobs) async {

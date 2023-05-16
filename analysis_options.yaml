@@ -37,6 +37,7 @@ analyzer:
 
 linter:
   rules:
+    avoid_renaming_method_parameters: false
     prefer_const_constructors_in_immutables: true
     prefer_relative_imports: true
     prefer_final_locals: true
