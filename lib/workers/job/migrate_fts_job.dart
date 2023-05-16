@@ -50,30 +50,30 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
   String get name => 'MigrateFtsJob';
 
   @override
-  Future<void> run(List<Job> jobs) async {
-    final Job job;
+  Future<void> run(List<Job> job) async {
+    final Job _job;
 
     // ensure there is only one job
-    if (jobs.length > 1) {
-      e('MigrateFtsJob: ${jobs.length} jobs found, only latest job will be executed');
-      job = jobs.reduce((value, element) =>
+    if (job.length > 1) {
+      e('MigrateFtsJob: ${job.length} jobs found, only latest job will be executed');
+      _job = job.reduce((value, element) =>
           value.createdAt.isAfter(element.createdAt) ? value : element);
       // delete invalid jobs
       final invalidJobs =
-          jobs.where((e) => e.jobId != job.jobId).map((e) => e.jobId).toList();
+          job.where((e) => e.jobId != _job.jobId).map((e) => e.jobId).toList();
       await database.jobDao.deleteJobs(invalidJobs);
-    } else if (jobs.length == 1) {
-      job = jobs.first;
+    } else if (job.length == 1) {
+      _job = job.first;
     } else {
       e('MigrateFtsJob: running no job found');
       return;
     }
 
-    i('$name startMigrate anchor: ${job.blazeMessage}');
+    i('$name startMigrate anchor: ${_job.blazeMessage}');
 
     final stopwatch = Stopwatch()..start();
     var lastMessageRowId =
-        job.blazeMessage == null ? null : int.tryParse(job.blazeMessage!);
+        _job.blazeMessage == null ? null : int.tryParse(_job.blazeMessage!);
     while (true) {
       final messages = await messageDao.getMessages(lastMessageRowId, 1000);
       if (messages.isEmpty) {
@@ -151,5 +151,5 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
   }
 
   @override
-  bool isValid(List<Job> l) => l.isNotEmpty;
+  bool isValid(List<Job> job) => job.isNotEmpty;
 }

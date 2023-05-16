@@ -37,17 +37,17 @@ class SessionAckJob extends JobQueue<List<Job>, List<Job>> {
   Future<List<Job>> fetchJobs() => database.jobDao.sessionAckJobs().get();
 
   @override
-  bool isValid(List<Job> l) => l.isNotEmpty;
+  bool isValid(List<Job> job) => job.isNotEmpty;
 
   @override
-  Future<List<Job>?> run(List<Job> jobs) async {
-    if (primarySessionId == null) return jobs;
+  Future<List<Job>?> run(List<Job> job) async {
+    if (primarySessionId == null) return job;
 
     final conversationId =
         await database.participantDao.findJoinedConversationId(userId) ??
             generateConversationId(userId, kTeamMixinUserId);
 
-    final ack = await Future.wait(jobs.map(
+    final ack = await Future.wait(job.map(
       (e) async {
         final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
         return BlazeAckMessage.fromJson(map);
@@ -56,7 +56,7 @@ class SessionAckJob extends JobQueue<List<Job>, List<Job>> {
 
     final stopwatch = Stopwatch()..start();
 
-    final jobIds = jobs.map((e) => e.jobId).toList();
+    final jobIds = job.map((e) => e.jobId).toList();
 
     final plainText = PlainJsonMessage(
         kAcknowledgeMessageReceipts, null, null, null, null, ack);
@@ -73,7 +73,7 @@ class SessionAckJob extends JobQueue<List<Job>, List<Job>> {
     if (result.success || result.errorCode == badData) {
       await database.jobDao.deleteJobs(jobIds);
     } else {
-      return jobs;
+      return job;
     }
   }
 }

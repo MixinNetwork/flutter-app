@@ -22,7 +22,7 @@ class UpdateStickerJob extends JobQueue<Job, List<Job>> {
   Future<List<Job>> fetchJobs() => database.jobDao.updateStickerJobs().get();
 
   @override
-  bool isValid(List<Job> l) => l.isNotEmpty;
+  bool isValid(List<Job> job) => job.isNotEmpty;
 
   @override
   Future<void> insertJob(Job job) async {
@@ -42,16 +42,16 @@ class UpdateStickerJob extends JobQueue<Job, List<Job>> {
   }
 
   @override
-  Future<List<Job>?> run(List<Job> jobs) async {
-    final list = await Future.wait(jobs.map((Job job) async {
+  Future<List<Job>?> run(List<Job> job) async {
+    final list = await Future.wait(job.map((Job _job) async {
       try {
-        final stickerId = job.blazeMessage;
+        final stickerId = _job.blazeMessage;
         if (stickerId != null) {
           final sticker =
               (await client.accountApi.getStickerById(stickerId)).data;
           await database.stickerDao.insert(sticker.asStickersCompanion);
         }
-        await database.jobDao.deleteJobById(job.jobId);
+        await database.jobDao.deleteJobById(_job.jobId);
       } catch (e, s) {
         if (e is MixinApiError) {
           var code = e.response?.statusCode;
@@ -60,14 +60,14 @@ class UpdateStickerJob extends JobQueue<Job, List<Job>> {
             code = error.code;
           }
           if (code == 404) {
-            i('Sticker not found: ${job.blazeMessage}');
-            await database.jobDao.deleteJobById(job.jobId);
+            i('Sticker not found: ${_job.blazeMessage}');
+            await database.jobDao.deleteJobById(_job.jobId);
             return null;
           }
         }
         w('Update sticker job error: $e, stack: $s');
         await Future.delayed(const Duration(seconds: 1));
-        return job;
+        return _job;
       }
     }));
 

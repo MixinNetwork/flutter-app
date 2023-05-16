@@ -24,18 +24,18 @@ class AckJob extends JobQueue<List<Job>, List<Job>> {
   Future<List<Job>> fetchJobs() => database.jobDao.ackJobs().get();
 
   @override
-  bool isValid(List<Job> l) => l.isNotEmpty;
+  bool isValid(List<Job> job) => job.isNotEmpty;
 
   @override
-  Future<void> run(List<Job> jobs) async {
-    final ack = await Future.wait(jobs.map(
+  Future<void> run(List<Job> job) async {
+    final ack = await Future.wait(job.map(
       (e) async {
         final map = jsonDecode(e.blazeMessage!) as Map<String, dynamic>;
         return BlazeAckMessage.fromJson(map);
       },
     ));
 
-    final jobIds = jobs.map((e) => e.jobId).toList();
+    final jobIds = job.map((e) => e.jobId).toList();
 
     try {
       final rsp = await client.dio.post('/acknowledgements', data: ack);
