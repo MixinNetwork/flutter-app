@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_app_icon_badge/flutter_app_icon_badge.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:rxdart/rxdart.dart' hide ThrottleExtensions;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../bloc/paging/paging_bloc.dart';
@@ -70,11 +70,17 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
 
   void init() => _switchBloc(slideCategoryCubit.state, _limit);
 
+  var _foo = DateTime.now();
+
   late Stream<void> updateEvent = Rx.merge([
     DataBaseEventBus.instance.updateConversationIdStream,
     DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
     DataBaseEventBus.instance.updateMessageMentionStream,
-  ]).throttleTime(kDefaultThrottleDuration).asBroadcastStream();
+  ]).throttleTime(kDefaultThrottleDuration).asBroadcastStream().map((event) {
+    final now = DateTime.now();
+    print('updateEvent: ${now.difference(_foo).inMilliseconds}, $event');
+    _foo = now;
+  });
 
   late Stream<void> circleUpdateEvent = Rx.merge([
     DataBaseEventBus.instance.updateConversationIdStream,

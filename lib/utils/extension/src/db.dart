@@ -9,12 +9,9 @@ extension SelectedableThrottle<T> on Selectable<T> {
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,
     required Future<Value> Function() fetch,
-    bool trailing = true,
-    bool leading = false,
     bool prepend = true,
   }) {
-    var stream = Rx.merge(eventStreams)
-        .throttleTime(duration, leading: leading, trailing: trailing);
+    var stream = Rx.merge(eventStreams).throttleTime(duration);
     if (prepend) stream = stream.startWith([]);
     return stream.asyncBufferMap((_) => fetch());
   }
@@ -22,15 +19,11 @@ extension SelectedableThrottle<T> on Selectable<T> {
   Stream<List<T>> watchWithStream({
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,
-    bool trailing = true,
-    bool leading = false,
     bool prepend = true,
   }) =>
       _watchWithStream(
         eventStreams: eventStreams,
         duration: duration,
-        trailing: trailing,
-        leading: leading,
         prepend: prepend,
         fetch: get,
       );
@@ -38,15 +31,11 @@ extension SelectedableThrottle<T> on Selectable<T> {
   Stream<T> watchSingleWithStream({
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,
-    bool trailing = true,
-    bool leading = false,
     bool prepend = true,
   }) =>
       _watchWithStream(
         eventStreams: eventStreams,
         duration: duration,
-        trailing: trailing,
-        leading: leading,
         prepend: prepend,
         fetch: getSingle,
       );
@@ -54,15 +43,11 @@ extension SelectedableThrottle<T> on Selectable<T> {
   Stream<T?> watchSingleOrNullWithStream({
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,
-    bool trailing = true,
-    bool leading = false,
     bool prepend = true,
   }) =>
       _watchWithStream(
         eventStreams: eventStreams,
         duration: duration,
-        trailing: trailing,
-        leading: leading,
         prepend: prepend,
         fetch: getSingleOrNull,
       );

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../constants/resources.dart';
 import '../../db/database_event_bus.dart';
@@ -84,11 +83,7 @@ class CommandPalettePage extends HookWidget {
     final stream = useValueNotifierConvertSteam(textEditingController);
     final keyword = useMemoizedStream(() => stream
             .map((event) => event.text)
-            .throttleTime(
-              const Duration(milliseconds: 100),
-              trailing: true,
-              leading: false,
-            )
+            .throttleTime(const Duration(milliseconds: 100))
             .distinct()).data ??
         '';
 
