@@ -113,7 +113,8 @@ Future<void> initMixinDocumentsDirectory() async {
 enum TempFileType {
   pasteboardImage('mixin_paste_board_image', '.png'),
   editImage('image_edit', '.png'),
-  voiceRecord('voice_record', '.ogg');
+  voiceRecord('voice_record', '.ogg'),
+  logZip('log', '.zip');
 
   const TempFileType(this.prefix, this.suffix);
 
