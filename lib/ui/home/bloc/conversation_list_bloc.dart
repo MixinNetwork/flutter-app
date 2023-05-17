@@ -70,17 +70,11 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
 
   void init() => _switchBloc(slideCategoryCubit.state, _limit);
 
-  var _foo = DateTime.now();
-
   late Stream<void> updateEvent = Rx.merge([
     DataBaseEventBus.instance.updateConversationIdStream,
     DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
     DataBaseEventBus.instance.updateMessageMentionStream,
-  ]).throttleTime(kDefaultThrottleDuration).asBroadcastStream().map((event) {
-    final now = DateTime.now();
-    print('updateEvent: ${now.difference(_foo).inMilliseconds}, $event');
-    _foo = now;
-  });
+  ]).throttleTime(kDefaultThrottleDuration).asBroadcastStream();
 
   late Stream<void> circleUpdateEvent = Rx.merge([
     DataBaseEventBus.instance.updateConversationIdStream,
