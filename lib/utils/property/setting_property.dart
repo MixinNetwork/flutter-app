@@ -40,7 +40,7 @@ class SettingPropertyStorage extends PropertyStorage {
     return [];
   }
 
-  String? get activatedProxyUrl {
+  ProxyConfig? get activatedProxy {
     if (!enableProxy) {
       return null;
     }
@@ -49,11 +49,9 @@ class SettingPropertyStorage extends PropertyStorage {
       return null;
     }
     if (selectedProxyId == null) {
-      return list.first.toUri();
+      return list.first;
     }
-    return list
-        .firstWhereOrNull((element) => element.id == selectedProxyId)
-        ?.toUri();
+    return list.firstWhereOrNull((element) => element.id == selectedProxyId);
   }
 
   void addProxy(ProxyConfig config) {

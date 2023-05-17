@@ -44,7 +44,7 @@ class Blaze {
     this.floodJob,
   ) {
     database.settingProperties.addListener(_onProxySettingChanged);
-    proxyUri = database.settingProperties.activatedProxyUrl;
+    proxyConfig = database.settingProperties.activatedProxy;
   }
 
   final String userId;
@@ -57,7 +57,7 @@ class Blaze {
 
   final String? userAgent;
 
-  String? proxyUri;
+  ProxyConfig? proxyConfig;
 
   String _host = _wsHost1;
   String? _token;
@@ -127,7 +127,7 @@ class Blaze {
         'Authorization': 'Bearer $token',
       },
       pingInterval: const Duration(seconds: 10),
-      customClient: HttpClient()..setProxy(proxyUri),
+      customClient: HttpClient()..setProxy(proxyConfig),
     );
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
@@ -344,11 +344,11 @@ class Blaze {
   }
 
   void _onProxySettingChanged() {
-    final url = database.settingProperties.activatedProxyUrl;
-    if (url == proxyUri) {
+    final url = database.settingProperties.activatedProxy;
+    if (url == proxyConfig) {
       return;
     }
-    proxyUri = url;
+    proxyConfig = url;
     _connectedState = ConnectedState.disconnected;
     reconnect();
   }

@@ -42,12 +42,12 @@ class CacheImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final proxyUrl = context.database.settingProperties.activatedProxyUrl;
+    final proxyUrl = context.database.settingProperties.activatedProxy;
     return Image(
       image: MixinNetworkImageProvider(
         src,
         controller: controller,
-        proxyUrl: proxyUrl,
+        proxyConfig: proxyUrl,
       ),
       width: width,
       height: height,
@@ -377,7 +377,7 @@ class MixinNetworkImageProvider
     this.imageCacheName,
     this.cacheMaxAge,
     this.controller,
-    this.proxyUrl,
+    this.proxyConfig,
   });
 
   final ValueNotifier<bool>? controller;
@@ -400,7 +400,7 @@ class MixinNetworkImageProvider
   /// The URL from which the image will be fetched.
   final String url;
 
-  final String? proxyUrl;
+  final ProxyConfig? proxyConfig;
 
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
@@ -587,7 +587,7 @@ class MixinNetworkImageProvider
   ) async {
     try {
       final resolved = Uri.base.resolve(key.url);
-      final response = await _tryGetResponse(resolved, key.proxyUrl);
+      final response = await _tryGetResponse(resolved, key.proxyConfig);
       if (response == null || response.statusCode != HttpStatus.ok) {
         return null;
       }
@@ -626,8 +626,8 @@ class MixinNetworkImageProvider
   }
 
   Future<HttpClientResponse> _getResponse(
-      Uri resolved, String? proxyUrl) async {
-    httpClient.setProxy(proxyUrl);
+      Uri resolved, ProxyConfig? proxy) async {
+    httpClient.setProxy(proxy);
     final request = await httpClient.getUrl(resolved);
     headers?.forEach((String name, String value) {
       request.headers.add(name, value);
@@ -644,13 +644,13 @@ class MixinNetworkImageProvider
   // Http get with cancel, delay try again
   Future<HttpClientResponse?> _tryGetResponse(
     Uri resolved,
-    String? proxyUrl,
+    ProxyConfig? proxy,
   ) async {
     cancelToken?.throwIfCancellationRequested();
     return RetryHelper.tryRun<HttpClientResponse>(
       () => CancellationTokenSource.register(
         cancelToken,
-        _getResponse(resolved, proxyUrl),
+        _getResponse(resolved, proxy),
       ),
       cancelToken: cancelToken,
       timeRetry: timeRetry,

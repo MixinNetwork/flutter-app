@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:dio/io.dart';
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:socks5_proxy/socks_client.dart';
 
 import 'extension/extension.dart';
 import 'property/setting_property.dart';
@@ -16,7 +18,7 @@ enum ProxyType {
 }
 
 @JsonSerializable()
-class ProxyConfig {
+class ProxyConfig with EquatableMixin {
   ProxyConfig({
     required this.type,
     required this.host,
@@ -45,27 +47,30 @@ class ProxyConfig {
   }
 
   Map<String, dynamic> toJson() => _$ProxyConfigToJson(this);
+
+  @override
+  List<Object?> get props => [id, type, host, port, username, password];
 }
 
 extension ClientExt on Client {
   void configProxySetting(SettingPropertyStorage settingProperties) {
-    var proxyUrl = settingProperties.activatedProxyUrl;
+    var proxyConfig = settingProperties.activatedProxy;
     settingProperties.addListener(() {
-      final url = settingProperties.activatedProxyUrl;
-      if (url != proxyUrl) {
-        proxyUrl = url;
-        _applyProxy(url);
+      final config = settingProperties.activatedProxy;
+      if (config != proxyConfig) {
+        proxyConfig = config;
+        _applyProxy(config);
       }
     });
-    _applyProxy(proxyUrl);
+    _applyProxy(proxyConfig);
   }
 
-  void _applyProxy(String? proxyUrl) {
-    if (proxyUrl != null && proxyUrl.isNotEmpty) {
-      i('apply client proxy $proxyUrl');
+  void _applyProxy(ProxyConfig? config) {
+    if (config != null) {
+      i('apply client proxy $config');
       dio.httpClientAdapter = IOHttpClientAdapter();
       (dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
-          (client) => client..setProxy(proxyUrl);
+          (client) => client..setProxy(config);
     } else {
       i('remove client proxy');
       dio.httpClientAdapter = IOHttpClientAdapter();
@@ -74,20 +79,30 @@ extension ClientExt on Client {
 }
 
 extension HttpClientProxy on HttpClient {
-  void setProxy(String? proxyUrl) {
-    if (proxyUrl == null || proxyUrl.isEmpty) {
-      findProxy = null;
-    } else {
-      findProxy = (url) => HttpClient.findProxyFromEnvironment(
-            url,
-            environment: {
-              if (proxyUrl.startsWith('http')) ...{
+  void setProxy(ProxyConfig? config) {
+    switch (config) {
+      case ProxyType.http:
+        final proxyUrl = config!.toUri();
+        i('set proxy $proxyUrl');
+        findProxy = (uri) => HttpClient.findProxyFromEnvironment(
+              uri,
+              environment: {
                 'https_proxy': proxyUrl,
                 'http_proxy': proxyUrl,
               },
-              if (proxyUrl.startsWith('socks5')) 'socks_proxy': proxyUrl,
-            },
-          );
+            );
+        break;
+      case ProxyType.socks5:
+        SocksTCPClient.assignToHttpClient(
+          this,
+          [
+            ProxySettings(config!.type, port),
+          ],
+        );
+        break;
+      case null:
+        findProxy = null;
+        break;
     }
   }
 }
