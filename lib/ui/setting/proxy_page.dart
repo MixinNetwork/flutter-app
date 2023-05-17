@@ -57,6 +57,10 @@ class _ProxySettingWidget extends HookWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CellGroup(
+          cellBackgroundColor: context.dynamicColor(
+            Colors.white,
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+          ),
           child: CellItem(
             title: Text(context.l10n.proxy),
             trailing: Transform.scale(
@@ -72,6 +76,10 @@ class _ProxySettingWidget extends HookWidget {
           ),
         ),
         CellGroup(
+          cellBackgroundColor: context.dynamicColor(
+            Colors.white,
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+          ),
           child: Column(
             children: [
               CellItem(
@@ -138,7 +146,10 @@ class _ProxyItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: context.theme.listSelected,
+        color: context.dynamicColor(
+          Colors.white,
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+        ),
         child: ListTile(
           leading: SizedBox(
             height: double.infinity,
@@ -168,6 +179,7 @@ class _ProxyItemWidget extends StatelessWidget {
           ),
           trailing: ActionButton(
             name: Resources.assetsImagesDeleteSvg,
+            color: context.theme.icon,
             onTap: () {
               context.database.settingProperties.removeProxy(proxy.id);
               if (selected) {
