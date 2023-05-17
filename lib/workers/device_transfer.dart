@@ -68,6 +68,9 @@ class DeviceTransferIsolateHandleCommand
   DeviceTransferIsolateHandleCommand(this.command);
 
   final TransferDataCommand command;
+
+  @override
+  String toString() => 'DeviceTransferIsolateHandleCommand{command: $command}';
 }
 
 class DeviceTransferIsolateController {
@@ -130,6 +133,7 @@ Future<DeviceTransferIsolateController> startTransferIsolate({
       errorReceivePort.close();
     },
     handleRemoteCommand: (command) {
+      i('device transfer isolate handle command: $command');
       isolateChannel.sink.add(DeviceTransferIsolateHandleCommand(command));
     },
   );

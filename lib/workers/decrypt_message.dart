@@ -277,6 +277,7 @@ class DecryptMessage extends Injector {
         if (_deviceTransfer == null) {
           e('DeviceTransfer is null, but received command $command');
         }
+        i('on device transfer command: $command');
         _deviceTransfer?.handleRemoteCommand(command);
       }
       await database.messagesHistoryDao
