@@ -8,22 +8,25 @@ extension ThrottleExtensions<T> on Stream<T> {
 
     return transform(StreamTransformer.fromHandlers(
       handleData: (data, sink) {
-        if (lastTime == null) {
+        void add(T event) {
+          timer?.cancel();
+          timer = null;
           lastTime = DateTime.now();
-          sink.add(data);
+          sink.add(event);
+        }
+
+        if (lastTime == null) {
+          add(data);
         } else {
           final now = DateTime.now();
           final diff = now.difference(lastTime!);
           if (diff >= duration) {
-            lastTime = now;
-            sink.add(data);
+            add(data);
           } else {
             lastData = data;
             timer?.cancel();
             timer = Timer(duration - diff, () {
-              lastTime = now;
-              sink.add(lastData);
-              timer = null;
+              add(lastData);
             });
           }
         }
