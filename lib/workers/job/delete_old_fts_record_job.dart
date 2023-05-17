@@ -1,7 +1,7 @@
 import '../../utils/logger.dart';
 import '../job_queue.dart';
 
-class DeleteOldFtsRecordJob extends JobQueue<bool> {
+class DeleteOldFtsRecordJob extends JobQueue<bool, List<bool>> {
   DeleteOldFtsRecordJob({required super.database});
 
   @override
@@ -59,4 +59,7 @@ class DeleteOldFtsRecordJob extends JobQueue<bool> {
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
   }
+
+  @override
+  bool isValid(List<bool> jobs) => jobs.isNotEmpty;
 }

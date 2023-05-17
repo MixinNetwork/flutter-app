@@ -349,11 +349,11 @@ class _MessageProcessRunner {
       case MainIsolateEventType.reconnectBlaze:
         blaze.reconnect();
         break;
-      case MainIsolateEventType.addAckJob:
-        _ackJob.add(event.argument as Job);
+      case MainIsolateEventType.addAckJobs:
+        _ackJob.add(event.argument as List<Job>);
         break;
-      case MainIsolateEventType.addSessionAckJob:
-        _sessionAckJob.add(event.argument as Job);
+      case MainIsolateEventType.addSessionAckJobs:
+        _sessionAckJob.add(event.argument as List<Job>);
         break;
       case MainIsolateEventType.addSendingJob:
         _sendingJob.add(event.argument as Job);

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
@@ -298,6 +299,19 @@ class _TransferProtocolSink implements EventSink<Uint8List> {
 
   @override
   void add(Uint8List event) {
+    // split 50kb to handle, avoid bytes too large.
+    // FIXME(BIN): refactor parse, avoid allocate too much memory.
+    const kMaxHandleLength = 50 * 1024;
+    var start = 0;
+    while (start < event.length) {
+      final end = math.min(start + kMaxHandleLength, event.length);
+      final bytes = event.sublist(start, end);
+      start = end;
+      _handleData(bytes);
+    }
+  }
+
+  void _handleData(Uint8List event) {
     Uint8List data;
     final carry = _carry;
     if (carry != null) {

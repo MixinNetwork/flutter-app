@@ -396,7 +396,7 @@ class _TransferProcessDialog extends HookWidget {
                     Text(context.l10n.transferringChats),
                     const SizedBox(width: 2),
                     if (progress.data != null && progress.data! > 0)
-                      Text('(${progress.data!.toStringAsFixed(1)}%)'),
+                      Text('(${progress.data!.toStringAsFixed(2)}%)'),
                   ],
                 ),
               ),

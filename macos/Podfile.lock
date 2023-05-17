@@ -151,7 +151,7 @@ SPEC CHECKSUMS:
   ogg_opus_player: 67fc56771b16586b9b2478f848e632f751400604
   package_info_plus: 02d7a575e80f194102bef286361c6c326e4c29ce
   pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
-  path_provider_foundation: c68054786f1b4f3343858c1e1d0caaded73f0be9
+  path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
   platform_device_id: 3e414428f45df149bbbfb623e2c0ca27c545b763
   platform_device_id_macos: f763bb55f088be804d61b96eb4710b8ab6598e94
   protocol_handler: 587e1caf6c0b92ce351ab14081968dae49cb8cc6
@@ -164,4 +164,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7
 
-COCOAPODS: 1.12.0
+COCOAPODS: 1.12.1

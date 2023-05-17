@@ -14,7 +14,7 @@ import '../job_queue.dart';
 ///
 /// The fist job is created by [MixinDatabase.migration].
 ///
-class MigrateFtsJob extends JobQueue<Job> {
+class MigrateFtsJob extends JobQueue<Job, List<Job>> {
   MigrateFtsJob({required super.database})
       : messageDao = database.messageDao,
         ftsDatabase = database.ftsDatabase,
@@ -149,4 +149,7 @@ class MigrateFtsJob extends JobQueue<Job> {
       }
     }
   }
+
+  @override
+  bool isValid(List<Job> jobs) => jobs.isNotEmpty;
 }

@@ -8,7 +8,7 @@ import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
 import '../job_queue.dart';
 
-class UpdateAssetJob extends JobQueue<Job> {
+class UpdateAssetJob extends JobQueue<Job, List<Job>> {
   UpdateAssetJob({
     required super.database,
     required this.client,
@@ -21,6 +21,9 @@ class UpdateAssetJob extends JobQueue<Job> {
 
   @override
   Future<List<Job>> fetchJobs() => database.jobDao.updateAssetJobs().get();
+
+  @override
+  bool isValid(List<Job> jobs) => jobs.isNotEmpty;
 
   @override
   Future<void> insertJob(Job job) async {

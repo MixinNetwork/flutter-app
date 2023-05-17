@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
@@ -102,9 +103,25 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     double alignment = 0,
     required PagingState<T> initState,
   }) : super(initState) {
-    on<PagingEvent>((event, emit) async {
-      await _onEvent(event, emit);
-    });
+    on<PagingUpdateEvent>(
+      (event, emit) async {
+        await _onEvent(event, emit);
+      },
+      transformer: restartable(),
+    );
+    on<PagingItemPositionEvent>(
+      (event, emit) async {
+        await _onEvent(event, emit);
+      },
+      transformer: restartable(),
+    );
+    on<PagingInitEvent>(
+      (event, emit) async {
+        await _onEvent(event, emit);
+      },
+      transformer: restartable(),
+    );
+
     itemPositionsListener.itemPositions.addListener(onItemPositions);
     add(PagingInitEvent(
       offset: offset,

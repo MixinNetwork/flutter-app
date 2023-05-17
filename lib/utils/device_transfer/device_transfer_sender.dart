@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:path/path.dart' as p;
 
 import '../../constants/constants.dart';
 import '../../db/database.dart';
+import '../../enum/media_status.dart';
 import '../attachment/attachment_util.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
@@ -223,7 +223,6 @@ class DeviceTransferSender {
     await runWithLog(_processTransferMessage, 'message');
     await runWithLog(_processTransferMessageMention, 'messageMention');
     await runWithLog(_processTransferExpiredMessage, 'expiredMessage');
-    await runWithLog(_processTransferAttachment, 'attachment');
 
     await socket.addCommand(TransferDataCommand.simple(
       deviceId: deviceId,
@@ -380,12 +379,29 @@ class DeviceTransferSender {
         break;
       }
       count += messages.length;
-      lastMessageRowId = messages.last.item1;
-      for (final message in messages) {
+      lastMessageRowId = messages.last.$1;
+      for (final (_, message) in messages) {
         await socket.addMessage(
-          TransferDataMessage.fromDbMessage(message.item2),
+          TransferDataMessage.fromDbMessage(message),
         );
         await onPacketSend();
+        if (message.category.isAttachment) {
+          if (message.mediaStatus == MediaStatus.done) {
+            final path = attachmentUtil.convertAbsolutePath(
+              category: message.category,
+              conversationId: message.conversationId,
+              fileName: message.mediaUrl,
+            );
+            final exist = File(path).existsSync();
+            if (exist) {
+              await socket.addAttachment(message.messageId, path);
+            } else {
+              e('attachment not exist: $path');
+            }
+          } else {
+            w('attachment not done: ${message.messageId} ${message.mediaStatus}');
+          }
+        }
       }
     }
     return count;
@@ -422,6 +438,23 @@ class DeviceTransferSender {
           TransferDataTranscriptMessage.fromDbTranscriptMessage(message),
         );
         await onPacketSend();
+        if (message.category.isAttachment) {
+          if (message.mediaStatus == MediaStatus.done) {
+            final path = attachmentUtil.convertAbsolutePath(
+              isTranscript: true,
+              category: message.category,
+              fileName: message.mediaUrl,
+            );
+            final exist = File(path).existsSync();
+            if (exist) {
+              await socket.addAttachment(message.messageId, path);
+            } else {
+              e('attachment not exist: $path');
+            }
+          } else {
+            w('attachment not done: ${message.messageId} ${message.mediaStatus}');
+          }
+        }
       }
       if (messages.length < _kQueryLimit) {
         break;
@@ -472,40 +505,6 @@ class DeviceTransferSender {
       }
     }
     return offset;
-  }
-
-  Future<int> _processTransferAttachment(TransferSocket socket) async {
-    final folder = attachmentUtil.mediaPath;
-    // send all files in media folder
-    final files = Directory(folder).list(recursive: true);
-    var count = 0;
-    await for (final file in files) {
-      if (file is File) {
-        final messageId = p.basenameWithoutExtension(file.path);
-
-        if (p.basename(file.parent.path) == 'Transcripts') {
-          final tm = await database.transcriptMessageDao
-              .transcriptMessageByMessageId(messageId)
-              .getSingleOrNull();
-          if (tm == null) {
-            d('attachment transcript message not found ${file.path}');
-            continue;
-          }
-        } else {
-          final message =
-              await database.messageDao.findMessageByMessageId(messageId);
-          if (message == null) {
-            d('attachment message not found ${file.path}');
-            continue;
-          }
-        }
-
-        await socket.addAttachment(messageId, file.path);
-        count++;
-        await onPacketSend();
-      }
-    }
-    return count;
   }
 
   Future<void> close({String? debugReason}) async {

@@ -216,11 +216,15 @@ class Blaze {
       }
     } else if (blazeMessage.action == kCreateCall ||
         blazeMessage.action == kCreateKraken) {
-      await ackJob.add(createAckJob(
-          kAcknowledgeMessageReceipts, data.messageId, MessageStatus.read));
+      await ackJob.add([
+        createAckJob(
+            kAcknowledgeMessageReceipts, data.messageId, MessageStatus.read)
+      ]);
     } else {
-      await ackJob.add(createAckJob(kAcknowledgeMessageReceipts, data.messageId,
-          MessageStatus.delivered));
+      await ackJob.add([
+        createAckJob(kAcknowledgeMessageReceipts, data.messageId,
+            MessageStatus.delivered)
+      ]);
     }
     if (stopwatch != null && stopwatch.elapsedMilliseconds > 5) {
       d('handle execution time: ${stopwatch.elapsedMilliseconds}');

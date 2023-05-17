@@ -4,7 +4,7 @@ import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../job_queue.dart';
 
-abstract class BaseMigrationJob extends JobQueue<Job> {
+abstract class BaseMigrationJob extends JobQueue<Job, List<Job>> {
   BaseMigrationJob({
     required super.database,
     required this.action,
@@ -67,4 +67,7 @@ abstract class BaseMigrationJob extends JobQueue<Job> {
   Future<void> onMigrationSuccess(Job job) async {
     await database.jobDao.deleteJobById(job.jobId);
   }
+
+  @override
+  bool isValid(List<Job> jobs) => jobs.isNotEmpty;
 }

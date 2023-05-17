@@ -106,7 +106,7 @@ class DeviceTransferReceiver {
     final socket = await Socket.connect(
       ip,
       port,
-      timeout: const Duration(seconds: 10),
+      timeout: const Duration(minutes: 1),
     );
     _resetTransferStates();
     _socket = TransferSocket(socket);
@@ -121,7 +121,6 @@ class DeviceTransferReceiver {
             await _processReceivedCommand(packet.command);
           } else if (packet is TransferAttachmentPacket) {
             await _processReceivedAttachmentPacket(packet);
-            await _notifyProgressUpdate();
           } else {
             e('unknown packet: $packet');
           }
