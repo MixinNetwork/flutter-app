@@ -22,6 +22,7 @@ extension ThrottleExtensions<T> on Stream<T> {
             timer?.cancel();
             timer = Timer(duration - diff, () {
               sink.add(lastData);
+              lastTime = now;
               timer = null;
             });
           }
