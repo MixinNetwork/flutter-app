@@ -1,5 +1,44 @@
 part of '../extension.dart';
 
+extension ThrottleExtensions<T> on Stream<T> {
+  Stream<T> throttleTime(Duration duration) {
+    DateTime? lastTime;
+    Timer? timer;
+    late T lastData;
+
+    return transform(StreamTransformer.fromHandlers(
+      handleData: (data, sink) {
+        void add(T event) {
+          timer?.cancel();
+          timer = null;
+          lastTime = DateTime.now();
+          sink.add(event);
+        }
+
+        if (lastTime == null) {
+          add(data);
+        } else {
+          final now = DateTime.now();
+          final diff = now.difference(lastTime!);
+          if (diff >= duration) {
+            add(data);
+          } else {
+            lastData = data;
+            timer?.cancel();
+            timer = Timer(duration - diff, () {
+              add(lastData);
+            });
+          }
+        }
+      },
+      handleDone: (sink) {
+        timer?.cancel();
+        sink.close();
+      },
+    ));
+  }
+}
+
 extension StreamExtensionWhereNotNull<T> on Stream<T?> {
   Stream<T> whereNotNull() => where((e) => e != null).cast<T>();
 }

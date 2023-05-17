@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:rxdart/rxdart.dart' hide ThrottleExtensions;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../constants/resources.dart';
@@ -333,7 +333,7 @@ class _SearchParticipantList extends HookWidget {
     final keywordStream = useValueNotifierConvertSteam(editingController);
 
     final filteredUser = useMemoizedStream(() => keywordStream
-                .throttleTime(const Duration(milliseconds: 100), trailing: true)
+                .throttleTime(const Duration(milliseconds: 100))
                 .map((event) => event.text)
                 .switchMap((value) {
               final state = context.read<ConversationCubit>().state;
