@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:tuple/tuple.dart';
+
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../bloc/keyword_cubit.dart';
@@ -35,9 +35,9 @@ class TextMessage extends HookWidget {
     );
 
     var keyword = useBlocStateConverter<SearchConversationKeywordCubit,
-        Tuple2<String?, String>, String>(
+        (String?, String), String>(
       converter: (state) {
-        if (state.item1 == null || state.item1 == userId) return state.item2;
+        if (state.$1 == null || state.$1 == userId) return state.$2;
         return '';
       },
       keys: [userId],

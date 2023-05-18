@@ -8,7 +8,6 @@ import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
-import 'package:tuple/tuple.dart';
 
 import '../../db/dao/message_dao.dart';
 import '../../db/dao/transcript_message_dao.dart';

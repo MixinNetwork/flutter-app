@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../constants/resources.dart';
 import '../../db/dao/sticker_album_dao.dart';
@@ -163,15 +162,13 @@ class _StickerStorePage extends HookWidget {
   }
 }
 
-typedef _StickerAlbumItem = Tuple2<StickerAlbum, List<Sticker>>;
-
 class _List extends HookWidget {
   const _List();
 
   @override
   Widget build(BuildContext context) {
     final albums = useMemoizedStream(() => Rx.combineLatest2<List<StickerAlbum>,
-                List<Sticker>, List<_StickerAlbumItem>>(
+                List<Sticker>, List<(StickerAlbum, List<Sticker>)>>(
               context.database.stickerAlbumDao.systemAlbums().watchWithStream(
                 eventStreams: [DataBaseEventBus.instance.updateStickerStream],
                 duration: kSlowThrottleDuration,
@@ -180,21 +177,25 @@ class _List extends HookWidget {
                 eventStreams: [DataBaseEventBus.instance.updateStickerStream],
                 duration: kSlowThrottleDuration,
               ),
-              (albums, stickers) => albums.map(
-                (e) {
-                  final _stickers = stickers
-                      .where((element) => element.albumId == e.albumId)
-                      .toList();
-                  return _StickerAlbumItem(e, _stickers);
-                },
-              ).toList(),
+              (albums, stickers) => albums
+                  .map(
+                    (e) => (
+                      e,
+                      stickers
+                          .where((element) => element.albumId == e.albumId)
+                          .toList()
+                    ),
+                  )
+                  .toList(),
             )).data ??
         [];
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 16),
       itemCount: albums.length,
-      itemBuilder: (BuildContext context, int index) =>
-          _Item(albums[index].item1, albums[index].item2),
+      itemBuilder: (BuildContext context, int index) {
+        final (album, stickers) = albums[index];
+        return _Item(album, stickers);
+      },
     );
   }
 }

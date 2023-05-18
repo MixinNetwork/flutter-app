@@ -6,7 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:tuple/tuple.dart';
+
 import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze_message.dart';
@@ -997,25 +997,24 @@ class DecryptMessage extends Injector {
 
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
     // key: messageId, value: message expired.
-    final messagesWithExpiredAt = <Tuple2<String, int?>>[];
+    final messagesWithExpiredAt = <(String, int?)>[];
     messages
         .where((m) => m.status == 'READ' || m.status == 'MENTION_READ')
         .forEach((m) async {
       if (m.status == 'MENTION_READ') {
         await database.messageMentionDao.markMentionRead(m.messageId);
       } else if (m.status == 'READ') {
-        messagesWithExpiredAt.add(Tuple2(m.messageId, m.expireAt));
+        messagesWithExpiredAt.add((m.messageId, m.expireAt));
       }
     });
 
     if (messagesWithExpiredAt.isNotEmpty) {
-      final messageIds = messagesWithExpiredAt.map((e) => e.item1).toList();
+      final messageIds = messagesWithExpiredAt.map((e) => e.$1).toList();
       final list = await database.messageDao.miniMessageByIds(messageIds).get();
 
       await database.messageDao.markMessageRead(list, updateExpired: false);
       for (final item in messagesWithExpiredAt) {
-        final messageId = item.item1;
-        final expireAt = item.item2;
+        final (messageId, expireAt) = item;
         if (expireAt != null && expireAt > 0) {
           await database.expiredMessageDao
               .updateMessageExpireAt(expireAt, messageId);

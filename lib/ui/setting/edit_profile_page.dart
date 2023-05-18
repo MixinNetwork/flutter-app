@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../bloc/bloc_converter.dart';
 import '../../utils/extension/extension.dart';
@@ -23,17 +22,16 @@ class EditProfilePage extends HookWidget {
     useEffect(() {
       context.accountServer.refreshSelf();
     }, []);
-    return BlocConverter<MultiAuthCubit, MultiAuthState,
-        Tuple2<String?, String?>>(
-      converter: (state) => Tuple2(
+    return BlocConverter<MultiAuthCubit, MultiAuthState, (String?, String?)>(
+      converter: (state) => (
         state.current?.account.fullName,
         state.current?.account.biography,
       ),
-      when: (a, b) => b?.item1 != null && b?.item2 != null,
+      when: (a, b) => b?.$1 != null && b?.$2 != null,
       immediatelyCallListener: true,
       listener: (context, state) {
-        nameTextEditingController.text = state.item1!;
-        bioTextEditingController.text = state.item2!;
+        nameTextEditingController.text = state.$1!;
+        bioTextEditingController.text = state.$2!;
       },
       child: Scaffold(
         backgroundColor: context.theme.background,
