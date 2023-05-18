@@ -164,7 +164,6 @@ class ClampingRenderViewport extends RenderViewport {
     do {
       correction = _attemptLayout(mainAxisExtent, crossAxisExtent,
           offset.pixels + centerOffsetAdjustment + _correctedOffset);
-      print('fuck correction: $correction, count: $count');
       if (correction != 0.0) {
         offset.correctBy(correction);
       } else {

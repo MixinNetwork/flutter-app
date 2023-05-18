@@ -44,7 +44,7 @@ Future<void> showShareLogDialog(
 
 Future<void> _createZipFile(List<String> paths) async {
   i('createZipFile: $paths');
-  final dir = paths[0];
+  final dir = paths.first;
   final zipPath = paths[1];
   final files = await Directory(dir).list().whereType<File>().toList();
   final encoder = ZipFileEncoder()..create(zipPath);
