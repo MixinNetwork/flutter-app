@@ -5,7 +5,6 @@ import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:tuple/tuple.dart';
 
 import '../subscribe_mixin.dart';
 
@@ -187,16 +186,12 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
 
       var map = state.map;
       // If the diff range has only one direction and is greater than the limit
-      if (result.length > 1 &&
-          (result.first.item2 - result.first.item1) > limit) {
+      if (result.length > 1 && (result.first.$2 - result.first.$1) > limit) {
         map = await queryMap(event.itemPositions.length + limit,
             event.itemPositions.first - prefetchDistance);
       } else {
-        for (final tuple in result) {
-          map = {
-            ...map,
-            ...await queryMap(tuple.item2 - tuple.item1, tuple.item1)
-          };
+        for (final (start, end) in result) {
+          map = {...map, ...await queryMap(end - start, start)};
         }
 
         if (map.length > expectEnd - expectStart) {
@@ -246,20 +241,20 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     return state.map[start] != null && state.map[end] != null;
   }
 
-  List<Tuple2<int, int>> differenceMaxExpectRange(int _start, int _end) {
+  List<(int, int)> differenceMaxExpectRange(int _start, int _end) {
     final start = max(_start, 0);
     final end = min(_end, state.count);
     final loadedIndexes = state.map.keys.toList();
 
-    Tuple2<int, int>? before;
-    Tuple2<int, int>? after;
+    (int, int)? before;
+    (int, int)? after;
 
     if (start < loadedIndexes.first) {
-      before = Tuple2(start, min(loadedIndexes.first, end));
+      before = (start, min(loadedIndexes.first, end));
     }
 
     if (loadedIndexes.last < end) {
-      after = Tuple2(max(loadedIndexes.last, start), end);
+      after = (max(loadedIndexes.last, start), end);
     }
 
     return [

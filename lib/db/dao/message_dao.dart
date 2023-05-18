@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../constants/constants.dart';
 import '../../enum/media_status.dart';
@@ -233,22 +232,23 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             ..where(messages.conversationId.equals(conversationId))
             ..limit(2)
             ..orderBy([OrderingTerm.desc(messages.createdAt)]))
-          .map((row) => Tuple2(
-              row.read(messages.messageId),
-              messages.createdAt.converter
-                  .fromSql(row.read(messages.createdAt))))
+          .map((row) => (
+                row.read(messages.messageId),
+                messages.createdAt.converter
+                    .fromSql(row.read(messages.createdAt))
+              ))
           .get();
 
       if (lastTwo.isEmpty) return;
-      if (lastTwo.firstOrNull?.item1 != messageId) return;
+      if (lastTwo.firstOrNull?.$1 != messageId) return;
 
       final newLast = lastTwo.lastOrNull;
 
       await (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(ConversationsCompanion(
-        lastMessageId: Value(newLast?.item1),
-        lastMessageCreatedAt: Value(newLast?.item2),
+        lastMessageId: Value(newLast?.$1),
+        lastMessageCreatedAt: Value(newLast?.$2),
       ))
           .then((value) {
         if (value > 0) {
@@ -1129,7 +1129,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         category: Value(category),
       ));
 
-  Future<List<Tuple2<int, Message>>> getMessages(int? rowid, int limit) async {
+  Future<List<(int, Message)>> getMessages(int? rowid, int limit) async {
     final messages = await customSelect(
         'SELECT rowid, * FROM messages WHERE ${rowid == null ? '1' : 'rowid < $rowid'} '
         "AND status != 'FAILED' AND status != 'UNKNOWN' "
@@ -1138,7 +1138,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       (row) async {
         final message = await db.messages.mapFromRow(row);
         final rowId = row.read<int>('rowid');
-        return Tuple2(rowId, message);
+        return (rowId, message);
       },
     ).get();
     return Future.wait(messages);
@@ -1168,13 +1168,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     List<String>? categories,
   }) async {
     // item1: created_at, item2: row_id
-    Tuple2<int, int>? anchor;
+    (int, int)? anchor;
     if (anchorMessageId != null) {
       anchor = await (selectOnly(db.messages)
             ..addColumns([db.messages.createdAt, db.messages.rowId])
             ..where(db.messages.messageId.equals(anchorMessageId))
             ..limit(1))
-          .map((row) => Tuple2(
+          .map((row) => (
                 row.read(db.messages.createdAt)!,
                 row.read(db.messages.rowId)!,
               ))
@@ -1187,10 +1187,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         predicate = predicate & m.category.isIn(categories!);
       }
       if (anchor != null) {
+        final (createdAt, rowId) = anchor;
         predicate = predicate &
-            (m.createdAt.isSmallerThanValue(anchor.item1) |
-                (m.createdAt.equals(anchor.item1) &
-                    m.rowId.isSmallerThanValue(anchor.item2)));
+            (m.createdAt.isSmallerThanValue(createdAt) |
+                (m.createdAt.equals(createdAt) &
+                    m.rowId.isSmallerThanValue(rowId)));
       }
       return predicate;
     }, (m, c, u, o) => Limit(limit, null)).get();

@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../account/account_server.dart';
 import '../../db/mixin_database.dart';
@@ -137,14 +136,14 @@ bool useAudioMessagePlaying(String messageId, {bool isMediaList = false}) {
       final ams = context.audioMessageService;
 
       return CombineLatestStream.combine2<MessageMedia?, bool,
-          Tuple2<MessageMedia?, bool>>(
+          (MessageMedia?, bool)>(
         ams._player.currentStream,
         ams._player.playbackStream.map((e) => e.isPlaying).distinct(),
-        Tuple2.new,
+        (a, b) => (a, b),
       ).map((event) {
-        if (!event.item2) return false;
+        if (!event.$2) return false;
 
-        final message = event.item1?.messageItem;
+        final message = event.$1?.messageItem;
 
         return message?.messageId == messageId &&
             isMediaList == ams._isMediaList;

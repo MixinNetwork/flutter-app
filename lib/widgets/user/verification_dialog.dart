@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
@@ -88,7 +87,7 @@ Future<VerificationResponse> requestVerificationCode({
   required String phone,
   required BuildContext context,
   required VerificationPurpose purpose,
-  Tuple2<CaptchaType, String>? captcha,
+  (CaptchaType, String)? captcha,
   AccountApi? accountApi,
 }) async {
   final request = VerificationRequest(
@@ -96,9 +95,8 @@ Future<VerificationResponse> requestVerificationCode({
     purpose: purpose,
     packageName: 'one.mixin.messenger',
     gRecaptchaResponse:
-        captcha?.item1 == CaptchaType.gCaptcha ? captcha?.item2 : null,
-    hCaptchaResponse:
-        captcha?.item1 == CaptchaType.hCaptcha ? captcha?.item2 : null,
+        captcha?.$1 == CaptchaType.gCaptcha ? captcha?.$2 : null,
+    hCaptchaResponse: captcha?.$1 == CaptchaType.hCaptcha ? captcha?.$2 : null,
   );
   final api = accountApi ?? context.accountServer.client.accountApi;
   try {
@@ -117,7 +115,7 @@ Future<VerificationResponse> requestVerificationCode({
         return requestVerificationCode(
           phone: phone,
           context: context,
-          captcha: Tuple2(type, token),
+          captcha: (type, token),
           purpose: purpose,
           accountApi: api,
         );

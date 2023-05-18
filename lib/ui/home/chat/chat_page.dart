@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../../account/scam_warning_key_value.dart';
 import '../../../account/show_pin_message_key_value.dart';
@@ -139,25 +138,25 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   }
 }
 
-class SearchConversationKeywordCubit
-    extends SimpleCubit<Tuple2<String?, String>> with SubscribeMixin {
+class SearchConversationKeywordCubit extends SimpleCubit<(String?, String)>
+    with SubscribeMixin {
   SearchConversationKeywordCubit({required ChatSideCubit chatSideCubit})
-      : super(const Tuple2(null, '')) {
+      : super(const (null, '')) {
     addSubscription(chatSideCubit.stream
         .map((event) => event.pages.any(
             (element) => element.name == ChatSideCubit.searchMessageHistory))
         .distinct()
-        .listen((event) => emit(const Tuple2(null, ''))));
+        .listen((event) => emit(const (null, ''))));
   }
 
   static void updateKeyword(BuildContext context, String keyword) {
     final cubit = context.read<SearchConversationKeywordCubit>();
-    cubit.emit(cubit.state.withItem2(keyword));
+    cubit.emit((cubit.state.$1, keyword));
   }
 
   static void updateSelectedUser(BuildContext context, String? userId) {
     final cubit = context.read<SearchConversationKeywordCubit>();
-    cubit.emit(cubit.state.withItem1(userId));
+    cubit.emit((userId, cubit.state.$2));
   }
 }
 
@@ -571,7 +570,7 @@ class _List extends HookWidget {
     );
 
     final key = ValueKey(
-      Tuple2(
+      (
         state.conversationId,
         state.refreshKey,
       ),

@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:tuple/tuple.dart';
 
 import 'account/account_key_value.dart';
 import 'account/account_server.dart';
@@ -80,7 +79,7 @@ class App extends StatelessWidget {
             const app = _App();
             if (authState == null) return app;
             return FutureProvider<AccountServer?>(
-              key: ValueKey(Tuple4(
+              key: ValueKey((
                 authState.account.userId,
                 authState.account.sessionId,
                 authState.account.identityNumber,

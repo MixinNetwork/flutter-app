@@ -259,16 +259,16 @@ class _SearchMessageList extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initKeyword =
+    final (_, initKeyword) =
         useMemoized(() => context.read<SearchConversationKeywordCubit>().state);
     final keyword = useMemoizedStream(
           () => context
               .read<SearchConversationKeywordCubit>()
               .stream
-              .map((event) => event.item2.trim())
+              .map((event) => event.$2.trim())
               .debounceTime(const Duration(milliseconds: 150)),
         ).data ??
-        initKeyword.item2.trim();
+        initKeyword.trim();
 
     final conversationId = useMemoized(() {
       final conversationId =

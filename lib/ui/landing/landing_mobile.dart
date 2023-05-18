@@ -11,7 +11,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../account/session_key_value.dart';
 import '../../constants/resources.dart';
@@ -308,16 +307,15 @@ class _CodeInputScene extends HookWidget {
 Future<VerificationResponse> _requestVerificationCode({
   required String phone,
   required BuildContext context,
-  Tuple2<CaptchaType, String>? captcha,
+  (CaptchaType, String)? captcha,
 }) async {
   final request = VerificationRequest(
     phone: phone,
     purpose: VerificationPurpose.session,
     packageName: 'one.mixin.messenger',
     gRecaptchaResponse:
-        captcha?.item1 == CaptchaType.gCaptcha ? captcha?.item2 : null,
-    hCaptchaResponse:
-        captcha?.item1 == CaptchaType.hCaptcha ? captcha?.item2 : null,
+        captcha?.$1 == CaptchaType.gCaptcha ? captcha?.$2 : null,
+    hCaptchaResponse: captcha?.$1 == CaptchaType.hCaptcha ? captcha?.$2 : null,
   );
   try {
     final cubit = context.read<LandingMobileCubit>();
@@ -336,7 +334,7 @@ Future<VerificationResponse> _requestVerificationCode({
         return _requestVerificationCode(
           phone: phone,
           context: context,
-          captcha: Tuple2(type, token),
+          captcha: (type, token),
         );
       }
     }

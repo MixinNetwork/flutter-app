@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../../account/account_server.dart';
 import '../../../bloc/subscribe_mixin.dart';
@@ -225,7 +224,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     addSubscription(
       conversationCubit.stream
           .where((event) => event?.conversationId != null)
-          .map((event) => Tuple4(
+          .map((event) => (
                 event?.conversationId,
                 event?.initIndexMessageId,
                 event?.lastReadMessageId,
@@ -234,8 +233,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           .distinct()
           .asyncMap(
             (event) async => _MessageInitEvent(
-              centerMessageId: event.item2,
-              lastReadMessageId: event.item3,
+              centerMessageId: event.$2,
+              lastReadMessageId: event.$3,
             ),
           )
           .listen(add),

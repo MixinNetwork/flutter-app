@@ -120,7 +120,6 @@ dependencies:
   synchronized: ^3.0.1
   system_tray:
     path: third_party/system_tray
-  tuple: ^2.0.1
   ui_device:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git

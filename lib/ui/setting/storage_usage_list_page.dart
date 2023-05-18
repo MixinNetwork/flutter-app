@@ -1,7 +1,7 @@
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:tuple/tuple.dart';
+
 import 'package:watcher/watcher.dart';
 
 import '../../db/extension/conversation.dart';
@@ -38,8 +38,7 @@ class _Content extends HookWidget {
     ).data;
 
     final list =
-        useMemoizedFuture<List<Tuple2<ConversationStorageUsage, int>>?>(
-            () async {
+        useMemoizedFuture<List<(ConversationStorageUsage, int)>?>(() async {
       try {
         final accountServer = context.accountServer;
         final list = await accountServer.database.conversationDao
@@ -47,13 +46,13 @@ class _Content extends HookWidget {
             .get();
         final result = await Future.wait(
           list.map(
-            (e) async => Tuple2(
+            (e) async => (
               e,
               await accountServer.getConversationMediaSize(e.conversationId),
             ),
           ),
         );
-        result.sort((a, b) => b.item2 - a.item2);
+        result.sort((a, b) => b.$2 - a.$2);
         return result;
       } catch (e) {
         return [];
@@ -71,8 +70,7 @@ class _Content extends HookWidget {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 40),
       itemBuilder: (_, index) {
-        final item = list[index].item1;
-        final size = list[index].item2;
+        final (item, size) = list[index];
         return _Item(item: item, size: size);
       },
       separatorBuilder: (_, __) => const SizedBox(height: 10),
@@ -125,12 +123,12 @@ class _Item extends HookWidget {
             ],
           ),
           onTap: () => context.read<ResponsiveNavigatorCubit>().pushPage(
-                ResponsiveNavigatorCubit.storageUsageDetail,
-                arguments: Tuple2(
-                  conversationValidName(item.name, item.fullName),
-                  item.conversationId,
-                ),
-              ),
+            ResponsiveNavigatorCubit.storageUsageDetail,
+            arguments: (
+              conversationValidName(item.name, item.fullName),
+              item.conversationId,
+            ),
+          ),
         ),
       ),
     );

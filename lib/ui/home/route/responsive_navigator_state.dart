@@ -12,7 +12,7 @@ class ResponsiveNavigatorState extends Equatable {
   @override
   List<Object?> get props => [
         routeMode,
-        ...pages.map((e) => Tuple4(
+        ...pages.map((e) => (
               e.key,
               e.name,
               e.arguments,

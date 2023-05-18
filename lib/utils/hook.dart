@@ -6,7 +6,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:tuple/tuple.dart';
 
 import '../app.dart';
 import 'app_lifecycle.dart';
@@ -60,18 +59,18 @@ S useBlocState<B extends BlocBase<S>, S>({
   bool preserveState = false,
   bool Function(S state)? when,
 }) {
-  final tuple = useMemoized(
+  final (stream, initialData) = useMemoized(
     () {
       final b = bloc ?? useContext().read<B>();
       var stream = b.stream;
       if (when != null) stream = stream.where(when);
-      return Tuple2(stream.distinct(), b.state);
+      return (stream.distinct(), b.state);
     },
     [bloc ?? useContext().read<B>(), ...keys],
   );
   return useStream(
-    tuple.item1,
-    initialData: tuple.item2,
+    stream,
+    initialData: initialData,
     preserveState: preserveState,
   ).data as S;
 }
@@ -83,18 +82,18 @@ T useBlocStateConverter<B extends BlocBase<S>, S, T>({
   bool Function(T)? when,
   required T Function(S) converter,
 }) {
-  final tuple = useMemoized(
+  final (stream, initialData) = useMemoized(
     () {
       final b = bloc ?? useContext().read<B>();
       var stream = b.stream.map(converter);
       if (when != null) stream = stream.where(when);
-      return Tuple2(stream.distinct(), converter(b.state));
+      return (stream.distinct(), converter(b.state));
     },
     [bloc ?? useContext().read<B>(), ...keys],
   );
   return useStream(
-    tuple.item1,
-    initialData: tuple.item2,
+    stream,
+    initialData: initialData,
     preserveState: preserveState,
   ).data as T;
 }
