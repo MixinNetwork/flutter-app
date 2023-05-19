@@ -1,3 +1,4 @@
+@TestOn('linux || mac-os')
 import 'package:drift/native.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/db/util/property_storage.dart';
