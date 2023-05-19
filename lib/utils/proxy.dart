@@ -5,7 +5,6 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
-import 'package:socks5_proxy/socks_client.dart';
 
 import 'extension/extension.dart';
 import 'property/setting_property.dart';
@@ -81,9 +80,8 @@ extension ClientExt on Client {
 extension HttpClientProxy on HttpClient {
   void setProxy(ProxyConfig? config) {
     switch (config) {
-      case ProxyType.http:
-        final proxyUrl = config!.toUri();
-        i('set proxy $proxyUrl');
+      case ProxyConfig(type: ProxyType.http):
+        final proxyUrl = config.toUri();
         findProxy = (uri) => HttpClient.findProxyFromEnvironment(
               uri,
               environment: {
@@ -91,18 +89,10 @@ extension HttpClientProxy on HttpClient {
                 'http_proxy': proxyUrl,
               },
             );
-        break;
-      case ProxyType.socks5:
-        SocksTCPClient.assignToHttpClient(
-          this,
-          [
-            ProxySettings(config!.type, port),
-          ],
-        );
-        break;
+      case ProxyConfig(type: ProxyType.socks5):
+      // not supported yet.
       case null:
         findProxy = null;
-        break;
     }
   }
 }

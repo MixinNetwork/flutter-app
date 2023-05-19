@@ -627,8 +627,11 @@ class MixinNetworkImageProvider
 
   Future<HttpClientResponse> _getResponse(
       Uri resolved, ProxyConfig? proxy) async {
-    httpClient.setProxy(proxy);
-    final request = await httpClient.getUrl(resolved);
+    if (proxy != _imageClientProxyConfig) {
+      _httpClient.setProxy(proxy);
+      _imageClientProxyConfig = proxy;
+    }
+    final request = await _httpClient.getUrl(resolved);
     headers?.forEach((String name, String value) {
       request.headers.add(name, value);
     });
@@ -725,7 +728,7 @@ class MixinNetworkImageProvider
   static final HttpClient _sharedHttpClient = HttpClient()
     ..autoUncompress = false;
 
-  static HttpClient get httpClient {
+  static HttpClient get _httpClient {
     var client = _sharedHttpClient;
     assert(() {
       if (debugNetworkImageHttpClientProvider != null) {
@@ -735,6 +738,9 @@ class MixinNetworkImageProvider
     }());
     return client;
   }
+
+  /// proxy config for [_httpClient]
+  static ProxyConfig? _imageClientProxyConfig;
 }
 
 /// download image from network to cache. return the cache image file.

@@ -321,18 +321,6 @@ class _ProxyTypeWidget extends StatelessWidget {
                     : null,
                 onTap: () => proxyType.value = ProxyType.http,
               ),
-              Divider(height: 1, color: context.theme.divider),
-              ListTile(
-                title: const Text('SOCKS5'),
-                trailing: proxyType.value == ProxyType.socks5
-                    ? SvgPicture.asset(
-                        Resources.assetsImagesCheckedSvg,
-                        width: 24,
-                        height: 24,
-                      )
-                    : null,
-                onTap: () => proxyType.value = ProxyType.socks5,
-              ),
             ],
           ),
         ),

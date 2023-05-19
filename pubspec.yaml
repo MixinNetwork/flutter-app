@@ -110,7 +110,6 @@ dependencies:
   rxdart: ^0.27.5
   scrollable_positioned_list: ^0.3.5
   sliver_tools: ^0.2.9
-  socks5_proxy: ^1.0.3+dev.3
   sqlite3_flutter_libs: ^0.5.12
   stream_transform: ^2.1.0
   string_tokenizer:
