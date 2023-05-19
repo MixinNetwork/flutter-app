@@ -51,11 +51,15 @@ class _AttachmentDownloadJob extends _AttachmentJobBase {
         completer.completeError(Exception('receive kill message'));
       }
 
-      if (message is Tuple2<int, int>) {
-        updateProgress(message.item1, message.item2);
-        sendProgress(message.item1, message.item2);
-        return;
+      switch (message) {
+        case (final int received, final int total):
+          {
+            updateProgress(received, total);
+            sendProgress(received, total);
+            return;
+          }
       }
+
       if (message == _completeMessage) {
         completer.complete();
       }
@@ -108,7 +112,7 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
         }
         return _stream.map((event) {
           received += event.length;
-          options.sendPort.send(Tuple2(received, total));
+          options.sendPort.send((received, total));
           return event;
         });
       },

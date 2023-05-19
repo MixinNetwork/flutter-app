@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../utils/extension/extension.dart';
 import '../../utils/file.dart';
@@ -58,8 +57,8 @@ class StorageUsageDetailPage extends HookWidget {
       keys: [watchEvent],
     ).requireData;
 
-    final selected = useState<Tuple4<bool, bool, bool, bool>>(
-        const Tuple4(false, false, false, false));
+    final selected =
+        useState<(bool, bool, bool, bool)>(const (false, false, false, false));
 
     return Scaffold(
       backgroundColor: context.theme.background,
@@ -67,25 +66,27 @@ class StorageUsageDetailPage extends HookWidget {
         title: Text(name),
         actions: [
           Disable(
-            disable: selected.value
-                .toList()
-                .cast<bool>()
-                .every((element) => !element),
+            disable: [
+              selected.value.$1,
+              selected.value.$2,
+              selected.value.$3,
+              selected.value.$4
+            ].every((element) => !element),
             child: MixinButton(
               backgroundTransparent: true,
               onTap: () => runFutureWithToast(
                 () async {
                   final accountServer = context.accountServer;
-                  if (selected.value.item1) {
+                  if (selected.value.$1) {
                     await _clear(accountServer.getImagesPath(conversationId));
                   }
-                  if (selected.value.item2) {
+                  if (selected.value.$2) {
                     await _clear(accountServer.getVideosPath(conversationId));
                   }
-                  if (selected.value.item3) {
+                  if (selected.value.$3) {
                     await _clear(accountServer.getAudiosPath(conversationId));
                   }
-                  if (selected.value.item4) {
+                  if (selected.value.$4) {
                     await _clear(accountServer.getFilesPath(conversationId));
                   }
                 }(),
@@ -115,10 +116,13 @@ class StorageUsageDetailPage extends HookWidget {
                   CellItem(
                     title: RadioItem(
                       groupValue: true,
-                      value: selected.value.item1,
+                      value: selected.value.$1,
                       title: Text(context.l10n.photos),
-                      onChanged: (bool value) =>
-                          selected.value = selected.value.withItem1(!value),
+                      onChanged: (bool value) {
+                        final (_, item2, item3, item4) = selected.value;
+
+                        selected.value = (!value, item2, item3, item4);
+                      },
                     ),
                     description: Text(
                       photosSize,
@@ -131,10 +135,13 @@ class StorageUsageDetailPage extends HookWidget {
                   CellItem(
                     title: RadioItem(
                       groupValue: true,
-                      value: selected.value.item2,
+                      value: selected.value.$2,
                       title: Text(context.l10n.videos),
-                      onChanged: (bool value) =>
-                          selected.value = selected.value.withItem2(!value),
+                      onChanged: (bool value) {
+                        final (item1, _, item3, item4) = selected.value;
+
+                        selected.value = (item1, !value, item3, item4);
+                      },
                     ),
                     description: Text(
                       videosSize,
@@ -147,10 +154,13 @@ class StorageUsageDetailPage extends HookWidget {
                   CellItem(
                     title: RadioItem(
                       groupValue: true,
-                      value: selected.value.item3,
+                      value: selected.value.$3,
                       title: Text(context.l10n.audio),
-                      onChanged: (bool value) =>
-                          selected.value = selected.value.withItem3(!value),
+                      onChanged: (bool value) {
+                        final (item1, item2, _, item4) = selected.value;
+
+                        selected.value = (item1, item2, !value, item4);
+                      },
                     ),
                     description: Text(
                       audiosSize,
@@ -163,10 +173,13 @@ class StorageUsageDetailPage extends HookWidget {
                   CellItem(
                     title: RadioItem(
                       groupValue: true,
-                      value: selected.value.item4,
+                      value: selected.value.$4,
                       title: Text(context.l10n.files),
-                      onChanged: (bool value) =>
-                          selected.value = selected.value.withItem4(!value),
+                      onChanged: (bool value) {
+                        final (item1, item2, item3, _) = selected.value;
+
+                        selected.value = (item1, item2, item3, !value);
+                      },
                     ),
                     description: Text(
                       filesSize,

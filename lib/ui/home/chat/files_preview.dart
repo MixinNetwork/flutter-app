@@ -12,7 +12,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/resources.dart';
@@ -97,12 +96,12 @@ class _FilesPreviewDialog extends HookWidget {
     final currentTab = useState(_TabType.files);
 
     final onFileAddedStream = useStreamController<int>();
-    final onFileRemovedStream = useStreamController<Tuple2<int, _File>>();
+    final onFileRemovedStream = useStreamController<(int, _File)>();
 
     void removeFile(_File file) {
       final index = files.value.indexOf(file);
       files.value = (files.value..removeAt(index)).toList();
-      onFileRemovedStream.add(Tuple2(index, file));
+      onFileRemovedStream.add((index, file));
       if (files.value.isEmpty) {
         Navigator.pop(context);
       }
@@ -475,7 +474,7 @@ class _AnimatedListBuilder extends HookWidget {
 
   final List<_File> files;
   final Stream<int> onFileAdded;
-  final Stream<Tuple2<int, _File>> onFileDeleted;
+  final Stream<(int, _File)> onFileDeleted;
 
   final Widget Function(BuildContext, _File, Animation<double>) builder;
 
@@ -493,8 +492,8 @@ class _AnimatedListBuilder extends HookWidget {
     useEffect(() {
       final subscription = onFileDeleted.listen((event) {
         animatedListKey.currentState?.removeItem(
-          event.item1,
-          (context, animation) => builder(context, event.item2, animation),
+          event.$1,
+          (context, animation) => builder(context, event.$2, animation),
         );
       });
       return subscription.cancel;

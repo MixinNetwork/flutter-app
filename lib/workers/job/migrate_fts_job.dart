@@ -82,14 +82,14 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
         break;
       }
       try {
-        lastMessageRowId = messages.last.item1;
+        lastMessageRowId = messages.last.$1;
 
         // migration skip the messages already in ftsDatabase.
         final messagesToMigrate = (await Future.wait(messages.map((e) async {
           final exist = await ftsDatabase
-              .checkMessageMetaExists(e.item2.messageId)
+              .checkMessageMetaExists(e.$2.messageId)
               .getSingle();
-          return exist ? null : e.item2;
+          return exist ? null : e.$2;
         })))
             .whereNotNull();
 

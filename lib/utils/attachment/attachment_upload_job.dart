@@ -59,10 +59,13 @@ class _AttachmentUploadJob extends _AttachmentJobBase {
         completer.completeError(Exception('receive kill message'));
       }
 
-      if (message is Tuple2<int, int>) {
-        updateProgress(message.item1, message.item2);
-        sendProgress(message.item1, message.item2);
-        return;
+      switch (message) {
+        case (final int received, final int total):
+          {
+            updateProgress(received, total);
+            sendProgress(received, total);
+            return;
+          }
       }
       if (message is List<int>?) {
         completer.complete(message);
@@ -124,7 +127,7 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
         },
       ),
       onSendProgress: (int count, int total) =>
-          options.sendPort.send(Tuple2(count, total)),
+          options.sendPort.send((count, total)),
       cancelToken: cancelToken,
     );
 

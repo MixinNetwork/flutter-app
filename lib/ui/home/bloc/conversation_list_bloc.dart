@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_app_icon_badge/flutter_app_icon_badge.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:rxdart/rxdart.dart' hide ThrottleExtensions;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../bloc/paging/paging_bloc.dart';

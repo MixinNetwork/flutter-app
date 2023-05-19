@@ -5,6 +5,7 @@ import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/logger.dart';
 import '../../../utils/web_view/web_view_interface.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
@@ -48,6 +49,7 @@ class ChatBar extends HookWidget {
     MoveWindowBarrier toggleInfoPageWrapper({
       required Widget child,
       HitTestBehavior behavior = HitTestBehavior.opaque,
+      bool longPressToShareLog = false,
     }) =>
         MoveWindowBarrier(
           child: InteractiveDecoratedBox(
@@ -57,6 +59,15 @@ class ChatBar extends HookWidget {
               }
               chatSideCubit.toggleInfoPage();
             },
+            onLongPress: longPressToShareLog
+                ? (details) {
+                    if ((conversation.isGroup ?? true) ||
+                        (conversation.isBot ?? true)) {
+                      return;
+                    }
+                    showShareLogDialog(context, conversation: conversation);
+                  }
+                : null,
             behavior: behavior,
             child: child,
           ),
@@ -75,6 +86,7 @@ class ChatBar extends HookWidget {
               : const SizedBox(width: 16),
         ),
         toggleInfoPageWrapper(
+          longPressToShareLog: true,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

@@ -13,7 +13,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:intl_phone_number_input/src/models/country_model.dart';
 import 'package:intl_phone_number_input/src/providers/country_provider.dart';
 import 'package:intl_phone_number_input/src/utils/phone_number/phone_number_util.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';

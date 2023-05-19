@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../../account/account_key_value.dart';
 import '../../../account/account_server.dart';
@@ -62,8 +61,8 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
     requestAuthUrl();
   }
 
-  final StreamController<Tuple2<int, String>> periodicStreamController =
-      StreamController<Tuple2<int, String>>();
+  final StreamController<(int, String)> periodicStreamController =
+      StreamController<(int, String)>();
   StreamSubscription? streamSubscription;
   late signal.ECKeyPair keyPair;
 
@@ -81,8 +80,8 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
         status: LandingStatus.ready,
       ));
 
-      streamSubscription = Stream.periodic(const Duration(milliseconds: 1500),
-              (i) => Tuple2(i, rsp.data.deviceId))
+      streamSubscription = Stream.periodic(
+              const Duration(milliseconds: 1500), (i) => (i, rsp.data.deviceId))
           .listen(periodicStreamController.add);
       addSubscription(streamSubscription);
     } catch (error, stack) {
@@ -94,12 +93,12 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
   void _initLandingListen() {
     final subscription = periodicStreamController.stream
         .where((event) {
-          if (event.item1 < 60) return true;
+          if (event.$1 < 60) return true;
           streamSubscription?.cancel();
           emit(state.needReload('qrcode display timeout.'));
           return false;
         })
-        .map((event) => event.item2)
+        .map((event) => event.$2)
         .asyncMap((deviceId) async =>
             (await client.provisioningApi.getProvisioning(deviceId))
                 .data
@@ -122,14 +121,14 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
         .whereNotNull()
         .listen((auth) => authCubit.signIn(
               AuthState(
-                account: auth.item1,
-                privateKey: auth.item2,
+                account: auth.$1,
+                privateKey: auth.$2,
               ),
             ));
     addSubscription(subscription);
   }
 
-  FutureOr<Tuple2<Account, String>?> _verify(String secret) async {
+  FutureOr<(Account, String)?> _verify(String secret) async {
     final result =
         signal.decrypt(base64Encode(keyPair.privateKey.serialize()), secret);
     final msg =
@@ -164,7 +163,7 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
     await CryptoKeyValue.instance.init(rsp.data.identityNumber);
     CryptoKeyValue.instance.localRegistrationId = registrationId;
 
-    return Tuple2(
+    return (
       rsp.data,
       privateKey,
     );

@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../setting/about_page.dart';
 import '../../setting/account_delete_page.dart';
@@ -111,7 +110,7 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
           ),
         );
       case storageUsageDetail:
-        if (arguments == null || arguments is! Tuple2<String, String>) {
+        if (arguments == null || arguments is! (String, String)) {
           throw ArgumentError('Invalid route');
         }
 
@@ -120,8 +119,8 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
           name: storageUsageDetail,
           child: StorageUsageDetailPage(
             key: const ValueKey(storageUsageDetail),
-            name: arguments.item1,
-            conversationId: arguments.item2,
+            name: arguments.$1,
+            conversationId: arguments.$2,
           ),
         );
       case appearancePage:
