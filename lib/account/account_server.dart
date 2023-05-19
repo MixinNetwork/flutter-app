@@ -157,12 +157,7 @@ class AccountServer {
       ],
     )..configProxySetting(database.settingProperties);
 
-    attachmentUtil = AttachmentUtil.init(
-      client,
-      database.messageDao,
-      database.transcriptMessageDao,
-      identityNumber,
-    );
+    attachmentUtil = AttachmentUtil.init(client, database, identityNumber);
     _sendMessageHelper =
         SendMessageHelper(database, attachmentUtil, addSendingJob);
 

@@ -17,6 +17,7 @@ class _AttachmentUploadJobOption {
     required this.keys,
     required this.iv,
     required this.sendPort,
+    required this.proxy,
   });
 
   final String path;
@@ -24,6 +25,7 @@ class _AttachmentUploadJobOption {
   final List<int>? keys;
   final List<int>? iv;
   final SendPort sendPort;
+  final ProxyConfig? proxy;
 }
 
 class _AttachmentUploadJob extends _AttachmentJobBase {
@@ -42,6 +44,7 @@ class _AttachmentUploadJob extends _AttachmentJobBase {
   late final ReceivePort? _receivePort;
 
   Future<List<int>?> upload(
+    ProxyConfig? proxy,
     void Function(int count, int total) sendProgress,
   ) async {
     late Isolate? isolate;
@@ -74,6 +77,7 @@ class _AttachmentUploadJob extends _AttachmentJobBase {
           keys: keys,
           iv: iv,
           sendPort: _receivePort!.sendPort,
+          proxy: proxy,
         ));
 
     return completer.future;
@@ -109,6 +113,7 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
   }
 
   try {
+    _dio.applyProxy(options.proxy);
     final response = await _dio.putUri(
       Uri.parse(options.url),
       data: uploadStream,

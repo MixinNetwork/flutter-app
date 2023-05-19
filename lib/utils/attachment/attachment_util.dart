@@ -12,6 +12,7 @@ import 'package:tuple/tuple.dart';
 
 import '../../db/dao/message_dao.dart';
 import '../../db/dao/transcript_message_dao.dart';
+import '../../db/database.dart';
 import '../../db/mixin_database.dart';
 import '../../db/util/util.dart';
 import '../../enum/media_status.dart';
@@ -22,9 +23,12 @@ import '../extension/extension.dart';
 import '../file.dart';
 import '../load_balancer_utils.dart';
 import '../logger.dart';
+import '../property/setting_property.dart';
+import '../proxy.dart';
 import 'download_key_value.dart';
 
 part 'attachment_download_job.dart';
+
 part 'attachment_upload_job.dart';
 
 final _dio = Dio(BaseOptions(
@@ -124,6 +128,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     this._client,
     this._messageDao,
     this._transcriptMessageDao,
+    this._settingProperties,
     super.mediaPath,
   ) {
     final httpClientAdapter = _dio.httpClientAdapter;
@@ -141,6 +146,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   final MessageDao _messageDao;
   final TranscriptMessageDao _transcriptMessageDao;
   final Client _client;
+  final SettingPropertyStorage _settingProperties;
 
   final _attachmentJob = <String, _AttachmentJobBase>{};
 
@@ -297,8 +303,10 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
 
         _setAttachmentJob(messageId, attachmentDownloadJob);
 
-        await attachmentDownloadJob
-            .download((int count, int total) => notifyListeners());
+        await attachmentDownloadJob.download(
+          _settingProperties.activatedProxy,
+          (int count, int total) => notifyListeners(),
+        );
 
         final fileSize = await file.length();
 
@@ -373,8 +381,10 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
 
       _setAttachmentJob(messageId, attachmentUploadJob);
 
-      final digest = await attachmentUploadJob
-          .upload((int count, int total) => notifyListeners());
+      final digest = await attachmentUploadJob.upload(
+        _settingProperties.activatedProxy,
+        (int count, int total) => notifyListeners(),
+      );
       await _messageDao.updateMediaStatus(messageId, MediaStatus.done);
       return AttachmentResult(
           response.data.attachmentId,
@@ -436,8 +446,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
 
   static AttachmentUtil init(
     Client client,
-    MessageDao messageDao,
-    TranscriptMessageDao transcriptMessageDao,
+    Database database,
     String identityNumber,
   ) {
     final documentDirectory = mixinDocumentsDirectory;
@@ -445,8 +454,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
         File(p.join(documentDirectory.path, identityNumber, 'Media'));
     return AttachmentUtil(
       client,
-      messageDao,
-      transcriptMessageDao,
+      database.messageDao,
+      database.transcriptMessageDao,
+      database.settingProperties,
       mediaDirectory.path,
     );
   }

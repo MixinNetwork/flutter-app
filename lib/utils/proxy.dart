@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -51,6 +52,20 @@ class ProxyConfig with EquatableMixin {
   List<Object?> get props => [id, type, host, port, username, password];
 }
 
+extension DioProxyExt on Dio {
+  void applyProxy(ProxyConfig? config) {
+    if (config != null) {
+      i('apply client proxy $config');
+      httpClientAdapter = IOHttpClientAdapter();
+      (httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
+          (client) => client..setProxy(config);
+    } else {
+      i('remove client proxy');
+      httpClientAdapter = IOHttpClientAdapter();
+    }
+  }
+}
+
 extension ClientExt on Client {
   void configProxySetting(SettingPropertyStorage settingProperties) {
     var proxyConfig = settingProperties.activatedProxy;
@@ -58,22 +73,10 @@ extension ClientExt on Client {
       final config = settingProperties.activatedProxy;
       if (config != proxyConfig) {
         proxyConfig = config;
-        _applyProxy(config);
+        dio.applyProxy(config);
       }
     });
-    _applyProxy(proxyConfig);
-  }
-
-  void _applyProxy(ProxyConfig? config) {
-    if (config != null) {
-      i('apply client proxy $config');
-      dio.httpClientAdapter = IOHttpClientAdapter();
-      (dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
-          (client) => client..setProxy(config);
-    } else {
-      i('remove client proxy');
-      dio.httpClientAdapter = IOHttpClientAdapter();
-    }
+    dio.applyProxy(proxyConfig);
   }
 }
 
