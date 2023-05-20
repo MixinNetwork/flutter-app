@@ -9,7 +9,7 @@ extension IsEncryptedExtension on App {
   bool get isEncrypted => capabilities?.contains('ENCRYPTED') == true;
 }
 
-@DriftAccessor(tables: [Apps])
+@DriftAccessor()
 class AppDao extends DatabaseAccessor<MixinDatabase> with _$AppDaoMixin {
   AppDao(super.db);
 

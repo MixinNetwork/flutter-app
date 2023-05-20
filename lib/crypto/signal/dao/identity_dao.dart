@@ -4,7 +4,7 @@ import '../signal_database.dart';
 
 part 'identity_dao.g.dart';
 
-@DriftAccessor(tables: [Identities])
+@DriftAccessor()
 class IdentityDao extends DatabaseAccessor<SignalDatabase>
     with _$IdentityDaoMixin {
   IdentityDao(super.db);

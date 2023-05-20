@@ -4,7 +4,7 @@ import '../mixin_database.dart';
 
 part 'participant_session_dao.g.dart';
 
-@DriftAccessor(tables: [ParticipantSession])
+@DriftAccessor()
 class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantSessionDaoMixin {
   ParticipantSessionDao(super.db);

@@ -14,6 +14,7 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
+import '../utils/proxy.dart';
 import '../workers/job/ack_job.dart';
 import '../workers/job/flood_job.dart';
 import '../workers/message_worker_isolate.dart';
@@ -41,7 +42,10 @@ class Blaze {
     this.userAgent,
     this.ackJob,
     this.floodJob,
-  );
+  ) {
+    database.settingProperties.addListener(_onProxySettingChanged);
+    proxyConfig = database.settingProperties.activatedProxy;
+  }
 
   final String userId;
   final String sessionId;
@@ -52,6 +56,8 @@ class Blaze {
   final FloodJob floodJob;
 
   final String? userAgent;
+
+  ProxyConfig? proxyConfig;
 
   String _host = _wsHost1;
   String? _token;
@@ -121,6 +127,7 @@ class Blaze {
         'Authorization': 'Bearer $token',
       },
       pingInterval: const Duration(seconds: 10),
+      customClient: HttpClient()..setProxy(proxyConfig),
     );
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
@@ -336,7 +343,18 @@ class Blaze {
     }
   }
 
+  void _onProxySettingChanged() {
+    final url = database.settingProperties.activatedProxy;
+    if (url == proxyConfig) {
+      return;
+    }
+    proxyConfig = url;
+    _connectedState = ConnectedState.disconnected;
+    reconnect();
+  }
+
   void dispose() {
+    database.settingProperties.removeListener(_onProxySettingChanged);
     _disconnect();
     _connectedStateBehaviorSubject.close();
   }

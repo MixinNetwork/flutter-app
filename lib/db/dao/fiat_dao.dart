@@ -5,7 +5,7 @@ import '../mixin_database.dart';
 
 part 'fiat_dao.g.dart';
 
-@DriftAccessor(tables: [Fiat])
+@DriftAccessor()
 class FiatDao extends DatabaseAccessor<MixinDatabase> with _$FiatDaoMixin {
   FiatDao(super.db);
 

@@ -180,6 +180,16 @@ class Localization {
     );
   }
 
+  /// `Add Proxy`
+  String get addProxy {
+    return Intl.message(
+      'Add Proxy',
+      name: 'addProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add Sticker`
   String get addSticker {
     return Intl.message(
@@ -2158,6 +2168,16 @@ class Localization {
     );
   }
 
+  /// `Host`
+  String get host {
+    return Intl.message(
+      'Host',
+      name: 'host',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{count, plural, one{{arg0} Hour} other{{arg0} Hours}}`
   String hour(num count, Object arg0) {
     return Intl.plural(
@@ -2950,6 +2970,16 @@ class Localization {
     );
   }
 
+  /// `Password`
+  String get password {
+    return Intl.message(
+      'Password',
+      name: 'password',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{count, plural, one{{arg0}/{arg1} confirmation} other{{arg0}/{arg1} confirmations}}`
   String pendingConfirmation(num count, Object arg0, Object arg1) {
     return Intl.plural(
@@ -3014,6 +3044,16 @@ class Localization {
     );
   }
 
+  /// `Port`
+  String get port {
+    return Intl.message(
+      'Port',
+      name: 'port',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Post`
   String get post {
     return Intl.message(
@@ -3049,6 +3089,46 @@ class Localization {
     return Intl.message(
       'Privacy Policy',
       name: 'privacyPolicy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy`
+  String get proxy {
+    return Intl.message(
+      'Proxy',
+      name: 'proxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authentication (Optional)`
+  String get proxyAuth {
+    return Intl.message(
+      'Authentication (Optional)',
+      name: 'proxyAuth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection`
+  String get proxyConnection {
+    return Intl.message(
+      'Connection',
+      name: 'proxyConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy Type`
+  String get proxyType {
+    return Intl.message(
+      'Proxy Type',
+      name: 'proxyType',
       desc: '',
       args: [],
     );
@@ -4171,6 +4251,16 @@ class Localization {
     return Intl.message(
       'User not found',
       name: 'userNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Username`
+  String get username {
+    return Intl.message(
+      'Username',
+      name: 'username',
       desc: '',
       args: [],
     );

@@ -25,7 +25,7 @@ class MiniParticipantItem with EquatableMixin {
       ];
 }
 
-@DriftAccessor(tables: [Participants])
+@DriftAccessor()
 class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantDaoMixin {
   ParticipantDao(super.db);

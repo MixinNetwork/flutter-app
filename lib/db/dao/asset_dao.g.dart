@@ -38,6 +38,7 @@ mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
   Fiats get fiats => attachedDatabase.fiats;
   FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
+  Properties get properties => attachedDatabase.properties;
   Selectable<AssetItem> assetItem(String assetId) {
     return customSelect(
         'SELECT asset.*, chain.symbol AS chainSymbol, chain.icon_url AS chainIconUrl, chain.name AS chainName, chain.threshold AS chainThreshold FROM assets AS asset LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id WHERE asset.asset_id = ?1 LIMIT 1',

@@ -29,7 +29,7 @@ extension UserExtension on sdk.User {
       );
 }
 
-@DriftAccessor(tables: [User])
+@DriftAccessor()
 class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   UserDao(super.db);
 

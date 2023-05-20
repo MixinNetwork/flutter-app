@@ -39,7 +39,7 @@ extension SnapshotItemExtension on SnapshotItem {
   }
 }
 
-@DriftAccessor(tables: [Snapshots], include: {'../moor/dao/snapshot.drift'})
+@DriftAccessor(include: {'../moor/dao/snapshot.drift'})
 class SnapshotDao extends DatabaseAccessor<MixinDatabase>
     with _$SnapshotDaoMixin {
   SnapshotDao(super.db);

@@ -5,7 +5,7 @@ import '../mixin_database.dart';
 
 part 'circle_conversation_dao.g.dart';
 
-@DriftAccessor(tables: [CircleConversation])
+@DriftAccessor()
 class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$CircleConversationDaoMixin {
   CircleConversationDao(super.db);

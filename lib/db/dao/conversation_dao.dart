@@ -17,7 +17,7 @@ import 'participant_dao.dart';
 
 part 'conversation_dao.g.dart';
 
-@DriftAccessor(tables: [Conversations])
+@DriftAccessor()
 class ConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationDaoMixin {
   ConversationDao(super.db);

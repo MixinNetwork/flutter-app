@@ -6,7 +6,7 @@ import '../mixin_database.dart';
 
 part 'sticker_relationship_dao.g.dart';
 
-@DriftAccessor(tables: [StickerRelationships])
+@DriftAccessor()
 class StickerRelationshipDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerRelationshipDaoMixin {
   StickerRelationshipDao(super.db);

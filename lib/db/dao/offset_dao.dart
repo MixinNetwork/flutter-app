@@ -5,7 +5,7 @@ import '../mixin_database.dart';
 
 part 'offset_dao.g.dart';
 
-@DriftAccessor(tables: [Offsets])
+@DriftAccessor()
 class OffsetDao extends DatabaseAccessor<MixinDatabase> with _$OffsetDaoMixin {
   OffsetDao(super.db);
 

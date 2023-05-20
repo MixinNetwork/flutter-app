@@ -7,7 +7,7 @@ import '../util/util.dart';
 
 part 'pin_message_dao.g.dart';
 
-@DriftAccessor(tables: [PinMessages])
+@DriftAccessor()
 class PinMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$PinMessageDaoMixin {
   PinMessageDao(super.attachedDatabase);

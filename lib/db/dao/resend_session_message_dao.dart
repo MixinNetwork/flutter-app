@@ -4,7 +4,7 @@ import '../mixin_database.dart';
 
 part 'resend_session_message_dao.g.dart';
 
-@DriftAccessor(tables: [ResendSessionMessages])
+@DriftAccessor()
 class ResendSessionMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$ResendSessionMessageDaoMixin {
   ResendSessionMessageDao(super.db);

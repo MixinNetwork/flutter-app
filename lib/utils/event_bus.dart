@@ -111,7 +111,7 @@ class _MainEventBus implements EventBus {
 
   final _controller = StreamController.broadcast();
 
-// other isolate send port. key: bus uuid.
+  // other isolate send port. key: bus uuid.
   final Map<String, SendPort> _ports = {};
 
   @override

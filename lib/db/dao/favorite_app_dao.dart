@@ -6,7 +6,7 @@ import '../mixin_database.dart';
 
 part 'favorite_app_dao.g.dart';
 
-@DriftAccessor(tables: [FavoriteApp])
+@DriftAccessor()
 class FavoriteAppDao extends DatabaseAccessor<MixinDatabase>
     with _$FavoriteAppDaoMixin {
   FavoriteAppDao(super.db);

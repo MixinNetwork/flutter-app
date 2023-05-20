@@ -4,12 +4,14 @@ import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../enum/media_status.dart';
+import '../enum/property_group.dart';
 import 'converter/conversation_category_type_converter.dart';
 import 'converter/conversation_status_type_converter.dart';
 import 'converter/media_status_type_converter.dart';
 import 'converter/message_status_type_converter.dart';
 import 'converter/millis_date_converter.dart';
 import 'converter/participant_role_converter.dart';
+import 'converter/property_group_converter.dart';
 import 'converter/user_relationship_converter.dart';
 import 'dao/address_dao.dart';
 import 'dao/app_dao.dart';
@@ -31,6 +33,7 @@ import 'dao/offset_dao.dart';
 import 'dao/participant_dao.dart';
 import 'dao/participant_session_dao.dart';
 import 'dao/pin_message_dao.dart';
+import 'dao/property_dao.dart';
 import 'dao/resend_session_message_dao.dart';
 import 'dao/sent_session_sender_key_dao.dart';
 import 'dao/snapshot_dao.dart';
@@ -88,6 +91,7 @@ part 'mixin_database.g.dart';
     FavoriteAppDao,
     ExpiredMessageDao,
     ChainDao,
+    PropertyDao,
   ],
   queries: {},
 )
@@ -95,7 +99,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   final eventBus = DataBaseEventBus.instance;
 
@@ -225,6 +229,9 @@ class MixinDatabase extends _$MixinDatabase {
             await _addColumnIfNotExists(m, snapshots, snapshots.snapshotHash);
             await _addColumnIfNotExists(m, snapshots, snapshots.openingBalance);
             await _addColumnIfNotExists(m, snapshots, snapshots.closingBalance);
+          }
+          if (from <= 22) {
+            await m.createTable(properties);
           }
         },
         beforeOpen: (details) async {

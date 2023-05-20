@@ -27,7 +27,7 @@ class MiniJobItem with EquatableMixin {
       ];
 }
 
-@DriftAccessor(tables: [MessagesHistory])
+@DriftAccessor()
 class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   JobDao(super.db);
 

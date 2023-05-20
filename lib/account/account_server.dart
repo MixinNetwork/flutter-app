@@ -38,6 +38,7 @@ import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
+import '../utils/proxy.dart';
 import '../utils/web_view/web_view_interface.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../workers/injector.dart';
@@ -83,23 +84,6 @@ class AccountServer {
 
     await initKeyValues(identityNumber);
 
-    client = createClient(
-      userId: userId,
-      sessionId: sessionId,
-      privateKey: privateKey,
-      loginByPhoneNumber: _loginByPhoneNumber,
-      interceptors: [
-        InterceptorsWrapper(
-          onError: (
-            DioError e,
-            ErrorInterceptorHandler handler,
-          ) async {
-            await _onClientRequestError(e);
-            handler.next(e);
-          },
-        ),
-      ],
-    );
     await _initDatabase();
 
     checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
@@ -155,12 +139,25 @@ class AccountServer {
       await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
     );
 
-    attachmentUtil = AttachmentUtil.init(
-      client,
-      database.messageDao,
-      database.transcriptMessageDao,
-      identityNumber,
-    );
+    client = createClient(
+      userId: userId,
+      sessionId: sessionId,
+      privateKey: privateKey,
+      loginByPhoneNumber: _loginByPhoneNumber,
+      interceptors: [
+        InterceptorsWrapper(
+          onError: (
+            DioError e,
+            ErrorInterceptorHandler handler,
+          ) async {
+            await _onClientRequestError(e);
+            handler.next(e);
+          },
+        ),
+      ],
+    )..configProxySetting(database.settingProperties);
+
+    attachmentUtil = AttachmentUtil.init(client, database, identityNumber);
     _sendMessageHelper =
         SendMessageHelper(database, attachmentUtil, addSendingJob);
 

@@ -9,7 +9,6 @@ import '../mixin_database.dart';
 part 'expired_message_dao.g.dart';
 
 @DriftAccessor(
-  tables: [ExpiredMessages],
   include: {
     '../moor/dao/expired_message.drift',
   },

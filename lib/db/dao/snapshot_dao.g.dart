@@ -38,6 +38,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   PinMessages get pinMessages => attachedDatabase.pinMessages;
   FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
+  Properties get properties => attachedDatabase.properties;
   Selectable<SnapshotItem> snapshotItems(
       String currentFiat,
       SnapshotItems$where where,

@@ -4,7 +4,7 @@ import '../mixin_database.dart';
 
 part 'flood_message_dao.g.dart';
 
-@DriftAccessor(tables: [FloodMessages])
+@DriftAccessor()
 class FloodMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$FloodMessageDaoMixin {
   FloodMessageDao(super.db);

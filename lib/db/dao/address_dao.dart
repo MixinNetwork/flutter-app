@@ -4,7 +4,7 @@ import '../mixin_database.dart';
 
 part 'address_dao.g.dart';
 
-@DriftAccessor(tables: [Addresses])
+@DriftAccessor()
 class AddressDao extends DatabaseAccessor<MixinDatabase>
     with _$AddressDaoMixin {
   AddressDao(super.db);

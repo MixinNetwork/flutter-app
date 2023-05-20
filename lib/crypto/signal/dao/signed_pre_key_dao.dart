@@ -4,7 +4,7 @@ import '../signal_database.dart';
 
 part 'signed_pre_key_dao.g.dart';
 
-@DriftAccessor(tables: [SignedPrekeys])
+@DriftAccessor()
 class SignedPreKeyDao extends DatabaseAccessor<SignalDatabase>
     with _$SignedPreKeyDaoMixin {
   SignedPreKeyDao(super.db);

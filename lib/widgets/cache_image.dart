@@ -11,7 +11,9 @@ import 'package:http_client_helper/http_client_helper.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
+import '../utils/proxy.dart';
 
 typedef PlaceholderWidgetBuilder = Widget Function();
 
@@ -39,20 +41,27 @@ class CacheImage extends StatelessWidget {
   final BoxFit fit;
 
   @override
-  Widget build(BuildContext context) => Image(
-        image: MixinNetworkImageProvider(src, controller: controller),
-        width: width,
-        height: height,
-        fit: fit,
-        errorBuilder: (context, error, stackTrace) =>
-            errorWidget?.call() ?? const SizedBox.shrink(),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) {
-            return child;
-          }
-          return placeholder?.call() ?? const SizedBox.shrink();
-        },
-      );
+  Widget build(BuildContext context) {
+    final proxyUrl = context.database.settingProperties.activatedProxy;
+    return Image(
+      image: MixinNetworkImageProvider(
+        src,
+        controller: controller,
+        proxyConfig: proxyUrl,
+      ),
+      width: width,
+      height: height,
+      fit: fit,
+      errorBuilder: (context, error, stackTrace) =>
+          errorWidget?.call() ?? const SizedBox.shrink(),
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        }
+        return placeholder?.call() ?? const SizedBox.shrink();
+      },
+    );
+  }
 }
 
 // min frameDuration
@@ -368,6 +377,7 @@ class MixinNetworkImageProvider
     this.imageCacheName,
     this.cacheMaxAge,
     this.controller,
+    this.proxyConfig,
   });
 
   final ValueNotifier<bool>? controller;
@@ -389,6 +399,8 @@ class MixinNetworkImageProvider
 
   /// The URL from which the image will be fetched.
   final String url;
+
+  final ProxyConfig? proxyConfig;
 
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
@@ -575,7 +587,7 @@ class MixinNetworkImageProvider
   ) async {
     try {
       final resolved = Uri.base.resolve(key.url);
-      final response = await _tryGetResponse(resolved);
+      final response = await _tryGetResponse(resolved, key.proxyConfig);
       if (response == null || response.statusCode != HttpStatus.ok) {
         return null;
       }
@@ -613,8 +625,13 @@ class MixinNetworkImageProvider
     return null;
   }
 
-  Future<HttpClientResponse> _getResponse(Uri resolved) async {
-    final request = await httpClient.getUrl(resolved);
+  Future<HttpClientResponse> _getResponse(
+      Uri resolved, ProxyConfig? proxy) async {
+    if (proxy != _imageClientProxyConfig) {
+      _httpClient.setProxy(proxy);
+      _imageClientProxyConfig = proxy;
+    }
+    final request = await _httpClient.getUrl(resolved);
     headers?.forEach((String name, String value) {
       request.headers.add(name, value);
     });
@@ -630,12 +647,13 @@ class MixinNetworkImageProvider
   // Http get with cancel, delay try again
   Future<HttpClientResponse?> _tryGetResponse(
     Uri resolved,
+    ProxyConfig? proxy,
   ) async {
     cancelToken?.throwIfCancellationRequested();
     return RetryHelper.tryRun<HttpClientResponse>(
       () => CancellationTokenSource.register(
         cancelToken,
-        _getResponse(resolved),
+        _getResponse(resolved, proxy),
       ),
       cancelToken: cancelToken,
       timeRetry: timeRetry,
@@ -710,7 +728,7 @@ class MixinNetworkImageProvider
   static final HttpClient _sharedHttpClient = HttpClient()
     ..autoUncompress = false;
 
-  static HttpClient get httpClient {
+  static HttpClient get _httpClient {
     var client = _sharedHttpClient;
     assert(() {
       if (debugNetworkImageHttpClientProvider != null) {
@@ -720,6 +738,9 @@ class MixinNetworkImageProvider
     }());
     return client;
   }
+
+  /// proxy config for [_httpClient]
+  static ProxyConfig? _imageClientProxyConfig;
 }
 
 /// download image from network to cache. return the cache image file.

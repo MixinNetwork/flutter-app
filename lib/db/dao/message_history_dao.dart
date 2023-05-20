@@ -4,7 +4,7 @@ import '../mixin_database.dart';
 
 part 'message_history_dao.g.dart';
 
-@DriftAccessor(tables: [MessagesHistory])
+@DriftAccessor()
 class MessageHistoryDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageHistoryDaoMixin {
   MessageHistoryDao(super.db);

@@ -23,7 +23,7 @@ class MessageOrderInfo {
   final int createdAt;
 }
 
-@DriftAccessor(tables: [Messages])
+@DriftAccessor()
 class MessageDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageDaoMixin {
   MessageDao(super.db);

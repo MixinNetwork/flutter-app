@@ -38,6 +38,7 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Chains get chains => attachedDatabase.chains;
+  Properties get properties => attachedDatabase.properties;
   Selectable<TranscriptMessageItem> baseTranscriptMessageItem(
       BaseTranscriptMessageItem$where where,
       BaseTranscriptMessageItem$limit limit) {

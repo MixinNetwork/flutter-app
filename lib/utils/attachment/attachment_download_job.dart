@@ -9,12 +9,14 @@ class _AttachmentDownloadJobOption {
     required this.keys,
     required this.digest,
     required this.sendPort,
+    required this.proxy,
   });
 
   final String path;
   final String url;
   final List<int>? keys;
   final List<int>? digest;
+  final ProxyConfig? proxy;
   final SendPort sendPort;
 }
 
@@ -34,6 +36,7 @@ class _AttachmentDownloadJob extends _AttachmentJobBase {
   late final ReceivePort? _receivePort;
 
   Future<void> download(
+    ProxyConfig? proxy,
     void Function(int count, int total) sendProgress,
   ) async {
     late Isolate? isolate;
@@ -70,6 +73,7 @@ class _AttachmentDownloadJob extends _AttachmentJobBase {
           keys: keys,
           digest: digest,
           sendPort: _receivePort!.sendPort,
+          proxy: proxy,
         ));
 
     return completer.future;
@@ -92,6 +96,7 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
 
   try {
     var received = 0;
+    _dio.applyProxy(options.proxy);
     final response = await _dio._download(
       options.url,
       options.path,
