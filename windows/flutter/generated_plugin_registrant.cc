@@ -12,7 +12,6 @@
 #include <desktop_webview_window/desktop_webview_window_plugin.h>
 #include <file_selector_windows/file_selector_windows.h>
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
-#include <network_info_plus/network_info_plus_windows_plugin.h>
 #include <pasteboard/pasteboard_plugin.h>
 #include <platform_device_id_windows/platform_device_id_windows_plugin.h>
 #include <protocol_handler/protocol_handler_plugin.h>
@@ -38,8 +37,6 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FileSelectorWindows"));
   FlutterAppIconBadgePluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterAppIconBadgePlugin"));
-  NetworkInfoPlusWindowsPluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("NetworkInfoPlusWindowsPlugin"));
   PasteboardPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("PasteboardPlugin"));
   PlatformDeviceIdWindowsPluginRegisterWithRegistrar(
