@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
@@ -230,8 +229,9 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
         e('_TransferAttachmentPacketBuilder#doWriteBody: bytes.length < 16');
         return false;
       }
-      final messageIdBytes = bytes.sublist(0, _kUUIDBytesCount);
-      final messageId = Uuid.unparse(messageIdBytes);
+      final messageId = Uuid.unparse(
+        Uint8List.sublistView(bytes, 0, _kUUIDBytesCount),
+      );
       _messageId = messageId;
       final tempFileName = const Uuid().v4();
       final file = File(p.join(folder, tempFileName));
@@ -242,7 +242,10 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
       }
       file
         ..createSync(recursive: true)
-        ..writeAsBytesSync(bytes.sublist(_kUUIDBytesCount), flush: true);
+        ..writeAsBytesSync(
+          Uint8List.sublistView(bytes, _kUUIDBytesCount),
+          flush: true,
+        );
     } else {
       _file!.writeAsBytesSync(bytes, mode: FileMode.append, flush: true);
     }
@@ -299,16 +302,7 @@ class _TransferProtocolSink implements EventSink<Uint8List> {
 
   @override
   void add(Uint8List event) {
-    // split 50kb to handle, avoid bytes too large.
-    // FIXME(BIN): refactor parse, avoid allocate too much memory.
-    const kMaxHandleLength = 50 * 1024;
-    var start = 0;
-    while (start < event.length) {
-      final end = math.min(start + kMaxHandleLength, event.length);
-      final bytes = event.sublist(start, end);
-      start = end;
-      _handleData(bytes);
-    }
+    _handleData(event);
   }
 
   void _handleData(Uint8List event) {
@@ -321,13 +315,14 @@ class _TransferProtocolSink implements EventSink<Uint8List> {
       data = event;
     }
 
+    var offset = 0;
     while (true) {
       if (_builder == null) {
-        if (data.length < 5) {
-          _carry = data;
+        if (data.length - offset < 5) {
+          _carry = data.sublist(offset);
           return;
         }
-        final bytes = data.buffer.asByteData();
+        final bytes = data.buffer.asByteData(offset, 5);
         final type = bytes.getInt8(0);
         final bodyLength = bytes.getInt32(1);
         switch (type) {
@@ -350,29 +345,30 @@ class _TransferProtocolSink implements EventSink<Uint8List> {
             _sink.addError('unknown type: $type', StackTrace.current);
             return;
         }
-        data = data.sublist(5);
+        offset += 5;
       } else {
         final builder = _builder!;
         final need = builder.expectedBodyLength - builder._writeBodyLength;
-        if (data.length < need) {
-          final write = builder.writeBody(data);
+        if (data.length - offset < need) {
+          final write = builder.writeBody(Uint8List.sublistView(data, offset));
           if (!write) {
-            _carry = data;
+            _carry = data.sublist(offset);
           }
           return;
         } else {
-          final write = builder.writeBody(data.sublist(0, need));
+          final write = builder
+              .writeBody(Uint8List.sublistView(data, offset, offset + need));
           assert(write,
               'data length larger than expected, this should not be happen.');
 
-          final left = data.sublist(need);
+          offset += need;
           // check if left is enough for crc
-          if (left.length < 8) {
-            _carry = left;
+          if (data.length - offset < 8) {
+            _carry = data.sublist(offset);
             return;
           }
           // check crc
-          final crc = left.buffer.asByteData().getUint64(0);
+          final crc = data.buffer.asByteData(offset).getUint64(0);
           if (crc != builder.bodyCrc) {
             _sink.addError(
               'crc not match. expected $crc, actually ${builder.bodyCrc}',
@@ -383,7 +379,7 @@ class _TransferProtocolSink implements EventSink<Uint8List> {
           final packet = builder.build();
           _sink.add(packet);
           _builder = null;
-          data = left.sublist(8);
+          offset += 8;
         }
       }
     }

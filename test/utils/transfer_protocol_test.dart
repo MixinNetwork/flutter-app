@@ -102,6 +102,56 @@ void main() {
     final packet = data.first as TransferCommandPacket;
     d('utf8.decode(body): ${packet.command}');
   });
+
+  test('benchmark json', () async {
+    final socket = MockTransferSocket();
+
+    Future<void> writeJson(Map<String, dynamic> json) => writePacketToSink(
+        socket,
+        TransferDataPacket(JsonTransferData(
+          type: JsonTransferDataType.message,
+          data: json,
+        )));
+
+    const length = 1000 * 100;
+    for (var i = 0; i < length; i++) {
+      await writeJson({'test': i});
+    }
+
+    final bytes = Uint8List.fromList(socket.sink.data);
+
+    i('size: ${bytes.length / 1024 / 1024} MB');
+
+    final stopwatch = Stopwatch()..start();
+    final stream = Stream.value(Uint8List.fromList(bytes))
+        .transform(const TransferProtocolTransform(fileFolder: ''));
+    final data = await stream.toList();
+    expect(data.length, length);
+    i('cost: ${stopwatch.elapsedMilliseconds}ms');
+  });
+
+  test('benchmark file', () async {
+    final socket = MockTransferSocket();
+
+    for (var i = 0; i < 10000; i++) {
+      final messageId = const Uuid().v4();
+      await writePacketToSink(
+        socket,
+        TransferAttachmentPacket(messageId: messageId, path: './LICENSE'),
+      );
+    }
+
+    final bytes = Uint8List.fromList(socket.sink.data);
+
+    i('size: ${bytes.length / 1024 / 1024} MB');
+
+    final stopwatch = Stopwatch()..start();
+    final stream = Stream.value(Uint8List.fromList(bytes)).transform(
+        TransferProtocolTransform(fileFolder: Directory.systemTemp.path));
+    final data = await stream.toList();
+    expect(data.length, 10000);
+    i('cost: ${stopwatch.elapsedMilliseconds}ms');
+  });
 }
 
 class MockTransferSocket extends TransferSocket {
