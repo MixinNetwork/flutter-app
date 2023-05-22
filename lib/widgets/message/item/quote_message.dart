@@ -249,7 +249,7 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           image: StickerItem(
             assetUrl: quote.assetUrl as String,
-            assetType: quote.assetType as String,
+            assetType: quote.assetType as String?,
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesStickerSvg,
