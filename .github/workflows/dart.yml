@@ -22,18 +22,6 @@ jobs:
         with:
           channel: 'master' # 'master', 'beta', 'dev' or 'stable'
 
-      # flutter build need ninja.
-      # https://github.com/subosito/flutter-action/issues/49
-      - name: Patch for linux build
-        run: |
-          flutter doctor
-          sudo apt-get update -y
-          sudo apt-get install -y ninja-build libgtk-3-dev
-          sudo apt-get install libsdl2-dev
-          sudo apt-get install webkit2gtk-4.1
-          sudo apt-get install libopus-dev libogg-dev
-          flutter doctor
-
       - name: Install dependencies
         run: flutter pub get
 
@@ -41,7 +29,7 @@ jobs:
         run: dart format --set-exit-if-changed .
 
       - name: Analyze project source
-        run: dart analyze
+        run: dart analyze --fatal-infos --fatal-warnings
 
       # dart_code_metrics
       - name: Run dart_code_metrics
@@ -53,6 +41,18 @@ jobs:
       # want to change this to 'flutter test'.
       - name: Run tests
         run: flutter test
+
+      # flutter build need ninja.
+      # https://github.com/subosito/flutter-action/issues/49
+      - name: Patch for linux build
+        run: |
+          flutter doctor
+          sudo apt-get update -y
+          sudo apt-get install -y ninja-build libgtk-3-dev
+          sudo apt-get install libsdl2-dev
+          sudo apt-get install webkit2gtk-4.1
+          sudo apt-get install libopus-dev libogg-dev
+          flutter doctor
 
       - name: Build APP
         run: flutter build linux

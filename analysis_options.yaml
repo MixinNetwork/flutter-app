@@ -76,6 +76,7 @@ linter:
     depend_on_referenced_packages: false
     no_leading_underscores_for_local_identifiers: false
     use_if_null_to_convert_nulls_to_bools: false
+    sort_pub_dependencies: false
 
 dart_code_metrics:
   rules:
