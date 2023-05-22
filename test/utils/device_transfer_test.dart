@@ -248,7 +248,7 @@ void main() {
   });
 
   test('test receiver', () async {
-    const verificationCode = 1234;
+    const verificationCode = 1231;
     final port = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
@@ -283,7 +283,7 @@ void main() {
   });
 
   test('connect with wrong verification code', () async {
-    const verificationCode = 1234;
+    const verificationCode = 1232;
     final port = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
@@ -302,7 +302,7 @@ void main() {
   });
 
   test('connected but sender close', () async {
-    const verificationCode = 1234;
+    const verificationCode = 1233;
     final port = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
