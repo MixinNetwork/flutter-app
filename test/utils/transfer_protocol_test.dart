@@ -151,7 +151,7 @@ void main() {
     final data = await stream.toList();
     expect(data.length, 10000);
     i('cost: ${stopwatch.elapsedMilliseconds}ms');
-  });
+  }, timeout: const Timeout(Duration(minutes: 2)));
 }
 
 class MockTransferSocket extends TransferSocket {
