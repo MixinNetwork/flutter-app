@@ -322,18 +322,23 @@ class DeviceTransferReceiver {
         fileName: tm.mediaUrl,
         isTranscript: true,
       );
-      try {
-        final target = File(path);
-        if (!target.parent.existsSync()) {
-          target.parent.createSync(recursive: true);
+      if (path.isEmpty) {
+        e('_processReceivedAttachmentPacket: transcript attachment path is empty.'
+            ' ${tm.messageId} ${tm.mediaUrl} ${tm.category}');
+      } else {
+        try {
+          final target = File(path);
+          if (!target.parent.existsSync()) {
+            target.parent.createSync(recursive: true);
+          }
+          if (!target.existsSync()) {
+            File(packet.path).copySync(path);
+          } else {
+            e('transcript message found, but file already exits: $path');
+          }
+        } catch (error, stacktrace) {
+          e('_processReceivedAttachmentPacket: $error $stacktrace');
         }
-        if (!target.existsSync()) {
-          File(packet.path).copySync(path);
-        } else {
-          e('transcript message found, but file already exits: $path');
-        }
-      } catch (error, stacktrace) {
-        e('_processReceivedAttachmentPacket: $error $stacktrace');
       }
     }
 
@@ -359,16 +364,23 @@ class DeviceTransferReceiver {
     }
 
     final file = File(path);
-    if (file.existsSync()) {
-      // already exist
-      i('_processReceivedAttachmentPacket: already exist. ${file.path}');
+    try {
+      if (file.existsSync()) {
+        // already exist
+        i('_processReceivedAttachmentPacket: already exist. ${file.path}');
+        deletePacketFile();
+        return;
+      }
+      // check file parent folder
+      final parent = file.parent;
+      if (!parent.existsSync()) {
+        parent.createSync(recursive: true);
+      }
+    } catch (error, stacktrace) {
+      e('_processReceivedAttachmentPacket: ${message.messageId} ${message.category} ${message.mediaUrl}',
+          error, stacktrace);
       deletePacketFile();
       return;
-    }
-    // check file parent folder
-    final parent = file.parent;
-    if (!parent.existsSync()) {
-      parent.createSync(recursive: true);
     }
 
     try {
