@@ -290,6 +290,8 @@ void main() {
     await receiver.connectToServer('localhost', port, verificationCode + 1);
 
     await receiverCompleter.future;
+
+    await sender.close(debugReason: 'test');
     await senderCompleter.future;
 
     expect(senderStartCount, 0);

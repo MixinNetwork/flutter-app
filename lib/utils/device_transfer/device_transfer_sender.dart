@@ -96,7 +96,9 @@ class DeviceTransferSender {
         return;
       }
       _pendingVerificationSockets.add(socket);
-      i('client connected: ${socket.remoteAddress.address}:${socket.remotePort}');
+
+      final remoteHost = '${socket.remoteAddress.address}:${socket.remotePort}';
+      i('client connected: $remoteHost');
 
       final transferSocket = TransferSocket(socket);
       socket.transform(protocolTransform).asyncListen((event) {
@@ -149,15 +151,15 @@ class DeviceTransferSender {
           }
         }
       }, onDone: () {
+        w('sender: client connected done. $remoteHost'
+            ' isFinished: $_finished, verified: ${_clientSocket == transferSocket}');
         if (_clientSocket != null && _clientSocket != transferSocket) {
           w('connection done, but not the verified client. ignore.');
           return;
         }
-        w('sender: client connected done. $_finished');
-        if (_finished) {
-          onSenderSucceed?.call();
-        } else {
-          onSenderFailed?.call();
+        if (_clientSocket == null) {
+          w('connection done, but current no verified client. ignore.');
+          return;
         }
         close(debugReason: 'client connected done');
       }, onError: (error, stacktrace) {
@@ -509,11 +511,23 @@ class DeviceTransferSender {
 
   Future<void> close({String? debugReason}) async {
     i('sender: closing transfer server. $debugReason');
-    await _clientSocket?.close();
-    _clientSocket?.destroy();
-    _clientSocket = null;
-    await _socket?.close();
+    final socket = _socket;
+    final clientSocket = _clientSocket;
     _socket = null;
+    _clientSocket = null;
+
+    if (socket == null && clientSocket == null) {
+      return;
+    }
+
+    if (_finished) {
+      onSenderSucceed?.call();
+    } else {
+      onSenderFailed?.call();
+    }
+    await clientSocket?.close();
+    clientSocket?.destroy();
+    await socket?.close();
     i('sender: transfer server closed');
   }
 }
