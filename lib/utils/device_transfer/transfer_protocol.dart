@@ -203,15 +203,65 @@ class TransferAttachmentPacket extends TransferPacket {
       ..addBytes(messageIdBytes)
       ..addBytes(iv);
 
+    var actualEncryptedLength = 0;
+
     final fileStream = file.openRead();
+
+    Uint8List? carry;
+    List<int>? preBytes;
     await for (final bytes in fileStream) {
-      final data = Uint8List.fromList(bytes);
-      final encryptedData = aesCipher.process(data);
+      final toProcess = preBytes;
+      preBytes = bytes;
+      if (toProcess == null) {
+        continue;
+      }
+      final Uint8List data;
+      if (carry == null) {
+        data = Uint8List.fromList(toProcess);
+      } else {
+        data = Uint8List.fromList(carry + toProcess);
+        carry = null;
+      }
+
+      final length = data.length - (data.length % 1024);
+      if (length < data.length) {
+        carry = data.sublist(length);
+      } else {
+        carry = null;
+      }
+
+      final encryptedData = Uint8List(length);
+      var offset = 0;
+      while (offset < length) {
+        offset += aesCipher.processBlock(data, offset, encryptedData, offset);
+      }
       hMacCalculator.addBytes(encryptedData);
       sink.add(encryptedData);
+      actualEncryptedLength += encryptedData.length;
       await sink.flush();
     }
+
+    // handle last block
+    final Uint8List lastBlock;
+    if (carry == null) {
+      lastBlock = Uint8List.fromList(preBytes!);
+    } else {
+      lastBlock = Uint8List.fromList(carry + preBytes!);
+    }
+    final encryptedData = aesCipher.process(lastBlock);
+    hMacCalculator.addBytes(encryptedData);
+    sink.add(encryptedData);
+    actualEncryptedLength += encryptedData.length;
+    await sink.flush();
+
     sink.add(hMacCalculator.result);
+    if (actualEncryptedLength != encryptedDataLength) {
+      e('actualEncryptedLength != encryptedDataLength, '
+          '$actualEncryptedLength != $encryptedDataLength');
+      throw Exception('write file failed.');
+    }
+    assert(actualEncryptedLength == encryptedDataLength,
+        'actualEncryptedLength != encryptedDataLength, $actualEncryptedLength != $encryptedDataLength');
     await sink.flush();
   }
 }
@@ -352,6 +402,7 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
     final Uint8List data;
     if (_carry != null) {
       data = Uint8List.fromList(_carry! + encryptedData);
+      _carry = null;
     } else {
       data = encryptedData;
     }
