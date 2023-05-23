@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter_app/utils/device_transfer/cipher.dart';
 import 'package:flutter_app/utils/device_transfer/json_transfer_data.dart';
 import 'package:flutter_app/utils/device_transfer/socket_wrapper.dart';
@@ -21,6 +23,13 @@ String _generateLargeString(int length) {
     buffer.write(alphabet[index]);
   }
   return buffer.toString();
+}
+
+Future<String> _fileMd5(String path) async {
+  final file = File(path);
+  final bytes = await file.readAsBytes();
+  final digest = md5.convert(bytes);
+  return hex.encode(digest.bytes);
 }
 
 Future<String> _createTempFile(int fileSize) async {
@@ -73,6 +82,7 @@ void main() {
 
     final testSmallFile = await _createTempFile(1024 * 1024 * 1);
     i('testSmallFile: ${File(testSmallFile).lengthSync()}');
+    final smallFileMd5 = await _fileMd5(testSmallFile);
 
     await writePacketToSink(
       socket,
@@ -83,6 +93,7 @@ void main() {
 
     final testLargeFile = await _createTempFile(1024 * 1024 * 50);
     i('testLargeFile: ${File(testLargeFile).lengthSync()}');
+    final largeFileMd5 = await _fileMd5(testLargeFile);
     await writePacketToSink(
       socket,
       TransferAttachmentPacket(messageId: messageId, path: testLargeFile),
@@ -102,6 +113,12 @@ void main() {
     expect(data.length, 2);
     final packet = data.first as TransferAttachmentPacket;
     expect(packet.messageId, messageId);
+    expect(await _fileMd5(packet.path), smallFileMd5);
+
+    final packet2 = data[1] as TransferAttachmentPacket;
+    expect(packet2.messageId, messageId);
+    expect(await _fileMd5(packet2.path), largeFileMd5);
+
     d('packet.path: ${packet.path}');
   });
 
@@ -194,11 +211,15 @@ void main() {
 
     final socket = MockTransferSocket(secretKey);
 
-    for (var i = 0; i < 1000; i++) {
+    final tempFile = await _createTempFile(500 * 1024);
+
+    final md5 = await _fileMd5(tempFile);
+
+    for (var i = 0; i < 100; i++) {
       final messageId = const Uuid().v4();
       await writePacketToSink(
         socket,
-        TransferAttachmentPacket(messageId: messageId, path: './LICENSE'),
+        TransferAttachmentPacket(messageId: messageId, path: tempFile),
         aesKey: secretKey.aesKey,
         hMacKey: secretKey.hMacKey,
       );
@@ -218,7 +239,12 @@ void main() {
       ),
     );
     final data = await stream.toList();
-    expect(data.length, 1000);
+    expect(data.length, 100);
+    for (final packet in data) {
+      expect(packet, isA<TransferAttachmentPacket>());
+      final attachment = packet as TransferAttachmentPacket;
+      expect(await _fileMd5(attachment.path), md5);
+    }
     i('cost: ${stopwatch.elapsedMilliseconds}ms');
   }, timeout: const Timeout(Duration(minutes: 5)));
 }

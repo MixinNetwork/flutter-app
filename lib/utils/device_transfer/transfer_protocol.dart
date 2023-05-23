@@ -356,6 +356,7 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
   late BlockCipher? _aesCipher;
 
   Uint8List? _carry;
+  Uint8List? _preProcessData;
 
   @override
   bool doWriteBody(Uint8List bytes) {
@@ -399,12 +400,18 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
   }
 
   void _processData(Uint8List encryptedData) {
+    final toProcessData = _preProcessData;
+    _preProcessData = encryptedData;
+    if (toProcessData == null) {
+      return;
+    }
+
     final Uint8List data;
     if (_carry != null) {
-      data = Uint8List.fromList(_carry! + encryptedData);
+      data = Uint8List.fromList(_carry! + toProcessData);
       _carry = null;
     } else {
-      data = encryptedData;
+      data = toProcessData;
     }
     // take the block size of the cipher into account
     final length = data.length - (data.length % 1024);
@@ -426,10 +433,16 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
 
   @override
   TransferAttachmentPacket build() {
+    final Uint8List lastBlockData;
     if (_carry != null) {
-      final bytes = _aesCipher!.process(_carry!);
-      _file!.writeAsBytesSync(bytes, mode: FileMode.append, flush: true);
+      lastBlockData = Uint8List.fromList(_carry! + _preProcessData!);
+      _carry = null;
+    } else {
+      lastBlockData = _preProcessData!;
     }
+    final bytes = _aesCipher!.process(lastBlockData);
+    _file!.writeAsBytesSync(bytes, mode: FileMode.append, flush: true);
+
     assert(_writeBodyLength == expectedBodyLength,
         'writeBodyLength != expectedBodyLength');
     if (_file == null || _messageId == null) {
