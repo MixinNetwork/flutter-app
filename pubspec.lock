@@ -963,10 +963,10 @@ packages:
     dependency: "direct main"
     description:
       name: libsignal_protocol_dart
-      sha256: "7d4fd7e122ed144a6137b5f405dd295c448708df1b5d77ed5d4baeedf644b84a"
+      sha256: ea8c59c805d6eae0eddc79ebb7b576f09d65b4555cb9ee1d77968f64287a2c4f
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.5"
+    version: "0.7.0"
   logging:
     dependency: transitive
     description:
@@ -1646,14 +1646,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
-  tuple:
-    dependency: transitive
-    description:
-      name: tuple
-      sha256: "0ea99cd2f9352b2586583ab2ce6489d1f95a5f6de6fb9492faaf97ae2060f0aa"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
   typed_data:
     dependency: transitive
     description:
@@ -1787,10 +1779,10 @@ packages:
     dependency: "direct main"
     description:
       name: very_good_analysis
-      sha256: "4815adc7ded57657038d2bb2a7f332c50e3c8152f7d3c6acf8f6b7c0cc81e5e2"
+      sha256: "5e4ea72d2a9188630f0dd8f120a541de730090ef8863243fedca8267a84508b8"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "5.0.0+1"
   visibility_detector:
     dependency: "direct main"
     description:
