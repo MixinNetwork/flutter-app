@@ -10,7 +10,25 @@ import 'package:flutter_app/utils/device_transfer/transfer_data_command.dart';
 import 'package:flutter_app/utils/device_transfer/transfer_protocol.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
+
+String _generateLargeString(int length) {
+  final buffer = StringBuffer();
+  for (var i = 0; i < length; i++) {
+    final index = i % 26;
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    buffer.write(alphabet[index]);
+  }
+  return buffer.toString();
+}
+
+Future<String> _createTempFile(int fileSize) async {
+  final file = File(p.join(Directory.systemTemp.path, const Uuid().v4()))
+    ..createSync()
+    ..writeAsStringSync(_generateLargeString(fileSize));
+  return file.path;
+}
 
 void main() {
   test('transfer writer', () async {
@@ -30,6 +48,8 @@ void main() {
     await writeJson({'bdfasf': 2124124});
     await writeJson({'bdfasf': 2124124});
     await writeJson({'bdfasf': 2124124});
+    final largeStr = _generateLargeString(1024 * 500 - 100);
+    await writeJson({'large': largeStr});
 
     final bytes = Uint8List.fromList(socket.sink.data);
 
@@ -38,7 +58,7 @@ void main() {
       (sink) => TransferProtocolSink(sink, '', secretKey),
     );
     final data = await stream.toList();
-    expect(data.length, 5);
+    expect(data.length, 6);
 
     final packet = data.first as TransferDataPacket;
     final body = packet.data.data;
@@ -51,9 +71,21 @@ void main() {
     final socket = MockTransferSocket(secretKey);
     final messageId = const Uuid().v4();
 
+    final testSmallFile = await _createTempFile(1024 * 1024 * 1);
+    i('testSmallFile: ${File(testSmallFile).lengthSync()}');
+
     await writePacketToSink(
       socket,
-      TransferAttachmentPacket(messageId: messageId, path: './LICENSE'),
+      TransferAttachmentPacket(messageId: messageId, path: testSmallFile),
+      hMacKey: secretKey.hMacKey,
+      aesKey: secretKey.aesKey,
+    );
+
+    final testLargeFile = await _createTempFile(1024 * 1024 * 50);
+    i('testLargeFile: ${File(testLargeFile).lengthSync()}');
+    await writePacketToSink(
+      socket,
+      TransferAttachmentPacket(messageId: messageId, path: testLargeFile),
       hMacKey: secretKey.hMacKey,
       aesKey: secretKey.aesKey,
     );
@@ -67,7 +99,7 @@ void main() {
     );
 
     final data = await stream.toList();
-    expect(data.length, 1);
+    expect(data.length, 2);
     final packet = data.first as TransferAttachmentPacket;
     expect(packet.messageId, messageId);
     d('packet.path: ${packet.path}');

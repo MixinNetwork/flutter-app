@@ -1,7 +1,7 @@
+// ignore_for_file: implementation_imports
 import 'dart:convert';
 import 'dart:typed_data';
 
-// ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/kdf/hkdfv3.dart';
 import 'package:pointycastle/digests/sha256.dart';
 import 'package:pointycastle/macs/hmac.dart';

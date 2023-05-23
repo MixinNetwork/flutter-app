@@ -49,7 +49,8 @@ sealed class TransferPacket {
 
 const _kIVBytesCount = 16;
 
-PaddedBlockCipherImpl _createAESCipher({
+@visibleForTesting
+PaddedBlockCipherImpl createAESCipher({
   required Uint8List aesKey,
   required Uint8List iv,
   required bool encrypt,
@@ -74,7 +75,7 @@ Future<void> _writeDataToSink({
 }) async {
   final iv = generateTransferIv();
 
-  final aesCipher = _createAESCipher(aesKey: aesKey, iv: iv, encrypt: true);
+  final aesCipher = createAESCipher(aesKey: aesKey, iv: iv, encrypt: true);
 
   final encryptedData = aesCipher.process(data);
 
@@ -84,12 +85,14 @@ Future<void> _writeDataToSink({
     ..setInt8(0, type)
     ..setInt32(1, bodyLength);
 
+  final hMacCalculator = HMacCalculator(hMacKey)
+    ..addBytes(iv)
+    ..addBytes(encryptedData);
   sink
     ..add(header.buffer.asUint8List())
     ..add(iv)
-    ..add(encryptedData);
-  final hMac = calculateHMac(hMacKey, encryptedData);
-  sink.add(hMac);
+    ..add(encryptedData)
+    ..add(hMacCalculator.result);
   await sink.flush();
 }
 
@@ -182,8 +185,10 @@ class TransferAttachmentPacket extends TransferPacket {
     final padding = kBlockSize - file.lengthSync() % kBlockSize;
     final encryptedDataLength = file.lengthSync() + padding;
 
+    final hMacCalculator = HMacCalculator(hMacKey);
+
     final iv = generateTransferIv();
-    final aesCipher = _createAESCipher(aesKey: aesKey, iv: iv, encrypt: true);
+    final aesCipher = createAESCipher(aesKey: aesKey, iv: iv, encrypt: true);
 
     final header = ByteData(5)
       ..setInt8(0, kTypeFile)
@@ -194,7 +199,9 @@ class TransferAttachmentPacket extends TransferPacket {
       ..add(messageIdBytes)
       ..add(iv);
 
-    final hMacCalculator = HMacCalculator(hMacKey);
+    hMacCalculator
+      ..addBytes(messageIdBytes)
+      ..addBytes(iv);
 
     final fileStream = file.openRead();
     await for (final bytes in fileStream) {
@@ -225,16 +232,18 @@ abstract class _TransferPacketBuilder {
     this.expectedBodyLength,
     this.hMacKey,
     this.aesKey,
-  );
+  ) : _hMacCalculator = HMacCalculator(hMacKey);
 
   final int expectedBodyLength;
 
   var _writeBodyLength = 0;
 
+  final HMacCalculator _hMacCalculator;
+
   final Uint8List aesKey;
   final Uint8List hMacKey;
 
-  Uint8List get hMac;
+  Uint8List get hMac => _hMacCalculator.result;
 
   /// return: true if write success, false if write failed.
   bool doWriteBody(Uint8List bytes);
@@ -246,6 +255,7 @@ abstract class _TransferPacketBuilder {
       i('writeBody, bytes.length: ${bytes.length}');
       return false;
     }
+    _hMacCalculator.addBytes(bytes);
     _writeBodyLength += bytes.length;
     assert(_writeBodyLength <= expectedBodyLength);
     return true;
@@ -262,12 +272,6 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
   final TransferPacket Function(Uint8List jsonBytes) creator;
 
   @override
-  Uint8List get hMac {
-    final data = Uint8List.fromList(_body);
-    return calculateHMac(hMacKey, Uint8List.sublistView(data, _kIVBytesCount));
-  }
-
-  @override
   bool doWriteBody(Uint8List bytes) {
     _body.addAll(bytes);
     return true;
@@ -278,7 +282,7 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
     assert(_writeBodyLength == expectedBodyLength);
     final data = Uint8List.fromList(_body);
     final iv = Uint8List.sublistView(data, 0, _kIVBytesCount);
-    final aesCipher = _createAESCipher(aesKey: aesKey, iv: iv, encrypt: false);
+    final aesCipher = createAESCipher(aesKey: aesKey, iv: iv, encrypt: false);
     final jsonData = aesCipher.process(
       Uint8List.sublistView(data, _kIVBytesCount),
     );
@@ -293,19 +297,13 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
 
 class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
   _TransferAttachmentPacketBuilder(
-      super.expectedBodyLength, super.hMacKey, super.aesKey, this.folder)
-      : _hMacCalculator = HMacCalculator(hMacKey);
-
-  final HMacCalculator _hMacCalculator;
+      super.expectedBodyLength, super.hMacKey, super.aesKey, this.folder);
 
   final String folder;
 
   File? _file;
   String? _messageId;
   late BlockCipher? _aesCipher;
-
-  @override
-  Uint8List get hMac => _hMacCalculator.result;
 
   @override
   bool doWriteBody(Uint8List bytes) {
@@ -324,7 +322,7 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
         _kUUIDBytesCount,
         _kUUIDBytesCount + _kIVBytesCount,
       );
-      _aesCipher = _createAESCipher(aesKey: aesKey, iv: iv, encrypt: false);
+      _aesCipher = createAESCipher(aesKey: aesKey, iv: iv, encrypt: false);
 
       final tempFileName = const Uuid().v4();
       final file = File(p.join(folder, tempFileName));
@@ -349,7 +347,6 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
   }
 
   void _processData(Uint8List encryptedData) {
-    _hMacCalculator.addBytes(encryptedData);
     final bytes = _aesCipher!.process(encryptedData);
     _file!.writeAsBytesSync(bytes, mode: FileMode.append, flush: true);
   }
@@ -464,13 +461,10 @@ class TransferProtocolSink implements EventSink<Uint8List> {
             return;
           }
           // check hMAC
-
           final hMac = Uint8List.sublistView(data, offset, offset + 32);
           if (!Uint8ListEquality.equals(hMac, builder.hMac)) {
-            _sink.addError(
-              'hMac not match. expected ${base64Encode(hMac)}, actually ${base64Encode(builder.hMac)}',
-              StackTrace.current,
-            );
+            e('hMac not match. expected ${base64Encode(hMac)}, actually ${base64Encode(builder.hMac)}');
+            _sink.addError('hMac check error', StackTrace.current);
             return;
           }
           final packet = builder.build();
