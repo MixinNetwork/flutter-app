@@ -534,7 +534,7 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
       String query, FuzzySearchAllMessage$where where, int limit) {
     var $arrayStartIndex = 3;
     final generatedwhere = $write(where(alias(this.messagesMetas, 'm')),
-        hasMultipleTables: true, startIndex: $arrayStartIndex);
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
     return customSelect(
         'SELECT m.message_id FROM messages_metas AS m,(SELECT "rowid" FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.doc_id = fts."rowid" AND ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC LIMIT ?2',
@@ -557,7 +557,7 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
       int limit) {
     var $arrayStartIndex = 4;
     final generatedwhere = $write(where(alias(this.messagesMetas, 'm')),
-        hasMultipleTables: true, startIndex: $arrayStartIndex);
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
     return customSelect(
         'SELECT m.message_id FROM messages_metas AS m,(SELECT "rowid" FROM messages_fts WHERE messages_fts MATCH ?1) AS fts,(SELECT created_at, "rowid" FROM messages_metas WHERE message_id = ?2) AS anchor WHERE m.doc_id = fts."rowid" AND(m.created_at < anchor.created_at OR(m.created_at = anchor.created_at AND m."rowid" < anchor."rowid"))AND ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC LIMIT ?3',

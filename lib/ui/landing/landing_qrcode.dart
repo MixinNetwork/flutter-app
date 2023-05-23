@@ -93,12 +93,9 @@ class _QrCode extends HookWidget {
     );
 
     Widget? qrCode;
+
     if (url != null) {
-      qrCode = QrImage(
-        data: url,
-        foregroundColor: Colors.black,
-        backgroundColor: Colors.white,
-      );
+      qrCode = QrImageView(data: url, backgroundColor: Colors.white);
     }
 
     return Column(
