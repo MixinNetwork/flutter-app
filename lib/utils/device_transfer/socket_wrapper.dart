@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart' hide JsonKey;
@@ -7,6 +6,7 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../db/mixin_database.dart';
 import '../logger.dart';
+import 'cipher.dart';
 import 'json_transfer_data.dart';
 import 'transfer_data_app.dart';
 import 'transfer_data_asset.dart';
@@ -23,11 +23,14 @@ import 'transfer_data_user.dart';
 import 'transfer_protocol.dart';
 
 abstract class TransferSocket {
-  factory TransferSocket(Socket socket) => _TransferSocket(socket);
+  factory TransferSocket(Socket socket, TransferSecretKey secretKey) =>
+      _TransferSocket(socket, secretKey);
 
-  TransferSocket.create();
+  TransferSocket.create(this.secretKey);
 
   final Lock _lock = Lock();
+
+  final TransferSecretKey secretKey;
 
   Future<void> close();
 
@@ -55,7 +58,12 @@ abstract class TransferSocket {
 
   Future<void> addAttachment(String messageId, String path) {
     final packet = TransferAttachmentPacket(messageId: messageId, path: path);
-    return writePacketToSink(this, packet);
+    return writePacketToSink(
+      this,
+      packet,
+      hMacKey: secretKey.hMacKey,
+      aesKey: secretKey.aesKey,
+    );
   }
 
   Future<void> addSticker(TransferDataSticker sticker) {
@@ -92,7 +100,8 @@ abstract class TransferSocket {
 
   Future<void> addCommand(TransferDataCommand command) async {
     d('send command to remote: $command');
-    await writePacketToSink(this, TransferCommandPacket(command));
+    await writePacketToSink(this, TransferCommandPacket(command),
+        hMacKey: secretKey.hMacKey, aesKey: secretKey.aesKey);
   }
 
   Future<void> addTranscriptMessage(
@@ -150,21 +159,13 @@ abstract class TransferSocket {
 
   Future<void> _addTransferJson(JsonTransferData data) {
     final packet = TransferDataPacket(data);
-    // skip large packet
-    if (packet.bytes.length > 500 * 1024) {
-      w('packet size is too large: ${data.type} ${packet.bytes.length} bytes');
-      data.data.forEach((key, value) {
-        final str = jsonEncode(value);
-        w('packet data: $key ${str.length}');
-      });
-      return Future<void>.value();
-    }
-    return writePacketToSink(this, packet);
+    return writePacketToSink(this, packet,
+        aesKey: secretKey.aesKey, hMacKey: secretKey.hMacKey);
   }
 }
 
 class _TransferSocket extends TransferSocket {
-  _TransferSocket(this.socket) : super.create();
+  _TransferSocket(this.socket, super.secretKey) : super.create();
 
   final Socket socket;
 

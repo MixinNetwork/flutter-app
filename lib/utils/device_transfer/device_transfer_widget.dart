@@ -40,7 +40,12 @@ enum DeviceTransferCallbackType {
 
   /// a pull event from other device.
   onRestoreRequestReceived,
-  onCommandVersionNotMatched,
+  onConnectionFailed,
+}
+
+enum ConnectionFailedReason {
+  versionNotMatched,
+  unknown,
 }
 
 class DeviceTransferCallbackEvent {
@@ -184,6 +189,18 @@ void useOnTransferEventType(
   }, [type]);
 }
 
+void useOnTransferEventTypePayload<T>(
+  DeviceTransferCallbackType type,
+  void Function(T) callback,
+) {
+  useEffect(() {
+    final subscription = DeviceTransferEventBus.instance
+        .on(type)
+        .listen((event) => callback(event.payload as T));
+    return subscription.cancel;
+  }, [type]);
+}
+
 class DeviceTransferHandlerWidget extends HookWidget {
   const DeviceTransferHandlerWidget({
     required this.child,
@@ -247,14 +264,21 @@ class DeviceTransferHandlerWidget extends HookWidget {
       },
     );
 
-    useOnTransferEventType(
-      DeviceTransferCallbackType.onCommandVersionNotMatched,
-      () => showMixinDialog(
-        context: context,
-        child: _ConfirmDialog(
-          message: context.l10n.transferProtocolVersionNotMatched,
-        ),
-      ),
+    useOnTransferEventTypePayload<ConnectionFailedReason>(
+      DeviceTransferCallbackType.onConnectionFailed,
+      (reason) {
+        final String message;
+        switch (reason) {
+          case ConnectionFailedReason.versionNotMatched:
+            message = context.l10n.transferProtocolVersionNotMatched;
+          case ConnectionFailedReason.unknown:
+            message = context.l10n.transferFailed;
+        }
+        showMixinDialog(
+          context: context,
+          child: _ConfirmDialog(message: message),
+        );
+      },
     );
 
     return child;

@@ -13,7 +13,6 @@ import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/utils/attachment/attachment_util.dart';
 import 'package:flutter_app/utils/device_transfer/device_transfer_receiver.dart';
 import 'package:flutter_app/utils/device_transfer/device_transfer_sender.dart';
-import 'package:flutter_app/utils/device_transfer/transfer_protocol.dart';
 import 'package:flutter_app/utils/event_bus.dart';
 import 'package:flutter_app/utils/file.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -119,7 +118,7 @@ class _SlowDeviceTransferSender extends DeviceTransferSender {
   _SlowDeviceTransferSender({
     required super.database,
     required super.attachmentUtil,
-    required super.protocolTransform,
+    required super.protocolTempFileDir,
     required super.deviceId,
     super.onSenderProgressUpdate,
     super.onSenderStart,
@@ -186,9 +185,7 @@ void main() {
       userId: userId,
       database: receiverDatabase,
       attachmentUtil: AttachmentUtilBase.of(identifyNumber),
-      protocolTransform: TransferProtocolTransform(
-        fileFolder: p.join(mixinDocumentsDirectory.path, 'receive_temp'),
-      ),
+      protocolTempFileDir: p.join(mixinDocumentsDirectory.path, 'receive_temp'),
       deviceId: receiverDeviceId,
       onReceiverStart: () {
         receiverStartCount++;
@@ -214,7 +211,7 @@ void main() {
     sender = _SlowDeviceTransferSender(
       database: senderDatabase,
       attachmentUtil: AttachmentUtilBase.of(identifyNumber),
-      protocolTransform: const TransferProtocolTransform(fileFolder: ''),
+      protocolTempFileDir: '',
       deviceId: senderDeviceId,
       onSenderStart: () {
         senderStartCount++;
@@ -249,10 +246,11 @@ void main() {
 
   test('test receiver', () async {
     const verificationCode = 1231;
-    final port = await sender.startServerSocket(verificationCode);
+    final (port, secretKey) = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
-    await receiver.connectToServer('localhost', port, verificationCode);
+    await receiver.connectToServer(
+        'localhost', port, verificationCode, secretKey);
 
     await senderStartCompleter.future;
     expect(senderStartCount, 1);
@@ -284,10 +282,11 @@ void main() {
 
   test('connect with wrong verification code', () async {
     const verificationCode = 1232;
-    final port = await sender.startServerSocket(verificationCode);
+    final (port, secretKey) = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
-    await receiver.connectToServer('localhost', port, verificationCode + 1);
+    await receiver.connectToServer(
+        'localhost', port, verificationCode + 1, secretKey);
 
     await receiverCompleter.future;
 
@@ -305,10 +304,11 @@ void main() {
 
   test('connected but sender close', () async {
     const verificationCode = 1233;
-    final port = await sender.startServerSocket(verificationCode);
+    final (port, secretKey) = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
-    await receiver.connectToServer('localhost', port, verificationCode);
+    await receiver.connectToServer(
+        'localhost', port, verificationCode, secretKey);
 
     await receiverStartCompleter.future;
     await senderStartCompleter.future;
@@ -336,10 +336,11 @@ void main() {
 
   test('connected but receiver close', () async {
     const verificationCode = 1234;
-    final port = await sender.startServerSocket(verificationCode);
+    final (port, secretKey) = await sender.startServerSocket(verificationCode);
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
-    await receiver.connectToServer('localhost', port, verificationCode);
+    await receiver.connectToServer(
+        'localhost', port, verificationCode, secretKey);
 
     await senderStartCompleter.future;
     expect(senderStartCount, 1);

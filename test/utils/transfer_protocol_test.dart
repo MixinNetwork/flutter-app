@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter_app/utils/device_transfer/cipher.dart';
 import 'package:flutter_app/utils/device_transfer/json_transfer_data.dart';
 import 'package:flutter_app/utils/device_transfer/socket_wrapper.dart';
 import 'package:flutter_app/utils/device_transfer/transfer_data_command.dart';
@@ -13,14 +14,17 @@ import 'package:uuid/uuid.dart';
 
 void main() {
   test('transfer writer', () async {
-    final socket = MockTransferSocket();
-
+    final secretKey = generateTransferKey();
+    final socket = MockTransferSocket(secretKey);
     Future<void> writeJson(Map<String, dynamic> json) => writePacketToSink(
-        socket,
-        TransferDataPacket(JsonTransferData(
-          type: JsonTransferDataType.message,
-          data: json,
-        )));
+          socket,
+          TransferDataPacket(JsonTransferData(
+            type: JsonTransferDataType.message,
+            data: json,
+          )),
+          hMacKey: secretKey.hMacKey,
+          aesKey: secretKey.aesKey,
+        );
     await writeJson({'abc': 1});
     await writeJson({'bdfasf': 2124124});
     await writeJson({'bdfasf': 2124124});
@@ -28,8 +32,11 @@ void main() {
     await writeJson({'bdfasf': 2124124});
 
     final bytes = Uint8List.fromList(socket.sink.data);
-    final stream = Stream.value(Uint8List.fromList(bytes))
-        .transform(const TransferProtocolTransform(fileFolder: ''));
+
+    final stream = Stream<TransferPacket>.eventTransformed(
+      Stream.value(Uint8List.fromList(bytes)),
+      (sink) => TransferProtocolSink(sink, '', secretKey),
+    );
     final data = await stream.toList();
     expect(data.length, 5);
 
@@ -40,16 +47,25 @@ void main() {
   });
 
   test('write file', () async {
-    final socket = MockTransferSocket();
+    final secretKey = generateTransferKey();
+    final socket = MockTransferSocket(secretKey);
     final messageId = const Uuid().v4();
+
     await writePacketToSink(
       socket,
       TransferAttachmentPacket(messageId: messageId, path: './LICENSE'),
+      hMacKey: secretKey.hMacKey,
+      aesKey: secretKey.aesKey,
     );
 
     final bytes = Uint8List.fromList(socket.sink.data);
-    final stream = Stream.value(Uint8List.fromList(bytes)).transform(
-        TransferProtocolTransform(fileFolder: Directory.systemTemp.path));
+
+    final stream = Stream<TransferPacket>.eventTransformed(
+      Stream.value(Uint8List.fromList(bytes)),
+      (sink) =>
+          TransferProtocolSink(sink, Directory.systemTemp.path, secretKey),
+    );
+
     final data = await stream.toList();
     expect(data.length, 1);
     final packet = data.first as TransferAttachmentPacket;
@@ -58,7 +74,9 @@ void main() {
   });
 
   test('write command and data', () async {
-    final socket = MockTransferSocket();
+    final secretKey = generateTransferKey();
+
+    final socket = MockTransferSocket(secretKey);
     const deviceId = '82525DEB-C242-57A2-9A14-8C473C2B1300';
     await socket.addCommand(
       TransferDataCommand.progress(
@@ -92,8 +110,10 @@ void main() {
     );
 
     final bytes = Uint8List.fromList(socket.sink.data);
-    final stream = Stream.value(Uint8List.fromList(bytes))
-        .transform(const TransferProtocolTransform(fileFolder: ''));
+    final stream = Stream<TransferPacket>.eventTransformed(
+      Stream.value(Uint8List.fromList(bytes)),
+      (sink) => TransferProtocolSink(sink, '', secretKey),
+    );
     final data = await stream.toList();
     expect(data.length, 5);
     for (final command in data) {
@@ -104,14 +124,19 @@ void main() {
   });
 
   test('benchmark json', () async {
-    final socket = MockTransferSocket();
+    final secretKey = generateTransferKey();
+
+    final socket = MockTransferSocket(secretKey);
 
     Future<void> writeJson(Map<String, dynamic> json) => writePacketToSink(
-        socket,
-        TransferDataPacket(JsonTransferData(
-          type: JsonTransferDataType.message,
-          data: json,
-        )));
+          socket,
+          TransferDataPacket(JsonTransferData(
+            type: JsonTransferDataType.message,
+            data: json,
+          )),
+          hMacKey: secretKey.hMacKey,
+          aesKey: secretKey.aesKey,
+        );
 
     const length = 1000 * 100;
     for (var i = 0; i < length; i++) {
@@ -123,21 +148,27 @@ void main() {
     i('size: ${bytes.length / 1024 / 1024} MB');
 
     final stopwatch = Stopwatch()..start();
-    final stream = Stream.value(Uint8List.fromList(bytes))
-        .transform(const TransferProtocolTransform(fileFolder: ''));
+    final stream = Stream<TransferPacket>.eventTransformed(
+      Stream.value(Uint8List.fromList(bytes)),
+      (sink) => TransferProtocolSink(sink, '', secretKey),
+    );
     final data = await stream.toList();
     expect(data.length, length);
     i('cost: ${stopwatch.elapsedMilliseconds}ms');
   });
 
   test('benchmark file', () async {
-    final socket = MockTransferSocket();
+    final secretKey = generateTransferKey();
+
+    final socket = MockTransferSocket(secretKey);
 
     for (var i = 0; i < 10000; i++) {
       final messageId = const Uuid().v4();
       await writePacketToSink(
         socket,
         TransferAttachmentPacket(messageId: messageId, path: './LICENSE'),
+        aesKey: secretKey.aesKey,
+        hMacKey: secretKey.hMacKey,
       );
     }
 
@@ -146,8 +177,14 @@ void main() {
     i('size: ${bytes.length / 1024 / 1024} MB');
 
     final stopwatch = Stopwatch()..start();
-    final stream = Stream.value(Uint8List.fromList(bytes)).transform(
-        TransferProtocolTransform(fileFolder: Directory.systemTemp.path));
+    final stream = Stream<TransferPacket>.eventTransformed(
+      Stream.value(Uint8List.fromList(bytes)),
+      (sink) => TransferProtocolSink(
+        sink,
+        Directory.systemTemp.path,
+        secretKey,
+      ),
+    );
     final data = await stream.toList();
     expect(data.length, 10000);
     i('cost: ${stopwatch.elapsedMilliseconds}ms');
@@ -155,7 +192,7 @@ void main() {
 }
 
 class MockTransferSocket extends TransferSocket {
-  MockTransferSocket() : super.create();
+  MockTransferSocket(super.secretKey) : super.create();
 
   final sink = _BytesStreamSink();
 
