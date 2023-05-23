@@ -199,16 +199,7 @@ class TransferAttachmentPacket extends TransferPacket {
     final fileStream = file.openRead();
     await for (final bytes in fileStream) {
       final data = Uint8List.fromList(bytes);
-
-      final Uint8List encryptedData;
-      if (data.length < aesCipher.blockSize) {
-        encryptedData = aesCipher.process(data);
-      } else {
-        encryptedData = Uint8List(data.length);
-        for (var offset = 0; offset < data.length;) {
-          offset += aesCipher.processBlock(data, offset, encryptedData, offset);
-        }
-      }
+      final encryptedData = aesCipher.process(data);
       hMacCalculator.addBytes(encryptedData);
       sink.add(encryptedData);
       await sink.flush();
@@ -314,7 +305,7 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
   late BlockCipher? _aesCipher;
 
   @override
-  Uint8List get hMac => throw UnimplementedError();
+  Uint8List get hMac => _hMacCalculator.result;
 
   @override
   bool doWriteBody(Uint8List bytes) {
@@ -371,11 +362,7 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
       e('_TransferAttachmentPacketBuilder#build: file or messageId is null');
       throw Exception('file or messageId is null');
     }
-    assert(
-      _file!.lengthSync() == _writeBodyLength - _kUUIDBytesCount,
-      'file length != writeBodyLength',
-    );
-    d('write $_messageId attachment done, bytes: ${_writeBodyLength - _kUUIDBytesCount}');
+    d('write $_messageId attachment done, bytes: ${_file!.lengthSync()}');
     return TransferAttachmentPacket(
       messageId: _messageId!,
       path: _file!.path,

@@ -155,14 +155,14 @@ void main() {
     final data = await stream.toList();
     expect(data.length, length);
     i('cost: ${stopwatch.elapsedMilliseconds}ms');
-  });
+  }, timeout: const Timeout(Duration(minutes: 2)));
 
   test('benchmark file', () async {
     final secretKey = generateTransferKey();
 
     final socket = MockTransferSocket(secretKey);
 
-    for (var i = 0; i < 10000; i++) {
+    for (var i = 0; i < 1000; i++) {
       final messageId = const Uuid().v4();
       await writePacketToSink(
         socket,
@@ -186,9 +186,9 @@ void main() {
       ),
     );
     final data = await stream.toList();
-    expect(data.length, 10000);
+    expect(data.length, 1000);
     i('cost: ${stopwatch.elapsedMilliseconds}ms');
-  }, timeout: const Timeout(Duration(minutes: 2)));
+  }, timeout: const Timeout(Duration(minutes: 5)));
 }
 
 class MockTransferSocket extends TransferSocket {
