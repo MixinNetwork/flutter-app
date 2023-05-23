@@ -131,6 +131,8 @@ class ClampingRenderViewport extends RenderViewport {
   }
 
   double _correctedOffset = 0;
+  bool _lastPositionIsBottom = false;
+  num? _lastMaxScrollOffset;
 
   @override
   void performLayout() {
@@ -179,6 +181,9 @@ class ClampingRenderViewport extends RenderViewport {
         // *** If the center widget's position is not near the bottom ***
         if (bottom - offset.pixels < 0) {
           _correctedOffset += bottom;
+          if (offset.pixels > (maxScrollOffset - bottom)) {
+            offset.correctBy(-(offset.pixels - (maxScrollOffset - bottom)));
+          }
           count += 1;
           continue;
         }
@@ -188,6 +193,23 @@ class ClampingRenderViewport extends RenderViewport {
           count += 1;
           _correctedOffset += minScrollOffset - offset.pixels;
           continue;
+        }
+
+        // *** If max scroll offset changed, and the positions is bottom ***
+        final maxScrollOffsetChanged = _lastMaxScrollOffset != null &&
+            _lastMaxScrollOffset != maxScrollOffset;
+        final positionIsBottom = offset.pixels == maxScrollOffset;
+        final correction = maxScrollOffset - offset.pixels;
+        try {
+          if (maxScrollOffsetChanged &&
+              _lastPositionIsBottom &&
+              correction > 0) {
+            offset.correctBy(correction);
+            continue;
+          }
+        } finally {
+          _lastPositionIsBottom = positionIsBottom;
+          _lastMaxScrollOffset = maxScrollOffset;
         }
 
         if (offset.applyContentDimensions(
