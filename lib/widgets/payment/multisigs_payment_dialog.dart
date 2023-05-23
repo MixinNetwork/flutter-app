@@ -294,9 +294,8 @@ class _QrCodeLayout extends StatelessWidget {
             borderRadius: const BorderRadius.all(Radius.circular(8)),
             child: SizedBox.square(
               dimension: 180,
-              child: QrImage(
+              child: QrImageView(
                 data: uri.toString(),
-                foregroundColor: Colors.black,
                 backgroundColor: Colors.white,
               ),
             ),

@@ -40,9 +40,8 @@ class _UnknownMixinUri extends StatelessWidget {
                   borderRadius: const BorderRadius.all(Radius.circular(8)),
                   child: SizedBox.square(
                     dimension: 240,
-                    child: QrImage(
+                    child: QrImageView(
                       data: uri.toString(),
-                      foregroundColor: Colors.black,
                       backgroundColor: Colors.white,
                     ),
                   ),
