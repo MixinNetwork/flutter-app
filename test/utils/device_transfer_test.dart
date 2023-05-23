@@ -307,7 +307,9 @@ void main() {
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
     await receiver.connectToServer('localhost', port, verificationCode);
-    await Future.delayed(const Duration(milliseconds: 100));
+
+    await receiverStartCompleter.future;
+    await senderStartCompleter.future;
 
     expect(senderStartCount, 1);
     expect(senderFailedCount, 0);

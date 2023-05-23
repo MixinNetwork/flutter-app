@@ -143,10 +143,11 @@ class DeviceTransferReceiver {
         close();
       },
       onError: (error, stacktrace) {
-        e('_handleRemotePushCommand: $error $stacktrace');
+        e('receiver: socket process error, $error $stacktrace');
         onReceiverFailed?.call();
         close();
       },
+      cancelOnError: true,
     );
     await _socket?.addCommand(
       TransferDataCommand.connect(
