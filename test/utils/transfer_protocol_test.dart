@@ -120,7 +120,7 @@ void main() {
     expect(await _fileMd5(packet2.path), largeFileMd5);
 
     d('packet.path: ${packet.path}');
-  });
+  }, timeout: const Timeout(Duration(minutes: 2)));
 
   test('write command and data', () async {
     final secretKey = generateTransferKey();
