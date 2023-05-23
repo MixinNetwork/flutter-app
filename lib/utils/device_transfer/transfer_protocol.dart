@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:pointycastle/block/aes.dart';
@@ -231,18 +232,18 @@ Future<void> writePacketToSink(
 abstract class _TransferPacketBuilder {
   _TransferPacketBuilder(
     this.expectedBodyLength,
-    Uint8List hMacKey,
+    this.hMacKey,
     this.aesKey,
-  ) : _hMac = HMacCalculator(hMacKey);
+  );
 
   final int expectedBodyLength;
 
   var _writeBodyLength = 0;
 
-  final HMacCalculator _hMac;
   final Uint8List aesKey;
+  final Uint8List hMacKey;
 
-  Uint8List get hMac => _hMac.result;
+  Uint8List get hMac;
 
   /// return: true if write success, false if write failed.
   bool doWriteBody(Uint8List bytes);
@@ -255,7 +256,6 @@ abstract class _TransferPacketBuilder {
       return false;
     }
     _writeBodyLength += bytes.length;
-    _hMac.addBytes(bytes);
     assert(_writeBodyLength <= expectedBodyLength);
     return true;
   }
@@ -269,6 +269,12 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
 
   final _body = <int>[];
   final TransferPacket Function(Uint8List jsonBytes) creator;
+
+  @override
+  Uint8List get hMac {
+    final data = Uint8List.fromList(_body);
+    return calculateHMac(hMacKey, Uint8List.sublistView(data, _kIVBytesCount));
+  }
 
   @override
   bool doWriteBody(Uint8List bytes) {
@@ -296,13 +302,19 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
 
 class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
   _TransferAttachmentPacketBuilder(
-      super.expectedBodyLength, super.hMacKey, super.aesKey, this.folder);
+      super.expectedBodyLength, super.hMacKey, super.aesKey, this.folder)
+      : _hMacCalculator = HMacCalculator(hMacKey);
+
+  final HMacCalculator _hMacCalculator;
 
   final String folder;
 
   File? _file;
   String? _messageId;
   late BlockCipher? _aesCipher;
+
+  @override
+  Uint8List get hMac => throw UnimplementedError();
 
   @override
   bool doWriteBody(Uint8List bytes) {
@@ -345,8 +357,9 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
     return true;
   }
 
-  void _processData(Uint8List rawData) {
-    final bytes = _aesCipher!.process(rawData);
+  void _processData(Uint8List encryptedData) {
+    _hMacCalculator.addBytes(encryptedData);
+    final bytes = _aesCipher!.process(encryptedData);
     _file!.writeAsBytesSync(bytes, mode: FileMode.append, flush: true);
   }
 
@@ -464,10 +477,11 @@ class TransferProtocolSink implements EventSink<Uint8List> {
             return;
           }
           // check hMAC
+
           final hMac = Uint8List.sublistView(data, offset, offset + 32);
-          if (hMac != builder.hMac) {
+          if (!Uint8ListEquality.equals(hMac, builder.hMac)) {
             _sink.addError(
-              'hMac not match. expected $hMac, actually ${builder.hMac}',
+              'hMac not match. expected ${base64Encode(hMac)}, actually ${base64Encode(builder.hMac)}',
               StackTrace.current,
             );
             return;
