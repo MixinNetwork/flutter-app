@@ -178,20 +178,22 @@ class ClampingRenderViewport extends RenderViewport {
         final maxScrollOffset = math.max(math.min(0, top), bottom);
         final minScrollOffset = math.min(top, maxScrollOffset);
 
-        // *** If the center widget's position is not near the bottom ***
-        if (bottom - offset.pixels < 0) {
-          _correctedOffset += bottom;
-          if (offset.pixels > (maxScrollOffset - bottom)) {
-            offset.correctBy(-(offset.pixels - (maxScrollOffset - bottom)));
-          }
+        // *** If overscroll ***
+        if (offset.pixels > maxScrollOffset) {
+          offset.correctBy(maxScrollOffset - offset.pixels);
           count += 1;
           continue;
         }
-
-        // *** If overscroll ***
         if (offset.pixels < minScrollOffset) {
           count += 1;
-          _correctedOffset += minScrollOffset - offset.pixels;
+          offset.correctBy(minScrollOffset - offset.pixels);
+          continue;
+        }
+
+        // *** If the center widget's position is not near the bottom ***
+        if (bottom - offset.pixels < 0) {
+          _correctedOffset += bottom;
+          count += 1;
           continue;
         }
 
