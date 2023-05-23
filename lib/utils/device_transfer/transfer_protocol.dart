@@ -4,6 +4,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
+import 'package:pointycastle/block/aes.dart';
+import 'package:pointycastle/block/modes/cbc.dart';
+import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
+import 'package:pointycastle/paddings/pkcs7.dart';
 import 'package:pointycastle/pointycastle.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:uuid/uuid.dart';
@@ -44,6 +48,22 @@ sealed class TransferPacket {
 
 const _kIVBytesCount = 16;
 
+PaddedBlockCipherImpl _createAESCipher({
+  required Uint8List aesKey,
+  required Uint8List iv,
+  required bool encrypt,
+}) {
+  final cbcCipher = CBCBlockCipher(AESEngine());
+  return PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
+    ..init(
+      encrypt,
+      PaddedBlockCipherParameters(
+        ParametersWithIV(KeyParameter(aesKey), iv),
+        null,
+      ),
+    );
+}
+
 Future<void> _writeDataToSink({
   required TransferSocket sink,
   required Uint8List aesKey,
@@ -52,8 +72,8 @@ Future<void> _writeDataToSink({
   required Uint8List data,
 }) async {
   final iv = generateTransferIv();
-  final aesCipher = BlockCipher('AES/CBC/PKCS5Padding')
-    ..init(true, ParametersWithIV(KeyParameter(aesKey), iv));
+
+  final aesCipher = _createAESCipher(aesKey: aesKey, iv: iv, encrypt: true);
 
   final encryptedData = aesCipher.process(data);
 
@@ -162,8 +182,7 @@ class TransferAttachmentPacket extends TransferPacket {
     final encryptedDataLength = file.lengthSync() + padding;
 
     final iv = generateTransferIv();
-    final aesCipher = BlockCipher('AES/CBC/PKCS5Padding')
-      ..init(true, ParametersWithIV(KeyParameter(aesKey), iv));
+    final aesCipher = _createAESCipher(aesKey: aesKey, iv: iv, encrypt: true);
 
     final header = ByteData(5)
       ..setInt8(0, kTypeFile)
@@ -262,8 +281,7 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
     assert(_writeBodyLength == expectedBodyLength);
     final data = Uint8List.fromList(_body);
     final iv = Uint8List.sublistView(data, 0, _kIVBytesCount);
-    final aesCipher = BlockCipher('AES/CBC/PKCS5Padding')
-      ..init(false, ParametersWithIV(KeyParameter(aesKey), iv));
+    final aesCipher = _createAESCipher(aesKey: aesKey, iv: iv, encrypt: false);
     final jsonData = aesCipher.process(
       Uint8List.sublistView(data, _kIVBytesCount),
     );
@@ -303,8 +321,7 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
         _kUUIDBytesCount,
         _kUUIDBytesCount + _kIVBytesCount,
       );
-      _aesCipher = BlockCipher('AES/CBC/PKCS5Padding')
-        ..init(false, ParametersWithIV(KeyParameter(aesKey), iv));
+      _aesCipher = _createAESCipher(aesKey: aesKey, iv: iv, encrypt: false);
 
       final tempFileName = const Uuid().v4();
       final file = File(p.join(folder, tempFileName));
