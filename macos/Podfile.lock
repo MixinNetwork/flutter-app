@@ -37,18 +37,18 @@ PODS:
     - FlutterMacOS
   - screen_retriever (0.0.1):
     - FlutterMacOS
-  - sqlite3 (3.41.0):
-    - sqlite3/common (= 3.41.0)
-  - sqlite3/common (3.41.0)
-  - sqlite3/fts5 (3.41.0):
+  - sqlite3 (3.41.2):
+    - sqlite3/common (= 3.41.2)
+  - sqlite3/common (3.41.2)
+  - sqlite3/fts5 (3.41.2):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.41.0):
+  - sqlite3/perf-threadsafe (3.41.2):
     - sqlite3/common
-  - sqlite3/rtree (3.41.0):
+  - sqlite3/rtree (3.41.2):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - FlutterMacOS
-    - sqlite3 (~> 3.41.0)
+    - sqlite3 (~> 3.41.2)
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
@@ -156,8 +156,8 @@ SPEC CHECKSUMS:
   platform_device_id_macos: f763bb55f088be804d61b96eb4710b8ab6598e94
   protocol_handler: 587e1caf6c0b92ce351ab14081968dae49cb8cc6
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
-  sqlite3: d31b2b69d59bd1b4ab30e5c92eb18fd8e82fa392
-  sqlite3_flutter_libs: f20746e4a0245afbee4f20d9afc0072ebff7cc26
+  sqlite3: fd89671d969f3e73efe503ce203e28b016b58f68
+  sqlite3_flutter_libs: 00a50503d69f7ab0fe85a5ff25b33082f4df4ce9
   url_launcher_macos: 5335912b679c073563f29d89d33d10d459f95451
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
   window_size: 339dafa0b27a95a62a843042038fa6c3c48de195
