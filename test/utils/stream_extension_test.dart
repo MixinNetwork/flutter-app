@@ -37,7 +37,7 @@ void main() {
     }
 
     final list = await periodic(6)
-        .throttleTime(const Duration(milliseconds: 410))
+        .throttleTime(const Duration(milliseconds: 450))
         .toList();
 
     expect(list, [0, 2, 4, 5]);
