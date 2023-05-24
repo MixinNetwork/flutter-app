@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
@@ -210,13 +211,15 @@ void main() {
     final secretKey = generateTransferKey();
 
     final socket = MockTransferSocket(secretKey);
-
-    final tempFile = await _createTempFile(500 * 1024);
-
-    final md5 = await _fileMd5(tempFile);
+    final random = Random();
+    final md5 = <String>[];
 
     for (var i = 0; i < 100; i++) {
+      // Create 100 random temporary files from 500KB to 1MB
+      final tempFile =
+          await _createTempFile(500 * 1024 + random.nextInt(1024 * 500));
       final messageId = const Uuid().v4();
+      md5.add(await _fileMd5(tempFile));
       await writePacketToSink(
         socket,
         TransferAttachmentPacket(messageId: messageId, path: tempFile),
@@ -240,10 +243,12 @@ void main() {
     );
     final data = await stream.toList();
     expect(data.length, 100);
-    for (final packet in data) {
+
+    for (var i = 0; i < data.length; i++) {
+      final packet = data[i];
       expect(packet, isA<TransferAttachmentPacket>());
       final attachment = packet as TransferAttachmentPacket;
-      expect(await _fileMd5(attachment.path), md5);
+      expect(await _fileMd5(attachment.path), md5[i]);
     }
     i('cost: ${stopwatch.elapsedMilliseconds}ms');
   }, timeout: const Timeout(Duration(minutes: 5)));
