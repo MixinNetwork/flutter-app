@@ -25,7 +25,6 @@ void main() {
     expect(callTimes.length, inInclusiveRange(1, 4));
   });
 
-  // FIXME: this test failed in GitHub Action's Windows platform.
   test('throttle', () async {
     Stream<int> periodic(int count,
         [Duration duration = const Duration(milliseconds: 200)]) async* {
@@ -41,5 +40,5 @@ void main() {
         .toList();
 
     expect(list, [0, 2, 4, 5]);
-  }, skip: true);
+  });
 }
