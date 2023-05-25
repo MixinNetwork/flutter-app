@@ -81,7 +81,7 @@ void main() {
     final socket = MockTransferSocket(secretKey);
     final messageId = const Uuid().v4();
 
-    final testSmallFile = await _createTempFile(1024 * 1024 * 1);
+    final testSmallFile = await _createTempFile(1024 * 1024 * 1 + 5);
     i('testSmallFile: ${File(testSmallFile).lengthSync()}');
     final smallFileMd5 = await _fileMd5(testSmallFile);
 
@@ -92,7 +92,7 @@ void main() {
       aesKey: secretKey.aesKey,
     );
 
-    final testLargeFile = await _createTempFile(1024 * 1024 * 50);
+    final testLargeFile = await _createTempFile(1024 * 1024 * 50 + 6);
     i('testLargeFile: ${File(testLargeFile).lengthSync()}');
     final largeFileMd5 = await _fileMd5(testLargeFile);
     await writePacketToSink(
@@ -104,6 +104,8 @@ void main() {
 
     final bytes = Uint8List.fromList(socket.sink.data);
 
+    i('bytes.length: ${bytes.length}');
+    final stopwatch = Stopwatch()..start();
     final stream = Stream<TransferPacket>.eventTransformed(
       Stream.value(Uint8List.fromList(bytes)),
       (sink) =>
@@ -111,6 +113,9 @@ void main() {
     );
 
     final data = await stream.toList();
+
+    i('parse ${bytes.length / (1024 * 1024)} MB, stopwatch.elapsed: ${stopwatch.elapsedMilliseconds}');
+
     expect(data.length, 2);
     final packet = data.first as TransferAttachmentPacket;
     expect(packet.messageId, messageId);
@@ -211,7 +216,7 @@ void main() {
     final secretKey = generateTransferKey();
 
     final socket = MockTransferSocket(secretKey);
-    final random = Random();
+    final random = Random.secure();
     final md5 = <String>[];
 
     for (var i = 0; i < 100; i++) {
