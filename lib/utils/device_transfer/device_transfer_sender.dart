@@ -395,7 +395,8 @@ class DeviceTransferSender {
         );
         await onPacketSend();
         if (message.category.isAttachment) {
-          if (message.mediaStatus == MediaStatus.done) {
+          if (message.mediaStatus == MediaStatus.done ||
+              message.mediaStatus == MediaStatus.read) {
             final path = attachmentUtil.convertAbsolutePath(
               category: message.category,
               conversationId: message.conversationId,
@@ -408,7 +409,7 @@ class DeviceTransferSender {
               e('attachment not exist: $path');
             }
           } else {
-            w('attachment not done: ${message.messageId} ${message.mediaStatus}');
+            w('attachment not done/read: ${message.messageId} ${message.mediaStatus}');
           }
         }
       }
