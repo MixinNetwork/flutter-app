@@ -84,7 +84,9 @@ class TransferDataMessage {
       thumbImage: data.thumbImage,
       mediaKey: data.mediaKey,
       mediaDigest: data.mediaDigest,
-      mediaStatus: data.mediaStatus,
+      mediaStatus: data.mediaStatus == MediaStatus.pending
+          ? MediaStatus.canceled
+          : data.mediaStatus,
       action: data.action,
       participantId: data.participantId,
       snapshotId: data.snapshotId,
@@ -182,7 +184,9 @@ class TransferDataMessage {
         thumbImage: thumbImage,
         mediaKey: mediaKey,
         mediaDigest: mediaDigest,
-        mediaStatus: mediaStatus,
+        mediaStatus: mediaStatus == MediaStatus.pending
+            ? MediaStatus.canceled
+            : mediaStatus,
         status: status,
         createdAt: createdAt,
         action: action,
