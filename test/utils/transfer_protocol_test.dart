@@ -44,15 +44,12 @@ void main() {
   test('transfer writer', () async {
     final secretKey = generateTransferKey();
     final socket = MockTransferSocket(secretKey);
-    Future<void> writeJson(Map<String, dynamic> json) => writePacketToSink(
-          socket,
-          TransferDataPacket(JsonTransferData(
-            type: JsonTransferDataType.message,
-            data: json,
-          )),
-          hMacKey: secretKey.hMacKey,
-          aesKey: secretKey.aesKey,
-        );
+    Future<void> writeJson(Map<String, dynamic> json) =>
+        TransferDataPacket(JsonTransferData(
+          type: JsonTransferDataType.message,
+          data: json,
+        )).write(socket, secretKey);
+
     await writeJson({'abc': 1});
     await writeJson({'bdfasf': 2124124});
     await writeJson({'bdfasf': 2124124});
@@ -83,33 +80,21 @@ void main() {
 
     final emptyFile = await _createTempFile(0);
     i('emptyFile: ${File(emptyFile).lengthSync()}');
-    await writePacketToSink(
-      socket,
-      TransferAttachmentPacket(messageId: messageId, path: emptyFile),
-      hMacKey: secretKey.hMacKey,
-      aesKey: secretKey.aesKey,
-    );
+    await TransferAttachmentPacket(messageId: messageId, path: emptyFile)
+        .write(socket, secretKey);
 
     final testSmallFile = await _createTempFile(1024 * 1024 * 1 + 5);
     i('testSmallFile: ${File(testSmallFile).lengthSync()}');
     final smallFileMd5 = await _fileMd5(testSmallFile);
 
-    await writePacketToSink(
-      socket,
-      TransferAttachmentPacket(messageId: messageId, path: testSmallFile),
-      hMacKey: secretKey.hMacKey,
-      aesKey: secretKey.aesKey,
-    );
+    await TransferAttachmentPacket(messageId: messageId, path: testSmallFile)
+        .write(socket, secretKey);
 
     final testLargeFile = await _createTempFile(1024 * 1024 * 50 + 6);
     i('testLargeFile: ${File(testLargeFile).lengthSync()}');
     final largeFileMd5 = await _fileMd5(testLargeFile);
-    await writePacketToSink(
-      socket,
-      TransferAttachmentPacket(messageId: messageId, path: testLargeFile),
-      hMacKey: secretKey.hMacKey,
-      aesKey: secretKey.aesKey,
-    );
+    await TransferAttachmentPacket(messageId: messageId, path: testLargeFile)
+        .write(socket, secretKey);
 
     final bytes = Uint8List.fromList(socket.sink.data);
 
@@ -192,15 +177,11 @@ void main() {
 
     final socket = MockTransferSocket(secretKey);
 
-    Future<void> writeJson(Map<String, dynamic> json) => writePacketToSink(
-          socket,
-          TransferDataPacket(JsonTransferData(
-            type: JsonTransferDataType.message,
-            data: json,
-          )),
-          hMacKey: secretKey.hMacKey,
-          aesKey: secretKey.aesKey,
-        );
+    Future<void> writeJson(Map<String, dynamic> json) =>
+        TransferDataPacket(JsonTransferData(
+          type: JsonTransferDataType.message,
+          data: json,
+        )).write(socket, secretKey);
 
     const length = 1000 * 100;
     for (var i = 0; i < length; i++) {
@@ -234,12 +215,8 @@ void main() {
           await _createTempFile(500 * 1024 + random.nextInt(1024 * 500));
       final messageId = const Uuid().v4();
       md5.add(await _fileMd5(tempFile));
-      await writePacketToSink(
-        socket,
-        TransferAttachmentPacket(messageId: messageId, path: tempFile),
-        aesKey: secretKey.aesKey,
-        hMacKey: secretKey.hMacKey,
-      );
+      await TransferAttachmentPacket(messageId: messageId, path: tempFile)
+          .write(socket, secretKey);
     }
 
     final bytes = Uint8List.fromList(socket.sink.data);

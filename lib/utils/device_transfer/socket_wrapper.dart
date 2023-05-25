@@ -28,8 +28,6 @@ abstract class TransferSocket {
 
   TransferSocket.create(this.secretKey);
 
-  final Lock _lock = Lock();
-
   final TransferSecretKey secretKey;
 
   Future<void> close();
@@ -39,6 +37,11 @@ abstract class TransferSocket {
   Future<void> flush();
 
   void add(List<int> data);
+
+  final _writeLock = Lock(reentrant: true);
+
+  Future<void> _writePacket(TransferPacket packet) =>
+      _writeLock.synchronized(() => packet.write(this, secretKey));
 
   Future<void> addConversation(TransferDataConversation conversation) {
     final wrapper = JsonTransferData(
@@ -58,12 +61,7 @@ abstract class TransferSocket {
 
   Future<void> addAttachment(String messageId, String path) {
     final packet = TransferAttachmentPacket(messageId: messageId, path: path);
-    return writePacketToSink(
-      this,
-      packet,
-      hMacKey: secretKey.hMacKey,
-      aesKey: secretKey.aesKey,
-    );
+    return _writePacket(packet);
   }
 
   Future<void> addSticker(TransferDataSticker sticker) {
@@ -100,8 +98,7 @@ abstract class TransferSocket {
 
   Future<void> addCommand(TransferDataCommand command) async {
     d('send command to remote: $command');
-    await writePacketToSink(this, TransferCommandPacket(command),
-        hMacKey: secretKey.hMacKey, aesKey: secretKey.aesKey);
+    await _writePacket(TransferCommandPacket(command));
   }
 
   Future<void> addTranscriptMessage(
@@ -159,8 +156,7 @@ abstract class TransferSocket {
 
   Future<void> _addTransferJson(JsonTransferData data) {
     final packet = TransferDataPacket(data);
-    return writePacketToSink(this, packet,
-        aesKey: secretKey.aesKey, hMacKey: secretKey.hMacKey);
+    return _writePacket(packet);
   }
 }
 
@@ -168,6 +164,7 @@ class _TransferSocket extends TransferSocket {
   _TransferSocket(this.socket, super.secretKey) : super.create();
 
   final Socket socket;
+  final Lock _lock = Lock();
 
   @override
   Future<void> close() => _lock.synchronized(socket.close);

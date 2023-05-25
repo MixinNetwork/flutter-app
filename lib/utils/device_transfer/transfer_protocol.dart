@@ -10,7 +10,6 @@ import 'package:pointycastle/block/modes/cbc.dart';
 import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
 import 'package:pointycastle/paddings/pkcs7.dart';
 import 'package:pointycastle/pointycastle.dart';
-import 'package:synchronized/synchronized.dart';
 import 'package:uuid/uuid.dart';
 
 import '../logger.dart';
@@ -40,11 +39,7 @@ const kTypeFile = 3;
 sealed class TransferPacket {
   TransferPacket();
 
-  Future<void> write(
-    TransferSocket sink, {
-    required Uint8List aesKey,
-    required Uint8List hMacKey,
-  });
+  Future<void> write(TransferSocket sink, TransferSecretKey key);
 }
 
 const _kIVBytesCount = 16;
@@ -68,14 +63,13 @@ PaddedBlockCipherImpl createAESCipher({
 
 Future<void> _writeDataToSink({
   required TransferSocket sink,
-  required Uint8List aesKey,
-  required Uint8List hMacKey,
+  required TransferSecretKey key,
   required int type,
   required Uint8List data,
 }) async {
   final iv = generateTransferIv();
 
-  final aesCipher = createAESCipher(aesKey: aesKey, iv: iv, encrypt: true);
+  final aesCipher = createAESCipher(aesKey: key.aesKey, iv: iv, encrypt: true);
 
   final encryptedData = aesCipher.process(data);
 
@@ -85,7 +79,7 @@ Future<void> _writeDataToSink({
     ..setInt8(0, type)
     ..setInt32(1, bodyLength);
 
-  final hMacCalculator = HMacCalculator(hMacKey)
+  final hMacCalculator = HMacCalculator(key.hMacKey)
     ..addBytes(iv)
     ..addBytes(encryptedData);
   sink
@@ -102,11 +96,7 @@ class TransferDataPacket extends TransferPacket {
   final JsonTransferData data;
 
   @override
-  Future<void> write(
-    TransferSocket sink, {
-    required Uint8List aesKey,
-    required Uint8List hMacKey,
-  }) async {
+  Future<void> write(TransferSocket sink, TransferSecretKey key) async {
     final json = this.data.toJson();
     final data = Uint8List.fromList(utf8.encode(jsonEncode(json)));
 
@@ -122,8 +112,7 @@ class TransferDataPacket extends TransferPacket {
 
     await _writeDataToSink(
       sink: sink,
-      aesKey: aesKey,
-      hMacKey: hMacKey,
+      key: key,
       type: kTypeJson,
       data: data,
     );
@@ -136,14 +125,12 @@ class TransferCommandPacket extends TransferPacket {
   final TransferDataCommand command;
 
   @override
-  Future<void> write(TransferSocket sink,
-      {required Uint8List aesKey, required Uint8List hMacKey}) {
+  Future<void> write(TransferSocket sink, TransferSecretKey key) {
     final json = command.toJson();
     final data = Uint8List.fromList(utf8.encode(jsonEncode(json)));
     return _writeDataToSink(
       sink: sink,
-      aesKey: aesKey,
-      hMacKey: hMacKey,
+      key: key,
       type: kTypeCommand,
       data: data,
     );
@@ -162,11 +149,7 @@ class TransferAttachmentPacket extends TransferPacket {
   final String path;
 
   @override
-  Future<void> write(
-    TransferSocket sink, {
-    required Uint8List aesKey,
-    required Uint8List hMacKey,
-  }) async {
+  Future<void> write(TransferSocket sink, TransferSecretKey key) async {
     final file = File(path);
     if (!file.existsSync() || file.lengthSync() == 0) {
       e('_AttachmentTransferProtocol#writeBody: file not exist or empty. $path');
@@ -185,10 +168,11 @@ class TransferAttachmentPacket extends TransferPacket {
     final padding = kBlockSize - file.lengthSync() % kBlockSize;
     final encryptedDataLength = file.lengthSync() + padding;
 
-    final hMacCalculator = HMacCalculator(hMacKey);
+    final hMacCalculator = HMacCalculator(key.hMacKey);
 
     final iv = generateTransferIv();
-    final aesCipher = createAESCipher(aesKey: aesKey, iv: iv, encrypt: true);
+    final aesCipher =
+        createAESCipher(aesKey: key.aesKey, iv: iv, encrypt: true);
 
     final header = ByteData(5)
       ..setInt8(0, kTypeFile)
@@ -265,17 +249,6 @@ class TransferAttachmentPacket extends TransferPacket {
     await sink.flush();
   }
 }
-
-final _lock = Lock(reentrant: true);
-
-Future<void> writePacketToSink(
-  TransferSocket sink,
-  TransferPacket packet, {
-  required Uint8List hMacKey,
-  required Uint8List aesKey,
-}) =>
-    _lock.synchronized(
-        () => packet.write(sink, aesKey: aesKey, hMacKey: hMacKey));
 
 abstract class _TransferPacketBuilder {
   _TransferPacketBuilder(
