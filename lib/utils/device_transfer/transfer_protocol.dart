@@ -168,8 +168,8 @@ class TransferAttachmentPacket extends TransferPacket {
     required Uint8List hMacKey,
   }) async {
     final file = File(path);
-    if (!file.existsSync()) {
-      e('_AttachmentTransferProtocol#writeBody: file not exist. $path');
+    if (!file.existsSync() || file.lengthSync() == 0) {
+      e('_AttachmentTransferProtocol#writeBody: file not exist or empty. $path');
       return;
     }
 
@@ -244,7 +244,7 @@ class TransferAttachmentPacket extends TransferPacket {
     // handle last block
     final Uint8List lastBlock;
     if (carry == null) {
-      lastBlock = Uint8List.fromList(preBytes!);
+      lastBlock = Uint8List.fromList(preBytes ?? []);
     } else {
       lastBlock = Uint8List.fromList(carry + preBytes!);
     }

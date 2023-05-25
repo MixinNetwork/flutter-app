@@ -81,6 +81,15 @@ void main() {
     final socket = MockTransferSocket(secretKey);
     final messageId = const Uuid().v4();
 
+    final emptyFile = await _createTempFile(0);
+    i('emptyFile: ${File(emptyFile).lengthSync()}');
+    await writePacketToSink(
+      socket,
+      TransferAttachmentPacket(messageId: messageId, path: emptyFile),
+      hMacKey: secretKey.hMacKey,
+      aesKey: secretKey.aesKey,
+    );
+
     final testSmallFile = await _createTempFile(1024 * 1024 * 1 + 5);
     i('testSmallFile: ${File(testSmallFile).lengthSync()}');
     final smallFileMd5 = await _fileMd5(testSmallFile);
