@@ -415,6 +415,7 @@ class DeviceTransfer {
         DeviceTransferCallbackType.onConnectionFailed,
         ConnectionFailedReason.versionNotMatched,
       );
+      _sendCommandAsPlainJson(TransferDataCommand.cancel(deviceId: deviceId));
       return;
     }
     switch (command.action) {
