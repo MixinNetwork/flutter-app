@@ -10,6 +10,7 @@ import '../attachment/attachment_util.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
 import '../system/memory.dart';
+import 'cipher.dart';
 import 'json_transfer_data.dart';
 import 'socket_wrapper.dart';
 import 'transfer_data_app.dart';
@@ -38,7 +39,7 @@ class DeviceTransferReceiver {
     required this.database,
     required this.attachmentUtil,
     required this.userId,
-    required this.protocolTransform,
+    required this.protocolTempFileDir,
     required this.deviceId,
     this.onReceiverStart,
     this.onReceiverSucceed,
@@ -50,7 +51,7 @@ class DeviceTransferReceiver {
   final Database database;
   final AttachmentUtilBase attachmentUtil;
   final String userId;
-  final TransferProtocolTransform protocolTransform;
+  final String protocolTempFileDir;
   final String deviceId;
 
   final OnReceiverStart? onReceiverStart;
@@ -96,7 +97,8 @@ class DeviceTransferReceiver {
     );
   }
 
-  Future<void> connectToServer(String ip, int port, int code) async {
+  Future<void> connectToServer(
+      String ip, int port, int code, TransferSecretKey secretKey) async {
     i('receiver connect to $ip:$port');
     if (_socket != null) {
       w('socket is not null, close it first');
@@ -109,9 +111,12 @@ class DeviceTransferReceiver {
       timeout: const Duration(minutes: 1),
     );
     _resetTransferStates();
-    _socket = TransferSocket(socket);
+    _socket = TransferSocket(socket, secretKey);
     d('connected to $ip:$port. my port: ${socket.port}');
-    socket.transform(protocolTransform).asyncListen(
+    Stream<TransferPacket>.eventTransformed(
+      socket,
+      (sink) => TransferProtocolSink(sink, protocolTempFileDir, secretKey),
+    ).asyncListen(
       (packet) async {
         try {
           if (packet is TransferDataPacket) {
@@ -323,18 +328,23 @@ class DeviceTransferReceiver {
         fileName: tm.mediaUrl,
         isTranscript: true,
       );
-      try {
-        final target = File(path);
-        if (!target.parent.existsSync()) {
-          target.parent.createSync(recursive: true);
+      if (path.isEmpty) {
+        e('_processReceivedAttachmentPacket: transcript attachment path is empty.'
+            ' ${tm.messageId} ${tm.mediaUrl} ${tm.category}');
+      } else {
+        try {
+          final target = File(path);
+          if (!target.parent.existsSync()) {
+            target.parent.createSync(recursive: true);
+          }
+          if (!target.existsSync()) {
+            File(packet.path).copySync(path);
+          } else {
+            e('transcript message found, but file already exits: $path');
+          }
+        } catch (error, stacktrace) {
+          e('_processReceivedAttachmentPacket: $error $stacktrace');
         }
-        if (!target.existsSync()) {
-          File(packet.path).copySync(path);
-        } else {
-          e('transcript message found, but file already exits: $path');
-        }
-      } catch (error, stacktrace) {
-        e('_processReceivedAttachmentPacket: $error $stacktrace');
       }
     }
 
@@ -360,16 +370,23 @@ class DeviceTransferReceiver {
     }
 
     final file = File(path);
-    if (file.existsSync()) {
-      // already exist
-      i('_processReceivedAttachmentPacket: already exist. ${file.path}');
+    try {
+      if (file.existsSync()) {
+        // already exist
+        i('_processReceivedAttachmentPacket: already exist. ${file.path}');
+        deletePacketFile();
+        return;
+      }
+      // check file parent folder
+      final parent = file.parent;
+      if (!parent.existsSync()) {
+        parent.createSync(recursive: true);
+      }
+    } catch (error, stacktrace) {
+      e('_processReceivedAttachmentPacket: ${message.messageId} ${message.category} ${message.mediaUrl}',
+          error, stacktrace);
       deletePacketFile();
       return;
-    }
-    // check file parent folder
-    final parent = file.parent;
-    if (!parent.existsSync()) {
-      parent.createSync(recursive: true);
     }
 
     try {

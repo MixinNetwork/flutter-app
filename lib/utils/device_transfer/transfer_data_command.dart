@@ -12,7 +12,7 @@ const kTransferCommandActionClose = 'close';
 const kTransferCommandActionProgress = 'progress';
 const kTransferCommandActionCancel = 'cancel';
 
-const kDeviceTransferProtocolVersion = 1;
+const kDeviceTransferProtocolVersion = 2;
 
 @JsonSerializable()
 class TransferDataCommand with EquatableMixin {
@@ -56,6 +56,7 @@ class TransferDataCommand with EquatableMixin {
     required int port,
     required String deviceId,
     required int code,
+    required String secretKey,
   }) =>
       TransferDataCommand(
         deviceId: deviceId,
@@ -64,6 +65,7 @@ class TransferDataCommand with EquatableMixin {
         ip: ip,
         port: port,
         code: code,
+        secretKey: secretKey,
       );
 
   factory TransferDataCommand.connect({

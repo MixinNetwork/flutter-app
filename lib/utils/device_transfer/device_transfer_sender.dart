@@ -9,6 +9,7 @@ import '../../enum/media_status.dart';
 import '../attachment/attachment_util.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
+import 'cipher.dart';
 import 'socket_wrapper.dart';
 import 'transfer_data_app.dart';
 import 'transfer_data_asset.dart';
@@ -36,7 +37,7 @@ class DeviceTransferSender {
   DeviceTransferSender({
     required this.database,
     required this.attachmentUtil,
-    required this.protocolTransform,
+    required this.protocolTempFileDir,
     required this.deviceId,
     this.onSenderProgressUpdate,
     this.onSenderStart,
@@ -47,7 +48,7 @@ class DeviceTransferSender {
 
   final Database database;
   final AttachmentUtilBase attachmentUtil;
-  final TransferProtocolTransform protocolTransform;
+  final String protocolTempFileDir;
   final OnSendProgressUpdate? onSenderProgressUpdate;
   final OnSendStart? onSenderStart;
   final OnSendSucceed? onSenderSucceed;
@@ -77,17 +78,20 @@ class DeviceTransferSender {
     onSenderProgressUpdate?.call(progress);
   }
 
-  Future<int> startServerSocket(int verificationCode) async {
+  Future<(int port, TransferSecretKey key)> startServerSocket(
+      int verificationCode) async {
     assert(!_debugStarting, 'server socket starting');
     if (_socket != null) {
       w('startServerSocket: already started');
-      return _socket!.port;
+      await close(debugReason: 'start need close current');
     }
     resetTransferStates();
     _debugStarting = true;
     final serverSocket = await ServerSocket.bind(InternetAddress.anyIPv4, 0);
     _socket = serverSocket;
     _debugStarting = false;
+
+    final transferKey = generateTransferKey();
 
     serverSocket.listen((socket) async {
       if (_clientSocket != null) {
@@ -96,10 +100,15 @@ class DeviceTransferSender {
         return;
       }
       _pendingVerificationSockets.add(socket);
-      i('client connected: ${socket.remoteAddress.address}:${socket.remotePort}');
 
-      final transferSocket = TransferSocket(socket);
-      socket.transform(protocolTransform).asyncListen((event) {
+      final remoteHost = '${socket.remoteAddress.address}:${socket.remotePort}';
+      i('client connected: $remoteHost');
+
+      final transferSocket = TransferSocket(socket, transferKey);
+      Stream<TransferPacket>.eventTransformed(
+        socket,
+        (sink) => TransferProtocolSink(sink, protocolTempFileDir, transferKey),
+      ).asyncListen((event) {
         d('receive data: $event');
 
         if (event is TransferCommandPacket) {
@@ -149,15 +158,15 @@ class DeviceTransferSender {
           }
         }
       }, onDone: () {
+        w('sender: client connected done. $remoteHost'
+            ' isFinished: $_finished, verified: ${_clientSocket == transferSocket}');
         if (_clientSocket != null && _clientSocket != transferSocket) {
           w('connection done, but not the verified client. ignore.');
           return;
         }
-        w('sender: client connected done. $_finished');
-        if (_finished) {
-          onSenderSucceed?.call();
-        } else {
-          onSenderFailed?.call();
+        if (_clientSocket == null) {
+          w('connection done, but current no verified client. ignore.');
+          return;
         }
         close(debugReason: 'client connected done');
       }, onError: (error, stacktrace) {
@@ -171,7 +180,7 @@ class DeviceTransferSender {
       });
     });
     onSenderServerCreated?.call();
-    return serverSocket.port;
+    return (serverSocket.port, transferKey);
   }
 
   /// transfer data to client.
@@ -386,7 +395,8 @@ class DeviceTransferSender {
         );
         await onPacketSend();
         if (message.category.isAttachment) {
-          if (message.mediaStatus == MediaStatus.done) {
+          if (message.mediaStatus == MediaStatus.done ||
+              message.mediaStatus == MediaStatus.read) {
             final path = attachmentUtil.convertAbsolutePath(
               category: message.category,
               conversationId: message.conversationId,
@@ -399,7 +409,7 @@ class DeviceTransferSender {
               e('attachment not exist: $path');
             }
           } else {
-            w('attachment not done: ${message.messageId} ${message.mediaStatus}');
+            w('attachment not done/read: ${message.messageId} ${message.mediaStatus}');
           }
         }
       }
@@ -509,11 +519,23 @@ class DeviceTransferSender {
 
   Future<void> close({String? debugReason}) async {
     i('sender: closing transfer server. $debugReason');
-    await _clientSocket?.close();
-    _clientSocket?.destroy();
-    _clientSocket = null;
-    await _socket?.close();
+    final socket = _socket;
+    final clientSocket = _clientSocket;
     _socket = null;
+    _clientSocket = null;
+
+    if (socket == null && clientSocket == null) {
+      return;
+    }
+
+    if (_finished) {
+      onSenderSucceed?.call();
+    } else {
+      onSenderFailed?.call();
+    }
+    await clientSocket?.close();
+    clientSocket?.destroy();
+    await socket?.close();
     i('sender: transfer server closed');
   }
 }

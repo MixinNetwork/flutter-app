@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
@@ -21,11 +22,11 @@ import '../db/database.dart';
 import '../db/fts_database.dart';
 import '../db/mixin_database.dart';
 import '../utils/attachment/attachment_util.dart';
+import '../utils/device_transfer/cipher.dart';
 import '../utils/device_transfer/device_transfer_receiver.dart';
 import '../utils/device_transfer/device_transfer_sender.dart';
 import '../utils/device_transfer/device_transfer_widget.dart';
 import '../utils/device_transfer/transfer_data_command.dart';
-import '../utils/device_transfer/transfer_protocol.dart';
 import '../utils/event_bus.dart';
 import '../utils/file.dart';
 import '../utils/load_balancer_utils.dart';
@@ -207,7 +208,8 @@ class DeviceTransfer {
             return;
           }
           _remotePushData = null;
-          await receiver.connectToServer(data.ip, data.port, data.code);
+          await receiver.connectToServer(
+              data.ip, data.port, data.code, data.secretKey);
           break;
         case DeviceTransferCommand.confirmBackup:
           await _sendPushToOtherSession();
@@ -234,12 +236,12 @@ class DeviceTransfer {
     required String identityNumber,
   }) async {
     final attachmentUtil = AttachmentUtilBase.of(identityNumber);
-    final transform = await _getProtocolTransform();
+    final protocolFileTempDir = await _getProtocolTempFileDir();
     final deviceId = await getDeviceId();
     final sender = DeviceTransferSender(
       database: database,
       attachmentUtil: attachmentUtil,
-      protocolTransform: transform,
+      protocolTempFileDir: protocolFileTempDir,
       deviceId: deviceId,
       onSenderStart: () {
         DeviceTransferEventBus.instance
@@ -268,7 +270,7 @@ class DeviceTransfer {
       database: database,
       userId: userId,
       attachmentUtil: attachmentUtil,
-      protocolTransform: transform,
+      protocolTempFileDir: protocolFileTempDir,
       deviceId: deviceId,
       onReceiverStart: () {
         DeviceTransferEventBus.instance
@@ -350,7 +352,7 @@ class DeviceTransfer {
     await _sendCommandAsPlainJson(command);
   }
 
-  static Future<TransferProtocolTransform> _getProtocolTransform() async {
+  static Future<String> _getProtocolTempFileDir() async {
     final fileFolder = await getTemporaryDirectory();
     final folder = p.join(fileFolder.path, 'mixin_transfer');
     try {
@@ -358,7 +360,7 @@ class DeviceTransfer {
     } catch (error, stacktrace) {
       e('create folder error: $error $stacktrace');
     }
-    return TransferProtocolTransform(fileFolder: folder);
+    return folder;
   }
 
   Future<String?> getFirstIpv4Address() async {
@@ -391,7 +393,7 @@ class DeviceTransfer {
 
     final code = Random().nextInt(10000);
 
-    final port = await sender.startServerSocket(code);
+    final (port, key) = await sender.startServerSocket(code);
     i('_sendPushToOtherSession: server addr $ipAddress:$port');
 
     final command = TransferDataCommand.push(
@@ -399,6 +401,7 @@ class DeviceTransfer {
       port: port,
       deviceId: deviceId,
       code: code,
+      secretKey: base64Encode(key.secretKey),
     );
 
     await _sendCommandAsPlainJson(command);
@@ -407,16 +410,18 @@ class DeviceTransfer {
   void handleRemoteCommand(TransferDataCommand command) {
     i('handleRemoteCommand: ${command.action}');
     if (command.version != kDeviceTransferProtocolVersion) {
-      e('command version not matched');
+      e('command version not matched.${command.version}, $kDeviceTransferProtocolVersion');
       DeviceTransferEventBus.instance.fire(
-        DeviceTransferCallbackType.onCommandVersionNotMatched,
-        command.version,
+        DeviceTransferCallbackType.onConnectionFailed,
+        ConnectionFailedReason.versionNotMatched,
       );
+      _sendCommandAsPlainJson(TransferDataCommand.cancel(deviceId: deviceId));
       return;
     }
     switch (command.action) {
       case kTransferCommandActionPush:
-        _handleRemotePushCommand(command.ip!, command.port!, command.code!);
+        _handleRemotePushCommand(
+            command.ip!, command.port!, command.code!, command.secretKey!);
         break;
       case kTransferCommandActionPull:
         DeviceTransferEventBus.instance
@@ -428,13 +433,25 @@ class DeviceTransfer {
     }
   }
 
-  Future<void> _handleRemotePushCommand(String ip, int port, int code) async {
+  Future<void> _handleRemotePushCommand(
+      String ip, int port, int code, String secretKey) async {
     d('_handleRemotePushCommand: $ip:$port ($code)');
+    final keyBytes = base64Decode(secretKey);
+    if (keyBytes.length != 64) {
+      e('handleRemotePushCommand: invalid secret key length.');
+      DeviceTransferEventBus.instance.fire(
+        DeviceTransferCallbackType.onConnectionFailed,
+        ConnectionFailedReason.unknown,
+      );
+      return;
+    }
+    final transferSecretKey = TransferSecretKey(keyBytes);
     if (_waitingForRemotePush) {
       _waitingForRemotePush = false;
-      await receiver.connectToServer(ip, port, code);
+      await receiver.connectToServer(ip, port, code, transferSecretKey);
     } else {
-      _remotePushData = _RemotePushData(ip: ip, port: port, code: code);
+      _remotePushData = _RemotePushData(
+          ip: ip, port: port, code: code, secretKey: transferSecretKey);
       DeviceTransferEventBus.instance
           .fire(DeviceTransferCallbackType.onBackupRequestReceived);
     }
@@ -456,9 +473,11 @@ class _RemotePushData {
     required this.ip,
     required this.port,
     required this.code,
+    required this.secretKey,
   });
 
   final String ip;
   final int port;
   final int code;
+  final TransferSecretKey secretKey;
 }
