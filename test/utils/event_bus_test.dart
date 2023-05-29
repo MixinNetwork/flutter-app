@@ -35,7 +35,7 @@ void main() {
       EventBus.instance.fire('c');
     }, null);
 
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 500));
     expect(events, ['a', 'b', 'c']);
   });
 
@@ -51,7 +51,7 @@ void main() {
       return events;
     }, null);
 
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 400));
     EventBus.instance.fire('a');
     EventBus.instance.fire('b');
     EventBus.instance.fire('c');
@@ -73,7 +73,7 @@ void main() {
       return events;
     }, null);
 
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 400));
     EventBus.instance.fire('a');
     EventBus.instance.fire('b');
     EventBus.instance.fire('c');
