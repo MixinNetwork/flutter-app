@@ -68,12 +68,8 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
     );
   }
 
-  Selectable<String?> getPinMessageIds(String conversationId) =>
-      (selectOnly(db.pinMessages)
-            ..addColumns([db.pinMessages.messageId])
-            ..where(db.pinMessages.conversationId.equals(conversationId))
-            ..orderBy([OrderingTerm.desc(db.pinMessages.createdAt)]))
-          .map((row) => row.read(db.pinMessages.messageId));
+  Selectable<String?> pinMessageIds(String conversationId) =>
+      db.pinMessageIds(conversationId);
 
   Selectable<PinMessageItemResult> pinMessageItem(
           String conversationId, String messageId) =>

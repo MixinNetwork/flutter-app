@@ -81,10 +81,16 @@ SELECT
     message.content AS content,
     sender.full_name AS userFullName
 FROM messages message
+         INNER JOIN pin_messages pinMessage ON message.message_id = pinMessage.message_id
          INNER JOIN users sender ON message.user_id = sender.user_id
 WHERE message.conversation_id = :conversationId AND message.category = 'MESSAGE_PIN' AND message.quote_message_id = :messageId
 ORDER BY message.created_at DESC
 LIMIT 1;
+
+pinMessageIds:
+SELECT pinMessage.message_id FROM pin_messages pinMessage
+        INNER JOIN messages message ON message.message_id = pinMessage.message_id
+WHERE pinMessage.conversation_id = :conversationId;
 
 countPinMessages:
 SELECT COUNT(1) FROM pin_messages;
