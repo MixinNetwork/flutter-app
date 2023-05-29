@@ -282,10 +282,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         [MiniTranscriptMessage(transcriptId: messageId)]);
   }
 
-  Future<void> deleteMessageByConversationId(String conversationId) =>
-      (delete(db.messages)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .go();
+  Future<void> deleteMessagesByConversationId(String conversationId) =>
+      db.transaction(() async {
+        await db.pinMessageDao.deleteByConversationId(conversationId);
+        await (delete(db.messages)
+              ..where((tbl) => tbl.conversationId.equals(conversationId)))
+            .go();
+      });
 
   Future<SendingMessage?> sendingMessage(String messageId) async =>
       db.sendingMessage(messageId).getSingleOrNull();

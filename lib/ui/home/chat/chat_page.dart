@@ -1138,8 +1138,8 @@ class _ConversationHandle extends ConversationMenuHandle {
       description: context.l10n.deleteChatDescription,
     );
     if (ret == null) return;
+    await context.accountServer.deleteMessagesByConversationId(conversationId);
     await context.database.conversationDao.deleteConversation(conversationId);
-    await context.database.pinMessageDao.deleteByConversationId(conversationId);
     if (context.read<ConversationCubit>().state?.conversationId ==
         conversationId) {
       context.read<ConversationCubit>().unselected();

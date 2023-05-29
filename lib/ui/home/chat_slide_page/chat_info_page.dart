@@ -466,8 +466,8 @@ class ChatInfoPage extends HookWidget {
                         context.l10n.clearChat,
                       );
                       if (result == null) return;
-                      await accountServer.database.messageDao
-                          .deleteMessageByConversationId(conversationId);
+                      await accountServer
+                          .deleteMessagesByConversationId(conversationId);
                       context.read<MessageBloc>().reload();
                     },
                   ),
@@ -504,12 +504,10 @@ class ChatInfoPage extends HookWidget {
                             context.l10n.deleteGroup,
                           );
                           if (result == null) return;
-                          await context.database.messageDao
-                              .deleteMessageByConversationId(conversationId);
+                          await accountServer
+                              .deleteMessagesByConversationId(conversationId);
                           await context.database.conversationDao
-                              .deleteConversation(
-                            conversationId,
-                          );
+                              .deleteConversation(conversationId);
                           if (context
                                   .read<ConversationCubit>()
                                   .state
