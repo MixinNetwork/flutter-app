@@ -302,7 +302,7 @@ class _ProxyTypeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
         color: context.theme.listSelected,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
         child: ListTileTheme(
           data: ListTileThemeData(
             dense: true,

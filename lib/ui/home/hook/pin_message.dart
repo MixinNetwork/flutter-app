@@ -47,7 +47,7 @@ PinMessageState usePinMessageState() {
     () {
       if (conversationId == null) return Stream.value([]);
       return context.database.pinMessageDao
-          .getPinMessageIds(conversationId)
+          .pinMessageIds(conversationId)
           .watchWithStream(
         eventStreams: [
           DataBaseEventBus.instance.watchPinMessageStream(
