@@ -108,7 +108,7 @@ class FtsDatabase extends _$FtsDatabase {
         .go();
   }
 
-  Future<void> deleteByConversationId(String conversationId) async {
+  Future<void> deleteFtsByConversationId(String conversationId) async {
     await _deleteFtsByMessageId(conversationId);
     await (delete(messagesMetas)
           ..where((tbl) => tbl.conversationId.equals(conversationId)))
