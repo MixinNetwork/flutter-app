@@ -463,6 +463,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   bool _hasAttachmentJob(String messageId) =>
       _attachmentJob.containsKey(messageId);
 
+  Iterable<String> get downloadingIds =>
+      _attachmentJob.entries.map((e) => e.key);
+
   void _setAttachmentJob(String messageId, _AttachmentJobBase job) {
     _attachmentJob[messageId] = job;
     if (job is _AttachmentDownloadJob) {
@@ -477,9 +480,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   }
 
   Future<bool> cancelProgressAttachmentJob(String messageId) async {
+    if (!_hasAttachmentJob(messageId)) return false;
     await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
     await DownloadKeyValue.instance.removeMessageId(messageId);
-    if (!_hasAttachmentJob(messageId)) return false;
     _attachmentJob[messageId]?.cancel();
     _attachmentJob.remove(messageId);
     return true;

@@ -530,6 +530,15 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
     );
   }
 
+  Future<int> _deleteFtsByConversationId(String conversationId) {
+    return customUpdate(
+      'DELETE FROM messages_fts WHERE "rowid" = (SELECT doc_id FROM messages_metas WHERE conversation_id = ?1)',
+      variables: [Variable<String>(conversationId)],
+      updates: {messagesFts},
+      updateKind: UpdateKind.delete,
+    );
+  }
+
   Selectable<String> _fuzzySearchAllMessage(
       String query, FuzzySearchAllMessage$where where, int limit) {
     var $arrayStartIndex = 3;

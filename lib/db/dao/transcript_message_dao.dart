@@ -43,16 +43,6 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
             // ignore: invalid_use_of_protected_member
             ..limitExpr = limit ?? Limit(1, 0));
 
-  Future<int> findCountByMessageId(String messageId) async {
-    final count = countAll();
-    return await (db.selectOnly(db.transcriptMessages)
-              ..addColumns([count])
-              ..where(db.transcriptMessages.messageId.equals(messageId)))
-            .map((row) => row.read(count))
-            .getSingleOrNull() ??
-        0;
-  }
-
   SimpleSelectStatement<TranscriptMessages, TranscriptMessage>
       transcriptMessageByTranscriptId(String transcriptId) =>
           db.select(db.transcriptMessages)

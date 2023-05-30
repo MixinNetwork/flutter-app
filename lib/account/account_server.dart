@@ -472,9 +472,12 @@ class AccountServer {
   }
 
   Future<void> sendRecallMessage(List<String> messageIds,
-          {String? conversationId, String? recipientId}) async =>
-      _sendMessageHelper.sendRecallMessage(
-          await _initConversation(conversationId, recipientId), messageIds);
+      {String? conversationId, String? recipientId}) async {
+    await Future.forEach(
+        messageIds, (id) => attachmentUtil.cancelProgressAttachmentJob(id));
+    return _sendMessageHelper.sendRecallMessage(
+        await _initConversation(conversationId, recipientId), messageIds);
+  }
 
   Future<void> sendAppCardMessage({
     String? conversationId,
@@ -1291,13 +1294,44 @@ class AccountServer {
     }
   }
 
+  Future<void> _deleteMessageAttachmentByConversationId(
+      String conversationId) async {
+    final directories = [
+      attachmentUtil.getImagesPath(conversationId),
+      attachmentUtil.getVideosPath(conversationId),
+      attachmentUtil.getAudiosPath(conversationId),
+      attachmentUtil.getFilesPath(conversationId),
+    ];
+
+    await Future.wait(directories.map((dir) async {
+      final directory = Directory(dir);
+      if (!directory.existsSync()) return;
+      await directory.delete(recursive: true);
+    }));
+  }
+
   Future<void> deleteMessage(String messageId) async {
     final message = await database.messageDao.findMessageByMessageId(messageId);
     if (message == null) return;
+    await attachmentUtil.cancelProgressAttachmentJob(messageId);
     await database.messageDao.deleteMessage(message.conversationId, messageId);
-
     unawaited(database.ftsDatabase.deleteByMessageId(messageId));
     unawaited(_deleteMessageAttachment(message));
+  }
+
+  Future<void> deleteMessagesByConversationId(String conversationId) async {
+    final miniMessageIds = await database.messageDao
+        .miniMessageByIds(attachmentUtil.downloadingIds.toList())
+        .get();
+    await Future.forEach(
+        miniMessageIds
+            .where((message) => message.conversationId == conversationId),
+        (message) =>
+            attachmentUtil.cancelProgressAttachmentJob(message.messageId));
+
+    await database.messageDao.deleteMessagesByConversationId(conversationId);
+    unawaited(database.ftsDatabase.deleteByConversationId(conversationId));
+    unawaited(_deleteMessageAttachmentByConversationId(conversationId));
   }
 
   String convertAbsolutePath(
