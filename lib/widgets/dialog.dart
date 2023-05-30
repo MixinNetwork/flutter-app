@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../constants/constants.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import 'disable.dart';
@@ -300,6 +301,7 @@ class DialogTextField extends HookWidget {
             ),
             maxLines: maxLines ?? 1,
             minLines: 1,
+            maxLength: kDefaultTextInputLimit,
             scrollPadding: EdgeInsets.zero,
             decoration: const InputDecoration(
               contentPadding: EdgeInsets.zero,

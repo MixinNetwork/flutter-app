@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../constants/constants.dart';
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
@@ -106,6 +107,7 @@ class SearchTextField extends HookWidget {
                         focusColor: Colors.transparent,
                         contentPadding: EdgeInsets.zero,
                       ),
+                      maxLength: kDefaultTextInputLimit,
                     ),
                   ),
                   if (hintText != null && !hasText)

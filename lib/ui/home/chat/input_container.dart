@@ -530,6 +530,7 @@ class _SendTextField extends HookWidget {
                 color: context.theme.text,
                 fontSize: 14,
               ),
+              maxLength: kMaxTextLength,
               textAlignVertical: TextAlignVertical.center,
               decoration: const InputDecoration(
                 isDense: true,

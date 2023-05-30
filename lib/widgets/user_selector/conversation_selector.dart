@@ -6,6 +6,7 @@ import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../bloc/simple_cubit.dart';
 import '../../constants/brightness_theme_data.dart';
+import '../../constants/constants.dart';
 import '../../constants/resources.dart';
 import '../../crypto/uuid/uuid.dart';
 import '../../db/mixin_database.dart';
@@ -468,6 +469,7 @@ class _FilterTextField extends HookWidget {
               color: context.theme.text,
               fontSize: 14,
             ),
+            maxLength: kDefaultTextInputLimit,
             autofocus: true,
             scrollPadding: EdgeInsets.zero,
             decoration: InputDecoration(
