@@ -72,7 +72,7 @@ class ConversationAvatarWidget extends HookWidget {
             ? AvatarWidget(
                 userId: _userId,
                 name: _name,
-                avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
+                avatarUrl: _avatarUrl ?? _groupIconUrl ?? '',
                 size: size)
             : AvatarPuzzlesWidget(list, size),
       ),

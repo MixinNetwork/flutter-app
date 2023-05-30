@@ -289,19 +289,19 @@ class ConversationAvatar extends StatelessWidget {
         size: Size.square(size),
         child: Builder(
           builder: (context) {
-            if (conversationState?.conversation != null) {
-              return ConversationAvatarWidget(
-                size: size,
-                conversation: conversationState!.conversation,
-              );
-            }
-
             if (conversationState?.user != null) {
               return AvatarWidget(
                 size: size,
                 userId: conversationState?.user?.userId,
                 avatarUrl: conversationState?.user?.avatarUrl,
                 name: conversationState?.name,
+              );
+            }
+
+            if (conversationState?.conversation != null) {
+              return ConversationAvatarWidget(
+                size: size,
+                conversation: conversationState!.conversation,
               );
             }
 
