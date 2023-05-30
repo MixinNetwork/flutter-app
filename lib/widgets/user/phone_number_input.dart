@@ -207,8 +207,8 @@ class _MobileInput extends HookWidget {
         textInputAction: TextInputAction.next,
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
         ],
-        maxLength: kDefaultTextInputLimit,
         autofillHints: const [
           AutofillHints.telephoneNumber,
         ],

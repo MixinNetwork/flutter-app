@@ -353,7 +353,9 @@ class _ProxyInputWidget extends StatelessWidget {
               fontSize: 14,
               color: context.theme.text,
             ),
-            maxLength: kDefaultTextInputLimit,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(kDefaultTextInputLimit)
+            ],
             decoration: InputDecoration(
               isDense: true,
               hintText: firstHintText,
@@ -382,7 +384,9 @@ class _ProxyInputWidget extends StatelessWidget {
               fontSize: 14,
               color: context.theme.text,
             ),
-            maxLength: kDefaultTextInputLimit,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(kDefaultTextInputLimit)
+            ],
             decoration: InputDecoration(
               isDense: true,
               hintText: secondHintText,

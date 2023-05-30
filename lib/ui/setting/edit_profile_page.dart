@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 
@@ -132,7 +133,7 @@ class _Item extends StatelessWidget {
     required this.title,
     required this.controller,
     this.readOnly = false,
-    this.maxLength = kDefaultTextInputLimit,
+    this.maxLength,
   });
 
   final String title;
@@ -187,6 +188,10 @@ class _Item extends StatelessWidget {
             minLines: 1,
             maxLines: 10,
             maxLength: maxLength,
+            inputFormatters: [
+              if (maxLength == null)
+                LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
+            ],
             decoration: InputDecoration(
               isDense: true,
               border: outlineInputBorder,
