@@ -95,7 +95,7 @@ class StickerMessageWidget extends HookWidget {
     const width = kMaxWidth;
     const height = kMaxWidth;
 
-    final placeholder = Container(
+    final errorWidget = Container(
       width: width,
       height: height,
       color: context.theme.stickerPlaceholderColor,
@@ -107,7 +107,7 @@ class StickerMessageWidget extends HookWidget {
       outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
       child: HookBuilder(
         builder: (context) {
-          if (stickerData == null) return placeholder;
+          if (stickerData == null) return errorWidget;
 
           return InteractiveDecoratedBox(
             onTap: () {
@@ -118,7 +118,7 @@ class StickerMessageWidget extends HookWidget {
             child: StickerItem(
               assetUrl: stickerData.assetUrl,
               assetType: assetType,
-              placeholder: placeholder,
+              errorWidget: errorWidget,
               width: width,
               height: height,
             ),
