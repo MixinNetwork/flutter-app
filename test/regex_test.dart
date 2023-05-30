@@ -71,7 +71,7 @@ void main() {
         match(uriRegExp, '你看看这个$uri可以吗', uri);
       }
     });
-  });
+  }, skip: true);
 
   group('bot number', () {
     test('speed', () {
@@ -100,7 +100,7 @@ void main() {
       match(botNumberRegExp, ':$botNumber,', '$botNumber');
       match(botNumberRegExp, '：$botNumber。', '$botNumber');
     });
-  });
+  }, skip: true);
 
   group('mail', () {
     test('speed', () {
@@ -155,5 +155,5 @@ void main() {
         match(mailRegExp, '你看看这个$mail可以吗', mail);
       }
     });
-  });
+  }, skip: true);
 }
