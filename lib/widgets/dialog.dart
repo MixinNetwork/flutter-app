@@ -301,7 +301,6 @@ class DialogTextField extends HookWidget {
             ),
             maxLines: maxLines ?? 1,
             minLines: 1,
-            maxLength: kDefaultTextInputLimit,
             scrollPadding: EdgeInsets.zero,
             decoration: const InputDecoration(
               contentPadding: EdgeInsets.zero,
@@ -309,7 +308,12 @@ class DialogTextField extends HookWidget {
               focusedBorder: InputBorder.none,
               enabledBorder: InputBorder.none,
             ),
-            inputFormatters: inputFormatters,
+            inputFormatters: [
+              if (inputFormatters == null)
+                LengthLimitingTextInputFormatter(kDefaultTextInputLimit)
+              else
+                ...inputFormatters!,
+            ],
           ),
           if (hintText.isNotEmpty && !hasText)
             IgnorePointer(

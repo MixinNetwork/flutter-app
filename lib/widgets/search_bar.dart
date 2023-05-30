@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../bloc/keyword_cubit.dart';
+import '../constants/constants.dart';
 import '../constants/resources.dart';
 import '../ui/home/bloc/conversation_filter_unseen_cubit.dart';
 import '../ui/home/home.dart';
@@ -227,7 +228,10 @@ class _SearchUserDialog extends HookWidget {
                           textEditingController: textEditingController,
                           hintText: context.l10n.addPeopleSearchHint,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp('[0-9+]'))
+                            FilteringTextInputFormatter.allow(RegExp('[0-9+]')),
+                            LengthLimitingTextInputFormatter(
+                              kDefaultTextInputLimit,
+                            ),
                           ],
                         ),
                       ),
