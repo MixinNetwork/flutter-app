@@ -13,14 +13,14 @@ class StickerItem extends HookWidget {
     super.key,
     required this.assetUrl,
     required this.assetType,
-    this.placeholder,
+    this.errorWidget,
     this.width,
     this.height,
   });
 
   final String assetUrl;
   final String? assetType;
-  final Widget? placeholder;
+  final Widget? errorWidget;
   final double? width;
   final double? height;
 
@@ -75,13 +75,17 @@ class StickerItem extends HookWidget {
               controller.duration = composition.duration;
               listener();
             },
+            errorBuilder:
+                errorWidget != null ? (_, __, ___) => errorWidget! : null,
           )
-        : CacheImage(assetUrl,
+        : CacheImage(
+            assetUrl,
             height: height,
             width: width,
             controller: playing,
             fit: BoxFit.contain,
-            placeholder: () => placeholder ?? const SizedBox());
+            errorWidget: errorWidget != null ? () => errorWidget! : null,
+          );
 
     if (width == null || height == null) {
       return AspectRatio(aspectRatio: 1, child: child);

@@ -53,12 +53,12 @@ class CacheImage extends StatelessWidget {
       height: height,
       fit: fit,
       errorBuilder: (context, error, stackTrace) =>
-          errorWidget?.call() ?? const SizedBox.shrink(),
+          errorWidget?.call() ?? SizedBox(width: width, height: height),
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) {
           return child;
         }
-        return placeholder?.call() ?? const SizedBox.shrink();
+        return placeholder?.call() ?? SizedBox(width: width, height: height);
       },
     );
   }
