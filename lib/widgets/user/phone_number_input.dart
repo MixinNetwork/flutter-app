@@ -14,6 +14,7 @@ import 'package:intl_phone_number_input/src/models/country_model.dart';
 import 'package:intl_phone_number_input/src/providers/country_provider.dart';
 import 'package:intl_phone_number_input/src/utils/phone_number/phone_number_util.dart';
 
+import '../../constants/constants.dart';
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -207,6 +208,7 @@ class _MobileInput extends HookWidget {
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
         ],
+        maxLength: kDefaultTextInputLimit,
         autofillHints: const [
           AutofillHints.telephoneNumber,
         ],

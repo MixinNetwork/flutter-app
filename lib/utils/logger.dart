@@ -13,8 +13,43 @@ import '../widgets/dialog.dart';
 import '../widgets/toast.dart';
 import 'extension/extension.dart';
 import 'file.dart';
+import 'system/memory.dart';
+import 'system/package_info.dart';
 
 export 'package:mixin_logger/mixin_logger.dart';
+
+Future<void> dumpAppAndSystemInfoToLogger() async {
+  final info = await _dumpAppAndSystemInfo();
+  i('app launch:\n$info');
+  setLoggerFileLeading(info);
+}
+
+String _getBuildType() {
+  if (kReleaseMode) {
+    return 'release';
+  }
+  if (kProfileMode) {
+    return 'profile';
+  }
+  return 'debug';
+}
+
+Future<String> _dumpAppAndSystemInfo() async {
+  final info = StringBuffer();
+  // app info
+  final packageInfo = await getPackageInfo();
+  info
+    ..writeln(
+        'AppVersion ${packageInfo.version} BuildNumber: ${packageInfo.buildNumber}')
+    ..writeln('BuildType: ${_getBuildType()}')
+    ..writeln(
+        'Platform: ${Platform.operatingSystem} ${Platform.operatingSystemVersion}')
+    ..writeln('DartRuntime: ${Platform.version}')
+    ..writeln('NumberOfProcessors: ${Platform.numberOfProcessors} cores')
+    ..writeln('DiskUsage: ${dumpFreeDiskSpaceToString()}');
+
+  return info.toString();
+}
 
 Future<void> showShareLogDialog(
   BuildContext context, {

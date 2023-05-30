@@ -9,7 +9,7 @@ extension _String on int {
   String get bytesToGbString => (this / 1024 / 1024 / 1024).toStringAsFixed(2);
 }
 
-void dumpFreeDiskSpace() {
+String dumpFreeDiskSpaceToString() {
   if (Platform.isWindows) {
     try {
       final lpDirectoryName = TEXT(r'C:\');
@@ -24,16 +24,18 @@ void dumpFreeDiskSpace() {
       final totalNumberOfFreeBytes =
           lpTotalNumberOfFreeBytes.value.bytesToGbString;
 
-      i('freeBytesAvailableToCaller: $freeBytesAvailableToCaller GB, '
+      final str = 'freeBytesAvailableToCaller: $freeBytesAvailableToCaller GB, '
           'totalNumberOfBytes: $totalNumberOfBytes GB, '
-          'totalNumberOfFreeBytes: $totalNumberOfFreeBytes GB');
+          'totalNumberOfFreeBytes: $totalNumberOfFreeBytes GB';
 
       free(lpFreeBytesAvailableToCaller);
       free(lpTotalNumberOfBytes);
       free(lpTotalNumberOfFreeBytes);
       free(lpDirectoryName);
+      return str;
     } catch (error, stacktrace) {
       e('failed to get disk free space. $error $stacktrace');
     }
   }
+  return '';
 }

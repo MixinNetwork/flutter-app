@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 
 import '../../bloc/bloc_converter.dart';
+import '../../constants/constants.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
@@ -131,7 +132,7 @@ class _Item extends StatelessWidget {
     required this.title,
     required this.controller,
     this.readOnly = false,
-    this.maxLength,
+    this.maxLength = kDefaultTextInputLimit,
   });
 
   final String title;
