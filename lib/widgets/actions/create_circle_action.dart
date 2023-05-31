@@ -19,6 +19,7 @@ class CreateCircleAction extends Action<CreateCircleIntent> {
       child: EditDialog(
         title: Text(context.l10n.circles),
         hintText: context.l10n.editCircleName,
+        maxLength: 64,
       ),
     );
 

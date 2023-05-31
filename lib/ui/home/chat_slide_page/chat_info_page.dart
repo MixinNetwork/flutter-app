@@ -276,6 +276,7 @@ class ChatInfoPage extends HookWidget {
                               title: Text(announcementTitle),
                               editText: announcement ?? '',
                               maxLines: 7,
+                              maxLength: 512,
                             ),
                           );
                           if (result == null) return;
