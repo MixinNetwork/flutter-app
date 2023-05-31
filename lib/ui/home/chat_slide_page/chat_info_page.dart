@@ -276,6 +276,7 @@ class ChatInfoPage extends HookWidget {
                               title: Text(announcementTitle),
                               editText: announcement ?? '',
                               maxLines: 7,
+                              maxLength: 512,
                             ),
                           );
                           if (result == null) return;
@@ -352,8 +353,8 @@ class ChatInfoPage extends HookWidget {
                           child: EditDialog(
                             editText: conversationState.name ?? '',
                             title: Text(context.l10n.editName),
-                            hintText: context.l10n.groupName,
                             positiveAction: context.l10n.change,
+                            maxLength: 40,
                           ),
                         );
                         if (name?.isEmpty ?? true) return;

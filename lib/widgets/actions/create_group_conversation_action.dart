@@ -89,7 +89,8 @@ class _NewConversationConfirm extends HookWidget {
           const SizedBox(height: 48),
           DialogTextField(
             textEditingController: textEditingController,
-            hintText: '',
+            hintText: context.l10n.groupName,
+            maxLength: 40,
           ),
         ],
       ),

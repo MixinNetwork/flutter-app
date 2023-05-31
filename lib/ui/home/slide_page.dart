@@ -274,6 +274,7 @@ class _CircleList extends HookWidget {
                                     title: Text(context.l10n.circles),
                                     hintText: context.l10n.editCircleName,
                                     positiveAction: context.l10n.edit,
+                                    maxLength: 64,
                                   ),
                                 );
                                 if (name?.isEmpty ?? true) return;

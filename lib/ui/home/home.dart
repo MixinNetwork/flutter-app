@@ -139,6 +139,7 @@ class _SetupNameWidget extends HookWidget {
           content: DialogTextField(
             textEditingController: textEditingController,
             hintText: context.l10n.name,
+            maxLength: 40,
           ),
           actions: [
             MixinButton(
