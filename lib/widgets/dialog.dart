@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../constants/constants.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import 'disable.dart';
@@ -268,6 +267,7 @@ class DialogTextField extends HookWidget {
     required this.hintText,
     this.inputFormatters,
     this.maxLines = 1,
+    this.maxLength,
   });
 
   final TextEditingController textEditingController;
@@ -275,6 +275,7 @@ class DialogTextField extends HookWidget {
   final List<TextInputFormatter>? inputFormatters;
 
   final int? maxLines;
+  final int? maxLength;
 
   @override
   Widget build(BuildContext context) {
@@ -301,19 +302,19 @@ class DialogTextField extends HookWidget {
             ),
             maxLines: maxLines ?? 1,
             minLines: 1,
+            maxLength: maxLength,
             scrollPadding: EdgeInsets.zero,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               contentPadding: EdgeInsets.zero,
               isDense: true,
               focusedBorder: InputBorder.none,
               enabledBorder: InputBorder.none,
+              counterStyle: TextStyle(
+                fontSize: 14,
+                color: context.theme.secondaryText,
+              ),
             ),
-            inputFormatters: [
-              if (inputFormatters == null)
-                LengthLimitingTextInputFormatter(kDefaultTextInputLimit)
-              else
-                ...inputFormatters!,
-            ],
+            inputFormatters: inputFormatters,
           ),
           if (hintText.isNotEmpty && !hasText)
             IgnorePointer(
@@ -403,6 +404,7 @@ class EditDialog extends HookWidget {
     this.hintText = '',
     this.positiveAction,
     this.maxLines,
+    this.maxLength,
   });
 
   final Widget title;
@@ -414,6 +416,8 @@ class EditDialog extends HookWidget {
 
   final int? maxLines;
 
+  final int? maxLength;
+
   @override
   Widget build(BuildContext context) {
     final textEditingController = useTextEditingController(text: editText);
@@ -424,6 +428,7 @@ class EditDialog extends HookWidget {
         textEditingController: textEditingController,
         hintText: hintText,
         maxLines: maxLines,
+        maxLength: maxLength,
       ),
       actions: [
         MixinButton(

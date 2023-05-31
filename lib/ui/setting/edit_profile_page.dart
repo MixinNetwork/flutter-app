@@ -1,12 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 
 import '../../bloc/bloc_converter.dart';
-import '../../constants/constants.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
@@ -86,6 +84,7 @@ class EditProfilePage extends HookWidget {
               _Item(
                 title: context.l10n.name,
                 controller: nameTextEditingController,
+                maxLength: 40,
               ),
               const SizedBox(height: 32),
               _Item(
@@ -188,10 +187,6 @@ class _Item extends StatelessWidget {
             minLines: 1,
             maxLines: 10,
             maxLength: maxLength,
-            inputFormatters: [
-              if (maxLength == null)
-                LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
-            ],
             decoration: InputDecoration(
               isDense: true,
               border: outlineInputBorder,
