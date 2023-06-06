@@ -44,24 +44,20 @@ class _AttachmentDownloadJob extends _AttachmentJobBase {
     final completer = Completer<void>();
 
     _receivePort!.listen((message) {
-      if (message == _killMessage) {
-        isolate?.kill();
-        isolate = null;
-        if (completer.isCompleted) return;
-        completer.completeError(Exception('receive kill message'));
-      }
-
       switch (message) {
+        case _completeMessage:
+          completer.complete();
+          return;
         case (final int received, final int total):
-          {
-            updateProgress(received, total);
-            sendProgress(received, total);
-            return;
-          }
-      }
-
-      if (message == _completeMessage) {
-        completer.complete();
+          updateProgress(received, total);
+          sendProgress(received, total);
+          return;
+        case _killMessage:
+          isolate?.kill();
+          isolate = null;
+          if (completer.isCompleted) return;
+          completer.completeError(Exception('receive kill message'));
+          return;
       }
     });
 
@@ -123,8 +119,8 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
     options.sendPort.send(_completeMessage);
   } catch (error, s) {
     e('download error: $e, stack: $s');
+    options.sendPort.send(_killMessage);
   }
-  options.sendPort.send(_killMessage);
 }
 
 extension _AttachmentDownloadExtension on Dio {
