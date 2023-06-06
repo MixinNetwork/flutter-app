@@ -52,23 +52,22 @@ class _AttachmentUploadJob extends _AttachmentJobBase {
     final completer = Completer<List<int>?>();
 
     _receivePort!.listen((message) {
-      if (message == _killMessage) {
-        isolate?.kill();
-        isolate = null;
-        if (completer.isCompleted) return;
-        completer.completeError(Exception('receive kill message'));
+      if (message is List<int>?) {
+        completer.complete(message);
+        return;
       }
 
       switch (message) {
         case (final int received, final int total):
-          {
-            updateProgress(received, total);
-            sendProgress(received, total);
-            return;
-          }
-      }
-      if (message is List<int>?) {
-        completer.complete(message);
+          updateProgress(received, total);
+          sendProgress(received, total);
+          return;
+        case _killMessage:
+          isolate?.kill();
+          isolate = null;
+          if (completer.isCompleted) return;
+          completer.completeError(Exception('receive kill message'));
+          return;
       }
     });
 
@@ -138,6 +137,6 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
     options.sendPort.send(digest);
   } catch (error, stacktrace) {
     e('failed to upload attachment $error, $stacktrace');
+    options.sendPort.send(_killMessage);
   }
-  options.sendPort.send(_killMessage);
 }
