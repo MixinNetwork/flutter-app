@@ -22,7 +22,7 @@ dependencies:
   ansicolor: ^2.0.1
   archive: ^3.3.2
   async: ^2.8.1
-  audio_session: ^0.1.15
+  audio_session: ^0.1.16
   bloc: ^8.1.2
   bloc_concurrency: ^0.2.2
   blurhash_dart: ^1.0.2
