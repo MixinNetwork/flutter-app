@@ -39,7 +39,7 @@ dependencies:
   desktop_webview_window: ^0.2.0
   device_info_plus: ^9.0.2
   dio: ^5.1.1
-  drift: 2.8.0
+  drift: ^2.8.2
   ecache: ^2.0.2
   emojis: ^0.9.9
   equatable: ^2.0.5
