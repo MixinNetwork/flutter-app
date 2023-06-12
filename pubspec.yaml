@@ -145,7 +145,7 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.4.4
-  dart_code_metrics: ^5.7.4
+  dart_code_metrics: ^5.7.5
   debug_info_collector:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
