@@ -35,7 +35,6 @@ class HighlightText extends HookWidget {
       ),
       maxLines: maxLines,
       overflow: overflow,
-      textWidthBasis: TextWidthBasis.longestLine,
       textAlign: textAlign,
     );
   }
@@ -106,7 +105,6 @@ class HighlightSelectableText extends HookWidget {
         children: spans,
       ),
       maxLines: maxLines,
-      textWidthBasis: TextWidthBasis.longestLine,
       contextMenuBuilder: (context, editState) => const SizedBox.shrink(),
       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
     );
@@ -207,7 +205,6 @@ class HighlightStarLinkText extends HookWidget {
       maxLines: maxLines,
       overflow: overflow,
       style: style,
-      textWidthBasis: TextWidthBasis.longestLine,
     );
   }
 }
