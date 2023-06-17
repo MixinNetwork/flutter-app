@@ -46,47 +46,52 @@ class ToastWidget extends StatelessWidget {
     this.barrierColor = const Color(0x80000000),
     this.icon,
     required this.text,
+    this.ignoring = true,
   });
 
   final Color barrierColor;
   final Widget? icon;
   final String text;
+  final bool ignoring;
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: Colors.transparent,
-        child: Container(
-          color: barrierColor,
-          alignment: Alignment.center,
+  Widget build(BuildContext context) => IgnorePointer(
+        ignoring: ignoring,
+        child: Material(
+          color: Colors.transparent,
           child: Container(
-            constraints: const BoxConstraints(
-              minWidth: 130,
-            ),
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-              color: Color.fromRGBO(62, 65, 72, 0.7),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 20),
-                if (icon != null)
-                  SizedBox(
-                    height: 30,
-                    width: 30,
-                    child: icon,
+            color: barrierColor,
+            alignment: Alignment.center,
+            child: Container(
+              constraints: const BoxConstraints(
+                minWidth: 130,
+              ),
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+                color: Color.fromRGBO(62, 65, 72, 0.7),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 20),
+                  if (icon != null)
+                    SizedBox(
+                      height: 30,
+                      width: 30,
+                      child: icon,
+                    ),
+                  if (icon != null) const SizedBox(height: 12),
+                  Text(
+                    text,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
                   ),
-                if (icon != null) const SizedBox(height: 12),
-                Text(
-                  text,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
@@ -152,6 +157,7 @@ void showToastLoading() => Toast.createView(
       builder: (context) => ToastWidget(
         icon: const _Loading(),
         text: context.l10n.loading,
+        ignoring: false,
       ),
       duration: null,
     );
