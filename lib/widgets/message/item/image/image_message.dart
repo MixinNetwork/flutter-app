@@ -235,14 +235,14 @@ class ImageMessageLayout extends StatelessWidget {
         final maxWidth = min(boxConstraints.maxWidth * 0.6, 300);
         final minWidth = max(boxConstraints.maxWidth * 0.2, 200);
         final width = max(
-                min(imageWidthInPixel / MediaQuery.of(context).devicePixelRatio,
+                min(imageWidthInPixel / MediaQuery.devicePixelRatioOf(context),
                     maxWidth),
                 minWidth)
             .toDouble();
         final aspectRatio = imageWidthInPixel / imageHeightInPixel;
         final height = min(
           width / aspectRatio,
-          MediaQuery.of(context).size.height * 2 / 3,
+          MediaQuery.sizeOf(context).height * 2 / 3,
         );
         return builder(context, width, height);
       });
