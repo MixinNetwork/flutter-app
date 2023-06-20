@@ -81,12 +81,15 @@ PinMessageState usePinMessageState() {
 
       return context.database.pinMessageDao
           .pinMessageItem(conversationId, messageId)
-          .watchSingleOrNullWithStream(eventStreams: [
-        DataBaseEventBus.instance
-            .watchInsertOrReplaceMessageIdsStream(messageIds: [messageId]),
-        DataBaseEventBus.instance.deleteMessageIdStream.where(
-            (event) => event.any((element) => element.contains(messageId)))
-      ], duration: kSlowThrottleDuration).asyncMap((message) async {
+          .watchSingleOrNullWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance
+              .watchInsertOrReplaceMessageIdsStream(messageIds: [messageId]),
+          DataBaseEventBus.instance.deleteMessageIdStream.where(
+              (event) => event.any((element) => element.contains(messageId)))
+        ],
+        duration: kSlowThrottleDuration,
+      ).asyncMap((message) async {
         if (message == null) return null;
 
         final pinMessageMinimal =

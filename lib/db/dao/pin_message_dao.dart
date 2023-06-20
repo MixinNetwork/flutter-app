@@ -73,7 +73,7 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<PinMessageItemResult> pinMessageItem(
           String conversationId, String messageId) =>
-      db.pinMessageItem(conversationId, messageId);
+      db.pinMessageItem(messageId, conversationId);
 
   Selectable<MessageItem> messageItems(String conversationId) =>
       db.basePinMessageItems(
