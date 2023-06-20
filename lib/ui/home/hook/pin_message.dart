@@ -80,7 +80,7 @@ PinMessageState usePinMessageState() {
       final messageId = pinMessageIds.first;
 
       return context.database.pinMessageDao
-          .pinMessageItem(conversationId, messageId)
+          .pinMessageItem(messageId, conversationId)
           .watchSingleOrNullWithStream(
         eventStreams: [
           DataBaseEventBus.instance
