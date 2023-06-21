@@ -7,12 +7,13 @@ import '../utils/extension/extension.dart';
 import 'interactive_decorated_box.dart';
 
 class CellGroup extends StatelessWidget {
-  const CellGroup(
-      {super.key,
-      this.borderRadius = const BorderRadius.all(Radius.circular(8)),
-      required this.child,
-      this.padding = const EdgeInsets.only(right: 10, left: 10, bottom: 10),
-      this.cellBackgroundColor});
+  const CellGroup({
+    super.key,
+    this.borderRadius = const BorderRadius.all(Radius.circular(8)),
+    required this.child,
+    this.padding = const EdgeInsets.only(right: 10, left: 10, bottom: 10),
+    this.cellBackgroundColor,
+  });
 
   final BorderRadius borderRadius;
   final Widget child;
