@@ -567,11 +567,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "report": MessageLookupByLibrary.simpleMessage("Отчет"),
         "reportAndBlock": MessageLookupByLibrary.simpleMessage(
             "Пожаловаться и заблокировать?"),
+        "reportTitle": MessageLookupByLibrary.simpleMessage(
+            "Отправить журнал бесед разработчикам?"),
         "resendCode":
             MessageLookupByLibrary.simpleMessage("Отправить код еще раз"),
         "resendCodeIn": m38,
         "reset": MessageLookupByLibrary.simpleMessage("Перезагрузить"),
         "resetLink": MessageLookupByLibrary.simpleMessage("Сбросить ссылку"),
+        "retry": MessageLookupByLibrary.simpleMessage("Повторить"),
         "retryUploadFailed": MessageLookupByLibrary.simpleMessage(
             "Повторная загрузка не удалась."),
         "revokeMultisigTransaction": MessageLookupByLibrary.simpleMessage(
@@ -599,6 +602,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Заархивированы все файлы в один zip файл"),
         "sendQuickly": MessageLookupByLibrary.simpleMessage("Отправить быстро"),
+        "sendToDeveloper":
+            MessageLookupByLibrary.simpleMessage("Отправить разработчику"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("Отправить без сжатия"),
         "sendWithoutSound":

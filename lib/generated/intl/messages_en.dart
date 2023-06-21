@@ -602,10 +602,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "report": MessageLookupByLibrary.simpleMessage("Report"),
         "reportAndBlock":
             MessageLookupByLibrary.simpleMessage("Report and block?"),
+        "reportTitle": MessageLookupByLibrary.simpleMessage(
+            "Send the conversation log to developers?"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Resend code"),
         "resendCodeIn": m38,
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "resetLink": MessageLookupByLibrary.simpleMessage("Reset Link"),
+        "retry": MessageLookupByLibrary.simpleMessage("Retry"),
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("Retry upload failed."),
         "revokeMultisigTransaction":
@@ -634,6 +637,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Archived all files in one zip file"),
         "sendQuickly": MessageLookupByLibrary.simpleMessage("Send quickly"),
+        "sendToDeveloper":
+            MessageLookupByLibrary.simpleMessage("Send to Developer"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("Send without compression"),
         "sendWithoutSound":

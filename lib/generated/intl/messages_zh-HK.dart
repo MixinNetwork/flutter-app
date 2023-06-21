@@ -528,10 +528,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "reply": MessageLookupByLibrary.simpleMessage("回覆"),
         "report": MessageLookupByLibrary.simpleMessage("舉報"),
         "reportAndBlock": MessageLookupByLibrary.simpleMessage("舉報並屏蔽？"),
+        "reportTitle": MessageLookupByLibrary.simpleMessage("給開發人員發送聊天日誌？"),
         "resendCode": MessageLookupByLibrary.simpleMessage("重發驗證碼"),
         "resendCodeIn": m38,
         "reset": MessageLookupByLibrary.simpleMessage("重置"),
         "resetLink": MessageLookupByLibrary.simpleMessage("重置邀請鏈接"),
+        "retry": MessageLookupByLibrary.simpleMessage("重試"),
         "retryUploadFailed": MessageLookupByLibrary.simpleMessage("重新上傳失敗。"),
         "revokeMultisigTransaction":
             MessageLookupByLibrary.simpleMessage("撤銷多重簽名交易"),
@@ -553,6 +555,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "send": MessageLookupByLibrary.simpleMessage("發送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 發送"),
         "sendQuickly": MessageLookupByLibrary.simpleMessage("快速發送"),
+        "sendToDeveloper": MessageLookupByLibrary.simpleMessage("把日誌發給開發者"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("發送原始檔案"),
         "sendWithoutSound": MessageLookupByLibrary.simpleMessage("靜音發送"),

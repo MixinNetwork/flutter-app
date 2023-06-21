@@ -170,6 +170,7 @@
 "report" : "Laporkan",
 "resendCode" : "Kirim ulang kode",
 "resendCodeIn" : "Kirim ulang kode dalam {arg0} d",
+"retry" : "COBA LAGI",
 "retryUploadFailed" : "Unggahan ulang gagal.",
 "revokeMultisigTransaction" : "Cabut Transaksi Multisig",
 "save" : "Simpan",
