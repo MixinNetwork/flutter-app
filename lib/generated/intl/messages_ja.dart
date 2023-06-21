@@ -505,10 +505,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "reply": MessageLookupByLibrary.simpleMessage("返信"),
         "report": MessageLookupByLibrary.simpleMessage("報告"),
         "reportAndBlock": MessageLookupByLibrary.simpleMessage("報告してブロックしますか?"),
+        "reportTitle":
+            MessageLookupByLibrary.simpleMessage("Mixinの開発者へ会話記録を送信しますか?"),
         "resendCode": MessageLookupByLibrary.simpleMessage("コードを再送する"),
         "resendCodeIn": m38,
         "reset": MessageLookupByLibrary.simpleMessage("リセット"),
         "resetLink": MessageLookupByLibrary.simpleMessage("リンクを取り消す"),
+        "retry": MessageLookupByLibrary.simpleMessage("リトライ"),
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("アップロードの再試行に失敗しました。"),
         "revokeMultisigTransaction":
@@ -535,6 +538,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendArchived":
             MessageLookupByLibrary.simpleMessage("1つのZIPファイルにアーカイブ"),
         "sendQuickly": MessageLookupByLibrary.simpleMessage("クイック送信"),
+        "sendToDeveloper": MessageLookupByLibrary.simpleMessage("開発者へ送信"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("圧縮せずに送信"),
         "sendWithoutSound":

@@ -3294,6 +3294,16 @@ class Localization {
     );
   }
 
+  /// `Send the conversation log to developers?`
+  String get reportTitle {
+    return Intl.message(
+      'Send the conversation log to developers?',
+      name: 'reportTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Resend code`
   String get resendCode {
     return Intl.message(
@@ -3329,6 +3339,16 @@ class Localization {
     return Intl.message(
       'Reset Link',
       name: 'resetLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retry`
+  String get retry {
+    return Intl.message(
+      'Retry',
+      name: 'retry',
       desc: '',
       args: [],
     );
@@ -3521,6 +3541,16 @@ class Localization {
     return Intl.message(
       'Send quickly',
       name: 'sendQuickly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send to Developer`
+  String get sendToDeveloper {
+    return Intl.message(
+      'Send to Developer',
+      name: 'sendToDeveloper',
       desc: '',
       args: [],
     );

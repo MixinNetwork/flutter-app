@@ -327,6 +327,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "report": MessageLookupByLibrary.simpleMessage("Laporkan"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Kirim ulang kode"),
         "resendCodeIn": m38,
+        "retry": MessageLookupByLibrary.simpleMessage("COBA LAGI"),
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("Unggahan ulang gagal."),
         "revokeMultisigTransaction":

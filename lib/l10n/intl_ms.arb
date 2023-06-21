@@ -171,6 +171,7 @@
 "report" : "Lapor",
 "resendCode" : "Hantar semula kod",
 "resendCodeIn" : "Hantar semula kod dalam {arg0} s",
+"retry" : "CUBA SEMULA",
 "retryUploadFailed" : "Gagal memuat naik semula.",
 "revokeMultisigTransaction" : "Batalkan Urus Niaga Multisig",
 "save" : "Jimat",

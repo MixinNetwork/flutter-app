@@ -332,6 +332,8 @@ class Blaze {
     } catch (e) {
       w('ws ping error: $e');
       if (e is MixinApiError &&
+          e.error != null &&
+          e.error is MixinError &&
           (e.error! as MixinError).code == authentication) {
         _connectedState = ConnectedState.disconnected;
         return;
@@ -339,7 +341,7 @@ class Blaze {
       await Future.delayed(const Duration(seconds: 2));
       _connectedState = ConnectedState.disconnected;
       i('reconnecting set false, ${StackTrace.current}');
-      return reconnect();
+      await reconnect();
     }
   }
 
