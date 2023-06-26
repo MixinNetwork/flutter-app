@@ -297,10 +297,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
       if (ids.isEmpty) break;
 
-      final deleteStatement = (delete(db.messages)
-        ..where((tbl) =>
-            tbl.conversationId.equals(conversationId) &
-            tbl.messageId.isIn(ids)));
+      final deleteStatement =
+          (delete(db.messages)..where((tbl) => tbl.messageId.isIn(ids)));
       await deleteStatement.go();
     }
     DataBaseEventBus.instance.updateConversation(conversationId);
