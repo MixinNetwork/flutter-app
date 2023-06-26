@@ -293,6 +293,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               .get())
           .whereNotNull();
 
+      d('${ids.length} ids to be deleted');
+
       if (ids.isEmpty) break;
 
       final deleteStatement = (delete(db.messages)
