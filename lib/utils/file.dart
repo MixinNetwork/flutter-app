@@ -146,3 +146,10 @@ Future<File?> saveBytesToTempFile(
     return null;
   }
 }
+
+void renameFileWithTime(String path, DateTime time) {
+  final file = File(path);
+  if (!file.existsSync()) return;
+  final newName = '${file.path}.${time.toIso8601String()}';
+  file.renameSync(newName);
+}

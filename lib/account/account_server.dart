@@ -70,6 +70,7 @@ class AccountServer {
       AccountKeyValue.instance.primarySessionId == null;
   String? userAgent;
   String? deviceId;
+  StreamSubscription<SqliteException>? databaseMalformedSubscription;
 
   Future<void> initServer(
     String userId,
@@ -79,19 +80,30 @@ class AccountServer {
   ) async {
     if (sid == sessionId) return;
     sid = sessionId;
-    EventBus.instance.on.whereType<SqliteException>().listen((event) async {
-      await signOutAndClear();
-      multiAuthCubit.signOut();
 
-      final dbFile = File(p.join(
-          mixinDocumentsDirectory.path, identityNumber, '$kDbFileName.db'));
-      final newDbFile = File(p.join(
-          mixinDocumentsDirectory.path,
-          identityNumber,
-          '$kDbFileName.${DateTime.now().toUtc().toIso8601String()}.db'));
-      if (dbFile.existsSync()) {
-        dbFile.renameSync(newDbFile.path);
-      }
+    await databaseMalformedSubscription?.cancel();
+    databaseMalformedSubscription =
+        EventBus.instance.on.whereType<SqliteException>().listen((event) async {
+      await signOutAndClear();
+
+      final now = DateTime.now();
+
+      renameFileWithTime(
+          p.join(
+              mixinDocumentsDirectory.path, identityNumber, '$kDbFileName.db'),
+          now);
+
+      await Future.forEach(
+        [
+          File(p.join(mixinDocumentsDirectory.path, identityNumber,
+              '$kDbFileName.db-shm')),
+          File(p.join(mixinDocumentsDirectory.path, identityNumber,
+              '$kDbFileName.db-wal'))
+        ].where((e) => e.existsSync()),
+        (element) => element.delete(),
+      );
+
+      multiAuthCubit.signOut();
     });
 
     this.userId = userId;
@@ -324,14 +336,28 @@ class AccountServer {
   }
 
   Future<void> signOutAndClear() async {
+    await databaseMalformedSubscription?.cancel();
+    databaseMalformedSubscription = null;
+
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
     await client.accountApi.logout(LogoutRequest(sessionId));
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
+
     await clearKeyValues();
-    await SignalDatabase.get.clear();
-    await database.participantSessionDao.deleteBySessionId(sessionId);
-    await database.participantSessionDao.updateSentToServer();
+
+    try {
+      await SignalDatabase.get.clear();
+    } catch (_) {
+      // ignore closed database error
+    }
+
+    try {
+      await database.participantSessionDao.deleteBySessionId(sessionId);
+      await database.participantSessionDao.updateSentToServer();
+    } catch (_) {
+      // ignore closed database error
+    }
 
     MixinWebView.instance.clearWebViewCacheAndCookies();
   }
