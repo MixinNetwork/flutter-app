@@ -6,8 +6,10 @@ import 'dart:isolate';
 import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:uuid/uuid.dart';
@@ -33,6 +35,7 @@ import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/attachment/download_key_value.dart';
+import '../utils/event_bus.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
@@ -76,6 +79,20 @@ class AccountServer {
   ) async {
     if (sid == sessionId) return;
     sid = sessionId;
+    EventBus.instance.on.whereType<SqliteException>().listen((event) async {
+      await signOutAndClear();
+      multiAuthCubit.signOut();
+
+      final dbFile = File(p.join(
+          mixinDocumentsDirectory.path, identityNumber, '$kDbFileName.db'));
+      final newDbFile = File(p.join(
+          mixinDocumentsDirectory.path,
+          identityNumber,
+          '$kDbFileName.${DateTime.now().toUtc().toIso8601String()}.db'));
+      if (dbFile.existsSync()) {
+        dbFile.renameSync(newDbFile.path);
+      }
+    });
 
     this.userId = userId;
     this.sessionId = sessionId;
