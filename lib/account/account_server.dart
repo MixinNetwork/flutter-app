@@ -82,6 +82,7 @@ class AccountServer {
     EventBus.instance.on.whereType<SqliteException>().listen((event) async {
       await signOutAndClear();
       multiAuthCubit.signOut();
+      return;
 
       final dbFile = File(p.join(
           mixinDocumentsDirectory.path, identityNumber, '$kDbFileName.db'));

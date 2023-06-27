@@ -32,17 +32,33 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
     }
   }
 
+  Future<T> _handleSqliteExceptionByFuture<T>(
+      ValueGetter<Future<T>> callback) async {
+    try {
+      return await callback();
+    } on SqliteException catch (e) {
+      if (e.extendedResultCode != 267) rethrow;
+      if (![e.message, e.explanation].whereNotNull().any(
+          (element) => element.contains('database disk image is malformed'))) {
+        rethrow;
+      }
+      EventBus.instance.fire(e);
+      rethrow;
+    }
+  }
+
   @override
   TransactionExecutor beginTransaction() =>
       _handleSqliteException(queryExecutor.beginTransaction);
 
   @override
   Future<bool> ensureOpen(QueryExecutorUser user) =>
-      _handleSqliteException(() => queryExecutor.ensureOpen(user));
+      _handleSqliteExceptionByFuture(() => queryExecutor.ensureOpen(user));
 
   @override
   Future<void> runBatched(BatchedStatements statements) =>
-      _handleSqliteException(() => queryExecutor.runBatched(statements));
+      _handleSqliteExceptionByFuture(
+          () => queryExecutor.runBatched(statements));
 
   @override
   Future<void> runCustom(String statement, [List<Object?>? args]) => logWrapper(
@@ -98,7 +114,7 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
 
     T result;
     try {
-      result = await _handleSqliteException(run);
+      result = await _handleSqliteExceptionByFuture(run);
     } catch (error, s) {
       e('queryExecutor Error: $error\n$s\nstatement: $statement, args: $args');
       rethrow;
