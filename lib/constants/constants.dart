@@ -54,6 +54,7 @@ const int hours24 = hour1 * 24;
 const statusOffset = 'messages_status_offset';
 
 const kMarkLimit = 999;
+const kDbDeleteLimit = 500;
 
 const kMaxTextLength = 64 * 1024;
 const kDefaultTextInputLimit = 200;
