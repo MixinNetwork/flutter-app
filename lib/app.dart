@@ -78,7 +78,7 @@ class App extends StatelessWidget {
           builder: (context, authState) {
             const app = _App();
             if (authState == null) return app;
-            return FutureProvider<AccountServer?>(
+            return FutureProvider<AsyncSnapshot<AccountServer>?>(
               key: ValueKey((
                 authState.account.userId,
                 authState.account.sessionId,
@@ -96,20 +96,29 @@ class App extends StatelessWidget {
                     authState.privateKey,
                   );
                 } catch (e, s) {
-                  lastInitErrorMessage = e.toString();
                   w('accountServer.initServer error: $e, $s');
-                  rethrow;
+                  return AsyncSnapshot<AccountServer>.withError(
+                      ConnectionState.done, e, s);
                 }
-                return accountServer;
+                return AsyncSnapshot<AccountServer>.withData(
+                    ConnectionState.done, accountServer);
               },
               initialData: null,
-              builder: (BuildContext context, _) => Consumer<AccountServer?>(
-                builder: (context, accountServer, child) {
-                  if (accountServer != null) {
-                    return _Providers(
-                      app: child!,
-                      accountServer: accountServer,
-                    );
+              builder: (BuildContext context, _) =>
+                  Consumer<AsyncSnapshot<AccountServer>?>(
+                builder: (context, result, child) {
+                  if (result != null) {
+                    if (result.data != null) {
+                      return _Providers(
+                        app: child!,
+                        accountServer: result.requireData,
+                      );
+                    } else {
+                      return Provider<AsyncSnapshot<AccountServer>?>.value(
+                        value: result,
+                        child: child,
+                      );
+                    }
                   }
                   return child!;
                 },

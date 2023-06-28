@@ -413,6 +413,7 @@
 "unitMinute" : "{count, plural, one{minute} other{minutes}}",
 "unitSecond" : "{count, plural, one{second} other{seconds}}",
 "unitWeek" : "{count, plural, one{week} other{weeks}}",
+"unknowError" : "Unknow error",
 "unmute" : "Unmute",
 "unpin" : "Unpin",
 "unpinAllMessages" : "Unpin All Messages",

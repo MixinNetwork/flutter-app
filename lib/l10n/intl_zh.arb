@@ -409,6 +409,7 @@
 "unitMinute" : "{count, plural, one{分} other{分}}",
 "unitSecond" : "{count, plural, one{秒} other{秒}}",
 "unitWeek" : "{count, plural, one{周} other{周}}",
+"unknowError" : "未知错误",
 "unmute" : "取消静音",
 "unpin" : "取消置顶",
 "unpinAllMessages" : "取消所有置顶消息",

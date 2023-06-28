@@ -12,7 +12,6 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../account/account_key_value.dart';
-import '../../../account/account_server.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/crypto_key_value.dart';
 import '../../../crypto/signal/signal_protocol.dart';
@@ -53,7 +52,6 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
             status: authCubit.state.current != null
                 ? LandingStatus.provisioning
                 : LandingStatus.init,
-            errorMessage: lastInitErrorMessage,
           ),
         ) {
     _initLandingListen();
