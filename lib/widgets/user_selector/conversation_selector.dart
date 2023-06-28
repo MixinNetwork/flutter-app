@@ -201,7 +201,7 @@ class _ConversationSelector extends HookWidget {
         final list = await context.database.appDao
             .appInIds(conversationFilterState.appIds)
             .get();
-        return {for (var e in list) e.appId: e};
+        return {for (final e in list) e.appId: e};
       },
       <String, App>{},
       keys: [conversationFilterState],
