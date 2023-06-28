@@ -48,8 +48,6 @@ import 'account_key_value.dart';
 import 'send_message_helper.dart';
 import 'show_pin_message_key_value.dart';
 
-String? lastInitErrorMessage;
-
 class AccountServer {
   AccountServer(this.multiAuthCubit, this.settingCubit,
       {this.userAgent, this.deviceId});
@@ -94,11 +92,10 @@ class AccountServer {
     try {
       await checkSignalKeys();
     } catch (e, s) {
-      lastInitErrorMessage = e.toString();
       w('$e, $s');
       await signOutAndClear();
       multiAuthCubit.signOut();
-      return;
+      rethrow;
     }
 
     unawaited(start());

@@ -96,7 +96,6 @@ class App extends StatelessWidget {
                     authState.privateKey,
                   );
                 } catch (e, s) {
-                  lastInitErrorMessage = e.toString();
                   w('accountServer.initServer error: $e, $s');
                   return AsyncSnapshot<AccountServer>.withError(
                       ConnectionState.done, e, s);
