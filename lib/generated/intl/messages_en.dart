@@ -728,6 +728,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unitMinute": m47,
         "unitSecond": m48,
         "unitWeek": m49,
+        "unknowError": MessageLookupByLibrary.simpleMessage("Unknow error"),
         "unmute": MessageLookupByLibrary.simpleMessage("Unmute"),
         "unpin": MessageLookupByLibrary.simpleMessage("Unpin"),
         "unpinAllMessages":
