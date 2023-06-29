@@ -626,6 +626,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unitMinute": m47,
         "unitSecond": m48,
         "unitWeek": m49,
+        "unknowError": MessageLookupByLibrary.simpleMessage("未知错误"),
         "unmute": MessageLookupByLibrary.simpleMessage("取消静音"),
         "unpin": MessageLookupByLibrary.simpleMessage("取消置顶"),
         "unpinAllMessages": MessageLookupByLibrary.simpleMessage("取消所有置顶消息"),

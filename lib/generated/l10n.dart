@@ -4216,6 +4216,16 @@ class Localization {
     );
   }
 
+  /// `Unknow error`
+  String get unknowError {
+    return Intl.message(
+      'Unknow error',
+      name: 'unknowError',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Unmute`
   String get unmute {
     return Intl.message(
