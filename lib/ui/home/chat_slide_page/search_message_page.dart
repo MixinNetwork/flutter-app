@@ -413,11 +413,15 @@ class _SearchParticipantList extends HookWidget {
                   size: 38,
                 ),
                 const SizedBox(width: 16),
-                Text(
-                  user.fullName ?? '',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: context.theme.text,
+                Expanded(
+                  child: Text(
+                    user.fullName ?? '',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: context.theme.text,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
