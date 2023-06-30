@@ -1,6 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 
+import '../utils/event_bus.dart';
+import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 
 class CustomVmDatabaseWrapper extends QueryExecutor {
@@ -15,16 +18,47 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
 
   late final NativeDatabase queryExecutor;
 
+  T _handleSqliteException<T>(ValueGetter<T> callback) {
+    try {
+      return callback();
+    } on SqliteException catch (e) {
+      if (e.extendedResultCode != 267) rethrow;
+      if (![e.message, e.explanation].whereNotNull().any(
+          (element) => element.contains('database disk image is malformed'))) {
+        rethrow;
+      }
+      EventBus.instance.fire(e);
+      rethrow;
+    }
+  }
+
+  Future<T> _handleSqliteExceptionByFuture<T>(
+      ValueGetter<Future<T>> callback) async {
+    try {
+      return await callback();
+    } on SqliteException catch (e) {
+      if (e.extendedResultCode != 267) rethrow;
+      if (![e.message, e.explanation].whereNotNull().any(
+          (element) => element.contains('database disk image is malformed'))) {
+        rethrow;
+      }
+      EventBus.instance.fire(e);
+      rethrow;
+    }
+  }
+
   @override
-  TransactionExecutor beginTransaction() => queryExecutor.beginTransaction();
+  TransactionExecutor beginTransaction() =>
+      _handleSqliteException(queryExecutor.beginTransaction);
 
   @override
   Future<bool> ensureOpen(QueryExecutorUser user) =>
-      queryExecutor.ensureOpen(user);
+      _handleSqliteExceptionByFuture(() => queryExecutor.ensureOpen(user));
 
   @override
   Future<void> runBatched(BatchedStatements statements) =>
-      queryExecutor.runBatched(statements);
+      _handleSqliteExceptionByFuture(
+          () => queryExecutor.runBatched(statements));
 
   @override
   Future<void> runCustom(String statement, [List<Object?>? args]) => logWrapper(
@@ -80,7 +114,7 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
 
     T result;
     try {
-      result = await run();
+      result = await _handleSqliteExceptionByFuture(run);
     } catch (error, s) {
       e('queryExecutor Error: $error\n$s\nstatement: $statement, args: $args');
       rethrow;

@@ -66,10 +66,12 @@ abstract class HiveKeyValue<E> {
   }
 
   Future delete() async {
-    if (!_hasInit) {
-      return;
+    if (!_hasInit) return;
+    try {
+      await Hive.deleteBoxFromDisk(_boxName);
+    } catch (_) {
+      // ignore already deleted
     }
-    await Hive.deleteBoxFromDisk(_boxName);
     _hasInit = false;
   }
 }

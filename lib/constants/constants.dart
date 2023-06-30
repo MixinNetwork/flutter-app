@@ -66,3 +66,5 @@ const giphyApiKey = String.fromEnvironment('MIXIN_GIPHY_KEY');
 
 const kRecaptchaKey = '';
 const hCaptchaKey = '';
+
+const kDbFileName = 'mixin';
