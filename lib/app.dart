@@ -222,7 +222,7 @@ class _App extends StatelessWidget {
             supportedLocales: [
               ...Localization.delegate.supportedLocales,
             ],
-            theme: ThemeData().withFallbackFonts(),
+            theme: ThemeData(useMaterial3: true).withFallbackFonts(),
             builder: (context, child) {
               try {
                 context.accountServer.language =
