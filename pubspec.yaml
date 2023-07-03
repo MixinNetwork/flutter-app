@@ -31,6 +31,11 @@ dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 904786942d698d103ef1f27b5e9331c6a6ec8a37
       path: packages/bring_window_to_front
+  common_crypto:
+    git:
+      url: https://github.com/MixinNetwork/flutter-plugins.git
+      ref: 1bf4315ba7a3ce6cc25e0530d2d7bac3b38d2876
+      path: packages/common_crypto
   dbus: ^0.7.8
   decimal: ^2.3.2
   desktop_drop: ^0.4.1
