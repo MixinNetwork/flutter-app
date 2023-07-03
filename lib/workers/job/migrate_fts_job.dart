@@ -123,7 +123,7 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
         // insert metas
         await ftsDatabase.batch((batch) {
           batch.insertAll(ftsDatabase.messagesMetas, [
-            for (MapEntry<int, Message> entry in messageMeta.entries)
+            for (final MapEntry<int, Message> entry in messageMeta.entries)
               MessagesMeta(
                 docId: entry.key,
                 messageId: entry.value.messageId,

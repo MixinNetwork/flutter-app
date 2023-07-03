@@ -156,7 +156,7 @@ class _DialogPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectivePadding =
-        MediaQuery.of(context).viewInsets + (padding ?? EdgeInsets.zero);
+        MediaQuery.viewInsetsOf(context) + (padding ?? EdgeInsets.zero);
     return Padding(
       padding: effectivePadding,
       child: ConstrainedBox(

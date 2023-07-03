@@ -603,10 +603,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "report": MessageLookupByLibrary.simpleMessage("Informe"),
         "reportAndBlock":
             MessageLookupByLibrary.simpleMessage("¿Denunciar y bloquear?"),
+        "reportTitle": MessageLookupByLibrary.simpleMessage(
+            "¿Enviar el registro de conversación a los desarrolladores?"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Reenviar codigo"),
         "resendCodeIn": m38,
         "reset": MessageLookupByLibrary.simpleMessage("Reiniciar"),
         "resetLink": MessageLookupByLibrary.simpleMessage("Restablecer enlace"),
+        "retry": MessageLookupByLibrary.simpleMessage("Reintentar"),
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("Reintentar carga fallida."),
         "revokeMultisigTransaction": MessageLookupByLibrary.simpleMessage(
@@ -637,6 +640,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Todos los archivos archivados en un archivo zip"),
         "sendQuickly":
             MessageLookupByLibrary.simpleMessage("Enviar rápidamente"),
+        "sendToDeveloper":
+            MessageLookupByLibrary.simpleMessage("Enviar al Desarrollador"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("Enviar sin compresión"),
         "sendWithoutSound":

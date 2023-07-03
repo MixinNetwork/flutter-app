@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import '../constants/constants.dart';
 import '../enum/media_status.dart';
 import '../enum/property_group.dart';
 import 'converter/conversation_category_type_converter.dart';
@@ -277,7 +278,7 @@ Future<MixinDatabase> connectToDatabase(
 }) async {
   final queryExecutor = await openQueryExecutor(
     identityNumber: identityNumber,
-    dbName: 'mixin',
+    dbName: kDbFileName,
     readCount: readCount,
     fromMainIsolate: fromMainIsolate,
   );

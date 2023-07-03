@@ -213,7 +213,7 @@ class ChatPage extends HookWidget {
       ),
     );
 
-    final windowHeight = MediaQuery.of(context).size.height;
+    final windowHeight = MediaQuery.sizeOf(context).height;
 
     final tickerProvider = useSingleTickerProvider();
     final blinkCubit = useBloc(
@@ -390,7 +390,7 @@ class ChatContainer extends HookWidget {
   Widget build(BuildContext context) {
     final quoteMessageCubit = useBloc(QuoteMessageCubit.new);
     BlocProvider.of<MessageBloc>(context).limit =
-        MediaQuery.of(context).size.height ~/ 20;
+        MediaQuery.sizeOf(context).height ~/ 20;
 
     final pendingJumpMessageCubit = useBloc(PendingJumpMessageCubit.new);
 

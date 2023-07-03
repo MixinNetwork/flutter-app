@@ -528,10 +528,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "reply": MessageLookupByLibrary.simpleMessage("回复"),
         "report": MessageLookupByLibrary.simpleMessage("举报"),
         "reportAndBlock": MessageLookupByLibrary.simpleMessage("举报并屏蔽？"),
+        "reportTitle": MessageLookupByLibrary.simpleMessage("给开发人员发送聊天日志？"),
         "resendCode": MessageLookupByLibrary.simpleMessage("重发验证码"),
         "resendCodeIn": m38,
         "reset": MessageLookupByLibrary.simpleMessage("重置"),
         "resetLink": MessageLookupByLibrary.simpleMessage("重置邀请链接"),
+        "retry": MessageLookupByLibrary.simpleMessage("重试"),
         "retryUploadFailed": MessageLookupByLibrary.simpleMessage("重新上传失败。"),
         "revokeMultisigTransaction":
             MessageLookupByLibrary.simpleMessage("撤销多重签名交易"),
@@ -553,6 +555,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "send": MessageLookupByLibrary.simpleMessage("发送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),
         "sendQuickly": MessageLookupByLibrary.simpleMessage("快速发送"),
+        "sendToDeveloper": MessageLookupByLibrary.simpleMessage("把日志发给开发者"),
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("发送原始文件"),
         "sendWithoutSound": MessageLookupByLibrary.simpleMessage("静音发送"),
@@ -623,6 +626,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unitMinute": m47,
         "unitSecond": m48,
         "unitWeek": m49,
+        "unknowError": MessageLookupByLibrary.simpleMessage("未知错误"),
         "unmute": MessageLookupByLibrary.simpleMessage("取消静音"),
         "unpin": MessageLookupByLibrary.simpleMessage("取消置顶"),
         "unpinAllMessages": MessageLookupByLibrary.simpleMessage("取消所有置顶消息"),

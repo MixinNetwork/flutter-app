@@ -13415,12 +13415,12 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   }
 
   Selectable<PinMessageItemResult> pinMessageItem(
-      String conversationId, String? messageId) {
+      String messageId, String conversationId) {
     return customSelect(
-        'SELECT message.content AS content, sender.full_name AS userFullName FROM messages AS message INNER JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id WHERE message.conversation_id = ?1 AND message.category = \'MESSAGE_PIN\' AND message.quote_message_id = ?2 ORDER BY message.created_at DESC LIMIT 1',
+        'SELECT message.content AS content, sender.full_name AS userFullName FROM messages AS message INNER JOIN pin_messages AS pinMessage ON ?1 = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id WHERE message.conversation_id = ?2 AND message.category = \'MESSAGE_PIN\' AND message.quote_message_id = ?1 ORDER BY message.created_at DESC LIMIT 1',
         variables: [
-          Variable<String>(conversationId),
-          Variable<String>(messageId)
+          Variable<String>(messageId),
+          Variable<String>(conversationId)
         ],
         readsFrom: {
           messages,
@@ -13436,7 +13436,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<String> pinMessageIds(String conversationId) {
     return customSelect(
-        'SELECT pinMessage.message_id FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id WHERE pinMessage.conversation_id = ?1',
+        'SELECT pinMessage.message_id FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id WHERE pinMessage.conversation_id = ?1 ORDER BY message.created_at DESC',
         variables: [
           Variable<String>(conversationId)
         ],

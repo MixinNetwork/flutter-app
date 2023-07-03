@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/file.dart';
 import '../../utils/hook.dart';
 import '../../utils/system/package_info.dart';
 import '../../utils/uri_utils.dart';
@@ -18,7 +19,33 @@ class AboutPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ref = useRef<(DateTime, int)?>(null);
+
+    final debugMode = useState(false);
+
     final info = useMemoizedFuture(getPackageInfo, null).data;
+
+    void onTap() {
+      if (debugMode.value) return;
+
+      final value = ref.value;
+      if (value == null) {
+        ref.value = (DateTime.now(), 1);
+      } else {
+        final now = DateTime.now();
+        final (last, count) = value;
+        if (now.difference(last) < 1.seconds) {
+          ref.value = (now, count + 1);
+        } else {
+          ref.value = (now, 1);
+        }
+      }
+
+      if ((ref.value?.$2 ?? 0) > 6) {
+        debugMode.value = true;
+      }
+    }
+
     return Scaffold(
       backgroundColor: context.theme.background,
       appBar: MixinAppBar(
@@ -36,16 +63,19 @@ class AboutPage extends HookWidget {
                 height: 60,
               ),
               const SizedBox(height: 24),
-              Animate(
-                effects: [
-                  FadeEffect(duration: 1000.ms),
-                  ScaleEffect(duration: 1000.ms)
-                ],
-                child: Text(
-                  context.l10n.mixinMessengerDesktop,
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 18,
+              GestureDetector(
+                onTap: onTap,
+                child: Animate(
+                  effects: [
+                    FadeEffect(duration: 1000.ms),
+                    ScaleEffect(duration: 1000.ms)
+                  ],
+                  child: Text(
+                    context.l10n.mixinMessengerDesktop,
+                    style: TextStyle(
+                      color: context.theme.text,
+                      fontSize: 18,
+                    ),
                   ),
                 ),
               ),
@@ -101,6 +131,16 @@ class AboutPage extends HookWidget {
                   ],
                 ),
               ),
+              if (debugMode.value)
+                CellGroup(
+                  child: CellItem(
+                    title: Text(context.l10n.openLogDirectory),
+                    onTap: () => openUri(
+                      context,
+                      mixinLogDirectory.uri.toString(),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
