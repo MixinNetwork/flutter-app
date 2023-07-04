@@ -294,6 +294,12 @@ class DeviceTransfer {
         DeviceTransferEventBus.instance
             .fire(DeviceTransferCallbackType.onRestoreConnected);
       },
+      onNetworkSpeedUpdate: (speed) {
+        DeviceTransferEventBus.instance.fire(
+          DeviceTransferCallbackType.onRestoreNetworkSpeed,
+          speed,
+        );
+      },
     );
 
     return DeviceTransfer(
