@@ -119,15 +119,16 @@ class DeviceTransferReceiver {
     _socket = TransferSocket(socket, secretKey);
     d('connected to $ip:$port. my port: ${socket.port}');
     Stream<TransferPacket>.eventTransformed(
-      socket.map(
-        (event) {
-          _speedCalculator.add(event.length);
+      socket,
+      (sink) => TransferProtocolSink(
+        sink,
+        protocolTempFileDir,
+        secretKey,
+        onHandleBytes: (size) {
+          _speedCalculator.add(size);
           onNetworkSpeedUpdate?.call(_speedCalculator.speed);
-          i('receiver: receive ${event.length} bytes from server. ${_speedCalculator.speed / 1000}');
-          return event;
         },
       ),
-      (sink) => TransferProtocolSink(sink, protocolTempFileDir, secretKey),
     ).asyncListen(
       (packet) async {
         try {
