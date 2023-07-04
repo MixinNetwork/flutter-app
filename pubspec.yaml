@@ -144,7 +144,7 @@ dependencies:
 
 
 dev_dependencies:
-  build_runner: ^2.4.4
+  build_runner: ^2.4.6
   dart_code_metrics: ^5.7.5
   debug_info_collector:
     git:
