@@ -164,9 +164,6 @@ class _DialogPage extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(11)),
-            border: Border.all(
-              color: const Color.fromRGBO(255, 255, 255, 0.08),
-            ),
             boxShadow: [
               const BoxShadow(
                 color: Color.fromRGBO(0, 0, 0, 0.15),
@@ -179,9 +176,9 @@ class _DialogPage extends StatelessWidget {
                 blurRadius: lerpDouble(16, 6, context.brightnessValue)!,
               ),
             ],
-            color: backgroundColor ?? context.theme.popUp,
           ),
-          child: ClipRRect(
+          child: Material(
+            color: backgroundColor ?? context.theme.popUp,
             borderRadius: const BorderRadius.all(Radius.circular(11)),
             child: child,
           ),
