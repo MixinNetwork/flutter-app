@@ -97,12 +97,14 @@ class _InputPasscode extends HookWidget {
       if (confirmPasscode.value == null) return;
 
       if (passcode.value != confirmPasscode.value) {
-        // todo fix toast
-        showToastFailed(context.l10n.passcodeIncorrect, context: context);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showToastFailed(context.l10n.passcodeIncorrect);
+        });
 
         passcode.value = null;
         confirmPasscode.value = null;
         textEditingController.text = '';
+        return;
       }
 
       SecurityKeyValue.instance.passcode = passcode.value;
