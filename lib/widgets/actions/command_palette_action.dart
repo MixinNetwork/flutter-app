@@ -287,7 +287,6 @@ class CommandPalettePage extends HookWidget {
                                     avatarUrl: user.avatarUrl,
                                   ),
                                   name: user.fullName ?? '?',
-                                  nameFontSize: 14,
                                   trailing: VerifiedOrBotWidget(
                                     verified: user.isVerified,
                                     isBot: user.appId != null,
@@ -323,7 +322,6 @@ class CommandPalettePage extends HookWidget {
                                     userId: conversation.ownerId,
                                   ),
                                   name: conversation.validName,
-                                  nameFontSize: 14,
                                   trailing: VerifiedOrBotWidget(
                                     verified: conversation.isVerified,
                                     isBot: conversation.appId != null,
