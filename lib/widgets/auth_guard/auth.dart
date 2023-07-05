@@ -174,8 +174,7 @@ class _AuthGuard extends HookWidget {
                       maintainAnimation: true,
                       maintainState: true,
                       child: Text(
-                        // todo l10n
-                        'Passcode incorrect',
+                        context.l10n.passcodeIncorrect,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: context.theme.red,

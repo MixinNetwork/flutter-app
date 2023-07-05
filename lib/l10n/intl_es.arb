@@ -329,6 +329,7 @@
 "searchRelatedMessage" : "{count, plural, one{{arg0} mensaje relacionado} other{{arg0} mensajes relacionados}}",
 "searchUnread" : "Buscar no leído",
 "secretUrl" : "https://mixin.one/pages/1000007",
+"security" : "Seguridad",
 "select" : "Seleccionar",
 "send" : "Enviar",
 "sendArchived" : "Todos los archivos archivados en un archivo zip",

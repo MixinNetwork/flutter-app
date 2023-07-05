@@ -113,11 +113,10 @@ class SettingPage extends HookWidget {
                                 .dataAndStorageUsagePage,
                             title: context.l10n.dataAndStorageUsage,
                           ),
-                          const _Item(
+                          _Item(
                             leadingAssetName: Resources.assetsImagesShieldSvg,
                             pageName: ResponsiveNavigatorCubit.securityPage,
-                            // todo l10n
-                            title: 'Security',
+                            title: context.l10n.security,
                           ),
                           _Item(
                             leadingAssetName: Resources.assetsImagesProxySvg,

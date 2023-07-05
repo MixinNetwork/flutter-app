@@ -18,9 +18,8 @@ class SecurityPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: context.theme.background,
-        appBar: const MixinAppBar(
-          // todo l10n
-          title: Text('Security'),
+        appBar: MixinAppBar(
+          title: Text(context.l10n.security),
         ),
         body: ConstrainedBox(
           constraints: const BoxConstraints.expand(),
@@ -46,8 +45,7 @@ class _Passcode extends HookWidget {
 
     return CellGroup(
       child: CellItem(
-        // todo l10n
-        title: const Text('Passcode'),
+        title: Text(context.l10n.screenPasscode),
         trailing: Transform.scale(
           scale: 0.7,
           child: CupertinoSwitch(
@@ -85,8 +83,8 @@ class _InputPasscode extends HookWidget {
       if (confirmPasscode.value == null) return;
 
       if (passcode.value != confirmPasscode.value) {
-        // todo l10n
-        showToastFailed('Passcode not match', context: context);
+        // todo fix toast
+        showToastFailed(context.l10n.passcodeIncorrect, context: context);
 
         passcode.value = null;
         confirmPasscode.value = null;
@@ -112,10 +110,9 @@ class _InputPasscode extends HookWidget {
             ],
           ),
           Text(
-            // todo l10n
             passcode.value != null
-                ? 'Enter again to confirm the passcode'
-                : 'Set Passcode to unlock Mixin Messenger',
+                ? context.l10n.confirmPasscodeDesc
+                : context.l10n.setPasscodeDesc,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.theme.text,

@@ -794,6 +794,16 @@ class Localization {
     );
   }
 
+  /// `Enter again to confirm the passcode`
+  String get confirmPasscodeDesc {
+    return Intl.message(
+      'Enter again to confirm the passcode',
+      name: 'confirmPasscodeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Are you sure to sync the chat history from the phone?`
   String get confirmSyncChatsFromPhone {
     return Intl.message(
@@ -2970,6 +2980,16 @@ class Localization {
     );
   }
 
+  /// `Passcode incorrect`
+  String get passcodeIncorrect {
+    return Intl.message(
+      'Passcode incorrect',
+      name: 'passcodeIncorrect',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Password`
   String get password {
     return Intl.message(
@@ -3424,6 +3444,16 @@ class Localization {
     );
   }
 
+  /// `Screen Passcode`
+  String get screenPasscode {
+    return Intl.message(
+      'Screen Passcode',
+      name: 'screenPasscode',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Search`
   String get search {
     return Intl.message(
@@ -3501,6 +3531,16 @@ class Localization {
     return Intl.message(
       'https://mixin.one/pages/1000007',
       name: 'secretUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Security`
+  String get security {
+    return Intl.message(
+      'Security',
+      name: 'security',
       desc: '',
       args: [],
     );
@@ -3593,6 +3633,16 @@ class Localization {
       name: 'setDisappearingMessageTimeTo',
       desc: '',
       args: [arg0, arg1],
+    );
+  }
+
+  /// `Set Passcode to unlock Mixin Messenger`
+  String get setPasscodeDesc {
+    return Intl.message(
+      'Set Passcode to unlock Mixin Messenger',
+      name: 'setPasscodeDesc',
+      desc: '',
+      args: [],
     );
   }
 
@@ -4221,6 +4271,16 @@ class Localization {
     return Intl.message(
       'Unknow error',
       name: 'unknowError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter Passcode to unlock Mixin Messenger`
+  String get unlockWithWasscode {
+    return Intl.message(
+      'Enter Passcode to unlock Mixin Messenger',
+      name: 'unlockWithWasscode',
       desc: '',
       args: [],
     );

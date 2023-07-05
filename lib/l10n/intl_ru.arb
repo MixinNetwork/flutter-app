@@ -309,6 +309,7 @@
 "searchPlaceholderNumber" : "Найдите Mixin ID или номер телефона:",
 "searchRelatedMessage" : "{count, plural, one{{arg0} связанное сообщение} other{{arg0} похожие сообщения}}",
 "secretUrl" : "https://mixin.one/pages/1000007",
+"security" : "Безопасность",
 "select" : "Выбрать",
 "send" : "Отправить",
 "sendArchived" : "Заархивированы все файлы в один zip файл",

@@ -309,6 +309,7 @@
 "searchPlaceholderNumber" : "Mixin ID または電話番号を検索",
 "searchRelatedMessage" : "{count, plural, one{{arg0}個の関連するメッセージ} other{{arg0}個の関連するメッセージ}}",
 "secretUrl" : "https://mixin.one/pages/1000007",
+"security" : "セキュリティ",
 "select" : "選択",
 "send" : "送る",
 "sendArchived" : "1つのZIPファイルにアーカイブ",

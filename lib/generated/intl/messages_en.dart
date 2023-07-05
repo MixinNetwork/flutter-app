@@ -243,6 +243,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "combineAndForward":
             MessageLookupByLibrary.simpleMessage("Combine and forward"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
+        "confirmPasscodeDesc": MessageLookupByLibrary.simpleMessage(
+            "Enter again to confirm the passcode"),
         "confirmSyncChatsFromPhone": MessageLookupByLibrary.simpleMessage(
             "Are you sure to sync the chat history from the phone?"),
         "confirmSyncChatsToPhone": MessageLookupByLibrary.simpleMessage(
@@ -563,6 +565,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
         "owner": MessageLookupByLibrary.simpleMessage("Owner"),
         "participantsCount": m35,
+        "passcodeIncorrect":
+            MessageLookupByLibrary.simpleMessage("Passcode incorrect"),
         "password": MessageLookupByLibrary.simpleMessage("Password"),
         "pendingConfirmation": m36,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone Number"),
@@ -620,6 +624,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sayHi": MessageLookupByLibrary.simpleMessage("Say Hi"),
         "scamWarning": MessageLookupByLibrary.simpleMessage(
             "Warning: Many users reported this account as a scam. Please be careful, especially if it asks you for money"),
+        "screenPasscode":
+            MessageLookupByLibrary.simpleMessage("Screen Passcode"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
         "searchContact": MessageLookupByLibrary.simpleMessage("Search contact"),
         "searchConversation":
@@ -632,6 +638,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchUnread": MessageLookupByLibrary.simpleMessage("Search Unread"),
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "security": MessageLookupByLibrary.simpleMessage("Security"),
         "select": MessageLookupByLibrary.simpleMessage("Select"),
         "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
@@ -645,6 +652,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Send Without Sound"),
         "set": MessageLookupByLibrary.simpleMessage("Set"),
         "setDisappearingMessageTimeTo": m40,
+        "setPasscodeDesc": MessageLookupByLibrary.simpleMessage(
+            "Set Passcode to unlock Mixin Messenger"),
         "settingAuthSearchHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
@@ -729,6 +738,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unitSecond": m48,
         "unitWeek": m49,
         "unknowError": MessageLookupByLibrary.simpleMessage("Unknow error"),
+        "unlockWithWasscode": MessageLookupByLibrary.simpleMessage(
+            "Enter Passcode to unlock Mixin Messenger"),
         "unmute": MessageLookupByLibrary.simpleMessage("Unmute"),
         "unpin": MessageLookupByLibrary.simpleMessage("Unpin"),
         "unpinAllMessages":

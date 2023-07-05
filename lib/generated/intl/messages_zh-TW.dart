@@ -216,6 +216,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collapse": MessageLookupByLibrary.simpleMessage("摺疊"),
         "combineAndForward": MessageLookupByLibrary.simpleMessage("合併轉發"),
         "confirm": MessageLookupByLibrary.simpleMessage("確認"),
+        "confirmPasscodeDesc": MessageLookupByLibrary.simpleMessage("再次確認密碼"),
         "confirmSyncChatsFromPhone":
             MessageLookupByLibrary.simpleMessage("確認從手機端同步聊天記錄嗎？"),
         "confirmSyncChatsToPhone":
@@ -494,6 +495,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "originalImage": MessageLookupByLibrary.simpleMessage("原圖"),
         "owner": MessageLookupByLibrary.simpleMessage("群主"),
         "participantsCount": m35,
+        "passcodeIncorrect": MessageLookupByLibrary.simpleMessage("密碼不正確"),
         "password": MessageLookupByLibrary.simpleMessage("密碼"),
         "pendingConfirmation": m36,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("手機號碼"),
@@ -543,6 +545,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sayHi": MessageLookupByLibrary.simpleMessage("打招呼"),
         "scamWarning": MessageLookupByLibrary.simpleMessage(
             "警告：此賬號被大量使用者舉報，請謹防網路詐騙，注意個人財產安全"),
+        "screenPasscode": MessageLookupByLibrary.simpleMessage("鎖屏密碼"),
         "search": MessageLookupByLibrary.simpleMessage("搜尋"),
         "searchContact": MessageLookupByLibrary.simpleMessage("搜尋使用者"),
         "searchConversation": MessageLookupByLibrary.simpleMessage("搜尋聊天記錄"),
@@ -551,6 +554,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("搜尋 Mixin ID 或手機號碼："),
         "searchRelatedMessage": m39,
         "searchUnread": MessageLookupByLibrary.simpleMessage("搜尋未讀會話"),
+        "security": MessageLookupByLibrary.simpleMessage("安全"),
         "select": MessageLookupByLibrary.simpleMessage("選擇"),
         "send": MessageLookupByLibrary.simpleMessage("傳送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 傳送"),
@@ -561,6 +565,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendWithoutSound": MessageLookupByLibrary.simpleMessage("靜音傳送"),
         "set": MessageLookupByLibrary.simpleMessage("設定"),
         "setDisappearingMessageTimeTo": m40,
+        "setPasscodeDesc": MessageLookupByLibrary.simpleMessage("設定解鎖密碼"),
         "settingAuthSearchHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID, 暱稱"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
@@ -627,6 +632,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unitSecond": m48,
         "unitWeek": m49,
         "unknowError": MessageLookupByLibrary.simpleMessage("未知錯誤"),
+        "unlockWithWasscode":
+            MessageLookupByLibrary.simpleMessage("輸入密碼解鎖 Mixin Messenger"),
         "unmute": MessageLookupByLibrary.simpleMessage("取消靜音"),
         "unpin": MessageLookupByLibrary.simpleMessage("取消置頂"),
         "unpinAllMessages": MessageLookupByLibrary.simpleMessage("取消所有置頂訊息"),
