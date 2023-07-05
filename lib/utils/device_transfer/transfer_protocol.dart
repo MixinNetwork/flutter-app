@@ -343,10 +343,16 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
 }
 
 class TransferProtocolSink implements EventSink<Uint8List> {
-  TransferProtocolSink(this._sink, this.folder, this.secretKey);
+  TransferProtocolSink(
+    this._sink,
+    this.folder,
+    this.secretKey, {
+    this.onHandleBytes,
+  });
 
   final EventSink<TransferPacket> _sink;
   final String folder;
+  final void Function(int)? onHandleBytes;
 
   final TransferSecretKey secretKey;
 
@@ -361,6 +367,7 @@ class TransferProtocolSink implements EventSink<Uint8List> {
 
   @override
   void add(Uint8List event) {
+    onHandleBytes?.call(event.length);
     _handleData(event);
   }
 
