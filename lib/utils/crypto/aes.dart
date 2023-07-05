@@ -8,7 +8,7 @@ import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
 import 'package:pointycastle/paddings/pkcs7.dart';
 import 'package:pointycastle/pointycastle.dart';
 
-import 'platform.dart';
+import '../platform.dart';
 
 typedef OnCipherCallback = void Function(Uint8List data);
 

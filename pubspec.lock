@@ -246,8 +246,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/common_crypto"
-      ref: ff6d787450e53305a492365d10b075f7391f6ea8
-      resolved-ref: ff6d787450e53305a492365d10b075f7391f6ea8
+      ref: "1ac0384083ca7d072f9d1246a0dd221e458d3169"
+      resolved-ref: "1ac0384083ca7d072f9d1246a0dd221e458d3169"
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "0.0.1"
