@@ -425,6 +425,9 @@ class Resources {
   static const String assetsImagesLocationMarkSvg =
       'assets/images/location_mark.svg';
 
+  /// {@macro assets_generator.assetsImagesLockSvg.preview}
+  static const String assetsImagesLockSvg = 'assets/images/lock.svg';
+
   /// {@macro assets_generator.assetsImagesLogoPng.preview}
   static const String assetsImagesLogoPng = 'assets/images/logo.png';
 

@@ -1,3 +1,5 @@
+import 'package:rxdart/rxdart.dart';
+
 import '../utils/hive_key_values.dart';
 
 class SecurityKeyValue extends HiveKeyValue {
@@ -24,8 +26,12 @@ class SecurityKeyValue extends HiveKeyValue {
 
   set biometric(bool value) => box.put(_biometric, value);
 
-  Stream<bool> watchHasPasscode() =>
-      box.watch(key: _passcode).map((event) => event.value != null);
+  bool get hasPasscode => passcode != null;
+
+  Stream<bool> watchHasPasscode() => box
+      .watch(key: _passcode)
+      .map((event) => event.value != null)
+      .startWith(passcode != null);
 
   Stream<bool> watchBiometric() =>
       box.watch(key: _biometric).map((event) => (event.value ?? false) as bool);
