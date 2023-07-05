@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:pin_input_text_field/pin_input_text_field.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../account/security_key_value.dart';
 import '../../utils/extension/extension.dart';
@@ -73,6 +73,20 @@ class _InputPasscode extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final focusNode = useFocusNode();
+    useEffect(() {
+      focusNode.requestFocus();
+      void listener() {
+        if (focusNode.hasFocus) return;
+        focusNode.requestFocus();
+      }
+
+      focusNode.addListener(listener);
+      return () {
+        focusNode.removeListener(listener);
+      };
+    }, []);
+
     final textEditingController = useTextEditingController();
 
     final passcode = useState<String?>(null);
@@ -123,24 +137,29 @@ class _InputPasscode extends HookWidget {
           const SizedBox(height: 40),
           SizedBox(
             width: 215,
-            child: PinInputTextField(
+            child: PinCodeTextField(
+              appContext: context,
+              length: 6,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               autoFocus: true,
-              decoration: UnderlineDecoration(
-                gapSpace: 25,
-                textStyle: TextStyle(
-                  color: context.theme.text,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
-                colorBuilder: FixedColorBuilder(
-                  context.theme.listSelected,
-                ),
+              keyboardType: TextInputType.number,
+              useHapticFeedback: true,
+              pinTheme: PinTheme(
+                activeColor: context.theme.text,
+                inactiveColor: context.theme.text,
+                selectedColor: context.theme.text,
+                fieldWidth: 15,
+                borderWidth: 2,
               ),
+              textStyle: TextStyle(
+                fontSize: 18,
+                color: context.theme.text,
+              ),
+              autoDisposeControllers: false,
+              focusNode: focusNode,
               controller: textEditingController,
-              onChanged: (value) {
-                if (value.length != 6) return;
-
+              showCursor: false,
+              onCompleted: (value) {
                 if (passcode.value != null) {
                   confirmPasscode.value = value;
                 } else {
