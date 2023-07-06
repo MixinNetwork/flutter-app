@@ -55,7 +55,7 @@ class _AuthGuard extends HookWidget {
             SecurityKeyValue.instance.hasPasscode;
 
     final hasError = useState(false);
-    final lock = useState(false);
+    final lock = useState(SecurityKeyValue.instance.hasPasscode);
 
     useEffect(() {
       Timer? timer;
