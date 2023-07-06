@@ -597,6 +597,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchRelatedMessage": m39,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "security": MessageLookupByLibrary.simpleMessage("Безопасность"),
         "select": MessageLookupByLibrary.simpleMessage("Выбрать"),
         "send": MessageLookupByLibrary.simpleMessage("Отправить"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(

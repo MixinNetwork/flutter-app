@@ -216,6 +216,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collapse": MessageLookupByLibrary.simpleMessage("折叠"),
         "combineAndForward": MessageLookupByLibrary.simpleMessage("合并转发"),
         "confirm": MessageLookupByLibrary.simpleMessage("确认"),
+        "confirmPasscodeDesc": MessageLookupByLibrary.simpleMessage("再次确认密码"),
         "confirmSyncChatsFromPhone":
             MessageLookupByLibrary.simpleMessage("确认从手机端同步聊天记录吗？"),
         "confirmSyncChatsToPhone":
@@ -428,6 +429,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("检测到系统时间异常，请校正后再继续使用"),
         "locateToChat": MessageLookupByLibrary.simpleMessage("定位到聊天"),
         "location": MessageLookupByLibrary.simpleMessage("位置"),
+        "lock": MessageLookupByLibrary.simpleMessage("锁定"),
         "logIn": MessageLookupByLibrary.simpleMessage("登录"),
         "loginAndAbortAccountDeletion":
             MessageLookupByLibrary.simpleMessage("继续登录并放弃删除账户"),
@@ -494,6 +496,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "originalImage": MessageLookupByLibrary.simpleMessage("原图"),
         "owner": MessageLookupByLibrary.simpleMessage("群主"),
         "participantsCount": m35,
+        "passcodeIncorrect": MessageLookupByLibrary.simpleMessage("密码不正确"),
         "password": MessageLookupByLibrary.simpleMessage("密码"),
         "pendingConfirmation": m36,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("手机号码"),
@@ -543,6 +546,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sayHi": MessageLookupByLibrary.simpleMessage("打招呼"),
         "scamWarning": MessageLookupByLibrary.simpleMessage(
             "警告：此账号被大量用户举报，请谨防网络诈骗，注意个人财产安全"),
+        "screenPasscode": MessageLookupByLibrary.simpleMessage("锁屏密码"),
         "search": MessageLookupByLibrary.simpleMessage("搜索"),
         "searchContact": MessageLookupByLibrary.simpleMessage("搜索用户"),
         "searchConversation": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
@@ -551,6 +555,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("搜索 Mixin ID 或手机号码："),
         "searchRelatedMessage": m39,
         "searchUnread": MessageLookupByLibrary.simpleMessage("搜索未读会话"),
+        "security": MessageLookupByLibrary.simpleMessage("安全"),
         "select": MessageLookupByLibrary.simpleMessage("选择"),
         "send": MessageLookupByLibrary.simpleMessage("发送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),
@@ -561,6 +566,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendWithoutSound": MessageLookupByLibrary.simpleMessage("静音发送"),
         "set": MessageLookupByLibrary.simpleMessage("设置"),
         "setDisappearingMessageTimeTo": m40,
+        "setPasscodeDesc": MessageLookupByLibrary.simpleMessage("设置解锁密码"),
         "settingAuthSearchHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID, 昵称"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
@@ -627,6 +633,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unitSecond": m48,
         "unitWeek": m49,
         "unknowError": MessageLookupByLibrary.simpleMessage("未知错误"),
+        "unlockWithWasscode":
+            MessageLookupByLibrary.simpleMessage("输入密码解锁 Mixin Messenger"),
         "unmute": MessageLookupByLibrary.simpleMessage("取消静音"),
         "unpin": MessageLookupByLibrary.simpleMessage("取消置顶"),
         "unpinAllMessages": MessageLookupByLibrary.simpleMessage("取消所有置顶消息"),
