@@ -5,13 +5,10 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
-import 'package:pointycastle/block/aes.dart';
-import 'package:pointycastle/block/modes/cbc.dart';
-import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
-import 'package:pointycastle/paddings/pkcs7.dart';
-import 'package:pointycastle/pointycastle.dart';
 import 'package:uuid/uuid.dart';
 
+import '../crypto/aes.dart';
+import '../crypto/hmac.dart';
 import '../logger.dart';
 import 'cipher.dart';
 import 'json_transfer_data.dart';
@@ -44,23 +41,6 @@ sealed class TransferPacket {
 
 const _kIVBytesCount = 16;
 
-@visibleForTesting
-PaddedBlockCipherImpl createAESCipher({
-  required Uint8List aesKey,
-  required Uint8List iv,
-  required bool encrypt,
-}) {
-  final cbcCipher = CBCBlockCipher(AESEngine());
-  return PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
-    ..init(
-      encrypt,
-      PaddedBlockCipherParameters(
-        ParametersWithIV(KeyParameter(aesKey), iv),
-        null,
-      ),
-    );
-}
-
 Future<void> _writeDataToSink({
   required TransferSocket sink,
   required TransferSecretKey key,
@@ -69,9 +49,7 @@ Future<void> _writeDataToSink({
 }) async {
   final iv = generateTransferIv();
 
-  final aesCipher = createAESCipher(aesKey: key.aesKey, iv: iv, encrypt: true);
-
-  final encryptedData = aesCipher.process(data);
+  final encryptedData = AesCipher.encrypt(key: key.aesKey, iv: iv, data: data);
 
   final bodyLength = iv.length + encryptedData.length;
 
@@ -171,8 +149,7 @@ class TransferAttachmentPacket extends TransferPacket {
     final hMacCalculator = HMacCalculator(key.hMacKey);
 
     final iv = generateTransferIv();
-    final aesCipher =
-        createAESCipher(aesKey: key.aesKey, iv: iv, encrypt: true);
+    final aesCipher = AesCipher(key: key.aesKey, iv: iv, encrypt: true);
 
     final header = ByteData(5)
       ..setInt8(0, kTypeFile)
@@ -191,51 +168,21 @@ class TransferAttachmentPacket extends TransferPacket {
 
     final fileStream = file.openRead();
 
-    Uint8List? carry;
-    List<int>? preBytes;
     await for (final bytes in fileStream) {
-      final toProcess = preBytes;
-      preBytes = bytes;
-      if (toProcess == null) {
-        continue;
-      }
-      final Uint8List data;
-      if (carry == null) {
-        data = Uint8List.fromList(toProcess);
-      } else {
-        data = Uint8List.fromList(carry + toProcess);
-        carry = null;
-      }
-
-      final length = data.length - (data.length % 1024);
-      if (length < data.length) {
-        carry = data.sublist(length);
-      } else {
-        carry = null;
-      }
-
-      final encryptedData = Uint8List(length);
-      var offset = 0;
-      while (offset < length) {
-        offset += aesCipher.processBlock(data, offset, encryptedData, offset);
-      }
-      hMacCalculator.addBytes(encryptedData);
-      sink.add(encryptedData);
-      actualEncryptedLength += encryptedData.length;
+      aesCipher.update(Uint8List.fromList(bytes), (data) {
+        hMacCalculator.addBytes(data);
+        sink.add(data);
+        actualEncryptedLength += data.length;
+      });
       await sink.flush();
     }
 
     // handle last block
-    final Uint8List lastBlock;
-    if (carry == null) {
-      lastBlock = Uint8List.fromList(preBytes ?? []);
-    } else {
-      lastBlock = Uint8List.fromList(carry + preBytes!);
-    }
-    final encryptedData = aesCipher.process(lastBlock);
-    hMacCalculator.addBytes(encryptedData);
-    sink.add(encryptedData);
-    actualEncryptedLength += encryptedData.length;
+    aesCipher.finish((data) {
+      hMacCalculator.addBytes(data);
+      sink.add(data);
+      actualEncryptedLength += data.length;
+    });
     await sink.flush();
 
     sink.add(hMacCalculator.result);
@@ -305,9 +252,10 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
     assert(_writeBodyLength == expectedBodyLength);
     final data = Uint8List.fromList(_body);
     final iv = Uint8List.sublistView(data, 0, _kIVBytesCount);
-    final aesCipher = createAESCipher(aesKey: aesKey, iv: iv, encrypt: false);
-    final jsonData = aesCipher.process(
-      Uint8List.sublistView(data, _kIVBytesCount),
+    final jsonData = AesCipher.decrypt(
+      key: aesKey,
+      iv: iv,
+      data: Uint8List.sublistView(data, _kIVBytesCount),
     );
     try {
       return creator(jsonData);
@@ -326,10 +274,7 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
 
   File? _file;
   String? _messageId;
-  late BlockCipher? _aesCipher;
-
-  Uint8List? _carry;
-  Uint8List? _preProcessData;
+  late AesCipher? _aesCipher;
 
   @override
   bool doWriteBody(Uint8List bytes) {
@@ -348,7 +293,7 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
         _kUUIDBytesCount,
         _kUUIDBytesCount + _kIVBytesCount,
       );
-      _aesCipher = createAESCipher(aesKey: aesKey, iv: iv, encrypt: false);
+      _aesCipher = AesCipher(key: aesKey, iv: iv, encrypt: false);
 
       final tempFileName = const Uuid().v4();
       final file = File(p.join(folder, tempFileName));
@@ -373,48 +318,16 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
   }
 
   void _processData(Uint8List encryptedData) {
-    final toProcessData = _preProcessData;
-    _preProcessData = encryptedData;
-    if (toProcessData == null) {
-      return;
-    }
-
-    final Uint8List data;
-    if (_carry != null) {
-      data = Uint8List.fromList(_carry! + toProcessData);
-      _carry = null;
-    } else {
-      data = toProcessData;
-    }
-    // take the block size of the cipher into account
-    final length = data.length - (data.length % 1024);
-    if (length < data.length) {
-      _carry = data.sublist(length);
-    } else {
-      _carry = null;
-    }
-    if (length <= 0) {
-      return;
-    }
-    final bytes = Uint8List(length);
-    var offset = 0;
-    while (offset < length) {
-      offset += _aesCipher!.processBlock(data, offset, bytes, offset);
-    }
-    _file!.writeAsBytesSync(bytes, mode: FileMode.append, flush: true);
+    _aesCipher!.update(encryptedData, (data) {
+      _file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
+    });
   }
 
   @override
   TransferAttachmentPacket build() {
-    final Uint8List lastBlockData;
-    if (_carry != null) {
-      lastBlockData = Uint8List.fromList(_carry! + _preProcessData!);
-      _carry = null;
-    } else {
-      lastBlockData = _preProcessData!;
-    }
-    final bytes = _aesCipher!.process(lastBlockData);
-    _file!.writeAsBytesSync(bytes, mode: FileMode.append, flush: true);
+    _aesCipher!.finish((data) {
+      _file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
+    });
 
     assert(_writeBodyLength == expectedBodyLength,
         'writeBodyLength != expectedBodyLength');
@@ -431,10 +344,16 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
 }
 
 class TransferProtocolSink implements EventSink<Uint8List> {
-  TransferProtocolSink(this._sink, this.folder, this.secretKey);
+  TransferProtocolSink(
+    this._sink,
+    this.folder,
+    this.secretKey, {
+    this.onHandleBytes,
+  });
 
   final EventSink<TransferPacket> _sink;
   final String folder;
+  final void Function(int)? onHandleBytes;
 
   final TransferSecretKey secretKey;
 
@@ -449,6 +368,7 @@ class TransferProtocolSink implements EventSink<Uint8List> {
 
   @override
   void add(Uint8List event) {
+    onHandleBytes?.call(event.length);
     _handleData(event);
   }
 

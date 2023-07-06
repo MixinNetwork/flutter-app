@@ -634,6 +634,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchUnread": MessageLookupByLibrary.simpleMessage("Buscar no leído"),
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "security": MessageLookupByLibrary.simpleMessage("Seguridad"),
         "select": MessageLookupByLibrary.simpleMessage("Seleccionar"),
         "send": MessageLookupByLibrary.simpleMessage("Enviar"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(

@@ -9,14 +9,17 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../account/account_server.dart';
+import '../../account/security_key_value.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
 import '../../utils/device_transfer/device_transfer_dialog.dart';
+import '../../utils/event_bus.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
 import '../actions/actions.dart';
+import '../auth.dart';
 
 abstract class ConversationMenuHandle {
   Stream<bool> get isMuted;
@@ -115,6 +118,12 @@ class _Menus extends HookWidget {
         ).data ??
         false;
 
+    final hasPasscode = useMemoizedStream(signed
+                ? SecurityKeyValue.instance.watchHasPasscode
+                : () => Stream.value(false))
+            .data ??
+        false;
+
     PlatformMenu buildConversationMenu() => PlatformMenu(
           label: context.l10n.conversation,
           menus: [
@@ -179,6 +188,19 @@ class _Menus extends HookWidget {
                           .read<SlideCategoryCubit>()
                           .select(SlideCategoryType.setting);
                     }
+                  : null,
+            ),
+          ]),
+          PlatformMenuItemGroup(members: [
+            PlatformMenuItem(
+              label: context.l10n.lock,
+              shortcut: const SingleActivator(
+                LogicalKeyboardKey.keyL,
+                meta: true,
+                shift: true,
+              ),
+              onSelected: hasPasscode
+                  ? () => EventBus.instance.fire(LockEvent.lock)
                   : null,
             ),
           ]),
