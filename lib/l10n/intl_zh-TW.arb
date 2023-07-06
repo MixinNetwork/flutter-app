@@ -235,6 +235,7 @@
 "loadingTime" : "檢測到系統時間異常，請校正後再繼續使用",
 "locateToChat" : "定位到聊天",
 "location" : "位置",
+"lock" : "鎖定",
 "logIn" : "登入",
 "loginAndAbortAccountDeletion" : "繼續登入並放棄刪除賬戶",
 "loginByQrcode" : "透過二維碼登入 Mixin Messenger",

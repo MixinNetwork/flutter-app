@@ -489,6 +489,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "System time is unusual, please continue to use again after correction"),
         "locateToChat": MessageLookupByLibrary.simpleMessage("locate to chat"),
         "location": MessageLookupByLibrary.simpleMessage("Location"),
+        "lock": MessageLookupByLibrary.simpleMessage("Lock"),
         "logIn": MessageLookupByLibrary.simpleMessage("Log in"),
         "loginAndAbortAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Continue to log in and abort account deletion"),

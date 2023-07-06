@@ -236,6 +236,7 @@
 "loadingTime" : "System time is unusual, please continue to use again after correction",
 "locateToChat" : "locate to chat",
 "location" : "Location",
+"lock" : "Lock",
 "logIn" : "Log in",
 "loginAndAbortAccountDeletion" : "Continue to log in and abort account deletion",
 "loginByQrcode" : "Login to Mixin Messenger by QR Code",

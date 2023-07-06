@@ -2430,6 +2430,16 @@ class Localization {
     );
   }
 
+  /// `Lock`
+  String get lock {
+    return Intl.message(
+      'Lock',
+      name: 'lock',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Log in`
   String get logIn {
     return Intl.message(

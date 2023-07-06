@@ -429,6 +429,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("檢測到系統時間異常，請校正後再繼續使用"),
         "locateToChat": MessageLookupByLibrary.simpleMessage("定位到聊天"),
         "location": MessageLookupByLibrary.simpleMessage("位置"),
+        "lock": MessageLookupByLibrary.simpleMessage("鎖定"),
         "logIn": MessageLookupByLibrary.simpleMessage("登入"),
         "loginAndAbortAccountDeletion":
             MessageLookupByLibrary.simpleMessage("繼續登入並放棄刪除賬戶"),
