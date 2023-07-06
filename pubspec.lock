@@ -242,6 +242,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.17.2"
+  common_crypto:
+    dependency: "direct main"
+    description:
+      path: "packages/common_crypto"
+      ref: "1ac0384083ca7d072f9d1246a0dd221e458d3169"
+      resolved-ref: "1ac0384083ca7d072f9d1246a0dd221e458d3169"
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
+    version: "0.0.1"
   console:
     dependency: transitive
     description:

@@ -3,9 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:libsignal_protocol_dart/src/kdf/hkdfv3.dart';
-import 'package:pointycastle/digests/sha256.dart';
-import 'package:pointycastle/macs/hmac.dart';
-import 'package:pointycastle/pointycastle.dart';
 
 import '../crypto_util.dart';
 
@@ -28,31 +25,7 @@ TransferSecretKey generateTransferKey() {
   return TransferSecretKey(bytes);
 }
 
-Uint8List calculateHMac(Uint8List key, Uint8List data) {
-  final calculator = HMacCalculator(key)..addBytes(data);
-  return calculator.result;
-}
-
 Uint8List generateTransferIv() {
   const _kIVBytesCount = 16;
   return Uint8List.fromList(generateRandomKey(_kIVBytesCount));
-}
-
-class HMacCalculator {
-  HMacCalculator(this._hMacKey) : _hmac = HMac.withDigest(SHA256Digest()) {
-    _hmac.init(KeyParameter(_hMacKey));
-  }
-
-  final Uint8List _hMacKey;
-  final HMac _hmac;
-
-  void addBytes(Uint8List data) {
-    _hmac.update(data, 0, data.length);
-  }
-
-  Uint8List get result {
-    final bytes = Uint8List(_hmac.macSize);
-    final len = _hmac.doFinal(bytes, 0);
-    return bytes.sublist(0, len);
-  }
 }
