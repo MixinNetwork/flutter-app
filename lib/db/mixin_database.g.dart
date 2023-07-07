@@ -3,786 +3,6 @@
 part of 'mixin_database.dart';
 
 // ignore_for_file: type=lint
-class StickerRelationships extends Table
-    with TableInfo<StickerRelationships, StickerRelationship> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  StickerRelationships(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _albumIdMeta =
-      const VerificationMeta('albumId');
-  late final GeneratedColumn<String> albumId = GeneratedColumn<String>(
-      'album_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _stickerIdMeta =
-      const VerificationMeta('stickerId');
-  late final GeneratedColumn<String> stickerId = GeneratedColumn<String>(
-      'sticker_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  @override
-  List<GeneratedColumn> get $columns => [albumId, stickerId];
-  @override
-  String get aliasedName => _alias ?? 'sticker_relationships';
-  @override
-  String get actualTableName => 'sticker_relationships';
-  @override
-  VerificationContext validateIntegrity(
-      Insertable<StickerRelationship> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('album_id')) {
-      context.handle(_albumIdMeta,
-          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
-    } else if (isInserting) {
-      context.missing(_albumIdMeta);
-    }
-    if (data.containsKey('sticker_id')) {
-      context.handle(_stickerIdMeta,
-          stickerId.isAcceptableOrUnknown(data['sticker_id']!, _stickerIdMeta));
-    } else if (isInserting) {
-      context.missing(_stickerIdMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {albumId, stickerId};
-  @override
-  StickerRelationship map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return StickerRelationship(
-      albumId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}album_id'])!,
-      stickerId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sticker_id'])!,
-    );
-  }
-
-  @override
-  StickerRelationships createAlias(String alias) {
-    return StickerRelationships(attachedDatabase, alias);
-  }
-
-  @override
-  List<String> get customConstraints =>
-      const ['PRIMARY KEY(album_id, sticker_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class StickerRelationship extends DataClass
-    implements Insertable<StickerRelationship> {
-  final String albumId;
-  final String stickerId;
-  const StickerRelationship({required this.albumId, required this.stickerId});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['album_id'] = Variable<String>(albumId);
-    map['sticker_id'] = Variable<String>(stickerId);
-    return map;
-  }
-
-  StickerRelationshipsCompanion toCompanion(bool nullToAbsent) {
-    return StickerRelationshipsCompanion(
-      albumId: Value(albumId),
-      stickerId: Value(stickerId),
-    );
-  }
-
-  factory StickerRelationship.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return StickerRelationship(
-      albumId: serializer.fromJson<String>(json['album_id']),
-      stickerId: serializer.fromJson<String>(json['sticker_id']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'album_id': serializer.toJson<String>(albumId),
-      'sticker_id': serializer.toJson<String>(stickerId),
-    };
-  }
-
-  StickerRelationship copyWith({String? albumId, String? stickerId}) =>
-      StickerRelationship(
-        albumId: albumId ?? this.albumId,
-        stickerId: stickerId ?? this.stickerId,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('StickerRelationship(')
-          ..write('albumId: $albumId, ')
-          ..write('stickerId: $stickerId')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(albumId, stickerId);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is StickerRelationship &&
-          other.albumId == this.albumId &&
-          other.stickerId == this.stickerId);
-}
-
-class StickerRelationshipsCompanion
-    extends UpdateCompanion<StickerRelationship> {
-  final Value<String> albumId;
-  final Value<String> stickerId;
-  final Value<int> rowid;
-  const StickerRelationshipsCompanion({
-    this.albumId = const Value.absent(),
-    this.stickerId = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  StickerRelationshipsCompanion.insert({
-    required String albumId,
-    required String stickerId,
-    this.rowid = const Value.absent(),
-  })  : albumId = Value(albumId),
-        stickerId = Value(stickerId);
-  static Insertable<StickerRelationship> custom({
-    Expression<String>? albumId,
-    Expression<String>? stickerId,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (albumId != null) 'album_id': albumId,
-      if (stickerId != null) 'sticker_id': stickerId,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  StickerRelationshipsCompanion copyWith(
-      {Value<String>? albumId, Value<String>? stickerId, Value<int>? rowid}) {
-    return StickerRelationshipsCompanion(
-      albumId: albumId ?? this.albumId,
-      stickerId: stickerId ?? this.stickerId,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (albumId.present) {
-      map['album_id'] = Variable<String>(albumId.value);
-    }
-    if (stickerId.present) {
-      map['sticker_id'] = Variable<String>(stickerId.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('StickerRelationshipsCompanion(')
-          ..write('albumId: $albumId, ')
-          ..write('stickerId: $stickerId, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  StickerAlbums(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _albumIdMeta =
-      const VerificationMeta('albumId');
-  late final GeneratedColumn<String> albumId = GeneratedColumn<String>(
-      'album_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _iconUrlMeta =
-      const VerificationMeta('iconUrl');
-  late final GeneratedColumn<String> iconUrl = GeneratedColumn<String>(
-      'icon_url', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(StickerAlbums.$convertercreatedAt);
-  static const VerificationMeta _updateAtMeta =
-      const VerificationMeta('updateAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> updateAt =
-      GeneratedColumn<int>('update_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(StickerAlbums.$converterupdateAt);
-  static const VerificationMeta _orderedAtMeta =
-      const VerificationMeta('orderedAt');
-  late final GeneratedColumn<int> orderedAt = GeneratedColumn<int>(
-      'ordered_at', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: 'NOT NULL DEFAULT 0',
-      defaultValue: const CustomExpression('0'));
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _categoryMeta =
-      const VerificationMeta('category');
-  late final GeneratedColumn<String> category = GeneratedColumn<String>(
-      'category', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _bannerMeta = const VerificationMeta('banner');
-  late final GeneratedColumn<String> banner = GeneratedColumn<String>(
-      'banner', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _addedMeta = const VerificationMeta('added');
-  late final GeneratedColumn<bool> added = GeneratedColumn<bool>(
-      'added', aliasedName, true,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      $customConstraints: 'DEFAULT FALSE',
-      defaultValue: const CustomExpression('FALSE'));
-  static const VerificationMeta _isVerifiedMeta =
-      const VerificationMeta('isVerified');
-  late final GeneratedColumn<bool> isVerified = GeneratedColumn<bool>(
-      'is_verified', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      $customConstraints: 'NOT NULL DEFAULT FALSE',
-      defaultValue: const CustomExpression('FALSE'));
-  @override
-  List<GeneratedColumn> get $columns => [
-        albumId,
-        name,
-        iconUrl,
-        createdAt,
-        updateAt,
-        orderedAt,
-        userId,
-        category,
-        description,
-        banner,
-        added,
-        isVerified
-      ];
-  @override
-  String get aliasedName => _alias ?? 'sticker_albums';
-  @override
-  String get actualTableName => 'sticker_albums';
-  @override
-  VerificationContext validateIntegrity(Insertable<StickerAlbum> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('album_id')) {
-      context.handle(_albumIdMeta,
-          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
-    } else if (isInserting) {
-      context.missing(_albumIdMeta);
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('icon_url')) {
-      context.handle(_iconUrlMeta,
-          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
-    } else if (isInserting) {
-      context.missing(_iconUrlMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_updateAtMeta, const VerificationResult.success());
-    if (data.containsKey('ordered_at')) {
-      context.handle(_orderedAtMeta,
-          orderedAt.isAcceptableOrUnknown(data['ordered_at']!, _orderedAtMeta));
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    if (data.containsKey('category')) {
-      context.handle(_categoryMeta,
-          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
-    } else if (isInserting) {
-      context.missing(_categoryMeta);
-    }
-    if (data.containsKey('description')) {
-      context.handle(
-          _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
-    } else if (isInserting) {
-      context.missing(_descriptionMeta);
-    }
-    if (data.containsKey('banner')) {
-      context.handle(_bannerMeta,
-          banner.isAcceptableOrUnknown(data['banner']!, _bannerMeta));
-    }
-    if (data.containsKey('added')) {
-      context.handle(
-          _addedMeta, added.isAcceptableOrUnknown(data['added']!, _addedMeta));
-    }
-    if (data.containsKey('is_verified')) {
-      context.handle(
-          _isVerifiedMeta,
-          isVerified.isAcceptableOrUnknown(
-              data['is_verified']!, _isVerifiedMeta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {albumId};
-  @override
-  StickerAlbum map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return StickerAlbum(
-      albumId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}album_id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      iconUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}icon_url'])!,
-      createdAt: StickerAlbums.$convertercreatedAt.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-      updateAt: StickerAlbums.$converterupdateAt.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}update_at'])!),
-      orderedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}ordered_at'])!,
-      userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
-      category: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}category'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      banner: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}banner']),
-      added: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}added']),
-      isVerified: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_verified'])!,
-    );
-  }
-
-  @override
-  StickerAlbums createAlias(String alias) {
-    return StickerAlbums(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converterupdateAt =
-      const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(album_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
-  final String albumId;
-  final String name;
-  final String iconUrl;
-  final DateTime createdAt;
-  final DateTime updateAt;
-  final int orderedAt;
-  final String userId;
-  final String category;
-  final String description;
-  final String? banner;
-  final bool? added;
-  final bool isVerified;
-  const StickerAlbum(
-      {required this.albumId,
-      required this.name,
-      required this.iconUrl,
-      required this.createdAt,
-      required this.updateAt,
-      required this.orderedAt,
-      required this.userId,
-      required this.category,
-      required this.description,
-      this.banner,
-      this.added,
-      required this.isVerified});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['album_id'] = Variable<String>(albumId);
-    map['name'] = Variable<String>(name);
-    map['icon_url'] = Variable<String>(iconUrl);
-    {
-      final converter = StickerAlbums.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    {
-      final converter = StickerAlbums.$converterupdateAt;
-      map['update_at'] = Variable<int>(converter.toSql(updateAt));
-    }
-    map['ordered_at'] = Variable<int>(orderedAt);
-    map['user_id'] = Variable<String>(userId);
-    map['category'] = Variable<String>(category);
-    map['description'] = Variable<String>(description);
-    if (!nullToAbsent || banner != null) {
-      map['banner'] = Variable<String>(banner);
-    }
-    if (!nullToAbsent || added != null) {
-      map['added'] = Variable<bool>(added);
-    }
-    map['is_verified'] = Variable<bool>(isVerified);
-    return map;
-  }
-
-  StickerAlbumsCompanion toCompanion(bool nullToAbsent) {
-    return StickerAlbumsCompanion(
-      albumId: Value(albumId),
-      name: Value(name),
-      iconUrl: Value(iconUrl),
-      createdAt: Value(createdAt),
-      updateAt: Value(updateAt),
-      orderedAt: Value(orderedAt),
-      userId: Value(userId),
-      category: Value(category),
-      description: Value(description),
-      banner:
-          banner == null && nullToAbsent ? const Value.absent() : Value(banner),
-      added:
-          added == null && nullToAbsent ? const Value.absent() : Value(added),
-      isVerified: Value(isVerified),
-    );
-  }
-
-  factory StickerAlbum.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return StickerAlbum(
-      albumId: serializer.fromJson<String>(json['album_id']),
-      name: serializer.fromJson<String>(json['name']),
-      iconUrl: serializer.fromJson<String>(json['icon_url']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      updateAt: serializer.fromJson<DateTime>(json['update_at']),
-      orderedAt: serializer.fromJson<int>(json['ordered_at']),
-      userId: serializer.fromJson<String>(json['user_id']),
-      category: serializer.fromJson<String>(json['category']),
-      description: serializer.fromJson<String>(json['description']),
-      banner: serializer.fromJson<String?>(json['banner']),
-      added: serializer.fromJson<bool?>(json['added']),
-      isVerified: serializer.fromJson<bool>(json['is_verified']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'album_id': serializer.toJson<String>(albumId),
-      'name': serializer.toJson<String>(name),
-      'icon_url': serializer.toJson<String>(iconUrl),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-      'update_at': serializer.toJson<DateTime>(updateAt),
-      'ordered_at': serializer.toJson<int>(orderedAt),
-      'user_id': serializer.toJson<String>(userId),
-      'category': serializer.toJson<String>(category),
-      'description': serializer.toJson<String>(description),
-      'banner': serializer.toJson<String?>(banner),
-      'added': serializer.toJson<bool?>(added),
-      'is_verified': serializer.toJson<bool>(isVerified),
-    };
-  }
-
-  StickerAlbum copyWith(
-          {String? albumId,
-          String? name,
-          String? iconUrl,
-          DateTime? createdAt,
-          DateTime? updateAt,
-          int? orderedAt,
-          String? userId,
-          String? category,
-          String? description,
-          Value<String?> banner = const Value.absent(),
-          Value<bool?> added = const Value.absent(),
-          bool? isVerified}) =>
-      StickerAlbum(
-        albumId: albumId ?? this.albumId,
-        name: name ?? this.name,
-        iconUrl: iconUrl ?? this.iconUrl,
-        createdAt: createdAt ?? this.createdAt,
-        updateAt: updateAt ?? this.updateAt,
-        orderedAt: orderedAt ?? this.orderedAt,
-        userId: userId ?? this.userId,
-        category: category ?? this.category,
-        description: description ?? this.description,
-        banner: banner.present ? banner.value : this.banner,
-        added: added.present ? added.value : this.added,
-        isVerified: isVerified ?? this.isVerified,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('StickerAlbum(')
-          ..write('albumId: $albumId, ')
-          ..write('name: $name, ')
-          ..write('iconUrl: $iconUrl, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updateAt: $updateAt, ')
-          ..write('orderedAt: $orderedAt, ')
-          ..write('userId: $userId, ')
-          ..write('category: $category, ')
-          ..write('description: $description, ')
-          ..write('banner: $banner, ')
-          ..write('added: $added, ')
-          ..write('isVerified: $isVerified')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(albumId, name, iconUrl, createdAt, updateAt,
-      orderedAt, userId, category, description, banner, added, isVerified);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is StickerAlbum &&
-          other.albumId == this.albumId &&
-          other.name == this.name &&
-          other.iconUrl == this.iconUrl &&
-          other.createdAt == this.createdAt &&
-          other.updateAt == this.updateAt &&
-          other.orderedAt == this.orderedAt &&
-          other.userId == this.userId &&
-          other.category == this.category &&
-          other.description == this.description &&
-          other.banner == this.banner &&
-          other.added == this.added &&
-          other.isVerified == this.isVerified);
-}
-
-class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
-  final Value<String> albumId;
-  final Value<String> name;
-  final Value<String> iconUrl;
-  final Value<DateTime> createdAt;
-  final Value<DateTime> updateAt;
-  final Value<int> orderedAt;
-  final Value<String> userId;
-  final Value<String> category;
-  final Value<String> description;
-  final Value<String?> banner;
-  final Value<bool?> added;
-  final Value<bool> isVerified;
-  final Value<int> rowid;
-  const StickerAlbumsCompanion({
-    this.albumId = const Value.absent(),
-    this.name = const Value.absent(),
-    this.iconUrl = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updateAt = const Value.absent(),
-    this.orderedAt = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.category = const Value.absent(),
-    this.description = const Value.absent(),
-    this.banner = const Value.absent(),
-    this.added = const Value.absent(),
-    this.isVerified = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  StickerAlbumsCompanion.insert({
-    required String albumId,
-    required String name,
-    required String iconUrl,
-    required DateTime createdAt,
-    required DateTime updateAt,
-    this.orderedAt = const Value.absent(),
-    required String userId,
-    required String category,
-    required String description,
-    this.banner = const Value.absent(),
-    this.added = const Value.absent(),
-    this.isVerified = const Value.absent(),
-    this.rowid = const Value.absent(),
-  })  : albumId = Value(albumId),
-        name = Value(name),
-        iconUrl = Value(iconUrl),
-        createdAt = Value(createdAt),
-        updateAt = Value(updateAt),
-        userId = Value(userId),
-        category = Value(category),
-        description = Value(description);
-  static Insertable<StickerAlbum> custom({
-    Expression<String>? albumId,
-    Expression<String>? name,
-    Expression<String>? iconUrl,
-    Expression<int>? createdAt,
-    Expression<int>? updateAt,
-    Expression<int>? orderedAt,
-    Expression<String>? userId,
-    Expression<String>? category,
-    Expression<String>? description,
-    Expression<String>? banner,
-    Expression<bool>? added,
-    Expression<bool>? isVerified,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (albumId != null) 'album_id': albumId,
-      if (name != null) 'name': name,
-      if (iconUrl != null) 'icon_url': iconUrl,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updateAt != null) 'update_at': updateAt,
-      if (orderedAt != null) 'ordered_at': orderedAt,
-      if (userId != null) 'user_id': userId,
-      if (category != null) 'category': category,
-      if (description != null) 'description': description,
-      if (banner != null) 'banner': banner,
-      if (added != null) 'added': added,
-      if (isVerified != null) 'is_verified': isVerified,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  StickerAlbumsCompanion copyWith(
-      {Value<String>? albumId,
-      Value<String>? name,
-      Value<String>? iconUrl,
-      Value<DateTime>? createdAt,
-      Value<DateTime>? updateAt,
-      Value<int>? orderedAt,
-      Value<String>? userId,
-      Value<String>? category,
-      Value<String>? description,
-      Value<String?>? banner,
-      Value<bool?>? added,
-      Value<bool>? isVerified,
-      Value<int>? rowid}) {
-    return StickerAlbumsCompanion(
-      albumId: albumId ?? this.albumId,
-      name: name ?? this.name,
-      iconUrl: iconUrl ?? this.iconUrl,
-      createdAt: createdAt ?? this.createdAt,
-      updateAt: updateAt ?? this.updateAt,
-      orderedAt: orderedAt ?? this.orderedAt,
-      userId: userId ?? this.userId,
-      category: category ?? this.category,
-      description: description ?? this.description,
-      banner: banner ?? this.banner,
-      added: added ?? this.added,
-      isVerified: isVerified ?? this.isVerified,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (albumId.present) {
-      map['album_id'] = Variable<String>(albumId.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (iconUrl.present) {
-      map['icon_url'] = Variable<String>(iconUrl.value);
-    }
-    if (createdAt.present) {
-      final converter = StickerAlbums.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (updateAt.present) {
-      final converter = StickerAlbums.$converterupdateAt;
-      map['update_at'] = Variable<int>(converter.toSql(updateAt.value));
-    }
-    if (orderedAt.present) {
-      map['ordered_at'] = Variable<int>(orderedAt.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (category.present) {
-      map['category'] = Variable<String>(category.value);
-    }
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
-    }
-    if (banner.present) {
-      map['banner'] = Variable<String>(banner.value);
-    }
-    if (added.present) {
-      map['added'] = Variable<bool>(added.value);
-    }
-    if (isVerified.present) {
-      map['is_verified'] = Variable<bool>(isVerified.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('StickerAlbumsCompanion(')
-          ..write('albumId: $albumId, ')
-          ..write('name: $name, ')
-          ..write('iconUrl: $iconUrl, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updateAt: $updateAt, ')
-          ..write('orderedAt: $orderedAt, ')
-          ..write('userId: $userId, ')
-          ..write('category: $category, ')
-          ..write('description: $description, ')
-          ..write('banner: $banner, ')
-          ..write('added: $added, ')
-          ..write('isVerified: $isVerified, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -8167,6 +7387,786 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
   }
 }
 
+class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  StickerAlbums(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _albumIdMeta =
+      const VerificationMeta('albumId');
+  late final GeneratedColumn<String> albumId = GeneratedColumn<String>(
+      'album_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _iconUrlMeta =
+      const VerificationMeta('iconUrl');
+  late final GeneratedColumn<String> iconUrl = GeneratedColumn<String>(
+      'icon_url', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(StickerAlbums.$convertercreatedAt);
+  static const VerificationMeta _updateAtMeta =
+      const VerificationMeta('updateAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> updateAt =
+      GeneratedColumn<int>('update_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(StickerAlbums.$converterupdateAt);
+  static const VerificationMeta _orderedAtMeta =
+      const VerificationMeta('orderedAt');
+  late final GeneratedColumn<int> orderedAt = GeneratedColumn<int>(
+      'ordered_at', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: 'NOT NULL DEFAULT 0',
+      defaultValue: const CustomExpression('0'));
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _categoryMeta =
+      const VerificationMeta('category');
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+      'category', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _bannerMeta = const VerificationMeta('banner');
+  late final GeneratedColumn<String> banner = GeneratedColumn<String>(
+      'banner', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _addedMeta = const VerificationMeta('added');
+  late final GeneratedColumn<bool> added = GeneratedColumn<bool>(
+      'added', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      $customConstraints: 'DEFAULT FALSE',
+      defaultValue: const CustomExpression('FALSE'));
+  static const VerificationMeta _isVerifiedMeta =
+      const VerificationMeta('isVerified');
+  late final GeneratedColumn<bool> isVerified = GeneratedColumn<bool>(
+      'is_verified', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      $customConstraints: 'NOT NULL DEFAULT FALSE',
+      defaultValue: const CustomExpression('FALSE'));
+  @override
+  List<GeneratedColumn> get $columns => [
+        albumId,
+        name,
+        iconUrl,
+        createdAt,
+        updateAt,
+        orderedAt,
+        userId,
+        category,
+        description,
+        banner,
+        added,
+        isVerified
+      ];
+  @override
+  String get aliasedName => _alias ?? 'sticker_albums';
+  @override
+  String get actualTableName => 'sticker_albums';
+  @override
+  VerificationContext validateIntegrity(Insertable<StickerAlbum> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('album_id')) {
+      context.handle(_albumIdMeta,
+          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
+    } else if (isInserting) {
+      context.missing(_albumIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('icon_url')) {
+      context.handle(_iconUrlMeta,
+          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
+    } else if (isInserting) {
+      context.missing(_iconUrlMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_updateAtMeta, const VerificationResult.success());
+    if (data.containsKey('ordered_at')) {
+      context.handle(_orderedAtMeta,
+          orderedAt.isAcceptableOrUnknown(data['ordered_at']!, _orderedAtMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('banner')) {
+      context.handle(_bannerMeta,
+          banner.isAcceptableOrUnknown(data['banner']!, _bannerMeta));
+    }
+    if (data.containsKey('added')) {
+      context.handle(
+          _addedMeta, added.isAcceptableOrUnknown(data['added']!, _addedMeta));
+    }
+    if (data.containsKey('is_verified')) {
+      context.handle(
+          _isVerifiedMeta,
+          isVerified.isAcceptableOrUnknown(
+              data['is_verified']!, _isVerifiedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {albumId};
+  @override
+  StickerAlbum map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StickerAlbum(
+      albumId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}album_id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      iconUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}icon_url'])!,
+      createdAt: StickerAlbums.$convertercreatedAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+      updateAt: StickerAlbums.$converterupdateAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}update_at'])!),
+      orderedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}ordered_at'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      category: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      banner: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}banner']),
+      added: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}added']),
+      isVerified: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_verified'])!,
+    );
+  }
+
+  @override
+  StickerAlbums createAlias(String alias) {
+    return StickerAlbums(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converterupdateAt =
+      const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(album_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
+  final String albumId;
+  final String name;
+  final String iconUrl;
+  final DateTime createdAt;
+  final DateTime updateAt;
+  final int orderedAt;
+  final String userId;
+  final String category;
+  final String description;
+  final String? banner;
+  final bool? added;
+  final bool isVerified;
+  const StickerAlbum(
+      {required this.albumId,
+      required this.name,
+      required this.iconUrl,
+      required this.createdAt,
+      required this.updateAt,
+      required this.orderedAt,
+      required this.userId,
+      required this.category,
+      required this.description,
+      this.banner,
+      this.added,
+      required this.isVerified});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['album_id'] = Variable<String>(albumId);
+    map['name'] = Variable<String>(name);
+    map['icon_url'] = Variable<String>(iconUrl);
+    {
+      final converter = StickerAlbums.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    {
+      final converter = StickerAlbums.$converterupdateAt;
+      map['update_at'] = Variable<int>(converter.toSql(updateAt));
+    }
+    map['ordered_at'] = Variable<int>(orderedAt);
+    map['user_id'] = Variable<String>(userId);
+    map['category'] = Variable<String>(category);
+    map['description'] = Variable<String>(description);
+    if (!nullToAbsent || banner != null) {
+      map['banner'] = Variable<String>(banner);
+    }
+    if (!nullToAbsent || added != null) {
+      map['added'] = Variable<bool>(added);
+    }
+    map['is_verified'] = Variable<bool>(isVerified);
+    return map;
+  }
+
+  StickerAlbumsCompanion toCompanion(bool nullToAbsent) {
+    return StickerAlbumsCompanion(
+      albumId: Value(albumId),
+      name: Value(name),
+      iconUrl: Value(iconUrl),
+      createdAt: Value(createdAt),
+      updateAt: Value(updateAt),
+      orderedAt: Value(orderedAt),
+      userId: Value(userId),
+      category: Value(category),
+      description: Value(description),
+      banner:
+          banner == null && nullToAbsent ? const Value.absent() : Value(banner),
+      added:
+          added == null && nullToAbsent ? const Value.absent() : Value(added),
+      isVerified: Value(isVerified),
+    );
+  }
+
+  factory StickerAlbum.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StickerAlbum(
+      albumId: serializer.fromJson<String>(json['album_id']),
+      name: serializer.fromJson<String>(json['name']),
+      iconUrl: serializer.fromJson<String>(json['icon_url']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      updateAt: serializer.fromJson<DateTime>(json['update_at']),
+      orderedAt: serializer.fromJson<int>(json['ordered_at']),
+      userId: serializer.fromJson<String>(json['user_id']),
+      category: serializer.fromJson<String>(json['category']),
+      description: serializer.fromJson<String>(json['description']),
+      banner: serializer.fromJson<String?>(json['banner']),
+      added: serializer.fromJson<bool?>(json['added']),
+      isVerified: serializer.fromJson<bool>(json['is_verified']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'album_id': serializer.toJson<String>(albumId),
+      'name': serializer.toJson<String>(name),
+      'icon_url': serializer.toJson<String>(iconUrl),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'update_at': serializer.toJson<DateTime>(updateAt),
+      'ordered_at': serializer.toJson<int>(orderedAt),
+      'user_id': serializer.toJson<String>(userId),
+      'category': serializer.toJson<String>(category),
+      'description': serializer.toJson<String>(description),
+      'banner': serializer.toJson<String?>(banner),
+      'added': serializer.toJson<bool?>(added),
+      'is_verified': serializer.toJson<bool>(isVerified),
+    };
+  }
+
+  StickerAlbum copyWith(
+          {String? albumId,
+          String? name,
+          String? iconUrl,
+          DateTime? createdAt,
+          DateTime? updateAt,
+          int? orderedAt,
+          String? userId,
+          String? category,
+          String? description,
+          Value<String?> banner = const Value.absent(),
+          Value<bool?> added = const Value.absent(),
+          bool? isVerified}) =>
+      StickerAlbum(
+        albumId: albumId ?? this.albumId,
+        name: name ?? this.name,
+        iconUrl: iconUrl ?? this.iconUrl,
+        createdAt: createdAt ?? this.createdAt,
+        updateAt: updateAt ?? this.updateAt,
+        orderedAt: orderedAt ?? this.orderedAt,
+        userId: userId ?? this.userId,
+        category: category ?? this.category,
+        description: description ?? this.description,
+        banner: banner.present ? banner.value : this.banner,
+        added: added.present ? added.value : this.added,
+        isVerified: isVerified ?? this.isVerified,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('StickerAlbum(')
+          ..write('albumId: $albumId, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updateAt: $updateAt, ')
+          ..write('orderedAt: $orderedAt, ')
+          ..write('userId: $userId, ')
+          ..write('category: $category, ')
+          ..write('description: $description, ')
+          ..write('banner: $banner, ')
+          ..write('added: $added, ')
+          ..write('isVerified: $isVerified')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(albumId, name, iconUrl, createdAt, updateAt,
+      orderedAt, userId, category, description, banner, added, isVerified);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StickerAlbum &&
+          other.albumId == this.albumId &&
+          other.name == this.name &&
+          other.iconUrl == this.iconUrl &&
+          other.createdAt == this.createdAt &&
+          other.updateAt == this.updateAt &&
+          other.orderedAt == this.orderedAt &&
+          other.userId == this.userId &&
+          other.category == this.category &&
+          other.description == this.description &&
+          other.banner == this.banner &&
+          other.added == this.added &&
+          other.isVerified == this.isVerified);
+}
+
+class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
+  final Value<String> albumId;
+  final Value<String> name;
+  final Value<String> iconUrl;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updateAt;
+  final Value<int> orderedAt;
+  final Value<String> userId;
+  final Value<String> category;
+  final Value<String> description;
+  final Value<String?> banner;
+  final Value<bool?> added;
+  final Value<bool> isVerified;
+  final Value<int> rowid;
+  const StickerAlbumsCompanion({
+    this.albumId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.iconUrl = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updateAt = const Value.absent(),
+    this.orderedAt = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.category = const Value.absent(),
+    this.description = const Value.absent(),
+    this.banner = const Value.absent(),
+    this.added = const Value.absent(),
+    this.isVerified = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StickerAlbumsCompanion.insert({
+    required String albumId,
+    required String name,
+    required String iconUrl,
+    required DateTime createdAt,
+    required DateTime updateAt,
+    this.orderedAt = const Value.absent(),
+    required String userId,
+    required String category,
+    required String description,
+    this.banner = const Value.absent(),
+    this.added = const Value.absent(),
+    this.isVerified = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : albumId = Value(albumId),
+        name = Value(name),
+        iconUrl = Value(iconUrl),
+        createdAt = Value(createdAt),
+        updateAt = Value(updateAt),
+        userId = Value(userId),
+        category = Value(category),
+        description = Value(description);
+  static Insertable<StickerAlbum> custom({
+    Expression<String>? albumId,
+    Expression<String>? name,
+    Expression<String>? iconUrl,
+    Expression<int>? createdAt,
+    Expression<int>? updateAt,
+    Expression<int>? orderedAt,
+    Expression<String>? userId,
+    Expression<String>? category,
+    Expression<String>? description,
+    Expression<String>? banner,
+    Expression<bool>? added,
+    Expression<bool>? isVerified,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (albumId != null) 'album_id': albumId,
+      if (name != null) 'name': name,
+      if (iconUrl != null) 'icon_url': iconUrl,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updateAt != null) 'update_at': updateAt,
+      if (orderedAt != null) 'ordered_at': orderedAt,
+      if (userId != null) 'user_id': userId,
+      if (category != null) 'category': category,
+      if (description != null) 'description': description,
+      if (banner != null) 'banner': banner,
+      if (added != null) 'added': added,
+      if (isVerified != null) 'is_verified': isVerified,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StickerAlbumsCompanion copyWith(
+      {Value<String>? albumId,
+      Value<String>? name,
+      Value<String>? iconUrl,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updateAt,
+      Value<int>? orderedAt,
+      Value<String>? userId,
+      Value<String>? category,
+      Value<String>? description,
+      Value<String?>? banner,
+      Value<bool?>? added,
+      Value<bool>? isVerified,
+      Value<int>? rowid}) {
+    return StickerAlbumsCompanion(
+      albumId: albumId ?? this.albumId,
+      name: name ?? this.name,
+      iconUrl: iconUrl ?? this.iconUrl,
+      createdAt: createdAt ?? this.createdAt,
+      updateAt: updateAt ?? this.updateAt,
+      orderedAt: orderedAt ?? this.orderedAt,
+      userId: userId ?? this.userId,
+      category: category ?? this.category,
+      description: description ?? this.description,
+      banner: banner ?? this.banner,
+      added: added ?? this.added,
+      isVerified: isVerified ?? this.isVerified,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (albumId.present) {
+      map['album_id'] = Variable<String>(albumId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (iconUrl.present) {
+      map['icon_url'] = Variable<String>(iconUrl.value);
+    }
+    if (createdAt.present) {
+      final converter = StickerAlbums.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (updateAt.present) {
+      final converter = StickerAlbums.$converterupdateAt;
+      map['update_at'] = Variable<int>(converter.toSql(updateAt.value));
+    }
+    if (orderedAt.present) {
+      map['ordered_at'] = Variable<int>(orderedAt.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (banner.present) {
+      map['banner'] = Variable<String>(banner.value);
+    }
+    if (added.present) {
+      map['added'] = Variable<bool>(added.value);
+    }
+    if (isVerified.present) {
+      map['is_verified'] = Variable<bool>(isVerified.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StickerAlbumsCompanion(')
+          ..write('albumId: $albumId, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updateAt: $updateAt, ')
+          ..write('orderedAt: $orderedAt, ')
+          ..write('userId: $userId, ')
+          ..write('category: $category, ')
+          ..write('description: $description, ')
+          ..write('banner: $banner, ')
+          ..write('added: $added, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class StickerRelationships extends Table
+    with TableInfo<StickerRelationships, StickerRelationship> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  StickerRelationships(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _albumIdMeta =
+      const VerificationMeta('albumId');
+  late final GeneratedColumn<String> albumId = GeneratedColumn<String>(
+      'album_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _stickerIdMeta =
+      const VerificationMeta('stickerId');
+  late final GeneratedColumn<String> stickerId = GeneratedColumn<String>(
+      'sticker_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  @override
+  List<GeneratedColumn> get $columns => [albumId, stickerId];
+  @override
+  String get aliasedName => _alias ?? 'sticker_relationships';
+  @override
+  String get actualTableName => 'sticker_relationships';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<StickerRelationship> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('album_id')) {
+      context.handle(_albumIdMeta,
+          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
+    } else if (isInserting) {
+      context.missing(_albumIdMeta);
+    }
+    if (data.containsKey('sticker_id')) {
+      context.handle(_stickerIdMeta,
+          stickerId.isAcceptableOrUnknown(data['sticker_id']!, _stickerIdMeta));
+    } else if (isInserting) {
+      context.missing(_stickerIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {albumId, stickerId};
+  @override
+  StickerRelationship map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StickerRelationship(
+      albumId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}album_id'])!,
+      stickerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sticker_id'])!,
+    );
+  }
+
+  @override
+  StickerRelationships createAlias(String alias) {
+    return StickerRelationships(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints =>
+      const ['PRIMARY KEY(album_id, sticker_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class StickerRelationship extends DataClass
+    implements Insertable<StickerRelationship> {
+  final String albumId;
+  final String stickerId;
+  const StickerRelationship({required this.albumId, required this.stickerId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['album_id'] = Variable<String>(albumId);
+    map['sticker_id'] = Variable<String>(stickerId);
+    return map;
+  }
+
+  StickerRelationshipsCompanion toCompanion(bool nullToAbsent) {
+    return StickerRelationshipsCompanion(
+      albumId: Value(albumId),
+      stickerId: Value(stickerId),
+    );
+  }
+
+  factory StickerRelationship.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StickerRelationship(
+      albumId: serializer.fromJson<String>(json['album_id']),
+      stickerId: serializer.fromJson<String>(json['sticker_id']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'album_id': serializer.toJson<String>(albumId),
+      'sticker_id': serializer.toJson<String>(stickerId),
+    };
+  }
+
+  StickerRelationship copyWith({String? albumId, String? stickerId}) =>
+      StickerRelationship(
+        albumId: albumId ?? this.albumId,
+        stickerId: stickerId ?? this.stickerId,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('StickerRelationship(')
+          ..write('albumId: $albumId, ')
+          ..write('stickerId: $stickerId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(albumId, stickerId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StickerRelationship &&
+          other.albumId == this.albumId &&
+          other.stickerId == this.stickerId);
+}
+
+class StickerRelationshipsCompanion
+    extends UpdateCompanion<StickerRelationship> {
+  final Value<String> albumId;
+  final Value<String> stickerId;
+  final Value<int> rowid;
+  const StickerRelationshipsCompanion({
+    this.albumId = const Value.absent(),
+    this.stickerId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StickerRelationshipsCompanion.insert({
+    required String albumId,
+    required String stickerId,
+    this.rowid = const Value.absent(),
+  })  : albumId = Value(albumId),
+        stickerId = Value(stickerId);
+  static Insertable<StickerRelationship> custom({
+    Expression<String>? albumId,
+    Expression<String>? stickerId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (albumId != null) 'album_id': albumId,
+      if (stickerId != null) 'sticker_id': stickerId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StickerRelationshipsCompanion copyWith(
+      {Value<String>? albumId, Value<String>? stickerId, Value<int>? rowid}) {
+    return StickerRelationshipsCompanion(
+      albumId: albumId ?? this.albumId,
+      stickerId: stickerId ?? this.stickerId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (albumId.present) {
+      map['album_id'] = Variable<String>(albumId.value);
+    }
+    if (stickerId.present) {
+      map['sticker_id'] = Variable<String>(stickerId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StickerRelationshipsCompanion(')
+          ..write('albumId: $albumId, ')
+          ..write('stickerId: $stickerId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class ParticipantSession extends Table
     with TableInfo<ParticipantSession, ParticipantSessionData> {
   @override
@@ -13119,9 +13119,6 @@ class PropertiesCompanion extends UpdateCompanion<Propertie> {
 
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(e);
-  late final StickerRelationships stickerRelationships =
-      StickerRelationships(this);
-  late final StickerAlbums stickerAlbums = StickerAlbums(this);
   late final PinMessages pinMessages = PinMessages(this);
   late final Conversations conversations = Conversations(this);
   late final Messages messages = Messages(this);
@@ -13138,6 +13135,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final CircleConversations circleConversations =
       CircleConversations(this);
   late final Participants participants = Participants(this);
+  late final StickerAlbums stickerAlbums = StickerAlbums(this);
+  late final StickerRelationships stickerRelationships =
+      StickerRelationships(this);
   late final ParticipantSession participantSession = ParticipantSession(this);
   late final ResendSessionMessages resendSessionMessages =
       ResendSessionMessages(this);
@@ -13233,30 +13233,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final PropertyDao propertyDao = PropertyDao(this as MixinDatabase);
   late final TranscriptMessageDao transcriptMessageDao =
       TranscriptMessageDao(this as MixinDatabase);
-  Selectable<String> stickerSystemAlbumId(String stickerId) {
-    return customSelect(
-        'SELECT sa.album_id FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
-        variables: [
-          Variable<String>(stickerId)
-        ],
-        readsFrom: {
-          stickerAlbums,
-          stickerRelationships,
-        }).map((QueryRow row) => row.read<String>('album_id'));
-  }
-
-  Selectable<StickerAlbum> stickerSystemAlbum(String stickerId) {
-    return customSelect(
-        'SELECT sa.* FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
-        variables: [
-          Variable<String>(stickerId)
-        ],
-        readsFrom: {
-          stickerRelationships,
-          stickerAlbums,
-        }).asyncMap(stickerAlbums.mapFromRow);
-  }
-
   Selectable<MessageItem> basePinMessageItems(String conversationId,
       BasePinMessageItems$order order, BasePinMessageItems$limit limit) {
     var $arrayStartIndex = 2;
@@ -14416,8 +14392,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        stickerRelationships,
-        stickerAlbums,
         pinMessages,
         conversations,
         messages,
@@ -14433,6 +14407,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         circles,
         circleConversations,
         participants,
+        stickerAlbums,
+        stickerRelationships,
         participantSession,
         resendSessionMessages,
         addresses,
