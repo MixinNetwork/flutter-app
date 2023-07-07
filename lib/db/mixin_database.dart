@@ -56,8 +56,6 @@ part 'mixin_database.g.dart';
     'moor/dao/common.drift',
     'moor/dao/message.drift',
     'moor/dao/participant.drift',
-    'moor/dao/sticker.drift',
-    'moor/dao/sticker_album.drift',
     'moor/dao/user.drift',
   },
   daos: [

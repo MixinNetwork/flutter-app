@@ -212,7 +212,7 @@ class DeviceTransferSender {
       final db = database.mixinDatabase;
       final count = await db.countMediaMessages().getSingle() +
           await db.countMessages().getSingle() +
-          await db.countStickers().getSingle() +
+          await db.stickerDao.countStickers().getSingle() +
           await db.assetDao.countAssets().getSingle() +
           await db.snapshotDao.countSnapshots().getSingle() +
           await db.countUsers().getSingle() +
