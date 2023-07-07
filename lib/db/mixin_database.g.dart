@@ -3,238 +3,6 @@
 part of 'mixin_database.dart';
 
 // ignore_for_file: type=lint
-class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  FloodMessages(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _messageIdMeta =
-      const VerificationMeta('messageId');
-  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
-      'message_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _dataMeta = const VerificationMeta('data');
-  late final GeneratedColumn<String> data = GeneratedColumn<String>(
-      'data', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(FloodMessages.$convertercreatedAt);
-  @override
-  List<GeneratedColumn> get $columns => [messageId, data, createdAt];
-  @override
-  String get aliasedName => _alias ?? 'flood_messages';
-  @override
-  String get actualTableName => 'flood_messages';
-  @override
-  VerificationContext validateIntegrity(Insertable<FloodMessage> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('message_id')) {
-      context.handle(_messageIdMeta,
-          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
-    }
-    if (data.containsKey('data')) {
-      context.handle(
-          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
-    } else if (isInserting) {
-      context.missing(_dataMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {messageId};
-  @override
-  FloodMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return FloodMessage(
-      messageId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
-      data: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
-      createdAt: FloodMessages.$convertercreatedAt.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-    );
-  }
-
-  @override
-  FloodMessages createAlias(String alias) {
-    return FloodMessages(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class FloodMessage extends DataClass implements Insertable<FloodMessage> {
-  final String messageId;
-  final String data;
-  final DateTime createdAt;
-  const FloodMessage(
-      {required this.messageId, required this.data, required this.createdAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['message_id'] = Variable<String>(messageId);
-    map['data'] = Variable<String>(data);
-    {
-      final converter = FloodMessages.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    return map;
-  }
-
-  FloodMessagesCompanion toCompanion(bool nullToAbsent) {
-    return FloodMessagesCompanion(
-      messageId: Value(messageId),
-      data: Value(data),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory FloodMessage.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return FloodMessage(
-      messageId: serializer.fromJson<String>(json['message_id']),
-      data: serializer.fromJson<String>(json['data']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'message_id': serializer.toJson<String>(messageId),
-      'data': serializer.toJson<String>(data),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-    };
-  }
-
-  FloodMessage copyWith(
-          {String? messageId, String? data, DateTime? createdAt}) =>
-      FloodMessage(
-        messageId: messageId ?? this.messageId,
-        data: data ?? this.data,
-        createdAt: createdAt ?? this.createdAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('FloodMessage(')
-          ..write('messageId: $messageId, ')
-          ..write('data: $data, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(messageId, data, createdAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is FloodMessage &&
-          other.messageId == this.messageId &&
-          other.data == this.data &&
-          other.createdAt == this.createdAt);
-}
-
-class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
-  final Value<String> messageId;
-  final Value<String> data;
-  final Value<DateTime> createdAt;
-  final Value<int> rowid;
-  const FloodMessagesCompanion({
-    this.messageId = const Value.absent(),
-    this.data = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  FloodMessagesCompanion.insert({
-    required String messageId,
-    required String data,
-    required DateTime createdAt,
-    this.rowid = const Value.absent(),
-  })  : messageId = Value(messageId),
-        data = Value(data),
-        createdAt = Value(createdAt);
-  static Insertable<FloodMessage> custom({
-    Expression<String>? messageId,
-    Expression<String>? data,
-    Expression<int>? createdAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (messageId != null) 'message_id': messageId,
-      if (data != null) 'data': data,
-      if (createdAt != null) 'created_at': createdAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  FloodMessagesCompanion copyWith(
-      {Value<String>? messageId,
-      Value<String>? data,
-      Value<DateTime>? createdAt,
-      Value<int>? rowid}) {
-    return FloodMessagesCompanion(
-      messageId: messageId ?? this.messageId,
-      data: data ?? this.data,
-      createdAt: createdAt ?? this.createdAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (messageId.present) {
-      map['message_id'] = Variable<String>(messageId.value);
-    }
-    if (data.present) {
-      map['data'] = Variable<String>(data.value);
-    }
-    if (createdAt.present) {
-      final converter = FloodMessages.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('FloodMessagesCompanion(')
-          ..write('messageId: $messageId, ')
-          ..write('data: $data, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class Circles extends Table with TableInfo<Circles, Circle> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -9998,6 +9766,238 @@ class AppsCompanion extends UpdateCompanion<App> {
   }
 }
 
+class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  FloodMessages(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _messageIdMeta =
+      const VerificationMeta('messageId');
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
+      'message_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+      'data', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(FloodMessages.$convertercreatedAt);
+  @override
+  List<GeneratedColumn> get $columns => [messageId, data, createdAt];
+  @override
+  String get aliasedName => _alias ?? 'flood_messages';
+  @override
+  String get actualTableName => 'flood_messages';
+  @override
+  VerificationContext validateIntegrity(Insertable<FloodMessage> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId};
+  @override
+  FloodMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FloodMessage(
+      messageId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+      data: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+      createdAt: FloodMessages.$convertercreatedAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+    );
+  }
+
+  @override
+  FloodMessages createAlias(String alias) {
+    return FloodMessages(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class FloodMessage extends DataClass implements Insertable<FloodMessage> {
+  final String messageId;
+  final String data;
+  final DateTime createdAt;
+  const FloodMessage(
+      {required this.messageId, required this.data, required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['message_id'] = Variable<String>(messageId);
+    map['data'] = Variable<String>(data);
+    {
+      final converter = FloodMessages.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    return map;
+  }
+
+  FloodMessagesCompanion toCompanion(bool nullToAbsent) {
+    return FloodMessagesCompanion(
+      messageId: Value(messageId),
+      data: Value(data),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FloodMessage.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FloodMessage(
+      messageId: serializer.fromJson<String>(json['message_id']),
+      data: serializer.fromJson<String>(json['data']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'message_id': serializer.toJson<String>(messageId),
+      'data': serializer.toJson<String>(data),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  FloodMessage copyWith(
+          {String? messageId, String? data, DateTime? createdAt}) =>
+      FloodMessage(
+        messageId: messageId ?? this.messageId,
+        data: data ?? this.data,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('FloodMessage(')
+          ..write('messageId: $messageId, ')
+          ..write('data: $data, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(messageId, data, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FloodMessage &&
+          other.messageId == this.messageId &&
+          other.data == this.data &&
+          other.createdAt == this.createdAt);
+}
+
+class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
+  final Value<String> messageId;
+  final Value<String> data;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const FloodMessagesCompanion({
+    this.messageId = const Value.absent(),
+    this.data = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FloodMessagesCompanion.insert({
+    required String messageId,
+    required String data,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  })  : messageId = Value(messageId),
+        data = Value(data),
+        createdAt = Value(createdAt);
+  static Insertable<FloodMessage> custom({
+    Expression<String>? messageId,
+    Expression<String>? data,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (data != null) 'data': data,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FloodMessagesCompanion copyWith(
+      {Value<String>? messageId,
+      Value<String>? data,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return FloodMessagesCompanion(
+      messageId: messageId ?? this.messageId,
+      data: data ?? this.data,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
+    }
+    if (createdAt.present) {
+      final converter = FloodMessages.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FloodMessagesCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('data: $data, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class Jobs extends Table with TableInfo<Jobs, Job> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -13119,7 +13119,6 @@ class PropertiesCompanion extends UpdateCompanion<Propertie> {
 
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(e);
-  late final FloodMessages floodMessages = FloodMessages(this);
   late final Circles circles = Circles(this);
   late final CircleConversations circleConversations =
       CircleConversations(this);
@@ -13143,6 +13142,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       ResendSessionMessages(this);
   late final Addresses addresses = Addresses(this);
   late final Apps apps = Apps(this);
+  late final FloodMessages floodMessages = FloodMessages(this);
   late final Jobs jobs = Jobs(this);
   late final MessagesHistory messagesHistory = MessagesHistory(this);
   late final Offsets offsets = Offsets(this);
@@ -13233,16 +13233,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final PropertyDao propertyDao = PropertyDao(this as MixinDatabase);
   late final TranscriptMessageDao transcriptMessageDao =
       TranscriptMessageDao(this as MixinDatabase);
-  Selectable<DateTime> getLastBlazeMessageCreatedAt() {
-    return customSelect(
-        'SELECT created_at FROM flood_messages ORDER BY created_at DESC LIMIT 1',
-        variables: [],
-        readsFrom: {
-          floodMessages,
-        }).map((QueryRow row) =>
-        FloodMessages.$convertercreatedAt.fromSql(row.read<int>('created_at')));
-  }
-
   Selectable<ConversationCircleItem> allCircles() {
     return customSelect(
         'SELECT ci.circle_id, ci.name, ci.created_at, ci.ordered_at, COUNT(c.conversation_id) AS count, IFNULL(SUM(CASE WHEN IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END), 0) AS unseen_conversation_count, IFNULL(SUM(CASE WHEN(CASE WHEN c.category = \'GROUP\' THEN c.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END), 0) AS unseen_muted_conversation_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id LEFT JOIN users AS owner ON owner.user_id = c.owner_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
@@ -14352,7 +14342,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        floodMessages,
         circles,
         circleConversations,
         conversations,
@@ -14373,6 +14362,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         resendSessionMessages,
         addresses,
         apps,
+        floodMessages,
         jobs,
         messagesHistory,
         offsets,
