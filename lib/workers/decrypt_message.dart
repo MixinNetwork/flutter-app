@@ -101,7 +101,7 @@ class DecryptMessage extends Injector {
       return true;
     }
     final messageHistory =
-        await database.messagesHistoryDao.findMessageHistoryById(messageId);
+        await database.messageHistoryDao.findMessageHistoryById(messageId);
     return messageHistory != null;
   }
 
@@ -146,7 +146,7 @@ class DecryptMessage extends Injector {
         d('DecryptMessage isSignal');
         if (data.category == MessageCategory.signalKey) {
           _remoteStatus = MessageStatus.read;
-          await database.messagesHistoryDao
+          await database.messageHistoryDao
               .insert(MessagesHistoryData(messageId: data.messageId));
         }
         await _processSignalMessage(data);
@@ -212,7 +212,7 @@ class DecryptMessage extends Injector {
           if (composeMessageData.resendMessageId != null) {
             await _processReDecryptMessage(
                 data, composeMessageData.resendMessageId!, plain);
-            await database.messagesHistoryDao
+            await database.messageHistoryDao
                 .insert(MessagesHistoryData(messageId: data.messageId));
           } else {
             try {
@@ -280,7 +280,7 @@ class DecryptMessage extends Injector {
         i('on device transfer command: $command');
         _deviceTransfer?.handleRemoteCommand(command);
       }
-      await database.messagesHistoryDao
+      await database.messageHistoryDao
           .insert(MessagesHistoryData(messageId: data.messageId));
     } else if (data.category == MessageCategory.plainText ||
         data.category == MessageCategory.plainImage ||
@@ -479,7 +479,7 @@ class DecryptMessage extends Injector {
       await database.pinMessageDao.deleteByIds(pinMessage.messageIds);
     }
 
-    await database.messagesHistoryDao
+    await database.messageHistoryDao
         .insert(MessagesHistoryData(messageId: data.messageId));
   }
 
@@ -526,7 +526,7 @@ class DecryptMessage extends Injector {
         messageId: recallMessage.messageId,
         conversationId: data.conversationId,
       )),
-      database.messagesHistoryDao
+      database.messageHistoryDao
           .insert(MessagesHistoryData(messageId: data.messageId)),
     ]);
   }

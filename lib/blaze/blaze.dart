@@ -261,7 +261,7 @@ class Blaze {
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
         if (!(await makeMessageStatus(m.messageId, m.status))) {
-          final messagesHistory = await database.messagesHistoryDao
+          final messagesHistory = await database.messageHistoryDao
               .findMessageHistoryById(m.messageId);
           if (messagesHistory != null) return;
 

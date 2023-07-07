@@ -13231,6 +13231,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       ExpiredMessageDao(this as MixinDatabase);
   late final ChainDao chainDao = ChainDao(this as MixinDatabase);
   late final PropertyDao propertyDao = PropertyDao(this as MixinDatabase);
+  late final TranscriptMessageDao transcriptMessageDao =
+      TranscriptMessageDao(this as MixinDatabase);
   Future<int> deleteFavoriteAppByAppIdAndUserId(String appId, String userId) {
     return customUpdate(
       'DELETE FROM favorite_apps WHERE app_id = ?1 AND user_id = ?2',

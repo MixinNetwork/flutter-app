@@ -331,34 +331,42 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     required int mediaSize,
     required MediaStatus mediaStatus,
     String? content,
-  }) =>
-      _sendInsertOrReplaceEventWithFuture(
-        [messageId],
-        db.transaction(() async {
-          await Future.wait([
-            (db.update(db.messages)
-                  ..where((tbl) => tbl.messageId.equals(messageId)))
-                .write(MessagesCompanion(
-              mediaUrl: Value(path.pathBasename),
-              mediaSize: Value(mediaSize),
-              mediaStatus: Value(mediaStatus),
-            )),
-            (db.update(db.transcriptMessages)
-                  ..where((tbl) => tbl.messageId.equals(messageId)))
-                .write(TranscriptMessagesCompanion(
-              mediaUrl: Value(path.pathBasename),
-              mediaSize: Value(mediaSize),
-              mediaStatus: Value(mediaStatus),
-              content: content != null ? Value(content) : const Value.absent(),
-            )),
-          ]);
-        }),
-      );
+  }) async {
+    final [
+      messageResult,
+      transcriptMessageResult
+    ] = await db.transaction(() => Future.wait([
+          (db.update(db.messages)
+                ..where((tbl) => tbl.messageId.equals(messageId)))
+              .write(MessagesCompanion(
+            mediaUrl: Value(path.pathBasename),
+            mediaSize: Value(mediaSize),
+            mediaStatus: Value(mediaStatus),
+          )),
+          (db.update(db.transcriptMessages)
+                ..where((tbl) => tbl.messageId.equals(messageId)))
+              .write(TranscriptMessagesCompanion(
+            mediaUrl: Value(path.pathBasename),
+            mediaSize: Value(mediaSize),
+            mediaStatus: Value(mediaStatus),
+            content: content != null ? Value(content) : const Value.absent(),
+          )),
+        ]));
+
+    await _notifyEventByMessageId(
+      messageId,
+      notifyMessageEvent: messageResult > 0,
+      notifyTranscriptMessageEvent: transcriptMessageResult > 0,
+    );
+  }
 
   Future<void> updateMediaStatus(String messageId, MediaStatus status) async {
     if (!await hasMediaStatus(messageId, status, true)) return;
 
-    final result = await db.transaction<List>(() => Future.wait([
+    final [
+      messageResult,
+      transcriptMessageResult
+    ] = await db.transaction(() => Future.wait([
           (db.update(db.messages)
                 ..where((tbl) => tbl.messageId.equals(messageId)))
               .write(MessagesCompanion(mediaStatus: Value(status))),
@@ -366,7 +374,20 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                 ..where((tbl) => tbl.messageId.equals(messageId)))
               .write(TranscriptMessagesCompanion(mediaStatus: Value(status))),
         ]));
-    if (result.cast<int>().any((element) => element > -1)) {
+
+    await _notifyEventByMessageId(
+      messageId,
+      notifyMessageEvent: messageResult > 0,
+      notifyTranscriptMessageEvent: transcriptMessageResult > 0,
+    );
+  }
+
+  Future<void> _notifyEventByMessageId(String messageId,
+      {required bool notifyMessageEvent,
+      required bool notifyTranscriptMessageEvent}) async {
+    if (!notifyMessageEvent && !notifyTranscriptMessageEvent) return;
+
+    Future<void> notifyEventForMessage() async {
       final conversationId = await findConversationIdByMessageId(messageId);
       if (conversationId == null) return;
       DataBaseEventBus.instance.insertOrReplaceMessages([
@@ -376,6 +397,33 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         )
       ]);
     }
+
+    Future<void> notifyEventForTranscriptMessage() async {
+      final list = await db.transcriptMessageDao
+          .transcriptMessageByMessageId(messageId, maxLimit)
+          .get();
+      if (list.isEmpty) return;
+
+      final miniTranscriptMessages = list.map((e) => MiniTranscriptMessage(
+            transcriptId: e.transcriptId,
+            messageId: e.messageId,
+          ));
+      if (miniTranscriptMessages.isNotEmpty) {
+        DataBaseEventBus.instance
+            .updateTranscriptMessage(miniTranscriptMessages);
+      }
+
+      final miniMessages =
+          await miniMessageByIds(list.map((e) => e.transcriptId).toList())
+              .get();
+      if (miniMessages.isEmpty) return;
+      DataBaseEventBus.instance.insertOrReplaceMessages(miniMessages);
+    }
+
+    await Future.wait([
+      if (notifyMessageEvent) notifyEventForMessage(),
+      if (notifyTranscriptMessageEvent) notifyEventForTranscriptMessage(),
+    ]);
   }
 
   Future<bool> messageHasMediaStatus(String messageId, MediaStatus mediaStatus,
