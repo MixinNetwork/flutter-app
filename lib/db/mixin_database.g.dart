@@ -3,11 +3,11 @@
 part of 'mixin_database.dart';
 
 // ignore_for_file: type=lint
-class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
+class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  PinMessages(this.attachedDatabase, [this._alias]);
+  FloodMessages(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _messageIdMeta =
       const VerificationMeta('messageId');
   late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
@@ -15,10 +15,9 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
       type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  static const VerificationMeta _conversationIdMeta =
-      const VerificationMeta('conversationId');
-  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
-      'conversation_id', aliasedName, false,
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+      'data', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
@@ -29,15 +28,15 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
               type: DriftSqlType.int,
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(PinMessages.$convertercreatedAt);
+          .withConverter<DateTime>(FloodMessages.$convertercreatedAt);
   @override
-  List<GeneratedColumn> get $columns => [messageId, conversationId, createdAt];
+  List<GeneratedColumn> get $columns => [messageId, data, createdAt];
   @override
-  String get aliasedName => _alias ?? 'pin_messages';
+  String get aliasedName => _alias ?? 'flood_messages';
   @override
-  String get actualTableName => 'pin_messages';
+  String get actualTableName => 'flood_messages';
   @override
-  VerificationContext validateIntegrity(Insertable<PinMessage> instance,
+  VerificationContext validateIntegrity(Insertable<FloodMessage> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -47,13 +46,11 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
     } else if (isInserting) {
       context.missing(_messageIdMeta);
     }
-    if (data.containsKey('conversation_id')) {
+    if (data.containsKey('data')) {
       context.handle(
-          _conversationIdMeta,
-          conversationId.isAcceptableOrUnknown(
-              data['conversation_id']!, _conversationIdMeta));
+          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
     } else if (isInserting) {
-      context.missing(_conversationIdMeta);
+      context.missing(_dataMeta);
     }
     context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
@@ -62,22 +59,22 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
   @override
   Set<GeneratedColumn> get $primaryKey => {messageId};
   @override
-  PinMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+  FloodMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return PinMessage(
+    return FloodMessage(
       messageId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
-      conversationId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
-      createdAt: PinMessages.$convertercreatedAt.fromSql(attachedDatabase
+      data: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+      createdAt: FloodMessages.$convertercreatedAt.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
     );
   }
 
   @override
-  PinMessages createAlias(String alias) {
-    return PinMessages(attachedDatabase, alias);
+  FloodMessages createAlias(String alias) {
+    return FloodMessages(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $convertercreatedAt =
@@ -88,40 +85,38 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
   bool get dontWriteConstraints => true;
 }
 
-class PinMessage extends DataClass implements Insertable<PinMessage> {
+class FloodMessage extends DataClass implements Insertable<FloodMessage> {
   final String messageId;
-  final String conversationId;
+  final String data;
   final DateTime createdAt;
-  const PinMessage(
-      {required this.messageId,
-      required this.conversationId,
-      required this.createdAt});
+  const FloodMessage(
+      {required this.messageId, required this.data, required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['message_id'] = Variable<String>(messageId);
-    map['conversation_id'] = Variable<String>(conversationId);
+    map['data'] = Variable<String>(data);
     {
-      final converter = PinMessages.$convertercreatedAt;
+      final converter = FloodMessages.$convertercreatedAt;
       map['created_at'] = Variable<int>(converter.toSql(createdAt));
     }
     return map;
   }
 
-  PinMessagesCompanion toCompanion(bool nullToAbsent) {
-    return PinMessagesCompanion(
+  FloodMessagesCompanion toCompanion(bool nullToAbsent) {
+    return FloodMessagesCompanion(
       messageId: Value(messageId),
-      conversationId: Value(conversationId),
+      data: Value(data),
       createdAt: Value(createdAt),
     );
   }
 
-  factory PinMessage.fromJson(Map<String, dynamic> json,
+  factory FloodMessage.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return PinMessage(
+    return FloodMessage(
       messageId: serializer.fromJson<String>(json['message_id']),
-      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      data: serializer.fromJson<String>(json['data']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
     );
   }
@@ -130,80 +125,80 @@ class PinMessage extends DataClass implements Insertable<PinMessage> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'message_id': serializer.toJson<String>(messageId),
-      'conversation_id': serializer.toJson<String>(conversationId),
+      'data': serializer.toJson<String>(data),
       'created_at': serializer.toJson<DateTime>(createdAt),
     };
   }
 
-  PinMessage copyWith(
-          {String? messageId, String? conversationId, DateTime? createdAt}) =>
-      PinMessage(
+  FloodMessage copyWith(
+          {String? messageId, String? data, DateTime? createdAt}) =>
+      FloodMessage(
         messageId: messageId ?? this.messageId,
-        conversationId: conversationId ?? this.conversationId,
+        data: data ?? this.data,
         createdAt: createdAt ?? this.createdAt,
       );
   @override
   String toString() {
-    return (StringBuffer('PinMessage(')
+    return (StringBuffer('FloodMessage(')
           ..write('messageId: $messageId, ')
-          ..write('conversationId: $conversationId, ')
+          ..write('data: $data, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(messageId, conversationId, createdAt);
+  int get hashCode => Object.hash(messageId, data, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is PinMessage &&
+      (other is FloodMessage &&
           other.messageId == this.messageId &&
-          other.conversationId == this.conversationId &&
+          other.data == this.data &&
           other.createdAt == this.createdAt);
 }
 
-class PinMessagesCompanion extends UpdateCompanion<PinMessage> {
+class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
   final Value<String> messageId;
-  final Value<String> conversationId;
+  final Value<String> data;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
-  const PinMessagesCompanion({
+  const FloodMessagesCompanion({
     this.messageId = const Value.absent(),
-    this.conversationId = const Value.absent(),
+    this.data = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  PinMessagesCompanion.insert({
+  FloodMessagesCompanion.insert({
     required String messageId,
-    required String conversationId,
+    required String data,
     required DateTime createdAt,
     this.rowid = const Value.absent(),
   })  : messageId = Value(messageId),
-        conversationId = Value(conversationId),
+        data = Value(data),
         createdAt = Value(createdAt);
-  static Insertable<PinMessage> custom({
+  static Insertable<FloodMessage> custom({
     Expression<String>? messageId,
-    Expression<String>? conversationId,
+    Expression<String>? data,
     Expression<int>? createdAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (messageId != null) 'message_id': messageId,
-      if (conversationId != null) 'conversation_id': conversationId,
+      if (data != null) 'data': data,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  PinMessagesCompanion copyWith(
+  FloodMessagesCompanion copyWith(
       {Value<String>? messageId,
-      Value<String>? conversationId,
+      Value<String>? data,
       Value<DateTime>? createdAt,
       Value<int>? rowid}) {
-    return PinMessagesCompanion(
+    return FloodMessagesCompanion(
       messageId: messageId ?? this.messageId,
-      conversationId: conversationId ?? this.conversationId,
+      data: data ?? this.data,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -215,11 +210,11 @@ class PinMessagesCompanion extends UpdateCompanion<PinMessage> {
     if (messageId.present) {
       map['message_id'] = Variable<String>(messageId.value);
     }
-    if (conversationId.present) {
-      map['conversation_id'] = Variable<String>(conversationId.value);
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
     }
     if (createdAt.present) {
-      final converter = PinMessages.$convertercreatedAt;
+      final converter = FloodMessages.$convertercreatedAt;
       map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
     }
     if (rowid.present) {
@@ -230,10 +225,612 @@ class PinMessagesCompanion extends UpdateCompanion<PinMessage> {
 
   @override
   String toString() {
-    return (StringBuffer('PinMessagesCompanion(')
+    return (StringBuffer('FloodMessagesCompanion(')
           ..write('messageId: $messageId, ')
-          ..write('conversationId: $conversationId, ')
+          ..write('data: $data, ')
           ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Circles extends Table with TableInfo<Circles, Circle> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Circles(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _circleIdMeta =
+      const VerificationMeta('circleId');
+  late final GeneratedColumn<String> circleId = GeneratedColumn<String>(
+      'circle_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Circles.$convertercreatedAt);
+  static const VerificationMeta _orderedAtMeta =
+      const VerificationMeta('orderedAt');
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> orderedAt =
+      GeneratedColumn<int>('ordered_at', aliasedName, true,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime?>(Circles.$converterorderedAtn);
+  @override
+  List<GeneratedColumn> get $columns => [circleId, name, createdAt, orderedAt];
+  @override
+  String get aliasedName => _alias ?? 'circles';
+  @override
+  String get actualTableName => 'circles';
+  @override
+  VerificationContext validateIntegrity(Insertable<Circle> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('circle_id')) {
+      context.handle(_circleIdMeta,
+          circleId.isAcceptableOrUnknown(data['circle_id']!, _circleIdMeta));
+    } else if (isInserting) {
+      context.missing(_circleIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_orderedAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {circleId};
+  @override
+  Circle map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Circle(
+      circleId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}circle_id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      createdAt: Circles.$convertercreatedAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+      orderedAt: Circles.$converterorderedAtn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}ordered_at'])),
+    );
+  }
+
+  @override
+  Circles createAlias(String alias) {
+    return Circles(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converterorderedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $converterorderedAtn =
+      NullAwareTypeConverter.wrap($converterorderedAt);
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(circle_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class Circle extends DataClass implements Insertable<Circle> {
+  final String circleId;
+  final String name;
+  final DateTime createdAt;
+  final DateTime? orderedAt;
+  const Circle(
+      {required this.circleId,
+      required this.name,
+      required this.createdAt,
+      this.orderedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['circle_id'] = Variable<String>(circleId);
+    map['name'] = Variable<String>(name);
+    {
+      final converter = Circles.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    if (!nullToAbsent || orderedAt != null) {
+      final converter = Circles.$converterorderedAtn;
+      map['ordered_at'] = Variable<int>(converter.toSql(orderedAt));
+    }
+    return map;
+  }
+
+  CirclesCompanion toCompanion(bool nullToAbsent) {
+    return CirclesCompanion(
+      circleId: Value(circleId),
+      name: Value(name),
+      createdAt: Value(createdAt),
+      orderedAt: orderedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderedAt),
+    );
+  }
+
+  factory Circle.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Circle(
+      circleId: serializer.fromJson<String>(json['circle_id']),
+      name: serializer.fromJson<String>(json['name']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      orderedAt: serializer.fromJson<DateTime?>(json['ordered_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'circle_id': serializer.toJson<String>(circleId),
+      'name': serializer.toJson<String>(name),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'ordered_at': serializer.toJson<DateTime?>(orderedAt),
+    };
+  }
+
+  Circle copyWith(
+          {String? circleId,
+          String? name,
+          DateTime? createdAt,
+          Value<DateTime?> orderedAt = const Value.absent()}) =>
+      Circle(
+        circleId: circleId ?? this.circleId,
+        name: name ?? this.name,
+        createdAt: createdAt ?? this.createdAt,
+        orderedAt: orderedAt.present ? orderedAt.value : this.orderedAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Circle(')
+          ..write('circleId: $circleId, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('orderedAt: $orderedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(circleId, name, createdAt, orderedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Circle &&
+          other.circleId == this.circleId &&
+          other.name == this.name &&
+          other.createdAt == this.createdAt &&
+          other.orderedAt == this.orderedAt);
+}
+
+class CirclesCompanion extends UpdateCompanion<Circle> {
+  final Value<String> circleId;
+  final Value<String> name;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> orderedAt;
+  final Value<int> rowid;
+  const CirclesCompanion({
+    this.circleId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.orderedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CirclesCompanion.insert({
+    required String circleId,
+    required String name,
+    required DateTime createdAt,
+    this.orderedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : circleId = Value(circleId),
+        name = Value(name),
+        createdAt = Value(createdAt);
+  static Insertable<Circle> custom({
+    Expression<String>? circleId,
+    Expression<String>? name,
+    Expression<int>? createdAt,
+    Expression<int>? orderedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (circleId != null) 'circle_id': circleId,
+      if (name != null) 'name': name,
+      if (createdAt != null) 'created_at': createdAt,
+      if (orderedAt != null) 'ordered_at': orderedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CirclesCompanion copyWith(
+      {Value<String>? circleId,
+      Value<String>? name,
+      Value<DateTime>? createdAt,
+      Value<DateTime?>? orderedAt,
+      Value<int>? rowid}) {
+    return CirclesCompanion(
+      circleId: circleId ?? this.circleId,
+      name: name ?? this.name,
+      createdAt: createdAt ?? this.createdAt,
+      orderedAt: orderedAt ?? this.orderedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (circleId.present) {
+      map['circle_id'] = Variable<String>(circleId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (createdAt.present) {
+      final converter = Circles.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (orderedAt.present) {
+      final converter = Circles.$converterorderedAtn;
+      map['ordered_at'] = Variable<int>(converter.toSql(orderedAt.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CirclesCompanion(')
+          ..write('circleId: $circleId, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('orderedAt: $orderedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class CircleConversations extends Table
+    with TableInfo<CircleConversations, CircleConversation> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  CircleConversations(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+      'conversation_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _circleIdMeta =
+      const VerificationMeta('circleId');
+  late final GeneratedColumn<String> circleId = GeneratedColumn<String>(
+      'circle_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(CircleConversations.$convertercreatedAt);
+  static const VerificationMeta _pinTimeMeta =
+      const VerificationMeta('pinTime');
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> pinTime =
+      GeneratedColumn<int>('pin_time', aliasedName, true,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime?>(CircleConversations.$converterpinTimen);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [conversationId, circleId, userId, createdAt, pinTime];
+  @override
+  String get aliasedName => _alias ?? 'circle_conversations';
+  @override
+  String get actualTableName => 'circle_conversations';
+  @override
+  VerificationContext validateIntegrity(Insertable<CircleConversation> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    if (data.containsKey('circle_id')) {
+      context.handle(_circleIdMeta,
+          circleId.isAcceptableOrUnknown(data['circle_id']!, _circleIdMeta));
+    } else if (isInserting) {
+      context.missing(_circleIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_pinTimeMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {conversationId, circleId};
+  @override
+  CircleConversation map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CircleConversation(
+      conversationId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
+      circleId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}circle_id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
+      createdAt: CircleConversations.$convertercreatedAt.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+      pinTime: CircleConversations.$converterpinTimen.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}pin_time'])),
+    );
+  }
+
+  @override
+  CircleConversations createAlias(String alias) {
+    return CircleConversations(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converterpinTime =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $converterpinTimen =
+      NullAwareTypeConverter.wrap($converterpinTime);
+  @override
+  List<String> get customConstraints =>
+      const ['PRIMARY KEY(conversation_id, circle_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class CircleConversation extends DataClass
+    implements Insertable<CircleConversation> {
+  final String conversationId;
+  final String circleId;
+  final String? userId;
+  final DateTime createdAt;
+  final DateTime? pinTime;
+  const CircleConversation(
+      {required this.conversationId,
+      required this.circleId,
+      this.userId,
+      required this.createdAt,
+      this.pinTime});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['conversation_id'] = Variable<String>(conversationId);
+    map['circle_id'] = Variable<String>(circleId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    {
+      final converter = CircleConversations.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    if (!nullToAbsent || pinTime != null) {
+      final converter = CircleConversations.$converterpinTimen;
+      map['pin_time'] = Variable<int>(converter.toSql(pinTime));
+    }
+    return map;
+  }
+
+  CircleConversationsCompanion toCompanion(bool nullToAbsent) {
+    return CircleConversationsCompanion(
+      conversationId: Value(conversationId),
+      circleId: Value(circleId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      createdAt: Value(createdAt),
+      pinTime: pinTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pinTime),
+    );
+  }
+
+  factory CircleConversation.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CircleConversation(
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      circleId: serializer.fromJson<String>(json['circle_id']),
+      userId: serializer.fromJson<String?>(json['user_id']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      pinTime: serializer.fromJson<DateTime?>(json['pin_time']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'conversation_id': serializer.toJson<String>(conversationId),
+      'circle_id': serializer.toJson<String>(circleId),
+      'user_id': serializer.toJson<String?>(userId),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'pin_time': serializer.toJson<DateTime?>(pinTime),
+    };
+  }
+
+  CircleConversation copyWith(
+          {String? conversationId,
+          String? circleId,
+          Value<String?> userId = const Value.absent(),
+          DateTime? createdAt,
+          Value<DateTime?> pinTime = const Value.absent()}) =>
+      CircleConversation(
+        conversationId: conversationId ?? this.conversationId,
+        circleId: circleId ?? this.circleId,
+        userId: userId.present ? userId.value : this.userId,
+        createdAt: createdAt ?? this.createdAt,
+        pinTime: pinTime.present ? pinTime.value : this.pinTime,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('CircleConversation(')
+          ..write('conversationId: $conversationId, ')
+          ..write('circleId: $circleId, ')
+          ..write('userId: $userId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('pinTime: $pinTime')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(conversationId, circleId, userId, createdAt, pinTime);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CircleConversation &&
+          other.conversationId == this.conversationId &&
+          other.circleId == this.circleId &&
+          other.userId == this.userId &&
+          other.createdAt == this.createdAt &&
+          other.pinTime == this.pinTime);
+}
+
+class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
+  final Value<String> conversationId;
+  final Value<String> circleId;
+  final Value<String?> userId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> pinTime;
+  final Value<int> rowid;
+  const CircleConversationsCompanion({
+    this.conversationId = const Value.absent(),
+    this.circleId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.pinTime = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CircleConversationsCompanion.insert({
+    required String conversationId,
+    required String circleId,
+    this.userId = const Value.absent(),
+    required DateTime createdAt,
+    this.pinTime = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : conversationId = Value(conversationId),
+        circleId = Value(circleId),
+        createdAt = Value(createdAt);
+  static Insertable<CircleConversation> custom({
+    Expression<String>? conversationId,
+    Expression<String>? circleId,
+    Expression<String>? userId,
+    Expression<int>? createdAt,
+    Expression<int>? pinTime,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (circleId != null) 'circle_id': circleId,
+      if (userId != null) 'user_id': userId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (pinTime != null) 'pin_time': pinTime,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CircleConversationsCompanion copyWith(
+      {Value<String>? conversationId,
+      Value<String>? circleId,
+      Value<String?>? userId,
+      Value<DateTime>? createdAt,
+      Value<DateTime?>? pinTime,
+      Value<int>? rowid}) {
+    return CircleConversationsCompanion(
+      conversationId: conversationId ?? this.conversationId,
+      circleId: circleId ?? this.circleId,
+      userId: userId ?? this.userId,
+      createdAt: createdAt ?? this.createdAt,
+      pinTime: pinTime ?? this.pinTime,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (circleId.present) {
+      map['circle_id'] = Variable<String>(circleId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (createdAt.present) {
+      final converter = CircleConversations.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (pinTime.present) {
+      final converter = CircleConversations.$converterpinTimen;
+      map['pin_time'] = Variable<int>(converter.toSql(pinTime.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CircleConversationsCompanion(')
+          ..write('conversationId: $conversationId, ')
+          ..write('circleId: $circleId, ')
+          ..write('userId: $userId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('pinTime: $pinTime, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1123,6 +1720,735 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
           ..write('draft: $draft, ')
           ..write('muteUntil: $muteUntil, ')
           ..write('expireIn: $expireIn, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Users extends Table with TableInfo<Users, User> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Users(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _identityNumberMeta =
+      const VerificationMeta('identityNumber');
+  late final GeneratedColumn<String> identityNumber = GeneratedColumn<String>(
+      'identity_number', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _relationshipMeta =
+      const VerificationMeta('relationship');
+  late final GeneratedColumnWithTypeConverter<UserRelationship?, String>
+      relationship = GeneratedColumn<String>('relationship', aliasedName, true,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<UserRelationship?>(Users.$converterrelationship);
+  static const VerificationMeta _fullNameMeta =
+      const VerificationMeta('fullName');
+  late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
+      'full_name', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _avatarUrlMeta =
+      const VerificationMeta('avatarUrl');
+  late final GeneratedColumn<String> avatarUrl = GeneratedColumn<String>(
+      'avatar_url', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
+      'phone', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _isVerifiedMeta =
+      const VerificationMeta('isVerified');
+  late final GeneratedColumn<bool> isVerified = GeneratedColumn<bool>(
+      'is_verified', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, true,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime?>(Users.$convertercreatedAtn);
+  static const VerificationMeta _muteUntilMeta =
+      const VerificationMeta('muteUntil');
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> muteUntil =
+      GeneratedColumn<int>('mute_until', aliasedName, true,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime?>(Users.$convertermuteUntiln);
+  static const VerificationMeta _hasPinMeta = const VerificationMeta('hasPin');
+  late final GeneratedColumn<int> hasPin = GeneratedColumn<int>(
+      'has_pin', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _appIdMeta = const VerificationMeta('appId');
+  late final GeneratedColumn<String> appId = GeneratedColumn<String>(
+      'app_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _biographyMeta =
+      const VerificationMeta('biography');
+  late final GeneratedColumn<String> biography = GeneratedColumn<String>(
+      'biography', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _isScamMeta = const VerificationMeta('isScam');
+  late final GeneratedColumn<int> isScam = GeneratedColumn<int>(
+      'is_scam', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _codeUrlMeta =
+      const VerificationMeta('codeUrl');
+  late final GeneratedColumn<String> codeUrl = GeneratedColumn<String>(
+      'code_url', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _codeIdMeta = const VerificationMeta('codeId');
+  late final GeneratedColumn<String> codeId = GeneratedColumn<String>(
+      'code_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns => [
+        userId,
+        identityNumber,
+        relationship,
+        fullName,
+        avatarUrl,
+        phone,
+        isVerified,
+        createdAt,
+        muteUntil,
+        hasPin,
+        appId,
+        biography,
+        isScam,
+        codeUrl,
+        codeId
+      ];
+  @override
+  String get aliasedName => _alias ?? 'users';
+  @override
+  String get actualTableName => 'users';
+  @override
+  VerificationContext validateIntegrity(Insertable<User> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('identity_number')) {
+      context.handle(
+          _identityNumberMeta,
+          identityNumber.isAcceptableOrUnknown(
+              data['identity_number']!, _identityNumberMeta));
+    } else if (isInserting) {
+      context.missing(_identityNumberMeta);
+    }
+    context.handle(_relationshipMeta, const VerificationResult.success());
+    if (data.containsKey('full_name')) {
+      context.handle(_fullNameMeta,
+          fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
+    }
+    if (data.containsKey('avatar_url')) {
+      context.handle(_avatarUrlMeta,
+          avatarUrl.isAcceptableOrUnknown(data['avatar_url']!, _avatarUrlMeta));
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+          _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
+    }
+    if (data.containsKey('is_verified')) {
+      context.handle(
+          _isVerifiedMeta,
+          isVerified.isAcceptableOrUnknown(
+              data['is_verified']!, _isVerifiedMeta));
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_muteUntilMeta, const VerificationResult.success());
+    if (data.containsKey('has_pin')) {
+      context.handle(_hasPinMeta,
+          hasPin.isAcceptableOrUnknown(data['has_pin']!, _hasPinMeta));
+    }
+    if (data.containsKey('app_id')) {
+      context.handle(
+          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
+    }
+    if (data.containsKey('biography')) {
+      context.handle(_biographyMeta,
+          biography.isAcceptableOrUnknown(data['biography']!, _biographyMeta));
+    }
+    if (data.containsKey('is_scam')) {
+      context.handle(_isScamMeta,
+          isScam.isAcceptableOrUnknown(data['is_scam']!, _isScamMeta));
+    }
+    if (data.containsKey('code_url')) {
+      context.handle(_codeUrlMeta,
+          codeUrl.isAcceptableOrUnknown(data['code_url']!, _codeUrlMeta));
+    }
+    if (data.containsKey('code_id')) {
+      context.handle(_codeIdMeta,
+          codeId.isAcceptableOrUnknown(data['code_id']!, _codeIdMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId};
+  @override
+  User map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return User(
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      identityNumber: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}identity_number'])!,
+      relationship: Users.$converterrelationship.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}relationship'])),
+      fullName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}full_name']),
+      avatarUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}avatar_url']),
+      phone: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}phone']),
+      isVerified: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_verified']),
+      createdAt: Users.$convertercreatedAtn.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])),
+      muteUntil: Users.$convertermuteUntiln.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}mute_until'])),
+      hasPin: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}has_pin']),
+      appId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}app_id']),
+      biography: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}biography']),
+      isScam: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}is_scam']),
+      codeUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}code_url']),
+      codeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}code_id']),
+    );
+  }
+
+  @override
+  Users createAlias(String alias) {
+    return Users(attachedDatabase, alias);
+  }
+
+  static TypeConverter<UserRelationship?, String?> $converterrelationship =
+      const UserRelationshipConverter();
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $convertercreatedAtn =
+      NullAwareTypeConverter.wrap($convertercreatedAt);
+  static TypeConverter<DateTime, int> $convertermuteUntil =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $convertermuteUntiln =
+      NullAwareTypeConverter.wrap($convertermuteUntil);
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(user_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class User extends DataClass implements Insertable<User> {
+  final String userId;
+  final String identityNumber;
+  final UserRelationship? relationship;
+  final String? fullName;
+  final String? avatarUrl;
+  final String? phone;
+  final bool? isVerified;
+  final DateTime? createdAt;
+  final DateTime? muteUntil;
+  final int? hasPin;
+  final String? appId;
+  final String? biography;
+  final int? isScam;
+  final String? codeUrl;
+  final String? codeId;
+  const User(
+      {required this.userId,
+      required this.identityNumber,
+      this.relationship,
+      this.fullName,
+      this.avatarUrl,
+      this.phone,
+      this.isVerified,
+      this.createdAt,
+      this.muteUntil,
+      this.hasPin,
+      this.appId,
+      this.biography,
+      this.isScam,
+      this.codeUrl,
+      this.codeId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['user_id'] = Variable<String>(userId);
+    map['identity_number'] = Variable<String>(identityNumber);
+    if (!nullToAbsent || relationship != null) {
+      final converter = Users.$converterrelationship;
+      map['relationship'] = Variable<String>(converter.toSql(relationship));
+    }
+    if (!nullToAbsent || fullName != null) {
+      map['full_name'] = Variable<String>(fullName);
+    }
+    if (!nullToAbsent || avatarUrl != null) {
+      map['avatar_url'] = Variable<String>(avatarUrl);
+    }
+    if (!nullToAbsent || phone != null) {
+      map['phone'] = Variable<String>(phone);
+    }
+    if (!nullToAbsent || isVerified != null) {
+      map['is_verified'] = Variable<bool>(isVerified);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      final converter = Users.$convertercreatedAtn;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    if (!nullToAbsent || muteUntil != null) {
+      final converter = Users.$convertermuteUntiln;
+      map['mute_until'] = Variable<int>(converter.toSql(muteUntil));
+    }
+    if (!nullToAbsent || hasPin != null) {
+      map['has_pin'] = Variable<int>(hasPin);
+    }
+    if (!nullToAbsent || appId != null) {
+      map['app_id'] = Variable<String>(appId);
+    }
+    if (!nullToAbsent || biography != null) {
+      map['biography'] = Variable<String>(biography);
+    }
+    if (!nullToAbsent || isScam != null) {
+      map['is_scam'] = Variable<int>(isScam);
+    }
+    if (!nullToAbsent || codeUrl != null) {
+      map['code_url'] = Variable<String>(codeUrl);
+    }
+    if (!nullToAbsent || codeId != null) {
+      map['code_id'] = Variable<String>(codeId);
+    }
+    return map;
+  }
+
+  UsersCompanion toCompanion(bool nullToAbsent) {
+    return UsersCompanion(
+      userId: Value(userId),
+      identityNumber: Value(identityNumber),
+      relationship: relationship == null && nullToAbsent
+          ? const Value.absent()
+          : Value(relationship),
+      fullName: fullName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fullName),
+      avatarUrl: avatarUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(avatarUrl),
+      phone:
+          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
+      isVerified: isVerified == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isVerified),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      muteUntil: muteUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muteUntil),
+      hasPin:
+          hasPin == null && nullToAbsent ? const Value.absent() : Value(hasPin),
+      appId:
+          appId == null && nullToAbsent ? const Value.absent() : Value(appId),
+      biography: biography == null && nullToAbsent
+          ? const Value.absent()
+          : Value(biography),
+      isScam:
+          isScam == null && nullToAbsent ? const Value.absent() : Value(isScam),
+      codeUrl: codeUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(codeUrl),
+      codeId:
+          codeId == null && nullToAbsent ? const Value.absent() : Value(codeId),
+    );
+  }
+
+  factory User.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return User(
+      userId: serializer.fromJson<String>(json['user_id']),
+      identityNumber: serializer.fromJson<String>(json['identity_number']),
+      relationship:
+          serializer.fromJson<UserRelationship?>(json['relationship']),
+      fullName: serializer.fromJson<String?>(json['full_name']),
+      avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
+      phone: serializer.fromJson<String?>(json['phone']),
+      isVerified: serializer.fromJson<bool?>(json['is_verified']),
+      createdAt: serializer.fromJson<DateTime?>(json['created_at']),
+      muteUntil: serializer.fromJson<DateTime?>(json['mute_until']),
+      hasPin: serializer.fromJson<int?>(json['has_pin']),
+      appId: serializer.fromJson<String?>(json['app_id']),
+      biography: serializer.fromJson<String?>(json['biography']),
+      isScam: serializer.fromJson<int?>(json['is_scam']),
+      codeUrl: serializer.fromJson<String?>(json['code_url']),
+      codeId: serializer.fromJson<String?>(json['code_id']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'user_id': serializer.toJson<String>(userId),
+      'identity_number': serializer.toJson<String>(identityNumber),
+      'relationship': serializer.toJson<UserRelationship?>(relationship),
+      'full_name': serializer.toJson<String?>(fullName),
+      'avatar_url': serializer.toJson<String?>(avatarUrl),
+      'phone': serializer.toJson<String?>(phone),
+      'is_verified': serializer.toJson<bool?>(isVerified),
+      'created_at': serializer.toJson<DateTime?>(createdAt),
+      'mute_until': serializer.toJson<DateTime?>(muteUntil),
+      'has_pin': serializer.toJson<int?>(hasPin),
+      'app_id': serializer.toJson<String?>(appId),
+      'biography': serializer.toJson<String?>(biography),
+      'is_scam': serializer.toJson<int?>(isScam),
+      'code_url': serializer.toJson<String?>(codeUrl),
+      'code_id': serializer.toJson<String?>(codeId),
+    };
+  }
+
+  User copyWith(
+          {String? userId,
+          String? identityNumber,
+          Value<UserRelationship?> relationship = const Value.absent(),
+          Value<String?> fullName = const Value.absent(),
+          Value<String?> avatarUrl = const Value.absent(),
+          Value<String?> phone = const Value.absent(),
+          Value<bool?> isVerified = const Value.absent(),
+          Value<DateTime?> createdAt = const Value.absent(),
+          Value<DateTime?> muteUntil = const Value.absent(),
+          Value<int?> hasPin = const Value.absent(),
+          Value<String?> appId = const Value.absent(),
+          Value<String?> biography = const Value.absent(),
+          Value<int?> isScam = const Value.absent(),
+          Value<String?> codeUrl = const Value.absent(),
+          Value<String?> codeId = const Value.absent()}) =>
+      User(
+        userId: userId ?? this.userId,
+        identityNumber: identityNumber ?? this.identityNumber,
+        relationship:
+            relationship.present ? relationship.value : this.relationship,
+        fullName: fullName.present ? fullName.value : this.fullName,
+        avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
+        phone: phone.present ? phone.value : this.phone,
+        isVerified: isVerified.present ? isVerified.value : this.isVerified,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
+        hasPin: hasPin.present ? hasPin.value : this.hasPin,
+        appId: appId.present ? appId.value : this.appId,
+        biography: biography.present ? biography.value : this.biography,
+        isScam: isScam.present ? isScam.value : this.isScam,
+        codeUrl: codeUrl.present ? codeUrl.value : this.codeUrl,
+        codeId: codeId.present ? codeId.value : this.codeId,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('User(')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('relationship: $relationship, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('phone: $phone, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('hasPin: $hasPin, ')
+          ..write('appId: $appId, ')
+          ..write('biography: $biography, ')
+          ..write('isScam: $isScam, ')
+          ..write('codeUrl: $codeUrl, ')
+          ..write('codeId: $codeId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      userId,
+      identityNumber,
+      relationship,
+      fullName,
+      avatarUrl,
+      phone,
+      isVerified,
+      createdAt,
+      muteUntil,
+      hasPin,
+      appId,
+      biography,
+      isScam,
+      codeUrl,
+      codeId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is User &&
+          other.userId == this.userId &&
+          other.identityNumber == this.identityNumber &&
+          other.relationship == this.relationship &&
+          other.fullName == this.fullName &&
+          other.avatarUrl == this.avatarUrl &&
+          other.phone == this.phone &&
+          other.isVerified == this.isVerified &&
+          other.createdAt == this.createdAt &&
+          other.muteUntil == this.muteUntil &&
+          other.hasPin == this.hasPin &&
+          other.appId == this.appId &&
+          other.biography == this.biography &&
+          other.isScam == this.isScam &&
+          other.codeUrl == this.codeUrl &&
+          other.codeId == this.codeId);
+}
+
+class UsersCompanion extends UpdateCompanion<User> {
+  final Value<String> userId;
+  final Value<String> identityNumber;
+  final Value<UserRelationship?> relationship;
+  final Value<String?> fullName;
+  final Value<String?> avatarUrl;
+  final Value<String?> phone;
+  final Value<bool?> isVerified;
+  final Value<DateTime?> createdAt;
+  final Value<DateTime?> muteUntil;
+  final Value<int?> hasPin;
+  final Value<String?> appId;
+  final Value<String?> biography;
+  final Value<int?> isScam;
+  final Value<String?> codeUrl;
+  final Value<String?> codeId;
+  final Value<int> rowid;
+  const UsersCompanion({
+    this.userId = const Value.absent(),
+    this.identityNumber = const Value.absent(),
+    this.relationship = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.isVerified = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.muteUntil = const Value.absent(),
+    this.hasPin = const Value.absent(),
+    this.appId = const Value.absent(),
+    this.biography = const Value.absent(),
+    this.isScam = const Value.absent(),
+    this.codeUrl = const Value.absent(),
+    this.codeId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  UsersCompanion.insert({
+    required String userId,
+    required String identityNumber,
+    this.relationship = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.isVerified = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.muteUntil = const Value.absent(),
+    this.hasPin = const Value.absent(),
+    this.appId = const Value.absent(),
+    this.biography = const Value.absent(),
+    this.isScam = const Value.absent(),
+    this.codeUrl = const Value.absent(),
+    this.codeId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : userId = Value(userId),
+        identityNumber = Value(identityNumber);
+  static Insertable<User> custom({
+    Expression<String>? userId,
+    Expression<String>? identityNumber,
+    Expression<String>? relationship,
+    Expression<String>? fullName,
+    Expression<String>? avatarUrl,
+    Expression<String>? phone,
+    Expression<bool>? isVerified,
+    Expression<int>? createdAt,
+    Expression<int>? muteUntil,
+    Expression<int>? hasPin,
+    Expression<String>? appId,
+    Expression<String>? biography,
+    Expression<int>? isScam,
+    Expression<String>? codeUrl,
+    Expression<String>? codeId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (userId != null) 'user_id': userId,
+      if (identityNumber != null) 'identity_number': identityNumber,
+      if (relationship != null) 'relationship': relationship,
+      if (fullName != null) 'full_name': fullName,
+      if (avatarUrl != null) 'avatar_url': avatarUrl,
+      if (phone != null) 'phone': phone,
+      if (isVerified != null) 'is_verified': isVerified,
+      if (createdAt != null) 'created_at': createdAt,
+      if (muteUntil != null) 'mute_until': muteUntil,
+      if (hasPin != null) 'has_pin': hasPin,
+      if (appId != null) 'app_id': appId,
+      if (biography != null) 'biography': biography,
+      if (isScam != null) 'is_scam': isScam,
+      if (codeUrl != null) 'code_url': codeUrl,
+      if (codeId != null) 'code_id': codeId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  UsersCompanion copyWith(
+      {Value<String>? userId,
+      Value<String>? identityNumber,
+      Value<UserRelationship?>? relationship,
+      Value<String?>? fullName,
+      Value<String?>? avatarUrl,
+      Value<String?>? phone,
+      Value<bool?>? isVerified,
+      Value<DateTime?>? createdAt,
+      Value<DateTime?>? muteUntil,
+      Value<int?>? hasPin,
+      Value<String?>? appId,
+      Value<String?>? biography,
+      Value<int?>? isScam,
+      Value<String?>? codeUrl,
+      Value<String?>? codeId,
+      Value<int>? rowid}) {
+    return UsersCompanion(
+      userId: userId ?? this.userId,
+      identityNumber: identityNumber ?? this.identityNumber,
+      relationship: relationship ?? this.relationship,
+      fullName: fullName ?? this.fullName,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      phone: phone ?? this.phone,
+      isVerified: isVerified ?? this.isVerified,
+      createdAt: createdAt ?? this.createdAt,
+      muteUntil: muteUntil ?? this.muteUntil,
+      hasPin: hasPin ?? this.hasPin,
+      appId: appId ?? this.appId,
+      biography: biography ?? this.biography,
+      isScam: isScam ?? this.isScam,
+      codeUrl: codeUrl ?? this.codeUrl,
+      codeId: codeId ?? this.codeId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (identityNumber.present) {
+      map['identity_number'] = Variable<String>(identityNumber.value);
+    }
+    if (relationship.present) {
+      final converter = Users.$converterrelationship;
+      map['relationship'] =
+          Variable<String>(converter.toSql(relationship.value));
+    }
+    if (fullName.present) {
+      map['full_name'] = Variable<String>(fullName.value);
+    }
+    if (avatarUrl.present) {
+      map['avatar_url'] = Variable<String>(avatarUrl.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String>(phone.value);
+    }
+    if (isVerified.present) {
+      map['is_verified'] = Variable<bool>(isVerified.value);
+    }
+    if (createdAt.present) {
+      final converter = Users.$convertercreatedAtn;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (muteUntil.present) {
+      final converter = Users.$convertermuteUntiln;
+      map['mute_until'] = Variable<int>(converter.toSql(muteUntil.value));
+    }
+    if (hasPin.present) {
+      map['has_pin'] = Variable<int>(hasPin.value);
+    }
+    if (appId.present) {
+      map['app_id'] = Variable<String>(appId.value);
+    }
+    if (biography.present) {
+      map['biography'] = Variable<String>(biography.value);
+    }
+    if (isScam.present) {
+      map['is_scam'] = Variable<int>(isScam.value);
+    }
+    if (codeUrl.present) {
+      map['code_url'] = Variable<String>(codeUrl.value);
+    }
+    if (codeId.present) {
+      map['code_id'] = Variable<String>(codeId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UsersCompanion(')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('relationship: $relationship, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('phone: $phone, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('hasPin: $hasPin, ')
+          ..write('appId: $appId, ')
+          ..write('biography: $biography, ')
+          ..write('isScam: $isScam, ')
+          ..write('codeUrl: $codeUrl, ')
+          ..write('codeId: $codeId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2526,649 +3852,245 @@ class MessagesCompanion extends UpdateCompanion<Message> {
   }
 }
 
-class Users extends Table with TableInfo<Users, User> {
+class Participants extends Table with TableInfo<Participants, Participant> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Users(this.attachedDatabase, [this._alias]);
+  Participants(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+      'conversation_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  static const VerificationMeta _identityNumberMeta =
-      const VerificationMeta('identityNumber');
-  late final GeneratedColumn<String> identityNumber = GeneratedColumn<String>(
-      'identity_number', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _relationshipMeta =
-      const VerificationMeta('relationship');
-  late final GeneratedColumnWithTypeConverter<UserRelationship?, String>
-      relationship = GeneratedColumn<String>('relationship', aliasedName, true,
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  late final GeneratedColumnWithTypeConverter<ParticipantRole?, String> role =
+      GeneratedColumn<String>('role', aliasedName, true,
               type: DriftSqlType.string,
               requiredDuringInsert: false,
               $customConstraints: '')
-          .withConverter<UserRelationship?>(Users.$converterrelationship);
-  static const VerificationMeta _fullNameMeta =
-      const VerificationMeta('fullName');
-  late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
-      'full_name', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _avatarUrlMeta =
-      const VerificationMeta('avatarUrl');
-  late final GeneratedColumn<String> avatarUrl = GeneratedColumn<String>(
-      'avatar_url', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
-  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
-      'phone', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _isVerifiedMeta =
-      const VerificationMeta('isVerified');
-  late final GeneratedColumn<bool> isVerified = GeneratedColumn<bool>(
-      'is_verified', aliasedName, true,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+          .withConverter<ParticipantRole?>(Participants.$converterrole);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime?, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, true,
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
               type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime?>(Users.$convertercreatedAtn);
-  static const VerificationMeta _muteUntilMeta =
-      const VerificationMeta('muteUntil');
-  late final GeneratedColumnWithTypeConverter<DateTime?, int> muteUntil =
-      GeneratedColumn<int>('mute_until', aliasedName, true,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime?>(Users.$convertermuteUntiln);
-  static const VerificationMeta _hasPinMeta = const VerificationMeta('hasPin');
-  late final GeneratedColumn<int> hasPin = GeneratedColumn<int>(
-      'has_pin', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _appIdMeta = const VerificationMeta('appId');
-  late final GeneratedColumn<String> appId = GeneratedColumn<String>(
-      'app_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _biographyMeta =
-      const VerificationMeta('biography');
-  late final GeneratedColumn<String> biography = GeneratedColumn<String>(
-      'biography', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _isScamMeta = const VerificationMeta('isScam');
-  late final GeneratedColumn<int> isScam = GeneratedColumn<int>(
-      'is_scam', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _codeUrlMeta =
-      const VerificationMeta('codeUrl');
-  late final GeneratedColumn<String> codeUrl = GeneratedColumn<String>(
-      'code_url', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _codeIdMeta = const VerificationMeta('codeId');
-  late final GeneratedColumn<String> codeId = GeneratedColumn<String>(
-      'code_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Participants.$convertercreatedAt);
   @override
-  List<GeneratedColumn> get $columns => [
-        userId,
-        identityNumber,
-        relationship,
-        fullName,
-        avatarUrl,
-        phone,
-        isVerified,
-        createdAt,
-        muteUntil,
-        hasPin,
-        appId,
-        biography,
-        isScam,
-        codeUrl,
-        codeId
-      ];
+  List<GeneratedColumn> get $columns =>
+      [conversationId, userId, role, createdAt];
   @override
-  String get aliasedName => _alias ?? 'users';
+  String get aliasedName => _alias ?? 'participants';
   @override
-  String get actualTableName => 'users';
+  String get actualTableName => 'participants';
   @override
-  VerificationContext validateIntegrity(Insertable<User> instance,
+  VerificationContext validateIntegrity(Insertable<Participant> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
-    if (data.containsKey('identity_number')) {
-      context.handle(
-          _identityNumberMeta,
-          identityNumber.isAcceptableOrUnknown(
-              data['identity_number']!, _identityNumberMeta));
-    } else if (isInserting) {
-      context.missing(_identityNumberMeta);
-    }
-    context.handle(_relationshipMeta, const VerificationResult.success());
-    if (data.containsKey('full_name')) {
-      context.handle(_fullNameMeta,
-          fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
-    }
-    if (data.containsKey('avatar_url')) {
-      context.handle(_avatarUrlMeta,
-          avatarUrl.isAcceptableOrUnknown(data['avatar_url']!, _avatarUrlMeta));
-    }
-    if (data.containsKey('phone')) {
-      context.handle(
-          _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
-    }
-    if (data.containsKey('is_verified')) {
-      context.handle(
-          _isVerifiedMeta,
-          isVerified.isAcceptableOrUnknown(
-              data['is_verified']!, _isVerifiedMeta));
-    }
+    context.handle(_roleMeta, const VerificationResult.success());
     context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_muteUntilMeta, const VerificationResult.success());
-    if (data.containsKey('has_pin')) {
-      context.handle(_hasPinMeta,
-          hasPin.isAcceptableOrUnknown(data['has_pin']!, _hasPinMeta));
-    }
-    if (data.containsKey('app_id')) {
-      context.handle(
-          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
-    }
-    if (data.containsKey('biography')) {
-      context.handle(_biographyMeta,
-          biography.isAcceptableOrUnknown(data['biography']!, _biographyMeta));
-    }
-    if (data.containsKey('is_scam')) {
-      context.handle(_isScamMeta,
-          isScam.isAcceptableOrUnknown(data['is_scam']!, _isScamMeta));
-    }
-    if (data.containsKey('code_url')) {
-      context.handle(_codeUrlMeta,
-          codeUrl.isAcceptableOrUnknown(data['code_url']!, _codeUrlMeta));
-    }
-    if (data.containsKey('code_id')) {
-      context.handle(_codeIdMeta,
-          codeId.isAcceptableOrUnknown(data['code_id']!, _codeIdMeta));
-    }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {userId};
+  Set<GeneratedColumn> get $primaryKey => {conversationId, userId};
   @override
-  User map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Participant map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return User(
+    return Participant(
+      conversationId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
       userId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
-      identityNumber: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}identity_number'])!,
-      relationship: Users.$converterrelationship.fromSql(attachedDatabase
+      role: Participants.$converterrole.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}role'])),
+      createdAt: Participants.$convertercreatedAt.fromSql(attachedDatabase
           .typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}relationship'])),
-      fullName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}full_name']),
-      avatarUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}avatar_url']),
-      phone: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}phone']),
-      isVerified: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_verified']),
-      createdAt: Users.$convertercreatedAtn.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])),
-      muteUntil: Users.$convertermuteUntiln.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}mute_until'])),
-      hasPin: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}has_pin']),
-      appId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}app_id']),
-      biography: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}biography']),
-      isScam: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}is_scam']),
-      codeUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}code_url']),
-      codeId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}code_id']),
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
     );
   }
 
   @override
-  Users createAlias(String alias) {
-    return Users(attachedDatabase, alias);
+  Participants createAlias(String alias) {
+    return Participants(attachedDatabase, alias);
   }
 
-  static TypeConverter<UserRelationship?, String?> $converterrelationship =
-      const UserRelationshipConverter();
+  static TypeConverter<ParticipantRole?, String?> $converterrole =
+      const ParticipantRoleConverter();
   static TypeConverter<DateTime, int> $convertercreatedAt =
       const MillisDateConverter();
-  static TypeConverter<DateTime?, int?> $convertercreatedAtn =
-      NullAwareTypeConverter.wrap($convertercreatedAt);
-  static TypeConverter<DateTime, int> $convertermuteUntil =
-      const MillisDateConverter();
-  static TypeConverter<DateTime?, int?> $convertermuteUntiln =
-      NullAwareTypeConverter.wrap($convertermuteUntil);
   @override
-  List<String> get customConstraints => const ['PRIMARY KEY(user_id)'];
+  List<String> get customConstraints => const [
+        'PRIMARY KEY(conversation_id, user_id)',
+        'FOREIGN KEY(conversation_id)REFERENCES conversations(conversation_id)ON UPDATE NO ACTION ON DELETE CASCADE'
+      ];
   @override
   bool get dontWriteConstraints => true;
 }
 
-class User extends DataClass implements Insertable<User> {
+class Participant extends DataClass implements Insertable<Participant> {
+  final String conversationId;
   final String userId;
-  final String identityNumber;
-  final UserRelationship? relationship;
-  final String? fullName;
-  final String? avatarUrl;
-  final String? phone;
-  final bool? isVerified;
-  final DateTime? createdAt;
-  final DateTime? muteUntil;
-  final int? hasPin;
-  final String? appId;
-  final String? biography;
-  final int? isScam;
-  final String? codeUrl;
-  final String? codeId;
-  const User(
-      {required this.userId,
-      required this.identityNumber,
-      this.relationship,
-      this.fullName,
-      this.avatarUrl,
-      this.phone,
-      this.isVerified,
-      this.createdAt,
-      this.muteUntil,
-      this.hasPin,
-      this.appId,
-      this.biography,
-      this.isScam,
-      this.codeUrl,
-      this.codeId});
+  final ParticipantRole? role;
+  final DateTime createdAt;
+  const Participant(
+      {required this.conversationId,
+      required this.userId,
+      this.role,
+      required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['conversation_id'] = Variable<String>(conversationId);
     map['user_id'] = Variable<String>(userId);
-    map['identity_number'] = Variable<String>(identityNumber);
-    if (!nullToAbsent || relationship != null) {
-      final converter = Users.$converterrelationship;
-      map['relationship'] = Variable<String>(converter.toSql(relationship));
+    if (!nullToAbsent || role != null) {
+      final converter = Participants.$converterrole;
+      map['role'] = Variable<String>(converter.toSql(role));
     }
-    if (!nullToAbsent || fullName != null) {
-      map['full_name'] = Variable<String>(fullName);
-    }
-    if (!nullToAbsent || avatarUrl != null) {
-      map['avatar_url'] = Variable<String>(avatarUrl);
-    }
-    if (!nullToAbsent || phone != null) {
-      map['phone'] = Variable<String>(phone);
-    }
-    if (!nullToAbsent || isVerified != null) {
-      map['is_verified'] = Variable<bool>(isVerified);
-    }
-    if (!nullToAbsent || createdAt != null) {
-      final converter = Users.$convertercreatedAtn;
+    {
+      final converter = Participants.$convertercreatedAt;
       map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    if (!nullToAbsent || muteUntil != null) {
-      final converter = Users.$convertermuteUntiln;
-      map['mute_until'] = Variable<int>(converter.toSql(muteUntil));
-    }
-    if (!nullToAbsent || hasPin != null) {
-      map['has_pin'] = Variable<int>(hasPin);
-    }
-    if (!nullToAbsent || appId != null) {
-      map['app_id'] = Variable<String>(appId);
-    }
-    if (!nullToAbsent || biography != null) {
-      map['biography'] = Variable<String>(biography);
-    }
-    if (!nullToAbsent || isScam != null) {
-      map['is_scam'] = Variable<int>(isScam);
-    }
-    if (!nullToAbsent || codeUrl != null) {
-      map['code_url'] = Variable<String>(codeUrl);
-    }
-    if (!nullToAbsent || codeId != null) {
-      map['code_id'] = Variable<String>(codeId);
     }
     return map;
   }
 
-  UsersCompanion toCompanion(bool nullToAbsent) {
-    return UsersCompanion(
+  ParticipantsCompanion toCompanion(bool nullToAbsent) {
+    return ParticipantsCompanion(
+      conversationId: Value(conversationId),
       userId: Value(userId),
-      identityNumber: Value(identityNumber),
-      relationship: relationship == null && nullToAbsent
-          ? const Value.absent()
-          : Value(relationship),
-      fullName: fullName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(fullName),
-      avatarUrl: avatarUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(avatarUrl),
-      phone:
-          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
-      isVerified: isVerified == null && nullToAbsent
-          ? const Value.absent()
-          : Value(isVerified),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-      muteUntil: muteUntil == null && nullToAbsent
-          ? const Value.absent()
-          : Value(muteUntil),
-      hasPin:
-          hasPin == null && nullToAbsent ? const Value.absent() : Value(hasPin),
-      appId:
-          appId == null && nullToAbsent ? const Value.absent() : Value(appId),
-      biography: biography == null && nullToAbsent
-          ? const Value.absent()
-          : Value(biography),
-      isScam:
-          isScam == null && nullToAbsent ? const Value.absent() : Value(isScam),
-      codeUrl: codeUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(codeUrl),
-      codeId:
-          codeId == null && nullToAbsent ? const Value.absent() : Value(codeId),
+      role: role == null && nullToAbsent ? const Value.absent() : Value(role),
+      createdAt: Value(createdAt),
     );
   }
 
-  factory User.fromJson(Map<String, dynamic> json,
+  factory Participant.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return User(
+    return Participant(
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
       userId: serializer.fromJson<String>(json['user_id']),
-      identityNumber: serializer.fromJson<String>(json['identity_number']),
-      relationship:
-          serializer.fromJson<UserRelationship?>(json['relationship']),
-      fullName: serializer.fromJson<String?>(json['full_name']),
-      avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
-      phone: serializer.fromJson<String?>(json['phone']),
-      isVerified: serializer.fromJson<bool?>(json['is_verified']),
-      createdAt: serializer.fromJson<DateTime?>(json['created_at']),
-      muteUntil: serializer.fromJson<DateTime?>(json['mute_until']),
-      hasPin: serializer.fromJson<int?>(json['has_pin']),
-      appId: serializer.fromJson<String?>(json['app_id']),
-      biography: serializer.fromJson<String?>(json['biography']),
-      isScam: serializer.fromJson<int?>(json['is_scam']),
-      codeUrl: serializer.fromJson<String?>(json['code_url']),
-      codeId: serializer.fromJson<String?>(json['code_id']),
+      role: serializer.fromJson<ParticipantRole?>(json['role']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'conversation_id': serializer.toJson<String>(conversationId),
       'user_id': serializer.toJson<String>(userId),
-      'identity_number': serializer.toJson<String>(identityNumber),
-      'relationship': serializer.toJson<UserRelationship?>(relationship),
-      'full_name': serializer.toJson<String?>(fullName),
-      'avatar_url': serializer.toJson<String?>(avatarUrl),
-      'phone': serializer.toJson<String?>(phone),
-      'is_verified': serializer.toJson<bool?>(isVerified),
-      'created_at': serializer.toJson<DateTime?>(createdAt),
-      'mute_until': serializer.toJson<DateTime?>(muteUntil),
-      'has_pin': serializer.toJson<int?>(hasPin),
-      'app_id': serializer.toJson<String?>(appId),
-      'biography': serializer.toJson<String?>(biography),
-      'is_scam': serializer.toJson<int?>(isScam),
-      'code_url': serializer.toJson<String?>(codeUrl),
-      'code_id': serializer.toJson<String?>(codeId),
+      'role': serializer.toJson<ParticipantRole?>(role),
+      'created_at': serializer.toJson<DateTime>(createdAt),
     };
   }
 
-  User copyWith(
-          {String? userId,
-          String? identityNumber,
-          Value<UserRelationship?> relationship = const Value.absent(),
-          Value<String?> fullName = const Value.absent(),
-          Value<String?> avatarUrl = const Value.absent(),
-          Value<String?> phone = const Value.absent(),
-          Value<bool?> isVerified = const Value.absent(),
-          Value<DateTime?> createdAt = const Value.absent(),
-          Value<DateTime?> muteUntil = const Value.absent(),
-          Value<int?> hasPin = const Value.absent(),
-          Value<String?> appId = const Value.absent(),
-          Value<String?> biography = const Value.absent(),
-          Value<int?> isScam = const Value.absent(),
-          Value<String?> codeUrl = const Value.absent(),
-          Value<String?> codeId = const Value.absent()}) =>
-      User(
+  Participant copyWith(
+          {String? conversationId,
+          String? userId,
+          Value<ParticipantRole?> role = const Value.absent(),
+          DateTime? createdAt}) =>
+      Participant(
+        conversationId: conversationId ?? this.conversationId,
         userId: userId ?? this.userId,
-        identityNumber: identityNumber ?? this.identityNumber,
-        relationship:
-            relationship.present ? relationship.value : this.relationship,
-        fullName: fullName.present ? fullName.value : this.fullName,
-        avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
-        phone: phone.present ? phone.value : this.phone,
-        isVerified: isVerified.present ? isVerified.value : this.isVerified,
-        createdAt: createdAt.present ? createdAt.value : this.createdAt,
-        muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
-        hasPin: hasPin.present ? hasPin.value : this.hasPin,
-        appId: appId.present ? appId.value : this.appId,
-        biography: biography.present ? biography.value : this.biography,
-        isScam: isScam.present ? isScam.value : this.isScam,
-        codeUrl: codeUrl.present ? codeUrl.value : this.codeUrl,
-        codeId: codeId.present ? codeId.value : this.codeId,
+        role: role.present ? role.value : this.role,
+        createdAt: createdAt ?? this.createdAt,
       );
   @override
   String toString() {
-    return (StringBuffer('User(')
+    return (StringBuffer('Participant(')
+          ..write('conversationId: $conversationId, ')
           ..write('userId: $userId, ')
-          ..write('identityNumber: $identityNumber, ')
-          ..write('relationship: $relationship, ')
-          ..write('fullName: $fullName, ')
-          ..write('avatarUrl: $avatarUrl, ')
-          ..write('phone: $phone, ')
-          ..write('isVerified: $isVerified, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('muteUntil: $muteUntil, ')
-          ..write('hasPin: $hasPin, ')
-          ..write('appId: $appId, ')
-          ..write('biography: $biography, ')
-          ..write('isScam: $isScam, ')
-          ..write('codeUrl: $codeUrl, ')
-          ..write('codeId: $codeId')
+          ..write('role: $role, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      userId,
-      identityNumber,
-      relationship,
-      fullName,
-      avatarUrl,
-      phone,
-      isVerified,
-      createdAt,
-      muteUntil,
-      hasPin,
-      appId,
-      biography,
-      isScam,
-      codeUrl,
-      codeId);
+  int get hashCode => Object.hash(conversationId, userId, role, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is User &&
+      (other is Participant &&
+          other.conversationId == this.conversationId &&
           other.userId == this.userId &&
-          other.identityNumber == this.identityNumber &&
-          other.relationship == this.relationship &&
-          other.fullName == this.fullName &&
-          other.avatarUrl == this.avatarUrl &&
-          other.phone == this.phone &&
-          other.isVerified == this.isVerified &&
-          other.createdAt == this.createdAt &&
-          other.muteUntil == this.muteUntil &&
-          other.hasPin == this.hasPin &&
-          other.appId == this.appId &&
-          other.biography == this.biography &&
-          other.isScam == this.isScam &&
-          other.codeUrl == this.codeUrl &&
-          other.codeId == this.codeId);
+          other.role == this.role &&
+          other.createdAt == this.createdAt);
 }
 
-class UsersCompanion extends UpdateCompanion<User> {
+class ParticipantsCompanion extends UpdateCompanion<Participant> {
+  final Value<String> conversationId;
   final Value<String> userId;
-  final Value<String> identityNumber;
-  final Value<UserRelationship?> relationship;
-  final Value<String?> fullName;
-  final Value<String?> avatarUrl;
-  final Value<String?> phone;
-  final Value<bool?> isVerified;
-  final Value<DateTime?> createdAt;
-  final Value<DateTime?> muteUntil;
-  final Value<int?> hasPin;
-  final Value<String?> appId;
-  final Value<String?> biography;
-  final Value<int?> isScam;
-  final Value<String?> codeUrl;
-  final Value<String?> codeId;
+  final Value<ParticipantRole?> role;
+  final Value<DateTime> createdAt;
   final Value<int> rowid;
-  const UsersCompanion({
+  const ParticipantsCompanion({
+    this.conversationId = const Value.absent(),
     this.userId = const Value.absent(),
-    this.identityNumber = const Value.absent(),
-    this.relationship = const Value.absent(),
-    this.fullName = const Value.absent(),
-    this.avatarUrl = const Value.absent(),
-    this.phone = const Value.absent(),
-    this.isVerified = const Value.absent(),
+    this.role = const Value.absent(),
     this.createdAt = const Value.absent(),
-    this.muteUntil = const Value.absent(),
-    this.hasPin = const Value.absent(),
-    this.appId = const Value.absent(),
-    this.biography = const Value.absent(),
-    this.isScam = const Value.absent(),
-    this.codeUrl = const Value.absent(),
-    this.codeId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  UsersCompanion.insert({
+  ParticipantsCompanion.insert({
+    required String conversationId,
     required String userId,
-    required String identityNumber,
-    this.relationship = const Value.absent(),
-    this.fullName = const Value.absent(),
-    this.avatarUrl = const Value.absent(),
-    this.phone = const Value.absent(),
-    this.isVerified = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.muteUntil = const Value.absent(),
-    this.hasPin = const Value.absent(),
-    this.appId = const Value.absent(),
-    this.biography = const Value.absent(),
-    this.isScam = const Value.absent(),
-    this.codeUrl = const Value.absent(),
-    this.codeId = const Value.absent(),
+    this.role = const Value.absent(),
+    required DateTime createdAt,
     this.rowid = const Value.absent(),
-  })  : userId = Value(userId),
-        identityNumber = Value(identityNumber);
-  static Insertable<User> custom({
+  })  : conversationId = Value(conversationId),
+        userId = Value(userId),
+        createdAt = Value(createdAt);
+  static Insertable<Participant> custom({
+    Expression<String>? conversationId,
     Expression<String>? userId,
-    Expression<String>? identityNumber,
-    Expression<String>? relationship,
-    Expression<String>? fullName,
-    Expression<String>? avatarUrl,
-    Expression<String>? phone,
-    Expression<bool>? isVerified,
+    Expression<String>? role,
     Expression<int>? createdAt,
-    Expression<int>? muteUntil,
-    Expression<int>? hasPin,
-    Expression<String>? appId,
-    Expression<String>? biography,
-    Expression<int>? isScam,
-    Expression<String>? codeUrl,
-    Expression<String>? codeId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
+      if (conversationId != null) 'conversation_id': conversationId,
       if (userId != null) 'user_id': userId,
-      if (identityNumber != null) 'identity_number': identityNumber,
-      if (relationship != null) 'relationship': relationship,
-      if (fullName != null) 'full_name': fullName,
-      if (avatarUrl != null) 'avatar_url': avatarUrl,
-      if (phone != null) 'phone': phone,
-      if (isVerified != null) 'is_verified': isVerified,
+      if (role != null) 'role': role,
       if (createdAt != null) 'created_at': createdAt,
-      if (muteUntil != null) 'mute_until': muteUntil,
-      if (hasPin != null) 'has_pin': hasPin,
-      if (appId != null) 'app_id': appId,
-      if (biography != null) 'biography': biography,
-      if (isScam != null) 'is_scam': isScam,
-      if (codeUrl != null) 'code_url': codeUrl,
-      if (codeId != null) 'code_id': codeId,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  UsersCompanion copyWith(
-      {Value<String>? userId,
-      Value<String>? identityNumber,
-      Value<UserRelationship?>? relationship,
-      Value<String?>? fullName,
-      Value<String?>? avatarUrl,
-      Value<String?>? phone,
-      Value<bool?>? isVerified,
-      Value<DateTime?>? createdAt,
-      Value<DateTime?>? muteUntil,
-      Value<int?>? hasPin,
-      Value<String?>? appId,
-      Value<String?>? biography,
-      Value<int?>? isScam,
-      Value<String?>? codeUrl,
-      Value<String?>? codeId,
+  ParticipantsCompanion copyWith(
+      {Value<String>? conversationId,
+      Value<String>? userId,
+      Value<ParticipantRole?>? role,
+      Value<DateTime>? createdAt,
       Value<int>? rowid}) {
-    return UsersCompanion(
+    return ParticipantsCompanion(
+      conversationId: conversationId ?? this.conversationId,
       userId: userId ?? this.userId,
-      identityNumber: identityNumber ?? this.identityNumber,
-      relationship: relationship ?? this.relationship,
-      fullName: fullName ?? this.fullName,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      phone: phone ?? this.phone,
-      isVerified: isVerified ?? this.isVerified,
+      role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,
-      muteUntil: muteUntil ?? this.muteUntil,
-      hasPin: hasPin ?? this.hasPin,
-      appId: appId ?? this.appId,
-      biography: biography ?? this.biography,
-      isScam: isScam ?? this.isScam,
-      codeUrl: codeUrl ?? this.codeUrl,
-      codeId: codeId ?? this.codeId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3176,54 +4098,19 @@ class UsersCompanion extends UpdateCompanion<User> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
     }
-    if (identityNumber.present) {
-      map['identity_number'] = Variable<String>(identityNumber.value);
-    }
-    if (relationship.present) {
-      final converter = Users.$converterrelationship;
-      map['relationship'] =
-          Variable<String>(converter.toSql(relationship.value));
-    }
-    if (fullName.present) {
-      map['full_name'] = Variable<String>(fullName.value);
-    }
-    if (avatarUrl.present) {
-      map['avatar_url'] = Variable<String>(avatarUrl.value);
-    }
-    if (phone.present) {
-      map['phone'] = Variable<String>(phone.value);
-    }
-    if (isVerified.present) {
-      map['is_verified'] = Variable<bool>(isVerified.value);
+    if (role.present) {
+      final converter = Participants.$converterrole;
+      map['role'] = Variable<String>(converter.toSql(role.value));
     }
     if (createdAt.present) {
-      final converter = Users.$convertercreatedAtn;
+      final converter = Participants.$convertercreatedAt;
       map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (muteUntil.present) {
-      final converter = Users.$convertermuteUntiln;
-      map['mute_until'] = Variable<int>(converter.toSql(muteUntil.value));
-    }
-    if (hasPin.present) {
-      map['has_pin'] = Variable<int>(hasPin.value);
-    }
-    if (appId.present) {
-      map['app_id'] = Variable<String>(appId.value);
-    }
-    if (biography.present) {
-      map['biography'] = Variable<String>(biography.value);
-    }
-    if (isScam.present) {
-      map['is_scam'] = Variable<int>(isScam.value);
-    }
-    if (codeUrl.present) {
-      map['code_url'] = Variable<String>(codeUrl.value);
-    }
-    if (codeId.present) {
-      map['code_id'] = Variable<String>(codeId.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -3233,22 +4120,1635 @@ class UsersCompanion extends UpdateCompanion<User> {
 
   @override
   String toString() {
-    return (StringBuffer('UsersCompanion(')
+    return (StringBuffer('ParticipantsCompanion(')
+          ..write('conversationId: $conversationId, ')
           ..write('userId: $userId, ')
-          ..write('identityNumber: $identityNumber, ')
-          ..write('relationship: $relationship, ')
-          ..write('fullName: $fullName, ')
-          ..write('avatarUrl: $avatarUrl, ')
-          ..write('phone: $phone, ')
-          ..write('isVerified: $isVerified, ')
+          ..write('role: $role, ')
           ..write('createdAt: $createdAt, ')
-          ..write('muteUntil: $muteUntil, ')
-          ..write('hasPin: $hasPin, ')
-          ..write('appId: $appId, ')
-          ..write('biography: $biography, ')
-          ..write('isScam: $isScam, ')
-          ..write('codeUrl: $codeUrl, ')
-          ..write('codeId: $codeId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Stickers extends Table with TableInfo<Stickers, Sticker> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Stickers(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _stickerIdMeta =
+      const VerificationMeta('stickerId');
+  late final GeneratedColumn<String> stickerId = GeneratedColumn<String>(
+      'sticker_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _albumIdMeta =
+      const VerificationMeta('albumId');
+  late final GeneratedColumn<String> albumId = GeneratedColumn<String>(
+      'album_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _assetUrlMeta =
+      const VerificationMeta('assetUrl');
+  late final GeneratedColumn<String> assetUrl = GeneratedColumn<String>(
+      'asset_url', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _assetTypeMeta =
+      const VerificationMeta('assetType');
+  late final GeneratedColumn<String> assetType = GeneratedColumn<String>(
+      'asset_type', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _assetWidthMeta =
+      const VerificationMeta('assetWidth');
+  late final GeneratedColumn<int> assetWidth = GeneratedColumn<int>(
+      'asset_width', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _assetHeightMeta =
+      const VerificationMeta('assetHeight');
+  late final GeneratedColumn<int> assetHeight = GeneratedColumn<int>(
+      'asset_height', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Stickers.$convertercreatedAt);
+  static const VerificationMeta _lastUseAtMeta =
+      const VerificationMeta('lastUseAt');
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> lastUseAt =
+      GeneratedColumn<int>('last_use_at', aliasedName, true,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime?>(Stickers.$converterlastUseAtn);
+  @override
+  List<GeneratedColumn> get $columns => [
+        stickerId,
+        albumId,
+        name,
+        assetUrl,
+        assetType,
+        assetWidth,
+        assetHeight,
+        createdAt,
+        lastUseAt
+      ];
+  @override
+  String get aliasedName => _alias ?? 'stickers';
+  @override
+  String get actualTableName => 'stickers';
+  @override
+  VerificationContext validateIntegrity(Insertable<Sticker> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('sticker_id')) {
+      context.handle(_stickerIdMeta,
+          stickerId.isAcceptableOrUnknown(data['sticker_id']!, _stickerIdMeta));
+    } else if (isInserting) {
+      context.missing(_stickerIdMeta);
+    }
+    if (data.containsKey('album_id')) {
+      context.handle(_albumIdMeta,
+          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('asset_url')) {
+      context.handle(_assetUrlMeta,
+          assetUrl.isAcceptableOrUnknown(data['asset_url']!, _assetUrlMeta));
+    } else if (isInserting) {
+      context.missing(_assetUrlMeta);
+    }
+    if (data.containsKey('asset_type')) {
+      context.handle(_assetTypeMeta,
+          assetType.isAcceptableOrUnknown(data['asset_type']!, _assetTypeMeta));
+    } else if (isInserting) {
+      context.missing(_assetTypeMeta);
+    }
+    if (data.containsKey('asset_width')) {
+      context.handle(
+          _assetWidthMeta,
+          assetWidth.isAcceptableOrUnknown(
+              data['asset_width']!, _assetWidthMeta));
+    } else if (isInserting) {
+      context.missing(_assetWidthMeta);
+    }
+    if (data.containsKey('asset_height')) {
+      context.handle(
+          _assetHeightMeta,
+          assetHeight.isAcceptableOrUnknown(
+              data['asset_height']!, _assetHeightMeta));
+    } else if (isInserting) {
+      context.missing(_assetHeightMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_lastUseAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {stickerId};
+  @override
+  Sticker map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Sticker(
+      stickerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sticker_id'])!,
+      albumId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}album_id']),
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      assetUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}asset_url'])!,
+      assetType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}asset_type'])!,
+      assetWidth: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}asset_width'])!,
+      assetHeight: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}asset_height'])!,
+      createdAt: Stickers.$convertercreatedAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+      lastUseAt: Stickers.$converterlastUseAtn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_use_at'])),
+    );
+  }
+
+  @override
+  Stickers createAlias(String alias) {
+    return Stickers(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converterlastUseAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $converterlastUseAtn =
+      NullAwareTypeConverter.wrap($converterlastUseAt);
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(sticker_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class Sticker extends DataClass implements Insertable<Sticker> {
+  final String stickerId;
+  final String? albumId;
+  final String name;
+  final String assetUrl;
+  final String assetType;
+  final int assetWidth;
+  final int assetHeight;
+  final DateTime createdAt;
+  final DateTime? lastUseAt;
+  const Sticker(
+      {required this.stickerId,
+      this.albumId,
+      required this.name,
+      required this.assetUrl,
+      required this.assetType,
+      required this.assetWidth,
+      required this.assetHeight,
+      required this.createdAt,
+      this.lastUseAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['sticker_id'] = Variable<String>(stickerId);
+    if (!nullToAbsent || albumId != null) {
+      map['album_id'] = Variable<String>(albumId);
+    }
+    map['name'] = Variable<String>(name);
+    map['asset_url'] = Variable<String>(assetUrl);
+    map['asset_type'] = Variable<String>(assetType);
+    map['asset_width'] = Variable<int>(assetWidth);
+    map['asset_height'] = Variable<int>(assetHeight);
+    {
+      final converter = Stickers.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    if (!nullToAbsent || lastUseAt != null) {
+      final converter = Stickers.$converterlastUseAtn;
+      map['last_use_at'] = Variable<int>(converter.toSql(lastUseAt));
+    }
+    return map;
+  }
+
+  StickersCompanion toCompanion(bool nullToAbsent) {
+    return StickersCompanion(
+      stickerId: Value(stickerId),
+      albumId: albumId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(albumId),
+      name: Value(name),
+      assetUrl: Value(assetUrl),
+      assetType: Value(assetType),
+      assetWidth: Value(assetWidth),
+      assetHeight: Value(assetHeight),
+      createdAt: Value(createdAt),
+      lastUseAt: lastUseAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastUseAt),
+    );
+  }
+
+  factory Sticker.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Sticker(
+      stickerId: serializer.fromJson<String>(json['sticker_id']),
+      albumId: serializer.fromJson<String?>(json['album_id']),
+      name: serializer.fromJson<String>(json['name']),
+      assetUrl: serializer.fromJson<String>(json['asset_url']),
+      assetType: serializer.fromJson<String>(json['asset_type']),
+      assetWidth: serializer.fromJson<int>(json['asset_width']),
+      assetHeight: serializer.fromJson<int>(json['asset_height']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      lastUseAt: serializer.fromJson<DateTime?>(json['last_use_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'sticker_id': serializer.toJson<String>(stickerId),
+      'album_id': serializer.toJson<String?>(albumId),
+      'name': serializer.toJson<String>(name),
+      'asset_url': serializer.toJson<String>(assetUrl),
+      'asset_type': serializer.toJson<String>(assetType),
+      'asset_width': serializer.toJson<int>(assetWidth),
+      'asset_height': serializer.toJson<int>(assetHeight),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'last_use_at': serializer.toJson<DateTime?>(lastUseAt),
+    };
+  }
+
+  Sticker copyWith(
+          {String? stickerId,
+          Value<String?> albumId = const Value.absent(),
+          String? name,
+          String? assetUrl,
+          String? assetType,
+          int? assetWidth,
+          int? assetHeight,
+          DateTime? createdAt,
+          Value<DateTime?> lastUseAt = const Value.absent()}) =>
+      Sticker(
+        stickerId: stickerId ?? this.stickerId,
+        albumId: albumId.present ? albumId.value : this.albumId,
+        name: name ?? this.name,
+        assetUrl: assetUrl ?? this.assetUrl,
+        assetType: assetType ?? this.assetType,
+        assetWidth: assetWidth ?? this.assetWidth,
+        assetHeight: assetHeight ?? this.assetHeight,
+        createdAt: createdAt ?? this.createdAt,
+        lastUseAt: lastUseAt.present ? lastUseAt.value : this.lastUseAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Sticker(')
+          ..write('stickerId: $stickerId, ')
+          ..write('albumId: $albumId, ')
+          ..write('name: $name, ')
+          ..write('assetUrl: $assetUrl, ')
+          ..write('assetType: $assetType, ')
+          ..write('assetWidth: $assetWidth, ')
+          ..write('assetHeight: $assetHeight, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUseAt: $lastUseAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(stickerId, albumId, name, assetUrl, assetType,
+      assetWidth, assetHeight, createdAt, lastUseAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Sticker &&
+          other.stickerId == this.stickerId &&
+          other.albumId == this.albumId &&
+          other.name == this.name &&
+          other.assetUrl == this.assetUrl &&
+          other.assetType == this.assetType &&
+          other.assetWidth == this.assetWidth &&
+          other.assetHeight == this.assetHeight &&
+          other.createdAt == this.createdAt &&
+          other.lastUseAt == this.lastUseAt);
+}
+
+class StickersCompanion extends UpdateCompanion<Sticker> {
+  final Value<String> stickerId;
+  final Value<String?> albumId;
+  final Value<String> name;
+  final Value<String> assetUrl;
+  final Value<String> assetType;
+  final Value<int> assetWidth;
+  final Value<int> assetHeight;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> lastUseAt;
+  final Value<int> rowid;
+  const StickersCompanion({
+    this.stickerId = const Value.absent(),
+    this.albumId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.assetUrl = const Value.absent(),
+    this.assetType = const Value.absent(),
+    this.assetWidth = const Value.absent(),
+    this.assetHeight = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastUseAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StickersCompanion.insert({
+    required String stickerId,
+    this.albumId = const Value.absent(),
+    required String name,
+    required String assetUrl,
+    required String assetType,
+    required int assetWidth,
+    required int assetHeight,
+    required DateTime createdAt,
+    this.lastUseAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : stickerId = Value(stickerId),
+        name = Value(name),
+        assetUrl = Value(assetUrl),
+        assetType = Value(assetType),
+        assetWidth = Value(assetWidth),
+        assetHeight = Value(assetHeight),
+        createdAt = Value(createdAt);
+  static Insertable<Sticker> custom({
+    Expression<String>? stickerId,
+    Expression<String>? albumId,
+    Expression<String>? name,
+    Expression<String>? assetUrl,
+    Expression<String>? assetType,
+    Expression<int>? assetWidth,
+    Expression<int>? assetHeight,
+    Expression<int>? createdAt,
+    Expression<int>? lastUseAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (stickerId != null) 'sticker_id': stickerId,
+      if (albumId != null) 'album_id': albumId,
+      if (name != null) 'name': name,
+      if (assetUrl != null) 'asset_url': assetUrl,
+      if (assetType != null) 'asset_type': assetType,
+      if (assetWidth != null) 'asset_width': assetWidth,
+      if (assetHeight != null) 'asset_height': assetHeight,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastUseAt != null) 'last_use_at': lastUseAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StickersCompanion copyWith(
+      {Value<String>? stickerId,
+      Value<String?>? albumId,
+      Value<String>? name,
+      Value<String>? assetUrl,
+      Value<String>? assetType,
+      Value<int>? assetWidth,
+      Value<int>? assetHeight,
+      Value<DateTime>? createdAt,
+      Value<DateTime?>? lastUseAt,
+      Value<int>? rowid}) {
+    return StickersCompanion(
+      stickerId: stickerId ?? this.stickerId,
+      albumId: albumId ?? this.albumId,
+      name: name ?? this.name,
+      assetUrl: assetUrl ?? this.assetUrl,
+      assetType: assetType ?? this.assetType,
+      assetWidth: assetWidth ?? this.assetWidth,
+      assetHeight: assetHeight ?? this.assetHeight,
+      createdAt: createdAt ?? this.createdAt,
+      lastUseAt: lastUseAt ?? this.lastUseAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (stickerId.present) {
+      map['sticker_id'] = Variable<String>(stickerId.value);
+    }
+    if (albumId.present) {
+      map['album_id'] = Variable<String>(albumId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (assetUrl.present) {
+      map['asset_url'] = Variable<String>(assetUrl.value);
+    }
+    if (assetType.present) {
+      map['asset_type'] = Variable<String>(assetType.value);
+    }
+    if (assetWidth.present) {
+      map['asset_width'] = Variable<int>(assetWidth.value);
+    }
+    if (assetHeight.present) {
+      map['asset_height'] = Variable<int>(assetHeight.value);
+    }
+    if (createdAt.present) {
+      final converter = Stickers.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (lastUseAt.present) {
+      final converter = Stickers.$converterlastUseAtn;
+      map['last_use_at'] = Variable<int>(converter.toSql(lastUseAt.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StickersCompanion(')
+          ..write('stickerId: $stickerId, ')
+          ..write('albumId: $albumId, ')
+          ..write('name: $name, ')
+          ..write('assetUrl: $assetUrl, ')
+          ..write('assetType: $assetType, ')
+          ..write('assetWidth: $assetWidth, ')
+          ..write('assetHeight: $assetHeight, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUseAt: $lastUseAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  StickerAlbums(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _albumIdMeta =
+      const VerificationMeta('albumId');
+  late final GeneratedColumn<String> albumId = GeneratedColumn<String>(
+      'album_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _iconUrlMeta =
+      const VerificationMeta('iconUrl');
+  late final GeneratedColumn<String> iconUrl = GeneratedColumn<String>(
+      'icon_url', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(StickerAlbums.$convertercreatedAt);
+  static const VerificationMeta _updateAtMeta =
+      const VerificationMeta('updateAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> updateAt =
+      GeneratedColumn<int>('update_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(StickerAlbums.$converterupdateAt);
+  static const VerificationMeta _orderedAtMeta =
+      const VerificationMeta('orderedAt');
+  late final GeneratedColumn<int> orderedAt = GeneratedColumn<int>(
+      'ordered_at', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: 'NOT NULL DEFAULT 0',
+      defaultValue: const CustomExpression('0'));
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _categoryMeta =
+      const VerificationMeta('category');
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+      'category', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _bannerMeta = const VerificationMeta('banner');
+  late final GeneratedColumn<String> banner = GeneratedColumn<String>(
+      'banner', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _addedMeta = const VerificationMeta('added');
+  late final GeneratedColumn<bool> added = GeneratedColumn<bool>(
+      'added', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      $customConstraints: 'DEFAULT FALSE',
+      defaultValue: const CustomExpression('FALSE'));
+  static const VerificationMeta _isVerifiedMeta =
+      const VerificationMeta('isVerified');
+  late final GeneratedColumn<bool> isVerified = GeneratedColumn<bool>(
+      'is_verified', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      $customConstraints: 'NOT NULL DEFAULT FALSE',
+      defaultValue: const CustomExpression('FALSE'));
+  @override
+  List<GeneratedColumn> get $columns => [
+        albumId,
+        name,
+        iconUrl,
+        createdAt,
+        updateAt,
+        orderedAt,
+        userId,
+        category,
+        description,
+        banner,
+        added,
+        isVerified
+      ];
+  @override
+  String get aliasedName => _alias ?? 'sticker_albums';
+  @override
+  String get actualTableName => 'sticker_albums';
+  @override
+  VerificationContext validateIntegrity(Insertable<StickerAlbum> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('album_id')) {
+      context.handle(_albumIdMeta,
+          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
+    } else if (isInserting) {
+      context.missing(_albumIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('icon_url')) {
+      context.handle(_iconUrlMeta,
+          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
+    } else if (isInserting) {
+      context.missing(_iconUrlMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_updateAtMeta, const VerificationResult.success());
+    if (data.containsKey('ordered_at')) {
+      context.handle(_orderedAtMeta,
+          orderedAt.isAcceptableOrUnknown(data['ordered_at']!, _orderedAtMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('banner')) {
+      context.handle(_bannerMeta,
+          banner.isAcceptableOrUnknown(data['banner']!, _bannerMeta));
+    }
+    if (data.containsKey('added')) {
+      context.handle(
+          _addedMeta, added.isAcceptableOrUnknown(data['added']!, _addedMeta));
+    }
+    if (data.containsKey('is_verified')) {
+      context.handle(
+          _isVerifiedMeta,
+          isVerified.isAcceptableOrUnknown(
+              data['is_verified']!, _isVerifiedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {albumId};
+  @override
+  StickerAlbum map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StickerAlbum(
+      albumId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}album_id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      iconUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}icon_url'])!,
+      createdAt: StickerAlbums.$convertercreatedAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+      updateAt: StickerAlbums.$converterupdateAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}update_at'])!),
+      orderedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}ordered_at'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      category: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      banner: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}banner']),
+      added: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}added']),
+      isVerified: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_verified'])!,
+    );
+  }
+
+  @override
+  StickerAlbums createAlias(String alias) {
+    return StickerAlbums(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converterupdateAt =
+      const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(album_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
+  final String albumId;
+  final String name;
+  final String iconUrl;
+  final DateTime createdAt;
+  final DateTime updateAt;
+  final int orderedAt;
+  final String userId;
+  final String category;
+  final String description;
+  final String? banner;
+  final bool? added;
+  final bool isVerified;
+  const StickerAlbum(
+      {required this.albumId,
+      required this.name,
+      required this.iconUrl,
+      required this.createdAt,
+      required this.updateAt,
+      required this.orderedAt,
+      required this.userId,
+      required this.category,
+      required this.description,
+      this.banner,
+      this.added,
+      required this.isVerified});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['album_id'] = Variable<String>(albumId);
+    map['name'] = Variable<String>(name);
+    map['icon_url'] = Variable<String>(iconUrl);
+    {
+      final converter = StickerAlbums.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    {
+      final converter = StickerAlbums.$converterupdateAt;
+      map['update_at'] = Variable<int>(converter.toSql(updateAt));
+    }
+    map['ordered_at'] = Variable<int>(orderedAt);
+    map['user_id'] = Variable<String>(userId);
+    map['category'] = Variable<String>(category);
+    map['description'] = Variable<String>(description);
+    if (!nullToAbsent || banner != null) {
+      map['banner'] = Variable<String>(banner);
+    }
+    if (!nullToAbsent || added != null) {
+      map['added'] = Variable<bool>(added);
+    }
+    map['is_verified'] = Variable<bool>(isVerified);
+    return map;
+  }
+
+  StickerAlbumsCompanion toCompanion(bool nullToAbsent) {
+    return StickerAlbumsCompanion(
+      albumId: Value(albumId),
+      name: Value(name),
+      iconUrl: Value(iconUrl),
+      createdAt: Value(createdAt),
+      updateAt: Value(updateAt),
+      orderedAt: Value(orderedAt),
+      userId: Value(userId),
+      category: Value(category),
+      description: Value(description),
+      banner:
+          banner == null && nullToAbsent ? const Value.absent() : Value(banner),
+      added:
+          added == null && nullToAbsent ? const Value.absent() : Value(added),
+      isVerified: Value(isVerified),
+    );
+  }
+
+  factory StickerAlbum.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StickerAlbum(
+      albumId: serializer.fromJson<String>(json['album_id']),
+      name: serializer.fromJson<String>(json['name']),
+      iconUrl: serializer.fromJson<String>(json['icon_url']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      updateAt: serializer.fromJson<DateTime>(json['update_at']),
+      orderedAt: serializer.fromJson<int>(json['ordered_at']),
+      userId: serializer.fromJson<String>(json['user_id']),
+      category: serializer.fromJson<String>(json['category']),
+      description: serializer.fromJson<String>(json['description']),
+      banner: serializer.fromJson<String?>(json['banner']),
+      added: serializer.fromJson<bool?>(json['added']),
+      isVerified: serializer.fromJson<bool>(json['is_verified']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'album_id': serializer.toJson<String>(albumId),
+      'name': serializer.toJson<String>(name),
+      'icon_url': serializer.toJson<String>(iconUrl),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'update_at': serializer.toJson<DateTime>(updateAt),
+      'ordered_at': serializer.toJson<int>(orderedAt),
+      'user_id': serializer.toJson<String>(userId),
+      'category': serializer.toJson<String>(category),
+      'description': serializer.toJson<String>(description),
+      'banner': serializer.toJson<String?>(banner),
+      'added': serializer.toJson<bool?>(added),
+      'is_verified': serializer.toJson<bool>(isVerified),
+    };
+  }
+
+  StickerAlbum copyWith(
+          {String? albumId,
+          String? name,
+          String? iconUrl,
+          DateTime? createdAt,
+          DateTime? updateAt,
+          int? orderedAt,
+          String? userId,
+          String? category,
+          String? description,
+          Value<String?> banner = const Value.absent(),
+          Value<bool?> added = const Value.absent(),
+          bool? isVerified}) =>
+      StickerAlbum(
+        albumId: albumId ?? this.albumId,
+        name: name ?? this.name,
+        iconUrl: iconUrl ?? this.iconUrl,
+        createdAt: createdAt ?? this.createdAt,
+        updateAt: updateAt ?? this.updateAt,
+        orderedAt: orderedAt ?? this.orderedAt,
+        userId: userId ?? this.userId,
+        category: category ?? this.category,
+        description: description ?? this.description,
+        banner: banner.present ? banner.value : this.banner,
+        added: added.present ? added.value : this.added,
+        isVerified: isVerified ?? this.isVerified,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('StickerAlbum(')
+          ..write('albumId: $albumId, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updateAt: $updateAt, ')
+          ..write('orderedAt: $orderedAt, ')
+          ..write('userId: $userId, ')
+          ..write('category: $category, ')
+          ..write('description: $description, ')
+          ..write('banner: $banner, ')
+          ..write('added: $added, ')
+          ..write('isVerified: $isVerified')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(albumId, name, iconUrl, createdAt, updateAt,
+      orderedAt, userId, category, description, banner, added, isVerified);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StickerAlbum &&
+          other.albumId == this.albumId &&
+          other.name == this.name &&
+          other.iconUrl == this.iconUrl &&
+          other.createdAt == this.createdAt &&
+          other.updateAt == this.updateAt &&
+          other.orderedAt == this.orderedAt &&
+          other.userId == this.userId &&
+          other.category == this.category &&
+          other.description == this.description &&
+          other.banner == this.banner &&
+          other.added == this.added &&
+          other.isVerified == this.isVerified);
+}
+
+class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
+  final Value<String> albumId;
+  final Value<String> name;
+  final Value<String> iconUrl;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updateAt;
+  final Value<int> orderedAt;
+  final Value<String> userId;
+  final Value<String> category;
+  final Value<String> description;
+  final Value<String?> banner;
+  final Value<bool?> added;
+  final Value<bool> isVerified;
+  final Value<int> rowid;
+  const StickerAlbumsCompanion({
+    this.albumId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.iconUrl = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updateAt = const Value.absent(),
+    this.orderedAt = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.category = const Value.absent(),
+    this.description = const Value.absent(),
+    this.banner = const Value.absent(),
+    this.added = const Value.absent(),
+    this.isVerified = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StickerAlbumsCompanion.insert({
+    required String albumId,
+    required String name,
+    required String iconUrl,
+    required DateTime createdAt,
+    required DateTime updateAt,
+    this.orderedAt = const Value.absent(),
+    required String userId,
+    required String category,
+    required String description,
+    this.banner = const Value.absent(),
+    this.added = const Value.absent(),
+    this.isVerified = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : albumId = Value(albumId),
+        name = Value(name),
+        iconUrl = Value(iconUrl),
+        createdAt = Value(createdAt),
+        updateAt = Value(updateAt),
+        userId = Value(userId),
+        category = Value(category),
+        description = Value(description);
+  static Insertable<StickerAlbum> custom({
+    Expression<String>? albumId,
+    Expression<String>? name,
+    Expression<String>? iconUrl,
+    Expression<int>? createdAt,
+    Expression<int>? updateAt,
+    Expression<int>? orderedAt,
+    Expression<String>? userId,
+    Expression<String>? category,
+    Expression<String>? description,
+    Expression<String>? banner,
+    Expression<bool>? added,
+    Expression<bool>? isVerified,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (albumId != null) 'album_id': albumId,
+      if (name != null) 'name': name,
+      if (iconUrl != null) 'icon_url': iconUrl,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updateAt != null) 'update_at': updateAt,
+      if (orderedAt != null) 'ordered_at': orderedAt,
+      if (userId != null) 'user_id': userId,
+      if (category != null) 'category': category,
+      if (description != null) 'description': description,
+      if (banner != null) 'banner': banner,
+      if (added != null) 'added': added,
+      if (isVerified != null) 'is_verified': isVerified,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StickerAlbumsCompanion copyWith(
+      {Value<String>? albumId,
+      Value<String>? name,
+      Value<String>? iconUrl,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updateAt,
+      Value<int>? orderedAt,
+      Value<String>? userId,
+      Value<String>? category,
+      Value<String>? description,
+      Value<String?>? banner,
+      Value<bool?>? added,
+      Value<bool>? isVerified,
+      Value<int>? rowid}) {
+    return StickerAlbumsCompanion(
+      albumId: albumId ?? this.albumId,
+      name: name ?? this.name,
+      iconUrl: iconUrl ?? this.iconUrl,
+      createdAt: createdAt ?? this.createdAt,
+      updateAt: updateAt ?? this.updateAt,
+      orderedAt: orderedAt ?? this.orderedAt,
+      userId: userId ?? this.userId,
+      category: category ?? this.category,
+      description: description ?? this.description,
+      banner: banner ?? this.banner,
+      added: added ?? this.added,
+      isVerified: isVerified ?? this.isVerified,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (albumId.present) {
+      map['album_id'] = Variable<String>(albumId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (iconUrl.present) {
+      map['icon_url'] = Variable<String>(iconUrl.value);
+    }
+    if (createdAt.present) {
+      final converter = StickerAlbums.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (updateAt.present) {
+      final converter = StickerAlbums.$converterupdateAt;
+      map['update_at'] = Variable<int>(converter.toSql(updateAt.value));
+    }
+    if (orderedAt.present) {
+      map['ordered_at'] = Variable<int>(orderedAt.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (banner.present) {
+      map['banner'] = Variable<String>(banner.value);
+    }
+    if (added.present) {
+      map['added'] = Variable<bool>(added.value);
+    }
+    if (isVerified.present) {
+      map['is_verified'] = Variable<bool>(isVerified.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StickerAlbumsCompanion(')
+          ..write('albumId: $albumId, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updateAt: $updateAt, ')
+          ..write('orderedAt: $orderedAt, ')
+          ..write('userId: $userId, ')
+          ..write('category: $category, ')
+          ..write('description: $description, ')
+          ..write('banner: $banner, ')
+          ..write('added: $added, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class StickerRelationships extends Table
+    with TableInfo<StickerRelationships, StickerRelationship> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  StickerRelationships(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _albumIdMeta =
+      const VerificationMeta('albumId');
+  late final GeneratedColumn<String> albumId = GeneratedColumn<String>(
+      'album_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _stickerIdMeta =
+      const VerificationMeta('stickerId');
+  late final GeneratedColumn<String> stickerId = GeneratedColumn<String>(
+      'sticker_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  @override
+  List<GeneratedColumn> get $columns => [albumId, stickerId];
+  @override
+  String get aliasedName => _alias ?? 'sticker_relationships';
+  @override
+  String get actualTableName => 'sticker_relationships';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<StickerRelationship> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('album_id')) {
+      context.handle(_albumIdMeta,
+          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
+    } else if (isInserting) {
+      context.missing(_albumIdMeta);
+    }
+    if (data.containsKey('sticker_id')) {
+      context.handle(_stickerIdMeta,
+          stickerId.isAcceptableOrUnknown(data['sticker_id']!, _stickerIdMeta));
+    } else if (isInserting) {
+      context.missing(_stickerIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {albumId, stickerId};
+  @override
+  StickerRelationship map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StickerRelationship(
+      albumId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}album_id'])!,
+      stickerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sticker_id'])!,
+    );
+  }
+
+  @override
+  StickerRelationships createAlias(String alias) {
+    return StickerRelationships(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints =>
+      const ['PRIMARY KEY(album_id, sticker_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class StickerRelationship extends DataClass
+    implements Insertable<StickerRelationship> {
+  final String albumId;
+  final String stickerId;
+  const StickerRelationship({required this.albumId, required this.stickerId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['album_id'] = Variable<String>(albumId);
+    map['sticker_id'] = Variable<String>(stickerId);
+    return map;
+  }
+
+  StickerRelationshipsCompanion toCompanion(bool nullToAbsent) {
+    return StickerRelationshipsCompanion(
+      albumId: Value(albumId),
+      stickerId: Value(stickerId),
+    );
+  }
+
+  factory StickerRelationship.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StickerRelationship(
+      albumId: serializer.fromJson<String>(json['album_id']),
+      stickerId: serializer.fromJson<String>(json['sticker_id']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'album_id': serializer.toJson<String>(albumId),
+      'sticker_id': serializer.toJson<String>(stickerId),
+    };
+  }
+
+  StickerRelationship copyWith({String? albumId, String? stickerId}) =>
+      StickerRelationship(
+        albumId: albumId ?? this.albumId,
+        stickerId: stickerId ?? this.stickerId,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('StickerRelationship(')
+          ..write('albumId: $albumId, ')
+          ..write('stickerId: $stickerId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(albumId, stickerId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StickerRelationship &&
+          other.albumId == this.albumId &&
+          other.stickerId == this.stickerId);
+}
+
+class StickerRelationshipsCompanion
+    extends UpdateCompanion<StickerRelationship> {
+  final Value<String> albumId;
+  final Value<String> stickerId;
+  final Value<int> rowid;
+  const StickerRelationshipsCompanion({
+    this.albumId = const Value.absent(),
+    this.stickerId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StickerRelationshipsCompanion.insert({
+    required String albumId,
+    required String stickerId,
+    this.rowid = const Value.absent(),
+  })  : albumId = Value(albumId),
+        stickerId = Value(stickerId);
+  static Insertable<StickerRelationship> custom({
+    Expression<String>? albumId,
+    Expression<String>? stickerId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (albumId != null) 'album_id': albumId,
+      if (stickerId != null) 'sticker_id': stickerId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StickerRelationshipsCompanion copyWith(
+      {Value<String>? albumId, Value<String>? stickerId, Value<int>? rowid}) {
+    return StickerRelationshipsCompanion(
+      albumId: albumId ?? this.albumId,
+      stickerId: stickerId ?? this.stickerId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (albumId.present) {
+      map['album_id'] = Variable<String>(albumId.value);
+    }
+    if (stickerId.present) {
+      map['sticker_id'] = Variable<String>(stickerId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StickerRelationshipsCompanion(')
+          ..write('albumId: $albumId, ')
+          ..write('stickerId: $stickerId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class ParticipantSession extends Table
+    with TableInfo<ParticipantSession, ParticipantSessionData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  ParticipantSession(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+      'conversation_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _sessionIdMeta =
+      const VerificationMeta('sessionId');
+  late final GeneratedColumn<String> sessionId = GeneratedColumn<String>(
+      'session_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _sentToServerMeta =
+      const VerificationMeta('sentToServer');
+  late final GeneratedColumn<int> sentToServer = GeneratedColumn<int>(
+      'sent_to_server', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, true,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime?>(ParticipantSession.$convertercreatedAtn);
+  static const VerificationMeta _publicKeyMeta =
+      const VerificationMeta('publicKey');
+  late final GeneratedColumn<String> publicKey = GeneratedColumn<String>(
+      'public_key', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns =>
+      [conversationId, userId, sessionId, sentToServer, createdAt, publicKey];
+  @override
+  String get aliasedName => _alias ?? 'participant_session';
+  @override
+  String get actualTableName => 'participant_session';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ParticipantSessionData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('session_id')) {
+      context.handle(_sessionIdMeta,
+          sessionId.isAcceptableOrUnknown(data['session_id']!, _sessionIdMeta));
+    } else if (isInserting) {
+      context.missing(_sessionIdMeta);
+    }
+    if (data.containsKey('sent_to_server')) {
+      context.handle(
+          _sentToServerMeta,
+          sentToServer.isAcceptableOrUnknown(
+              data['sent_to_server']!, _sentToServerMeta));
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    if (data.containsKey('public_key')) {
+      context.handle(_publicKeyMeta,
+          publicKey.isAcceptableOrUnknown(data['public_key']!, _publicKeyMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {conversationId, userId, sessionId};
+  @override
+  ParticipantSessionData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ParticipantSessionData(
+      conversationId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      sessionId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}session_id'])!,
+      sentToServer: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sent_to_server']),
+      createdAt: ParticipantSession.$convertercreatedAtn.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.int, data['${effectivePrefix}created_at'])),
+      publicKey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}public_key']),
+    );
+  }
+
+  @override
+  ParticipantSession createAlias(String alias) {
+    return ParticipantSession(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $convertercreatedAtn =
+      NullAwareTypeConverter.wrap($convertercreatedAt);
+  @override
+  List<String> get customConstraints =>
+      const ['PRIMARY KEY(conversation_id, user_id, session_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class ParticipantSessionData extends DataClass
+    implements Insertable<ParticipantSessionData> {
+  final String conversationId;
+  final String userId;
+  final String sessionId;
+  final int? sentToServer;
+  final DateTime? createdAt;
+  final String? publicKey;
+  const ParticipantSessionData(
+      {required this.conversationId,
+      required this.userId,
+      required this.sessionId,
+      this.sentToServer,
+      this.createdAt,
+      this.publicKey});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['conversation_id'] = Variable<String>(conversationId);
+    map['user_id'] = Variable<String>(userId);
+    map['session_id'] = Variable<String>(sessionId);
+    if (!nullToAbsent || sentToServer != null) {
+      map['sent_to_server'] = Variable<int>(sentToServer);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      final converter = ParticipantSession.$convertercreatedAtn;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    if (!nullToAbsent || publicKey != null) {
+      map['public_key'] = Variable<String>(publicKey);
+    }
+    return map;
+  }
+
+  ParticipantSessionCompanion toCompanion(bool nullToAbsent) {
+    return ParticipantSessionCompanion(
+      conversationId: Value(conversationId),
+      userId: Value(userId),
+      sessionId: Value(sessionId),
+      sentToServer: sentToServer == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sentToServer),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      publicKey: publicKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(publicKey),
+    );
+  }
+
+  factory ParticipantSessionData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ParticipantSessionData(
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      userId: serializer.fromJson<String>(json['user_id']),
+      sessionId: serializer.fromJson<String>(json['session_id']),
+      sentToServer: serializer.fromJson<int?>(json['sent_to_server']),
+      createdAt: serializer.fromJson<DateTime?>(json['created_at']),
+      publicKey: serializer.fromJson<String?>(json['public_key']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'conversation_id': serializer.toJson<String>(conversationId),
+      'user_id': serializer.toJson<String>(userId),
+      'session_id': serializer.toJson<String>(sessionId),
+      'sent_to_server': serializer.toJson<int?>(sentToServer),
+      'created_at': serializer.toJson<DateTime?>(createdAt),
+      'public_key': serializer.toJson<String?>(publicKey),
+    };
+  }
+
+  ParticipantSessionData copyWith(
+          {String? conversationId,
+          String? userId,
+          String? sessionId,
+          Value<int?> sentToServer = const Value.absent(),
+          Value<DateTime?> createdAt = const Value.absent(),
+          Value<String?> publicKey = const Value.absent()}) =>
+      ParticipantSessionData(
+        conversationId: conversationId ?? this.conversationId,
+        userId: userId ?? this.userId,
+        sessionId: sessionId ?? this.sessionId,
+        sentToServer:
+            sentToServer.present ? sentToServer.value : this.sentToServer,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        publicKey: publicKey.present ? publicKey.value : this.publicKey,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('ParticipantSessionData(')
+          ..write('conversationId: $conversationId, ')
+          ..write('userId: $userId, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('sentToServer: $sentToServer, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('publicKey: $publicKey')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      conversationId, userId, sessionId, sentToServer, createdAt, publicKey);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ParticipantSessionData &&
+          other.conversationId == this.conversationId &&
+          other.userId == this.userId &&
+          other.sessionId == this.sessionId &&
+          other.sentToServer == this.sentToServer &&
+          other.createdAt == this.createdAt &&
+          other.publicKey == this.publicKey);
+}
+
+class ParticipantSessionCompanion
+    extends UpdateCompanion<ParticipantSessionData> {
+  final Value<String> conversationId;
+  final Value<String> userId;
+  final Value<String> sessionId;
+  final Value<int?> sentToServer;
+  final Value<DateTime?> createdAt;
+  final Value<String?> publicKey;
+  final Value<int> rowid;
+  const ParticipantSessionCompanion({
+    this.conversationId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.sessionId = const Value.absent(),
+    this.sentToServer = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.publicKey = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ParticipantSessionCompanion.insert({
+    required String conversationId,
+    required String userId,
+    required String sessionId,
+    this.sentToServer = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.publicKey = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : conversationId = Value(conversationId),
+        userId = Value(userId),
+        sessionId = Value(sessionId);
+  static Insertable<ParticipantSessionData> custom({
+    Expression<String>? conversationId,
+    Expression<String>? userId,
+    Expression<String>? sessionId,
+    Expression<int>? sentToServer,
+    Expression<int>? createdAt,
+    Expression<String>? publicKey,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (userId != null) 'user_id': userId,
+      if (sessionId != null) 'session_id': sessionId,
+      if (sentToServer != null) 'sent_to_server': sentToServer,
+      if (createdAt != null) 'created_at': createdAt,
+      if (publicKey != null) 'public_key': publicKey,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ParticipantSessionCompanion copyWith(
+      {Value<String>? conversationId,
+      Value<String>? userId,
+      Value<String>? sessionId,
+      Value<int?>? sentToServer,
+      Value<DateTime?>? createdAt,
+      Value<String?>? publicKey,
+      Value<int>? rowid}) {
+    return ParticipantSessionCompanion(
+      conversationId: conversationId ?? this.conversationId,
+      userId: userId ?? this.userId,
+      sessionId: sessionId ?? this.sessionId,
+      sentToServer: sentToServer ?? this.sentToServer,
+      createdAt: createdAt ?? this.createdAt,
+      publicKey: publicKey ?? this.publicKey,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (sessionId.present) {
+      map['session_id'] = Variable<String>(sessionId.value);
+    }
+    if (sentToServer.present) {
+      map['sent_to_server'] = Variable<int>(sentToServer.value);
+    }
+    if (createdAt.present) {
+      final converter = ParticipantSession.$convertercreatedAtn;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (publicKey.present) {
+      map['public_key'] = Variable<String>(publicKey.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParticipantSessionCompanion(')
+          ..write('conversationId: $conversationId, ')
+          ..write('userId: $userId, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('sentToServer: $sentToServer, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('publicKey: $publicKey, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5008,486 +7508,6 @@ class ChainsCompanion extends UpdateCompanion<Chain> {
   }
 }
 
-class Stickers extends Table with TableInfo<Stickers, Sticker> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  Stickers(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _stickerIdMeta =
-      const VerificationMeta('stickerId');
-  late final GeneratedColumn<String> stickerId = GeneratedColumn<String>(
-      'sticker_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _albumIdMeta =
-      const VerificationMeta('albumId');
-  late final GeneratedColumn<String> albumId = GeneratedColumn<String>(
-      'album_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _assetUrlMeta =
-      const VerificationMeta('assetUrl');
-  late final GeneratedColumn<String> assetUrl = GeneratedColumn<String>(
-      'asset_url', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _assetTypeMeta =
-      const VerificationMeta('assetType');
-  late final GeneratedColumn<String> assetType = GeneratedColumn<String>(
-      'asset_type', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _assetWidthMeta =
-      const VerificationMeta('assetWidth');
-  late final GeneratedColumn<int> assetWidth = GeneratedColumn<int>(
-      'asset_width', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _assetHeightMeta =
-      const VerificationMeta('assetHeight');
-  late final GeneratedColumn<int> assetHeight = GeneratedColumn<int>(
-      'asset_height', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(Stickers.$convertercreatedAt);
-  static const VerificationMeta _lastUseAtMeta =
-      const VerificationMeta('lastUseAt');
-  late final GeneratedColumnWithTypeConverter<DateTime?, int> lastUseAt =
-      GeneratedColumn<int>('last_use_at', aliasedName, true,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime?>(Stickers.$converterlastUseAtn);
-  @override
-  List<GeneratedColumn> get $columns => [
-        stickerId,
-        albumId,
-        name,
-        assetUrl,
-        assetType,
-        assetWidth,
-        assetHeight,
-        createdAt,
-        lastUseAt
-      ];
-  @override
-  String get aliasedName => _alias ?? 'stickers';
-  @override
-  String get actualTableName => 'stickers';
-  @override
-  VerificationContext validateIntegrity(Insertable<Sticker> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('sticker_id')) {
-      context.handle(_stickerIdMeta,
-          stickerId.isAcceptableOrUnknown(data['sticker_id']!, _stickerIdMeta));
-    } else if (isInserting) {
-      context.missing(_stickerIdMeta);
-    }
-    if (data.containsKey('album_id')) {
-      context.handle(_albumIdMeta,
-          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('asset_url')) {
-      context.handle(_assetUrlMeta,
-          assetUrl.isAcceptableOrUnknown(data['asset_url']!, _assetUrlMeta));
-    } else if (isInserting) {
-      context.missing(_assetUrlMeta);
-    }
-    if (data.containsKey('asset_type')) {
-      context.handle(_assetTypeMeta,
-          assetType.isAcceptableOrUnknown(data['asset_type']!, _assetTypeMeta));
-    } else if (isInserting) {
-      context.missing(_assetTypeMeta);
-    }
-    if (data.containsKey('asset_width')) {
-      context.handle(
-          _assetWidthMeta,
-          assetWidth.isAcceptableOrUnknown(
-              data['asset_width']!, _assetWidthMeta));
-    } else if (isInserting) {
-      context.missing(_assetWidthMeta);
-    }
-    if (data.containsKey('asset_height')) {
-      context.handle(
-          _assetHeightMeta,
-          assetHeight.isAcceptableOrUnknown(
-              data['asset_height']!, _assetHeightMeta));
-    } else if (isInserting) {
-      context.missing(_assetHeightMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_lastUseAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {stickerId};
-  @override
-  Sticker map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Sticker(
-      stickerId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sticker_id'])!,
-      albumId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}album_id']),
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      assetUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}asset_url'])!,
-      assetType: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}asset_type'])!,
-      assetWidth: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}asset_width'])!,
-      assetHeight: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}asset_height'])!,
-      createdAt: Stickers.$convertercreatedAt.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-      lastUseAt: Stickers.$converterlastUseAtn.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_use_at'])),
-    );
-  }
-
-  @override
-  Stickers createAlias(String alias) {
-    return Stickers(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converterlastUseAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime?, int?> $converterlastUseAtn =
-      NullAwareTypeConverter.wrap($converterlastUseAt);
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(sticker_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class Sticker extends DataClass implements Insertable<Sticker> {
-  final String stickerId;
-  final String? albumId;
-  final String name;
-  final String assetUrl;
-  final String assetType;
-  final int assetWidth;
-  final int assetHeight;
-  final DateTime createdAt;
-  final DateTime? lastUseAt;
-  const Sticker(
-      {required this.stickerId,
-      this.albumId,
-      required this.name,
-      required this.assetUrl,
-      required this.assetType,
-      required this.assetWidth,
-      required this.assetHeight,
-      required this.createdAt,
-      this.lastUseAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['sticker_id'] = Variable<String>(stickerId);
-    if (!nullToAbsent || albumId != null) {
-      map['album_id'] = Variable<String>(albumId);
-    }
-    map['name'] = Variable<String>(name);
-    map['asset_url'] = Variable<String>(assetUrl);
-    map['asset_type'] = Variable<String>(assetType);
-    map['asset_width'] = Variable<int>(assetWidth);
-    map['asset_height'] = Variable<int>(assetHeight);
-    {
-      final converter = Stickers.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    if (!nullToAbsent || lastUseAt != null) {
-      final converter = Stickers.$converterlastUseAtn;
-      map['last_use_at'] = Variable<int>(converter.toSql(lastUseAt));
-    }
-    return map;
-  }
-
-  StickersCompanion toCompanion(bool nullToAbsent) {
-    return StickersCompanion(
-      stickerId: Value(stickerId),
-      albumId: albumId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(albumId),
-      name: Value(name),
-      assetUrl: Value(assetUrl),
-      assetType: Value(assetType),
-      assetWidth: Value(assetWidth),
-      assetHeight: Value(assetHeight),
-      createdAt: Value(createdAt),
-      lastUseAt: lastUseAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastUseAt),
-    );
-  }
-
-  factory Sticker.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Sticker(
-      stickerId: serializer.fromJson<String>(json['sticker_id']),
-      albumId: serializer.fromJson<String?>(json['album_id']),
-      name: serializer.fromJson<String>(json['name']),
-      assetUrl: serializer.fromJson<String>(json['asset_url']),
-      assetType: serializer.fromJson<String>(json['asset_type']),
-      assetWidth: serializer.fromJson<int>(json['asset_width']),
-      assetHeight: serializer.fromJson<int>(json['asset_height']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      lastUseAt: serializer.fromJson<DateTime?>(json['last_use_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'sticker_id': serializer.toJson<String>(stickerId),
-      'album_id': serializer.toJson<String?>(albumId),
-      'name': serializer.toJson<String>(name),
-      'asset_url': serializer.toJson<String>(assetUrl),
-      'asset_type': serializer.toJson<String>(assetType),
-      'asset_width': serializer.toJson<int>(assetWidth),
-      'asset_height': serializer.toJson<int>(assetHeight),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-      'last_use_at': serializer.toJson<DateTime?>(lastUseAt),
-    };
-  }
-
-  Sticker copyWith(
-          {String? stickerId,
-          Value<String?> albumId = const Value.absent(),
-          String? name,
-          String? assetUrl,
-          String? assetType,
-          int? assetWidth,
-          int? assetHeight,
-          DateTime? createdAt,
-          Value<DateTime?> lastUseAt = const Value.absent()}) =>
-      Sticker(
-        stickerId: stickerId ?? this.stickerId,
-        albumId: albumId.present ? albumId.value : this.albumId,
-        name: name ?? this.name,
-        assetUrl: assetUrl ?? this.assetUrl,
-        assetType: assetType ?? this.assetType,
-        assetWidth: assetWidth ?? this.assetWidth,
-        assetHeight: assetHeight ?? this.assetHeight,
-        createdAt: createdAt ?? this.createdAt,
-        lastUseAt: lastUseAt.present ? lastUseAt.value : this.lastUseAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('Sticker(')
-          ..write('stickerId: $stickerId, ')
-          ..write('albumId: $albumId, ')
-          ..write('name: $name, ')
-          ..write('assetUrl: $assetUrl, ')
-          ..write('assetType: $assetType, ')
-          ..write('assetWidth: $assetWidth, ')
-          ..write('assetHeight: $assetHeight, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('lastUseAt: $lastUseAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(stickerId, albumId, name, assetUrl, assetType,
-      assetWidth, assetHeight, createdAt, lastUseAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Sticker &&
-          other.stickerId == this.stickerId &&
-          other.albumId == this.albumId &&
-          other.name == this.name &&
-          other.assetUrl == this.assetUrl &&
-          other.assetType == this.assetType &&
-          other.assetWidth == this.assetWidth &&
-          other.assetHeight == this.assetHeight &&
-          other.createdAt == this.createdAt &&
-          other.lastUseAt == this.lastUseAt);
-}
-
-class StickersCompanion extends UpdateCompanion<Sticker> {
-  final Value<String> stickerId;
-  final Value<String?> albumId;
-  final Value<String> name;
-  final Value<String> assetUrl;
-  final Value<String> assetType;
-  final Value<int> assetWidth;
-  final Value<int> assetHeight;
-  final Value<DateTime> createdAt;
-  final Value<DateTime?> lastUseAt;
-  final Value<int> rowid;
-  const StickersCompanion({
-    this.stickerId = const Value.absent(),
-    this.albumId = const Value.absent(),
-    this.name = const Value.absent(),
-    this.assetUrl = const Value.absent(),
-    this.assetType = const Value.absent(),
-    this.assetWidth = const Value.absent(),
-    this.assetHeight = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.lastUseAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  StickersCompanion.insert({
-    required String stickerId,
-    this.albumId = const Value.absent(),
-    required String name,
-    required String assetUrl,
-    required String assetType,
-    required int assetWidth,
-    required int assetHeight,
-    required DateTime createdAt,
-    this.lastUseAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  })  : stickerId = Value(stickerId),
-        name = Value(name),
-        assetUrl = Value(assetUrl),
-        assetType = Value(assetType),
-        assetWidth = Value(assetWidth),
-        assetHeight = Value(assetHeight),
-        createdAt = Value(createdAt);
-  static Insertable<Sticker> custom({
-    Expression<String>? stickerId,
-    Expression<String>? albumId,
-    Expression<String>? name,
-    Expression<String>? assetUrl,
-    Expression<String>? assetType,
-    Expression<int>? assetWidth,
-    Expression<int>? assetHeight,
-    Expression<int>? createdAt,
-    Expression<int>? lastUseAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (stickerId != null) 'sticker_id': stickerId,
-      if (albumId != null) 'album_id': albumId,
-      if (name != null) 'name': name,
-      if (assetUrl != null) 'asset_url': assetUrl,
-      if (assetType != null) 'asset_type': assetType,
-      if (assetWidth != null) 'asset_width': assetWidth,
-      if (assetHeight != null) 'asset_height': assetHeight,
-      if (createdAt != null) 'created_at': createdAt,
-      if (lastUseAt != null) 'last_use_at': lastUseAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  StickersCompanion copyWith(
-      {Value<String>? stickerId,
-      Value<String?>? albumId,
-      Value<String>? name,
-      Value<String>? assetUrl,
-      Value<String>? assetType,
-      Value<int>? assetWidth,
-      Value<int>? assetHeight,
-      Value<DateTime>? createdAt,
-      Value<DateTime?>? lastUseAt,
-      Value<int>? rowid}) {
-    return StickersCompanion(
-      stickerId: stickerId ?? this.stickerId,
-      albumId: albumId ?? this.albumId,
-      name: name ?? this.name,
-      assetUrl: assetUrl ?? this.assetUrl,
-      assetType: assetType ?? this.assetType,
-      assetWidth: assetWidth ?? this.assetWidth,
-      assetHeight: assetHeight ?? this.assetHeight,
-      createdAt: createdAt ?? this.createdAt,
-      lastUseAt: lastUseAt ?? this.lastUseAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (stickerId.present) {
-      map['sticker_id'] = Variable<String>(stickerId.value);
-    }
-    if (albumId.present) {
-      map['album_id'] = Variable<String>(albumId.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (assetUrl.present) {
-      map['asset_url'] = Variable<String>(assetUrl.value);
-    }
-    if (assetType.present) {
-      map['asset_type'] = Variable<String>(assetType.value);
-    }
-    if (assetWidth.present) {
-      map['asset_width'] = Variable<int>(assetWidth.value);
-    }
-    if (assetHeight.present) {
-      map['asset_height'] = Variable<int>(assetHeight.value);
-    }
-    if (createdAt.present) {
-      final converter = Stickers.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (lastUseAt.present) {
-      final converter = Stickers.$converterlastUseAtn;
-      map['last_use_at'] = Variable<int>(converter.toSql(lastUseAt.value));
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('StickersCompanion(')
-          ..write('stickerId: $stickerId, ')
-          ..write('albumId: $albumId, ')
-          ..write('name: $name, ')
-          ..write('assetUrl: $assetUrl, ')
-          ..write('assetType: $assetType, ')
-          ..write('assetWidth: $assetWidth, ')
-          ..write('assetHeight: $assetHeight, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('lastUseAt: $lastUseAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -6040,6 +8060,243 @@ class MessageMentionsCompanion extends UpdateCompanion<MessageMention> {
   }
 }
 
+class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  PinMessages(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _messageIdMeta =
+      const VerificationMeta('messageId');
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
+      'message_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+      'conversation_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(PinMessages.$convertercreatedAt);
+  @override
+  List<GeneratedColumn> get $columns => [messageId, conversationId, createdAt];
+  @override
+  String get aliasedName => _alias ?? 'pin_messages';
+  @override
+  String get actualTableName => 'pin_messages';
+  @override
+  VerificationContext validateIntegrity(Insertable<PinMessage> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId};
+  @override
+  PinMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PinMessage(
+      messageId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+      conversationId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
+      createdAt: PinMessages.$convertercreatedAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+    );
+  }
+
+  @override
+  PinMessages createAlias(String alias) {
+    return PinMessages(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class PinMessage extends DataClass implements Insertable<PinMessage> {
+  final String messageId;
+  final String conversationId;
+  final DateTime createdAt;
+  const PinMessage(
+      {required this.messageId,
+      required this.conversationId,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['message_id'] = Variable<String>(messageId);
+    map['conversation_id'] = Variable<String>(conversationId);
+    {
+      final converter = PinMessages.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    return map;
+  }
+
+  PinMessagesCompanion toCompanion(bool nullToAbsent) {
+    return PinMessagesCompanion(
+      messageId: Value(messageId),
+      conversationId: Value(conversationId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory PinMessage.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PinMessage(
+      messageId: serializer.fromJson<String>(json['message_id']),
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'message_id': serializer.toJson<String>(messageId),
+      'conversation_id': serializer.toJson<String>(conversationId),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  PinMessage copyWith(
+          {String? messageId, String? conversationId, DateTime? createdAt}) =>
+      PinMessage(
+        messageId: messageId ?? this.messageId,
+        conversationId: conversationId ?? this.conversationId,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('PinMessage(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(messageId, conversationId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PinMessage &&
+          other.messageId == this.messageId &&
+          other.conversationId == this.conversationId &&
+          other.createdAt == this.createdAt);
+}
+
+class PinMessagesCompanion extends UpdateCompanion<PinMessage> {
+  final Value<String> messageId;
+  final Value<String> conversationId;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const PinMessagesCompanion({
+    this.messageId = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PinMessagesCompanion.insert({
+    required String messageId,
+    required String conversationId,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  })  : messageId = Value(messageId),
+        conversationId = Value(conversationId),
+        createdAt = Value(createdAt);
+  static Insertable<PinMessage> custom({
+    Expression<String>? messageId,
+    Expression<String>? conversationId,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PinMessagesCompanion copyWith(
+      {Value<String>? messageId,
+      Value<String>? conversationId,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return PinMessagesCompanion(
+      messageId: messageId ?? this.messageId,
+      conversationId: conversationId ?? this.conversationId,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (createdAt.present) {
+      final converter = PinMessages.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PinMessagesCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class ExpiredMessages extends Table
     with TableInfo<ExpiredMessages, ExpiredMessage> {
   @override
@@ -6268,2263 +8525,6 @@ class ExpiredMessagesCompanion extends UpdateCompanion<ExpiredMessage> {
           ..write('messageId: $messageId, ')
           ..write('expireIn: $expireIn, ')
           ..write('expireAt: $expireAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  FloodMessages(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _messageIdMeta =
-      const VerificationMeta('messageId');
-  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
-      'message_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _dataMeta = const VerificationMeta('data');
-  late final GeneratedColumn<String> data = GeneratedColumn<String>(
-      'data', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(FloodMessages.$convertercreatedAt);
-  @override
-  List<GeneratedColumn> get $columns => [messageId, data, createdAt];
-  @override
-  String get aliasedName => _alias ?? 'flood_messages';
-  @override
-  String get actualTableName => 'flood_messages';
-  @override
-  VerificationContext validateIntegrity(Insertable<FloodMessage> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('message_id')) {
-      context.handle(_messageIdMeta,
-          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
-    }
-    if (data.containsKey('data')) {
-      context.handle(
-          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
-    } else if (isInserting) {
-      context.missing(_dataMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {messageId};
-  @override
-  FloodMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return FloodMessage(
-      messageId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
-      data: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
-      createdAt: FloodMessages.$convertercreatedAt.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-    );
-  }
-
-  @override
-  FloodMessages createAlias(String alias) {
-    return FloodMessages(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class FloodMessage extends DataClass implements Insertable<FloodMessage> {
-  final String messageId;
-  final String data;
-  final DateTime createdAt;
-  const FloodMessage(
-      {required this.messageId, required this.data, required this.createdAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['message_id'] = Variable<String>(messageId);
-    map['data'] = Variable<String>(data);
-    {
-      final converter = FloodMessages.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    return map;
-  }
-
-  FloodMessagesCompanion toCompanion(bool nullToAbsent) {
-    return FloodMessagesCompanion(
-      messageId: Value(messageId),
-      data: Value(data),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory FloodMessage.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return FloodMessage(
-      messageId: serializer.fromJson<String>(json['message_id']),
-      data: serializer.fromJson<String>(json['data']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'message_id': serializer.toJson<String>(messageId),
-      'data': serializer.toJson<String>(data),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-    };
-  }
-
-  FloodMessage copyWith(
-          {String? messageId, String? data, DateTime? createdAt}) =>
-      FloodMessage(
-        messageId: messageId ?? this.messageId,
-        data: data ?? this.data,
-        createdAt: createdAt ?? this.createdAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('FloodMessage(')
-          ..write('messageId: $messageId, ')
-          ..write('data: $data, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(messageId, data, createdAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is FloodMessage &&
-          other.messageId == this.messageId &&
-          other.data == this.data &&
-          other.createdAt == this.createdAt);
-}
-
-class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
-  final Value<String> messageId;
-  final Value<String> data;
-  final Value<DateTime> createdAt;
-  final Value<int> rowid;
-  const FloodMessagesCompanion({
-    this.messageId = const Value.absent(),
-    this.data = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  FloodMessagesCompanion.insert({
-    required String messageId,
-    required String data,
-    required DateTime createdAt,
-    this.rowid = const Value.absent(),
-  })  : messageId = Value(messageId),
-        data = Value(data),
-        createdAt = Value(createdAt);
-  static Insertable<FloodMessage> custom({
-    Expression<String>? messageId,
-    Expression<String>? data,
-    Expression<int>? createdAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (messageId != null) 'message_id': messageId,
-      if (data != null) 'data': data,
-      if (createdAt != null) 'created_at': createdAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  FloodMessagesCompanion copyWith(
-      {Value<String>? messageId,
-      Value<String>? data,
-      Value<DateTime>? createdAt,
-      Value<int>? rowid}) {
-    return FloodMessagesCompanion(
-      messageId: messageId ?? this.messageId,
-      data: data ?? this.data,
-      createdAt: createdAt ?? this.createdAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (messageId.present) {
-      map['message_id'] = Variable<String>(messageId.value);
-    }
-    if (data.present) {
-      map['data'] = Variable<String>(data.value);
-    }
-    if (createdAt.present) {
-      final converter = FloodMessages.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('FloodMessagesCompanion(')
-          ..write('messageId: $messageId, ')
-          ..write('data: $data, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class Circles extends Table with TableInfo<Circles, Circle> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  Circles(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _circleIdMeta =
-      const VerificationMeta('circleId');
-  late final GeneratedColumn<String> circleId = GeneratedColumn<String>(
-      'circle_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(Circles.$convertercreatedAt);
-  static const VerificationMeta _orderedAtMeta =
-      const VerificationMeta('orderedAt');
-  late final GeneratedColumnWithTypeConverter<DateTime?, int> orderedAt =
-      GeneratedColumn<int>('ordered_at', aliasedName, true,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime?>(Circles.$converterorderedAtn);
-  @override
-  List<GeneratedColumn> get $columns => [circleId, name, createdAt, orderedAt];
-  @override
-  String get aliasedName => _alias ?? 'circles';
-  @override
-  String get actualTableName => 'circles';
-  @override
-  VerificationContext validateIntegrity(Insertable<Circle> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('circle_id')) {
-      context.handle(_circleIdMeta,
-          circleId.isAcceptableOrUnknown(data['circle_id']!, _circleIdMeta));
-    } else if (isInserting) {
-      context.missing(_circleIdMeta);
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_orderedAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {circleId};
-  @override
-  Circle map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Circle(
-      circleId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}circle_id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      createdAt: Circles.$convertercreatedAt.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-      orderedAt: Circles.$converterorderedAtn.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}ordered_at'])),
-    );
-  }
-
-  @override
-  Circles createAlias(String alias) {
-    return Circles(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converterorderedAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime?, int?> $converterorderedAtn =
-      NullAwareTypeConverter.wrap($converterorderedAt);
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(circle_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class Circle extends DataClass implements Insertable<Circle> {
-  final String circleId;
-  final String name;
-  final DateTime createdAt;
-  final DateTime? orderedAt;
-  const Circle(
-      {required this.circleId,
-      required this.name,
-      required this.createdAt,
-      this.orderedAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['circle_id'] = Variable<String>(circleId);
-    map['name'] = Variable<String>(name);
-    {
-      final converter = Circles.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    if (!nullToAbsent || orderedAt != null) {
-      final converter = Circles.$converterorderedAtn;
-      map['ordered_at'] = Variable<int>(converter.toSql(orderedAt));
-    }
-    return map;
-  }
-
-  CirclesCompanion toCompanion(bool nullToAbsent) {
-    return CirclesCompanion(
-      circleId: Value(circleId),
-      name: Value(name),
-      createdAt: Value(createdAt),
-      orderedAt: orderedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(orderedAt),
-    );
-  }
-
-  factory Circle.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Circle(
-      circleId: serializer.fromJson<String>(json['circle_id']),
-      name: serializer.fromJson<String>(json['name']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      orderedAt: serializer.fromJson<DateTime?>(json['ordered_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'circle_id': serializer.toJson<String>(circleId),
-      'name': serializer.toJson<String>(name),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-      'ordered_at': serializer.toJson<DateTime?>(orderedAt),
-    };
-  }
-
-  Circle copyWith(
-          {String? circleId,
-          String? name,
-          DateTime? createdAt,
-          Value<DateTime?> orderedAt = const Value.absent()}) =>
-      Circle(
-        circleId: circleId ?? this.circleId,
-        name: name ?? this.name,
-        createdAt: createdAt ?? this.createdAt,
-        orderedAt: orderedAt.present ? orderedAt.value : this.orderedAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('Circle(')
-          ..write('circleId: $circleId, ')
-          ..write('name: $name, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('orderedAt: $orderedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(circleId, name, createdAt, orderedAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Circle &&
-          other.circleId == this.circleId &&
-          other.name == this.name &&
-          other.createdAt == this.createdAt &&
-          other.orderedAt == this.orderedAt);
-}
-
-class CirclesCompanion extends UpdateCompanion<Circle> {
-  final Value<String> circleId;
-  final Value<String> name;
-  final Value<DateTime> createdAt;
-  final Value<DateTime?> orderedAt;
-  final Value<int> rowid;
-  const CirclesCompanion({
-    this.circleId = const Value.absent(),
-    this.name = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.orderedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  CirclesCompanion.insert({
-    required String circleId,
-    required String name,
-    required DateTime createdAt,
-    this.orderedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  })  : circleId = Value(circleId),
-        name = Value(name),
-        createdAt = Value(createdAt);
-  static Insertable<Circle> custom({
-    Expression<String>? circleId,
-    Expression<String>? name,
-    Expression<int>? createdAt,
-    Expression<int>? orderedAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (circleId != null) 'circle_id': circleId,
-      if (name != null) 'name': name,
-      if (createdAt != null) 'created_at': createdAt,
-      if (orderedAt != null) 'ordered_at': orderedAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  CirclesCompanion copyWith(
-      {Value<String>? circleId,
-      Value<String>? name,
-      Value<DateTime>? createdAt,
-      Value<DateTime?>? orderedAt,
-      Value<int>? rowid}) {
-    return CirclesCompanion(
-      circleId: circleId ?? this.circleId,
-      name: name ?? this.name,
-      createdAt: createdAt ?? this.createdAt,
-      orderedAt: orderedAt ?? this.orderedAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (circleId.present) {
-      map['circle_id'] = Variable<String>(circleId.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (createdAt.present) {
-      final converter = Circles.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (orderedAt.present) {
-      final converter = Circles.$converterorderedAtn;
-      map['ordered_at'] = Variable<int>(converter.toSql(orderedAt.value));
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CirclesCompanion(')
-          ..write('circleId: $circleId, ')
-          ..write('name: $name, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('orderedAt: $orderedAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class CircleConversations extends Table
-    with TableInfo<CircleConversations, CircleConversation> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  CircleConversations(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _conversationIdMeta =
-      const VerificationMeta('conversationId');
-  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
-      'conversation_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _circleIdMeta =
-      const VerificationMeta('circleId');
-  late final GeneratedColumn<String> circleId = GeneratedColumn<String>(
-      'circle_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(CircleConversations.$convertercreatedAt);
-  static const VerificationMeta _pinTimeMeta =
-      const VerificationMeta('pinTime');
-  late final GeneratedColumnWithTypeConverter<DateTime?, int> pinTime =
-      GeneratedColumn<int>('pin_time', aliasedName, true,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime?>(CircleConversations.$converterpinTimen);
-  @override
-  List<GeneratedColumn> get $columns =>
-      [conversationId, circleId, userId, createdAt, pinTime];
-  @override
-  String get aliasedName => _alias ?? 'circle_conversations';
-  @override
-  String get actualTableName => 'circle_conversations';
-  @override
-  VerificationContext validateIntegrity(Insertable<CircleConversation> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('conversation_id')) {
-      context.handle(
-          _conversationIdMeta,
-          conversationId.isAcceptableOrUnknown(
-              data['conversation_id']!, _conversationIdMeta));
-    } else if (isInserting) {
-      context.missing(_conversationIdMeta);
-    }
-    if (data.containsKey('circle_id')) {
-      context.handle(_circleIdMeta,
-          circleId.isAcceptableOrUnknown(data['circle_id']!, _circleIdMeta));
-    } else if (isInserting) {
-      context.missing(_circleIdMeta);
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_pinTimeMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {conversationId, circleId};
-  @override
-  CircleConversation map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CircleConversation(
-      conversationId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
-      circleId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}circle_id'])!,
-      userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
-      createdAt: CircleConversations.$convertercreatedAt.fromSql(
-          attachedDatabase.typeMapping
-              .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-      pinTime: CircleConversations.$converterpinTimen.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}pin_time'])),
-    );
-  }
-
-  @override
-  CircleConversations createAlias(String alias) {
-    return CircleConversations(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converterpinTime =
-      const MillisDateConverter();
-  static TypeConverter<DateTime?, int?> $converterpinTimen =
-      NullAwareTypeConverter.wrap($converterpinTime);
-  @override
-  List<String> get customConstraints =>
-      const ['PRIMARY KEY(conversation_id, circle_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class CircleConversation extends DataClass
-    implements Insertable<CircleConversation> {
-  final String conversationId;
-  final String circleId;
-  final String? userId;
-  final DateTime createdAt;
-  final DateTime? pinTime;
-  const CircleConversation(
-      {required this.conversationId,
-      required this.circleId,
-      this.userId,
-      required this.createdAt,
-      this.pinTime});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['conversation_id'] = Variable<String>(conversationId);
-    map['circle_id'] = Variable<String>(circleId);
-    if (!nullToAbsent || userId != null) {
-      map['user_id'] = Variable<String>(userId);
-    }
-    {
-      final converter = CircleConversations.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    if (!nullToAbsent || pinTime != null) {
-      final converter = CircleConversations.$converterpinTimen;
-      map['pin_time'] = Variable<int>(converter.toSql(pinTime));
-    }
-    return map;
-  }
-
-  CircleConversationsCompanion toCompanion(bool nullToAbsent) {
-    return CircleConversationsCompanion(
-      conversationId: Value(conversationId),
-      circleId: Value(circleId),
-      userId:
-          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      createdAt: Value(createdAt),
-      pinTime: pinTime == null && nullToAbsent
-          ? const Value.absent()
-          : Value(pinTime),
-    );
-  }
-
-  factory CircleConversation.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return CircleConversation(
-      conversationId: serializer.fromJson<String>(json['conversation_id']),
-      circleId: serializer.fromJson<String>(json['circle_id']),
-      userId: serializer.fromJson<String?>(json['user_id']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      pinTime: serializer.fromJson<DateTime?>(json['pin_time']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'conversation_id': serializer.toJson<String>(conversationId),
-      'circle_id': serializer.toJson<String>(circleId),
-      'user_id': serializer.toJson<String?>(userId),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-      'pin_time': serializer.toJson<DateTime?>(pinTime),
-    };
-  }
-
-  CircleConversation copyWith(
-          {String? conversationId,
-          String? circleId,
-          Value<String?> userId = const Value.absent(),
-          DateTime? createdAt,
-          Value<DateTime?> pinTime = const Value.absent()}) =>
-      CircleConversation(
-        conversationId: conversationId ?? this.conversationId,
-        circleId: circleId ?? this.circleId,
-        userId: userId.present ? userId.value : this.userId,
-        createdAt: createdAt ?? this.createdAt,
-        pinTime: pinTime.present ? pinTime.value : this.pinTime,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('CircleConversation(')
-          ..write('conversationId: $conversationId, ')
-          ..write('circleId: $circleId, ')
-          ..write('userId: $userId, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('pinTime: $pinTime')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(conversationId, circleId, userId, createdAt, pinTime);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is CircleConversation &&
-          other.conversationId == this.conversationId &&
-          other.circleId == this.circleId &&
-          other.userId == this.userId &&
-          other.createdAt == this.createdAt &&
-          other.pinTime == this.pinTime);
-}
-
-class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
-  final Value<String> conversationId;
-  final Value<String> circleId;
-  final Value<String?> userId;
-  final Value<DateTime> createdAt;
-  final Value<DateTime?> pinTime;
-  final Value<int> rowid;
-  const CircleConversationsCompanion({
-    this.conversationId = const Value.absent(),
-    this.circleId = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.pinTime = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  CircleConversationsCompanion.insert({
-    required String conversationId,
-    required String circleId,
-    this.userId = const Value.absent(),
-    required DateTime createdAt,
-    this.pinTime = const Value.absent(),
-    this.rowid = const Value.absent(),
-  })  : conversationId = Value(conversationId),
-        circleId = Value(circleId),
-        createdAt = Value(createdAt);
-  static Insertable<CircleConversation> custom({
-    Expression<String>? conversationId,
-    Expression<String>? circleId,
-    Expression<String>? userId,
-    Expression<int>? createdAt,
-    Expression<int>? pinTime,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (conversationId != null) 'conversation_id': conversationId,
-      if (circleId != null) 'circle_id': circleId,
-      if (userId != null) 'user_id': userId,
-      if (createdAt != null) 'created_at': createdAt,
-      if (pinTime != null) 'pin_time': pinTime,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  CircleConversationsCompanion copyWith(
-      {Value<String>? conversationId,
-      Value<String>? circleId,
-      Value<String?>? userId,
-      Value<DateTime>? createdAt,
-      Value<DateTime?>? pinTime,
-      Value<int>? rowid}) {
-    return CircleConversationsCompanion(
-      conversationId: conversationId ?? this.conversationId,
-      circleId: circleId ?? this.circleId,
-      userId: userId ?? this.userId,
-      createdAt: createdAt ?? this.createdAt,
-      pinTime: pinTime ?? this.pinTime,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (conversationId.present) {
-      map['conversation_id'] = Variable<String>(conversationId.value);
-    }
-    if (circleId.present) {
-      map['circle_id'] = Variable<String>(circleId.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (createdAt.present) {
-      final converter = CircleConversations.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (pinTime.present) {
-      final converter = CircleConversations.$converterpinTimen;
-      map['pin_time'] = Variable<int>(converter.toSql(pinTime.value));
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CircleConversationsCompanion(')
-          ..write('conversationId: $conversationId, ')
-          ..write('circleId: $circleId, ')
-          ..write('userId: $userId, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('pinTime: $pinTime, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class Participants extends Table with TableInfo<Participants, Participant> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  Participants(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _conversationIdMeta =
-      const VerificationMeta('conversationId');
-  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
-      'conversation_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _roleMeta = const VerificationMeta('role');
-  late final GeneratedColumnWithTypeConverter<ParticipantRole?, String> role =
-      GeneratedColumn<String>('role', aliasedName, true,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<ParticipantRole?>(Participants.$converterrole);
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(Participants.$convertercreatedAt);
-  @override
-  List<GeneratedColumn> get $columns =>
-      [conversationId, userId, role, createdAt];
-  @override
-  String get aliasedName => _alias ?? 'participants';
-  @override
-  String get actualTableName => 'participants';
-  @override
-  VerificationContext validateIntegrity(Insertable<Participant> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('conversation_id')) {
-      context.handle(
-          _conversationIdMeta,
-          conversationId.isAcceptableOrUnknown(
-              data['conversation_id']!, _conversationIdMeta));
-    } else if (isInserting) {
-      context.missing(_conversationIdMeta);
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    context.handle(_roleMeta, const VerificationResult.success());
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {conversationId, userId};
-  @override
-  Participant map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Participant(
-      conversationId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
-      userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
-      role: Participants.$converterrole.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}role'])),
-      createdAt: Participants.$convertercreatedAt.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-    );
-  }
-
-  @override
-  Participants createAlias(String alias) {
-    return Participants(attachedDatabase, alias);
-  }
-
-  static TypeConverter<ParticipantRole?, String?> $converterrole =
-      const ParticipantRoleConverter();
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const [
-        'PRIMARY KEY(conversation_id, user_id)',
-        'FOREIGN KEY(conversation_id)REFERENCES conversations(conversation_id)ON UPDATE NO ACTION ON DELETE CASCADE'
-      ];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class Participant extends DataClass implements Insertable<Participant> {
-  final String conversationId;
-  final String userId;
-  final ParticipantRole? role;
-  final DateTime createdAt;
-  const Participant(
-      {required this.conversationId,
-      required this.userId,
-      this.role,
-      required this.createdAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['conversation_id'] = Variable<String>(conversationId);
-    map['user_id'] = Variable<String>(userId);
-    if (!nullToAbsent || role != null) {
-      final converter = Participants.$converterrole;
-      map['role'] = Variable<String>(converter.toSql(role));
-    }
-    {
-      final converter = Participants.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    return map;
-  }
-
-  ParticipantsCompanion toCompanion(bool nullToAbsent) {
-    return ParticipantsCompanion(
-      conversationId: Value(conversationId),
-      userId: Value(userId),
-      role: role == null && nullToAbsent ? const Value.absent() : Value(role),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory Participant.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Participant(
-      conversationId: serializer.fromJson<String>(json['conversation_id']),
-      userId: serializer.fromJson<String>(json['user_id']),
-      role: serializer.fromJson<ParticipantRole?>(json['role']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'conversation_id': serializer.toJson<String>(conversationId),
-      'user_id': serializer.toJson<String>(userId),
-      'role': serializer.toJson<ParticipantRole?>(role),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-    };
-  }
-
-  Participant copyWith(
-          {String? conversationId,
-          String? userId,
-          Value<ParticipantRole?> role = const Value.absent(),
-          DateTime? createdAt}) =>
-      Participant(
-        conversationId: conversationId ?? this.conversationId,
-        userId: userId ?? this.userId,
-        role: role.present ? role.value : this.role,
-        createdAt: createdAt ?? this.createdAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('Participant(')
-          ..write('conversationId: $conversationId, ')
-          ..write('userId: $userId, ')
-          ..write('role: $role, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(conversationId, userId, role, createdAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Participant &&
-          other.conversationId == this.conversationId &&
-          other.userId == this.userId &&
-          other.role == this.role &&
-          other.createdAt == this.createdAt);
-}
-
-class ParticipantsCompanion extends UpdateCompanion<Participant> {
-  final Value<String> conversationId;
-  final Value<String> userId;
-  final Value<ParticipantRole?> role;
-  final Value<DateTime> createdAt;
-  final Value<int> rowid;
-  const ParticipantsCompanion({
-    this.conversationId = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.role = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  ParticipantsCompanion.insert({
-    required String conversationId,
-    required String userId,
-    this.role = const Value.absent(),
-    required DateTime createdAt,
-    this.rowid = const Value.absent(),
-  })  : conversationId = Value(conversationId),
-        userId = Value(userId),
-        createdAt = Value(createdAt);
-  static Insertable<Participant> custom({
-    Expression<String>? conversationId,
-    Expression<String>? userId,
-    Expression<String>? role,
-    Expression<int>? createdAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (conversationId != null) 'conversation_id': conversationId,
-      if (userId != null) 'user_id': userId,
-      if (role != null) 'role': role,
-      if (createdAt != null) 'created_at': createdAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  ParticipantsCompanion copyWith(
-      {Value<String>? conversationId,
-      Value<String>? userId,
-      Value<ParticipantRole?>? role,
-      Value<DateTime>? createdAt,
-      Value<int>? rowid}) {
-    return ParticipantsCompanion(
-      conversationId: conversationId ?? this.conversationId,
-      userId: userId ?? this.userId,
-      role: role ?? this.role,
-      createdAt: createdAt ?? this.createdAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (conversationId.present) {
-      map['conversation_id'] = Variable<String>(conversationId.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (role.present) {
-      final converter = Participants.$converterrole;
-      map['role'] = Variable<String>(converter.toSql(role.value));
-    }
-    if (createdAt.present) {
-      final converter = Participants.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ParticipantsCompanion(')
-          ..write('conversationId: $conversationId, ')
-          ..write('userId: $userId, ')
-          ..write('role: $role, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  StickerAlbums(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _albumIdMeta =
-      const VerificationMeta('albumId');
-  late final GeneratedColumn<String> albumId = GeneratedColumn<String>(
-      'album_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _iconUrlMeta =
-      const VerificationMeta('iconUrl');
-  late final GeneratedColumn<String> iconUrl = GeneratedColumn<String>(
-      'icon_url', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(StickerAlbums.$convertercreatedAt);
-  static const VerificationMeta _updateAtMeta =
-      const VerificationMeta('updateAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> updateAt =
-      GeneratedColumn<int>('update_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(StickerAlbums.$converterupdateAt);
-  static const VerificationMeta _orderedAtMeta =
-      const VerificationMeta('orderedAt');
-  late final GeneratedColumn<int> orderedAt = GeneratedColumn<int>(
-      'ordered_at', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: 'NOT NULL DEFAULT 0',
-      defaultValue: const CustomExpression('0'));
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _categoryMeta =
-      const VerificationMeta('category');
-  late final GeneratedColumn<String> category = GeneratedColumn<String>(
-      'category', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _bannerMeta = const VerificationMeta('banner');
-  late final GeneratedColumn<String> banner = GeneratedColumn<String>(
-      'banner', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _addedMeta = const VerificationMeta('added');
-  late final GeneratedColumn<bool> added = GeneratedColumn<bool>(
-      'added', aliasedName, true,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      $customConstraints: 'DEFAULT FALSE',
-      defaultValue: const CustomExpression('FALSE'));
-  static const VerificationMeta _isVerifiedMeta =
-      const VerificationMeta('isVerified');
-  late final GeneratedColumn<bool> isVerified = GeneratedColumn<bool>(
-      'is_verified', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      $customConstraints: 'NOT NULL DEFAULT FALSE',
-      defaultValue: const CustomExpression('FALSE'));
-  @override
-  List<GeneratedColumn> get $columns => [
-        albumId,
-        name,
-        iconUrl,
-        createdAt,
-        updateAt,
-        orderedAt,
-        userId,
-        category,
-        description,
-        banner,
-        added,
-        isVerified
-      ];
-  @override
-  String get aliasedName => _alias ?? 'sticker_albums';
-  @override
-  String get actualTableName => 'sticker_albums';
-  @override
-  VerificationContext validateIntegrity(Insertable<StickerAlbum> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('album_id')) {
-      context.handle(_albumIdMeta,
-          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
-    } else if (isInserting) {
-      context.missing(_albumIdMeta);
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('icon_url')) {
-      context.handle(_iconUrlMeta,
-          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
-    } else if (isInserting) {
-      context.missing(_iconUrlMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_updateAtMeta, const VerificationResult.success());
-    if (data.containsKey('ordered_at')) {
-      context.handle(_orderedAtMeta,
-          orderedAt.isAcceptableOrUnknown(data['ordered_at']!, _orderedAtMeta));
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    if (data.containsKey('category')) {
-      context.handle(_categoryMeta,
-          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
-    } else if (isInserting) {
-      context.missing(_categoryMeta);
-    }
-    if (data.containsKey('description')) {
-      context.handle(
-          _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
-    } else if (isInserting) {
-      context.missing(_descriptionMeta);
-    }
-    if (data.containsKey('banner')) {
-      context.handle(_bannerMeta,
-          banner.isAcceptableOrUnknown(data['banner']!, _bannerMeta));
-    }
-    if (data.containsKey('added')) {
-      context.handle(
-          _addedMeta, added.isAcceptableOrUnknown(data['added']!, _addedMeta));
-    }
-    if (data.containsKey('is_verified')) {
-      context.handle(
-          _isVerifiedMeta,
-          isVerified.isAcceptableOrUnknown(
-              data['is_verified']!, _isVerifiedMeta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {albumId};
-  @override
-  StickerAlbum map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return StickerAlbum(
-      albumId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}album_id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      iconUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}icon_url'])!,
-      createdAt: StickerAlbums.$convertercreatedAt.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-      updateAt: StickerAlbums.$converterupdateAt.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}update_at'])!),
-      orderedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}ordered_at'])!,
-      userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
-      category: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}category'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      banner: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}banner']),
-      added: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}added']),
-      isVerified: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_verified'])!,
-    );
-  }
-
-  @override
-  StickerAlbums createAlias(String alias) {
-    return StickerAlbums(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converterupdateAt =
-      const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(album_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
-  final String albumId;
-  final String name;
-  final String iconUrl;
-  final DateTime createdAt;
-  final DateTime updateAt;
-  final int orderedAt;
-  final String userId;
-  final String category;
-  final String description;
-  final String? banner;
-  final bool? added;
-  final bool isVerified;
-  const StickerAlbum(
-      {required this.albumId,
-      required this.name,
-      required this.iconUrl,
-      required this.createdAt,
-      required this.updateAt,
-      required this.orderedAt,
-      required this.userId,
-      required this.category,
-      required this.description,
-      this.banner,
-      this.added,
-      required this.isVerified});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['album_id'] = Variable<String>(albumId);
-    map['name'] = Variable<String>(name);
-    map['icon_url'] = Variable<String>(iconUrl);
-    {
-      final converter = StickerAlbums.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    {
-      final converter = StickerAlbums.$converterupdateAt;
-      map['update_at'] = Variable<int>(converter.toSql(updateAt));
-    }
-    map['ordered_at'] = Variable<int>(orderedAt);
-    map['user_id'] = Variable<String>(userId);
-    map['category'] = Variable<String>(category);
-    map['description'] = Variable<String>(description);
-    if (!nullToAbsent || banner != null) {
-      map['banner'] = Variable<String>(banner);
-    }
-    if (!nullToAbsent || added != null) {
-      map['added'] = Variable<bool>(added);
-    }
-    map['is_verified'] = Variable<bool>(isVerified);
-    return map;
-  }
-
-  StickerAlbumsCompanion toCompanion(bool nullToAbsent) {
-    return StickerAlbumsCompanion(
-      albumId: Value(albumId),
-      name: Value(name),
-      iconUrl: Value(iconUrl),
-      createdAt: Value(createdAt),
-      updateAt: Value(updateAt),
-      orderedAt: Value(orderedAt),
-      userId: Value(userId),
-      category: Value(category),
-      description: Value(description),
-      banner:
-          banner == null && nullToAbsent ? const Value.absent() : Value(banner),
-      added:
-          added == null && nullToAbsent ? const Value.absent() : Value(added),
-      isVerified: Value(isVerified),
-    );
-  }
-
-  factory StickerAlbum.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return StickerAlbum(
-      albumId: serializer.fromJson<String>(json['album_id']),
-      name: serializer.fromJson<String>(json['name']),
-      iconUrl: serializer.fromJson<String>(json['icon_url']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      updateAt: serializer.fromJson<DateTime>(json['update_at']),
-      orderedAt: serializer.fromJson<int>(json['ordered_at']),
-      userId: serializer.fromJson<String>(json['user_id']),
-      category: serializer.fromJson<String>(json['category']),
-      description: serializer.fromJson<String>(json['description']),
-      banner: serializer.fromJson<String?>(json['banner']),
-      added: serializer.fromJson<bool?>(json['added']),
-      isVerified: serializer.fromJson<bool>(json['is_verified']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'album_id': serializer.toJson<String>(albumId),
-      'name': serializer.toJson<String>(name),
-      'icon_url': serializer.toJson<String>(iconUrl),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-      'update_at': serializer.toJson<DateTime>(updateAt),
-      'ordered_at': serializer.toJson<int>(orderedAt),
-      'user_id': serializer.toJson<String>(userId),
-      'category': serializer.toJson<String>(category),
-      'description': serializer.toJson<String>(description),
-      'banner': serializer.toJson<String?>(banner),
-      'added': serializer.toJson<bool?>(added),
-      'is_verified': serializer.toJson<bool>(isVerified),
-    };
-  }
-
-  StickerAlbum copyWith(
-          {String? albumId,
-          String? name,
-          String? iconUrl,
-          DateTime? createdAt,
-          DateTime? updateAt,
-          int? orderedAt,
-          String? userId,
-          String? category,
-          String? description,
-          Value<String?> banner = const Value.absent(),
-          Value<bool?> added = const Value.absent(),
-          bool? isVerified}) =>
-      StickerAlbum(
-        albumId: albumId ?? this.albumId,
-        name: name ?? this.name,
-        iconUrl: iconUrl ?? this.iconUrl,
-        createdAt: createdAt ?? this.createdAt,
-        updateAt: updateAt ?? this.updateAt,
-        orderedAt: orderedAt ?? this.orderedAt,
-        userId: userId ?? this.userId,
-        category: category ?? this.category,
-        description: description ?? this.description,
-        banner: banner.present ? banner.value : this.banner,
-        added: added.present ? added.value : this.added,
-        isVerified: isVerified ?? this.isVerified,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('StickerAlbum(')
-          ..write('albumId: $albumId, ')
-          ..write('name: $name, ')
-          ..write('iconUrl: $iconUrl, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updateAt: $updateAt, ')
-          ..write('orderedAt: $orderedAt, ')
-          ..write('userId: $userId, ')
-          ..write('category: $category, ')
-          ..write('description: $description, ')
-          ..write('banner: $banner, ')
-          ..write('added: $added, ')
-          ..write('isVerified: $isVerified')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(albumId, name, iconUrl, createdAt, updateAt,
-      orderedAt, userId, category, description, banner, added, isVerified);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is StickerAlbum &&
-          other.albumId == this.albumId &&
-          other.name == this.name &&
-          other.iconUrl == this.iconUrl &&
-          other.createdAt == this.createdAt &&
-          other.updateAt == this.updateAt &&
-          other.orderedAt == this.orderedAt &&
-          other.userId == this.userId &&
-          other.category == this.category &&
-          other.description == this.description &&
-          other.banner == this.banner &&
-          other.added == this.added &&
-          other.isVerified == this.isVerified);
-}
-
-class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
-  final Value<String> albumId;
-  final Value<String> name;
-  final Value<String> iconUrl;
-  final Value<DateTime> createdAt;
-  final Value<DateTime> updateAt;
-  final Value<int> orderedAt;
-  final Value<String> userId;
-  final Value<String> category;
-  final Value<String> description;
-  final Value<String?> banner;
-  final Value<bool?> added;
-  final Value<bool> isVerified;
-  final Value<int> rowid;
-  const StickerAlbumsCompanion({
-    this.albumId = const Value.absent(),
-    this.name = const Value.absent(),
-    this.iconUrl = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updateAt = const Value.absent(),
-    this.orderedAt = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.category = const Value.absent(),
-    this.description = const Value.absent(),
-    this.banner = const Value.absent(),
-    this.added = const Value.absent(),
-    this.isVerified = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  StickerAlbumsCompanion.insert({
-    required String albumId,
-    required String name,
-    required String iconUrl,
-    required DateTime createdAt,
-    required DateTime updateAt,
-    this.orderedAt = const Value.absent(),
-    required String userId,
-    required String category,
-    required String description,
-    this.banner = const Value.absent(),
-    this.added = const Value.absent(),
-    this.isVerified = const Value.absent(),
-    this.rowid = const Value.absent(),
-  })  : albumId = Value(albumId),
-        name = Value(name),
-        iconUrl = Value(iconUrl),
-        createdAt = Value(createdAt),
-        updateAt = Value(updateAt),
-        userId = Value(userId),
-        category = Value(category),
-        description = Value(description);
-  static Insertable<StickerAlbum> custom({
-    Expression<String>? albumId,
-    Expression<String>? name,
-    Expression<String>? iconUrl,
-    Expression<int>? createdAt,
-    Expression<int>? updateAt,
-    Expression<int>? orderedAt,
-    Expression<String>? userId,
-    Expression<String>? category,
-    Expression<String>? description,
-    Expression<String>? banner,
-    Expression<bool>? added,
-    Expression<bool>? isVerified,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (albumId != null) 'album_id': albumId,
-      if (name != null) 'name': name,
-      if (iconUrl != null) 'icon_url': iconUrl,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updateAt != null) 'update_at': updateAt,
-      if (orderedAt != null) 'ordered_at': orderedAt,
-      if (userId != null) 'user_id': userId,
-      if (category != null) 'category': category,
-      if (description != null) 'description': description,
-      if (banner != null) 'banner': banner,
-      if (added != null) 'added': added,
-      if (isVerified != null) 'is_verified': isVerified,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  StickerAlbumsCompanion copyWith(
-      {Value<String>? albumId,
-      Value<String>? name,
-      Value<String>? iconUrl,
-      Value<DateTime>? createdAt,
-      Value<DateTime>? updateAt,
-      Value<int>? orderedAt,
-      Value<String>? userId,
-      Value<String>? category,
-      Value<String>? description,
-      Value<String?>? banner,
-      Value<bool?>? added,
-      Value<bool>? isVerified,
-      Value<int>? rowid}) {
-    return StickerAlbumsCompanion(
-      albumId: albumId ?? this.albumId,
-      name: name ?? this.name,
-      iconUrl: iconUrl ?? this.iconUrl,
-      createdAt: createdAt ?? this.createdAt,
-      updateAt: updateAt ?? this.updateAt,
-      orderedAt: orderedAt ?? this.orderedAt,
-      userId: userId ?? this.userId,
-      category: category ?? this.category,
-      description: description ?? this.description,
-      banner: banner ?? this.banner,
-      added: added ?? this.added,
-      isVerified: isVerified ?? this.isVerified,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (albumId.present) {
-      map['album_id'] = Variable<String>(albumId.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (iconUrl.present) {
-      map['icon_url'] = Variable<String>(iconUrl.value);
-    }
-    if (createdAt.present) {
-      final converter = StickerAlbums.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (updateAt.present) {
-      final converter = StickerAlbums.$converterupdateAt;
-      map['update_at'] = Variable<int>(converter.toSql(updateAt.value));
-    }
-    if (orderedAt.present) {
-      map['ordered_at'] = Variable<int>(orderedAt.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (category.present) {
-      map['category'] = Variable<String>(category.value);
-    }
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
-    }
-    if (banner.present) {
-      map['banner'] = Variable<String>(banner.value);
-    }
-    if (added.present) {
-      map['added'] = Variable<bool>(added.value);
-    }
-    if (isVerified.present) {
-      map['is_verified'] = Variable<bool>(isVerified.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('StickerAlbumsCompanion(')
-          ..write('albumId: $albumId, ')
-          ..write('name: $name, ')
-          ..write('iconUrl: $iconUrl, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updateAt: $updateAt, ')
-          ..write('orderedAt: $orderedAt, ')
-          ..write('userId: $userId, ')
-          ..write('category: $category, ')
-          ..write('description: $description, ')
-          ..write('banner: $banner, ')
-          ..write('added: $added, ')
-          ..write('isVerified: $isVerified, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class StickerRelationships extends Table
-    with TableInfo<StickerRelationships, StickerRelationship> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  StickerRelationships(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _albumIdMeta =
-      const VerificationMeta('albumId');
-  late final GeneratedColumn<String> albumId = GeneratedColumn<String>(
-      'album_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _stickerIdMeta =
-      const VerificationMeta('stickerId');
-  late final GeneratedColumn<String> stickerId = GeneratedColumn<String>(
-      'sticker_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  @override
-  List<GeneratedColumn> get $columns => [albumId, stickerId];
-  @override
-  String get aliasedName => _alias ?? 'sticker_relationships';
-  @override
-  String get actualTableName => 'sticker_relationships';
-  @override
-  VerificationContext validateIntegrity(
-      Insertable<StickerRelationship> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('album_id')) {
-      context.handle(_albumIdMeta,
-          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
-    } else if (isInserting) {
-      context.missing(_albumIdMeta);
-    }
-    if (data.containsKey('sticker_id')) {
-      context.handle(_stickerIdMeta,
-          stickerId.isAcceptableOrUnknown(data['sticker_id']!, _stickerIdMeta));
-    } else if (isInserting) {
-      context.missing(_stickerIdMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {albumId, stickerId};
-  @override
-  StickerRelationship map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return StickerRelationship(
-      albumId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}album_id'])!,
-      stickerId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sticker_id'])!,
-    );
-  }
-
-  @override
-  StickerRelationships createAlias(String alias) {
-    return StickerRelationships(attachedDatabase, alias);
-  }
-
-  @override
-  List<String> get customConstraints =>
-      const ['PRIMARY KEY(album_id, sticker_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class StickerRelationship extends DataClass
-    implements Insertable<StickerRelationship> {
-  final String albumId;
-  final String stickerId;
-  const StickerRelationship({required this.albumId, required this.stickerId});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['album_id'] = Variable<String>(albumId);
-    map['sticker_id'] = Variable<String>(stickerId);
-    return map;
-  }
-
-  StickerRelationshipsCompanion toCompanion(bool nullToAbsent) {
-    return StickerRelationshipsCompanion(
-      albumId: Value(albumId),
-      stickerId: Value(stickerId),
-    );
-  }
-
-  factory StickerRelationship.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return StickerRelationship(
-      albumId: serializer.fromJson<String>(json['album_id']),
-      stickerId: serializer.fromJson<String>(json['sticker_id']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'album_id': serializer.toJson<String>(albumId),
-      'sticker_id': serializer.toJson<String>(stickerId),
-    };
-  }
-
-  StickerRelationship copyWith({String? albumId, String? stickerId}) =>
-      StickerRelationship(
-        albumId: albumId ?? this.albumId,
-        stickerId: stickerId ?? this.stickerId,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('StickerRelationship(')
-          ..write('albumId: $albumId, ')
-          ..write('stickerId: $stickerId')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(albumId, stickerId);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is StickerRelationship &&
-          other.albumId == this.albumId &&
-          other.stickerId == this.stickerId);
-}
-
-class StickerRelationshipsCompanion
-    extends UpdateCompanion<StickerRelationship> {
-  final Value<String> albumId;
-  final Value<String> stickerId;
-  final Value<int> rowid;
-  const StickerRelationshipsCompanion({
-    this.albumId = const Value.absent(),
-    this.stickerId = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  StickerRelationshipsCompanion.insert({
-    required String albumId,
-    required String stickerId,
-    this.rowid = const Value.absent(),
-  })  : albumId = Value(albumId),
-        stickerId = Value(stickerId);
-  static Insertable<StickerRelationship> custom({
-    Expression<String>? albumId,
-    Expression<String>? stickerId,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (albumId != null) 'album_id': albumId,
-      if (stickerId != null) 'sticker_id': stickerId,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  StickerRelationshipsCompanion copyWith(
-      {Value<String>? albumId, Value<String>? stickerId, Value<int>? rowid}) {
-    return StickerRelationshipsCompanion(
-      albumId: albumId ?? this.albumId,
-      stickerId: stickerId ?? this.stickerId,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (albumId.present) {
-      map['album_id'] = Variable<String>(albumId.value);
-    }
-    if (stickerId.present) {
-      map['sticker_id'] = Variable<String>(stickerId.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('StickerRelationshipsCompanion(')
-          ..write('albumId: $albumId, ')
-          ..write('stickerId: $stickerId, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class ParticipantSession extends Table
-    with TableInfo<ParticipantSession, ParticipantSessionData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  ParticipantSession(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _conversationIdMeta =
-      const VerificationMeta('conversationId');
-  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
-      'conversation_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _sessionIdMeta =
-      const VerificationMeta('sessionId');
-  late final GeneratedColumn<String> sessionId = GeneratedColumn<String>(
-      'session_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _sentToServerMeta =
-      const VerificationMeta('sentToServer');
-  late final GeneratedColumn<int> sentToServer = GeneratedColumn<int>(
-      'sent_to_server', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime?, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, true,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime?>(ParticipantSession.$convertercreatedAtn);
-  static const VerificationMeta _publicKeyMeta =
-      const VerificationMeta('publicKey');
-  late final GeneratedColumn<String> publicKey = GeneratedColumn<String>(
-      'public_key', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  @override
-  List<GeneratedColumn> get $columns =>
-      [conversationId, userId, sessionId, sentToServer, createdAt, publicKey];
-  @override
-  String get aliasedName => _alias ?? 'participant_session';
-  @override
-  String get actualTableName => 'participant_session';
-  @override
-  VerificationContext validateIntegrity(
-      Insertable<ParticipantSessionData> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('conversation_id')) {
-      context.handle(
-          _conversationIdMeta,
-          conversationId.isAcceptableOrUnknown(
-              data['conversation_id']!, _conversationIdMeta));
-    } else if (isInserting) {
-      context.missing(_conversationIdMeta);
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    if (data.containsKey('session_id')) {
-      context.handle(_sessionIdMeta,
-          sessionId.isAcceptableOrUnknown(data['session_id']!, _sessionIdMeta));
-    } else if (isInserting) {
-      context.missing(_sessionIdMeta);
-    }
-    if (data.containsKey('sent_to_server')) {
-      context.handle(
-          _sentToServerMeta,
-          sentToServer.isAcceptableOrUnknown(
-              data['sent_to_server']!, _sentToServerMeta));
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    if (data.containsKey('public_key')) {
-      context.handle(_publicKeyMeta,
-          publicKey.isAcceptableOrUnknown(data['public_key']!, _publicKeyMeta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {conversationId, userId, sessionId};
-  @override
-  ParticipantSessionData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ParticipantSessionData(
-      conversationId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
-      userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
-      sessionId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}session_id'])!,
-      sentToServer: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}sent_to_server']),
-      createdAt: ParticipantSession.$convertercreatedAtn.fromSql(
-          attachedDatabase.typeMapping
-              .read(DriftSqlType.int, data['${effectivePrefix}created_at'])),
-      publicKey: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}public_key']),
-    );
-  }
-
-  @override
-  ParticipantSession createAlias(String alias) {
-    return ParticipantSession(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime?, int?> $convertercreatedAtn =
-      NullAwareTypeConverter.wrap($convertercreatedAt);
-  @override
-  List<String> get customConstraints =>
-      const ['PRIMARY KEY(conversation_id, user_id, session_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class ParticipantSessionData extends DataClass
-    implements Insertable<ParticipantSessionData> {
-  final String conversationId;
-  final String userId;
-  final String sessionId;
-  final int? sentToServer;
-  final DateTime? createdAt;
-  final String? publicKey;
-  const ParticipantSessionData(
-      {required this.conversationId,
-      required this.userId,
-      required this.sessionId,
-      this.sentToServer,
-      this.createdAt,
-      this.publicKey});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['conversation_id'] = Variable<String>(conversationId);
-    map['user_id'] = Variable<String>(userId);
-    map['session_id'] = Variable<String>(sessionId);
-    if (!nullToAbsent || sentToServer != null) {
-      map['sent_to_server'] = Variable<int>(sentToServer);
-    }
-    if (!nullToAbsent || createdAt != null) {
-      final converter = ParticipantSession.$convertercreatedAtn;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    if (!nullToAbsent || publicKey != null) {
-      map['public_key'] = Variable<String>(publicKey);
-    }
-    return map;
-  }
-
-  ParticipantSessionCompanion toCompanion(bool nullToAbsent) {
-    return ParticipantSessionCompanion(
-      conversationId: Value(conversationId),
-      userId: Value(userId),
-      sessionId: Value(sessionId),
-      sentToServer: sentToServer == null && nullToAbsent
-          ? const Value.absent()
-          : Value(sentToServer),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-      publicKey: publicKey == null && nullToAbsent
-          ? const Value.absent()
-          : Value(publicKey),
-    );
-  }
-
-  factory ParticipantSessionData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ParticipantSessionData(
-      conversationId: serializer.fromJson<String>(json['conversation_id']),
-      userId: serializer.fromJson<String>(json['user_id']),
-      sessionId: serializer.fromJson<String>(json['session_id']),
-      sentToServer: serializer.fromJson<int?>(json['sent_to_server']),
-      createdAt: serializer.fromJson<DateTime?>(json['created_at']),
-      publicKey: serializer.fromJson<String?>(json['public_key']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'conversation_id': serializer.toJson<String>(conversationId),
-      'user_id': serializer.toJson<String>(userId),
-      'session_id': serializer.toJson<String>(sessionId),
-      'sent_to_server': serializer.toJson<int?>(sentToServer),
-      'created_at': serializer.toJson<DateTime?>(createdAt),
-      'public_key': serializer.toJson<String?>(publicKey),
-    };
-  }
-
-  ParticipantSessionData copyWith(
-          {String? conversationId,
-          String? userId,
-          String? sessionId,
-          Value<int?> sentToServer = const Value.absent(),
-          Value<DateTime?> createdAt = const Value.absent(),
-          Value<String?> publicKey = const Value.absent()}) =>
-      ParticipantSessionData(
-        conversationId: conversationId ?? this.conversationId,
-        userId: userId ?? this.userId,
-        sessionId: sessionId ?? this.sessionId,
-        sentToServer:
-            sentToServer.present ? sentToServer.value : this.sentToServer,
-        createdAt: createdAt.present ? createdAt.value : this.createdAt,
-        publicKey: publicKey.present ? publicKey.value : this.publicKey,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('ParticipantSessionData(')
-          ..write('conversationId: $conversationId, ')
-          ..write('userId: $userId, ')
-          ..write('sessionId: $sessionId, ')
-          ..write('sentToServer: $sentToServer, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('publicKey: $publicKey')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-      conversationId, userId, sessionId, sentToServer, createdAt, publicKey);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ParticipantSessionData &&
-          other.conversationId == this.conversationId &&
-          other.userId == this.userId &&
-          other.sessionId == this.sessionId &&
-          other.sentToServer == this.sentToServer &&
-          other.createdAt == this.createdAt &&
-          other.publicKey == this.publicKey);
-}
-
-class ParticipantSessionCompanion
-    extends UpdateCompanion<ParticipantSessionData> {
-  final Value<String> conversationId;
-  final Value<String> userId;
-  final Value<String> sessionId;
-  final Value<int?> sentToServer;
-  final Value<DateTime?> createdAt;
-  final Value<String?> publicKey;
-  final Value<int> rowid;
-  const ParticipantSessionCompanion({
-    this.conversationId = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.sessionId = const Value.absent(),
-    this.sentToServer = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.publicKey = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  ParticipantSessionCompanion.insert({
-    required String conversationId,
-    required String userId,
-    required String sessionId,
-    this.sentToServer = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.publicKey = const Value.absent(),
-    this.rowid = const Value.absent(),
-  })  : conversationId = Value(conversationId),
-        userId = Value(userId),
-        sessionId = Value(sessionId);
-  static Insertable<ParticipantSessionData> custom({
-    Expression<String>? conversationId,
-    Expression<String>? userId,
-    Expression<String>? sessionId,
-    Expression<int>? sentToServer,
-    Expression<int>? createdAt,
-    Expression<String>? publicKey,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (conversationId != null) 'conversation_id': conversationId,
-      if (userId != null) 'user_id': userId,
-      if (sessionId != null) 'session_id': sessionId,
-      if (sentToServer != null) 'sent_to_server': sentToServer,
-      if (createdAt != null) 'created_at': createdAt,
-      if (publicKey != null) 'public_key': publicKey,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  ParticipantSessionCompanion copyWith(
-      {Value<String>? conversationId,
-      Value<String>? userId,
-      Value<String>? sessionId,
-      Value<int?>? sentToServer,
-      Value<DateTime?>? createdAt,
-      Value<String?>? publicKey,
-      Value<int>? rowid}) {
-    return ParticipantSessionCompanion(
-      conversationId: conversationId ?? this.conversationId,
-      userId: userId ?? this.userId,
-      sessionId: sessionId ?? this.sessionId,
-      sentToServer: sentToServer ?? this.sentToServer,
-      createdAt: createdAt ?? this.createdAt,
-      publicKey: publicKey ?? this.publicKey,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (conversationId.present) {
-      map['conversation_id'] = Variable<String>(conversationId.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (sessionId.present) {
-      map['session_id'] = Variable<String>(sessionId.value);
-    }
-    if (sentToServer.present) {
-      map['sent_to_server'] = Variable<int>(sentToServer.value);
-    }
-    if (createdAt.present) {
-      final converter = ParticipantSession.$convertercreatedAtn;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (publicKey.present) {
-      map['public_key'] = Variable<String>(publicKey.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ParticipantSessionCompanion(')
-          ..write('conversationId: $conversationId, ')
-          ..write('userId: $userId, ')
-          ..write('sessionId: $sessionId, ')
-          ..write('sentToServer: $sentToServer, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('publicKey: $publicKey, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -13119,26 +13119,26 @@ class PropertiesCompanion extends UpdateCompanion<Propertie> {
 
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(e);
-  late final PinMessages pinMessages = PinMessages(this);
-  late final Conversations conversations = Conversations(this);
-  late final Messages messages = Messages(this);
-  late final Users users = Users(this);
-  late final Snapshots snapshots = Snapshots(this);
-  late final Assets assets = Assets(this);
-  late final Chains chains = Chains(this);
-  late final Stickers stickers = Stickers(this);
-  late final Hyperlinks hyperlinks = Hyperlinks(this);
-  late final MessageMentions messageMentions = MessageMentions(this);
-  late final ExpiredMessages expiredMessages = ExpiredMessages(this);
   late final FloodMessages floodMessages = FloodMessages(this);
   late final Circles circles = Circles(this);
   late final CircleConversations circleConversations =
       CircleConversations(this);
+  late final Conversations conversations = Conversations(this);
+  late final Users users = Users(this);
+  late final Messages messages = Messages(this);
   late final Participants participants = Participants(this);
+  late final Stickers stickers = Stickers(this);
   late final StickerAlbums stickerAlbums = StickerAlbums(this);
   late final StickerRelationships stickerRelationships =
       StickerRelationships(this);
   late final ParticipantSession participantSession = ParticipantSession(this);
+  late final Snapshots snapshots = Snapshots(this);
+  late final Assets assets = Assets(this);
+  late final Chains chains = Chains(this);
+  late final Hyperlinks hyperlinks = Hyperlinks(this);
+  late final MessageMentions messageMentions = MessageMentions(this);
+  late final PinMessages pinMessages = PinMessages(this);
+  late final ExpiredMessages expiredMessages = ExpiredMessages(this);
   late final ResendSessionMessages resendSessionMessages =
       ResendSessionMessages(this);
   late final Addresses addresses = Addresses(this);
@@ -13233,175 +13233,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final PropertyDao propertyDao = PropertyDao(this as MixinDatabase);
   late final TranscriptMessageDao transcriptMessageDao =
       TranscriptMessageDao(this as MixinDatabase);
-  Selectable<MessageItem> basePinMessageItems(String conversationId,
-      BasePinMessageItems$order order, BasePinMessageItems$limit limit) {
-    var $arrayStartIndex = 2;
-    final generatedorder = $write(
-        order?.call(
-                alias(this.pinMessages, 'pinMessage'),
-                alias(this.messages, 'message'),
-                alias(this.users, 'sender'),
-                alias(this.users, 'participant'),
-                alias(this.snapshots, 'snapshot'),
-                alias(this.assets, 'asset'),
-                alias(this.chains, 'chain'),
-                alias(this.stickers, 'sticker'),
-                alias(this.hyperlinks, 'hyperlink'),
-                alias(this.users, 'sharedUser'),
-                alias(this.conversations, 'conversation'),
-                alias(this.messageMentions, 'messageMention'),
-                alias(this.expiredMessages, 'em')) ??
-            const OrderBy.nothing(),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedorder.amountOfVariables;
-    final generatedlimit = $write(
-        limit(
-            alias(this.pinMessages, 'pinMessage'),
-            alias(this.messages, 'message'),
-            alias(this.users, 'sender'),
-            alias(this.users, 'participant'),
-            alias(this.snapshots, 'snapshot'),
-            alias(this.assets, 'asset'),
-            alias(this.chains, 'chain'),
-            alias(this.stickers, 'sticker'),
-            alias(this.hyperlinks, 'hyperlink'),
-            alias(this.users, 'sharedUser'),
-            alias(this.conversations, 'conversation'),
-            alias(this.messageMentions, 'messageMention'),
-            alias(this.expiredMessages, 'em')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
-    $arrayStartIndex += generatedlimit.amountOfVariables;
-    return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
-        variables: [
-          Variable<String>(conversationId),
-          ...generatedorder.introducedVariables,
-          ...generatedlimit.introducedVariables
-        ],
-        readsFrom: {
-          messages,
-          users,
-          conversations,
-          stickers,
-          snapshots,
-          assets,
-          chains,
-          hyperlinks,
-          messageMentions,
-          expiredMessages,
-          pinMessages,
-          ...generatedorder.watchedTables,
-          ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return MessageItem(
-        messageId: row.read<String>('messageId'),
-        conversationId: row.read<String>('conversationId'),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt:
-            Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
-        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-        mediaStatus: Messages.$convertermediaStatus
-            .fromSql(row.readNullable<String>('mediaStatus')),
-        mediaWaveform: row.readNullable<String>('mediaWaveform'),
-        mediaName: row.readNullable<String>('mediaName'),
-        mediaMimeType: row.readNullable<String>('mediaMimeType'),
-        mediaSize: row.readNullable<int>('mediaSize'),
-        mediaWidth: row.readNullable<int>('mediaWidth'),
-        mediaHeight: row.readNullable<int>('mediaHeight'),
-        thumbImage: row.readNullable<String>('thumbImage'),
-        thumbUrl: row.readNullable<String>('thumbUrl'),
-        mediaUrl: row.readNullable<String>('mediaUrl'),
-        mediaDuration: row.readNullable<String>('mediaDuration'),
-        quoteId: row.readNullable<String>('quoteId'),
-        quoteContent: row.readNullable<String>('quoteContent'),
-        actionName: row.readNullable<String>('actionName'),
-        sharedUserId: row.readNullable<String>('sharedUserId'),
-        userId: row.read<String>('userId'),
-        userFullName: row.readNullable<String>('userFullName'),
-        userIdentityNumber: row.read<String>('userIdentityNumber'),
-        appId: row.readNullable<String>('appId'),
-        relationship: Users.$converterrelationship
-            .fromSql(row.readNullable<String>('relationship')),
-        avatarUrl: row.readNullable<String>('avatarUrl'),
-        sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
-        sharedUserIdentityNumber:
-            row.readNullable<String>('sharedUserIdentityNumber'),
-        sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
-        sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
-        conversationOwnerId: row.readNullable<String>('conversationOwnerId'),
-        conversionCategory: Conversations.$convertercategory
-            .fromSql(row.readNullable<String>('conversionCategory')),
-        groupName: row.readNullable<String>('groupName'),
-        assetUrl: row.readNullable<String>('assetUrl'),
-        assetWidth: row.readNullable<int>('assetWidth'),
-        assetHeight: row.readNullable<int>('assetHeight'),
-        stickerId: row.readNullable<String>('stickerId'),
-        assetName: row.readNullable<String>('assetName'),
-        assetType: row.readNullable<String>('assetType'),
-        participantFullName: row.readNullable<String>('participantFullName'),
-        participantUserId: row.readNullable<String>('participantUserId'),
-        snapshotId: row.readNullable<String>('snapshotId'),
-        snapshotType: row.readNullable<String>('snapshotType'),
-        snapshotAmount: row.readNullable<String>('snapshotAmount'),
-        assetId: row.readNullable<String>('assetId'),
-        assetSymbol: row.readNullable<String>('assetSymbol'),
-        assetIcon: row.readNullable<String>('assetIcon'),
-        chainIcon: row.readNullable<String>('chainIcon'),
-        siteName: row.readNullable<String>('siteName'),
-        siteTitle: row.readNullable<String>('siteTitle'),
-        siteDescription: row.readNullable<String>('siteDescription'),
-        siteImage: row.readNullable<String>('siteImage'),
-        mentionRead: row.readNullable<bool>('mentionRead'),
-        expireIn: row.readNullable<int>('expireIn'),
-        pinned: row.read<bool>('pinned'),
-      );
-    });
-  }
-
-  Selectable<PinMessageItemResult> pinMessageItem(
-      String messageId, String conversationId) {
-    return customSelect(
-        'SELECT message.content AS content, sender.full_name AS userFullName FROM messages AS message INNER JOIN pin_messages AS pinMessage ON ?1 = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id WHERE message.conversation_id = ?2 AND message.category = \'MESSAGE_PIN\' AND message.quote_message_id = ?1 ORDER BY message.created_at DESC LIMIT 1',
-        variables: [
-          Variable<String>(messageId),
-          Variable<String>(conversationId)
-        ],
-        readsFrom: {
-          messages,
-          users,
-          pinMessages,
-        }).map((QueryRow row) {
-      return PinMessageItemResult(
-        content: row.readNullable<String>('content'),
-        userFullName: row.readNullable<String>('userFullName'),
-      );
-    });
-  }
-
-  Selectable<String> pinMessageIds(String conversationId) {
-    return customSelect(
-        'SELECT pinMessage.message_id FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id WHERE pinMessage.conversation_id = ?1 ORDER BY message.created_at DESC',
-        variables: [
-          Variable<String>(conversationId)
-        ],
-        readsFrom: {
-          pinMessages,
-          messages,
-        }).map((QueryRow row) => row.read<String>('message_id'));
-  }
-
-  Selectable<int> countPinMessages() {
-    return customSelect('SELECT COUNT(1) AS _c0 FROM pin_messages',
-        variables: [],
-        readsFrom: {
-          pinMessages,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
   Selectable<DateTime> getLastBlazeMessageCreatedAt() {
     return customSelect(
         'SELECT created_at FROM flood_messages ORDER BY created_at DESC LIMIT 1',
@@ -13982,6 +13813,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         quoteContent: row.readNullable<String>('quoteContent'),
         actionName: row.readNullable<String>('actionName'),
         sharedUserId: row.readNullable<String>('sharedUserId'),
+        stickerId: row.readNullable<String>('stickerId'),
         userId: row.read<String>('userId'),
         userFullName: row.readNullable<String>('userFullName'),
         userIdentityNumber: row.read<String>('userIdentityNumber'),
@@ -14002,7 +13834,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         assetUrl: row.readNullable<String>('assetUrl'),
         assetWidth: row.readNullable<int>('assetWidth'),
         assetHeight: row.readNullable<int>('assetHeight'),
-        stickerId: row.readNullable<String>('stickerId'),
         assetName: row.readNullable<String>('assetName'),
         assetType: row.readNullable<String>('assetType'),
         participantFullName: row.readNullable<String>('participantFullName'),
@@ -14387,29 +14218,158 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<MessageItem> basePinMessageItems(String conversationId,
+      BasePinMessageItems$order order, BasePinMessageItems$limit limit) {
+    var $arrayStartIndex = 2;
+    final generatedorder = $write(
+        order?.call(
+                alias(this.pinMessages, 'pinMessage'),
+                alias(this.messages, 'message'),
+                alias(this.users, 'sender'),
+                alias(this.users, 'participant'),
+                alias(this.snapshots, 'snapshot'),
+                alias(this.assets, 'asset'),
+                alias(this.chains, 'chain'),
+                alias(this.stickers, 'sticker'),
+                alias(this.hyperlinks, 'hyperlink'),
+                alias(this.users, 'sharedUser'),
+                alias(this.conversations, 'conversation'),
+                alias(this.messageMentions, 'messageMention'),
+                alias(this.expiredMessages, 'em')) ??
+            const OrderBy.nothing(),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedorder.amountOfVariables;
+    final generatedlimit = $write(
+        limit(
+            alias(this.pinMessages, 'pinMessage'),
+            alias(this.messages, 'message'),
+            alias(this.users, 'sender'),
+            alias(this.users, 'participant'),
+            alias(this.snapshots, 'snapshot'),
+            alias(this.assets, 'asset'),
+            alias(this.chains, 'chain'),
+            alias(this.stickers, 'sticker'),
+            alias(this.hyperlinks, 'hyperlink'),
+            alias(this.users, 'sharedUser'),
+            alias(this.conversations, 'conversation'),
+            alias(this.messageMentions, 'messageMention'),
+            alias(this.expiredMessages, 'em')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
+    return customSelect(
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
+        variables: [
+          Variable<String>(conversationId),
+          ...generatedorder.introducedVariables,
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          stickers,
+          snapshots,
+          assets,
+          chains,
+          hyperlinks,
+          messageMentions,
+          expiredMessages,
+          pinMessages,
+          ...generatedorder.watchedTables,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) {
+      return MessageItem(
+        messageId: row.read<String>('messageId'),
+        conversationId: row.read<String>('conversationId'),
+        type: row.read<String>('type'),
+        content: row.readNullable<String>('content'),
+        createdAt:
+            Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
+        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+        mediaStatus: Messages.$convertermediaStatus
+            .fromSql(row.readNullable<String>('mediaStatus')),
+        mediaWaveform: row.readNullable<String>('mediaWaveform'),
+        mediaName: row.readNullable<String>('mediaName'),
+        mediaMimeType: row.readNullable<String>('mediaMimeType'),
+        mediaSize: row.readNullable<int>('mediaSize'),
+        mediaWidth: row.readNullable<int>('mediaWidth'),
+        mediaHeight: row.readNullable<int>('mediaHeight'),
+        thumbImage: row.readNullable<String>('thumbImage'),
+        thumbUrl: row.readNullable<String>('thumbUrl'),
+        mediaUrl: row.readNullable<String>('mediaUrl'),
+        mediaDuration: row.readNullable<String>('mediaDuration'),
+        quoteId: row.readNullable<String>('quoteId'),
+        quoteContent: row.readNullable<String>('quoteContent'),
+        actionName: row.readNullable<String>('actionName'),
+        sharedUserId: row.readNullable<String>('sharedUserId'),
+        stickerId: row.readNullable<String>('stickerId'),
+        userId: row.read<String>('userId'),
+        userFullName: row.readNullable<String>('userFullName'),
+        userIdentityNumber: row.read<String>('userIdentityNumber'),
+        appId: row.readNullable<String>('appId'),
+        relationship: Users.$converterrelationship
+            .fromSql(row.readNullable<String>('relationship')),
+        avatarUrl: row.readNullable<String>('avatarUrl'),
+        sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
+        sharedUserIdentityNumber:
+            row.readNullable<String>('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
+        sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
+        conversationOwnerId: row.readNullable<String>('conversationOwnerId'),
+        conversionCategory: Conversations.$convertercategory
+            .fromSql(row.readNullable<String>('conversionCategory')),
+        groupName: row.readNullable<String>('groupName'),
+        assetUrl: row.readNullable<String>('assetUrl'),
+        assetWidth: row.readNullable<int>('assetWidth'),
+        assetHeight: row.readNullable<int>('assetHeight'),
+        assetName: row.readNullable<String>('assetName'),
+        assetType: row.readNullable<String>('assetType'),
+        participantFullName: row.readNullable<String>('participantFullName'),
+        participantUserId: row.readNullable<String>('participantUserId'),
+        snapshotId: row.readNullable<String>('snapshotId'),
+        snapshotType: row.readNullable<String>('snapshotType'),
+        snapshotAmount: row.readNullable<String>('snapshotAmount'),
+        assetId: row.readNullable<String>('assetId'),
+        assetSymbol: row.readNullable<String>('assetSymbol'),
+        assetIcon: row.readNullable<String>('assetIcon'),
+        chainIcon: row.readNullable<String>('chainIcon'),
+        siteName: row.readNullable<String>('siteName'),
+        siteTitle: row.readNullable<String>('siteTitle'),
+        siteDescription: row.readNullable<String>('siteDescription'),
+        siteImage: row.readNullable<String>('siteImage'),
+        mentionRead: row.readNullable<bool>('mentionRead'),
+        expireIn: row.readNullable<int>('expireIn'),
+        pinned: row.read<bool>('pinned'),
+      );
+    });
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        pinMessages,
-        conversations,
-        messages,
-        users,
-        snapshots,
-        assets,
-        chains,
-        stickers,
-        hyperlinks,
-        messageMentions,
-        expiredMessages,
         floodMessages,
         circles,
         circleConversations,
+        conversations,
+        users,
+        messages,
         participants,
+        stickers,
         stickerAlbums,
         stickerRelationships,
         participantSession,
+        snapshots,
+        assets,
+        chains,
+        hyperlinks,
+        messageMentions,
+        pinMessages,
+        expiredMessages,
         resendSessionMessages,
         addresses,
         apps,
@@ -14454,363 +14414,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           ),
         ],
       );
-}
-
-class MessageItem {
-  final String messageId;
-  final String conversationId;
-  final String type;
-  final String? content;
-  final DateTime createdAt;
-  final MessageStatus status;
-  final MediaStatus? mediaStatus;
-  final String? mediaWaveform;
-  final String? mediaName;
-  final String? mediaMimeType;
-  final int? mediaSize;
-  final int? mediaWidth;
-  final int? mediaHeight;
-  final String? thumbImage;
-  final String? thumbUrl;
-  final String? mediaUrl;
-  final String? mediaDuration;
-  final String? quoteId;
-  final String? quoteContent;
-  final String? actionName;
-  final String? sharedUserId;
-  final String userId;
-  final String? userFullName;
-  final String userIdentityNumber;
-  final String? appId;
-  final UserRelationship? relationship;
-  final String? avatarUrl;
-  final String? sharedUserFullName;
-  final String? sharedUserIdentityNumber;
-  final String? sharedUserAvatarUrl;
-  final bool? sharedUserIsVerified;
-  final String? sharedUserAppId;
-  final String? conversationOwnerId;
-  final ConversationCategory? conversionCategory;
-  final String? groupName;
-  final String? assetUrl;
-  final int? assetWidth;
-  final int? assetHeight;
-  final String? stickerId;
-  final String? assetName;
-  final String? assetType;
-  final String? participantFullName;
-  final String? participantUserId;
-  final String? snapshotId;
-  final String? snapshotType;
-  final String? snapshotAmount;
-  final String? assetId;
-  final String? assetSymbol;
-  final String? assetIcon;
-  final String? chainIcon;
-  final String? siteName;
-  final String? siteTitle;
-  final String? siteDescription;
-  final String? siteImage;
-  final bool? mentionRead;
-  final int? expireIn;
-  final bool pinned;
-  MessageItem({
-    required this.messageId,
-    required this.conversationId,
-    required this.type,
-    this.content,
-    required this.createdAt,
-    required this.status,
-    this.mediaStatus,
-    this.mediaWaveform,
-    this.mediaName,
-    this.mediaMimeType,
-    this.mediaSize,
-    this.mediaWidth,
-    this.mediaHeight,
-    this.thumbImage,
-    this.thumbUrl,
-    this.mediaUrl,
-    this.mediaDuration,
-    this.quoteId,
-    this.quoteContent,
-    this.actionName,
-    this.sharedUserId,
-    required this.userId,
-    this.userFullName,
-    required this.userIdentityNumber,
-    this.appId,
-    this.relationship,
-    this.avatarUrl,
-    this.sharedUserFullName,
-    this.sharedUserIdentityNumber,
-    this.sharedUserAvatarUrl,
-    this.sharedUserIsVerified,
-    this.sharedUserAppId,
-    this.conversationOwnerId,
-    this.conversionCategory,
-    this.groupName,
-    this.assetUrl,
-    this.assetWidth,
-    this.assetHeight,
-    this.stickerId,
-    this.assetName,
-    this.assetType,
-    this.participantFullName,
-    this.participantUserId,
-    this.snapshotId,
-    this.snapshotType,
-    this.snapshotAmount,
-    this.assetId,
-    this.assetSymbol,
-    this.assetIcon,
-    this.chainIcon,
-    this.siteName,
-    this.siteTitle,
-    this.siteDescription,
-    this.siteImage,
-    this.mentionRead,
-    this.expireIn,
-    required this.pinned,
-  });
-  @override
-  int get hashCode => Object.hashAll([
-        messageId,
-        conversationId,
-        type,
-        content,
-        createdAt,
-        status,
-        mediaStatus,
-        mediaWaveform,
-        mediaName,
-        mediaMimeType,
-        mediaSize,
-        mediaWidth,
-        mediaHeight,
-        thumbImage,
-        thumbUrl,
-        mediaUrl,
-        mediaDuration,
-        quoteId,
-        quoteContent,
-        actionName,
-        sharedUserId,
-        userId,
-        userFullName,
-        userIdentityNumber,
-        appId,
-        relationship,
-        avatarUrl,
-        sharedUserFullName,
-        sharedUserIdentityNumber,
-        sharedUserAvatarUrl,
-        sharedUserIsVerified,
-        sharedUserAppId,
-        conversationOwnerId,
-        conversionCategory,
-        groupName,
-        assetUrl,
-        assetWidth,
-        assetHeight,
-        stickerId,
-        assetName,
-        assetType,
-        participantFullName,
-        participantUserId,
-        snapshotId,
-        snapshotType,
-        snapshotAmount,
-        assetId,
-        assetSymbol,
-        assetIcon,
-        chainIcon,
-        siteName,
-        siteTitle,
-        siteDescription,
-        siteImage,
-        mentionRead,
-        expireIn,
-        pinned
-      ]);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is MessageItem &&
-          other.messageId == this.messageId &&
-          other.conversationId == this.conversationId &&
-          other.type == this.type &&
-          other.content == this.content &&
-          other.createdAt == this.createdAt &&
-          other.status == this.status &&
-          other.mediaStatus == this.mediaStatus &&
-          other.mediaWaveform == this.mediaWaveform &&
-          other.mediaName == this.mediaName &&
-          other.mediaMimeType == this.mediaMimeType &&
-          other.mediaSize == this.mediaSize &&
-          other.mediaWidth == this.mediaWidth &&
-          other.mediaHeight == this.mediaHeight &&
-          other.thumbImage == this.thumbImage &&
-          other.thumbUrl == this.thumbUrl &&
-          other.mediaUrl == this.mediaUrl &&
-          other.mediaDuration == this.mediaDuration &&
-          other.quoteId == this.quoteId &&
-          other.quoteContent == this.quoteContent &&
-          other.actionName == this.actionName &&
-          other.sharedUserId == this.sharedUserId &&
-          other.userId == this.userId &&
-          other.userFullName == this.userFullName &&
-          other.userIdentityNumber == this.userIdentityNumber &&
-          other.appId == this.appId &&
-          other.relationship == this.relationship &&
-          other.avatarUrl == this.avatarUrl &&
-          other.sharedUserFullName == this.sharedUserFullName &&
-          other.sharedUserIdentityNumber == this.sharedUserIdentityNumber &&
-          other.sharedUserAvatarUrl == this.sharedUserAvatarUrl &&
-          other.sharedUserIsVerified == this.sharedUserIsVerified &&
-          other.sharedUserAppId == this.sharedUserAppId &&
-          other.conversationOwnerId == this.conversationOwnerId &&
-          other.conversionCategory == this.conversionCategory &&
-          other.groupName == this.groupName &&
-          other.assetUrl == this.assetUrl &&
-          other.assetWidth == this.assetWidth &&
-          other.assetHeight == this.assetHeight &&
-          other.stickerId == this.stickerId &&
-          other.assetName == this.assetName &&
-          other.assetType == this.assetType &&
-          other.participantFullName == this.participantFullName &&
-          other.participantUserId == this.participantUserId &&
-          other.snapshotId == this.snapshotId &&
-          other.snapshotType == this.snapshotType &&
-          other.snapshotAmount == this.snapshotAmount &&
-          other.assetId == this.assetId &&
-          other.assetSymbol == this.assetSymbol &&
-          other.assetIcon == this.assetIcon &&
-          other.chainIcon == this.chainIcon &&
-          other.siteName == this.siteName &&
-          other.siteTitle == this.siteTitle &&
-          other.siteDescription == this.siteDescription &&
-          other.siteImage == this.siteImage &&
-          other.mentionRead == this.mentionRead &&
-          other.expireIn == this.expireIn &&
-          other.pinned == this.pinned);
-  @override
-  String toString() {
-    return (StringBuffer('MessageItem(')
-          ..write('messageId: $messageId, ')
-          ..write('conversationId: $conversationId, ')
-          ..write('type: $type, ')
-          ..write('content: $content, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('status: $status, ')
-          ..write('mediaStatus: $mediaStatus, ')
-          ..write('mediaWaveform: $mediaWaveform, ')
-          ..write('mediaName: $mediaName, ')
-          ..write('mediaMimeType: $mediaMimeType, ')
-          ..write('mediaSize: $mediaSize, ')
-          ..write('mediaWidth: $mediaWidth, ')
-          ..write('mediaHeight: $mediaHeight, ')
-          ..write('thumbImage: $thumbImage, ')
-          ..write('thumbUrl: $thumbUrl, ')
-          ..write('mediaUrl: $mediaUrl, ')
-          ..write('mediaDuration: $mediaDuration, ')
-          ..write('quoteId: $quoteId, ')
-          ..write('quoteContent: $quoteContent, ')
-          ..write('actionName: $actionName, ')
-          ..write('sharedUserId: $sharedUserId, ')
-          ..write('userId: $userId, ')
-          ..write('userFullName: $userFullName, ')
-          ..write('userIdentityNumber: $userIdentityNumber, ')
-          ..write('appId: $appId, ')
-          ..write('relationship: $relationship, ')
-          ..write('avatarUrl: $avatarUrl, ')
-          ..write('sharedUserFullName: $sharedUserFullName, ')
-          ..write('sharedUserIdentityNumber: $sharedUserIdentityNumber, ')
-          ..write('sharedUserAvatarUrl: $sharedUserAvatarUrl, ')
-          ..write('sharedUserIsVerified: $sharedUserIsVerified, ')
-          ..write('sharedUserAppId: $sharedUserAppId, ')
-          ..write('conversationOwnerId: $conversationOwnerId, ')
-          ..write('conversionCategory: $conversionCategory, ')
-          ..write('groupName: $groupName, ')
-          ..write('assetUrl: $assetUrl, ')
-          ..write('assetWidth: $assetWidth, ')
-          ..write('assetHeight: $assetHeight, ')
-          ..write('stickerId: $stickerId, ')
-          ..write('assetName: $assetName, ')
-          ..write('assetType: $assetType, ')
-          ..write('participantFullName: $participantFullName, ')
-          ..write('participantUserId: $participantUserId, ')
-          ..write('snapshotId: $snapshotId, ')
-          ..write('snapshotType: $snapshotType, ')
-          ..write('snapshotAmount: $snapshotAmount, ')
-          ..write('assetId: $assetId, ')
-          ..write('assetSymbol: $assetSymbol, ')
-          ..write('assetIcon: $assetIcon, ')
-          ..write('chainIcon: $chainIcon, ')
-          ..write('siteName: $siteName, ')
-          ..write('siteTitle: $siteTitle, ')
-          ..write('siteDescription: $siteDescription, ')
-          ..write('siteImage: $siteImage, ')
-          ..write('mentionRead: $mentionRead, ')
-          ..write('expireIn: $expireIn, ')
-          ..write('pinned: $pinned')
-          ..write(')'))
-        .toString();
-  }
-}
-
-typedef BasePinMessageItems$order = OrderBy Function(
-    PinMessages pinMessage,
-    Messages message,
-    Users sender,
-    Users participant,
-    Snapshots snapshot,
-    Assets asset,
-    Chains chain,
-    Stickers sticker,
-    Hyperlinks hyperlink,
-    Users sharedUser,
-    Conversations conversation,
-    MessageMentions messageMention,
-    ExpiredMessages em);
-typedef BasePinMessageItems$limit = Limit Function(
-    PinMessages pinMessage,
-    Messages message,
-    Users sender,
-    Users participant,
-    Snapshots snapshot,
-    Assets asset,
-    Chains chain,
-    Stickers sticker,
-    Hyperlinks hyperlink,
-    Users sharedUser,
-    Conversations conversation,
-    MessageMentions messageMention,
-    ExpiredMessages em);
-
-class PinMessageItemResult {
-  final String? content;
-  final String? userFullName;
-  PinMessageItemResult({
-    this.content,
-    this.userFullName,
-  });
-  @override
-  int get hashCode => Object.hash(content, userFullName);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is PinMessageItemResult &&
-          other.content == this.content &&
-          other.userFullName == this.userFullName);
-  @override
-  String toString() {
-    return (StringBuffer('PinMessageItemResult(')
-          ..write('content: $content, ')
-          ..write('userFullName: $userFullName')
-          ..write(')'))
-        .toString();
-  }
 }
 
 class ConversationCircleItem {
@@ -15050,6 +14653,309 @@ class ParticipantUser {
           ..write('hasPin: $hasPin, ')
           ..write('appId: $appId, ')
           ..write('isScam: $isScam')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class MessageItem {
+  final String messageId;
+  final String conversationId;
+  final String type;
+  final String? content;
+  final DateTime createdAt;
+  final MessageStatus status;
+  final MediaStatus? mediaStatus;
+  final String? mediaWaveform;
+  final String? mediaName;
+  final String? mediaMimeType;
+  final int? mediaSize;
+  final int? mediaWidth;
+  final int? mediaHeight;
+  final String? thumbImage;
+  final String? thumbUrl;
+  final String? mediaUrl;
+  final String? mediaDuration;
+  final String? quoteId;
+  final String? quoteContent;
+  final String? actionName;
+  final String? sharedUserId;
+  final String? stickerId;
+  final String userId;
+  final String? userFullName;
+  final String userIdentityNumber;
+  final String? appId;
+  final UserRelationship? relationship;
+  final String? avatarUrl;
+  final String? sharedUserFullName;
+  final String? sharedUserIdentityNumber;
+  final String? sharedUserAvatarUrl;
+  final bool? sharedUserIsVerified;
+  final String? sharedUserAppId;
+  final String? conversationOwnerId;
+  final ConversationCategory? conversionCategory;
+  final String? groupName;
+  final String? assetUrl;
+  final int? assetWidth;
+  final int? assetHeight;
+  final String? assetName;
+  final String? assetType;
+  final String? participantFullName;
+  final String? participantUserId;
+  final String? snapshotId;
+  final String? snapshotType;
+  final String? snapshotAmount;
+  final String? assetId;
+  final String? assetSymbol;
+  final String? assetIcon;
+  final String? chainIcon;
+  final String? siteName;
+  final String? siteTitle;
+  final String? siteDescription;
+  final String? siteImage;
+  final bool? mentionRead;
+  final int? expireIn;
+  final bool pinned;
+  MessageItem({
+    required this.messageId,
+    required this.conversationId,
+    required this.type,
+    this.content,
+    required this.createdAt,
+    required this.status,
+    this.mediaStatus,
+    this.mediaWaveform,
+    this.mediaName,
+    this.mediaMimeType,
+    this.mediaSize,
+    this.mediaWidth,
+    this.mediaHeight,
+    this.thumbImage,
+    this.thumbUrl,
+    this.mediaUrl,
+    this.mediaDuration,
+    this.quoteId,
+    this.quoteContent,
+    this.actionName,
+    this.sharedUserId,
+    this.stickerId,
+    required this.userId,
+    this.userFullName,
+    required this.userIdentityNumber,
+    this.appId,
+    this.relationship,
+    this.avatarUrl,
+    this.sharedUserFullName,
+    this.sharedUserIdentityNumber,
+    this.sharedUserAvatarUrl,
+    this.sharedUserIsVerified,
+    this.sharedUserAppId,
+    this.conversationOwnerId,
+    this.conversionCategory,
+    this.groupName,
+    this.assetUrl,
+    this.assetWidth,
+    this.assetHeight,
+    this.assetName,
+    this.assetType,
+    this.participantFullName,
+    this.participantUserId,
+    this.snapshotId,
+    this.snapshotType,
+    this.snapshotAmount,
+    this.assetId,
+    this.assetSymbol,
+    this.assetIcon,
+    this.chainIcon,
+    this.siteName,
+    this.siteTitle,
+    this.siteDescription,
+    this.siteImage,
+    this.mentionRead,
+    this.expireIn,
+    required this.pinned,
+  });
+  @override
+  int get hashCode => Object.hashAll([
+        messageId,
+        conversationId,
+        type,
+        content,
+        createdAt,
+        status,
+        mediaStatus,
+        mediaWaveform,
+        mediaName,
+        mediaMimeType,
+        mediaSize,
+        mediaWidth,
+        mediaHeight,
+        thumbImage,
+        thumbUrl,
+        mediaUrl,
+        mediaDuration,
+        quoteId,
+        quoteContent,
+        actionName,
+        sharedUserId,
+        stickerId,
+        userId,
+        userFullName,
+        userIdentityNumber,
+        appId,
+        relationship,
+        avatarUrl,
+        sharedUserFullName,
+        sharedUserIdentityNumber,
+        sharedUserAvatarUrl,
+        sharedUserIsVerified,
+        sharedUserAppId,
+        conversationOwnerId,
+        conversionCategory,
+        groupName,
+        assetUrl,
+        assetWidth,
+        assetHeight,
+        assetName,
+        assetType,
+        participantFullName,
+        participantUserId,
+        snapshotId,
+        snapshotType,
+        snapshotAmount,
+        assetId,
+        assetSymbol,
+        assetIcon,
+        chainIcon,
+        siteName,
+        siteTitle,
+        siteDescription,
+        siteImage,
+        mentionRead,
+        expireIn,
+        pinned
+      ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MessageItem &&
+          other.messageId == this.messageId &&
+          other.conversationId == this.conversationId &&
+          other.type == this.type &&
+          other.content == this.content &&
+          other.createdAt == this.createdAt &&
+          other.status == this.status &&
+          other.mediaStatus == this.mediaStatus &&
+          other.mediaWaveform == this.mediaWaveform &&
+          other.mediaName == this.mediaName &&
+          other.mediaMimeType == this.mediaMimeType &&
+          other.mediaSize == this.mediaSize &&
+          other.mediaWidth == this.mediaWidth &&
+          other.mediaHeight == this.mediaHeight &&
+          other.thumbImage == this.thumbImage &&
+          other.thumbUrl == this.thumbUrl &&
+          other.mediaUrl == this.mediaUrl &&
+          other.mediaDuration == this.mediaDuration &&
+          other.quoteId == this.quoteId &&
+          other.quoteContent == this.quoteContent &&
+          other.actionName == this.actionName &&
+          other.sharedUserId == this.sharedUserId &&
+          other.stickerId == this.stickerId &&
+          other.userId == this.userId &&
+          other.userFullName == this.userFullName &&
+          other.userIdentityNumber == this.userIdentityNumber &&
+          other.appId == this.appId &&
+          other.relationship == this.relationship &&
+          other.avatarUrl == this.avatarUrl &&
+          other.sharedUserFullName == this.sharedUserFullName &&
+          other.sharedUserIdentityNumber == this.sharedUserIdentityNumber &&
+          other.sharedUserAvatarUrl == this.sharedUserAvatarUrl &&
+          other.sharedUserIsVerified == this.sharedUserIsVerified &&
+          other.sharedUserAppId == this.sharedUserAppId &&
+          other.conversationOwnerId == this.conversationOwnerId &&
+          other.conversionCategory == this.conversionCategory &&
+          other.groupName == this.groupName &&
+          other.assetUrl == this.assetUrl &&
+          other.assetWidth == this.assetWidth &&
+          other.assetHeight == this.assetHeight &&
+          other.assetName == this.assetName &&
+          other.assetType == this.assetType &&
+          other.participantFullName == this.participantFullName &&
+          other.participantUserId == this.participantUserId &&
+          other.snapshotId == this.snapshotId &&
+          other.snapshotType == this.snapshotType &&
+          other.snapshotAmount == this.snapshotAmount &&
+          other.assetId == this.assetId &&
+          other.assetSymbol == this.assetSymbol &&
+          other.assetIcon == this.assetIcon &&
+          other.chainIcon == this.chainIcon &&
+          other.siteName == this.siteName &&
+          other.siteTitle == this.siteTitle &&
+          other.siteDescription == this.siteDescription &&
+          other.siteImage == this.siteImage &&
+          other.mentionRead == this.mentionRead &&
+          other.expireIn == this.expireIn &&
+          other.pinned == this.pinned);
+  @override
+  String toString() {
+    return (StringBuffer('MessageItem(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('type: $type, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('status: $status, ')
+          ..write('mediaStatus: $mediaStatus, ')
+          ..write('mediaWaveform: $mediaWaveform, ')
+          ..write('mediaName: $mediaName, ')
+          ..write('mediaMimeType: $mediaMimeType, ')
+          ..write('mediaSize: $mediaSize, ')
+          ..write('mediaWidth: $mediaWidth, ')
+          ..write('mediaHeight: $mediaHeight, ')
+          ..write('thumbImage: $thumbImage, ')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('mediaUrl: $mediaUrl, ')
+          ..write('mediaDuration: $mediaDuration, ')
+          ..write('quoteId: $quoteId, ')
+          ..write('quoteContent: $quoteContent, ')
+          ..write('actionName: $actionName, ')
+          ..write('sharedUserId: $sharedUserId, ')
+          ..write('stickerId: $stickerId, ')
+          ..write('userId: $userId, ')
+          ..write('userFullName: $userFullName, ')
+          ..write('userIdentityNumber: $userIdentityNumber, ')
+          ..write('appId: $appId, ')
+          ..write('relationship: $relationship, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('sharedUserFullName: $sharedUserFullName, ')
+          ..write('sharedUserIdentityNumber: $sharedUserIdentityNumber, ')
+          ..write('sharedUserAvatarUrl: $sharedUserAvatarUrl, ')
+          ..write('sharedUserIsVerified: $sharedUserIsVerified, ')
+          ..write('sharedUserAppId: $sharedUserAppId, ')
+          ..write('conversationOwnerId: $conversationOwnerId, ')
+          ..write('conversionCategory: $conversionCategory, ')
+          ..write('groupName: $groupName, ')
+          ..write('assetUrl: $assetUrl, ')
+          ..write('assetWidth: $assetWidth, ')
+          ..write('assetHeight: $assetHeight, ')
+          ..write('assetName: $assetName, ')
+          ..write('assetType: $assetType, ')
+          ..write('participantFullName: $participantFullName, ')
+          ..write('participantUserId: $participantUserId, ')
+          ..write('snapshotId: $snapshotId, ')
+          ..write('snapshotType: $snapshotType, ')
+          ..write('snapshotAmount: $snapshotAmount, ')
+          ..write('assetId: $assetId, ')
+          ..write('assetSymbol: $assetSymbol, ')
+          ..write('assetIcon: $assetIcon, ')
+          ..write('chainIcon: $chainIcon, ')
+          ..write('siteName: $siteName, ')
+          ..write('siteTitle: $siteTitle, ')
+          ..write('siteDescription: $siteDescription, ')
+          ..write('siteImage: $siteImage, ')
+          ..write('mentionRead: $mentionRead, ')
+          ..write('expireIn: $expireIn, ')
+          ..write('pinned: $pinned')
           ..write(')'))
         .toString();
   }
@@ -15755,3 +15661,32 @@ class QuoteMinimal {
         .toString();
   }
 }
+
+typedef BasePinMessageItems$order = OrderBy Function(
+    PinMessages pinMessage,
+    Messages message,
+    Users sender,
+    Users participant,
+    Snapshots snapshot,
+    Assets asset,
+    Chains chain,
+    Stickers sticker,
+    Hyperlinks hyperlink,
+    Users sharedUser,
+    Conversations conversation,
+    MessageMentions messageMention,
+    ExpiredMessages em);
+typedef BasePinMessageItems$limit = Limit Function(
+    PinMessages pinMessage,
+    Messages message,
+    Users sender,
+    Users participant,
+    Snapshots snapshot,
+    Assets asset,
+    Chains chain,
+    Stickers sticker,
+    Hyperlinks hyperlink,
+    Users sharedUser,
+    Conversations conversation,
+    MessageMentions messageMention,
+    ExpiredMessages em);

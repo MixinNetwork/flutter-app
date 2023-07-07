@@ -53,6 +53,7 @@ part 'mixin_database.g.dart';
 @DriftDatabase(
   include: {
     'moor/mixin.drift',
+    'moor/dao/common.drift',
     'moor/dao/message.drift',
     'moor/dao/participant.drift',
     'moor/dao/sticker.drift',
@@ -60,7 +61,6 @@ part 'mixin_database.g.dart';
     'moor/dao/user.drift',
     'moor/dao/circle.drift',
     'moor/dao/flood.drift',
-    'moor/dao/pin_message.drift',
   },
   daos: [
     AddressDao,

@@ -218,7 +218,7 @@ class DeviceTransferSender {
           await db.countUsers().getSingle() +
           await db.conversationDao.countConversations().getSingle() +
           await db.countParticipants().getSingle() +
-          await db.countPinMessages().getSingle() +
+          await db.pinMessageDao.countPinMessages().getSingle() +
           await database.transcriptMessageDao
               .countTranscriptMessages()
               .getSingle() +
