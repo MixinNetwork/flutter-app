@@ -118,7 +118,8 @@ class Sender {
 
   Future checkSessionSenderKey(String conversationId) async {
     final participants = await database.participantSessionDao
-        .getNotSendSessionParticipants(conversationId, sessionId);
+        .notSendSessionParticipants(conversationId, sessionId)
+        .get();
     if (participants.isEmpty) {
       return;
     }

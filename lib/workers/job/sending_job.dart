@@ -358,13 +358,15 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     required int expireIn,
   }) async {
     var participantSessionKey = await database.participantSessionDao
-        .getParticipantSessionKeyWithoutSelf(message.conversationId, userId);
+        .participantSessionKeyWithoutSelf(message.conversationId, userId)
+        .getSingleOrNull();
 
     if (participantSessionKey == null ||
         participantSessionKey.publicKey.isNullOrBlank()) {
       await sender.syncConversation(message.conversationId);
       participantSessionKey = await database.participantSessionDao
-          .getParticipantSessionKeyWithoutSelf(message.conversationId, userId);
+          .participantSessionKeyWithoutSelf(message.conversationId, userId)
+          .getSingleOrNull();
     }
 
     // Workaround no session key, can't encrypt message
@@ -374,8 +376,8 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     }
 
     final otherSessionKey = await database.participantSessionDao
-        .getOtherParticipantSessionKey(
-            message.conversationId, userId, sessionId);
+        .otherParticipantSessionKey(message.conversationId, userId, sessionId)
+        .getSingleOrNull();
 
     final plaintext = message.category.isAttachment ||
             message.category.isSticker ||
