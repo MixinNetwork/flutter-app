@@ -23,7 +23,7 @@ class MessageOrderInfo {
   final int createdAt;
 }
 
-@DriftAccessor()
+@DriftAccessor(include: {'../moor/dao/message.drift'})
 class MessageDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageDaoMixin {
   MessageDao(super.db);
@@ -55,10 +55,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         }
         return messages;
       });
-
-  Selectable<NotificationMessage> notificationMessage(
-          List<String> messageIds) =>
-      db.notificationMessage(messageIds);
 
   Selectable<MessageItem> _baseMessageItems(
     Expression<bool> Function(
@@ -134,7 +130,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     Future<T> future,
   ) async {
     final result = await future;
-    final miniMessage = await db.miniMessageByIds(messageIds).get();
+    final miniMessage = await miniMessageByIds(messageIds).get();
     DataBaseEventBus.instance.insertOrReplaceMessages(miniMessage);
     return result;
   }
@@ -304,9 +300,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     DataBaseEventBus.instance.updateConversation(conversationId);
   }
 
-  Future<SendingMessage?> sendingMessage(String messageId) async =>
-      db.sendingMessage(messageId).getSingleOrNull();
-
   Future<int> updateMessageStatusById(
       String messageId, MessageStatus status) async {
     final already = await db.hasData(
@@ -321,9 +314,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           .write(MessagesCompanion(status: Value(status))),
     );
   }
-
-  Future<MessageStatus?> findMessageStatusById(String messageId) =>
-      db.findMessageStatusById(messageId).getSingleOrNull();
 
   Future<void> updateMedia({
     required String path,
@@ -616,35 +606,27 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   Future<QuoteMessageItem?> findMessageItemById(
           String conversationId, String messageId) =>
-      db
-          .baseQuoteMessageItem(
-              (message, sender, sticker, shareUser, messageMention) =>
-                  message.conversationId.equals(conversationId) &
-                  message.messageId.equals(messageId) &
-                  message.status.equalsValue(MessageStatus.failed).not(),
-              (message, sender, sticker, shareUser, messageMention) =>
-                  ignoreOrderBy,
-              (message, sender, sticker, shareUser, messageMention) =>
-                  Limit(1, 0))
-          .getSingleOrNull();
+      _baseQuoteMessageItem(
+          (message, sender, sticker, shareUser, messageMention) =>
+              message.conversationId.equals(conversationId) &
+              message.messageId.equals(messageId) &
+              message.status.equalsValue(MessageStatus.failed).not(),
+          (message, sender, sticker, shareUser, messageMention) =>
+              ignoreOrderBy,
+          (message, sender, sticker, shareUser, messageMention) =>
+              Limit(1, 0)).getSingleOrNull();
 
   Future<QuoteMessageItem?> findMessageItemByMessageId(
       String? messageId) async {
     if (messageId == null) return null;
-    return db
-        .baseQuoteMessageItem(
-            (message, sender, sticker, shareUser, messageMention) =>
-                message.messageId.equals(messageId) &
-                message.status.equalsValue(MessageStatus.failed).not(),
-            (message, sender, sticker, shareUser, messageMention) =>
-                ignoreOrderBy,
-            (message, sender, sticker, shareUser, messageMention) =>
-                Limit(1, 0))
-        .getSingleOrNull();
+    return _baseQuoteMessageItem(
+        (message, sender, sticker, shareUser, messageMention) =>
+            message.messageId.equals(messageId) &
+            message.status.equalsValue(MessageStatus.failed).not(),
+        (message, sender, sticker, shareUser, messageMention) => ignoreOrderBy,
+        (message, sender, sticker, shareUser, messageMention) =>
+            Limit(1, 0)).getSingleOrNull();
   }
-
-  Selectable<QuoteMinimal> findBigQuoteMessage(int rowId, int limit) =>
-      db.findBigQuoteMessage(rowId, limit);
 
   Future<int> updateMessageQuoteContent(
           String messageId, String? quoteContent) =>
@@ -652,9 +634,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           .write(MessagesCompanion(
         quoteContent: Value(quoteContent),
       ));
-
-  Selectable<MiniMessageItem> miniMessageByIds(List<String> messageIds) =>
-      db.miniMessageByIds(messageIds);
 
   Future<Message?> findMessageByMessageId(String messageId) =>
       (db.select(db.messages)
@@ -1245,7 +1224,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               ))
           .getSingleOrNull();
     }
-    return db.searchMessage((m, c, u, o) {
+    return _searchMessage((m, c, u, o) {
       var predicate =
           m.conversationId.equals(conversationId) & m.userId.equals(userId);
       if (categories?.isNotEmpty ?? false) {

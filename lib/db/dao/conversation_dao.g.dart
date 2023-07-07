@@ -595,6 +595,22 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
           conversations,
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
+
+  Future<int> _updateUnseenMessageCountAndLastMessageId(String conversationId,
+      String userId, String? lastMessageId, DateTime? lastMessageCreatedAt) {
+    return customUpdate(
+      'UPDATE conversations SET unseen_message_count = (SELECT count(1) FROM messages WHERE conversation_id = ?1 AND status IN (\'SENT\', \'DELIVERED\') AND user_id != ?2), last_message_id = ?3, last_message_created_at = ?4 WHERE conversation_id = ?1',
+      variables: [
+        Variable<String>(conversationId),
+        Variable<String>(userId),
+        Variable<String>(lastMessageId),
+        Variable<int>(NullAwareTypeConverter.wrapToSql(
+            Conversations.$converterlastMessageCreatedAt, lastMessageCreatedAt))
+      ],
+      updates: {conversations},
+      updateKind: UpdateKind.update,
+    );
+  }
 }
 typedef BaseConversationItemCount$where = Expression<bool> Function(
     Conversations conversation,

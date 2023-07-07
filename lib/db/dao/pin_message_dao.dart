@@ -4,6 +4,7 @@ import '../database_event_bus.dart';
 import '../extension/db.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
+import 'message_dao.dart';
 
 part 'pin_message_dao.g.dart';
 

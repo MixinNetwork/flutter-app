@@ -125,7 +125,7 @@ class Database {
       anchorMessageId: anchorMessageId,
     );
     final messages =
-        await mixinDatabase.getSearchMessageByIds(messageIds).get();
+        await mixinDatabase.messageDao.searchMessageByIds(messageIds).get();
 
     final result = <SearchMessageDetailItem>[];
 

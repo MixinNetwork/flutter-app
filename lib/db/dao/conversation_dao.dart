@@ -507,14 +507,12 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     String? lastMessageId,
     DateTime? lastMessageCreatedAt,
   ) =>
-      db
-          .updateUnseenMessageCountAndLastMessageId(
+      _updateUnseenMessageCountAndLastMessageId(
         conversationId,
         userId,
         lastMessageId,
         lastMessageCreatedAt,
-      )
-          .then((value) {
+      ).then((value) {
         if (value > 0) {
           DataBaseEventBus.instance.updateConversation(conversationId);
         }

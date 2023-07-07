@@ -54,7 +54,6 @@ part 'mixin_database.g.dart';
   include: {
     'moor/mixin.drift',
     'moor/dao/common.drift',
-    'moor/dao/message.drift',
   },
   daos: [
     AddressDao,

@@ -5,6 +5,7 @@ import '../../utils/reg_exp_utils.dart';
 import '../database_event_bus.dart';
 import '../extension/db.dart';
 import '../mixin_database.dart';
+import 'message_dao.dart';
 
 part 'message_mention_dao.g.dart';
 

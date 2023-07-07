@@ -26,6 +26,7 @@ import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../crypto/uuid/uuid.dart';
+import '../db/dao/message_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;

@@ -15,6 +15,7 @@ import '../../crypto/encrypted/encrypted_protocol.dart';
 import '../../crypto/signal/signal_protocol.dart';
 import '../../db/converter/utc_value_serializer.dart';
 import '../../db/dao/job_dao.dart';
+import '../../db/dao/message_dao.dart';
 import '../../db/extension/message.dart';
 import '../../db/mixin_database.dart';
 import '../../enum/message_category.dart';
@@ -136,7 +137,8 @@ class SendingJob extends JobQueue<Job, List<Job>> {
       messageId = job.blazeMessage!;
     }
 
-    var message = await database.messageDao.sendingMessage(messageId);
+    var message =
+        await database.messageDao.sendingMessage(messageId).getSingleOrNull();
     if (message == null) {
       await database.jobDao.deleteJobById(job.jobId);
       return;
