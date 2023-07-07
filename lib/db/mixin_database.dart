@@ -59,7 +59,6 @@ part 'mixin_database.g.dart';
     'moor/dao/sticker.drift',
     'moor/dao/sticker_album.drift',
     'moor/dao/user.drift',
-    'moor/dao/circle.drift',
   },
   daos: [
     AddressDao,
@@ -92,7 +91,6 @@ part 'mixin_database.g.dart';
     PropertyDao,
     TranscriptMessageDao,
   ],
-  queries: {},
 )
 class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);

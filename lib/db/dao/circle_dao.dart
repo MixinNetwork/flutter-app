@@ -5,7 +5,7 @@ import '../mixin_database.dart';
 
 part 'circle_dao.g.dart';
 
-@DriftAccessor()
+@DriftAccessor(include: {'../moor/dao/circle.drift'})
 class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
   CircleDao(super.db);
 
@@ -29,22 +29,9 @@ class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
         return value;
       });
 
-  Selectable<ConversationCircleItem> allCircles() => db.allCircles();
-
-  Selectable<ConversationCircleManagerItem> circleByConversationId(
-          String conversationId) =>
-      db.circleByConversationId(conversationId);
-
   Future<Circle?> findCircleById(String circleId) =>
       (select(db.circles)..where((t) => t.circleId.equals(circleId)))
           .getSingleOrNull();
-
-  Selectable<ConversationCircleManagerItem> otherCircleByConversationId(
-          String conversationId) =>
-      db.otherCircleByConversationId(conversationId);
-
-  Selectable<String> circlesNameByConversationId(String conversationId) =>
-      db.circlesNameByConversationId(conversationId);
 
   Future<void> updateOrders(List<ConversationCircleItem> value) {
     final now = DateTime.now();

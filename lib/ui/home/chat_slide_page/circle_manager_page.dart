@@ -4,8 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/dao/circle_dao.dart';
 import '../../../db/database_event_bus.dart';
-import '../../../db/mixin_database.dart';
 
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';

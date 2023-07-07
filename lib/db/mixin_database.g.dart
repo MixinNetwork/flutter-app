@@ -3,564 +3,649 @@
 part of 'mixin_database.dart';
 
 // ignore_for_file: type=lint
-class Circles extends Table with TableInfo<Circles, Circle> {
+class Users extends Table with TableInfo<Users, User> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Circles(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _circleIdMeta =
-      const VerificationMeta('circleId');
-  late final GeneratedColumn<String> circleId = GeneratedColumn<String>(
-      'circle_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(Circles.$convertercreatedAt);
-  static const VerificationMeta _orderedAtMeta =
-      const VerificationMeta('orderedAt');
-  late final GeneratedColumnWithTypeConverter<DateTime?, int> orderedAt =
-      GeneratedColumn<int>('ordered_at', aliasedName, true,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime?>(Circles.$converterorderedAtn);
-  @override
-  List<GeneratedColumn> get $columns => [circleId, name, createdAt, orderedAt];
-  @override
-  String get aliasedName => _alias ?? 'circles';
-  @override
-  String get actualTableName => 'circles';
-  @override
-  VerificationContext validateIntegrity(Insertable<Circle> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('circle_id')) {
-      context.handle(_circleIdMeta,
-          circleId.isAcceptableOrUnknown(data['circle_id']!, _circleIdMeta));
-    } else if (isInserting) {
-      context.missing(_circleIdMeta);
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_orderedAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {circleId};
-  @override
-  Circle map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Circle(
-      circleId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}circle_id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      createdAt: Circles.$convertercreatedAt.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-      orderedAt: Circles.$converterorderedAtn.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}ordered_at'])),
-    );
-  }
-
-  @override
-  Circles createAlias(String alias) {
-    return Circles(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converterorderedAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime?, int?> $converterorderedAtn =
-      NullAwareTypeConverter.wrap($converterorderedAt);
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(circle_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class Circle extends DataClass implements Insertable<Circle> {
-  final String circleId;
-  final String name;
-  final DateTime createdAt;
-  final DateTime? orderedAt;
-  const Circle(
-      {required this.circleId,
-      required this.name,
-      required this.createdAt,
-      this.orderedAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['circle_id'] = Variable<String>(circleId);
-    map['name'] = Variable<String>(name);
-    {
-      final converter = Circles.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    if (!nullToAbsent || orderedAt != null) {
-      final converter = Circles.$converterorderedAtn;
-      map['ordered_at'] = Variable<int>(converter.toSql(orderedAt));
-    }
-    return map;
-  }
-
-  CirclesCompanion toCompanion(bool nullToAbsent) {
-    return CirclesCompanion(
-      circleId: Value(circleId),
-      name: Value(name),
-      createdAt: Value(createdAt),
-      orderedAt: orderedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(orderedAt),
-    );
-  }
-
-  factory Circle.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Circle(
-      circleId: serializer.fromJson<String>(json['circle_id']),
-      name: serializer.fromJson<String>(json['name']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      orderedAt: serializer.fromJson<DateTime?>(json['ordered_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'circle_id': serializer.toJson<String>(circleId),
-      'name': serializer.toJson<String>(name),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-      'ordered_at': serializer.toJson<DateTime?>(orderedAt),
-    };
-  }
-
-  Circle copyWith(
-          {String? circleId,
-          String? name,
-          DateTime? createdAt,
-          Value<DateTime?> orderedAt = const Value.absent()}) =>
-      Circle(
-        circleId: circleId ?? this.circleId,
-        name: name ?? this.name,
-        createdAt: createdAt ?? this.createdAt,
-        orderedAt: orderedAt.present ? orderedAt.value : this.orderedAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('Circle(')
-          ..write('circleId: $circleId, ')
-          ..write('name: $name, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('orderedAt: $orderedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(circleId, name, createdAt, orderedAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Circle &&
-          other.circleId == this.circleId &&
-          other.name == this.name &&
-          other.createdAt == this.createdAt &&
-          other.orderedAt == this.orderedAt);
-}
-
-class CirclesCompanion extends UpdateCompanion<Circle> {
-  final Value<String> circleId;
-  final Value<String> name;
-  final Value<DateTime> createdAt;
-  final Value<DateTime?> orderedAt;
-  final Value<int> rowid;
-  const CirclesCompanion({
-    this.circleId = const Value.absent(),
-    this.name = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.orderedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  CirclesCompanion.insert({
-    required String circleId,
-    required String name,
-    required DateTime createdAt,
-    this.orderedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  })  : circleId = Value(circleId),
-        name = Value(name),
-        createdAt = Value(createdAt);
-  static Insertable<Circle> custom({
-    Expression<String>? circleId,
-    Expression<String>? name,
-    Expression<int>? createdAt,
-    Expression<int>? orderedAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (circleId != null) 'circle_id': circleId,
-      if (name != null) 'name': name,
-      if (createdAt != null) 'created_at': createdAt,
-      if (orderedAt != null) 'ordered_at': orderedAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  CirclesCompanion copyWith(
-      {Value<String>? circleId,
-      Value<String>? name,
-      Value<DateTime>? createdAt,
-      Value<DateTime?>? orderedAt,
-      Value<int>? rowid}) {
-    return CirclesCompanion(
-      circleId: circleId ?? this.circleId,
-      name: name ?? this.name,
-      createdAt: createdAt ?? this.createdAt,
-      orderedAt: orderedAt ?? this.orderedAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (circleId.present) {
-      map['circle_id'] = Variable<String>(circleId.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (createdAt.present) {
-      final converter = Circles.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (orderedAt.present) {
-      final converter = Circles.$converterorderedAtn;
-      map['ordered_at'] = Variable<int>(converter.toSql(orderedAt.value));
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CirclesCompanion(')
-          ..write('circleId: $circleId, ')
-          ..write('name: $name, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('orderedAt: $orderedAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class CircleConversations extends Table
-    with TableInfo<CircleConversations, CircleConversation> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  CircleConversations(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _conversationIdMeta =
-      const VerificationMeta('conversationId');
-  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
-      'conversation_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _circleIdMeta =
-      const VerificationMeta('circleId');
-  late final GeneratedColumn<String> circleId = GeneratedColumn<String>(
-      'circle_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+  Users(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, true,
+      'user_id', aliasedName, false,
       type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _identityNumberMeta =
+      const VerificationMeta('identityNumber');
+  late final GeneratedColumn<String> identityNumber = GeneratedColumn<String>(
+      'identity_number', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _relationshipMeta =
+      const VerificationMeta('relationship');
+  late final GeneratedColumnWithTypeConverter<UserRelationship?, String>
+      relationship = GeneratedColumn<String>('relationship', aliasedName, true,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<UserRelationship?>(Users.$converterrelationship);
+  static const VerificationMeta _fullNameMeta =
+      const VerificationMeta('fullName');
+  late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
+      'full_name', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _avatarUrlMeta =
+      const VerificationMeta('avatarUrl');
+  late final GeneratedColumn<String> avatarUrl = GeneratedColumn<String>(
+      'avatar_url', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
+      'phone', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _isVerifiedMeta =
+      const VerificationMeta('isVerified');
+  late final GeneratedColumn<bool> isVerified = GeneratedColumn<bool>(
+      'is_verified', aliasedName, true,
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       $customConstraints: '');
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(CircleConversations.$convertercreatedAt);
-  static const VerificationMeta _pinTimeMeta =
-      const VerificationMeta('pinTime');
-  late final GeneratedColumnWithTypeConverter<DateTime?, int> pinTime =
-      GeneratedColumn<int>('pin_time', aliasedName, true,
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, true,
               type: DriftSqlType.int,
               requiredDuringInsert: false,
               $customConstraints: '')
-          .withConverter<DateTime?>(CircleConversations.$converterpinTimen);
+          .withConverter<DateTime?>(Users.$convertercreatedAtn);
+  static const VerificationMeta _muteUntilMeta =
+      const VerificationMeta('muteUntil');
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> muteUntil =
+      GeneratedColumn<int>('mute_until', aliasedName, true,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime?>(Users.$convertermuteUntiln);
+  static const VerificationMeta _hasPinMeta = const VerificationMeta('hasPin');
+  late final GeneratedColumn<int> hasPin = GeneratedColumn<int>(
+      'has_pin', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _appIdMeta = const VerificationMeta('appId');
+  late final GeneratedColumn<String> appId = GeneratedColumn<String>(
+      'app_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _biographyMeta =
+      const VerificationMeta('biography');
+  late final GeneratedColumn<String> biography = GeneratedColumn<String>(
+      'biography', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _isScamMeta = const VerificationMeta('isScam');
+  late final GeneratedColumn<int> isScam = GeneratedColumn<int>(
+      'is_scam', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _codeUrlMeta =
+      const VerificationMeta('codeUrl');
+  late final GeneratedColumn<String> codeUrl = GeneratedColumn<String>(
+      'code_url', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _codeIdMeta = const VerificationMeta('codeId');
+  late final GeneratedColumn<String> codeId = GeneratedColumn<String>(
+      'code_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
-  List<GeneratedColumn> get $columns =>
-      [conversationId, circleId, userId, createdAt, pinTime];
+  List<GeneratedColumn> get $columns => [
+        userId,
+        identityNumber,
+        relationship,
+        fullName,
+        avatarUrl,
+        phone,
+        isVerified,
+        createdAt,
+        muteUntil,
+        hasPin,
+        appId,
+        biography,
+        isScam,
+        codeUrl,
+        codeId
+      ];
   @override
-  String get aliasedName => _alias ?? 'circle_conversations';
+  String get aliasedName => _alias ?? 'users';
   @override
-  String get actualTableName => 'circle_conversations';
+  String get actualTableName => 'users';
   @override
-  VerificationContext validateIntegrity(Insertable<CircleConversation> instance,
+  VerificationContext validateIntegrity(Insertable<User> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('conversation_id')) {
-      context.handle(
-          _conversationIdMeta,
-          conversationId.isAcceptableOrUnknown(
-              data['conversation_id']!, _conversationIdMeta));
-    } else if (isInserting) {
-      context.missing(_conversationIdMeta);
-    }
-    if (data.containsKey('circle_id')) {
-      context.handle(_circleIdMeta,
-          circleId.isAcceptableOrUnknown(data['circle_id']!, _circleIdMeta));
-    } else if (isInserting) {
-      context.missing(_circleIdMeta);
-    }
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('identity_number')) {
+      context.handle(
+          _identityNumberMeta,
+          identityNumber.isAcceptableOrUnknown(
+              data['identity_number']!, _identityNumberMeta));
+    } else if (isInserting) {
+      context.missing(_identityNumberMeta);
+    }
+    context.handle(_relationshipMeta, const VerificationResult.success());
+    if (data.containsKey('full_name')) {
+      context.handle(_fullNameMeta,
+          fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
+    }
+    if (data.containsKey('avatar_url')) {
+      context.handle(_avatarUrlMeta,
+          avatarUrl.isAcceptableOrUnknown(data['avatar_url']!, _avatarUrlMeta));
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+          _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
+    }
+    if (data.containsKey('is_verified')) {
+      context.handle(
+          _isVerifiedMeta,
+          isVerified.isAcceptableOrUnknown(
+              data['is_verified']!, _isVerifiedMeta));
     }
     context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_pinTimeMeta, const VerificationResult.success());
+    context.handle(_muteUntilMeta, const VerificationResult.success());
+    if (data.containsKey('has_pin')) {
+      context.handle(_hasPinMeta,
+          hasPin.isAcceptableOrUnknown(data['has_pin']!, _hasPinMeta));
+    }
+    if (data.containsKey('app_id')) {
+      context.handle(
+          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
+    }
+    if (data.containsKey('biography')) {
+      context.handle(_biographyMeta,
+          biography.isAcceptableOrUnknown(data['biography']!, _biographyMeta));
+    }
+    if (data.containsKey('is_scam')) {
+      context.handle(_isScamMeta,
+          isScam.isAcceptableOrUnknown(data['is_scam']!, _isScamMeta));
+    }
+    if (data.containsKey('code_url')) {
+      context.handle(_codeUrlMeta,
+          codeUrl.isAcceptableOrUnknown(data['code_url']!, _codeUrlMeta));
+    }
+    if (data.containsKey('code_id')) {
+      context.handle(_codeIdMeta,
+          codeId.isAcceptableOrUnknown(data['code_id']!, _codeIdMeta));
+    }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {conversationId, circleId};
+  Set<GeneratedColumn> get $primaryKey => {userId};
   @override
-  CircleConversation map(Map<String, dynamic> data, {String? tablePrefix}) {
+  User map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CircleConversation(
-      conversationId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
-      circleId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}circle_id'])!,
+    return User(
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
-      createdAt: CircleConversations.$convertercreatedAt.fromSql(
-          attachedDatabase.typeMapping
-              .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-      pinTime: CircleConversations.$converterpinTimen.fromSql(attachedDatabase
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      identityNumber: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}identity_number'])!,
+      relationship: Users.$converterrelationship.fromSql(attachedDatabase
           .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}pin_time'])),
+          .read(DriftSqlType.string, data['${effectivePrefix}relationship'])),
+      fullName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}full_name']),
+      avatarUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}avatar_url']),
+      phone: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}phone']),
+      isVerified: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_verified']),
+      createdAt: Users.$convertercreatedAtn.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])),
+      muteUntil: Users.$convertermuteUntiln.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}mute_until'])),
+      hasPin: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}has_pin']),
+      appId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}app_id']),
+      biography: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}biography']),
+      isScam: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}is_scam']),
+      codeUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}code_url']),
+      codeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}code_id']),
     );
   }
 
   @override
-  CircleConversations createAlias(String alias) {
-    return CircleConversations(attachedDatabase, alias);
+  Users createAlias(String alias) {
+    return Users(attachedDatabase, alias);
   }
 
+  static TypeConverter<UserRelationship?, String?> $converterrelationship =
+      const UserRelationshipConverter();
   static TypeConverter<DateTime, int> $convertercreatedAt =
       const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converterpinTime =
+  static TypeConverter<DateTime?, int?> $convertercreatedAtn =
+      NullAwareTypeConverter.wrap($convertercreatedAt);
+  static TypeConverter<DateTime, int> $convertermuteUntil =
       const MillisDateConverter();
-  static TypeConverter<DateTime?, int?> $converterpinTimen =
-      NullAwareTypeConverter.wrap($converterpinTime);
+  static TypeConverter<DateTime?, int?> $convertermuteUntiln =
+      NullAwareTypeConverter.wrap($convertermuteUntil);
   @override
-  List<String> get customConstraints =>
-      const ['PRIMARY KEY(conversation_id, circle_id)'];
+  List<String> get customConstraints => const ['PRIMARY KEY(user_id)'];
   @override
   bool get dontWriteConstraints => true;
 }
 
-class CircleConversation extends DataClass
-    implements Insertable<CircleConversation> {
-  final String conversationId;
-  final String circleId;
-  final String? userId;
-  final DateTime createdAt;
-  final DateTime? pinTime;
-  const CircleConversation(
-      {required this.conversationId,
-      required this.circleId,
-      this.userId,
-      required this.createdAt,
-      this.pinTime});
+class User extends DataClass implements Insertable<User> {
+  final String userId;
+  final String identityNumber;
+  final UserRelationship? relationship;
+  final String? fullName;
+  final String? avatarUrl;
+  final String? phone;
+  final bool? isVerified;
+  final DateTime? createdAt;
+  final DateTime? muteUntil;
+  final int? hasPin;
+  final String? appId;
+  final String? biography;
+  final int? isScam;
+  final String? codeUrl;
+  final String? codeId;
+  const User(
+      {required this.userId,
+      required this.identityNumber,
+      this.relationship,
+      this.fullName,
+      this.avatarUrl,
+      this.phone,
+      this.isVerified,
+      this.createdAt,
+      this.muteUntil,
+      this.hasPin,
+      this.appId,
+      this.biography,
+      this.isScam,
+      this.codeUrl,
+      this.codeId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['conversation_id'] = Variable<String>(conversationId);
-    map['circle_id'] = Variable<String>(circleId);
-    if (!nullToAbsent || userId != null) {
-      map['user_id'] = Variable<String>(userId);
+    map['user_id'] = Variable<String>(userId);
+    map['identity_number'] = Variable<String>(identityNumber);
+    if (!nullToAbsent || relationship != null) {
+      final converter = Users.$converterrelationship;
+      map['relationship'] = Variable<String>(converter.toSql(relationship));
     }
-    {
-      final converter = CircleConversations.$convertercreatedAt;
+    if (!nullToAbsent || fullName != null) {
+      map['full_name'] = Variable<String>(fullName);
+    }
+    if (!nullToAbsent || avatarUrl != null) {
+      map['avatar_url'] = Variable<String>(avatarUrl);
+    }
+    if (!nullToAbsent || phone != null) {
+      map['phone'] = Variable<String>(phone);
+    }
+    if (!nullToAbsent || isVerified != null) {
+      map['is_verified'] = Variable<bool>(isVerified);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      final converter = Users.$convertercreatedAtn;
       map['created_at'] = Variable<int>(converter.toSql(createdAt));
     }
-    if (!nullToAbsent || pinTime != null) {
-      final converter = CircleConversations.$converterpinTimen;
-      map['pin_time'] = Variable<int>(converter.toSql(pinTime));
+    if (!nullToAbsent || muteUntil != null) {
+      final converter = Users.$convertermuteUntiln;
+      map['mute_until'] = Variable<int>(converter.toSql(muteUntil));
+    }
+    if (!nullToAbsent || hasPin != null) {
+      map['has_pin'] = Variable<int>(hasPin);
+    }
+    if (!nullToAbsent || appId != null) {
+      map['app_id'] = Variable<String>(appId);
+    }
+    if (!nullToAbsent || biography != null) {
+      map['biography'] = Variable<String>(biography);
+    }
+    if (!nullToAbsent || isScam != null) {
+      map['is_scam'] = Variable<int>(isScam);
+    }
+    if (!nullToAbsent || codeUrl != null) {
+      map['code_url'] = Variable<String>(codeUrl);
+    }
+    if (!nullToAbsent || codeId != null) {
+      map['code_id'] = Variable<String>(codeId);
     }
     return map;
   }
 
-  CircleConversationsCompanion toCompanion(bool nullToAbsent) {
-    return CircleConversationsCompanion(
-      conversationId: Value(conversationId),
-      circleId: Value(circleId),
-      userId:
-          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      createdAt: Value(createdAt),
-      pinTime: pinTime == null && nullToAbsent
+  UsersCompanion toCompanion(bool nullToAbsent) {
+    return UsersCompanion(
+      userId: Value(userId),
+      identityNumber: Value(identityNumber),
+      relationship: relationship == null && nullToAbsent
           ? const Value.absent()
-          : Value(pinTime),
+          : Value(relationship),
+      fullName: fullName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fullName),
+      avatarUrl: avatarUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(avatarUrl),
+      phone:
+          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
+      isVerified: isVerified == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isVerified),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      muteUntil: muteUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muteUntil),
+      hasPin:
+          hasPin == null && nullToAbsent ? const Value.absent() : Value(hasPin),
+      appId:
+          appId == null && nullToAbsent ? const Value.absent() : Value(appId),
+      biography: biography == null && nullToAbsent
+          ? const Value.absent()
+          : Value(biography),
+      isScam:
+          isScam == null && nullToAbsent ? const Value.absent() : Value(isScam),
+      codeUrl: codeUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(codeUrl),
+      codeId:
+          codeId == null && nullToAbsent ? const Value.absent() : Value(codeId),
     );
   }
 
-  factory CircleConversation.fromJson(Map<String, dynamic> json,
+  factory User.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return CircleConversation(
-      conversationId: serializer.fromJson<String>(json['conversation_id']),
-      circleId: serializer.fromJson<String>(json['circle_id']),
-      userId: serializer.fromJson<String?>(json['user_id']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      pinTime: serializer.fromJson<DateTime?>(json['pin_time']),
+    return User(
+      userId: serializer.fromJson<String>(json['user_id']),
+      identityNumber: serializer.fromJson<String>(json['identity_number']),
+      relationship:
+          serializer.fromJson<UserRelationship?>(json['relationship']),
+      fullName: serializer.fromJson<String?>(json['full_name']),
+      avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
+      phone: serializer.fromJson<String?>(json['phone']),
+      isVerified: serializer.fromJson<bool?>(json['is_verified']),
+      createdAt: serializer.fromJson<DateTime?>(json['created_at']),
+      muteUntil: serializer.fromJson<DateTime?>(json['mute_until']),
+      hasPin: serializer.fromJson<int?>(json['has_pin']),
+      appId: serializer.fromJson<String?>(json['app_id']),
+      biography: serializer.fromJson<String?>(json['biography']),
+      isScam: serializer.fromJson<int?>(json['is_scam']),
+      codeUrl: serializer.fromJson<String?>(json['code_url']),
+      codeId: serializer.fromJson<String?>(json['code_id']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'conversation_id': serializer.toJson<String>(conversationId),
-      'circle_id': serializer.toJson<String>(circleId),
-      'user_id': serializer.toJson<String?>(userId),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-      'pin_time': serializer.toJson<DateTime?>(pinTime),
+      'user_id': serializer.toJson<String>(userId),
+      'identity_number': serializer.toJson<String>(identityNumber),
+      'relationship': serializer.toJson<UserRelationship?>(relationship),
+      'full_name': serializer.toJson<String?>(fullName),
+      'avatar_url': serializer.toJson<String?>(avatarUrl),
+      'phone': serializer.toJson<String?>(phone),
+      'is_verified': serializer.toJson<bool?>(isVerified),
+      'created_at': serializer.toJson<DateTime?>(createdAt),
+      'mute_until': serializer.toJson<DateTime?>(muteUntil),
+      'has_pin': serializer.toJson<int?>(hasPin),
+      'app_id': serializer.toJson<String?>(appId),
+      'biography': serializer.toJson<String?>(biography),
+      'is_scam': serializer.toJson<int?>(isScam),
+      'code_url': serializer.toJson<String?>(codeUrl),
+      'code_id': serializer.toJson<String?>(codeId),
     };
   }
 
-  CircleConversation copyWith(
-          {String? conversationId,
-          String? circleId,
-          Value<String?> userId = const Value.absent(),
-          DateTime? createdAt,
-          Value<DateTime?> pinTime = const Value.absent()}) =>
-      CircleConversation(
-        conversationId: conversationId ?? this.conversationId,
-        circleId: circleId ?? this.circleId,
-        userId: userId.present ? userId.value : this.userId,
-        createdAt: createdAt ?? this.createdAt,
-        pinTime: pinTime.present ? pinTime.value : this.pinTime,
+  User copyWith(
+          {String? userId,
+          String? identityNumber,
+          Value<UserRelationship?> relationship = const Value.absent(),
+          Value<String?> fullName = const Value.absent(),
+          Value<String?> avatarUrl = const Value.absent(),
+          Value<String?> phone = const Value.absent(),
+          Value<bool?> isVerified = const Value.absent(),
+          Value<DateTime?> createdAt = const Value.absent(),
+          Value<DateTime?> muteUntil = const Value.absent(),
+          Value<int?> hasPin = const Value.absent(),
+          Value<String?> appId = const Value.absent(),
+          Value<String?> biography = const Value.absent(),
+          Value<int?> isScam = const Value.absent(),
+          Value<String?> codeUrl = const Value.absent(),
+          Value<String?> codeId = const Value.absent()}) =>
+      User(
+        userId: userId ?? this.userId,
+        identityNumber: identityNumber ?? this.identityNumber,
+        relationship:
+            relationship.present ? relationship.value : this.relationship,
+        fullName: fullName.present ? fullName.value : this.fullName,
+        avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
+        phone: phone.present ? phone.value : this.phone,
+        isVerified: isVerified.present ? isVerified.value : this.isVerified,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
+        hasPin: hasPin.present ? hasPin.value : this.hasPin,
+        appId: appId.present ? appId.value : this.appId,
+        biography: biography.present ? biography.value : this.biography,
+        isScam: isScam.present ? isScam.value : this.isScam,
+        codeUrl: codeUrl.present ? codeUrl.value : this.codeUrl,
+        codeId: codeId.present ? codeId.value : this.codeId,
       );
   @override
   String toString() {
-    return (StringBuffer('CircleConversation(')
-          ..write('conversationId: $conversationId, ')
-          ..write('circleId: $circleId, ')
+    return (StringBuffer('User(')
           ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('relationship: $relationship, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('phone: $phone, ')
+          ..write('isVerified: $isVerified, ')
           ..write('createdAt: $createdAt, ')
-          ..write('pinTime: $pinTime')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('hasPin: $hasPin, ')
+          ..write('appId: $appId, ')
+          ..write('biography: $biography, ')
+          ..write('isScam: $isScam, ')
+          ..write('codeUrl: $codeUrl, ')
+          ..write('codeId: $codeId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(conversationId, circleId, userId, createdAt, pinTime);
+  int get hashCode => Object.hash(
+      userId,
+      identityNumber,
+      relationship,
+      fullName,
+      avatarUrl,
+      phone,
+      isVerified,
+      createdAt,
+      muteUntil,
+      hasPin,
+      appId,
+      biography,
+      isScam,
+      codeUrl,
+      codeId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is CircleConversation &&
-          other.conversationId == this.conversationId &&
-          other.circleId == this.circleId &&
+      (other is User &&
           other.userId == this.userId &&
+          other.identityNumber == this.identityNumber &&
+          other.relationship == this.relationship &&
+          other.fullName == this.fullName &&
+          other.avatarUrl == this.avatarUrl &&
+          other.phone == this.phone &&
+          other.isVerified == this.isVerified &&
           other.createdAt == this.createdAt &&
-          other.pinTime == this.pinTime);
+          other.muteUntil == this.muteUntil &&
+          other.hasPin == this.hasPin &&
+          other.appId == this.appId &&
+          other.biography == this.biography &&
+          other.isScam == this.isScam &&
+          other.codeUrl == this.codeUrl &&
+          other.codeId == this.codeId);
 }
 
-class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
-  final Value<String> conversationId;
-  final Value<String> circleId;
-  final Value<String?> userId;
-  final Value<DateTime> createdAt;
-  final Value<DateTime?> pinTime;
+class UsersCompanion extends UpdateCompanion<User> {
+  final Value<String> userId;
+  final Value<String> identityNumber;
+  final Value<UserRelationship?> relationship;
+  final Value<String?> fullName;
+  final Value<String?> avatarUrl;
+  final Value<String?> phone;
+  final Value<bool?> isVerified;
+  final Value<DateTime?> createdAt;
+  final Value<DateTime?> muteUntil;
+  final Value<int?> hasPin;
+  final Value<String?> appId;
+  final Value<String?> biography;
+  final Value<int?> isScam;
+  final Value<String?> codeUrl;
+  final Value<String?> codeId;
   final Value<int> rowid;
-  const CircleConversationsCompanion({
-    this.conversationId = const Value.absent(),
-    this.circleId = const Value.absent(),
+  const UsersCompanion({
     this.userId = const Value.absent(),
+    this.identityNumber = const Value.absent(),
+    this.relationship = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.isVerified = const Value.absent(),
     this.createdAt = const Value.absent(),
-    this.pinTime = const Value.absent(),
+    this.muteUntil = const Value.absent(),
+    this.hasPin = const Value.absent(),
+    this.appId = const Value.absent(),
+    this.biography = const Value.absent(),
+    this.isScam = const Value.absent(),
+    this.codeUrl = const Value.absent(),
+    this.codeId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  CircleConversationsCompanion.insert({
-    required String conversationId,
-    required String circleId,
-    this.userId = const Value.absent(),
-    required DateTime createdAt,
-    this.pinTime = const Value.absent(),
+  UsersCompanion.insert({
+    required String userId,
+    required String identityNumber,
+    this.relationship = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.isVerified = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.muteUntil = const Value.absent(),
+    this.hasPin = const Value.absent(),
+    this.appId = const Value.absent(),
+    this.biography = const Value.absent(),
+    this.isScam = const Value.absent(),
+    this.codeUrl = const Value.absent(),
+    this.codeId = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : conversationId = Value(conversationId),
-        circleId = Value(circleId),
-        createdAt = Value(createdAt);
-  static Insertable<CircleConversation> custom({
-    Expression<String>? conversationId,
-    Expression<String>? circleId,
+  })  : userId = Value(userId),
+        identityNumber = Value(identityNumber);
+  static Insertable<User> custom({
     Expression<String>? userId,
+    Expression<String>? identityNumber,
+    Expression<String>? relationship,
+    Expression<String>? fullName,
+    Expression<String>? avatarUrl,
+    Expression<String>? phone,
+    Expression<bool>? isVerified,
     Expression<int>? createdAt,
-    Expression<int>? pinTime,
+    Expression<int>? muteUntil,
+    Expression<int>? hasPin,
+    Expression<String>? appId,
+    Expression<String>? biography,
+    Expression<int>? isScam,
+    Expression<String>? codeUrl,
+    Expression<String>? codeId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (conversationId != null) 'conversation_id': conversationId,
-      if (circleId != null) 'circle_id': circleId,
       if (userId != null) 'user_id': userId,
+      if (identityNumber != null) 'identity_number': identityNumber,
+      if (relationship != null) 'relationship': relationship,
+      if (fullName != null) 'full_name': fullName,
+      if (avatarUrl != null) 'avatar_url': avatarUrl,
+      if (phone != null) 'phone': phone,
+      if (isVerified != null) 'is_verified': isVerified,
       if (createdAt != null) 'created_at': createdAt,
-      if (pinTime != null) 'pin_time': pinTime,
+      if (muteUntil != null) 'mute_until': muteUntil,
+      if (hasPin != null) 'has_pin': hasPin,
+      if (appId != null) 'app_id': appId,
+      if (biography != null) 'biography': biography,
+      if (isScam != null) 'is_scam': isScam,
+      if (codeUrl != null) 'code_url': codeUrl,
+      if (codeId != null) 'code_id': codeId,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  CircleConversationsCompanion copyWith(
-      {Value<String>? conversationId,
-      Value<String>? circleId,
-      Value<String?>? userId,
-      Value<DateTime>? createdAt,
-      Value<DateTime?>? pinTime,
+  UsersCompanion copyWith(
+      {Value<String>? userId,
+      Value<String>? identityNumber,
+      Value<UserRelationship?>? relationship,
+      Value<String?>? fullName,
+      Value<String?>? avatarUrl,
+      Value<String?>? phone,
+      Value<bool?>? isVerified,
+      Value<DateTime?>? createdAt,
+      Value<DateTime?>? muteUntil,
+      Value<int?>? hasPin,
+      Value<String?>? appId,
+      Value<String?>? biography,
+      Value<int?>? isScam,
+      Value<String?>? codeUrl,
+      Value<String?>? codeId,
       Value<int>? rowid}) {
-    return CircleConversationsCompanion(
-      conversationId: conversationId ?? this.conversationId,
-      circleId: circleId ?? this.circleId,
+    return UsersCompanion(
       userId: userId ?? this.userId,
+      identityNumber: identityNumber ?? this.identityNumber,
+      relationship: relationship ?? this.relationship,
+      fullName: fullName ?? this.fullName,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      phone: phone ?? this.phone,
+      isVerified: isVerified ?? this.isVerified,
       createdAt: createdAt ?? this.createdAt,
-      pinTime: pinTime ?? this.pinTime,
+      muteUntil: muteUntil ?? this.muteUntil,
+      hasPin: hasPin ?? this.hasPin,
+      appId: appId ?? this.appId,
+      biography: biography ?? this.biography,
+      isScam: isScam ?? this.isScam,
+      codeUrl: codeUrl ?? this.codeUrl,
+      codeId: codeId ?? this.codeId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -568,22 +653,54 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (conversationId.present) {
-      map['conversation_id'] = Variable<String>(conversationId.value);
-    }
-    if (circleId.present) {
-      map['circle_id'] = Variable<String>(circleId.value);
-    }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
     }
+    if (identityNumber.present) {
+      map['identity_number'] = Variable<String>(identityNumber.value);
+    }
+    if (relationship.present) {
+      final converter = Users.$converterrelationship;
+      map['relationship'] =
+          Variable<String>(converter.toSql(relationship.value));
+    }
+    if (fullName.present) {
+      map['full_name'] = Variable<String>(fullName.value);
+    }
+    if (avatarUrl.present) {
+      map['avatar_url'] = Variable<String>(avatarUrl.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String>(phone.value);
+    }
+    if (isVerified.present) {
+      map['is_verified'] = Variable<bool>(isVerified.value);
+    }
     if (createdAt.present) {
-      final converter = CircleConversations.$convertercreatedAt;
+      final converter = Users.$convertercreatedAtn;
       map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
     }
-    if (pinTime.present) {
-      final converter = CircleConversations.$converterpinTimen;
-      map['pin_time'] = Variable<int>(converter.toSql(pinTime.value));
+    if (muteUntil.present) {
+      final converter = Users.$convertermuteUntiln;
+      map['mute_until'] = Variable<int>(converter.toSql(muteUntil.value));
+    }
+    if (hasPin.present) {
+      map['has_pin'] = Variable<int>(hasPin.value);
+    }
+    if (appId.present) {
+      map['app_id'] = Variable<String>(appId.value);
+    }
+    if (biography.present) {
+      map['biography'] = Variable<String>(biography.value);
+    }
+    if (isScam.present) {
+      map['is_scam'] = Variable<int>(isScam.value);
+    }
+    if (codeUrl.present) {
+      map['code_url'] = Variable<String>(codeUrl.value);
+    }
+    if (codeId.present) {
+      map['code_id'] = Variable<String>(codeId.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -593,12 +710,22 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
 
   @override
   String toString() {
-    return (StringBuffer('CircleConversationsCompanion(')
-          ..write('conversationId: $conversationId, ')
-          ..write('circleId: $circleId, ')
+    return (StringBuffer('UsersCompanion(')
           ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('relationship: $relationship, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('phone: $phone, ')
+          ..write('isVerified: $isVerified, ')
           ..write('createdAt: $createdAt, ')
-          ..write('pinTime: $pinTime, ')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('hasPin: $hasPin, ')
+          ..write('appId: $appId, ')
+          ..write('biography: $biography, ')
+          ..write('isScam: $isScam, ')
+          ..write('codeUrl: $codeUrl, ')
+          ..write('codeId: $codeId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1488,735 +1615,6 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
           ..write('draft: $draft, ')
           ..write('muteUntil: $muteUntil, ')
           ..write('expireIn: $expireIn, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class Users extends Table with TableInfo<Users, User> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  Users(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _identityNumberMeta =
-      const VerificationMeta('identityNumber');
-  late final GeneratedColumn<String> identityNumber = GeneratedColumn<String>(
-      'identity_number', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _relationshipMeta =
-      const VerificationMeta('relationship');
-  late final GeneratedColumnWithTypeConverter<UserRelationship?, String>
-      relationship = GeneratedColumn<String>('relationship', aliasedName, true,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<UserRelationship?>(Users.$converterrelationship);
-  static const VerificationMeta _fullNameMeta =
-      const VerificationMeta('fullName');
-  late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
-      'full_name', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _avatarUrlMeta =
-      const VerificationMeta('avatarUrl');
-  late final GeneratedColumn<String> avatarUrl = GeneratedColumn<String>(
-      'avatar_url', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
-  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
-      'phone', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _isVerifiedMeta =
-      const VerificationMeta('isVerified');
-  late final GeneratedColumn<bool> isVerified = GeneratedColumn<bool>(
-      'is_verified', aliasedName, true,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime?, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, true,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime?>(Users.$convertercreatedAtn);
-  static const VerificationMeta _muteUntilMeta =
-      const VerificationMeta('muteUntil');
-  late final GeneratedColumnWithTypeConverter<DateTime?, int> muteUntil =
-      GeneratedColumn<int>('mute_until', aliasedName, true,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime?>(Users.$convertermuteUntiln);
-  static const VerificationMeta _hasPinMeta = const VerificationMeta('hasPin');
-  late final GeneratedColumn<int> hasPin = GeneratedColumn<int>(
-      'has_pin', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _appIdMeta = const VerificationMeta('appId');
-  late final GeneratedColumn<String> appId = GeneratedColumn<String>(
-      'app_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _biographyMeta =
-      const VerificationMeta('biography');
-  late final GeneratedColumn<String> biography = GeneratedColumn<String>(
-      'biography', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _isScamMeta = const VerificationMeta('isScam');
-  late final GeneratedColumn<int> isScam = GeneratedColumn<int>(
-      'is_scam', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _codeUrlMeta =
-      const VerificationMeta('codeUrl');
-  late final GeneratedColumn<String> codeUrl = GeneratedColumn<String>(
-      'code_url', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _codeIdMeta = const VerificationMeta('codeId');
-  late final GeneratedColumn<String> codeId = GeneratedColumn<String>(
-      'code_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  @override
-  List<GeneratedColumn> get $columns => [
-        userId,
-        identityNumber,
-        relationship,
-        fullName,
-        avatarUrl,
-        phone,
-        isVerified,
-        createdAt,
-        muteUntil,
-        hasPin,
-        appId,
-        biography,
-        isScam,
-        codeUrl,
-        codeId
-      ];
-  @override
-  String get aliasedName => _alias ?? 'users';
-  @override
-  String get actualTableName => 'users';
-  @override
-  VerificationContext validateIntegrity(Insertable<User> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    if (data.containsKey('identity_number')) {
-      context.handle(
-          _identityNumberMeta,
-          identityNumber.isAcceptableOrUnknown(
-              data['identity_number']!, _identityNumberMeta));
-    } else if (isInserting) {
-      context.missing(_identityNumberMeta);
-    }
-    context.handle(_relationshipMeta, const VerificationResult.success());
-    if (data.containsKey('full_name')) {
-      context.handle(_fullNameMeta,
-          fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
-    }
-    if (data.containsKey('avatar_url')) {
-      context.handle(_avatarUrlMeta,
-          avatarUrl.isAcceptableOrUnknown(data['avatar_url']!, _avatarUrlMeta));
-    }
-    if (data.containsKey('phone')) {
-      context.handle(
-          _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
-    }
-    if (data.containsKey('is_verified')) {
-      context.handle(
-          _isVerifiedMeta,
-          isVerified.isAcceptableOrUnknown(
-              data['is_verified']!, _isVerifiedMeta));
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_muteUntilMeta, const VerificationResult.success());
-    if (data.containsKey('has_pin')) {
-      context.handle(_hasPinMeta,
-          hasPin.isAcceptableOrUnknown(data['has_pin']!, _hasPinMeta));
-    }
-    if (data.containsKey('app_id')) {
-      context.handle(
-          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
-    }
-    if (data.containsKey('biography')) {
-      context.handle(_biographyMeta,
-          biography.isAcceptableOrUnknown(data['biography']!, _biographyMeta));
-    }
-    if (data.containsKey('is_scam')) {
-      context.handle(_isScamMeta,
-          isScam.isAcceptableOrUnknown(data['is_scam']!, _isScamMeta));
-    }
-    if (data.containsKey('code_url')) {
-      context.handle(_codeUrlMeta,
-          codeUrl.isAcceptableOrUnknown(data['code_url']!, _codeUrlMeta));
-    }
-    if (data.containsKey('code_id')) {
-      context.handle(_codeIdMeta,
-          codeId.isAcceptableOrUnknown(data['code_id']!, _codeIdMeta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {userId};
-  @override
-  User map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return User(
-      userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
-      identityNumber: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}identity_number'])!,
-      relationship: Users.$converterrelationship.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}relationship'])),
-      fullName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}full_name']),
-      avatarUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}avatar_url']),
-      phone: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}phone']),
-      isVerified: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_verified']),
-      createdAt: Users.$convertercreatedAtn.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])),
-      muteUntil: Users.$convertermuteUntiln.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}mute_until'])),
-      hasPin: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}has_pin']),
-      appId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}app_id']),
-      biography: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}biography']),
-      isScam: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}is_scam']),
-      codeUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}code_url']),
-      codeId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}code_id']),
-    );
-  }
-
-  @override
-  Users createAlias(String alias) {
-    return Users(attachedDatabase, alias);
-  }
-
-  static TypeConverter<UserRelationship?, String?> $converterrelationship =
-      const UserRelationshipConverter();
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime?, int?> $convertercreatedAtn =
-      NullAwareTypeConverter.wrap($convertercreatedAt);
-  static TypeConverter<DateTime, int> $convertermuteUntil =
-      const MillisDateConverter();
-  static TypeConverter<DateTime?, int?> $convertermuteUntiln =
-      NullAwareTypeConverter.wrap($convertermuteUntil);
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(user_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class User extends DataClass implements Insertable<User> {
-  final String userId;
-  final String identityNumber;
-  final UserRelationship? relationship;
-  final String? fullName;
-  final String? avatarUrl;
-  final String? phone;
-  final bool? isVerified;
-  final DateTime? createdAt;
-  final DateTime? muteUntil;
-  final int? hasPin;
-  final String? appId;
-  final String? biography;
-  final int? isScam;
-  final String? codeUrl;
-  final String? codeId;
-  const User(
-      {required this.userId,
-      required this.identityNumber,
-      this.relationship,
-      this.fullName,
-      this.avatarUrl,
-      this.phone,
-      this.isVerified,
-      this.createdAt,
-      this.muteUntil,
-      this.hasPin,
-      this.appId,
-      this.biography,
-      this.isScam,
-      this.codeUrl,
-      this.codeId});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['user_id'] = Variable<String>(userId);
-    map['identity_number'] = Variable<String>(identityNumber);
-    if (!nullToAbsent || relationship != null) {
-      final converter = Users.$converterrelationship;
-      map['relationship'] = Variable<String>(converter.toSql(relationship));
-    }
-    if (!nullToAbsent || fullName != null) {
-      map['full_name'] = Variable<String>(fullName);
-    }
-    if (!nullToAbsent || avatarUrl != null) {
-      map['avatar_url'] = Variable<String>(avatarUrl);
-    }
-    if (!nullToAbsent || phone != null) {
-      map['phone'] = Variable<String>(phone);
-    }
-    if (!nullToAbsent || isVerified != null) {
-      map['is_verified'] = Variable<bool>(isVerified);
-    }
-    if (!nullToAbsent || createdAt != null) {
-      final converter = Users.$convertercreatedAtn;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    if (!nullToAbsent || muteUntil != null) {
-      final converter = Users.$convertermuteUntiln;
-      map['mute_until'] = Variable<int>(converter.toSql(muteUntil));
-    }
-    if (!nullToAbsent || hasPin != null) {
-      map['has_pin'] = Variable<int>(hasPin);
-    }
-    if (!nullToAbsent || appId != null) {
-      map['app_id'] = Variable<String>(appId);
-    }
-    if (!nullToAbsent || biography != null) {
-      map['biography'] = Variable<String>(biography);
-    }
-    if (!nullToAbsent || isScam != null) {
-      map['is_scam'] = Variable<int>(isScam);
-    }
-    if (!nullToAbsent || codeUrl != null) {
-      map['code_url'] = Variable<String>(codeUrl);
-    }
-    if (!nullToAbsent || codeId != null) {
-      map['code_id'] = Variable<String>(codeId);
-    }
-    return map;
-  }
-
-  UsersCompanion toCompanion(bool nullToAbsent) {
-    return UsersCompanion(
-      userId: Value(userId),
-      identityNumber: Value(identityNumber),
-      relationship: relationship == null && nullToAbsent
-          ? const Value.absent()
-          : Value(relationship),
-      fullName: fullName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(fullName),
-      avatarUrl: avatarUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(avatarUrl),
-      phone:
-          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
-      isVerified: isVerified == null && nullToAbsent
-          ? const Value.absent()
-          : Value(isVerified),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-      muteUntil: muteUntil == null && nullToAbsent
-          ? const Value.absent()
-          : Value(muteUntil),
-      hasPin:
-          hasPin == null && nullToAbsent ? const Value.absent() : Value(hasPin),
-      appId:
-          appId == null && nullToAbsent ? const Value.absent() : Value(appId),
-      biography: biography == null && nullToAbsent
-          ? const Value.absent()
-          : Value(biography),
-      isScam:
-          isScam == null && nullToAbsent ? const Value.absent() : Value(isScam),
-      codeUrl: codeUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(codeUrl),
-      codeId:
-          codeId == null && nullToAbsent ? const Value.absent() : Value(codeId),
-    );
-  }
-
-  factory User.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return User(
-      userId: serializer.fromJson<String>(json['user_id']),
-      identityNumber: serializer.fromJson<String>(json['identity_number']),
-      relationship:
-          serializer.fromJson<UserRelationship?>(json['relationship']),
-      fullName: serializer.fromJson<String?>(json['full_name']),
-      avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
-      phone: serializer.fromJson<String?>(json['phone']),
-      isVerified: serializer.fromJson<bool?>(json['is_verified']),
-      createdAt: serializer.fromJson<DateTime?>(json['created_at']),
-      muteUntil: serializer.fromJson<DateTime?>(json['mute_until']),
-      hasPin: serializer.fromJson<int?>(json['has_pin']),
-      appId: serializer.fromJson<String?>(json['app_id']),
-      biography: serializer.fromJson<String?>(json['biography']),
-      isScam: serializer.fromJson<int?>(json['is_scam']),
-      codeUrl: serializer.fromJson<String?>(json['code_url']),
-      codeId: serializer.fromJson<String?>(json['code_id']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'user_id': serializer.toJson<String>(userId),
-      'identity_number': serializer.toJson<String>(identityNumber),
-      'relationship': serializer.toJson<UserRelationship?>(relationship),
-      'full_name': serializer.toJson<String?>(fullName),
-      'avatar_url': serializer.toJson<String?>(avatarUrl),
-      'phone': serializer.toJson<String?>(phone),
-      'is_verified': serializer.toJson<bool?>(isVerified),
-      'created_at': serializer.toJson<DateTime?>(createdAt),
-      'mute_until': serializer.toJson<DateTime?>(muteUntil),
-      'has_pin': serializer.toJson<int?>(hasPin),
-      'app_id': serializer.toJson<String?>(appId),
-      'biography': serializer.toJson<String?>(biography),
-      'is_scam': serializer.toJson<int?>(isScam),
-      'code_url': serializer.toJson<String?>(codeUrl),
-      'code_id': serializer.toJson<String?>(codeId),
-    };
-  }
-
-  User copyWith(
-          {String? userId,
-          String? identityNumber,
-          Value<UserRelationship?> relationship = const Value.absent(),
-          Value<String?> fullName = const Value.absent(),
-          Value<String?> avatarUrl = const Value.absent(),
-          Value<String?> phone = const Value.absent(),
-          Value<bool?> isVerified = const Value.absent(),
-          Value<DateTime?> createdAt = const Value.absent(),
-          Value<DateTime?> muteUntil = const Value.absent(),
-          Value<int?> hasPin = const Value.absent(),
-          Value<String?> appId = const Value.absent(),
-          Value<String?> biography = const Value.absent(),
-          Value<int?> isScam = const Value.absent(),
-          Value<String?> codeUrl = const Value.absent(),
-          Value<String?> codeId = const Value.absent()}) =>
-      User(
-        userId: userId ?? this.userId,
-        identityNumber: identityNumber ?? this.identityNumber,
-        relationship:
-            relationship.present ? relationship.value : this.relationship,
-        fullName: fullName.present ? fullName.value : this.fullName,
-        avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
-        phone: phone.present ? phone.value : this.phone,
-        isVerified: isVerified.present ? isVerified.value : this.isVerified,
-        createdAt: createdAt.present ? createdAt.value : this.createdAt,
-        muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
-        hasPin: hasPin.present ? hasPin.value : this.hasPin,
-        appId: appId.present ? appId.value : this.appId,
-        biography: biography.present ? biography.value : this.biography,
-        isScam: isScam.present ? isScam.value : this.isScam,
-        codeUrl: codeUrl.present ? codeUrl.value : this.codeUrl,
-        codeId: codeId.present ? codeId.value : this.codeId,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('User(')
-          ..write('userId: $userId, ')
-          ..write('identityNumber: $identityNumber, ')
-          ..write('relationship: $relationship, ')
-          ..write('fullName: $fullName, ')
-          ..write('avatarUrl: $avatarUrl, ')
-          ..write('phone: $phone, ')
-          ..write('isVerified: $isVerified, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('muteUntil: $muteUntil, ')
-          ..write('hasPin: $hasPin, ')
-          ..write('appId: $appId, ')
-          ..write('biography: $biography, ')
-          ..write('isScam: $isScam, ')
-          ..write('codeUrl: $codeUrl, ')
-          ..write('codeId: $codeId')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-      userId,
-      identityNumber,
-      relationship,
-      fullName,
-      avatarUrl,
-      phone,
-      isVerified,
-      createdAt,
-      muteUntil,
-      hasPin,
-      appId,
-      biography,
-      isScam,
-      codeUrl,
-      codeId);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is User &&
-          other.userId == this.userId &&
-          other.identityNumber == this.identityNumber &&
-          other.relationship == this.relationship &&
-          other.fullName == this.fullName &&
-          other.avatarUrl == this.avatarUrl &&
-          other.phone == this.phone &&
-          other.isVerified == this.isVerified &&
-          other.createdAt == this.createdAt &&
-          other.muteUntil == this.muteUntil &&
-          other.hasPin == this.hasPin &&
-          other.appId == this.appId &&
-          other.biography == this.biography &&
-          other.isScam == this.isScam &&
-          other.codeUrl == this.codeUrl &&
-          other.codeId == this.codeId);
-}
-
-class UsersCompanion extends UpdateCompanion<User> {
-  final Value<String> userId;
-  final Value<String> identityNumber;
-  final Value<UserRelationship?> relationship;
-  final Value<String?> fullName;
-  final Value<String?> avatarUrl;
-  final Value<String?> phone;
-  final Value<bool?> isVerified;
-  final Value<DateTime?> createdAt;
-  final Value<DateTime?> muteUntil;
-  final Value<int?> hasPin;
-  final Value<String?> appId;
-  final Value<String?> biography;
-  final Value<int?> isScam;
-  final Value<String?> codeUrl;
-  final Value<String?> codeId;
-  final Value<int> rowid;
-  const UsersCompanion({
-    this.userId = const Value.absent(),
-    this.identityNumber = const Value.absent(),
-    this.relationship = const Value.absent(),
-    this.fullName = const Value.absent(),
-    this.avatarUrl = const Value.absent(),
-    this.phone = const Value.absent(),
-    this.isVerified = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.muteUntil = const Value.absent(),
-    this.hasPin = const Value.absent(),
-    this.appId = const Value.absent(),
-    this.biography = const Value.absent(),
-    this.isScam = const Value.absent(),
-    this.codeUrl = const Value.absent(),
-    this.codeId = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  UsersCompanion.insert({
-    required String userId,
-    required String identityNumber,
-    this.relationship = const Value.absent(),
-    this.fullName = const Value.absent(),
-    this.avatarUrl = const Value.absent(),
-    this.phone = const Value.absent(),
-    this.isVerified = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.muteUntil = const Value.absent(),
-    this.hasPin = const Value.absent(),
-    this.appId = const Value.absent(),
-    this.biography = const Value.absent(),
-    this.isScam = const Value.absent(),
-    this.codeUrl = const Value.absent(),
-    this.codeId = const Value.absent(),
-    this.rowid = const Value.absent(),
-  })  : userId = Value(userId),
-        identityNumber = Value(identityNumber);
-  static Insertable<User> custom({
-    Expression<String>? userId,
-    Expression<String>? identityNumber,
-    Expression<String>? relationship,
-    Expression<String>? fullName,
-    Expression<String>? avatarUrl,
-    Expression<String>? phone,
-    Expression<bool>? isVerified,
-    Expression<int>? createdAt,
-    Expression<int>? muteUntil,
-    Expression<int>? hasPin,
-    Expression<String>? appId,
-    Expression<String>? biography,
-    Expression<int>? isScam,
-    Expression<String>? codeUrl,
-    Expression<String>? codeId,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (userId != null) 'user_id': userId,
-      if (identityNumber != null) 'identity_number': identityNumber,
-      if (relationship != null) 'relationship': relationship,
-      if (fullName != null) 'full_name': fullName,
-      if (avatarUrl != null) 'avatar_url': avatarUrl,
-      if (phone != null) 'phone': phone,
-      if (isVerified != null) 'is_verified': isVerified,
-      if (createdAt != null) 'created_at': createdAt,
-      if (muteUntil != null) 'mute_until': muteUntil,
-      if (hasPin != null) 'has_pin': hasPin,
-      if (appId != null) 'app_id': appId,
-      if (biography != null) 'biography': biography,
-      if (isScam != null) 'is_scam': isScam,
-      if (codeUrl != null) 'code_url': codeUrl,
-      if (codeId != null) 'code_id': codeId,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  UsersCompanion copyWith(
-      {Value<String>? userId,
-      Value<String>? identityNumber,
-      Value<UserRelationship?>? relationship,
-      Value<String?>? fullName,
-      Value<String?>? avatarUrl,
-      Value<String?>? phone,
-      Value<bool?>? isVerified,
-      Value<DateTime?>? createdAt,
-      Value<DateTime?>? muteUntil,
-      Value<int?>? hasPin,
-      Value<String?>? appId,
-      Value<String?>? biography,
-      Value<int?>? isScam,
-      Value<String?>? codeUrl,
-      Value<String?>? codeId,
-      Value<int>? rowid}) {
-    return UsersCompanion(
-      userId: userId ?? this.userId,
-      identityNumber: identityNumber ?? this.identityNumber,
-      relationship: relationship ?? this.relationship,
-      fullName: fullName ?? this.fullName,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      phone: phone ?? this.phone,
-      isVerified: isVerified ?? this.isVerified,
-      createdAt: createdAt ?? this.createdAt,
-      muteUntil: muteUntil ?? this.muteUntil,
-      hasPin: hasPin ?? this.hasPin,
-      appId: appId ?? this.appId,
-      biography: biography ?? this.biography,
-      isScam: isScam ?? this.isScam,
-      codeUrl: codeUrl ?? this.codeUrl,
-      codeId: codeId ?? this.codeId,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (identityNumber.present) {
-      map['identity_number'] = Variable<String>(identityNumber.value);
-    }
-    if (relationship.present) {
-      final converter = Users.$converterrelationship;
-      map['relationship'] =
-          Variable<String>(converter.toSql(relationship.value));
-    }
-    if (fullName.present) {
-      map['full_name'] = Variable<String>(fullName.value);
-    }
-    if (avatarUrl.present) {
-      map['avatar_url'] = Variable<String>(avatarUrl.value);
-    }
-    if (phone.present) {
-      map['phone'] = Variable<String>(phone.value);
-    }
-    if (isVerified.present) {
-      map['is_verified'] = Variable<bool>(isVerified.value);
-    }
-    if (createdAt.present) {
-      final converter = Users.$convertercreatedAtn;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (muteUntil.present) {
-      final converter = Users.$convertermuteUntiln;
-      map['mute_until'] = Variable<int>(converter.toSql(muteUntil.value));
-    }
-    if (hasPin.present) {
-      map['has_pin'] = Variable<int>(hasPin.value);
-    }
-    if (appId.present) {
-      map['app_id'] = Variable<String>(appId.value);
-    }
-    if (biography.present) {
-      map['biography'] = Variable<String>(biography.value);
-    }
-    if (isScam.present) {
-      map['is_scam'] = Variable<int>(isScam.value);
-    }
-    if (codeUrl.present) {
-      map['code_url'] = Variable<String>(codeUrl.value);
-    }
-    if (codeId.present) {
-      map['code_id'] = Variable<String>(codeId.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('UsersCompanion(')
-          ..write('userId: $userId, ')
-          ..write('identityNumber: $identityNumber, ')
-          ..write('relationship: $relationship, ')
-          ..write('fullName: $fullName, ')
-          ..write('avatarUrl: $avatarUrl, ')
-          ..write('phone: $phone, ')
-          ..write('isVerified: $isVerified, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('muteUntil: $muteUntil, ')
-          ..write('hasPin: $hasPin, ')
-          ..write('appId: $appId, ')
-          ..write('biography: $biography, ')
-          ..write('isScam: $isScam, ')
-          ..write('codeUrl: $codeUrl, ')
-          ..write('codeId: $codeId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3893,6 +3291,329 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
           ..write('userId: $userId, ')
           ..write('role: $role, ')
           ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class CircleConversations extends Table
+    with TableInfo<CircleConversations, CircleConversation> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  CircleConversations(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+      'conversation_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _circleIdMeta =
+      const VerificationMeta('circleId');
+  late final GeneratedColumn<String> circleId = GeneratedColumn<String>(
+      'circle_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(CircleConversations.$convertercreatedAt);
+  static const VerificationMeta _pinTimeMeta =
+      const VerificationMeta('pinTime');
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> pinTime =
+      GeneratedColumn<int>('pin_time', aliasedName, true,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime?>(CircleConversations.$converterpinTimen);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [conversationId, circleId, userId, createdAt, pinTime];
+  @override
+  String get aliasedName => _alias ?? 'circle_conversations';
+  @override
+  String get actualTableName => 'circle_conversations';
+  @override
+  VerificationContext validateIntegrity(Insertable<CircleConversation> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    if (data.containsKey('circle_id')) {
+      context.handle(_circleIdMeta,
+          circleId.isAcceptableOrUnknown(data['circle_id']!, _circleIdMeta));
+    } else if (isInserting) {
+      context.missing(_circleIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_pinTimeMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {conversationId, circleId};
+  @override
+  CircleConversation map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CircleConversation(
+      conversationId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
+      circleId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}circle_id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
+      createdAt: CircleConversations.$convertercreatedAt.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+      pinTime: CircleConversations.$converterpinTimen.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}pin_time'])),
+    );
+  }
+
+  @override
+  CircleConversations createAlias(String alias) {
+    return CircleConversations(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converterpinTime =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $converterpinTimen =
+      NullAwareTypeConverter.wrap($converterpinTime);
+  @override
+  List<String> get customConstraints =>
+      const ['PRIMARY KEY(conversation_id, circle_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class CircleConversation extends DataClass
+    implements Insertable<CircleConversation> {
+  final String conversationId;
+  final String circleId;
+  final String? userId;
+  final DateTime createdAt;
+  final DateTime? pinTime;
+  const CircleConversation(
+      {required this.conversationId,
+      required this.circleId,
+      this.userId,
+      required this.createdAt,
+      this.pinTime});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['conversation_id'] = Variable<String>(conversationId);
+    map['circle_id'] = Variable<String>(circleId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    {
+      final converter = CircleConversations.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    if (!nullToAbsent || pinTime != null) {
+      final converter = CircleConversations.$converterpinTimen;
+      map['pin_time'] = Variable<int>(converter.toSql(pinTime));
+    }
+    return map;
+  }
+
+  CircleConversationsCompanion toCompanion(bool nullToAbsent) {
+    return CircleConversationsCompanion(
+      conversationId: Value(conversationId),
+      circleId: Value(circleId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      createdAt: Value(createdAt),
+      pinTime: pinTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pinTime),
+    );
+  }
+
+  factory CircleConversation.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CircleConversation(
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      circleId: serializer.fromJson<String>(json['circle_id']),
+      userId: serializer.fromJson<String?>(json['user_id']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      pinTime: serializer.fromJson<DateTime?>(json['pin_time']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'conversation_id': serializer.toJson<String>(conversationId),
+      'circle_id': serializer.toJson<String>(circleId),
+      'user_id': serializer.toJson<String?>(userId),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'pin_time': serializer.toJson<DateTime?>(pinTime),
+    };
+  }
+
+  CircleConversation copyWith(
+          {String? conversationId,
+          String? circleId,
+          Value<String?> userId = const Value.absent(),
+          DateTime? createdAt,
+          Value<DateTime?> pinTime = const Value.absent()}) =>
+      CircleConversation(
+        conversationId: conversationId ?? this.conversationId,
+        circleId: circleId ?? this.circleId,
+        userId: userId.present ? userId.value : this.userId,
+        createdAt: createdAt ?? this.createdAt,
+        pinTime: pinTime.present ? pinTime.value : this.pinTime,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('CircleConversation(')
+          ..write('conversationId: $conversationId, ')
+          ..write('circleId: $circleId, ')
+          ..write('userId: $userId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('pinTime: $pinTime')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(conversationId, circleId, userId, createdAt, pinTime);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CircleConversation &&
+          other.conversationId == this.conversationId &&
+          other.circleId == this.circleId &&
+          other.userId == this.userId &&
+          other.createdAt == this.createdAt &&
+          other.pinTime == this.pinTime);
+}
+
+class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
+  final Value<String> conversationId;
+  final Value<String> circleId;
+  final Value<String?> userId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> pinTime;
+  final Value<int> rowid;
+  const CircleConversationsCompanion({
+    this.conversationId = const Value.absent(),
+    this.circleId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.pinTime = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CircleConversationsCompanion.insert({
+    required String conversationId,
+    required String circleId,
+    this.userId = const Value.absent(),
+    required DateTime createdAt,
+    this.pinTime = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : conversationId = Value(conversationId),
+        circleId = Value(circleId),
+        createdAt = Value(createdAt);
+  static Insertable<CircleConversation> custom({
+    Expression<String>? conversationId,
+    Expression<String>? circleId,
+    Expression<String>? userId,
+    Expression<int>? createdAt,
+    Expression<int>? pinTime,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (circleId != null) 'circle_id': circleId,
+      if (userId != null) 'user_id': userId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (pinTime != null) 'pin_time': pinTime,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CircleConversationsCompanion copyWith(
+      {Value<String>? conversationId,
+      Value<String>? circleId,
+      Value<String?>? userId,
+      Value<DateTime>? createdAt,
+      Value<DateTime?>? pinTime,
+      Value<int>? rowid}) {
+    return CircleConversationsCompanion(
+      conversationId: conversationId ?? this.conversationId,
+      circleId: circleId ?? this.circleId,
+      userId: userId ?? this.userId,
+      createdAt: createdAt ?? this.createdAt,
+      pinTime: pinTime ?? this.pinTime,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (circleId.present) {
+      map['circle_id'] = Variable<String>(circleId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (createdAt.present) {
+      final converter = CircleConversations.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (pinTime.present) {
+      final converter = CircleConversations.$converterpinTimen;
+      map['pin_time'] = Variable<int>(converter.toSql(pinTime.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CircleConversationsCompanion(')
+          ..write('conversationId: $conversationId, ')
+          ..write('circleId: $circleId, ')
+          ..write('userId: $userId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('pinTime: $pinTime, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -9766,6 +9487,285 @@ class AppsCompanion extends UpdateCompanion<App> {
   }
 }
 
+class Circles extends Table with TableInfo<Circles, Circle> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Circles(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _circleIdMeta =
+      const VerificationMeta('circleId');
+  late final GeneratedColumn<String> circleId = GeneratedColumn<String>(
+      'circle_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Circles.$convertercreatedAt);
+  static const VerificationMeta _orderedAtMeta =
+      const VerificationMeta('orderedAt');
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> orderedAt =
+      GeneratedColumn<int>('ordered_at', aliasedName, true,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime?>(Circles.$converterorderedAtn);
+  @override
+  List<GeneratedColumn> get $columns => [circleId, name, createdAt, orderedAt];
+  @override
+  String get aliasedName => _alias ?? 'circles';
+  @override
+  String get actualTableName => 'circles';
+  @override
+  VerificationContext validateIntegrity(Insertable<Circle> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('circle_id')) {
+      context.handle(_circleIdMeta,
+          circleId.isAcceptableOrUnknown(data['circle_id']!, _circleIdMeta));
+    } else if (isInserting) {
+      context.missing(_circleIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_orderedAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {circleId};
+  @override
+  Circle map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Circle(
+      circleId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}circle_id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      createdAt: Circles.$convertercreatedAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+      orderedAt: Circles.$converterorderedAtn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}ordered_at'])),
+    );
+  }
+
+  @override
+  Circles createAlias(String alias) {
+    return Circles(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converterorderedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $converterorderedAtn =
+      NullAwareTypeConverter.wrap($converterorderedAt);
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(circle_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class Circle extends DataClass implements Insertable<Circle> {
+  final String circleId;
+  final String name;
+  final DateTime createdAt;
+  final DateTime? orderedAt;
+  const Circle(
+      {required this.circleId,
+      required this.name,
+      required this.createdAt,
+      this.orderedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['circle_id'] = Variable<String>(circleId);
+    map['name'] = Variable<String>(name);
+    {
+      final converter = Circles.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    if (!nullToAbsent || orderedAt != null) {
+      final converter = Circles.$converterorderedAtn;
+      map['ordered_at'] = Variable<int>(converter.toSql(orderedAt));
+    }
+    return map;
+  }
+
+  CirclesCompanion toCompanion(bool nullToAbsent) {
+    return CirclesCompanion(
+      circleId: Value(circleId),
+      name: Value(name),
+      createdAt: Value(createdAt),
+      orderedAt: orderedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderedAt),
+    );
+  }
+
+  factory Circle.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Circle(
+      circleId: serializer.fromJson<String>(json['circle_id']),
+      name: serializer.fromJson<String>(json['name']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      orderedAt: serializer.fromJson<DateTime?>(json['ordered_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'circle_id': serializer.toJson<String>(circleId),
+      'name': serializer.toJson<String>(name),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'ordered_at': serializer.toJson<DateTime?>(orderedAt),
+    };
+  }
+
+  Circle copyWith(
+          {String? circleId,
+          String? name,
+          DateTime? createdAt,
+          Value<DateTime?> orderedAt = const Value.absent()}) =>
+      Circle(
+        circleId: circleId ?? this.circleId,
+        name: name ?? this.name,
+        createdAt: createdAt ?? this.createdAt,
+        orderedAt: orderedAt.present ? orderedAt.value : this.orderedAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Circle(')
+          ..write('circleId: $circleId, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('orderedAt: $orderedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(circleId, name, createdAt, orderedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Circle &&
+          other.circleId == this.circleId &&
+          other.name == this.name &&
+          other.createdAt == this.createdAt &&
+          other.orderedAt == this.orderedAt);
+}
+
+class CirclesCompanion extends UpdateCompanion<Circle> {
+  final Value<String> circleId;
+  final Value<String> name;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> orderedAt;
+  final Value<int> rowid;
+  const CirclesCompanion({
+    this.circleId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.orderedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CirclesCompanion.insert({
+    required String circleId,
+    required String name,
+    required DateTime createdAt,
+    this.orderedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : circleId = Value(circleId),
+        name = Value(name),
+        createdAt = Value(createdAt);
+  static Insertable<Circle> custom({
+    Expression<String>? circleId,
+    Expression<String>? name,
+    Expression<int>? createdAt,
+    Expression<int>? orderedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (circleId != null) 'circle_id': circleId,
+      if (name != null) 'name': name,
+      if (createdAt != null) 'created_at': createdAt,
+      if (orderedAt != null) 'ordered_at': orderedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CirclesCompanion copyWith(
+      {Value<String>? circleId,
+      Value<String>? name,
+      Value<DateTime>? createdAt,
+      Value<DateTime?>? orderedAt,
+      Value<int>? rowid}) {
+    return CirclesCompanion(
+      circleId: circleId ?? this.circleId,
+      name: name ?? this.name,
+      createdAt: createdAt ?? this.createdAt,
+      orderedAt: orderedAt ?? this.orderedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (circleId.present) {
+      map['circle_id'] = Variable<String>(circleId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (createdAt.present) {
+      final converter = Circles.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (orderedAt.present) {
+      final converter = Circles.$converterorderedAtn;
+      map['ordered_at'] = Variable<int>(converter.toSql(orderedAt.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CirclesCompanion(')
+          ..write('circleId: $circleId, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('orderedAt: $orderedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -13119,13 +13119,12 @@ class PropertiesCompanion extends UpdateCompanion<Propertie> {
 
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(e);
-  late final Circles circles = Circles(this);
-  late final CircleConversations circleConversations =
-      CircleConversations(this);
-  late final Conversations conversations = Conversations(this);
   late final Users users = Users(this);
+  late final Conversations conversations = Conversations(this);
   late final Messages messages = Messages(this);
   late final Participants participants = Participants(this);
+  late final CircleConversations circleConversations =
+      CircleConversations(this);
   late final Stickers stickers = Stickers(this);
   late final StickerAlbums stickerAlbums = StickerAlbums(this);
   late final StickerRelationships stickerRelationships =
@@ -13142,6 +13141,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       ResendSessionMessages(this);
   late final Addresses addresses = Addresses(this);
   late final Apps apps = Apps(this);
+  late final Circles circles = Circles(this);
   late final FloodMessages floodMessages = FloodMessages(this);
   late final Jobs jobs = Jobs(this);
   late final MessagesHistory messagesHistory = MessagesHistory(this);
@@ -13233,102 +13233,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final PropertyDao propertyDao = PropertyDao(this as MixinDatabase);
   late final TranscriptMessageDao transcriptMessageDao =
       TranscriptMessageDao(this as MixinDatabase);
-  Selectable<ConversationCircleItem> allCircles() {
-    return customSelect(
-        'SELECT ci.circle_id, ci.name, ci.created_at, ci.ordered_at, COUNT(c.conversation_id) AS count, IFNULL(SUM(CASE WHEN IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END), 0) AS unseen_conversation_count, IFNULL(SUM(CASE WHEN(CASE WHEN c.category = \'GROUP\' THEN c.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END), 0) AS unseen_muted_conversation_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id LEFT JOIN users AS owner ON owner.user_id = c.owner_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
-        variables: [],
-        readsFrom: {
-          circles,
-          conversations,
-          users,
-          circleConversations,
-        }).map((QueryRow row) {
-      return ConversationCircleItem(
-        circleId: row.read<String>('circle_id'),
-        name: row.read<String>('name'),
-        createdAt:
-            Circles.$convertercreatedAt.fromSql(row.read<int>('created_at')),
-        orderedAt: NullAwareTypeConverter.wrapFromSql(
-            Circles.$converterorderedAt, row.readNullable<int>('ordered_at')),
-        count: row.read<int>('count'),
-        unseenConversationCount: row.read<int>('unseen_conversation_count'),
-        unseenMutedConversationCount:
-            row.read<int>('unseen_muted_conversation_count'),
-      );
-    });
-  }
-
-  Selectable<ConversationCircleManagerItem> circleByConversationId(
-      String? conversationId) {
-    return customSelect(
-        'SELECT ci.circle_id, ci.name, COUNT(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = ?1) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
-        variables: [
-          Variable<String>(conversationId)
-        ],
-        readsFrom: {
-          circles,
-          conversations,
-          circleConversations,
-        }).map((QueryRow row) {
-      return ConversationCircleManagerItem(
-        circleId: row.read<String>('circle_id'),
-        name: row.read<String>('name'),
-        count: row.read<int>('count'),
-      );
-    });
-  }
-
-  Selectable<ConversationCircleManagerItem> otherCircleByConversationId(
-      String? conversationId) {
-    return customSelect(
-        'SELECT ci.circle_id, ci.name, COUNT(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id NOT IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = ?1) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
-        variables: [
-          Variable<String>(conversationId)
-        ],
-        readsFrom: {
-          circles,
-          conversations,
-          circleConversations,
-        }).map((QueryRow row) {
-      return ConversationCircleManagerItem(
-        circleId: row.read<String>('circle_id'),
-        name: row.read<String>('name'),
-        count: row.read<int>('count'),
-      );
-    });
-  }
-
-  Selectable<String> circlesNameByConversationId(String? conversationId) {
-    return customSelect(
-        'SELECT ci.name FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE cc.conversation_id = ?1',
-        variables: [
-          Variable<String>(conversationId)
-        ],
-        readsFrom: {
-          circles,
-          circleConversations,
-          conversations,
-        }).map((QueryRow row) => row.read<String>('name'));
-  }
-
-  Future<int> deleteByCircleId(String circleId) {
-    return customUpdate(
-      'DELETE FROM circle_conversations WHERE circle_id = ?1',
-      variables: [Variable<String>(circleId)],
-      updates: {circleConversations},
-      updateKind: UpdateKind.delete,
-    );
-  }
-
-  Future<int> deleteByIds(String conversationId, String circleId) {
-    return customUpdate(
-      'DELETE FROM circle_conversations WHERE conversation_id = ?1 AND circle_id = ?2',
-      variables: [Variable<String>(conversationId), Variable<String>(circleId)],
-      updates: {circleConversations},
-      updateKind: UpdateKind.delete,
-    );
-  }
-
   Selectable<User> fuzzySearchBotGroupUser(String conversationId,
       DateTime createdAt, String id, String username, String identityNumber) {
     return customSelect(
@@ -14342,12 +14246,11 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        circles,
-        circleConversations,
-        conversations,
         users,
+        conversations,
         messages,
         participants,
+        circleConversations,
         stickers,
         stickerAlbums,
         stickerRelationships,
@@ -14362,6 +14265,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         resendSessionMessages,
         addresses,
         apps,
+        circles,
         floodMessages,
         jobs,
         messagesHistory,
@@ -14404,82 +14308,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           ),
         ],
       );
-}
-
-class ConversationCircleItem {
-  final String circleId;
-  final String name;
-  final DateTime createdAt;
-  final DateTime? orderedAt;
-  final int count;
-  final int unseenConversationCount;
-  final int unseenMutedConversationCount;
-  ConversationCircleItem({
-    required this.circleId,
-    required this.name,
-    required this.createdAt,
-    this.orderedAt,
-    required this.count,
-    required this.unseenConversationCount,
-    required this.unseenMutedConversationCount,
-  });
-  @override
-  int get hashCode => Object.hash(circleId, name, createdAt, orderedAt, count,
-      unseenConversationCount, unseenMutedConversationCount);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ConversationCircleItem &&
-          other.circleId == this.circleId &&
-          other.name == this.name &&
-          other.createdAt == this.createdAt &&
-          other.orderedAt == this.orderedAt &&
-          other.count == this.count &&
-          other.unseenConversationCount == this.unseenConversationCount &&
-          other.unseenMutedConversationCount ==
-              this.unseenMutedConversationCount);
-  @override
-  String toString() {
-    return (StringBuffer('ConversationCircleItem(')
-          ..write('circleId: $circleId, ')
-          ..write('name: $name, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('orderedAt: $orderedAt, ')
-          ..write('count: $count, ')
-          ..write('unseenConversationCount: $unseenConversationCount, ')
-          ..write('unseenMutedConversationCount: $unseenMutedConversationCount')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class ConversationCircleManagerItem {
-  final String circleId;
-  final String name;
-  final int count;
-  ConversationCircleManagerItem({
-    required this.circleId,
-    required this.name,
-    required this.count,
-  });
-  @override
-  int get hashCode => Object.hash(circleId, name, count);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ConversationCircleManagerItem &&
-          other.circleId == this.circleId &&
-          other.name == this.name &&
-          other.count == this.count);
-  @override
-  String toString() {
-    return (StringBuffer('ConversationCircleManagerItem(')
-          ..write('circleId: $circleId, ')
-          ..write('name: $name, ')
-          ..write('count: $count')
-          ..write(')'))
-        .toString();
-  }
 }
 
 typedef FuzzySearchUser$firstFilter = Expression<bool> Function(
