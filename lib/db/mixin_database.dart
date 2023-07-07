@@ -62,7 +62,6 @@ part 'mixin_database.g.dart';
     'moor/dao/flood.drift',
     'moor/dao/pin_message.drift',
     'moor/dao/sticker_relationship.drift',
-    'moor/dao/favorite_app.drift',
   },
   daos: [
     AddressDao,

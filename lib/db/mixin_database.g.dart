@@ -3,884 +3,6 @@
 part of 'mixin_database.dart';
 
 // ignore_for_file: type=lint
-class FavoriteApps extends Table with TableInfo<FavoriteApps, FavoriteApp> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  FavoriteApps(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _appIdMeta = const VerificationMeta('appId');
-  late final GeneratedColumn<String> appId = GeneratedColumn<String>(
-      'app_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>('created_at', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(FavoriteApps.$convertercreatedAt);
-  @override
-  List<GeneratedColumn> get $columns => [appId, userId, createdAt];
-  @override
-  String get aliasedName => _alias ?? 'favorite_apps';
-  @override
-  String get actualTableName => 'favorite_apps';
-  @override
-  VerificationContext validateIntegrity(Insertable<FavoriteApp> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('app_id')) {
-      context.handle(
-          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
-    } else if (isInserting) {
-      context.missing(_appIdMeta);
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {appId, userId};
-  @override
-  FavoriteApp map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return FavoriteApp(
-      appId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}app_id'])!,
-      userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
-      createdAt: FavoriteApps.$convertercreatedAt.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
-    );
-  }
-
-  @override
-  FavoriteApps createAlias(String alias) {
-    return FavoriteApps(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(app_id, user_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class FavoriteApp extends DataClass implements Insertable<FavoriteApp> {
-  final String appId;
-  final String userId;
-  final DateTime createdAt;
-  const FavoriteApp(
-      {required this.appId, required this.userId, required this.createdAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['app_id'] = Variable<String>(appId);
-    map['user_id'] = Variable<String>(userId);
-    {
-      final converter = FavoriteApps.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
-    }
-    return map;
-  }
-
-  FavoriteAppsCompanion toCompanion(bool nullToAbsent) {
-    return FavoriteAppsCompanion(
-      appId: Value(appId),
-      userId: Value(userId),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory FavoriteApp.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return FavoriteApp(
-      appId: serializer.fromJson<String>(json['app_id']),
-      userId: serializer.fromJson<String>(json['user_id']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'app_id': serializer.toJson<String>(appId),
-      'user_id': serializer.toJson<String>(userId),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-    };
-  }
-
-  FavoriteApp copyWith({String? appId, String? userId, DateTime? createdAt}) =>
-      FavoriteApp(
-        appId: appId ?? this.appId,
-        userId: userId ?? this.userId,
-        createdAt: createdAt ?? this.createdAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('FavoriteApp(')
-          ..write('appId: $appId, ')
-          ..write('userId: $userId, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(appId, userId, createdAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is FavoriteApp &&
-          other.appId == this.appId &&
-          other.userId == this.userId &&
-          other.createdAt == this.createdAt);
-}
-
-class FavoriteAppsCompanion extends UpdateCompanion<FavoriteApp> {
-  final Value<String> appId;
-  final Value<String> userId;
-  final Value<DateTime> createdAt;
-  final Value<int> rowid;
-  const FavoriteAppsCompanion({
-    this.appId = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  FavoriteAppsCompanion.insert({
-    required String appId,
-    required String userId,
-    required DateTime createdAt,
-    this.rowid = const Value.absent(),
-  })  : appId = Value(appId),
-        userId = Value(userId),
-        createdAt = Value(createdAt);
-  static Insertable<FavoriteApp> custom({
-    Expression<String>? appId,
-    Expression<String>? userId,
-    Expression<int>? createdAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (appId != null) 'app_id': appId,
-      if (userId != null) 'user_id': userId,
-      if (createdAt != null) 'created_at': createdAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  FavoriteAppsCompanion copyWith(
-      {Value<String>? appId,
-      Value<String>? userId,
-      Value<DateTime>? createdAt,
-      Value<int>? rowid}) {
-    return FavoriteAppsCompanion(
-      appId: appId ?? this.appId,
-      userId: userId ?? this.userId,
-      createdAt: createdAt ?? this.createdAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (appId.present) {
-      map['app_id'] = Variable<String>(appId.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (createdAt.present) {
-      final converter = FavoriteApps.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('FavoriteAppsCompanion(')
-          ..write('appId: $appId, ')
-          ..write('userId: $userId, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class Apps extends Table with TableInfo<Apps, App> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  Apps(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _appIdMeta = const VerificationMeta('appId');
-  late final GeneratedColumn<String> appId = GeneratedColumn<String>(
-      'app_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _appNumberMeta =
-      const VerificationMeta('appNumber');
-  late final GeneratedColumn<String> appNumber = GeneratedColumn<String>(
-      'app_number', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _homeUriMeta =
-      const VerificationMeta('homeUri');
-  late final GeneratedColumn<String> homeUri = GeneratedColumn<String>(
-      'home_uri', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _redirectUriMeta =
-      const VerificationMeta('redirectUri');
-  late final GeneratedColumn<String> redirectUri = GeneratedColumn<String>(
-      'redirect_uri', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _iconUrlMeta =
-      const VerificationMeta('iconUrl');
-  late final GeneratedColumn<String> iconUrl = GeneratedColumn<String>(
-      'icon_url', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _categoryMeta =
-      const VerificationMeta('category');
-  late final GeneratedColumn<String> category = GeneratedColumn<String>(
-      'category', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _appSecretMeta =
-      const VerificationMeta('appSecret');
-  late final GeneratedColumn<String> appSecret = GeneratedColumn<String>(
-      'app_secret', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _capabilitiesMeta =
-      const VerificationMeta('capabilities');
-  late final GeneratedColumn<String> capabilities = GeneratedColumn<String>(
-      'capabilities', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _creatorIdMeta =
-      const VerificationMeta('creatorId');
-  late final GeneratedColumn<String> creatorId = GeneratedColumn<String>(
-      'creator_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  static const VerificationMeta _resourcePatternsMeta =
-      const VerificationMeta('resourcePatterns');
-  late final GeneratedColumn<String> resourcePatterns = GeneratedColumn<String>(
-      'resource_patterns', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
-  static const VerificationMeta _updatedAtMeta =
-      const VerificationMeta('updatedAt');
-  late final GeneratedColumnWithTypeConverter<DateTime?, int> updatedAt =
-      GeneratedColumn<int>('updated_at', aliasedName, true,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime?>(Apps.$converterupdatedAtn);
-  @override
-  List<GeneratedColumn> get $columns => [
-        appId,
-        appNumber,
-        homeUri,
-        redirectUri,
-        name,
-        iconUrl,
-        category,
-        description,
-        appSecret,
-        capabilities,
-        creatorId,
-        resourcePatterns,
-        updatedAt
-      ];
-  @override
-  String get aliasedName => _alias ?? 'apps';
-  @override
-  String get actualTableName => 'apps';
-  @override
-  VerificationContext validateIntegrity(Insertable<App> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('app_id')) {
-      context.handle(
-          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
-    } else if (isInserting) {
-      context.missing(_appIdMeta);
-    }
-    if (data.containsKey('app_number')) {
-      context.handle(_appNumberMeta,
-          appNumber.isAcceptableOrUnknown(data['app_number']!, _appNumberMeta));
-    } else if (isInserting) {
-      context.missing(_appNumberMeta);
-    }
-    if (data.containsKey('home_uri')) {
-      context.handle(_homeUriMeta,
-          homeUri.isAcceptableOrUnknown(data['home_uri']!, _homeUriMeta));
-    } else if (isInserting) {
-      context.missing(_homeUriMeta);
-    }
-    if (data.containsKey('redirect_uri')) {
-      context.handle(
-          _redirectUriMeta,
-          redirectUri.isAcceptableOrUnknown(
-              data['redirect_uri']!, _redirectUriMeta));
-    } else if (isInserting) {
-      context.missing(_redirectUriMeta);
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('icon_url')) {
-      context.handle(_iconUrlMeta,
-          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
-    } else if (isInserting) {
-      context.missing(_iconUrlMeta);
-    }
-    if (data.containsKey('category')) {
-      context.handle(_categoryMeta,
-          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
-    }
-    if (data.containsKey('description')) {
-      context.handle(
-          _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
-    } else if (isInserting) {
-      context.missing(_descriptionMeta);
-    }
-    if (data.containsKey('app_secret')) {
-      context.handle(_appSecretMeta,
-          appSecret.isAcceptableOrUnknown(data['app_secret']!, _appSecretMeta));
-    } else if (isInserting) {
-      context.missing(_appSecretMeta);
-    }
-    if (data.containsKey('capabilities')) {
-      context.handle(
-          _capabilitiesMeta,
-          capabilities.isAcceptableOrUnknown(
-              data['capabilities']!, _capabilitiesMeta));
-    }
-    if (data.containsKey('creator_id')) {
-      context.handle(_creatorIdMeta,
-          creatorId.isAcceptableOrUnknown(data['creator_id']!, _creatorIdMeta));
-    } else if (isInserting) {
-      context.missing(_creatorIdMeta);
-    }
-    if (data.containsKey('resource_patterns')) {
-      context.handle(
-          _resourcePatternsMeta,
-          resourcePatterns.isAcceptableOrUnknown(
-              data['resource_patterns']!, _resourcePatternsMeta));
-    }
-    context.handle(_updatedAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {appId};
-  @override
-  App map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return App(
-      appId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}app_id'])!,
-      appNumber: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}app_number'])!,
-      homeUri: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}home_uri'])!,
-      redirectUri: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}redirect_uri'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      iconUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}icon_url'])!,
-      category: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}category']),
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      appSecret: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}app_secret'])!,
-      capabilities: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}capabilities']),
-      creatorId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}creator_id'])!,
-      resourcePatterns: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}resource_patterns']),
-      updatedAt: Apps.$converterupdatedAtn.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}updated_at'])),
-    );
-  }
-
-  @override
-  Apps createAlias(String alias) {
-    return Apps(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, int> $converterupdatedAt =
-      const MillisDateConverter();
-  static TypeConverter<DateTime?, int?> $converterupdatedAtn =
-      NullAwareTypeConverter.wrap($converterupdatedAt);
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(app_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class App extends DataClass implements Insertable<App> {
-  final String appId;
-  final String appNumber;
-  final String homeUri;
-  final String redirectUri;
-  final String name;
-  final String iconUrl;
-  final String? category;
-  final String description;
-  final String appSecret;
-  final String? capabilities;
-  final String creatorId;
-  final String? resourcePatterns;
-  final DateTime? updatedAt;
-  const App(
-      {required this.appId,
-      required this.appNumber,
-      required this.homeUri,
-      required this.redirectUri,
-      required this.name,
-      required this.iconUrl,
-      this.category,
-      required this.description,
-      required this.appSecret,
-      this.capabilities,
-      required this.creatorId,
-      this.resourcePatterns,
-      this.updatedAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['app_id'] = Variable<String>(appId);
-    map['app_number'] = Variable<String>(appNumber);
-    map['home_uri'] = Variable<String>(homeUri);
-    map['redirect_uri'] = Variable<String>(redirectUri);
-    map['name'] = Variable<String>(name);
-    map['icon_url'] = Variable<String>(iconUrl);
-    if (!nullToAbsent || category != null) {
-      map['category'] = Variable<String>(category);
-    }
-    map['description'] = Variable<String>(description);
-    map['app_secret'] = Variable<String>(appSecret);
-    if (!nullToAbsent || capabilities != null) {
-      map['capabilities'] = Variable<String>(capabilities);
-    }
-    map['creator_id'] = Variable<String>(creatorId);
-    if (!nullToAbsent || resourcePatterns != null) {
-      map['resource_patterns'] = Variable<String>(resourcePatterns);
-    }
-    if (!nullToAbsent || updatedAt != null) {
-      final converter = Apps.$converterupdatedAtn;
-      map['updated_at'] = Variable<int>(converter.toSql(updatedAt));
-    }
-    return map;
-  }
-
-  AppsCompanion toCompanion(bool nullToAbsent) {
-    return AppsCompanion(
-      appId: Value(appId),
-      appNumber: Value(appNumber),
-      homeUri: Value(homeUri),
-      redirectUri: Value(redirectUri),
-      name: Value(name),
-      iconUrl: Value(iconUrl),
-      category: category == null && nullToAbsent
-          ? const Value.absent()
-          : Value(category),
-      description: Value(description),
-      appSecret: Value(appSecret),
-      capabilities: capabilities == null && nullToAbsent
-          ? const Value.absent()
-          : Value(capabilities),
-      creatorId: Value(creatorId),
-      resourcePatterns: resourcePatterns == null && nullToAbsent
-          ? const Value.absent()
-          : Value(resourcePatterns),
-      updatedAt: updatedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedAt),
-    );
-  }
-
-  factory App.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return App(
-      appId: serializer.fromJson<String>(json['app_id']),
-      appNumber: serializer.fromJson<String>(json['app_number']),
-      homeUri: serializer.fromJson<String>(json['home_uri']),
-      redirectUri: serializer.fromJson<String>(json['redirect_uri']),
-      name: serializer.fromJson<String>(json['name']),
-      iconUrl: serializer.fromJson<String>(json['icon_url']),
-      category: serializer.fromJson<String?>(json['category']),
-      description: serializer.fromJson<String>(json['description']),
-      appSecret: serializer.fromJson<String>(json['app_secret']),
-      capabilities: serializer.fromJson<String?>(json['capabilities']),
-      creatorId: serializer.fromJson<String>(json['creator_id']),
-      resourcePatterns: serializer.fromJson<String?>(json['resource_patterns']),
-      updatedAt: serializer.fromJson<DateTime?>(json['updated_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'app_id': serializer.toJson<String>(appId),
-      'app_number': serializer.toJson<String>(appNumber),
-      'home_uri': serializer.toJson<String>(homeUri),
-      'redirect_uri': serializer.toJson<String>(redirectUri),
-      'name': serializer.toJson<String>(name),
-      'icon_url': serializer.toJson<String>(iconUrl),
-      'category': serializer.toJson<String?>(category),
-      'description': serializer.toJson<String>(description),
-      'app_secret': serializer.toJson<String>(appSecret),
-      'capabilities': serializer.toJson<String?>(capabilities),
-      'creator_id': serializer.toJson<String>(creatorId),
-      'resource_patterns': serializer.toJson<String?>(resourcePatterns),
-      'updated_at': serializer.toJson<DateTime?>(updatedAt),
-    };
-  }
-
-  App copyWith(
-          {String? appId,
-          String? appNumber,
-          String? homeUri,
-          String? redirectUri,
-          String? name,
-          String? iconUrl,
-          Value<String?> category = const Value.absent(),
-          String? description,
-          String? appSecret,
-          Value<String?> capabilities = const Value.absent(),
-          String? creatorId,
-          Value<String?> resourcePatterns = const Value.absent(),
-          Value<DateTime?> updatedAt = const Value.absent()}) =>
-      App(
-        appId: appId ?? this.appId,
-        appNumber: appNumber ?? this.appNumber,
-        homeUri: homeUri ?? this.homeUri,
-        redirectUri: redirectUri ?? this.redirectUri,
-        name: name ?? this.name,
-        iconUrl: iconUrl ?? this.iconUrl,
-        category: category.present ? category.value : this.category,
-        description: description ?? this.description,
-        appSecret: appSecret ?? this.appSecret,
-        capabilities:
-            capabilities.present ? capabilities.value : this.capabilities,
-        creatorId: creatorId ?? this.creatorId,
-        resourcePatterns: resourcePatterns.present
-            ? resourcePatterns.value
-            : this.resourcePatterns,
-        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('App(')
-          ..write('appId: $appId, ')
-          ..write('appNumber: $appNumber, ')
-          ..write('homeUri: $homeUri, ')
-          ..write('redirectUri: $redirectUri, ')
-          ..write('name: $name, ')
-          ..write('iconUrl: $iconUrl, ')
-          ..write('category: $category, ')
-          ..write('description: $description, ')
-          ..write('appSecret: $appSecret, ')
-          ..write('capabilities: $capabilities, ')
-          ..write('creatorId: $creatorId, ')
-          ..write('resourcePatterns: $resourcePatterns, ')
-          ..write('updatedAt: $updatedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-      appId,
-      appNumber,
-      homeUri,
-      redirectUri,
-      name,
-      iconUrl,
-      category,
-      description,
-      appSecret,
-      capabilities,
-      creatorId,
-      resourcePatterns,
-      updatedAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is App &&
-          other.appId == this.appId &&
-          other.appNumber == this.appNumber &&
-          other.homeUri == this.homeUri &&
-          other.redirectUri == this.redirectUri &&
-          other.name == this.name &&
-          other.iconUrl == this.iconUrl &&
-          other.category == this.category &&
-          other.description == this.description &&
-          other.appSecret == this.appSecret &&
-          other.capabilities == this.capabilities &&
-          other.creatorId == this.creatorId &&
-          other.resourcePatterns == this.resourcePatterns &&
-          other.updatedAt == this.updatedAt);
-}
-
-class AppsCompanion extends UpdateCompanion<App> {
-  final Value<String> appId;
-  final Value<String> appNumber;
-  final Value<String> homeUri;
-  final Value<String> redirectUri;
-  final Value<String> name;
-  final Value<String> iconUrl;
-  final Value<String?> category;
-  final Value<String> description;
-  final Value<String> appSecret;
-  final Value<String?> capabilities;
-  final Value<String> creatorId;
-  final Value<String?> resourcePatterns;
-  final Value<DateTime?> updatedAt;
-  final Value<int> rowid;
-  const AppsCompanion({
-    this.appId = const Value.absent(),
-    this.appNumber = const Value.absent(),
-    this.homeUri = const Value.absent(),
-    this.redirectUri = const Value.absent(),
-    this.name = const Value.absent(),
-    this.iconUrl = const Value.absent(),
-    this.category = const Value.absent(),
-    this.description = const Value.absent(),
-    this.appSecret = const Value.absent(),
-    this.capabilities = const Value.absent(),
-    this.creatorId = const Value.absent(),
-    this.resourcePatterns = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  AppsCompanion.insert({
-    required String appId,
-    required String appNumber,
-    required String homeUri,
-    required String redirectUri,
-    required String name,
-    required String iconUrl,
-    this.category = const Value.absent(),
-    required String description,
-    required String appSecret,
-    this.capabilities = const Value.absent(),
-    required String creatorId,
-    this.resourcePatterns = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  })  : appId = Value(appId),
-        appNumber = Value(appNumber),
-        homeUri = Value(homeUri),
-        redirectUri = Value(redirectUri),
-        name = Value(name),
-        iconUrl = Value(iconUrl),
-        description = Value(description),
-        appSecret = Value(appSecret),
-        creatorId = Value(creatorId);
-  static Insertable<App> custom({
-    Expression<String>? appId,
-    Expression<String>? appNumber,
-    Expression<String>? homeUri,
-    Expression<String>? redirectUri,
-    Expression<String>? name,
-    Expression<String>? iconUrl,
-    Expression<String>? category,
-    Expression<String>? description,
-    Expression<String>? appSecret,
-    Expression<String>? capabilities,
-    Expression<String>? creatorId,
-    Expression<String>? resourcePatterns,
-    Expression<int>? updatedAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (appId != null) 'app_id': appId,
-      if (appNumber != null) 'app_number': appNumber,
-      if (homeUri != null) 'home_uri': homeUri,
-      if (redirectUri != null) 'redirect_uri': redirectUri,
-      if (name != null) 'name': name,
-      if (iconUrl != null) 'icon_url': iconUrl,
-      if (category != null) 'category': category,
-      if (description != null) 'description': description,
-      if (appSecret != null) 'app_secret': appSecret,
-      if (capabilities != null) 'capabilities': capabilities,
-      if (creatorId != null) 'creator_id': creatorId,
-      if (resourcePatterns != null) 'resource_patterns': resourcePatterns,
-      if (updatedAt != null) 'updated_at': updatedAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  AppsCompanion copyWith(
-      {Value<String>? appId,
-      Value<String>? appNumber,
-      Value<String>? homeUri,
-      Value<String>? redirectUri,
-      Value<String>? name,
-      Value<String>? iconUrl,
-      Value<String?>? category,
-      Value<String>? description,
-      Value<String>? appSecret,
-      Value<String?>? capabilities,
-      Value<String>? creatorId,
-      Value<String?>? resourcePatterns,
-      Value<DateTime?>? updatedAt,
-      Value<int>? rowid}) {
-    return AppsCompanion(
-      appId: appId ?? this.appId,
-      appNumber: appNumber ?? this.appNumber,
-      homeUri: homeUri ?? this.homeUri,
-      redirectUri: redirectUri ?? this.redirectUri,
-      name: name ?? this.name,
-      iconUrl: iconUrl ?? this.iconUrl,
-      category: category ?? this.category,
-      description: description ?? this.description,
-      appSecret: appSecret ?? this.appSecret,
-      capabilities: capabilities ?? this.capabilities,
-      creatorId: creatorId ?? this.creatorId,
-      resourcePatterns: resourcePatterns ?? this.resourcePatterns,
-      updatedAt: updatedAt ?? this.updatedAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (appId.present) {
-      map['app_id'] = Variable<String>(appId.value);
-    }
-    if (appNumber.present) {
-      map['app_number'] = Variable<String>(appNumber.value);
-    }
-    if (homeUri.present) {
-      map['home_uri'] = Variable<String>(homeUri.value);
-    }
-    if (redirectUri.present) {
-      map['redirect_uri'] = Variable<String>(redirectUri.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (iconUrl.present) {
-      map['icon_url'] = Variable<String>(iconUrl.value);
-    }
-    if (category.present) {
-      map['category'] = Variable<String>(category.value);
-    }
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
-    }
-    if (appSecret.present) {
-      map['app_secret'] = Variable<String>(appSecret.value);
-    }
-    if (capabilities.present) {
-      map['capabilities'] = Variable<String>(capabilities.value);
-    }
-    if (creatorId.present) {
-      map['creator_id'] = Variable<String>(creatorId.value);
-    }
-    if (resourcePatterns.present) {
-      map['resource_patterns'] = Variable<String>(resourcePatterns.value);
-    }
-    if (updatedAt.present) {
-      final converter = Apps.$converterupdatedAtn;
-      map['updated_at'] = Variable<int>(converter.toSql(updatedAt.value));
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('AppsCompanion(')
-          ..write('appId: $appId, ')
-          ..write('appNumber: $appNumber, ')
-          ..write('homeUri: $homeUri, ')
-          ..write('redirectUri: $redirectUri, ')
-          ..write('name: $name, ')
-          ..write('iconUrl: $iconUrl, ')
-          ..write('category: $category, ')
-          ..write('description: $description, ')
-          ..write('appSecret: $appSecret, ')
-          ..write('capabilities: $capabilities, ')
-          ..write('creatorId: $creatorId, ')
-          ..write('resourcePatterns: $resourcePatterns, ')
-          ..write('updatedAt: $updatedAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class StickerRelationships extends Table
     with TableInfo<StickerRelationships, StickerRelationship> {
   @override
@@ -10228,6 +9350,654 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
   }
 }
 
+class Apps extends Table with TableInfo<Apps, App> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Apps(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _appIdMeta = const VerificationMeta('appId');
+  late final GeneratedColumn<String> appId = GeneratedColumn<String>(
+      'app_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _appNumberMeta =
+      const VerificationMeta('appNumber');
+  late final GeneratedColumn<String> appNumber = GeneratedColumn<String>(
+      'app_number', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _homeUriMeta =
+      const VerificationMeta('homeUri');
+  late final GeneratedColumn<String> homeUri = GeneratedColumn<String>(
+      'home_uri', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _redirectUriMeta =
+      const VerificationMeta('redirectUri');
+  late final GeneratedColumn<String> redirectUri = GeneratedColumn<String>(
+      'redirect_uri', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _iconUrlMeta =
+      const VerificationMeta('iconUrl');
+  late final GeneratedColumn<String> iconUrl = GeneratedColumn<String>(
+      'icon_url', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _categoryMeta =
+      const VerificationMeta('category');
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+      'category', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _appSecretMeta =
+      const VerificationMeta('appSecret');
+  late final GeneratedColumn<String> appSecret = GeneratedColumn<String>(
+      'app_secret', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _capabilitiesMeta =
+      const VerificationMeta('capabilities');
+  late final GeneratedColumn<String> capabilities = GeneratedColumn<String>(
+      'capabilities', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _creatorIdMeta =
+      const VerificationMeta('creatorId');
+  late final GeneratedColumn<String> creatorId = GeneratedColumn<String>(
+      'creator_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _resourcePatternsMeta =
+      const VerificationMeta('resourcePatterns');
+  late final GeneratedColumn<String> resourcePatterns = GeneratedColumn<String>(
+      'resource_patterns', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> updatedAt =
+      GeneratedColumn<int>('updated_at', aliasedName, true,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime?>(Apps.$converterupdatedAtn);
+  @override
+  List<GeneratedColumn> get $columns => [
+        appId,
+        appNumber,
+        homeUri,
+        redirectUri,
+        name,
+        iconUrl,
+        category,
+        description,
+        appSecret,
+        capabilities,
+        creatorId,
+        resourcePatterns,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? 'apps';
+  @override
+  String get actualTableName => 'apps';
+  @override
+  VerificationContext validateIntegrity(Insertable<App> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('app_id')) {
+      context.handle(
+          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
+    } else if (isInserting) {
+      context.missing(_appIdMeta);
+    }
+    if (data.containsKey('app_number')) {
+      context.handle(_appNumberMeta,
+          appNumber.isAcceptableOrUnknown(data['app_number']!, _appNumberMeta));
+    } else if (isInserting) {
+      context.missing(_appNumberMeta);
+    }
+    if (data.containsKey('home_uri')) {
+      context.handle(_homeUriMeta,
+          homeUri.isAcceptableOrUnknown(data['home_uri']!, _homeUriMeta));
+    } else if (isInserting) {
+      context.missing(_homeUriMeta);
+    }
+    if (data.containsKey('redirect_uri')) {
+      context.handle(
+          _redirectUriMeta,
+          redirectUri.isAcceptableOrUnknown(
+              data['redirect_uri']!, _redirectUriMeta));
+    } else if (isInserting) {
+      context.missing(_redirectUriMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('icon_url')) {
+      context.handle(_iconUrlMeta,
+          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
+    } else if (isInserting) {
+      context.missing(_iconUrlMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('app_secret')) {
+      context.handle(_appSecretMeta,
+          appSecret.isAcceptableOrUnknown(data['app_secret']!, _appSecretMeta));
+    } else if (isInserting) {
+      context.missing(_appSecretMeta);
+    }
+    if (data.containsKey('capabilities')) {
+      context.handle(
+          _capabilitiesMeta,
+          capabilities.isAcceptableOrUnknown(
+              data['capabilities']!, _capabilitiesMeta));
+    }
+    if (data.containsKey('creator_id')) {
+      context.handle(_creatorIdMeta,
+          creatorId.isAcceptableOrUnknown(data['creator_id']!, _creatorIdMeta));
+    } else if (isInserting) {
+      context.missing(_creatorIdMeta);
+    }
+    if (data.containsKey('resource_patterns')) {
+      context.handle(
+          _resourcePatternsMeta,
+          resourcePatterns.isAcceptableOrUnknown(
+              data['resource_patterns']!, _resourcePatternsMeta));
+    }
+    context.handle(_updatedAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {appId};
+  @override
+  App map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return App(
+      appId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}app_id'])!,
+      appNumber: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}app_number'])!,
+      homeUri: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}home_uri'])!,
+      redirectUri: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}redirect_uri'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      iconUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}icon_url'])!,
+      category: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category']),
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      appSecret: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}app_secret'])!,
+      capabilities: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}capabilities']),
+      creatorId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}creator_id'])!,
+      resourcePatterns: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}resource_patterns']),
+      updatedAt: Apps.$converterupdatedAtn.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at'])),
+    );
+  }
+
+  @override
+  Apps createAlias(String alias) {
+    return Apps(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $converterupdatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $converterupdatedAtn =
+      NullAwareTypeConverter.wrap($converterupdatedAt);
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(app_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class App extends DataClass implements Insertable<App> {
+  final String appId;
+  final String appNumber;
+  final String homeUri;
+  final String redirectUri;
+  final String name;
+  final String iconUrl;
+  final String? category;
+  final String description;
+  final String appSecret;
+  final String? capabilities;
+  final String creatorId;
+  final String? resourcePatterns;
+  final DateTime? updatedAt;
+  const App(
+      {required this.appId,
+      required this.appNumber,
+      required this.homeUri,
+      required this.redirectUri,
+      required this.name,
+      required this.iconUrl,
+      this.category,
+      required this.description,
+      required this.appSecret,
+      this.capabilities,
+      required this.creatorId,
+      this.resourcePatterns,
+      this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['app_id'] = Variable<String>(appId);
+    map['app_number'] = Variable<String>(appNumber);
+    map['home_uri'] = Variable<String>(homeUri);
+    map['redirect_uri'] = Variable<String>(redirectUri);
+    map['name'] = Variable<String>(name);
+    map['icon_url'] = Variable<String>(iconUrl);
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
+    }
+    map['description'] = Variable<String>(description);
+    map['app_secret'] = Variable<String>(appSecret);
+    if (!nullToAbsent || capabilities != null) {
+      map['capabilities'] = Variable<String>(capabilities);
+    }
+    map['creator_id'] = Variable<String>(creatorId);
+    if (!nullToAbsent || resourcePatterns != null) {
+      map['resource_patterns'] = Variable<String>(resourcePatterns);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      final converter = Apps.$converterupdatedAtn;
+      map['updated_at'] = Variable<int>(converter.toSql(updatedAt));
+    }
+    return map;
+  }
+
+  AppsCompanion toCompanion(bool nullToAbsent) {
+    return AppsCompanion(
+      appId: Value(appId),
+      appNumber: Value(appNumber),
+      homeUri: Value(homeUri),
+      redirectUri: Value(redirectUri),
+      name: Value(name),
+      iconUrl: Value(iconUrl),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
+      description: Value(description),
+      appSecret: Value(appSecret),
+      capabilities: capabilities == null && nullToAbsent
+          ? const Value.absent()
+          : Value(capabilities),
+      creatorId: Value(creatorId),
+      resourcePatterns: resourcePatterns == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resourcePatterns),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory App.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return App(
+      appId: serializer.fromJson<String>(json['app_id']),
+      appNumber: serializer.fromJson<String>(json['app_number']),
+      homeUri: serializer.fromJson<String>(json['home_uri']),
+      redirectUri: serializer.fromJson<String>(json['redirect_uri']),
+      name: serializer.fromJson<String>(json['name']),
+      iconUrl: serializer.fromJson<String>(json['icon_url']),
+      category: serializer.fromJson<String?>(json['category']),
+      description: serializer.fromJson<String>(json['description']),
+      appSecret: serializer.fromJson<String>(json['app_secret']),
+      capabilities: serializer.fromJson<String?>(json['capabilities']),
+      creatorId: serializer.fromJson<String>(json['creator_id']),
+      resourcePatterns: serializer.fromJson<String?>(json['resource_patterns']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updated_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'app_id': serializer.toJson<String>(appId),
+      'app_number': serializer.toJson<String>(appNumber),
+      'home_uri': serializer.toJson<String>(homeUri),
+      'redirect_uri': serializer.toJson<String>(redirectUri),
+      'name': serializer.toJson<String>(name),
+      'icon_url': serializer.toJson<String>(iconUrl),
+      'category': serializer.toJson<String?>(category),
+      'description': serializer.toJson<String>(description),
+      'app_secret': serializer.toJson<String>(appSecret),
+      'capabilities': serializer.toJson<String?>(capabilities),
+      'creator_id': serializer.toJson<String>(creatorId),
+      'resource_patterns': serializer.toJson<String?>(resourcePatterns),
+      'updated_at': serializer.toJson<DateTime?>(updatedAt),
+    };
+  }
+
+  App copyWith(
+          {String? appId,
+          String? appNumber,
+          String? homeUri,
+          String? redirectUri,
+          String? name,
+          String? iconUrl,
+          Value<String?> category = const Value.absent(),
+          String? description,
+          String? appSecret,
+          Value<String?> capabilities = const Value.absent(),
+          String? creatorId,
+          Value<String?> resourcePatterns = const Value.absent(),
+          Value<DateTime?> updatedAt = const Value.absent()}) =>
+      App(
+        appId: appId ?? this.appId,
+        appNumber: appNumber ?? this.appNumber,
+        homeUri: homeUri ?? this.homeUri,
+        redirectUri: redirectUri ?? this.redirectUri,
+        name: name ?? this.name,
+        iconUrl: iconUrl ?? this.iconUrl,
+        category: category.present ? category.value : this.category,
+        description: description ?? this.description,
+        appSecret: appSecret ?? this.appSecret,
+        capabilities:
+            capabilities.present ? capabilities.value : this.capabilities,
+        creatorId: creatorId ?? this.creatorId,
+        resourcePatterns: resourcePatterns.present
+            ? resourcePatterns.value
+            : this.resourcePatterns,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('App(')
+          ..write('appId: $appId, ')
+          ..write('appNumber: $appNumber, ')
+          ..write('homeUri: $homeUri, ')
+          ..write('redirectUri: $redirectUri, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('category: $category, ')
+          ..write('description: $description, ')
+          ..write('appSecret: $appSecret, ')
+          ..write('capabilities: $capabilities, ')
+          ..write('creatorId: $creatorId, ')
+          ..write('resourcePatterns: $resourcePatterns, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      appId,
+      appNumber,
+      homeUri,
+      redirectUri,
+      name,
+      iconUrl,
+      category,
+      description,
+      appSecret,
+      capabilities,
+      creatorId,
+      resourcePatterns,
+      updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is App &&
+          other.appId == this.appId &&
+          other.appNumber == this.appNumber &&
+          other.homeUri == this.homeUri &&
+          other.redirectUri == this.redirectUri &&
+          other.name == this.name &&
+          other.iconUrl == this.iconUrl &&
+          other.category == this.category &&
+          other.description == this.description &&
+          other.appSecret == this.appSecret &&
+          other.capabilities == this.capabilities &&
+          other.creatorId == this.creatorId &&
+          other.resourcePatterns == this.resourcePatterns &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AppsCompanion extends UpdateCompanion<App> {
+  final Value<String> appId;
+  final Value<String> appNumber;
+  final Value<String> homeUri;
+  final Value<String> redirectUri;
+  final Value<String> name;
+  final Value<String> iconUrl;
+  final Value<String?> category;
+  final Value<String> description;
+  final Value<String> appSecret;
+  final Value<String?> capabilities;
+  final Value<String> creatorId;
+  final Value<String?> resourcePatterns;
+  final Value<DateTime?> updatedAt;
+  final Value<int> rowid;
+  const AppsCompanion({
+    this.appId = const Value.absent(),
+    this.appNumber = const Value.absent(),
+    this.homeUri = const Value.absent(),
+    this.redirectUri = const Value.absent(),
+    this.name = const Value.absent(),
+    this.iconUrl = const Value.absent(),
+    this.category = const Value.absent(),
+    this.description = const Value.absent(),
+    this.appSecret = const Value.absent(),
+    this.capabilities = const Value.absent(),
+    this.creatorId = const Value.absent(),
+    this.resourcePatterns = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AppsCompanion.insert({
+    required String appId,
+    required String appNumber,
+    required String homeUri,
+    required String redirectUri,
+    required String name,
+    required String iconUrl,
+    this.category = const Value.absent(),
+    required String description,
+    required String appSecret,
+    this.capabilities = const Value.absent(),
+    required String creatorId,
+    this.resourcePatterns = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : appId = Value(appId),
+        appNumber = Value(appNumber),
+        homeUri = Value(homeUri),
+        redirectUri = Value(redirectUri),
+        name = Value(name),
+        iconUrl = Value(iconUrl),
+        description = Value(description),
+        appSecret = Value(appSecret),
+        creatorId = Value(creatorId);
+  static Insertable<App> custom({
+    Expression<String>? appId,
+    Expression<String>? appNumber,
+    Expression<String>? homeUri,
+    Expression<String>? redirectUri,
+    Expression<String>? name,
+    Expression<String>? iconUrl,
+    Expression<String>? category,
+    Expression<String>? description,
+    Expression<String>? appSecret,
+    Expression<String>? capabilities,
+    Expression<String>? creatorId,
+    Expression<String>? resourcePatterns,
+    Expression<int>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (appId != null) 'app_id': appId,
+      if (appNumber != null) 'app_number': appNumber,
+      if (homeUri != null) 'home_uri': homeUri,
+      if (redirectUri != null) 'redirect_uri': redirectUri,
+      if (name != null) 'name': name,
+      if (iconUrl != null) 'icon_url': iconUrl,
+      if (category != null) 'category': category,
+      if (description != null) 'description': description,
+      if (appSecret != null) 'app_secret': appSecret,
+      if (capabilities != null) 'capabilities': capabilities,
+      if (creatorId != null) 'creator_id': creatorId,
+      if (resourcePatterns != null) 'resource_patterns': resourcePatterns,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AppsCompanion copyWith(
+      {Value<String>? appId,
+      Value<String>? appNumber,
+      Value<String>? homeUri,
+      Value<String>? redirectUri,
+      Value<String>? name,
+      Value<String>? iconUrl,
+      Value<String?>? category,
+      Value<String>? description,
+      Value<String>? appSecret,
+      Value<String?>? capabilities,
+      Value<String>? creatorId,
+      Value<String?>? resourcePatterns,
+      Value<DateTime?>? updatedAt,
+      Value<int>? rowid}) {
+    return AppsCompanion(
+      appId: appId ?? this.appId,
+      appNumber: appNumber ?? this.appNumber,
+      homeUri: homeUri ?? this.homeUri,
+      redirectUri: redirectUri ?? this.redirectUri,
+      name: name ?? this.name,
+      iconUrl: iconUrl ?? this.iconUrl,
+      category: category ?? this.category,
+      description: description ?? this.description,
+      appSecret: appSecret ?? this.appSecret,
+      capabilities: capabilities ?? this.capabilities,
+      creatorId: creatorId ?? this.creatorId,
+      resourcePatterns: resourcePatterns ?? this.resourcePatterns,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (appId.present) {
+      map['app_id'] = Variable<String>(appId.value);
+    }
+    if (appNumber.present) {
+      map['app_number'] = Variable<String>(appNumber.value);
+    }
+    if (homeUri.present) {
+      map['home_uri'] = Variable<String>(homeUri.value);
+    }
+    if (redirectUri.present) {
+      map['redirect_uri'] = Variable<String>(redirectUri.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (iconUrl.present) {
+      map['icon_url'] = Variable<String>(iconUrl.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (appSecret.present) {
+      map['app_secret'] = Variable<String>(appSecret.value);
+    }
+    if (capabilities.present) {
+      map['capabilities'] = Variable<String>(capabilities.value);
+    }
+    if (creatorId.present) {
+      map['creator_id'] = Variable<String>(creatorId.value);
+    }
+    if (resourcePatterns.present) {
+      map['resource_patterns'] = Variable<String>(resourcePatterns.value);
+    }
+    if (updatedAt.present) {
+      final converter = Apps.$converterupdatedAtn;
+      map['updated_at'] = Variable<int>(converter.toSql(updatedAt.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppsCompanion(')
+          ..write('appId: $appId, ')
+          ..write('appNumber: $appNumber, ')
+          ..write('homeUri: $homeUri, ')
+          ..write('redirectUri: $redirectUri, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('category: $category, ')
+          ..write('description: $description, ')
+          ..write('appSecret: $appSecret, ')
+          ..write('capabilities: $capabilities, ')
+          ..write('creatorId: $creatorId, ')
+          ..write('resourcePatterns: $resourcePatterns, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class Jobs extends Table with TableInfo<Jobs, Job> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -12889,6 +12659,236 @@ class FiatsCompanion extends UpdateCompanion<Fiat> {
   }
 }
 
+class FavoriteApps extends Table with TableInfo<FavoriteApps, FavoriteApp> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  FavoriteApps(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _appIdMeta = const VerificationMeta('appId');
+  late final GeneratedColumn<String> appId = GeneratedColumn<String>(
+      'app_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(FavoriteApps.$convertercreatedAt);
+  @override
+  List<GeneratedColumn> get $columns => [appId, userId, createdAt];
+  @override
+  String get aliasedName => _alias ?? 'favorite_apps';
+  @override
+  String get actualTableName => 'favorite_apps';
+  @override
+  VerificationContext validateIntegrity(Insertable<FavoriteApp> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('app_id')) {
+      context.handle(
+          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
+    } else if (isInserting) {
+      context.missing(_appIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {appId, userId};
+  @override
+  FavoriteApp map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FavoriteApp(
+      appId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}app_id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      createdAt: FavoriteApps.$convertercreatedAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+    );
+  }
+
+  @override
+  FavoriteApps createAlias(String alias) {
+    return FavoriteApps(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(app_id, user_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class FavoriteApp extends DataClass implements Insertable<FavoriteApp> {
+  final String appId;
+  final String userId;
+  final DateTime createdAt;
+  const FavoriteApp(
+      {required this.appId, required this.userId, required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['app_id'] = Variable<String>(appId);
+    map['user_id'] = Variable<String>(userId);
+    {
+      final converter = FavoriteApps.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+    }
+    return map;
+  }
+
+  FavoriteAppsCompanion toCompanion(bool nullToAbsent) {
+    return FavoriteAppsCompanion(
+      appId: Value(appId),
+      userId: Value(userId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FavoriteApp.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FavoriteApp(
+      appId: serializer.fromJson<String>(json['app_id']),
+      userId: serializer.fromJson<String>(json['user_id']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'app_id': serializer.toJson<String>(appId),
+      'user_id': serializer.toJson<String>(userId),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  FavoriteApp copyWith({String? appId, String? userId, DateTime? createdAt}) =>
+      FavoriteApp(
+        appId: appId ?? this.appId,
+        userId: userId ?? this.userId,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('FavoriteApp(')
+          ..write('appId: $appId, ')
+          ..write('userId: $userId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(appId, userId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FavoriteApp &&
+          other.appId == this.appId &&
+          other.userId == this.userId &&
+          other.createdAt == this.createdAt);
+}
+
+class FavoriteAppsCompanion extends UpdateCompanion<FavoriteApp> {
+  final Value<String> appId;
+  final Value<String> userId;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const FavoriteAppsCompanion({
+    this.appId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FavoriteAppsCompanion.insert({
+    required String appId,
+    required String userId,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  })  : appId = Value(appId),
+        userId = Value(userId),
+        createdAt = Value(createdAt);
+  static Insertable<FavoriteApp> custom({
+    Expression<String>? appId,
+    Expression<String>? userId,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (appId != null) 'app_id': appId,
+      if (userId != null) 'user_id': userId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FavoriteAppsCompanion copyWith(
+      {Value<String>? appId,
+      Value<String>? userId,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return FavoriteAppsCompanion(
+      appId: appId ?? this.appId,
+      userId: userId ?? this.userId,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (appId.present) {
+      map['app_id'] = Variable<String>(appId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (createdAt.present) {
+      final converter = FavoriteApps.$convertercreatedAt;
+      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FavoriteAppsCompanion(')
+          ..write('appId: $appId, ')
+          ..write('userId: $userId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class Properties extends Table with TableInfo<Properties, Propertie> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -13119,8 +13119,6 @@ class PropertiesCompanion extends UpdateCompanion<Propertie> {
 
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(e);
-  late final FavoriteApps favoriteApps = FavoriteApps(this);
-  late final Apps apps = Apps(this);
   late final StickerRelationships stickerRelationships =
       StickerRelationships(this);
   late final StickerAlbums stickerAlbums = StickerAlbums(this);
@@ -13144,6 +13142,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final ResendSessionMessages resendSessionMessages =
       ResendSessionMessages(this);
   late final Addresses addresses = Addresses(this);
+  late final Apps apps = Apps(this);
   late final Jobs jobs = Jobs(this);
   late final MessagesHistory messagesHistory = MessagesHistory(this);
   late final Offsets offsets = Offsets(this);
@@ -13151,6 +13150,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       SentSessionSenderKeys(this);
   late final TranscriptMessages transcriptMessages = TranscriptMessages(this);
   late final Fiats fiats = Fiats(this);
+  late final FavoriteApps favoriteApps = FavoriteApps(this);
   late final Properties properties = Properties(this);
   late final Index indexConversationsCategoryStatus = Index(
       'index_conversations_category_status',
@@ -13233,36 +13233,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final PropertyDao propertyDao = PropertyDao(this as MixinDatabase);
   late final TranscriptMessageDao transcriptMessageDao =
       TranscriptMessageDao(this as MixinDatabase);
-  Future<int> deleteFavoriteAppByAppIdAndUserId(String appId, String userId) {
-    return customUpdate(
-      'DELETE FROM favorite_apps WHERE app_id = ?1 AND user_id = ?2',
-      variables: [Variable<String>(appId), Variable<String>(userId)],
-      updates: {favoriteApps},
-      updateKind: UpdateKind.delete,
-    );
-  }
-
-  Future<int> deleteFavoriteAppByUserId(String userId) {
-    return customUpdate(
-      'DELETE FROM favorite_apps WHERE user_id = ?1',
-      variables: [Variable<String>(userId)],
-      updates: {favoriteApps},
-      updateKind: UpdateKind.delete,
-    );
-  }
-
-  Selectable<App> getFavoriteAppByUserId(String userId) {
-    return customSelect(
-        'SELECT a.* FROM favorite_apps AS fa INNER JOIN apps AS a ON fa.app_id = a.app_id WHERE fa.user_id = ?1',
-        variables: [
-          Variable<String>(userId)
-        ],
-        readsFrom: {
-          favoriteApps,
-          apps,
-        }).asyncMap(apps.mapFromRow);
-  }
-
   Selectable<String> stickerSystemAlbumId(String stickerId) {
     return customSelect(
         'SELECT sa.album_id FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
@@ -14446,8 +14416,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        favoriteApps,
-        apps,
         stickerRelationships,
         stickerAlbums,
         pinMessages,
@@ -14468,12 +14436,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantSession,
         resendSessionMessages,
         addresses,
+        apps,
         jobs,
         messagesHistory,
         offsets,
         sentSessionSenderKeys,
         transcriptMessages,
         fiats,
+        favoriteApps,
         properties,
         indexConversationsCategoryStatus,
         indexConversationsMuteUntil,
