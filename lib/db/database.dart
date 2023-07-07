@@ -159,6 +159,7 @@ class Database {
       } else {
         conversations = await conversationDao
             .conversationItemsByCategory(category.type, 1000, 0)
+            .get()
             .then((value) => value.map((e) => e.conversationId).toList());
       }
       return conversations;

@@ -53,7 +53,6 @@ part 'mixin_database.g.dart';
 @DriftDatabase(
   include: {
     'moor/mixin.drift',
-    'moor/dao/conversation.drift',
     'moor/dao/message.drift',
     'moor/dao/participant.drift',
     'moor/dao/sticker.drift',

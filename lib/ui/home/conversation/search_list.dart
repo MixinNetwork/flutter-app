@@ -13,6 +13,7 @@ import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../bloc/bloc_converter.dart';
 import '../../../bloc/keyword_cubit.dart';
 import '../../../bloc/minute_timer_cubit.dart';
+import '../../../db/dao/conversation_dao.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/mixin_database.dart';
