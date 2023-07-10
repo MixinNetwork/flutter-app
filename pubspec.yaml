@@ -60,7 +60,7 @@ dependencies:
   flutter_app_icon_badge: ^2.0.0
   flutter_bloc: ^8.1.3
   flutter_hooks: ^0.18.6
-  flutter_local_notifications: ^14.1.1
+  flutter_local_notifications: ^15.1.0+1
   flutter_localizations:
     sdk: flutter
   flutter_portal: ^1.1.4
@@ -134,16 +134,16 @@ dependencies:
       ref: 00654e51f51aa65cdc39784a3075c9abb8b9dd7c
       path: packages/ui_device
   ulid: ^2.0.0
-  url_launcher: ^6.1.11
+  url_launcher: ^6.1.12
   uuid: ^3.0.4
   very_good_analysis: ^5.0.0+1
   visibility_detector: ^0.4.0+2
   watcher: ^1.1.0
   web_socket_channel: ^2.4.0
   webview_flutter: ^4.2.2
-  win32: ^5.0.4
+  win32: ^5.0.5
   win_toast: ^0.3.0
-  window_manager: ^0.3.4
+  window_manager: ^0.3.5
   window_size:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
