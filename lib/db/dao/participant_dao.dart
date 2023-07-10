@@ -62,13 +62,8 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     return query.get();
   }
 
-  Future<String?> findJoinedConversationId(String userId) async => db
-      .customSelect(
-        'SELECT p.conversation_id FROM participants p, conversations c WHERE p.user_id = ? AND p.conversation_id = c.conversation_id AND c.status = 2 LIMIT 1',
-        variables: [Variable.withString(userId)],
-      )
-      .map((row) => row.read<String>('conversation_id'))
-      .getSingleOrNull();
+  Future<String?> findJoinedConversationId(String userId) async =>
+      _joinedConversationId(userId).getSingleOrNull();
 
   Future<void> insertAll(List<Participant> add) => batch((batch) {
         batch.insertAllOnConflictUpdate(db.participants, add);
@@ -86,17 +81,13 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> updateParticipantRole(
           String conversationId, String participantId, ParticipantRole? role) =>
-      db
-          .customUpdate(
-        'UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
-        variables: [
-          Variable<String>(const ParticipantRoleJsonConverter().toJson(role)),
-          Variable.withString(conversationId),
-          Variable.withString(participantId)
-        ],
-        updates: {db.participants},
-        updateKind: UpdateKind.update,
-      )
+      (update(db.participants)
+            ..where((tbl) =>
+                tbl.conversationId.equals(conversationId) &
+                tbl.userId.equals(participantId)))
+          .write(ParticipantsCompanion(
+        role: Value(role),
+      ))
           .then((value) {
         DataBaseEventBus.instance.updateParticipant([
           MiniParticipantItem(

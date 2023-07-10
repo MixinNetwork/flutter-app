@@ -120,6 +120,18 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
           participants,
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
+
+  Selectable<String> _joinedConversationId(String userId) {
+    return customSelect(
+        'SELECT p.conversation_id FROM participants AS p,conversations AS c WHERE p.user_id = ?1 AND p.conversation_id = c.conversation_id AND c.status = 2 LIMIT 1',
+        variables: [
+          Variable<String>(userId)
+        ],
+        readsFrom: {
+          participants,
+          conversations,
+        }).map((QueryRow row) => row.read<String>('conversation_id'));
+  }
 }
 
 class ParticipantUser {

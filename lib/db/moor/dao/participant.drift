@@ -27,3 +27,6 @@ SELECT COUNT(1) FROM participants;
 
 conversationParticipantsCount:
 SELECT COUNT(1) FROM participants WHERE conversation_id = :conversationId;
+
+_joinedConversationId:
+SELECT p.conversation_id FROM participants p, conversations c WHERE p.user_id = :userId AND p.conversation_id = c.conversation_id AND c.status = 2 LIMIT 1;
