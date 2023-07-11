@@ -118,7 +118,8 @@ class Sender {
 
   Future checkSessionSenderKey(String conversationId) async {
     final participants = await database.participantSessionDao
-        .getNotSendSessionParticipants(conversationId, sessionId);
+        .notSendSessionParticipants(conversationId, sessionId)
+        .get();
     if (participants.isEmpty) {
       return;
     }
@@ -199,7 +200,7 @@ class Sender {
     if (result.success) {
       final messageIds = signalKeyMessages
           .map((e) => db.MessagesHistoryData(messageId: e.messageId));
-      await database.messagesHistoryDao.insertList(messageIds);
+      await database.messageHistoryDao.insertList(messageIds);
 
       final sentSenderKeys = signalKeyMessages
           .map((e) => db.ParticipantSessionData(

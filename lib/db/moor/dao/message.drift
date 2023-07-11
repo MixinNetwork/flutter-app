@@ -1,81 +1,6 @@
 import '../mixin.drift';
 
-baseMessageItems AS MessageItem:
-SELECT message.message_id AS messageId,
-    message.conversation_id AS conversationId,
-    message.category AS type,
-    message.content AS content,
-    message.created_at AS createdAt,
-    message.status AS status,
-    message.media_status AS mediaStatus,
-    message.media_waveform AS mediaWaveform,
-    message.name AS mediaName,
-    message.media_mime_type AS mediaMimeType,
-    message.media_size AS mediaSize,
-    message.media_width AS mediaWidth,
-    message.media_height AS mediaHeight,
-    message.thumb_image AS thumbImage,
-    message.thumb_url AS thumbUrl, message.media_url AS mediaUrl,
-    message.media_duration AS mediaDuration,
-    message.quote_message_id AS quoteId,
-    message.quote_content AS quoteContent,
-    message.action AS actionName,
-    message.shared_user_id AS sharedUserId,
-    message.sticker_id AS stickerId,
-    sender.user_id AS userId,
-    sender.full_name AS userFullName,
-    sender.identity_number AS userIdentityNumber,
-    sender.app_id AS appId,
-    sender.relationship AS relationship,
-    sender.avatar_url AS avatarUrl,
-    sharedUser.full_name AS sharedUserFullName,
-    sharedUser.identity_number AS sharedUserIdentityNumber,
-    sharedUser.avatar_url AS sharedUserAvatarUrl,
-    sharedUser.is_verified AS sharedUserIsVerified,
-    sharedUser.app_id AS sharedUserAppId,
-    conversation.owner_id AS conversationOwnerId,
-    conversation.category AS conversionCategory,
-    conversation.name AS groupName,
-    sticker.asset_url AS assetUrl,
-    sticker.asset_width AS assetWidth,
-    sticker.asset_height AS assetHeight,
-    sticker.name AS assetName,
-    sticker.asset_type AS assetType,
-    participant.full_name AS participantFullName,
-    participant.user_id AS participantUserId,
-    snapshot.snapshot_id AS snapshotId,
-    snapshot.type AS snapshotType,
-    snapshot.amount AS snapshotAmount,
-    snapshot.asset_id AS assetId,
-    asset.symbol AS assetSymbol,
-    asset.icon_url AS assetIcon,
-    chain.icon_url AS chainIcon,
-    hyperlink.site_name AS siteName,
-    hyperlink.site_title AS siteTitle,
-    hyperlink.site_description AS siteDescription,
-    hyperlink.site_image AS siteImage,
-    messageMention.has_read AS mentionRead,
-    em.expire_in AS expireIn,
-    CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned
-FROM messages message
-         INNER JOIN users sender ON message.user_id = sender.user_id
-         LEFT JOIN users participant ON message.participant_id = participant.user_id
-         LEFT JOIN snapshots snapshot ON message.snapshot_id = snapshot.snapshot_id
-         LEFT JOIN assets asset ON snapshot.asset_id = asset.asset_id
-         LEFT JOIN chains chain ON asset.chain_id = chain.chain_id
-         LEFT JOIN stickers sticker ON sticker.sticker_id = message.sticker_id
-         LEFT JOIN hyperlinks hyperlink ON message.hyperlink = hyperlink.hyperlink
-         LEFT JOIN users sharedUser ON message.shared_user_id = sharedUser.user_id
-         LEFT JOIN conversations conversation
-ON message.conversation_id = conversation.conversation_id
-         LEFT JOIN message_mentions messageMention ON message.message_id = messageMention.message_id
-         LEFT JOIN pin_messages pinMessage on message.message_id = pinMessage.message_id
-         LEFT JOIN expired_messages em ON message.message_id = em.message_id
-WHERE $where
-ORDER BY $order
-LIMIT $limit;
-
-baseQuoteMessageItem AS QuoteMessageItem:
+_baseQuoteMessageItem AS QuoteMessageItem:
 SELECT message.message_id AS messageId, message.conversation_id AS conversationId,
     sender.user_id AS userId,
     sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber,
@@ -106,7 +31,7 @@ WHERE $where
 ORDER BY $order
 LIMIT $limit;
 
-findMessageStatusById:
+messageStatusById:
 SELECT status FROM messages WHERE message_id = :messageId LIMIT 1;
 
 sendingMessage AS SendingMessage:
@@ -155,14 +80,7 @@ WHERE  m.message_id in :messageId
 ORDER  BY m.created_at DESC;
 
 
-updateUnseenMessageCountAndLastMessageId:
-UPDATE conversations SET unseen_message_count
-    = (SELECT count(1) FROM messages WHERE conversation_id = :conversationId AND status IN ('SENT', 'DELIVERED')  AND user_id != :userId),
-    last_message_id = :lastMessageId,
-    last_message_created_at = :lastMessageCreatedAt
-    WHERE conversation_id = :conversationId;
-
-getSearchMessageByIds AS SearchMessageDetailItem:
+searchMessageByIds AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName,
     m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
     c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl
@@ -176,7 +94,7 @@ SELECT m.message_id messageId, u.user_id AS senderId, u.avatar_url AS senderAvat
 miniMessageByIds AS MiniMessageItem:
 SELECT conversation_id as conversationId, message_id as messageId FROM messages WHERE message_id IN :messageIds;
 
-searchMessage AS SearchMessageDetailItem:
+_searchMessage AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName,
     m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
     c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl
@@ -194,5 +112,5 @@ SELECT count(1) FROM messages;
 countMediaMessages:
 SELECT count(1) FROM messages WHERE category IN ('SIGNAL_IMAGE', 'SIGNAL_VIDEO', 'SIGNAL_DATA', 'SIGNAL_AUDIO', 'PLAIN_IMAGE', 'PLAIN_VIDEO', 'PLAIN_DATA', 'PLAIN_AUDIO', 'ENCRYPTED_IMAGE', 'ENCRYPTED_VIDEO', 'ENCRYPTED_DATA', 'ENCRYPTED_AUDIO');
 
-findBigQuoteMessage as QuoteMinimal:
+bigQuoteMessage as QuoteMinimal:
 SELECT rowid, conversation_id, quote_message_id FROM messages WHERE rowid > :rowId AND quote_message_id IS NOT NULL AND quote_message_id != '' AND length(quote_content) > 10240 GROUP BY quote_message_id ORDER BY rowid ASC LIMIT :limit;

@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../constants/resources.dart';
+import '../../db/dao/conversation_dao.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';

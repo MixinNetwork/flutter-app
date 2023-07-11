@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../../db/dao/user_dao.dart';
-import '../../../../db/mixin_database.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../../utils/reg_exp_utils.dart';

@@ -1,6 +1,6 @@
 import '../mixin.drift';
 
-fuzzySearchBotGroupUser:
+_fuzzySearchBotGroupUser:
 SELECT u.* FROM users u
         WHERE (u.user_id in (SELECT m.user_id FROM messages m WHERE conversation_id = :conversationId AND m.created_at > :createdAt)
         OR u.user_id in (SELECT f.user_id FROM users f WHERE relationship = 'FRIEND'))
@@ -12,10 +12,10 @@ SELECT u.* FROM users u
 
 fuzzySearchGroupUser:
 SELECT u.* FROM participants p, users u
-        WHERE u.user_id != :id
+        WHERE u.user_id != :currentUserId
         AND p.conversation_id = :conversationId AND p.user_id = u.user_id
-        AND (u.full_name LIKE '%' || :username || '%'  ESCAPE '\' OR u.identity_number like '%' || :identityNumber || '%'  ESCAPE '\')
-        ORDER BY u.full_name = :username COLLATE NOCASE OR u.identity_number = :identityNumber COLLATE NOCASE DESC;
+        AND (u.full_name LIKE '%' || :keyword || '%'  ESCAPE '\' OR u.identity_number like '%' || :keyword || '%'  ESCAPE '\')
+        ORDER BY u.full_name = :keyword COLLATE NOCASE OR u.identity_number = :keyword COLLATE NOCASE DESC;
 
 groupParticipants:
 SELECT u.* FROM participants p, users u WHERE p.conversation_id = :conversationId AND p.user_id = u.user_id;
@@ -29,7 +29,7 @@ SELECT * FROM users WHERE user_id IN :userIds;
 userIdsByIn:
 SELECT user_id FROM users WHERE user_id IN :userIds;
 
-fuzzySearchUser:
+_fuzzySearchUser:
 SELECT users.*
 FROM users
     LEFT JOIN conversations ON conversations.owner_id = user_id
@@ -43,7 +43,7 @@ WHERE $firstFilter
 ORDER BY full_name = :username COLLATE nocase
     OR identity_number = :identityNumber COLLATE nocase DESC;
 
-fuzzySearchUserInCircle:
+_fuzzySearchUserInCircle:
 SELECT users.*
 FROM users
     LEFT JOIN conversations ON conversations.owner_id = users.user_id

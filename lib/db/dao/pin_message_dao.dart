@@ -4,10 +4,11 @@ import '../database_event_bus.dart';
 import '../extension/db.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
+import 'message_dao.dart';
 
 part 'pin_message_dao.g.dart';
 
-@DriftAccessor()
+@DriftAccessor(include: {'../moor/dao/pin_message.drift'})
 class PinMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$PinMessageDaoMixin {
   PinMessageDao(super.attachedDatabase);
@@ -67,11 +68,6 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
       ),
     );
   }
-
-  Selectable<String?> pinMessageIds(String conversationId) =>
-      db.pinMessageIds(conversationId);
-
-  late final pinMessageItem = db.pinMessageItem;
 
   Selectable<MessageItem> messageItems(String conversationId) =>
       db.basePinMessageItems(

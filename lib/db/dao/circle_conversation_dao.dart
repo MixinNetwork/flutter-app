@@ -5,7 +5,7 @@ import '../mixin_database.dart';
 
 part 'circle_conversation_dao.g.dart';
 
-@DriftAccessor()
+@DriftAccessor(include: {'../moor/dao/circle_conversation.drift'})
 class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$CircleConversationDaoMixin {
   CircleConversationDao(super.db);
@@ -23,13 +23,13 @@ class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
         ..where((tbl) => tbl.circleId.equals(circleId));
 
   Future<int> deleteByCircleId(String circleId) =>
-      db.deleteByCircleId(circleId).then((value) {
+      _deleteByCircleId(circleId).then((value) {
         DataBaseEventBus.instance.updateCircleConversation();
         return value;
       });
 
   Future<int> deleteById(String conversationId, String circleId) =>
-      db.deleteByIds(conversationId, circleId).then((value) {
+      _deleteByIds(conversationId, circleId).then((value) {
         DataBaseEventBus.instance.updateCircleConversation();
         return value;
       });

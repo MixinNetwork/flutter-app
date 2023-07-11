@@ -1,0 +1,10 @@
+import '../mixin.drift';
+
+participantSessionKeyWithoutSelf AS ParticipantSessionKey:
+SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id != :userId LIMIT 1;
+
+otherParticipantSessionKey AS ParticipantSessionKey:
+SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id == :userId AND session_id != :sessionId ORDER BY created_at DESC LIMIT 1;
+
+notSendSessionParticipants:
+SELECT p.* FROM participant_session p LEFT JOIN users u ON p.user_id = u.user_id WHERE p.conversation_id = :conversationId AND p.session_id != :sessionId AND u.app_id IS NULL AND p.sent_to_server IS NULL;

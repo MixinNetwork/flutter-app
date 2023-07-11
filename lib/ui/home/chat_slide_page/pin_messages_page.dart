@@ -36,7 +36,9 @@ class PinMessagesPage extends HookWidget {
         eventStreams: [
           DataBaseEventBus.instance.watchPinMessageStream(
             conversationIds: [conversationId],
-          )
+          ),
+          DataBaseEventBus.instance.updateAssetStream,
+          DataBaseEventBus.instance.updateStickerStream,
         ],
         duration: kSlowThrottleDuration,
       ),

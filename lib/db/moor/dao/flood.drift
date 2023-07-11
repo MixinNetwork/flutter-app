@@ -1,4 +1,4 @@
 import '../mixin.drift';
 
-getLastBlazeMessageCreatedAt:
+_getLastBlazeMessageCreatedAt:
 SELECT created_at FROM flood_messages ORDER BY created_at DESC limit 1;

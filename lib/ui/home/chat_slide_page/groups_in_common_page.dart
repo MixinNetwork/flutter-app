@@ -4,7 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
-import '../../../db/mixin_database.dart';
+import '../../../db/dao/conversation_dao.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/app_bar.dart';
@@ -45,7 +45,7 @@ class _ConversationList extends HookWidget {
     final conversationList = useMemoizedFuture(() {
       final selfId = context.accountServer.userId;
       return context.accountServer.database.conversationDao
-          .findTheSameConversations(selfId, userId)
+          .findSameConversations(selfId, userId)
           .get();
     }, <GroupMinimal>[], keys: [userId]).data;
 

@@ -20,7 +20,7 @@ extension StickerConverter on sdk.Sticker {
       );
 }
 
-@DriftAccessor()
+@DriftAccessor(include: {'../moor/dao/sticker.drift'})
 class StickerDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerDaoMixin {
   StickerDao(super.db);
@@ -58,8 +58,6 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
         return value;
       });
 
-  Selectable<Sticker> recentUsedStickers() => db.recentUsedStickers();
-
   SimpleSelectStatement<Stickers, Sticker> sticker(String stickerId) =>
       (select(db.stickers)
         ..where((tbl) => tbl.stickerId.equals(stickerId))
@@ -71,9 +69,9 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
       (t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)
     ]);
 
-  Selectable<Sticker> personalStickers() => db.stickersByCategory('PERSONAL');
+  Selectable<Sticker> personalStickers() => _stickersByCategory('PERSONAL');
 
-  Selectable<Sticker> systemStickers() => db.stickersByCategory('SYSTEM');
+  Selectable<Sticker> systemStickers() => _stickersByCategory('SYSTEM');
 
   Future<int> updateUsedAt(
           String? albumId, String stickerId, DateTime dateTime) =>

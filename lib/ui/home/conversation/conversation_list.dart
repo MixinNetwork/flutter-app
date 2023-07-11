@@ -9,7 +9,7 @@ import '../../../bloc/bloc_converter.dart';
 import '../../../bloc/minute_timer_cubit.dart';
 import '../../../bloc/paging/paging_bloc.dart';
 import '../../../constants/resources.dart';
-import '../../../db/mixin_database.dart';
+import '../../../db/dao/conversation_dao.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';

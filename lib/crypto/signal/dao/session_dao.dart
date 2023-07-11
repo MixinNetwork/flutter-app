@@ -1,6 +1,6 @@
+import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 
-import '../../../utils/extension/extension.dart';
 import '../signal_database.dart';
 
 part 'session_dao.g.dart';

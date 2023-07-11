@@ -6,7 +6,7 @@ import '../mixin_database.dart';
 
 part 'sticker_relationship_dao.g.dart';
 
-@DriftAccessor()
+@DriftAccessor(include: {'../moor/dao/sticker_relationship.drift'})
 class StickerRelationshipDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerRelationshipDaoMixin {
   StickerRelationshipDao(super.db);
@@ -44,10 +44,4 @@ class StickerRelationshipDao extends DatabaseAccessor<MixinDatabase>
                 albumId: stickerRelationship.albumId)));
         return value;
       });
-
-  Selectable<String> stickerSystemAlbumId(String stickerId) =>
-      db.stickerSystemAlbumId(stickerId);
-
-  Selectable<StickerAlbum> stickerSystemAlbum(String stickerId) =>
-      db.stickerSystemAlbum(stickerId);
 }
