@@ -34,92 +34,67 @@ import 'mixin_database.dart';
 
 class Database {
   Database(this.mixinDatabase, this.ftsDatabase) {
-    appDao = AppDao(mixinDatabase);
-    assetDao = AssetDao(mixinDatabase);
-    chainDao = ChainDao(mixinDatabase);
-    conversationDao = ConversationDao(mixinDatabase);
-    circleDao = CircleDao(mixinDatabase);
-    circleConversationDao = CircleConversationDao(mixinDatabase);
-    floodMessageDao = FloodMessageDao(mixinDatabase);
-    messageDao = MessageDao(mixinDatabase);
-    messagesHistoryDao = MessageHistoryDao(mixinDatabase);
-    messageMentionDao = MessageMentionDao(mixinDatabase);
-    jobDao = JobDao(mixinDatabase);
-    offsetDao = OffsetDao(mixinDatabase);
-    participantDao = ParticipantDao(mixinDatabase);
-    resendSessionMessageDao = ResendSessionMessageDao(mixinDatabase);
-    snapshotDao = SnapshotDao(mixinDatabase);
-    stickerDao = StickerDao(mixinDatabase);
-    stickerAlbumDao = StickerAlbumDao(mixinDatabase);
-    stickerRelationshipDao = StickerRelationshipDao(mixinDatabase);
-    participantSessionDao = ParticipantSessionDao(mixinDatabase);
-    userDao = UserDao(mixinDatabase);
-    transcriptMessageDao = TranscriptMessageDao(mixinDatabase);
-    pinMessageDao = PinMessageDao(mixinDatabase);
-    fiatDao = FiatDao(mixinDatabase);
-    favoriteAppDao = FavoriteAppDao(mixinDatabase);
-    expiredMessageDao = ExpiredMessageDao(mixinDatabase);
     settingProperties = SettingPropertyStorage(mixinDatabase.propertyDao);
   }
-
-  // static MixinDatabase _database;
-  // static Future init() async {
-  //   _database = await getMixinDatabaseConnection('3910');
-  // }
 
   final MixinDatabase mixinDatabase;
 
   final FtsDatabase ftsDatabase;
 
-  late final AppDao appDao;
+  AppDao get appDao => mixinDatabase.appDao;
 
-  late final AssetDao assetDao;
+  AssetDao get assetDao => mixinDatabase.assetDao;
 
-  late final ChainDao chainDao;
+  ChainDao get chainDao => mixinDatabase.chainDao;
 
-  late final MessageDao messageDao;
+  MessageDao get messageDao => mixinDatabase.messageDao;
 
-  late final MessageHistoryDao messagesHistoryDao;
+  MessageHistoryDao get messageHistoryDao => mixinDatabase.messageHistoryDao;
 
-  late final MessageMentionDao messageMentionDao;
+  MessageMentionDao get messageMentionDao => mixinDatabase.messageMentionDao;
 
-  late final ConversationDao conversationDao;
+  ConversationDao get conversationDao => mixinDatabase.conversationDao;
 
-  late final CircleDao circleDao;
+  CircleDao get circleDao => mixinDatabase.circleDao;
 
-  late final CircleConversationDao circleConversationDao;
+  CircleConversationDao get circleConversationDao =>
+      mixinDatabase.circleConversationDao;
 
-  late final FloodMessageDao floodMessageDao;
+  FloodMessageDao get floodMessageDao => mixinDatabase.floodMessageDao;
 
-  late final JobDao jobDao;
+  JobDao get jobDao => mixinDatabase.jobDao;
 
-  late final OffsetDao offsetDao;
+  OffsetDao get offsetDao => mixinDatabase.offsetDao;
 
-  late final ParticipantDao participantDao;
+  ParticipantDao get participantDao => mixinDatabase.participantDao;
 
-  late final ParticipantSessionDao participantSessionDao;
+  ParticipantSessionDao get participantSessionDao =>
+      mixinDatabase.participantSessionDao;
 
-  late final ResendSessionMessageDao resendSessionMessageDao;
+  ResendSessionMessageDao get resendSessionMessageDao =>
+      mixinDatabase.resendSessionMessageDao;
 
-  late final SnapshotDao snapshotDao;
+  SnapshotDao get snapshotDao => mixinDatabase.snapshotDao;
 
-  late final StickerDao stickerDao;
+  StickerDao get stickerDao => mixinDatabase.stickerDao;
 
-  late final StickerAlbumDao stickerAlbumDao;
+  StickerAlbumDao get stickerAlbumDao => mixinDatabase.stickerAlbumDao;
 
-  late final StickerRelationshipDao stickerRelationshipDao;
+  StickerRelationshipDao get stickerRelationshipDao =>
+      mixinDatabase.stickerRelationshipDao;
 
-  late final UserDao userDao;
+  UserDao get userDao => mixinDatabase.userDao;
 
-  late final TranscriptMessageDao transcriptMessageDao;
+  TranscriptMessageDao get transcriptMessageDao =>
+      mixinDatabase.transcriptMessageDao;
 
-  late final PinMessageDao pinMessageDao;
+  PinMessageDao get pinMessageDao => mixinDatabase.pinMessageDao;
 
-  late final FiatDao fiatDao;
+  FiatDao get fiatDao => mixinDatabase.fiatDao;
 
-  late final FavoriteAppDao favoriteAppDao;
+  FavoriteAppDao get favoriteAppDao => mixinDatabase.favoriteAppDao;
 
-  late final ExpiredMessageDao expiredMessageDao;
+  ExpiredMessageDao get expiredMessageDao => mixinDatabase.expiredMessageDao;
 
   late final SettingPropertyStorage settingProperties;
 
@@ -150,7 +125,7 @@ class Database {
       anchorMessageId: anchorMessageId,
     );
     final messages =
-        await mixinDatabase.getSearchMessageByIds(messageIds).get();
+        await mixinDatabase.messageDao.searchMessageByIds(messageIds).get();
 
     final result = <SearchMessageDetailItem>[];
 
@@ -184,6 +159,7 @@ class Database {
       } else {
         conversations = await conversationDao
             .conversationItemsByCategory(category.type, 1000, 0)
+            .get()
             .then((value) => value.map((e) => e.conversationId).toList());
       }
       return conversations;

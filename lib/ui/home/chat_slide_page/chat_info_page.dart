@@ -589,7 +589,9 @@ class ConversationBio extends HookWidget {
           duration: kVerySlowThrottleDuration,
         );
       }
-      return database.userDao.biography(userId!).watchSingleWithStream(
+      return database.userDao
+          .biographyByIdentityNumber(userId!)
+          .watchSingleWithStream(
         eventStreams: [
           DataBaseEventBus.instance.watchUpdateUserStream([userId!])
         ],

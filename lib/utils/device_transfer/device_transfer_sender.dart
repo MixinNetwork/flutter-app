@@ -210,15 +210,15 @@ class DeviceTransferSender {
     // send total count
     await runWithLog((socket) async {
       final db = database.mixinDatabase;
-      final count = await db.countMediaMessages().getSingle() +
-          await db.countMessages().getSingle() +
-          await db.countStickers().getSingle() +
+      final count = await db.messageDao.countMediaMessages().getSingle() +
+          await db.messageDao.countMessages().getSingle() +
+          await db.stickerDao.countStickers().getSingle() +
           await db.assetDao.countAssets().getSingle() +
           await db.snapshotDao.countSnapshots().getSingle() +
-          await db.countUsers().getSingle() +
-          await db.countConversations().getSingle() +
-          await db.countParticipants().getSingle() +
-          await db.countPinMessages().getSingle() +
+          await db.userDao.countUsers().getSingle() +
+          await db.conversationDao.countConversations().getSingle() +
+          await db.participantDao.countParticipants().getSingle() +
+          await db.pinMessageDao.countPinMessages().getSingle() +
           await database.transcriptMessageDao
               .countTranscriptMessages()
               .getSingle() +

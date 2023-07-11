@@ -8,18 +8,6 @@ WHERE participant.conversation_id = :conversationId
 ORDER BY participant.created_at ASC
 LIMIT 4;
 
-participantSessionKeyWithoutSelf AS ParticipantSessionKey:
-SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id != :userId LIMIT 1;
-
-otherParticipantSessionKey AS ParticipantSessionKey:
-SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id == :userId AND session_id != :sessionId ORDER BY created_at DESC LIMIT 1;
-
-notSendSessionParticipants:
-SELECT p.* FROM participant_session p LEFT JOIN users u ON p.user_id = u.user_id WHERE p.conversation_id = :conversationId AND p.session_id != :sessionId AND u.app_id IS NULL AND p.sent_to_server IS NULL;
-
-participantSessionKeyBySessionId:
-SELECT * FROM participant_session WHERE conversation_id = :conversationId AND session_id == :sessionId;
-
 groupParticipantsByConversationId AS ParticipantUser:
 SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt,
 u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName,
@@ -36,3 +24,9 @@ SELECT u.user_id FROM users u INNER JOIN participants p ON p.user_id = u.user_id
 
 countParticipants:
 SELECT COUNT(1) FROM participants;
+
+conversationParticipantsCount:
+SELECT COUNT(1) FROM participants WHERE conversation_id = :conversationId;
+
+_joinedConversationId:
+SELECT p.conversation_id FROM participants p, conversations c WHERE p.user_id = :userId AND p.conversation_id = c.conversation_id AND c.status = 2 LIMIT 1;

@@ -10,6 +10,7 @@ import '../../constants/brightness_theme_data.dart';
 import '../../constants/constants.dart';
 import '../../constants/resources.dart';
 import '../../crypto/uuid/uuid.dart';
+import '../../db/dao/conversation_dao.dart';
 import '../../db/mixin_database.dart';
 import '../../enum/encrypt_category.dart';
 import '../../utils/extension/extension.dart';

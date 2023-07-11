@@ -84,8 +84,7 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
         }
         if (conversationState.isGroup ?? false) {
           return userDao
-              .groupParticipants(
-                  conversationId: conversationState.conversationId)
+              .groupParticipants(conversationState.conversationId)
               .watchWithStream(
             eventStreams: [
               DataBaseEventBus.instance.watchUpdateParticipantStream(
@@ -121,9 +120,9 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
       if (conversationState.isGroup ?? false) {
         return userDao
             .fuzzySearchGroupUser(
-          currentUserId: multiAuthCubit.state.currentUserId ?? '',
-          conversationId: conversationState.conversationId,
-          keyword: keyword,
+          multiAuthCubit.state.currentUserId ?? '',
+          conversationState.conversationId,
+          keyword,
         )
             .watchWithStream(
           eventStreams: [

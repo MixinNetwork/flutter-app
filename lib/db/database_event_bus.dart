@@ -6,9 +6,9 @@ import 'package:rxdart/rxdart.dart';
 import '../utils/event_bus.dart';
 import '../utils/logger.dart';
 import 'dao/job_dao.dart';
+import 'dao/message_dao.dart';
 import 'dao/participant_dao.dart';
 import 'event.dart';
-import 'mixin_database.dart';
 
 enum _DatabaseEvent {
   notification,

@@ -3,7 +3,7 @@ import '../mixin.drift';
 recentUsedStickers:
 SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20;
 
-stickersByCategory:
+_stickersByCategory:
 SELECT s.*
 FROM   sticker_albums sa
        INNER JOIN sticker_relationships sr
