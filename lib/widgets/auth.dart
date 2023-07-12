@@ -17,7 +17,7 @@ import '../utils/event_bus.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 
-const lockDuration = Duration(minutes: 1);
+const _lockDuration = Duration(minutes: 1);
 
 enum LockEvent { lock, unlock }
 
@@ -82,15 +82,19 @@ class _AuthGuard extends HookWidget {
 
         final needLock = !isAppActive;
 
+        final lockDuration =
+            SecurityKeyValue.instance.lockDuration ?? _lockDuration;
         if (needLock) {
-          timer = Timer(lockDuration, () {
-            if (!hasPasscode) {
-              lock.value = false;
-              return;
-            }
+          if (lockDuration.inMinutes > 0) {
+            timer = Timer(lockDuration, () {
+              if (!hasPasscode) {
+                lock.value = false;
+                return;
+              }
 
-            lock.value = !isAppActive;
-          });
+              lock.value = !isAppActive;
+            });
+          }
         } else {
           dispose();
           lock.value = needLock;
