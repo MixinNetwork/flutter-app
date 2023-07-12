@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -223,7 +224,14 @@ class _App extends StatelessWidget {
             supportedLocales: [
               ...Localization.delegate.supportedLocales,
             ],
-            theme: ThemeData(useMaterial3: true).withFallbackFonts(),
+            theme: ThemeData(
+              colorScheme: const ColorScheme.light(primary: Colors.black),
+              useMaterial3: true,
+            ).withFallbackFonts(),
+            darkTheme: ThemeData(
+              colorScheme: const ColorScheme.dark(primary: Colors.white),
+              useMaterial3: true,
+            ).withFallbackFonts(),
             builder: (context, child) {
               try {
                 context.accountServer.language =
