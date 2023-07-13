@@ -175,6 +175,7 @@ class _EmojiGroupHeader extends HookWidget {
           isScrollable: true,
           labelPadding: EdgeInsets.zero,
           indicator: const BoxDecoration(color: Colors.transparent),
+          dividerColor: Colors.transparent,
           tabs: List.generate(
             icons.length,
             (index) => Padding(

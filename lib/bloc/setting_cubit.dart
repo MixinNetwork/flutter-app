@@ -1,6 +1,5 @@
-import 'dart:ui';
-
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 import '../utils/logger.dart';
@@ -145,6 +144,17 @@ class SettingCubit extends HydratedCubit<SettingState> {
       default:
         w('invalid value for brightness. $state');
         return null;
+    }
+  }
+
+  ThemeMode get themeMode {
+    switch (brightness) {
+      case Brightness.dark:
+        return ThemeMode.dark;
+      case Brightness.light:
+        return ThemeMode.light;
+      case null:
+        return ThemeMode.system;
     }
   }
 

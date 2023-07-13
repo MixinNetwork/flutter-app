@@ -151,10 +151,11 @@ class _FilesPreviewDialog extends HookWidget {
     }
 
     return Material(
-      child: Container(
+      color: context.theme.popUp,
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
+      child: SizedBox(
           width: 480,
           height: 600,
-          color: context.theme.popUp,
           child: Stack(
             children: [
               Column(
@@ -245,7 +246,10 @@ class _FilesPreviewDialog extends HookWidget {
                             left: 32, top: 18, bottom: 18, right: 32),
                         backgroundColor: context.theme.accent,
                       ),
-                      child: Text(context.l10n.send.toUpperCase()),
+                      child: Text(
+                        context.l10n.send.toUpperCase(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),

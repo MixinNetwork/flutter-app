@@ -18,7 +18,7 @@ import 'avatar_view/avatar_view.dart';
 import 'high_light_text.dart';
 import 'interactive_decorated_box.dart';
 
-const kMentionItemHeight = 48.0;
+const kMentionItemHeight = 50.0;
 
 class MentionPanelPortalEntry extends HookWidget {
   const MentionPanelPortalEntry({
