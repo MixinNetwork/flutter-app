@@ -422,6 +422,7 @@ class AccountServer {
     String? conversationId,
     String? recipientId,
     String? quoteMessageId,
+    bool silent = false,
   }) async =>
       _sendMessageHelper.sendImageMessage(
         conversationId: await _initConversation(conversationId, recipientId),
@@ -431,21 +432,28 @@ class AccountServer {
         category: encryptCategory.toCategory(MessageCategory.plainImage,
             MessageCategory.signalImage, MessageCategory.encryptedImage),
         quoteMessageId: quoteMessageId,
+        silent: silent,
       );
 
 // NOTE: Send video as DataMessage, cause we can not retriever video metadata
 // from video file.
-  Future<void> sendVideoMessage(XFile video, EncryptCategory encryptCategory,
-          {String? conversationId,
-          String? recipientId,
-          String? quoteMessageId}) async =>
+  Future<void> sendVideoMessage(
+    XFile video,
+    EncryptCategory encryptCategory, {
+    String? conversationId,
+    String? recipientId,
+    String? quoteMessageId,
+    bool silent = false,
+  }) async =>
       _sendMessageHelper.sendDataMessage(
-          await _initConversation(conversationId, recipientId),
-          userId,
-          video,
-          encryptCategory.toCategory(MessageCategory.plainData,
-              MessageCategory.signalData, MessageCategory.encryptedData),
-          quoteMessageId);
+        await _initConversation(conversationId, recipientId),
+        userId,
+        video,
+        encryptCategory.toCategory(MessageCategory.plainData,
+            MessageCategory.signalData, MessageCategory.encryptedData),
+        quoteMessageId,
+        silent: silent,
+      );
 
   Future<void> sendAudioMessage(
     XFile audio,
@@ -467,17 +475,23 @@ class AccountServer {
         mediaWaveform: waveform,
       );
 
-  Future<void> sendDataMessage(XFile file, EncryptCategory encryptCategory,
-          {String? conversationId,
-          String? recipientId,
-          String? quoteMessageId}) async =>
+  Future<void> sendDataMessage(
+    XFile file,
+    EncryptCategory encryptCategory, {
+    String? conversationId,
+    String? recipientId,
+    String? quoteMessageId,
+    bool silent = false,
+  }) async =>
       _sendMessageHelper.sendDataMessage(
-          await _initConversation(conversationId, recipientId),
-          userId,
-          file,
-          encryptCategory.toCategory(MessageCategory.plainData,
-              MessageCategory.signalData, MessageCategory.encryptedData),
-          quoteMessageId);
+        await _initConversation(conversationId, recipientId),
+        userId,
+        file,
+        encryptCategory.toCategory(MessageCategory.plainData,
+            MessageCategory.signalData, MessageCategory.encryptedData),
+        quoteMessageId,
+        silent: silent,
+      );
 
   Future<void> sendStickerMessage(
     String stickerId,

@@ -121,6 +121,7 @@ class SendMessageHelper {
     required String category,
     String? quoteMessageId,
     AttachmentResult? attachmentResult,
+    bool silent = false,
   }) async {
     final messageId = const Uuid().v4();
     final _bytes = bytes ?? await file!.readAsBytes();
@@ -203,7 +204,8 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
+    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId,
+        silent: silent));
   }
 
   Future<void> sendVideoMessage(
@@ -217,6 +219,7 @@ class SendMessageHelper {
     int? mediaHeight,
     String? thumbImage,
     String? mediaDuration,
+    bool silent = false,
   }) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
@@ -281,7 +284,11 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
+    _addSendingJob(await _jobDao.createSendingJob(
+      messageId,
+      conversationId,
+      silent: silent,
+    ));
   }
 
   Future<void> sendStickerMessage(String conversationId, String senderId,
@@ -314,6 +321,7 @@ class SendMessageHelper {
     String? quoteMessageId, {
     AttachmentResult? attachmentResult,
     String? name,
+    bool silent = false,
   }) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ??
@@ -377,7 +385,11 @@ class SendMessageHelper {
       attachmentResult.keys,
       attachmentResult.digest,
     );
-    _addSendingJob(await _jobDao.createSendingJob(messageId, conversationId));
+    _addSendingJob(await _jobDao.createSendingJob(
+      messageId,
+      conversationId,
+      silent: silent,
+    ));
   }
 
   Future<void> sendContactMessage(
