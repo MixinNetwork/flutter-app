@@ -151,10 +151,11 @@ class _FilesPreviewDialog extends HookWidget {
     }
 
     return Material(
-      child: Container(
+      color: context.theme.popUp,
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
+      child: SizedBox(
           width: 480,
           height: 600,
-          color: context.theme.popUp,
           child: Stack(
             children: [
               Column(
