@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -226,12 +225,19 @@ class _App extends StatelessWidget {
             ],
             theme: ThemeData(
               colorScheme: const ColorScheme.light(primary: Colors.black),
+              textSelectionTheme: TextSelectionThemeData(
+                cursorColor: lightBrightnessThemeData.accent,
+              ),
               useMaterial3: true,
             ).withFallbackFonts(),
             darkTheme: ThemeData(
               colorScheme: const ColorScheme.dark(primary: Colors.white),
+              textSelectionTheme: TextSelectionThemeData(
+                cursorColor: darkBrightnessThemeData.accent,
+              ),
               useMaterial3: true,
             ).withFallbackFonts(),
+            themeMode: context.watch<SettingCubit>().themeMode,
             builder: (context, child) {
               try {
                 context.accountServer.language =

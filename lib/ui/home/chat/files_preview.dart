@@ -246,7 +246,10 @@ class _FilesPreviewDialog extends HookWidget {
                             left: 32, top: 18, bottom: 18, right: 32),
                         backgroundColor: context.theme.accent,
                       ),
-                      child: Text(context.l10n.send.toUpperCase()),
+                      child: Text(
+                        context.l10n.send.toUpperCase(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
