@@ -224,14 +224,16 @@ class _App extends StatelessWidget {
               ...Localization.delegate.supportedLocales,
             ],
             theme: ThemeData(
-              colorScheme: const ColorScheme.light(primary: Colors.black),
+              colorScheme:
+                  ColorScheme.light(primary: lightBrightnessThemeData.text),
               textSelectionTheme: TextSelectionThemeData(
                 cursorColor: lightBrightnessThemeData.accent,
               ),
               useMaterial3: true,
             ).withFallbackFonts(),
             darkTheme: ThemeData(
-              colorScheme: const ColorScheme.dark(primary: Colors.white),
+              colorScheme:
+                  ColorScheme.dark(primary: darkBrightnessThemeData.text),
               textSelectionTheme: TextSelectionThemeData(
                 cursorColor: darkBrightnessThemeData.accent,
               ),

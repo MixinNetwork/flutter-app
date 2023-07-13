@@ -148,7 +148,7 @@ class SettingCubit extends HydratedCubit<SettingState> {
   }
 
   ThemeMode get themeMode {
-    switch(brightness) {
+    switch (brightness) {
       case Brightness.dark:
         return ThemeMode.dark;
       case Brightness.light:
