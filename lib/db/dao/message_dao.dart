@@ -139,8 +139,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   void _updateConversationUnseenCount(
     Message message,
-    String currentUserId,
-  ) {
+    String currentUserId, {
+    bool cleanDraft = true,
+  }) {
     final conversationId = message.conversationId;
 
     if (message.userId == currentUserId) {
@@ -148,6 +149,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         conversationId,
         message.messageId,
         message.createdAt,
+        cleanDraft: cleanDraft,
       );
       return;
     }
@@ -187,6 +189,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String currentUserId, {
     bool? silent = false,
     int expireIn = 0,
+    bool cleanDraft = true,
   }) async {
     final futures = <Future>[
       into(db.messages).insertOnConflictUpdate(message),
@@ -196,7 +199,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ];
     final result = (await Future.wait(futures)).first as int;
 
-    _updateConversationUnseenCount(message, currentUserId);
+    _updateConversationUnseenCount(
+      message,
+      currentUserId,
+      cleanDraft: cleanDraft,
+    );
 
     DataBaseEventBus.instance.insertOrReplaceMessages([
       MiniMessageItem(
