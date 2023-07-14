@@ -106,7 +106,10 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
         if (options.keys != null && options.digest != null) {
           _stream = _stream.decrypt(options.keys!, options.digest!, total);
         }
-        return _stream.map((event) {
+        return _stream.handleError((error, stacktrace) {
+          e('download error: $error, stack: $stacktrace');
+          throw Exception(error);
+        }).map((event) {
           received += event.length;
           options.sendPort.send((received, total));
           return event;

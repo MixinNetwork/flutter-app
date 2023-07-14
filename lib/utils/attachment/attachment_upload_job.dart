@@ -118,7 +118,10 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
     _dio.applyProxy(options.proxy);
     final response = await _dio.putUri(
       Uri.parse(options.url),
-      data: uploadStream,
+      data: uploadStream.handleError((error, stacktrace) {
+        e('uploadStream error: $error $stacktrace');
+        throw Exception(error);
+      }),
       options: Options(
         headers: {
           ..._uploadHeaders,
