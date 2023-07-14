@@ -25,6 +25,7 @@ import '../../../widgets/buttons.dart';
 import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
+import '../../../widgets/menu.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import 'image_editor.dart';
@@ -127,11 +128,15 @@ class _FilesPreviewDialog extends HookWidget {
       showAsBigImage.value = hasImage && currentTab.value == _TabType.image;
     }, [hasImage, currentTab.value]);
 
-    Future<void> send() async {
+    Future<void> send(bool silent) async {
       if (currentTab.value != _TabType.zip) {
         for (final file in files.value) {
-          unawaited(
-              _sendFile(context, file, quoteMessageCubit?.state?.messageId));
+          unawaited(_sendFile(
+            context,
+            file,
+            quoteMessageCubit?.state?.messageId,
+            silent: silent,
+          ));
         }
         quoteMessageCubit?.emit(null);
         Navigator.pop(context);
@@ -144,6 +149,7 @@ class _FilesPreviewDialog extends HookWidget {
           context,
           await _File.createFromPath(zipFilePath),
           quoteMessageCubit?.state?.messageId,
+          silent: silent,
         ));
         quoteMessageCubit?.emit(null);
         Navigator.pop(context);
@@ -151,10 +157,11 @@ class _FilesPreviewDialog extends HookWidget {
     }
 
     return Material(
-      child: Container(
+      color: context.theme.popUp,
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
+      child: SizedBox(
           width: 480,
           height: 600,
-          color: context.theme.popUp,
           child: Stack(
             children: [
               Column(
@@ -192,7 +199,7 @@ class _FilesPreviewDialog extends HookWidget {
                   const SizedBox(height: 4),
                   Expanded(
                     child: _FileInputOverlay(
-                      onSend: send,
+                      onSend: () => send(false),
                       onFileAdded: (fileAdded) {
                         final currentFiles =
                             files.value.map((e) => e.path).toSet();
@@ -238,14 +245,26 @@ class _FilesPreviewDialog extends HookWidget {
                   ),
                   const SizedBox(height: 32),
                   Align(
-                    child: ElevatedButton(
-                      onPressed: send,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.only(
-                            left: 32, top: 18, bottom: 18, right: 32),
-                        backgroundColor: context.theme.accent,
+                    child: ContextMenuPortalEntry(
+                      buildMenus: () => [
+                        ContextMenu(
+                          icon: Resources.assetsImagesContextMenuMuteSvg,
+                          title: context.l10n.sendWithoutSound,
+                          onTap: () => send(true),
+                        )
+                      ],
+                      child: ElevatedButton(
+                        onPressed: () => send(false),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.only(
+                              left: 32, top: 18, bottom: 18, right: 32),
+                          backgroundColor: context.theme.accent,
+                        ),
+                        child: Text(
+                          context.l10n.send.toUpperCase(),
+                          style: const TextStyle(color: Colors.white),
+                        ),
                       ),
-                      child: Text(context.l10n.send.toUpperCase()),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -285,7 +304,11 @@ Future<String> _archiveFiles(List<String> paths) async {
 }
 
 Future<void> _sendFile(
-    BuildContext context, _File file, String? quoteMessageId) async {
+  BuildContext context,
+  _File file,
+  String? quoteMessageId, {
+  required bool silent,
+}) async {
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
   final xFile = file.file;
@@ -296,6 +319,7 @@ Future<void> _sendFile(
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
       quoteMessageId: quoteMessageId,
+      silent: silent,
     );
   } else if (xFile.isVideo) {
     return context.accountServer.sendVideoMessage(
@@ -304,6 +328,7 @@ Future<void> _sendFile(
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
       quoteMessageId: quoteMessageId,
+      silent: silent,
     );
   }
   await context.accountServer.sendDataMessage(
@@ -312,6 +337,7 @@ Future<void> _sendFile(
     conversationId: conversationItem.conversationId,
     recipientId: conversationItem.userId,
     quoteMessageId: quoteMessageId,
+    silent: silent,
   );
 }
 
