@@ -137,6 +137,9 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
     options.sendPort.send(digest);
   } catch (error, stacktrace) {
     e('failed to upload attachment $error, $stacktrace');
+    if (error is DioError) {
+      e('original stacktrace: ${error.stackTrace}');
+    }
     options.sendPort.send(_killMessage);
   }
 }
