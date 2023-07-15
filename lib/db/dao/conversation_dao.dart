@@ -485,14 +485,15 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Future<int> updateLastSentMessage(
     String conversationId,
     String messageId,
-    DateTime createdAt,
-  ) =>
+    DateTime createdAt, {
+    bool cleanDraft = true,
+  }) =>
       (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(ConversationsCompanion(
         lastMessageId: Value(messageId),
         lastMessageCreatedAt: Value(createdAt),
-        draft: const Value(''),
+        draft: cleanDraft ? const Value('') : const Value.absent(),
       ))
           .then((value) {
         if (value > 0) {
