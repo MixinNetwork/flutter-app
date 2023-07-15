@@ -290,6 +290,16 @@ class Localization {
     );
   }
 
+  /// `Anonymous Number`
+  String get anonymousNumber {
+    return Intl.message(
+      'Anonymous Number',
+      name: 'anonymousNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Disallow sharing of this URL`
   String get appCardShareDisallow {
     return Intl.message(
@@ -355,6 +365,16 @@ class Localization {
     return Intl.message(
       'Auto Backup',
       name: 'autoBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto Lock`
+  String get autoLock {
+    return Intl.message(
+      'Auto Lock',
+      name: 'autoLock',
       desc: '',
       args: [],
     );
@@ -1201,6 +1221,16 @@ class Localization {
       name: 'disableDisappearingMessage',
       desc: '',
       args: [arg0],
+    );
+  }
+
+  /// `Disabled`
+  String get disabled {
+    return Intl.message(
+      'Disabled',
+      name: 'disabled',
+      desc: '',
+      args: [],
     );
   }
 
@@ -2587,6 +2617,18 @@ class Localization {
       name: 'minimize',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `{count, plural, one{{arg0} Minute} other{{arg0} Minutes}}`
+  String minute(num count, Object arg0) {
+    return Intl.plural(
+      count,
+      one: '$arg0 Minute',
+      other: '$arg0 Minutes',
+      name: 'minute',
+      desc: '',
+      args: [count, arg0],
     );
   }
 

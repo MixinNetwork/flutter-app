@@ -40,29 +40,96 @@ class _Passcode extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final globalKey = useMemoized(GlobalKey.new, []);
+
     final hasPasscode =
         useStream(SecurityKeyValue.instance.watchHasPasscode()).data ?? false;
 
+    final minutes = useStream(SecurityKeyValue.instance
+        .watchLockDuration()
+        .map((event) => event.inMinutes)).data;
+
     return CellGroup(
-      child: CellItem(
-        title: Text(context.l10n.screenPasscode),
-        trailing: Transform.scale(
-          scale: 0.7,
-          child: CupertinoSwitch(
-            activeColor: context.theme.accent,
-            value: hasPasscode,
-            onChanged: (value) {
-              if (!value) {
-                SecurityKeyValue.instance.passcode = null;
-                return;
-              }
-              showMixinDialog(
-                context: context,
-                child: const _InputPasscode(),
-              );
-            },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CellItem(
+            title: Text(context.l10n.screenPasscode),
+            trailing: Transform.scale(
+              scale: 0.7,
+              child: CupertinoSwitch(
+                activeColor: context.theme.accent,
+                value: hasPasscode,
+                onChanged: (value) {
+                  if (!value) {
+                    SecurityKeyValue.instance.passcode = null;
+                    return;
+                  }
+                  showMixinDialog(
+                    context: context,
+                    child: const _InputPasscode(),
+                  );
+                },
+              ),
+            ),
           ),
-        ),
+          if (hasPasscode)
+            CellItem(
+              description: PopupMenuButton(
+                key: globalKey,
+                color: Color.alphaBlend(
+                    context.theme.listSelected, context.theme.background),
+                itemBuilder: (BuildContext context) => [
+                  PopupMenuItem(
+                    value: Duration.zero,
+                    child: Text(context.l10n.disabled),
+                  ),
+                  PopupMenuItem(
+                    value: const Duration(minutes: 1),
+                    child: Text(context.l10n.minute(1, 1)),
+                  ),
+                  PopupMenuItem(
+                    value: const Duration(minutes: 5),
+                    child: Text(context.l10n.minute(5, 5)),
+                  ),
+                  PopupMenuItem(
+                    value: const Duration(hours: 1),
+                    child: Text(context.l10n.hour(1, 1)),
+                  ),
+                  PopupMenuItem(
+                    value: const Duration(hours: 5),
+                    child: Text(context.l10n.hour(5, 5)),
+                  ),
+                ]
+                    .map(
+                      (e) => PopupMenuItem(
+                        value: e.value,
+                        child: DefaultTextStyle.merge(
+                          child: e.child ?? const SizedBox(),
+                          style: TextStyle(color: context.theme.text),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onSelected: (value) =>
+                    SecurityKeyValue.instance.lockDuration = value,
+                child: Text(
+                  (minutes == null || minutes == 0)
+                      ? context.l10n.disabled
+                      : minutes < 60
+                          ? context.l10n.minute(minutes, minutes)
+                          : context.l10n.hour(minutes ~/ 60, minutes ~/ 60),
+                ),
+              ),
+              title: Text(context.l10n.autoLock),
+              onTap: () {
+                final state = globalKey.currentState;
+                if (state == null) return;
+                if (state is! PopupMenuButtonState) return;
+                state.showButtonMenu();
+              },
+            ),
+        ],
       ),
     );
   }
