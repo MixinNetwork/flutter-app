@@ -65,6 +65,7 @@ class _MessageDayTimeWidget extends HookWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: context.messageStyle.secondaryFontSize,
+              color: Colors.black,
             ),
           ),
         ),
