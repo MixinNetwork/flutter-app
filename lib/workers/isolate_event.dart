@@ -23,7 +23,7 @@ enum WorkerIsolateEventType {
   /// args: ConnectedState
   onBlazeConnectStateChanged,
 
-  /// args: DioError
+  /// args: DioException
   onApiRequestedError,
 
   /// args: [AttachmentRequest]
