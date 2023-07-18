@@ -152,7 +152,7 @@ class _MessageProcessRunner {
       interceptors: [
         InterceptorsWrapper(
           onError: (
-            DioError e,
+            DioException e,
             ErrorInterceptorHandler handler,
           ) async {
             _sendEventToMainIsolate(
