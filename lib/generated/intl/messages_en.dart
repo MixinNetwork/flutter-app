@@ -92,59 +92,62 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m30(arg0) => "Enter the 4-digit code sent to you at ${arg0}";
 
-  static String m31(arg0) => "My Mixin ID: ${arg0}";
+  static String m31(count, arg0) =>
+      "${Intl.plural(count, one: '${arg0} Minute', other: '${arg0} Minutes')}";
 
-  static String m32(arg0, arg1) =>
+  static String m32(arg0) => "My Mixin ID: ${arg0}";
+
+  static String m33(arg0, arg1) =>
       "Mixin Messenger ${arg0} is now available, you have ${arg1}. Would you like to download it now?";
 
-  static String m33(arg0) => "${arg0} now an admin";
+  static String m34(arg0) => "${arg0} now an admin";
 
-  static String m34(arg0) => "Open Link: ${arg0}";
+  static String m35(arg0) => "Open Link: ${arg0}";
 
-  static String m35(arg0) => "${arg0} PARTICIPANTS";
+  static String m36(arg0) => "${arg0} PARTICIPANTS";
 
-  static String m36(count, arg0, arg1) =>
+  static String m37(count, arg0, arg1) =>
       "${Intl.plural(count, one: '${arg0}/${arg1} confirmation', other: '${arg0}/${arg1} confirmations')}";
 
-  static String m37(count, arg0) =>
+  static String m38(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} Pinned Message', other: '${arg0} Pinned Messages')}";
 
-  static String m38(arg0) => "Resend code in ${arg0} s";
+  static String m39(arg0) => "Resend code in ${arg0} s";
 
-  static String m39(count, arg0) =>
+  static String m40(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} related message', other: '${arg0} related messages')}";
 
-  static String m40(arg0, arg1) =>
+  static String m41(arg0, arg1) =>
       "${arg0} set disappearing message time to ${arg1}";
 
-  static String m41(arg0) =>
+  static String m42(arg0) =>
       "If you continue, your profile and account details will be delete on ${arg0}. read our document to **learn more**.";
 
-  static String m42(arg0, arg1) =>
+  static String m43(arg0, arg1) =>
       "Are you sure you want to send a ${arg0} from ${arg1}?";
 
-  static String m43(arg0) => "Are you sure you want to send the ${arg0}?";
+  static String m44(arg0) => "Are you sure you want to send the ${arg0}?";
 
-  static String m44(arg0) => "Unable to open file: ${arg0}";
-
-  static String m45(count) =>
-      "${Intl.plural(count, one: 'day', other: 'days')}";
+  static String m45(arg0) => "Unable to open file: ${arg0}";
 
   static String m46(count) =>
-      "${Intl.plural(count, one: 'hour', other: 'hours')}";
+      "${Intl.plural(count, one: 'day', other: 'days')}";
 
   static String m47(count) =>
-      "${Intl.plural(count, one: 'minute', other: 'minutes')}";
+      "${Intl.plural(count, one: 'hour', other: 'hours')}";
 
   static String m48(count) =>
-      "${Intl.plural(count, one: 'second', other: 'seconds')}";
+      "${Intl.plural(count, one: 'minute', other: 'minutes')}";
 
   static String m49(count) =>
+      "${Intl.plural(count, one: 'second', other: 'seconds')}";
+
+  static String m50(count) =>
       "${Intl.plural(count, one: 'week', other: 'weeks')}";
 
-  static String m50(arg0) => "value now ${arg0}";
+  static String m51(arg0) => "value now ${arg0}";
 
-  static String m51(arg0) => "value then ${arg0}";
+  static String m52(arg0) => "value then ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -179,6 +182,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allChats": MessageLookupByLibrary.simpleMessage("Chats"),
         "animalsAndNature":
             MessageLookupByLibrary.simpleMessage("Animals & Nature"),
+        "anonymousNumber":
+            MessageLookupByLibrary.simpleMessage("Anonymous Number"),
         "appCardShareDisallow": MessageLookupByLibrary.simpleMessage(
             "Disallow sharing of this URL"),
         "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
@@ -188,6 +193,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "audio": MessageLookupByLibrary.simpleMessage("Audio"),
         "audios": MessageLookupByLibrary.simpleMessage("Audios"),
         "autoBackup": MessageLookupByLibrary.simpleMessage("Auto Backup"),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto Lock"),
         "avatar": MessageLookupByLibrary.simpleMessage("Avatar"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
         "biography": MessageLookupByLibrary.simpleMessage("Biography"),
@@ -243,6 +249,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "combineAndForward":
             MessageLookupByLibrary.simpleMessage("Combine and forward"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
+        "confirmPasscodeDesc": MessageLookupByLibrary.simpleMessage(
+            "Enter again to confirm the passcode"),
         "confirmSyncChatsFromPhone": MessageLookupByLibrary.simpleMessage(
             "Are you sure to sync the chat history from the phone?"),
         "confirmSyncChatsToPhone": MessageLookupByLibrary.simpleMessage(
@@ -296,6 +304,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
         "developer": MessageLookupByLibrary.simpleMessage("Developer"),
         "disableDisappearingMessage": m15,
+        "disabled": MessageLookupByLibrary.simpleMessage("Disabled"),
         "disappearingCustomTimeMaxWarning": m16,
         "disappearingMessage":
             MessageLookupByLibrary.simpleMessage("Disappearing Messages"),
@@ -487,6 +496,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "System time is unusual, please continue to use again after correction"),
         "locateToChat": MessageLookupByLibrary.simpleMessage("locate to chat"),
         "location": MessageLookupByLibrary.simpleMessage("Location"),
+        "lock": MessageLookupByLibrary.simpleMessage("Lock"),
         "logIn": MessageLookupByLibrary.simpleMessage("Log in"),
         "loginAndAbortAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Continue to log in and abort account deletion"),
@@ -512,13 +522,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "Preview message text inside new message notifications."),
         "messages": MessageLookupByLibrary.simpleMessage("Messages"),
         "minimize": MessageLookupByLibrary.simpleMessage("Minimize"),
+        "minute": m31,
         "mixinMessengerDesktop":
             MessageLookupByLibrary.simpleMessage("Mixin Messenger Desktop"),
         "more": MessageLookupByLibrary.simpleMessage("More"),
         "multisigTransaction":
             MessageLookupByLibrary.simpleMessage("Multisig Transaction"),
         "mute": MessageLookupByLibrary.simpleMessage("Mute"),
-        "myMixinId": m31,
+        "myMixinId": m32,
         "myStickers": MessageLookupByLibrary.simpleMessage("My Stickers"),
         "na": MessageLookupByLibrary.simpleMessage("N/A"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
@@ -527,7 +538,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "networkError": MessageLookupByLibrary.simpleMessage("Network error"),
         "newVersionAvailable":
             MessageLookupByLibrary.simpleMessage("New version available"),
-        "newVersionDescription": m32,
+        "newVersionDescription": m33,
         "next": MessageLookupByLibrary.simpleMessage("Next"),
         "nextConversation":
             MessageLookupByLibrary.simpleMessage("Next conversation"),
@@ -547,7 +558,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "notificationPermissionManually": MessageLookupByLibrary.simpleMessage(
             "Notifications are not allowed, please go to Notification Settings to turn on."),
         "notifications": MessageLookupByLibrary.simpleMessage("Notifications"),
-        "nowAnAddmin": m33,
+        "nowAnAddmin": m34,
         "objects": MessageLookupByLibrary.simpleMessage("Objects"),
         "oneByOneForward":
             MessageLookupByLibrary.simpleMessage("One-by-One Forward"),
@@ -555,22 +566,24 @@ class MessageLookup extends MessageLookupByLibrary {
         "oneWeek": MessageLookupByLibrary.simpleMessage("1 Week"),
         "oneYear": MessageLookupByLibrary.simpleMessage("1 Year"),
         "openHomePage": MessageLookupByLibrary.simpleMessage("Open Home page"),
-        "openLink": m34,
+        "openLink": m35,
         "openLogDirectory":
             MessageLookupByLibrary.simpleMessage("open log directory"),
         "openingBalance":
             MessageLookupByLibrary.simpleMessage("Opening Balance"),
         "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
         "owner": MessageLookupByLibrary.simpleMessage("Owner"),
-        "participantsCount": m35,
+        "participantsCount": m36,
+        "passcodeIncorrect":
+            MessageLookupByLibrary.simpleMessage("Passcode incorrect"),
         "password": MessageLookupByLibrary.simpleMessage("Password"),
-        "pendingConfirmation": m36,
+        "pendingConfirmation": m37,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone Number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "pickAConversation": MessageLookupByLibrary.simpleMessage(
             "Select a conversation and start sending a message"),
         "pinTitle": MessageLookupByLibrary.simpleMessage("Pin"),
-        "pinnedMessageTitle": m37,
+        "pinnedMessageTitle": m38,
         "port": MessageLookupByLibrary.simpleMessage("Port"),
         "post": MessageLookupByLibrary.simpleMessage("Post"),
         "preferences": MessageLookupByLibrary.simpleMessage("Preferences"),
@@ -605,7 +618,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportTitle": MessageLookupByLibrary.simpleMessage(
             "Send the conversation log to developers?"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Resend code"),
-        "resendCodeIn": m38,
+        "resendCodeIn": m39,
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "resetLink": MessageLookupByLibrary.simpleMessage("Reset Link"),
         "retry": MessageLookupByLibrary.simpleMessage("Retry"),
@@ -620,6 +633,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sayHi": MessageLookupByLibrary.simpleMessage("Say Hi"),
         "scamWarning": MessageLookupByLibrary.simpleMessage(
             "Warning: Many users reported this account as a scam. Please be careful, especially if it asks you for money"),
+        "screenPasscode":
+            MessageLookupByLibrary.simpleMessage("Screen Passcode"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
         "searchContact": MessageLookupByLibrary.simpleMessage("Search contact"),
         "searchConversation":
@@ -628,10 +643,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "No chats, contacts or messages found."),
         "searchPlaceholderNumber": MessageLookupByLibrary.simpleMessage(
             "Search Mixin ID or phone number:"),
-        "searchRelatedMessage": m39,
+        "searchRelatedMessage": m40,
         "searchUnread": MessageLookupByLibrary.simpleMessage("Search Unread"),
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "security": MessageLookupByLibrary.simpleMessage("Security"),
         "select": MessageLookupByLibrary.simpleMessage("Select"),
         "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
@@ -644,12 +660,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendWithoutSound":
             MessageLookupByLibrary.simpleMessage("Send Without Sound"),
         "set": MessageLookupByLibrary.simpleMessage("Set"),
-        "setDisappearingMessageTimeTo": m40,
+        "setDisappearingMessageTimeTo": m41,
+        "setPasscodeDesc": MessageLookupByLibrary.simpleMessage(
+            "Set Passcode to unlock Mixin Messenger"),
         "settingAuthSearchHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
             "Back up your chat history to iCloud. if you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin Messenger. Messages you back up are not protected by Mixin Messenger end-to-end encryption while in iCloud."),
-        "settingDeleteAccountPinContent": m41,
+        "settingDeleteAccountPinContent": m42,
         "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixinmessenger.zendesk.com/hc/articles/4414170627988"),
         "share": MessageLookupByLibrary.simpleMessage("Share"),
@@ -657,8 +675,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareContact": MessageLookupByLibrary.simpleMessage("Share Contact"),
         "shareError": MessageLookupByLibrary.simpleMessage("Share error."),
         "shareLink": MessageLookupByLibrary.simpleMessage("Share Link"),
-        "shareMessageDescription": m42,
-        "shareMessageDescriptionEmpty": m43,
+        "shareMessageDescription": m43,
+        "shareMessageDescriptionEmpty": m44,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
         "show": MessageLookupByLibrary.simpleMessage("Show"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("Show avatar"),
@@ -721,14 +739,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "turnOnNotifications":
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("Type message"),
-        "unableToOpenFile": m44,
+        "unableToOpenFile": m45,
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),
-        "unitDay": m45,
-        "unitHour": m46,
-        "unitMinute": m47,
-        "unitSecond": m48,
-        "unitWeek": m49,
+        "unitDay": m46,
+        "unitHour": m47,
+        "unitMinute": m48,
+        "unitSecond": m49,
+        "unitWeek": m50,
         "unknowError": MessageLookupByLibrary.simpleMessage("Unknow error"),
+        "unlockWithWasscode": MessageLookupByLibrary.simpleMessage(
+            "Enter Passcode to unlock Mixin Messenger"),
         "unmute": MessageLookupByLibrary.simpleMessage("Unmute"),
         "unpin": MessageLookupByLibrary.simpleMessage("Unpin"),
         "unpinAllMessages":
@@ -740,8 +760,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrading": MessageLookupByLibrary.simpleMessage("Upgrading"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "username": MessageLookupByLibrary.simpleMessage("Username"),
-        "valueNow": m50,
-        "valueThen": m51,
+        "valueNow": m51,
+        "valueThen": m52,
         "verifyPin": MessageLookupByLibrary.simpleMessage("Verify PIN"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),

@@ -34,6 +34,8 @@ enum DeviceTransferCallbackType {
   onBackupFailed,
   onRestoreProgress,
   onBackupProgress,
+  onRestoreNetworkSpeed,
+  onBackupNetworkSpeed,
 
   /// a push event from other device.
   onBackupRequestReceived,
@@ -122,6 +124,26 @@ final _restoreProgressBehavior = () {
   final subject = PublishSubject<double>();
   DeviceTransferEventBus.instance.events().listen((event) {
     if (event.action == DeviceTransferCallbackType.onRestoreProgress) {
+      subject.add(event.payload as double);
+    }
+  });
+  return subject;
+}();
+
+final _backupNetworkSpeedBehavior = () {
+  final subject = PublishSubject<double>();
+  DeviceTransferEventBus.instance.events().listen((event) {
+    if (event.action == DeviceTransferCallbackType.onBackupNetworkSpeed) {
+      subject.add(event.payload as double);
+    }
+  });
+  return subject;
+}();
+
+final _restoreNetworkSpeedBehavior = () {
+  final subject = PublishSubject<double>();
+  DeviceTransferEventBus.instance.events().listen((event) {
+    if (event.action == DeviceTransferCallbackType.onRestoreNetworkSpeed) {
       subject.add(event.payload as double);
     }
   });
@@ -353,6 +375,7 @@ class _RestoreProcessingDialog extends StatelessWidget {
         },
         iconAssetName: Resources.assetsImagesTransferFromPhoneSvg,
         progressBehavior: _restoreProgressBehavior,
+        networkSpeedBehavior: _restoreNetworkSpeedBehavior,
       );
 }
 
@@ -367,6 +390,7 @@ class _BackupProcessingDialog extends StatelessWidget {
         },
         iconAssetName: Resources.assetsImagesTransferToPhoneSvg,
         progressBehavior: _backupProgressBehavior,
+        networkSpeedBehavior: _backupNetworkSpeedBehavior,
       );
 }
 
@@ -375,10 +399,12 @@ class _TransferProcessDialog extends HookWidget {
     required this.onCancelTapped,
     required this.progressBehavior,
     required this.iconAssetName,
+    required this.networkSpeedBehavior,
   });
 
   final VoidCallback onCancelTapped;
   final Stream<double> progressBehavior;
+  final Stream<double> networkSpeedBehavior;
 
   final String iconAssetName;
 
@@ -389,6 +415,8 @@ class _TransferProcessDialog extends HookWidget {
       DesktopKeepScreenOn.setPreventSleep(true);
       return () => DesktopKeepScreenOn.setPreventSleep(false);
     }, []);
+    final networkSpeed =
+        useStream<double>(networkSpeedBehavior, initialData: 0);
     return SizedBox(
       width: 420,
       child: Padding(
@@ -433,6 +461,14 @@ class _TransferProcessDialog extends HookWidget {
                 textAlign: TextAlign.center,
                 child: Text(context.l10n.transferringChatsTips),
               ),
+              const SizedBox(height: 18),
+              Text(
+                _formatNetworkSpeed(networkSpeed.data ?? 0),
+                style: TextStyle(
+                  color: context.theme.secondaryText,
+                  fontSize: 14,
+                ),
+              ),
               const SizedBox(height: 32),
               TextButton(
                 onPressed: onCancelTapped,
@@ -450,5 +486,14 @@ class _TransferProcessDialog extends HookWidget {
         ),
       ),
     );
+  }
+}
+
+String _formatNetworkSpeed(double speed) {
+  final speedInKb = speed / 1024;
+  if (speedInKb < 1024) {
+    return '${speedInKb.toStringAsFixed(2)} KB/s';
+  } else {
+    return '${(speedInKb / 1024).toStringAsFixed(2)} MB/s';
   }
 }

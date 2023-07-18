@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 
+import '../../db/dao/conversation_dao.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/color_utils.dart';

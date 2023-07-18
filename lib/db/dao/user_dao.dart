@@ -29,7 +29,7 @@ extension UserExtension on sdk.User {
       );
 }
 
-@DriftAccessor()
+@DriftAccessor(include: {'../moor/dao/user.drift'})
 class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   UserDao(super.db);
 
@@ -89,7 +89,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     required String conversationId,
     required String keyword,
   }) =>
-      db.fuzzySearchBotGroupUser(
+      _fuzzySearchBotGroupUser(
         conversationId,
         DateTime.now().subtract(const Duration(days: 7)),
         currentUserId,
@@ -97,32 +97,12 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
         keyword,
       );
 
-  Selectable<User> fuzzySearchGroupUser({
-    required String currentUserId,
-    required String conversationId,
-    required String keyword,
-  }) =>
-      db.fuzzySearchGroupUser(
-        currentUserId,
-        conversationId,
-        keyword,
-        keyword,
-      );
-
-  Selectable<User> groupParticipants({required String conversationId}) =>
-      db.groupParticipants(conversationId);
-
   Selectable<User> friends() => (select(db.users)
     ..where((tbl) => tbl.relationship.equalsValue(sdk.UserRelationship.friend))
     ..orderBy([
       (tbl) => OrderingTerm.asc(tbl.fullName),
       (tbl) => OrderingTerm.asc(tbl.userId),
     ]));
-
-  Selectable<User> notInFriends(List<String> filterIds) =>
-      db.notInFriends(filterIds);
-
-  Selectable<User> usersByIn(List<String> userIds) => db.usersByIn(userIds);
 
   Selectable<User> fuzzySearchUser({
     required String id,
@@ -133,14 +113,14 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   }) {
     if (category?.type == SlideCategoryType.circle) {
       final circleId = category!.id;
-      return db.fuzzySearchUserInCircle((_, conversation, __) {
+      return _fuzzySearchUserInCircle((_, conversation, __) {
         if (!isIncludeConversation) {
           return conversation.status.isNull();
         }
         return const Constant(true);
       }, id, username, identityNumber, circleId);
     }
-    return db.fuzzySearchUser(
+    return _fuzzySearchUser(
         (_, conversation) {
           if (!isIncludeConversation) {
             return conversation.status.isNull();
@@ -175,9 +155,6 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
         });
   }
 
-  Selectable<String?> biography(String userId) =>
-      db.biographyByIdentityNumber(userId);
-
   Future updateMuteUntil(String userId, String muteUntil) async {
     await (update(db.users)..where((tbl) => tbl.userId.equals(userId)))
         .write(UsersCompanion(muteUntil: Value(DateTime.tryParse(muteUntil))));
@@ -191,9 +168,6 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
             ..where((tbl) => tbl.identityNumber.isIn(identityNumbers)))
           .map((row) => row.userId)
           .get();
-
-  Selectable<MentionUser> userByIdentityNumbers(List<String> list) =>
-      db.userByIdentityNumbers(list);
 
   Future<bool> hasUser(String userIdOrIdentityNumber) => db.hasData(
       db.users,

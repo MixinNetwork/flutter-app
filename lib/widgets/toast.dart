@@ -23,9 +23,11 @@ class Toast {
   static void createView({
     required WidgetBuilder builder,
     Duration? duration = Toast.shortDuration,
+    BuildContext? context,
   }) {
     dismiss();
     _entry = showOverlay(
+      context: context,
       (context, progress) => Opacity(
         opacity: progress,
         child: builder(context),
@@ -138,7 +140,9 @@ class ToastError extends Error {
   final String Function(BuildContext)? messageBuilder;
 }
 
-void showToastFailed(Object? error) => Toast.createView(
+void showToastFailed(Object? error, {BuildContext? context}) =>
+    Toast.createView(
+      context: context,
       builder: (context) => ToastWidget(
         barrierColor: Colors.transparent,
         icon: const _Failed(),

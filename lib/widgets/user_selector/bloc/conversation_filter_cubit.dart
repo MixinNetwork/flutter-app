@@ -1,11 +1,10 @@
 import 'package:bloc/bloc.dart';
-import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../account/account_server.dart';
-import '../../../db/extension/conversation.dart';
-import '../../../db/extension/user.dart';
+import '../../../db/dao/conversation_dao.dart';
 import '../../../db/mixin_database.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../utils/sort.dart';
 
 part 'conversation_filter_state.dart';
@@ -36,7 +35,8 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
       contactConversationIds = conversations
           .where((element) =>
               element.isContactConversation && element.ownerId != null)
-          .map((e) => e.ownerId!)
+          .map((e) => e.ownerId)
+          .whereNotNull()
           .toSet();
       botConversationIds = conversations
           .where((element) => element.isBotConversation)

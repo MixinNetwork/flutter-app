@@ -12,6 +12,7 @@ import '../logger.dart';
 import 'cipher.dart';
 import 'json_transfer_data.dart';
 import 'socket_wrapper.dart';
+import 'speed_calculator.dart';
 import 'transfer_data_app.dart';
 import 'transfer_data_asset.dart';
 import 'transfer_data_command.dart';
@@ -33,6 +34,8 @@ typedef OnReceiverFailed = void Function();
 /// [progress] is between 0.0 and 100.0
 typedef OnReceiverProgressUpdate = void Function(double progress);
 
+typedef OnReceiverNetworkSpeedUpdate = void Function(double speed);
+
 class DeviceTransferReceiver {
   DeviceTransferReceiver({
     required this.database,
@@ -45,6 +48,7 @@ class DeviceTransferReceiver {
     this.onReceiverFailed,
     this.onReceiverProgressUpdate,
     this.onConnectedToServer,
+    this.onNetworkSpeedUpdate,
   });
 
   final Database database;
@@ -52,12 +56,14 @@ class DeviceTransferReceiver {
   final String userId;
   final String protocolTempFileDir;
   final String deviceId;
+  final _speedCalculator = SpeedCalculator();
 
   final OnReceiverStart? onReceiverStart;
   final OnReceiverSucceed? onReceiverSucceed;
   final OnReceiverFailed? onReceiverFailed;
   final OnReceiverProgressUpdate? onReceiverProgressUpdate;
   final OnReceiverStart? onConnectedToServer;
+  final OnReceiverNetworkSpeedUpdate? onNetworkSpeedUpdate;
 
   TransferSocket? _socket;
   int _total = 0;
@@ -71,6 +77,7 @@ class DeviceTransferReceiver {
     _progress = 0;
     _finished = false;
     _lastProgressNotifyTime = DateTime(0);
+    _speedCalculator.reset();
   }
 
   Future<void> _notifyProgressUpdate() async {
@@ -113,7 +120,15 @@ class DeviceTransferReceiver {
     d('connected to $ip:$port. my port: ${socket.port}');
     Stream<TransferPacket>.eventTransformed(
       socket,
-      (sink) => TransferProtocolSink(sink, protocolTempFileDir, secretKey),
+      (sink) => TransferProtocolSink(
+        sink,
+        protocolTempFileDir,
+        secretKey,
+        onHandleBytes: (size) {
+          _speedCalculator.add(size);
+          onNetworkSpeedUpdate?.call(_speedCalculator.speed);
+        },
+      ),
     ).asyncListen(
       (packet) async {
         try {

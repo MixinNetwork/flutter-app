@@ -290,6 +290,16 @@ class Localization {
     );
   }
 
+  /// `Anonymous Number`
+  String get anonymousNumber {
+    return Intl.message(
+      'Anonymous Number',
+      name: 'anonymousNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Disallow sharing of this URL`
   String get appCardShareDisallow {
     return Intl.message(
@@ -355,6 +365,16 @@ class Localization {
     return Intl.message(
       'Auto Backup',
       name: 'autoBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto Lock`
+  String get autoLock {
+    return Intl.message(
+      'Auto Lock',
+      name: 'autoLock',
       desc: '',
       args: [],
     );
@@ -794,6 +814,16 @@ class Localization {
     );
   }
 
+  /// `Enter again to confirm the passcode`
+  String get confirmPasscodeDesc {
+    return Intl.message(
+      'Enter again to confirm the passcode',
+      name: 'confirmPasscodeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Are you sure to sync the chat history from the phone?`
   String get confirmSyncChatsFromPhone {
     return Intl.message(
@@ -1191,6 +1221,16 @@ class Localization {
       name: 'disableDisappearingMessage',
       desc: '',
       args: [arg0],
+    );
+  }
+
+  /// `Disabled`
+  String get disabled {
+    return Intl.message(
+      'Disabled',
+      name: 'disabled',
+      desc: '',
+      args: [],
     );
   }
 
@@ -2420,6 +2460,16 @@ class Localization {
     );
   }
 
+  /// `Lock`
+  String get lock {
+    return Intl.message(
+      'Lock',
+      name: 'lock',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Log in`
   String get logIn {
     return Intl.message(
@@ -2567,6 +2617,18 @@ class Localization {
       name: 'minimize',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `{count, plural, one{{arg0} Minute} other{{arg0} Minutes}}`
+  String minute(num count, Object arg0) {
+    return Intl.plural(
+      count,
+      one: '$arg0 Minute',
+      other: '$arg0 Minutes',
+      name: 'minute',
+      desc: '',
+      args: [count, arg0],
     );
   }
 
@@ -2967,6 +3029,16 @@ class Localization {
       name: 'participantsCount',
       desc: '',
       args: [arg0],
+    );
+  }
+
+  /// `Passcode incorrect`
+  String get passcodeIncorrect {
+    return Intl.message(
+      'Passcode incorrect',
+      name: 'passcodeIncorrect',
+      desc: '',
+      args: [],
     );
   }
 
@@ -3424,6 +3496,16 @@ class Localization {
     );
   }
 
+  /// `Screen Passcode`
+  String get screenPasscode {
+    return Intl.message(
+      'Screen Passcode',
+      name: 'screenPasscode',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Search`
   String get search {
     return Intl.message(
@@ -3501,6 +3583,16 @@ class Localization {
     return Intl.message(
       'https://mixin.one/pages/1000007',
       name: 'secretUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Security`
+  String get security {
+    return Intl.message(
+      'Security',
+      name: 'security',
       desc: '',
       args: [],
     );
@@ -3593,6 +3685,16 @@ class Localization {
       name: 'setDisappearingMessageTimeTo',
       desc: '',
       args: [arg0, arg1],
+    );
+  }
+
+  /// `Set Passcode to unlock Mixin Messenger`
+  String get setPasscodeDesc {
+    return Intl.message(
+      'Set Passcode to unlock Mixin Messenger',
+      name: 'setPasscodeDesc',
+      desc: '',
+      args: [],
     );
   }
 
@@ -4221,6 +4323,16 @@ class Localization {
     return Intl.message(
       'Unknow error',
       name: 'unknowError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter Passcode to unlock Mixin Messenger`
+  String get unlockWithWasscode {
+    return Intl.message(
+      'Enter Passcode to unlock Mixin Messenger',
+      name: 'unlockWithWasscode',
       desc: '',
       args: [],
     );

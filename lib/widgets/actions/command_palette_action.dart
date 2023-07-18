@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../constants/resources.dart';
+import '../../db/dao/conversation_dao.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
@@ -287,7 +288,6 @@ class CommandPalettePage extends HookWidget {
                                     avatarUrl: user.avatarUrl,
                                   ),
                                   name: user.fullName ?? '?',
-                                  nameFontSize: 14,
                                   trailing: VerifiedOrBotWidget(
                                     verified: user.isVerified,
                                     isBot: user.appId != null,
@@ -323,7 +323,6 @@ class CommandPalettePage extends HookWidget {
                                     userId: conversation.ownerId,
                                   ),
                                   name: conversation.validName,
-                                  nameFontSize: 14,
                                   trailing: VerifiedOrBotWidget(
                                     verified: conversation.isVerified,
                                     isBot: conversation.appId != null,

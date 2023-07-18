@@ -3,8 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/dao/conversation_dao.dart';
 import '../../../db/extension/conversation.dart';
-import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/conversation/mute_dialog.dart';

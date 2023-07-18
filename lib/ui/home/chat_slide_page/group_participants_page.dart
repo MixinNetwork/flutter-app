@@ -4,8 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/dao/participant_dao.dart';
 import '../../../db/database_event_bus.dart';
-import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';

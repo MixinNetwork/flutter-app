@@ -7,9 +7,9 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../bloc/paging/paging_bloc.dart';
 import '../../../bloc/subscribe_mixin.dart';
+import '../../../db/dao/conversation_dao.dart';
 import '../../../db/database.dart';
 import '../../../db/database_event_bus.dart';
-import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
@@ -100,7 +100,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
           limit ?? kDefaultLimit,
           () => dao.conversationCountByCategory(state.type),
           (limit, offset) =>
-              dao.conversationItemsByCategory(state.type, limit, offset),
+              dao.conversationItemsByCategory(state.type, limit, offset).get(),
           updateEvent,
           mentionCache,
           () => dao.conversationHasDataByCategory(state.type),

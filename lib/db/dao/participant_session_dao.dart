@@ -4,7 +4,7 @@ import '../mixin_database.dart';
 
 part 'participant_session_dao.g.dart';
 
-@DriftAccessor()
+@DriftAccessor(include: {'../moor/dao/participant_session.drift'})
 class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantSessionDaoMixin {
   ParticipantSessionDao(super.db);
@@ -12,18 +12,6 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insert(ParticipantSessionData participantSession) =>
       into(db.participantSession)
           .insert(participantSession, mode: InsertMode.insertOrReplace);
-
-  Future<ParticipantSessionKey?> getParticipantSessionKeyWithoutSelf(
-          String conversationId, String userId) =>
-      db
-          .participantSessionKeyWithoutSelf(conversationId, userId)
-          .getSingleOrNull();
-
-  Future<ParticipantSessionKey?> getOtherParticipantSessionKey(
-          String conversationId, String userId, String sessionId) =>
-      db
-          .otherParticipantSessionKey(conversationId, userId, sessionId)
-          .getSingleOrNull();
 
   Future deleteByStatus(String conversationId) async {
     await (delete(db.participantSession)
@@ -74,16 +62,6 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
         await deleteByConversationId(conversationId);
         await insertAll(list);
       });
-
-  Future<List<ParticipantSessionData>> getNotSendSessionParticipants(
-          String conversationId, String sessionId) async =>
-      db.notSendSessionParticipants(conversationId, sessionId).get();
-
-  Future<ParticipantSessionData?> getParticipantSessionKeyBySessionId(
-          String conversationId, String sessionId) async =>
-      db
-          .participantSessionKeyBySessionId(conversationId, sessionId)
-          .getSingleOrNull();
 
   Future updateList(List<ParticipantSessionData> list) async {
     for (final p in list) {

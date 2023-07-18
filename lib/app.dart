@@ -34,6 +34,7 @@ import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/system/text_input.dart';
 import 'utils/system/tray.dart';
+import 'widgets/auth.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
 import 'widgets/message/item/text/mention_builder.dart';
@@ -222,7 +223,23 @@ class _App extends StatelessWidget {
             supportedLocales: [
               ...Localization.delegate.supportedLocales,
             ],
-            theme: ThemeData().withFallbackFonts(),
+            theme: ThemeData(
+              colorScheme:
+                  ColorScheme.light(primary: lightBrightnessThemeData.text),
+              textSelectionTheme: TextSelectionThemeData(
+                cursorColor: lightBrightnessThemeData.accent,
+              ),
+              useMaterial3: true,
+            ).withFallbackFonts(),
+            darkTheme: ThemeData(
+              colorScheme:
+                  ColorScheme.dark(primary: darkBrightnessThemeData.text),
+              textSelectionTheme: TextSelectionThemeData(
+                cursorColor: darkBrightnessThemeData.accent,
+              ),
+              useMaterial3: true,
+            ).withFallbackFonts(),
+            themeMode: context.watch<SettingCubit>().themeMode,
             builder: (context, child) {
               try {
                 context.accountServer.language =
@@ -243,7 +260,9 @@ class _App extends StatelessWidget {
                   ),
                   child: SystemTrayWidget(
                     child: TextInputActionHandler(
-                      child: child!,
+                      child: AuthGuard(
+                        child: child!,
+                      ),
                     ),
                   ),
                 ),

@@ -86,51 +86,51 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m30(arg0) => "${arg0}に送信された4桁のコードを入力してください";
 
-  static String m31(arg0) => "マイMixin ID:${arg0}";
+  static String m32(arg0) => "マイMixin ID:${arg0}";
 
-  static String m32(arg0, arg1) => "Mixin${arg0}が利用可能です。今すぐアップデートしますか？";
+  static String m33(arg0, arg1) => "Mixin${arg0}が利用可能です。今すぐアップデートしますか？";
 
-  static String m33(arg0) => "${arg0}は管理者です";
+  static String m34(arg0) => "${arg0}は管理者です";
 
-  static String m34(arg0) => "リンクを開く: ${arg0}";
+  static String m35(arg0) => "リンクを開く: ${arg0}";
 
-  static String m35(arg0) => "${arg0}人のメンバー";
+  static String m36(arg0) => "${arg0}人のメンバー";
 
-  static String m36(count, arg0, arg1) =>
+  static String m37(count, arg0, arg1) =>
       "${Intl.plural(count, one: '${arg0}/${arg1} 承認', other: '${arg0}/${arg1} 承認')}";
 
-  static String m37(count, arg0) =>
+  static String m38(count, arg0) =>
       "${Intl.plural(count, one: '${arg0}個のピン留めされたメッセージ', other: '${arg0}個のピン留めされたメッセージ')}";
 
-  static String m38(arg0) => "${arg0}秒後にコードを再送";
+  static String m39(arg0) => "${arg0}秒後にコードを再送";
 
-  static String m39(count, arg0) =>
+  static String m40(count, arg0) =>
       "${Intl.plural(count, one: '${arg0}個の関連するメッセージ', other: '${arg0}個の関連するメッセージ')}";
 
-  static String m40(arg0, arg1) => "1\$sは、消えるメッセージの有効時間を${arg0}に設定しました。";
+  static String m41(arg0, arg1) => "1\$sは、消えるメッセージの有効時間を${arg0}に設定しました。";
 
-  static String m41(arg0) =>
+  static String m42(arg0) =>
       "${arg0}と紐付けられたプロフィールとアカウント情報が削除されます。詳細はこちらをご覧ください。";
 
-  static String m42(arg0, arg1) => "${arg0}から${arg1}を送信しますか？";
+  static String m43(arg0, arg1) => "${arg0}から${arg1}を送信しますか？";
 
-  static String m43(arg0) => "${arg0}を送信しますか？";
+  static String m44(arg0) => "${arg0}を送信しますか？";
 
-  static String m44(arg0) => "ファイルを開くことができません: ${arg0}";
+  static String m45(arg0) => "ファイルを開くことができません: ${arg0}";
 
-  static String m45(count) => "${Intl.plural(count, one: '日', other: '日間')}";
+  static String m46(count) => "${Intl.plural(count, one: '日', other: '日間')}";
 
-  static String m46(count) => "${Intl.plural(count, one: '時', other: '時間')}";
+  static String m47(count) => "${Intl.plural(count, one: '時', other: '時間')}";
 
-  static String m47(count) => "${Intl.plural(count, one: '分', other: '分間')}";
+  static String m48(count) => "${Intl.plural(count, one: '分', other: '分間')}";
 
-  static String m48(count) => "${Intl.plural(count, one: '秒', other: '秒間')}";
+  static String m49(count) => "${Intl.plural(count, one: '秒', other: '秒間')}";
 
-  static String m49(count) => "${Intl.plural(count, one: '週', other: '週間')}";
+  static String m50(count) => "${Intl.plural(count, one: '週', other: '週間')}";
 
-  static String m50(arg0) => "現在価格 ${arg0}";
+  static String m51(arg0) => "現在価格 ${arg0}";
 
-  static String m51(arg0) => "当時の価格 ${arg0}";
+  static String m52(arg0) => "当時の価格 ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -157,6 +157,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "alertKeyContactContactMessage":
             MessageLookupByLibrary.simpleMessage("連絡先が届きました"),
         "allChats": MessageLookupByLibrary.simpleMessage("チャット"),
+        "anonymousNumber": MessageLookupByLibrary.simpleMessage("匿名番号"),
         "appCardShareDisallow":
             MessageLookupByLibrary.simpleMessage("このURLの共有を許可しない"),
         "appearance": MessageLookupByLibrary.simpleMessage("言語とテーマ"),
@@ -276,7 +277,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
             "アカウントを削除するためにPINコードを入力してください"),
         "enterYourPhoneNumber":
-            MessageLookupByLibrary.simpleMessage("電話番号を入力して下さい"),
+            MessageLookupByLibrary.simpleMessage("電話番号を入力してください"),
         "enterYourPinToContinue":
             MessageLookupByLibrary.simpleMessage("PINコードを入力して、続けてください"),
         "errorAddressExists": MessageLookupByLibrary.simpleMessage(
@@ -289,7 +290,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "errorBadData":
             MessageLookupByLibrary.simpleMessage("エラー 10002：リクエストデータが無効です"),
         "errorBlockchain": MessageLookupByLibrary.simpleMessage(
-            "エラー 30100：ブロックチェーンが同期できていません。後程もう一度お試し下さい。"),
+            "エラー 30100：ブロックチェーンが同期できていません。後程もう一度お試しください。"),
         "errorConnectionTimeout":
             MessageLookupByLibrary.simpleMessage("ネットワーク接続がタイムアウトしました"),
         "errorFullGroup":
@@ -439,13 +440,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "more": MessageLookupByLibrary.simpleMessage("もっとみる"),
         "multisigTransaction":
             MessageLookupByLibrary.simpleMessage("マルチシグトランザクション"),
-        "myMixinId": m31,
+        "myMixinId": m32,
         "myStickers": MessageLookupByLibrary.simpleMessage("マイスタンプ"),
         "na": MessageLookupByLibrary.simpleMessage("なし"),
         "name": MessageLookupByLibrary.simpleMessage("名前"),
         "networkError": MessageLookupByLibrary.simpleMessage("ネットワークエラー"),
         "newVersionAvailable": MessageLookupByLibrary.simpleMessage("最新版の公開"),
-        "newVersionDescription": m32,
+        "newVersionDescription": m33,
         "next": MessageLookupByLibrary.simpleMessage("次へ"),
         "nextConversation": MessageLookupByLibrary.simpleMessage("次のチャットルーム"),
         "noAudio": MessageLookupByLibrary.simpleMessage("音声メッセージがありません"),
@@ -464,24 +465,24 @@ class MessageLookup extends MessageLookupByLibrary {
         "notificationPermissionManually": MessageLookupByLibrary.simpleMessage(
             "通知は許可されていませんので、通知設定から許可してください。"),
         "notifications": MessageLookupByLibrary.simpleMessage("通知"),
-        "nowAnAddmin": m33,
+        "nowAnAddmin": m34,
         "oneByOneForward": MessageLookupByLibrary.simpleMessage("それぞれ転送する"),
         "oneHour": MessageLookupByLibrary.simpleMessage("1時間"),
         "oneWeek": MessageLookupByLibrary.simpleMessage("1週間"),
         "oneYear": MessageLookupByLibrary.simpleMessage("1年間"),
         "openHomePage": MessageLookupByLibrary.simpleMessage("ホームページを開く"),
-        "openLink": m34,
+        "openLink": m35,
         "openLogDirectory": MessageLookupByLibrary.simpleMessage("ログディレクトリを開く"),
         "originalImage": MessageLookupByLibrary.simpleMessage("オリジナル"),
         "owner": MessageLookupByLibrary.simpleMessage("オーナー"),
-        "participantsCount": m35,
-        "pendingConfirmation": m36,
+        "participantsCount": m36,
+        "pendingConfirmation": m37,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("電話番号を変更する"),
         "photos": MessageLookupByLibrary.simpleMessage("写真"),
         "pickAConversation": MessageLookupByLibrary.simpleMessage(
             "チャットルームを選択して、メッセージを送信してみましょう"),
         "pinTitle": MessageLookupByLibrary.simpleMessage("ピン留め"),
-        "pinnedMessageTitle": m37,
+        "pinnedMessageTitle": m38,
         "post": MessageLookupByLibrary.simpleMessage("投稿"),
         "preferences": MessageLookupByLibrary.simpleMessage("環境設定"),
         "previousConversation":
@@ -508,7 +509,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportTitle":
             MessageLookupByLibrary.simpleMessage("Mixinの開発者へ会話記録を送信しますか?"),
         "resendCode": MessageLookupByLibrary.simpleMessage("コードを再送する"),
-        "resendCodeIn": m38,
+        "resendCodeIn": m39,
         "reset": MessageLookupByLibrary.simpleMessage("リセット"),
         "resetLink": MessageLookupByLibrary.simpleMessage("リンクを取り消す"),
         "retry": MessageLookupByLibrary.simpleMessage("リトライ"),
@@ -530,9 +531,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("一致する情報は見つかりませんでした"),
         "searchPlaceholderNumber":
             MessageLookupByLibrary.simpleMessage("Mixin ID または電話番号を検索"),
-        "searchRelatedMessage": m39,
+        "searchRelatedMessage": m40,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "security": MessageLookupByLibrary.simpleMessage("セキュリティ"),
         "select": MessageLookupByLibrary.simpleMessage("選択"),
         "send": MessageLookupByLibrary.simpleMessage("送る"),
         "sendArchived":
@@ -544,20 +546,20 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendWithoutSound":
             MessageLookupByLibrary.simpleMessage("通知音を鳴らさずに送信する"),
         "set": MessageLookupByLibrary.simpleMessage("設定"),
-        "setDisappearingMessageTimeTo": m40,
+        "setDisappearingMessageTimeTo": m41,
         "settingAuthSearchHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID, 名前"),
         "settingBackupTips": MessageLookupByLibrary.simpleMessage(
             "iCloudにチャット履歴をバックアップします。 iPhoneを紛失または機種変更した場合にMixinを再インストールしてチャット履歴を復元できます。バックアップしたメッセージはMixinのE2E暗号によって保護されていません。"),
-        "settingDeleteAccountPinContent": m41,
+        "settingDeleteAccountPinContent": m42,
         "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixinmessenger.zendesk.com/hc/articles/4414170627988"),
         "share": MessageLookupByLibrary.simpleMessage("共有"),
         "shareApps": MessageLookupByLibrary.simpleMessage("共有ずみのアプリ"),
         "shareError": MessageLookupByLibrary.simpleMessage("エラーを共有"),
         "shareLink": MessageLookupByLibrary.simpleMessage("リンクをシェアする"),
-        "shareMessageDescription": m42,
-        "shareMessageDescriptionEmpty": m43,
+        "shareMessageDescription": m43,
+        "shareMessageDescriptionEmpty": m44,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("共有されたメディア"),
         "show": MessageLookupByLibrary.simpleMessage("表示"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("アバターの表示"),
@@ -598,13 +600,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "transfer": MessageLookupByLibrary.simpleMessage("送金"),
         "turnOnNotifications": MessageLookupByLibrary.simpleMessage("通知をオンにする"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("メッセージを入力"),
-        "unableToOpenFile": m44,
+        "unableToOpenFile": m45,
         "unblock": MessageLookupByLibrary.simpleMessage("ブロックを解除"),
-        "unitDay": m45,
-        "unitHour": m46,
-        "unitMinute": m47,
-        "unitSecond": m48,
-        "unitWeek": m49,
+        "unitDay": m46,
+        "unitHour": m47,
+        "unitMinute": m48,
+        "unitSecond": m49,
+        "unitWeek": m50,
         "unmute": MessageLookupByLibrary.simpleMessage("ミュート解除"),
         "unpin": MessageLookupByLibrary.simpleMessage("ピン留めを止める"),
         "unpinAllMessages":
@@ -614,8 +616,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unreadMessages": MessageLookupByLibrary.simpleMessage("新しいメッセージ"),
         "upgrading": MessageLookupByLibrary.simpleMessage("アップデート中"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("ユーザーが見つかりませんでした"),
-        "valueNow": m50,
-        "valueThen": m51,
+        "valueNow": m51,
+        "valueThen": m52,
         "verifyPin": MessageLookupByLibrary.simpleMessage("PINコードを認証"),
         "video": MessageLookupByLibrary.simpleMessage("動画"),
         "videos": MessageLookupByLibrary.simpleMessage("動画"),

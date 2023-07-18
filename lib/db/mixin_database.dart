@@ -41,6 +41,7 @@ import 'dao/snapshot_dao.dart';
 import 'dao/sticker_album_dao.dart';
 import 'dao/sticker_dao.dart';
 import 'dao/sticker_relationship_dao.dart';
+import 'dao/transcript_message_dao.dart';
 import 'dao/user_dao.dart';
 import 'database_event_bus.dart';
 import 'extension/job.dart';
@@ -52,17 +53,7 @@ part 'mixin_database.g.dart';
 @DriftDatabase(
   include: {
     'moor/mixin.drift',
-    'moor/dao/conversation.drift',
-    'moor/dao/message.drift',
-    'moor/dao/participant.drift',
-    'moor/dao/sticker.drift',
-    'moor/dao/sticker_album.drift',
-    'moor/dao/user.drift',
-    'moor/dao/circle.drift',
-    'moor/dao/flood.drift',
-    'moor/dao/pin_message.drift',
-    'moor/dao/sticker_relationship.drift',
-    'moor/dao/favorite_app.drift',
+    'moor/dao/common.drift',
   },
   daos: [
     AddressDao,
@@ -93,8 +84,8 @@ part 'mixin_database.g.dart';
     ExpiredMessageDao,
     ChainDao,
     PropertyDao,
+    TranscriptMessageDao,
   ],
-  queries: {},
 )
 class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);

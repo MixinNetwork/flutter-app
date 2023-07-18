@@ -11,6 +11,7 @@ import '../extension/extension.dart';
 import '../logger.dart';
 import 'cipher.dart';
 import 'socket_wrapper.dart';
+import 'speed_calculator.dart';
 import 'transfer_data_app.dart';
 import 'transfer_data_asset.dart';
 import 'transfer_data_command.dart';
@@ -33,6 +34,8 @@ typedef OnSendStart = void Function();
 typedef OnSendSucceed = void Function();
 typedef OnSendFailed = void Function();
 
+typedef OnSendNetworkSpeedUpdate = void Function(double speed);
+
 class DeviceTransferSender {
   DeviceTransferSender({
     required this.database,
@@ -44,6 +47,7 @@ class DeviceTransferSender {
     this.onSenderSucceed,
     this.onSenderFailed,
     this.onSenderServerCreated,
+    this.onSenderNetworkSpeedUpdate,
   });
 
   final Database database;
@@ -54,11 +58,13 @@ class DeviceTransferSender {
   final OnSendSucceed? onSenderSucceed;
   final OnSendFailed? onSenderFailed;
   final OnSendStart? onSenderServerCreated;
+  final OnSendNetworkSpeedUpdate? onSenderNetworkSpeedUpdate;
   final String deviceId;
 
   ServerSocket? _socket;
 
   TransferSocket? _clientSocket;
+  final _speedCalculator = SpeedCalculator();
 
   final _pendingVerificationSockets = <Socket>[];
 
@@ -68,6 +74,7 @@ class DeviceTransferSender {
 
   void resetTransferStates() {
     _finished = false;
+    _speedCalculator.reset();
   }
 
   @visibleForTesting
@@ -104,7 +111,14 @@ class DeviceTransferSender {
       final remoteHost = '${socket.remoteAddress.address}:${socket.remotePort}';
       i('client connected: $remoteHost');
 
-      final transferSocket = TransferSocket(socket, transferKey);
+      final transferSocket = TransferSocket(
+        socket,
+        transferKey,
+        onWriteBytes: (size) {
+          _speedCalculator.add(size);
+          onSenderNetworkSpeedUpdate?.call(_speedCalculator.speed);
+        },
+      );
       Stream<TransferPacket>.eventTransformed(
         socket,
         (sink) => TransferProtocolSink(sink, protocolTempFileDir, transferKey),
@@ -196,15 +210,15 @@ class DeviceTransferSender {
     // send total count
     await runWithLog((socket) async {
       final db = database.mixinDatabase;
-      final count = await db.countMediaMessages().getSingle() +
-          await db.countMessages().getSingle() +
-          await db.countStickers().getSingle() +
+      final count = await db.messageDao.countMediaMessages().getSingle() +
+          await db.messageDao.countMessages().getSingle() +
+          await db.stickerDao.countStickers().getSingle() +
           await db.assetDao.countAssets().getSingle() +
           await db.snapshotDao.countSnapshots().getSingle() +
-          await db.countUsers().getSingle() +
-          await db.countConversations().getSingle() +
-          await db.countParticipants().getSingle() +
-          await db.countPinMessages().getSingle() +
+          await db.userDao.countUsers().getSingle() +
+          await db.conversationDao.countConversations().getSingle() +
+          await db.participantDao.countParticipants().getSingle() +
+          await db.pinMessageDao.countPinMessages().getSingle() +
           await database.transcriptMessageDao
               .countTranscriptMessages()
               .getSingle() +

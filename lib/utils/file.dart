@@ -45,7 +45,7 @@ Future<bool> saveFileToSystem(
 
   d('saveFileToSystem: $file, $targetName, $mineType, $extension');
 
-  var path = await file_selector.getSavePath(
+  var path = (await file_selector.getSaveLocation(
     confirmButtonText: context.l10n.save,
     suggestedName: targetName,
     acceptedTypeGroups: [
@@ -55,7 +55,8 @@ Future<bool> saveFileToSystem(
         mimeTypes: [if (mineType != null) mineType],
       ),
     ],
-  );
+  ))
+      ?.path;
   if (path == null || path.isEmpty) {
     return false;
   }

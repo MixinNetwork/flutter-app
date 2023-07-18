@@ -232,8 +232,9 @@ class Blaze {
   }
 
   Future<bool> makeMessageStatus(String messageId, MessageStatus status) async {
-    final currentStatus =
-        await database.messageDao.findMessageStatusById(messageId);
+    final currentStatus = await database.messageDao
+        .messageStatusById(messageId)
+        .getSingleOrNull();
     if (currentStatus != null && status.index > currentStatus.index) {
       await database.messageDao.updateMessageStatusById(messageId, status);
     }
@@ -261,7 +262,7 @@ class Blaze {
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
         if (!(await makeMessageStatus(m.messageId, m.status))) {
-          final messagesHistory = await database.messagesHistoryDao
+          final messagesHistory = await database.messageHistoryDao
               .findMessageHistoryById(m.messageId);
           if (messagesHistory != null) return;
 

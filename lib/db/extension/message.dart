@@ -10,6 +10,7 @@ import '../../widgets/message/send_message_dialog/attachment_extra.dart';
 import '../converter/media_status_type_converter.dart';
 import '../converter/message_status_type_converter.dart';
 import '../converter/millis_date_converter.dart';
+import '../dao/message_dao.dart';
 import '../mixin_database.dart';
 import 'message_category.dart';
 

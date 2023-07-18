@@ -9,6 +9,7 @@ import '../../../account/account_server.dart';
 import '../../../bloc/simple_cubit.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/uuid/uuid.dart';
+import '../../../db/dao/conversation_dao.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';

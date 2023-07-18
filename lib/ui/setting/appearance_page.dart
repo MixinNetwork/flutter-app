@@ -41,7 +41,7 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
-      child: Container(
+        child: Container(
           padding: const EdgeInsets.only(top: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +100,9 @@ class _Body extends StatelessWidget {
               const _MessageAvatarSetting(),
               const _ChatTextSizeSetting(),
             ],
-          )));
+          ),
+        ),
+      );
 }
 
 class _MessageAvatarSetting extends HookWidget {

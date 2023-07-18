@@ -5,10 +5,6 @@ extension IterableExtension<T> on Iterable<T> {
       cast<T?>().firstWhere(test, orElse: () => null);
 }
 
-extension IterableExtenstionNull<T> on Iterable<T?> {
-  Iterable<T> whereNotNull() => where((e) => e != null).cast<T>();
-}
-
 extension ListExtension<T> on List<T> {
   List<T> joinList(T separator) {
     final iterator = this.iterator;

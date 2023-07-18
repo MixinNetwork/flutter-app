@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart' hide JsonKey;
+import 'package:flutter/services.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../db/mixin_database.dart';
@@ -23,12 +24,17 @@ import 'transfer_data_user.dart';
 import 'transfer_protocol.dart';
 
 abstract class TransferSocket {
-  factory TransferSocket(Socket socket, TransferSecretKey secretKey) =>
-      _TransferSocket(socket, secretKey);
+  factory TransferSocket(
+    Socket socket,
+    TransferSecretKey secretKey, {
+    ValueChanged<int>? onWriteBytes,
+  }) =>
+      _TransferSocket(socket, secretKey, onWriteBytes: onWriteBytes);
 
-  TransferSocket.create(this.secretKey);
+  TransferSocket.create(this.secretKey, {this.onWriteBytes});
 
   final TransferSecretKey secretKey;
+  final ValueChanged<int>? onWriteBytes;
 
   Future<void> close();
 
@@ -161,7 +167,8 @@ abstract class TransferSocket {
 }
 
 class _TransferSocket extends TransferSocket {
-  _TransferSocket(this.socket, super.secretKey) : super.create();
+  _TransferSocket(this.socket, super.secretKey, {super.onWriteBytes})
+      : super.create();
 
   final Socket socket;
   final Lock _lock = Lock();
@@ -176,5 +183,8 @@ class _TransferSocket extends TransferSocket {
   Future<void> flush() => _lock.synchronized(socket.flush);
 
   @override
-  void add(List<int> data) => socket.add(data);
+  void add(List<int> data) {
+    onWriteBytes?.call(data.length);
+    socket.add(data);
+  }
 }

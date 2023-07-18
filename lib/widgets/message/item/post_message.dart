@@ -168,10 +168,13 @@ class PostPreview extends StatelessWidget {
               ],
             ),
             Expanded(
-              child: Markdown(
-                data: message.content ?? '',
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Markdown(
+                  data: message.content ?? '',
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+                ),
               ),
             ),
           ],

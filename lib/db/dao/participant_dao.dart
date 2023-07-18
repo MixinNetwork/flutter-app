@@ -25,7 +25,7 @@ class MiniParticipantItem with EquatableMixin {
       ];
 }
 
-@DriftAccessor()
+@DriftAccessor(include: {'../moor/dao/participant.drift'})
 class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantDaoMixin {
   ParticipantDao(super.db);
@@ -62,17 +62,8 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     return query.get();
   }
 
-  Selectable<ParticipantUser> groupParticipantsByConversationId(
-          String conversationId) =>
-      db.groupParticipantsByConversationId(conversationId);
-
-  Future<String?> findJoinedConversationId(String userId) async => db
-      .customSelect(
-        'SELECT p.conversation_id FROM participants p, conversations c WHERE p.user_id = ? AND p.conversation_id = c.conversation_id AND c.status = 2 LIMIT 1',
-        variables: [Variable.withString(userId)],
-      )
-      .map((row) => row.read<String>('conversation_id'))
-      .getSingleOrNull();
+  Future<String?> findJoinedConversationId(String userId) async =>
+      _joinedConversationId(userId).getSingleOrNull();
 
   Future<void> insertAll(List<Participant> add) => batch((batch) {
         batch.insertAllOnConflictUpdate(db.participants, add);
@@ -88,22 +79,15 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     });
   }
 
-  Selectable<User> participantsAvatar(String conversationId) =>
-      db.participantsAvatar(conversationId);
-
   Future<int> updateParticipantRole(
           String conversationId, String participantId, ParticipantRole? role) =>
-      db
-          .customUpdate(
-        'UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
-        variables: [
-          Variable<String>(const ParticipantRoleJsonConverter().toJson(role)),
-          Variable.withString(conversationId),
-          Variable.withString(participantId)
-        ],
-        updates: {db.participants},
-        updateKind: UpdateKind.update,
-      )
+      (update(db.participants)
+            ..where((tbl) =>
+                tbl.conversationId.equals(conversationId) &
+                tbl.userId.equals(participantId)))
+          .write(ParticipantsCompanion(
+        role: Value(role),
+      ))
           .then((value) {
         DataBaseEventBus.instance.updateParticipant([
           MiniParticipantItem(
@@ -147,13 +131,6 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
         ]);
         return value;
       });
-
-  Selectable<String> userIdByIdentityNumber(
-          String conversationId, String identityNumber) =>
-      db.userIdByIdentityNumber(conversationId, identityNumber);
-
-  Selectable<int> conversationParticipantsCount(String conversationId) =>
-      db.conversationParticipantsCount(conversationId);
 
   Selectable<Participant> participantById(
           String conversationId, String userId) =>

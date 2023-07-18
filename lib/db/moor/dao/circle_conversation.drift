@@ -1,0 +1,7 @@
+import '../mixin.drift';
+
+_deleteByCircleId:
+DELETE FROM circle_conversations WHERE circle_id = :circleId;
+
+_deleteByIds:
+DELETE FROM circle_conversations WHERE conversation_id = :conversationId AND circle_id = :circleId;

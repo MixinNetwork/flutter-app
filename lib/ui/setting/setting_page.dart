@@ -114,13 +114,14 @@ class SettingPage extends HookWidget {
                             title: context.l10n.dataAndStorageUsage,
                           ),
                           _Item(
+                            leadingAssetName: Resources.assetsImagesShieldSvg,
+                            pageName: ResponsiveNavigatorCubit.securityPage,
+                            title: context.l10n.security,
+                          ),
+                          _Item(
+                            leadingAssetName: Resources.assetsImagesProxySvg,
                             pageName: ResponsiveNavigatorCubit.proxyPage,
                             title: context.l10n.proxy,
-                            leading: Icon(
-                              Icons.shield_outlined,
-                              size: 24,
-                              color: context.theme.icon,
-                            ),
                           ),
                           _Item(
                             leadingAssetName:
@@ -170,6 +171,7 @@ class _Item extends StatelessWidget {
     this.color,
     this.onTap,
     this.trailing = const Arrow(),
+    // ignore: unused_element
     this.leading,
   });
 

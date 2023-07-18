@@ -1,10 +1,7 @@
 import '../mixin.drift';
 
-deleteFavoriteAppByAppIdAndUserId:
-DELETE FROM favorite_apps WHERE app_id = :appId AND user_id = :userId;
-
-deleteFavoriteAppByUserId:
+_deleteFavoriteAppByUserId:
 DELETE FROM favorite_apps WHERE user_id = :userId;
 
-getFavoriteAppByUserId:
+getFavoriteAppsByUserId:
 SELECT a.* FROM favorite_apps fa INNER JOIN apps a ON fa.app_id = a.app_id WHERE fa.user_id =:userId;

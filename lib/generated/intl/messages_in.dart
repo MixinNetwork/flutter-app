@@ -66,19 +66,19 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m30(arg0) =>
       "Masukkan kode 4 digit yang dikirim kepada Anda di ${arg0}";
 
-  static String m31(arg0) => "ID Mixin saya: ${arg0}";
+  static String m32(arg0) => "ID Mixin saya: ${arg0}";
 
-  static String m36(count, arg0, arg1) =>
+  static String m37(count, arg0, arg1) =>
       "${Intl.plural(count, one: 'null', other: '${arg0}/${arg1} konfirmasi')}";
 
-  static String m38(arg0) => "Kirim ulang kode dalam ${arg0} d";
+  static String m39(arg0) => "Kirim ulang kode dalam ${arg0} d";
 
-  static String m39(count, arg0) =>
+  static String m40(count, arg0) =>
       "${Intl.plural(count, one: 'null', other: '${arg0} pesan terkait')}";
 
-  static String m42(arg0, arg1) => "Yakin ingin mengirim ${arg0} dari ${arg1}?";
+  static String m43(arg0, arg1) => "Yakin ingin mengirim ${arg0} dari ${arg1}?";
 
-  static String m43(arg0) => "Yakin ingin mengirim ${arg0}?";
+  static String m44(arg0) => "Yakin ingin mengirim ${arg0}?";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -285,7 +285,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "more": MessageLookupByLibrary.simpleMessage("Lebih banyak"),
         "multisigTransaction":
             MessageLookupByLibrary.simpleMessage("Transaksi Multisig"),
-        "myMixinId": m31,
+        "myMixinId": m32,
         "na": MessageLookupByLibrary.simpleMessage("N/A"),
         "name": MessageLookupByLibrary.simpleMessage("Nama"),
         "networkError":
@@ -309,7 +309,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "oneYear": MessageLookupByLibrary.simpleMessage("1 Tahun"),
         "openHomePage": MessageLookupByLibrary.simpleMessage("Buka Beranda"),
         "owner": MessageLookupByLibrary.simpleMessage("pemilik"),
-        "pendingConfirmation": m36,
+        "pendingConfirmation": m37,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Nomor Telepon"),
         "photos": MessageLookupByLibrary.simpleMessage("Foto"),
         "post": MessageLookupByLibrary.simpleMessage("Postingan"),
@@ -326,7 +326,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeContact": MessageLookupByLibrary.simpleMessage("Hapus kontak"),
         "report": MessageLookupByLibrary.simpleMessage("Laporkan"),
         "resendCode": MessageLookupByLibrary.simpleMessage("Kirim ulang kode"),
-        "resendCodeIn": m38,
+        "resendCodeIn": m39,
         "retry": MessageLookupByLibrary.simpleMessage("COBA LAGI"),
         "retryUploadFailed":
             MessageLookupByLibrary.simpleMessage("Unggahan ulang gagal."),
@@ -339,9 +339,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "search": MessageLookupByLibrary.simpleMessage("Cari"),
         "searchConversation":
             MessageLookupByLibrary.simpleMessage("Cari Percakapan"),
-        "searchRelatedMessage": m39,
+        "searchRelatedMessage": m40,
         "secretUrl": MessageLookupByLibrary.simpleMessage(
             "https://mixin.one/pages/1000007"),
+        "security": MessageLookupByLibrary.simpleMessage("Keamanan"),
         "select": MessageLookupByLibrary.simpleMessage("Pilih"),
         "send": MessageLookupByLibrary.simpleMessage("Kirim"),
         "settingAuthSearchHint":
@@ -350,8 +351,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareError":
             MessageLookupByLibrary.simpleMessage("Bagikan kesalahan."),
         "shareLink": MessageLookupByLibrary.simpleMessage("Bagikan Tautan"),
-        "shareMessageDescription": m42,
-        "shareMessageDescriptionEmpty": m43,
+        "shareMessageDescription": m43,
+        "shareMessageDescriptionEmpty": m44,
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Media Bersama"),
         "show": MessageLookupByLibrary.simpleMessage("Tampilkan"),
         "signIn": MessageLookupByLibrary.simpleMessage("Masuk"),

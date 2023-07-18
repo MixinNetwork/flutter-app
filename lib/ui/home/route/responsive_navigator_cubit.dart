@@ -9,6 +9,7 @@ import '../../setting/backup_page.dart';
 import '../../setting/edit_profile_page.dart';
 import '../../setting/notification_page.dart';
 import '../../setting/proxy_page.dart';
+import '../../setting/security_page.dart';
 import '../../setting/storage_page.dart';
 import '../../setting/storage_usage_detail_page.dart';
 import '../../setting/storage_usage_list_page.dart';
@@ -35,6 +36,7 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
   static const storageUsage = 'storageUsage';
   static const storageUsageDetail = 'storageUsageDetail';
   static const proxyPage = 'proxyPage';
+  static const securityPage = 'securityPage';
 
   static const settingPageNameSet = {
     editProfilePage,
@@ -48,6 +50,7 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
     accountPage,
     accountDeletePage,
     proxyPage,
+    securityPage,
   };
 
   @override
@@ -152,6 +155,14 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
           name: proxyPage,
           child: ProxyPage(
             key: ValueKey(proxyPage),
+          ),
+        );
+      case securityPage:
+        return const MaterialPage(
+          key: ValueKey(securityPage),
+          name: securityPage,
+          child: SecurityPage(
+            key: ValueKey(securityPage),
           ),
         );
       default:

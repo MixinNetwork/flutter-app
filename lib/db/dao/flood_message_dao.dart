@@ -4,7 +4,7 @@ import '../mixin_database.dart';
 
 part 'flood_message_dao.g.dart';
 
-@DriftAccessor()
+@DriftAccessor(include: {'../moor/dao/flood.drift'})
 class FloodMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$FloodMessageDaoMixin {
   FloodMessageDao(super.db);
@@ -33,5 +33,5 @@ class FloodMessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<DateTime?> getLastBlazeMessageCreatedAt() =>
-      db.getLastBlazeMessageCreatedAt().getSingleOrNull();
+      _getLastBlazeMessageCreatedAt().getSingleOrNull();
 }

@@ -2,8 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
+import '../../../db/dao/message_dao.dart';
 import '../../../db/database.dart';
-import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import 'slide_category_cubit.dart';

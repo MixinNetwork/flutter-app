@@ -6,17 +6,14 @@ import '../mixin_database.dart';
 
 part 'favorite_app_dao.g.dart';
 
-@DriftAccessor()
+@DriftAccessor(include: {'../moor/dao/favorite_app.drift'})
 class FavoriteAppDao extends DatabaseAccessor<MixinDatabase>
     with _$FavoriteAppDaoMixin {
   FavoriteAppDao(super.db);
 
-  Future<void> _deleteByUserId(String userId) =>
-      db.deleteFavoriteAppByUserId(userId);
-
   Future<void> insertFavoriteApps(
       String userId, List<sdk.FavoriteApp> apps) async {
-    await _deleteByUserId(userId);
+    await _deleteFavoriteAppByUserId(userId);
     final list = apps
         .map((app) => FavoriteAppsCompanion.insert(
               appId: app.appId,
@@ -29,7 +26,4 @@ class FavoriteAppDao extends DatabaseAccessor<MixinDatabase>
 
     DataBaseEventBus.instance.updateFavoriteApp(apps.map((e) => e.appId));
   }
-
-  Selectable<App> getFavoriteAppsByUserId(String userId) =>
-      db.getFavoriteAppByUserId(userId);
 }

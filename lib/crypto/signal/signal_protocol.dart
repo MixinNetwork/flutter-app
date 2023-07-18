@@ -10,7 +10,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../blaze/blaze_message.dart';
 import '../../blaze/blaze_message_param.dart';
-import '../../db/mixin_database.dart';
+import '../../db/dao/message_dao.dart';
 import '../../enum/message_category.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';

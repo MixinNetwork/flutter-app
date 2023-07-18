@@ -1,13 +1,13 @@
 import '../mixin.drift';
 
-baseConversationItemCount:
+_baseConversationItemCount:
 SELECT COUNT(DISTINCT conversation.conversation_id)
 FROM conversations conversation
          INNER JOIN users owner ON owner.user_id = conversation.owner_id
          LEFT JOIN circle_conversations circleConversation ON conversation.conversation_id = circleConversation.conversation_id
 WHERE $where;
 
-baseConversationItems AS ConversationItem:
+_baseConversationItems AS ConversationItem:
 SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl,
     conversation.category AS category, conversation.draft AS draft,
     conversation.name AS groupName, conversation.status AS status,
@@ -42,7 +42,7 @@ WHERE $where
 ORDER BY $order
 LIMIT $limit;
 
-baseConversationItemsByCircleId AS ConversationItem:
+_baseConversationItemsByCircleId AS ConversationItem:
 SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl,
     conversation.category AS category, conversation.draft AS draft,
     conversation.name AS groupName, conversation.status AS status,
@@ -79,7 +79,7 @@ ORDER BY $order
 LIMIT $limit;
 
 
-baseUnseenMessageCount:
+_baseUnseenMessageCount:
 SELECT IFNULL(SUM(unseen_message_count), 0)
 FROM conversations conversation
     INNER JOIN users owner ON owner.user_id = conversation.owner_id
@@ -87,7 +87,7 @@ FROM conversations conversation
 WHERE $where
 LIMIT 1;
 
-baseUnseenConversationCount:
+_baseUnseenConversationCount:
 SELECT COUNT(1) AS unseen_conversation_count,
     IFNULL(
         SUM(
@@ -109,7 +109,7 @@ FROM conversations AS conversation
 WHERE $where
 LIMIT 1;
 
-fuzzySearchConversation AS SearchConversationItem:
+_fuzzySearchConversation AS SearchConversationItem:
 SELECT conversation.conversation_id AS conversationId,
     conversation.icon_url AS groupIconUrl,
     conversation.category AS category,
@@ -152,7 +152,7 @@ ORDER BY (conversation.category = 'GROUP' AND conversation.name = :query COLLATE
     message.created_at DESC
     limit $limit;
 
-searchConversationItemByIn AS SearchConversationItem:
+_searchConversationItemByIn AS SearchConversationItem:
 SELECT conversation.conversation_id AS conversationId,
     conversation.icon_url AS groupIconUrl,
     conversation.category AS category,
@@ -182,7 +182,7 @@ FROM conversations conversation
 WHERE conversation.conversation_id IN :ids
 ORDER BY $order;
 
-fuzzySearchConversationInCircle AS SearchConversationItem:
+_fuzzySearchConversationInCircle AS SearchConversationItem:
 SELECT conversation.conversation_id AS conversationId,
     conversation.icon_url AS groupIconUrl,
     conversation.category AS category,
@@ -223,9 +223,6 @@ ORDER BY (conversation.category = 'GROUP' AND conversation.name = :query COLLATE
     message.created_at DESC
     limit $limit;
 
-conversationParticipantsCount:
-SELECT COUNT(1) FROM participants WHERE conversation_id = :conversationId;
-
 conversationStorageUsage AS ConversationStorageUsage:
 SELECT c.conversation_id, c.owner_id, c.category, c.icon_url, c.name, u.identity_number,
     u.full_name, u.avatar_url, u.is_verified
@@ -248,3 +245,10 @@ ORDER BY c.last_message_created_at DESC;
 
 countConversations:
 SELECT COUNT(1) FROM conversations;
+
+_updateUnseenMessageCountAndLastMessageId:
+UPDATE conversations SET unseen_message_count
+    = (SELECT count(1) FROM messages WHERE conversation_id = :conversationId AND status IN ('SENT', 'DELIVERED')  AND user_id != :userId),
+    last_message_id = :lastMessageId,
+    last_message_created_at = :lastMessageCreatedAt
+    WHERE conversation_id = :conversationId;

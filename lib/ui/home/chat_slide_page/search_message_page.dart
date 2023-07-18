@@ -369,7 +369,7 @@ class _SearchParticipantList extends HookWidget {
 
               if (value.isEmpty) {
                 return userDao
-                    .groupParticipants(conversationId: conversationId)
+                    .groupParticipants(conversationId)
                     .watchWithStream(
                   eventStreams: [
                     DataBaseEventBus.instance.watchUpdateParticipantStream(
@@ -381,9 +381,9 @@ class _SearchParticipantList extends HookWidget {
               }
               return userDao
                   .fuzzySearchGroupUser(
-                currentUserId: context.multiAuthState.currentUserId ?? '',
-                conversationId: conversationId,
-                keyword: value,
+                context.multiAuthState.currentUserId ?? '',
+                conversationId,
+                value,
               )
                   .watchWithStream(
                 eventStreams: [

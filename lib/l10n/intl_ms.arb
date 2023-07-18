@@ -181,6 +181,7 @@
 "searchConversation" : "Cari Perbualan",
 "searchRelatedMessage" : "{count, plural, one{null} other{{arg0} mesej berkaitan}}",
 "secretUrl" : "https://mixin.one/pages/1000007",
+"security" : "Keselamatan",
 "select" : "Pilih",
 "send" : "Hantar",
 "settingAuthSearchHint" : "Mixin ID, Nama",

@@ -230,6 +230,7 @@ class TranscriptPage extends HookWidget {
             DataBaseEventBus.instance.watchUpdateTranscriptMessageStream(
                 transcriptIds: [transcriptMessage.messageId]),
             DataBaseEventBus.instance.updateAssetStream,
+            DataBaseEventBus.instance.updateStickerStream,
           ],
           duration: kDefaultThrottleDuration,
         ).map((list) => list

@@ -15,9 +15,8 @@ class CleanupQuoteContentJob extends BaseMigrationJob {
   Future<void> migration(Job job) async {
     var rowId = -1;
     while (true) {
-      final messages = await database.messageDao
-          .findBigQuoteMessage(rowId, _kQueryMax)
-          .get();
+      final messages =
+          await database.messageDao.bigQuoteMessage(rowId, _kQueryMax).get();
       for (final message in messages) {
         final quoteMessageId = message.quoteMessageId;
         if (quoteMessageId == null) {
