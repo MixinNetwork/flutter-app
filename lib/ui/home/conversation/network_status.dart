@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../../blaze/blaze.dart';
 import '../../../constants/resources.dart';
@@ -108,7 +109,10 @@ class _NetworkNotConnect extends StatelessWidget {
                       MouseRegion(
                         cursor: MaterialStateMouseCursor.clickable,
                         child: GestureDetector(
-                          onTap: () => context.accountServer.reconnectBlaze(),
+                          onTap: () {
+                            i('ui: click reconnect');
+                            context.accountServer.reconnectBlaze();
+                          },
                           child: Text(
                             context.l10n.retry,
                             style: TextStyle(color: context.theme.accent),

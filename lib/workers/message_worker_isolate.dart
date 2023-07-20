@@ -347,6 +347,7 @@ class _MessageProcessRunner {
         blaze.waitSyncTime();
         break;
       case MainIsolateEventType.reconnectBlaze:
+        i('message worker isolate: reconnect blaze');
         blaze.reconnect();
         break;
       case MainIsolateEventType.addAckJobs:
