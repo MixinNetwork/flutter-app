@@ -410,6 +410,16 @@ class Localization {
     );
   }
 
+  /// `Biometric`
+  String get biometric {
+    return Intl.message(
+      'Biometric',
+      name: 'biometric',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Block`
   String get block {
     return Intl.message(
@@ -2872,6 +2882,16 @@ class Localization {
     );
   }
 
+  /// `This Device is not supported Biometric authentication`
+  String get notSupportBiometric {
+    return Intl.message(
+      'This Device is not supported Biometric authentication',
+      name: 'notSupportBiometric',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Don't miss messages from your friends.`
   String get notificationContent {
     return Intl.message(
@@ -4328,6 +4348,16 @@ class Localization {
     );
   }
 
+  /// `Unlock Mixin Messenger`
+  String get unlockMixinMessenger {
+    return Intl.message(
+      'Unlock Mixin Messenger',
+      name: 'unlockMixinMessenger',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Enter Passcode to unlock Mixin Messenger`
   String get unlockWithWasscode {
     return Intl.message(
@@ -4393,6 +4423,16 @@ class Localization {
     return Intl.message(
       'Upgrading',
       name: 'upgrading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use Biometric`
+  String get useBiometric {
+    return Intl.message(
+      'Use Biometric',
+      name: 'useBiometric',
       desc: '',
       args: [],
     );

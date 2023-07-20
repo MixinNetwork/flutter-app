@@ -197,6 +197,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "avatar": MessageLookupByLibrary.simpleMessage("Avatar"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
         "biography": MessageLookupByLibrary.simpleMessage("Biography"),
+        "biometric": MessageLookupByLibrary.simpleMessage("Biometric"),
         "block": MessageLookupByLibrary.simpleMessage("Block"),
         "botNotFound": MessageLookupByLibrary.simpleMessage("Bot not found"),
         "bots": MessageLookupByLibrary.simpleMessage("BOTS"),
@@ -553,6 +554,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noPosts": MessageLookupByLibrary.simpleMessage("NO POSTS"),
         "noResults": MessageLookupByLibrary.simpleMessage("NO RESULTS"),
         "notFound": MessageLookupByLibrary.simpleMessage("Not found"),
+        "notSupportBiometric": MessageLookupByLibrary.simpleMessage(
+            "This Device is not supported Biometric authentication"),
         "notificationContent": MessageLookupByLibrary.simpleMessage(
             "Don\'t miss messages from your friends."),
         "notificationPermissionManually": MessageLookupByLibrary.simpleMessage(
@@ -747,6 +750,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unitSecond": m49,
         "unitWeek": m50,
         "unknowError": MessageLookupByLibrary.simpleMessage("Unknow error"),
+        "unlockMixinMessenger":
+            MessageLookupByLibrary.simpleMessage("Unlock Mixin Messenger"),
         "unlockWithWasscode": MessageLookupByLibrary.simpleMessage(
             "Enter Passcode to unlock Mixin Messenger"),
         "unmute": MessageLookupByLibrary.simpleMessage("Unmute"),
@@ -758,6 +763,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unreadMessages":
             MessageLookupByLibrary.simpleMessage("Unread messages"),
         "upgrading": MessageLookupByLibrary.simpleMessage("Upgrading"),
+        "useBiometric": MessageLookupByLibrary.simpleMessage("Use Biometric"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "username": MessageLookupByLibrary.simpleMessage("Username"),
         "valueNow": m51,

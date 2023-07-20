@@ -1008,6 +1008,48 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.1"
+  local_auth:
+    dependency: "direct main"
+    description:
+      path: "packages/local_auth/local_auth"
+      ref: "69bab28cda3bd948f0db5ad7fc9831c29fdcf400"
+      resolved-ref: "69bab28cda3bd948f0db5ad7fc9831c29fdcf400"
+      url: "https://github.com/YeungKC/packages"
+    source: git
+    version: "2.1.6"
+  local_auth_android:
+    dependency: transitive
+    description:
+      name: local_auth_android
+      sha256: "36a78898198386d36d4e152b8cb46059b18f0e2017f813a0e833e216199f8950"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.32"
+  local_auth_foundation:
+    dependency: transitive
+    description:
+      path: "packages/local_auth/local_auth_foundation"
+      ref: "7ba9b32b9abdb4f5461c16354986418e83d81095"
+      resolved-ref: "7ba9b32b9abdb4f5461c16354986418e83d81095"
+      url: "https://github.com/YeungKC/packages"
+    source: git
+    version: "1.2.0"
+  local_auth_platform_interface:
+    dependency: transitive
+    description:
+      name: local_auth_platform_interface
+      sha256: "9e160d59ef0743e35f1b50f4fb84dc64f55676b1b8071e319ef35e7f3bc13367"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.7"
+  local_auth_windows:
+    dependency: transitive
+    description:
+      name: local_auth_windows
+      sha256: "5af808e108c445d0cf702a8c5f8242f1363b7970320334f82e6e1e8ad0b0d7d4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.9"
   logging:
     dependency: transitive
     description:

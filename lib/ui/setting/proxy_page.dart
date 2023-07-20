@@ -59,10 +59,7 @@ class _ProxySettingWidget extends HookWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CellGroup(
-          cellBackgroundColor: context.dynamicColor(
-            Colors.white,
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-          ),
+          cellBackgroundColor: context.theme.settingCellBackgroundColor,
           child: CellItem(
             title: Text(context.l10n.proxy),
             trailing: Transform.scale(
@@ -78,10 +75,7 @@ class _ProxySettingWidget extends HookWidget {
           ),
         ),
         CellGroup(
-          cellBackgroundColor: context.dynamicColor(
-            Colors.white,
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-          ),
+          cellBackgroundColor: context.theme.settingCellBackgroundColor,
           child: Column(
             children: [
               CellItem(
@@ -148,10 +142,7 @@ class _ProxyItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: context.dynamicColor(
-          Colors.white,
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-        ),
+        color: context.theme.settingCellBackgroundColor,
         child: ListTile(
           leading: SizedBox(
             height: double.infinity,

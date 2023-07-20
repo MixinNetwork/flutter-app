@@ -13,9 +13,11 @@ import '../account/security_key_value.dart';
 import '../constants/resources.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../utils/app_lifecycle.dart';
+import '../utils/authentication.dart';
 import '../utils/event_bus.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
+import 'dialog.dart';
 
 const _lockDuration = Duration(minutes: 1);
 
@@ -54,9 +56,14 @@ class _AuthGuard extends HookWidget {
   Widget build(BuildContext context) {
     final focusNode = useFocusNode();
     final textEditingController = useTextEditingController();
+
     final hasPasscode =
         useMemoizedStream(SecurityKeyValue.instance.watchHasPasscode).data ??
             SecurityKeyValue.instance.hasPasscode;
+
+    final enableBiometric =
+        useMemoizedStream(SecurityKeyValue.instance.watchBiometric).data ??
+            SecurityKeyValue.instance.biometric;
 
     final hasError = useState(false);
     final lock = useState(SecurityKeyValue.instance.hasPasscode);
@@ -226,6 +233,24 @@ class _AuthGuard extends HookWidget {
                             ),
                           ),
                         ),
+                        if (enableBiometric)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: MixinButton(
+                              backgroundColor: Colors.transparent,
+                              padding: const EdgeInsets.all(24),
+                              onTap: () async {
+                                if (await authenticate()) {
+                                  lock.value = false;
+                                  return;
+                                }
+                              },
+                              child: Text(
+                                context.l10n.useBiometric,
+                                style: TextStyle(color: context.theme.accent),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),

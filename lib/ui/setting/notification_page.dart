@@ -42,10 +42,7 @@ class NotificationPage extends HookWidget {
           children: [
             CellGroup(
               padding: const EdgeInsets.only(right: 10, left: 10),
-              cellBackgroundColor: context.dynamicColor(
-                Colors.white,
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-              ),
+              cellBackgroundColor: context.theme.settingCellBackgroundColor,
               child: CellItem(
                 title: Text(context.l10n.messagePreview),
                 trailing: Transform.scale(
@@ -78,10 +75,8 @@ class NotificationPage extends HookWidget {
                   children: [
                     CellGroup(
                       padding: const EdgeInsets.only(right: 10, left: 10),
-                      cellBackgroundColor: context.dynamicColor(
-                        Colors.white,
-                        darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-                      ),
+                      cellBackgroundColor:
+                          context.theme.settingCellBackgroundColor,
                       child: CellItem(
                         title: Text(context.l10n.turnOnNotifications),
                         onTap: () => openUri(context,

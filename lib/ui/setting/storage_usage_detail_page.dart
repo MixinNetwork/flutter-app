@@ -107,10 +107,7 @@ class StorageUsageDetailPage extends HookWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CellGroup(
-              cellBackgroundColor: context.dynamicColor(
-                Colors.white,
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-              ),
+              cellBackgroundColor: context.theme.settingCellBackgroundColor,
               child: Column(
                 children: [
                   CellItem(

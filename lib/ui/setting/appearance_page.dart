@@ -57,10 +57,7 @@ class _Body extends StatelessWidget {
                 ),
               ),
               CellGroup(
-                cellBackgroundColor: context.dynamicColor(
-                  Colors.white,
-                  darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-                ),
+                cellBackgroundColor: context.theme.settingCellBackgroundColor,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -128,10 +125,7 @@ class _MessageAvatarSetting extends HookWidget {
           ),
         ),
         CellGroup(
-          cellBackgroundColor: context.dynamicColor(
-            Colors.white,
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-          ),
+          cellBackgroundColor: context.theme.settingCellBackgroundColor,
           child: CellItem(
             title: Text(context.l10n.showAvatar),
             trailing: Transform.scale(

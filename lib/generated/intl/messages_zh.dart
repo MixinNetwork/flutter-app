@@ -177,6 +177,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "avatar": MessageLookupByLibrary.simpleMessage("头像"),
         "backup": MessageLookupByLibrary.simpleMessage("备份"),
         "biography": MessageLookupByLibrary.simpleMessage("简介"),
+        "biometric": MessageLookupByLibrary.simpleMessage("生物识别"),
         "block": MessageLookupByLibrary.simpleMessage("屏蔽用户"),
         "botNotFound": MessageLookupByLibrary.simpleMessage("找不到这个机器人"),
         "bots": MessageLookupByLibrary.simpleMessage("机器人"),
@@ -485,6 +486,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noPosts": MessageLookupByLibrary.simpleMessage("没有文章"),
         "noResults": MessageLookupByLibrary.simpleMessage("未找到相关结果"),
         "notFound": MessageLookupByLibrary.simpleMessage("没有找到相应的消息"),
+        "notSupportBiometric":
+            MessageLookupByLibrary.simpleMessage("此设备不支持生物验证"),
         "notificationContent":
             MessageLookupByLibrary.simpleMessage("不再遗漏好友的消息。"),
         "notificationPermissionManually":
@@ -640,6 +643,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unitSecond": m49,
         "unitWeek": m50,
         "unknowError": MessageLookupByLibrary.simpleMessage("未知错误"),
+        "unlockMixinMessenger":
+            MessageLookupByLibrary.simpleMessage("解锁 Mixin Messenger"),
         "unlockWithWasscode":
             MessageLookupByLibrary.simpleMessage("输入密码解锁 Mixin Messenger"),
         "unmute": MessageLookupByLibrary.simpleMessage("取消静音"),
@@ -649,6 +654,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("确定取消置顶所有消息么？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未读消息"),
         "upgrading": MessageLookupByLibrary.simpleMessage("升级中..."),
+        "useBiometric": MessageLookupByLibrary.simpleMessage("使用生物识别"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到这个用户"),
         "username": MessageLookupByLibrary.simpleMessage("用户名"),
         "valueNow": m51,
