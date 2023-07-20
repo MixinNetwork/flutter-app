@@ -1514,10 +1514,14 @@ class AccountServer {
   }
 
   void _sendEventToWorkerIsolate(MainIsolateEventType type, [dynamic args]) {
-    if (_isolateChannel == null) {
-      d('_sendEventToWorkerIsolate: _isolateChannel is null $type');
-      assert(type == MainIsolateEventType.exit);
+    try {
+      if (_isolateChannel == null) {
+        d('_sendEventToWorkerIsolate: _isolateChannel is null $type');
+        assert(type == MainIsolateEventType.exit);
+      }
+      _isolateChannel?.sink.add(type.toEvent(args));
+    } catch (error, s) {
+      e('_sendEventToWorkerIsolate: $error, $s');
     }
-    _isolateChannel?.sink.add(type.toEvent(args));
   }
 }
