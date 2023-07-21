@@ -177,6 +177,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "avatar": MessageLookupByLibrary.simpleMessage("頭像"),
         "backup": MessageLookupByLibrary.simpleMessage("備份"),
         "biography": MessageLookupByLibrary.simpleMessage("簡介"),
+        "biometric": MessageLookupByLibrary.simpleMessage("生物識別"),
         "block": MessageLookupByLibrary.simpleMessage("屏蔽用户"),
         "botNotFound": MessageLookupByLibrary.simpleMessage("找不到這個機器人"),
         "bots": MessageLookupByLibrary.simpleMessage("機器人"),
@@ -249,6 +250,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage("數據與存儲空間"),
         "dataError": MessageLookupByLibrary.simpleMessage("數據錯誤"),
         "dataLoading": MessageLookupByLibrary.simpleMessage("數據加載中，請稍後"),
+        "databaseCorruptedTips": MessageLookupByLibrary.simpleMessage(
+            "數據庫已損壞，暫無法恢復。點擊繼續將重新創建一個新的數據庫檔案。"),
+        "databaseLockedTips": MessageLookupByLibrary.simpleMessage(
+            "數據庫檔案已被鎖定，無法訪問。請嘗試重啓應用或者重啓系統後再試。"),
         "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
             "正在進行數據庫升級，可能需要幾分鐘，請不要強制關閉應用。"),
         "delete": MessageLookupByLibrary.simpleMessage("刪除"),
@@ -379,6 +384,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "exit": MessageLookupByLibrary.simpleMessage("退出"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("退出羣組"),
         "failed": MessageLookupByLibrary.simpleMessage("失敗"),
+        "failedToOpenDatabase":
+            MessageLookupByLibrary.simpleMessage("打開數據庫時出現了錯誤。"),
         "fee": MessageLookupByLibrary.simpleMessage("手續費"),
         "file": MessageLookupByLibrary.simpleMessage("檔案"),
         "fileChooserError": MessageLookupByLibrary.simpleMessage("檔案選擇錯誤"),
@@ -485,6 +492,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noPosts": MessageLookupByLibrary.simpleMessage("沒有文章"),
         "noResults": MessageLookupByLibrary.simpleMessage("未找到相關結果"),
         "notFound": MessageLookupByLibrary.simpleMessage("沒有找到相應的消息"),
+        "notSupportBiometric":
+            MessageLookupByLibrary.simpleMessage("此設備不支持生物驗證"),
         "notificationContent":
             MessageLookupByLibrary.simpleMessage("不再遺漏好友的消息。"),
         "notificationPermissionManually":
@@ -640,6 +649,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unitSecond": m49,
         "unitWeek": m50,
         "unknowError": MessageLookupByLibrary.simpleMessage("未知錯誤"),
+        "unlockMixinMessenger":
+            MessageLookupByLibrary.simpleMessage("解鎖 Mixin Messenger"),
         "unlockWithWasscode":
             MessageLookupByLibrary.simpleMessage("輸入密碼解鎖 Mixin Messenger"),
         "unmute": MessageLookupByLibrary.simpleMessage("取消靜音"),
@@ -649,6 +660,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("確定取消置頂所有消息麼？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未讀消息"),
         "upgrading": MessageLookupByLibrary.simpleMessage("升級中..."),
+        "useBiometric": MessageLookupByLibrary.simpleMessage("使用生物識別"),
+        "userDeleteHint": MessageLookupByLibrary.simpleMessage("該用户已經刪除了賬號。"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到這個用户"),
         "username": MessageLookupByLibrary.simpleMessage("用户名"),
         "valueNow": m51,

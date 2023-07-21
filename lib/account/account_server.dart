@@ -27,7 +27,6 @@ import '../db/dao/sticker_album_dao.dart';
 import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
-import '../db/fts_database.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
@@ -52,8 +51,13 @@ import 'send_message_helper.dart';
 import 'show_pin_message_key_value.dart';
 
 class AccountServer {
-  AccountServer(this.multiAuthCubit, this.settingCubit,
-      {this.userAgent, this.deviceId});
+  AccountServer(
+    this.multiAuthCubit,
+    this.settingCubit, {
+    this.userAgent,
+    this.deviceId,
+    required this.database,
+  });
 
   static String? sid;
 
@@ -62,6 +66,7 @@ class AccountServer {
 
   final MultiAuthCubit multiAuthCubit;
   final SettingCubit settingCubit;
+  final Database database;
   Timer? checkSignalKeyTimer;
 
   bool get _loginByPhoneNumber =>
@@ -111,7 +116,7 @@ class AccountServer {
 
     await initKeyValues(identityNumber);
 
-    await _initDatabase();
+    await _initClient();
 
     checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
       i('refreshSignalKeys periodic');
@@ -159,12 +164,7 @@ class AccountServer {
     markRead(_activeConversationId!);
   }
 
-  Future<void> _initDatabase() async {
-    database = Database(
-      await db.connectToDatabase(identityNumber, fromMainIsolate: true),
-      await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
-    );
-
+  Future<void> _initClient() async {
     client = createClient(
       userId: userId,
       sessionId: sessionId,
@@ -196,7 +196,6 @@ class AccountServer {
   late String privateKey;
 
   late Client client;
-  late Database database;
   late Injector _injector;
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil attachmentUtil;
@@ -738,7 +737,6 @@ class AccountServer {
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
-    await database.dispose();
   }
 
   void release() {
