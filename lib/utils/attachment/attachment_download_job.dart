@@ -122,7 +122,7 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
     options.sendPort.send(_completeMessage);
   } catch (error, s) {
     e('download error: $error, stack: $s');
-    if (error is DioError) {
+    if (error is DioException) {
       e('original stacktrace: ${error.stackTrace}');
     }
     options.sendPort.send(_killMessage);

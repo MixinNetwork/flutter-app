@@ -36,7 +36,7 @@ Client createClient({
         sendTimeout: tenSecond,
         followRedirects: false,
       ),
-      httpLogLevel: HttpLogLevel.none,
+      // httpLogLevel: HttpLogLevel.none,
       jsonDecodeCallback: jsonDecode,
       interceptors: [
         ...interceptors,

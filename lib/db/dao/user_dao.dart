@@ -26,6 +26,7 @@ extension UserExtension on sdk.User {
         isScam: isScam ? 1 : 0,
         codeId: codeId,
         codeUrl: codeUrl,
+        isDeactivated: isDeactivated,
       );
 }
 

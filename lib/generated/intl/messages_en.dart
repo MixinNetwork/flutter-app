@@ -197,6 +197,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "avatar": MessageLookupByLibrary.simpleMessage("Avatar"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
         "biography": MessageLookupByLibrary.simpleMessage("Biography"),
+        "biometric": MessageLookupByLibrary.simpleMessage("Biometric"),
         "block": MessageLookupByLibrary.simpleMessage("Block"),
         "botNotFound": MessageLookupByLibrary.simpleMessage("Bot not found"),
         "bots": MessageLookupByLibrary.simpleMessage("BOTS"),
@@ -283,6 +284,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataError": MessageLookupByLibrary.simpleMessage("Data error"),
         "dataLoading": MessageLookupByLibrary.simpleMessage(
             "Data loading, please wait..."),
+        "databaseCorruptedTips": MessageLookupByLibrary.simpleMessage(
+            "The database is corrupted and cannot be recovered. Clicking continue will create a new database file."),
+        "databaseLockedTips": MessageLookupByLibrary.simpleMessage(
+            "The database file is locked and cannot be accessed. Please try restarting the application or the system and try again."),
         "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
             "The database is being upgraded, it may take several minutes, please do not close this App."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
@@ -431,6 +436,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "exit": MessageLookupByLibrary.simpleMessage("Exit"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("Exit Group"),
         "failed": MessageLookupByLibrary.simpleMessage("Failed"),
+        "failedToOpenDatabase": MessageLookupByLibrary.simpleMessage(
+            "An error occurred while opening the database."),
         "fee": MessageLookupByLibrary.simpleMessage("Fee"),
         "file": MessageLookupByLibrary.simpleMessage("File"),
         "fileChooserError":
@@ -553,6 +560,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noPosts": MessageLookupByLibrary.simpleMessage("NO POSTS"),
         "noResults": MessageLookupByLibrary.simpleMessage("NO RESULTS"),
         "notFound": MessageLookupByLibrary.simpleMessage("Not found"),
+        "notSupportBiometric": MessageLookupByLibrary.simpleMessage(
+            "This Device is not supported Biometric authentication"),
         "notificationContent": MessageLookupByLibrary.simpleMessage(
             "Don\'t miss messages from your friends."),
         "notificationPermissionManually": MessageLookupByLibrary.simpleMessage(
@@ -747,6 +756,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unitSecond": m49,
         "unitWeek": m50,
         "unknowError": MessageLookupByLibrary.simpleMessage("Unknow error"),
+        "unlockMixinMessenger":
+            MessageLookupByLibrary.simpleMessage("Unlock Mixin Messenger"),
         "unlockWithWasscode": MessageLookupByLibrary.simpleMessage(
             "Enter Passcode to unlock Mixin Messenger"),
         "unmute": MessageLookupByLibrary.simpleMessage("Unmute"),
@@ -758,6 +769,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "unreadMessages":
             MessageLookupByLibrary.simpleMessage("Unread messages"),
         "upgrading": MessageLookupByLibrary.simpleMessage("Upgrading"),
+        "useBiometric": MessageLookupByLibrary.simpleMessage("Use Biometric"),
+        "userDeleteHint": MessageLookupByLibrary.simpleMessage(
+            "The user has deleted his own account."),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "username": MessageLookupByLibrary.simpleMessage("Username"),
         "valueNow": m51,
