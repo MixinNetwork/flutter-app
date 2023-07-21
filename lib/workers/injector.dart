@@ -5,6 +5,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../constants/constants.dart';
 import '../db/dao/user_dao.dart';
 import '../db/database.dart';
+import '../db/database_event_bus.dart';
 import '../db/mixin_database.dart' as db;
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
@@ -123,8 +124,10 @@ class Injector {
         .replaceAll(conversationId, participantSessions);
   }
 
-  Future<List<db.User>?> refreshUsers(List<String> ids,
-      {bool force = false}) async {
+  Future<List<db.User>?> refreshUsers(
+    List<String> ids, {
+    bool force = false,
+  }) async {
     if (ids.isEmpty) {
       return null;
     }
@@ -153,8 +156,13 @@ class Injector {
 
   Future<List<db.User>?> _fetchUsers(List<String> ids) async {
     try {
-      final response = await client.userApi.getUsers(ids);
-      return insertUpdateUsers(response.data);
+      if (ids.length == 1) {
+        final response = await client.userApi.getUserById(ids.first);
+        return insertUpdateUsers([response.data]);
+      } else {
+        final response = await client.userApi.getUsers(ids);
+        return insertUpdateUsers(response.data);
+      }
     } catch (e, s) {
       w('_fetchUsers error $e, stack: $s');
     }
@@ -188,6 +196,7 @@ class Injector {
         );
       }
     }
+    DataBaseEventBus.instance.updateUsers(users.map((e) => e.userId));
     return result;
   }
 
