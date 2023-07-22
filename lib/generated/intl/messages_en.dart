@@ -284,6 +284,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataError": MessageLookupByLibrary.simpleMessage("Data error"),
         "dataLoading": MessageLookupByLibrary.simpleMessage(
             "Data loading, please wait..."),
+        "databaseCorruptedTips": MessageLookupByLibrary.simpleMessage(
+            "The database is corrupted and cannot be recovered. Clicking continue will create a new database file."),
+        "databaseLockedTips": MessageLookupByLibrary.simpleMessage(
+            "The database file is locked and cannot be accessed. Please try restarting the application or the system and try again."),
         "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
             "The database is being upgraded, it may take several minutes, please do not close this App."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
@@ -432,6 +436,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "exit": MessageLookupByLibrary.simpleMessage("Exit"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("Exit Group"),
         "failed": MessageLookupByLibrary.simpleMessage("Failed"),
+        "failedToOpenDatabase": MessageLookupByLibrary.simpleMessage(
+            "An error occurred while opening the database."),
         "fee": MessageLookupByLibrary.simpleMessage("Fee"),
         "file": MessageLookupByLibrary.simpleMessage("File"),
         "fileChooserError":
@@ -764,6 +770,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Unread messages"),
         "upgrading": MessageLookupByLibrary.simpleMessage("Upgrading"),
         "useBiometric": MessageLookupByLibrary.simpleMessage("Use Biometric"),
+        "userDeleteHint": MessageLookupByLibrary.simpleMessage(
+            "The user has deleted his own account."),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "username": MessageLookupByLibrary.simpleMessage("Username"),
         "valueNow": m51,

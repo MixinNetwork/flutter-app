@@ -2396,6 +2396,13 @@ class Users extends Table with TableInfo<Users, User> {
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       $customConstraints: '');
+  static const VerificationMeta _isDeactivatedMeta =
+      const VerificationMeta('isDeactivated');
+  late final GeneratedColumn<bool> isDeactivated = GeneratedColumn<bool>(
+      'is_deactivated', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         userId,
@@ -2412,7 +2419,8 @@ class Users extends Table with TableInfo<Users, User> {
         biography,
         isScam,
         codeUrl,
-        codeId
+        codeId,
+        isDeactivated
       ];
   @override
   String get aliasedName => _alias ?? 'users';
@@ -2482,6 +2490,12 @@ class Users extends Table with TableInfo<Users, User> {
       context.handle(_codeIdMeta,
           codeId.isAcceptableOrUnknown(data['code_id']!, _codeIdMeta));
     }
+    if (data.containsKey('is_deactivated')) {
+      context.handle(
+          _isDeactivatedMeta,
+          isDeactivated.isAcceptableOrUnknown(
+              data['is_deactivated']!, _isDeactivatedMeta));
+    }
     return context;
   }
 
@@ -2522,6 +2536,8 @@ class Users extends Table with TableInfo<Users, User> {
           .read(DriftSqlType.string, data['${effectivePrefix}code_url']),
       codeId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}code_id']),
+      isDeactivated: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_deactivated']),
     );
   }
 
@@ -2562,6 +2578,7 @@ class User extends DataClass implements Insertable<User> {
   final int? isScam;
   final String? codeUrl;
   final String? codeId;
+  final bool? isDeactivated;
   const User(
       {required this.userId,
       required this.identityNumber,
@@ -2577,7 +2594,8 @@ class User extends DataClass implements Insertable<User> {
       this.biography,
       this.isScam,
       this.codeUrl,
-      this.codeId});
+      this.codeId,
+      this.isDeactivated});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2625,6 +2643,9 @@ class User extends DataClass implements Insertable<User> {
     if (!nullToAbsent || codeId != null) {
       map['code_id'] = Variable<String>(codeId);
     }
+    if (!nullToAbsent || isDeactivated != null) {
+      map['is_deactivated'] = Variable<bool>(isDeactivated);
+    }
     return map;
   }
 
@@ -2666,6 +2687,9 @@ class User extends DataClass implements Insertable<User> {
           : Value(codeUrl),
       codeId:
           codeId == null && nullToAbsent ? const Value.absent() : Value(codeId),
+      isDeactivated: isDeactivated == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isDeactivated),
     );
   }
 
@@ -2689,6 +2713,7 @@ class User extends DataClass implements Insertable<User> {
       isScam: serializer.fromJson<int?>(json['is_scam']),
       codeUrl: serializer.fromJson<String?>(json['code_url']),
       codeId: serializer.fromJson<String?>(json['code_id']),
+      isDeactivated: serializer.fromJson<bool?>(json['is_deactivated']),
     );
   }
   @override
@@ -2710,6 +2735,7 @@ class User extends DataClass implements Insertable<User> {
       'is_scam': serializer.toJson<int?>(isScam),
       'code_url': serializer.toJson<String?>(codeUrl),
       'code_id': serializer.toJson<String?>(codeId),
+      'is_deactivated': serializer.toJson<bool?>(isDeactivated),
     };
   }
 
@@ -2728,7 +2754,8 @@ class User extends DataClass implements Insertable<User> {
           Value<String?> biography = const Value.absent(),
           Value<int?> isScam = const Value.absent(),
           Value<String?> codeUrl = const Value.absent(),
-          Value<String?> codeId = const Value.absent()}) =>
+          Value<String?> codeId = const Value.absent(),
+          Value<bool?> isDeactivated = const Value.absent()}) =>
       User(
         userId: userId ?? this.userId,
         identityNumber: identityNumber ?? this.identityNumber,
@@ -2746,6 +2773,8 @@ class User extends DataClass implements Insertable<User> {
         isScam: isScam.present ? isScam.value : this.isScam,
         codeUrl: codeUrl.present ? codeUrl.value : this.codeUrl,
         codeId: codeId.present ? codeId.value : this.codeId,
+        isDeactivated:
+            isDeactivated.present ? isDeactivated.value : this.isDeactivated,
       );
   @override
   String toString() {
@@ -2764,7 +2793,8 @@ class User extends DataClass implements Insertable<User> {
           ..write('biography: $biography, ')
           ..write('isScam: $isScam, ')
           ..write('codeUrl: $codeUrl, ')
-          ..write('codeId: $codeId')
+          ..write('codeId: $codeId, ')
+          ..write('isDeactivated: $isDeactivated')
           ..write(')'))
         .toString();
   }
@@ -2785,7 +2815,8 @@ class User extends DataClass implements Insertable<User> {
       biography,
       isScam,
       codeUrl,
-      codeId);
+      codeId,
+      isDeactivated);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2804,7 +2835,8 @@ class User extends DataClass implements Insertable<User> {
           other.biography == this.biography &&
           other.isScam == this.isScam &&
           other.codeUrl == this.codeUrl &&
-          other.codeId == this.codeId);
+          other.codeId == this.codeId &&
+          other.isDeactivated == this.isDeactivated);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -2823,6 +2855,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<int?> isScam;
   final Value<String?> codeUrl;
   final Value<String?> codeId;
+  final Value<bool?> isDeactivated;
   final Value<int> rowid;
   const UsersCompanion({
     this.userId = const Value.absent(),
@@ -2840,6 +2873,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.isScam = const Value.absent(),
     this.codeUrl = const Value.absent(),
     this.codeId = const Value.absent(),
+    this.isDeactivated = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UsersCompanion.insert({
@@ -2858,6 +2892,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.isScam = const Value.absent(),
     this.codeUrl = const Value.absent(),
     this.codeId = const Value.absent(),
+    this.isDeactivated = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : userId = Value(userId),
         identityNumber = Value(identityNumber);
@@ -2877,6 +2912,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<int>? isScam,
     Expression<String>? codeUrl,
     Expression<String>? codeId,
+    Expression<bool>? isDeactivated,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2895,6 +2931,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (isScam != null) 'is_scam': isScam,
       if (codeUrl != null) 'code_url': codeUrl,
       if (codeId != null) 'code_id': codeId,
+      if (isDeactivated != null) 'is_deactivated': isDeactivated,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2915,6 +2952,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       Value<int?>? isScam,
       Value<String?>? codeUrl,
       Value<String?>? codeId,
+      Value<bool?>? isDeactivated,
       Value<int>? rowid}) {
     return UsersCompanion(
       userId: userId ?? this.userId,
@@ -2932,6 +2970,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       isScam: isScam ?? this.isScam,
       codeUrl: codeUrl ?? this.codeUrl,
       codeId: codeId ?? this.codeId,
+      isDeactivated: isDeactivated ?? this.isDeactivated,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2988,6 +3027,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (codeId.present) {
       map['code_id'] = Variable<String>(codeId.value);
     }
+    if (isDeactivated.present) {
+      map['is_deactivated'] = Variable<bool>(isDeactivated.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3012,6 +3054,7 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('isScam: $isScam, ')
           ..write('codeUrl: $codeUrl, ')
           ..write('codeId: $codeId, ')
+          ..write('isDeactivated: $isDeactivated, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

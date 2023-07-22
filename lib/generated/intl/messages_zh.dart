@@ -250,6 +250,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage("数据与存储空间"),
         "dataError": MessageLookupByLibrary.simpleMessage("数据错误"),
         "dataLoading": MessageLookupByLibrary.simpleMessage("数据加载中，请稍后"),
+        "databaseCorruptedTips": MessageLookupByLibrary.simpleMessage(
+            "数据库已损坏，暂无法恢复。点击继续将重新创建一个新的数据库文件。"),
+        "databaseLockedTips": MessageLookupByLibrary.simpleMessage(
+            "数据库文件已被锁定，无法访问。请尝试重启应用或者重启系统后再试。"),
         "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
             "正在进行数据库升级，可能需要几分钟，请不要强制关闭应用。"),
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
@@ -380,6 +384,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "exit": MessageLookupByLibrary.simpleMessage("退出"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("退出群组"),
         "failed": MessageLookupByLibrary.simpleMessage("失败"),
+        "failedToOpenDatabase":
+            MessageLookupByLibrary.simpleMessage("打开数据库时出现了错误。"),
         "fee": MessageLookupByLibrary.simpleMessage("手续费"),
         "file": MessageLookupByLibrary.simpleMessage("文件"),
         "fileChooserError": MessageLookupByLibrary.simpleMessage("文件选择错误"),
@@ -655,6 +661,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未读消息"),
         "upgrading": MessageLookupByLibrary.simpleMessage("升级中..."),
         "useBiometric": MessageLookupByLibrary.simpleMessage("使用生物识别"),
+        "userDeleteHint": MessageLookupByLibrary.simpleMessage("该用户已经删除了账号。"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到这个用户"),
         "username": MessageLookupByLibrary.simpleMessage("用户名"),
         "valueNow": m51,

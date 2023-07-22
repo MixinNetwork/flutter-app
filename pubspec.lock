@@ -311,10 +311,10 @@ packages:
     dependency: transitive
     description:
       name: dart_jsonwebtoken
-      sha256: "2a42e97c0b8b4e9a42b24a71453635f445c7b66c7d7c81e3a429f37ead9fe778"
+      sha256: e878f2ee660aba6536d23aca710a475b2dd1ccf61130e2341fbb07cc98442f4a
       url: "https://pub.dev"
     source: hosted
-    version: "2.7.1"
+    version: "2.8.2"
   dart_style:
     dependency: transitive
     description:
@@ -1126,10 +1126,10 @@ packages:
     dependency: "direct main"
     description:
       name: mixin_bot_sdk_dart
-      sha256: "1843e10a0c64fbf1936bb7703cce72c3f3da2ca7ace8dc6ada8a79b4db9437fc"
+      sha256: "9e623b63e13d7d85a11212120c9ebb27e777e5293fbdd443427d48c20f9a2946"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.4.1"
   mixin_logger:
     dependency: "direct main"
     description:

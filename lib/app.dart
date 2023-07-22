@@ -252,8 +252,8 @@ class _App extends StatelessWidget {
                 forceBrightness: context.watch<SettingCubit>().brightness,
                 child: MediaQuery(
                   data: mediaQueryData.copyWith(
+                    // Different linux distro change the value, e.g. 1.2
                     textScaler: Platform.isLinux
-                        // Different linux distro change the value, e.g. 1.2
                         ? TextScaler.noScaling
                         : mediaQueryData.textScaler,
                   ),

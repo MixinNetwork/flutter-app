@@ -250,6 +250,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage("數據與存儲空間"),
         "dataError": MessageLookupByLibrary.simpleMessage("數據錯誤"),
         "dataLoading": MessageLookupByLibrary.simpleMessage("數據加載中，請稍後"),
+        "databaseCorruptedTips": MessageLookupByLibrary.simpleMessage(
+            "數據庫已損壞，暫無法恢復。點擊繼續將重新創建一個新的數據庫檔案。"),
+        "databaseLockedTips": MessageLookupByLibrary.simpleMessage(
+            "數據庫檔案已被鎖定，無法訪問。請嘗試重啓應用或者重啓系統後再試。"),
         "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
             "正在進行數據庫升級，可能需要幾分鐘，請不要強制關閉應用。"),
         "delete": MessageLookupByLibrary.simpleMessage("刪除"),
@@ -380,6 +384,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "exit": MessageLookupByLibrary.simpleMessage("退出"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("退出羣組"),
         "failed": MessageLookupByLibrary.simpleMessage("失敗"),
+        "failedToOpenDatabase":
+            MessageLookupByLibrary.simpleMessage("打開數據庫時出現了錯誤。"),
         "fee": MessageLookupByLibrary.simpleMessage("手續費"),
         "file": MessageLookupByLibrary.simpleMessage("檔案"),
         "fileChooserError": MessageLookupByLibrary.simpleMessage("檔案選擇錯誤"),
@@ -655,6 +661,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未讀消息"),
         "upgrading": MessageLookupByLibrary.simpleMessage("升級中..."),
         "useBiometric": MessageLookupByLibrary.simpleMessage("使用生物識別"),
+        "userDeleteHint": MessageLookupByLibrary.simpleMessage("該用户已經刪除了賬號。"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到這個用户"),
         "username": MessageLookupByLibrary.simpleMessage("用户名"),
         "valueNow": m51,

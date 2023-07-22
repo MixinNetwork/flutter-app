@@ -1084,6 +1084,26 @@ class Localization {
     );
   }
 
+  /// `The database is corrupted and cannot be recovered. Clicking continue will create a new database file.`
+  String get databaseCorruptedTips {
+    return Intl.message(
+      'The database is corrupted and cannot be recovered. Clicking continue will create a new database file.',
+      name: 'databaseCorruptedTips',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The database file is locked and cannot be accessed. Please try restarting the application or the system and try again.`
+  String get databaseLockedTips {
+    return Intl.message(
+      'The database file is locked and cannot be accessed. Please try restarting the application or the system and try again.',
+      name: 'databaseLockedTips',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The database is being upgraded, it may take several minutes, please do not close this App.`
   String get databaseUpgradeTips {
     return Intl.message(
@@ -1953,6 +1973,16 @@ class Localization {
     return Intl.message(
       'Failed',
       name: 'failed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An error occurred while opening the database.`
+  String get failedToOpenDatabase {
+    return Intl.message(
+      'An error occurred while opening the database.',
+      name: 'failedToOpenDatabase',
       desc: '',
       args: [],
     );
@@ -4433,6 +4463,16 @@ class Localization {
     return Intl.message(
       'Use Biometric',
       name: 'useBiometric',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The user has deleted his own account.`
+  String get userDeleteHint {
+    return Intl.message(
+      'The user has deleted his own account.',
+      name: 'userDeleteHint',
       desc: '',
       args: [],
     );
