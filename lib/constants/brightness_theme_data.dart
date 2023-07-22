@@ -24,6 +24,7 @@ const lightBrightnessThemeData = BrightnessThemeData(
   stickerPlaceholderColor: Color.fromRGBO(236, 236, 236, 1),
   waveformBackground: Color.fromRGBO(221, 221, 221, 1),
   waveformForeground: Color.fromRGBO(155, 155, 155, 1),
+  settingCellBackgroundColor: Colors.white,
 );
 
 const darkBrightnessThemeData = BrightnessThemeData(
@@ -48,6 +49,7 @@ const darkBrightnessThemeData = BrightnessThemeData(
   stickerPlaceholderColor: Color.fromRGBO(40, 44, 48, 1),
   waveformBackground: Color.fromRGBO(255, 255, 255, 0.4),
   waveformForeground: Color.fromRGBO(255, 255, 255, 1),
+  settingCellBackgroundColor: Color.fromRGBO(255, 255, 255, 0.06),
 );
 
 final circleColors = [
