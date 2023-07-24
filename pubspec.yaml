@@ -71,7 +71,7 @@ dependencies:
   hive_flutter: ^1.0.0
   http: ^0.13.6
   http_client_helper: ^2.0.3
-  hydrated_bloc: ^9.1.1
+  hydrated_bloc: ^9.1.2
   image_picker: ^1.0.1
   intl: ^0.18.0
   intl_phone_number_input: ^0.7.3+1
