@@ -165,25 +165,30 @@ class _UserProfileBody extends StatelessWidget {
             name: user.fullName,
           ),
           const SizedBox(height: 8),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: SelectableText(
-                  user.fullName ?? '',
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 16,
-                    height: 1,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: SelectionArea(
+                    child: Text(
+                      user.fullName ?? '',
+                      style: TextStyle(
+                        color: context.theme.text,
+                        fontSize: 16,
+                        height: 1,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
                 ),
-              ),
-              VerifiedOrBotWidget(
-                verified: user.isVerified,
-                isBot: !anonymous && user.appId != null,
-              )
-            ],
+                VerifiedOrBotWidget(
+                  verified: user.isVerified,
+                  isBot: !anonymous && user.appId != null,
+                )
+              ],
+            ),
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
