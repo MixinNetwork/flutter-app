@@ -555,7 +555,7 @@ class _TileBigImage extends HookWidget {
           children: [
             ConstrainedBox(
               constraints: const BoxConstraints(
-                maxHeight: 420,
+                maxHeight: 350,
                 minWidth: 420,
                 maxWidth: 420,
               ),
@@ -565,43 +565,49 @@ class _TileBigImage extends HookWidget {
                 errorBuilder: (_, __, ___) => const SizedBox(),
               ),
             ),
-            Container(
-              height: 50,
-              decoration: BoxDecoration(
+            Positioned(
+              bottom: 0,
+              right: 0,
+              left: 0,
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.28),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              )),
-              child: Row(
-                children: [
-                  const Spacer(),
-                  ActionButton(
-                    color: Colors.white,
-                    name: Resources.assetsImagesEditImageSvg,
-                    padding: const EdgeInsets.all(10),
-                    onTap: () async {
-                      final snapshot = file.imageEditorSnapshot != null
-                          ? await showImageEditor(context,
-                              path: file.imageEditorSnapshot!.rawImagePath,
-                              snapshot: file.imageEditorSnapshot)
-                          : await showImageEditor(context, path: file.path);
-                      if (snapshot == null) {
-                        return;
-                      }
-                      onEdited.call(file, snapshot);
-                    },
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.7),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
-                  ActionButton(
-                    color: Colors.white,
-                    name: Resources.assetsImagesDeleteSvg,
-                    padding: const EdgeInsets.all(10),
-                    onTap: onDelete,
-                  ),
-                ],
+                ),
+                child: Row(
+                  children: [
+                    const Spacer(),
+                    ActionButton(
+                      color: Colors.white,
+                      name: Resources.assetsImagesEditImageSvg,
+                      padding: const EdgeInsets.all(10),
+                      onTap: () async {
+                        final snapshot = file.imageEditorSnapshot != null
+                            ? await showImageEditor(context,
+                                path: file.imageEditorSnapshot!.rawImagePath,
+                                snapshot: file.imageEditorSnapshot)
+                            : await showImageEditor(context, path: file.path);
+                        if (snapshot == null) {
+                          return;
+                        }
+                        onEdited.call(file, snapshot);
+                      },
+                    ),
+                    ActionButton(
+                      color: Colors.white,
+                      name: Resources.assetsImagesDeleteSvg,
+                      padding: const EdgeInsets.all(10),
+                      onTap: onDelete,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
