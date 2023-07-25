@@ -1,6 +1,8 @@
 PODS:
   - audio_session (0.0.1):
     - FlutterMacOS
+  - cupertino_http (0.0.1):
+    - FlutterMacOS
   - desktop_drop (0.0.1):
     - FlutterMacOS
   - desktop_keep_screen_on (0.0.1):
@@ -64,6 +66,7 @@ PODS:
 
 DEPENDENCIES:
   - audio_session (from `Flutter/ephemeral/.symlinks/plugins/audio_session/macos`)
+  - cupertino_http (from `Flutter/ephemeral/.symlinks/plugins/cupertino_http/macos`)
   - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
   - desktop_keep_screen_on (from `Flutter/ephemeral/.symlinks/plugins/desktop_keep_screen_on/macos`)
   - desktop_lifecycle (from `Flutter/ephemeral/.symlinks/plugins/desktop_lifecycle/macos`)
@@ -95,6 +98,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   audio_session:
     :path: Flutter/ephemeral/.symlinks/plugins/audio_session/macos
+  cupertino_http:
+    :path: Flutter/ephemeral/.symlinks/plugins/cupertino_http/macos
   desktop_drop:
     :path: Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos
   desktop_keep_screen_on:
@@ -144,6 +149,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   audio_session: dea1f41890dbf1718f04a56f1d6150fd50039b72
+  cupertino_http: afa11b9e2786b62da2671e4ddd32caf792503748
   desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
   desktop_keep_screen_on: 855ea723f37225b8fc7895cffa06fe89f4fabd46
   desktop_lifecycle: a600c10e12fe033c7be9078f2e929b8241f2c1e3
