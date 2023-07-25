@@ -546,79 +546,65 @@ class _TileBigImage extends HookWidget {
   Widget build(BuildContext context) {
     assert(file.isImage);
 
-    final showDelete = useState(false);
-
-    return MouseRegion(
-      onEnter: (_) => showDelete.value = true,
-      onExit: (_) => showDelete.value = false,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(6)),
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 420,
-                  minWidth: 420,
-                  maxWidth: 420,
-                ),
-                child: Image(
-                  image: MixinFileImage(File(file.path)),
-                  fit: BoxFit.fitWidth,
-                  errorBuilder: (_, __, ___) => const SizedBox(),
-                ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(6)),
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxHeight: 420,
+                minWidth: 420,
+                maxWidth: 420,
               ),
-              AnimatedCrossFade(
-                firstChild: const SizedBox(),
-                alignment: Alignment.center,
-                secondChild: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.28),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  )),
-                  child: Row(
-                    children: [
-                      const Spacer(),
-                      ActionButton(
-                        color: Colors.white,
-                        name: Resources.assetsImagesEditImageSvg,
-                        padding: const EdgeInsets.all(10),
-                        onTap: () async {
-                          final snapshot = file.imageEditorSnapshot != null
-                              ? await showImageEditor(context,
-                                  path: file.imageEditorSnapshot!.rawImagePath,
-                                  snapshot: file.imageEditorSnapshot)
-                              : await showImageEditor(context, path: file.path);
-                          if (snapshot == null) {
-                            return;
-                          }
-                          onEdited.call(file, snapshot);
-                        },
-                      ),
-                      ActionButton(
-                        color: Colors.white,
-                        name: Resources.assetsImagesDeleteSvg,
-                        padding: const EdgeInsets.all(10),
-                        onTap: onDelete,
-                      ),
-                    ],
+              child: Image(
+                image: MixinFileImage(File(file.path)),
+                fit: BoxFit.fitWidth,
+                errorBuilder: (_, __, ___) => const SizedBox(),
+              ),
+            ),
+            Container(
+              height: 50,
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.28),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              )),
+              child: Row(
+                children: [
+                  const Spacer(),
+                  ActionButton(
+                    color: Colors.white,
+                    name: Resources.assetsImagesEditImageSvg,
+                    padding: const EdgeInsets.all(10),
+                    onTap: () async {
+                      final snapshot = file.imageEditorSnapshot != null
+                          ? await showImageEditor(context,
+                              path: file.imageEditorSnapshot!.rawImagePath,
+                              snapshot: file.imageEditorSnapshot)
+                          : await showImageEditor(context, path: file.path);
+                      if (snapshot == null) {
+                        return;
+                      }
+                      onEdited.call(file, snapshot);
+                    },
                   ),
-                ),
-                crossFadeState: kPlatformIsMobile || showDelete.value
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                duration: const Duration(milliseconds: 150),
-              )
-            ],
-          ),
+                  ActionButton(
+                    color: Colors.white,
+                    name: Resources.assetsImagesDeleteSvg,
+                    padding: const EdgeInsets.all(10),
+                    onTap: onDelete,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -672,12 +658,7 @@ class _TileNormalFile extends HookWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final showDelete = useState(false);
-    return MouseRegion(
-      onEnter: (_) => showDelete.value = true,
-      onExit: (_) => showDelete.value = false,
-      child: Row(
+  Widget build(BuildContext context) => Row(
         children: [
           const SizedBox(width: 30),
           _FileIcon(extension: _getFileExtension(file)),
@@ -708,19 +689,15 @@ class _TileNormalFile extends HookWidget {
               ],
             ),
           ),
-          if (showDelete.value)
-            ActionButton(
-              color: context.theme.secondaryText,
-              name: Resources.assetsImagesDeleteSvg,
-              padding: const EdgeInsets.all(10),
-              onTap: onDelete,
-            ),
-          if (showDelete.value) const SizedBox(width: 10),
-          if (!showDelete.value) const SizedBox(width: 30),
+          ActionButton(
+            color: context.theme.secondaryText,
+            name: Resources.assetsImagesDeleteSvg,
+            padding: const EdgeInsets.all(10),
+            onTap: onDelete,
+          ),
+          const SizedBox(width: 10),
         ],
-      ),
-    );
-  }
+      );
 }
 
 class _FileInputOverlay extends HookWidget {
