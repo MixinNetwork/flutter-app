@@ -37,7 +37,7 @@ dependencies:
       ref: 1ac0384083ca7d072f9d1246a0dd221e458d3169
       path: packages/common_crypto
   dbus: ^0.7.8
-  decimal: ^2.3.2
+  decimal: ^2.3.3
   desktop_drop: ^0.4.1
   desktop_keep_screen_on: ^0.0.2
   desktop_lifecycle: ^0.1.1
