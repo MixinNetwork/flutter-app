@@ -254,6 +254,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "資料庫已損壞，暫無法恢復。點選繼續將重新建立一個新的資料庫檔案。"),
         "databaseLockedTips": MessageLookupByLibrary.simpleMessage(
             "資料庫檔案已被鎖定，無法訪問。請嘗試重啟應用或者重啟系統後再試。"),
+        "databaseNotADbTips":
+            MessageLookupByLibrary.simpleMessage("無法開啟資料庫，檔案不是一個有效的資料庫檔案。"),
+        "databaseRecreateTips":
+            MessageLookupByLibrary.simpleMessage("重新建立一個新的資料庫檔案，舊檔案將被刪除。"),
         "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
             "正在進行資料庫升級，可能需要幾分鐘，請不要強制關閉應用。"),
         "delete": MessageLookupByLibrary.simpleMessage("刪除"),

@@ -1104,6 +1104,26 @@ class Localization {
     );
   }
 
+  /// `Cannot open the database. The file is not a valid database file.`
+  String get databaseNotADbTips {
+    return Intl.message(
+      'Cannot open the database. The file is not a valid database file.',
+      name: 'databaseNotADbTips',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create a new database file and the old file will be deleted.`
+  String get databaseRecreateTips {
+    return Intl.message(
+      'Create a new database file and the old file will be deleted.',
+      name: 'databaseRecreateTips',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The database is being upgraded, it may take several minutes, please do not close this App.`
   String get databaseUpgradeTips {
     return Intl.message(

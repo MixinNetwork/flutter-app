@@ -111,27 +111,14 @@ class _LoginApp extends rp.ConsumerWidget {
         error = error.remoteCause;
       }
       if (error is SqliteException) {
-        e('SqliteException: ${error.operation} ${error.explanation}');
-        return LandingFailedPage(
-          title: context.l10n.failedToOpenDatabase,
-          message: '${error.explanation}',
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.theme.accent,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () {
-                exit(1);
-              },
-              child: Text(context.l10n.exit),
-            )
-          ],
+        return DatabaseOpenFailedPage(
+          error: error,
+          identityNumber: identityNumber,
         );
       } else {
         return LandingFailedPage(
             title: context.l10n.unknowError,
-            message: 'Unkonwn ERror',
+            message: error.toString(),
             actions: [
               ElevatedButton(
                 onPressed: () {},
