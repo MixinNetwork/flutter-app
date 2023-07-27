@@ -132,10 +132,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   ) {
     final httpClientAdapter = _dio.httpClientAdapter;
     if (httpClientAdapter is IOHttpClientAdapter) {
-      httpClientAdapter.onHttpClientCreate = (client) {
-        client.badCertificateCallback =
+      httpClientAdapter.createHttpClient = () => HttpClient()
+        ..badCertificateCallback =
             (X509Certificate cert, String host, int port) => true;
-      };
     } else {
       w('httpClientAdapter is not IOHttpClientAdapter');
     }
