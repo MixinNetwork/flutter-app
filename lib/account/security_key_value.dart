@@ -21,7 +21,10 @@ class SecurityKeyValue extends HiveKeyValue {
       throw ArgumentError('Passcode must be 6 digits');
     }
     box.put(_passcode, value);
-    if (value == null) lockDuration = null;
+    if (value == null) {
+      lockDuration = null;
+      biometric = false;
+    }
   }
 
   bool get biometric => box.get(_biometric, defaultValue: false) as bool;

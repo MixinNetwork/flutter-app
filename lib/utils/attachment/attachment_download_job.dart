@@ -122,7 +122,7 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
     options.sendPort.send(_completeMessage);
   } catch (error, s) {
     e('download error: $error, stack: $s');
-    if (error is DioError) {
+    if (error is DioException) {
       e('original stacktrace: ${error.stackTrace}');
     }
     options.sendPort.send(_killMessage);
@@ -157,8 +157,8 @@ extension _AttachmentDownloadExtension on Dio {
         queryParameters: queryParameters,
         cancelToken: cancelToken ?? CancelToken(),
       );
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.badResponse) {
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.badResponse) {
         if (e.response!.requestOptions.receiveDataWhenStatusError) {
           final res = await transformer.transformResponse(
             e.response!.requestOptions..responseType = ResponseType.json,
@@ -226,7 +226,7 @@ extension _AttachmentDownloadExtension on Dio {
           } finally {
             completer.completeError(
                 // ignore: invalid_use_of_internal_member
-                DioMixin.assureDioError(err, response.requestOptions));
+                DioMixin.assureDioException(err, response.requestOptions));
           }
         });
       },
@@ -238,7 +238,7 @@ extension _AttachmentDownloadExtension on Dio {
           completer.complete(response);
         } catch (e) {
           // ignore: invalid_use_of_internal_member
-          completer.completeError(DioMixin.assureDioError(
+          completer.completeError(DioMixin.assureDioException(
             e,
             response.requestOptions,
           ));
@@ -250,7 +250,7 @@ extension _AttachmentDownloadExtension on Dio {
         } finally {
           completer.completeError(
               // ignore: invalid_use_of_internal_member
-              DioMixin.assureDioError(e, response.requestOptions));
+              DioMixin.assureDioException(e, response.requestOptions));
         }
       },
       cancelOnError: true,
@@ -273,10 +273,10 @@ extension _AttachmentDownloadExtension on Dio {
         await _closeAndDelete();
         if (err is TimeoutException) {
           // ignore: only_throw_errors
-          throw DioError(
+          throw DioException(
             requestOptions: response.requestOptions,
             error: 'Receiving data timeout[${receiveTimeout}ms]',
-            type: DioErrorType.receiveTimeout,
+            type: DioExceptionType.receiveTimeout,
           );
         } else {
           w('download error: $err, stack: $s');

@@ -315,8 +315,11 @@ class Sender {
         ],
       ),
     );
+
     await database.conversationDao.updateConversationStatusById(
-        conversation.conversationId, ConversationStatus.success);
+      conversation.conversationId,
+      ConversationStatus.success,
+    );
 
     final sessionParticipants = response.data.participantSessions;
     if (sessionParticipants != null && sessionParticipants.isNotEmpty) {

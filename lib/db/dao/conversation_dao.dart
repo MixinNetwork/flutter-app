@@ -169,8 +169,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Selectable<ConversationItem> conversationItems() => _baseConversationItems(
       (conversation, owner, lastMessage, lastMessageSender, snapshot,
               participant, em) =>
-          conversation.category.isIn(['CONTACT', 'GROUP']) &
-          conversation.status.equalsValue(ConversationStatus.success),
+          _conversationPredicateByCategory(
+              SlideCategoryType.chats, conversation),
       (conversation, owner, lastMessage, lastMessageSender, snapshot,
               participant, em) =>
           _baseConversationItemOrder(conversation),
@@ -256,10 +256,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         db.conversations,
         [],
         db.conversations.conversationId.equals(conversationId) &
-            db.conversations.status
-                .equals(const ConversationStatusTypeConverter().toSql(status))
-                .not());
+            db.conversations.status.equalsValue(status));
     if (already) return -1;
+
     return (db.update(db.conversations)
           ..where((tbl) =>
               tbl.conversationId.equals(conversationId) &

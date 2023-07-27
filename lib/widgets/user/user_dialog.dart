@@ -151,6 +151,8 @@ class _UserProfileBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final anonymous = user.identityNumber == '0';
     final biographyIsNotEmpty = !(user.biography?.isEmpty ?? true);
+
+    final isDeactivated = user.isDeactivated ?? false;
     return AnimatedSize(
       duration: const Duration(milliseconds: 150),
       child: Column(
@@ -163,25 +165,30 @@ class _UserProfileBody extends StatelessWidget {
             name: user.fullName,
           ),
           const SizedBox(height: 8),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: SelectableText(
-                  user.fullName ?? '',
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 16,
-                    height: 1,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: SelectionArea(
+                    child: Text(
+                      user.fullName ?? '',
+                      style: TextStyle(
+                        color: context.theme.text,
+                        fontSize: 16,
+                        height: 1,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
                 ),
-              ),
-              VerifiedOrBotWidget(
-                verified: user.isVerified,
-                isBot: !anonymous && user.appId != null,
-              )
-            ],
+                VerifiedOrBotWidget(
+                  verified: user.isVerified,
+                  isBot: !anonymous && user.appId != null,
+                )
+              ],
+            ),
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
@@ -197,15 +204,33 @@ class _UserProfileBody extends StatelessWidget {
                     ),
                   ),
                 ),
-              if (!anonymous && user.isStranger)
+              if (!anonymous && user.isStranger && !isDeactivated)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: _AddToContactsButton(user: user),
                 ),
-              if (biographyIsNotEmpty)
+              if (biographyIsNotEmpty && !isDeactivated)
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: _BioText(biography: user.biography ?? ''),
+                ),
+              if (isDeactivated)
+                Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  alignment: Alignment.center,
+                  margin: const EdgeInsets.only(top: 20, right: 20, left: 20),
+                  decoration: BoxDecoration(
+                    color: context.theme.listSelected,
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  ),
+                  child: Text(
+                    context.l10n.userDeleteHint,
+                    style: TextStyle(
+                      color: context.theme.red,
+                    ),
+                  ),
                 ),
               if (!anonymous)
                 Padding(

@@ -22,20 +22,14 @@ class AccountPage extends StatelessWidget {
             child: Column(
               children: [
                 CellGroup(
-                  cellBackgroundColor: context.dynamicColor(
-                    Colors.white,
-                    darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-                  ),
+                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
                   child: CellItem(
                     title: Text(context.l10n.changeNumber),
                     onTap: () => showChangeNumberDialog(context),
                   ),
                 ),
                 CellGroup(
-                  cellBackgroundColor: context.dynamicColor(
-                    Colors.white,
-                    darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-                  ),
+                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
                   child: CellItem(
                     title: Text(context.l10n.deleteMyAccount),
                     onTap: () => context

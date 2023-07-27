@@ -156,137 +156,133 @@ class _FilesPreviewDialog extends HookWidget {
       }
     }
 
-    return Material(
-      color: context.theme.popUp,
-      borderRadius: const BorderRadius.all(Radius.circular(8)),
-      child: SizedBox(
-          width: 480,
-          height: 600,
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _Tab(
-                          assetName: Resources.assetsImagesFilePreviewImagesSvg,
-                          tooltip: context.l10n.sendQuickly,
-                          onTap: () => currentTab.value = _TabType.image,
-                          selected: currentTab.value == _TabType.image,
-                          show: hasImage,
-                        ),
-                        _Tab(
-                          assetName: Resources.assetsImagesFilePreviewFilesSvg,
-                          tooltip: context.l10n.sendWithoutCompression,
-                          onTap: () => currentTab.value = _TabType.files,
-                          selected: currentTab.value == _TabType.files,
-                        ),
-                        _Tab(
-                          assetName: Resources.assetsImagesFilePreviewZipSvg,
-                          tooltip: context.l10n.sendArchived,
-                          onTap: () => currentTab.value = _TabType.zip,
-                          selected: currentTab.value == _TabType.zip,
-                          show: showZipTab,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Expanded(
-                    child: _FileInputOverlay(
-                      onSend: () => send(false),
-                      onFileAdded: (fileAdded) {
-                        final currentFiles =
-                            files.value.map((e) => e.path).toSet();
-                        fileAdded
-                            .removeWhere((e) => currentFiles.contains(e.path));
-                        files.value = (files.value..addAll(fileAdded)).toList();
-                        for (var i = 0; i < fileAdded.length; i++) {
-                          onFileAddedStream.add(currentFiles.length + i);
-                        }
-                      },
-                      child: IndexedStack(
-                        sizing: StackFit.expand,
-                        index: currentTab.value == _TabType.zip ? 1 : 0,
-                        children: [
-                          _AnimatedListBuilder(
-                              files: files.value,
-                              onFileAdded: onFileAddedStream.stream,
-                              onFileDeleted: onFileRemovedStream.stream,
-                              builder: (context, file, animation) =>
-                                  _AnimatedFileTile(
-                                    key: ValueKey(file),
-                                    file: file,
-                                    animation: animation,
-                                    onDelete: removeFile,
-                                    showBigImage: showAsBigImage,
-                                    onImageEdited: (file, image) async {
-                                      final index = files.value.indexOf(file);
-                                      if (index == -1) {
-                                        e('failed to found file');
-                                        return;
-                                      }
-                                      final list = files.value.toList();
-                                      final newFile = File(image.imagePath);
-                                      list[index] = _File(newFile.xFile,
-                                          await newFile.length(), image);
-                                      files.value = list;
-                                    },
-                                  )),
-                          const _PageZip(),
-                        ],
+    return SizedBox(
+        width: 480,
+        height: 600,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.only(left: 15),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _Tab(
+                        assetName: Resources.assetsImagesFilePreviewImagesSvg,
+                        tooltip: context.l10n.sendQuickly,
+                        onTap: () => currentTab.value = _TabType.image,
+                        selected: currentTab.value == _TabType.image,
+                        show: hasImage,
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Align(
-                    child: ContextMenuPortalEntry(
-                      buildMenus: () => [
-                        ContextMenu(
-                          icon: Resources.assetsImagesContextMenuMuteSvg,
-                          title: context.l10n.sendWithoutSound,
-                          onTap: () => send(true),
-                        )
-                      ],
-                      child: ElevatedButton(
-                        onPressed: () => send(false),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.only(
-                              left: 32, top: 18, bottom: 18, right: 32),
-                          backgroundColor: context.theme.accent,
-                        ),
-                        child: Text(
-                          context.l10n.send.toUpperCase(),
-                          style: const TextStyle(color: Colors.white),
-                        ),
+                      _Tab(
+                        assetName: Resources.assetsImagesFilePreviewFilesSvg,
+                        tooltip: context.l10n.sendWithoutCompression,
+                        onTap: () => currentTab.value = _TabType.files,
+                        selected: currentTab.value == _TabType.files,
                       ),
-                    ),
+                      _Tab(
+                        assetName: Resources.assetsImagesFilePreviewZipSvg,
+                        tooltip: context.l10n.sendArchived,
+                        onTap: () => currentTab.value = _TabType.zip,
+                        selected: currentTab.value == _TabType.zip,
+                        show: showZipTab,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  Align(
-                    child: Text(
-                      context.l10n.enterToSend,
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
-              const Align(
-                alignment: AlignmentDirectional.topEnd,
-                child: Padding(
-                  padding: EdgeInsets.all(22),
-                  child: MixinCloseButton(),
                 ),
-              )
-            ],
-          )),
-    );
+                const SizedBox(height: 4),
+                Expanded(
+                  child: _FileInputOverlay(
+                    onSend: () => send(false),
+                    onFileAdded: (fileAdded) {
+                      final currentFiles =
+                          files.value.map((e) => e.path).toSet();
+                      fileAdded
+                          .removeWhere((e) => currentFiles.contains(e.path));
+                      files.value = (files.value..addAll(fileAdded)).toList();
+                      for (var i = 0; i < fileAdded.length; i++) {
+                        onFileAddedStream.add(currentFiles.length + i);
+                      }
+                    },
+                    child: IndexedStack(
+                      sizing: StackFit.expand,
+                      index: currentTab.value == _TabType.zip ? 1 : 0,
+                      children: [
+                        _AnimatedListBuilder(
+                            files: files.value,
+                            onFileAdded: onFileAddedStream.stream,
+                            onFileDeleted: onFileRemovedStream.stream,
+                            builder: (context, file, animation) =>
+                                _AnimatedFileTile(
+                                  key: ValueKey(file),
+                                  file: file,
+                                  animation: animation,
+                                  onDelete: removeFile,
+                                  showBigImage: showAsBigImage,
+                                  onImageEdited: (file, image) async {
+                                    final index = files.value.indexOf(file);
+                                    if (index == -1) {
+                                      e('failed to found file');
+                                      return;
+                                    }
+                                    final list = files.value.toList();
+                                    final newFile = File(image.imagePath);
+                                    list[index] = _File(newFile.xFile,
+                                        await newFile.length(), image);
+                                    files.value = list;
+                                  },
+                                )),
+                        const _PageZip(),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Align(
+                  child: ContextMenuPortalEntry(
+                    buildMenus: () => [
+                      ContextMenu(
+                        icon: Resources.assetsImagesContextMenuMuteSvg,
+                        title: context.l10n.sendWithoutSound,
+                        onTap: () => send(true),
+                      )
+                    ],
+                    child: ElevatedButton(
+                      onPressed: () => send(false),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.only(
+                            left: 32, top: 18, bottom: 18, right: 32),
+                        backgroundColor: context.theme.accent,
+                      ),
+                      child: Text(
+                        context.l10n.send.toUpperCase(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Align(
+                  child: Text(
+                    context.l10n.enterToSend,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+            const Align(
+              alignment: AlignmentDirectional.topEnd,
+              child: Padding(
+                padding: EdgeInsets.all(22),
+                child: MixinCloseButton(),
+              ),
+            )
+          ],
+        ));
   }
 }
 
@@ -550,79 +546,65 @@ class _TileBigImage extends HookWidget {
   Widget build(BuildContext context) {
     assert(file.isImage);
 
-    final showDelete = useState(false);
-
-    return MouseRegion(
-      onEnter: (_) => showDelete.value = true,
-      onExit: (_) => showDelete.value = false,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(6)),
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 420,
-                  minWidth: 420,
-                  maxWidth: 420,
-                ),
-                child: Image(
-                  image: MixinFileImage(File(file.path)),
-                  fit: BoxFit.fitWidth,
-                  errorBuilder: (_, __, ___) => const SizedBox(),
-                ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(6)),
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxHeight: 420,
+                minWidth: 420,
+                maxWidth: 420,
               ),
-              AnimatedCrossFade(
-                firstChild: const SizedBox(),
-                alignment: Alignment.center,
-                secondChild: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.28),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  )),
-                  child: Row(
-                    children: [
-                      const Spacer(),
-                      ActionButton(
-                        color: Colors.white,
-                        name: Resources.assetsImagesEditImageSvg,
-                        padding: const EdgeInsets.all(10),
-                        onTap: () async {
-                          final snapshot = file.imageEditorSnapshot != null
-                              ? await showImageEditor(context,
-                                  path: file.imageEditorSnapshot!.rawImagePath,
-                                  snapshot: file.imageEditorSnapshot)
-                              : await showImageEditor(context, path: file.path);
-                          if (snapshot == null) {
-                            return;
-                          }
-                          onEdited.call(file, snapshot);
-                        },
-                      ),
-                      ActionButton(
-                        color: Colors.white,
-                        name: Resources.assetsImagesDeleteSvg,
-                        padding: const EdgeInsets.all(10),
-                        onTap: onDelete,
-                      ),
-                    ],
+              child: Image(
+                image: MixinFileImage(File(file.path)),
+                fit: BoxFit.fitWidth,
+                errorBuilder: (_, __, ___) => const SizedBox(),
+              ),
+            ),
+            Container(
+              height: 50,
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.28),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              )),
+              child: Row(
+                children: [
+                  const Spacer(),
+                  ActionButton(
+                    color: Colors.white,
+                    name: Resources.assetsImagesEditImageSvg,
+                    padding: const EdgeInsets.all(10),
+                    onTap: () async {
+                      final snapshot = file.imageEditorSnapshot != null
+                          ? await showImageEditor(context,
+                              path: file.imageEditorSnapshot!.rawImagePath,
+                              snapshot: file.imageEditorSnapshot)
+                          : await showImageEditor(context, path: file.path);
+                      if (snapshot == null) {
+                        return;
+                      }
+                      onEdited.call(file, snapshot);
+                    },
                   ),
-                ),
-                crossFadeState: kPlatformIsMobile || showDelete.value
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                duration: const Duration(milliseconds: 150),
-              )
-            ],
-          ),
+                  ActionButton(
+                    color: Colors.white,
+                    name: Resources.assetsImagesDeleteSvg,
+                    padding: const EdgeInsets.all(10),
+                    onTap: onDelete,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -676,12 +658,7 @@ class _TileNormalFile extends HookWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final showDelete = useState(false);
-    return MouseRegion(
-      onEnter: (_) => showDelete.value = true,
-      onExit: (_) => showDelete.value = false,
-      child: Row(
+  Widget build(BuildContext context) => Row(
         children: [
           const SizedBox(width: 30),
           _FileIcon(extension: _getFileExtension(file)),
@@ -712,19 +689,15 @@ class _TileNormalFile extends HookWidget {
               ],
             ),
           ),
-          if (showDelete.value)
-            ActionButton(
-              color: context.theme.secondaryText,
-              name: Resources.assetsImagesDeleteSvg,
-              padding: const EdgeInsets.all(10),
-              onTap: onDelete,
-            ),
-          if (showDelete.value) const SizedBox(width: 10),
-          if (!showDelete.value) const SizedBox(width: 30),
+          ActionButton(
+            color: context.theme.secondaryText,
+            name: Resources.assetsImagesDeleteSvg,
+            padding: const EdgeInsets.all(10),
+            onTap: onDelete,
+          ),
+          const SizedBox(width: 10),
         ],
-      ),
-    );
-  }
+      );
 }
 
 class _FileInputOverlay extends HookWidget {

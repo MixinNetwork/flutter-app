@@ -1,6 +1,8 @@
 PODS:
   - audio_session (0.0.1):
     - FlutterMacOS
+  - cupertino_http (0.0.1):
+    - FlutterMacOS
   - desktop_drop (0.0.1):
     - FlutterMacOS
   - desktop_keep_screen_on (0.0.1):
@@ -18,6 +20,9 @@ PODS:
   - flutter_local_notifications (0.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
+  - local_auth_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - network_info_plus (0.0.1):
     - FlutterMacOS
   - ogg_opus_player (0.0.1):
@@ -61,6 +66,7 @@ PODS:
 
 DEPENDENCIES:
   - audio_session (from `Flutter/ephemeral/.symlinks/plugins/audio_session/macos`)
+  - cupertino_http (from `Flutter/ephemeral/.symlinks/plugins/cupertino_http/macos`)
   - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
   - desktop_keep_screen_on (from `Flutter/ephemeral/.symlinks/plugins/desktop_keep_screen_on/macos`)
   - desktop_lifecycle (from `Flutter/ephemeral/.symlinks/plugins/desktop_lifecycle/macos`)
@@ -70,6 +76,7 @@ DEPENDENCIES:
   - flutter_app_icon_badge (from `Flutter/ephemeral/.symlinks/plugins/flutter_app_icon_badge/macos`)
   - flutter_local_notifications (from `Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
+  - local_auth_foundation (from `Flutter/ephemeral/.symlinks/plugins/local_auth_foundation/darwin`)
   - network_info_plus (from `Flutter/ephemeral/.symlinks/plugins/network_info_plus/macos`)
   - ogg_opus_player (from `Flutter/ephemeral/.symlinks/plugins/ogg_opus_player/macos`)
   - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
@@ -91,6 +98,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   audio_session:
     :path: Flutter/ephemeral/.symlinks/plugins/audio_session/macos
+  cupertino_http:
+    :path: Flutter/ephemeral/.symlinks/plugins/cupertino_http/macos
   desktop_drop:
     :path: Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos
   desktop_keep_screen_on:
@@ -109,6 +118,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
+  local_auth_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/local_auth_foundation/darwin
   network_info_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/network_info_plus/macos
   ogg_opus_player:
@@ -138,6 +149,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   audio_session: dea1f41890dbf1718f04a56f1d6150fd50039b72
+  cupertino_http: afa11b9e2786b62da2671e4ddd32caf792503748
   desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
   desktop_keep_screen_on: 855ea723f37225b8fc7895cffa06fe89f4fabd46
   desktop_lifecycle: a600c10e12fe033c7be9078f2e929b8241f2c1e3
@@ -147,6 +159,7 @@ SPEC CHECKSUMS:
   flutter_app_icon_badge: 099b018a4b36109fb73874411fb4e8b5febac20e
   flutter_local_notifications: 3805ca215b2fb7f397d78b66db91f6a747af52e4
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  local_auth_foundation: 7d1835ccc3ff0cfcf081d7bae330db0911218412
   network_info_plus: f4fbc7877ab7b3294500d9441dfa53cd54972d05
   ogg_opus_player: 67fc56771b16586b9b2478f848e632f751400604
   package_info_plus: 02d7a575e80f194102bef286361c6c326e4c29ce

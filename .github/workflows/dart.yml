@@ -20,7 +20,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: 'beta' # 'master', 'beta', 'dev' or 'stable'
+          channel: 'master' # 'master', 'beta', 'dev' or 'stable'
 
       # flutter build need ninja.
       # https://github.com/subosito/flutter-action/issues/49

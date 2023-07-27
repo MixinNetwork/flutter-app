@@ -140,7 +140,7 @@ class AccountServer {
     appActiveListener.addListener(onActive);
   }
 
-  Future<void> _onClientRequestError(DioError e) async {
+  Future<void> _onClientRequestError(DioException e) async {
     if (e is MixinApiError && (e.error! as MixinError).code == authentication) {
       final serverTime =
           int.tryParse(e.response?.headers.value('x-server-time') ?? '');
@@ -173,7 +173,7 @@ class AccountServer {
       interceptors: [
         InterceptorsWrapper(
           onError: (
-            DioError e,
+            DioException e,
             ErrorInterceptorHandler handler,
           ) async {
             await _onClientRequestError(e);
@@ -272,7 +272,7 @@ class AccountServer {
         _connectedStateBehaviorSubject.add(event.argument as ConnectedState);
         break;
       case WorkerIsolateEventType.onApiRequestedError:
-        _onClientRequestError(event.argument as DioError);
+        _onClientRequestError(event.argument as DioException);
         break;
       case WorkerIsolateEventType.requestDownloadAttachment:
         final request = event.argument as AttachmentRequest;
@@ -1512,10 +1512,14 @@ class AccountServer {
   }
 
   void _sendEventToWorkerIsolate(MainIsolateEventType type, [dynamic args]) {
-    if (_isolateChannel == null) {
-      d('_sendEventToWorkerIsolate: _isolateChannel is null $type');
-      assert(type == MainIsolateEventType.exit);
+    try {
+      if (_isolateChannel == null) {
+        d('_sendEventToWorkerIsolate: _isolateChannel is null $type');
+        assert(type == MainIsolateEventType.exit);
+      }
+      _isolateChannel?.sink.add(type.toEvent(args));
+    } catch (error, s) {
+      e('_sendEventToWorkerIsolate: $error, $s');
     }
-    _isolateChannel?.sink.add(type.toEvent(args));
   }
 }

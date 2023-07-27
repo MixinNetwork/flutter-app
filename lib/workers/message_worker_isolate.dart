@@ -152,7 +152,7 @@ class _MessageProcessRunner {
       interceptors: [
         InterceptorsWrapper(
           onError: (
-            DioError e,
+            DioException e,
             ErrorInterceptorHandler handler,
           ) async {
             _sendEventToMainIsolate(
@@ -347,6 +347,7 @@ class _MessageProcessRunner {
         blaze.waitSyncTime();
         break;
       case MainIsolateEventType.reconnectBlaze:
+        i('message worker isolate: reconnect blaze');
         blaze.reconnect();
         break;
       case MainIsolateEventType.addAckJobs:

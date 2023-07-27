@@ -146,6 +146,7 @@ class BrightnessThemeData {
     required this.stickerPlaceholderColor,
     required this.waveformBackground,
     required this.waveformForeground,
+    required this.settingCellBackgroundColor,
   });
 
   final Color primary;
@@ -169,6 +170,7 @@ class BrightnessThemeData {
   final Color stickerPlaceholderColor;
   final Color waveformBackground;
   final Color waveformForeground;
+  final Color settingCellBackgroundColor;
 
   static BrightnessThemeData lerp(
           BrightnessThemeData begin, BrightnessThemeData end, double t) =>
@@ -200,6 +202,8 @@ class BrightnessThemeData {
             Color.lerp(begin.waveformBackground, end.waveformBackground, t)!,
         waveformForeground:
             Color.lerp(begin.waveformForeground, end.waveformForeground, t)!,
+        settingCellBackgroundColor: Color.lerp(begin.settingCellBackgroundColor,
+            end.settingCellBackgroundColor, t)!,
       );
 
   @override
@@ -226,7 +230,8 @@ class BrightnessThemeData {
           statusBackground == other.statusBackground &&
           stickerPlaceholderColor == other.stickerPlaceholderColor &&
           waveformBackground == other.waveformBackground &&
-          waveformForeground == other.waveformForeground;
+          waveformForeground == other.waveformForeground &&
+          settingCellBackgroundColor == other.settingCellBackgroundColor;
 
   @override
   int get hashCode =>
@@ -249,5 +254,6 @@ class BrightnessThemeData {
       statusBackground.hashCode ^
       stickerPlaceholderColor.hashCode ^
       waveformBackground.hashCode ^
+      waveformForeground.hashCode ^
       waveformForeground.hashCode;
 }

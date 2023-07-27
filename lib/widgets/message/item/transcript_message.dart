@@ -104,6 +104,7 @@ class TranscriptMessageWidget extends HookWidget {
             await showMixinDialog(
                 context: context,
                 padding: const EdgeInsets.symmetric(vertical: 80),
+                backgroundColor: context.theme.chatBackground,
                 child: TranscriptPage(
                   transcriptMessage: message,
                   vlcService: context.audioMessageService,
@@ -257,81 +258,78 @@ class TranscriptPage extends HookWidget {
     final listKey =
         useMemoized(() => GlobalKey(debugLabel: 'transcript_list_key'));
 
-    return ColoredBox(
-      color: context.theme.chatBackground,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: 600,
-          minWidth: 600,
-          minHeight: 800,
-        ),
-        child: MultiProvider(
-          providers: [
-            BlocProvider.value(value: searchConversationKeywordCubit),
-            BlocProvider.value(value: blinkCubit),
-            Provider.value(value: vlcService),
-            Provider(
-              create: (_) => AudioMessagesPlayAgent(
-                  list,
-                  (m) => context.accountServer
-                      .convertMessageAbsolutePath(m, true)),
-            ),
-            Provider.value(value: TranscriptMessagesWatcher(watchMessages)),
-            BlocProvider(create: (_) => MessageSelectionCubit()),
-          ],
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16, left: 16, top: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: ActionButton(
-                          name: Resources.assetsImagesIcCloseSvg,
-                          color: context.theme.icon,
-                          onTap: () => Navigator.pop(context),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Align(
-                        child: Text(
-                          context.l10n.transcript,
-                          style: TextStyle(
-                            color: context.theme.text,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Expanded(child: SizedBox()),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: MessageDayTimeViewportWidget.singleList(
-                  listKey: listKey,
-                  scrollController: scrollController,
-                  child: ListView.builder(
-                    controller: scrollController,
-                    key: listKey,
-                    padding: const EdgeInsets.only(bottom: 16),
-                    itemBuilder: (BuildContext context, int index) =>
-                        MessageItemWidget(
-                      prev: list.getOrNull(index - 1),
-                      message: list[index],
-                      next: list.getOrNull(index + 1),
-                      isTranscriptPage: true,
-                    ),
-                    itemCount: list.length,
-                  ),
-                ),
-              ),
-            ],
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        maxWidth: 600,
+        minWidth: 600,
+        minHeight: 800,
+      ),
+      child: MultiProvider(
+        providers: [
+          BlocProvider.value(value: searchConversationKeywordCubit),
+          BlocProvider.value(value: blinkCubit),
+          Provider.value(value: vlcService),
+          Provider(
+            create: (_) => AudioMessagesPlayAgent(
+                list,
+                (m) =>
+                    context.accountServer.convertMessageAbsolutePath(m, true)),
           ),
+          Provider.value(value: TranscriptMessagesWatcher(watchMessages)),
+          BlocProvider(create: (_) => MessageSelectionCubit()),
+        ],
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16, left: 16, top: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: ActionButton(
+                        name: Resources.assetsImagesIcCloseSvg,
+                        color: context.theme.icon,
+                        onTap: () => Navigator.pop(context),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Align(
+                      child: Text(
+                        context.l10n.transcript,
+                        style: TextStyle(
+                          color: context.theme.text,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Expanded(child: SizedBox()),
+                ],
+              ),
+            ),
+            Expanded(
+              child: MessageDayTimeViewportWidget.singleList(
+                listKey: listKey,
+                scrollController: scrollController,
+                child: ListView.builder(
+                  controller: scrollController,
+                  key: listKey,
+                  padding: const EdgeInsets.only(bottom: 16),
+                  itemBuilder: (BuildContext context, int index) =>
+                      MessageItemWidget(
+                    prev: list.getOrNull(index - 1),
+                    message: list[index],
+                    next: list.getOrNull(index + 1),
+                    isTranscriptPage: true,
+                  ),
+                  itemCount: list.length,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

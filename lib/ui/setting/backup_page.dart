@@ -46,19 +46,13 @@ class BackupPage extends HookWidget {
               ),
               const SizedBox(height: 30),
               CellGroup(
-                cellBackgroundColor: context.dynamicColor(
-                  Colors.white,
-                  darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-                ),
+                cellBackgroundColor: context.theme.settingCellBackgroundColor,
                 child: CellItem(
                   title: Text(context.l10n.backup),
                 ),
               ),
               CellGroup(
-                cellBackgroundColor: context.dynamicColor(
-                  Colors.white,
-                  darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-                ),
+                cellBackgroundColor: context.theme.settingCellBackgroundColor,
                 child: Column(
                   children: [
                     CellItem(
