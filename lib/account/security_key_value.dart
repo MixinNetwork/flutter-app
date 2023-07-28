@@ -1,3 +1,4 @@
+import 'package:mixin_logger/mixin_logger.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../utils/hive_key_values.dart';
@@ -14,7 +15,14 @@ class SecurityKeyValue extends HiveKeyValue {
   static const _biometric = 'biometric';
   static const _lockDuration = 'lockDuration';
 
-  String? get passcode => box.get(_passcode) as String?;
+  String? get passcode {
+    try {
+      return box.get(_passcode) as String?;
+    } catch (e, s) {
+      i('[SecurityKeyValue] passcode error: $e, $s');
+      return null;
+    }
+  }
 
   set passcode(String? value) {
     if (value != null && value.length != 6) {
@@ -27,7 +35,14 @@ class SecurityKeyValue extends HiveKeyValue {
     }
   }
 
-  bool get biometric => box.get(_biometric, defaultValue: false) as bool;
+  bool get biometric {
+    try {
+      return box.get(_biometric, defaultValue: false) as bool;
+    } catch (e, s) {
+      i('[SecurityKeyValue] biometric error: $e, $s');
+      return false;
+    }
+  }
 
   set biometric(bool value) => box.put(_biometric, value);
 
@@ -35,17 +50,28 @@ class SecurityKeyValue extends HiveKeyValue {
 
   // must be return non-null value
   Duration? get lockDuration {
-    final minutes = box.get(_lockDuration);
+    dynamic minutes;
+    try {
+      minutes = box.get(_lockDuration);
+    } catch (_) {}
     if (minutes == null) return const Duration(minutes: 1);
     return Duration(minutes: minutes as int);
   }
 
   set lockDuration(Duration? value) => box.put(_lockDuration, value?.inMinutes);
 
-  Stream<bool> watchHasPasscode() => box
-      .watch(key: _passcode)
-      .map((event) => event.value != null)
-      .startWith(passcode != null);
+  Stream<bool> watchHasPasscode() {
+    try {
+      return box
+          .watch(key: _passcode)
+          .map((event) => event.value != null)
+          .startWith(passcode != null)
+          .onErrorReturn(false);
+    } catch (e, s) {
+      i('[SecurityKeyValue] watchHasPasscode error: $e, $s');
+      return Stream.value(false);
+    }
+  }
 
   Stream<Duration> watchLockDuration() =>
       box.watch(key: _lockDuration).map((event) {
@@ -54,6 +80,15 @@ class SecurityKeyValue extends HiveKeyValue {
         return Duration(minutes: minutes as int);
       });
 
-  Stream<bool> watchBiometric() =>
-      box.watch(key: _biometric).map((event) => (event.value ?? false) as bool);
+  Stream<bool> watchBiometric() {
+    try {
+      return box
+          .watch(key: _biometric)
+          .map((event) => (event.value ?? false) as bool)
+          .onErrorReturn(false);
+    } catch (e, s) {
+      i('[SecurityKeyValue] watchBiometric error: $e, $s');
+      return Stream.value(false);
+    }
+  }
 }
