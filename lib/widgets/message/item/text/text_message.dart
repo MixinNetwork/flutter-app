@@ -32,6 +32,7 @@ class TextMessage extends HookWidget {
 
     final keywordTextStyle = TextStyle(
       backgroundColor: context.theme.highlight,
+      color: context.theme.text,
     );
 
     var keyword = useBlocStateConverter<SearchConversationKeywordCubit,
@@ -115,7 +116,8 @@ class TextMessage extends HookWidget {
                       HighlightTextSpan(
                         match[0]!,
                         onTap: element.onTap,
-                        style: keywordTextStyle.merge(element.style),
+                        style: (element.style ?? const TextStyle())
+                            .merge(keywordTextStyle),
                       ),
                     );
                     return '';
@@ -143,11 +145,11 @@ class TextMessage extends HookWidget {
             HighlightSelectableText(
           newContent ?? ' ',
           highlightTextSpans: [
-            ...keywordHighlightTextSpans,
             HighlightTextSpan(
               keyword,
               style: keywordTextStyle,
             ),
+            ...keywordHighlightTextSpans,
             ...mentionHighlightTextSpans,
           ],
           style: TextStyle(

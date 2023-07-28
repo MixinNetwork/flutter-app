@@ -57,8 +57,8 @@ extension DioProxyExt on Dio {
     if (config != null) {
       i('apply client proxy $config');
       httpClientAdapter = IOHttpClientAdapter();
-      (httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
-          (client) => client..setProxy(config);
+      (httpClientAdapter as IOHttpClientAdapter).createHttpClient =
+          () => HttpClient()..setProxy(config);
     } else {
       i('remove client proxy');
       httpClientAdapter = IOHttpClientAdapter();
