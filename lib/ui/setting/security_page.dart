@@ -42,7 +42,8 @@ class _Passcode extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final globalKey = useMemoized(GlobalKey.new, []);
+    final globalKey =
+        useMemoized(GlobalKey<PopupMenuButtonState<Duration>>.new, []);
 
     final hasPasscode =
         useMemoizedStream(SecurityKeyValue.instance.watchHasPasscode).data ??
@@ -133,12 +134,7 @@ class _Passcode extends HookWidget {
                     ),
                   ),
                   title: Text(context.l10n.autoLock),
-                  onTap: () {
-                    final state = globalKey.currentState;
-                    if (state == null) return;
-                    if (state is! PopupMenuButtonState) return;
-                    state.showButtonMenu();
-                  },
+                  onTap: () => globalKey.currentState?.showButtonMenu(),
                 ),
             ],
           ),
