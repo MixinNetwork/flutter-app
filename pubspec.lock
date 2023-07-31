@@ -756,10 +756,10 @@ packages:
     dependency: "direct main"
     description:
       name: github
-      sha256: "5640619ae3780877fe62b7837b41343350acc845c528f7b339c34c60745f2cdd"
+      sha256: "9966bc13bf612342e916b0a343e95e5f046c88f602a14476440e9b75d2295411"
       url: "https://pub.dev"
     source: hosted
-    version: "9.15.1"
+    version: "9.17.0"
   glob:
     dependency: transitive
     description:
