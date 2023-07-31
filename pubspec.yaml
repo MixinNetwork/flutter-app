@@ -44,6 +44,7 @@ dependencies:
   desktop_webview_window: ^0.2.0
   device_info_plus: ^9.0.2
   dio: ^5.2.1+1
+  dio_smart_retry: ^5.0.0
   drift: ^2.9.0
   ecache: ^2.0.2
   emojis: ^0.9.9
