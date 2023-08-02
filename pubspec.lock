@@ -1166,10 +1166,10 @@ packages:
     dependency: "direct dev"
     description:
       name: msix
-      sha256: "927c207656dc92eaf3d005c734d259c4ede440052a7281f9e1cc8966ffdbf1c7"
+      sha256: "76c87b8207323803169626a55afd78bbb8413c984df349a76598b9fbf9224677"
       url: "https://pub.dev"
     source: hosted
-    version: "3.16.0"
+    version: "3.16.1"
   native_dio_adapter:
     dependency: "direct main"
     description:
