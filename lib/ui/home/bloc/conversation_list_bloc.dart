@@ -72,12 +72,14 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
 
   late Stream<void> updateEvent = Rx.merge([
     DataBaseEventBus.instance.updateConversationIdStream,
+    DataBaseEventBus.instance.updateUserIdsStream,
     DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
     DataBaseEventBus.instance.updateMessageMentionStream,
   ]).throttleTime(kDefaultThrottleDuration).asBroadcastStream();
 
   late Stream<void> circleUpdateEvent = Rx.merge([
     DataBaseEventBus.instance.updateConversationIdStream,
+    DataBaseEventBus.instance.updateUserIdsStream,
     DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
     DataBaseEventBus.instance.updateMessageMentionStream,
     DataBaseEventBus.instance.updateCircleStream,
