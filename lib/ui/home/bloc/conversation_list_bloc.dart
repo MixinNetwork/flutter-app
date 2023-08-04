@@ -157,7 +157,8 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     await updateBadge(count);
     addSubscription(database
         .conversationDao.allUnseenIgnoreMuteMessageCountEvent
-        .asyncMap(updateBadge)
+        .distinct()
+        .asyncBufferMap((event) => updateBadge(event.last))
         .listen((_) {}));
   }
 }
