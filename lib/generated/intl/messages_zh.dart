@@ -254,6 +254,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "数据库已损坏，暂无法恢复。点击继续将重新创建一个新的数据库文件。"),
         "databaseLockedTips": MessageLookupByLibrary.simpleMessage(
             "数据库文件已被锁定，无法访问。请尝试重启应用或者重启系统后再试。"),
+        "databaseNotADbTips":
+            MessageLookupByLibrary.simpleMessage("无法打开数据库，文件不是一个有效的数据库文件。"),
+        "databaseRecreateTips":
+            MessageLookupByLibrary.simpleMessage("重新创建一个新的数据库文件，旧文件将被删除。"),
         "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
             "正在进行数据库升级，可能需要几分钟，请不要强制关闭应用。"),
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
@@ -530,6 +534,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "proxyAuth": MessageLookupByLibrary.simpleMessage("验证（可选）"),
         "proxyConnection": MessageLookupByLibrary.simpleMessage("连接"),
         "proxyType": MessageLookupByLibrary.simpleMessage("代理类型"),
+        "qrCodeExpiredDesc": MessageLookupByLibrary.simpleMessage("二维码过期，请重试"),
         "quickSearch": MessageLookupByLibrary.simpleMessage("快速搜索"),
         "quitMixin": MessageLookupByLibrary.simpleMessage("退出 Mixin"),
         "raw": MessageLookupByLibrary.simpleMessage("其他"),
