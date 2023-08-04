@@ -9,12 +9,12 @@ import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:flutter/material.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../../account/account_key_value.dart';
-import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/crypto_key_value.dart';
 import '../../../crypto/signal/signal_protocol.dart';
+import '../../../generated/l10n.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/system/package_info.dart';
@@ -42,8 +42,7 @@ class LandingCubit<T> extends Cubit<T> {
   final MultiAuthCubit authCubit;
 }
 
-class LandingQrCodeCubit extends LandingCubit<LandingState>
-    with SubscribeMixin {
+class LandingQrCodeCubit extends LandingCubit<LandingState> {
   LandingQrCodeCubit(MultiAuthCubit authCubit, Locale locale)
       : super(
           authCubit,
@@ -54,22 +53,28 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
                 : LandingStatus.init,
           ),
         ) {
-    _initLandingListen();
     if (authCubit.state.current != null) return;
     requestAuthUrl();
   }
 
-  final StreamController<(int, String)> periodicStreamController =
-      StreamController<(int, String)>();
-  StreamSubscription? streamSubscription;
-  late signal.ECKeyPair keyPair;
+  final StreamController<(int, String, signal.ECKeyPair)>
+      periodicStreamController =
+      StreamController<(int, String, signal.ECKeyPair)>();
+
+  StreamSubscription? _periodicSubscription;
+
+  void _cancelPeriodicSubscription() {
+    final periodicSubscription = _periodicSubscription;
+    _periodicSubscription = null;
+    unawaited(periodicSubscription?.cancel());
+  }
 
   Future<void> requestAuthUrl() async {
-    await streamSubscription?.cancel();
+    _cancelPeriodicSubscription();
     try {
       final rsp = await client.provisioningApi
           .getProvisioningId(Platform.operatingSystem);
-      keyPair = signal.Curve.generateKeyPair();
+      final keyPair = signal.Curve.generateKeyPair();
       final pubKey =
           Uri.encodeComponent(base64Encode(keyPair.publicKey.serialize()));
 
@@ -78,55 +83,55 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
         status: LandingStatus.ready,
       ));
 
-      streamSubscription = Stream.periodic(
-              const Duration(milliseconds: 1500), (i) => (i, rsp.data.deviceId))
-          .listen(periodicStreamController.add);
-      addSubscription(streamSubscription);
+      _periodicSubscription = Stream.periodic(
+        const Duration(milliseconds: 1500),
+        (i) => i,
+      )
+          .asyncBufferMap(
+              (event) => _checkLanding(event.last, rsp.data.deviceId, keyPair))
+          .listen((event) {});
     } catch (error, stack) {
       e('requestAuthUrl failed: $error $stack');
       emit(state.needReload('Failed to request auth: $error'));
     }
   }
 
-  void _initLandingListen() {
-    final subscription = periodicStreamController.stream
-        .where((event) {
-          if (event.$1 < 60) return true;
-          streamSubscription?.cancel();
-          emit(state.needReload('qrcode display timeout.'));
-          return false;
-        })
-        .map((event) => event.$2)
-        .asyncMap((deviceId) async =>
-            (await client.provisioningApi.getProvisioning(deviceId))
-                .data
-                .secret)
-        .handleError((e) => null)
-        .where((secret) => secret.isNotEmpty)
-        .map((secret) {
-          streamSubscription?.cancel();
-          emit(state.copyWith(
-            status: LandingStatus.provisioning,
-          ));
-          return secret;
-        })
-        .asyncMap(_verify)
-        .handleError((error, stack) {
-          emit(state.needReload('Failed to verify: $error'));
-          e('_verify: $error $stack');
-          return null;
-        })
-        .whereNotNull()
-        .listen((auth) => authCubit.signIn(
-              AuthState(
-                account: auth.$1,
-                privateKey: auth.$2,
-              ),
-            ));
-    addSubscription(subscription);
+  Future<void> _checkLanding(
+    int count,
+    String deviceId,
+    signal.ECKeyPair keyPair,
+  ) async {
+    if (_periodicSubscription == null) return;
+
+    if (count > 60) {
+      _cancelPeriodicSubscription();
+      emit(state.needReload(Localization.current.qrCodeExpiredDesc));
+      return;
+    }
+
+    String secret;
+    try {
+      secret =
+          (await client.provisioningApi.getProvisioning(deviceId)).data.secret;
+    } catch (e) {
+      return;
+    }
+    if (secret.isEmpty) return;
+
+    _cancelPeriodicSubscription();
+    emit(state.copyWith(status: LandingStatus.provisioning));
+
+    try {
+      final (acount, privateKey) = await _verify(secret, keyPair);
+      authCubit.signIn(AuthState(account: acount, privateKey: privateKey));
+    } catch (error, stack) {
+      emit(state.needReload('Failed to verify: $error'));
+      e('_verify: $error $stack');
+    }
   }
 
-  FutureOr<(Account, String)?> _verify(String secret) async {
+  FutureOr<(Account, String)> _verify(
+      String secret, signal.ECKeyPair keyPair) async {
     final result =
         signal.decrypt(base64Encode(keyPair.privateKey.serialize()), secret);
     final msg =
@@ -169,7 +174,7 @@ class LandingQrCodeCubit extends LandingCubit<LandingState>
 
   @override
   Future<void> close() async {
-    await streamSubscription?.cancel();
+    await _periodicSubscription?.cancel();
     await periodicStreamController.close();
     await super.close();
   }
