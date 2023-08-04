@@ -62,7 +62,6 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
       StreamController<(int, String, signal.ECKeyPair)>();
 
   StreamSubscription? _periodicSubscription;
-  StreamSubscription? _landingSubscription;
 
   void _cancelPeriodicSubscription() {
     final periodicSubscription = _periodicSubscription;
@@ -176,7 +175,6 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
   @override
   Future<void> close() async {
     await _periodicSubscription?.cancel();
-    await _landingSubscription?.cancel();
     await periodicStreamController.close();
     await super.close();
   }
