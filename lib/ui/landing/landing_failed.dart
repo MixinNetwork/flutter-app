@@ -143,12 +143,15 @@ class LandingFailedPage extends StatelessWidget {
           children: [
             const SizedBox(height: 32),
             const Spacer(),
-            Text(
-              title,
-              style: TextStyle(
-                color: context.theme.text,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: context.theme.text,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(height: 32),
