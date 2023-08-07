@@ -238,10 +238,10 @@ packages:
     dependency: transitive
     description:
       name: collection
-      sha256: f092b211a4319e98e5ff58223576de6c2803db36221657b46c82574721240687
+      sha256: ee67cb0715911d28db6bf4af1026078bd6f0128b07a5f66fb2ed94ec6783c09a
       url: "https://pub.dev"
     source: hosted
-    version: "1.17.2"
+    version: "1.18.0"
   common_crypto:
     dependency: "direct main"
     description:
@@ -440,18 +440,18 @@ packages:
     dependency: "direct main"
     description:
       name: drift
-      sha256: a8ec4e44b4359ef44eab3d2c2f8e44b41a00c15673b879984484b34d27656ad5
+      sha256: "01e7237766b3404f08489ed0dc531a2fa5f5a42d7fa7787da6cc0a10e8d2632f"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.0"
+    version: "2.10.0"
   drift_dev:
     dependency: "direct dev"
     description:
       name: drift_dev
-      sha256: "2713aabc91d8e9cdf269b2ecfa503f103341925b07186e845de11a781015f7eb"
+      sha256: "407eb1f149332238c567f06cc89b6aaee848de00d9031c76dc372dc16d993bca"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.0"
+    version: "2.10.0"
   ecache:
     dependency: "direct main"
     description:
@@ -756,10 +756,10 @@ packages:
     dependency: "direct main"
     description:
       name: github
-      sha256: "5640619ae3780877fe62b7837b41343350acc845c528f7b339c34c60745f2cdd"
+      sha256: "9966bc13bf612342e916b0a343e95e5f046c88f602a14476440e9b75d2295411"
       url: "https://pub.dev"
     source: hosted
-    version: "9.15.1"
+    version: "9.17.0"
   glob:
     dependency: transitive
     description:
@@ -812,10 +812,10 @@ packages:
     dependency: "direct main"
     description:
       name: hooks_riverpod
-      sha256: be68cf7653fcab798500f9047ac58c3f109287a1595012412f4a0d654a9bb9c5
+      sha256: "117edbe7e5cfc02e31a94f97e2acd4581f54bc37fcda9dce1f606f8ac851ba24"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.6"
+    version: "2.3.7"
   html:
     dependency: transitive
     description:
@@ -1094,10 +1094,10 @@ packages:
     dependency: "direct main"
     description:
       name: lottie
-      sha256: f461105d3a35887b27089abf9c292334478dd292f7b47ecdccb6ae5c37a22c80
+      sha256: "0793a5866062e5cc8a8b24892fa94c3095953ea914a7fdf790f550dd7537fe60"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.0"
+    version: "2.5.0"
   map:
     dependency: "direct main"
     description:
@@ -1174,10 +1174,10 @@ packages:
     dependency: "direct dev"
     description:
       name: msix
-      sha256: "927c207656dc92eaf3d005c734d259c4ede440052a7281f9e1cc8966ffdbf1c7"
+      sha256: "76c87b8207323803169626a55afd78bbb8413c984df349a76598b9fbf9224677"
       url: "https://pub.dev"
     source: hosted
-    version: "3.16.0"
+    version: "3.16.1"
   native_dio_adapter:
     dependency: "direct main"
     description:
