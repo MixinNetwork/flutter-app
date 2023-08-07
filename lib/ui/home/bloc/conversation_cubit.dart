@@ -138,30 +138,29 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
   }) : super(null) {
     addSubscription(
       stream
-          .map((event) => event?.conversationId)
-          .where((event) => event != null)
+          .map((event) => (event?.conversationId, event?.userId))
+          .where((event) => event.$1 != null)
           .distinct()
-          .switchMap((conversationId) => database.conversationDao
-                  .conversationItem(conversationId!)
-                  .watchSingleOrNullWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance
-                      .watchUpdateConversationStream([conversationId])
-                ],
-                duration: kSlowThrottleDuration,
-                prepend: false,
-              ))
-          .listen((event) {
+          .switchMap((event) {
+        final (String? conversationId, String? userId) = event;
+        return database.conversationDao
+            .conversationItem(conversationId!)
+            .watchSingleOrNullWithStream(
+          eventStreams: [
+            DataBaseEventBus.instance
+                .watchUpdateConversationStream([conversationId]),
+            if (userId != null)
+              DataBaseEventBus.instance.watchUpdateUserStream([userId])
+          ],
+          duration: kSlowThrottleDuration,
+          prepend: false,
+        );
+      }).listen((event) {
         String? userId;
         if (event != null && !event.isGroupConversation) {
           userId = event.ownerId;
         }
-        emit(
-          state?.copyWith(
-            conversation: event,
-            userId: userId,
-          ),
-        );
+        emit(state?.copyWith(conversation: event, userId: userId));
       }),
     );
     addSubscription(
@@ -174,9 +173,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           duration: kDefaultThrottleDuration,
           prepend: false,
         );
-      }).listen((event) => emit(
-            state?.copyWith(user: event),
-          )),
+      }).listen((event) => emit(state?.copyWith(user: event))),
     );
     addSubscription(
       stream
@@ -188,19 +185,16 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
                   .watchSingleOrNullWithStream(
                 eventStreams: [
                   DataBaseEventBus.instance.watchUpdateParticipantStream(
-                      conversationIds: [conversationId],
-                      userIds: [accountServer.userId],
-                      and: true)
+                    conversationIds: [conversationId],
+                    userIds: [accountServer.userId],
+                    and: true,
+                  )
                 ],
                 duration: kSlowThrottleDuration,
                 prepend: false,
               ))
           .listen((Participant? event) {
-        emit(
-          state?.copyWith(
-            participant: event,
-          ),
-        );
+        emit(state?.copyWith(participant: event));
       }),
     );
 

@@ -608,6 +608,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Authentication (Optional)"),
         "proxyConnection": MessageLookupByLibrary.simpleMessage("Connection"),
         "proxyType": MessageLookupByLibrary.simpleMessage("Proxy Type"),
+        "qrCodeExpiredDesc": MessageLookupByLibrary.simpleMessage(
+            "QR Code expired, please retry"),
         "quickSearch": MessageLookupByLibrary.simpleMessage("Quick search"),
         "quitMixin": MessageLookupByLibrary.simpleMessage("Quit Mixin"),
         "raw": MessageLookupByLibrary.simpleMessage("Raw"),

@@ -320,6 +320,7 @@
 "proxyAuth" : "Authentication (Optional)",
 "proxyConnection" : "Connection",
 "proxyType" : "Proxy Type",
+"qrCodeExpiredDesc" : "QR Code expired, please retry",
 "quickSearch" : "Quick search",
 "quitMixin" : "Quit Mixin",
 "raw" : "Raw",

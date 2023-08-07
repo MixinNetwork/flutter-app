@@ -3276,6 +3276,16 @@ class Localization {
     );
   }
 
+  /// `QR Code expired, please retry`
+  String get qrCodeExpiredDesc {
+    return Intl.message(
+      'QR Code expired, please retry',
+      name: 'qrCodeExpiredDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Quick search`
   String get quickSearch {
     return Intl.message(

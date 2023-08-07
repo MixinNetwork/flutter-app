@@ -534,6 +534,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "proxyAuth": MessageLookupByLibrary.simpleMessage("验证（可选）"),
         "proxyConnection": MessageLookupByLibrary.simpleMessage("连接"),
         "proxyType": MessageLookupByLibrary.simpleMessage("代理类型"),
+        "qrCodeExpiredDesc": MessageLookupByLibrary.simpleMessage("二维码过期，请重试"),
         "quickSearch": MessageLookupByLibrary.simpleMessage("快速搜索"),
         "quitMixin": MessageLookupByLibrary.simpleMessage("退出 Mixin"),
         "raw": MessageLookupByLibrary.simpleMessage("其他"),

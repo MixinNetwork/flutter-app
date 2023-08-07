@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:dio_smart_retry/dio_smart_retry.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
@@ -30,10 +31,23 @@ part 'attachment_download_job.dart';
 
 part 'attachment_upload_job.dart';
 
-final _dio = Dio(BaseOptions(
-  connectTimeout: const Duration(milliseconds: 150 * 1000),
-  receiveTimeout: const Duration(milliseconds: 150 * 1000),
-));
+final _dio = (() {
+  final dio = Dio(BaseOptions(
+    connectTimeout: const Duration(milliseconds: 150 * 1000),
+    receiveTimeout: const Duration(milliseconds: 150 * 1000),
+  ));
+
+  dio.interceptors.add(RetryInterceptor(
+    dio: dio,
+    logPrint: i,
+    retryDelays: const [
+      Duration(seconds: 1),
+      Duration(seconds: 2),
+      Duration(seconds: 3),
+    ],
+  ));
+  return dio;
+})();
 
 // isolate kill message
 const _killMessage = 'kill';

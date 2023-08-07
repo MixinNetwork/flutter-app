@@ -319,6 +319,7 @@
 "proxyAuth" : "验证（可选）",
 "proxyConnection" : "连接",
 "proxyType" : "代理类型",
+"qrCodeExpiredDesc" : "二维码过期，请重试",
 "quickSearch" : "快速搜索",
 "quitMixin" : "退出 Mixin",
 "raw" : "其他",
