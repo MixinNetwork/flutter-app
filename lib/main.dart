@@ -7,6 +7,7 @@ import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
 import 'package:overlay_support/overlay_support.dart';
@@ -92,7 +93,7 @@ Future<void> main(List<String> args) async {
     Bloc.observer = CustomBlocObserver();
   }
 
-  runApp(const OverlaySupport.global(child: App()));
+  runApp(const ProviderScope(child: OverlaySupport.global(child: App())));
 
   if (kPlatformIsDesktop) {
     Size? windowSize;

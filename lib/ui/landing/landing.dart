@@ -54,7 +54,7 @@ class LandingPage extends HookWidget {
     }
     return BlocProvider.value(
       value: modeCubit,
-      child: _LandingScaffold(child: child),
+      child: LandingScaffold(child: child),
     );
   }
 }
@@ -164,8 +164,9 @@ class _LoginFailed extends HookWidget {
   }
 }
 
-class _LandingScaffold extends HookWidget {
-  const _LandingScaffold({
+class LandingScaffold extends HookWidget {
+  const LandingScaffold({
+    super.key,
     required this.child,
   });
 

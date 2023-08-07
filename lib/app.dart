@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:drift/isolate.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' as rp;
 import 'package:provider/provider.dart';
 
 import 'account/account_key_value.dart';
@@ -27,6 +30,8 @@ import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
+import 'ui/landing/landing_failed.dart';
+import 'ui/provider/database_provider.dart';
 import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
@@ -77,57 +82,99 @@ class App extends StatelessWidget {
         child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
           converter: (state) => state.current,
           builder: (context, authState) {
-            const app = _App();
-            if (authState == null) return app;
-            return FutureProvider<AsyncSnapshot<AccountServer>?>(
-              key: ValueKey((
-                authState.account.userId,
-                authState.account.sessionId,
-                authState.account.identityNumber,
-                authState.privateKey,
-              )),
-              create: (BuildContext context) async {
-                final accountServer =
-                    AccountServer(context.multiAuthCubit, context.settingCubit);
-                try {
-                  await accountServer.initServer(
-                    authState.account.userId,
-                    authState.account.sessionId,
-                    authState.account.identityNumber,
-                    authState.privateKey,
-                  );
-                } catch (e, s) {
-                  w('accountServer.initServer error: $e, $s');
-                  return AsyncSnapshot<AccountServer>.withError(
-                      ConnectionState.done, e, s);
-                }
-                return AsyncSnapshot<AccountServer>.withData(
-                    ConnectionState.done, accountServer);
-              },
-              initialData: null,
-              builder: (BuildContext context, _) =>
-                  Consumer<AsyncSnapshot<AccountServer>?>(
-                builder: (context, result, child) {
-                  if (result != null) {
-                    if (result.data != null) {
-                      return _Providers(
-                        app: child!,
-                        accountServer: result.requireData,
-                      );
-                    } else {
-                      return Provider<AsyncSnapshot<AccountServer>?>.value(
-                        value: result,
-                        child: child,
-                      );
-                    }
-                  }
-                  return child!;
-                },
-                child: app,
-              ),
-            );
+            if (authState == null) {
+              return const _App(home: LandingPage());
+            }
+            return _App(home: _LoginApp(authState: authState));
           },
         ),
+      ),
+    );
+  }
+}
+
+class _LoginApp extends rp.ConsumerWidget {
+  const _LoginApp({required this.authState});
+
+  final AuthState authState;
+
+  @override
+  Widget build(BuildContext context, rp.WidgetRef ref) {
+    final identityNumber = authState.account.identityNumber;
+    final database = ref.watch(databaseProvider(identityNumber));
+    if (database.isLoading) {
+      return const LandingPage();
+    }
+    if (database.hasError) {
+      var error = database.error;
+      if (error is DriftRemoteException) {
+        error = error.remoteCause;
+      }
+      if (error is SqliteException) {
+        return DatabaseOpenFailedPage(
+          error: error,
+          identityNumber: identityNumber,
+        );
+      } else {
+        return LandingFailedPage(
+            title: context.l10n.unknowError,
+            message: error.toString(),
+            actions: [
+              ElevatedButton(
+                onPressed: () {},
+                child: Text(context.l10n.exit),
+              )
+            ]);
+      }
+    }
+    return FutureProvider<AsyncSnapshot<AccountServer>?>(
+      key: ValueKey((
+        authState.account.userId,
+        authState.account.sessionId,
+        identityNumber,
+        authState.privateKey,
+      )),
+      create: (BuildContext context) async {
+        final accountServer = AccountServer(
+          context.multiAuthCubit,
+          context.settingCubit,
+          database: database.requireValue,
+        );
+        try {
+          await accountServer.initServer(
+            authState.account.userId,
+            authState.account.sessionId,
+            authState.account.identityNumber,
+            authState.privateKey,
+          );
+        } catch (e, s) {
+          w('accountServer.initServer error: $e, $s');
+          return AsyncSnapshot<AccountServer>.withError(
+              ConnectionState.done, e, s);
+        }
+        return AsyncSnapshot<AccountServer>.withData(
+            ConnectionState.done, accountServer);
+      },
+      initialData: null,
+      builder: (BuildContext context, _) =>
+          Consumer<AsyncSnapshot<AccountServer>?>(
+        builder: (context, result, child) {
+          if (result != null) {
+            if (result.data != null) {
+              return _Providers(
+                app: child!,
+                accountServer: result.requireData,
+              );
+            } else {
+              return Provider<AsyncSnapshot<AccountServer>?>.value(
+                value: result,
+                child: child,
+              );
+            }
+          }
+          return child!;
+        },
+        child: const _Home(),
       ),
     );
   }
@@ -205,7 +252,9 @@ class _Providers extends StatelessWidget {
 }
 
 class _App extends StatelessWidget {
-  const _App();
+  const _App({required this.home});
+
+  final Widget home;
 
   @override
   Widget build(BuildContext context) => WindowShortcuts(
@@ -267,7 +316,7 @@ class _App extends StatelessWidget {
                 ),
               );
             },
-            home: const _Home(),
+            home: MacosMenuBar(child: home),
           ),
         ),
       );
