@@ -1190,10 +1190,10 @@ packages:
     dependency: "direct main"
     description:
       name: network_info_plus
-      sha256: "5a79c244070fb7f7d10fbcfa24eed315252b4e662f42658029871d31afdbba9e"
+      sha256: c0113bfd4276be3fe4ba56aeb2792d780df9f3f62aaa4afdd1cdf716b8e29545
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.1"
+    version: "4.0.2"
   network_info_plus_platform_interface:
     dependency: transitive
     description:
