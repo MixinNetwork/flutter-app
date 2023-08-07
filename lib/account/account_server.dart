@@ -6,10 +6,8 @@ import 'dart:isolate';
 import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:uuid/uuid.dart';
@@ -34,7 +32,6 @@ import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/attachment/download_key_value.dart';
-import '../utils/event_bus.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
@@ -73,7 +70,6 @@ class AccountServer {
       AccountKeyValue.instance.primarySessionId == null;
   String? userAgent;
   String? deviceId;
-  StreamSubscription<SqliteException>? databaseMalformedSubscription;
 
   Future<void> initServer(
     String userId,
@@ -83,31 +79,6 @@ class AccountServer {
   ) async {
     if (sid == sessionId) return;
     sid = sessionId;
-
-    await databaseMalformedSubscription?.cancel();
-    databaseMalformedSubscription =
-        EventBus.instance.on.whereType<SqliteException>().listen((event) async {
-      await signOutAndClear();
-
-      final now = DateTime.now();
-
-      renameFileWithTime(
-          p.join(
-              mixinDocumentsDirectory.path, identityNumber, '$kDbFileName.db'),
-          now);
-
-      await Future.forEach(
-        [
-          File(p.join(mixinDocumentsDirectory.path, identityNumber,
-              '$kDbFileName.db-shm')),
-          File(p.join(mixinDocumentsDirectory.path, identityNumber,
-              '$kDbFileName.db-wal'))
-        ].where((e) => e.existsSync()),
-        (element) => element.delete(),
-      );
-
-      multiAuthCubit.signOut();
-    });
 
     this.userId = userId;
     this.sessionId = sessionId;
@@ -332,9 +303,6 @@ class AccountServer {
   }
 
   Future<void> signOutAndClear() async {
-    await databaseMalformedSubscription?.cancel();
-    databaseMalformedSubscription = null;
-
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
     await client.accountApi.logout(LogoutRequest(sessionId));
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
