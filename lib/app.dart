@@ -39,6 +39,7 @@ import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/system/text_input.dart';
 import 'utils/system/tray.dart';
+import 'widgets/actions/actions.dart';
 import 'widgets/auth.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
@@ -320,7 +321,7 @@ class _App extends StatelessWidget {
                 ),
               );
             },
-            home: MacosMenuBar(child: home),
+            home: MixinAppActions(child: MacosMenuBar(child: home)),
           ),
         ),
       );
