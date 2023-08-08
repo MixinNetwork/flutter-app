@@ -39,6 +39,7 @@ import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/system/text_input.dart';
 import 'utils/system/tray.dart';
+import 'widgets/actions/actions.dart';
 import 'widgets/auth.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
@@ -85,7 +86,7 @@ class App extends StatelessWidget {
             if (authState == null) {
               return const _App(home: LandingPage());
             }
-            return _App(home: _LoginApp(authState: authState));
+            return _LoginApp(authState: authState);
           },
         ),
       ),
@@ -103,7 +104,7 @@ class _LoginApp extends rp.ConsumerWidget {
     final identityNumber = authState.account.identityNumber;
     final database = ref.watch(databaseProvider(identityNumber));
     if (database.isLoading) {
-      return const LandingPage();
+      return const _App(home: LandingPage());
     }
     if (database.hasError) {
       var error = database.error;
@@ -111,20 +112,24 @@ class _LoginApp extends rp.ConsumerWidget {
         error = error.remoteCause;
       }
       if (error is SqliteException) {
-        return DatabaseOpenFailedPage(
-          error: error,
-          identityNumber: identityNumber,
+        return _App(
+          home: DatabaseOpenFailedPage(
+            error: error,
+            identityNumber: identityNumber,
+          ),
         );
       } else {
-        return LandingFailedPage(
-            title: context.l10n.unknowError,
-            message: error.toString(),
-            actions: [
-              ElevatedButton(
-                onPressed: () {},
-                child: Text(context.l10n.exit),
-              )
-            ]);
+        return _App(
+          home: LandingFailedPage(
+              title: context.l10n.unknowError,
+              message: error.toString(),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {},
+                  child: Text(context.l10n.exit),
+                )
+              ]),
+        );
       }
     }
     return FutureProvider<AsyncSnapshot<AccountServer>?>(
@@ -174,7 +179,7 @@ class _LoginApp extends rp.ConsumerWidget {
           }
           return child!;
         },
-        child: const _Home(),
+        child: const _App(home: _Home()),
       ),
     );
   }
@@ -316,7 +321,7 @@ class _App extends StatelessWidget {
                 ),
               );
             },
-            home: MacosMenuBar(child: home),
+            home: MixinAppActions(child: MacosMenuBar(child: home)),
           ),
         ),
       );
@@ -380,6 +385,6 @@ class _Home extends HookWidget {
         ..init();
       return const HomePage();
     }
-    return const MacosMenuBar(child: LandingPage());
+    return const LandingPage();
   }
 }
