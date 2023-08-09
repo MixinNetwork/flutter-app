@@ -41,7 +41,7 @@ class DesktopMixinWebView extends MixinWebView {
   ) async {
     assert(context.auth != null);
 
-    final mode = context.settingCubit.brightness ??
+    final mode = context.settingChangeNotifier.brightness ??
         MediaQuery.platformBrightnessOf(context);
     final info = await getPackageInfo();
     debugPrint(
@@ -74,7 +74,7 @@ class DesktopMixinWebView extends MixinWebView {
     App? app,
     AppCardData? appCardData,
   }) async {
-    final brightness = context.settingCubit.brightness;
+    final brightness = context.settingChangeNotifier.brightness;
     final packageInfo = await getPackageInfo();
     final webView = await WebviewWindow.create(
       configuration: CreateConfiguration(

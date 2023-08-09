@@ -95,7 +95,7 @@ class NotificationService {
             );
 
             String? body;
-            if (context.settingCubit.state.messagePreview) {
+            if (context.settingChangeNotifier.messagePreview) {
               if (event.type == MessageCategory.systemConversation) {
                 body = generateSystemText(
                   actionName: event.actionName,

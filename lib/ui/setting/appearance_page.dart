@@ -2,11 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../bloc/setting_cubit.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
@@ -19,6 +19,7 @@ import '../../widgets/message/message_day_time.dart';
 import '../../widgets/radio.dart';
 import '../home/bloc/blink_cubit.dart';
 import '../home/chat/chat_page.dart';
+import '../provider/setting_provider.dart';
 
 class AppearancePage extends StatelessWidget {
   const AppearancePage({super.key});
@@ -36,11 +37,11 @@ class AppearancePage extends StatelessWidget {
       );
 }
 
-class _Body extends StatelessWidget {
+class _Body extends HookConsumerWidget {
   const _Body();
 
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
+  Widget build(BuildContext context, WidgetRef ref) => SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.only(top: 20),
           child: Column(
@@ -64,9 +65,9 @@ class _Body extends StatelessWidget {
                     CellItem(
                       title: RadioItem<Brightness?>(
                         title: Text(context.l10n.followSystem),
-                        groupValue: context.watch<SettingCubit>().brightness,
+                        groupValue: ref.watch(settingProvider).brightness,
                         onChanged: (value) =>
-                            context.settingCubit.brightness = value,
+                            context.settingChangeNotifier.brightness = value,
                         value: null,
                       ),
                       trailing: null,
@@ -74,9 +75,9 @@ class _Body extends StatelessWidget {
                     CellItem(
                       title: RadioItem<Brightness?>(
                         title: Text(context.l10n.light),
-                        groupValue: context.watch<SettingCubit>().brightness,
+                        groupValue: ref.watch(settingProvider).brightness,
                         onChanged: (value) =>
-                            context.settingCubit.brightness = value,
+                            context.settingChangeNotifier.brightness = value,
                         value: Brightness.light,
                       ),
                       trailing: null,
@@ -84,9 +85,9 @@ class _Body extends StatelessWidget {
                     CellItem(
                       title: RadioItem<Brightness?>(
                         title: Text(context.l10n.dark),
-                        groupValue: context.watch<SettingCubit>().brightness,
+                        groupValue: ref.watch(settingProvider).brightness,
                         onChanged: (value) =>
-                            context.settingCubit.brightness = value,
+                            context.settingChangeNotifier.brightness = value,
                         value: Brightness.dark,
                       ),
                       trailing: null,
@@ -102,14 +103,13 @@ class _Body extends StatelessWidget {
       );
 }
 
-class _MessageAvatarSetting extends HookWidget {
+class _MessageAvatarSetting extends HookConsumerWidget {
   const _MessageAvatarSetting();
 
   @override
-  Widget build(BuildContext context) {
-    final showAvatar = useBlocStateConverter<SettingCubit, SettingState, bool>(
-      converter: (style) => style.messageShowAvatar,
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showAvatar =
+        ref.watch(settingProvider.select((value) => value.messageShowAvatar));
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,7 +134,7 @@ class _MessageAvatarSetting extends HookWidget {
                   activeColor: context.theme.accent,
                   value: showAvatar,
                   onChanged: (bool value) =>
-                      context.settingCubit.messageShowAvatar = value,
+                      context.settingChangeNotifier.messageShowAvatar = value,
                 )),
           ),
         )
@@ -143,14 +143,14 @@ class _MessageAvatarSetting extends HookWidget {
   }
 }
 
-class _ChatTextSizeSetting extends HookWidget {
+class _ChatTextSizeSetting extends HookConsumerWidget {
   const _ChatTextSizeSetting();
 
   @override
-  Widget build(BuildContext context) {
-    final fontSize = useBlocStateConverter<SettingCubit, SettingState, double>(
-      converter: (style) => style.chatFontSizeDelta,
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final fontSize =
+        ref.watch(settingProvider.select((value) => value.chatFontSizeDelta));
+
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 600),
       child: Column(
@@ -196,7 +196,7 @@ class _ChatTextSizeSetting extends HookWidget {
                     max: 4,
                     onChanged: (value) {
                       debugPrint('fontSize: $value');
-                      context.settingCubit.chatFontSizeDelta = value;
+                      context.settingChangeNotifier.chatFontSizeDelta = value;
                     },
                   ),
                 ),

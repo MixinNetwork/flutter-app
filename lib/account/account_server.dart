@@ -14,7 +14,6 @@ import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/vo/pin_message_minimal.dart';
-import '../bloc/setting_cubit.dart';
 import '../constants/constants.dart';
 import '../crypto/privacy_key_value.dart';
 import '../crypto/signal/signal_database.dart';
@@ -29,6 +28,7 @@ import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../ui/provider/multi_auth_provider.dart';
+import '../ui/provider/setting_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/attachment/download_key_value.dart';
@@ -50,7 +50,7 @@ import 'show_pin_message_key_value.dart';
 class AccountServer {
   AccountServer(
     this.multiAuthCubit,
-    this.settingCubit, {
+    this.settingChangeNotifier, {
     this.userAgent,
     this.deviceId,
     required this.database,
@@ -62,7 +62,7 @@ class AccountServer {
       client.dio.options.headers['Accept-Language'] = language;
 
   final MultiAuthChangeNotifier multiAuthCubit;
-  final SettingCubit settingCubit;
+  final SettingChangeNotifier settingChangeNotifier;
   final Database database;
   Timer? checkSignalKeyTimer;
 
@@ -262,11 +262,11 @@ class AccountServer {
   ) async {
     bool needDownload(String category) {
       if (category.isImage) {
-        return settingCubit.state.photoAutoDownload;
+        return settingChangeNotifier.photoAutoDownload;
       } else if (category.isVideo) {
-        return settingCubit.state.videoAutoDownload;
+        return settingChangeNotifier.videoAutoDownload;
       } else if (category.isData) {
-        return settingCubit.state.fileAutoDownload;
+        return settingChangeNotifier.fileAutoDownload;
       }
       return true;
     }

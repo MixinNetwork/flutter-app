@@ -8,7 +8,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../bloc/bloc_converter.dart';
-import '../../bloc/setting_cubit.dart';
 import '../../constants/resources.dart';
 import '../../db/dao/circle_dao.dart';
 import '../../db/dao/conversation_dao.dart';
@@ -26,6 +25,7 @@ import '../../widgets/toast.dart';
 import '../../widgets/user_selector/conversation_selector.dart';
 import '../../widgets/window/move_window.dart';
 import '../provider/multi_auth_provider.dart';
+import '../provider/setting_provider.dart';
 import 'bloc/slide_category_cubit.dart';
 
 class SlidePage extends StatelessWidget {
@@ -100,11 +100,9 @@ class SlidePage extends StatelessWidget {
                     AnimatedVisibility(
                       alignment: Alignment.bottomCenter,
                       visible: showCollapse,
-                      child: HookBuilder(builder: (context) {
-                        final collapse = useBlocStateConverter<SettingCubit,
-                            SettingState, bool>(
-                          converter: (style) => style.collapsedSidebar,
-                        );
+                      child: Consumer(builder: (context, ref, child) {
+                        final collapse = ref.watch(settingProvider
+                            .select((value) => value.collapsedSidebar));
 
                         return SelectItem(
                           icon: SvgPicture.asset(
@@ -119,8 +117,8 @@ class SlidePage extends StatelessWidget {
                             ),
                           ),
                           title: Text(context.l10n.collapse),
-                          onTap: () =>
-                              context.settingCubit.collapsedSidebar = !collapse,
+                          onTap: () => context.settingChangeNotifier
+                              .collapsedSidebar = !collapse,
                         );
                       }),
                     ),

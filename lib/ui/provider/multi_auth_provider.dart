@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
@@ -70,6 +72,8 @@ class MultiAuthState extends Equatable {
 class MultiAuthChangeNotifier extends ChangeNotifier {
   MultiAuthChangeNotifier(this._state);
 
+  static const _kMultiAuthNotifierProviderKey = 'auths';
+
   MultiAuthState _state;
 
   AuthState? get current => _state.current;
@@ -116,23 +120,17 @@ class MultiAuthChangeNotifier extends ChangeNotifier {
 
   @override
   void notifyListeners() {
-    globalBox.put(_kMultiAuthNotifierProvider, _state.toJson());
+    globalBox.put(_kMultiAuthNotifierProviderKey, _state.toJson());
     super.notifyListeners();
   }
 }
 
-// ignore_for_file: deprecated_member_use_from_same_package
 @Deprecated('Use multiAuthNotifierProvider instead')
 const _kMultiAuthCubitKey = 'MultiAuthCubit';
 
-const _kMultiAuthNotifierProvider = 'auths';
-
 final multiAuthNotifierProvider =
     ChangeNotifierProvider.autoDispose<MultiAuthChangeNotifier>((ref) {
-  final json = globalBox.get(_kMultiAuthNotifierProvider);
-  if (json != null && json is String) {
-    return MultiAuthChangeNotifier(MultiAuthState.fromJson(json));
-  }
+  ref.keepAlive();
 
   //  migrate
   {
@@ -143,10 +141,18 @@ final multiAuthNotifierProvider =
         return MultiAuthChangeNotifier(const MultiAuthState());
       }
 
-      globalBox.put(_kMultiAuthNotifierProvider, multiAuthState.toJson());
+      globalBox.put(MultiAuthChangeNotifier._kMultiAuthNotifierProviderKey,
+          multiAuthState.toJson());
+
       HydratedBloc.storage.delete(_kMultiAuthCubitKey);
 
       return MultiAuthChangeNotifier(multiAuthState);
+    }
+
+    final json =
+        globalBox.get(MultiAuthChangeNotifier._kMultiAuthNotifierProviderKey);
+    if (json != null && json is String) {
+      return MultiAuthChangeNotifier(MultiAuthState.fromJson(json));
     }
   }
 

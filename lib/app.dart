@@ -15,7 +15,6 @@ import 'account/account_server.dart';
 import 'account/notification_service.dart';
 import 'bloc/keyword_cubit.dart';
 import 'bloc/minute_timer_cubit.dart';
-import 'bloc/setting_cubit.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
@@ -31,6 +30,7 @@ import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
 import 'ui/provider/database_provider.dart';
 import 'ui/provider/multi_auth_provider.dart';
+import 'ui/provider/setting_provider.dart';
 import 'utils/extension/extension.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
@@ -66,14 +66,7 @@ class App extends HookConsumerWidget {
       child = _LoginApp(authState: authState);
     }
 
-    return FocusHelper(
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (context) => SettingCubit()),
-        ],
-        child: child,
-      ),
-    );
+    return FocusHelper(child: child);
   }
 }
 
@@ -126,7 +119,7 @@ class _LoginApp extends ConsumerWidget {
         try {
           final accountServer = AccountServer(
             ref.read(multiAuthNotifierProvider),
-            context.settingCubit,
+            ref.read(settingProvider),
             database: database.requireValue,
           );
           await accountServer.initServer(
@@ -236,13 +229,13 @@ class _Providers extends StatelessWidget {
       );
 }
 
-class _App extends StatelessWidget {
+class _App extends HookConsumerWidget {
   const _App({required this.home});
 
   final Widget home;
 
   @override
-  Widget build(BuildContext context) => WindowShortcuts(
+  Widget build(BuildContext context, WidgetRef ref) => WindowShortcuts(
         child: GlobalMoveWindow(
           child: MaterialApp(
             title: 'Mixin',
@@ -273,7 +266,7 @@ class _App extends StatelessWidget {
               ),
               useMaterial3: true,
             ).withFallbackFonts(),
-            themeMode: context.watch<SettingCubit>().themeMode,
+            themeMode: ref.read(settingProvider).themeMode,
             builder: (context, child) {
               try {
                 context.accountServer.language =
@@ -283,7 +276,7 @@ class _App extends StatelessWidget {
               return BrightnessObserver(
                 lightThemeData: lightBrightnessThemeData,
                 darkThemeData: darkBrightnessThemeData,
-                forceBrightness: context.watch<SettingCubit>().brightness,
+                forceBrightness: ref.read(settingProvider).brightness,
                 child: MediaQuery(
                   data: mediaQueryData.copyWith(
                     // Different linux distro change the value, e.g. 1.2

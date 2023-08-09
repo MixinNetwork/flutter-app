@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 
 import '../../blaze/blaze.dart';
 import '../../bloc/bloc_converter.dart';
-import '../../bloc/setting_cubit.dart';
 import '../../utils/audio_message_player/audio_message_service.dart';
 import '../../utils/device_transfer/device_transfer_widget.dart';
 import '../../utils/extension/extension.dart';
@@ -19,6 +18,7 @@ import '../../widgets/empty.dart';
 import '../../widgets/protocol_handler.dart';
 import '../../widgets/toast.dart';
 import '../provider/multi_auth_provider.dart';
+import '../provider/setting_provider.dart';
 import '../setting/setting_page.dart';
 import 'bloc/conversation_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
@@ -167,7 +167,7 @@ class HasDrawerValueNotifier extends ValueNotifier<bool> {
   HasDrawerValueNotifier(super.value);
 }
 
-class _HomePage extends HookWidget {
+class _HomePage extends HookConsumerWidget {
   const _HomePage({
     required this.constraints,
   });
@@ -175,15 +175,13 @@ class _HomePage extends HookWidget {
   final BoxConstraints constraints;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final maxWidth = constraints.maxWidth;
     final clampSlideWidth = (maxWidth - kResponsiveNavigationMinWidth)
         .clamp(kSlidePageMinWidth, kSlidePageMaxWidth);
 
     final userCollapse =
-        useBlocStateConverter<SettingCubit, SettingState, bool>(
-      converter: (state) => state.collapsedSidebar,
-    );
+        ref.watch(settingProvider.select((value) => value.collapsedSidebar));
 
     final autoCollapse = clampSlideWidth < kSlidePageMaxWidth;
     final collapse = userCollapse || autoCollapse;

@@ -21,11 +21,11 @@ import 'package:ulid/ulid.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../account/account_server.dart';
-import '../../bloc/setting_cubit.dart';
 import '../../db/dao/snapshot_dao.dart';
 import '../../db/database.dart';
 import '../../generated/l10n.dart';
 import '../../ui/provider/multi_auth_provider.dart';
+import '../../ui/provider/setting_provider.dart';
 import '../../widgets/brightness_observer.dart';
 import '../audio_message_player/audio_message_service.dart';
 import '../platform.dart';

@@ -3,10 +3,13 @@ part of '../extension.dart';
 extension ProviderExtension on BuildContext {
   MultiAuthChangeNotifier get multiAuthChangeNotifier =>
       providerContainer.read(multiAuthNotifierProvider);
+
   AuthState? get auth => providerContainer.read(authProvider);
+
   Account? get account => providerContainer.read(authAccountProvider);
 
-  SettingCubit get settingCubit => read<SettingCubit>();
+  SettingChangeNotifier get settingChangeNotifier =>
+      providerContainer.read(settingProvider);
 
   AccountServer get accountServer => read<AccountServer>();
 
@@ -22,7 +25,7 @@ extension ProviderExtension on BuildContext {
   double get brightnessValue => BrightnessData.of(this);
 
   Brightness get brightness =>
-      watch<SettingCubit>().brightness ?? MediaQuery.platformBrightnessOf(this);
+      settingChangeNotifier.brightness ?? MediaQuery.platformBrightnessOf(this);
 
   Color dynamicColor(
     Color color, {
