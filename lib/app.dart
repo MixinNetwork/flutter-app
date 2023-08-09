@@ -11,7 +11,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart'
 import 'package:provider/provider.dart';
 
 import 'account/account_key_value.dart';
-import 'account/account_server.dart';
 import 'account/notification_service.dart';
 import 'bloc/keyword_cubit.dart';
 import 'bloc/minute_timer_cubit.dart';
@@ -28,6 +27,7 @@ import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
+import 'ui/provider/account_server_provider.dart';
 import 'ui/provider/database_provider.dart';
 import 'ui/provider/multi_auth_provider.dart';
 import 'ui/provider/setting_provider.dart';
@@ -78,6 +78,7 @@ class _LoginApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final database = ref.watch(databaseProvider);
+
     if (database.isLoading) {
       return const _App(home: LandingPage());
     }
@@ -104,125 +105,75 @@ class _LoginApp extends ConsumerWidget {
         );
       }
     }
-    return FutureProvider<AsyncSnapshot<AccountServer>?>(
-      key: ValueKey((
-        authState.account.userId,
-        authState.account.sessionId,
-        authState.account.identityNumber,
-        authState.privateKey,
-      )),
-      create: (BuildContext context) async {
-        try {
-          final accountServer = AccountServer(
-            ref.read(multiAuthNotifierProvider),
-            ref.read(settingProvider),
-            database: database.requireValue,
-          );
-          await accountServer.initServer(
-            authState.account.userId,
-            authState.account.sessionId,
-            authState.account.identityNumber,
-            authState.privateKey,
-          );
-          return AsyncSnapshot<AccountServer>.withData(
-              ConnectionState.done, accountServer);
-        } catch (e, s) {
-          w('accountServer.initServer error: $e, $s');
-          return AsyncSnapshot<AccountServer>.withError(
-              ConnectionState.done, e, s);
-        }
-      },
-      initialData: null,
-      builder: (BuildContext context, _) =>
-          Consumer<AsyncSnapshot<AccountServer>?>(
-        builder: (context, result, child) {
-          if (result != null) {
-            if (result.data != null) {
-              return _Providers(
-                app: child!,
-                accountServer: result.requireData,
-              );
-            } else {
-              return Provider<AsyncSnapshot<AccountServer>?>.value(
-                value: result,
-                child: child,
-              );
-            }
-          }
-          return child!;
-        },
-        child: const _App(home: _Home()),
-      ),
-    );
+
+    return const _Providers(app: _App(home: _Home()));
   }
 }
 
-class _Providers extends StatelessWidget {
+class _Providers extends HookConsumerWidget {
   const _Providers({
     required this.app,
-    required this.accountServer,
   });
 
   final Widget app;
-  final AccountServer accountServer;
 
   @override
-  Widget build(BuildContext context) => MultiProvider(
-        providers: [
-          Provider<AccountServer>(
-            key: ValueKey(accountServer.userId),
-            create: (context) => accountServer,
-            dispose: (BuildContext context, AccountServer accountServer) =>
-                accountServer.stop(),
-          ),
-          Provider(
-            create: (context) => MentionCache(accountServer.database.userDao),
-          ),
-        ],
-        child: Builder(
-          builder: (context) => MultiBlocProvider(
-            providers: [
-              BlocProvider(
-                create: (BuildContext context) => SlideCategoryCubit(),
-              ),
-              BlocProvider(
-                create: (BuildContext context) => ResponsiveNavigatorCubit(),
-              ),
-              BlocProvider(
-                create: (BuildContext context) => ConversationCubit(
-                  accountServer: accountServer,
-                  responsiveNavigatorCubit:
-                      context.read<ResponsiveNavigatorCubit>(),
-                ),
-              ),
-              BlocProvider(
-                create: (context) => ConversationFilterUnseenCubit(),
-              ),
-              BlocProvider(
-                create: (BuildContext context) => KeywordCubit(),
-              ),
-              BlocProvider(
-                create: (BuildContext context) => MinuteTimerCubit(),
-              ),
-              BlocProvider(
-                create: (BuildContext context) => ConversationListBloc(
-                  context.read<SlideCategoryCubit>(),
-                  accountServer.database,
-                  context.read<MentionCache>(),
-                ),
-              ),
-              BlocProvider(create: (context) => RecallMessageReeditCubit()),
-            ],
-            child: Provider<NotificationService>(
-              create: (BuildContext context) =>
-                  NotificationService(context: context),
-              lazy: false,
-              dispose: (_, notificationService) => notificationService.close(),
-              child: PortalProviders(child: app),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncAccountServer = ref.watch(accountServerProvider);
+    if (!asyncAccountServer.hasValue) return app;
+    final accountServer = asyncAccountServer.requireValue;
+
+    return MultiProvider(
+      providers: [
+        Provider(
+          create: (context) => MentionCache(accountServer.database.userDao),
+        ),
+      ],
+      child: Builder(
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (BuildContext context) => SlideCategoryCubit(),
             ),
+            BlocProvider(
+              create: (BuildContext context) => ResponsiveNavigatorCubit(),
+            ),
+            BlocProvider(
+              create: (BuildContext context) => ConversationCubit(
+                accountServer: accountServer,
+                responsiveNavigatorCubit:
+                    context.read<ResponsiveNavigatorCubit>(),
+              ),
+            ),
+            BlocProvider(
+              create: (context) => ConversationFilterUnseenCubit(),
+            ),
+            BlocProvider(
+              create: (BuildContext context) => KeywordCubit(),
+            ),
+            BlocProvider(
+              create: (BuildContext context) => MinuteTimerCubit(),
+            ),
+            BlocProvider(
+              create: (BuildContext context) => ConversationListBloc(
+                context.read<SlideCategoryCubit>(),
+                accountServer.database,
+                context.read<MentionCache>(),
+              ),
+            ),
+            BlocProvider(create: (context) => RecallMessageReeditCubit()),
+          ],
+          child: Provider<NotificationService>(
+            create: (BuildContext context) =>
+                NotificationService(context: context),
+            lazy: false,
+            dispose: (_, notificationService) => notificationService.close(),
+            child: PortalProviders(child: app),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class _App extends HookConsumerWidget {
@@ -301,27 +252,20 @@ class _Home extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authAvailable =
-        ref.watch(authProvider.select((value) => value != null));
-    AccountServer? accountServer;
-    try {
-      accountServer = context.read<AccountServer?>();
-    } catch (_) {}
-    final signed = authAvailable && accountServer != null;
+    final accountServer =
+        ref.watch(accountServerProvider.select((value) => value.valueOrNull));
+
     useEffect(() {
-      if (signed) {
-        accountServer!
-          ..refreshSelf()
-          ..refreshFriends()
-          ..refreshSticker()
-          ..initCircles()
-          ..checkMigration();
-      }
-    }, [signed]);
+      accountServer?.refreshSelf();
+      accountServer?.refreshFriends();
+      accountServer?.refreshSticker();
+      accountServer?.initCircles();
+      accountServer?.checkMigration();
+    }, [accountServer]);
 
     useEffect(() {
       Future<void> effect() async {
-        if (!signed || accountServer == null) return;
+        if (accountServer == null) return;
 
         try {
           final currentDeviceId = await getDeviceId();
@@ -345,9 +289,9 @@ class _Home extends HookConsumerWidget {
       }
 
       effect();
-    }, [signed]);
+    }, [accountServer]);
 
-    if (signed) {
+    if (accountServer != null) {
       BlocProvider.of<ConversationListBloc>(context)
         ..limit = MediaQuery.sizeOf(context).height ~/
             (ConversationPage.conversationItemHeight / 1.75)

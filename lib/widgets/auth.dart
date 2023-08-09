@@ -9,10 +9,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../account/account_server.dart';
 import '../account/security_key_value.dart';
 import '../constants/resources.dart';
-import '../ui/provider/multi_auth_provider.dart';
+import '../ui/provider/account_server_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/authentication.dart';
 import '../utils/event_bus.dart';
@@ -34,14 +33,8 @@ class AuthGuard extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authAvailable =
-        ref.watch(authProvider.select((value) => value != null));
-
-    AccountServer? accountServer;
-    try {
-      accountServer = context.read<AccountServer?>();
-    } catch (_) {}
-    final signed = authAvailable && accountServer != null;
+    final signed =
+        ref.watch(accountServerProvider.select((value) => value.hasValue));
 
     if (signed) return _AuthGuard(child: child);
 

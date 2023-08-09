@@ -24,6 +24,8 @@ import '../../account/account_server.dart';
 import '../../db/dao/snapshot_dao.dart';
 import '../../db/database.dart';
 import '../../generated/l10n.dart';
+import '../../ui/provider/account_server_provider.dart';
+import '../../ui/provider/database_provider.dart';
 import '../../ui/provider/multi_auth_provider.dart';
 import '../../ui/provider/setting_provider.dart';
 import '../../widgets/brightness_observer.dart';

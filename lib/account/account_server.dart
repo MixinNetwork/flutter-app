@@ -103,7 +103,7 @@ class AccountServer {
       rethrow;
     }
 
-    unawaited(start());
+    unawaited(_start());
 
     DownloadKeyValue.instance.messageIds.forEach((messageId) {
       attachmentUtil.downloadAttachment(messageId: messageId);
@@ -191,7 +191,7 @@ class AccountServer {
 
   final jobSubscribers = <StreamSubscription>{};
 
-  Future<void> start() async {
+  Future<void> _start() async {
     final receivePort = ReceivePort();
     _isolateChannel = IsolateChannel<dynamic>.connectReceive(receivePort);
     final exitReceivePort = ReceivePort();

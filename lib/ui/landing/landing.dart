@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../account/account_key_value.dart';
-import '../../account/account_server.dart';
 import '../../crypto/signal/signal_database.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hive_key_values.dart';
@@ -15,6 +15,7 @@ import '../../utils/mixin_api_client.dart';
 import '../../utils/system/package_info.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
+import '../provider/account_server_provider.dart';
 import 'landing_mobile.dart';
 import 'landing_qrcode.dart';
 
@@ -29,12 +30,13 @@ class LandingModeCubit extends Cubit<LandingMode> {
   void changeMode(LandingMode mode) => emit(mode);
 }
 
-class LandingPage extends HookWidget {
+class LandingPage extends HookConsumerWidget {
   const LandingPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final accountServerError = context.watch<AsyncSnapshot<AccountServer>?>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accountServerHasError =
+        ref.watch(accountServerProvider.select((value) => value.hasError));
 
     final modeCubit = useBloc(LandingModeCubit.new);
     final mode = useBlocState<LandingModeCubit, LandingMode>(bloc: modeCubit);
@@ -48,7 +50,7 @@ class LandingPage extends HookWidget {
         child = const LoginWithMobileWidget();
         break;
     }
-    if (accountServerError?.hasError ?? false) {
+    if (accountServerHasError) {
       child = const _LoginFailed();
     }
     return BlocProvider.value(
@@ -58,12 +60,13 @@ class LandingPage extends HookWidget {
   }
 }
 
-class _LoginFailed extends HookWidget {
+class _LoginFailed extends HookConsumerWidget {
   const _LoginFailed();
 
   @override
-  Widget build(BuildContext context) {
-    final accountServerError = context.read<AsyncSnapshot<AccountServer>?>()!;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accountServerError = ref.watch(accountServerProvider);
+
     final errorText = 'Error: ${accountServerError.error}';
     final stackTraceText = 'StackTrace: ${accountServerError.stackTrace}';
 

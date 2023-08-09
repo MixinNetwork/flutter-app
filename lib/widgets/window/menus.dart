@@ -9,11 +9,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../account/account_server.dart';
 import '../../account/security_key_value.dart';
 import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
-import '../../ui/provider/multi_auth_provider.dart';
+import '../../ui/provider/account_server_provider.dart';
 import '../../utils/device_transfer/device_transfer_dialog.dart';
 import '../../utils/event_bus.dart';
 import '../../utils/extension/extension.dart';
@@ -91,14 +90,8 @@ class _Menus extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authAvailable =
-        ref.watch(authProvider.select((value) => value != null));
-
-    AccountServer? accountServer;
-    try {
-      accountServer = context.read<AccountServer?>();
-    } catch (_) {}
-    final signed = authAvailable && accountServer != null;
+    final signed =
+        ref.watch(accountServerProvider.select((value) => value.hasValue));
 
     final menuCubit = useBloc<MacMenuBarCubit>(MacMenuBarCubit.new);
 

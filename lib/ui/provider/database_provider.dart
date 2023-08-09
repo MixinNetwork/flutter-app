@@ -13,7 +13,10 @@ final databaseProvider =
   (ref) {
     final identityNumber =
         ref.watch(authAccountProvider.select((value) => value?.identityNumber));
-    return DatabaseOpener(identityNumber);
+
+    if (identityNumber == null) return DatabaseOpener();
+
+    return DatabaseOpener.open(identityNumber);
   },
 );
 
@@ -23,30 +26,29 @@ extension _DatabaseExt on MixinDatabase {
 }
 
 class DatabaseOpener extends StateNotifier<AsyncValue<Database>> {
-  DatabaseOpener(this.identityNumber) : super(const AsyncValue.loading()) {
-    if (identityNumber != null) open();
+  DatabaseOpener() : super(const AsyncValue.loading());
+
+  DatabaseOpener.open(this.identityNumber) : super(const AsyncValue.loading()) {
+    open();
   }
 
-  final String? identityNumber;
-
-  Database? _database;
+  late final String identityNumber;
 
   final Lock _lock = Lock();
 
   Future<void> open() => _lock.synchronized(() async {
         i('connect to database: $identityNumber');
-        if (_database != null) {
+        if (state.hasValue) {
           e('database already opened');
           return;
         }
         try {
           final mixinDatabase =
-              await connectToDatabase(identityNumber!, fromMainIsolate: true);
+              await connectToDatabase(identityNumber, fromMainIsolate: true);
           final db = Database(
             mixinDatabase,
-            await FtsDatabase.connect(identityNumber!, fromMainIsolate: true),
+            await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
           );
-          _database = db;
           // Do a database query, to ensure database has properly initialized.
           await mixinDatabase.doInitVerify();
           state = AsyncValue.data(db);
@@ -56,11 +58,14 @@ class DatabaseOpener extends StateNotifier<AsyncValue<Database>> {
         }
       });
 
+  @override
+  Future<void> dispose() async {
+    await close();
+    super.dispose();
+  }
+
   Future<void> close() async {
-    if (_database != null) {
-      await _database?.dispose();
-      _database = null;
-    }
+    await state.valueOrNull?.dispose();
     state = const AsyncValue.loading();
   }
 }

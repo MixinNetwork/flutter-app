@@ -11,12 +11,20 @@ extension ProviderExtension on BuildContext {
   SettingChangeNotifier get settingChangeNotifier =>
       providerContainer.read(settingProvider);
 
-  AccountServer get accountServer => read<AccountServer>();
+  AccountServer get accountServer =>
+      providerContainer.read(accountServerProvider.select((value) {
+        if (!value.hasValue) throw Exception('AccountServerProvider not ready');
+        return value.requireValue;
+      }));
 
   AudioMessagePlayService get audioMessageService =>
       read<AudioMessagePlayService>();
 
-  Database get database => accountServer.database;
+  Database get database =>
+      providerContainer.read(databaseProvider.select((value) {
+        if (!value.hasValue) throw Exception('DatabaseProvider not ready');
+        return value.requireValue;
+      }));
 
   Localization get l10n => Localization.of(this);
 
@@ -33,5 +41,6 @@ extension ProviderExtension on BuildContext {
   }) =>
       BrightnessData.dynamicColor(this, color, darkColor: darkColor);
 
-  ProviderContainer get providerContainer => ProviderScope.containerOf(this);
+  ProviderContainer get providerContainer =>
+      ProviderScope.containerOf(this, listen: false);
 }
