@@ -77,8 +77,7 @@ class _LoginApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final identityNumber = authState.account.identityNumber;
-    final database = ref.watch(databaseProvider(identityNumber));
+    final database = ref.watch(databaseProvider);
     if (database.isLoading) {
       return const _App(home: LandingPage());
     }
@@ -89,10 +88,7 @@ class _LoginApp extends ConsumerWidget {
       }
       if (error is SqliteException) {
         return _App(
-          home: DatabaseOpenFailedPage(
-            error: error,
-            identityNumber: identityNumber,
-          ),
+          home: DatabaseOpenFailedPage(error: error),
         );
       } else {
         return _App(
@@ -112,7 +108,7 @@ class _LoginApp extends ConsumerWidget {
       key: ValueKey((
         authState.account.userId,
         authState.account.sessionId,
-        identityNumber,
+        authState.account.identityNumber,
         authState.privateKey,
       )),
       create: (BuildContext context) async {

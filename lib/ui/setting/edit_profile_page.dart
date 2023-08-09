@@ -17,19 +17,22 @@ class EditProfilePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final nameTextEditingController = useTextEditingController();
-    final bioTextEditingController = useTextEditingController();
-    useEffect(() {
-      context.accountServer.refreshSelf();
-    }, []);
-
-    final (identityNumber, phone, createdAt) = ref.watch(
+    final (fullName, biography, identityNumber, phone, createdAt) = ref.watch(
       authAccountProvider.select((value) => (
+            value?.fullName,
+            value?.biography,
             value?.identityNumber,
             value?.phone,
             value?.createdAt,
           )),
     );
+
+    final nameTextEditingController = useTextEditingController(text: fullName);
+    final bioTextEditingController = useTextEditingController(text: biography);
+
+    useEffect(() {
+      context.accountServer.refreshSelf();
+    }, []);
 
     ref.listen(authAccountProvider, (previous, next) {
       if (next == null) return;

@@ -6,10 +6,15 @@ import '../../db/fts_database.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/synchronized.dart';
 import '../home/bloc/slide_category_cubit.dart';
+import 'multi_auth_provider.dart';
 
-final databaseProvider = StateNotifierProvider.family
-    .autoDispose<DatabaseOpener, AsyncValue<Database>, String>(
-  (ref, identityNumber) => DatabaseOpener(identityNumber),
+final databaseProvider =
+    StateNotifierProvider.autoDispose<DatabaseOpener, AsyncValue<Database>>(
+  (ref) {
+    final identityNumber =
+        ref.watch(authAccountProvider.select((value) => value?.identityNumber));
+    return DatabaseOpener(identityNumber);
+  },
 );
 
 extension _DatabaseExt on MixinDatabase {
@@ -19,10 +24,10 @@ extension _DatabaseExt on MixinDatabase {
 
 class DatabaseOpener extends StateNotifier<AsyncValue<Database>> {
   DatabaseOpener(this.identityNumber) : super(const AsyncValue.loading()) {
-    open();
+    if (identityNumber != null) open();
   }
 
-  final String identityNumber;
+  final String? identityNumber;
 
   Database? _database;
 
@@ -36,10 +41,10 @@ class DatabaseOpener extends StateNotifier<AsyncValue<Database>> {
         }
         try {
           final mixinDatabase =
-              await connectToDatabase(identityNumber, fromMainIsolate: true);
+              await connectToDatabase(identityNumber!, fromMainIsolate: true);
           final db = Database(
             mixinDatabase,
-            await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
+            await FtsDatabase.connect(identityNumber!, fromMainIsolate: true),
           );
           _database = db;
           // Do a database query, to ensure database has properly initialized.
