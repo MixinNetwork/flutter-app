@@ -6,10 +6,8 @@ import 'dart:isolate';
 import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:uuid/uuid.dart';
@@ -27,7 +25,6 @@ import '../db/dao/sticker_album_dao.dart';
 import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
-import '../db/fts_database.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
@@ -35,7 +32,6 @@ import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/attachment/download_key_value.dart';
-import '../utils/event_bus.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
@@ -52,8 +48,13 @@ import 'send_message_helper.dart';
 import 'show_pin_message_key_value.dart';
 
 class AccountServer {
-  AccountServer(this.multiAuthCubit, this.settingCubit,
-      {this.userAgent, this.deviceId});
+  AccountServer(
+    this.multiAuthCubit,
+    this.settingCubit, {
+    this.userAgent,
+    this.deviceId,
+    required this.database,
+  });
 
   static String? sid;
 
@@ -62,13 +63,13 @@ class AccountServer {
 
   final MultiAuthCubit multiAuthCubit;
   final SettingCubit settingCubit;
+  final Database database;
   Timer? checkSignalKeyTimer;
 
   bool get _loginByPhoneNumber =>
       AccountKeyValue.instance.primarySessionId == null;
   String? userAgent;
   String? deviceId;
-  StreamSubscription<SqliteException>? databaseMalformedSubscription;
 
   Future<void> initServer(
     String userId,
@@ -79,31 +80,6 @@ class AccountServer {
     if (sid == sessionId) return;
     sid = sessionId;
 
-    await databaseMalformedSubscription?.cancel();
-    databaseMalformedSubscription =
-        EventBus.instance.on.whereType<SqliteException>().listen((event) async {
-      await signOutAndClear();
-
-      final now = DateTime.now();
-
-      renameFileWithTime(
-          p.join(
-              mixinDocumentsDirectory.path, identityNumber, '$kDbFileName.db'),
-          now);
-
-      await Future.forEach(
-        [
-          File(p.join(mixinDocumentsDirectory.path, identityNumber,
-              '$kDbFileName.db-shm')),
-          File(p.join(mixinDocumentsDirectory.path, identityNumber,
-              '$kDbFileName.db-wal'))
-        ].where((e) => e.existsSync()),
-        (element) => element.delete(),
-      );
-
-      multiAuthCubit.signOut();
-    });
-
     this.userId = userId;
     this.sessionId = sessionId;
     this.identityNumber = identityNumber;
@@ -111,7 +87,7 @@ class AccountServer {
 
     await initKeyValues(identityNumber);
 
-    await _initDatabase();
+    await _initClient();
 
     checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
       i('refreshSignalKeys periodic');
@@ -159,12 +135,7 @@ class AccountServer {
     markRead(_activeConversationId!);
   }
 
-  Future<void> _initDatabase() async {
-    database = Database(
-      await db.connectToDatabase(identityNumber, fromMainIsolate: true),
-      await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
-    );
-
+  Future<void> _initClient() async {
     client = createClient(
       userId: userId,
       sessionId: sessionId,
@@ -196,7 +167,6 @@ class AccountServer {
   late String privateKey;
 
   late Client client;
-  late Database database;
   late Injector _injector;
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil attachmentUtil;
@@ -333,9 +303,6 @@ class AccountServer {
   }
 
   Future<void> signOutAndClear() async {
-    await databaseMalformedSubscription?.cancel();
-    databaseMalformedSubscription = null;
-
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
     await client.accountApi.logout(LogoutRequest(sessionId));
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
@@ -738,7 +705,6 @@ class AccountServer {
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
-    await database.dispose();
   }
 
   void release() {

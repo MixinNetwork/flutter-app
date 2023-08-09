@@ -288,6 +288,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "The database is corrupted and cannot be recovered. Clicking continue will create a new database file."),
         "databaseLockedTips": MessageLookupByLibrary.simpleMessage(
             "The database file is locked and cannot be accessed. Please try restarting the application or the system and try again."),
+        "databaseNotADbTips": MessageLookupByLibrary.simpleMessage(
+            "Cannot open the database. The file is not a valid database file."),
+        "databaseRecreateTips": MessageLookupByLibrary.simpleMessage(
+            "Create a new database file and the old file will be deleted."),
         "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
             "The database is being upgraded, it may take several minutes, please do not close this App."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
@@ -604,6 +608,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Authentication (Optional)"),
         "proxyConnection": MessageLookupByLibrary.simpleMessage("Connection"),
         "proxyType": MessageLookupByLibrary.simpleMessage("Proxy Type"),
+        "qrCodeExpiredDesc": MessageLookupByLibrary.simpleMessage(
+            "QR Code expired, please retry"),
         "quickSearch": MessageLookupByLibrary.simpleMessage("Quick search"),
         "quitMixin": MessageLookupByLibrary.simpleMessage("Quit Mixin"),
         "raw": MessageLookupByLibrary.simpleMessage("Raw"),

@@ -12,6 +12,7 @@ import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/recent_conversation_cubit.dart';
+import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/conversation/search_list.dart';
 import '../../ui/home/intent.dart';
 import '../../utils/extension/extension.dart';
@@ -168,6 +169,12 @@ class CommandPalettePage extends HookWidget {
       if (index != null) {
         selectedIndex.value = index;
       }
+
+      final slideCategoryCubit = context.read<SlideCategoryCubit>();
+      if (slideCategoryCubit.state.type == SlideCategoryType.setting) {
+        slideCategoryCubit.select(SlideCategoryType.chats);
+      }
+
       if (selectedIndex.value < users.length) {
         ConversationCubit.selectUser(context, ids[selectedIndex.value]);
       } else if ((selectedIndex.value - users.length) < conversations.length) {
