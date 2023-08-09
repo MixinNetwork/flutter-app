@@ -9,8 +9,8 @@ extension CurrencyExtension on BuildContext {
 
   String get currencyFormatCoin => NumberFormat().format(num.tryParse('$this'));
 
-  NumberFormat get currentCurrencyNumberFormat => NumberFormat.simpleCurrency(
-      name: multiAuthState.currentUser?.fiatCurrency);
+  NumberFormat get currentCurrencyNumberFormat =>
+      NumberFormat.simpleCurrency(name: account?.fiatCurrency);
 }
 
 extension StringCurrencyExtension on String {

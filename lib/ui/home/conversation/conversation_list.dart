@@ -430,7 +430,7 @@ class _MessageStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (context.multiAuthState.currentUserId == conversation.senderId &&
+    if (context.account?.userId == conversation.senderId &&
         conversation.contentType != MessageCategory.systemConversation &&
         conversation.contentType != MessageCategory.systemAccountSnapshot &&
         !conversation.contentType.isCallMessage &&

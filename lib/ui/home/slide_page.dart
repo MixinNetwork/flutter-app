@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../bloc/bloc_converter.dart';
@@ -24,7 +25,7 @@ import '../../widgets/select_item.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/user_selector/conversation_selector.dart';
 import '../../widgets/window/move_window.dart';
-import 'bloc/multi_auth_cubit.dart';
+import '../provider/multi_auth_provider.dart';
 import 'bloc/slide_category_cubit.dart';
 
 class SlidePage extends StatelessWidget {
@@ -133,61 +134,57 @@ class SlidePage extends StatelessWidget {
       );
 }
 
-class _CurrentUser extends StatelessWidget {
+class _CurrentUser extends HookConsumerWidget {
   const _CurrentUser();
 
   @override
-  Widget build(BuildContext context) => MoveWindowBarrier(
-        child: Builder(
-          builder: (context) =>
-              BlocConverter<MultiAuthCubit, MultiAuthState, Account?>(
-            converter: (state) => state.current?.account,
-            when: (a, b) => b?.fullName != null,
-            builder: (context, account) =>
-                BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-              converter: (state) => state.type == SlideCategoryType.setting,
-              builder: (context, selected) {
-                assert(account != null);
-                return SelectItem(
-                  icon: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: AvatarWidget(
-                      avatarUrl: account?.avatarUrl,
-                      size: 24,
-                      name: account?.fullName,
-                      userId: account?.userId,
-                    ),
-                  ),
-                  title: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        account?.fullName ?? '',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${account?.identityNumber}',
-                        style: TextStyle(
-                            color: context.theme.secondaryText, fontSize: 12),
-                      )
-                    ],
-                  ),
-                  selected: selected,
-                  onTap: () {
-                    BlocProvider.of<SlideCategoryCubit>(context)
-                        .select(SlideCategoryType.setting);
-                    if (ModalRoute.of(context)?.canPop == true) {
-                      Navigator.pop(context);
-                    }
-                  },
-                );
-              },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final account = ref.watch(authAccountProvider);
+
+    return MoveWindowBarrier(
+      child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+        converter: (state) => state.type == SlideCategoryType.setting,
+        builder: (context, selected) {
+          assert(account != null);
+          return SelectItem(
+            icon: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: AvatarWidget(
+                avatarUrl: account?.avatarUrl,
+                size: 24,
+                name: account?.fullName,
+                userId: account?.userId,
+              ),
             ),
-          ),
-        ),
-      );
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  account?.fullName ?? '',
+                  style: const TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${account?.identityNumber}',
+                  style: TextStyle(
+                      color: context.theme.secondaryText, fontSize: 12),
+                )
+              ],
+            ),
+            selected: selected,
+            onTap: () {
+              BlocProvider.of<SlideCategoryCubit>(context)
+                  .select(SlideCategoryType.setting);
+              if (ModalRoute.of(context)?.canPop == true) {
+                Navigator.pop(context);
+              }
+            },
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _CircleList extends HookWidget {

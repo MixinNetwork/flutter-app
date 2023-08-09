@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../constants/resources.dart';
 import '../../db/dao/conversation_dao.dart';
@@ -11,10 +12,10 @@ import '../../db/database_event_bus.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
-import '../../ui/home/bloc/recent_conversation_cubit.dart';
 import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/conversation/search_list.dart';
 import '../../ui/home/intent.dart';
+import '../../ui/provider/recent_conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
@@ -75,11 +76,11 @@ class CommandPaletteAction extends Action<ToggleCommandPaletteIntent> {
   }
 }
 
-class CommandPalettePage extends HookWidget {
+class CommandPalettePage extends HookConsumerWidget {
   const CommandPalettePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scrollController = useScrollController();
     final textEditingController = useTextEditingController();
     final stream = useValueNotifierConvertSteam(textEditingController);
@@ -105,8 +106,7 @@ class CommandPalettePage extends HookWidget {
         }, keys: [keyword]).data ??
         [];
 
-    final recentConversationIds =
-        useBlocState<RecentConversationCubit, List<String>>();
+    final recentConversationIds = ref.watch(recentConversationIDsProvider);
 
     final conversations = useMemoizedStream(() {
           if (keyword.trim().isEmpty) {

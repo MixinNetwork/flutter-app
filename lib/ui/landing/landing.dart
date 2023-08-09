@@ -15,7 +15,6 @@ import '../../utils/mixin_api_client.dart';
 import '../../utils/system/package_info.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
-import '../home/bloc/multi_auth_cubit.dart';
 import 'landing_mobile.dart';
 import 'landing_qrcode.dart';
 
@@ -137,8 +136,7 @@ class _LoginFailed extends HookWidget {
                   vertical: 14,
                 ),
                 onTap: () async {
-                  final multiAuthCubit = context.read<MultiAuthCubit>();
-                  final authState = multiAuthCubit.state.current;
+                  final authState = context.auth;
                   if (authState == null) return;
 
                   await createClient(
@@ -152,7 +150,7 @@ class _LoginFailed extends HookWidget {
                       .logout(LogoutRequest(authState.account.sessionId));
                   await clearKeyValues();
                   await SignalDatabase.get.clear();
-                  multiAuthCubit.signOut();
+                  context.multiAuthChangeNotifier.signOut();
                 },
                 child: Text(context.l10n.retry),
               ),

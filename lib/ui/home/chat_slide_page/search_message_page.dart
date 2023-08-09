@@ -351,9 +351,9 @@ class _SearchParticipantList extends HookWidget {
                       )
                     : userDao
                         .fuzzySearchBotGroupUser(
-                            currentUserId:
-                                context.multiAuthCubit.state.currentUserId ??
-                                    '',
+                            currentUserId: context
+                                    .multiAuthChangeNotifier.current?.userId ??
+                                '',
                             conversationId: conversationId,
                             keyword: value)
                         .watchWithStream(
@@ -381,7 +381,7 @@ class _SearchParticipantList extends HookWidget {
               }
               return userDao
                   .fuzzySearchGroupUser(
-                context.multiAuthState.currentUserId ?? '',
+                context.account?.userId ?? '',
                 conversationId,
                 value,
               )

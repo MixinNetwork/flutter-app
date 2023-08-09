@@ -115,7 +115,7 @@ class _InputContainer extends HookWidget {
     final mentionCubit = useBloc(
       () => MentionCubit(
         userDao: context.database.userDao,
-        multiAuthCubit: context.multiAuthCubit,
+        multiAuthChangeNotifier: context.multiAuthChangeNotifier,
       ),
     );
 

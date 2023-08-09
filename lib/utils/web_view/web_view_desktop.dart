@@ -8,7 +8,6 @@ import 'package:path/path.dart' as p;
 
 import '../../constants/brightness_theme_data.dart';
 import '../../db/mixin_database.dart';
-import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
@@ -40,7 +39,7 @@ class DesktopMixinWebView extends MixinWebView {
     BuildContext context,
     String? conversationId,
   ) async {
-    assert(MultiAuthCubit.currentAccount != null);
+    assert(context.auth != null);
 
     final mode = context.settingCubit.brightness ??
         MediaQuery.platformBrightnessOf(context);
@@ -54,7 +53,7 @@ class DesktopMixinWebView extends MixinWebView {
       'platform': 'Desktop',
       'locale': Localizations.localeOf(context).toLanguageTag(),
       'conversation_id': conversationId ?? '',
-      'currency': MultiAuthCubit.currentAccount?.fiatCurrency
+      'currency': context.account?.fiatCurrency
     };
   }
 

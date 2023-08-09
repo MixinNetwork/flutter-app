@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart'
+    hide ChangeNotifierProvider, Provider;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
@@ -16,9 +18,9 @@ import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
 import '../../widgets/protocol_handler.dart';
 import '../../widgets/toast.dart';
+import '../provider/multi_auth_provider.dart';
 import '../setting/setting_page.dart';
 import 'bloc/conversation_cubit.dart';
-import 'bloc/multi_auth_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
 import 'command_palette_wrapper.dart';
 import 'conversation/conversation_hotkey.dart';
@@ -40,11 +42,11 @@ const kChatSidePageWidth = 300.0;
 
 final _conversationPageKey = GlobalKey();
 
-class HomePage extends HookWidget {
+class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final localTimeError = useMemoizedStream(
             () => context.accountServer.connectedStateStream
                 .map((event) => event == ConnectedState.hasLocalTimeError)
@@ -52,10 +54,8 @@ class HomePage extends HookWidget {
             keys: [context.accountServer]).data ??
         false;
 
-    final isEmptyUserName =
-        useBlocStateConverter<MultiAuthCubit, MultiAuthState, bool>(
-            converter: (state) =>
-                state.current?.account.fullName?.isEmpty ?? true);
+    final isEmptyUserName = ref.watch(authAccountProvider
+        .select((value) => value?.fullName?.isEmpty ?? true));
 
     return DeviceTransferHandlerWidget(
       child: CommandPaletteWrapper(

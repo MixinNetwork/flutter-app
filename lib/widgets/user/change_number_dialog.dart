@@ -71,7 +71,7 @@ Future<void> showChangeNumberDialog(BuildContext context) async {
     i('showChangeNumberDialog: Verification failed');
     return;
   }
-  context.multiAuthCubit.updateAccount(account);
+  context.multiAuthChangeNotifier.updateAccount(account);
   showToastSuccessful();
 }
 

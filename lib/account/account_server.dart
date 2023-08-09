@@ -28,7 +28,7 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
-import '../ui/home/bloc/multi_auth_cubit.dart';
+import '../ui/provider/multi_auth_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/attachment/download_key_value.dart';
@@ -61,7 +61,7 @@ class AccountServer {
   set language(String language) =>
       client.dio.options.headers['Accept-Language'] = language;
 
-  final MultiAuthCubit multiAuthCubit;
+  final MultiAuthChangeNotifier multiAuthCubit;
   final SettingCubit settingCubit;
   final Database database;
   Timer? checkSignalKeyTimer;

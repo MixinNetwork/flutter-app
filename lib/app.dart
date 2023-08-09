@@ -6,13 +6,13 @@ import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart' as rp;
+import 'package:hooks_riverpod/hooks_riverpod.dart'
+    hide Provider, FutureProvider, Consumer;
 import 'package:provider/provider.dart';
 
 import 'account/account_key_value.dart';
 import 'account/account_server.dart';
 import 'account/notification_service.dart';
-import 'bloc/bloc_converter.dart';
 import 'bloc/keyword_cubit.dart';
 import 'bloc/minute_timer_cubit.dart';
 import 'bloc/setting_cubit.dart';
@@ -22,9 +22,7 @@ import 'generated/l10n.dart';
 import 'ui/home/bloc/conversation_cubit.dart';
 import 'ui/home/bloc/conversation_filter_unseen_cubit.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
-import 'ui/home/bloc/multi_auth_cubit.dart';
 import 'ui/home/bloc/recall_message_bloc.dart';
-import 'ui/home/bloc/recent_conversation_cubit.dart';
 import 'ui/home/bloc/slide_category_cubit.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
@@ -32,8 +30,8 @@ import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
 import 'ui/provider/database_provider.dart';
+import 'ui/provider/multi_auth_provider.dart';
 import 'utils/extension/extension.dart';
-import 'utils/hook.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
@@ -51,56 +49,41 @@ import 'widgets/window/window_shortcuts.dart';
 
 final rootRouteObserver = RouteObserver<ModalRoute>();
 
-class App extends StatelessWidget {
+class App extends HookConsumerWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     precacheImage(
         const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
+
+    final authState = ref.watch(authProvider);
+
+    Widget child;
+    if (authState == null) {
+      child = const _App(home: LandingPage());
+    } else {
+      child = _LoginApp(authState: authState);
+    }
+
     return FocusHelper(
       child: MultiBlocProvider(
         providers: [
-          BlocProvider(
-            create: (context) => MultiAuthCubit(),
-          ),
-          BlocProvider(create: (context) {
-            final authState = context.multiAuthState.current;
-            final settingCubit = SettingCubit()
-              ..migrate(
-                messagePreview: authState?.messagePreview,
-                photoAutoDownload: authState?.photoAutoDownload,
-                videoAutoDownload: authState?.videoAutoDownload,
-                fileAutoDownload: authState?.fileAutoDownload,
-                collapsedSidebar: authState?.collapsedSidebar,
-              );
-
-            context.multiAuthCubit.cleanCurrentSetting();
-
-            return settingCubit;
-          }),
+          BlocProvider(create: (context) => SettingCubit()),
         ],
-        child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
-          converter: (state) => state.current,
-          builder: (context, authState) {
-            if (authState == null) {
-              return const _App(home: LandingPage());
-            }
-            return _LoginApp(authState: authState);
-          },
-        ),
+        child: child,
       ),
     );
   }
 }
 
-class _LoginApp extends rp.ConsumerWidget {
+class _LoginApp extends ConsumerWidget {
   const _LoginApp({required this.authState});
 
   final AuthState authState;
 
   @override
-  Widget build(BuildContext context, rp.WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final identityNumber = authState.account.identityNumber;
     final database = ref.watch(databaseProvider(identityNumber));
     if (database.isLoading) {
@@ -140,25 +123,25 @@ class _LoginApp extends rp.ConsumerWidget {
         authState.privateKey,
       )),
       create: (BuildContext context) async {
-        final accountServer = AccountServer(
-          context.multiAuthCubit,
-          context.settingCubit,
-          database: database.requireValue,
-        );
         try {
+          final accountServer = AccountServer(
+            ref.read(multiAuthNotifierProvider),
+            context.settingCubit,
+            database: database.requireValue,
+          );
           await accountServer.initServer(
             authState.account.userId,
             authState.account.sessionId,
             authState.account.identityNumber,
             authState.privateKey,
           );
+          return AsyncSnapshot<AccountServer>.withData(
+              ConnectionState.done, accountServer);
         } catch (e, s) {
           w('accountServer.initServer error: $e, $s');
           return AsyncSnapshot<AccountServer>.withError(
               ConnectionState.done, e, s);
         }
-        return AsyncSnapshot<AccountServer>.withData(
-            ConnectionState.done, accountServer);
       },
       initialData: null,
       builder: (BuildContext context, _) =>
@@ -215,9 +198,6 @@ class _Providers extends StatelessWidget {
               ),
               BlocProvider(
                 create: (BuildContext context) => ResponsiveNavigatorCubit(),
-              ),
-              BlocProvider(
-                create: (BuildContext context) => RecentConversationCubit(),
               ),
               BlocProvider(
                 create: (BuildContext context) => ConversationCubit(
@@ -327,13 +307,13 @@ class _App extends StatelessWidget {
       );
 }
 
-class _Home extends HookWidget {
+class _Home extends HookConsumerWidget {
   const _Home();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final authAvailable =
-        useBlocState<MultiAuthCubit, MultiAuthState>().current != null;
+        ref.watch(authProvider.select((value) => value != null));
     AccountServer? accountServer;
     try {
       accountServer = context.read<AccountServer?>();
@@ -366,7 +346,7 @@ class _Home extends HookWidget {
           }
 
           if (deviceId != currentDeviceId) {
-            final multiAuthCubit = context.multiAuthCubit;
+            final multiAuthCubit = context.multiAuthChangeNotifier;
             await accountServer.signOutAndClear();
             multiAuthCubit.signOut();
           }

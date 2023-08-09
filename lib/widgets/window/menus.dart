@@ -6,13 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../account/account_server.dart';
 import '../../account/security_key_value.dart';
-import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
+import '../../ui/provider/multi_auth_provider.dart';
 import '../../utils/device_transfer/device_transfer_dialog.dart';
 import '../../utils/event_bus.dart';
 import '../../utils/extension/extension.dart';
@@ -83,15 +84,16 @@ class MacosMenuBar extends StatelessWidget {
   }
 }
 
-class _Menus extends HookWidget {
+class _Menus extends HookConsumerWidget {
   const _Menus({required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final authAvailable =
-        useBlocState<MultiAuthCubit, MultiAuthState>().current != null;
+        ref.watch(authProvider.select((value) => value != null));
+
     AccountServer? accountServer;
     try {
       accountServer = context.read<AccountServer?>();

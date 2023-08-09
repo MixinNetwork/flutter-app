@@ -27,7 +27,7 @@ import '../../widgets/toast.dart';
 import '../../widgets/user/captcha_web_view_dialog.dart';
 import '../../widgets/user/phone_number_input.dart';
 import '../../widgets/user/verification_dialog.dart';
-import '../home/bloc/multi_auth_cubit.dart';
+import '../provider/multi_auth_provider.dart';
 import 'bloc/landing_cubit.dart';
 import 'landing.dart';
 
@@ -44,7 +44,7 @@ class LoginWithMobileWidget extends HookWidget {
       return const Center(child: CircularProgressIndicator());
     }
     return BlocProvider<LandingMobileCubit>(
-      create: (_) => LandingMobileCubit(context.multiAuthCubit, locale,
+      create: (_) => LandingMobileCubit(context.multiAuthChangeNotifier, locale,
           userAgent: userAgent, deviceId: deviceId),
       child: Navigator(
         onPopPage: (_, __) => true,
@@ -184,9 +184,8 @@ class _CodeInputScene extends HookWidget {
           response.data.pinToken,
           sessionKey.privateKey,
         ));
-        context.multiAuthCubit.signIn(
-          AuthState(account: response.data, privateKey: privateKey),
-        );
+        context.multiAuthChangeNotifier
+            .signIn(AuthState(account: response.data, privateKey: privateKey));
         Toast.dismiss();
       } catch (error) {
         e('login account error: $error');

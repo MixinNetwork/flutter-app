@@ -59,7 +59,7 @@ class NotificationService {
               .get())
           .expand((event) => event)
           .asyncWhere((event) async {
-            final account = context.multiAuthState.currentUser!;
+            final account = context.account!;
 
             bool mentionedCurrentUser() => mentionNumberRegExp
                 .allMatchesAndSort(event.content ?? '')
