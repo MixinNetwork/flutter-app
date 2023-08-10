@@ -202,6 +202,8 @@ class SettingChangeNotifier extends ChangeNotifier {
   }
 
   set messageShowAvatar(bool value) {
+    if (_messageShowAvatar == value) return;
+
     _messageShowAvatar = value;
     globalBox.put(_kSettingMessageShowAvatarKey, _messageShowAvatar);
     notifyListeners();
@@ -210,6 +212,8 @@ class SettingChangeNotifier extends ChangeNotifier {
   bool get messageShowAvatar => _messageShowAvatar ?? false;
 
   set messagePreview(bool value) {
+    if (_messagePreview == value) return;
+
     _messagePreview = value;
     globalBox.put(_kSettingMessagePreviewKey, _messagePreview);
     notifyListeners();
@@ -218,6 +222,8 @@ class SettingChangeNotifier extends ChangeNotifier {
   bool get messagePreview => _messagePreview ?? true;
 
   set photoAutoDownload(bool value) {
+    if (_photoAutoDownload == value) return;
+
     _photoAutoDownload = value;
     globalBox.put(_kSettingPhotoAutoDownloadKey, _photoAutoDownload);
     notifyListeners();
@@ -226,6 +232,8 @@ class SettingChangeNotifier extends ChangeNotifier {
   bool get photoAutoDownload => _photoAutoDownload ?? true;
 
   set videoAutoDownload(bool value) {
+    if (_videoAutoDownload == value) return;
+
     _videoAutoDownload = value;
     globalBox.put(_kSettingVideoAutoDownloadKey, _videoAutoDownload);
     notifyListeners();
@@ -234,6 +242,8 @@ class SettingChangeNotifier extends ChangeNotifier {
   bool get videoAutoDownload => _videoAutoDownload ?? true;
 
   set fileAutoDownload(bool value) {
+    if (_fileAutoDownload == value) return;
+
     _fileAutoDownload = value;
     globalBox.put(_kSettingFileAutoDownloadKey, _fileAutoDownload);
     notifyListeners();
@@ -242,6 +252,8 @@ class SettingChangeNotifier extends ChangeNotifier {
   bool get fileAutoDownload => _fileAutoDownload ?? true;
 
   set collapsedSidebar(bool value) {
+    if (_collapsedSidebar == value) return;
+
     _collapsedSidebar = value;
     globalBox.put(_kSettingCollapsedSidebarKey, _collapsedSidebar);
     notifyListeners();
@@ -250,6 +262,8 @@ class SettingChangeNotifier extends ChangeNotifier {
   bool get collapsedSidebar => _collapsedSidebar ?? false;
 
   set chatFontSizeDelta(double value) {
+    if (_chatFontSizeDelta == value) return;
+
     _chatFontSizeDelta = value;
     globalBox.put(_kSettingChatFontSizeDeltaKey, _chatFontSizeDelta);
     notifyListeners();

@@ -13,7 +13,7 @@ import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
-import '../../../widgets/message/item/text/mention_builder.dart';
+import '../../provider/mention_cache_provider.dart';
 import '../../provider/slide_category_provider.dart';
 
 const kDefaultLimit = 15;

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/extension/message.dart';
@@ -13,6 +14,7 @@ import '../../../ui/home/bloc/blink_cubit.dart';
 import '../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
+import '../../../ui/provider/mention_cache_provider.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -25,7 +27,6 @@ import '../message.dart';
 import '../message_style.dart';
 import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
-import 'text/mention_builder.dart';
 
 // ignore_for_file: avoid_dynamic_calls
 class QuoteMessage extends HookWidget {
@@ -82,10 +83,11 @@ class QuoteMessage extends HookWidget {
       final userId = quote?.userId as String?;
       final userFullName = quote?.userFullName as String?;
       if (type.isText) {
-        return HookBuilder(
-          builder: (context) {
+        return HookConsumer(
+          builder: (context, ref, _) {
             final rawContent = quote.content as String;
-            final mentionCache = context.read<MentionCache>();
+            final mentionCache = ref.read(mentionCacheProvider);
+
             final content = useMemoizedFuture(
               () async => mentionCache.replaceMention(
                 rawContent,

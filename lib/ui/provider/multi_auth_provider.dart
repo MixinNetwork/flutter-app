@@ -69,29 +69,25 @@ class MultiAuthState extends Equatable {
   String toJson() => json.encode(toMap());
 }
 
-class MultiAuthChangeNotifier extends ChangeNotifier {
-  MultiAuthChangeNotifier(this._state);
+class MultiAuthStateNotifier extends StateNotifier<MultiAuthState> {
+  MultiAuthStateNotifier(super.state);
 
   static const _kMultiAuthNotifierProviderKey = 'auths';
 
-  MultiAuthState _state;
-
-  AuthState? get current => _state.current;
+  AuthState? get current => state.current;
 
   void signIn(AuthState authState) {
-    _state = MultiAuthState(
+    state = MultiAuthState(
       auths: {
-        ..._state._auths.where(
+        ...state._auths.where(
             (element) => element.account.userId != authState.account.userId),
         authState,
       },
     );
-
-    notifyListeners();
   }
 
   void updateAccount(Account account) {
-    var authState = _state._auths
+    var authState = state._auths
         .cast<AuthState?>()
         .firstWhere((element) => element?.account.userId == account.userId);
     if (authState == null) {
@@ -99,37 +95,35 @@ class MultiAuthChangeNotifier extends ChangeNotifier {
       return;
     }
     authState = AuthState(account: account, privateKey: authState.privateKey);
-    _state = MultiAuthState(
+    state = MultiAuthState(
       auths: {
-        ..._state._auths.where(
+        ...state._auths.where(
             (element) => element.account.userId != authState?.account.userId),
         authState,
       },
     );
-
-    notifyListeners();
   }
 
   void signOut() {
-    if (_state._auths.isEmpty) return;
-    _state = MultiAuthState(
-        auths: _state._auths.toSet()..remove(_state._auths.last));
-
-    notifyListeners();
+    if (state._auths.isEmpty) return;
+    state =
+        MultiAuthState(auths: state._auths.toSet()..remove(state._auths.last));
   }
 
   @override
-  void notifyListeners() {
-    globalBox.put(_kMultiAuthNotifierProviderKey, _state.toJson());
-    super.notifyListeners();
+  @protected
+  set state(MultiAuthState value) {
+    globalBox.put(_kMultiAuthNotifierProviderKey, state.toJson());
+    super.state = value;
   }
 }
 
 @Deprecated('Use multiAuthNotifierProvider instead')
 const _kMultiAuthCubitKey = 'MultiAuthCubit';
 
-final multiAuthNotifierProvider =
-    ChangeNotifierProvider.autoDispose<MultiAuthChangeNotifier>((ref) {
+final multiAuthStateNotifierProvider =
+    StateNotifierProvider.autoDispose<MultiAuthStateNotifier, MultiAuthState>(
+        (ref) {
   ref.keepAlive();
 
   //  migrate
@@ -138,30 +132,28 @@ final multiAuthNotifierProvider =
     if (oldJson != null) {
       final multiAuthState = fromHydratedJson(oldJson, MultiAuthState.fromMap);
       if (multiAuthState == null) {
-        return MultiAuthChangeNotifier(const MultiAuthState());
+        return MultiAuthStateNotifier(const MultiAuthState());
       }
 
-      globalBox.put(MultiAuthChangeNotifier._kMultiAuthNotifierProviderKey,
+      globalBox.put(MultiAuthStateNotifier._kMultiAuthNotifierProviderKey,
           multiAuthState.toJson());
 
       HydratedBloc.storage.delete(_kMultiAuthCubitKey);
 
-      return MultiAuthChangeNotifier(multiAuthState);
+      return MultiAuthStateNotifier(multiAuthState);
     }
 
     final json =
-        globalBox.get(MultiAuthChangeNotifier._kMultiAuthNotifierProviderKey);
+        globalBox.get(MultiAuthStateNotifier._kMultiAuthNotifierProviderKey);
     if (json != null && json is String) {
-      return MultiAuthChangeNotifier(MultiAuthState.fromJson(json));
+      return MultiAuthStateNotifier(MultiAuthState.fromJson(json));
     }
   }
 
-  return MultiAuthChangeNotifier(const MultiAuthState());
+  return MultiAuthStateNotifier(const MultiAuthState());
 });
 
-final multiAuthProvider =
-    multiAuthNotifierProvider.select((value) => value._state);
-
-final authProvider = multiAuthNotifierProvider.select((value) => value.current);
+final authProvider =
+    multiAuthStateNotifierProvider.select((value) => value.current);
 
 final authAccountProvider = authProvider.select((value) => value?.account);

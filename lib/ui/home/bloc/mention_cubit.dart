@@ -180,7 +180,7 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
   }
 
   final UserDao userDao;
-  final MultiAuthChangeNotifier multiAuthChangeNotifier;
+  final MultiAuthStateNotifier multiAuthChangeNotifier;
   final scrollController = ScrollController();
 
   @override

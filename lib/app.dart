@@ -28,6 +28,7 @@ import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
 import 'ui/provider/account_server_provider.dart';
 import 'ui/provider/database_provider.dart';
+import 'ui/provider/mention_cache_provider.dart';
 import 'ui/provider/multi_auth_provider.dart';
 import 'ui/provider/setting_provider.dart';
 import 'ui/provider/slide_category_provider.dart';
@@ -41,7 +42,6 @@ import 'widgets/actions/actions.dart';
 import 'widgets/auth.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/focus_helper.dart';
-import 'widgets/message/item/text/mention_builder.dart';
 import 'widgets/portal_providers.dart';
 import 'widgets/window/menus.dart';
 import 'widgets/window/move_window.dart';
@@ -155,7 +155,7 @@ class _Providers extends HookConsumerWidget {
               create: (BuildContext context) => ConversationListBloc(
                 ref.read(slideCategoryStateProvider.notifier),
                 accountServer.database,
-                context.read<MentionCache>(),
+                ref.read(mentionCacheProvider),
               ),
             ),
             BlocProvider(create: (context) => RecallMessageReeditCubit()),

@@ -1,8 +1,8 @@
 part of '../extension.dart';
 
 extension ProviderExtension on BuildContext {
-  MultiAuthChangeNotifier get multiAuthChangeNotifier =>
-      providerContainer.read(multiAuthNotifierProvider);
+  MultiAuthStateNotifier get multiAuthChangeNotifier =>
+      providerContainer.read(multiAuthStateNotifierProvider.notifier);
 
   AuthState? get auth => providerContainer.read(authProvider);
 

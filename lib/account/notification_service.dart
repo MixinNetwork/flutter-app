@@ -10,6 +10,7 @@ import '../db/extension/conversation.dart';
 import '../enum/message_category.dart';
 import '../generated/l10n.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
+import '../ui/provider/mention_cache_provider.dart';
 import '../ui/provider/slide_category_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/extension/extension.dart';
@@ -20,7 +21,6 @@ import '../utils/message_optimize.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/message/item/pin_message.dart';
 import '../widgets/message/item/system_message.dart';
-import '../widgets/message/item/text/mention_builder.dart';
 
 const _keyConversationId = 'conversationId';
 
@@ -96,6 +96,9 @@ class NotificationService {
 
             String? body;
             if (context.settingChangeNotifier.messagePreview) {
+              final mentionCache =
+                  context.providerContainer.read(mentionCacheProvider);
+
               if (event.type == MessageCategory.systemConversation) {
                 body = generateSystemText(
                   actionName: event.actionName,
@@ -117,7 +120,7 @@ class NotificationService {
                 } else {
                   final preview = await generatePinPreviewText(
                     pinMessageMinimal: pinMessageMinimal,
-                    mentionCache: context.read<MentionCache>(),
+                    mentionCache: mentionCache,
                   );
 
                   body = Localization.current
@@ -128,7 +131,6 @@ class NotificationService {
                     event.senderId != event.ownerUserId;
 
                 if (event.type.isText) {
-                  final mentionCache = context.read<MentionCache>();
                   body = mentionCache.replaceMention(
                     event.content,
                     await mentionCache.checkMentionCache({event.content}),

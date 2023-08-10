@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -19,9 +20,9 @@ import '../../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/pin_message.dart';
 import '../../../widgets/message/item/system_message.dart';
-import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/message_status_icon.dart';
 import '../../../widgets/unread_text.dart';
+import '../../provider/mention_cache_provider.dart';
 import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
@@ -311,7 +312,7 @@ class _MessagePreview extends StatelessWidget {
   }
 }
 
-class _MessageContent extends HookWidget {
+class _MessageContent extends HookConsumerWidget {
   const _MessageContent({
     required this.conversation,
     required this.hasDraft,
@@ -321,12 +322,15 @@ class _MessageContent extends HookWidget {
   final bool hasDraft;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final text = useMemoizedFuture(
       () async {
         if (hasDraft) return conversation.draft;
         final isGroup = conversation.category == ConversationCategory.group ||
             conversation.senderId != conversation.ownerId;
+
+        final mentionCache = ref.read(mentionCacheProvider);
+
         if (conversation.contentType == MessageCategory.systemConversation) {
           return generateSystemText(
             actionName: conversation.actionName,
@@ -346,13 +350,11 @@ class _MessageContent extends HookWidget {
           }
           final preview = await generatePinPreviewText(
             pinMessageMinimal: pinMessageMinimal,
-            mentionCache: context.read<MentionCache>(),
+            mentionCache: mentionCache,
           );
           return context.l10n
               .chatPinMessage(conversation.senderFullName ?? '', preview);
         }
-
-        final mentionCache = context.read<MentionCache>();
 
         return messagePreviewOptimize(
           conversation.messageStatus,

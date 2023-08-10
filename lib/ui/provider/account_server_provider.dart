@@ -23,7 +23,7 @@ class AccountServerOpener extends StateNotifier<AsyncValue<AccountServer>> {
     _init();
   }
 
-  late final MultiAuthChangeNotifier multiAuthChangeNotifier;
+  late final MultiAuthStateNotifier multiAuthChangeNotifier;
   late final SettingChangeNotifier settingChangeNotifier;
   late final Database database;
 
@@ -73,7 +73,7 @@ class _Args extends Equatable {
   final String? sessionId;
   final String? identityNumber;
   final String? privateKey;
-  final MultiAuthChangeNotifier multiAuthChangeNotifier;
+  final MultiAuthStateNotifier multiAuthChangeNotifier;
   final SettingChangeNotifier settingChangeNotifier;
 
   @override
@@ -98,7 +98,8 @@ final _argsProvider = Provider.autoDispose((ref) {
             value?.account.identityNumber,
             value?.privateKey,
           )));
-  final multiAuthChangeNotifier = ref.watch(multiAuthNotifierProvider);
+  final multiAuthChangeNotifier =
+      ref.watch(multiAuthStateNotifierProvider.notifier);
   final settingChangeNotifier = ref.watch(settingProvider);
   return _Args(
     database: database,

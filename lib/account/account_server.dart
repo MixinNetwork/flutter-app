@@ -61,7 +61,7 @@ class AccountServer {
   set language(String language) =>
       client.dio.options.headers['Accept-Language'] = language;
 
-  final MultiAuthChangeNotifier multiAuthCubit;
+  final MultiAuthStateNotifier multiAuthCubit;
   final SettingChangeNotifier settingChangeNotifier;
   final Database database;
   Timer? checkSignalKeyTimer;

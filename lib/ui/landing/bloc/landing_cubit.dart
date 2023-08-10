@@ -39,12 +39,12 @@ class LandingCubit<T> extends Cubit<T> {
         ),
         super(initialState);
   final Client client;
-  final MultiAuthChangeNotifier multiAuthChangeNotifier;
+  final MultiAuthStateNotifier multiAuthChangeNotifier;
 }
 
 class LandingQrCodeCubit extends LandingCubit<LandingState> {
   LandingQrCodeCubit(
-      MultiAuthChangeNotifier multiAuthChangeNotifier, Locale locale)
+      MultiAuthStateNotifier multiAuthChangeNotifier, Locale locale)
       : super(
           multiAuthChangeNotifier,
           locale,
@@ -184,7 +184,7 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
 
 class LandingMobileCubit extends LandingCubit<void> {
   LandingMobileCubit(
-    MultiAuthChangeNotifier multiAuthChangeNotifier,
+    MultiAuthStateNotifier multiAuthChangeNotifier,
     Locale locale, {
     required String deviceId,
     required String userAgent,
