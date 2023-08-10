@@ -123,51 +123,40 @@ class _Providers extends HookConsumerWidget {
     if (!asyncAccountServer.hasValue) return app;
     final accountServer = asyncAccountServer.requireValue;
 
-    return MultiProvider(
+    return MultiBlocProvider(
       providers: [
-        Provider(
-          create: (context) => MentionCache(accountServer.database.userDao),
+        BlocProvider(
+          create: (BuildContext context) => ResponsiveNavigatorCubit(),
         ),
-      ],
-      child: Builder(
-        builder: (context) => MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (BuildContext context) => ResponsiveNavigatorCubit(),
-            ),
-            BlocProvider(
-              create: (BuildContext context) => ConversationCubit(
-                accountServer: accountServer,
-                responsiveNavigatorCubit:
-                    context.read<ResponsiveNavigatorCubit>(),
-              ),
-            ),
-            BlocProvider(
-              create: (context) => ConversationFilterUnseenCubit(),
-            ),
-            BlocProvider(
-              create: (BuildContext context) => KeywordCubit(),
-            ),
-            BlocProvider(
-              create: (BuildContext context) => MinuteTimerCubit(),
-            ),
-            BlocProvider(
-              create: (BuildContext context) => ConversationListBloc(
-                ref.read(slideCategoryStateProvider.notifier),
-                accountServer.database,
-                ref.read(mentionCacheProvider),
-              ),
-            ),
-            BlocProvider(create: (context) => RecallMessageReeditCubit()),
-          ],
-          child: Provider<NotificationService>(
-            create: (BuildContext context) =>
-                NotificationService(context: context),
-            lazy: false,
-            dispose: (_, notificationService) => notificationService.close(),
-            child: PortalProviders(child: app),
+        BlocProvider(
+          create: (BuildContext context) => ConversationCubit(
+            accountServer: accountServer,
+            responsiveNavigatorCubit: context.read<ResponsiveNavigatorCubit>(),
           ),
         ),
+        BlocProvider(
+          create: (context) => ConversationFilterUnseenCubit(),
+        ),
+        BlocProvider(
+          create: (BuildContext context) => KeywordCubit(),
+        ),
+        BlocProvider(
+          create: (BuildContext context) => MinuteTimerCubit(),
+        ),
+        BlocProvider(
+          create: (BuildContext context) => ConversationListBloc(
+            ref.read(slideCategoryStateProvider.notifier),
+            accountServer.database,
+            ref.read(mentionCacheProvider),
+          ),
+        ),
+        BlocProvider(create: (context) => RecallMessageReeditCubit()),
+      ],
+      child: Provider<NotificationService>(
+        create: (BuildContext context) => NotificationService(context: context),
+        lazy: false,
+        dispose: (_, notificationService) => notificationService.close(),
+        child: PortalProviders(child: app),
       ),
     );
   }
