@@ -14,24 +14,24 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
-import 'slide_category_cubit.dart';
+import '../../provider/slide_category_provider.dart';
 
 const kDefaultLimit = 15;
 
 class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     with SubscribeMixin {
   ConversationListBloc(
-    this.slideCategoryCubit,
+    this.slideCategoryStateNotifier,
     this.database,
     this.mentionCache,
   ) : super(const PagingState<ConversationItem>()) {
-    addSubscription(slideCategoryCubit.stream
+    addSubscription(slideCategoryStateNotifier.stream
         .distinct()
         .listen((event) => _switchBloc(event, _limit)));
     _initBadge();
   }
 
-  final SlideCategoryCubit slideCategoryCubit;
+  final SlideCategoryStateNotifier slideCategoryStateNotifier;
   final Database database;
   final MentionCache mentionCache;
   final Map<SlideCategoryState, _ConversationListBloc> _map = {};
@@ -60,15 +60,15 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
 
   StreamSubscription? streamSubscription;
 
-  ItemPositionsListener itemPositionsListener(
+  ItemPositionsListener? itemPositionsListener(
           SlideCategoryState slideCategoryState) =>
-      _map[slideCategoryState]!.itemPositionsListener;
+      _map[slideCategoryState]?.itemPositionsListener;
 
-  ItemScrollController itemScrollController(
+  ItemScrollController? itemScrollController(
           SlideCategoryState slideCategoryState) =>
-      _map[slideCategoryState]!.itemScrollController;
+      _map[slideCategoryState]?.itemScrollController;
 
-  void init() => _switchBloc(slideCategoryCubit.state, _limit);
+  void init() => _switchBloc(slideCategoryStateNotifier.state, _limit);
 
   late Stream<void> updateEvent = Rx.merge([
     DataBaseEventBus.instance.updateConversationIdStream,

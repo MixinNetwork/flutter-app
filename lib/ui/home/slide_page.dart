@@ -1,13 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../db/dao/circle_dao.dart';
 import '../../db/dao/conversation_dao.dart';
@@ -26,7 +24,7 @@ import '../../widgets/user_selector/conversation_selector.dart';
 import '../../widgets/window/move_window.dart';
 import '../provider/multi_auth_provider.dart';
 import '../provider/setting_provider.dart';
-import 'bloc/slide_category_cubit.dart';
+import '../provider/slide_category_provider.dart';
 
 class SlidePage extends StatelessWidget {
   const SlidePage({
@@ -138,58 +136,56 @@ class _CurrentUser extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final account = ref.watch(authAccountProvider);
+    final selected = ref.watch(slideCategoryStateProvider
+        .select((value) => value.type == SlideCategoryType.setting));
 
     return MoveWindowBarrier(
-      child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-        converter: (state) => state.type == SlideCategoryType.setting,
-        builder: (context, selected) {
-          assert(account != null);
-          return SelectItem(
-            icon: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: AvatarWidget(
-                avatarUrl: account?.avatarUrl,
-                size: 24,
-                name: account?.fullName,
-                userId: account?.userId,
-              ),
+      child: SelectItem(
+        icon: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: AvatarWidget(
+            avatarUrl: account?.avatarUrl,
+            size: 24,
+            name: account?.fullName,
+            userId: account?.userId,
+          ),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              account?.fullName ?? '',
+              style: const TextStyle(fontSize: 14),
             ),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  account?.fullName ?? '',
-                  style: const TextStyle(fontSize: 14),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${account?.identityNumber}',
-                  style: TextStyle(
-                      color: context.theme.secondaryText, fontSize: 12),
-                )
-              ],
-            ),
-            selected: selected,
-            onTap: () {
-              BlocProvider.of<SlideCategoryCubit>(context)
-                  .select(SlideCategoryType.setting);
-              if (ModalRoute.of(context)?.canPop == true) {
-                Navigator.pop(context);
-              }
-            },
-          );
+            const SizedBox(height: 2),
+            Text(
+              '${account?.identityNumber}',
+              style:
+                  TextStyle(color: context.theme.secondaryText, fontSize: 12),
+            )
+          ],
+        ),
+        selected: selected,
+        onTap: () {
+          ref
+              .read(slideCategoryStateProvider.notifier)
+              .select(SlideCategoryType.setting);
+
+          if (ModalRoute.of(context)?.canPop == true) {
+            Navigator.pop(context);
+          }
         },
       ),
     );
   }
 }
 
-class _CircleList extends HookWidget {
+class _CircleList extends HookConsumerWidget {
   const _CircleList();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final circles = useMemoizedStream<List<ConversationCircleItem>>(
       () => context.database.circleDao.allCircles().watchWithStream(
         eventStreams: [
@@ -229,17 +225,16 @@ class _CircleList extends HookWidget {
             itemCount: list.value.length,
             itemBuilder: (BuildContext context, int index) {
               final circle = list.value[index];
-              return HookBuilder(
+              return Consumer(
                 key: Key(circle.circleId),
-                builder: (BuildContext context) {
-                  final selected = useBlocStateConverter<SlideCategoryCubit,
-                      SlideCategoryState, bool>(
-                    converter: (state) {
-                      final conversationCircleItem = list.value[index];
-                      return state.type == SlideCategoryType.circle &&
-                          state.id == conversationCircleItem.circleId;
-                    },
-                  );
+                builder: (BuildContext context, ref, __) {
+                  final selected =
+                      ref.watch(slideCategoryStateProvider.select((value) {
+                    final conversationCircleItem = list.value[index];
+                    return value.type == SlideCategoryType.circle &&
+                        value.id == conversationCircleItem.circleId;
+                  }));
+
                   return MoveWindowBarrier(
                     child: Listener(
                       onPointerDown: (event) {
@@ -354,8 +349,8 @@ class _CircleList extends HookWidget {
                                 () async {
                                   await context.accountServer
                                       .deleteCircle(circle.circleId);
-                                  context
-                                      .read<SlideCategoryCubit>()
+                                  ref
+                                      .read(slideCategoryStateProvider.notifier)
                                       .select(SlideCategoryType.chats);
                                 }(),
                               );
@@ -376,11 +371,11 @@ class _CircleList extends HookWidget {
                             ),
                             title: Text(circle.name),
                             onTap: () {
-                              BlocProvider.of<SlideCategoryCubit>(context)
-                                  .select(
-                                SlideCategoryType.circle,
-                                circle.circleId,
-                              );
+                              ref
+                                  .read(slideCategoryStateProvider.notifier)
+                                  .select(SlideCategoryType.circle,
+                                      circle.circleId);
+
                               if (ModalRoute.of(context)?.canPop == true) {
                                 Navigator.pop(context);
                               }
@@ -425,7 +420,7 @@ class _CategoryList extends HookWidget {
   }
 }
 
-class _Item extends HookWidget {
+class _Item extends HookConsumerWidget {
   const _Item({
     required this.type,
     required this.title,
@@ -437,12 +432,10 @@ class _Item extends HookWidget {
   final String asset;
 
   @override
-  Widget build(BuildContext context) {
-    final selected =
-        useBlocStateConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-      converter: (state) => state.type == type,
-      keys: [type],
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = ref.watch(
+        slideCategoryStateProvider.select((value) => value.type == type));
+
     final result = useMemoizedStream<BaseUnseenConversationCountResult>(
       () {
         final dao = context.database.conversationDao;
@@ -478,10 +471,8 @@ class _Item extends HookWidget {
         ),
         title: Text(title),
         onTap: () {
-          BlocProvider.of<SlideCategoryCubit>(context).select(
-            type,
-            title,
-          );
+          ref.read(slideCategoryStateProvider.notifier).select(type, title);
+
           if (ModalRoute.of(context)?.canPop == true) {
             Navigator.pop(context);
           }

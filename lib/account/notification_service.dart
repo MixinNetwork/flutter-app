@@ -10,7 +10,7 @@ import '../db/extension/conversation.dart';
 import '../enum/message_category.dart';
 import '../generated/l10n.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
-import '../ui/home/bloc/slide_category_cubit.dart';
+import '../ui/provider/slide_category_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
@@ -169,10 +169,11 @@ class NotificationService {
         notificationSelectEvent(NotificationScheme.conversation).listen(
           (event) {
             i('select notification $event');
-            final slideCategoryCubit = context.read<SlideCategoryCubit>();
-            if (slideCategoryCubit.state.type == SlideCategoryType.setting) {
-              slideCategoryCubit.select(SlideCategoryType.chats);
-            }
+
+            context.providerContainer
+                .read(slideCategoryStateProvider.notifier)
+                .switchToChatsIfSettings();
+
             final conversationId =
                 event.queryParameters[_keyConversationId] ?? event.host;
             ConversationCubit.selectConversation(

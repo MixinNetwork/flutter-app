@@ -5,8 +5,8 @@ import '../../db/database.dart';
 import '../../db/fts_database.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/synchronized.dart';
-import '../home/bloc/slide_category_cubit.dart';
 import 'multi_auth_provider.dart';
+import 'slide_category_provider.dart';
 
 final databaseProvider =
     StateNotifierProvider.autoDispose<DatabaseOpener, AsyncValue<Database>>(

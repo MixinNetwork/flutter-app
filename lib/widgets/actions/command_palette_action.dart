@@ -12,10 +12,10 @@ import '../../db/database_event_bus.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
-import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/conversation/search_list.dart';
 import '../../ui/home/intent.dart';
 import '../../ui/provider/recent_conversation_provider.dart';
+import '../../ui/provider/slide_category_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
@@ -170,10 +170,7 @@ class CommandPalettePage extends HookConsumerWidget {
         selectedIndex.value = index;
       }
 
-      final slideCategoryCubit = context.read<SlideCategoryCubit>();
-      if (slideCategoryCubit.state.type == SlideCategoryType.setting) {
-        slideCategoryCubit.select(SlideCategoryType.chats);
-      }
+      ref.read(slideCategoryStateProvider.notifier).switchToChatsIfSettings();
 
       if (selectedIndex.value < users.length) {
         ConversationCubit.selectUser(context, ids[selectedIndex.value]);

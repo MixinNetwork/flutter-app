@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -33,11 +34,11 @@ import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
+import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_filter_unseen_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
 import '../bloc/search_message_cubit.dart';
-import '../bloc/slide_category_cubit.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
 import 'unseen_conversation_list.dart';
@@ -50,13 +51,13 @@ void _clear(BuildContext context) {
   context.read<FocusNode>().unfocus();
 }
 
-class SearchList extends HookWidget {
+class SearchList extends HookConsumerWidget {
   const SearchList({super.key, this.filterUnseen = false});
 
   final bool filterUnseen;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final keyword = useMemoizedStream(
           () {
             final keywordCubit = context.read<KeywordCubit>();
@@ -72,8 +73,7 @@ class SearchList extends HookWidget {
 
     final accountServer = context.accountServer;
 
-    final slideCategoryState =
-        useBlocState<SlideCategoryCubit, SlideCategoryState>();
+    final slideCategoryState = ref.watch(slideCategoryStateProvider);
 
     final users = useMemoizedStream(() {
           if (keyword.trim().isEmpty || filterUnseen) {

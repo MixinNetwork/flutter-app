@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../ui/home/bloc/slide_category_cubit.dart';
+import '../ui/provider/slide_category_provider.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import '../utils/property/setting_property.dart';

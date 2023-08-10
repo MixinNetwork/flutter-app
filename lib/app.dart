@@ -21,7 +21,6 @@ import 'ui/home/bloc/conversation_cubit.dart';
 import 'ui/home/bloc/conversation_filter_unseen_cubit.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/bloc/recall_message_bloc.dart';
-import 'ui/home/bloc/slide_category_cubit.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
@@ -31,6 +30,7 @@ import 'ui/provider/account_server_provider.dart';
 import 'ui/provider/database_provider.dart';
 import 'ui/provider/multi_auth_provider.dart';
 import 'ui/provider/setting_provider.dart';
+import 'ui/provider/slide_category_provider.dart';
 import 'utils/extension/extension.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
@@ -133,9 +133,6 @@ class _Providers extends HookConsumerWidget {
         builder: (context) => MultiBlocProvider(
           providers: [
             BlocProvider(
-              create: (BuildContext context) => SlideCategoryCubit(),
-            ),
-            BlocProvider(
               create: (BuildContext context) => ResponsiveNavigatorCubit(),
             ),
             BlocProvider(
@@ -156,7 +153,7 @@ class _Providers extends HookConsumerWidget {
             ),
             BlocProvider(
               create: (BuildContext context) => ConversationListBloc(
-                context.read<SlideCategoryCubit>(),
+                ref.read(slideCategoryStateProvider.notifier),
                 accountServer.database,
                 context.read<MentionCache>(),
               ),

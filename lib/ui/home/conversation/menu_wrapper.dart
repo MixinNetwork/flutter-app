@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
@@ -11,8 +12,8 @@ import '../../../widgets/conversation/mute_dialog.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
+import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_cubit.dart';
-import '../bloc/slide_category_cubit.dart';
 
 class ConversationMenuWrapper extends StatelessWidget {
   const ConversationMenuWrapper({
@@ -149,12 +150,12 @@ class ConversationMenuWrapper extends StatelessWidget {
           },
         ),
         if (removeChatFromCircle)
-          HookBuilder(builder: (_) {
-            final circleId = useBlocStateConverter<SlideCategoryCubit,
-                SlideCategoryState, String?>(converter: (state) {
-              if (state.type != SlideCategoryType.circle) return null;
-              return state.id;
-            });
+          Consumer(builder: (_, ref, __) {
+            final circleId =
+                ref.watch(slideCategoryStateProvider.select((value) {
+              if (value.type != SlideCategoryType.circle) return null;
+              return value.id;
+            }));
 
             if (circleId?.isEmpty ?? true) return const SizedBox();
 

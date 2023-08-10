@@ -10,9 +10,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../account/security_key_value.dart';
-import '../../ui/home/bloc/slide_category_cubit.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
 import '../../ui/provider/account_server_provider.dart';
+import '../../ui/provider/slide_category_provider.dart';
 import '../../utils/device_transfer/device_transfer_dialog.dart';
 import '../../utils/event_bus.dart';
 import '../../utils/extension/extension.dart';
@@ -179,8 +179,8 @@ class _Menus extends HookConsumerWidget {
               onSelected: signed
                   ? () {
                       windowManager.show();
-                      context
-                          .read<SlideCategoryCubit>()
+                      ref
+                          .read(slideCategoryStateProvider.notifier)
                           .select(SlideCategoryType.setting);
                     }
                   : null,

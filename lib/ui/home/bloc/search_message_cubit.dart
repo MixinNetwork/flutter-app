@@ -6,7 +6,7 @@ import '../../../db/dao/message_dao.dart';
 import '../../../db/database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
-import 'slide_category_cubit.dart';
+import '../../provider/slide_category_provider.dart';
 
 class SearchMessageState with EquatableMixin {
   const SearchMessageState(

@@ -22,9 +22,9 @@ import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/message_status_icon.dart';
 import '../../../widgets/unread_text.dart';
+import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
-import '../bloc/slide_category_cubit.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'audio_player_bar.dart';
 import 'conversation_page.dart';
@@ -56,7 +56,17 @@ class ConversationList extends HookWidget {
       converter: (state) => state.routeMode,
     );
 
+    final itemPositionsListener =
+        conversationListBloc.itemPositionsListener(slideCategoryState);
+    final itemScrollController =
+        conversationListBloc.itemScrollController(slideCategoryState);
+
+    if (itemPositionsListener == null || itemScrollController == null) {
+      return const SizedBox();
+    }
+
     Widget child;
+
     child = pagingState.count == 0
         ? pagingState.hasData
             ? Center(
@@ -68,11 +78,9 @@ class ConversationList extends HookWidget {
             : const _Empty()
         : ScrollablePositionedList.builder(
             key: PageStorageKey(slideCategoryState),
-            itemPositionsListener:
-                conversationListBloc.itemPositionsListener(slideCategoryState),
+            itemPositionsListener: itemPositionsListener,
             itemCount: pagingState.count,
-            itemScrollController:
-                conversationListBloc.itemScrollController(slideCategoryState),
+            itemScrollController: itemScrollController,
             itemBuilder: (context, index) {
               final conversation = pagingState.map[index];
               if (conversation == null) return const SizedBox(height: 80);
