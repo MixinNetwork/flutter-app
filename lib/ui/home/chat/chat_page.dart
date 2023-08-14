@@ -24,13 +24,13 @@ import '../../../widgets/conversation/mute_dialog.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/interactive_decorated_box.dart';
-import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_bubble.dart';
 import '../../../widgets/message/message_day_time.dart';
 import '../../../widgets/pin_bubble.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/window/menus.dart';
+import '../../provider/mention_cache_provider.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
@@ -234,7 +234,7 @@ class ChatPage extends HookWidget {
             accountServer: context.accountServer,
             database: context.database,
             conversationCubit: context.read<ConversationCubit>(),
-            mentionCache: context.read<MentionCache>(),
+            mentionCache: context.providerContainer.read(mentionCacheProvider),
             limit: windowHeight ~/ 20,
           ),
         ),

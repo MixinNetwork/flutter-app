@@ -21,11 +21,9 @@ class DatabaseOpenFailedPage extends StatelessWidget {
   const DatabaseOpenFailedPage({
     super.key,
     required this.error,
-    required this.identityNumber,
   });
 
   final SqliteException error;
-  final String identityNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +46,9 @@ class DatabaseOpenFailedPage extends StatelessWidget {
       message: message,
       actions: [
         if (canDeleteDatabase)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: _RecreateDatabaseButton(identityNumber: identityNumber),
+          const Padding(
+            padding: EdgeInsets.only(bottom: 16),
+            child: _RecreateDatabaseButton(),
           ),
         _Button(
           onTap: () {
@@ -64,15 +62,14 @@ class DatabaseOpenFailedPage extends StatelessWidget {
 }
 
 class _RecreateDatabaseButton extends ConsumerWidget {
-  const _RecreateDatabaseButton({
-    required this.identityNumber,
-  });
-
-  final String identityNumber;
+  const _RecreateDatabaseButton();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => TextButton(
         onPressed: () async {
+          final identityNumber = context.account?.identityNumber;
+          if (identityNumber == null) return;
+
           final result = await showConfirmMixinDialog(
             context,
             context.l10n.databaseRecreateTips,
@@ -81,7 +78,7 @@ class _RecreateDatabaseButton extends ConsumerWidget {
           if (result != DialogEvent.positive) {
             return;
           }
-          await ref.read(databaseProvider(identityNumber).notifier).close();
+          await ref.read(databaseProvider.notifier).close();
           // Rename the old database file to a new name with timestamp.
           final now = DateTime.now();
           renameFileWithTime(
@@ -97,7 +94,7 @@ class _RecreateDatabaseButton extends ConsumerWidget {
             ].where((e) => e.existsSync()),
             (element) => element.delete(),
           );
-          await ref.read(databaseProvider(identityNumber).notifier).open();
+          await ref.read(databaseProvider.notifier).open();
         },
         child: Text(
           context.l10n.continueText,

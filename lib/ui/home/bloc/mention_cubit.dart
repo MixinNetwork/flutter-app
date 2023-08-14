@@ -15,8 +15,8 @@ import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../widgets/mention_panel.dart';
+import '../../provider/multi_auth_provider.dart';
 import 'conversation_cubit.dart';
-import 'multi_auth_cubit.dart';
 
 class MentionState extends Equatable {
   const MentionState({
@@ -47,7 +47,7 @@ class MentionState extends Equatable {
 class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
   MentionCubit({
     required this.userDao,
-    required this.multiAuthCubit,
+    required this.multiAuthChangeNotifier,
   }) : super(const MentionState());
 
   void setTextEditingValueStream(
@@ -96,7 +96,8 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
                   value
                     ..removeWhere(
                       (element) =>
-                          element.userId == multiAuthCubit.state.currentUserId,
+                          element.userId ==
+                          multiAuthChangeNotifier.current!.userId,
                     )));
         }
       }
@@ -104,7 +105,7 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
       if (conversationState.isBot ?? false) {
         return userDao
             .fuzzySearchBotGroupUser(
-          currentUserId: multiAuthCubit.state.currentUserId ?? '',
+          currentUserId: multiAuthChangeNotifier.current?.userId ?? '',
           conversationId: conversationState.conversationId,
           keyword: keyword,
         )
@@ -120,7 +121,7 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
       if (conversationState.isGroup ?? false) {
         return userDao
             .fuzzySearchGroupUser(
-          multiAuthCubit.state.currentUserId ?? '',
+          multiAuthChangeNotifier.current?.userId ?? '',
           conversationState.conversationId,
           keyword,
         )
@@ -179,7 +180,7 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
   }
 
   final UserDao userDao;
-  final MultiAuthCubit multiAuthCubit;
+  final MultiAuthStateNotifier multiAuthChangeNotifier;
   final scrollController = ScrollController();
 
   @override

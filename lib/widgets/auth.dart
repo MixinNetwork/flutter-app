@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../account/account_server.dart';
 import '../account/security_key_value.dart';
 import '../constants/resources.dart';
-import '../ui/home/bloc/multi_auth_cubit.dart';
+import '../ui/provider/account_server_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/authentication.dart';
 import '../utils/event_bus.dart';
@@ -23,7 +23,7 @@ const _lockDuration = Duration(minutes: 1);
 
 enum LockEvent { lock, unlock }
 
-class AuthGuard extends HookWidget {
+class AuthGuard extends HookConsumerWidget {
   const AuthGuard({
     super.key,
     required this.child,
@@ -32,14 +32,9 @@ class AuthGuard extends HookWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    final authAvailable =
-        useBlocState<MultiAuthCubit, MultiAuthState>().current != null;
-    AccountServer? accountServer;
-    try {
-      accountServer = context.read<AccountServer?>();
-    } catch (_) {}
-    final signed = authAvailable && accountServer != null;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final signed =
+        ref.watch(accountServerProvider.select((value) => value.hasValue));
 
     if (signed) return _AuthGuard(child: child);
 

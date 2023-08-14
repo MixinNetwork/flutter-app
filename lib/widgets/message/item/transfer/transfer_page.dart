@@ -39,7 +39,7 @@ class _TransferPage extends HookWidget {
     final snapshotItem = useMemoizedStream(() => context.database.snapshotDao
             .snapshotItemById(
           snapshotId,
-          context.multiAuthState.currentUser!.fiatCurrency,
+          context.account!.fiatCurrency,
         )
             .watchSingleOrNullWithStream(
           eventStreams: [
@@ -319,14 +319,14 @@ class _TransactionDetailInfo extends StatelessWidget {
               title: Text(context.l10n.from),
               subtitle: SelectableText((snapshot.isPositive
                       ? opponentFullName
-                      : context.multiAuthState.currentUser?.fullName) ??
+                      : context.account?.fullName) ??
                   ''),
             ),
             TransactionInfoTile(
               title: Text(context.l10n.receiver),
               subtitle: SelectableText((!snapshot.isPositive
                       ? opponentFullName
-                      : context.multiAuthState.currentUser?.fullName) ??
+                      : context.account?.fullName) ??
                   ''),
             ),
           ] else if (snapshot.tag?.isNotEmpty ?? false) ...[

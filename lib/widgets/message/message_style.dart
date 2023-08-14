@@ -1,11 +1,10 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../bloc/setting_cubit.dart';
+import '../../utils/extension/extension.dart';
 
 extension MessageStyleExt on BuildContext {
   MessageStyle get messageStyle =>
-      MessageStyle.defaultStyle + watch<SettingCubit>().state.chatFontSizeDelta;
+      MessageStyle.defaultStyle + settingChangeNotifier.chatFontSizeDelta;
 }
 
 class MessageStyle {

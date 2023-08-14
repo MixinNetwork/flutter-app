@@ -5,11 +5,19 @@ import '../../db/database.dart';
 import '../../db/fts_database.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/synchronized.dart';
-import '../home/bloc/slide_category_cubit.dart';
+import 'multi_auth_provider.dart';
+import 'slide_category_provider.dart';
 
-final databaseProvider = StateNotifierProvider.family
-    .autoDispose<DatabaseOpener, AsyncValue<Database>, String>(
-  (ref, identityNumber) => DatabaseOpener(identityNumber),
+final databaseProvider =
+    StateNotifierProvider.autoDispose<DatabaseOpener, AsyncValue<Database>>(
+  (ref) {
+    final identityNumber =
+        ref.watch(authAccountProvider.select((value) => value?.identityNumber));
+
+    if (identityNumber == null) return DatabaseOpener();
+
+    return DatabaseOpener.open(identityNumber);
+  },
 );
 
 extension _DatabaseExt on MixinDatabase {
@@ -18,19 +26,19 @@ extension _DatabaseExt on MixinDatabase {
 }
 
 class DatabaseOpener extends StateNotifier<AsyncValue<Database>> {
-  DatabaseOpener(this.identityNumber) : super(const AsyncValue.loading()) {
+  DatabaseOpener() : super(const AsyncValue.loading());
+
+  DatabaseOpener.open(this.identityNumber) : super(const AsyncValue.loading()) {
     open();
   }
 
-  final String identityNumber;
-
-  Database? _database;
+  late final String identityNumber;
 
   final Lock _lock = Lock();
 
   Future<void> open() => _lock.synchronized(() async {
         i('connect to database: $identityNumber');
-        if (_database != null) {
+        if (state.hasValue) {
           e('database already opened');
           return;
         }
@@ -41,7 +49,6 @@ class DatabaseOpener extends StateNotifier<AsyncValue<Database>> {
             mixinDatabase,
             await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
           );
-          _database = db;
           // Do a database query, to ensure database has properly initialized.
           await mixinDatabase.doInitVerify();
           state = AsyncValue.data(db);
@@ -51,11 +58,14 @@ class DatabaseOpener extends StateNotifier<AsyncValue<Database>> {
         }
       });
 
+  @override
+  Future<void> dispose() async {
+    await close();
+    super.dispose();
+  }
+
   Future<void> close() async {
-    if (_database != null) {
-      await _database?.dispose();
-      _database = null;
-    }
+    await state.valueOrNull?.dispose();
     state = const AsyncValue.loading();
   }
 }

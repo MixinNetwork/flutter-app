@@ -18,12 +18,12 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/system/package_info.dart';
-import '../../home/bloc/multi_auth_cubit.dart';
+import '../../provider/multi_auth_provider.dart';
 import 'landing_state.dart';
 
 class LandingCubit<T> extends Cubit<T> {
   LandingCubit(
-    this.authCubit,
+    this.multiAuthChangeNotifier,
     Locale locale,
     T initialState, {
     String? userAgent,
@@ -39,21 +39,22 @@ class LandingCubit<T> extends Cubit<T> {
         ),
         super(initialState);
   final Client client;
-  final MultiAuthCubit authCubit;
+  final MultiAuthStateNotifier multiAuthChangeNotifier;
 }
 
 class LandingQrCodeCubit extends LandingCubit<LandingState> {
-  LandingQrCodeCubit(MultiAuthCubit authCubit, Locale locale)
+  LandingQrCodeCubit(
+      MultiAuthStateNotifier multiAuthChangeNotifier, Locale locale)
       : super(
-          authCubit,
+          multiAuthChangeNotifier,
           locale,
           LandingState(
-            status: authCubit.state.current != null
+            status: multiAuthChangeNotifier.current != null
                 ? LandingStatus.provisioning
                 : LandingStatus.init,
           ),
         ) {
-    if (authCubit.state.current != null) return;
+    if (multiAuthChangeNotifier.current != null) return;
     requestAuthUrl();
   }
 
@@ -123,7 +124,8 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
 
     try {
       final (acount, privateKey) = await _verify(secret, keyPair);
-      authCubit.signIn(AuthState(account: acount, privateKey: privateKey));
+      multiAuthChangeNotifier
+          .signIn(AuthState(account: acount, privateKey: privateKey));
     } catch (error, stack) {
       emit(state.needReload('Failed to verify: $error'));
       e('_verify: $error $stack');
@@ -182,12 +184,12 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
 
 class LandingMobileCubit extends LandingCubit<void> {
   LandingMobileCubit(
-    MultiAuthCubit authCubit,
+    MultiAuthStateNotifier multiAuthChangeNotifier,
     Locale locale, {
     required String deviceId,
     required String userAgent,
   }) : super(
-          authCubit,
+          multiAuthChangeNotifier,
           locale,
           null,
           deviceId: deviceId,
