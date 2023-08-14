@@ -64,10 +64,6 @@ class UnseenConversationList extends HookConsumerWidget {
     final slideCategoryState = ref.watch(slideCategoryStateProvider);
     useEffect(() {
       selectedConversationIdRef.value = null;
-      // Can not update state of provider in a widget life-cycle.
-      Future(() {
-        lastSelectedConversationIdController.state = null;
-      });
 
       return lastSelectedConversationIdController
           .addListener((state) => selectedConversationIdRef.value = state);
