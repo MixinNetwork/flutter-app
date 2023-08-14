@@ -8,6 +8,7 @@ import '../../../db/dao/conversation_dao.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../provider/last_selected_conversation_id.dart';
 import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_cubit.dart';
 import '../route/responsive_navigator_cubit.dart';
@@ -56,13 +57,21 @@ class UnseenConversationList extends HookConsumerWidget {
       converter: (state) => state?.conversationId,
     );
 
-    final selectedConversation = useRef<String?>(null);
+    final lastSelectedConversationIdController =
+        ref.read(lastSelectedConversationId.notifier);
+    final selectedConversationIdRef = useRef<String?>(null);
 
     final slideCategoryState = ref.watch(slideCategoryStateProvider);
-
     useEffect(() {
-      selectedConversation.value = null;
-    }, [slideCategoryState]);
+      selectedConversationIdRef.value = null;
+      // Can not update state of provider in a widget life-cycle.
+      Future(() {
+        lastSelectedConversationIdController.state = null;
+      });
+
+      return lastSelectedConversationIdController
+          .addListener((state) => selectedConversationIdRef.value = state);
+    }, [lastSelectedConversationIdController]);
 
     useEffect(() {
       final updateEvent = Rx.merge([
@@ -100,7 +109,7 @@ class UnseenConversationList extends HookConsumerWidget {
       final subscription = unseenConversations.asyncListen((items) async {
         final newItems = List<ConversationItem>.of(items);
 
-        final selectedConversationId = selectedConversation.value;
+        final selectedConversationId = selectedConversationIdRef.value;
         if (selectedConversationId != null &&
             !newItems
                 .any((item) => item.conversationId == selectedConversationId)) {
@@ -137,12 +146,11 @@ class UnseenConversationList extends HookConsumerWidget {
             conversation: conversation,
             selected: conversation.conversationId == currentConversationId &&
                 !routeMode,
-            onTap: () {
-              selectedConversation.value = conversation.conversationId;
-              ConversationCubit.selectConversation(
-                  context, conversation.conversationId,
-                  conversation: conversation);
-            },
+            onTap: () => ConversationCubit.selectConversation(
+              context,
+              conversation.conversationId,
+              conversation: conversation,
+            ),
           ),
         );
       },

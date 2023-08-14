@@ -17,6 +17,7 @@ import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/local_notification_center.dart';
 import '../../../widgets/toast.dart';
+import '../../provider/last_selected_conversation_id.dart';
 import '../../provider/recent_conversation_provider.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'conversation_list_bloc.dart';
@@ -269,6 +270,9 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     if (_conversation == null) {
       return showToastFailed(null);
     }
+
+    context.providerContainer.read(lastSelectedConversationId.notifier).state =
+        conversationId;
 
     final _initIndexMessageId = initIndexMessageId ??
         (hasUnreadMessage ? _conversation.lastReadMessageId : null);
