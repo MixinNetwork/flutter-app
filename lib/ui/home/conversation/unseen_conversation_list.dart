@@ -58,7 +58,7 @@ class UnseenConversationList extends HookConsumerWidget {
     );
 
     final lastSelectedConversationIdController =
-        ref.read(lastSelectedConversationId.notifier);
+        ref.watch(lastSelectedConversationId.notifier);
     final selectedConversationIdRef = useRef<String?>(null);
 
     final slideCategoryState = ref.watch(slideCategoryStateProvider);
