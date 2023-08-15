@@ -4,12 +4,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
-import '../../bloc/minute_timer_cubit.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../message_status_icon.dart';
 import 'message.dart';
 import 'message_style.dart';
@@ -137,9 +135,9 @@ class _MessageDatetime extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = useBlocStateConverter<MinuteTimerCubit, DateTime, String>(
-      converter: (_) => DateFormat.Hm().format(dateTime.toLocal()),
-    );
+    final text = useMemoized(
+        () => DateFormat.Hm().format(dateTime.toLocal()), [dateTime]);
+
     return Text(
       text,
       style: TextStyle(

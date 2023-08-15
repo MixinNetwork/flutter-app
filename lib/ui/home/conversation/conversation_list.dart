@@ -6,8 +6,6 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
-import '../../../bloc/bloc_converter.dart';
-import '../../../bloc/minute_timer_cubit.dart';
 import '../../../bloc/paging/paging_bloc.dart';
 import '../../../constants/resources.dart';
 import '../../../db/dao/conversation_dao.dart';
@@ -23,6 +21,7 @@ import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/message_status_icon.dart';
 import '../../../widgets/unread_text.dart';
 import '../../provider/mention_cache_provider.dart';
+import '../../provider/minute_timer_provider.dart';
 import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
@@ -211,18 +210,21 @@ class ConversationItemWidget extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              BlocConverter<MinuteTimerCubit, DateTime, String>(
-                                converter: (_) =>
-                                    (conversation.lastMessageCreatedAt ??
-                                            conversation.createdAt)
-                                        .format,
-                                builder: (context, text) => Text(
-                                  text,
-                                  style: TextStyle(
-                                    color: messageColor,
-                                    fontSize: 12,
-                                  ),
-                                ),
+                              Consumer(
+                                builder: (context, ref, _) {
+                                  final text = ref.watch(
+                                    formattedDateTimeProvider(
+                                        conversation.lastMessageCreatedAt ??
+                                            conversation.createdAt),
+                                  );
+                                  return Text(
+                                    text,
+                                    style: TextStyle(
+                                      color: messageColor,
+                                      fontSize: 12,
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),

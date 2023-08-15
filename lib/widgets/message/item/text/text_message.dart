@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:url_launcher/url_launcher_string.dart';
 
-import '../../../../bloc/keyword_cubit.dart';
 import '../../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../../ui/home/chat/chat_page.dart';
+import '../../../../ui/provider/keyword_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../../utils/logger.dart';
@@ -21,11 +22,11 @@ import '../../message_layout.dart';
 import '../../message_style.dart';
 import 'mention_builder.dart';
 
-class TextMessage extends HookWidget {
+class TextMessage extends HookConsumerWidget {
   const TextMessage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final userId = useMessageConverter(converter: (state) => state.userId);
     final content =
         useMessageConverter(converter: (state) => state.content ?? '');
@@ -44,7 +45,7 @@ class TextMessage extends HookWidget {
       keys: [userId],
     );
 
-    final globalKeyword = useBlocState<KeywordCubit, String>();
+    final globalKeyword = ref.watch(trimmedKeywordProvider);
     final conversationKeyword =
         useBlocState<ConversationCubit, ConversationState?>()?.keyword;
 

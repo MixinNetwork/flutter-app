@@ -3,11 +3,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:provider/provider.dart';
 
-import '../../../bloc/keyword_cubit.dart';
-import '../../../utils/hook.dart';
 import '../../../widgets/search_bar.dart';
+import '../../provider/conversation_unseen_filter_enabled.dart';
+import '../../provider/keyword_provider.dart';
 import '../../provider/slide_category_provider.dart';
-import '../bloc/conversation_filter_unseen_cubit.dart';
 import 'conversation_list.dart';
 import 'search_list.dart';
 
@@ -19,17 +18,14 @@ class ConversationPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasKeyword =
-        useBlocState<KeywordCubit, String>(bloc: context.read<KeywordCubit>())
-            .trim()
-            .isNotEmpty;
+    final hasKeyword = ref.watch(hasKeywordProvider);
 
     final textEditingController = useTextEditingController();
     final focusNode = useFocusNode();
 
     final slideCategoryState = ref.watch(slideCategoryStateProvider);
 
-    final filterUnseen = useBlocState<ConversationFilterUnseenCubit, bool>();
+    final filterUnseen = ref.watch(conversationUnseenFilterEnabledProvider);
 
     return MultiProvider(
       providers: [

@@ -12,13 +12,10 @@ import 'package:provider/provider.dart';
 
 import 'account/account_key_value.dart';
 import 'account/notification_service.dart';
-import 'bloc/keyword_cubit.dart';
-import 'bloc/minute_timer_cubit.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
 import 'ui/home/bloc/conversation_cubit.dart';
-import 'ui/home/bloc/conversation_filter_unseen_cubit.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/bloc/recall_message_bloc.dart';
 import 'ui/home/conversation/conversation_page.dart';
@@ -133,15 +130,6 @@ class _Providers extends HookConsumerWidget {
             accountServer: accountServer,
             responsiveNavigatorCubit: context.read<ResponsiveNavigatorCubit>(),
           ),
-        ),
-        BlocProvider(
-          create: (context) => ConversationFilterUnseenCubit(),
-        ),
-        BlocProvider(
-          create: (BuildContext context) => KeywordCubit(),
-        ),
-        BlocProvider(
-          create: (BuildContext context) => MinuteTimerCubit(),
         ),
         BlocProvider(
           create: (BuildContext context) => ConversationListBloc(

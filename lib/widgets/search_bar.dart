@@ -4,12 +4,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../bloc/keyword_cubit.dart';
 import '../constants/constants.dart';
 import '../constants/resources.dart';
-import '../ui/home/bloc/conversation_filter_unseen_cubit.dart';
 import '../ui/home/home.dart';
+import '../ui/provider/conversation_unseen_filter_enabled.dart';
+import '../ui/provider/keyword_provider.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import 'action_button.dart';
@@ -21,11 +22,11 @@ import 'toast.dart';
 import 'user/user_dialog.dart';
 import 'window/move_window.dart';
 
-class SearchBar extends HookWidget {
+class SearchBar extends HookConsumerWidget {
   const SearchBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final hasDrawer = context.watch<HasDrawerValueNotifier>();
 
     Widget? leading;
@@ -40,7 +41,7 @@ class SearchBar extends HookWidget {
       );
     }
 
-    final filterUnseen = useBlocState<ConversationFilterUnseenCubit, bool>();
+    final filterUnseen = ref.watch(conversationUnseenFilterEnabledProvider);
 
     return MoveWindow(
       child: SizedBox(
@@ -63,7 +64,7 @@ class SearchBar extends HookWidget {
                   actions: {
                     EscapeIntent: CallbackAction<EscapeIntent>(
                       onInvoke: (intent) {
-                        context.read<KeywordCubit>().emit('');
+                        ref.read(keywordProvider.notifier).state = '';
                         context.read<TextEditingController>().text = '';
                         context.read<FocusNode>().unfocus();
                       },
@@ -73,8 +74,9 @@ class SearchBar extends HookWidget {
                       builder: (context) => SearchTextField(
                             focusNode: context.read<FocusNode>(),
                             controller: context.read<TextEditingController>(),
-                            onChanged: (keyword) =>
-                                context.read<KeywordCubit>().emit(keyword),
+                            onChanged: (keyword) => ref
+                                .read(keywordProvider.notifier)
+                                .state = keyword,
                             hintText: filterUnseen
                                 ? context.l10n.searchUnread
                                 // ignore: avoid-non-ascii-symbols
@@ -86,8 +88,9 @@ class SearchBar extends HookWidget {
             const SizedBox(width: 8),
             ActionButton(
               name: Resources.assetsImagesFilterUnseenSvg,
-              onTap: () =>
-                  context.read<ConversationFilterUnseenCubit>().toggle(),
+              onTap: () => ref
+                  .read(conversationUnseenFilterEnabledProvider.notifier)
+                  .toggle(),
               color: filterUnseen ? context.theme.accent : context.theme.icon,
             ),
             const SizedBox(width: 4),

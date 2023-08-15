@@ -8,12 +8,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:stream_transform/stream_transform.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
-import '../../../bloc/bloc_converter.dart';
-import '../../../bloc/keyword_cubit.dart';
-import '../../../bloc/minute_timer_cubit.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../db/dao/message_dao.dart';
 import '../../../db/database_event_bus.dart';
@@ -33,10 +29,12 @@ import '../../../widgets/message/item/pin_message.dart';
 import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
+import '../../provider/conversation_unseen_filter_enabled.dart';
+import '../../provider/keyword_provider.dart';
 import '../../provider/mention_cache_provider.dart';
+import '../../provider/minute_timer_provider.dart';
 import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_cubit.dart';
-import '../bloc/conversation_filter_unseen_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
 import '../bloc/search_message_cubit.dart';
 import 'conversation_page.dart';
@@ -46,7 +44,7 @@ import 'unseen_conversation_list.dart';
 const _defaultLimit = 3;
 
 void _clear(BuildContext context) {
-  context.read<KeywordCubit>().emit('');
+  context.providerContainer.read(keywordProvider.notifier).state = '';
   context.read<TextEditingController>().text = '';
   context.read<FocusNode>().unfocus();
 }
@@ -60,9 +58,9 @@ class SearchList extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final keyword = useMemoizedStream(
           () {
-            final keywordCubit = context.read<KeywordCubit>();
-            return Stream.value(keywordCubit.state)
-                .merge(keywordCubit.stream)
+            final keywordCubit = ref.watch(keywordProvider.notifier);
+            return keywordCubit.stream
+                .startWith(keywordCubit.state)
                 .map((event) => event.trim())
                 .distinct()
                 .debounceTime(const Duration(milliseconds: 150));
@@ -494,10 +492,9 @@ class SearchItem extends StatelessWidget {
                           ),
                         ),
                         if (date != null)
-                          BlocConverter<MinuteTimerCubit, DateTime, String>(
-                            converter: (_) => date!.format,
-                            builder: (context, text) => Text(
-                              text,
+                          Consumer(
+                            builder: (context, ref, _) => Text(
+                              ref.watch(formattedDateTimeProvider(date!)),
                               style: TextStyle(
                                 color: context.theme.secondaryText,
                                 fontSize: 12,
@@ -675,7 +672,7 @@ Future Function() _searchMessageItemOnTap(
         context,
         message.conversationId,
         initIndexMessageId: message.messageId,
-        keyword: context.read<KeywordCubit>().state,
+        keyword: context.providerContainer.read(trimmedKeywordProvider),
       );
 
       _clear(context);
@@ -776,11 +773,11 @@ class SearchMessageItem extends HookConsumerWidget {
   }
 }
 
-class SearchEmptyWidget extends StatelessWidget {
+class SearchEmptyWidget extends ConsumerWidget {
   const SearchEmptyWidget({super.key});
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context, WidgetRef ref) => Container(
         padding: const EdgeInsets.symmetric(
           horizontal: 43,
           vertical: 86,
@@ -807,7 +804,9 @@ class SearchEmptyWidget extends StatelessWidget {
               ),
               onPressed: () {
                 _clear(context);
-                context.read<ConversationFilterUnseenCubit>().reset();
+                ref
+                    .read(conversationUnseenFilterEnabledProvider.notifier)
+                    .reset();
               },
             ),
           ],
