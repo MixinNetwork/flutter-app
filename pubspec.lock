@@ -367,10 +367,11 @@ packages:
   desktop_drop:
     dependency: "direct main"
     description:
-      name: desktop_drop
-      sha256: "4ca4d960f4b11c032e9adfd2a0a8ac615bc3fddb4cbe73dcf840dd8077582186"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/desktop_drop"
+      ref: a8e2bab0447760eb09457eafbc49e8d7c8cbb99f
+      resolved-ref: a8e2bab0447760eb09457eafbc49e8d7c8cbb99f
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
     version: "0.4.1"
   desktop_keep_screen_on:
     dependency: "direct main"
