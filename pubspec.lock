@@ -1174,8 +1174,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/mixin_logger"
-      ref: d103dc30bb5153116cfe8d2f0efa6bbde9cfc081
-      resolved-ref: d103dc30bb5153116cfe8d2f0efa6bbde9cfc081
+      ref: "3214026ad280f57b46b738845bc30b404dab26fc"
+      resolved-ref: "3214026ad280f57b46b738845bc30b404dab26fc"
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "0.1.0"

@@ -93,7 +93,7 @@ dependencies:
   mixin_logger:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
-      ref: d103dc30bb5153116cfe8d2f0efa6bbde9cfc081
+      ref: 3214026ad280f57b46b738845bc30b404dab26fc
       path: packages/mixin_logger
   native_dio_adapter: ^0.1.0
   network_info_plus: ^4.0.2
