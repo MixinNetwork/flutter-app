@@ -5,7 +5,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, Conversation;
 
 import '../../enum/encrypt_category.dart';
-import '../../ui/home/bloc/slide_category_cubit.dart';
+import '../../ui/provider/slide_category_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../converter/conversation_status_type_converter.dart';
 import '../converter/millis_date_converter.dart';

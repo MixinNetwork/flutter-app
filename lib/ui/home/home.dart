@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart'
+    hide ChangeNotifierProvider, Provider;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
 import '../../blaze/blaze.dart';
-import '../../bloc/bloc_converter.dart';
-import '../../bloc/setting_cubit.dart';
 import '../../utils/audio_message_player/audio_message_service.dart';
 import '../../utils/device_transfer/device_transfer_widget.dart';
 import '../../utils/extension/extension.dart';
@@ -16,10 +16,11 @@ import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
 import '../../widgets/protocol_handler.dart';
 import '../../widgets/toast.dart';
+import '../provider/multi_auth_provider.dart';
+import '../provider/setting_provider.dart';
+import '../provider/slide_category_provider.dart';
 import '../setting/setting_page.dart';
 import 'bloc/conversation_cubit.dart';
-import 'bloc/multi_auth_cubit.dart';
-import 'bloc/slide_category_cubit.dart';
 import 'command_palette_wrapper.dart';
 import 'conversation/conversation_hotkey.dart';
 import 'conversation/conversation_page.dart';
@@ -40,11 +41,11 @@ const kChatSidePageWidth = 300.0;
 
 final _conversationPageKey = GlobalKey();
 
-class HomePage extends HookWidget {
+class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final localTimeError = useMemoizedStream(
             () => context.accountServer.connectedStateStream
                 .map((event) => event == ConnectedState.hasLocalTimeError)
@@ -52,10 +53,8 @@ class HomePage extends HookWidget {
             keys: [context.accountServer]).data ??
         false;
 
-    final isEmptyUserName =
-        useBlocStateConverter<MultiAuthCubit, MultiAuthState, bool>(
-            converter: (state) =>
-                state.current?.account.fullName?.isEmpty ?? true);
+    final isEmptyUserName = ref.watch(authAccountProvider
+        .select((value) => value?.fullName?.isEmpty ?? true));
 
     return DeviceTransferHandlerWidget(
       child: CommandPaletteWrapper(
@@ -167,7 +166,7 @@ class HasDrawerValueNotifier extends ValueNotifier<bool> {
   HasDrawerValueNotifier(super.value);
 }
 
-class _HomePage extends HookWidget {
+class _HomePage extends HookConsumerWidget {
   const _HomePage({
     required this.constraints,
   });
@@ -175,15 +174,13 @@ class _HomePage extends HookWidget {
   final BoxConstraints constraints;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final maxWidth = constraints.maxWidth;
     final clampSlideWidth = (maxWidth - kResponsiveNavigationMinWidth)
         .clamp(kSlidePageMinWidth, kSlidePageMaxWidth);
 
     final userCollapse =
-        useBlocStateConverter<SettingCubit, SettingState, bool>(
-      converter: (state) => state.collapsedSidebar,
-    );
+        ref.watch(settingProvider.select((value) => value.collapsedSidebar));
 
     final autoCollapse = clampSlideWidth < kSlidePageMaxWidth;
     final collapse = userCollapse || autoCollapse;
@@ -274,53 +271,53 @@ class _HomePage extends HookWidget {
   }
 }
 
-class _CenterPage extends StatelessWidget {
+class _CenterPage extends ConsumerWidget {
   const _CenterPage();
 
   @override
-  Widget build(BuildContext context) => RepaintBoundary(
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: context.theme.primary,
-            border: Border(
-              right: BorderSide(
-                color: context.theme.divider,
-              ),
-            ),
-          ),
-          child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-            converter: (state) => state.type == SlideCategoryType.setting,
-            listener: (context, isSetting) {
-              final responsiveNavigatorCubit =
-                  context.read<ResponsiveNavigatorCubit>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSetting = ref.watch(slideCategoryStateProvider
+        .select((value) => value.type == SlideCategoryType.setting));
 
-              responsiveNavigatorCubit.popWhere((page) {
-                if (responsiveNavigatorCubit.state.routeMode) return true;
+    ref.listen(slideCategoryStateProvider, (previous, next) {
+      final isSetting = next.type == SlideCategoryType.setting;
 
-                return ResponsiveNavigatorCubit.settingPageNameSet
-                    .contains(page.name);
-              });
+      final responsiveNavigatorCubit = context.read<ResponsiveNavigatorCubit>();
 
-              if (isSetting && !responsiveNavigatorCubit.state.routeMode) {
-                context.read<ConversationCubit>().unselected();
-                responsiveNavigatorCubit.pushPage(
-                    ResponsiveNavigatorCubit.settingPageNameSet.first);
-              }
-            },
-            child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-              converter: (state) => state.type == SlideCategoryType.setting,
-              builder: (context, isSetting) => IndexedStack(
-                index: isSetting ? 1 : 0,
-                sizing: StackFit.expand,
-                children: const [
-                  AutomaticKeepAliveClientWidget(
-                    child: ConversationPage(),
-                  ),
-                  AutomaticKeepAliveClientWidget(child: SettingPage()),
-                ],
-              ),
+      responsiveNavigatorCubit.popWhere((page) {
+        if (responsiveNavigatorCubit.state.routeMode) return true;
+
+        return ResponsiveNavigatorCubit.settingPageNameSet.contains(page.name);
+      });
+
+      if (isSetting && !responsiveNavigatorCubit.state.routeMode) {
+        context.read<ConversationCubit>().unselected();
+        responsiveNavigatorCubit
+            .pushPage(ResponsiveNavigatorCubit.settingPageNameSet.first);
+      }
+    });
+
+    return RepaintBoundary(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.theme.primary,
+          border: Border(
+            right: BorderSide(
+              color: context.theme.divider,
             ),
           ),
         ),
-      );
+        child: IndexedStack(
+          index: isSetting ? 1 : 0,
+          sizing: StackFit.expand,
+          children: const [
+            AutomaticKeepAliveClientWidget(
+              child: ConversationPage(),
+            ),
+            AutomaticKeepAliveClientWidget(child: SettingPage()),
+          ],
+        ),
+      ),
+    );
+  }
 }

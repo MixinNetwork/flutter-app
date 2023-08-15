@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gallery_saver/gallery_saver.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,6 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../account/account_server.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
-import '../../bloc/setting_cubit.dart';
 import '../../bloc/simple_cubit.dart';
 import '../../constants/resources.dart';
 import '../../db/dao/sticker_dao.dart';
@@ -28,6 +28,7 @@ import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/message_selection_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../ui/home/bloc/recall_message_bloc.dart';
+import '../../ui/provider/setting_provider.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/double_tap_util.dart';
 import '../../utils/extension/extension.dart';
@@ -139,7 +140,7 @@ void _quickReply(BuildContext context) {
   });
 }
 
-class MessageItemWidget extends HookWidget {
+class MessageItemWidget extends HookConsumerWidget {
   const MessageItemWidget({
     super.key,
     required this.message,
@@ -166,7 +167,7 @@ class MessageItemWidget extends HookWidget {
   static const statusFontSize = 10.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isCurrentUser = message.relationship == UserRelationship.me;
 
     final sameDayPrev = isSameDay(prev?.createdAt, message.createdAt);
@@ -183,9 +184,7 @@ class MessageItemWidget extends HookWidget {
             message.userId != message.conversationOwnerId;
 
     final enableShowAvatar =
-        useBlocStateConverter<SettingCubit, SettingState, bool>(
-      converter: (style) => style.messageShowAvatar,
-    );
+        ref.watch(settingProvider.select((value) => value.messageShowAvatar));
     final showAvatar = isGroupOrBotGroupConversation && enableShowAvatar;
 
     final showNip =

@@ -8,7 +8,7 @@ import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/message/item/pin_message.dart';
-import '../../../widgets/message/item/text/mention_builder.dart';
+import '../../provider/mention_cache_provider.dart';
 import '../bloc/conversation_cubit.dart';
 
 class PinMessageState extends Equatable {
@@ -97,7 +97,7 @@ PinMessageState usePinMessageState() {
         if (pinMessageMinimal == null) return null;
         final preview = await generatePinPreviewText(
           pinMessageMinimal: pinMessageMinimal,
-          mentionCache: context.read<MentionCache>(),
+          mentionCache: context.providerContainer.read(mentionCacheProvider),
         );
 
         return context.l10n.chatPinMessage(message.userFullName ?? '', preview);

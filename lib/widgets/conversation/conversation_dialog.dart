@@ -22,7 +22,7 @@ Future<void> showConversationDialog(BuildContext context,
   }
 
   final existed = conversationResponse.participants
-      .any((element) => element.userId == context.multiAuthState.currentUserId);
+      .any((element) => element.userId == context.account?.userId);
   if (existed) {
     showToast(context.l10n.groupAlreadyIn);
     await ConversationCubit.selectConversation(

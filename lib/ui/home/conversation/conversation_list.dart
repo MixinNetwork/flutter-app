@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -19,12 +20,12 @@ import '../../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/pin_message.dart';
 import '../../../widgets/message/item/system_message.dart';
-import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/message_status_icon.dart';
 import '../../../widgets/unread_text.dart';
+import '../../provider/mention_cache_provider.dart';
+import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
-import '../bloc/slide_category_cubit.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'audio_player_bar.dart';
 import 'conversation_page.dart';
@@ -56,7 +57,17 @@ class ConversationList extends HookWidget {
       converter: (state) => state.routeMode,
     );
 
+    final itemPositionsListener =
+        conversationListBloc.itemPositionsListener(slideCategoryState);
+    final itemScrollController =
+        conversationListBloc.itemScrollController(slideCategoryState);
+
+    if (itemPositionsListener == null || itemScrollController == null) {
+      return const SizedBox();
+    }
+
     Widget child;
+
     child = pagingState.count == 0
         ? pagingState.hasData
             ? Center(
@@ -68,11 +79,9 @@ class ConversationList extends HookWidget {
             : const _Empty()
         : ScrollablePositionedList.builder(
             key: PageStorageKey(slideCategoryState),
-            itemPositionsListener:
-                conversationListBloc.itemPositionsListener(slideCategoryState),
+            itemPositionsListener: itemPositionsListener,
             itemCount: pagingState.count,
-            itemScrollController:
-                conversationListBloc.itemScrollController(slideCategoryState),
+            itemScrollController: itemScrollController,
             itemBuilder: (context, index) {
               final conversation = pagingState.map[index];
               if (conversation == null) return const SizedBox(height: 80);
@@ -303,7 +312,7 @@ class _MessagePreview extends StatelessWidget {
   }
 }
 
-class _MessageContent extends HookWidget {
+class _MessageContent extends HookConsumerWidget {
   const _MessageContent({
     required this.conversation,
     required this.hasDraft,
@@ -313,12 +322,15 @@ class _MessageContent extends HookWidget {
   final bool hasDraft;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final text = useMemoizedFuture(
       () async {
         if (hasDraft) return conversation.draft;
         final isGroup = conversation.category == ConversationCategory.group ||
             conversation.senderId != conversation.ownerId;
+
+        final mentionCache = ref.read(mentionCacheProvider);
+
         if (conversation.contentType == MessageCategory.systemConversation) {
           return generateSystemText(
             actionName: conversation.actionName,
@@ -338,13 +350,11 @@ class _MessageContent extends HookWidget {
           }
           final preview = await generatePinPreviewText(
             pinMessageMinimal: pinMessageMinimal,
-            mentionCache: context.read<MentionCache>(),
+            mentionCache: mentionCache,
           );
           return context.l10n
               .chatPinMessage(conversation.senderFullName ?? '', preview);
         }
-
-        final mentionCache = context.read<MentionCache>();
 
         return messagePreviewOptimize(
           conversation.messageStatus,
@@ -430,7 +440,7 @@ class _MessageStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (context.multiAuthState.currentUserId == conversation.senderId &&
+    if (context.account?.userId == conversation.senderId &&
         conversation.contentType != MessageCategory.systemConversation &&
         conversation.contentType != MessageCategory.systemAccountSnapshot &&
         !conversation.contentType.isCallMessage &&

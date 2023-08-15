@@ -2,125 +2,118 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../bloc/bloc_converter.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
-import '../home/bloc/multi_auth_cubit.dart';
+import '../provider/multi_auth_provider.dart';
 
-class EditProfilePage extends HookWidget {
+class EditProfilePage extends HookConsumerWidget {
   const EditProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final nameTextEditingController = useTextEditingController();
-    final bioTextEditingController = useTextEditingController();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final (fullName, biography, identityNumber, phone, createdAt) = ref.watch(
+      authAccountProvider.select((value) => (
+            value?.fullName,
+            value?.biography,
+            value?.identityNumber,
+            value?.phone,
+            value?.createdAt,
+          )),
+    );
+
+    final nameTextEditingController = useTextEditingController(text: fullName);
+    final bioTextEditingController = useTextEditingController(text: biography);
+
     useEffect(() {
       context.accountServer.refreshSelf();
     }, []);
-    return BlocConverter<MultiAuthCubit, MultiAuthState, (String?, String?)>(
-      converter: (state) => (
-        state.current?.account.fullName,
-        state.current?.account.biography,
-      ),
-      when: (a, b) => b?.$1 != null && b?.$2 != null,
-      immediatelyCallListener: true,
-      listener: (context, state) {
-        nameTextEditingController.text = state.$1!;
-        bioTextEditingController.text = state.$2!;
-      },
-      child: Scaffold(
-        backgroundColor: context.theme.background,
-        appBar: MixinAppBar(
-          title: Text(context.l10n.editProfile),
-          actions: [
-            MixinButton(
-              onTap: () {
-                runFutureWithToast(
-                  context.accountServer.updateAccount(
-                    fullName: nameTextEditingController.text.trim(),
-                    biography: bioTextEditingController.text.trim(),
-                  ),
-                );
-              },
-              backgroundTransparent: true,
-              child: Center(child: Text(context.l10n.save)),
-            ),
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 40),
-              Builder(builder: (context) {
-                final account = context.multiAuthState.currentUser!;
-                return AvatarWidget(
-                  userId: account.userId,
-                  name: account.fullName,
-                  avatarUrl: account.avatarUrl,
-                  size: 100,
-                );
-              }),
-              const SizedBox(height: 10),
-              BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
-                converter: (state) => state.current?.account.identityNumber,
-                when: (a, b) => b != null,
-                builder: (context, identityNumber) => Text(
-                  'Mixin ID: $identityNumber',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: context.dynamicColor(
-                      const Color.fromRGBO(188, 190, 195, 1),
-                      darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-                    ),
-                  ),
+
+    ref.listen(authAccountProvider, (previous, next) {
+      if (next == null) return;
+      nameTextEditingController.text = next.fullName ?? '';
+      bioTextEditingController.text = next.biography;
+    });
+
+    return Scaffold(
+      backgroundColor: context.theme.background,
+      appBar: MixinAppBar(
+        title: Text(context.l10n.editProfile),
+        actions: [
+          MixinButton(
+            onTap: () {
+              runFutureWithToast(
+                context.accountServer.updateAccount(
+                  fullName: nameTextEditingController.text.trim(),
+                  biography: bioTextEditingController.text.trim(),
                 ),
-              ),
-              const SizedBox(height: 32),
-              _Item(
-                title: context.l10n.name,
-                controller: nameTextEditingController,
-                maxLength: 40,
-              ),
-              const SizedBox(height: 32),
-              _Item(
-                title: context.l10n.biography,
-                controller: bioTextEditingController,
-                maxLength: 140,
-              ),
-              const SizedBox(height: 32),
-              BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
-                converter: (state) => state.current?.account.phone,
-                when: (a, b) => b != null,
-                builder: (context, phone) => _Item(
-                  title: context.l10n.phoneNumber,
-                  controller: TextEditingController(text: phone),
-                  readOnly: true,
-                ),
-              ),
-              const SizedBox(height: 70),
-              BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
-                converter: (state) {
-                  final createdAt = state.current?.account.createdAt;
-                  if (createdAt == null) return null;
-                  return DateFormat.yMMMd().format(createdAt.toLocal());
-                },
-                when: (a, b) => b != null,
-                builder: (context, createdAt) => Text(
-                  createdAt != null ? context.l10n.joinedIn(createdAt) : '',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: context.theme.secondaryText,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 48),
-            ],
+              );
+            },
+            backgroundTransparent: true,
+            child: Center(child: Text(context.l10n.save)),
           ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            Builder(builder: (context) {
+              final account = context.account!;
+              return AvatarWidget(
+                userId: account.userId,
+                name: account.fullName,
+                avatarUrl: account.avatarUrl,
+                size: 100,
+              );
+            }),
+            const SizedBox(height: 10),
+            Text(
+              'Mixin ID: $identityNumber',
+              style: TextStyle(
+                fontSize: 14,
+                color: context.dynamicColor(
+                  const Color.fromRGBO(188, 190, 195, 1),
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            _Item(
+              title: context.l10n.name,
+              controller: nameTextEditingController,
+              maxLength: 40,
+            ),
+            const SizedBox(height: 32),
+            _Item(
+              title: context.l10n.biography,
+              controller: bioTextEditingController,
+              maxLength: 140,
+            ),
+            const SizedBox(height: 32),
+            _Item(
+              title: context.l10n.phoneNumber,
+              controller: TextEditingController(text: phone),
+              readOnly: true,
+            ),
+            const SizedBox(height: 70),
+            Text(
+              createdAt != null
+                  ? context.l10n
+                      .joinedIn(DateFormat.yMMMd().format(createdAt.toLocal()))
+                  : '',
+              style: TextStyle(
+                fontSize: 14,
+                color: context.theme.secondaryText,
+              ),
+            ),
+            const SizedBox(height: 48),
+          ],
         ),
       ),
     );

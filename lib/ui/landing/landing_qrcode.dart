@@ -20,7 +20,7 @@ class LandingQrCodeWidget extends HookWidget {
     final locale = useMemoized(() => Localizations.localeOf(context));
 
     final landingCubit = useBloc(() => LandingQrCodeCubit(
-          context.multiAuthCubit,
+          context.multiAuthChangeNotifier,
           locale,
         ));
 

@@ -17,7 +17,7 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../widgets/message/item/text/mention_builder.dart';
+import '../../provider/mention_cache_provider.dart';
 import 'conversation_cubit.dart';
 
 abstract class _MessageEvent extends Equatable {

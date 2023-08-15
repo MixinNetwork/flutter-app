@@ -4,20 +4,23 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
+import '../../../ui/provider/mention_cache_provider.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
 import '../message.dart';
 import '../message_style.dart';
-import 'text/mention_builder.dart';
 
-class PinMessageWidget extends HookWidget {
+class PinMessageWidget extends HookConsumerWidget {
   const PinMessageWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mentionCache = ref.read(mentionCacheProvider);
+
     final content =
         useMessageConverter(converter: (state) => state.content ?? '');
     final userFullName =
@@ -34,7 +37,7 @@ class PinMessageWidget extends HookWidget {
       }
       final preview = cachePinPreviewText(
         pinMessageMinimal: pinMessageMinimal,
-        mentionCache: context.read<MentionCache>(),
+        mentionCache: mentionCache,
       );
 
       final lines = const LineSplitter().convert(preview);
@@ -42,7 +45,7 @@ class PinMessageWidget extends HookWidget {
           lines.length > 1 ? '${lines.first}...' : lines.firstOrNull ?? '';
 
       return context.l10n.chatPinMessage(userFullName, singleLinePreview);
-    }, [userFullName, content]);
+    }, [userFullName, content, mentionCache]);
 
     final text = useMemoizedFuture(
       () async {
@@ -50,7 +53,7 @@ class PinMessageWidget extends HookWidget {
 
         final preview = await generatePinPreviewText(
           pinMessageMinimal: pinMessageMinimal,
-          mentionCache: context.read<MentionCache>(),
+          mentionCache: mentionCache,
         );
 
         final lines = const LineSplitter().convert(preview);
@@ -61,7 +64,7 @@ class PinMessageWidget extends HookWidget {
             .overflow;
       },
       cachePreview,
-      keys: [userFullName, content],
+      keys: [userFullName, content, mentionCache],
     ).requireData;
 
     return Center(

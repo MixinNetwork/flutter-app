@@ -7,6 +7,7 @@ import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
@@ -19,6 +20,7 @@ import 'package:window_size/window_size.dart';
 
 import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
+import 'db/global_hive.dart';
 import 'ui/home/home.dart';
 import 'utils/app_lifecycle.dart';
 import 'utils/event_bus.dart';
@@ -85,6 +87,9 @@ Future<void> main(List<String> args) async {
     e('unhandled error: $error $stack');
     return true;
   };
+
+  Hive.init(mixinDocumentsDirectory.path);
+  await initGlobalHive();
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: mixinDocumentsDirectory,

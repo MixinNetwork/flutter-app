@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -7,8 +8,9 @@ import '../../../db/dao/conversation_dao.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../provider/last_selected_conversation_id.dart';
+import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_cubit.dart';
-import '../bloc/slide_category_cubit.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'conversation_list.dart';
 import 'menu_wrapper.dart';
@@ -43,11 +45,11 @@ extension _ConversationItemSort on List<ConversationItem> {
       });
 }
 
-class UnseenConversationList extends HookWidget {
+class UnseenConversationList extends HookConsumerWidget {
   const UnseenConversationList({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final unreadConversations = useState(<ConversationItem>[]);
 
     final currentConversationId =
@@ -55,14 +57,17 @@ class UnseenConversationList extends HookWidget {
       converter: (state) => state?.conversationId,
     );
 
-    final selectedConversation = useRef<String?>(null);
+    final lastSelectedConversationIdController =
+        ref.watch(lastSelectedConversationId.notifier);
+    final selectedConversationIdRef = useRef<String?>(null);
 
-    final slideCategoryState =
-        useBlocState<SlideCategoryCubit, SlideCategoryState>();
-
+    final slideCategoryState = ref.watch(slideCategoryStateProvider);
     useEffect(() {
-      selectedConversation.value = null;
-    }, [slideCategoryState]);
+      selectedConversationIdRef.value = null;
+
+      return lastSelectedConversationIdController
+          .addListener((state) => selectedConversationIdRef.value = state);
+    }, [lastSelectedConversationIdController]);
 
     useEffect(() {
       final updateEvent = Rx.merge([
@@ -100,7 +105,7 @@ class UnseenConversationList extends HookWidget {
       final subscription = unseenConversations.asyncListen((items) async {
         final newItems = List<ConversationItem>.of(items);
 
-        final selectedConversationId = selectedConversation.value;
+        final selectedConversationId = selectedConversationIdRef.value;
         if (selectedConversationId != null &&
             !newItems
                 .any((item) => item.conversationId == selectedConversationId)) {
@@ -137,12 +142,11 @@ class UnseenConversationList extends HookWidget {
             conversation: conversation,
             selected: conversation.conversationId == currentConversationId &&
                 !routeMode,
-            onTap: () {
-              selectedConversation.value = conversation.conversationId;
-              ConversationCubit.selectConversation(
-                  context, conversation.conversationId,
-                  conversation: conversation);
-            },
+            onTap: () => ConversationCubit.selectConversation(
+              context,
+              conversation.conversationId,
+              conversation: conversation,
+            ),
           ),
         );
       },

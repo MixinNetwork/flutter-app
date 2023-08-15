@@ -160,7 +160,7 @@ class _SearchUserDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentIdentityNumber = context.multiAuthState.currentIdentityNumber;
+    final currentIdentityNumber = context.account?.identityNumber;
 
     final textEditingController = useTextEditingController();
     final textEditingValueStream =

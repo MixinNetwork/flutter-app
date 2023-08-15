@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 
 import '../../../utils/extension/extension.dart';
 import '../../../utils/platform.dart';
+import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
-import '../bloc/slide_category_cubit.dart';
 
 class ConversationHotKey extends StatelessWidget {
   const ConversationHotKey({
@@ -54,10 +54,9 @@ void _navigationConversation(
   BuildContext context, {
   required bool forward,
 }) {
-  final category = context.read<SlideCategoryCubit>().state;
-  if (category.type == SlideCategoryType.setting) {
-    return;
-  }
+  final category = context.providerContainer.read(slideCategoryStateProvider);
+  if (category.type == SlideCategoryType.setting) return;
+
   final conversationCubit = context.read<ConversationCubit>();
   final currentConversation = conversationCubit.state?.conversationId;
   if (currentConversation == null) {
@@ -87,7 +86,9 @@ void _navigationConversation(
     nextConversation.conversationId,
   );
   final itemPositions =
-      conversationListBloc.itemPositionsListener(category).itemPositions.value;
+      conversationListBloc.itemPositionsListener(category)?.itemPositions.value;
+
+  if (itemPositions == null) return;
 
   // use 0.9 instead 1 to ensure that the next conversation is visible if we forward.
   // in forward navigation, if alignment is 1, ScrollablePositionedList will only
@@ -107,6 +108,7 @@ void _navigationConversation(
   }
   final itemScrollController =
       conversationListBloc.itemScrollController(category);
+  if (itemScrollController == null) return;
   if (itemScrollController.isAttached) {
     itemScrollController.jumpTo(
       index: nextConversationIndex,

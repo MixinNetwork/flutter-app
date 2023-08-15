@@ -17,7 +17,6 @@ import '../../widgets/toast.dart';
 import '../../widgets/user/change_number_dialog.dart';
 import '../../widgets/user/pin_verification_dialog.dart';
 import '../../widgets/user/verification_dialog.dart';
-import '../home/bloc/multi_auth_cubit.dart';
 
 class AccountDeletePage extends StatelessWidget {
   const AccountDeletePage({super.key});
@@ -49,8 +48,7 @@ class AccountDeletePage extends StatelessWidget {
                         return;
                       }
 
-                      final user =
-                          context.read<MultiAuthCubit>().state.currentUser;
+                      final user = context.account;
                       assert(user != null, 'user is null');
                       if (user == null) {
                         return;
@@ -112,7 +110,7 @@ class AccountDeletePage extends StatelessWidget {
                         if (deleted) {
                           w('account deleted');
                           await context.accountServer.signOutAndClear();
-                          context.multiAuthCubit.signOut();
+                          context.multiAuthChangeNotifier.signOut();
                         }
                       } else {
                         e('delete account no pin');

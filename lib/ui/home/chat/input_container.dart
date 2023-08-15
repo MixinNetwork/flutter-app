@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:image_picker/image_picker.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide StickerAlbum;
 import 'package:provider/provider.dart';
@@ -31,11 +32,11 @@ import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
-import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/emoji_page.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
+import '../../provider/mention_cache_provider.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/mention_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
@@ -107,15 +108,15 @@ class InputContainer extends HookWidget {
   }
 }
 
-class _InputContainer extends HookWidget {
+class _InputContainer extends HookConsumerWidget {
   const _InputContainer();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final mentionCubit = useBloc(
       () => MentionCubit(
         userDao: context.database.userDao,
-        multiAuthCubit: context.multiAuthCubit,
+        multiAuthChangeNotifier: context.multiAuthChangeNotifier,
       ),
     );
 
@@ -139,11 +140,11 @@ class _InputContainer extends HookWidget {
         final draft =
             context.read<ConversationCubit>().state?.conversation?.draft;
         return HighlightTextEditingController(
-            initialText: draft,
-            highlightTextStyle: TextStyle(color: context.theme.accent),
-            mentionCache: context.read<MentionCache>())
-          ..selection = TextSelection.fromPosition(
-              TextPosition(offset: draft?.length ?? 0));
+          initialText: draft,
+          highlightTextStyle: TextStyle(color: context.theme.accent),
+          mentionCache: ref.read(mentionCacheProvider),
+        )..selection = TextSelection.fromPosition(
+            TextPosition(offset: draft?.length ?? 0));
       },
       [conversationId],
     );
