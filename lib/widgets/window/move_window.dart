@@ -47,12 +47,9 @@ class MoveWindow extends StatelessWidget {
         behavior: behavior,
         onDoubleTap: clickToFullScreen
             ? () async {
-                if (defaultTargetPlatform == TargetPlatform.windows) {
-                  // Disable MaximizeWindow for windows.
-                  // Windows already has a title bar.
-                  return;
-                }
-                if (!kPlatformIsDesktop) {
+                if (!kPlatformIsDarwin) {
+                  // Only enable for macOS.
+                  // Windows and Linux already has a title bar.
                   return;
                 }
                 if (await windowManager.isMaximized()) {
