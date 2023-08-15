@@ -337,6 +337,9 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       );
     }
 
+    context.providerContainer.read(lastSelectedConversationId.notifier).state =
+        conversationId;
+
     final _user =
         user ?? await database.userDao.userById(userId).getSingleOrNull();
 

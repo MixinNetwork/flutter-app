@@ -17,7 +17,6 @@ import 'constants/resources.dart';
 import 'generated/l10n.dart';
 import 'ui/home/bloc/conversation_cubit.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
-import 'ui/home/bloc/recall_message_bloc.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
@@ -138,7 +137,6 @@ class _Providers extends HookConsumerWidget {
             ref.read(mentionCacheProvider),
           ),
         ),
-        BlocProvider(create: (context) => RecallMessageReeditCubit()),
       ],
       child: Provider<NotificationService>(
         create: (BuildContext context) => NotificationService(context: context),

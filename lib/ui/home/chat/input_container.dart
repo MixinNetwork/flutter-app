@@ -37,10 +37,10 @@ import '../../../widgets/sticker_page/emoji_page.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../../provider/mention_cache_provider.dart';
+import '../../provider/recall_message_reedit_provider.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/mention_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
-import '../bloc/recall_message_bloc.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'chat_page.dart';
 import 'files_preview.dart';
@@ -425,7 +425,7 @@ void _sendMessage(
   context.read<QuoteMessageCubit>().emit(null);
 }
 
-class _SendTextField extends HookWidget {
+class _SendTextField extends HookConsumerWidget {
   const _SendTextField({
     required this.focusNode,
     required this.textEditingController,
@@ -435,7 +435,7 @@ class _SendTextField extends HookWidget {
   final TextEditingController textEditingController;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textEditingValueStream =
         useValueNotifierConvertSteam(textEditingController);
 
@@ -457,15 +457,13 @@ class _SendTextField extends HookWidget {
         ).data ??
         true;
 
-    useEffect(() {
-      final subscription = context
-          .read<RecallMessageReeditCubit>()
-          .onReeditStream
-          .listen((event) {
-        textEditingController.text = textEditingController.text + event;
-      });
-      return subscription.cancel;
-    }, [textEditingController]);
+    useEffect(
+        () => ref
+            .read(onReEditStreamProvider)
+            .listen((event) =>
+                textEditingController.text = textEditingController.text + event)
+            .cancel,
+        [textEditingController]);
 
     final isEncryptConversation =
         useBlocStateConverter<ConversationCubit, ConversationState?, bool>(

@@ -27,7 +27,7 @@ import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/message_selection_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
-import '../../ui/home/bloc/recall_message_bloc.dart';
+import '../../ui/provider/recall_message_reedit_provider.dart';
 import '../../ui/provider/setting_provider.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/double_tap_util.dart';
@@ -372,8 +372,8 @@ class MessageItemWidget extends HookConsumerWidget {
                             conversationId: message.conversationId,
                           );
                           if (content != null) {
-                            context
-                                .read<RecallMessageReeditCubit>()
+                            context.providerContainer
+                                .read(recallMessageNotifierProvider)
                                 .onRecalled(message.messageId, content);
                           }
                         },
