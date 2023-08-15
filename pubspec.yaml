@@ -38,7 +38,11 @@ dependencies:
       path: packages/common_crypto
   dbus: ^0.7.8
   decimal: ^2.3.3
-  desktop_drop: ^0.4.1
+  desktop_drop:
+    git:
+      url: https://github.com/MixinNetwork/flutter-plugins.git
+      ref: a8e2bab0447760eb09457eafbc49e8d7c8cbb99f
+      path: packages/desktop_drop
   desktop_keep_screen_on: ^0.0.2
   desktop_lifecycle: ^0.1.1
   desktop_webview_window: ^0.2.1

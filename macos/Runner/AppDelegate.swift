@@ -45,6 +45,6 @@ class AppDelegate: FlutterAppDelegate {
     }
   
     @IBAction func onChatMenuClicked(_ sender: Any) {
-        mainFlutterWindow.makeKeyAndOrderFront(self)
+        mainFlutterWindow?.makeKeyAndOrderFront(self)
     }
 }
