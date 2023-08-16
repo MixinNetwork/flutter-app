@@ -211,7 +211,7 @@ class _Item extends HookConsumerWidget {
       selected: selected,
       onTap: () {
         if (onTap == null && pageName != null) {
-          context.read<ResponsiveNavigatorStateNotifier>()
+          context.providerContainer.read(responsiveNavigatorProvider.notifier)
             ..popWhere((page) => ResponsiveNavigatorStateNotifier
                 .settingPageNameSet
                 .contains(page.name))

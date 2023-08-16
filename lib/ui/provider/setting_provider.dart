@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
-import '../../db/global_hive.dart';
 import '../../utils/hydrated_bloc.dart';
 import '../../utils/logger.dart';
 
@@ -130,15 +129,6 @@ class SettingChangeNotifier extends ChangeNotifier {
         _collapsedSidebar = collapsedSidebar,
         _chatFontSizeDelta = chatFontSizeDelta;
 
-  static const _kSettingBrightnessKey = 'settings_brightness';
-  static const _kSettingMessageShowAvatarKey = 'settings_messageShowAvatar';
-  static const _kSettingMessagePreviewKey = 'settings_messagePreview';
-  static const _kSettingPhotoAutoDownloadKey = 'settings_photoAutoDownload';
-  static const _kSettingVideoAutoDownloadKey = 'settings_videoAutoDownload';
-  static const _kSettingFileAutoDownloadKey = 'settings_fileAutoDownload';
-  static const _kSettingCollapsedSidebarKey = 'settings_collapsedSidebar';
-  static const _kSettingChatFontSizeDeltaKey = 'settings_chatFontSizeDelta';
-
   /// The brightness of theme.
   /// 0 : follow system
   /// 1 : dark
@@ -171,7 +161,6 @@ class SettingChangeNotifier extends ChangeNotifier {
         _brightness = 0;
         break;
     }
-    globalBox.put(_kSettingBrightnessKey, _brightness);
     notifyListeners();
   }
 
@@ -205,7 +194,6 @@ class SettingChangeNotifier extends ChangeNotifier {
     if (_messageShowAvatar == value) return;
 
     _messageShowAvatar = value;
-    globalBox.put(_kSettingMessageShowAvatarKey, _messageShowAvatar);
     notifyListeners();
   }
 
@@ -215,7 +203,6 @@ class SettingChangeNotifier extends ChangeNotifier {
     if (_messagePreview == value) return;
 
     _messagePreview = value;
-    globalBox.put(_kSettingMessagePreviewKey, _messagePreview);
     notifyListeners();
   }
 
@@ -225,7 +212,6 @@ class SettingChangeNotifier extends ChangeNotifier {
     if (_photoAutoDownload == value) return;
 
     _photoAutoDownload = value;
-    globalBox.put(_kSettingPhotoAutoDownloadKey, _photoAutoDownload);
     notifyListeners();
   }
 
@@ -235,7 +221,6 @@ class SettingChangeNotifier extends ChangeNotifier {
     if (_videoAutoDownload == value) return;
 
     _videoAutoDownload = value;
-    globalBox.put(_kSettingVideoAutoDownloadKey, _videoAutoDownload);
     notifyListeners();
   }
 
@@ -245,7 +230,6 @@ class SettingChangeNotifier extends ChangeNotifier {
     if (_fileAutoDownload == value) return;
 
     _fileAutoDownload = value;
-    globalBox.put(_kSettingFileAutoDownloadKey, _fileAutoDownload);
     notifyListeners();
   }
 
@@ -255,7 +239,6 @@ class SettingChangeNotifier extends ChangeNotifier {
     if (_collapsedSidebar == value) return;
 
     _collapsedSidebar = value;
-    globalBox.put(_kSettingCollapsedSidebarKey, _collapsedSidebar);
     notifyListeners();
   }
 
@@ -265,11 +248,27 @@ class SettingChangeNotifier extends ChangeNotifier {
     if (_chatFontSizeDelta == value) return;
 
     _chatFontSizeDelta = value;
-    globalBox.put(_kSettingChatFontSizeDeltaKey, _chatFontSizeDelta);
     notifyListeners();
   }
 
   double get chatFontSizeDelta => _chatFontSizeDelta ?? 0;
+
+  @override
+  void notifyListeners() {
+    HydratedBloc.storage.write(
+        _kSettingCubitKey,
+        _SettingState(
+          brightness: _brightness,
+          messageShowAvatar: _messageShowAvatar,
+          messagePreview: _messagePreview,
+          photoAutoDownload: _photoAutoDownload,
+          videoAutoDownload: _videoAutoDownload,
+          fileAutoDownload: _fileAutoDownload,
+          collapsedSidebar: _collapsedSidebar,
+          chatFontSizeDelta: _chatFontSizeDelta,
+        ).toMap());
+    super.notifyListeners();
+  }
 }
 
 @Deprecated('Use SettingChangeNotifier instead')
@@ -280,51 +279,24 @@ final settingProvider =
   ref.keepAlive();
 
   //migrate
-  {
-    final oldJson = HydratedBloc.storage.read(_kSettingCubitKey);
-    if (oldJson != null) {
-      final settingState = fromHydratedJson(oldJson, _SettingState.fromMap);
-      if (settingState == null) return SettingChangeNotifier();
+  final oldJson = HydratedBloc.storage.read(_kSettingCubitKey);
+  if (oldJson != null) {
+    final settingState = fromHydratedJson(oldJson, _SettingState.fromMap);
+    if (settingState == null) return SettingChangeNotifier();
 
-      HydratedBloc.storage.delete(_kSettingCubitKey);
+    HydratedBloc.storage.delete(_kSettingCubitKey);
 
-      return SettingChangeNotifier(
-        brightness: settingState.brightness,
-        messageShowAvatar: settingState.messageShowAvatar,
-        messagePreview: settingState.messagePreview,
-        photoAutoDownload: settingState.photoAutoDownload,
-        videoAutoDownload: settingState.videoAutoDownload,
-        fileAutoDownload: settingState.fileAutoDownload,
-        collapsedSidebar: settingState.collapsedSidebar,
-        chatFontSizeDelta: settingState.chatFontSizeDelta,
-      );
-    }
+    return SettingChangeNotifier(
+      brightness: settingState.brightness,
+      messageShowAvatar: settingState.messageShowAvatar,
+      messagePreview: settingState.messagePreview,
+      photoAutoDownload: settingState.photoAutoDownload,
+      videoAutoDownload: settingState.videoAutoDownload,
+      fileAutoDownload: settingState.fileAutoDownload,
+      collapsedSidebar: settingState.collapsedSidebar,
+      chatFontSizeDelta: settingState.chatFontSizeDelta,
+    );
   }
 
-  final brightness =
-      globalBox.get(SettingChangeNotifier._kSettingBrightnessKey);
-  final messageShowAvatar =
-      globalBox.get(SettingChangeNotifier._kSettingMessageShowAvatarKey);
-  final messagePreview =
-      globalBox.get(SettingChangeNotifier._kSettingMessagePreviewKey);
-  final photoAutoDownload =
-      globalBox.get(SettingChangeNotifier._kSettingPhotoAutoDownloadKey);
-  final videoAutoDownload =
-      globalBox.get(SettingChangeNotifier._kSettingVideoAutoDownloadKey);
-  final fileAutoDownload =
-      globalBox.get(SettingChangeNotifier._kSettingFileAutoDownloadKey);
-  final collapsedSidebar =
-      globalBox.get(SettingChangeNotifier._kSettingCollapsedSidebarKey);
-  final chatFontSizeDelta =
-      globalBox.get(SettingChangeNotifier._kSettingChatFontSizeDeltaKey);
-  return SettingChangeNotifier(
-    brightness: brightness is int ? brightness : null,
-    messageShowAvatar: messageShowAvatar is bool ? messageShowAvatar : null,
-    messagePreview: messagePreview is bool ? messagePreview : null,
-    photoAutoDownload: photoAutoDownload is bool ? photoAutoDownload : null,
-    videoAutoDownload: videoAutoDownload is bool ? videoAutoDownload : null,
-    fileAutoDownload: fileAutoDownload is bool ? fileAutoDownload : null,
-    collapsedSidebar: collapsedSidebar is bool ? collapsedSidebar : null,
-    chatFontSizeDelta: chatFontSizeDelta is double ? chatFontSizeDelta : null,
-  );
+  return SettingChangeNotifier();
 });
