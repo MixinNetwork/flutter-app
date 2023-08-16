@@ -170,7 +170,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: ${{ github.event.inputs.flutter_channel || 'beta' }}
+          channel: ${{ github.event.inputs.flutter_channel || 'master' }}
 
       - run: flutter --version
 
