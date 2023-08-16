@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../account/account_key_value.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
-import '../../ui/home/bloc/conversation_cubit.dart';
+import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../automatic_keep_alive_client_widget.dart';
@@ -142,7 +143,7 @@ class StickerPage extends StatelessWidget {
       );
 }
 
-class _StickerAlbumPage extends HookWidget {
+class _StickerAlbumPage extends HookConsumerWidget {
   const _StickerAlbumPage({
     required this.getStickers,
     this.updateUsedAt = true,
@@ -155,7 +156,7 @@ class _StickerAlbumPage extends HookWidget {
   final bool rightClickDelete;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final stickerCubit = useBloc(() => StickerCubit(getStickers()));
 
     final itemCount = useBlocStateConverter<StickerCubit, List<Sticker>, int>(
@@ -197,7 +198,7 @@ class _StickerStoreEmptyPage extends StatelessWidget {
       );
 }
 
-class _StickerAlbumPageItem extends HookWidget {
+class _StickerAlbumPageItem extends HookConsumerWidget {
   const _StickerAlbumPageItem({
     required this.index,
     required this.updateUsedAt,
@@ -209,7 +210,7 @@ class _StickerAlbumPageItem extends HookWidget {
   final bool rightClickDelete;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final sticker = useBlocStateConverter<StickerCubit, List<Sticker>, Sticker>(
       converter: (state) => state[index],
       keys: [index],
@@ -218,7 +219,7 @@ class _StickerAlbumPageItem extends HookWidget {
     return InteractiveDecoratedBox(
       onTap: () async {
         final accountServer = context.accountServer;
-        final conversationItem = context.read<ConversationCubit>().state;
+        final conversationItem = ref.read(conversationProvider);
         if (conversationItem == null) return;
 
         final albumId = await accountServer.database.stickerRelationshipDao
@@ -264,7 +265,7 @@ class _StickerAlbumPageItem extends HookWidget {
   }
 }
 
-class _StickerAlbumBar extends HookWidget {
+class _StickerAlbumBar extends HookConsumerWidget {
   const _StickerAlbumBar({
     required this.tabLength,
     required this.tabController,
@@ -276,7 +277,7 @@ class _StickerAlbumBar extends HookWidget {
   final List<PresetStickerGroup> presetStickerGroups;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final validIndexRef = useRef<int?>(tabController.index);
 
     final setPreviousIndex = useCallback(() {
@@ -408,13 +409,13 @@ class _StickerAlbumBarItem extends StatelessWidget {
       );
 }
 
-class _StickerGroupIconHoverContainer extends HookWidget {
+class _StickerGroupIconHoverContainer extends HookConsumerWidget {
   const _StickerGroupIconHoverContainer({required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isHovering = useState(false);
     return MouseRegion(
       onEnter: (event) {

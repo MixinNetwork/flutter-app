@@ -234,11 +234,11 @@ MessageItem _buildFakeTextMessage(String content) {
   );
 }
 
-class _ChatTextSizePreview extends HookWidget {
+class _ChatTextSizePreview extends HookConsumerWidget {
   const _ChatTextSizePreview();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tickerProvider = useSingleTickerProvider();
     final blinkCubit = useMemoized(() => BlinkCubit(
           tickerProvider,

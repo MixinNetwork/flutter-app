@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
@@ -18,7 +19,7 @@ import '../../../../widgets/message/message.dart';
 import '../../chat/chat_page.dart';
 import '../shared_media_page.dart';
 
-class MediaPage extends HookWidget {
+class MediaPage extends HookConsumerWidget {
   const MediaPage({
     super.key,
     required this.maxHeight,
@@ -29,7 +30,7 @@ class MediaPage extends HookWidget {
   final String conversationId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final column = useMemoized(() => maxHeight / 90 * 2, [maxHeight]).toInt();
     final routeMode = context.read<ChatSideCubit>().state.routeMode;
     final size = column * (routeMode ? 4 : 3);
@@ -201,11 +202,11 @@ class _Item extends StatelessWidget {
   }
 }
 
-class _ItemVideo extends HookWidget {
+class _ItemVideo extends HookConsumerWidget {
   const _ItemVideo();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final durationText = useMessageConverter(
       converter: (state) =>
           Duration(milliseconds: int.tryParse(state.mediaDuration ?? '') ?? 0)

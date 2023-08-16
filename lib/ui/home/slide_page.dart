@@ -398,7 +398,7 @@ class _CircleList extends HookConsumerWidget {
   }
 }
 
-class _CategoryList extends HookWidget {
+class _CategoryList extends HookConsumerWidget {
   const _CategoryList({
     required this.children,
   });
@@ -406,7 +406,7 @@ class _CategoryList extends HookWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final controller = useScrollController();
     return ListView.separated(
       controller: controller,

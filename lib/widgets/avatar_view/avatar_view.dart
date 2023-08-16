@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 
 import '../../db/dao/conversation_dao.dart';
@@ -12,7 +12,7 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../cache_image.dart';
 
-class ConversationAvatarWidget extends HookWidget {
+class ConversationAvatarWidget extends HookConsumerWidget {
   const ConversationAvatarWidget({
     super.key,
     this.conversation,
@@ -35,7 +35,7 @@ class ConversationAvatarWidget extends HookWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final _conversationId = conversation?.conversationId ?? conversationId;
     assert(_conversationId != null);
     final _name = conversation?.name ?? fullName;
@@ -81,14 +81,14 @@ class ConversationAvatarWidget extends HookWidget {
   }
 }
 
-class AvatarPuzzlesWidget extends HookWidget {
+class AvatarPuzzlesWidget extends HookConsumerWidget {
   const AvatarPuzzlesWidget(this.users, this.size, {super.key});
 
   final List<User> users;
   final double size;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (users.isEmpty) return SizedBox.fromSize(size: Size.square(size));
     switch (users.length) {
       case 1:

@@ -5,6 +5,7 @@ import 'package:bring_window_to_front/bring_window_to_front.dart';
 import 'package:dbus/dbus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -27,13 +28,13 @@ Future<void> parseAppInitialArguments(List<String> args) async {
   }
 }
 
-class AppProtocolHandler extends HookWidget {
+class AppProtocolHandler extends HookConsumerWidget {
   const AppProtocolHandler({super.key, required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     useEffect(() {
       if (_initialUrl != null) {
         openUri(context, _initialUrl!);
@@ -47,13 +48,13 @@ class AppProtocolHandler extends HookWidget {
   }
 }
 
-class _LinuxAppProtocolHandler extends HookWidget {
+class _LinuxAppProtocolHandler extends HookConsumerWidget {
   const _LinuxAppProtocolHandler({required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final client = useMemoized(DBusClient.session);
     useEffect(() {
       final object = _MixinDbusObject(
@@ -108,13 +109,13 @@ class _MixinDbusObject extends DBusObject {
   }
 }
 
-class _ProtocolHandler extends HookWidget {
+class _ProtocolHandler extends HookConsumerWidget {
   const _ProtocolHandler({required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     useProtocol((String url) {
       windowManager.show();
       openUri(context, url);

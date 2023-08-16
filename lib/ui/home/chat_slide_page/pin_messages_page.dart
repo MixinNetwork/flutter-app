@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
@@ -18,16 +19,17 @@ import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/audio_message.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_day_time.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/conversation_provider.dart';
 import '../chat/chat_page.dart';
 
-class PinMessagesPage extends HookWidget {
-  const PinMessagesPage({super.key});
+class PinMessagesPage extends HookConsumerWidget {
+  const PinMessagesPage(this.conversationState, {super.key});
+
+  final ConversationState conversationState;
 
   @override
-  Widget build(BuildContext context) {
-    final conversationId = useMemoized(
-        () => context.read<ConversationCubit>().state!.conversationId);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final conversationId = conversationState.conversationId;
 
     final rawList = useMemoizedStream<List<MessageItem>>(
       () => context.database.pinMessageDao

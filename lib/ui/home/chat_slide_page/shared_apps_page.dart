@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
@@ -8,26 +8,25 @@ import '../../../utils/hook.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/cache_image.dart';
 import '../../../widgets/user/user_dialog.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/conversation_provider.dart';
 
-class SharedAppsPage extends HookWidget {
-  const SharedAppsPage({super.key});
+class SharedAppsPage extends HookConsumerWidget {
+  const SharedAppsPage(this.conversationState, {super.key});
+
+  final ConversationState conversationState;
 
   @override
-  Widget build(BuildContext context) {
-    final userId = useMemoized(() {
-      final userId = context.read<ConversationCubit>().state?.userId;
-      assert(userId != null, 'userId is null');
-      return userId ?? '';
-    });
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userId = conversationState.userId;
 
-    final apps = useMemoizedStream(
-            () => context.database.favoriteAppDao
-                .getFavoriteAppsByUserId(userId)
-                .watchWithStream(
-                    eventStreams: [DataBaseEventBus.instance.updateAppIdStream],
-                    duration: kVerySlowThrottleDuration),
-            keys: [userId]).data ??
+    final apps = useMemoizedStream(() {
+          if (userId == null) return Stream.value(<App>[]);
+          return context.database.favoriteAppDao
+              .getFavoriteAppsByUserId(userId)
+              .watchWithStream(
+                  eventStreams: [DataBaseEventBus.instance.updateAppIdStream],
+                  duration: kVerySlowThrottleDuration);
+        }, keys: [userId]).data ??
         const [];
 
     return Scaffold(

@@ -29,12 +29,12 @@ import '../../../widgets/message/item/pin_message.dart';
 import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
+import '../../provider/conversation_provider.dart';
 import '../../provider/conversation_unseen_filter_enabled.dart';
 import '../../provider/keyword_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/minute_timer_provider.dart';
 import '../../provider/slide_category_provider.dart';
-import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
 import '../bloc/search_message_cubit.dart';
 import 'conversation_page.dart';
@@ -229,7 +229,7 @@ class SearchList extends HookConsumerWidget {
                   ),
                   keyword: keyword,
                   onTap: () async {
-                    await ConversationCubit.selectUser(
+                    await ConversationStateNotifier.selectUser(
                       context,
                       user.userId,
                       user: user,
@@ -341,7 +341,7 @@ class SearchList extends HookConsumerWidget {
                       ),
                       keyword: keyword,
                       onTap: () async {
-                        await ConversationCubit.selectConversation(
+                        await ConversationStateNotifier.selectConversation(
                           context,
                           conversation.conversationId,
                         );
@@ -549,7 +549,7 @@ class SearchItem extends StatelessWidget {
   }
 }
 
-class _SearchMessageList extends HookWidget {
+class _SearchMessageList extends HookConsumerWidget {
   const _SearchMessageList({
     required this.keyword,
     required this.onTap,
@@ -563,7 +563,7 @@ class _SearchMessageList extends HookWidget {
   final SlideCategoryState categoryState;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final searchMessageCubit = useBloc(
       () => SearchMessageCubit.slideCategory(
         database: context.database,
@@ -668,7 +668,7 @@ enum _ShowMoreType {
 Future Function() _searchMessageItemOnTap(
         BuildContext context, SearchMessageDetailItem message) =>
     () async {
-      await ConversationCubit.selectConversation(
+      await ConversationStateNotifier.selectConversation(
         context,
         message.conversationId,
         initIndexMessageId: message.messageId,
@@ -773,7 +773,7 @@ class SearchMessageItem extends HookConsumerWidget {
   }
 }
 
-class SearchEmptyWidget extends ConsumerWidget {
+class SearchEmptyWidget extends HookConsumerWidget {
   const SearchEmptyWidget({super.key});
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../constants/constants.dart';
@@ -39,11 +40,11 @@ class ProxyPage extends StatelessWidget {
       );
 }
 
-class _ProxySettingWidget extends HookWidget {
+class _ProxySettingWidget extends HookConsumerWidget {
   const _ProxySettingWidget();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final enableProxy = useListenableConverter(
           context.database.settingProperties,
           converter: (settingProperties) => settingProperties.enableProxy,
@@ -102,11 +103,11 @@ class _ProxySettingWidget extends HookWidget {
   }
 }
 
-class _ProxyItemList extends HookWidget {
+class _ProxyItemList extends HookConsumerWidget {
   const _ProxyItemList();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final proxyList = useListenableConverter(
           context.database.settingProperties,
           converter: (settingProperties) => settingProperties.proxyList,
@@ -191,11 +192,11 @@ class _ProxyItemWidget extends StatelessWidget {
       );
 }
 
-class _ProxyAddDialog extends HookWidget {
+class _ProxyAddDialog extends HookConsumerWidget {
   const _ProxyAddDialog();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final proxyType = useState<ProxyType>(ProxyType.http);
     final proxyHostController = useTextEditingController();
     final proxyPortController = useTextEditingController();

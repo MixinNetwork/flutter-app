@@ -4,6 +4,7 @@ import 'package:desktop_keep_screen_on/desktop_keep_screen_on.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../constants/resources.dart';
@@ -223,7 +224,7 @@ void useOnTransferEventTypePayload<T>(
   }, [type]);
 }
 
-class DeviceTransferHandlerWidget extends HookWidget {
+class DeviceTransferHandlerWidget extends HookConsumerWidget {
   const DeviceTransferHandlerWidget({
     required this.child,
     super.key,
@@ -232,7 +233,7 @@ class DeviceTransferHandlerWidget extends HookWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     _useTransferStatus(
       () => _restoreBehavior.stream,
       progressBuilder: (context) => const _RestoreProcessingDialog(),
@@ -394,7 +395,7 @@ class _BackupProcessingDialog extends StatelessWidget {
       );
 }
 
-class _TransferProcessDialog extends HookWidget {
+class _TransferProcessDialog extends HookConsumerWidget {
   const _TransferProcessDialog({
     required this.onCancelTapped,
     required this.progressBehavior,
@@ -409,7 +410,7 @@ class _TransferProcessDialog extends HookWidget {
   final String iconAssetName;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final progress = useStream<double>(progressBehavior, initialData: 0);
     useEffect(() {
       DesktopKeepScreenOn.setPreventSleep(true);

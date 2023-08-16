@@ -158,11 +158,11 @@ class _SearchIntent extends Intent {
   const _SearchIntent();
 }
 
-class _SearchUserDialog extends HookWidget {
+class _SearchUserDialog extends HookConsumerWidget {
   const _SearchUserDialog();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final currentIdentityNumber = context.account?.identityNumber;
 
     final textEditingController = useTextEditingController();

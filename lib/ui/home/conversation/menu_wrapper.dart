@@ -12,10 +12,10 @@ import '../../../widgets/conversation/mute_dialog.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
+import '../../provider/conversation_provider.dart';
 import '../../provider/slide_category_provider.dart';
-import '../bloc/conversation_cubit.dart';
 
-class ConversationMenuWrapper extends StatelessWidget {
+class ConversationMenuWrapper extends HookConsumerWidget {
   const ConversationMenuWrapper({
     super.key,
     this.conversation,
@@ -30,7 +30,7 @@ class ConversationMenuWrapper extends StatelessWidget {
   final bool removeChatFromCircle;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     assert(conversation != null || searchConversation != null);
 
     final conversationId =
@@ -143,9 +143,9 @@ class ConversationMenuWrapper extends StatelessWidget {
                 .deleteMessagesByConversationId(conversationId);
             await context.database.conversationDao
                 .deleteConversation(conversationId);
-            if (context.read<ConversationCubit>().state?.conversationId ==
+            if (ref.read(conversationProvider)?.conversationId ==
                 conversationId) {
-              context.read<ConversationCubit>().unselected();
+              ref.read(conversationProvider.notifier).unselected();
             }
           },
         ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
@@ -11,7 +11,7 @@ import '../dialog.dart';
 import 'sticker_item.dart';
 import 'sticker_store.dart';
 
-class StickerAlbumPage extends HookWidget {
+class StickerAlbumPage extends HookConsumerWidget {
   const StickerAlbumPage({
     super.key,
     required this.albumId,
@@ -24,7 +24,7 @@ class StickerAlbumPage extends HookWidget {
   final String albumId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final album = useMemoizedStream(
           () => context.database.stickerAlbumDao
               .album(albumId)
@@ -85,7 +85,7 @@ class _StickerAlbumHeader extends StatelessWidget {
       );
 }
 
-class _StickerAlbumDetail extends HookWidget {
+class _StickerAlbumDetail extends HookConsumerWidget {
   const _StickerAlbumDetail({
     this.stickers,
     required this.album,
@@ -95,7 +95,7 @@ class _StickerAlbumDetail extends HookWidget {
   final List<Sticker>? stickers;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final stickers = useMemoizedFuture(() async {
           if (this.stickers != null) return this.stickers;
           return context.database.stickerDao

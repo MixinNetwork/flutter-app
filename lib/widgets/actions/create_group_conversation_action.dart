@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
@@ -47,7 +48,7 @@ class CreateGroupConversationAction
   }
 }
 
-class _NewConversationConfirm extends HookWidget {
+class _NewConversationConfirm extends HookConsumerWidget {
   const _NewConversationConfirm(
     this.userIds,
   );
@@ -55,7 +56,7 @@ class _NewConversationConfirm extends HookWidget {
   final List<String> userIds;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final users = useMemoizedFuture(
       () => context.database.userDao
           .usersByIn(userIds.sublist(0, math.min(4, userIds.length)))

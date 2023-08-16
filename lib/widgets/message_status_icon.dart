@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -50,13 +51,13 @@ class MessageStatusIcon extends StatelessWidget {
   }
 }
 
-class _VisibilityAwareAnimatedSendingIcon extends HookWidget {
+class _VisibilityAwareAnimatedSendingIcon extends HookConsumerWidget {
   const _VisibilityAwareAnimatedSendingIcon({required this.color});
 
   final Color color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final visible = useState(false);
     final key = useMemoized(UniqueKey.new);
     final isMount = useIsMounted();
@@ -78,7 +79,7 @@ class _VisibilityAwareAnimatedSendingIcon extends HookWidget {
   }
 }
 
-class _AnimatedMessageSendingIcon extends HookWidget {
+class _AnimatedMessageSendingIcon extends HookConsumerWidget {
   const _AnimatedMessageSendingIcon({
     required this.color,
     required this.play,
@@ -88,7 +89,7 @@ class _AnimatedMessageSendingIcon extends HookWidget {
   final bool play;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final time = useState(0);
 
     final play = useValueListenable(useImagePlaying(context)) && this.play;

@@ -15,11 +15,10 @@ import 'account/notification_service.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
-import 'ui/home/bloc/conversation_cubit.dart';
+
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
-import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
 import 'ui/provider/account_server_provider.dart';
@@ -66,7 +65,7 @@ class App extends HookConsumerWidget {
   }
 }
 
-class _LoginApp extends ConsumerWidget {
+class _LoginApp extends HookConsumerWidget {
   const _LoginApp({required this.authState});
 
   final AuthState authState;
@@ -121,15 +120,6 @@ class _Providers extends HookConsumerWidget {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (BuildContext context) => ResponsiveNavigatorCubit(),
-        ),
-        BlocProvider(
-          create: (BuildContext context) => ConversationCubit(
-            accountServer: accountServer,
-            responsiveNavigatorCubit: context.read<ResponsiveNavigatorCubit>(),
-          ),
-        ),
         BlocProvider(
           create: (BuildContext context) => ConversationListBloc(
             ref.read(slideCategoryStateProvider.notifier),

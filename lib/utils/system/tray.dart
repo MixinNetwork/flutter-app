@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
@@ -15,13 +16,13 @@ final SystemTray _systemTray = SystemTray();
 
 final _enableTray = Platform.isWindows;
 
-class SystemTrayWidget extends HookWidget {
+class SystemTrayWidget extends HookConsumerWidget {
   const SystemTrayWidget({super.key, required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final show = context.l10n.show;
     final exitStr = context.l10n.exit;
 

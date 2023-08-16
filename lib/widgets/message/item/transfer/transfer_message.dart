@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../../../db/database_event_bus.dart';
@@ -15,11 +16,11 @@ import '../../message_datetime_and_status.dart';
 import '../../message_style.dart';
 import 'transfer_page.dart';
 
-class TransferMessage extends HookWidget {
+class TransferMessage extends HookConsumerWidget {
   const TransferMessage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final assetId = useMessageConverter(converter: (state) => state.assetId);
 
     var assetIcon = useMessageConverter(converter: (state) => state.assetIcon);

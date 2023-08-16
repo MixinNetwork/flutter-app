@@ -7,6 +7,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image/image.dart' as img;
 
 import '../../../bloc/subscribe_mixin.dart';
@@ -33,7 +34,7 @@ Future<ImageEditorSnapshot?> showImageEditor(
       ),
     );
 
-class _ImageEditorDialog extends HookWidget {
+class _ImageEditorDialog extends HookConsumerWidget {
   const _ImageEditorDialog({
     required this.path,
     this.snapshot,
@@ -44,7 +45,7 @@ class _ImageEditorDialog extends HookWidget {
   final ImageEditorSnapshot? snapshot;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final boundaryKey = useMemoized(GlobalKey.new);
     final image = useMemoizedFuture<ui.Image?>(() async {
       final bytes = File(path).readAsBytesSync();
@@ -515,7 +516,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   }
 }
 
-class _Preview extends HookWidget {
+class _Preview extends HookConsumerWidget {
   const _Preview({
     required this.path,
     required this.viewPortSize,
@@ -532,7 +533,7 @@ class _Preview extends HookWidget {
   final ui.Image image;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isFlip =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
       converter: (state) => state.flip,
@@ -659,7 +660,7 @@ Rect transformInsideRect(Rect rect, Rect parent, double radius) {
   return transformed.translate(-rotateImageRect.left, -rotateImageRect.top);
 }
 
-class _CropRectWidget extends HookWidget {
+class _CropRectWidget extends HookConsumerWidget {
   const _CropRectWidget({
     required this.scaledImageSize,
     required this.isFlip,
@@ -673,7 +674,7 @@ class _CropRectWidget extends HookWidget {
   final double scale;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cropRect =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, Rect>(
       converter: (state) => state.cropRect,
@@ -910,7 +911,7 @@ class _CropShadowOverlayPainter extends CustomPainter {
       oldDelegate.lineColor != lineColor;
 }
 
-class _CustomDrawingWidget extends HookWidget {
+class _CustomDrawingWidget extends HookConsumerWidget {
   const _CustomDrawingWidget({
     required this.viewPortSize,
     required this.image,
@@ -924,7 +925,7 @@ class _CustomDrawingWidget extends HookWidget {
   final bool flip;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final transformedViewPortSize = rotate.apply(viewPortSize);
     final scale = math.min<double>(
         math.min(transformedViewPortSize.width / image.width,
@@ -1104,11 +1105,11 @@ class _DrawerPainter extends CustomPainter {
       oldDelegate.scale != scale;
 }
 
-class _DrawColorSelector extends HookWidget {
+class _DrawColorSelector extends HookConsumerWidget {
   const _DrawColorSelector();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isCustomColor = useState(false);
     return SizedBox(
       height: 38,
@@ -1148,13 +1149,13 @@ const _kPresetColors = [
 
 const _kDefaultDrawColor = Color(0xFFE84D3D);
 
-class _NormalColorTile extends HookWidget {
+class _NormalColorTile extends HookConsumerWidget {
   const _NormalColorTile({required this.color});
 
   final Color color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final currentColor =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, Color>(
       converter: (state) => state.drawColor,
@@ -1267,7 +1268,7 @@ class _CustomColorTile extends StatelessWidget {
       );
 }
 
-class _CustomColorBar extends HookWidget {
+class _CustomColorBar extends HookConsumerWidget {
   const _CustomColorBar({
     required this.onColorSelected,
   });
@@ -1275,7 +1276,7 @@ class _CustomColorBar extends HookWidget {
   final void Function(Color color) onColorSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final initialHue = useMemoized(() {
       final color = context.read<_ImageEditorBloc>().state.drawColor;
       return HSLColor.fromColor(color).hue;
@@ -1340,11 +1341,11 @@ class _CustomColorBar extends HookWidget {
   }
 }
 
-class _ResetButton extends HookWidget {
+class _ResetButton extends HookConsumerWidget {
   const _ResetButton();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final canReset =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
       converter: (state) => state.canReset,
@@ -1363,11 +1364,11 @@ class _ResetButton extends HookWidget {
   }
 }
 
-class _OperationButtons extends HookWidget {
+class _OperationButtons extends HookConsumerWidget {
   const _OperationButtons();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final drawMode =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, DrawMode>(
       converter: (state) => state.drawMode,
@@ -1388,11 +1389,11 @@ class _OperationButtons extends HookWidget {
   }
 }
 
-class _NormalOperationBar extends HookWidget {
+class _NormalOperationBar extends HookConsumerWidget {
   const _NormalOperationBar();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final imageEditorBloc = context.read<_ImageEditorBloc>();
 
     final rotated =
@@ -1522,11 +1523,11 @@ class _NormalOperationBar extends HookWidget {
   }
 }
 
-class _DrawOperationBar extends HookWidget {
+class _DrawOperationBar extends HookConsumerWidget {
   const _DrawOperationBar();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final drawMode =
         useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, DrawMode>(
       converter: (state) => state.drawMode,

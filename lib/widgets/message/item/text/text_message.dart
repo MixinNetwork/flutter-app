@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
 import 'package:url_launcher/url_launcher_string.dart';
 
-import '../../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../../ui/home/chat/chat_page.dart';
+import '../../../../ui/provider/conversation_provider.dart';
 import '../../../../ui/provider/keyword_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
@@ -47,7 +46,7 @@ class TextMessage extends HookConsumerWidget {
 
     final globalKeyword = ref.watch(trimmedKeywordProvider);
     final conversationKeyword =
-        useBlocState<ConversationCubit, ConversationState?>()?.keyword;
+        ref.watch(conversationProvider.select((value) => value?.keyword));
 
     if (globalKeyword.isNotEmpty) {
       keyword = globalKeyword;
@@ -63,7 +62,8 @@ class TextMessage extends HookConsumerWidget {
                 color: context.theme.accent,
               ),
               onTap: () => openUri(context, e[0]!,
-                  app: context.read<ConversationCubit>().state?.app),
+                  app: ref.read(
+                      conversationProvider.select((value) => value?.app))),
             ),
           ),
       [content],

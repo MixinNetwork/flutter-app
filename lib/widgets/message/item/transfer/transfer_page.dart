@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide Snapshot, Asset, User;
@@ -23,7 +24,7 @@ Future<void> showTransferDialog(
       child: _TransferPage(snapshotId),
     );
 
-class _TransferPage extends HookWidget {
+class _TransferPage extends HookConsumerWidget {
   const _TransferPage(
     this.snapshotId,
   );
@@ -31,7 +32,7 @@ class _TransferPage extends HookWidget {
   final String snapshotId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     useEffect(() {
       context.accountServer.updateFiats();
     }, []);
@@ -118,7 +119,7 @@ class _TransferPage extends HookWidget {
   }
 }
 
-class _SnapshotDetailHeader extends HookWidget {
+class _SnapshotDetailHeader extends HookConsumerWidget {
   const _SnapshotDetailHeader({
     required this.snapshot,
   });
@@ -126,7 +127,7 @@ class _SnapshotDetailHeader extends HookWidget {
   final SnapshotItem snapshot;
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context, WidgetRef ref) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 20),
@@ -181,7 +182,7 @@ class _SnapshotDetailHeader extends HookWidget {
       );
 }
 
-class _ValuesDescription extends HookWidget {
+class _ValuesDescription extends HookConsumerWidget {
   const _ValuesDescription({
     required this.snapshot,
   });
@@ -189,7 +190,7 @@ class _ValuesDescription extends HookWidget {
   final SnapshotItem snapshot;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ticker = useMemoizedFuture(
       () => context.accountServer.client.snapshotApi.getTicker(
         snapshot.assetId,

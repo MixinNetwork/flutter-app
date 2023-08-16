@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import 'disable.dart';
@@ -257,7 +257,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
   }
 }
 
-class DialogTextField extends HookWidget {
+class DialogTextField extends HookConsumerWidget {
   const DialogTextField({
     super.key,
     required this.textEditingController,
@@ -275,7 +275,7 @@ class DialogTextField extends HookWidget {
   final int? maxLength;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textStream = useValueNotifierConvertSteam(textEditingController);
     final hasText = useMemoizedStream(
           () => textStream.map((event) => event.text.isNotEmpty).distinct(),
@@ -393,7 +393,7 @@ Future<DialogEvent?> showConfirmMixinDialog(
       ),
     );
 
-class EditDialog extends HookWidget {
+class EditDialog extends HookConsumerWidget {
   const EditDialog({
     super.key,
     required this.title,
@@ -416,7 +416,7 @@ class EditDialog extends HookWidget {
   final int? maxLength;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textEditingController = useTextEditingController(text: editText);
     final textEditingValue = useValueListenable(textEditingController);
     return AlertDialogLayout(

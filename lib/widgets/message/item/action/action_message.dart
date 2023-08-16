@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../../ui/home/bloc/conversation_cubit.dart';
+import '../../../../ui/provider/conversation_provider.dart';
 import '../../../../utils/color_utils.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/logger.dart';
@@ -15,11 +15,11 @@ import '../../message_style.dart';
 import '../unknown_message.dart';
 import 'action_data.dart';
 
-class ActionMessage extends HookWidget {
+class ActionMessage extends HookConsumerWidget {
   const ActionMessage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final actionDataList = useMessageConverter(converter: (state) {
       try {
         final list = jsonDecode(state.content!) as List<dynamic>;
@@ -54,8 +54,7 @@ class ActionMessage extends HookWidget {
                     context,
                     e.action,
                     title: e.label,
-                    conversationId:
-                        context.read<ConversationCubit>().state?.conversationId,
+                    conversationId: ref.read(currentConversationIdProvider),
                   );
                 },
                 child: Padding(

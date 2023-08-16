@@ -12,7 +12,7 @@ import '../../utils/logger.dart';
 import 'message.dart';
 import 'message_style.dart';
 
-class MessageDayTime extends HookWidget {
+class MessageDayTime extends HookConsumerWidget {
   const MessageDayTime({
     super.key,
     required this.dateTime,
@@ -21,7 +21,7 @@ class MessageDayTime extends HookWidget {
   final DateTime dateTime;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final hide =
         useBlocStateConverter<HiddenMessageDayTimeBloc, DateTime?, bool>(
       converter: (state) => isSameDay(state, dateTime),
@@ -105,7 +105,7 @@ class _CurrentShowingMessages {
   }
 }
 
-class MessageDayTimeViewportWidget extends HookWidget {
+class MessageDayTimeViewportWidget extends HookConsumerWidget {
   const MessageDayTimeViewportWidget._create(
     this._traversalCurrentShowingMessageElements, {
     required this.child,
@@ -181,7 +181,7 @@ class MessageDayTimeViewportWidget extends HookWidget {
       _traversalCurrentShowingMessageElements;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final dateTime = useState<DateTime?>(null);
     final dateTimeTopOffset = useState<double>(0);
 

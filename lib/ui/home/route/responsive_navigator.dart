@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../utils/hook.dart';
-import 'responsive_navigator_cubit.dart';
+import '../../provider/abstract_responsive_navigator.dart';
+import '../../provider/responsive_navigator_provider.dart';
 
 abstract class AbstractResponsiveNavigatorCubit
     extends Cubit<ResponsiveNavigatorState> {
@@ -68,7 +68,7 @@ abstract class AbstractResponsiveNavigatorCubit
   void clear() => emit(state.copyWith(pages: []));
 }
 
-class ResponsiveNavigator extends HookWidget {
+class ResponsiveNavigator extends HookConsumerWidget {
   const ResponsiveNavigator({
     super.key,
     required this.leftPage,
@@ -81,15 +81,14 @@ class ResponsiveNavigator extends HookWidget {
   final double switchWidth;
 
   @override
-  Widget build(BuildContext context) {
-    final responsiveNavigatorCubit = context.read<ResponsiveNavigatorCubit>();
-    final responsiveNavigatorState =
-        useBlocState<ResponsiveNavigatorCubit, ResponsiveNavigatorState>(
-      bloc: responsiveNavigatorCubit,
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final responsiveNavigatorNotifier =
+        ref.watch(responsiveNavigatorProvider.notifier);
+    final responsiveNavigatorState = ref.watch(responsiveNavigatorProvider);
+
     return LayoutBuilder(builder: (context, boxConstraints) {
       final routeMode = boxConstraints.maxWidth < switchWidth;
-      responsiveNavigatorCubit.updateRouteMode(routeMode);
+      responsiveNavigatorNotifier.updateRouteMode(routeMode);
       return Row(
         children: [
           if (!routeMode) leftPage.child,
@@ -103,7 +102,7 @@ class ResponsiveNavigator extends HookWidget {
                   },
                 ),
                 onPopPage: (Route<dynamic> route, dynamic result) {
-                  responsiveNavigatorCubit.onPopPage();
+                  responsiveNavigatorNotifier.onPopPage();
                   return route.didPop(result);
                 },
                 pages: [

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:open_file/open_file.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -24,11 +25,11 @@ import 'transcript_message.dart';
 
 const _kDefaultVideoSize = 200;
 
-class VideoMessageWidget extends HookWidget {
+class VideoMessageWidget extends HookConsumerWidget {
   const VideoMessageWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final mediaWidth =
         useMessageConverter(converter: (state) => state.mediaWidth);
     final mediaHeight =
@@ -58,7 +59,7 @@ class VideoMessageWidget extends HookWidget {
   }
 }
 
-class MessageVideo extends HookWidget {
+class MessageVideo extends HookConsumerWidget {
   const MessageVideo({
     super.key,
     this.overlay,
@@ -67,7 +68,7 @@ class MessageVideo extends HookWidget {
   final Widget? overlay;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isCurrentUser = useIsCurrentUser();
     final isTranscriptPage = useIsTranscriptPage();
 
@@ -128,7 +129,7 @@ class MessageVideo extends HookWidget {
   }
 }
 
-class VideoMessageMediaStatusWidget extends HookWidget {
+class VideoMessageMediaStatusWidget extends HookConsumerWidget {
   const VideoMessageMediaStatusWidget({
     super.key,
     this.done,
@@ -137,7 +138,7 @@ class VideoMessageMediaStatusWidget extends HookWidget {
   final Widget? done;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final mediaStatus =
         useMessageConverter(converter: (state) => state.mediaStatus);
     final relationship =
@@ -171,7 +172,7 @@ class VideoMessageMediaStatusWidget extends HookWidget {
   }
 }
 
-class _VideoMessageOverlayInfo extends HookWidget {
+class _VideoMessageOverlayInfo extends HookConsumerWidget {
   const _VideoMessageOverlayInfo({
     required this.isCurrentUser,
   });
@@ -179,7 +180,7 @@ class _VideoMessageOverlayInfo extends HookWidget {
   final bool isCurrentUser;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isVideo =
         useMessageConverter(converter: (state) => state.type.isVideo);
     return Stack(

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../account/security_key_value.dart';
@@ -37,11 +38,11 @@ class SecurityPage extends StatelessWidget {
       );
 }
 
-class _Passcode extends HookWidget {
+class _Passcode extends HookConsumerWidget {
   const _Passcode();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final globalKey =
         useMemoized(GlobalKey<PopupMenuButtonState<Duration>>.new, []);
 
@@ -166,11 +167,11 @@ class _Passcode extends HookWidget {
   }
 }
 
-class _InputPasscode extends HookWidget {
+class _InputPasscode extends HookConsumerWidget {
   const _InputPasscode();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final focusNode = useFocusNode();
     useEffect(() {
       focusNode.requestFocus();

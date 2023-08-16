@@ -24,9 +24,9 @@ import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
-import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/message_selection_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
+import '../../ui/provider/conversation_provider.dart';
 import '../../ui/provider/recall_message_reedit_provider.dart';
 import '../../ui/provider/setting_provider.dart';
 import '../../utils/datetime_format_utils.dart';
@@ -537,7 +537,7 @@ class MessageItemWidget extends HookConsumerWidget {
   }
 }
 
-class MessageContext extends HookWidget {
+class MessageContext extends HookConsumerWidget {
   const MessageContext({
     super.key,
     required this.isTranscriptPage,
@@ -565,7 +565,7 @@ class MessageContext extends HookWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     _MessageContext newMessageContext() => _MessageContext(
           isTranscriptPage: isTranscriptPage,
           isPinnedPage: isPinnedPage,
@@ -620,7 +620,7 @@ Future<void> saveAs(BuildContext context, AccountServer accountServer,
   }
 }
 
-class _PinMenu extends HookWidget {
+class _PinMenu extends HookConsumerWidget {
   const _PinMenu({
     required this.message,
   });
@@ -628,11 +628,8 @@ class _PinMenu extends HookWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) {
-    final role = useBlocStateConverter<ConversationCubit, ConversationState?,
-        ParticipantRole?>(
-      converter: (state) => state?.role,
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final role = ref.watch(conversationProvider.select((value) => value?.role));
 
     if (role == null ||
         [MessageStatus.failed, MessageStatus.unknown, MessageStatus.sending]
@@ -665,7 +662,7 @@ class _PinMenu extends HookWidget {
   }
 }
 
-class _MessageBubbleMargin extends HookWidget {
+class _MessageBubbleMargin extends HookConsumerWidget {
   const _MessageBubbleMargin({
     required this.isCurrentUser,
     required this.userName,
@@ -689,7 +686,7 @@ class _MessageBubbleMargin extends HookWidget {
   final bool showAvatar;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
         MessageSelectionState, bool>(
       converter: (state) => state.hasSelectedMessage,
@@ -772,7 +769,7 @@ class _UnreadMessageBar extends StatelessWidget {
       );
 }
 
-class _MessageSelectionWrapper extends HookWidget {
+class _MessageSelectionWrapper extends HookConsumerWidget {
   const _MessageSelectionWrapper({
     required this.child,
     required this.message,
@@ -783,7 +780,7 @@ class _MessageSelectionWrapper extends HookWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
         MessageSelectionState, bool>(
       converter: (state) => state.hasSelectedMessage,
@@ -817,7 +814,7 @@ class _MessageSelectionWrapper extends HookWidget {
   }
 }
 
-class _AnimatedSelectionIcon extends HookWidget {
+class _AnimatedSelectionIcon extends HookConsumerWidget {
   const _AnimatedSelectionIcon({
     required this.selected,
     required this.inSelectedMode,
@@ -828,7 +825,7 @@ class _AnimatedSelectionIcon extends HookWidget {
   final bool inSelectedMode;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final animationController = useAnimationController(
       duration: const Duration(milliseconds: 300),
     );

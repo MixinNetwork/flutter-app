@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -19,30 +20,24 @@ import '../../../widgets/more_extended_text.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/conversation_provider.dart';
 import '../bloc/message_bloc.dart';
 import '../chat/chat_bar.dart';
 import '../chat/chat_page.dart';
 import 'shared_apps_page.dart';
 
-class ChatInfoPage extends HookWidget {
-  const ChatInfoPage({super.key});
+class ChatInfoPage extends HookConsumerWidget {
+  const ChatInfoPage(
+    this.conversationState, {
+    super.key,
+  });
+
+  final ConversationState conversationState;
+
+  String get conversationId => conversationState.conversationId;
 
   @override
-  Widget build(BuildContext context) {
-    final conversationId = useMemoized(() {
-      final conversationId =
-          context.read<ConversationCubit>().state?.conversationId;
-      assert(conversationId != null);
-      return conversationId!;
-    });
-
-    final conversationState =
-        useBlocState<ConversationCubit, ConversationState?>(
-      when: (state) =>
-          state?.isLoaded == true && state?.conversationId == conversationId,
-    )!;
-
+  Widget build(BuildContext context, WidgetRef ref) {
     final createdAt = useMemoized(() {
       final item = conversationState.conversation;
       if (item == null) return null;
@@ -488,7 +483,7 @@ class ChatInfoPage extends HookWidget {
                             accountServer.exitGroup(conversationId),
                           );
 
-                          await ConversationCubit.selectConversation(
+                          await ConversationStateNotifier.selectConversation(
                             context,
                             conversationId,
                           );
@@ -509,13 +504,7 @@ class ChatInfoPage extends HookWidget {
                               .deleteMessagesByConversationId(conversationId);
                           await context.database.conversationDao
                               .deleteConversation(conversationId);
-                          if (context
-                                  .read<ConversationCubit>()
-                                  .state
-                                  ?.conversationId ==
-                              conversationId) {
-                            context.read<ConversationCubit>().unselected();
-                          }
+                          ref.read(conversationProvider.notifier).unselected();
                         },
                       ),
                 ],
@@ -560,7 +549,7 @@ class ChatInfoPage extends HookWidget {
   }
 }
 
-class ConversationBio extends HookWidget {
+class ConversationBio extends HookConsumerWidget {
   const ConversationBio({
     super.key,
     this.fontSize = 14,
@@ -575,7 +564,7 @@ class ConversationBio extends HookWidget {
   final bool isGroup;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textStream = useMemoized(() {
       final database = context.database;
       if (isGroup) {
@@ -665,13 +654,13 @@ class _AddToContactsButton extends StatelessWidget {
       );
 }
 
-class _SharedApps extends HookWidget {
+class _SharedApps extends HookConsumerWidget {
   const _SharedApps({required this.userId});
 
   final String userId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     useMemoized(() {
       context.accountServer.loadFavoriteApps(userId);
     }, [userId]);

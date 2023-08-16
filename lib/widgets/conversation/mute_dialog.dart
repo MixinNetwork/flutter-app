@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../utils/extension/extension.dart';
 import '../dialog.dart';
 import '../radio.dart';
 
-class MuteDialog extends HookWidget {
+class MuteDialog extends HookConsumerWidget {
   const MuteDialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final result = useState<int?>(null);
     return AlertDialogLayout(
       title: Text(context.l10n.contactMuteTitle),

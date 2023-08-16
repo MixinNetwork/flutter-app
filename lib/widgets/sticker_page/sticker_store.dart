@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../constants/resources.dart';
@@ -121,11 +122,11 @@ Future<void> showStickerPageDialog(
   );
 }
 
-class _StickerStorePage extends HookWidget {
+class _StickerStorePage extends HookConsumerWidget {
   const _StickerStorePage();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     useEffect(() {
       context.accountServer.refreshSticker(force: true);
     }, []);
@@ -162,11 +163,11 @@ class _StickerStorePage extends HookWidget {
   }
 }
 
-class _List extends HookWidget {
+class _List extends HookConsumerWidget {
   const _List();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final albums = useMemoizedStream(() => Rx.combineLatest2<List<StickerAlbum>,
                 List<Sticker>, List<(StickerAlbum, List<Sticker>)>>(
               context.database.stickerAlbumDao.systemAlbums().watchWithStream(
@@ -200,7 +201,7 @@ class _List extends HookWidget {
   }
 }
 
-class _Item extends HookWidget {
+class _Item extends HookConsumerWidget {
   const _Item(
     this.album,
     this.stickers,
@@ -210,7 +211,7 @@ class _Item extends HookWidget {
   final List<Sticker> stickers;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
+  Widget build(BuildContext context, WidgetRef ref) => SizedBox(
         height: 104,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -279,11 +280,11 @@ class _Item extends HookWidget {
       );
 }
 
-class _StickerAlbumManagePage extends HookWidget {
+class _StickerAlbumManagePage extends HookConsumerWidget {
   const _StickerAlbumManagePage();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final controller = useScrollController();
 
     final albums = useMemoizedStream(() =>
@@ -381,7 +382,7 @@ class _StickerAlbumManagePage extends HookWidget {
   }
 }
 
-class _StickerPage extends HookWidget {
+class _StickerPage extends HookConsumerWidget {
   const _StickerPage({
     required this.stickerId,
     this.albumId,
@@ -391,7 +392,7 @@ class _StickerPage extends HookWidget {
   final String? albumId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final sticker = useState<Sticker?>(null);
     useEffect(() {
       Future<void> effect() async {

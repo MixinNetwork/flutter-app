@@ -42,13 +42,13 @@ class AuthGuard extends HookConsumerWidget {
   }
 }
 
-class _AuthGuard extends HookWidget {
+class _AuthGuard extends HookConsumerWidget {
   const _AuthGuard({required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final focusNode = useFocusNode();
     final textEditingController = useTextEditingController();
 

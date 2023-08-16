@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../constants/resources.dart';
@@ -95,7 +95,7 @@ class _PaymentDialog extends StatelessWidget {
       );
 }
 
-class _MultisigsPaymentBody extends HookWidget {
+class _MultisigsPaymentBody extends HookConsumerWidget {
   const _MultisigsPaymentBody({
     required this.item,
   });
@@ -103,7 +103,7 @@ class _MultisigsPaymentBody extends HookWidget {
   final MultisigsPaymentItem item;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final asset = item.asset;
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -239,13 +239,13 @@ class _OverlappedUserAvatars extends StatelessWidget {
       );
 }
 
-class _UserIcon extends HookWidget {
+class _UserIcon extends HookConsumerWidget {
   const _UserIcon({required this.userId});
 
   final String userId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final user = useMemoizedStream(() => context.accountServer.database.userDao
             .userById(userId)
             .watchSingleOrNullWithStream(

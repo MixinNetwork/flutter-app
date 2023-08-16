@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 
 import '../../../blaze/vo/transcript_minimal.dart';
@@ -36,11 +37,11 @@ class TranscriptMessagesWatcher {
   final Stream<List<MessageItem>> Function() watchMessages;
 }
 
-class TranscriptMessageWidget extends HookWidget {
+class TranscriptMessageWidget extends HookConsumerWidget {
   const TranscriptMessageWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final content =
         useMessageConverter(converter: (state) => state.content ?? '');
     final transcriptMinimals = useMemoized<List<TranscriptMinimal>?>(() {
@@ -207,7 +208,7 @@ class TranscriptMessageWidget extends HookWidget {
   }
 }
 
-class TranscriptPage extends HookWidget {
+class TranscriptPage extends HookConsumerWidget {
   const TranscriptPage({
     super.key,
     required this.vlcService,
@@ -222,7 +223,7 @@ class TranscriptPage extends HookWidget {
       ?.transcriptMessage;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     Stream<List<MessageItem>> watchMessages() =>
         context.database.transcriptMessageDao
             .transactionMessageItem(transcriptMessage.messageId)

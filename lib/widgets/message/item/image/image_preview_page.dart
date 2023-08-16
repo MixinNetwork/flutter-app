@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -24,7 +25,7 @@ import '../../message.dart';
 import '../transcript_message.dart';
 import 'preview_image_widget.dart';
 
-class ImagePreviewPage extends HookWidget {
+class ImagePreviewPage extends HookConsumerWidget {
   const ImagePreviewPage({
     super.key,
     required this.conversationId,
@@ -68,7 +69,7 @@ class ImagePreviewPage extends HookWidget {
       );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final _messageId = useState(messageId);
     final current = useState<MessageItem?>(null);
     final prev = useState<MessageItem?>(null);
@@ -504,7 +505,7 @@ class _Action extends StatelessWidget {
   }
 }
 
-class _Item extends HookWidget {
+class _Item extends HookConsumerWidget {
   const _Item({
     required this.message,
     required this.controller,
@@ -520,7 +521,7 @@ class _Item extends HookWidget {
   final BoxConstraints constraints;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // scale image to fit viewport on first show.
     final initialScale = useMemoized(() {
       final imageSize = Size(

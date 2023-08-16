@@ -1,28 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/menu.dart';
+import '../../provider/conversation_provider.dart';
 import '../bloc/blink_cubit.dart';
-import '../bloc/conversation_cubit.dart';
+
 import '../bloc/message_bloc.dart';
 import 'share_media/file_page.dart';
 import 'share_media/media_page.dart';
 import 'share_media/post_page.dart';
 
-class SharedMediaPage extends HookWidget {
-  const SharedMediaPage({super.key});
+class SharedMediaPage extends HookConsumerWidget {
+  const SharedMediaPage(this.conversationState, {super.key});
+
+  final ConversationState conversationState;
 
   @override
-  Widget build(BuildContext context) {
-    final conversationId = useMemoized(() {
-      final conversationId =
-          context.read<ConversationCubit>().state?.conversationId;
-      assert(conversationId != null);
-      return conversationId!;
-    });
+  Widget build(BuildContext context, WidgetRef ref) {
+    final conversationId = conversationState.conversationId;
 
     final selectedIndex = useState(0);
     return Scaffold(

@@ -1,11 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 
 import '../../db/mixin_database.dart';
-import '../../ui/home/bloc/conversation_cubit.dart';
+import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';
@@ -25,7 +25,7 @@ Future<void> showConversationDialog(BuildContext context,
       .any((element) => element.userId == context.account?.userId);
   if (existed) {
     showToast(context.l10n.groupAlreadyIn);
-    await ConversationCubit.selectConversation(
+    await ConversationStateNotifier.selectConversation(
       context,
       conversationResponse.conversationId,
     );
@@ -89,7 +89,7 @@ class _ConversationDialog extends StatelessWidget {
       );
 }
 
-class _ConversationInfo extends HookWidget {
+class _ConversationInfo extends HookConsumerWidget {
   const _ConversationInfo({
     required this.conversationResponse,
     required this.users,
@@ -101,7 +101,7 @@ class _ConversationInfo extends HookWidget {
   final String code;
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context, WidgetRef ref) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ClipOval(
@@ -134,7 +134,7 @@ class _ConversationInfo extends HookWidget {
             onTap: () => runFutureWithToast(
               () async {
                 await context.accountServer.joinGroup(code);
-                await ConversationCubit.selectConversation(
+                await ConversationStateNotifier.selectConversation(
                     context, conversationResponse.conversationId);
                 Navigator.pop(context);
               }(),

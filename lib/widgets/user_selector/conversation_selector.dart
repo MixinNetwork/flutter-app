@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../bloc/simple_cubit.dart';
@@ -141,7 +142,7 @@ class ConversationSelector with EquatableMixin {
       );
 }
 
-class _ConversationSelector extends HookWidget {
+class _ConversationSelector extends HookConsumerWidget {
   const _ConversationSelector({
     required this.singleSelect,
     required this.title,
@@ -161,7 +162,7 @@ class _ConversationSelector extends HookWidget {
   final Widget? action;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final selector = useBloc(() => SimpleCubit<List<dynamic>>(const []));
     void selectItem(dynamic item) {
       final list = [...selector.state];
@@ -437,7 +438,7 @@ class _ConversationSelector extends HookWidget {
   }
 }
 
-class _FilterTextField extends HookWidget {
+class _FilterTextField extends HookConsumerWidget {
   const _FilterTextField({
     required this.conversationFilterCubit,
   });
@@ -445,7 +446,7 @@ class _FilterTextField extends HookWidget {
   final ConversationFilterCubit conversationFilterCubit;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isTextEmpty = useMemoizedStream(
           () => conversationFilterCubit.stream
               .map((event) => event.keyword?.isEmpty ?? true)

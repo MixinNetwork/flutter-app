@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../utils/extension/extension.dart';
 import 'interactive_decorated_box.dart';
 import 'unread_text.dart';
 
-class SelectItem extends HookWidget {
+class SelectItem extends HookConsumerWidget {
   const SelectItem({
     required this.title,
     required this.icon,
@@ -27,7 +28,7 @@ class SelectItem extends HookWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final showed = useState(false);
     final showedTooltip = useState(false);
 

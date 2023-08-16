@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../constants/resources.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
-import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/chat/chat_page.dart';
+import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
@@ -109,7 +110,7 @@ class UserDialog extends StatelessWidget {
       );
 }
 
-class _UserProfileLoader extends HookWidget {
+class _UserProfileLoader extends HookConsumerWidget {
   const _UserProfileLoader(
     this.userId, {
     this.refreshUser = true,
@@ -119,7 +120,7 @@ class _UserProfileLoader extends HookWidget {
   final bool refreshUser;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final accountServer = context.accountServer;
     final user = useMemoizedStream(
         () => accountServer.database.userDao
@@ -369,7 +370,7 @@ class _UserProfileButtonBar extends StatelessWidget {
               // skip self.
               return;
             }
-            await ConversationCubit.selectUser(
+            await ConversationStateNotifier.selectUser(
               context,
               user.userId,
             );
@@ -382,7 +383,7 @@ class _UserProfileButtonBar extends StatelessWidget {
           name: Resources.assetsImagesInformationSvg,
           size: 30,
           onTap: () async {
-            await ConversationCubit.selectUser(
+            await ConversationStateNotifier.selectUser(
               context,
               user.userId,
               initialChatSidePage: ChatSideCubit.infoPage,

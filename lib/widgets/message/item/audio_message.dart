@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../db/mixin_database.dart' hide Offset, Message;
@@ -18,11 +19,11 @@ import '../message_datetime_and_status.dart';
 import '../message_style.dart';
 import 'transcript_message.dart';
 
-class AudioMessage extends HookWidget {
+class AudioMessage extends HookConsumerWidget {
   const AudioMessage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
     final messageId =
         useMessageConverter(converter: (state) => state.messageId);
@@ -142,7 +143,7 @@ class AudioMessage extends HookWidget {
   }
 }
 
-class _AnimatedWave extends HookWidget {
+class _AnimatedWave extends HookConsumerWidget {
   const _AnimatedWave({
     required this.duration,
   });
@@ -150,7 +151,7 @@ class _AnimatedWave extends HookWidget {
   final Duration duration;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final mediaWaveform =
         useMessageConverter(converter: (state) => state.mediaWaveform ?? '');
     final mediaStatus =

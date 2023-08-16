@@ -7,11 +7,10 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/hook.dart';
-import '../../provider/last_selected_conversation_id.dart';
+import '../../provider/conversation_provider.dart';
+import '../../provider/responsive_navigator_provider.dart';
+import '../../provider/selected_conversation_id.dart';
 import '../../provider/slide_category_provider.dart';
-import '../bloc/conversation_cubit.dart';
-import '../route/responsive_navigator_cubit.dart';
 import 'conversation_list.dart';
 import 'menu_wrapper.dart';
 import 'search_list.dart';
@@ -52,22 +51,19 @@ class UnseenConversationList extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final unreadConversations = useState(<ConversationItem>[]);
 
-    final currentConversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-    );
+    final currentConversationId = ref.watch(currentConversationIdProvider);
 
-    final lastSelectedConversationIdController =
-        ref.watch(lastSelectedConversationId.notifier);
+    final selectedConversationIdController =
+        ref.watch(selectedConversationId.notifier);
     final selectedConversationIdRef = useRef<String?>(null);
 
     final slideCategoryState = ref.watch(slideCategoryStateProvider);
     useEffect(() {
       selectedConversationIdRef.value = null;
 
-      return lastSelectedConversationIdController
+      return selectedConversationIdController
           .addListener((state) => selectedConversationIdRef.value = state);
-    }, [lastSelectedConversationIdController]);
+    }, [selectedConversationIdController]);
 
     useEffect(() {
       final updateEvent = Rx.merge([
@@ -124,10 +120,7 @@ class UnseenConversationList extends HookConsumerWidget {
 
     final conversationItems = unreadConversations.value;
 
-    final routeMode = useBlocStateConverter<ResponsiveNavigatorCubit,
-        ResponsiveNavigatorState, bool>(
-      converter: (state) => state.routeMode,
-    );
+    final routeMode = ref.watch(navigatorRouteModeProvider);
 
     if (conversationItems.isEmpty) {
       return const SearchEmptyWidget();
@@ -142,7 +135,7 @@ class UnseenConversationList extends HookConsumerWidget {
             conversation: conversation,
             selected: conversation.conversationId == currentConversationId &&
                 !routeMode,
-            onTap: () => ConversationCubit.selectConversation(
+            onTap: () => ConversationStateNotifier.selectConversation(
               context,
               conversation.conversationId,
               conversation: conversation,

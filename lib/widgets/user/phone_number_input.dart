@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl_phone_number_input/src/models/country_model.dart';
 import 'package:intl_phone_number_input/src/providers/country_provider.dart';
 import 'package:intl_phone_number_input/src/utils/phone_number/phone_number_util.dart';
@@ -22,7 +23,7 @@ import '../../utils/logger.dart';
 import '../az_selection.dart';
 import '../dialog.dart';
 
-class PhoneNumberInputLayout extends HookWidget {
+class PhoneNumberInputLayout extends HookConsumerWidget {
   const PhoneNumberInputLayout({
     super.key,
     required this.onNextStep,
@@ -31,7 +32,7 @@ class PhoneNumberInputLayout extends HookWidget {
   final void Function(String number) onNextStep;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final countries =
         useMemoizedFuture(() => compute(_getCountries, null), null).data;
     if (countries == null || countries.isEmpty) {
@@ -48,7 +49,7 @@ class PhoneNumberInputLayout extends HookWidget {
   }
 }
 
-class _PhoneNumberInputScene extends HookWidget {
+class _PhoneNumberInputScene extends HookConsumerWidget {
   const _PhoneNumberInputScene({
     required this.countries,
     required this.onNextStep,
@@ -58,7 +59,7 @@ class _PhoneNumberInputScene extends HookWidget {
   final void Function(String number) onNextStep;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final phoneInputController = useTextEditingController();
     final countryMap = useMemoized(
         () => Map.fromEntries(countries.map((e) => MapEntry(e.alpha2Code, e))),
@@ -184,7 +185,7 @@ class _PhoneNumberInputScene extends HookWidget {
   }
 }
 
-class _MobileInput extends HookWidget {
+class _MobileInput extends HookConsumerWidget {
   const _MobileInput({
     required this.controller,
     required this.country,
@@ -198,7 +199,7 @@ class _MobileInput extends HookWidget {
   final bool countryPortalExpand;
 
   @override
-  Widget build(BuildContext context) => TextField(
+  Widget build(BuildContext context, WidgetRef ref) => TextField(
         controller: controller,
         style: TextStyle(
           fontSize: 16,
@@ -267,7 +268,7 @@ class _MobileInput extends HookWidget {
 List<Country> _getCountries(dynamic any) =>
     CountryProvider.getCountriesData(countries: null);
 
-class _CountryPickPortal extends HookWidget {
+class _CountryPickPortal extends HookConsumerWidget {
   const _CountryPickPortal({
     required this.onSelected,
     required this.countries,
@@ -279,7 +280,7 @@ class _CountryPickPortal extends HookWidget {
   final Country selected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final groupedCountries = useMemoized(
       () => countries
           .groupListsBy((country) => country.alpha2Code?.substring(0, 1)),

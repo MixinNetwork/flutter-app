@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
@@ -10,14 +10,14 @@ import '../../../widgets/dialog.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/conversation_provider.dart';
 import '../bloc/message_selection_cubit.dart';
 
-class SelectionBottomBar extends HookWidget {
+class SelectionBottomBar extends HookConsumerWidget {
   const SelectionBottomBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final canForward = useBlocStateConverter<MessageSelectionCubit,
         MessageSelectionState, bool>(converter: (state) => state.canForward);
     return SizedBox(
@@ -108,8 +108,7 @@ class SelectionBottomBar extends HookWidget {
                 if (confirm == DialogEvent.neutral) {
                   await context.accountServer.sendRecallMessage(
                     messagesToDelete.toList(),
-                    conversationId:
-                        context.read<ConversationCubit>().state?.conversationId,
+                    conversationId: ref.read(currentConversationIdProvider),
                   );
                 }
               });

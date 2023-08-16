@@ -20,24 +20,24 @@ import '../../../widgets/message/item/pin_message.dart';
 import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/message_status_icon.dart';
 import '../../../widgets/unread_text.dart';
+import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/minute_timer_provider.dart';
+import '../../provider/responsive_navigator_provider.dart';
 import '../../provider/slide_category_provider.dart';
-import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
-import '../route/responsive_navigator_cubit.dart';
 import 'audio_player_bar.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
 import 'network_status.dart';
 
-class ConversationList extends HookWidget {
+class ConversationList extends HookConsumerWidget {
   const ConversationList({
     required Key key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final slideCategoryState =
         (key! as PageStorageKey<SlideCategoryState>).value;
 
@@ -46,15 +46,9 @@ class ConversationList extends HookWidget {
         useBlocState<ConversationListBloc, PagingState<ConversationItem>>(
       bloc: conversationListBloc,
     );
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-    );
+    final conversationId = ref.watch(currentConversationIdProvider);
 
-    final routeMode = useBlocStateConverter<ResponsiveNavigatorCubit,
-        ResponsiveNavigatorState, bool>(
-      converter: (state) => state.routeMode,
-    );
+    final routeMode = ref.watch(navigatorRouteModeProvider);
 
     final itemPositionsListener =
         conversationListBloc.itemPositionsListener(slideCategoryState);
@@ -93,7 +87,7 @@ class ConversationList extends HookWidget {
                   selected: selected,
                   conversation: conversation,
                   onTap: () {
-                    ConversationCubit.selectConversation(
+                    ConversationStateNotifier.selectConversation(
                         context, conversation.conversationId,
                         conversation: conversation);
                   },

@@ -5,11 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../db/mixin_database.dart' hide Offset;
-import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/mention_cubit.dart';
 import '../ui/home/intent.dart';
+import '../ui/provider/conversation_provider.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import '../utils/platform.dart';
@@ -20,7 +21,7 @@ import 'interactive_decorated_box.dart';
 
 const kMentionItemHeight = 50.0;
 
-class MentionPanelPortalEntry extends HookWidget {
+class MentionPanelPortalEntry extends HookConsumerWidget {
   const MentionPanelPortalEntry({
     super.key,
     required this.constraints,
@@ -33,18 +34,15 @@ class MentionPanelPortalEntry extends HookWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final mentionState = useBlocState<MentionCubit, MentionState>();
     final visible = mentionState.users.isNotEmpty;
 
     final selectable =
         useValueListenable(textEditingController).composing.composed && visible;
 
-    final isGroupOrBot =
-        useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
-      converter: (state) =>
-          (state?.isGroup ?? false) || (state?.isBot ?? false),
-    );
+    final isGroupOrBot = ref.watch(conversationProvider
+        .select((value) => (value?.isGroup == true) || (value?.isBot == true)));
 
     return FocusableActionDetector(
       enabled: selectable,

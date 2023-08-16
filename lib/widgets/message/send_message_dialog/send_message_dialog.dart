@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../db/dao/sticker_dao.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';
-import '../../../ui/home/bloc/conversation_cubit.dart';
+
+import '../../../ui/provider/conversation_provider.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/load_balancer_utils.dart';
@@ -51,7 +53,8 @@ Future<bool> showSendDialog(
   if (_category == null || data == null || data.isEmpty) return false;
 
   final _conversationId =
-      context.read<ConversationCubit>().state?.conversationId == conversationId
+      context.providerContainer.read(currentConversationIdProvider) ==
+              conversationId
           ? conversationId
           : null;
 
@@ -112,7 +115,7 @@ Future<bool> showSendDialog(
   return true;
 }
 
-class _SendPage extends HookWidget {
+class _SendPage extends HookConsumerWidget {
   const _SendPage(this.category, this.conversationId, this.data, this.app);
 
   final _Category category;
@@ -121,7 +124,7 @@ class _SendPage extends HookWidget {
   final App? app;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final title = useMemoized(() {
       String _category;
       switch (category) {
@@ -324,13 +327,13 @@ class _Text extends StatelessWidget {
       );
 }
 
-class _Image extends HookWidget {
+class _Image extends HookConsumerWidget {
   const _Image(this.image);
 
   final SendImageData image;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final playing = useImagePlaying(context);
 
     return CacheImage(
@@ -341,13 +344,13 @@ class _Image extends HookWidget {
   }
 }
 
-class _Sticker extends HookWidget {
+class _Sticker extends HookConsumerWidget {
   const _Sticker(this.stickerId);
 
   final String stickerId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final sticker = useMemoizedFuture(() async {
       final sticker = await context.database.stickerDao
           .sticker(stickerId)
@@ -374,13 +377,13 @@ class _Sticker extends HookWidget {
   }
 }
 
-class _Contact extends HookWidget {
+class _Contact extends HookConsumerWidget {
   const _Contact(this.userId);
 
   final String userId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final user = useMemoizedFuture(() async {
       final list = await context.accountServer.refreshUsers([userId]);
       return (list != null && list.isNotEmpty) ? list.first : null;

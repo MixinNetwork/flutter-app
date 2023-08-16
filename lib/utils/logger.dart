@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/chat/files_preview.dart';
 import '../widgets/dialog.dart';
 import '../widgets/toast.dart';
@@ -53,16 +52,16 @@ Future<String> _dumpAppAndSystemInfo() async {
 
 Future<void> showShareLogDialog(
   BuildContext context, {
-  required ConversationState conversation,
+  required String conversationName,
 }) async {
   final event = await showConfirmMixinDialog(
     context,
     'shared log',
-    description: 'share log to ${conversation.name}',
+    description: 'share log to $conversationName',
   );
-  if (event != DialogEvent.positive) {
-    return;
-  }
+
+  if (event != DialogEvent.positive) return;
+
   try {
     showToastLoading();
     final zipPath = await generateTempFilePath(TempFileType.logZip);

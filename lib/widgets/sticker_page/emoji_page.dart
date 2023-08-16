@@ -5,6 +5,7 @@ import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 import '../../account/account_key_value.dart';
@@ -43,13 +44,13 @@ class EmojiPage extends StatelessWidget {
       );
 }
 
-class _EmojiPageBody extends HookWidget {
+class _EmojiPageBody extends HookConsumerWidget {
   const _EmojiPageBody({required this.layoutWidth});
 
   final double layoutWidth;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     const emojiGroupIcon = [
       Resources.assetsImagesEmojiRecentSvg,
       Resources.assetsImagesEmojiFaceSvg,
@@ -148,7 +149,7 @@ class _EmojiPageBody extends HookWidget {
   }
 }
 
-class _EmojiGroupHeader extends HookWidget {
+class _EmojiGroupHeader extends HookConsumerWidget {
   const _EmojiGroupHeader({
     required this.icons,
     required this.onTap,
@@ -160,7 +161,7 @@ class _EmojiGroupHeader extends HookWidget {
   final int selectedIndex;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tabController = useTabController(initialLength: icons.length);
     useEffect(() {
       tabController.index = selectedIndex;
@@ -231,7 +232,7 @@ class _EmojiGroupIcon extends StatelessWidget {
       );
 }
 
-class _AllEmojisPage extends HookWidget {
+class _AllEmojisPage extends HookConsumerWidget {
   const _AllEmojisPage({
     required this.initialOffset,
     required this.offsetStream,
@@ -245,7 +246,7 @@ class _AllEmojisPage extends HookWidget {
   final List<List<String>> groupedEmojis;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final controller = useMemoized(() => ScrollController(
           initialScrollOffset: initialOffset,
         ));

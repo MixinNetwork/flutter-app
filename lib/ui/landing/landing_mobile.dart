@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -31,11 +32,11 @@ import '../provider/multi_auth_provider.dart';
 import 'bloc/landing_cubit.dart';
 import 'landing.dart';
 
-class LoginWithMobileWidget extends HookWidget {
+class LoginWithMobileWidget extends HookConsumerWidget {
   const LoginWithMobileWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final locale = useMemoized(() => Localizations.localeOf(context));
     final userAgent = useMemoizedFuture(generateUserAgent, null).data;
     final deviceId = useMemoizedFuture(getDeviceId, null).data;
@@ -129,7 +130,7 @@ class _PhoneNumberInputScene extends StatelessWidget {
       );
 }
 
-class _CodeInputScene extends HookWidget {
+class _CodeInputScene extends HookConsumerWidget {
   const _CodeInputScene({
     required this.phoneNumber,
     required this.initialVerificationResponse,
@@ -139,7 +140,7 @@ class _CodeInputScene extends HookWidget {
   final VerificationResponse initialVerificationResponse;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final codeInputController = useTextEditingController();
 
     final verification =

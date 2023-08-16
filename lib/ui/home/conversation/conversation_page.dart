@@ -32,9 +32,7 @@ class ConversationPage extends HookConsumerWidget {
         ChangeNotifierProvider<TextEditingController>.value(
           value: textEditingController,
         ),
-        ChangeNotifierProvider<FocusNode>.value(
-          value: focusNode,
-        ),
+        ChangeNotifierProvider<FocusNode>.value(value: focusNode),
       ],
       child: Column(
         children: [

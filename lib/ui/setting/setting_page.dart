@@ -6,7 +6,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../account/account_key_value.dart';
-import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
@@ -18,8 +17,8 @@ import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/toast.dart';
 import '../home/home.dart';
-import '../home/route/responsive_navigator_cubit.dart';
 import '../provider/multi_auth_provider.dart';
+import '../provider/responsive_navigator_provider.dart';
 
 class SettingPage extends HookConsumerWidget {
   const SettingPage({super.key});
@@ -69,7 +68,8 @@ class SettingPage extends HookConsumerWidget {
                     CellGroup(
                       child: _Item(
                         leadingAssetName: Resources.assetsImagesIcProfileSvg,
-                        pageName: ResponsiveNavigatorCubit.editProfilePage,
+                        pageName:
+                            ResponsiveNavigatorStateNotifier.editProfilePage,
                         title: context.l10n.editProfile,
                       ),
                     ),
@@ -82,13 +82,15 @@ class SettingPage extends HookConsumerWidget {
                             _Item(
                               leadingAssetName:
                                   Resources.assetsImagesAccountSvg,
-                              pageName: ResponsiveNavigatorCubit.accountPage,
+                              pageName:
+                                  ResponsiveNavigatorStateNotifier.accountPage,
                               title: context.l10n.account,
                             ),
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcNotificationSvg,
-                            pageName: ResponsiveNavigatorCubit.notificationPage,
+                            pageName: ResponsiveNavigatorStateNotifier
+                                .notificationPage,
                             title: context.l10n.notifications,
                             trailing: hasNotificationPermission == false
                                 ? Padding(
@@ -109,29 +111,33 @@ class SettingPage extends HookConsumerWidget {
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcStorageUsageSvg,
-                            pageName: ResponsiveNavigatorCubit
+                            pageName: ResponsiveNavigatorStateNotifier
                                 .dataAndStorageUsagePage,
                             title: context.l10n.dataAndStorageUsage,
                           ),
                           _Item(
                             leadingAssetName: Resources.assetsImagesShieldSvg,
-                            pageName: ResponsiveNavigatorCubit.securityPage,
+                            pageName:
+                                ResponsiveNavigatorStateNotifier.securityPage,
                             title: context.l10n.security,
                           ),
                           _Item(
                             leadingAssetName: Resources.assetsImagesProxySvg,
-                            pageName: ResponsiveNavigatorCubit.proxyPage,
+                            pageName:
+                                ResponsiveNavigatorStateNotifier.proxyPage,
                             title: context.l10n.proxy,
                           ),
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcAppearanceSvg,
-                            pageName: ResponsiveNavigatorCubit.appearancePage,
+                            pageName:
+                                ResponsiveNavigatorStateNotifier.appearancePage,
                             title: context.l10n.appearance,
                           ),
                           _Item(
                             leadingAssetName: Resources.assetsImagesIcAboutSvg,
-                            pageName: ResponsiveNavigatorCubit.aboutPage,
+                            pageName:
+                                ResponsiveNavigatorStateNotifier.aboutPage,
                             title: context.l10n.about,
                           ),
                         ],
@@ -163,7 +169,7 @@ class SettingPage extends HookConsumerWidget {
   }
 }
 
-class _Item extends StatelessWidget {
+class _Item extends HookConsumerWidget {
   const _Item({
     this.leadingAssetName,
     required this.title,
@@ -184,39 +190,40 @@ class _Item extends StatelessWidget {
   final Widget? trailing;
 
   @override
-  Widget build(BuildContext context) =>
-      BlocConverter<ResponsiveNavigatorCubit, ResponsiveNavigatorState, bool>(
-        converter: (state) =>
-            !state.routeMode &&
-            state.pages.any((element) => pageName == element.name),
-        builder: (context, selected) => CellItem(
-          leading: leading ??
-              (leadingAssetName != null
-                  ? SvgPicture.asset(
-                      leadingAssetName!,
-                      width: 24,
-                      height: 24,
-                      colorFilter: ColorFilter.mode(
-                          color ?? context.theme.text, BlendMode.srcIn),
-                    )
-                  : null),
-          title: Text(title),
-          color: color ?? context.theme.text,
-          selected: selected,
-          onTap: () {
-            if (onTap == null && pageName != null) {
-              context.read<ResponsiveNavigatorCubit>()
-                ..popWhere((page) => ResponsiveNavigatorCubit.settingPageNameSet
-                    .contains(page.name))
-                ..pushPage(pageName!);
-              return;
-            }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = ref.watch(responsiveNavigatorProvider.select((value) =>
+        !value.routeMode &&
+        value.pages.any((element) => pageName == element.name)));
 
-            onTap?.call();
-          },
-          trailing: trailing,
-        ),
-      );
+    return CellItem(
+      leading: leading ??
+          (leadingAssetName != null
+              ? SvgPicture.asset(
+                  leadingAssetName!,
+                  width: 24,
+                  height: 24,
+                  colorFilter: ColorFilter.mode(
+                      color ?? context.theme.text, BlendMode.srcIn),
+                )
+              : null),
+      title: Text(title),
+      color: color ?? context.theme.text,
+      selected: selected,
+      onTap: () {
+        if (onTap == null && pageName != null) {
+          context.read<ResponsiveNavigatorStateNotifier>()
+            ..popWhere((page) => ResponsiveNavigatorStateNotifier
+                .settingPageNameSet
+                .contains(page.name))
+            ..pushPage(pageName!);
+          return;
+        }
+
+        onTap?.call();
+      },
+      trailing: trailing,
+    );
+  }
 }
 
 class _UserProfile extends HookConsumerWidget {

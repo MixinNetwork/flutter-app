@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/constants.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/uri_utils.dart';
 import '../../../widgets/app_bar.dart';
@@ -18,10 +18,15 @@ import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/conversation_provider.dart';
 
 class DisappearMessagePage extends StatelessWidget {
-  const DisappearMessagePage({super.key});
+  const DisappearMessagePage(
+    this.conversationState, {
+    super.key,
+  });
+
+  final ConversationState conversationState;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -56,134 +61,126 @@ class DisappearMessagePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 40),
-              const _Options(),
+              _Options(
+                conversationId: conversationState.conversationId,
+                expireDuration:
+                    conversationState.conversation?.expireDuration ??
+                        Duration.zero,
+              ),
             ],
           ),
         ),
       );
 }
 
-class _Options extends HookWidget {
-  const _Options();
+class _Options extends StatelessWidget {
+  const _Options({
+    required this.conversationId,
+    required this.expireDuration,
+  });
+
+  final String conversationId;
+  final Duration expireDuration;
 
   @override
-  Widget build(BuildContext context) {
-    final conversationId = useMemoized(() {
-      final conversationId =
-          context.read<ConversationCubit>().state?.conversationId;
-      assert(conversationId != null);
-      return conversationId!;
-    });
-    final conversation = useBlocState<ConversationCubit, ConversationState?>(
-      when: (state) =>
-          state?.isLoaded == true && state?.conversationId == conversationId,
-    )!;
+  Widget build(BuildContext context) => CellGroup(
+        child: Column(
+          children: [
+            CellItem(
+              title: Text(context.l10n.close),
+              trailing: expireDuration < const Duration(seconds: 1)
+                  ? SvgPicture.asset(
+                      Resources.assetsImagesCheckedSvg,
+                      width: 24,
+                      height: 24,
+                    )
+                  : null,
+              onTap: () {
+                if (expireDuration < const Duration(seconds: 1)) return;
 
-    final expireIn = conversation.conversation?.expireDuration ?? Duration.zero;
-
-    return CellGroup(
-      child: Column(
-        children: [
-          CellItem(
-            title: Text(context.l10n.close),
-            trailing: expireIn < const Duration(seconds: 1)
-                ? SvgPicture.asset(
-                    Resources.assetsImagesCheckedSvg,
-                    width: 24,
-                    height: 24,
-                  )
-                : null,
-            onTap: () {
-              if (expireIn < const Duration(seconds: 1)) {
-                return;
-              }
-              _updateConversationExpireDuration(
-                context,
-                duration: Duration.zero,
-                conversationId: conversationId,
-              );
-            },
-          ),
-          _DurationOptionItem(
-            label: '30 ${context.l10n.unitSecond(30)}',
-            duration: const Duration(seconds: 30),
-            current: expireIn,
-          ),
-          _DurationOptionItem(
-            label: '10 ${context.l10n.unitMinute(10)}',
-            duration: const Duration(minutes: 10),
-            current: expireIn,
-          ),
-          _DurationOptionItem(
-            label: '2 ${context.l10n.unitHour(2)}',
-            duration: const Duration(hours: 2),
-            current: expireIn,
-          ),
-          _DurationOptionItem(
-            label: '1 ${context.l10n.unitDay(1)}',
-            duration: const Duration(days: 1),
-            current: expireIn,
-          ),
-          _DurationOptionItem(
-            label: '1 ${context.l10n.unitWeek(1)}',
-            duration: const Duration(days: 7),
-            current: expireIn,
-          ),
-          CellItem(
-            title: Text(context.l10n.customTime),
-            onTap: () {
-              showMixinDialog(
+                _updateConversationExpireDuration(
+                  context,
+                  duration: Duration.zero,
+                  conversationId: conversationId,
+                );
+              },
+            ),
+            _DurationOptionItem(
+              conversationId: conversationId,
+              label: '30 ${context.l10n.unitSecond(30)}',
+              duration: const Duration(seconds: 30),
+              current: expireDuration,
+            ),
+            _DurationOptionItem(
+              conversationId: conversationId,
+              label: '10 ${context.l10n.unitMinute(10)}',
+              duration: const Duration(minutes: 10),
+              current: expireDuration,
+            ),
+            _DurationOptionItem(
+              conversationId: conversationId,
+              label: '2 ${context.l10n.unitHour(2)}',
+              duration: const Duration(hours: 2),
+              current: expireDuration,
+            ),
+            _DurationOptionItem(
+              conversationId: conversationId,
+              label: '1 ${context.l10n.unitDay(1)}',
+              duration: const Duration(days: 1),
+              current: expireDuration,
+            ),
+            _DurationOptionItem(
+              conversationId: conversationId,
+              label: '1 ${context.l10n.unitWeek(1)}',
+              duration: const Duration(days: 7),
+              current: expireDuration,
+            ),
+            CellItem(
+              title: Text(context.l10n.customTime),
+              onTap: () => showMixinDialog(
                 context: context,
                 child: _CustomExpireTimeDialog(conversationId: conversationId),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
+              ),
+            ),
+          ],
+        ),
+      );
 }
 
-class _DurationOptionItem extends HookWidget {
+class _DurationOptionItem extends StatelessWidget {
   const _DurationOptionItem({
     required this.duration,
     required this.current,
     required this.label,
+    required this.conversationId,
   });
 
   final Duration duration;
   final Duration current;
   final String label;
+  final String conversationId;
 
   @override
-  Widget build(BuildContext context) {
-    final conversationId = useMemoized(() {
-      final conversationId =
-          context.read<ConversationCubit>().state?.conversationId;
-      assert(conversationId != null);
-      return conversationId!;
-    });
-    return CellItem(
-      title: Text(label),
-      trailing: duration == current
-          ? SvgPicture.asset(
-              Resources.assetsImagesCheckedSvg,
-              width: 24,
-              height: 24,
-            )
-          : null,
-      onTap: () {
-        if (current == duration) {
-          return;
-        }
-        _updateConversationExpireDuration(
-          context,
-          duration: duration,
-          conversationId: conversationId,
-        );
-      },
-    );
-  }
+  Widget build(BuildContext context) => CellItem(
+        title: Text(label),
+        trailing: duration == current
+            ? SvgPicture.asset(
+                Resources.assetsImagesCheckedSvg,
+                width: 24,
+                height: 24,
+              )
+            : null,
+        onTap: () {
+          if (current == duration) {
+            return;
+          }
+          _updateConversationExpireDuration(
+            context,
+            duration: duration,
+            conversationId: conversationId,
+          );
+        },
+      );
 }
 
 // duration: zero to turn off disappearing messages.
@@ -242,7 +239,7 @@ extension _CustomExpireTimeUnitExtension on _CustomExpireTimeUnit {
   }
 }
 
-class _CustomExpireTimeDialog extends HookWidget {
+class _CustomExpireTimeDialog extends HookConsumerWidget {
   const _CustomExpireTimeDialog({
     required this.conversationId,
   });
@@ -250,7 +247,7 @@ class _CustomExpireTimeDialog extends HookWidget {
   final String conversationId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final inputController = useTextEditingController();
     final unit = useState(_CustomExpireTimeUnit.second);
     return Material(

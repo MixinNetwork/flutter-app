@@ -61,7 +61,7 @@ class DatabaseOpenFailedPage extends StatelessWidget {
   }
 }
 
-class _RecreateDatabaseButton extends ConsumerWidget {
+class _RecreateDatabaseButton extends HookConsumerWidget {
   const _RecreateDatabaseButton();
 
   @override

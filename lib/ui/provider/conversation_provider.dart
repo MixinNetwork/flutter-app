@@ -2,25 +2,26 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
 
-import '../../../account/account_server.dart';
-import '../../../bloc/simple_cubit.dart';
-import '../../../bloc/subscribe_mixin.dart';
-import '../../../crypto/uuid/uuid.dart';
-import '../../../db/dao/conversation_dao.dart';
-import '../../../db/database_event_bus.dart';
-import '../../../db/mixin_database.dart';
-import '../../../enum/encrypt_category.dart';
-import '../../../utils/app_lifecycle.dart';
-import '../../../utils/extension/extension.dart';
-import '../../../utils/local_notification_center.dart';
-import '../../../widgets/toast.dart';
-import '../../provider/last_selected_conversation_id.dart';
-import '../../provider/recent_conversation_provider.dart';
-import '../route/responsive_navigator_cubit.dart';
-import 'conversation_list_bloc.dart';
+import '../../account/account_server.dart';
+import '../../crypto/uuid/uuid.dart';
+import '../../db/dao/conversation_dao.dart';
+import '../../db/database.dart';
+import '../../db/database_event_bus.dart';
+import '../../db/mixin_database.dart';
+import '../../enum/encrypt_category.dart';
+import '../../utils/app_lifecycle.dart';
+import '../../utils/extension/extension.dart';
+import '../../utils/local_notification_center.dart';
+import '../../widgets/toast.dart';
+import '../home/bloc/conversation_list_bloc.dart';
+import '../home/bloc/subscriber_mixin.dart';
+import 'account_server_provider.dart';
+import 'recent_conversation_provider.dart';
+import 'responsive_navigator_provider.dart';
 
 class ConversationState extends Equatable {
   const ConversationState({
@@ -73,7 +74,7 @@ class ConversationState extends Equatable {
   UserRelationship? get relationship =>
       conversation?.relationship ?? user?.relationship;
 
-  EncryptCategory get encryptCategory => getEncryptCategory(app);
+  EncryptCategory get encryptCategory => _getEncryptCategory(app);
 
   ParticipantRole? get role =>
       conversation?.category == ConversationCategory.contact
@@ -122,7 +123,7 @@ class ConversationState extends Equatable {
       );
 }
 
-EncryptCategory getEncryptCategory(App? app) {
+EncryptCategory _getEncryptCategory(App? app) {
   if (app != null && app.capabilities?.contains('ENCRYPTED') == true) {
     return EncryptCategory.encrypted;
   } else if (app != null) {
@@ -131,11 +132,11 @@ EncryptCategory getEncryptCategory(App? app) {
   return EncryptCategory.signal;
 }
 
-class ConversationCubit extends SimpleCubit<ConversationState?>
-    with SubscribeMixin {
-  ConversationCubit({
+class ConversationStateNotifier extends StateNotifier<ConversationState?>
+    with SubscriberMixin {
+  ConversationStateNotifier({
     required this.accountServer,
-    required this.responsiveNavigatorCubit,
+    required this.responsiveNavigatorStateNotifier,
   }) : super(null) {
     addSubscription(
       stream
@@ -161,7 +162,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
         if (event != null && !event.isGroupConversation) {
           userId = event.ownerId;
         }
-        emit(state?.copyWith(conversation: event, userId: userId));
+        state = state?.copyWith(conversation: event, userId: userId);
       }),
     );
     addSubscription(
@@ -174,7 +175,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           duration: kDefaultThrottleDuration,
           prepend: false,
         );
-      }).listen((event) => emit(state?.copyWith(user: event))),
+      }).listen((event) => state = state?.copyWith(user: event)),
     );
     addSubscription(
       stream
@@ -182,12 +183,12 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           .where((event) => event != null)
           .distinct()
           .switchMap((conversationId) => database.participantDao
-                  .participantById(conversationId!, accountServer.userId)
+                  .participantById(conversationId!, currentUserId)
                   .watchSingleOrNullWithStream(
                 eventStreams: [
                   DataBaseEventBus.instance.watchUpdateParticipantStream(
                     conversationIds: [conversationId],
-                    userIds: [accountServer.userId],
+                    userIds: [currentUserId],
                     and: true,
                   )
                 ],
@@ -195,7 +196,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
                 prepend: false,
               ))
           .listen((Participant? event) {
-        emit(state?.copyWith(participant: event));
+        state = state?.copyWith(participant: event);
       }),
     );
 
@@ -203,13 +204,14 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
   }
 
   final AccountServer accountServer;
-  final ResponsiveNavigatorCubit responsiveNavigatorCubit;
-  late final database = accountServer.database;
+  final ResponsiveNavigatorStateNotifier responsiveNavigatorStateNotifier;
+  late final Database database = accountServer.database;
+  late final String currentUserId = accountServer.userId;
 
   @override
-  Future<void> close() async {
-    await super.close();
+  void dispose() {
     appActiveListener.removeListener(onListen);
+    super.dispose();
   }
 
   void onListen() {
@@ -220,9 +222,9 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
   }
 
   void unselected() {
-    emit(null);
+    state = null;
     accountServer.selectConversation(null);
-    responsiveNavigatorCubit.clear();
+    responsiveNavigatorStateNotifier.clear();
   }
 
   static Future<void> selectConversation(
@@ -237,8 +239,9 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
   }) async {
     final accountServer = context.accountServer;
     final database = context.database;
-    final conversationCubit = context.read<ConversationCubit>();
-    final state = conversationCubit.state;
+    final conversationNotifier =
+        context.providerContainer.read(conversationProvider.notifier);
+    final state = conversationNotifier.state;
 
     ConversationItem? _conversation;
     String? lastReadMessageId;
@@ -271,9 +274,6 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       return showToastFailed(null);
     }
 
-    context.providerContainer.read(lastSelectedConversationId.notifier).state =
-        conversationId;
-
     final _initIndexMessageId = initIndexMessageId ??
         (hasUnreadMessage ? _conversation.lastReadMessageId : null);
 
@@ -304,11 +304,12 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     );
 
     Toast.dismiss();
-    conversationCubit.emit(conversationState);
-
     accountServer.selectConversation(conversationId);
-    conversationCubit.responsiveNavigatorCubit
-        .pushPage(ResponsiveNavigatorCubit.chatPage);
+
+    conversationNotifier.state = conversationState;
+
+    conversationNotifier.responsiveNavigatorStateNotifier
+        .pushPage(ResponsiveNavigatorStateNotifier.chatPage);
 
     unawaited(dismissByConversationId(conversationId));
     context.providerContainer
@@ -324,7 +325,8 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
   }) async {
     final accountServer = context.accountServer;
     final database = context.database;
-    final conversationCubit = context.read<ConversationCubit>();
+    final conversationNotifier =
+        context.providerContainer.read(conversationProvider.notifier);
 
     final conversationId = generateConversationId(userId, accountServer.userId);
     final conversation = await _conversationItem(context, conversationId);
@@ -337,9 +339,6 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       );
     }
 
-    context.providerContainer.read(lastSelectedConversationId.notifier).state =
-        conversationId;
-
     final _user =
         user ?? await database.userDao.userById(userId).getSingleOrNull();
 
@@ -349,18 +348,19 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
     final app = await database.appDao.findAppById(userId);
 
-    conversationCubit.emit(ConversationState(
+    accountServer.selectConversation(conversationId);
+
+    conversationNotifier.state = ConversationState(
       conversationId: conversationId,
       userId: userId,
       user: _user,
       app: app,
       initialSidePage: initialChatSidePage,
       refreshKey: Object(),
-    ));
+    );
 
-    accountServer.selectConversation(conversationId);
-    conversationCubit.responsiveNavigatorCubit
-        .pushPage(ResponsiveNavigatorCubit.chatPage);
+    conversationNotifier.responsiveNavigatorStateNotifier
+        .pushPage(ResponsiveNavigatorStateNotifier.chatPage);
 
     unawaited(dismissByConversationId(conversationId));
   }
@@ -383,3 +383,75 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
             .getSingleOrNull();
   }
 }
+
+class _LastConversationNotifier extends StateNotifier<ConversationState?> {
+  _LastConversationNotifier(super.state);
+
+  @override
+  set state(ConversationState? value) => super.state = value;
+}
+
+final conversationProvider = StateNotifierProvider.autoDispose<
+    ConversationStateNotifier, ConversationState?>((ref) {
+  final accountServerAsync = ref.watch(accountServerProvider);
+
+  if (!accountServerAsync.hasValue) {
+    throw Exception('accountServer is not ready');
+  }
+
+  final responsiveNavigatorNotifier =
+      ref.watch(responsiveNavigatorProvider.notifier);
+
+  return ConversationStateNotifier(
+    accountServer: accountServerAsync.requireValue,
+    responsiveNavigatorStateNotifier: responsiveNavigatorNotifier,
+  );
+});
+
+final _lastConversationProvider = StateNotifierProvider.autoDispose<
+    _LastConversationNotifier, ConversationState?>((ref) {
+  final conversation = ref.read(conversationProvider);
+  final lastConversationNotifier = _LastConversationNotifier(conversation);
+  ref.listen(conversationProvider, (previous, next) {
+    if (next == null) return;
+    lastConversationNotifier.state = next;
+  });
+  return lastConversationNotifier;
+});
+
+final filterLastConversationProvider = StateNotifierProvider.autoDispose.family<
+    _LastConversationNotifier,
+    ConversationState?,
+    bool Function(ConversationState?)>((ref, filter) {
+  final conversation = ref.read(conversationProvider);
+  final lastConversationNotifier = _LastConversationNotifier(conversation);
+  ref.listen(conversationProvider, (previous, next) {
+    if (!filter(next)) return;
+    lastConversationNotifier.state = next;
+  });
+  return lastConversationNotifier;
+});
+
+final lastConversationProvider =
+    _lastConversationProvider.select((value) => value);
+
+final lastConversationIdProvider =
+    lastConversationProvider.select((value) => value?.conversationId);
+
+final currentConversationIdProvider =
+    conversationProvider.select((value) => value?.conversationId);
+
+final currentConversationNameProvider =
+    conversationProvider.select((value) => value?.conversation?.name);
+
+final currentConversationHasParticipantProvider =
+    conversationProvider.select((value) {
+  if (value?.conversation == null) return true;
+  if (value?.conversation?.category == ConversationCategory.contact) {
+    return true;
+  }
+  if (value?.conversation?.status == ConversationStatus.quit) {
+    return false;
+  }
+  return value?.participant != null;
+});

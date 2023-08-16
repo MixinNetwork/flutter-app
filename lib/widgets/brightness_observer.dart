@@ -2,11 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/system/system_utils.dart';
 
-class BrightnessObserver extends HookWidget {
+class BrightnessObserver extends HookConsumerWidget {
   const BrightnessObserver({
     super.key,
     this.duration = const Duration(milliseconds: 200),
@@ -30,7 +30,7 @@ class BrightnessObserver extends HookWidget {
       forceBrightness ?? MediaQuery.platformBrightnessOf(context);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final currentBrightness = _getBrightness(context);
     final brightnessRef = useRef(currentBrightness);
 
