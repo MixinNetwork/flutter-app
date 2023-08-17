@@ -283,9 +283,6 @@ final settingProvider =
   if (oldJson != null) {
     final settingState = fromHydratedJson(oldJson, _SettingState.fromMap);
     if (settingState == null) return SettingChangeNotifier();
-
-    HydratedBloc.storage.delete(_kSettingCubitKey);
-
     return SettingChangeNotifier(
       brightness: settingState.brightness,
       messageShowAvatar: settingState.messageShowAvatar,
