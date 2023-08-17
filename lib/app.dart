@@ -175,7 +175,7 @@ class _App extends HookConsumerWidget {
               ),
               useMaterial3: true,
             ).withFallbackFonts(),
-            themeMode: ref.read(settingProvider).themeMode,
+            themeMode: ref.watch(settingProvider).themeMode,
             builder: (context, child) {
               try {
                 context.accountServer.language =
@@ -185,7 +185,7 @@ class _App extends HookConsumerWidget {
               return BrightnessObserver(
                 lightThemeData: lightBrightnessThemeData,
                 darkThemeData: darkBrightnessThemeData,
-                forceBrightness: ref.read(settingProvider).brightness,
+                forceBrightness: ref.watch(settingProvider).brightness,
                 child: MediaQuery(
                   data: mediaQueryData.copyWith(
                     // Different linux distro change the value, e.g. 1.2
