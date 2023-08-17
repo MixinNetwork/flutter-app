@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
@@ -16,7 +17,7 @@ import '../../../../widgets/message/item/post_message.dart';
 import '../../../../widgets/message/message.dart';
 import '../shared_media_page.dart';
 
-class PostPage extends HookWidget {
+class PostPage extends HookConsumerWidget {
   const PostPage({
     super.key,
     required this.maxHeight,
@@ -27,7 +28,7 @@ class PostPage extends HookWidget {
   final String conversationId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final size = useMemoized(() => maxHeight / 90 * 2, [maxHeight]).toInt();
 
     final messageDao = context.database.messageDao;

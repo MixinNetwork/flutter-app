@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
@@ -13,16 +14,17 @@ import '../../../widgets/buttons.dart';
 import '../../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/abstract_responsive_navigator.dart';
+import '../../provider/conversation_provider.dart';
+import '../../provider/responsive_navigator_provider.dart';
 import '../bloc/message_selection_cubit.dart';
-import '../route/responsive_navigator_cubit.dart';
 import 'chat_page.dart';
 
-class ChatBar extends HookWidget {
+class ChatBar extends HookConsumerWidget {
   const ChatBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final actionColor = context.theme.icon;
     final chatSideCubit = context.read<ChatSideCubit>();
 
@@ -32,14 +34,9 @@ class ChatBar extends HookWidget {
       converter: (state) => state.routeMode,
     );
 
-    final routeMode = useBlocStateConverter<ResponsiveNavigatorCubit,
-        ResponsiveNavigatorState, bool>(
-      converter: (state) => state.routeMode,
-    );
+    final routeMode = ref.watch(navigatorRouteModeProvider);
 
-    final conversation = useBlocState<ConversationCubit, ConversationState?>(
-      when: (state) => state?.isLoaded == true,
-    )!;
+    final conversation = ref.watch(conversationProvider);
 
     final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
         MessageSelectionState, bool>(
@@ -61,11 +58,14 @@ class ChatBar extends HookWidget {
             },
             onLongPress: longPressToShareLog
                 ? (details) {
+                    if (conversation == null) return;
+
                     if ((conversation.isGroup ?? true) ||
                         (conversation.isBot ?? true)) {
                       return;
                     }
-                    showShareLogDialog(context, conversation: conversation);
+                    showShareLogDialog(context,
+                        conversationName: conversation.name ?? '');
                   }
                 : null,
             behavior: behavior,
@@ -73,14 +73,17 @@ class ChatBar extends HookWidget {
           ),
         );
 
+    if (conversation == null) return const SizedBox();
+
     return Row(
       children: [
-        Builder(
-          builder: (context) => routeMode
+        Consumer(
+          builder: (_, ref, __) => routeMode
               ? MoveWindowBarrier(
                   child: MixinBackButton(
                     color: actionColor,
-                    onTap: () => context.read<ConversationCubit>().unselected(),
+                    onTap: () =>
+                        ref.read(conversationProvider.notifier).unselected(),
                   ),
                 )
               : const SizedBox(width: 16),
@@ -172,7 +175,7 @@ class ChatBar extends HookWidget {
   }
 }
 
-class ConversationIDOrCount extends HookWidget {
+class ConversationIDOrCount extends HookConsumerWidget {
   const ConversationIDOrCount({
     super.key,
     this.fontSize = 14,
@@ -183,7 +186,7 @@ class ConversationIDOrCount extends HookWidget {
   final ConversationState? conversationState;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isGroup = conversationState?.isGroup ?? false;
 
     final countStream = useMemoized(
@@ -311,13 +314,13 @@ class ConversationAvatar extends StatelessWidget {
       );
 }
 
-class _BotIcon extends HookWidget {
+class _BotIcon extends HookConsumerWidget {
   const _BotIcon({required this.conversation});
 
   final ConversationState conversation;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (conversation.isBot != true) {
       return const SizedBox();
     }

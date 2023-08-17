@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../bloc/minute_timer_cubit.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
-import '../../ui/home/bloc/conversation_cubit.dart';
+import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../message_status_icon.dart';
 import 'message.dart';
 import 'message_style.dart';
@@ -24,7 +23,7 @@ bool _isRepresentative(
     (conversation.user?.userId != message.userId) &&
     (message.userId != userId);
 
-class MessageDatetimeAndStatus extends HookWidget {
+class MessageDatetimeAndStatus extends HookConsumerWidget {
   const MessageDatetimeAndStatus(
       {super.key, this.color, this.hideStatus = false});
 
@@ -32,7 +31,7 @@ class MessageDatetimeAndStatus extends HookWidget {
   final bool hideStatus;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
     final isPinnedPage = useIsPinnedPage();
     final isCurrentUser = useIsCurrentUser();
@@ -41,7 +40,7 @@ class MessageDatetimeAndStatus extends HookWidget {
     final isRepresentative = useMessageConverter(
         converter: (state) => _isRepresentative(
               state,
-              context.read<ConversationCubit>().state,
+              ref.read(conversationProvider),
               context.accountServer.userId,
             ));
     final createdAt =
@@ -126,7 +125,7 @@ class _ChatIcon extends StatelessWidget {
       );
 }
 
-class _MessageDatetime extends HookWidget {
+class _MessageDatetime extends HookConsumerWidget {
   const _MessageDatetime({
     required this.dateTime,
     this.color,
@@ -136,10 +135,10 @@ class _MessageDatetime extends HookWidget {
   final Color? color;
 
   @override
-  Widget build(BuildContext context) {
-    final text = useBlocStateConverter<MinuteTimerCubit, DateTime, String>(
-      converter: (_) => DateFormat.Hm().format(dateTime.toLocal()),
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = useMemoized(
+        () => DateFormat.Hm().format(dateTime.toLocal()), [dateTime]);
+
     return Text(
       text,
       style: TextStyle(

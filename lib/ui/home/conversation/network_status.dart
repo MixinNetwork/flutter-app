@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../../blaze/blaze.dart';
@@ -11,11 +12,11 @@ import '../../../utils/hook.dart';
 import '../../../utils/uri_utils.dart';
 import '../../../widgets/menu.dart';
 
-class NetworkStatus extends HookWidget {
+class NetworkStatus extends HookConsumerWidget {
   const NetworkStatus({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final connectedState = useMemoizedStream(
             () => context.accountServer.connectedStateStream.distinct(),
             initialData: ConnectedState.connecting)

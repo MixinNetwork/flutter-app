@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../enum/message_action.dart';
 import '../../../generated/l10n.dart';
@@ -7,11 +7,11 @@ import '../../../utils/extension/extension.dart';
 import '../message.dart';
 import '../message_style.dart';
 
-class SystemMessage extends HookWidget {
+class SystemMessage extends HookConsumerWidget {
   const SystemMessage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final actionName =
         useMessageConverter(converter: (state) => state.actionName);
     final participantUserId =

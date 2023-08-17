@@ -1,7 +1,7 @@
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watcher/watcher.dart';
 
 import '../../db/dao/conversation_dao.dart';
@@ -11,13 +11,13 @@ import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
-import '../home/route/responsive_navigator_cubit.dart';
+import '../provider/responsive_navigator_provider.dart';
 
-class StorageUsageListPage extends HookWidget {
+class StorageUsageListPage extends HookConsumerWidget {
   const StorageUsageListPage({super.key});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
         backgroundColor: context.theme.background,
         appBar: MixinAppBar(
           title: Text(context.l10n.storageUsage),
@@ -26,11 +26,11 @@ class StorageUsageListPage extends HookWidget {
       );
 }
 
-class _Content extends HookWidget {
+class _Content extends HookConsumerWidget {
   const _Content();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final watchEvent = useMemoizedStream(
       () => DirectoryWatcher(context.accountServer.getMediaFilePath())
           .events
@@ -79,7 +79,7 @@ class _Content extends HookWidget {
   }
 }
 
-class _Item extends HookWidget {
+class _Item extends HookConsumerWidget {
   const _Item({
     required this.item,
     required this.size,
@@ -89,7 +89,7 @@ class _Item extends HookWidget {
   final int size;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final sizeString = useMemoized(() => filesize(size), [item, size]);
     return Align(
       child: CellGroup(
@@ -119,8 +119,8 @@ class _Item extends HookWidget {
               ),
             ],
           ),
-          onTap: () => context.read<ResponsiveNavigatorCubit>().pushPage(
-            ResponsiveNavigatorCubit.storageUsageDetail,
+          onTap: () => ref.read(responsiveNavigatorProvider.notifier).pushPage(
+            ResponsiveNavigatorStateNotifier.storageUsageDetail,
             arguments: (
               conversationValidName(item.name, item.fullName),
               item.conversationId,

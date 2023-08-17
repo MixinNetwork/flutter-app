@@ -20,7 +20,6 @@ import 'package:window_size/window_size.dart';
 
 import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
-import 'db/global_hive.dart';
 import 'ui/home/home.dart';
 import 'utils/app_lifecycle.dart';
 import 'utils/event_bus.dart';
@@ -89,7 +88,6 @@ Future<void> main(List<String> args) async {
   };
 
   Hive.init(mixinDocumentsDirectory.path);
-  await initGlobalHive();
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: mixinDocumentsDirectory,

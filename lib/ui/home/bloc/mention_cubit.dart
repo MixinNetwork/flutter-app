@@ -15,8 +15,8 @@ import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../widgets/mention_panel.dart';
+import '../../provider/conversation_provider.dart';
 import '../../provider/multi_auth_provider.dart';
-import 'conversation_cubit.dart';
 
 class MentionState extends Equatable {
   const MentionState({

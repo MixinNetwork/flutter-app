@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 
 import 'interactive_decorated_box.dart';
@@ -30,7 +31,7 @@ class _HoverOverlayForceHiddenTool {
 typedef PortalBuilder<T> = Widget Function(BuildContext context, T value,
     Widget Function(Widget child) portalHoverWrapper, Widget? child);
 
-class HoverOverlay extends HookWidget {
+class HoverOverlay extends HookConsumerWidget {
   const HoverOverlay({
     super.key,
     required this.closeDuration,
@@ -63,7 +64,7 @@ class HoverOverlay extends HookWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cancelableRef = useRef<CancelableOperation<bool>?>(null);
 
     final forceHidden = useState<bool>(false);

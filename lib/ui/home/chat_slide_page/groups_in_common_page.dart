@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
@@ -10,19 +10,19 @@ import '../../../utils/hook.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/interactive_decorated_box.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/conversation_provider.dart';
 import '../conversation/conversation_page.dart';
 
-class GroupsInCommonPage extends HookWidget {
-  const GroupsInCommonPage({super.key});
+class GroupsInCommonPage extends HookConsumerWidget {
+  const GroupsInCommonPage(this.conversationState, {super.key});
+
+  final ConversationState conversationState;
 
   @override
-  Widget build(BuildContext context) {
-    final userId = useMemoized(() {
-      final userId = context.read<ConversationCubit>().state?.userId;
-      assert(userId != null, 'userId is null');
-      return userId ?? '';
-    });
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userId = conversationState.userId;
+    if (userId == null) return const SizedBox();
+
     return Scaffold(
       backgroundColor: context.theme.primary,
       appBar: MixinAppBar(
@@ -33,7 +33,7 @@ class GroupsInCommonPage extends HookWidget {
   }
 }
 
-class _ConversationList extends HookWidget {
+class _ConversationList extends HookConsumerWidget {
   const _ConversationList({
     required this.userId,
   });
@@ -41,7 +41,7 @@ class _ConversationList extends HookWidget {
   final String userId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final conversationList = useMemoizedFuture(() {
       final selfId = context.accountServer.userId;
       return context.accountServer.database.conversationDao
@@ -102,7 +102,7 @@ class _GroupConversationItemWidget extends StatelessWidget {
         height: ConversationPage.conversationItemHeight,
         child: InteractiveDecoratedBox(
           onTap: () {
-            ConversationCubit.selectConversation(
+            ConversationStateNotifier.selectConversation(
               context,
               group.conversationId,
             );

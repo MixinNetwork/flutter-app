@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 
 import '../../../utils/extension/extension.dart';
 import '../../../utils/platform.dart';
+import '../../provider/conversation_provider.dart';
 import '../../provider/slide_category_provider.dart';
-import '../bloc/conversation_cubit.dart';
+
 import '../bloc/conversation_list_bloc.dart';
 
 class ConversationHotKey extends StatelessWidget {
@@ -57,21 +58,19 @@ void _navigationConversation(
   final category = context.providerContainer.read(slideCategoryStateProvider);
   if (category.type == SlideCategoryType.setting) return;
 
-  final conversationCubit = context.read<ConversationCubit>();
-  final currentConversation = conversationCubit.state?.conversationId;
-  if (currentConversation == null) {
-    return;
-  }
+  final currentConversationId =
+      context.providerContainer.read(currentConversationIdProvider);
+  if (currentConversationId == null) return;
+
   final conversationListBloc = context.read<ConversationListBloc>();
   var currentConversationIndex = -1;
   conversationListBloc.state.map.forEach((key, value) {
-    if (value.conversationId == currentConversation) {
+    if (value.conversationId == currentConversationId) {
       currentConversationIndex = key;
     }
   });
-  if (currentConversationIndex == -1) {
-    return;
-  }
+
+  if (currentConversationIndex == -1) return;
 
   final nextConversationIndex =
       forward ? currentConversationIndex + 1 : currentConversationIndex - 1;
@@ -81,7 +80,7 @@ void _navigationConversation(
   if (nextConversation == null) {
     return;
   }
-  ConversationCubit.selectConversation(
+  ConversationStateNotifier.selectConversation(
     context,
     nextConversation.conversationId,
   );

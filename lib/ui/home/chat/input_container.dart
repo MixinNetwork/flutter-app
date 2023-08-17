@@ -10,7 +10,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:image_picker/image_picker.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide StickerAlbum;
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -36,40 +35,24 @@ import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/emoji_page.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
+import '../../provider/abstract_responsive_navigator.dart';
+import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/recall_message_reedit_provider.dart';
 import '../bloc/mention_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
-import '../bloc/recall_message_bloc.dart';
-import '../route/responsive_navigator_cubit.dart';
 import 'chat_page.dart';
 import 'files_preview.dart';
 import 'voice_recorder_bottom_bar.dart';
 
-class InputContainer extends HookWidget {
+class InputContainer extends HookConsumerWidget {
   const InputContainer({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-      when: (state) => state != null,
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final conversationId = ref.watch(currentConversationIdProvider);
 
-    final hasParticipant =
-        useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
-      converter: (state) {
-        if (state?.conversation == null) return true;
-        if (state?.conversation?.category == ConversationCategory.contact) {
-          return true;
-        }
-        if (state?.conversation?.status == ConversationStatus.quit) {
-          return false;
-        }
-        return state?.participant != null;
-      },
-    );
+    final hasParticipant = ref.watch(currentConversationHasParticipantProvider);
 
     useEffect(() {
       context.read<QuoteMessageCubit>().emit(null);
@@ -120,15 +103,10 @@ class _InputContainer extends HookConsumerWidget {
       ),
     );
 
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) =>
-          (state?.isLoaded ?? false) ? state?.conversationId : null,
+    final (conversationId, originalDraft) = ref.watch(
+      conversationProvider.select(
+          (value) => (value?.conversationId, value?.conversation?.draft)),
     );
-
-    final originalDraft = useMemoized(
-        () => context.read<ConversationCubit>().state?.conversation?.draft,
-        [conversationId]);
 
     final quoteMessageId =
         useBlocStateConverter<QuoteMessageCubit, MessageItem?, String?>(
@@ -137,8 +115,8 @@ class _InputContainer extends HookConsumerWidget {
 
     final textEditingController = useMemoized(
       () {
-        final draft =
-            context.read<ConversationCubit>().state?.conversation?.draft;
+        final draft = ref.read(
+            conversationProvider.select((value) => value?.conversation?.draft));
         return HighlightTextEditingController(
           initialText: draft,
           highlightTextStyle: TextStyle(color: context.theme.accent),
@@ -154,9 +132,12 @@ class _InputContainer extends HookConsumerWidget {
 
     useEffect(() {
       if (conversationId == null) return;
+      final conversationState = ref.read(conversationProvider);
+      if (conversationState == null) return;
+
       mentionCubit.setTextEditingValueStream(
         textEditingValueStream,
-        context.read<ConversationCubit>().state!,
+        conversationState,
       );
     }, [textEditingValueStream.hashCode, conversationId]);
 
@@ -171,7 +152,7 @@ class _InputContainer extends HookConsumerWidget {
           textEditingController.text,
         );
       };
-    }, [conversationId]);
+    }, [conversationId, originalDraft]);
 
     final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
 
@@ -283,7 +264,7 @@ class _InputContainer extends HookConsumerWidget {
   }
 }
 
-class _AnimatedSendOrVoiceButton extends HookWidget {
+class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
   const _AnimatedSendOrVoiceButton({
     required this.textEditingValueStream,
     required this.textEditingController,
@@ -293,7 +274,7 @@ class _AnimatedSendOrVoiceButton extends HookWidget {
   final TextEditingController textEditingController;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final hasInputText = useMemoizedStream(
           () => textEditingValueStream
               .map((event) => event.text.isNotEmpty)
@@ -382,7 +363,7 @@ void _sendPostMessage(
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
 
-  final conversationItem = context.read<ConversationCubit>().state;
+  final conversationItem = context.providerContainer.read(conversationProvider);
   if (conversationItem == null) return;
   if (text.length > kMaxTextLength) {
     showMaxLengthReachedToast(context);
@@ -405,7 +386,7 @@ void _sendMessage(
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
 
-  final conversationItem = context.read<ConversationCubit>().state;
+  final conversationItem = context.providerContainer.read(conversationProvider);
   if (conversationItem == null) return;
   if (text.length > kMaxTextLength) {
     showMaxLengthReachedToast(context);
@@ -425,7 +406,7 @@ void _sendMessage(
   context.read<QuoteMessageCubit>().emit(null);
 }
 
-class _SendTextField extends HookWidget {
+class _SendTextField extends HookConsumerWidget {
   const _SendTextField({
     required this.focusNode,
     required this.textEditingController,
@@ -435,7 +416,7 @@ class _SendTextField extends HookWidget {
   final TextEditingController textEditingController;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textEditingValueStream =
         useValueNotifierConvertSteam(textEditingController);
 
@@ -457,21 +438,16 @@ class _SendTextField extends HookWidget {
         ).data ??
         true;
 
-    useEffect(() {
-      final subscription = context
-          .read<RecallMessageReeditCubit>()
-          .onReeditStream
-          .listen((event) {
-        textEditingController.text = textEditingController.text + event;
-      });
-      return subscription.cancel;
-    }, [textEditingController]);
+    useEffect(
+        () => ref
+            .read(onReEditStreamProvider)
+            .listen((event) =>
+                textEditingController.text = textEditingController.text + event)
+            .cancel,
+        [textEditingController]);
 
-    final isEncryptConversation =
-        useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
-      bloc: context.read<ConversationCubit>(),
-      converter: (state) => state?.encryptCategory.isEncrypt == true,
-    );
+    final isEncryptConversation = ref.watch(conversationProvider
+        .select((value) => value?.encryptCategory.isEncrypt == true));
 
     final hasInputText = useMemoizedStream(
           () => textEditingValueStream
@@ -698,7 +674,7 @@ class _FileButton extends StatelessWidget {
       );
 }
 
-class _StickerButton extends HookWidget {
+class _StickerButton extends HookConsumerWidget {
   const _StickerButton({
     required this.textEditingController,
   });
@@ -706,7 +682,7 @@ class _StickerButton extends HookWidget {
   final TextEditingController textEditingController;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final key = useMemoized(GlobalKey.new);
 
     final stickerAlbumsCubit = useBloc(

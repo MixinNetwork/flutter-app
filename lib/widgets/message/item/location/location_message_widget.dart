@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:latlng/latlng.dart';
 import 'package:map/map.dart' as map;
 
@@ -16,11 +17,11 @@ import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import 'location_payload.dart';
 
-class LocationMessageWidget extends HookWidget {
+class LocationMessageWidget extends HookConsumerWidget {
   const LocationMessageWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final content =
         useMessageConverter(converter: (state) => state.content ?? '');
 

@@ -9,7 +9,8 @@ import '../db/database_event_bus.dart';
 import '../db/extension/conversation.dart';
 import '../enum/message_category.dart';
 import '../generated/l10n.dart';
-import '../ui/home/bloc/conversation_cubit.dart';
+
+import '../ui/provider/conversation_provider.dart';
 import '../ui/provider/mention_cache_provider.dart';
 import '../ui/provider/slide_category_provider.dart';
 import '../utils/app_lifecycle.dart';
@@ -47,7 +48,8 @@ class NotificationService {
                   .isAfter(DateTime.now().subtract(const Duration(minutes: 2))))
           .where((event) {
             if (isAppActive) {
-              final conversationState = context.read<ConversationCubit>().state;
+              final conversationState =
+                  context.providerContainer.read(conversationProvider);
               return event.conversationId !=
                   (conversationState?.conversationId ??
                       conversationState?.conversation?.conversationId);
@@ -178,7 +180,7 @@ class NotificationService {
 
             final conversationId =
                 event.queryParameters[_keyConversationId] ?? event.host;
-            ConversationCubit.selectConversation(
+            ConversationStateNotifier.selectConversation(
               context,
               conversationId,
               initIndexMessageId: event.path,

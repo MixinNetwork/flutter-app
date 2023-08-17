@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../constants/resources.dart';
 import '../../../../db/database_event_bus.dart';
@@ -24,7 +24,7 @@ Future<void> showGroupInviteByLinkDialog(BuildContext context,
       ));
 }
 
-class _GroupInviteByLinkDialog extends HookWidget {
+class _GroupInviteByLinkDialog extends HookConsumerWidget {
   const _GroupInviteByLinkDialog({
     required this.conversationId,
   });
@@ -32,7 +32,7 @@ class _GroupInviteByLinkDialog extends HookWidget {
   final String conversationId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final conversation = useMemoizedStream(
       () {
         context.accountServer.refreshConversation(conversationId);

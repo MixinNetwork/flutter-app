@@ -16,16 +16,17 @@ import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
 import '../../widgets/protocol_handler.dart';
 import '../../widgets/toast.dart';
+import '../provider/conversation_provider.dart';
 import '../provider/multi_auth_provider.dart';
+import '../provider/responsive_navigator_provider.dart';
 import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
 import '../setting/setting_page.dart';
-import 'bloc/conversation_cubit.dart';
+
 import 'command_palette_wrapper.dart';
 import 'conversation/conversation_hotkey.dart';
 import 'conversation/conversation_page.dart';
 import 'route/responsive_navigator.dart';
-import 'route/responsive_navigator_cubit.dart';
 import 'slide_page.dart';
 
 // chat category list min width
@@ -115,11 +116,11 @@ class HomePage extends HookConsumerWidget {
   }
 }
 
-class _SetupNameWidget extends HookWidget {
+class _SetupNameWidget extends HookConsumerWidget {
   const _SetupNameWidget();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textEditingController = useTextEditingController();
     final textEditingValue = useValueListenable(textEditingController);
     return Scaffold(
@@ -271,7 +272,7 @@ class _HomePage extends HookConsumerWidget {
   }
 }
 
-class _CenterPage extends ConsumerWidget {
+class _CenterPage extends HookConsumerWidget {
   const _CenterPage();
 
   @override
@@ -282,18 +283,20 @@ class _CenterPage extends ConsumerWidget {
     ref.listen(slideCategoryStateProvider, (previous, next) {
       final isSetting = next.type == SlideCategoryType.setting;
 
-      final responsiveNavigatorCubit = context.read<ResponsiveNavigatorCubit>();
+      final responsiveNavigatorNotifier =
+          context.providerContainer.read(responsiveNavigatorProvider.notifier);
 
-      responsiveNavigatorCubit.popWhere((page) {
-        if (responsiveNavigatorCubit.state.routeMode) return true;
+      responsiveNavigatorNotifier.popWhere((page) {
+        if (responsiveNavigatorNotifier.state.routeMode) return true;
 
-        return ResponsiveNavigatorCubit.settingPageNameSet.contains(page.name);
+        return ResponsiveNavigatorStateNotifier.settingPageNameSet
+            .contains(page.name);
       });
 
-      if (isSetting && !responsiveNavigatorCubit.state.routeMode) {
-        context.read<ConversationCubit>().unselected();
-        responsiveNavigatorCubit
-            .pushPage(ResponsiveNavigatorCubit.settingPageNameSet.first);
+      if (isSetting && !responsiveNavigatorNotifier.state.routeMode) {
+        ref.read(conversationProvider.notifier).unselected();
+        responsiveNavigatorNotifier.pushPage(
+            ResponsiveNavigatorStateNotifier.settingPageNameSet.first);
       }
     });
 

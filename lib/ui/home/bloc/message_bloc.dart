@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
@@ -17,8 +19,8 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
+import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
-import 'conversation_cubit.dart';
 
 abstract class _MessageEvent extends Equatable {
   @override
@@ -204,7 +206,7 @@ class MessageState extends Equatable {
 class MessageBloc extends Bloc<_MessageEvent, MessageState>
     with SubscribeMixin {
   MessageBloc({
-    required this.conversationCubit,
+    required this.conversationNotifier,
     required this.limit,
     required this.database,
     required this.mentionCache,
@@ -218,11 +220,11 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
 
     add(_MessageInitEvent(
-      centerMessageId: conversationCubit.state?.initIndexMessageId,
-      lastReadMessageId: conversationCubit.state?.lastReadMessageId,
+      centerMessageId: conversationNotifier.state?.initIndexMessageId,
+      lastReadMessageId: conversationNotifier.state?.lastReadMessageId,
     ));
     addSubscription(
-      conversationCubit.stream
+      conversationNotifier.stream
           .where((event) => event?.conversationId != null)
           .map((event) => (
                 event?.conversationId,
@@ -241,7 +243,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
 
     addSubscription(
-      conversationCubit.stream
+      conversationNotifier.stream
           .map((event) => event?.conversationId)
           .distinct()
           .switchMap((conversationId) {
@@ -261,7 +263,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   }
 
   final ScrollController scrollController = ScrollController();
-  final ConversationCubit conversationCubit;
+  final ConversationStateNotifier conversationNotifier;
   final Database database;
   final MentionCache mentionCache;
   final AccountServer accountServer;
@@ -282,7 +284,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     // Avoid value change
     final finalLimit = limit;
 
-    final conversationId = conversationCubit.state?.conversationId;
+    final conversationId = conversationNotifier.state?.conversationId;
     if (conversationId == null) return;
     // If the conversationId has changed, then events other than init are ignored
     if (event is! _MessageInitEvent && state.conversationId != conversationId) {
@@ -368,7 +370,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     int limit, [
     String? centerMessageId,
   ]) async {
-    final conversation = conversationCubit.state?.conversation;
+    final conversation = conversationNotifier.state?.conversation;
     final _centerMessageId = centerMessageId ??
         ((conversation?.unseenMessageCount ?? 0) > 0
             ? conversation?.lastReadMessageId
@@ -532,7 +534,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   MessageState _pretreatment(MessageState messageState) {
     List<MessageItem>? top;
     // check secretMessage
-    if (messageState.isOldest && conversationCubit.state?.isBot == false) {
+    if (messageState.isOldest && conversationNotifier.state?.isBot == false) {
       if (messageState.top.firstOrNull?.type == MessageCategory.secret) {
         messageState.top.remove(messageState.top.first);
       }
@@ -557,7 +559,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       top: top,
     );
     if (isAppActive) {
-      accountServer.markRead(conversationCubit.state!.conversationId);
+      accountServer.markRead(conversationNotifier.state!.conversationId);
     }
     return _messageState;
   }

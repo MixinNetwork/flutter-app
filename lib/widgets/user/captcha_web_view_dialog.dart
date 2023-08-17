@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../constants/constants.dart';
@@ -26,11 +27,11 @@ Future<List<dynamic>?> showCaptchaWebViewDialog(BuildContext context) =>
       child: const CaptchaWebViewDialog(),
     );
 
-class CaptchaWebViewDialog extends HookWidget {
+class CaptchaWebViewDialog extends HookConsumerWidget {
   const CaptchaWebViewDialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final timer = useRef<Timer?>(null);
     final captcha = useRef<CaptchaType>(CaptchaType.gCaptcha);
 

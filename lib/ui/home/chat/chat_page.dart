@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 
 import '../../../account/scam_warning_key_value.dart';
@@ -14,6 +15,7 @@ import '../../../bloc/simple_cubit.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
+import '../../../db/mixin_database.dart' hide Offset;
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
@@ -30,9 +32,10 @@ import '../../../widgets/message/message_day_time.dart';
 import '../../../widgets/pin_bubble.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/window/menus.dart';
+import '../../provider/abstract_responsive_navigator.dart';
+import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../bloc/blink_cubit.dart';
-import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
 import '../bloc/message_selection_cubit.dart';
 import '../bloc/pending_jump_message_cubit.dart';
@@ -49,7 +52,6 @@ import '../chat_slide_page/shared_media_page.dart';
 import '../home.dart';
 import '../hook/pin_message.dart';
 import '../route/responsive_navigator.dart';
-import '../route/responsive_navigator_cubit.dart';
 import 'chat_bar.dart';
 import 'files_preview.dart';
 import 'input_container.dart';
@@ -75,55 +77,55 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
         return const MaterialPage(
           key: ValueKey(infoPage),
           name: infoPage,
-          child: ChatInfoPage(),
+          child: _ChatSidePageBuilder(ChatInfoPage.new),
         );
       case circles:
         return const MaterialPage(
           key: ValueKey(circles),
           name: circles,
-          child: CircleManagerPage(),
+          child: _ChatSidePageBuilder(CircleManagerPage.new),
         );
       case searchMessageHistory:
         return const MaterialPage(
           key: ValueKey(searchMessageHistory),
           name: searchMessageHistory,
-          child: SearchMessagePage(),
+          child: _ChatSidePageBuilder(SearchMessagePage.new),
         );
       case sharedMedia:
         return const MaterialPage(
           key: ValueKey(sharedMedia),
           name: sharedMedia,
-          child: SharedMediaPage(),
+          child: _ChatSidePageBuilder(SharedMediaPage.new),
         );
       case participants:
         return const MaterialPage(
           key: ValueKey(participants),
           name: participants,
-          child: GroupParticipantsPage(),
+          child: _ChatSidePageBuilder(GroupParticipantsPage.new),
         );
       case pinMessages:
         return const MaterialPage(
           key: ValueKey(pinMessages),
           name: pinMessages,
-          child: PinMessagesPage(),
+          child: _ChatSidePageBuilder(PinMessagesPage.new),
         );
       case sharedApps:
         return const MaterialPage(
           key: ValueKey(sharedApps),
           name: sharedApps,
-          child: SharedAppsPage(),
+          child: _ChatSidePageBuilder(SharedAppsPage.new),
         );
       case groupsInCommon:
         return const MaterialPage(
           key: ValueKey(groupsInCommon),
           name: groupsInCommon,
-          child: GroupsInCommonPage(),
+          child: _ChatSidePageBuilder(GroupsInCommonPage.new),
         );
       case disappearMessages:
         return const MaterialPage(
           key: ValueKey(disappearMessages),
           name: disappearMessages,
-          child: DisappearMessagePage(),
+          child: _ChatSidePageBuilder(DisappearMessagePage.new),
         );
       default:
         throw ArgumentError('Invalid route');
@@ -160,18 +162,40 @@ class SearchConversationKeywordCubit extends SimpleCubit<(String?, String)>
   }
 }
 
-class ChatPage extends HookWidget {
+class _ChatSidePageBuilder extends HookConsumerWidget {
+  const _ChatSidePageBuilder(this.builder);
+
+  final Widget Function(ConversationState conversationState) builder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final conversationId =
+        useMemoized(() => ref.read(lastConversationIdProvider), []);
+
+    final filter = useCallback(
+        (ConversationState? state) => state?.conversationId == conversationId,
+        [conversationId]);
+
+    final conversationState = ref.watch(filterLastConversationProvider(filter));
+
+    if (conversationId == null || conversationState == null) {
+      return const SizedBox();
+    }
+
+    return builder(conversationState);
+  }
+}
+
+class ChatPage extends HookConsumerWidget {
   const ChatPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final chatContainerPageKey = useMemoized(GlobalKey.new);
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-            converter: (state) => state?.conversationId);
-    final initialSidePage =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-            converter: (state) => state?.initialSidePage);
+    final (conversationId, initialSidePage) = ref.watch(
+      conversationProvider
+          .select((value) => (value?.conversationId, value?.initialSidePage)),
+    );
 
     final chatSideCubit = useBloc(ChatSideCubit.new, keys: [conversationId]);
 
@@ -222,7 +246,7 @@ class ChatPage extends HookWidget {
         context.theme.accent.withOpacity(0.5),
       ),
     );
-    final pinMessageState = usePinMessageState();
+    final pinMessageState = usePinMessageState(conversationId);
 
     return MultiProvider(
       providers: [
@@ -233,7 +257,7 @@ class ChatPage extends HookWidget {
           create: (context) => MessageBloc(
             accountServer: context.accountServer,
             database: context.database,
-            conversationCubit: context.read<ConversationCubit>(),
+            conversationNotifier: ref.read(conversationProvider.notifier),
             mentionCache: context.providerContainer.read(mentionCacheProvider),
             limit: windowHeight ~/ 20,
           ),
@@ -324,7 +348,7 @@ class _SideRouter extends StatelessWidget {
   }
 }
 
-class _AnimatedChatSlide extends HookWidget {
+class _AnimatedChatSlide extends HookConsumerWidget {
   const _AnimatedChatSlide({
     required this.pages,
     required this.constraints,
@@ -338,7 +362,7 @@ class _AnimatedChatSlide extends HookWidget {
   final BoxConstraints constraints;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final controller = useAnimationController(
       duration: const Duration(milliseconds: 300),
     );
@@ -383,11 +407,11 @@ class _AnimatedChatSlide extends HookWidget {
   }
 }
 
-class ChatContainer extends HookWidget {
+class ChatContainer extends HookConsumerWidget {
   const ChatContainer({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final quoteMessageCubit = useBloc(QuoteMessageCubit.new);
     BlocProvider.of<MessageBloc>(context).limit =
         MediaQuery.sizeOf(context).height ~/ 20;
@@ -560,11 +584,11 @@ class _NotificationListener extends StatelessWidget {
       );
 }
 
-class _List extends HookWidget {
+class _List extends HookConsumerWidget {
   const _List();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final state = useBlocState<MessageBloc, MessageState>(
       when: (state) => state.conversationId != null,
     );
@@ -667,17 +691,13 @@ class _List extends HookWidget {
   }
 }
 
-class _JumpCurrentButton extends HookWidget {
+class _JumpCurrentButton extends HookConsumerWidget {
   const _JumpCurrentButton();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final messageBloc = context.read<MessageBloc>();
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-      when: (conversationId) => conversationId != null,
-    )!;
+    final conversationId = ref.watch(currentConversationIdProvider);
 
     final state = useBlocState<MessageBloc, MessageState>();
     final scrollController = useListenable(messageBloc.scrollController);
@@ -750,17 +770,15 @@ class _JumpCurrentButton extends HookWidget {
   }
 }
 
-class _BottomBanner extends HookWidget {
+class _BottomBanner extends HookConsumerWidget {
   const _BottomBanner();
 
   @override
-  Widget build(BuildContext context) {
-    final userId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-            converter: (state) => state?.userId);
-    final isScam =
-        useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
-            converter: (state) => (state?.user?.isScam ?? 0) > 0);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final (userId, isScam) = ref.watch(
+      conversationProvider
+          .select((value) => (value?.userId, (value?.user?.isScam ?? 0) > 0)),
+    );
 
     final showScamWarning = useMemoizedStream(
           () {
@@ -818,7 +836,6 @@ class _BottomBanner extends HookWidget {
               color: context.theme.icon,
               size: 20,
               onTap: () {
-                final userId = context.read<ConversationCubit>().state?.userId;
                 if (userId == null) return;
                 ScamWarningKeyValue.instance.dismiss(userId);
               },
@@ -830,11 +847,11 @@ class _BottomBanner extends HookWidget {
   }
 }
 
-class _PinMessagesBanner extends HookWidget {
+class _PinMessagesBanner extends HookConsumerWidget {
   const _PinMessagesBanner();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final currentPinMessageIds = context.watchCurrentPinMessageIds;
     final lastMessage = context.lastMessage;
 
@@ -860,10 +877,8 @@ class _PinMessagesBanner extends HookWidget {
                         color: context.theme.icon,
                         size: 20,
                         onTap: () {
-                          final conversationId = context
-                              .read<ConversationCubit>()
-                              .state
-                              ?.conversationId;
+                          final conversationId =
+                              ref.read(currentConversationIdProvider);
                           if (conversationId == null) return;
                           ShowPinMessageKeyValue.instance
                               .dismiss(conversationId);
@@ -927,34 +942,33 @@ class _PinMessagesBanner extends HookWidget {
   }
 }
 
-class _JumpMentionButton extends HookWidget {
+class _JumpMentionButton extends HookConsumerWidget {
   const _JumpMentionButton();
 
   @override
-  Widget build(BuildContext context) {
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-      when: (conversationId) => conversationId != null,
-    )!;
-    final messageMentions = useMemoizedStream(
-            () => context.database.messageMentionDao
-                    .unreadMentionMessageByConversationId(conversationId)
-                    .watchWithStream(
-                  eventStreams: [
-                    DataBaseEventBus.instance.watchUpdateMessageMention(
-                      conversationIds: [conversationId],
-                    )
-                  ],
-                  duration: kSlowThrottleDuration,
-                ),
-            keys: [conversationId]).data ??
+  Widget build(BuildContext context, WidgetRef ref) {
+    final conversationId = ref.watch(currentConversationIdProvider);
+    final messageMentions = useMemoizedStream(() {
+          if (conversationId == null) return Stream.value(<MessageMention>[]);
+          return context.database.messageMentionDao
+              .unreadMentionMessageByConversationId(conversationId)
+              .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateMessageMention(
+                conversationIds: [conversationId],
+              )
+            ],
+            duration: kSlowThrottleDuration,
+          );
+        }, keys: [conversationId]).data ??
         [];
 
     if (messageMentions.isEmpty) return const SizedBox();
 
     return InteractiveDecoratedBox(
       onTap: () {
+        if (messageMentions.isEmpty) return;
+
         final mention = messageMentions.first;
         context.read<MessageBloc>().scrollTo(mention.messageId);
         context.accountServer
@@ -1020,7 +1034,7 @@ class _JumpMentionButton extends HookWidget {
   }
 }
 
-class _ChatDropOverlay extends HookWidget {
+class _ChatDropOverlay extends HookConsumerWidget {
   const _ChatDropOverlay({
     required this.child,
     required this.enable,
@@ -1031,7 +1045,7 @@ class _ChatDropOverlay extends HookWidget {
   final bool enable;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final dragging = useState(false);
     final enable = useState(true);
     return DropTarget(
@@ -1093,7 +1107,7 @@ class _ChatDragIndicator extends StatelessWidget {
       );
 }
 
-class _ChatMenuHandler extends HookWidget {
+class _ChatMenuHandler extends HookConsumerWidget {
   const _ChatMenuHandler({
     required this.child,
   });
@@ -1101,18 +1115,14 @@ class _ChatMenuHandler extends HookWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-      when: (conversationId) => conversationId != null,
-    )!;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final conversationId = ref.watch(currentConversationIdProvider);
 
     useEffect(() {
       final cubit = context.read<MacMenuBarCubit?>();
-      if (cubit == null) {
-        return null;
-      }
+      if (cubit == null) return null;
+      if (conversationId == null) return null;
+
       final handle = _ConversationHandle(context, conversationId);
       cubit.attach(handle);
       return () => cubit.unAttach(handle);
@@ -1130,7 +1140,8 @@ class _ConversationHandle extends ConversationMenuHandle {
 
   @override
   Future<void> delete() async {
-    final name = context.read<ConversationCubit>().state?.name ?? '';
+    final name =
+        context.providerContainer.read(currentConversationNameProvider) ?? '';
     assert(name.isNotEmpty, 'name is empty');
     final ret = await showConfirmMixinDialog(
       context,
@@ -1140,21 +1151,23 @@ class _ConversationHandle extends ConversationMenuHandle {
     if (ret == null) return;
     await context.accountServer.deleteMessagesByConversationId(conversationId);
     await context.database.conversationDao.deleteConversation(conversationId);
-    if (context.read<ConversationCubit>().state?.conversationId ==
+    if (context.providerContainer.read(currentConversationIdProvider) ==
         conversationId) {
-      context.read<ConversationCubit>().unselected();
+      context.providerContainer
+          .read(conversationProvider.notifier)
+          .unselected();
     }
   }
 
   @override
-  Stream<bool> get isMuted => context
-      .read<ConversationCubit>()
+  Stream<bool> get isMuted => context.providerContainer
+      .read(conversationProvider.notifier)
       .stream
       .map((event) => event?.conversation?.isMute == true);
 
   @override
-  Stream<bool> get isPinned => context
-      .read<ConversationCubit>()
+  Stream<bool> get isPinned => context.providerContainer
+      .read(conversationProvider.notifier)
       .stream
       .map((event) => event?.conversation?.pinTime != null);
 
@@ -1163,10 +1176,10 @@ class _ConversationHandle extends ConversationMenuHandle {
     final result = await showMixinDialog<int?>(
         context: context, child: const MuteDialog());
     if (result == null) return;
-    final conversationState = context.read<ConversationCubit>().state;
-    if (conversationState == null) {
-      return;
-    }
+    final conversationState =
+        context.providerContainer.read(conversationProvider);
+    if (conversationState == null) return;
+
     final isGroupConversation = conversationState.isGroup == true;
     await runFutureWithToast(
       context.accountServer.muteConversation(
@@ -1211,10 +1224,10 @@ class _ConversationHandle extends ConversationMenuHandle {
 
   @override
   void unmute() {
-    final conversationState = context.read<ConversationCubit>().state;
-    if (conversationState == null) {
-      return;
-    }
+    final conversationState =
+        context.providerContainer.read(conversationProvider);
+    if (conversationState == null) return;
+
     final isGroup = conversationState.isGroup == true;
     runFutureWithToast(
       context.accountServer.unMuteConversation(

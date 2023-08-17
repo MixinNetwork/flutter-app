@@ -11,9 +11,9 @@ import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../ui/home/bloc/blink_cubit.dart';
-import '../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
+import '../../../ui/provider/conversation_provider.dart';
 import '../../../ui/provider/mention_cache_provider.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
@@ -29,7 +29,7 @@ import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
 
 // ignore_for_file: avoid_dynamic_calls
-class QuoteMessage extends HookWidget {
+class QuoteMessage extends HookConsumerWidget {
   const QuoteMessage({
     super.key,
     this.content,
@@ -46,7 +46,7 @@ class QuoteMessage extends HookWidget {
   final bool isTranscriptPage;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final decodeMap = useMemoized(() {
       if (content == null) return null;
       return jsonDecode(content!);
@@ -380,7 +380,7 @@ class _QuoteMessageBase extends StatelessWidget {
 
           try {
             if (context.isPinnedPage) {
-              ConversationCubit.selectConversation(
+              ConversationStateNotifier.selectConversation(
                 context,
                 context.message.conversationId,
                 initIndexMessageId: quoteMessageId,

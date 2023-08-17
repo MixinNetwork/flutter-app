@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
-import '../home/route/responsive_navigator_cubit.dart';
+import '../provider/responsive_navigator_provider.dart';
 import '../provider/setting_provider.dart';
 
 class StoragePage extends HookConsumerWidget {
@@ -89,9 +89,9 @@ class StoragePage extends HookConsumerWidget {
                 cellBackgroundColor: context.theme.settingCellBackgroundColor,
                 child: CellItem(
                   title: Text(context.l10n.storageUsage),
-                  onTap: () => context
-                      .read<ResponsiveNavigatorCubit>()
-                      .pushPage(ResponsiveNavigatorCubit.storageUsage),
+                  onTap: () => ref
+                      .read(responsiveNavigatorProvider.notifier)
+                      .pushPage(ResponsiveNavigatorStateNotifier.storageUsage),
                 ),
               )
             ],

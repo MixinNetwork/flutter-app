@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -127,7 +128,7 @@ Future<VerificationResponse> requestVerificationCode({
   }
 }
 
-class VerificationCodeInputLayout extends HookWidget {
+class VerificationCodeInputLayout extends HookConsumerWidget {
   const VerificationCodeInputLayout({
     super.key,
     required this.phoneNumber,
@@ -144,7 +145,7 @@ class VerificationCodeInputLayout extends HookWidget {
   final void Function(String, VerificationResponse) onVerification;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final codeInputController = useTextEditingController();
     final verification =
         useRef<VerificationResponse>(initialVerificationResponse);
@@ -219,13 +220,13 @@ class VerificationCodeInputLayout extends HookWidget {
   }
 }
 
-class ResendCodeWidget extends HookWidget {
+class ResendCodeWidget extends HookConsumerWidget {
   const ResendCodeWidget({super.key, required this.onResend});
 
   final Future<bool> Function() onResend;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final nextDuration = useState(60);
     useEffect(() {
       final timer = Timer.periodic(

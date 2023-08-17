@@ -4,8 +4,9 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class HighlightText extends HookWidget {
+class HighlightText extends HookConsumerWidget {
   const HighlightText(
     this.text, {
     super.key,
@@ -24,7 +25,7 @@ class HighlightText extends HookWidget {
   final TextAlign? textAlign;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final spans = useMemoized(
       () => buildHighlightTextSpan(text, highlightTextSpans, style),
       [text, highlightTextSpans, style],
@@ -79,7 +80,7 @@ List<InlineSpan> buildHighlightTextSpan(
   return children;
 }
 
-class HighlightSelectableText extends HookWidget {
+class HighlightSelectableText extends HookConsumerWidget {
   const HighlightSelectableText(
     this.text, {
     super.key,
@@ -94,7 +95,7 @@ class HighlightSelectableText extends HookWidget {
   final int? maxLines;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final spans = useMemoized(
       () => buildHighlightTextSpan(text, highlightTextSpans, style),
       [text, highlightTextSpans, style],
@@ -129,7 +130,7 @@ class HighlightTextSpan extends Equatable {
       ];
 }
 
-class HighlightStarLinkText extends HookWidget {
+class HighlightStarLinkText extends HookConsumerWidget {
   const HighlightStarLinkText(
     this.text, {
     super.key,
@@ -150,7 +151,7 @@ class HighlightStarLinkText extends HookWidget {
   final TextOverflow? overflow;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final spans = useMemoized(
       () {
         // replace ** around text with highlight text span

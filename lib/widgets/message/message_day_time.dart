@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../bloc/minute_timer_cubit.dart';
 import '../../db/mixin_database.dart' as db;
+import '../../ui/provider/minute_timer_provider.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -11,7 +12,7 @@ import '../../utils/logger.dart';
 import 'message.dart';
 import 'message_style.dart';
 
-class MessageDayTime extends HookWidget {
+class MessageDayTime extends HookConsumerWidget {
   const MessageDayTime({
     super.key,
     required this.dateTime,
@@ -20,7 +21,7 @@ class MessageDayTime extends HookWidget {
   final DateTime dateTime;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final hide =
         useBlocStateConverter<HiddenMessageDayTimeBloc, DateTime?, bool>(
       converter: (state) => isSameDay(state, dateTime),
@@ -35,18 +36,15 @@ class MessageDayTime extends HookWidget {
   }
 }
 
-class _MessageDayTimeWidget extends HookWidget {
+class _MessageDayTimeWidget extends HookConsumerWidget {
   const _MessageDayTimeWidget({required this.dateTime});
 
   final DateTime dateTime;
 
   @override
-  Widget build(BuildContext context) {
-    final dateTimeString =
-        useBlocStateConverter<MinuteTimerCubit, DateTime, String>(
-      converter: (_) => dateTime.formatOfDay,
-      keys: [dateTime],
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dateTimeString = ref.watch(formattedDayProvider(dateTime));
+
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 10),
       child: Container(
@@ -107,7 +105,7 @@ class _CurrentShowingMessages {
   }
 }
 
-class MessageDayTimeViewportWidget extends HookWidget {
+class MessageDayTimeViewportWidget extends HookConsumerWidget {
   const MessageDayTimeViewportWidget._create(
     this._traversalCurrentShowingMessageElements, {
     required this.child,
@@ -183,7 +181,7 @@ class MessageDayTimeViewportWidget extends HookWidget {
       _traversalCurrentShowingMessageElements;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final dateTime = useState<DateTime?>(null);
     final dateTimeTopOffset = useState<double>(0);
 

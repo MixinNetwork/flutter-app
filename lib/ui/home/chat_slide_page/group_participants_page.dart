@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
@@ -18,21 +19,18 @@ import '../../../widgets/search_text_field.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/conversation_provider.dart';
 import 'group_invite/group_invite_dialog.dart';
 
 /// The participants of group.
-class GroupParticipantsPage extends HookWidget {
-  const GroupParticipantsPage({super.key});
+class GroupParticipantsPage extends HookConsumerWidget {
+  const GroupParticipantsPage(this.conversationState, {super.key});
+
+  final ConversationState conversationState;
 
   @override
-  Widget build(BuildContext context) {
-    final conversationId = useMemoized(() {
-      final conversationId =
-          context.read<ConversationCubit>().state?.conversationId;
-      assert(conversationId != null);
-      return conversationId!;
-    });
+  Widget build(BuildContext context, WidgetRef ref) {
+    final conversationId = conversationState.conversationId;
 
     final participants = useMemoizedStream(() {
           final dao = context.database.participantDao;
@@ -90,7 +88,7 @@ class GroupParticipantsPage extends HookWidget {
   }
 }
 
-class _ParticipantList extends HookWidget {
+class _ParticipantList extends HookConsumerWidget {
   const _ParticipantList({
     required this.filterKeyword,
     required this.participants,
@@ -106,7 +104,7 @@ class _ParticipantList extends HookWidget {
   final ParticipantUser? currentUser;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final keyword = useValueListenable(filterKeyword).text.trim();
     final filteredParticipants = useMemoized(() {
       if (keyword.isEmpty) {
@@ -191,7 +189,7 @@ class _ParticipantTile extends StatelessWidget {
       );
 }
 
-class _ParticipantMenuEntry extends StatelessWidget {
+class _ParticipantMenuEntry extends HookConsumerWidget {
   const _ParticipantMenuEntry({
     required this.child,
     required this.participant,
@@ -203,7 +201,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final self = participant.userId == context.accountServer.userId;
     if (self) {
       return child;
@@ -217,7 +215,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
             title:
                 context.l10n.groupPopMenuMessage(participant.fullName ?? '?'),
             onTap: () {
-              ConversationCubit.selectUser(
+              ConversationStateNotifier.selectUser(
                 context,
                 participant.userId,
               );
@@ -229,22 +227,27 @@ class _ParticipantMenuEntry extends StatelessWidget {
             menus.add(ContextMenu(
               icon: Resources.assetsImagesContextMenuUserEditSvg,
               title: context.l10n.makeGroupAdmin,
-              onTap: () => runFutureWithToast(
-                context.accountServer.updateParticipantRole(
-                    context.read<ConversationCubit>().state!.conversationId,
-                    participant.userId,
-                    ParticipantRole.admin),
-              ),
+              onTap: () {
+                final conversationId = ref.read(currentConversationIdProvider);
+                if (conversationId == null) return;
+
+                runFutureWithToast(
+                  context.accountServer.updateParticipantRole(conversationId,
+                      participant.userId, ParticipantRole.admin),
+                );
+              },
             ));
           } else {
             menus.add(ContextMenu(
               icon: Resources.assetsImagesContextMenuStopSvg,
               title: context.l10n.dismissAsAdmin,
-              onTap: () => runFutureWithToast(context.accountServer
-                  .updateParticipantRole(
-                      context.read<ConversationCubit>().state!.conversationId,
-                      participant.userId,
-                      null)),
+              onTap: () {
+                final conversationId = ref.read(currentConversationIdProvider);
+                if (conversationId == null) return;
+
+                runFutureWithToast(context.accountServer.updateParticipantRole(
+                    conversationId, participant.userId, null));
+              },
             ));
           }
         }
@@ -255,10 +258,13 @@ class _ParticipantMenuEntry extends StatelessWidget {
             icon: Resources.assetsImagesContextMenuDeleteSvg,
             isDestructiveAction: true,
             title: context.l10n.groupPopMenuRemove(participant.fullName ?? '?'),
-            onTap: () => runFutureWithToast(context.accountServer
-                .removeParticipant(
-                    context.read<ConversationCubit>().state!.conversationId,
-                    participant.userId)),
+            onTap: () {
+              final conversationId = ref.read(currentConversationIdProvider);
+              if (conversationId == null) return;
+
+              runFutureWithToast(context.accountServer
+                  .removeParticipant(conversationId, participant.userId));
+            },
           ));
         }
         return menus;
@@ -303,7 +309,7 @@ class _RoleLabel extends StatelessWidget {
       );
 }
 
-class _ActionAddParticipants extends StatelessWidget {
+class _ActionAddParticipants extends HookConsumerWidget {
   const _ActionAddParticipants({
     required this.participants,
   });
@@ -311,7 +317,7 @@ class _ActionAddParticipants extends StatelessWidget {
   final List<ParticipantUser> participants;
 
   @override
-  Widget build(BuildContext context) => ContextMenuPortalEntry(
+  Widget build(BuildContext context, WidgetRef ref) => ContextMenuPortalEntry(
         buildMenus: () => [
           ContextMenu(
             icon: Resources.assetsImagesContextMenuSearchUserSvg,
@@ -327,11 +333,11 @@ class _ActionAddParticipants extends StatelessWidget {
 
               final userIds =
                   result.map((e) => e.userId).whereNotNull().toList();
-              final conversationId =
-                  context.read<ConversationCubit>().state?.conversationId;
-              assert(conversationId != null);
+              final conversationId = ref.read(currentConversationIdProvider);
+              if (conversationId == null) return;
+
               await runFutureWithToast(
-                context.accountServer.addParticipant(conversationId!, userIds),
+                context.accountServer.addParticipant(conversationId, userIds),
               );
             },
           ),
@@ -339,10 +345,11 @@ class _ActionAddParticipants extends StatelessWidget {
             icon: Resources.assetsImagesContextMenuLinkSvg,
             title: context.l10n.inviteToGroupViaLink,
             onTap: () {
-              final conversationCubit = context.read<ConversationCubit>().state;
-              assert(conversationCubit != null);
+              final conversationId = ref.read(currentConversationIdProvider);
+              if (conversationId == null) return;
+
               showGroupInviteByLinkDialog(context,
-                  conversationId: conversationCubit!.conversationId);
+                  conversationId: conversationId);
             },
           ),
         ],

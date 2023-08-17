@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../app.dart';
@@ -8,7 +9,7 @@ import '../../utils/hook.dart';
 import '../cache_image.dart';
 import '../cache_lottie.dart';
 
-class StickerItem extends HookWidget {
+class StickerItem extends HookConsumerWidget {
   const StickerItem({
     super.key,
     required this.assetUrl,
@@ -25,7 +26,7 @@ class StickerItem extends HookWidget {
   final double? height;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isJson = useMemoized(() => assetType == 'json', [assetType]);
 
     final playing = useState(true);

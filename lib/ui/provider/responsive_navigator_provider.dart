@@ -1,25 +1,24 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../setting/about_page.dart';
-import '../../setting/account_delete_page.dart';
-import '../../setting/account_page.dart';
-import '../../setting/appearance_page.dart';
-import '../../setting/backup_page.dart';
-import '../../setting/edit_profile_page.dart';
-import '../../setting/notification_page.dart';
-import '../../setting/proxy_page.dart';
-import '../../setting/security_page.dart';
-import '../../setting/storage_page.dart';
-import '../../setting/storage_usage_detail_page.dart';
-import '../../setting/storage_usage_list_page.dart';
-import '../chat/chat_page.dart';
-import 'responsive_navigator.dart';
+import '../home/chat/chat_page.dart';
+import '../setting/about_page.dart';
+import '../setting/account_delete_page.dart';
+import '../setting/account_page.dart';
+import '../setting/appearance_page.dart';
+import '../setting/backup_page.dart';
+import '../setting/edit_profile_page.dart';
+import '../setting/notification_page.dart';
+import '../setting/proxy_page.dart';
+import '../setting/security_page.dart';
+import '../setting/storage_page.dart';
+import '../setting/storage_usage_detail_page.dart';
+import '../setting/storage_usage_list_page.dart';
+import 'abstract_responsive_navigator.dart';
 
-part 'responsive_navigator_state.dart';
-
-class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
-  ResponsiveNavigatorCubit() : super(const ResponsiveNavigatorState());
+class ResponsiveNavigatorStateNotifier
+    extends AbstractResponsiveNavigatorStateNotifier {
+  ResponsiveNavigatorStateNotifier() : super(const ResponsiveNavigatorState());
 
   final _chatPageKey = GlobalKey();
 
@@ -60,57 +59,43 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
         return MaterialPage(
           key: const ValueKey(chatPage),
           name: chatPage,
-          child: ChatPage(
-            key: _chatPageKey,
-          ),
+          child: ChatPage(key: _chatPageKey),
         );
       case editProfilePage:
         return const MaterialPage(
           key: ValueKey(editProfilePage),
           name: editProfilePage,
-          child: EditProfilePage(
-            key: ValueKey(editProfilePage),
-          ),
+          child: EditProfilePage(key: ValueKey(editProfilePage)),
         );
       case notificationPage:
         return const MaterialPage(
           key: ValueKey(notificationPage),
           name: notificationPage,
-          child: NotificationPage(
-            key: ValueKey(notificationPage),
-          ),
+          child: NotificationPage(key: ValueKey(notificationPage)),
         );
       case chatBackupPage:
         return const MaterialPage(
           key: ValueKey(chatBackupPage),
           name: chatBackupPage,
-          child: BackupPage(
-            key: ValueKey(chatBackupPage),
-          ),
+          child: BackupPage(key: ValueKey(chatBackupPage)),
         );
       case dataAndStorageUsagePage:
         return const MaterialPage(
           key: ValueKey(dataAndStorageUsagePage),
           name: dataAndStorageUsagePage,
-          child: StoragePage(
-            key: ValueKey(dataAndStorageUsagePage),
-          ),
+          child: StoragePage(key: ValueKey(dataAndStorageUsagePage)),
         );
       case aboutPage:
         return const MaterialPage(
           key: ValueKey(aboutPage),
           name: aboutPage,
-          child: AboutPage(
-            key: ValueKey(aboutPage),
-          ),
+          child: AboutPage(key: ValueKey(aboutPage)),
         );
       case storageUsage:
         return const MaterialPage(
           key: ValueKey(storageUsage),
           name: storageUsage,
-          child: StorageUsageListPage(
-            key: ValueKey(storageUsage),
-          ),
+          child: StorageUsageListPage(key: ValueKey(storageUsage)),
         );
       case storageUsageDetail:
         if (arguments == null || arguments is! (String, String)) {
@@ -130,43 +115,40 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
         return const MaterialPage(
             key: ValueKey(appearancePage),
             name: appearancePage,
-            child: AppearancePage(
-              key: ValueKey(appearancePage),
-            ));
+            child: AppearancePage(key: ValueKey(appearancePage)));
       case accountPage:
         return const MaterialPage(
           key: ValueKey(accountPage),
           name: accountPage,
-          child: AccountPage(
-            key: ValueKey(accountPage),
-          ),
+          child: AccountPage(key: ValueKey(accountPage)),
         );
       case accountDeletePage:
         return const MaterialPage(
           key: ValueKey(accountDeletePage),
           name: accountDeletePage,
-          child: AccountDeletePage(
-            key: ValueKey(accountDeletePage),
-          ),
+          child: AccountDeletePage(key: ValueKey(accountDeletePage)),
         );
       case proxyPage:
         return const MaterialPage(
           key: ValueKey(proxyPage),
           name: proxyPage,
-          child: ProxyPage(
-            key: ValueKey(proxyPage),
-          ),
+          child: ProxyPage(key: ValueKey(proxyPage)),
         );
       case securityPage:
         return const MaterialPage(
           key: ValueKey(securityPage),
           name: securityPage,
-          child: SecurityPage(
-            key: ValueKey(securityPage),
-          ),
+          child: SecurityPage(key: ValueKey(securityPage)),
         );
       default:
         throw ArgumentError('Invalid route');
     }
   }
 }
+
+final responsiveNavigatorProvider = StateNotifierProvider.autoDispose<
+    ResponsiveNavigatorStateNotifier,
+    ResponsiveNavigatorState>((ref) => ResponsiveNavigatorStateNotifier());
+
+final navigatorRouteModeProvider =
+    responsiveNavigatorProvider.select((value) => value.routeMode);

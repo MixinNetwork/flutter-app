@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -26,7 +27,7 @@ import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/menu.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/conversation_provider.dart';
 import '../bloc/quote_message_cubit.dart';
 import 'image_editor.dart';
 
@@ -74,7 +75,7 @@ const _kDefaultArchiveName = 'Archive.zip';
 
 enum _TabType { image, files, zip }
 
-class _FilesPreviewDialog extends HookWidget {
+class _FilesPreviewDialog extends HookConsumerWidget {
   const _FilesPreviewDialog({
     required this.initialFiles,
     this.quoteMessageCubit,
@@ -84,7 +85,7 @@ class _FilesPreviewDialog extends HookWidget {
   final QuoteMessageCubit? quoteMessageCubit;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final files = useState(initialFiles);
 
     final hasImage = useMemoized(
@@ -305,7 +306,7 @@ Future<void> _sendFile(
   String? quoteMessageId, {
   required bool silent,
 }) async {
-  final conversationItem = context.read<ConversationCubit>().state;
+  final conversationItem = context.providerContainer.read(conversationProvider);
   if (conversationItem == null) return;
   final xFile = file.file;
   if (xFile.isImage) {
@@ -337,7 +338,7 @@ Future<void> _sendFile(
   );
 }
 
-class _AnimatedFileTile extends HookWidget {
+class _AnimatedFileTile extends HookConsumerWidget {
   const _AnimatedFileTile({
     super.key,
     required this.file,
@@ -357,7 +358,7 @@ class _AnimatedFileTile extends HookWidget {
   final ValueNotifier<bool> showBigImage;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final big = useValueListenable(showBigImage);
     return SizeTransition(
       sizeFactor: animation,
@@ -486,7 +487,7 @@ class _PageZip extends StatelessWidget {
       );
 }
 
-class _AnimatedListBuilder extends HookWidget {
+class _AnimatedListBuilder extends HookConsumerWidget {
   const _AnimatedListBuilder({
     required this.files,
     required this.onFileAdded,
@@ -501,7 +502,7 @@ class _AnimatedListBuilder extends HookWidget {
   final Widget Function(BuildContext, _File, Animation<double>) builder;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final animatedListKey = useMemoized(() => GlobalKey<AnimatedListState>(
           debugLabel: 'file_preview_dialog',
         ));
@@ -529,7 +530,7 @@ class _AnimatedListBuilder extends HookWidget {
   }
 }
 
-class _TileBigImage extends HookWidget {
+class _TileBigImage extends HookConsumerWidget {
   const _TileBigImage({
     required this.file,
     required this.onDelete,
@@ -543,7 +544,7 @@ class _TileBigImage extends HookWidget {
   final _ImageEditedCallback onEdited;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     assert(file.isImage);
 
     return Padding(
@@ -637,7 +638,7 @@ class _FileIcon extends StatelessWidget {
       );
 }
 
-class _TileNormalFile extends HookWidget {
+class _TileNormalFile extends HookConsumerWidget {
   const _TileNormalFile({
     required this.file,
     required this.onDelete,
@@ -658,7 +659,7 @@ class _TileNormalFile extends HookWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Row(
+  Widget build(BuildContext context, WidgetRef ref) => Row(
         children: [
           const SizedBox(width: 30),
           _FileIcon(extension: _getFileExtension(file)),
@@ -700,7 +701,7 @@ class _TileNormalFile extends HookWidget {
       );
 }
 
-class _FileInputOverlay extends HookWidget {
+class _FileInputOverlay extends HookConsumerWidget {
   const _FileInputOverlay({
     required this.child,
     required this.onFileAdded,
@@ -713,7 +714,7 @@ class _FileInputOverlay extends HookWidget {
   final void Function() onSend;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final dragging = useState(false);
     return FocusableActionDetector(
       autofocus: true,

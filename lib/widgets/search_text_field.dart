@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../constants/constants.dart';
 import '../constants/resources.dart';
@@ -9,7 +10,7 @@ import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import 'interactive_decorated_box.dart';
 
-class SearchTextField extends HookWidget {
+class SearchTextField extends HookConsumerWidget {
   const SearchTextField({
     super.key,
     this.focusNode,
@@ -37,7 +38,7 @@ class SearchTextField extends HookWidget {
   final Widget? leading;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final _focusNode = useMemoized(() => focusNode ?? FocusNode());
     final backgroundColor = context.dynamicColor(
       const Color.fromRGBO(245, 247, 250, 1),
@@ -147,13 +148,13 @@ class SearchTextField extends HookWidget {
   }
 }
 
-class _SearchClearIcon extends HookWidget {
+class _SearchClearIcon extends HookConsumerWidget {
   const _SearchClearIcon({required this.onTap});
 
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InteractiveDecoratedBox(
+  Widget build(BuildContext context, WidgetRef ref) => InteractiveDecoratedBox(
         cursor: SystemMouseCursors.basic,
         onTap: onTap,
         child: Padding(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -165,7 +164,7 @@ class _LoginFailed extends HookConsumerWidget {
   }
 }
 
-class LandingScaffold extends HookWidget {
+class LandingScaffold extends HookConsumerWidget {
   const LandingScaffold({
     super.key,
     required this.child,
@@ -174,7 +173,7 @@ class LandingScaffold extends HookWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final info = useMemoizedFuture(getPackageInfo, null).data;
     return Portal(
       child: Scaffold(
@@ -218,11 +217,11 @@ class LandingScaffold extends HookWidget {
   }
 }
 
-class LandingModeSwitchButton extends HookWidget {
+class LandingModeSwitchButton extends HookConsumerWidget {
   const LandingModeSwitchButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final mode = useBlocState<LandingModeCubit, LandingMode>();
     final String buttonText;
     switch (mode) {

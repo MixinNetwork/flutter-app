@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:ogg_opus_player/ogg_opus_player.dart';
 
 import '../../../constants/resources.dart';
@@ -19,7 +20,7 @@ import '../../../widgets/action_button.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/waveform_widget.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/conversation_provider.dart';
 import '../bloc/quote_message_cubit.dart';
 
 enum RecorderState {
@@ -172,7 +173,7 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
   }
 }
 
-class VoiceRecorderBarOverlayComposition extends HookWidget {
+class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
   const VoiceRecorderBarOverlayComposition({
     super.key,
     required this.child,
@@ -184,7 +185,7 @@ class VoiceRecorderBarOverlayComposition extends HookWidget {
   final double layoutWidth;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isRecorderMode = useBlocStateConverter<VoiceRecorderCubit,
         VoiceRecorderCubitState, bool>(
       converter: (state) => state.state != RecorderState.idle,
@@ -196,7 +197,6 @@ class VoiceRecorderBarOverlayComposition extends HookWidget {
 
     final voiceRecorderCubit = context.read<VoiceRecorderCubit>();
     final quoteMessageCubit = context.read<QuoteMessageCubit>();
-    final conversationCubit = context.read<ConversationCubit>();
 
     useEffect(
       () {
@@ -213,9 +213,6 @@ class VoiceRecorderBarOverlayComposition extends HookWidget {
               ),
               BlocProvider<QuoteMessageCubit>.value(
                 value: quoteMessageCubit,
-              ),
-              BlocProvider<ConversationCubit>.value(
-                value: conversationCubit,
               ),
             ],
             child: _RecordingInterceptor(
@@ -246,13 +243,13 @@ class VoiceRecorderBarOverlayComposition extends HookWidget {
   }
 }
 
-class _RecordingInterceptor extends HookWidget {
+class _RecordingInterceptor extends HookConsumerWidget {
   const _RecordingInterceptor({required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isRecording = useBlocStateConverter<VoiceRecorderCubit,
         VoiceRecorderCubitState, bool>(
       converter: (state) => state.state == RecorderState.recording,
@@ -351,11 +348,11 @@ void _showDiscardRecordingWarningAlertOverlay(
   overlay.insert(entry!);
 }
 
-class VoiceRecorderBottomBar extends HookWidget {
+class VoiceRecorderBottomBar extends HookConsumerWidget {
   const VoiceRecorderBottomBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final startTime = useBlocStateConverter<VoiceRecorderCubit,
         VoiceRecorderCubitState, DateTime?>(
       converter: (state) => state.startTime,
@@ -455,7 +452,7 @@ class VoiceRecorderBottomBar extends HookWidget {
             name: Resources.assetsImagesIcSendSvg,
             color: context.theme.icon,
             onTap: () async {
-              final conversationItem = context.read<ConversationCubit>().state;
+              final conversationItem = ref.read(conversationProvider);
               final accountServer = context.accountServer;
               final quietMessageId =
                   context.read<QuoteMessageCubit>().state?.messageId;
@@ -540,13 +537,13 @@ class _Player {
   }
 }
 
-class _RecordedResultPreviewLayout extends HookWidget {
+class _RecordedResultPreviewLayout extends HookConsumerWidget {
   const _RecordedResultPreviewLayout({required this.result});
 
   final RecordedData result;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final player = useMemoized(
       () => _Player(result.path),
     );
@@ -607,7 +604,7 @@ class _RecordedResultPreviewLayout extends HookWidget {
   }
 }
 
-class _TickRefreshContainer extends HookWidget {
+class _TickRefreshContainer extends HookConsumerWidget {
   const _TickRefreshContainer({
     required this.builder,
     required this.active,
@@ -617,7 +614,7 @@ class _TickRefreshContainer extends HookWidget {
   final bool active;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tickerProvider = useSingleTickerProvider();
     final state = useState<bool>(false);
     final ticker = useMemoized(

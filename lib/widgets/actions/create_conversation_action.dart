@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../ui/home/bloc/conversation_cubit.dart';
+import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../user_selector/conversation_selector.dart';
 import 'actions.dart';
@@ -23,7 +23,7 @@ class CreateConversationAction extends Action<CreateConversationIntent> {
     }
     final userId = list.first.userId!;
 
-    await ConversationCubit.selectUser(
+    await ConversationStateNotifier.selectUser(
       context,
       userId,
     );

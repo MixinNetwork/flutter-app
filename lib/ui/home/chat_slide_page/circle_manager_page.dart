@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/dao/circle_dao.dart';
 import '../../../db/database_event_bus.dart';
-
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -14,20 +13,17 @@ import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/toast.dart';
-import '../bloc/conversation_cubit.dart';
+import '../../provider/conversation_provider.dart';
 
-class CircleManagerPage extends HookWidget {
-  const CircleManagerPage({super.key});
+class CircleManagerPage extends HookConsumerWidget {
+  const CircleManagerPage(this.conversationState, {super.key});
+
+  final ConversationState conversationState;
+
+  String get conversationId => conversationState.conversationId;
 
   @override
-  Widget build(BuildContext context) {
-    final conversationId = useMemoized(() {
-      final state = context.read<ConversationCubit>().state;
-      final conversationId = state?.conversationId;
-      assert(conversationId != null);
-      return conversationId;
-    })!;
-
+  Widget build(BuildContext context, WidgetRef ref) {
     final circles = useMemoizedStream<List<ConversationCircleManagerItem>>(
           () => context.database.circleDao
               .circleByConversationId(conversationId)
@@ -63,8 +59,10 @@ class CircleManagerPage extends HookWidget {
           ActionButton(
             name: Resources.assetsImagesIcAddSvg,
             onTap: () async {
-              final conversation = context.read<ConversationCubit>().state;
-              if (conversation?.conversationId.isEmpty ?? true) return;
+              final (conversationId, userId) = ref.read(conversationProvider
+                  .select((value) => (value?.conversationId, value?.userId)));
+
+              if (conversationId == null || userId == null) return;
 
               final name = await showMixinDialog<String>(
                 context: context,
@@ -78,8 +76,8 @@ class CircleManagerPage extends HookWidget {
                 context.accountServer.createCircle(name!, [
                   CircleConversationRequest(
                     action: CircleConversationAction.add,
-                    conversationId: conversation!.conversationId,
-                    userId: conversation.userId,
+                    conversationId: conversationId,
+                    userId: userId,
                   ),
                 ]),
               );
@@ -115,7 +113,7 @@ class CircleManagerPage extends HookWidget {
   }
 }
 
-class _CircleManagerItem extends StatelessWidget {
+class _CircleManagerItem extends HookConsumerWidget {
   const _CircleManagerItem({
     required this.name,
     required this.count,
@@ -129,20 +127,22 @@ class _CircleManagerItem extends StatelessWidget {
   final bool selected;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context, WidgetRef ref) => Container(
         height: 80,
         color: context.theme.primary,
         child: Row(
           children: [
             GestureDetector(
               onTap: () async {
-                final conversation = context.read<ConversationCubit>().state;
-                if (conversation?.conversationId.isEmpty ?? true) return;
+                final (conversationId, userId) = ref.read(conversationProvider
+                    .select((value) => (value?.conversationId, value?.userId)));
+
+                if (conversationId == null || userId == null) return;
 
                 if (selected) {
                   await runFutureWithToast(
-                    context.accountServer.circleRemoveConversation(
-                        circleId, conversation!.conversationId),
+                    context.accountServer
+                        .circleRemoveConversation(circleId, conversationId),
                   );
                   return;
                 }
@@ -153,8 +153,8 @@ class _CircleManagerItem extends StatelessWidget {
                     [
                       CircleConversationRequest(
                         action: CircleConversationAction.add,
-                        conversationId: conversation!.conversationId,
-                        userId: conversation.userId,
+                        conversationId: conversationId,
+                        userId: userId,
                       ),
                     ],
                   ),

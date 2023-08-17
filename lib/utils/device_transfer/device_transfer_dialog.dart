@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../constants/resources.dart';
 import '../../widgets/app_bar.dart';
@@ -72,11 +72,11 @@ class _NavigatorCubit extends Cubit<_NavigatorState> {
   }
 }
 
-class _Navigator extends HookWidget {
+class _Navigator extends HookConsumerWidget {
   const _Navigator();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cubit = useBloc(_NavigatorCubit.new);
     final pages = useBlocState<_NavigatorCubit, _NavigatorState>(bloc: cubit);
     return BlocProvider.value(
@@ -137,13 +137,13 @@ class _DeviceTransferPage extends StatelessWidget {
       );
 }
 
-class _DialogBackButton extends HookWidget {
+class _DialogBackButton extends HookConsumerWidget {
   const _DialogBackButton({this.onTapped});
 
   final VoidCallback? onTapped;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final canPopup =
         useBlocStateConverter<_NavigatorCubit, _NavigatorState, bool>(
             converter: (state) => state.pages.length > 1);
@@ -212,11 +212,11 @@ class _RestorePage extends StatelessWidget {
       );
 }
 
-class _RestoreWaitingConnectPage extends HookWidget {
+class _RestoreWaitingConnectPage extends HookConsumerWidget {
   const _RestoreWaitingConnectPage();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     useOnTransferEventType(DeviceTransferCallbackType.onRestoreStart, () {
       i('_RestoreWaitingConnectPage: onRestoreStart, closing dialog');
       Navigator.maybeOf(context, rootNavigator: true)?.pop();
@@ -327,11 +327,11 @@ class _BackupPage extends StatelessWidget {
       );
 }
 
-class _BackupWaitingConnectPage extends HookWidget {
+class _BackupWaitingConnectPage extends HookConsumerWidget {
   const _BackupWaitingConnectPage();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     useOnTransferEventType(DeviceTransferCallbackType.onBackupStart, () {
       i('_BackupWaitingConnectPage: onBackupStart, closing dialog');
       Navigator.maybeOf(context, rootNavigator: true)?.pop();

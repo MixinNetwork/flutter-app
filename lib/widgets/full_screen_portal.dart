@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../bloc/simple_cubit.dart';
 import '../utils/hook.dart';
@@ -11,7 +11,7 @@ class FullScreenVisibleCubit extends SimpleCubit<bool> {
   FullScreenVisibleCubit(super.state);
 }
 
-class FullScreenPortal extends HookWidget {
+class FullScreenPortal extends HookConsumerWidget {
   const FullScreenPortal({
     super.key,
     required this.builder,
@@ -27,7 +27,7 @@ class FullScreenPortal extends HookWidget {
   final Curve curve;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final visibleBloc =
         useBloc<FullScreenVisibleCubit>(() => FullScreenVisibleCubit(false));
     final visible =

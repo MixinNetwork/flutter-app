@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../constants/resources.dart';
@@ -56,7 +57,7 @@ class MobileMixinWebView extends MixinWebView {
   }
 }
 
-class _FullWindowInAppWebViewPage extends HookWidget {
+class _FullWindowInAppWebViewPage extends HookConsumerWidget {
   const _FullWindowInAppWebViewPage({
     required this.initialUrl,
     required this.app,
@@ -68,7 +69,7 @@ class _FullWindowInAppWebViewPage extends HookWidget {
   final AppCardData? appCardData;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final webViewController = useMemoized(() => WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..loadRequest(Uri.parse(initialUrl)));

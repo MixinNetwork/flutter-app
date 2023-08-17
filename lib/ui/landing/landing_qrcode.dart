@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../constants/resources.dart';
@@ -12,11 +13,11 @@ import 'bloc/landing_cubit.dart';
 import 'bloc/landing_state.dart';
 import 'landing.dart';
 
-class LandingQrCodeWidget extends HookWidget {
+class LandingQrCodeWidget extends HookConsumerWidget {
   const LandingQrCodeWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final locale = useMemoized(() => Localizations.localeOf(context));
 
     final landingCubit = useBloc(() => LandingQrCodeCubit(
@@ -74,11 +75,11 @@ class LandingQrCodeWidget extends HookWidget {
   }
 }
 
-class _QrCode extends HookWidget {
+class _QrCode extends HookConsumerWidget {
   const _QrCode();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final url =
         useBlocStateConverter<LandingQrCodeCubit, LandingState, String?>(
             converter: (state) => state.authUrl);

@@ -9,7 +9,6 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
-import '../../db/global_hive.dart';
 import '../../utils/hydrated_bloc.dart';
 
 class AuthState extends Equatable {
@@ -72,8 +71,6 @@ class MultiAuthState extends Equatable {
 class MultiAuthStateNotifier extends StateNotifier<MultiAuthState> {
   MultiAuthStateNotifier(super.state);
 
-  static const _kMultiAuthNotifierProviderKey = 'auths';
-
   AuthState? get current => state.current;
 
   void signIn(AuthState authState) {
@@ -113,7 +110,8 @@ class MultiAuthStateNotifier extends StateNotifier<MultiAuthState> {
   @override
   @protected
   set state(MultiAuthState value) {
-    globalBox.put(_kMultiAuthNotifierProviderKey, state.toJson());
+    final hydratedJson = toHydratedJson(state.toMap());
+    HydratedBloc.storage.write(_kMultiAuthCubitKey, hydratedJson);
     super.state = value;
   }
 }
@@ -126,28 +124,14 @@ final multiAuthStateNotifierProvider =
         (ref) {
   ref.keepAlive();
 
-  //  migrate
-  {
-    final oldJson = HydratedBloc.storage.read(_kMultiAuthCubitKey);
-    if (oldJson != null) {
-      final multiAuthState = fromHydratedJson(oldJson, MultiAuthState.fromMap);
-      if (multiAuthState == null) {
-        return MultiAuthStateNotifier(const MultiAuthState());
-      }
-
-      globalBox.put(MultiAuthStateNotifier._kMultiAuthNotifierProviderKey,
-          multiAuthState.toJson());
-
-      HydratedBloc.storage.delete(_kMultiAuthCubitKey);
-
-      return MultiAuthStateNotifier(multiAuthState);
+  final oldJson = HydratedBloc.storage.read(_kMultiAuthCubitKey);
+  if (oldJson != null) {
+    final multiAuthState = fromHydratedJson(oldJson, MultiAuthState.fromMap);
+    if (multiAuthState == null) {
+      return MultiAuthStateNotifier(const MultiAuthState());
     }
 
-    final json =
-        globalBox.get(MultiAuthStateNotifier._kMultiAuthNotifierProviderKey);
-    if (json != null && json is String) {
-      return MultiAuthStateNotifier(MultiAuthState.fromJson(json));
-    }
+    return MultiAuthStateNotifier(multiAuthState);
   }
 
   return MultiAuthStateNotifier(const MultiAuthState());

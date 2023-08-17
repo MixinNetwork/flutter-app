@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 
 import '../bloc/simple_cubit.dart';
@@ -26,7 +27,7 @@ extension ContextMenuPortalEntrySender on BuildContext {
   void closeMenu() => read<_OffsetCubit>().emit(null);
 }
 
-class ContextMenuPortalEntry extends HookWidget {
+class ContextMenuPortalEntry extends HookConsumerWidget {
   const ContextMenuPortalEntry({
     super.key,
     required this.child,
@@ -45,7 +46,7 @@ class ContextMenuPortalEntry extends HookWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final offsetCubit = useBloc(() => _OffsetCubit(null));
     final offset = useBlocState<_OffsetCubit, Offset?>(
       bloc: offsetCubit,

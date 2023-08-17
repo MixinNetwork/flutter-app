@@ -5,7 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/constants.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/mixin_database.dart' hide User;
-import '../ui/home/bloc/conversation_cubit.dart';
+
+import '../ui/provider/conversation_provider.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/item/transfer/transfer_page.dart';
@@ -231,12 +232,12 @@ Future<bool> _selectConversation(
       showToastFailed(null);
       return false;
     } else {
-      await ConversationCubit.selectUser(context, userId);
+      await ConversationStateNotifier.selectUser(context, userId);
       return true;
     }
   }
 
-  await ConversationCubit.selectConversation(
+  await ConversationStateNotifier.selectConversation(
     context,
     conversationId,
     sync: true,

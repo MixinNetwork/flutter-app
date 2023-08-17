@@ -6,6 +6,7 @@ import '../../db/database.dart';
 import '../../utils/logger.dart';
 import 'database_provider.dart';
 import 'multi_auth_provider.dart';
+import 'selected_conversation_id.dart';
 import 'setting_provider.dart';
 
 class AccountServerOpener extends StateNotifier<AsyncValue<AccountServer>> {
@@ -19,6 +20,7 @@ class AccountServerOpener extends StateNotifier<AsyncValue<AccountServer>> {
     required this.sessionId,
     required this.identityNumber,
     required this.privateKey,
+    required this.selectedConversationIdController,
   }) : super(const AsyncValue.loading()) {
     _init();
   }
@@ -31,12 +33,14 @@ class AccountServerOpener extends StateNotifier<AsyncValue<AccountServer>> {
   late final String sessionId;
   late final String identityNumber;
   late final String privateKey;
+  late final StateController<String?> selectedConversationIdController;
 
   Future<void> _init() async {
     final accountServer = AccountServer(
-      multiAuthChangeNotifier,
-      settingChangeNotifier,
+      multiAuthNotifier: multiAuthChangeNotifier,
+      settingChangeNotifier: settingChangeNotifier,
       database: database,
+      selectedConversationIdController: selectedConversationIdController,
     );
 
     await accountServer.initServer(
@@ -66,6 +70,7 @@ class _Args extends Equatable {
     required this.privateKey,
     required this.multiAuthChangeNotifier,
     required this.settingChangeNotifier,
+    required this.selectedConversationIdController,
   });
 
   final Database? database;
@@ -75,6 +80,7 @@ class _Args extends Equatable {
   final String? privateKey;
   final MultiAuthStateNotifier multiAuthChangeNotifier;
   final SettingChangeNotifier settingChangeNotifier;
+  final StateController<String?> selectedConversationIdController;
 
   @override
   List<Object?> get props => [
@@ -85,6 +91,7 @@ class _Args extends Equatable {
         privateKey,
         multiAuthChangeNotifier,
         settingChangeNotifier,
+        selectedConversationIdController,
       ];
 }
 
@@ -101,6 +108,8 @@ final _argsProvider = Provider.autoDispose((ref) {
   final multiAuthChangeNotifier =
       ref.watch(multiAuthStateNotifierProvider.notifier);
   final settingChangeNotifier = ref.watch(settingProvider);
+  final selectedConversationIdController =
+      ref.watch(selectedConversationId.notifier);
   return _Args(
     database: database,
     userId: userId,
@@ -109,6 +118,7 @@ final _argsProvider = Provider.autoDispose((ref) {
     privateKey: privateKey,
     multiAuthChangeNotifier: multiAuthChangeNotifier,
     settingChangeNotifier: settingChangeNotifier,
+    selectedConversationIdController: selectedConversationIdController,
   );
 });
 
@@ -133,5 +143,6 @@ final accountServerProvider = StateNotifierProvider.autoDispose<
     sessionId: args.sessionId!,
     identityNumber: args.identityNumber!,
     privateKey: args.privateKey!,
+    selectedConversationIdController: args.selectedConversationIdController,
   );
 });

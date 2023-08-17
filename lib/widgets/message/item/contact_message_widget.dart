@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../utils/extension/extension.dart';
 import '../../avatar_view/avatar_view.dart';
@@ -12,11 +12,11 @@ import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_style.dart';
 
-class ContactMessageWidget extends HookWidget {
+class ContactMessageWidget extends HookConsumerWidget {
   const ContactMessageWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final sharedUserId =
         useMessageConverter(converter: (state) => state.sharedUserId);
     final sharedUserAvatarUrl =

@@ -1,13 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../utils/extension/extension.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
 import 'high_light_text.dart';
 
-class MoreExtendedText extends HookWidget {
+class MoreExtendedText extends HookConsumerWidget {
   const MoreExtendedText(
     this.text, {
     super.key,
@@ -18,7 +18,7 @@ class MoreExtendedText extends HookWidget {
   final TextStyle? style;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
+  Widget build(BuildContext context, WidgetRef ref) => LayoutBuilder(
         builder: (context, constraints) => _MoreExtendedText(
           text,
           style: style,
@@ -27,7 +27,7 @@ class MoreExtendedText extends HookWidget {
       );
 }
 
-class _MoreExtendedText extends HookWidget {
+class _MoreExtendedText extends HookConsumerWidget {
   const _MoreExtendedText(
     this.text, {
     required this.constraints,
@@ -39,7 +39,7 @@ class _MoreExtendedText extends HookWidget {
   final BoxConstraints constraints;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final expand = useState(false);
     final style =
         useMemoized(() => this.style?.merge(const TextStyle(height: 1)));

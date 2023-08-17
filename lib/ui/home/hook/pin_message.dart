@@ -9,7 +9,6 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/message/item/pin_message.dart';
 import '../../provider/mention_cache_provider.dart';
-import '../bloc/conversation_cubit.dart';
 
 class PinMessageState extends Equatable {
   const PinMessageState({
@@ -36,12 +35,8 @@ extension PinMessageCubitExtension on BuildContext {
   String? get lastMessage => read<PinMessageState>().lastMessage;
 }
 
-PinMessageState usePinMessageState() {
+PinMessageState usePinMessageState(String? conversationId) {
   final context = useContext();
-  final conversationId =
-      useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-    converter: (state) => state?.conversationId,
-  );
 
   final pinMessageIds = useMemoizedStream<List<String>>(
     () {

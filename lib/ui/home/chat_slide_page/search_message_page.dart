@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rxdart/rxdart.dart' hide ThrottleExtensions;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -17,18 +18,23 @@ import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/search_text_field.dart';
+import '../../provider/conversation_provider.dart';
 import '../bloc/blink_cubit.dart';
-import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
 import '../bloc/search_message_cubit.dart';
 import '../chat/chat_page.dart';
 import '../conversation/search_list.dart';
 
-class SearchMessagePage extends HookWidget {
-  const SearchMessagePage({super.key});
+class SearchMessagePage extends HookConsumerWidget {
+  const SearchMessagePage(
+    this.conversationState, {
+    super.key,
+  });
+
+  final ConversationState conversationState;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final categories = useMemoized(() => [
           _Category(
             context.l10n.text,
@@ -236,10 +242,13 @@ class SearchMessagePage extends HookWidget {
                       editingController.text = '';
                       selectedUser.value = user;
                     },
+                    conversationId: conversationState.conversationId,
+                    isBot: conversationState.isBot,
                   )
                 : _SearchMessageList(
                     selectedUserId: selectedUser.value?.userId,
                     categories: selectedCategories.value,
+                    conversationId: conversationState.conversationId,
                   ),
           ),
         ],
@@ -248,17 +257,19 @@ class SearchMessagePage extends HookWidget {
   }
 }
 
-class _SearchMessageList extends HookWidget {
+class _SearchMessageList extends HookConsumerWidget {
   const _SearchMessageList({
     this.selectedUserId,
     this.categories,
+    required this.conversationId,
   });
 
   final String? selectedUserId;
   final List<String>? categories;
+  final String conversationId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final (_, initKeyword) =
         useMemoized(() => context.read<SearchConversationKeywordCubit>().state);
     final keyword = useMemoizedStream(
@@ -269,13 +280,6 @@ class _SearchMessageList extends HookWidget {
               .debounceTime(const Duration(milliseconds: 150)),
         ).data ??
         initKeyword.trim();
-
-    final conversationId = useMemoized(() {
-      final conversationId =
-          context.read<ConversationCubit>().state?.conversationId;
-      assert(conversationId != null);
-      return conversationId!;
-    });
 
     final searchMessageCubit = useBloc(
       () => SearchMessageCubit.conversation(
@@ -302,7 +306,7 @@ class _SearchMessageList extends HookWidget {
           keyword: keyword,
           showSender: true,
           onTap: () {
-            ConversationCubit.selectConversation(
+            ConversationStateNotifier.selectConversation(
               context,
               message.conversationId,
               initIndexMessageId: message.messageId,
@@ -319,29 +323,30 @@ class _SearchMessageList extends HookWidget {
   }
 }
 
-class _SearchParticipantList extends HookWidget {
+class _SearchParticipantList extends HookConsumerWidget {
   const _SearchParticipantList({
     required this.onSelected,
     required this.editingController,
+    required this.conversationId,
+    this.isBot,
   });
 
   final ValueChanged<User> onSelected;
   final TextEditingController editingController;
+  final String conversationId;
+  final bool? isBot;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final keywordStream = useValueNotifierConvertSteam(editingController);
 
     final filteredUser = useMemoizedStream(() => keywordStream
                 .throttleTime(const Duration(milliseconds: 100))
                 .map((event) => event.text)
                 .switchMap((value) {
-              final state = context.read<ConversationCubit>().state;
-              final conversationId = state?.conversationId;
-              if (conversationId == null) return Stream.value(<User>[]);
               final userDao = context.database.userDao;
 
-              if (state?.isBot ?? false) {
+              if (isBot ?? false) {
                 return value.isEmpty
                     ? userDao.friends().watchWithStream(
                         eventStreams: [

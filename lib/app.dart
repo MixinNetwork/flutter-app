@@ -12,18 +12,13 @@ import 'package:provider/provider.dart';
 
 import 'account/account_key_value.dart';
 import 'account/notification_service.dart';
-import 'bloc/keyword_cubit.dart';
-import 'bloc/minute_timer_cubit.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
-import 'ui/home/bloc/conversation_cubit.dart';
-import 'ui/home/bloc/conversation_filter_unseen_cubit.dart';
+
 import 'ui/home/bloc/conversation_list_bloc.dart';
-import 'ui/home/bloc/recall_message_bloc.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
-import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
 import 'ui/provider/account_server_provider.dart';
@@ -70,7 +65,7 @@ class App extends HookConsumerWidget {
   }
 }
 
-class _LoginApp extends ConsumerWidget {
+class _LoginApp extends HookConsumerWidget {
   const _LoginApp({required this.authState});
 
   final AuthState authState;
@@ -126,31 +121,12 @@ class _Providers extends HookConsumerWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (BuildContext context) => ResponsiveNavigatorCubit(),
-        ),
-        BlocProvider(
-          create: (BuildContext context) => ConversationCubit(
-            accountServer: accountServer,
-            responsiveNavigatorCubit: context.read<ResponsiveNavigatorCubit>(),
-          ),
-        ),
-        BlocProvider(
-          create: (context) => ConversationFilterUnseenCubit(),
-        ),
-        BlocProvider(
-          create: (BuildContext context) => KeywordCubit(),
-        ),
-        BlocProvider(
-          create: (BuildContext context) => MinuteTimerCubit(),
-        ),
-        BlocProvider(
           create: (BuildContext context) => ConversationListBloc(
             ref.read(slideCategoryStateProvider.notifier),
             accountServer.database,
             ref.read(mentionCacheProvider),
           ),
         ),
-        BlocProvider(create: (context) => RecallMessageReeditCubit()),
       ],
       child: Provider<NotificationService>(
         create: (BuildContext context) => NotificationService(context: context),
@@ -199,7 +175,7 @@ class _App extends HookConsumerWidget {
               ),
               useMaterial3: true,
             ).withFallbackFonts(),
-            themeMode: ref.read(settingProvider).themeMode,
+            themeMode: ref.watch(settingProvider).themeMode,
             builder: (context, child) {
               try {
                 context.accountServer.language =
@@ -209,7 +185,7 @@ class _App extends HookConsumerWidget {
               return BrightnessObserver(
                 lightThemeData: lightBrightnessThemeData,
                 darkThemeData: darkBrightnessThemeData,
-                forceBrightness: ref.read(settingProvider).brightness,
+                forceBrightness: ref.watch(settingProvider).brightness,
                 child: MediaQuery(
                   data: mediaQueryData.copyWith(
                     // Different linux distro change the value, e.g. 1.2

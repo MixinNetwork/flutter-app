@@ -7,6 +7,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -48,12 +49,13 @@ import 'send_message_helper.dart';
 import 'show_pin_message_key_value.dart';
 
 class AccountServer {
-  AccountServer(
-    this.multiAuthCubit,
-    this.settingChangeNotifier, {
+  AccountServer({
     this.userAgent,
     this.deviceId,
+    required this.multiAuthNotifier,
+    required this.settingChangeNotifier,
     required this.database,
+    required this.selectedConversationIdController,
   });
 
   static String? sid;
@@ -61,9 +63,10 @@ class AccountServer {
   set language(String language) =>
       client.dio.options.headers['Accept-Language'] = language;
 
-  final MultiAuthStateNotifier multiAuthCubit;
+  final MultiAuthStateNotifier multiAuthNotifier;
   final SettingChangeNotifier settingChangeNotifier;
   final Database database;
+  final StateController<String?> selectedConversationIdController;
   Timer? checkSignalKeyTimer;
 
   bool get _loginByPhoneNumber =>
@@ -99,7 +102,7 @@ class AccountServer {
     } catch (e, s) {
       w('$e, $s');
       await signOutAndClear();
-      multiAuthCubit.signOut();
+      multiAuthNotifier.signOut();
       rethrow;
     }
 
@@ -126,13 +129,14 @@ class AccountServer {
         }
       }
       await signOutAndClear();
-      multiAuthCubit.signOut();
+      multiAuthNotifier.signOut();
     }
   }
 
   void onActive() {
-    if (!isAppActive || _activeConversationId == null) return;
-    markRead(_activeConversationId!);
+    final id = selectedConversationIdController.state;
+    if (!isAppActive || id == null) return;
+    markRead(id);
   }
 
   Future<void> _initClient() async {
@@ -186,8 +190,6 @@ class AccountServer {
   void _notifyBlazeWaitSyncTime() {
     _sendEventToWorkerIsolate(MainIsolateEventType.disconnectBlazeWithTime);
   }
-
-  String? _activeConversationId;
 
   final jobSubscribers = <StreamSubscription>{};
 
@@ -610,7 +612,7 @@ class AccountServer {
       );
 
   void selectConversation(String? conversationId) {
-    _activeConversationId = conversationId;
+    selectedConversationIdController.state = conversationId;
     _sendEventToWorkerIsolate(
       MainIsolateEventType.updateSelectedConversation,
       conversationId,
@@ -729,7 +731,7 @@ class AccountServer {
       codeId: me.codeId,
       codeUrl: me.codeUrl,
     ));
-    multiAuthCubit.updateAccount(me);
+    multiAuthNotifier.updateAccount(me);
   }
 
   Future<void> refreshFriends() async {
@@ -1276,7 +1278,7 @@ class AccountServer {
       fullName: fullName,
       biography: biography,
     ));
-    multiAuthCubit.updateAccount(user.data);
+    multiAuthNotifier.updateAccount(user.data);
   }
 
   Future<bool> cancelProgressAttachmentJob(String messageId) =>

@@ -3,10 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../constants/resources.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
-import '../../ui/home/bloc/conversation_cubit.dart';
+import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../action_button.dart';
 import '../toast.dart';
@@ -25,7 +26,7 @@ extension BubbleColor on BuildContext {
       : dynamicColor(lightOtherBubble, darkColor: darkOtherBubble);
 }
 
-class MessageBubble extends HookWidget {
+class MessageBubble extends HookConsumerWidget {
   const MessageBubble({
     super.key,
     required this.child,
@@ -46,7 +47,7 @@ class MessageBubble extends HookWidget {
   final bool? forceIsCurrentUserColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final showNip = useShowNip();
     final isCurrentUser = useIsCurrentUser();
     final isPinnedPage = useIsPinnedPage();
@@ -145,7 +146,7 @@ class MessageBubble extends HookWidget {
         onTap: () {
           final message = context.message;
           context.read<BlinkCubit>().blinkByMessageId(message.messageId);
-          ConversationCubit.selectConversation(
+          ConversationStateNotifier.selectConversation(
             context,
             message.conversationId,
             initIndexMessageId: message.messageId,
