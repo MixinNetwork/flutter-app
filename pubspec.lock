@@ -1629,12 +1629,11 @@ packages:
   sliver_tools:
     dependency: "direct main"
     description:
-      path: "."
-      ref: c69a4cf18846531c5059f42805778804bc2334a1
-      resolved-ref: c69a4cf18846531c5059f42805778804bc2334a1
-      url: "https://github.com/crossle/sliver_tools.git"
-    source: git
-    version: "0.2.10"
+      name: sliver_tools
+      sha256: eae28220badfb9d0559207badcbbc9ad5331aac829a88cb0964d330d2a4636a6
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.12"
   source_gen:
     dependency: transitive
     description:

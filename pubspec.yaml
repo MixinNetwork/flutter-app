@@ -126,10 +126,7 @@ dependencies:
   recase: ^4.1.0
   rxdart: ^0.27.5
   scrollable_positioned_list: ^0.3.5
-  sliver_tools:
-    git:
-      url: https://github.com/crossle/sliver_tools.git
-      ref: c69a4cf18846531c5059f42805778804bc2334a1
+  sliver_tools: ^0.2.12
   sqlite3_flutter_libs: ^0.5.15
   stream_transform: ^2.1.0
   string_tokenizer:
