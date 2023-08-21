@@ -94,7 +94,11 @@ dependencies:
   markdown_widget: ^2.2.0
   mime: ^1.0.2
   mixin_bot_sdk_dart: ^0.4.1
-  mixin_logger: ^0.0.6
+  mixin_logger:
+    git:
+      url: https://github.com/MixinNetwork/flutter-plugins.git
+      ref: 3214026ad280f57b46b738845bc30b404dab26fc
+      path: packages/mixin_logger
   native_dio_adapter: ^0.1.0
   network_info_plus: ^4.0.2
   octo_image: ^1.0.2

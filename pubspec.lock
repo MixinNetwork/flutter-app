@@ -1174,11 +1174,12 @@ packages:
   mixin_logger:
     dependency: "direct main"
     description:
-      name: mixin_logger
-      sha256: d463157603c9b9fbc3e7c314851c9b0a505333162e7da22a1f9c93e200148ea7
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.6"
+      path: "packages/mixin_logger"
+      ref: "3214026ad280f57b46b738845bc30b404dab26fc"
+      resolved-ref: "3214026ad280f57b46b738845bc30b404dab26fc"
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
+    version: "0.1.0"
   msix:
     dependency: "direct dev"
     description:
