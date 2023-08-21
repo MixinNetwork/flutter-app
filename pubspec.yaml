@@ -174,7 +174,7 @@ dev_dependencies:
   drift_dev: ^2.10.0
   flutter_test:
     sdk: flutter
-  hive_generator: ^2.0.0
+  hive_generator: ^2.0.1
   intl_utils: ^2.8.3
   json_serializable: ^6.7.1
   msix: ^3.16.1
