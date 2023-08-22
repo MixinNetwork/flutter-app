@@ -16,8 +16,8 @@ import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
 import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
+import '../../provider/message_selection_provider.dart';
 import '../../provider/responsive_navigator_provider.dart';
-import '../bloc/message_selection_cubit.dart';
 import 'chat_page.dart';
 
 class ChatBar extends HookConsumerWidget {
@@ -38,10 +38,7 @@ class ChatBar extends HookConsumerWidget {
 
     final conversation = ref.watch(conversationProvider);
 
-    final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
-        MessageSelectionState, bool>(
-      converter: (state) => state.hasSelectedMessage,
-    );
+    final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
 
     MoveWindowBarrier toggleInfoPageWrapper({
       required Widget child,
@@ -134,9 +131,8 @@ class ChatBar extends HookConsumerWidget {
         if (inMultiSelectMode)
           MoveWindowBarrier(
             child: TextButton(
-              onPressed: () {
-                context.read<MessageSelectionCubit>().clearSelection();
-              },
+              onPressed: () =>
+                  ref.read(messageSelectionProvider).clearSelection(),
               child: Text(context.l10n.cancel),
             ),
           )

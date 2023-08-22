@@ -35,9 +35,9 @@ import '../../../widgets/window/menus.dart';
 import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
+import '../../provider/message_selection_provider.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/message_bloc.dart';
-import '../bloc/message_selection_cubit.dart';
 import '../bloc/pending_jump_message_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import '../chat_slide_page/chat_info_page.dart';
@@ -203,11 +203,6 @@ class ChatPage extends HookConsumerWidget {
         () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
         keys: [conversationId]);
 
-    final messageSelectionCubit = useBloc(
-      MessageSelectionCubit.new,
-      keys: [conversationId],
-    );
-
     useEffect(() {
       if (initialSidePage != null) {
         chatSideCubit.pushPage(initialSidePage);
@@ -218,16 +213,10 @@ class ChatPage extends HookConsumerWidget {
         useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
             bloc: chatSideCubit);
 
-    useEffect(
-        () => messageSelectionCubit.stream
-                .map((event) => event.hasSelectedMessage)
-                .distinct()
-                .listen((hasSelectedMessage) {
-              if (hasSelectedMessage) {
-                chatSideCubit.clear();
-              }
-            }).cancel,
-        [messageSelectionCubit, chatSideCubit]);
+    ref.listen(hasSelectedMessageProvider, (previous, hasSelectedMessage) {
+      if (!hasSelectedMessage) return;
+      chatSideCubit.clear();
+    });
 
     final chatContainerPage = MaterialPage(
       key: const ValueKey('chatContainer'),
@@ -263,7 +252,6 @@ class ChatPage extends HookConsumerWidget {
           ),
         ),
         Provider.value(value: pinMessageState),
-        BlocProvider.value(value: messageSelectionCubit),
       ],
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -418,10 +406,7 @@ class ChatContainer extends HookConsumerWidget {
 
     final pendingJumpMessageCubit = useBloc(PendingJumpMessageCubit.new);
 
-    final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
-        MessageSelectionState, bool>(
-      converter: (state) => state.hasSelectedMessage,
-    );
+    final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
 
     return RepaintBoundary(
       child: MultiProvider(
@@ -439,7 +424,7 @@ class ChatContainer extends HookConsumerWidget {
           actions: {
             EscapeIntent: CallbackAction<EscapeIntent>(
               onInvoke: (intent) {
-                context.read<MessageSelectionCubit>().clearSelection();
+                ref.read(messageSelectionProvider).clearSelection();
               },
             )
           },
