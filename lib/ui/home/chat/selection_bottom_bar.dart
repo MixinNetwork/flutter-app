@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
+import '../../../utils/message_optimize.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/toast.dart';
@@ -81,6 +83,32 @@ class SelectionBottomBar extends HookConsumerWidget {
               cubit.clearSelection();
             },
           ),
+          _Button(
+              label: context.l10n.copy,
+              iconAssetName: Resources.assetsImagesCopySvg,
+              onTap: () async => runFutureWithToast((() async {
+                    final messageSelectionNotifier =
+                        ref.read(messageSelectionProvider);
+
+                    final selectedMessageIds =
+                        messageSelectionNotifier.selectedMessageIds;
+                    final messages = await context.database.messageDao
+                        .messageItemByMessageIds(selectedMessageIds.toList())
+                        .get();
+
+                    final text = messages.map((e) {
+                      var content = e.content;
+                      if (!e.type.isText) {
+                        content =
+                            messagePreviewOptimize(e.status, e.type, e.content);
+                      }
+                      return '${e.userFullName}, (${e.createdAt.format}):\n$content';
+                    }).join('\n\n');
+
+                    await Clipboard.setData(ClipboardData(text: text));
+
+                    messageSelectionNotifier.clearSelection();
+                  })())),
           _Button(
             label: context.l10n.delete,
             iconAssetName: Resources.assetsImagesContextMenuDeleteSvg,
