@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
@@ -96,13 +97,14 @@ class SelectionBottomBar extends HookConsumerWidget {
                         .messageItemByMessageIds(selectedMessageIds.toList())
                         .get();
 
+                    final dateFormat = DateFormat.yMd().add_Hms();
                     final text = messages.map((e) {
                       var content = e.content;
                       if (!e.type.isText) {
                         content =
                             messagePreviewOptimize(e.status, e.type, e.content);
                       }
-                      return '${e.userFullName}, (${e.createdAt.format}):\n$content';
+                      return '${e.userFullName}, (${dateFormat.format(e.createdAt)}):\n$content';
                     }).join('\n\n');
 
                     await Clipboard.setData(ClipboardData(text: text));
