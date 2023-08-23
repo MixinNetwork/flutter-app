@@ -13,7 +13,6 @@ import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../ui/home/bloc/blink_cubit.dart';
-import '../../../ui/home/bloc/message_selection_cubit.dart';
 import '../../../ui/home/chat/chat_page.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
@@ -277,7 +276,6 @@ class TranscriptPage extends HookConsumerWidget {
                     context.accountServer.convertMessageAbsolutePath(m, true)),
           ),
           Provider.value(value: TranscriptMessagesWatcher(watchMessages)),
-          BlocProvider(create: (_) => MessageSelectionCubit()),
         ],
         child: Column(
           children: [

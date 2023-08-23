@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
+import '../../../utils/message_optimize.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/message_selection_cubit.dart';
+import '../../provider/message_selection_provider.dart';
 
 class SelectionBottomBar extends HookConsumerWidget {
   const SelectionBottomBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canForward = useBlocStateConverter<MessageSelectionCubit,
-        MessageSelectionState, bool>(converter: (state) => state.canForward);
+    final canForward =
+        ref.watch(messageSelectionProvider.select((value) => value.canForward));
+
     return SizedBox(
       height: 80,
       child: Row(
@@ -38,8 +41,8 @@ class SelectionBottomBar extends HookConsumerWidget {
               );
               if (result == null || result.isEmpty) return;
 
-              final cubit = context.read<MessageSelectionCubit>();
-              final messageIds = cubit.state.selectedMessageIds;
+              final cubit = ref.read(messageSelectionProvider);
+              final messageIds = cubit.selectedMessageIds;
 
               await runWithLoading(
                 () => context.accountServer.sendTranscriptMessage(
@@ -65,8 +68,8 @@ class SelectionBottomBar extends HookConsumerWidget {
               );
               if (result == null || result.isEmpty) return;
 
-              final cubit = context.read<MessageSelectionCubit>();
-              final messageIds = cubit.state.selectedMessageIds;
+              final cubit = ref.read(messageSelectionProvider);
+              final messageIds = cubit.selectedMessageIds;
 
               await runWithLoading(() async {
                 for (final id in messageIds) {
@@ -82,11 +85,38 @@ class SelectionBottomBar extends HookConsumerWidget {
             },
           ),
           _Button(
+              label: context.l10n.copy,
+              iconAssetName: Resources.assetsImagesCopySvg,
+              onTap: () async => runFutureWithToast((() async {
+                    final messageSelectionNotifier =
+                        ref.read(messageSelectionProvider);
+
+                    final selectedMessageIds =
+                        messageSelectionNotifier.selectedMessageIds;
+                    final messages = await context.database.messageDao
+                        .messageItemByMessageIds(selectedMessageIds.toList())
+                        .get();
+
+                    final dateFormat = DateFormat.yMd().add_Hms();
+                    final text = messages.map((e) {
+                      var content = e.content;
+                      if (!e.type.isText) {
+                        content =
+                            messagePreviewOptimize(e.status, e.type, e.content);
+                      }
+                      return '${e.userFullName}, (${dateFormat.format(e.createdAt)}):\n$content';
+                    }).join('\n\n');
+
+                    await Clipboard.setData(ClipboardData(text: text));
+
+                    messageSelectionNotifier.clearSelection();
+                  })())),
+          _Button(
             label: context.l10n.delete,
             iconAssetName: Resources.assetsImagesContextMenuDeleteSvg,
             onTap: () async {
-              final cubit = context.read<MessageSelectionCubit>();
-              final messagesToDelete = cubit.state.selectedMessageIds;
+              final cubit = ref.read(messageSelectionProvider);
+              final messagesToDelete = cubit.selectedMessageIds;
 
               final confirm = await showConfirmMixinDialog(
                 context,

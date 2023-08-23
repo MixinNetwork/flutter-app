@@ -24,9 +24,9 @@ import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
-import '../../ui/home/bloc/message_selection_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../ui/provider/conversation_provider.dart';
+import '../../ui/provider/message_selection_provider.dart';
 import '../../ui/provider/recall_message_reedit_provider.dart';
 import '../../ui/provider/setting_provider.dart';
 import '../../utils/datetime_format_utils.dart';
@@ -305,8 +305,8 @@ class MessageItemWidget extends HookConsumerWidget {
                       ContextMenu(
                         icon: Resources.assetsImagesMultiSelectionSvg,
                         title: context.l10n.select,
-                        onTap: () => context
-                            .read<MessageSelectionCubit>()
+                        onTap: () => ref
+                            .read(messageSelectionProvider)
                             .selectMessage(message),
                       ),
                     if (message.type.isText ||
@@ -687,10 +687,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
-        MessageSelectionState, bool>(
-      converter: (state) => state.hasSelectedMessage,
-    );
+    final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
 
     final messageColumn = Column(
       mainAxisSize: MainAxisSize.min,
@@ -781,20 +778,15 @@ class _MessageSelectionWrapper extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final inMultiSelectMode = useBlocStateConverter<MessageSelectionCubit,
-        MessageSelectionState, bool>(
-      converter: (state) => state.hasSelectedMessage,
-    );
+    final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
 
-    final selected = useBlocStateConverter<MessageSelectionCubit,
-        MessageSelectionState, bool>(
-      converter: (state) =>
-          state.selectedMessageIds.contains(message.messageId),
-    );
+    final selected = ref.watch(messageSelectionProvider.select(
+        (value) => value.selectedMessageIds.contains(message.messageId)));
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: inMultiSelectMode
-          ? () => context.read<MessageSelectionCubit>().toggleSelection(message)
+          ? () => ref.read(messageSelectionProvider).toggleSelection(message)
           : null,
       child: Row(
         children: [
