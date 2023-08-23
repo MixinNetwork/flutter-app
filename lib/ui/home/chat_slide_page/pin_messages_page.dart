@@ -103,6 +103,7 @@ class PinMessagesPage extends HookConsumerWidget {
                   itemBuilder: (BuildContext context, int index) {
                     final messageItem = list[index];
                     return MessageItemWidget(
+                      key: ValueKey(messageItem.messageId),
                       prev: list.getOrNull(index + 1),
                       message: messageItem,
                       next: list.getOrNull(index - 1),
