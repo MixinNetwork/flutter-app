@@ -1,30 +1,28 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:pasteboard/pasteboard.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 import '../../widgets/toast.dart';
+import '../extension/extension.dart';
 import '../file.dart';
 import '../logger.dart';
 
-final _supportedPlatform =
-    Platform.isWindows || Platform.isMacOS || Platform.isLinux;
-
-Future<List<File>> getClipboardFiles() async {
-  if (!_supportedPlatform) {
-    return const [];
-  }
+Future<Iterable<File>> getClipboardFiles() async {
+  final reader = await ClipboardReader.readClipboard();
 
   try {
-    final filePaths = await Pasteboard.files();
-    if (filePaths.isNotEmpty) {
-      final files =
-          filePaths.map(File.new).where((e) => e.existsSync()).toList();
-      if (files.isNotEmpty) {
-        return files;
-      }
+    final fileReaders =
+        reader.items.where((item) => item.canProvide(Formats.fileUri));
+
+    if (fileReaders.isNotEmpty) {
+      final uris = await Future.wait(
+          fileReaders.map((item) => item.readValue(Formats.fileUri)));
+      final files = uris.whereNotNull().map((item) => File(item.path));
+      if (files.isNotEmpty) return files;
     }
   } catch (error, stack) {
     e('Pasteboard.files: $error $stack');
@@ -32,7 +30,27 @@ Future<List<File>> getClipboardFiles() async {
 
   Uint8List? imageBytes;
   try {
-    imageBytes = await Pasteboard.image;
+    final format = reader
+        .getFormats([
+          Formats.jpeg,
+          Formats.png,
+          Formats.gif,
+          Formats.tiff,
+          Formats.webp,
+        ])
+        .map((e) => switch (e) {
+              Formats.jpeg => Formats.jpeg,
+              Formats.png => Formats.png,
+              Formats.gif => Formats.gif,
+              Formats.tiff => Formats.tiff,
+              Formats.webp => Formats.webp,
+              DataFormat<Object>() => null,
+            })
+        .whereNotNull()
+        .firstOrNull;
+    if (format == null) return [];
+
+    imageBytes = await reader.readFile(format);
   } catch (error, stack) {
     e('Pasteboard.image: $error $stack');
   }
@@ -61,14 +79,35 @@ Future<List<File>> getClipboardFiles() async {
 }
 
 Future<void> copyFile(String? filePath) async {
-  if (filePath?.isEmpty ?? true) {
+  if (filePath == null || filePath.isEmpty) {
     return showToastFailed(null);
   }
   try {
-    await Pasteboard.writeFiles([filePath!]);
+    final dataWriterItem = DataWriterItem()
+      ..add(Formats.fileUri(Uri.parse(filePath)));
+
+    await ClipboardWriter.instance.write([dataWriterItem]);
   } catch (error) {
     showToastFailed(error);
     return;
   }
   showToastSuccessful();
+}
+
+extension _ReadValue on DataReader {
+  Future<Uint8List?>? readFile(FileFormat format) {
+    final c = Completer<Uint8List?>();
+    final progress = getFile(format, (file) async {
+      try {
+        final all = await file.readAll();
+        c.complete(all);
+      } catch (e) {
+        c.completeError(e);
+      }
+    }, onError: c.completeError);
+    if (progress == null) {
+      c.complete(null);
+    }
+    return c.future;
+  }
 }
