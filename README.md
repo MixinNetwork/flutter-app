@@ -8,6 +8,22 @@ Download release version from https://mixin.one/mm
 
 ## Quick start
 
+Because it depends on super_clipboard, you will need to install Rust:
+For macOS or Linux, execute the following command in Terminal.
+
+```shell
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+For Windows, you can use the [Rust Installer](https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe).
+In case you have Rust already installed, make sure to update it to latest version:
+
+```shell
+rustup update
+```
+
+Then you can run the app with:
+
 ```
 flutter run -d macOS
 flutter run -d linux

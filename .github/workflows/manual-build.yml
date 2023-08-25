@@ -22,6 +22,12 @@ jobs:
         with:
           channel: ${{ github.event.inputs.flutter_channel || 'master' }} # 'master', 'beta', 'dev' or 'stable'
 
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 'stable' # 'stable' or 'nightly'
+          override: true
+          components: rustfmt, clippy
+
       # flutter build need ninja.
       # https://github.com/subosito/flutter-action/issues/49
       - name: Patch for linux build
@@ -171,6 +177,12 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ github.event.inputs.flutter_channel || 'master' }}
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 'stable' # 'stable' or 'nightly'
+          override: true
+          components: rustfmt, clippy
 
       - run: flutter --version
 
