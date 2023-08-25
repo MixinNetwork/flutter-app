@@ -9,73 +9,54 @@ import 'package:super_clipboard/super_clipboard.dart';
 import '../../widgets/toast.dart';
 import '../extension/extension.dart';
 import '../file.dart';
-import '../logger.dart';
 
 Future<Iterable<File>> getClipboardFiles() async {
   final reader = await ClipboardReader.readClipboard();
 
-  try {
-    final fileReaders =
-        reader.items.where((item) => item.canProvide(Formats.fileUri));
+  final fileReaders =
+      reader.items.where((item) => item.canProvide(Formats.fileUri));
 
-    if (fileReaders.isNotEmpty) {
-      final uris = await Future.wait(
-          fileReaders.map((item) => item.readValue(Formats.fileUri)));
-      final files = uris.whereNotNull().map((item) => File(item.path));
-      if (files.isNotEmpty) return files;
-    }
-  } catch (error, stack) {
-    e('Pasteboard.files: $error $stack');
-  }
+  if (fileReaders.isNotEmpty) {
+    final uris = await Future.wait(
+        fileReaders.map((item) => item.readValue(Formats.fileUri)));
 
-  Uint8List? imageBytes;
-  try {
-    final format = reader
-        .getFormats([
-          Formats.jpeg,
-          Formats.png,
-          Formats.gif,
-          Formats.tiff,
-          Formats.webp,
-        ])
-        .map((e) => switch (e) {
-              Formats.jpeg => Formats.jpeg,
-              Formats.png => Formats.png,
-              Formats.gif => Formats.gif,
-              Formats.tiff => Formats.tiff,
-              Formats.webp => Formats.webp,
-              DataFormat<Object>() => null,
-            })
+    final files = uris
         .whereNotNull()
-        .firstOrNull;
-    if (format == null) return [];
-
-    imageBytes = await reader.readFile(format);
-  } catch (error, stack) {
-    e('Pasteboard.image: $error $stack');
+        .map((e) => e.toFilePath(windows: Platform.isWindows))
+        .map(File.new)
+        .where((element) => element.existsSync());
+    if (files.isNotEmpty) return files;
   }
 
-  if (imageBytes != null) {
+  final list = await Future.wait(reader.items
+      .map((reader) => (
+            reader,
+            reader.getFormats([
+              Formats.jpeg,
+              Formats.png,
+              Formats.gif,
+              Formats.webp,
+              Formats.bmp,
+            ]).whereType<FileFormat>()
+          ))
+      .where((element) => element.$2.isNotEmpty)
+      .map((item) async {
+    final (reader, formats) = item;
+
+    var imageBytes = await reader.readFile(formats.firstOrNull!);
+    if (imageBytes == null) return null;
+
     if (Platform.isWindows) {
-      try {
-        final image = await decodeImageFromList(imageBytes);
-        final data = await image.toByteData(format: ImageByteFormat.png);
-        if (data == null) {
-          return const [];
-        }
-        imageBytes = Uint8List.view(data.buffer);
-      } catch (error, s) {
-        e('re format image failed: $error $s');
-      }
+      final image = await decodeImageFromList(imageBytes);
+      final data = await image.toByteData(format: ImageByteFormat.png);
+      if (data == null) return null;
+      imageBytes = Uint8List.view(data.buffer);
     }
-    final file =
-        await saveBytesToTempFile(imageBytes!, TempFileType.pasteboardImage);
-    if (file != null) {
-      return [file];
-    }
-  }
 
-  return const [];
+    return saveBytesToTempFile(imageBytes, TempFileType.pasteboardImage);
+  }));
+
+  return list.whereNotNull();
 }
 
 Future<void> copyFile(String? filePath) async {
