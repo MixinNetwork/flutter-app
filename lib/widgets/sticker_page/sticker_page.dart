@@ -322,6 +322,7 @@ class _StickerAlbumBar extends HookConsumerWidget {
       child: TabBar(
         controller: tabController,
         isScrollable: true,
+        tabAlignment: TabAlignment.start,
         indicator: BoxDecoration(
           color: context.dynamicColor(
             const Color.fromRGBO(229, 231, 235, 1),

@@ -177,6 +177,7 @@ class _EmojiGroupHeader extends HookConsumerWidget {
           labelPadding: EdgeInsets.zero,
           indicator: const BoxDecoration(color: Colors.transparent),
           dividerColor: Colors.transparent,
+          tabAlignment: TabAlignment.start,
           tabs: List.generate(
             icons.length,
             (index) => Padding(
