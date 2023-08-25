@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
 import '../../widgets/toast.dart';
@@ -65,10 +66,11 @@ Future<void> copyFile(String? filePath) async {
   }
   try {
     final dataWriterItem = DataWriterItem()
-      ..add(Formats.fileUri(Uri.parse(filePath)));
+      ..add(Formats.fileUri(Uri.file(filePath)));
 
     await ClipboardWriter.instance.write([dataWriterItem]);
-  } catch (error) {
+  } catch (error, stackTrace) {
+    e('copy file failed: $error\n$stackTrace');
     showToastFailed(error);
     return;
   }
