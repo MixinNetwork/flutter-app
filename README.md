@@ -8,7 +8,7 @@ Download release version from https://mixin.one/mm
 
 ## Quick start
 
-Because it depends on super_clipboard, you will need to install Rust:
+Because some of the underlying implementations in the libraries are written in Rust, you will need to install Rust:
 For macOS or Linux, execute the following command in Terminal.
 
 ```shell
