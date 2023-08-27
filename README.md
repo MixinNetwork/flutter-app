@@ -8,21 +8,7 @@ Download release version from https://mixin.one/mm
 
 ## Quick start
 
-Because some of the underlying implementations in the libraries are written in Rust, you will need to install Rust:
-For macOS or Linux, execute the following command in Terminal.
-
-```shell
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
-
-For Windows, you can use the [Rust Installer](https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe).
-In case you have Rust already installed, make sure to update it to latest version:
-
-```shell
-rustup update
-```
-
-Then you can run the app with:
+*Because some of the underlying implementations in the libraries are written in [Rust](https://www.rust-lang.org/), you will need to install [Rust](https://www.rust-lang.org/).*
 
 ```
 flutter run -d macOS
