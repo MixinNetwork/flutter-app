@@ -9,10 +9,11 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   file_selector_linux
   flutter_app_icon_badge
-  pasteboard
+  irondash_engine_context
   platform_device_id_linux
   screen_retriever
   sqlite3_flutter_libs
+  super_native_extensions
   url_launcher_linux
   window_manager
   window_size

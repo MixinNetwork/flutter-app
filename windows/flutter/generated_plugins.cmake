@@ -9,13 +9,14 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   file_selector_windows
   flutter_app_icon_badge
+  irondash_engine_context
   local_auth_windows
-  pasteboard
   platform_device_id_windows
   protocol_handler
   quick_breakpad
   screen_retriever
   sqlite3_flutter_libs
+  super_native_extensions
   system_tray
   url_launcher_windows
   win_toast

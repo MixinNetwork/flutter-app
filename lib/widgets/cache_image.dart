@@ -286,20 +286,6 @@ class MixinFileImage extends FileImage {
   }
 
   @override
-  ImageStreamCompleter load(
-          FileImage key,
-          // ignore: deprecated_member_use
-          DecoderCallback decode) =>
-      _MultiFrameImageStreamCompleter(
-        codec: _loadAsync(key, decodeDeprecated: decode),
-        scale: key.scale,
-        debugLabel: key.file.path,
-        informationCollector: () => <DiagnosticsNode>[
-          ErrorDescription('Path: ${file.path}'),
-        ],
-      );
-
-  @override
   @protected
   ImageStreamCompleter loadImage(FileImage key, ImageDecoderCallback decode) =>
       _MultiFrameImageStreamCompleter(
@@ -316,8 +302,6 @@ class MixinFileImage extends FileImage {
     ImageDecoderCallback? decode,
     // ignore: deprecated_member_use
     DecoderBufferCallback? decodeBufferDeprecated,
-    // ignore: deprecated_member_use
-    DecoderCallback? decodeDeprecated,
   }) async {
     assert(key == this);
 
@@ -340,8 +324,6 @@ class MixinFileImage extends FileImage {
     if (decodeBufferDeprecated != null) {
       return decodeBufferDeprecated(
           await ui.ImmutableBuffer.fromUint8List(bytes));
-    } else if (decodeDeprecated != null) {
-      return decodeDeprecated(bytes);
     } else {
       final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
       return decode!(buffer);
@@ -422,25 +404,6 @@ class MixinNetworkImageProvider
   final Duration? cacheMaxAge;
 
   @override
-  ImageStreamCompleter load(
-      MixinNetworkImageProvider key,
-      // ignore: deprecated_member_use
-      DecoderCallback decode) {
-    final chunkEvents = StreamController<ImageChunkEvent>();
-
-    return _MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, chunkEvents, decodeDeprecated: decode),
-      scale: key.scale,
-      chunkEvents: chunkEvents.stream,
-      informationCollector: () => <DiagnosticsNode>[
-        DiagnosticsProperty<ImageProvider>('Image provider', this),
-        DiagnosticsProperty<MixinNetworkImageProvider>('Image key', key),
-      ],
-      controller: controller,
-    );
-  }
-
-  @override
   ImageStreamCompleter loadImage(
       MixinNetworkImageProvider key, ImageDecoderCallback decode) {
     final chunkEvents = StreamController<ImageChunkEvent>();
@@ -464,14 +427,10 @@ class MixinNetworkImageProvider
     ImageDecoderCallback? decode,
     // ignore: deprecated_member_use
     DecoderBufferCallback? decodeBufferDeprecated,
-    // ignore: deprecated_member_use
-    DecoderCallback? decodeDeprecated,
   }) async {
     if (decodeBufferDeprecated != null) {
       return decodeBufferDeprecated(
           await ui.ImmutableBuffer.fromUint8List(data));
-    } else if (decodeDeprecated != null) {
-      return decodeDeprecated(data);
     } else {
       return decode!(await ui.ImmutableBuffer.fromUint8List(data));
     }
@@ -488,8 +447,6 @@ class MixinNetworkImageProvider
     ImageDecoderCallback? decode,
     // ignore: deprecated_member_use
     DecoderBufferCallback? decodeBufferDeprecated,
-    // ignore: deprecated_member_use
-    DecoderCallback? decodeDeprecated,
   }) async {
     assert(key == this);
     final md5Key = cacheKey ?? keyToMd5(key.url);
@@ -498,10 +455,11 @@ class MixinNetworkImageProvider
       try {
         final data = await _loadCache(key, chunkEvents, md5Key);
         if (data != null) {
-          result = await instantiateImageCodec(data,
-              decode: decode,
-              decodeBufferDeprecated: decodeBufferDeprecated,
-              decodeDeprecated: decodeDeprecated);
+          result = await instantiateImageCodec(
+            data,
+            decode: decode,
+            decodeBufferDeprecated: decodeBufferDeprecated,
+          );
         }
       } catch (e) {
         if (printError) {
@@ -514,10 +472,11 @@ class MixinNetworkImageProvider
       try {
         final data = await _loadNetwork(key, chunkEvents);
         if (data != null) {
-          result = await instantiateImageCodec(data,
-              decode: decode,
-              decodeBufferDeprecated: decodeBufferDeprecated,
-              decodeDeprecated: decodeDeprecated);
+          result = await instantiateImageCodec(
+            data,
+            decode: decode,
+            decodeBufferDeprecated: decodeBufferDeprecated,
+          );
         }
       } catch (e) {
         i('load network error $e');
