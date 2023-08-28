@@ -326,7 +326,7 @@ class Blaze {
     _host = _host == _wsHost1 ? _wsHost2 : _wsHost1;
 
     try {
-      _disconnect();
+      _disconnect(false);
       await client.accountApi.getMe();
       i('http ping');
       await connect();
@@ -339,8 +339,8 @@ class Blaze {
         _connectedState = ConnectedState.disconnected;
         return;
       }
-      await Future.delayed(const Duration(seconds: 2));
       _connectedState = ConnectedState.disconnected;
+      await Future.delayed(const Duration(seconds: 2));
       i('reconnecting set false, ${StackTrace.current}');
       await reconnect();
     }
