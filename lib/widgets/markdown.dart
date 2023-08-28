@@ -26,6 +26,7 @@ class MarkdownColumn extends StatelessWidget {
         config,
         visitor,
       ),
+      generators: _kMixinGenerators,
     ).buildWidgets(data);
     return ClipRect(
       child: DefaultTextStyle.merge(
@@ -68,6 +69,7 @@ class Markdown extends StatelessWidget {
               config,
               visitor,
             ),
+            generators: _kMixinGenerators,
           ),
         ),
       );
@@ -253,5 +255,48 @@ class CustomTextNode extends ElementNode {
           WidgetVisitor(config: visitor.config, generators: visitor.generators),
       parentStyle: parentStyle,
     ).forEach(accept);
+  }
+}
+
+final _kMixinGenerators = <SpanNodeGeneratorWithTag>[
+  SpanNodeGeneratorWithTag(
+    tag: MarkdownTag.pre.name,
+    generator: (e, config, visitor) => _MixinCodeBlockNode(
+      e.textContent,
+      config.pre,
+    ),
+  ),
+];
+
+class _MixinCodeBlockNode extends CodeBlockNode {
+  _MixinCodeBlockNode(super.content, super.preConfig);
+
+  @override
+  InlineSpan build() {
+    final splitContents = content.trim().split(RegExp(r'(\r?\n)|(\r?\t)|(\r)'));
+    if (splitContents.last.isEmpty) splitContents.removeLast();
+    final widget = Container(
+      decoration: preConfig.decoration,
+      margin: preConfig.margin,
+      padding: preConfig.padding,
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: List.generate(splitContents.length, (index) {
+          final currentContent = splitContents[index];
+          return ProxyRichText(TextSpan(
+            children: highLightSpans(
+              currentContent,
+              language: preConfig.language,
+              theme: preConfig.theme,
+              textStyle: style,
+              styleNotMatched: preConfig.styleNotMatched,
+            ),
+          ));
+        }),
+      ),
+    );
+    return WidgetSpan(
+        child: preConfig.wrapper?.call(widget, content) ?? widget);
   }
 }

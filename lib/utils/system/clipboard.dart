@@ -1,74 +1,96 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:pasteboard/pasteboard.dart';
+import 'package:mixin_logger/mixin_logger.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 import '../../widgets/toast.dart';
+import '../extension/extension.dart';
 import '../file.dart';
-import '../logger.dart';
 
-final _supportedPlatform =
-    Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+Future<Iterable<File>> getClipboardFiles() async {
+  final reader = await ClipboardReader.readClipboard();
 
-Future<List<File>> getClipboardFiles() async {
-  if (!_supportedPlatform) {
-    return const [];
+  final fileReaders =
+      reader.items.where((item) => item.canProvide(Formats.fileUri));
+
+  if (fileReaders.isNotEmpty) {
+    final uris = await Future.wait(
+        fileReaders.map((item) => item.readValue(Formats.fileUri)));
+
+    final files = uris
+        .whereNotNull()
+        .map((e) => e.toFilePath(windows: Platform.isWindows))
+        .map(File.new)
+        .where((element) => element.existsSync());
+    if (files.isNotEmpty) return files;
   }
 
-  try {
-    final filePaths = await Pasteboard.files();
-    if (filePaths.isNotEmpty) {
-      final files =
-          filePaths.map(File.new).where((e) => e.existsSync()).toList();
-      if (files.isNotEmpty) {
-        return files;
-      }
-    }
-  } catch (error, stack) {
-    e('Pasteboard.files: $error $stack');
-  }
+  final list = await Future.wait(reader.items
+      .map((reader) => (
+            reader,
+            reader.getFormats([
+              Formats.jpeg,
+              Formats.png,
+              Formats.gif,
+              Formats.webp,
+              Formats.bmp,
+            ]).whereType<FileFormat>()
+          ))
+      .where((element) => element.$2.isNotEmpty)
+      .map((item) async {
+    final (reader, formats) = item;
 
-  Uint8List? imageBytes;
-  try {
-    imageBytes = await Pasteboard.image;
-  } catch (error, stack) {
-    e('Pasteboard.image: $error $stack');
-  }
+    var imageBytes = await reader.readFile(formats.firstOrNull!);
+    if (imageBytes == null) return null;
 
-  if (imageBytes != null) {
     if (Platform.isWindows) {
-      try {
-        final image = await decodeImageFromList(imageBytes);
-        final data = await image.toByteData(format: ImageByteFormat.png);
-        if (data == null) {
-          return const [];
-        }
-        imageBytes = Uint8List.view(data.buffer);
-      } catch (error, s) {
-        e('re format image failed: $error $s');
-      }
+      final image = await decodeImageFromList(imageBytes);
+      final data = await image.toByteData(format: ImageByteFormat.png);
+      if (data == null) return null;
+      imageBytes = Uint8List.view(data.buffer);
     }
-    final file =
-        await saveBytesToTempFile(imageBytes!, TempFileType.pasteboardImage);
-    if (file != null) {
-      return [file];
-    }
-  }
 
-  return const [];
+    return saveBytesToTempFile(imageBytes, TempFileType.pasteboardImage);
+  }));
+
+  return list.whereNotNull();
 }
 
 Future<void> copyFile(String? filePath) async {
-  if (filePath?.isEmpty ?? true) {
+  if (filePath == null || filePath.isEmpty) {
     return showToastFailed(null);
   }
   try {
-    await Pasteboard.writeFiles([filePath!]);
-  } catch (error) {
+    final dataWriterItem = DataWriterItem()
+      ..add(Formats.fileUri(Uri.file(filePath)));
+
+    await ClipboardWriter.instance.write([dataWriterItem]);
+  } catch (error, stackTrace) {
+    e('copy file failed: $error\n$stackTrace');
     showToastFailed(error);
     return;
   }
   showToastSuccessful();
+}
+
+extension _ReadValue on DataReader {
+  Future<Uint8List?>? readFile(FileFormat format) {
+    final c = Completer<Uint8List?>();
+    final progress = getFile(format, (file) async {
+      try {
+        final all = await file.readAll();
+        c.complete(all);
+      } catch (e) {
+        c.completeError(e);
+      }
+    }, onError: c.completeError);
+    if (progress == null) {
+      c.complete(null);
+    }
+    return c.future;
+  }
 }
