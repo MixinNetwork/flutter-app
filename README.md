@@ -8,6 +8,8 @@ Download release version from https://mixin.one/mm
 
 ## Quick start
 
+*Because some of the underlying implementations in the libraries are written in [Rust](https://www.rust-lang.org/), you will need to install [Rust](https://www.rust-lang.org/).*
+
 ```
 flutter run -d macOS
 flutter run -d linux
