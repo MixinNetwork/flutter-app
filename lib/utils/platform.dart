@@ -63,7 +63,7 @@ Future<String> getDeviceId() async {
       return nameUuidFromBytes(utf8.encode(id)).uuid;
     }
 
-    return id;
+    return id.toLowerCase();
   } catch (error, stack) {
     e('failed to get device id. $error $stack');
   }
@@ -131,7 +131,7 @@ Future<String?> _getMacOSDeviceId() async {
     e('failed to get macos device id. $result');
     return null;
   }
-  final uuid = matches[0]?.toLowerCase();
+  final uuid = matches[0];
   if (uuid == null) {
     e('get macos device id: failed to get group. $matches');
     return null;

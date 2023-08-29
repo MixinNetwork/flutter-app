@@ -1,6 +1,8 @@
 PODS:
   - audio_session (0.0.1):
     - Flutter
+  - cupertino_http (0.0.1):
+    - Flutter
   - device_info (0.0.1):
     - Flutter
   - device_info_plus (0.0.1):
@@ -50,9 +52,14 @@ PODS:
     - Flutter
   - image_picker_ios (0.0.1):
     - Flutter
+  - irondash_engine_context (0.0.1):
+    - Flutter
   - libphonenumber_plugin (0.0.1):
     - Flutter
     - PhoneNumberKit
+  - local_auth_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - network_info_plus (0.0.1):
     - Flutter
   - ogg_opus_player (0.0.1):
@@ -92,6 +99,8 @@ PODS:
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
+  - super_native_extensions (0.0.1):
+    - Flutter
   - SwiftyGif (5.4.3)
   - url_launcher_ios (0.0.1):
     - Flutter
@@ -100,6 +109,7 @@ PODS:
 
 DEPENDENCIES:
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
+  - cupertino_http (from `.symlinks/plugins/cupertino_http/ios`)
   - device_info (from `.symlinks/plugins/device_info/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
@@ -109,7 +119,9 @@ DEPENDENCIES:
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - gallery_saver (from `.symlinks/plugins/gallery_saver/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - irondash_engine_context (from `.symlinks/plugins/irondash_engine_context/ios`)
   - libphonenumber_plugin (from `.symlinks/plugins/libphonenumber_plugin/ios`)
+  - local_auth_foundation (from `.symlinks/plugins/local_auth_foundation/darwin`)
   - network_info_plus (from `.symlinks/plugins/network_info_plus/ios`)
   - ogg_opus_player (from `.symlinks/plugins/ogg_opus_player/ios`)
   - open_file (from `.symlinks/plugins/open_file/ios`)
@@ -118,6 +130,7 @@ DEPENDENCIES:
   - platform_device_id (from `.symlinks/plugins/platform_device_id/ios`)
   - protocol_handler (from `.symlinks/plugins/protocol_handler/ios`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
+  - super_native_extensions (from `.symlinks/plugins/super_native_extensions/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
 
@@ -133,6 +146,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   audio_session:
     :path: ".symlinks/plugins/audio_session/ios"
+  cupertino_http:
+    :path: ".symlinks/plugins/cupertino_http/ios"
   device_info:
     :path: ".symlinks/plugins/device_info/ios"
   device_info_plus:
@@ -151,8 +166,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/gallery_saver/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
+  irondash_engine_context:
+    :path: ".symlinks/plugins/irondash_engine_context/ios"
   libphonenumber_plugin:
     :path: ".symlinks/plugins/libphonenumber_plugin/ios"
+  local_auth_foundation:
+    :path: ".symlinks/plugins/local_auth_foundation/darwin"
   network_info_plus:
     :path: ".symlinks/plugins/network_info_plus/ios"
   ogg_opus_player:
@@ -169,6 +188,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/protocol_handler/ios"
   sqlite3_flutter_libs:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
+  super_native_extensions:
+    :path: ".symlinks/plugins/super_native_extensions/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   webview_flutter_wkwebview:
@@ -176,6 +197,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   audio_session: 4f3e461722055d21515cf3261b64c973c062f345
+  cupertino_http: 5f8b1161107fe6c8d94a0c618735a033d93fa7db
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
@@ -187,18 +209,21 @@ SPEC CHECKSUMS:
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542
   image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
+  irondash_engine_context: 3458bf979b90d616ffb8ae03a150bafe2e860cc9
   libphonenumber_plugin: e8a7d64a6624a7c25f2c4ab0b7ead2a8e341e35e
+  local_auth_foundation: 7d1835ccc3ff0cfcf081d7bae330db0911218412
   network_info_plus: 122280582fe2fa2bbb8681a4269745cd5c3a9b32
   ogg_opus_player: 01dc6eaa63d1e061f0065f41845a0a9ea76b9396
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
   package_info_plus: fd030dabf36271f146f1f3beacd48f564b0f17f7
-  path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
+  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
   PhoneNumberKit: 441e8b26ec88d598e3591de9061eff18f5dd12e8
   platform_device_id: 81b3e2993881f87d0c82ef151dc274df4869aef5
   protocol_handler: ae9efcf3b307f3fdffcd9d5252775b9f7d9f0d09
   SDWebImage: b9a731e1d6307f44ca703b3976d18c24ca561e84
   sqlite3: fd89671d969f3e73efe503ce203e28b016b58f68
   sqlite3_flutter_libs: 04ba0d14a04335a2fbf9a331e8664f401fbccdd5
+  super_native_extensions: 4916b3c627a9c7fffdc48a23a9eca0b1ac228fa7
   SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
   webview_flutter_wkwebview: 2e2d318f21a5e036e2c3f26171342e95908bd60a
