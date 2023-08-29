@@ -131,7 +131,7 @@ Future<String?> _getMacOSDeviceId() async {
     e('failed to get macos device id. $result');
     return null;
   }
-  final uuid = matches[0];
+  final uuid = matches[0]?.toLowerCase();
   if (uuid == null) {
     e('get macos device id: failed to get group. $matches');
     return null;
