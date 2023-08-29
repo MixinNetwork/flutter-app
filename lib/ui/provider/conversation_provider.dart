@@ -393,6 +393,7 @@ class _LastConversationNotifier extends StateNotifier<ConversationState?> {
 
 final conversationProvider = StateNotifierProvider.autoDispose<
     ConversationStateNotifier, ConversationState?>((ref) {
+  ref.keepAlive();
   final accountServerAsync = ref.watch(accountServerProvider);
 
   if (!accountServerAsync.hasValue) {
