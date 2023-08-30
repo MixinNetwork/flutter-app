@@ -135,9 +135,15 @@ EncryptCategory _getEncryptCategory(App? app) {
 class ConversationStateNotifier extends StateNotifier<ConversationState?>
     with SubscriberMixin {
   ConversationStateNotifier({
-    required this.accountServer,
-    required this.responsiveNavigatorStateNotifier,
-  }) : super(null) {
+    required AccountServer accountServer,
+    required ResponsiveNavigatorStateNotifier responsiveNavigatorStateNotifier,
+  })  : _responsiveNavigatorStateNotifier = responsiveNavigatorStateNotifier,
+        _accountServer = accountServer,
+        super(null) {
+    addSubscription(stream
+        .map((event) => event?.conversationId)
+        .distinct()
+        .listen(_accountServer.selectConversation));
     addSubscription(
       stream
           .map((event) => (event?.conversationId, event?.userId))
@@ -145,7 +151,7 @@ class ConversationStateNotifier extends StateNotifier<ConversationState?>
           .distinct()
           .switchMap((event) {
         final (String? conversationId, String? userId) = event;
-        return database.conversationDao
+        return _database.conversationDao
             .conversationItem(conversationId!)
             .watchSingleOrNullWithStream(
           eventStreams: [
@@ -168,7 +174,7 @@ class ConversationStateNotifier extends StateNotifier<ConversationState?>
     addSubscription(
       stream.map((event) => event?.userId).distinct().switchMap((userId) {
         if (userId == null) return Stream.value(null);
-        return database.userDao.userById(userId).watchSingleOrNullWithStream(
+        return _database.userDao.userById(userId).watchSingleOrNullWithStream(
           eventStreams: [
             DataBaseEventBus.instance.watchUpdateUserStream([userId])
           ],
@@ -182,13 +188,13 @@ class ConversationStateNotifier extends StateNotifier<ConversationState?>
           .map((event) => event?.conversationId)
           .where((event) => event != null)
           .distinct()
-          .switchMap((conversationId) => database.participantDao
-                  .participantById(conversationId!, currentUserId)
+          .switchMap((conversationId) => _database.participantDao
+                  .participantById(conversationId!, _currentUserId)
                   .watchSingleOrNullWithStream(
                 eventStreams: [
                   DataBaseEventBus.instance.watchUpdateParticipantStream(
                     conversationIds: [conversationId],
-                    userIds: [currentUserId],
+                    userIds: [_currentUserId],
                     and: true,
                   )
                 ],
@@ -203,10 +209,10 @@ class ConversationStateNotifier extends StateNotifier<ConversationState?>
     appActiveListener.addListener(onListen);
   }
 
-  final AccountServer accountServer;
-  final ResponsiveNavigatorStateNotifier responsiveNavigatorStateNotifier;
-  late final Database database = accountServer.database;
-  late final String currentUserId = accountServer.userId;
+  final AccountServer _accountServer;
+  final ResponsiveNavigatorStateNotifier _responsiveNavigatorStateNotifier;
+  late final Database _database = _accountServer.database;
+  late final String _currentUserId = _accountServer.userId;
 
   @override
   void dispose() {
@@ -223,8 +229,7 @@ class ConversationStateNotifier extends StateNotifier<ConversationState?>
 
   void unselected() {
     state = null;
-    accountServer.selectConversation(null);
-    responsiveNavigatorStateNotifier.clear();
+    _responsiveNavigatorStateNotifier.clear();
   }
 
   static Future<void> selectConversation(
@@ -304,11 +309,10 @@ class ConversationStateNotifier extends StateNotifier<ConversationState?>
     );
 
     Toast.dismiss();
-    accountServer.selectConversation(conversationId);
 
     conversationNotifier.state = conversationState;
 
-    conversationNotifier.responsiveNavigatorStateNotifier
+    conversationNotifier._responsiveNavigatorStateNotifier
         .pushPage(ResponsiveNavigatorStateNotifier.chatPage);
 
     unawaited(dismissByConversationId(conversationId));
@@ -348,8 +352,6 @@ class ConversationStateNotifier extends StateNotifier<ConversationState?>
 
     final app = await database.appDao.findAppById(userId);
 
-    accountServer.selectConversation(conversationId);
-
     conversationNotifier.state = ConversationState(
       conversationId: conversationId,
       userId: userId,
@@ -359,7 +361,7 @@ class ConversationStateNotifier extends StateNotifier<ConversationState?>
       refreshKey: Object(),
     );
 
-    conversationNotifier.responsiveNavigatorStateNotifier
+    conversationNotifier._responsiveNavigatorStateNotifier
         .pushPage(ResponsiveNavigatorStateNotifier.chatPage);
 
     unawaited(dismissByConversationId(conversationId));

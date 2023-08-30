@@ -4,10 +4,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../account/account_server.dart';
 import '../../db/database.dart';
 import '../../utils/logger.dart';
+import 'conversation_provider.dart';
 import 'database_provider.dart';
 import 'multi_auth_provider.dart';
-import 'selected_conversation_id.dart';
 import 'setting_provider.dart';
+
+typedef GetCurrentConversationId = String? Function();
 
 class AccountServerOpener extends StateNotifier<AsyncValue<AccountServer>> {
   AccountServerOpener() : super(const AsyncValue.loading());
@@ -20,7 +22,7 @@ class AccountServerOpener extends StateNotifier<AsyncValue<AccountServer>> {
     required this.sessionId,
     required this.identityNumber,
     required this.privateKey,
-    required this.selectedConversationIdController,
+    required this.currentConversationId,
   }) : super(const AsyncValue.loading()) {
     _init();
   }
@@ -33,14 +35,14 @@ class AccountServerOpener extends StateNotifier<AsyncValue<AccountServer>> {
   late final String sessionId;
   late final String identityNumber;
   late final String privateKey;
-  late final StateController<String?> selectedConversationIdController;
+  late final GetCurrentConversationId currentConversationId;
 
   Future<void> _init() async {
     final accountServer = AccountServer(
       multiAuthNotifier: multiAuthChangeNotifier,
       settingChangeNotifier: settingChangeNotifier,
       database: database,
-      selectedConversationIdController: selectedConversationIdController,
+      currentConversationId: currentConversationId,
     );
 
     await accountServer.initServer(
@@ -70,7 +72,7 @@ class _Args extends Equatable {
     required this.privateKey,
     required this.multiAuthChangeNotifier,
     required this.settingChangeNotifier,
-    required this.selectedConversationIdController,
+    required this.currentConversationId,
   });
 
   final Database? database;
@@ -80,7 +82,7 @@ class _Args extends Equatable {
   final String? privateKey;
   final MultiAuthStateNotifier multiAuthChangeNotifier;
   final SettingChangeNotifier settingChangeNotifier;
-  final StateController<String?> selectedConversationIdController;
+  final GetCurrentConversationId currentConversationId;
 
   @override
   List<Object?> get props => [
@@ -91,9 +93,14 @@ class _Args extends Equatable {
         privateKey,
         multiAuthChangeNotifier,
         settingChangeNotifier,
-        selectedConversationIdController,
+        currentConversationId,
       ];
 }
+
+final Provider<GetCurrentConversationId> _currentConversationIdProvider =
+    Provider<GetCurrentConversationId>(
+  (ref) => () => ref.read(currentConversationIdProvider),
+);
 
 final _argsProvider = Provider.autoDispose((ref) {
   final database =
@@ -108,8 +115,8 @@ final _argsProvider = Provider.autoDispose((ref) {
   final multiAuthChangeNotifier =
       ref.watch(multiAuthStateNotifierProvider.notifier);
   final settingChangeNotifier = ref.watch(settingProvider);
-  final selectedConversationIdController =
-      ref.watch(selectedConversationId.notifier);
+  final currentConversationId = ref.read(_currentConversationIdProvider);
+
   return _Args(
     database: database,
     userId: userId,
@@ -118,7 +125,7 @@ final _argsProvider = Provider.autoDispose((ref) {
     privateKey: privateKey,
     multiAuthChangeNotifier: multiAuthChangeNotifier,
     settingChangeNotifier: settingChangeNotifier,
-    selectedConversationIdController: selectedConversationIdController,
+    currentConversationId: currentConversationId,
   );
 });
 
@@ -143,6 +150,6 @@ final accountServerProvider = StateNotifierProvider.autoDispose<
     sessionId: args.sessionId!,
     identityNumber: args.identityNumber!,
     privateKey: args.privateKey!,
-    selectedConversationIdController: args.selectedConversationIdController,
+    currentConversationId: args.currentConversationId,
   );
 });
