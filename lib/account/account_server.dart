@@ -7,7 +7,6 @@ import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -28,6 +27,7 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
+import '../ui/provider/account_server_provider.dart';
 import '../ui/provider/multi_auth_provider.dart';
 import '../ui/provider/setting_provider.dart';
 import '../utils/app_lifecycle.dart';
@@ -55,7 +55,7 @@ class AccountServer {
     required this.multiAuthNotifier,
     required this.settingChangeNotifier,
     required this.database,
-    required this.selectedConversationIdController,
+    required this.currentConversationId,
   });
 
   static String? sid;
@@ -66,7 +66,7 @@ class AccountServer {
   final MultiAuthStateNotifier multiAuthNotifier;
   final SettingChangeNotifier settingChangeNotifier;
   final Database database;
-  final StateController<String?> selectedConversationIdController;
+  final GetCurrentConversationId currentConversationId;
   Timer? checkSignalKeyTimer;
 
   bool get _loginByPhoneNumber =>
@@ -134,7 +134,7 @@ class AccountServer {
   }
 
   void onActive() {
-    final id = selectedConversationIdController.state;
+    final id = currentConversationId();
     if (!isAppActive || id == null) return;
     markRead(id);
   }
@@ -612,7 +612,6 @@ class AccountServer {
       );
 
   void selectConversation(String? conversationId) {
-    selectedConversationIdController.state = conversationId;
     _sendEventToWorkerIsolate(
       MainIsolateEventType.updateSelectedConversation,
       conversationId,

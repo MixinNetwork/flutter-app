@@ -4,8 +4,10 @@ import 'package:flutter/services.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/platform.dart';
 import '../../provider/conversation_provider.dart';
+import '../../provider/conversation_unseen_filter_enabled.dart';
 import '../../provider/slide_category_provider.dart';
 
+import '../../provider/unseen_conversations_provider.dart';
 import '../bloc/conversation_list_bloc.dart';
 
 class ConversationHotKey extends StatelessWidget {
@@ -56,34 +58,58 @@ void _navigationConversation(
   required bool forward,
 }) {
   final category = context.providerContainer.read(slideCategoryStateProvider);
+  final conversationListBloc = context.read<ConversationListBloc>();
+
   if (category.type == SlideCategoryType.setting) return;
 
   final currentConversationId =
       context.providerContainer.read(currentConversationIdProvider);
   if (currentConversationId == null) return;
 
-  final conversationListBloc = context.read<ConversationListBloc>();
-  var currentConversationIndex = -1;
-  conversationListBloc.state.map.forEach((key, value) {
-    if (value.conversationId == currentConversationId) {
-      currentConversationIndex = key;
-    }
-  });
+  final conversationUnseenFilterEnabled =
+      context.providerContainer.read(conversationUnseenFilterEnabledProvider);
 
-  if (currentConversationIndex == -1) return;
+  String nextConversationId;
+  int? nextConversationIndex;
+  if (conversationUnseenFilterEnabled) {
+    final unseenConversations =
+        context.providerContainer.read(unseenConversationsProvider);
+    final index = unseenConversations?.indexWhere(
+        (element) => element.conversationId == currentConversationId);
 
-  final nextConversationIndex =
-      forward ? currentConversationIndex + 1 : currentConversationIndex - 1;
+    if (index == null || index == -1) return;
 
-  final nextConversation =
-      conversationListBloc.state.map[nextConversationIndex];
-  if (nextConversation == null) {
-    return;
+    final nextIndex = forward ? index + 1 : index - 1;
+
+    if (nextIndex < 0 || nextIndex >= unseenConversations!.length) return;
+
+    nextConversationId = unseenConversations[nextIndex].conversationId;
+  } else {
+    var currentConversationIndex = -1;
+    conversationListBloc.state.map.forEach((key, value) {
+      if (value.conversationId == currentConversationId) {
+        currentConversationIndex = key;
+      }
+    });
+
+    if (currentConversationIndex == -1) return;
+
+    nextConversationIndex =
+        forward ? currentConversationIndex + 1 : currentConversationIndex - 1;
+
+    final nextConversation =
+        conversationListBloc.state.map[nextConversationIndex];
+    if (nextConversation == null) return;
+    nextConversationId = nextConversation.conversationId;
   }
+
   ConversationStateNotifier.selectConversation(
     context,
-    nextConversation.conversationId,
+    nextConversationId,
   );
+
+  if (nextConversationIndex == null) return;
+
   final itemPositions =
       conversationListBloc.itemPositionsListener(category)?.itemPositions.value;
 
