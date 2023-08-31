@@ -389,13 +389,13 @@ class ConversationStateNotifier extends StateNotifier<ConversationState?>
 class _LastConversationNotifier extends StateNotifier<ConversationState?> {
   _LastConversationNotifier(super.state);
 
-  @override
-  set state(ConversationState? value) => super.state = value;
+  set _state(ConversationState? value) => super.state = value;
 }
 
 final conversationProvider = StateNotifierProvider.autoDispose<
     ConversationStateNotifier, ConversationState?>((ref) {
-  ref.keepAlive();
+  final keepAlive = ref.keepAlive();
+
   final accountServerAsync = ref.watch(accountServerProvider);
 
   if (!accountServerAsync.hasValue) {
@@ -404,6 +404,11 @@ final conversationProvider = StateNotifierProvider.autoDispose<
 
   final responsiveNavigatorNotifier =
       ref.watch(responsiveNavigatorProvider.notifier);
+
+  ref
+    ..listen(accountServerProvider, (previous, next) => keepAlive.close())
+    ..listen(responsiveNavigatorProvider.notifier,
+        (previous, next) => keepAlive.close());
 
   return ConversationStateNotifier(
     accountServer: accountServerAsync.requireValue,
@@ -417,7 +422,7 @@ final _lastConversationProvider = StateNotifierProvider.autoDispose<
   final lastConversationNotifier = _LastConversationNotifier(conversation);
   ref.listen(conversationProvider, (previous, next) {
     if (next == null) return;
-    lastConversationNotifier.state = next;
+    lastConversationNotifier._state = next;
   });
   return lastConversationNotifier;
 });
@@ -430,7 +435,7 @@ final filterLastConversationProvider = StateNotifierProvider.autoDispose.family<
   final lastConversationNotifier = _LastConversationNotifier(conversation);
   ref.listen(conversationProvider, (previous, next) {
     if (!filter(next)) return;
-    lastConversationNotifier.state = next;
+    lastConversationNotifier._state = next;
   });
   return lastConversationNotifier;
 });

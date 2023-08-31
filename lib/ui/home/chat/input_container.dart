@@ -10,7 +10,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' hide Consumer;
 import 'package:rxdart/rxdart.dart';
 
 import '../../../constants/constants.dart';
@@ -32,15 +32,14 @@ import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
-import '../../../widgets/sticker_page/emoji_page.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
+import '../../provider/mention_provider.dart';
+import '../../provider/quote_message_provider.dart';
 import '../../provider/recall_message_reedit_provider.dart';
-import '../bloc/mention_cubit.dart';
-import '../bloc/quote_message_cubit.dart';
 import 'chat_page.dart';
 import 'files_preview.dart';
 import 'voice_recorder_bottom_bar.dart';
@@ -53,10 +52,6 @@ class InputContainer extends HookConsumerWidget {
     final conversationId = ref.watch(currentConversationIdProvider);
 
     final hasParticipant = ref.watch(currentConversationHasParticipantProvider);
-
-    useEffect(() {
-      context.read<QuoteMessageCubit>().emit(null);
-    }, [conversationId]);
 
     final voiceRecorderCubit = useBloc(
       () => VoiceRecorderCubit(context.audioMessageService),
@@ -96,22 +91,12 @@ class _InputContainer extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mentionCubit = useBloc(
-      () => MentionCubit(
-        userDao: context.database.userDao,
-        multiAuthChangeNotifier: context.multiAuthChangeNotifier,
-      ),
-    );
-
     final (conversationId, originalDraft) = ref.watch(
       conversationProvider.select(
           (value) => (value?.conversationId, value?.conversation?.draft)),
     );
 
-    final quoteMessageId =
-        useBlocStateConverter<QuoteMessageCubit, MessageItem?, String?>(
-      converter: (state) => state?.messageId,
-    );
+    final quoteMessageId = ref.watch(quoteMessageIdProvider);
 
     final textEditingController = useMemoized(
       () {
@@ -130,16 +115,7 @@ class _InputContainer extends HookConsumerWidget {
     final textEditingValueStream =
         useValueNotifierConvertSteam(textEditingController);
 
-    useEffect(() {
-      if (conversationId == null) return;
-      final conversationState = ref.read(conversationProvider);
-      if (conversationState == null) return;
-
-      mentionCubit.setTextEditingValueStream(
-        textEditingValueStream,
-        conversationState,
-      );
-    }, [textEditingValueStream.hashCode, conversationId]);
+    final mentionProviderInstance = mentionProvider(textEditingValueStream);
 
     useEffect(() {
       final updateDraft = context.database.conversationDao.updateDraft;
@@ -204,60 +180,55 @@ class _InputContainer extends HookConsumerWidget {
       }
     }, [chatSidePageSize]);
 
-    return MultiProvider(
-      providers: [
-        BlocProvider.value(
-          value: mentionCubit,
-        ),
-      ],
-      child: LayoutBuilder(
-        builder: (context, BoxConstraints constraints) =>
-            MentionPanelPortalEntry(
-          textEditingController: textEditingController,
-          constraints: constraints,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const _QuoteMessage(),
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: 56,
+    return LayoutBuilder(
+      builder: (context, BoxConstraints constraints) => MentionPanelPortalEntry(
+        textEditingController: textEditingController,
+        mentionProviderInstance: mentionProviderInstance,
+        constraints: constraints,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const _QuoteMessage(),
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: 56,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: context.theme.primary,
                 ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: context.theme.primary,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _FileButton(actionColor: context.theme.icon),
-                      const _ImagePickButton(),
-                      const SizedBox(width: 6),
-                      _StickerButton(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _FileButton(actionColor: context.theme.icon),
+                    const _ImagePickButton(),
+                    const SizedBox(width: 6),
+                    _StickerButton(
+                      textEditingController: textEditingController,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _SendTextField(
+                        focusNode: focusNode,
                         textEditingController: textEditingController,
+                        mentionProviderInstance: mentionProviderInstance,
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _SendTextField(
-                          focusNode: focusNode,
-                          textEditingController: textEditingController,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      _AnimatedSendOrVoiceButton(
-                        textEditingController: textEditingController,
-                        textEditingValueStream: textEditingValueStream,
-                      )
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 16),
+                    _AnimatedSendOrVoiceButton(
+                      textEditingController: textEditingController,
+                      textEditingValueStream: textEditingValueStream,
+                    )
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -375,7 +346,7 @@ void _sendPostMessage(
       recipientId: conversationItem.userId);
 
   textEditingController.text = '';
-  context.read<QuoteMessageCubit>().emit(null);
+  context.providerContainer.read(quoteMessageProvider.notifier).state = null;
 }
 
 void _sendMessage(
@@ -398,35 +369,36 @@ void _sendMessage(
     conversationItem.encryptCategory,
     conversationId: conversationItem.conversationId,
     recipientId: conversationItem.userId,
-    quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
+    quoteMessageId: context.providerContainer.read(quoteMessageIdProvider),
     silent: silent,
   );
 
   textEditingController.text = '';
-  context.read<QuoteMessageCubit>().emit(null);
+  context.providerContainer.read(quoteMessageProvider.notifier).state = null;
 }
 
 class _SendTextField extends HookConsumerWidget {
   const _SendTextField({
     required this.focusNode,
     required this.textEditingController,
+    required this.mentionProviderInstance,
   });
 
   final FocusNode focusNode;
   final TextEditingController textEditingController;
+  final AutoDisposeStateNotifierProvider<MentionStateNotifier, MentionState>
+      mentionProviderInstance;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textEditingValueStream =
         useValueNotifierConvertSteam(textEditingController);
-
-    final mentionCubit = context.read<MentionCubit>();
-    final mentionStream = mentionCubit.stream;
+    final mentionStream = ref.watch(mentionProviderInstance.notifier).stream;
 
     final sendable = useMemoizedStream(
           () => Rx.combineLatest2<TextEditingValue, MentionState, bool>(
               textEditingValueStream,
-              mentionStream.startWith(mentionCubit.state),
+              mentionStream.startWith(ref.read(mentionProviderInstance)),
               (textEditingValue, mentionState) =>
                   (textEditingValue.text.trim().isNotEmpty) &&
                   (textEditingValue.composing.composed) &&
@@ -493,7 +465,8 @@ class _SendTextField extends HookConsumerWidget {
             onInvoke: (_) => _sendPostMessage(context, textEditingController),
           ),
           EscapeIntent: CallbackAction<Intent>(
-            onInvoke: (_) => context.read<QuoteMessageCubit>().emit(null),
+            onInvoke: (_) =>
+                ref.read(quoteMessageProvider.notifier).state = null,
           ),
         },
         child: Stack(
@@ -550,59 +523,61 @@ class _SendTextField extends HookConsumerWidget {
   }
 }
 
-class _QuoteMessage extends StatelessWidget {
+class _QuoteMessage extends HookConsumerWidget {
   const _QuoteMessage();
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<QuoteMessageCubit, MessageItem?>(
-        builder: (context, message) => TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: message != null ? 1 : 0),
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOut,
-          builder: (BuildContext context, double progress, Widget? child) =>
-              ClipRect(
-            child: Align(
-              alignment: AlignmentDirectional.topEnd,
-              heightFactor: progress,
-              child: child,
-            ),
-          ),
-          child: BlocBuilder<QuoteMessageCubit, MessageItem?>(
-            buildWhen: (a, b) => b != null,
-            builder: (context, message) {
-              if (message == null) return const SizedBox();
-              return DecoratedBox(
-                decoration: BoxDecoration(
-                  color: context.theme.popUp,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: QuoteMessage(
-                        quoteMessageId: message.messageId,
-                        message: message,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => context.read<QuoteMessageCubit>().emit(null),
-                      behavior: HitTestBehavior.opaque,
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        child: SvgPicture.asset(
-                          Resources.assetsImagesCloseOvalSvg,
-                          height: 22,
-                          width: 22,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final quoting =
+        ref.watch(quoteMessageProvider.select((value) => value != null));
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: quoting ? 1 : 0),
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      builder: (BuildContext context, double progress, Widget? child) =>
+          ClipRect(
+        child: Align(
+          alignment: AlignmentDirectional.topCenter,
+          heightFactor: progress,
+          child: child,
         ),
-      );
+      ),
+      child: Consumer(builder: (context, ref, child) {
+        final message = ref.watch(lastQuoteMessageProvider);
+
+        if (message == null) return const SizedBox();
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: context.theme.popUp,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: QuoteMessage(
+                  quoteMessageId: message.messageId,
+                  message: message,
+                ),
+              ),
+              GestureDetector(
+                onTap: () =>
+                    ref.read(quoteMessageProvider.notifier).state = null,
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesCloseOvalSvg,
+                    height: 22,
+                    width: 22,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    );
+  }
 }
 
 class _ImagePickButton extends StatelessWidget {
@@ -713,7 +688,6 @@ class _StickerButton extends HookConsumerWidget {
     return MultiProvider(
       providers: [
         BlocProvider.value(value: stickerAlbumsCubit),
-        BlocProvider(create: (context) => EmojiScrollOffsetCubit()),
         ChangeNotifierProvider.value(value: textEditingController),
       ],
       child: DefaultTabController(

@@ -1,22 +1,21 @@
-import 'dart:async';
-import 'dart:math' as math;
 import 'dart:math';
 
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../../bloc/subscribe_mixin.dart';
-import '../../../db/dao/user_dao.dart';
-import '../../../db/database_event_bus.dart';
-import '../../../db/mixin_database.dart';
-import '../../../utils/extension/extension.dart';
-import '../../../utils/reg_exp_utils.dart';
-import '../../../widgets/mention_panel.dart';
-import '../../provider/conversation_provider.dart';
-import '../../provider/multi_auth_provider.dart';
+import '../../db/dao/user_dao.dart';
+import '../../db/database_event_bus.dart';
+import '../../db/mixin_database.dart';
+import '../../utils/extension/extension.dart';
+import '../../utils/reg_exp_utils.dart';
+import '../../widgets/mention_panel.dart';
+import '../home/bloc/subscriber_mixin.dart';
+import 'conversation_provider.dart';
+import 'database_provider.dart';
+import 'multi_auth_provider.dart';
 
 class MentionState extends Equatable {
   const MentionState({
@@ -44,21 +43,16 @@ class MentionState extends Equatable {
       );
 }
 
-class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
-  MentionCubit({
+class MentionStateNotifier extends StateNotifier<MentionState>
+    with SubscriberMixin {
+  MentionStateNotifier({
     required this.userDao,
     required this.multiAuthChangeNotifier,
-  }) : super(const MentionState());
-
-  void setTextEditingValueStream(
-    Stream<TextEditingValue> textEditingValueStream,
-    ConversationState conversationState,
-  ) {
-    Future.wait(subscriptions
-        .toList()
-        .where((element) => element != null)
-        .map((e) => e!.cancel()));
-
+    required this.textEditingValueStream,
+    required String conversationId,
+    required bool? isGroup,
+    required bool? isBot,
+  }) : super(const MentionState()) {
     final mentionTextStream = textEditingValueStream.map((event) {
       final text = event.text.substring(0, max(event.selection.baseOffset, 0));
       return mentionRegExp.firstMatch(text)?[1];
@@ -76,37 +70,34 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
         return Stream.value(MentionState(text: keyword));
       }
       if (keyword.isEmpty) {
-        if (conversationState.isBot ?? false) {
+        if (isBot ?? false) {
           return userDao.friends().watchWithStream(
             eventStreams: [DataBaseEventBus.instance.updateUserIdsStream],
             duration: kVerySlowThrottleDuration,
           ).map((value) => _resultToMentionState(keyword, value));
         }
-        if (conversationState.isGroup ?? false) {
-          return userDao
-              .groupParticipants(conversationState.conversationId)
-              .watchWithStream(
+        if (isGroup ?? false) {
+          return userDao.groupParticipants(conversationId).watchWithStream(
             eventStreams: [
               DataBaseEventBus.instance.watchUpdateParticipantStream(
-                  conversationIds: [conversationState.conversationId])
+                  conversationIds: [conversationId])
             ],
             duration: kVerySlowThrottleDuration,
           ).map((value) => _resultToMentionState(
-                  keyword,
-                  value
-                    ..removeWhere(
-                      (element) =>
-                          element.userId ==
-                          multiAuthChangeNotifier.current!.userId,
-                    )));
+              keyword,
+              value
+                ..removeWhere(
+                  (element) =>
+                      element.userId == multiAuthChangeNotifier.current!.userId,
+                )));
         }
       }
 
-      if (conversationState.isBot ?? false) {
+      if (isBot ?? false) {
         return userDao
             .fuzzySearchBotGroupUser(
           currentUserId: multiAuthChangeNotifier.current?.userId ?? '',
-          conversationId: conversationState.conversationId,
+          conversationId: conversationId,
           keyword: keyword,
         )
             .watchWithStream(
@@ -118,24 +109,30 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
           duration: kVerySlowThrottleDuration,
         ).map((value) => _resultToMentionState(keyword, value));
       }
-      if (conversationState.isGroup ?? false) {
+      if (isGroup ?? false) {
         return userDao
             .fuzzySearchGroupUser(
           multiAuthChangeNotifier.current?.userId ?? '',
-          conversationState.conversationId,
+          conversationId,
           keyword,
         )
             .watchWithStream(
           eventStreams: [
-            DataBaseEventBus.instance.watchUpdateParticipantStream(
-                conversationIds: [conversationState.conversationId])
+            DataBaseEventBus.instance
+                .watchUpdateParticipantStream(conversationIds: [conversationId])
           ],
           duration: kVerySlowThrottleDuration,
         ).map((value) => _resultToMentionState(keyword, value));
       }
       return Stream.value(MentionState(text: keyword));
-    }).listen(emit));
+    }).listen((value) => state = value));
   }
+
+  MentionStateNotifier.idle({
+    required this.userDao,
+    required this.multiAuthChangeNotifier,
+    required this.textEditingValueStream,
+  }) : super(const MentionState());
 
   MentionState _resultToMentionState(String? keyword, List<User> users) =>
       MentionState(
@@ -181,27 +178,59 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
 
   final UserDao userDao;
   final MultiAuthStateNotifier multiAuthChangeNotifier;
+  final Stream<TextEditingValue> textEditingValueStream;
+
   final scrollController = ScrollController();
 
   @override
-  Future<void> close() async {
+  Future<void> dispose() async {
     scrollController.dispose();
-    await super.close();
+    super.dispose();
   }
 
   void next() {
-    final index = math.min(state.index + 1, state.users.length - 1);
-    emit(state.copyWith(
+    final index = min(state.index + 1, state.users.length - 1);
+    state = state.copyWith(
       index: index,
-    ));
+    );
     _jumpToPosition(index);
   }
 
   void prev() {
-    final index = math.max(state.index - 1, 0);
-    emit(state.copyWith(
+    final index = max(state.index - 1, 0);
+    state = state.copyWith(
       index: index,
-    ));
+    );
     _jumpToPosition(index);
   }
 }
+
+final mentionProvider = StateNotifierProvider.autoDispose
+    .family<MentionStateNotifier, MentionState, Stream<TextEditingValue>>(
+  (ref, stream) {
+    final userDao = ref
+        .watch(databaseProvider.select((value) => value.requireValue.userDao));
+    final authStateNotifier =
+        ref.watch(multiAuthStateNotifierProvider.notifier);
+    final (conversationId, isGroup, isBot) = ref.watch(
+        conversationProvider.select(
+            (value) => (value?.conversationId, value?.isGroup, value?.isBot)));
+
+    if (conversationId == null) {
+      return MentionStateNotifier.idle(
+        userDao: userDao,
+        multiAuthChangeNotifier: authStateNotifier,
+        textEditingValueStream: stream,
+      );
+    }
+
+    return MentionStateNotifier(
+      userDao: userDao,
+      multiAuthChangeNotifier: authStateNotifier,
+      textEditingValueStream: stream,
+      conversationId: conversationId,
+      isGroup: isGroup,
+      isBot: isBot,
+    );
+  },
+);

@@ -8,11 +8,10 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../db/mixin_database.dart' hide Offset;
-import '../ui/home/bloc/mention_cubit.dart';
 import '../ui/home/intent.dart';
 import '../ui/provider/conversation_provider.dart';
+import '../ui/provider/mention_provider.dart';
 import '../utils/extension/extension.dart';
-import '../utils/hook.dart';
 import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import 'avatar_view/avatar_view.dart';
@@ -27,15 +26,20 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
     required this.constraints,
     required this.textEditingController,
     required this.child,
+    required this.mentionProviderInstance,
   });
 
   final BoxConstraints constraints;
   final TextEditingController textEditingController;
   final Widget child;
+  final AutoDisposeStateNotifierProvider<MentionStateNotifier, MentionState>
+      mentionProviderInstance;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mentionState = useBlocState<MentionCubit, MentionState>();
+    final scrollController = ref.watch(mentionProviderInstance.notifier
+        .select((value) => value.scrollController));
+    final mentionState = ref.watch(mentionProviderInstance);
     final visible = mentionState.users.isNotEmpty;
 
     final selectable =
@@ -68,14 +72,16 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
       },
       actions: {
         ListSelectionNextIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => context.read<MentionCubit>().next(),
+          onInvoke: (Intent intent) =>
+              ref.read(mentionProviderInstance.notifier).next(),
         ),
         ListSelectionPrevIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => context.read<MentionCubit>().prev(),
+          onInvoke: (Intent intent) =>
+              ref.read(mentionProviderInstance.notifier).prev(),
         ),
         ListSelectionSelectedIntent: CallbackAction<Intent>(
           onInvoke: (Intent intent) {
-            final state = context.read<MentionCubit>().state;
+            final state = ref.read(mentionProviderInstance);
             _select(state.users[state.index]);
           },
         ),
@@ -104,6 +110,7 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
               ),
               child: _MentionPanel(
                 mentionState: mentionState,
+                scrollController: scrollController,
                 onSelect: _select,
               ),
             ),
@@ -139,10 +146,12 @@ class _MentionPanel extends StatelessWidget {
   const _MentionPanel({
     required this.mentionState,
     required this.onSelect,
+    required this.scrollController,
   });
 
   final MentionState mentionState;
   final Function(User user) onSelect;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -150,7 +159,7 @@ class _MentionPanel extends StatelessWidget {
           color: context.theme.popUp,
         ),
         child: ListView.builder(
-          controller: context.read<MentionCubit>().scrollController,
+          controller: scrollController,
           itemCount: mentionState.users.length,
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) => _MentionItem(
