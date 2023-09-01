@@ -615,40 +615,41 @@ class _ImagePickButton extends StatelessWidget {
     }
     return Padding(
       padding: const EdgeInsets.only(left: 6),
-      child: ContextMenuPortalEntry(
-        interactiveForTap: true,
-        buildMenus: () => [
-          ContextMenu(
-            icon: Resources.assetsImagesImageSvg,
-            title: context.l10n.image,
-            onTap: () async {
-              final file =
-                  await ImagePicker().pickImage(source: ImageSource.gallery);
-              if (file != null) {
-                // recreate the XFile to generate mimeType.
-                final xFile = File(file.path).xFile;
-                await showFilesPreviewDialog(context, [xFile]);
-              }
-            },
-          ),
-          ContextMenu(
-            icon: Resources.assetsImagesVideoSvg,
-            title: context.l10n.video,
-            onTap: () async {
-              final file =
-                  await ImagePicker().pickVideo(source: ImageSource.gallery);
-              if (file != null) {
-                // recreate the XFile to generate mimeType.
-                final xFile = File(file.path).xFile;
-                await showFilesPreviewDialog(context, [xFile]);
-              }
-            },
-          ),
+      child: PopupMenuPageButton(
+        itemBuilder: (context) => [
+          createPopupMenuItem(
+              icon: Resources.assetsImagesImageSvg,
+              title: context.l10n.image,
+              context: context,
+              value: 'image'),
+          createPopupMenuItem(
+              icon: Resources.assetsImagesVideoSvg,
+              title: context.l10n.video,
+              context: context,
+              value: 'video'),
         ],
-        child: ActionButton(
-          name: Resources.assetsImagesFilePreviewImagesSvg,
-          color: context.theme.icon,
-          interactive: false,
+        onSelected: (value) async {
+          XFile? file;
+          if (value == 'image') {
+            file = await ImagePicker().pickImage(source: ImageSource.gallery);
+          } else if (value == 'video') {
+            file = await ImagePicker().pickVideo(source: ImageSource.gallery);
+          }
+
+          if (file != null) {
+            // recreate the XFile to generate mimeType.
+            final xFile = File(file.path).xFile;
+            await showFilesPreviewDialog(context, [xFile]);
+          }
+        },
+        icon: SvgPicture.asset(
+          Resources.assetsImagesFilePreviewImagesSvg,
+          height: 24,
+          width: 24,
+          colorFilter: ColorFilter.mode(
+            context.theme.icon,
+            BlendMode.srcIn,
+          ),
         ),
       ),
     );

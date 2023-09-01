@@ -27,13 +27,75 @@ extension ContextMenuPortalEntrySender on BuildContext {
   void closeMenu() => read<_OffsetCubit>().emit(null);
 }
 
+class PopupMenuPageButton<T> extends HookConsumerWidget {
+  const PopupMenuPageButton({
+    super.key,
+    required this.itemBuilder,
+    this.onSelected,
+    this.child,
+    this.icon,
+  });
+
+  final PopupMenuItemBuilder<T> itemBuilder;
+  final PopupMenuItemSelected<T>? onSelected;
+  final Widget? child;
+  final Widget? icon;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => PopupMenuButton(
+        color: context.theme.popUp,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 160),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(11))),
+        itemBuilder: itemBuilder,
+        onSelected: onSelected,
+        icon: icon,
+        child: child,
+      );
+}
+
+PopupMenuItem<T> createPopupMenuItem<T>({
+  T? value,
+  String? icon,
+  required String title,
+  required BuildContext context,
+}) =>
+    PopupMenuItem(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      value: value,
+      child: Row(
+        children: [
+          if (icon != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: SvgPicture.asset(
+                icon,
+                colorFilter:
+                    ColorFilter.mode(context.theme.text, BlendMode.srcIn),
+                width: 20,
+                height: 20,
+              ),
+            ),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: context.theme.text,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+
 class ContextMenuPortalEntry extends HookConsumerWidget {
   const ContextMenuPortalEntry({
     super.key,
     required this.child,
     required this.buildMenus,
     this.showedMenu,
-    this.interactiveForTap = false,
     this.enable = true,
     this.onTap,
   });
@@ -41,7 +103,6 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
   final Widget child;
   final List<Widget> Function() buildMenus;
   final ValueChanged<bool>? showedMenu;
-  final bool interactiveForTap;
   final bool enable;
   final VoidCallback? onTap;
 
@@ -100,7 +161,7 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
                 },
                 child: CustomSingleChildLayout(
                   delegate: PositionedLayoutDelegate(position: offset),
-                  child: ContextMenuPage(menus: buildMenus()),
+                  child: _ContextMenuPage(menus: buildMenus()),
                 ),
               );
             }
@@ -115,9 +176,6 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
                 offsetCubit.emit(details.globalPosition);
               }
             },
-            onTapUp: interactiveForTap
-                ? (details) => offsetCubit.emit(details.globalPosition)
-                : null,
             onTap: onTap,
             child: child,
           ),
@@ -186,9 +244,8 @@ class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
       position != oldDelegate.position;
 }
 
-class ContextMenuPage extends StatelessWidget {
-  const ContextMenuPage({
-    super.key,
+class _ContextMenuPage extends StatelessWidget {
+  const _ContextMenuPage({
     required this.menus,
   });
 
@@ -356,7 +413,7 @@ class SubContextMenu extends StatelessWidget {
           target: Alignment.centerRight,
           offset: Offset(-8, 0),
         ),
-        portal: ContextMenuPage(menus: menus),
+        portal: _ContextMenuPage(menus: menus),
         child: ContextMenu._sub(
           icon: icon,
           title: title,

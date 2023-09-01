@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -153,45 +154,48 @@ class ChatInfoPage extends HookConsumerWidget {
                       singleSelect: true,
                       title: context.l10n.shareContact,
                       onlyContact: false,
-                      action: ContextMenuPortalEntry(
-                        buildMenus: () => [
-                          ContextMenu(
+                      action: PopupMenuPageButton(
+                        icon: SvgPicture.asset(
+                          Resources.assetsImagesInviteShareSvg,
+                          height: 24,
+                          width: 24,
+                          colorFilter: ColorFilter.mode(
+                            context.theme.icon,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        itemBuilder: (context) => [
+                          createPopupMenuItem(
                             icon: Resources.assetsImagesContextMenuCopySvg,
                             title: context.l10n.copyLink,
-                            onTap: () async {
-                              final userId = conversationState.userId;
-                              if (userId == null) {
-                                e('can not share contact, userId is null $conversationState');
-                                return;
-                              }
-
-                              final user = await context.database.userDao
-                                  .userById(userId)
-                                  .getSingleOrNull();
-
-                              if (user == null) {
-                                e('can not find user $userId');
-                                return;
-                              }
-
-                              final codeUrl = user.codeUrl;
-                              if (codeUrl == null) {
-                                e('can not find codeUrl $codeUrl');
-                                return;
-                              }
-
-                              i('share contact ${user.userId} $codeUrl');
-                              await Clipboard.setData(
-                                  ClipboardData(text: codeUrl));
-                            },
+                            context: context,
                           ),
                         ],
-                        interactiveForTap: true,
-                        child: ActionButton(
-                          name: Resources.assetsImagesInviteShareSvg,
-                          interactive: false,
-                          color: context.theme.icon,
-                        ),
+                        onSelected: (_) async {
+                          final userId = conversationState.userId;
+                          if (userId == null) {
+                            e('can not share contact, userId is null $conversationState');
+                            return;
+                          }
+
+                          final user = await context.database.userDao
+                              .userById(userId)
+                              .getSingleOrNull();
+
+                          if (user == null) {
+                            e('can not find user $userId');
+                            return;
+                          }
+
+                          final codeUrl = user.codeUrl;
+                          if (codeUrl == null) {
+                            e('can not find codeUrl $codeUrl');
+                            return;
+                          }
+
+                          i('share contact ${user.userId} $codeUrl');
+                          await Clipboard.setData(ClipboardData(text: codeUrl));
+                        },
                       ),
                     );
 
