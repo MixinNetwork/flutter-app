@@ -165,10 +165,9 @@ class ChatInfoPage extends HookConsumerWidget {
                           ),
                         ),
                         itemBuilder: (context) => [
-                          createPopupMenuItem(
+                          CustomPopupMenuButton(
                             icon: Resources.assetsImagesContextMenuCopySvg,
                             title: context.l10n.copyLink,
-                            context: context,
                           ),
                         ],
                         onSelected: (_) async {

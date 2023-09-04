@@ -1455,50 +1455,37 @@ class _NormalOperationBar extends HookConsumerWidget {
             const SizedBox(width: 4),
             PopupMenuPageButton(
               itemBuilder: (context) => [
-                createPopupMenuItem(
-                  title: context.l10n.originalImage,
-                  value: null,
-                  context: context,
-                ),
-                createPopupMenuItem(
+                CustomPopupMenuButton(title: context.l10n.originalImage),
+                CustomPopupMenuButton(
                   title: '1:1',
                   value: 1,
-                  context: context,
                 ),
-                createPopupMenuItem(
+                CustomPopupMenuButton(
                   title: '2:3',
                   value: 2 / 3,
-                  context: context,
                 ),
-                createPopupMenuItem(
+                CustomPopupMenuButton(
                   title: '3:2',
                   value: 3 / 2,
-                  context: context,
                 ),
-                createPopupMenuItem(
+                CustomPopupMenuButton(
                   title: '3:4',
                   value: 3 / 4,
-                  context: context,
                 ),
-                createPopupMenuItem(
+                CustomPopupMenuButton(
                   title: '4:3',
                   value: 4 / 3,
-                  context: context,
                 ),
-                createPopupMenuItem(
+                CustomPopupMenuButton(
                   title: '9:16',
                   value: 9 / 16,
-                  context: context,
                 ),
-                createPopupMenuItem(
+                CustomPopupMenuButton(
                   title: '16:9',
                   value: 16 / 9,
-                  context: context,
                 ),
               ],
-              onSelected: (value) {
-                imageEditorBloc.setCropRatio(null);
-              },
+              onSelected: (_) => imageEditorBloc.setCropRatio(null),
               icon: SvgPicture.asset(
                 Resources.assetsImagesEditImageClipSvg,
                 height: 24,

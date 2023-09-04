@@ -580,6 +580,11 @@ class _QuoteMessage extends HookConsumerWidget {
   }
 }
 
+enum _ImagePickType {
+  image,
+  video,
+}
+
 class _ImagePickButton extends StatelessWidget {
   const _ImagePickButton();
 
@@ -592,22 +597,22 @@ class _ImagePickButton extends StatelessWidget {
       padding: const EdgeInsets.only(left: 6),
       child: PopupMenuPageButton(
         itemBuilder: (context) => [
-          createPopupMenuItem(
-              icon: Resources.assetsImagesImageSvg,
-              title: context.l10n.image,
-              context: context,
-              value: 'image'),
-          createPopupMenuItem(
-              icon: Resources.assetsImagesVideoSvg,
-              title: context.l10n.video,
-              context: context,
-              value: 'video'),
+          CustomPopupMenuButton(
+            icon: Resources.assetsImagesImageSvg,
+            title: context.l10n.image,
+            value: _ImagePickType.image,
+          ),
+          CustomPopupMenuButton(
+            icon: Resources.assetsImagesVideoSvg,
+            title: context.l10n.video,
+            value: _ImagePickType.video,
+          ),
         ],
         onSelected: (value) async {
           XFile? file;
-          if (value == 'image') {
+          if (value == _ImagePickType.image) {
             file = await ImagePicker().pickImage(source: ImageSource.gallery);
-          } else if (value == 'video') {
+          } else if (value == _ImagePickType.video) {
             file = await ImagePicker().pickVideo(source: ImageSource.gallery);
           }
 

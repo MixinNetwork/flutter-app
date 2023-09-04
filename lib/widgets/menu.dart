@@ -55,40 +55,42 @@ class PopupMenuPageButton<T> extends HookConsumerWidget {
       );
 }
 
-PopupMenuItem<T> createPopupMenuItem<T>({
-  T? value,
-  String? icon,
-  required String title,
-  required BuildContext context,
-}) =>
-    PopupMenuItem(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      value: value,
-      child: Row(
-        children: [
-          if (icon != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: SvgPicture.asset(
-                icon,
-                colorFilter:
-                    ColorFilter.mode(context.theme.text, BlendMode.srcIn),
-                width: 20,
-                height: 20,
-              ),
+class CustomPopupMenuButton<T> extends PopupMenuItem<T> {
+  CustomPopupMenuButton({
+    super.key,
+    super.value,
+    String? icon,
+    required String title,
+  }) : super(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Builder(
+            builder: (context) => Row(
+              children: [
+                if (icon != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: SvgPicture.asset(
+                      icon,
+                      colorFilter:
+                          ColorFilter.mode(context.theme.text, BlendMode.srcIn),
+                      width: 20,
+                      height: 20,
+                    ),
+                  ),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: context.theme.text,
+                    ),
+                  ),
+                )
+              ],
             ),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                color: context.theme.text,
-              ),
-            ),
-          )
-        ],
-      ),
-    );
+          ),
+        );
+}
 
 class ContextMenuPortalEntry extends HookConsumerWidget {
   const ContextMenuPortalEntry({
