@@ -6,18 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
 import '../interactive_decorated_box.dart';
 
-class EmojiScrollOffsetCubit extends Cubit<double> {
-  EmojiScrollOffsetCubit() : super(0);
-
-  void setOffset(double offset) => emit(offset);
-}
+final _emojiScrollOffsetProvider = StateProvider<double>((ref) => 0);
 
 const emojiGroups = [
   [EmojiGroup.smileysEmotion, EmojiGroup.peopleBody],
@@ -63,7 +58,7 @@ class _EmojiPageBody extends HookConsumerWidget {
       Resources.assetsImagesEmojiFlagsSvg,
     ];
 
-    final offset = context.watch<EmojiScrollOffsetCubit>().state;
+    final offset = ref.watch(_emojiScrollOffsetProvider);
 
     final emojiLineStride = useRef(8);
 
@@ -125,9 +120,8 @@ class _EmojiPageBody extends HookConsumerWidget {
           selectedIndex: selectedIndex,
           icons: emojiGroupIcon,
           onTap: (index) {
-            context
-                .read<EmojiScrollOffsetCubit>()
-                .setOffset(groupOffset[index]);
+            ref.read(_emojiScrollOffsetProvider.notifier).state =
+                groupOffset[index];
             emojiOffsetController.add(groupOffset[index]);
           },
         ),
@@ -265,7 +259,7 @@ class _AllEmojisPage extends HookConsumerWidget {
 
     useEffect(() {
       void onScroll() {
-        context.read<EmojiScrollOffsetCubit>().setOffset(controller.offset);
+        ref.read(_emojiScrollOffsetProvider.notifier).state = controller.offset;
       }
 
       controller.addListener(onScroll);

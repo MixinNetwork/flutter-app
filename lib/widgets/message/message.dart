@@ -24,9 +24,9 @@ import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
-import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
+import '../../ui/provider/quote_message_provider.dart';
 import '../../ui/provider/recall_message_reedit_provider.dart';
 import '../../ui/provider/setting_provider.dart';
 import '../../utils/datetime_format_utils.dart';
@@ -136,7 +136,8 @@ void _quickReply(BuildContext context) {
 
   doubleTap('_quickReply', const Duration(milliseconds: 300), () {
     context.read<BlinkCubit>().blinkByMessageId(context.message.messageId);
-    context.read<QuoteMessageCubit>().emit(context.message);
+    context.providerContainer.read(quoteMessageProvider.notifier).state =
+        context.message;
   });
 }
 
@@ -270,8 +271,9 @@ class MessageItemWidget extends HookConsumerWidget {
                       ContextMenu(
                         icon: Resources.assetsImagesContextMenuReplySvg,
                         title: context.l10n.reply,
-                        onTap: () =>
-                            context.read<QuoteMessageCubit>().emit(message),
+                        onTap: () => context.providerContainer
+                            .read(quoteMessageProvider.notifier)
+                            .state = message,
                       ),
                     if (!isTranscriptPage &&
                         message.type.canReply &&
