@@ -42,7 +42,6 @@ abstract class ConversationMenuHandle {
 class MacMenuBarStateNotifier extends StateNotifier<ConversationMenuHandle?> {
   MacMenuBarStateNotifier(super.state);
 
-  // ignore: use_setters_to_change_properties
   void attach(ConversationMenuHandle handle) {
     if (!Platform.isMacOS) return;
     Future(() => state = handle);
