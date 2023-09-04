@@ -28,7 +28,7 @@ import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/menu.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/quote_message_cubit.dart';
+import '../../provider/quote_message_provider.dart';
 import 'image_editor.dart';
 
 Future<void> showFilesPreviewDialog(
@@ -39,7 +39,6 @@ Future<void> showFilesPreviewDialog(
       initialFiles: await Future.wait(files.map(
         (e) async => _File(e, await e.length(), null),
       )),
-      quoteMessageCubit: context.read<QuoteMessageCubit>(),
     ),
   );
 }
@@ -78,15 +77,14 @@ enum _TabType { image, files, zip }
 class _FilesPreviewDialog extends HookConsumerWidget {
   const _FilesPreviewDialog({
     required this.initialFiles,
-    this.quoteMessageCubit,
   });
 
   final List<_File> initialFiles;
-  final QuoteMessageCubit? quoteMessageCubit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final files = useState(initialFiles);
+    final quoteMessageCubit = ref.watch(quoteMessageProvider.notifier);
 
     final hasImage = useMemoized(
       () => files.value.indexWhere((e) => e.isImage) != -1,
@@ -135,11 +133,11 @@ class _FilesPreviewDialog extends HookConsumerWidget {
           unawaited(_sendFile(
             context,
             file,
-            quoteMessageCubit?.state?.messageId,
+            quoteMessageCubit.state?.messageId,
             silent: silent,
           ));
         }
-        quoteMessageCubit?.emit(null);
+        quoteMessageCubit.state = null;
         Navigator.pop(context);
       } else {
         final zipFilePath = await runLoadBalancer(_archiveFiles, [
@@ -149,10 +147,10 @@ class _FilesPreviewDialog extends HookConsumerWidget {
         unawaited(_sendFile(
           context,
           await _File.createFromPath(zipFilePath),
-          quoteMessageCubit?.state?.messageId,
+          quoteMessageCubit.state?.messageId,
           silent: silent,
         ));
-        quoteMessageCubit?.emit(null);
+        quoteMessageCubit.state = null;
         Navigator.pop(context);
       }
     }

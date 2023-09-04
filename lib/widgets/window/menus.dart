@@ -1,10 +1,8 @@
 import 'dart:io';
 
-import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
@@ -41,32 +39,26 @@ abstract class ConversationMenuHandle {
   void delete();
 }
 
-class MacMenuBarCubitState with EquatableMixin {
-  const MacMenuBarCubitState({
-    this.conversationMenuHandle,
-  });
-
-  final ConversationMenuHandle? conversationMenuHandle;
-
-  @override
-  List<Object?> get props => [conversationMenuHandle];
-}
-
-class MacMenuBarCubit extends Cubit<MacMenuBarCubitState> {
-  MacMenuBarCubit() : super(const MacMenuBarCubitState());
+class MacMenuBarStateNotifier extends StateNotifier<ConversationMenuHandle?> {
+  MacMenuBarStateNotifier(super.state);
 
   void attach(ConversationMenuHandle handle) {
-    emit(MacMenuBarCubitState(conversationMenuHandle: handle));
+    if (!Platform.isMacOS) return;
+    Future(() => state = handle);
   }
 
   void unAttach(ConversationMenuHandle handle) {
-    if (state.conversationMenuHandle == handle) {
-      emit(const MacMenuBarCubitState());
-    }
+    if (!Platform.isMacOS) return;
+    if (state != handle) return;
+    state = null;
   }
 }
 
-class MacosMenuBar extends StatelessWidget {
+final macMenuBarProvider =
+    StateNotifierProvider<MacMenuBarStateNotifier, ConversationMenuHandle?>(
+        (ref) => MacMenuBarStateNotifier(null));
+
+class MacosMenuBar extends HookConsumerWidget {
   const MacosMenuBar({
     super.key,
     required this.child,
@@ -75,7 +67,9 @@ class MacosMenuBar extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    useEffect(() => () => ref.invalidate(macMenuBarProvider));
+
     if (!Platform.isMacOS) {
       return child;
     }
@@ -93,13 +87,7 @@ class _Menus extends HookConsumerWidget {
     final signed =
         ref.watch(accountServerProvider.select((value) => value.hasValue));
 
-    final menuCubit = useBloc<MacMenuBarCubit>(MacMenuBarCubit.new);
-
-    final handle = useBlocStateConverter<MacMenuBarCubit, MacMenuBarCubitState,
-        ConversationMenuHandle?>(
-      converter: (state) => state.conversationMenuHandle,
-      bloc: menuCubit,
-    );
+    final handle = ref.watch(macMenuBarProvider);
 
     final muted = useMemoizedStream(
           () => handle?.isMuted ?? const Stream<bool>.empty(),
@@ -404,6 +392,6 @@ class _Menus extends HookConsumerWidget {
       WidgetsBinding.instance.platformMenuDelegate.setMenus(menus);
     }, [menus]);
 
-    return BlocProvider.value(value: menuCubit, child: child);
+    return child;
   }
 }

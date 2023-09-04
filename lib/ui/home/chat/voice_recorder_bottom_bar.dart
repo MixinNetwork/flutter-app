@@ -21,7 +21,7 @@ import '../../../widgets/dialog.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/waveform_widget.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/quote_message_cubit.dart';
+import '../../provider/quote_message_provider.dart';
 
 enum RecorderState {
   idle,
@@ -196,7 +196,6 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
     final recorderBottomBarEntry = useRef<OverlayEntry?>(null);
 
     final voiceRecorderCubit = context.read<VoiceRecorderCubit>();
-    final quoteMessageCubit = context.read<QuoteMessageCubit>();
 
     useEffect(
       () {
@@ -210,9 +209,6 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
             providers: [
               BlocProvider<VoiceRecorderCubit>.value(
                 value: voiceRecorderCubit,
-              ),
-              BlocProvider<QuoteMessageCubit>.value(
-                value: quoteMessageCubit,
               ),
             ],
             child: _RecordingInterceptor(
@@ -454,8 +450,7 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
             onTap: () async {
               final conversationItem = ref.read(conversationProvider);
               final accountServer = context.accountServer;
-              final quietMessageId =
-                  context.read<QuoteMessageCubit>().state?.messageId;
+              final quietMessageId = ref.read(quoteMessageIdProvider);
 
               final recorderCubit = context.read<VoiceRecorderCubit>();
 

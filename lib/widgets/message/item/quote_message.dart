@@ -12,9 +12,9 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../ui/home/bloc/blink_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
-import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
 import '../../../ui/provider/conversation_provider.dart';
 import '../../../ui/provider/mention_cache_provider.dart';
+import '../../../ui/provider/pending_jump_message_provider.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -389,7 +389,9 @@ class _QuoteMessageBase extends StatelessWidget {
             }
           } catch (_) {}
 
-          context.read<PendingJumpMessageCubit>().emit(messageId);
+          context.providerContainer
+              .read(pendingJumpMessageProvider.notifier)
+              .state = messageId;
           context.read<MessageBloc>().scrollTo(quoteMessageId);
         },
         behavior: HitTestBehavior.opaque,

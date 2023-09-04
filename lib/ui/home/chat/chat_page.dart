@@ -36,10 +36,9 @@ import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/message_selection_provider.dart';
+import '../../provider/pending_jump_message_provider.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/message_bloc.dart';
-import '../bloc/pending_jump_message_cubit.dart';
-import '../bloc/quote_message_cubit.dart';
 import '../chat_slide_page/chat_info_page.dart';
 import '../chat_slide_page/circle_manager_page.dart';
 import '../chat_slide_page/disappear_message_page.dart';
@@ -400,129 +399,120 @@ class ChatContainer extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final quoteMessageCubit = useBloc(QuoteMessageCubit.new);
     BlocProvider.of<MessageBloc>(context).limit =
         MediaQuery.sizeOf(context).height ~/ 20;
-
-    final pendingJumpMessageCubit = useBloc(PendingJumpMessageCubit.new);
 
     final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
 
     return RepaintBoundary(
-      child: MultiProvider(
-        providers: [
-          BlocProvider.value(value: quoteMessageCubit),
-          BlocProvider.value(value: pendingJumpMessageCubit),
-        ],
-        child: FocusableActionDetector(
-          autofocus: true,
-          shortcuts: {
-            if (inMultiSelectMode)
-              const SingleActivator(LogicalKeyboardKey.escape):
-                  const EscapeIntent(),
-          },
-          actions: {
-            EscapeIntent: CallbackAction<EscapeIntent>(
-              onInvoke: (intent) {
-                ref.read(messageSelectionProvider).clearSelection();
-              },
-            )
-          },
-          child: Column(
-            children: [
-              Container(
-                height: 64,
+      child: FocusableActionDetector(
+        autofocus: true,
+        shortcuts: {
+          if (inMultiSelectMode)
+            const SingleActivator(LogicalKeyboardKey.escape):
+                const EscapeIntent(),
+        },
+        actions: {
+          EscapeIntent: CallbackAction<EscapeIntent>(
+            onInvoke: (intent) {
+              ref.read(messageSelectionProvider).clearSelection();
+            },
+          )
+        },
+        child: Column(
+          children: [
+            Container(
+              height: 64,
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: context.theme.divider,
+                  ),
+                ),
+              ),
+              child: const ChatBar(),
+            ),
+            Expanded(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: context.theme.divider,
+                  color: context.theme.chatBackground,
+                  image: DecorationImage(
+                    image: const ExactAssetImage(
+                      Resources.assetsImagesChatBackgroundPng,
+                    ),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      context.brightnessValue == 1.0
+                          ? Colors.white.withOpacity(0.02)
+                          : Colors.black.withOpacity(0.03),
+                      BlendMode.srcIn,
                     ),
                   ),
                 ),
-                child: const ChatBar(),
-              ),
-              Expanded(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: context.theme.chatBackground,
-                    image: DecorationImage(
-                      image: const ExactAssetImage(
-                        Resources.assetsImagesChatBackgroundPng,
-                      ),
-                      fit: BoxFit.cover,
-                      colorFilter: ColorFilter.mode(
-                        context.brightnessValue == 1.0
-                            ? Colors.white.withOpacity(0.02)
-                            : Colors.black.withOpacity(0.03),
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                  child: Navigator(
-                    onPopPage: (Route<dynamic> route, dynamic result) =>
-                        route.didPop(result),
-                    pages: [
-                      MaterialPage(
-                        child: _ChatDropOverlay(
-                          enable: !inMultiSelectMode,
-                          child: Column(
-                            children: [
-                              Expanded(
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: context.theme.divider,
-                                      ),
+                child: Navigator(
+                  onPopPage: (Route<dynamic> route, dynamic result) =>
+                      route.didPop(result),
+                  pages: [
+                    MaterialPage(
+                      child: _ChatDropOverlay(
+                        enable: !inMultiSelectMode,
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: context.theme.divider,
                                     ),
                                   ),
-                                  child: const Stack(
-                                    children: [
-                                      RepaintBoundary(
-                                        child: _NotificationListener(
-                                          child: _List(),
-                                        ),
+                                ),
+                                child: const Stack(
+                                  children: [
+                                    RepaintBoundary(
+                                      child: _NotificationListener(
+                                        child: _List(),
                                       ),
-                                      Positioned(
-                                        left: 6,
-                                        right: 6,
-                                        bottom: 6,
-                                        child: _BottomBanner(),
+                                    ),
+                                    Positioned(
+                                      left: 6,
+                                      right: 6,
+                                      bottom: 6,
+                                      child: _BottomBanner(),
+                                    ),
+                                    Positioned(
+                                      bottom: 16,
+                                      right: 16,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          _JumpMentionButton(),
+                                          _JumpCurrentButton(),
+                                        ],
                                       ),
-                                      Positioned(
-                                        bottom: 16,
-                                        right: 16,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            _JumpMentionButton(),
-                                            _JumpCurrentButton(),
-                                          ],
-                                        ),
-                                      ),
-                                      _PinMessagesBanner(),
-                                    ],
-                                  ),
+                                    ),
+                                    _PinMessagesBanner(),
+                                  ],
                                 ),
                               ),
-                              AnimatedCrossFade(
-                                firstChild: const InputContainer(),
-                                secondChild: const SelectionBottomBar(),
-                                crossFadeState: inMultiSelectMode
-                                    ? CrossFadeState.showSecond
-                                    : CrossFadeState.showFirst,
-                                duration: const Duration(milliseconds: 300),
-                              ),
-                            ],
-                          ),
+                            ),
+                            AnimatedCrossFade(
+                              firstChild: const InputContainer(),
+                              secondChild: const SelectionBottomBar(),
+                              crossFadeState: inMultiSelectMode
+                                  ? CrossFadeState.showSecond
+                                  : CrossFadeState.showFirst,
+                              duration: const Duration(milliseconds: 300),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -710,10 +700,11 @@ class _JumpCurrentButton extends HookConsumerWidget {
     final enable =
         (!state.isEmpty && !state.isLatest) || listPositionIsLatest.value;
 
-    final pendingJumpMessageCubit = context.read<PendingJumpMessageCubit>();
+    final pendingJumpMessageController =
+        ref.read(pendingJumpMessageProvider.notifier);
 
     if (!enable) {
-      pendingJumpMessageCubit.emit(null);
+      Future(() => pendingJumpMessageController.state = null);
       return const SizedBox();
     }
 
@@ -721,11 +712,11 @@ class _JumpCurrentButton extends HookConsumerWidget {
       padding: const EdgeInsets.only(top: 8),
       child: InteractiveDecoratedBox(
         onTap: () {
-          final messageId = pendingJumpMessageCubit.state;
+          final messageId = pendingJumpMessageController.state;
           if (messageId != null) {
             messageBloc.scrollTo(messageId);
             context.read<BlinkCubit>().blinkByMessageId(messageId);
-            pendingJumpMessageCubit.emit(null);
+            pendingJumpMessageController.state = null;
             return;
           }
           messageBloc.jumpToCurrent();
@@ -1104,13 +1095,12 @@ class _ChatMenuHandler extends HookConsumerWidget {
     final conversationId = ref.watch(currentConversationIdProvider);
 
     useEffect(() {
-      final cubit = context.read<MacMenuBarCubit?>();
-      if (cubit == null) return null;
+      final cubit = ref.read(macMenuBarProvider.notifier);
       if (conversationId == null) return null;
 
       final handle = _ConversationHandle(context, conversationId);
-      cubit.attach(handle);
-      return () => cubit.unAttach(handle);
+      Future(() => cubit.attach(handle));
+      return () => Future(() => cubit.unAttach(handle));
     }, [conversationId]);
 
     return child;
