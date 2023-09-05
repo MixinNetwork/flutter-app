@@ -1455,7 +1455,10 @@ class _NormalOperationBar extends HookConsumerWidget {
             const SizedBox(width: 4),
             PopupMenuPageButton<double?>(
               itemBuilder: (context) => [
-                CustomPopupMenuButton(title: context.l10n.originalImage),
+                CustomPopupMenuButton(
+                  title: context.l10n.originalImage,
+                  value: 0,
+                ),
                 CustomPopupMenuButton(title: '1:1', value: 1),
                 CustomPopupMenuButton(title: '2:3', value: 2 / 3),
                 CustomPopupMenuButton(title: '3:2', value: 3 / 2),
@@ -1464,7 +1467,13 @@ class _NormalOperationBar extends HookConsumerWidget {
                 CustomPopupMenuButton(title: '9:16', value: 9 / 16),
                 CustomPopupMenuButton(title: '16:9', value: 16 / 9),
               ],
-              onSelected: imageEditorBloc.setCropRatio,
+              onSelected: (value) {
+                if (value == 0) {
+                  imageEditorBloc.setCropRatio(null);
+                } else {
+                  imageEditorBloc.setCropRatio(value);
+                }
+              },
               icon: SvgPicture.asset(
                 Resources.assetsImagesEditImageClipSvg,
                 height: 24,
