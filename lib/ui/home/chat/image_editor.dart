@@ -7,6 +7,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image/image.dart' as img;
 
@@ -1452,46 +1453,35 @@ class _NormalOperationBar extends HookConsumerWidget {
               onTap: imageEditorBloc.flip,
             ),
             const SizedBox(width: 4),
-            ContextMenuPortalEntry(
-              interactiveForTap: true,
-              buildMenus: () => [
-                ContextMenu(
+            PopupMenuPageButton<double>(
+              itemBuilder: (context) => [
+                CustomPopupMenuButton(
                   title: context.l10n.originalImage,
-                  onTap: () => imageEditorBloc.setCropRatio(null),
+                  value: 0,
                 ),
-                ContextMenu(
-                  title: '1:1',
-                  onTap: () => imageEditorBloc.setCropRatio(1),
-                ),
-                ContextMenu(
-                  title: '2:3',
-                  onTap: () => imageEditorBloc.setCropRatio(2 / 3),
-                ),
-                ContextMenu(
-                  title: '3:2',
-                  onTap: () => imageEditorBloc.setCropRatio(3 / 2),
-                ),
-                ContextMenu(
-                  title: '3:4',
-                  onTap: () => imageEditorBloc.setCropRatio(3 / 4),
-                ),
-                ContextMenu(
-                  title: '4:3',
-                  onTap: () => imageEditorBloc.setCropRatio(4 / 3),
-                ),
-                ContextMenu(
-                  title: '9:16',
-                  onTap: () => imageEditorBloc.setCropRatio(9 / 16),
-                ),
-                ContextMenu(
-                  title: '16:9',
-                  onTap: () => imageEditorBloc.setCropRatio(16 / 9),
-                ),
+                CustomPopupMenuButton(title: '1:1', value: 1),
+                CustomPopupMenuButton(title: '2:3', value: 2 / 3),
+                CustomPopupMenuButton(title: '3:2', value: 3 / 2),
+                CustomPopupMenuButton(title: '3:4', value: 3 / 4),
+                CustomPopupMenuButton(title: '4:3', value: 4 / 3),
+                CustomPopupMenuButton(title: '9:16', value: 9 / 16),
+                CustomPopupMenuButton(title: '16:9', value: 16 / 9),
               ],
-              child: ActionButton(
-                interactive: false,
-                color: hasCrop ? context.theme.accent : context.theme.icon,
-                name: Resources.assetsImagesEditImageClipSvg,
+              onSelected: (value) {
+                if (value == 0) {
+                  imageEditorBloc.setCropRatio(null);
+                } else {
+                  imageEditorBloc.setCropRatio(value);
+                }
+              },
+              icon: SvgPicture.asset(
+                Resources.assetsImagesEditImageClipSvg,
+                height: 24,
+                width: 24,
+                colorFilter: ColorFilter.mode(
+                  hasCrop ? context.theme.accent : context.theme.icon,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
             const SizedBox(width: 4),
