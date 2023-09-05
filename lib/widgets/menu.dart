@@ -21,12 +21,6 @@ class _OffsetCubit extends SimpleCubit<Offset?> {
   _OffsetCubit(super.state);
 }
 
-extension ContextMenuPortalEntrySender on BuildContext {
-  void sendMenuPosition(Offset offset) => read<_OffsetCubit>().emit(offset);
-
-  void closeMenu() => read<_OffsetCubit>().emit(null);
-}
-
 class PopupMenuPageButton<T> extends HookConsumerWidget {
   const PopupMenuPageButton({
     super.key,
@@ -34,15 +28,20 @@ class PopupMenuPageButton<T> extends HookConsumerWidget {
     this.onSelected,
     this.child,
     this.icon,
+    this.enabled = true,
+    this.popupMenuButtonKey,
   });
 
   final PopupMenuItemBuilder<T> itemBuilder;
   final PopupMenuItemSelected<T>? onSelected;
   final Widget? child;
   final Widget? icon;
+  final bool enabled;
+  final Key? popupMenuButtonKey;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => PopupMenuButton(
+        key: popupMenuButtonKey,
         color: context.theme.popUp,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints(minWidth: 160),
@@ -50,6 +49,7 @@ class PopupMenuPageButton<T> extends HookConsumerWidget {
             borderRadius: BorderRadius.all(Radius.circular(11))),
         itemBuilder: itemBuilder,
         onSelected: onSelected,
+        enabled: enabled,
         icon: icon,
         child: child,
       );
@@ -343,7 +343,7 @@ class ContextMenu extends StatelessWidget {
         ),
         onTap: () {
           onTap?.call();
-          if (!_subMenuMode) context.closeMenu();
+          // if (!_subMenuMode) context.closeMenu();
         },
         onTapUp: (details) {
           if (_subMenuMode && details.kind == PointerDeviceKind.touch) {

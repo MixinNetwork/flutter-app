@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -9,7 +10,6 @@ import '../../../db/dao/participant_dao.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
-import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/verified_or_bot_widget.dart';
@@ -309,6 +309,11 @@ class _RoleLabel extends StatelessWidget {
       );
 }
 
+enum _ActionType {
+  addParticipants,
+  inviteByLink,
+}
+
 class _ActionAddParticipants extends HookConsumerWidget {
   const _ActionAddParticipants({
     required this.participants,
@@ -317,48 +322,60 @@ class _ActionAddParticipants extends HookConsumerWidget {
   final List<ParticipantUser> participants;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => ContextMenuPortalEntry(
-        buildMenus: () => [
-          ContextMenu(
+  Widget build(BuildContext context, WidgetRef ref) => PopupMenuPageButton(
+        itemBuilder: (context) => [
+          CustomPopupMenuButton(
             icon: Resources.assetsImagesContextMenuSearchUserSvg,
             title: context.l10n.addParticipants,
-            onTap: () async {
-              final result = await showConversationSelector(
-                context: context,
-                singleSelect: false,
-                title: context.l10n.addParticipants,
-                onlyContact: true,
-              );
-              if (result == null || result.isEmpty) return;
-
-              final userIds =
-                  result.map((e) => e.userId).whereNotNull().toList();
-              final conversationId = ref.read(currentConversationIdProvider);
-              if (conversationId == null) return;
-
-              await runFutureWithToast(
-                context.accountServer.addParticipant(conversationId, userIds),
-              );
-            },
+            value: _ActionType.addParticipants,
           ),
-          ContextMenu(
+          CustomPopupMenuButton(
             icon: Resources.assetsImagesContextMenuLinkSvg,
             title: context.l10n.inviteToGroupViaLink,
-            onTap: () {
-              final conversationId = ref.read(currentConversationIdProvider);
-              if (conversationId == null) return;
-
-              showGroupInviteByLinkDialog(context,
-                  conversationId: conversationId);
-            },
+            value: _ActionType.inviteByLink,
           ),
         ],
-        child: Builder(
-            builder: (context) => ActionButton(
-                  name: Resources.assetsImagesIcAddSvg,
-                  color: context.theme.icon,
-                  onTapUp: (event) =>
-                      context.sendMenuPosition(event.globalPosition),
-                )),
+        onSelected: (action) async {
+          switch (action) {
+            case _ActionType.addParticipants:
+              {
+                final result = await showConversationSelector(
+                  context: context,
+                  singleSelect: false,
+                  title: context.l10n.addParticipants,
+                  onlyContact: true,
+                );
+                if (result == null || result.isEmpty) return;
+
+                final userIds =
+                    result.map((e) => e.userId).whereNotNull().toList();
+                final conversationId = ref.read(currentConversationIdProvider);
+                if (conversationId == null) return;
+
+                await runFutureWithToast(
+                  context.accountServer.addParticipant(conversationId, userIds),
+                );
+                break;
+              }
+            case _ActionType.inviteByLink:
+              {
+                final conversationId = ref.read(currentConversationIdProvider);
+                if (conversationId == null) return;
+
+                await showGroupInviteByLinkDialog(context,
+                    conversationId: conversationId);
+                break;
+              }
+          }
+        },
+        icon: SvgPicture.asset(
+          Resources.assetsImagesIcAddSvg,
+          height: 24,
+          width: 24,
+          colorFilter: ColorFilter.mode(
+            context.theme.icon,
+            BlendMode.srcIn,
+          ),
+        ),
       );
 }

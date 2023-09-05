@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../constants/constants.dart';
@@ -21,6 +22,13 @@ import 'search_text_field.dart';
 import 'toast.dart';
 import 'user/user_dialog.dart';
 import 'window/move_window.dart';
+
+enum _ActionType {
+  searchContact,
+  createConversation,
+  createGroup,
+  createCircle,
+}
 
 class SearchBar extends HookConsumerWidget {
   const SearchBar({super.key});
@@ -94,55 +102,64 @@ class SearchBar extends HookConsumerWidget {
               color: filterUnseen ? context.theme.accent : context.theme.icon,
             ),
             const SizedBox(width: 4),
-            ContextMenuPortalEntry(
-              buildMenus: () => [
-                ContextMenu(
+            PopupMenuPageButton(
+              itemBuilder: (context) => [
+                CustomPopupMenuButton(
                   icon: Resources.assetsImagesContextMenuSearchUserSvg,
                   title: context.l10n.searchContact,
-                  onTap: () => showMixinDialog<String>(
-                    context: context,
-                    child: const _SearchUserDialog(),
-                  ),
+                  value: _ActionType.searchContact,
                 ),
-                ContextMenu(
+                CustomPopupMenuButton(
                   icon: Resources.assetsImagesContextMenuCreateConversationSvg,
                   title: context.l10n.createConversation,
-                  onTap: () {
+                  value: _ActionType.createConversation,
+                ),
+                CustomPopupMenuButton(
+                  icon: Resources.assetsImagesContextMenuCreateGroupSvg,
+                  title: context.l10n.createGroup,
+                  value: _ActionType.createGroup,
+                ),
+                CustomPopupMenuButton(
+                  icon: Resources.assetsImagesCircleSvg,
+                  title: context.l10n.createCircle,
+                  value: _ActionType.createCircle,
+                ),
+              ],
+              onSelected: (type) {
+                switch (type) {
+                  case _ActionType.searchContact:
+                    showMixinDialog<String>(
+                      context: context,
+                      child: const _SearchUserDialog(),
+                    );
+                    break;
+                  case _ActionType.createConversation:
                     Actions.maybeInvoke(
                       context,
                       const CreateConversationIntent(),
                     );
-                  },
-                ),
-                ContextMenu(
-                  icon: Resources.assetsImagesContextMenuCreateGroupSvg,
-                  title: context.l10n.createGroup,
-                  onTap: () async {
+                    break;
+                  case _ActionType.createGroup:
                     Actions.maybeInvoke(
                       context,
                       const CreateGroupConversationIntent(),
                     );
-                  },
-                ),
-                ContextMenu(
-                  icon: Resources.assetsImagesCircleSvg,
-                  title: context.l10n.createCircle,
-                  onTap: () async {
+                    break;
+                  case _ActionType.createCircle:
                     Actions.maybeInvoke(
                       context,
                       const CreateCircleIntent(),
                     );
-                  },
-                ),
-              ],
-              child: Builder(
-                builder: (context) => MoveWindowBarrier(
-                  child: ActionButton(
-                    name: Resources.assetsImagesIcAddSvg,
-                    onTapUp: (event) =>
-                        context.sendMenuPosition(event.globalPosition),
-                    color: context.theme.icon,
-                  ),
+                    break;
+                }
+              },
+              icon: SvgPicture.asset(
+                Resources.assetsImagesIcAddSvg,
+                height: 24,
+                width: 24,
+                colorFilter: ColorFilter.mode(
+                  context.theme.icon,
+                  BlendMode.srcIn,
                 ),
               ),
             ),
