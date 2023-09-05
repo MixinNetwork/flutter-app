@@ -12,6 +12,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart' hide Consumer;
 import 'package:rxdart/rxdart.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../constants/constants.dart';
 import '../../../constants/resources.dart';
@@ -293,18 +294,18 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
         if (sendScale >= 0.6)
           Transform.scale(
             scale: sendScale,
-            child: ContextMenuPortalEntry(
-              buildMenus: () => [
-                ContextMenu(
-                  icon: Resources.assetsImagesContextMenuMuteSvg,
+            child: ContextMenuWidget(
+              menuProvider: (_) => Menu(children: [
+                MenuAction(
+                  // icon: Resources.assetsImagesContextMenuMuteSvg,
                   title: context.l10n.sendWithoutSound,
-                  onTap: () => _sendMessage(
+                  callback: () => _sendMessage(
                     context,
                     textEditingController,
                     silent: true,
                   ),
                 ),
-              ],
+              ]),
               child: ActionButton(
                 name: Resources.assetsImagesIcSendSvg,
                 color: context.theme.icon,
