@@ -1453,7 +1453,7 @@ class _NormalOperationBar extends HookConsumerWidget {
               onTap: imageEditorBloc.flip,
             ),
             const SizedBox(width: 4),
-            PopupMenuPageButton<double?>(
+            PopupMenuPageButton<double>(
               itemBuilder: (context) => [
                 CustomPopupMenuButton(
                   title: context.l10n.originalImage,
