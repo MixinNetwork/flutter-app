@@ -1453,39 +1453,18 @@ class _NormalOperationBar extends HookConsumerWidget {
               onTap: imageEditorBloc.flip,
             ),
             const SizedBox(width: 4),
-            PopupMenuPageButton(
+            PopupMenuPageButton<double?>(
               itemBuilder: (context) => [
                 CustomPopupMenuButton(title: context.l10n.originalImage),
-                CustomPopupMenuButton(
-                  title: '1:1',
-                  value: 1,
-                ),
-                CustomPopupMenuButton(
-                  title: '2:3',
-                  value: 2 / 3,
-                ),
-                CustomPopupMenuButton(
-                  title: '3:2',
-                  value: 3 / 2,
-                ),
-                CustomPopupMenuButton(
-                  title: '3:4',
-                  value: 3 / 4,
-                ),
-                CustomPopupMenuButton(
-                  title: '4:3',
-                  value: 4 / 3,
-                ),
-                CustomPopupMenuButton(
-                  title: '9:16',
-                  value: 9 / 16,
-                ),
-                CustomPopupMenuButton(
-                  title: '16:9',
-                  value: 16 / 9,
-                ),
+                CustomPopupMenuButton(title: '1:1', value: 1),
+                CustomPopupMenuButton(title: '2:3', value: 2 / 3),
+                CustomPopupMenuButton(title: '3:2', value: 3 / 2),
+                CustomPopupMenuButton(title: '3:4', value: 3 / 4),
+                CustomPopupMenuButton(title: '4:3', value: 4 / 3),
+                CustomPopupMenuButton(title: '9:16', value: 9 / 16),
+                CustomPopupMenuButton(title: '16:9', value: 16 / 9),
               ],
-              onSelected: (_) => imageEditorBloc.setCropRatio(null),
+              onSelected: imageEditorBloc.setCropRatio,
               icon: SvgPicture.asset(
                 Resources.assetsImagesEditImageClipSvg,
                 height: 24,
