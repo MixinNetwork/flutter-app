@@ -3,9 +3,7 @@ part of '../extension.dart';
 extension IterableExtension<T> on Iterable<T> {
   T? firstWhereOrNull(bool Function(T? element) test) =>
       cast<T?>().firstWhere(test, orElse: () => null);
-}
 
-extension ListExtension<T> on List<T> {
   List<T> joinList(T separator) {
     final iterator = this.iterator;
     if (!iterator.moveNext()) return [];
@@ -25,7 +23,9 @@ extension ListExtension<T> on List<T> {
 
     return buffer;
   }
+}
 
+extension ListExtension<T> on List<T> {
   T? getOrNull(int index) {
     if (index < 0) return null;
     if (isEmpty) return null;
