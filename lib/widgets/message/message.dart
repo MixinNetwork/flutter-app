@@ -39,6 +39,7 @@ import '../../utils/platform.dart';
 import '../../utils/system/clipboard.dart';
 import '../avatar_view/avatar_view.dart';
 import '../interactive_decorated_box.dart';
+import '../menu.dart';
 import '../toast.dart';
 import '../user/user_dialog.dart';
 import '../user_selector/conversation_selector.dart';
@@ -465,19 +466,15 @@ class MessageItemWidget extends HookConsumerWidget {
                         ),
                     ];
 
-                    return Menu(
-                      children: <List<MenuElement>>[
+                    return MenusWithSeparator(
+                      childrens: [
                         addStickerMenuAction,
                         messageActions,
                         copyActions,
                         saveActions,
                         deleteActions,
                         devActions,
-                      ]
-                          .where((element) => element.isNotEmpty)
-                          .joinList([MenuSeparator()])
-                          .expand((element) => element.toList())
-                          .toList(),
+                      ],
                     );
                   },
                   builder: (BuildContext context) {

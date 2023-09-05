@@ -325,11 +325,11 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
               }
               if (value > unit.value.maxValue) {
                 showToastFailed(
-                  ToastError(context.l10n.disappearingCustomTimeMaxWarning(
-                      unit.value
-                          .toDuration(unit.value.maxValue)
-                          .formatAsConversationExpireIn(
-                              localization: context.l10n))),
+                  ToastError(context.l10n.disappearingCustomTimeMaxWarning(unit
+                      .value
+                      .toDuration(unit.value.maxValue)
+                      .formatAsConversationExpireIn(
+                          localization: context.l10n))),
                 );
                 return;
               }

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../../constants/resources.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/app_bar.dart';
-import '../../../widgets/menu.dart';
 import '../../provider/conversation_provider.dart';
 import '../bloc/blink_cubit.dart';
 
@@ -100,17 +99,17 @@ class ShareMediaItemMenuWrapper extends StatelessWidget {
   final String messageId;
 
   @override
-  Widget build(BuildContext context) => ContextMenuPortalEntry(
-        buildMenus: () => [
-          ContextMenu(
-            icon: Resources.assetsImagesContextMenuGotoSvg,
+  Widget build(BuildContext context) => ContextMenuWidget(
+        menuProvider: (request) => Menu(children: [
+          MenuAction(
+            // icon: Resources.assetsImagesContextMenuGotoSvg,
             title: context.l10n.locateToChat,
-            onTap: () {
+            callback: () {
               context.read<BlinkCubit>().blinkByMessageId(messageId);
               context.read<MessageBloc>().scrollTo(messageId);
             },
           )
-        ],
+        ]),
         child: child,
       );
 }
