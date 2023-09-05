@@ -425,6 +425,8 @@ class MessageItemWidget extends HookConsumerWidget {
                           // icon: Resources.assetsImagesContextMenuRecallSvg,
                           title: context.l10n.deleteForEveryone,
                           // isDestructiveAction: true,
+                          attributes:
+                              const MenuActionAttributes(destructive: true),
                           callback: () async {
                             String? content;
                             if (message.type.isText) {
@@ -446,6 +448,8 @@ class MessageItemWidget extends HookConsumerWidget {
                           // icon: Resources.assetsImagesContextMenuDeleteSvg,
                           title: context.l10n.deleteForMe,
                           // isDestructiveAction: true,
+                          attributes:
+                              const MenuActionAttributes(destructive: true),
                           callback: () => context.accountServer
                               .deleteMessage(message.messageId),
                         ),
@@ -735,6 +739,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
             userId: userId!,
           ),
         ContextMenuWidget(
+          hitTestBehavior: HitTestBehavior.translucent,
           menuProvider: buildMenus,
           child: GestureDetector(
             onTap: () => _quickReply(context),

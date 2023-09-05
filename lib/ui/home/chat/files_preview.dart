@@ -13,6 +13,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/resources.dart';
@@ -26,7 +27,6 @@ import '../../../widgets/buttons.dart';
 import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
-import '../../../widgets/menu.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import 'image_editor.dart';
@@ -241,14 +241,14 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 32),
                 Align(
-                  child: ContextMenuPortalEntry(
-                    buildMenus: () => [
-                      ContextMenu(
-                        icon: Resources.assetsImagesContextMenuMuteSvg,
+                  child: ContextMenuWidget(
+                    menuProvider: (_) => Menu(children: [
+                      MenuAction(
+                        // icon: Resources.assetsImagesContextMenuMuteSvg,
                         title: context.l10n.sendWithoutSound,
-                        onTap: () => send(true),
+                        callback: () => send(true),
                       )
-                    ],
+                    ]),
                     child: ElevatedButton(
                       onPressed: () => send(false),
                       style: ElevatedButton.styleFrom(
