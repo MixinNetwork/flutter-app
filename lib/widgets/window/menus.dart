@@ -68,8 +68,6 @@ class MacosMenuBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    useEffect(() => () => ref.invalidate(macMenuBarProvider));
-
     if (!Platform.isMacOS) {
       return child;
     }
