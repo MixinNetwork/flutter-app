@@ -130,6 +130,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     Future<T> future,
   ) async {
     final result = await future;
+    // If future is update or delete, return the number of rows updated.
+    if (result is int && result <= 0) return result;
     final miniMessage = await miniMessageByIds(messageIds).get();
     DataBaseEventBus.instance.insertOrReplaceMessages(miniMessage);
     return result;
@@ -637,10 +639,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> updateMessageQuoteContent(
           String messageId, String? quoteContent) =>
-      (update(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
-          .write(MessagesCompanion(
-        quoteContent: Value(quoteContent),
-      ));
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        (update(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
+            .write(MessagesCompanion(
+          quoteContent: Value(quoteContent),
+        )),
+      );
 
   Future<Message?> findMessageByMessageId(String messageId) =>
       (db.select(db.messages)
@@ -684,14 +689,22 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         return string!;
       }).get();
 
-  Future<int> countMessageByQuoteId(String conversationId, String messageId) =>
-      (db.selectOnly(db.messages)
-            ..addColumns([db.messages.messageId.count()])
-            ..where(db.messages.conversationId.equals(conversationId) &
-                db.messages.quoteMessageId.equals(messageId) &
-                db.messages.quoteContent.isNull()))
-          .map((row) => row.read(db.messages.messageId.count())!)
-          .getSingle();
+  Future<int> countMessageByQuoteId(
+    String conversationId,
+    String messageId, {
+    bool nullQuoteContentOnly = true,
+  }) {
+    var predicate = db.messages.conversationId.equals(conversationId) &
+        db.messages.quoteMessageId.equals(messageId);
+    if (nullQuoteContentOnly) {
+      predicate = predicate & db.messages.quoteContent.isNull();
+    }
+    return (db.selectOnly(db.messages)
+          ..addColumns([db.messages.messageId.count()])
+          ..where(predicate))
+        .map((row) => row.read(db.messages.messageId.count())!)
+        .getSingle();
+  }
 
   Future<void> updateQuoteContentByQuoteId(
       String conversationId, String quoteMessageId, String? content) async {
@@ -733,8 +746,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Future<void> updateMessageContent(String messageId, String content) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
-        db.transaction(() async {
-          await Future.wait([
+        db.transaction<num>(() async {
+          final results = await Future.wait([
             (db.update(db.messages)
                   ..where((tbl) => tbl.messageId.equals(messageId)))
                 .write(MessagesCompanion(content: Value(content))),
@@ -742,6 +755,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   ..where((tbl) => tbl.messageId.equals(messageId)))
                 .write(TranscriptMessagesCompanion(content: Value(content))),
           ]);
+          return results.fold<num>(
+              0, (previousValue, element) => previousValue + element);
         }),
       );
 
