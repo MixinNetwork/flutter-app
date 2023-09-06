@@ -351,6 +351,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
           mediaStatus: MediaStatus.done,
         );
 
+        await _updateMessageQuotedContent(messageId, conversationId);
         await _updateTranscriptMessageStatus(messageId);
       }
     } catch (er) {
@@ -576,6 +577,26 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
           : MediaStatus.canceled;
       await _messageDao.updateMediaStatus(transcriptId, status);
     });
+  }
+
+  Future<void> _updateMessageQuotedContent(
+      String messageId, String? conversationId) async {
+    if (conversationId == null) {
+      d('_updateMessageQuotedContent: conversationId is null');
+      return;
+    }
+    if (await _messageDao.countMessageByQuoteId(conversationId, messageId,
+            nullQuoteContentOnly: false) >
+        0) {
+      final messageItem =
+          await _messageDao.findMessageItemById(conversationId, messageId);
+      if (messageItem != null) {
+        await _messageDao.updateQuoteContentByQuoteId(
+            conversationId, messageId, messageItem.toJson());
+      }
+    } else {
+      d('_updateMessageQuotedContent: no message quoted this message $conversationId $messageId');
+    }
   }
 }
 

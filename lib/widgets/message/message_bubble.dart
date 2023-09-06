@@ -9,6 +9,7 @@ import '../../constants/resources.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/logger.dart';
 import '../action_button.dart';
 import '../toast.dart';
 import 'item/quote_message.dart';
@@ -66,6 +67,12 @@ class MessageBubble extends HookConsumerWidget {
 
     final messageType = useMessageConverter(converter: (state) => state.type);
 
+    final quoteContent = useMessageConverter(
+        converter: (state) => state.quoteContent);
+
+    i('MessageBubble quoteContent: $quoteContent');
+
+
     var _child = child;
 
     if (!includeNip) {
@@ -99,6 +106,9 @@ class MessageBubble extends HookConsumerWidget {
                       converter: (state) => state.quoteContent);
                   final messageId = useMessageConverter(
                       converter: (state) => state.messageId);
+                  i('quoteContent: $quoteContent');
+
+                  useMessage();
 
                   return QuoteMessage(
                     messageId: messageId,
