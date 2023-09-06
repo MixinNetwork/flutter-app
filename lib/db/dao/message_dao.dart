@@ -130,6 +130,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     Future<T> future,
   ) async {
     final result = await future;
+    // If future is update or delete, return the number of rows updated.
+    if (result is int && result <= 0) return result;
     final miniMessage = await miniMessageByIds(messageIds).get();
     DataBaseEventBus.instance.insertOrReplaceMessages(miniMessage);
     return result;
@@ -744,8 +746,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Future<void> updateMessageContent(String messageId, String content) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
-        db.transaction(() async {
-          await Future.wait([
+        db.transaction<num>(() async {
+          final results = await Future.wait([
             (db.update(db.messages)
                   ..where((tbl) => tbl.messageId.equals(messageId)))
                 .write(MessagesCompanion(content: Value(content))),
@@ -753,6 +755,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   ..where((tbl) => tbl.messageId.equals(messageId)))
                 .write(TranscriptMessagesCompanion(content: Value(content))),
           ]);
+          return results.fold<num>(
+              0, (previousValue, element) => previousValue + element);
         }),
       );
 
