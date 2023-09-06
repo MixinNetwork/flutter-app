@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -115,17 +116,12 @@ class QuoteMessage extends HookConsumerWidget {
           quoteMessageId: quoteMessageId!,
           userId: userId,
           name: userFullName,
-          image: Image(
-            image:
-                MixinFileImage(File(context.accountServer.convertAbsolutePath(
-              type,
-              quote.conversationId as String,
-              quote.mediaUrl as String?,
-              isTranscriptPage,
-            ))),
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) =>
-                ImageByBlurHashOrBase64(imageData: thumbImage!),
+          image: _QuoteImage(
+            quote: quote,
+            type: type,
+            isTranscriptPage: isTranscriptPage,
+            quoteMessageId: quoteMessageId!,
+            messageId: messageId,
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesImageSvg,
@@ -331,6 +327,64 @@ class QuoteMessage extends HookConsumerWidget {
       ),
       inputMode: inputMode,
       onTap: () {},
+    );
+  }
+}
+
+class _QuoteImage extends HookWidget {
+  const _QuoteImage({
+    required this.quote,
+    required this.type,
+    required this.isTranscriptPage,
+    required this.quoteMessageId,
+    required this.messageId,
+  });
+
+  final dynamic quote;
+  final String type;
+  final bool isTranscriptPage;
+  final String quoteMessageId;
+  final String? messageId;
+
+  @override
+  Widget build(BuildContext context) {
+    final thumbImage = quote?.thumbImage as String?;
+    final mediaUrl = quote?.mediaUrl as String?;
+
+    useEffect(
+      () {
+        if (messageId == null) {
+          // Quote is display in input container. no need to update quote content
+          return;
+        }
+        if (mediaUrl == null) {
+          scheduleMicrotask(() async {
+            final messageDao = context.database.messageDao;
+            final messageItem =
+                await messageDao.findMessageItemByMessageId(quoteMessageId);
+            if (messageItem == null) {
+              return;
+            }
+            await messageDao.updateMessageQuoteContent(
+              messageId!,
+              messageItem.toJson(),
+            );
+          });
+        }
+      },
+      [mediaUrl, messageId],
+    );
+
+    return Image(
+      image: MixinFileImage(File(context.accountServer.convertAbsolutePath(
+        type,
+        quote.conversationId as String,
+        mediaUrl,
+        isTranscriptPage,
+      ))),
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) =>
+          ImageByBlurHashOrBase64(imageData: thumbImage!),
     );
   }
 }
