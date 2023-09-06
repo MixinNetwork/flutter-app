@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
+import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
 import '../../../db/dao/participant_dao.dart';
 import '../../../db/database_event_bus.dart';
@@ -212,7 +213,7 @@ class _ParticipantMenuEntry extends HookConsumerWidget {
       menuProvider: (request) => MenusWithSeparator(childrens: [
         [
           MenuAction(
-            // icon: Resources.assetsImagesContextMenuChatSvg,
+            image: MenuImage.icon(IconFonts.chat),
             title:
                 context.l10n.groupPopMenuMessage(participant.fullName ?? '?'),
             callback: () {
@@ -227,7 +228,7 @@ class _ParticipantMenuEntry extends HookConsumerWidget {
           [
             if (participant.role != ParticipantRole.admin)
               MenuAction(
-                // icon: Resources.assetsImagesContextMenuUserEditSvg,
+                image: MenuImage.icon(IconFonts.manageUser),
                 title: context.l10n.makeGroupAdmin,
                 callback: () {
                   final conversationId =
@@ -242,7 +243,7 @@ class _ParticipantMenuEntry extends HookConsumerWidget {
               )
             else
               MenuAction(
-                // icon: Resources.assetsImagesContextMenuStopSvg,
+                image: MenuImage.icon(IconFonts.stop),
                 title: context.l10n.dismissAsAdmin,
                 callback: () {
                   final conversationId =
@@ -259,7 +260,7 @@ class _ParticipantMenuEntry extends HookConsumerWidget {
           if (currentUser?.role != null && participant.role == null ||
               currentUser?.role == ParticipantRole.owner)
             MenuAction(
-              // icon: Resources.assetsImagesContextMenuDeleteSvg,
+              image: MenuImage.icon(IconFonts.delete),
               attributes: const MenuActionAttributes(destructive: true),
               title:
                   context.l10n.groupPopMenuRemove(participant.fullName ?? '?'),

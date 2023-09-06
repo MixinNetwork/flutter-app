@@ -19,6 +19,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../account/account_server.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
 import '../../bloc/simple_cubit.dart';
+import '../../constants/icon_fonts.dart';
 import '../../constants/resources.dart';
 import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
@@ -315,7 +316,7 @@ class MessageItemWidget extends HookConsumerWidget {
                     final addStickerMenuAction = [
                       if (message.type.isSticker)
                         MenuAction(
-                          // icon: Resources.assetsImagesContextMenuStickerSvg,
+                          image: MenuImage.icon(IconFonts.sticker),
                           title: context.l10n.addSticker,
                           callback: () => _onAddSticker(context),
                         )
@@ -324,7 +325,7 @@ class MessageItemWidget extends HookConsumerWidget {
                     final messageActions = [
                       if (enableReply)
                         MenuAction(
-                          // icon: Resources.assetsImagesContextMenuReplySvg,
+                          image: MenuImage.icon(IconFonts.reply),
                           title: context.l10n.reply,
                           callback: () => context.providerContainer
                               .read(quoteMessageProvider.notifier)
@@ -332,9 +333,8 @@ class MessageItemWidget extends HookConsumerWidget {
                         ),
                       if (pinEnabled)
                         MenuAction(
-                          // icon: message.pinned
-                          //     ? Resources.assetsImagesContextMenuUnpinSvg
-                          //     : Resources.assetsImagesContextMenuPinSvg,
+                          image: MenuImage.icon(
+                              message.pinned ? IconFonts.unPin : IconFonts.pin),
                           title: message.pinned
                               ? context.l10n.unpin
                               : context.l10n.pinTitle,
@@ -360,7 +360,7 @@ class MessageItemWidget extends HookConsumerWidget {
                         ),
                       if (enableForward)
                         MenuAction(
-                          // icon: Resources.assetsImagesContextMenuForwardSvg,
+                          image: MenuImage.icon(IconFonts.forward),
                           title: context.l10n.forward,
                           callback: () async {
                             final result = await showConversationSelector(
@@ -380,7 +380,7 @@ class MessageItemWidget extends HookConsumerWidget {
                         ),
                       if (enableSelect)
                         MenuAction(
-                          // icon: Resources.assetsImagesMultiSelectionSvg,
+                          image: MenuImage.icon(IconFonts.select),
                           title: context.l10n.select,
                           callback: () => ref
                               .read(messageSelectionProvider)
@@ -390,7 +390,7 @@ class MessageItemWidget extends HookConsumerWidget {
                     final copyActions = [
                       if (enableCopy)
                         MenuAction(
-                          // icon: Resources.assetsImagesContextMenuCopySvg,
+                          image: MenuImage.icon(IconFonts.copy),
                           title: context.l10n.copy,
                           callback: () {
                             if (message.type.isImage) {
@@ -407,14 +407,14 @@ class MessageItemWidget extends HookConsumerWidget {
                     final saveActions = [
                       if (enableSaveMobile)
                         MenuAction(
-                          // icon: Resources.assetsImagesContextMenuDownloadSvg,
+                          image: MenuImage.icon(IconFonts.download),
                           title: context.l10n.saveToCameraRoll,
                           callback: () => saveAs(context, context.accountServer,
                               message, isTranscriptPage),
                         ),
                       if (enableSaveDesktop)
                         MenuAction(
-                          // icon: Resources.assetsImagesContextMenuDownloadSvg,
+                          image: MenuImage.icon(IconFonts.download),
                           title: context.l10n.saveAs,
                           callback: () => saveAs(context, context.accountServer,
                               message, isTranscriptPage),
@@ -423,9 +423,8 @@ class MessageItemWidget extends HookConsumerWidget {
                     final deleteActions = [
                       if (enableRecall)
                         MenuAction(
-                          // icon: Resources.assetsImagesContextMenuRecallSvg,
+                          image: MenuImage.icon(IconFonts.recall),
                           title: context.l10n.deleteForEveryone,
-                          // isDestructiveAction: true,
                           attributes:
                               const MenuActionAttributes(destructive: true),
                           callback: () async {
@@ -446,9 +445,8 @@ class MessageItemWidget extends HookConsumerWidget {
                         ),
                       if (enableDelete)
                         MenuAction(
-                          // icon: Resources.assetsImagesContextMenuDeleteSvg,
+                          image: MenuImage.icon(IconFonts.delete),
                           title: context.l10n.deleteForMe,
-                          // isDestructiveAction: true,
                           attributes:
                               const MenuActionAttributes(destructive: true),
                           callback: () => context.accountServer
@@ -459,7 +457,7 @@ class MessageItemWidget extends HookConsumerWidget {
                     final devActions = [
                       if (!kReleaseMode)
                         MenuAction(
-                          // icon: Resources.assetsImagesContextMenuCopySvg,
+                          image: MenuImage.icon(IconFonts.copy),
                           title: 'Copy message',
                           callback: () => Clipboard.setData(
                               ClipboardData(text: message.toString())),
@@ -470,8 +468,10 @@ class MessageItemWidget extends HookConsumerWidget {
                       childrens: [
                         addStickerMenuAction,
                         messageActions,
-                        copyActions,
-                        saveActions,
+                        [
+                          ...copyActions,
+                          ...saveActions,
+                        ],
                         deleteActions,
                         devActions,
                       ],

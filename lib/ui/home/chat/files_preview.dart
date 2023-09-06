@@ -16,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../constants/brightness_theme_data.dart';
+import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/load_balancer_utils.dart';
@@ -244,7 +245,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                   child: ContextMenuWidget(
                     menuProvider: (_) => Menu(children: [
                       MenuAction(
-                        // icon: Resources.assetsImagesContextMenuMuteSvg,
+                        image: MenuImage.icon(IconFonts.mute),
                         title: context.l10n.sendWithoutSound,
                         callback: () => send(true),
                       )

@@ -3,10 +3,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
-import '../../../constants/resources.dart';
+import '../../../constants/icon_fonts.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../db/extension/conversation.dart';
-import '../../../utils/context_menu_image.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/conversation/mute_dialog.dart';
 import '../../../widgets/dialog.dart';
@@ -57,8 +56,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
             [
               if (pinTime != null)
                 MenuAction(
-                  // icon: Resources.assetsImagesContextMenuUnpinSvg,
-                  image: MenuSvg(Resources.assetsImagesContextMenuUnpinSvg),
+                  image: MenuImage.icon(IconFonts.unPin),
                   title: context.l10n.unpin,
                   callback: () => runFutureWithToast(
                     context.accountServer.unpin(conversationId),
@@ -66,7 +64,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                 )
               else
                 MenuAction(
-                  // icon: Resources.assetsImagesContextMenuPinSvg,
+                  image: MenuImage.icon(IconFonts.pin),
                   title: context.l10n.pinTitle,
                   callback: () => runFutureWithToast(
                     context.accountServer.pin(conversationId),
@@ -74,7 +72,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                 ),
               if (isMute)
                 MenuAction(
-                  // icon: Resources.assetsImagesContextMenuMuteSvg,
+                  image: MenuImage.icon(IconFonts.unMute),
                   title: context.l10n.unmute,
                   callback: () => runFutureWithToast(
                     context.accountServer.unMuteConversation(
@@ -86,8 +84,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                 )
               else
                 MenuAction(
-                  // icon: Resources.assetsImagesContextMenuUnmuteSvg,
-                  image: MenuImage.icon(Icons.access_time),
+                  image: MenuImage.icon(IconFonts.mute),
                   title: context.l10n.mute,
                   callback: () async {
                     final result = await showMixinDialog<int?>(
@@ -108,7 +105,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
             [
               if (circles.isNotEmpty)
                 Menu(
-                    // icon: Resources.assetsImagesCircleSvg,
+                    image: MenuImage.icon(IconFonts.circle),
                     title: context.l10n.addToCircle,
                     children: circles
                         .map((e) => MenuAction(
@@ -137,7 +134,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
             ],
             [
               MenuAction(
-                // icon: Resources.assetsImagesContextMenuDeleteSvg,
+                image: MenuImage.icon(IconFonts.delete),
                 title: context.l10n.deleteChat,
                 attributes: const MenuActionAttributes(destructive: true),
                 callback: () async {
@@ -163,7 +160,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                   circleId != null &&
                   circleId.isNotEmpty)
                 MenuAction(
-                  // icon: Resources.assetsImagesContextMenuDeleteSvg,
+                  image: MenuImage.icon(IconFonts.delete),
                   title: context.l10n.removeChatFromCircle,
                   attributes: const MenuActionAttributes(destructive: true),
                   callback: () => runFutureWithToast(

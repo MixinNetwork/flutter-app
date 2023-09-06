@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
+import '../../constants/icon_fonts.dart';
 import '../../constants/resources.dart';
 import '../../db/dao/circle_dao.dart';
 import '../../db/dao/conversation_dao.dart';
@@ -258,7 +259,7 @@ class _CircleList extends HookConsumerWidget {
                             MenusWithSeparator(childrens: [
                           [
                             MenuAction(
-                                // icon: Resources.assetsImagesContextMenuEditSvg,
+                                image: MenuImage.icon(IconFonts.edit),
                                 title: context.l10n.editCircleName,
                                 callback: () async {
                                   final name = await showMixinDialog<String>(
@@ -279,8 +280,7 @@ class _CircleList extends HookConsumerWidget {
                                   );
                                 }),
                             MenuAction(
-                              // icon: Resources
-                              //     .assetsImagesContextMenuEditCircleSvg,
+                              image: MenuImage.icon(IconFonts.manageCircle),
                               title: context.l10n.editConversations,
                               callback: () async {
                                 final initSelected = (await context
@@ -344,7 +344,7 @@ class _CircleList extends HookConsumerWidget {
                           ],
                           [
                             MenuAction(
-                              // icon: Resources.assetsImagesContextMenuDeleteSvg,
+                              image: MenuImage.icon(IconFonts.delete),
                               title: context.l10n.deleteCircle,
                               attributes:
                                   const MenuActionAttributes(destructive: true),

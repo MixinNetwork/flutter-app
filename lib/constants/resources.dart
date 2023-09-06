@@ -8,6 +8,8 @@ class Resources {
   const Resources._();
   static const String assetsCaptchaHtml = 'assets/captcha.html';
 
+  static const String assetsFontsIconfontTtf = 'assets/fonts/iconfont.ttf';
+
   /// {@macro assets_generator.assetsIconsMacosAppIconPng.preview}
   static const String assetsIconsMacosAppIconPng =
       'assets/icons/macos_app_icon.png';
@@ -87,10 +89,6 @@ class Resources {
   /// {@macro assets_generator.assetsImagesContactSvg.preview}
   static const String assetsImagesContactSvg = 'assets/images/contact.svg';
 
-  /// {@macro assets_generator.assetsImagesContextMenuChatSvg.preview}
-  static const String assetsImagesContextMenuChatSvg =
-      'assets/images/context_menu_chat.svg';
-
   /// {@macro assets_generator.assetsImagesContextMenuCopySvg.preview}
   static const String assetsImagesContextMenuCopySvg =
       'assets/images/context_menu_copy.svg';
@@ -107,69 +105,17 @@ class Resources {
   static const String assetsImagesContextMenuDeleteSvg =
       'assets/images/context_menu_delete.svg';
 
-  /// {@macro assets_generator.assetsImagesContextMenuDownloadSvg.preview}
-  static const String assetsImagesContextMenuDownloadSvg =
-      'assets/images/context_menu_download.svg';
-
-  /// {@macro assets_generator.assetsImagesContextMenuEditSvg.preview}
-  static const String assetsImagesContextMenuEditSvg =
-      'assets/images/context_menu_edit.svg';
-
-  /// {@macro assets_generator.assetsImagesContextMenuEditCircleSvg.preview}
-  static const String assetsImagesContextMenuEditCircleSvg =
-      'assets/images/context_menu_edit_circle.svg';
-
   /// {@macro assets_generator.assetsImagesContextMenuForwardSvg.preview}
   static const String assetsImagesContextMenuForwardSvg =
       'assets/images/context_menu_forward.svg';
-
-  /// {@macro assets_generator.assetsImagesContextMenuGotoSvg.preview}
-  static const String assetsImagesContextMenuGotoSvg =
-      'assets/images/context_menu_goto.svg';
 
   /// {@macro assets_generator.assetsImagesContextMenuLinkSvg.preview}
   static const String assetsImagesContextMenuLinkSvg =
       'assets/images/context_menu_link.svg';
 
-  /// {@macro assets_generator.assetsImagesContextMenuMuteSvg.preview}
-  static const String assetsImagesContextMenuMuteSvg =
-      'assets/images/context_menu_mute.svg';
-
-  /// {@macro assets_generator.assetsImagesContextMenuPinSvg.preview}
-  static const String assetsImagesContextMenuPinSvg =
-      'assets/images/context_menu_pin.svg';
-
-  /// {@macro assets_generator.assetsImagesContextMenuRecallSvg.preview}
-  static const String assetsImagesContextMenuRecallSvg =
-      'assets/images/context_menu_recall.svg';
-
-  /// {@macro assets_generator.assetsImagesContextMenuReplySvg.preview}
-  static const String assetsImagesContextMenuReplySvg =
-      'assets/images/context_menu_reply.svg';
-
   /// {@macro assets_generator.assetsImagesContextMenuSearchUserSvg.preview}
   static const String assetsImagesContextMenuSearchUserSvg =
       'assets/images/context_menu_search_user.svg';
-
-  /// {@macro assets_generator.assetsImagesContextMenuStickerSvg.preview}
-  static const String assetsImagesContextMenuStickerSvg =
-      'assets/images/context_menu_sticker.svg';
-
-  /// {@macro assets_generator.assetsImagesContextMenuStopSvg.preview}
-  static const String assetsImagesContextMenuStopSvg =
-      'assets/images/context_menu_stop.svg';
-
-  /// {@macro assets_generator.assetsImagesContextMenuUnmuteSvg.preview}
-  static const String assetsImagesContextMenuUnmuteSvg =
-      'assets/images/context_menu_unmute.svg';
-
-  /// {@macro assets_generator.assetsImagesContextMenuUnpinSvg.preview}
-  static const String assetsImagesContextMenuUnpinSvg =
-      'assets/images/context_menu_unpin.svg';
-
-  /// {@macro assets_generator.assetsImagesContextMenuUserEditSvg.preview}
-  static const String assetsImagesContextMenuUserEditSvg =
-      'assets/images/context_menu_user_edit.svg';
 
   /// {@macro assets_generator.assetsImagesCopySvg.preview}
   static const String assetsImagesCopySvg = 'assets/images/copy.svg';
@@ -450,10 +396,6 @@ class Resources {
   /// {@macro assets_generator.assetsImagesMicrophoneSvg.preview}
   static const String assetsImagesMicrophoneSvg =
       'assets/images/microphone.svg';
-
-  /// {@macro assets_generator.assetsImagesMultiSelectionSvg.preview}
-  static const String assetsImagesMultiSelectionSvg =
-      'assets/images/multi_selection.svg';
 
   /// {@macro assets_generator.assetsImagesMuteSvg.preview}
   static const String assetsImagesMuteSvg = 'assets/images/mute.svg';

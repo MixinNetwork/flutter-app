@@ -15,6 +15,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../constants/constants.dart';
+import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart' hide Offset;
@@ -297,7 +298,7 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
             child: ContextMenuWidget(
               menuProvider: (_) => Menu(children: [
                 MenuAction(
-                  // icon: Resources.assetsImagesContextMenuMuteSvg,
+                  image: MenuImage.icon(IconFonts.mute),
                   title: context.l10n.sendWithoutSound,
                   callback: () => _sendMessage(
                     context,

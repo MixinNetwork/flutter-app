@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import '../../../constants/icon_fonts.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/app_bar.dart';
 import '../../provider/conversation_provider.dart';
@@ -102,7 +103,7 @@ class ShareMediaItemMenuWrapper extends StatelessWidget {
   Widget build(BuildContext context) => ContextMenuWidget(
         menuProvider: (request) => Menu(children: [
           MenuAction(
-            // icon: Resources.assetsImagesContextMenuGotoSvg,
+            image: MenuImage.icon(IconFonts.positionToChat),
             title: context.l10n.locateToChat,
             callback: () {
               context.read<BlinkCubit>().blinkByMessageId(messageId);
