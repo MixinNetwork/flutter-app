@@ -7,6 +7,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -194,48 +195,50 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 Expanded(
-                  child: _FileInputOverlay(
-                    onSend: () => send(false),
-                    onFileAdded: (fileAdded) {
-                      final currentFiles =
-                          files.value.map((e) => e.path).toSet();
-                      fileAdded
-                          .removeWhere((e) => currentFiles.contains(e.path));
-                      files.value = (files.value..addAll(fileAdded)).toList();
-                      for (var i = 0; i < fileAdded.length; i++) {
-                        onFileAddedStream.add(currentFiles.length + i);
-                      }
-                    },
-                    child: IndexedStack(
-                      sizing: StackFit.expand,
-                      index: currentTab.value == _TabType.zip ? 1 : 0,
-                      children: [
-                        _AnimatedListBuilder(
-                            files: files.value,
-                            onFileAdded: onFileAddedStream.stream,
-                            onFileDeleted: onFileRemovedStream.stream,
-                            builder: (context, file, animation) =>
-                                _AnimatedFileTile(
-                                  key: ValueKey(file),
-                                  file: file,
-                                  animation: animation,
-                                  onDelete: removeFile,
-                                  showBigImage: showAsBigImage,
-                                  onImageEdited: (file, image) async {
-                                    final index = files.value.indexOf(file);
-                                    if (index == -1) {
-                                      e('failed to found file');
-                                      return;
-                                    }
-                                    final list = files.value.toList();
-                                    final newFile = File(image.imagePath);
-                                    list[index] = _File(newFile.xFile,
-                                        await newFile.length(), image);
-                                    files.value = list;
-                                  },
-                                )),
-                        const _PageZip(),
-                      ],
+                  child: _FileListViewportProvider(
+                    child: _FileInputOverlay(
+                      onSend: () => send(false),
+                      onFileAdded: (fileAdded) {
+                        final currentFiles =
+                            files.value.map((e) => e.path).toSet();
+                        fileAdded
+                            .removeWhere((e) => currentFiles.contains(e.path));
+                        files.value = (files.value..addAll(fileAdded)).toList();
+                        for (var i = 0; i < fileAdded.length; i++) {
+                          onFileAddedStream.add(currentFiles.length + i);
+                        }
+                      },
+                      child: IndexedStack(
+                        sizing: StackFit.expand,
+                        index: currentTab.value == _TabType.zip ? 1 : 0,
+                        children: [
+                          _AnimatedListBuilder(
+                              files: files.value,
+                              onFileAdded: onFileAddedStream.stream,
+                              onFileDeleted: onFileRemovedStream.stream,
+                              builder: (context, file, animation) =>
+                                  _AnimatedFileTile(
+                                    key: ValueKey(file),
+                                    file: file,
+                                    animation: animation,
+                                    onDelete: removeFile,
+                                    showBigImage: showAsBigImage,
+                                    onImageEdited: (file, image) async {
+                                      final index = files.value.indexOf(file);
+                                      if (index == -1) {
+                                        e('failed to found file');
+                                        return;
+                                      }
+                                      final list = files.value.toList();
+                                      final newFile = File(image.imagePath);
+                                      list[index] = _File(newFile.xFile,
+                                          await newFile.length(), image);
+                                      files.value = list;
+                                    },
+                                  )),
+                          const _PageZip(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -283,6 +286,30 @@ class _FilesPreviewDialog extends HookConsumerWidget {
           ],
         ));
   }
+}
+
+class _FileListViewportProvider extends StatelessWidget {
+  const _FileListViewportProvider({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) => _FileListViewport(
+          height: constraints.maxHeight,
+          child: child,
+        ),
+      );
+}
+
+class _FileListViewport extends StatelessWidget {
+  const _FileListViewport({required this.child, required this.height});
+
+  final Widget child;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) => child;
 }
 
 Future<String> _archiveFiles(List<String> paths) async {
@@ -504,9 +531,19 @@ class _AnimatedListBuilder extends HookConsumerWidget {
     final animatedListKey = useMemoized(() => GlobalKey<AnimatedListState>(
           debugLabel: 'file_preview_dialog',
         ));
+    final controller = useScrollController();
     useEffect(() {
       final subscription = onFileAdded.listen((event) {
         animatedListKey.currentState?.insertItem(event);
+        // auto scroll to bottom.
+        scheduleMicrotask(() async {
+          await Future.delayed(350.milliseconds);
+          await controller.animateTo(
+            controller.position.maxScrollExtent,
+            duration: 200.milliseconds,
+            curve: Curves.fastOutSlowIn,
+          );
+        });
       });
       return subscription.cancel;
     }, [onFileAdded]);
@@ -520,6 +557,7 @@ class _AnimatedListBuilder extends HookConsumerWidget {
       return subscription.cancel;
     }, [onFileDeleted]);
     return AnimatedList(
+      controller: controller,
       initialItemCount: files.length,
       key: animatedListKey,
       itemBuilder: (context, index, animation) =>
@@ -544,7 +582,7 @@ class _TileBigImage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     assert(file.isImage);
-
+    final viewport = context.findAncestorWidgetOfExactType<_FileListViewport>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30),
       child: ClipRRect(
@@ -553,8 +591,9 @@ class _TileBigImage extends HookConsumerWidget {
           alignment: Alignment.bottomCenter,
           children: [
             ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxHeight: 420,
+              constraints: BoxConstraints(
+                maxHeight:
+                    (viewport?.height ?? 270) - 30 /* vertical padding */,
                 minWidth: 420,
                 maxWidth: 420,
               ),
