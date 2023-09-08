@@ -3,12 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
+import '../../widgets/qr_code.dart';
 import 'bloc/landing_cubit.dart';
 import 'bloc/landing_state.dart';
 import 'landing.dart';
@@ -96,7 +96,10 @@ class _QrCode extends HookConsumerWidget {
     Widget? qrCode;
 
     if (url != null) {
-      qrCode = QrImageView(data: url, backgroundColor: Colors.white);
+      qrCode = QrCode(
+        image: const AssetImage(Resources.assetsImagesLogoPng),
+        data: url,
+      );
     }
 
     return Column(
@@ -111,14 +114,6 @@ class _QrCode extends HookConsumerWidget {
               fit: StackFit.expand,
               children: [
                 qrCode ?? const SizedBox(),
-                if (qrCode != null)
-                  Center(
-                    child: Image.asset(
-                      Resources.assetsImagesLogoPng,
-                      width: 36,
-                      height: 36,
-                    ),
-                  ),
                 Visibility(
                   visible: visible,
                   child: _Retry(

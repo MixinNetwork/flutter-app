@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../constants/resources.dart';
 import '../../db/dao/asset_dao.dart';
@@ -12,6 +11,7 @@ import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';
 import '../dialog.dart';
 import '../message/item/transfer/transfer_page.dart';
+import '../qr_code.dart';
 
 class MultisigsPaymentItem {
   const MultisigsPaymentItem({
@@ -292,12 +292,9 @@ class _QrCodeLayout extends StatelessWidget {
           const SizedBox(height: 32),
           ClipRRect(
             borderRadius: const BorderRadius.all(Radius.circular(8)),
-            child: SizedBox.square(
+            child: QrCode(
               dimension: 180,
-              child: QrImageView(
-                data: uri.toString(),
-                backgroundColor: Colors.white,
-              ),
+              data: uri.toString(),
             ),
           ),
           const SizedBox(height: 32),
