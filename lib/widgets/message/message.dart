@@ -425,8 +425,6 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.recall),
                           title: context.l10n.deleteForEveryone,
-                          attributes:
-                              const MenuActionAttributes(destructive: true),
                           callback: () async {
                             String? content;
                             if (message.type.isText) {
@@ -447,8 +445,6 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.delete),
                           title: context.l10n.deleteForMe,
-                          attributes:
-                              const MenuActionAttributes(destructive: true),
                           callback: () => context.accountServer
                               .deleteMessage(message.messageId),
                         ),

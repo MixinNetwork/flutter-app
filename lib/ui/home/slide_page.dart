@@ -346,8 +346,6 @@ class _CircleList extends HookConsumerWidget {
                             MenuAction(
                               image: MenuImage.icon(IconFonts.delete),
                               title: context.l10n.deleteCircle,
-                              attributes:
-                                  const MenuActionAttributes(destructive: true),
                               callback: () async {
                                 final result = await showConfirmMixinDialog(
                                     context,

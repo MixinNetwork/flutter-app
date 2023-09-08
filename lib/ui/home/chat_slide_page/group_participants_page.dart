@@ -261,7 +261,6 @@ class _ParticipantMenuEntry extends HookConsumerWidget {
               currentUser?.role == ParticipantRole.owner)
             MenuAction(
               image: MenuImage.icon(IconFonts.delete),
-              attributes: const MenuActionAttributes(destructive: true),
               title:
                   context.l10n.groupPopMenuRemove(participant.fullName ?? '?'),
               callback: () {

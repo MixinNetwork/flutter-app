@@ -136,7 +136,6 @@ class ConversationMenuWrapper extends HookConsumerWidget {
               MenuAction(
                 image: MenuImage.icon(IconFonts.delete),
                 title: context.l10n.deleteChat,
-                attributes: const MenuActionAttributes(destructive: true),
                 callback: () async {
                   final name =
                       conversation?.validName ?? searchConversation!.validName;
@@ -162,7 +161,6 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                 MenuAction(
                   image: MenuImage.icon(IconFonts.delete),
                   title: context.l10n.removeChatFromCircle,
-                  attributes: const MenuActionAttributes(destructive: true),
                   callback: () => runFutureWithToast(
                     context.accountServer.editCircleConversation(
                       circleId,
