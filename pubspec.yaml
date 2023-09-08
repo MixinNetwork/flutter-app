@@ -117,9 +117,9 @@ dependencies:
       ref: 52685ab7beaf8a9107904bdb8a1590924015d016
   pin_code_fields: ^8.0.1
   platform_device_id: ^1.0.1
+  pretty_qr_code: ^2.0.3
   protocol_handler: ^0.1.5
   provider: ^6.0.4
-  qr_flutter: ^4.1.0
   quick_breakpad:
     path: third_party/quick_breakpad
   recase: ^4.1.0

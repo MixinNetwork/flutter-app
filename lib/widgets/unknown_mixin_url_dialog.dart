@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 import '../utils/extension/extension.dart';
 import 'dialog.dart';
+import 'qr_code.dart';
 
 Future<void> showUnknownMixinUrlDialog(
   BuildContext context,
@@ -38,12 +38,9 @@ class _UnknownMixinUri extends StatelessWidget {
                 const SizedBox(height: 36),
                 ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  child: SizedBox.square(
+                  child: QrCode(
                     dimension: 240,
-                    child: QrImageView(
-                      data: uri.toString(),
-                      backgroundColor: Colors.white,
-                    ),
+                    data: uri.toString(),
                   ),
                 ),
                 const SizedBox(height: 36),
