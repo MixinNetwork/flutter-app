@@ -662,10 +662,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_hooks
-      sha256: "9eab8fd7aa752c3c1c0a364f9825851d410eb935243411682f4b1b0a4c569d71"
+      sha256: "6ae13b1145c589112cbd5c4fda6c65908993a9cb18d4f82042e9c28dd9fbf611"
       url: "https://pub.dev"
     source: hosted
-    version: "0.20.0"
+    version: "0.20.1"
   flutter_local_notifications:
     dependency: "direct main"
     description:
