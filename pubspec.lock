@@ -1082,15 +1082,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.32"
-  local_auth_foundation:
+  local_auth_ios:
     dependency: transitive
     description:
-      path: "packages/local_auth/local_auth_foundation"
-      ref: "7ba9b32b9abdb4f5461c16354986418e83d81095"
-      resolved-ref: "7ba9b32b9abdb4f5461c16354986418e83d81095"
-      url: "https://github.com/YeungKC/packages"
-    source: git
-    version: "1.2.0"
+      name: local_auth_ios
+      sha256: "26a8d1ad0b4ef6f861d29921be8383000fda952e323a5b6752cf82ca9cf9a7a9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.4"
   local_auth_platform_interface:
     dependency: transitive
     description:
