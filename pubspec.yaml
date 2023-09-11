@@ -167,7 +167,7 @@ dev_dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 77f03330001941f0ac303de6276dd2380f5bcc7e
       path: packages/debug_info_collector
-  drift_dev: ^2.11.1
+  drift_dev: ^2.11.2
   flutter_test:
     sdk: flutter
   hive_generator: ^2.0.1
