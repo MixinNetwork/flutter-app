@@ -476,11 +476,14 @@ class AccountServer {
           encryptCategory.toCategory(MessageCategory.plainSticker,
               MessageCategory.signalSticker, MessageCategory.encryptedSticker));
 
-  Future<void> sendContactMessage(String shareUserId, String? shareUserFullName,
-      EncryptCategory encryptCategory,
-      {String? conversationId,
-      String? recipientId,
-      String? quoteMessageId}) async {
+  Future<void> sendContactMessage(
+    String shareUserId,
+    String? shareUserFullName,
+    EncryptCategory encryptCategory, {
+    String? conversationId,
+    String? recipientId,
+    String? quoteMessageId,
+  }) async {
     final fullName = shareUserFullName ??
         (await database.userDao.userById(shareUserId).getSingleOrNull())
             ?.fullName;
