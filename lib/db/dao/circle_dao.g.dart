@@ -48,20 +48,18 @@ mixin _$CircleDaoMixin on DatabaseAccessor<MixinDatabase> {
           conversations,
           users,
           circleConversations,
-        }).map((QueryRow row) {
-      return ConversationCircleItem(
-        circleId: row.read<String>('circle_id'),
-        name: row.read<String>('name'),
-        createdAt:
-            Circles.$convertercreatedAt.fromSql(row.read<int>('created_at')),
-        orderedAt: NullAwareTypeConverter.wrapFromSql(
-            Circles.$converterorderedAt, row.readNullable<int>('ordered_at')),
-        count: row.read<int>('count'),
-        unseenConversationCount: row.read<int>('unseen_conversation_count'),
-        unseenMutedConversationCount:
-            row.read<int>('unseen_muted_conversation_count'),
-      );
-    });
+        }).map((QueryRow row) => ConversationCircleItem(
+          circleId: row.read<String>('circle_id'),
+          name: row.read<String>('name'),
+          createdAt:
+              Circles.$convertercreatedAt.fromSql(row.read<int>('created_at')),
+          orderedAt: NullAwareTypeConverter.wrapFromSql(
+              Circles.$converterorderedAt, row.readNullable<int>('ordered_at')),
+          count: row.read<int>('count'),
+          unseenConversationCount: row.read<int>('unseen_conversation_count'),
+          unseenMutedConversationCount:
+              row.read<int>('unseen_muted_conversation_count'),
+        ));
   }
 
   Selectable<ConversationCircleManagerItem> circleByConversationId(
@@ -75,13 +73,11 @@ mixin _$CircleDaoMixin on DatabaseAccessor<MixinDatabase> {
           circles,
           conversations,
           circleConversations,
-        }).map((QueryRow row) {
-      return ConversationCircleManagerItem(
-        circleId: row.read<String>('circle_id'),
-        name: row.read<String>('name'),
-        count: row.read<int>('count'),
-      );
-    });
+        }).map((QueryRow row) => ConversationCircleManagerItem(
+          circleId: row.read<String>('circle_id'),
+          name: row.read<String>('name'),
+          count: row.read<int>('count'),
+        ));
   }
 
   Selectable<ConversationCircleManagerItem> otherCircleByConversationId(
@@ -95,13 +91,11 @@ mixin _$CircleDaoMixin on DatabaseAccessor<MixinDatabase> {
           circles,
           conversations,
           circleConversations,
-        }).map((QueryRow row) {
-      return ConversationCircleManagerItem(
-        circleId: row.read<String>('circle_id'),
-        name: row.read<String>('name'),
-        count: row.read<int>('count'),
-      );
-    });
+        }).map((QueryRow row) => ConversationCircleManagerItem(
+          circleId: row.read<String>('circle_id'),
+          name: row.read<String>('name'),
+          count: row.read<int>('count'),
+        ));
   }
 }
 

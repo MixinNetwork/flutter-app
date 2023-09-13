@@ -210,13 +210,11 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
         ],
         readsFrom: {
           users,
-        }).map((QueryRow row) {
-      return MentionUser(
-        userId: row.read<String>('user_id'),
-        identityNumber: row.read<String>('identity_number'),
-        fullName: row.readNullable<String>('full_name'),
-      );
-    });
+        }).map((QueryRow row) => MentionUser(
+          userId: row.read<String>('user_id'),
+          identityNumber: row.read<String>('identity_number'),
+          fullName: row.readNullable<String>('full_name'),
+        ));
   }
 
   Selectable<int> countUsers() {

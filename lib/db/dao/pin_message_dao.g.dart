@@ -51,12 +51,10 @@ mixin _$PinMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           messages,
           users,
           pinMessages,
-        }).map((QueryRow row) {
-      return PinMessageItemResult(
-        content: row.readNullable<String>('content'),
-        userFullName: row.readNullable<String>('userFullName'),
-      );
-    });
+        }).map((QueryRow row) => PinMessageItemResult(
+          content: row.readNullable<String>('content'),
+          userFullName: row.readNullable<String>('userFullName'),
+        ));
   }
 
   Selectable<String> pinMessageIds(String conversationId) {

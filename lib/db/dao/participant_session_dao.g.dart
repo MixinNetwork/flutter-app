@@ -49,14 +49,12 @@ mixin _$ParticipantSessionDaoMixin on DatabaseAccessor<MixinDatabase> {
         ],
         readsFrom: {
           participantSession,
-        }).map((QueryRow row) {
-      return ParticipantSessionKey(
-        conversationId: row.read<String>('conversation_id'),
-        userId: row.read<String>('user_id'),
-        sessionId: row.read<String>('session_id'),
-        publicKey: row.readNullable<String>('public_key'),
-      );
-    });
+        }).map((QueryRow row) => ParticipantSessionKey(
+          conversationId: row.read<String>('conversation_id'),
+          userId: row.read<String>('user_id'),
+          sessionId: row.read<String>('session_id'),
+          publicKey: row.readNullable<String>('public_key'),
+        ));
   }
 
   Selectable<ParticipantSessionKey> otherParticipantSessionKey(
@@ -70,14 +68,12 @@ mixin _$ParticipantSessionDaoMixin on DatabaseAccessor<MixinDatabase> {
         ],
         readsFrom: {
           participantSession,
-        }).map((QueryRow row) {
-      return ParticipantSessionKey(
-        conversationId: row.read<String>('conversation_id'),
-        userId: row.read<String>('user_id'),
-        sessionId: row.read<String>('session_id'),
-        publicKey: row.readNullable<String>('public_key'),
-      );
-    });
+        }).map((QueryRow row) => ParticipantSessionKey(
+          conversationId: row.read<String>('conversation_id'),
+          userId: row.read<String>('user_id'),
+          sessionId: row.read<String>('session_id'),
+          publicKey: row.readNullable<String>('public_key'),
+        ));
   }
 
   Selectable<ParticipantSessionData> notSendSessionParticipants(

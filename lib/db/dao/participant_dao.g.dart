@@ -61,31 +61,30 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
         readsFrom: {
           participants,
           users,
-        }).map((QueryRow row) {
-      return ParticipantUser(
-        conversationId: row.read<String>('conversationId'),
-        role: Participants.$converterrole
-            .fromSql(row.readNullable<String>('role')),
-        createdAt: Participants.$convertercreatedAt
-            .fromSql(row.read<int>('createdAt')),
-        userId: row.read<String>('userId'),
-        identityNumber: row.read<String>('identityNumber'),
-        relationship: Users.$converterrelationship
-            .fromSql(row.readNullable<String>('relationship')),
-        biography: row.readNullable<String>('biography'),
-        fullName: row.readNullable<String>('fullName'),
-        avatarUrl: row.readNullable<String>('avatarUrl'),
-        phone: row.readNullable<String>('phone'),
-        isVerified: row.readNullable<bool>('isVerified'),
-        userCreatedAt: NullAwareTypeConverter.wrapFromSql(
-            Users.$convertercreatedAt, row.readNullable<int>('userCreatedAt')),
-        muteUntil: NullAwareTypeConverter.wrapFromSql(
-            Users.$convertermuteUntil, row.readNullable<int>('muteUntil')),
-        hasPin: row.readNullable<int>('hasPin'),
-        appId: row.readNullable<String>('appId'),
-        isScam: row.readNullable<int>('isScam'),
-      );
-    });
+        }).map((QueryRow row) => ParticipantUser(
+          conversationId: row.read<String>('conversationId'),
+          role: Participants.$converterrole
+              .fromSql(row.readNullable<String>('role')),
+          createdAt: Participants.$convertercreatedAt
+              .fromSql(row.read<int>('createdAt')),
+          userId: row.read<String>('userId'),
+          identityNumber: row.read<String>('identityNumber'),
+          relationship: Users.$converterrelationship
+              .fromSql(row.readNullable<String>('relationship')),
+          biography: row.readNullable<String>('biography'),
+          fullName: row.readNullable<String>('fullName'),
+          avatarUrl: row.readNullable<String>('avatarUrl'),
+          phone: row.readNullable<String>('phone'),
+          isVerified: row.readNullable<bool>('isVerified'),
+          userCreatedAt: NullAwareTypeConverter.wrapFromSql(
+              Users.$convertercreatedAt,
+              row.readNullable<int>('userCreatedAt')),
+          muteUntil: NullAwareTypeConverter.wrapFromSql(
+              Users.$convertermuteUntil, row.readNullable<int>('muteUntil')),
+          hasPin: row.readNullable<int>('hasPin'),
+          appId: row.readNullable<String>('appId'),
+          isScam: row.readNullable<int>('isScam'),
+        ));
   }
 
   Selectable<String> userIdByIdentityNumber(
