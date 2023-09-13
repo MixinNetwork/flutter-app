@@ -90,46 +90,44 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           ...generatedwhere.watchedTables,
           ...generatedorder.watchedTables,
           ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return QuoteMessageItem(
-        messageId: row.read<String>('messageId'),
-        conversationId: row.read<String>('conversationId'),
-        userId: row.read<String>('userId'),
-        userFullName: row.readNullable<String>('userFullName'),
-        userIdentityNumber: row.read<String>('userIdentityNumber'),
-        appId: row.readNullable<String>('appId'),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt:
-            Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
-        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-        mediaStatus: Messages.$convertermediaStatus
-            .fromSql(row.readNullable<String>('mediaStatus')),
-        mediaWaveform: row.readNullable<String>('mediaWaveform'),
-        mediaName: row.readNullable<String>('mediaName'),
-        mediaMimeType: row.readNullable<String>('mediaMimeType'),
-        mediaSize: row.readNullable<int>('mediaSize'),
-        mediaWidth: row.readNullable<int>('mediaWidth'),
-        mediaHeight: row.readNullable<int>('mediaHeight'),
-        thumbImage: row.readNullable<String>('thumbImage'),
-        thumbUrl: row.readNullable<String>('thumbUrl'),
-        mediaUrl: row.readNullable<String>('mediaUrl'),
-        mediaDuration: row.readNullable<String>('mediaDuration'),
-        stickerId: row.readNullable<String>('stickerId'),
-        assetUrl: row.readNullable<String>('assetUrl'),
-        assetWidth: row.readNullable<int>('assetWidth'),
-        assetHeight: row.readNullable<int>('assetHeight'),
-        assetName: row.readNullable<String>('assetName'),
-        assetType: row.readNullable<String>('assetType'),
-        sharedUserId: row.readNullable<String>('sharedUserId'),
-        sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
-        sharedUserIdentityNumber:
-            row.readNullable<String>('sharedUserIdentityNumber'),
-        sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
-        sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
-      );
-    });
+        }).map((QueryRow row) => QuoteMessageItem(
+          messageId: row.read<String>('messageId'),
+          conversationId: row.read<String>('conversationId'),
+          userId: row.read<String>('userId'),
+          userFullName: row.readNullable<String>('userFullName'),
+          userIdentityNumber: row.read<String>('userIdentityNumber'),
+          appId: row.readNullable<String>('appId'),
+          type: row.read<String>('type'),
+          content: row.readNullable<String>('content'),
+          createdAt:
+              Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
+          status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+          mediaStatus: Messages.$convertermediaStatus
+              .fromSql(row.readNullable<String>('mediaStatus')),
+          mediaWaveform: row.readNullable<String>('mediaWaveform'),
+          mediaName: row.readNullable<String>('mediaName'),
+          mediaMimeType: row.readNullable<String>('mediaMimeType'),
+          mediaSize: row.readNullable<int>('mediaSize'),
+          mediaWidth: row.readNullable<int>('mediaWidth'),
+          mediaHeight: row.readNullable<int>('mediaHeight'),
+          thumbImage: row.readNullable<String>('thumbImage'),
+          thumbUrl: row.readNullable<String>('thumbUrl'),
+          mediaUrl: row.readNullable<String>('mediaUrl'),
+          mediaDuration: row.readNullable<String>('mediaDuration'),
+          stickerId: row.readNullable<String>('stickerId'),
+          assetUrl: row.readNullable<String>('assetUrl'),
+          assetWidth: row.readNullable<int>('assetWidth'),
+          assetHeight: row.readNullable<int>('assetHeight'),
+          assetName: row.readNullable<String>('assetName'),
+          assetType: row.readNullable<String>('assetType'),
+          sharedUserId: row.readNullable<String>('sharedUserId'),
+          sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
+          sharedUserIdentityNumber:
+              row.readNullable<String>('sharedUserIdentityNumber'),
+          sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
+          sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
+          sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
+        ));
   }
 
   Selectable<MessageStatus> messageStatusById(String messageId) {
@@ -153,44 +151,42 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         readsFrom: {
           messages,
           resendSessionMessages,
-        }).map((QueryRow row) {
-      return SendingMessage(
-        messageId: row.read<String>('message_id'),
-        conversationId: row.read<String>('conversation_id'),
-        userId: row.read<String>('user_id'),
-        category: row.read<String>('category'),
-        content: row.readNullable<String>('content'),
-        mediaUrl: row.readNullable<String>('media_url'),
-        mediaMimeType: row.readNullable<String>('media_mime_type'),
-        mediaSize: row.readNullable<int>('media_size'),
-        mediaDuration: row.readNullable<String>('media_duration'),
-        mediaWidth: row.readNullable<int>('media_width'),
-        mediaHeight: row.readNullable<int>('media_height'),
-        mediaHash: row.readNullable<String>('media_hash'),
-        thumbImage: row.readNullable<String>('thumb_image'),
-        mediaKey: row.readNullable<String>('media_key'),
-        mediaDigest: row.readNullable<String>('media_digest'),
-        mediaStatus: Messages.$convertermediaStatus
-            .fromSql(row.readNullable<String>('media_status')),
-        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-        createdAt:
-            Messages.$convertercreatedAt.fromSql(row.read<int>('created_at')),
-        action: row.readNullable<String>('action'),
-        participantId: row.readNullable<String>('participant_id'),
-        snapshotId: row.readNullable<String>('snapshot_id'),
-        hyperlink: row.readNullable<String>('hyperlink'),
-        name: row.readNullable<String>('name'),
-        albumId: row.readNullable<String>('album_id'),
-        stickerId: row.readNullable<String>('sticker_id'),
-        sharedUserId: row.readNullable<String>('shared_user_id'),
-        mediaWaveform: row.readNullable<String>('media_waveform'),
-        quoteMessageId: row.readNullable<String>('quote_message_id'),
-        quoteContent: row.readNullable<String>('quote_content'),
-        resendStatus: row.readNullable<int>('resend_status'),
-        resendUserId: row.readNullable<String>('resend_user_id'),
-        resendSessionId: row.readNullable<String>('resend_session_id'),
-      );
-    });
+        }).map((QueryRow row) => SendingMessage(
+          messageId: row.read<String>('message_id'),
+          conversationId: row.read<String>('conversation_id'),
+          userId: row.read<String>('user_id'),
+          category: row.read<String>('category'),
+          content: row.readNullable<String>('content'),
+          mediaUrl: row.readNullable<String>('media_url'),
+          mediaMimeType: row.readNullable<String>('media_mime_type'),
+          mediaSize: row.readNullable<int>('media_size'),
+          mediaDuration: row.readNullable<String>('media_duration'),
+          mediaWidth: row.readNullable<int>('media_width'),
+          mediaHeight: row.readNullable<int>('media_height'),
+          mediaHash: row.readNullable<String>('media_hash'),
+          thumbImage: row.readNullable<String>('thumb_image'),
+          mediaKey: row.readNullable<String>('media_key'),
+          mediaDigest: row.readNullable<String>('media_digest'),
+          mediaStatus: Messages.$convertermediaStatus
+              .fromSql(row.readNullable<String>('media_status')),
+          status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+          createdAt:
+              Messages.$convertercreatedAt.fromSql(row.read<int>('created_at')),
+          action: row.readNullable<String>('action'),
+          participantId: row.readNullable<String>('participant_id'),
+          snapshotId: row.readNullable<String>('snapshot_id'),
+          hyperlink: row.readNullable<String>('hyperlink'),
+          name: row.readNullable<String>('name'),
+          albumId: row.readNullable<String>('album_id'),
+          stickerId: row.readNullable<String>('sticker_id'),
+          sharedUserId: row.readNullable<String>('shared_user_id'),
+          mediaWaveform: row.readNullable<String>('media_waveform'),
+          quoteMessageId: row.readNullable<String>('quote_message_id'),
+          quoteContent: row.readNullable<String>('quote_content'),
+          resendStatus: row.readNullable<int>('resend_status'),
+          resendUserId: row.readNullable<String>('resend_user_id'),
+          resendSessionId: row.readNullable<String>('resend_session_id'),
+        ));
   }
 
   Selectable<NotificationMessage> notificationMessage(List<String> messageId) {
@@ -207,35 +203,34 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           users,
           conversations,
           messageMentions,
-        }).map((QueryRow row) {
-      return NotificationMessage(
-        messageId: row.read<String>('messageId'),
-        conversationId: row.read<String>('conversationId'),
-        senderId: row.read<String>('senderId'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        quoteContent: row.readNullable<String>('quoteContent'),
-        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-        groupName: row.readNullable<String>('groupName'),
-        muteUntil: NullAwareTypeConverter.wrapFromSql(
-            Conversations.$convertermuteUntil,
-            row.readNullable<int>('muteUntil')),
-        ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
-            Users.$convertermuteUntil, row.readNullable<int>('ownerMuteUntil')),
-        ownerUserId: row.readNullable<String>('ownerUserId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        createdAt:
-            Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
-        category: Conversations.$convertercategory
-            .fromSql(row.readNullable<String>('category')),
-        actionName: row.readNullable<String>('actionName'),
-        relationship: Users.$converterrelationship
-            .fromSql(row.readNullable<String>('relationship')),
-        participantFullName: row.readNullable<String>('participantFullName'),
-        participantUserId: row.readNullable<String>('participantUserId'),
-      );
-    });
+        }).map((QueryRow row) => NotificationMessage(
+          messageId: row.read<String>('messageId'),
+          conversationId: row.read<String>('conversationId'),
+          senderId: row.read<String>('senderId'),
+          senderFullName: row.readNullable<String>('senderFullName'),
+          type: row.read<String>('type'),
+          content: row.readNullable<String>('content'),
+          quoteContent: row.readNullable<String>('quoteContent'),
+          status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+          groupName: row.readNullable<String>('groupName'),
+          muteUntil: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$convertermuteUntil,
+              row.readNullable<int>('muteUntil')),
+          ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
+              Users.$convertermuteUntil,
+              row.readNullable<int>('ownerMuteUntil')),
+          ownerUserId: row.readNullable<String>('ownerUserId'),
+          ownerFullName: row.readNullable<String>('ownerFullName'),
+          createdAt:
+              Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          actionName: row.readNullable<String>('actionName'),
+          relationship: Users.$converterrelationship
+              .fromSql(row.readNullable<String>('relationship')),
+          participantFullName: row.readNullable<String>('participantFullName'),
+          participantUserId: row.readNullable<String>('participantUserId'),
+        ));
   }
 
   Selectable<SearchMessageDetailItem> searchMessageByIds(
@@ -252,30 +247,28 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           messages,
           users,
           conversations,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt:
-            Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$convertercategory
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      );
-    });
+        }).map((QueryRow row) => SearchMessageDetailItem(
+          messageId: row.read<String>('messageId'),
+          senderId: row.read<String>('senderId'),
+          senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
+          senderFullName: row.readNullable<String>('senderFullName'),
+          status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+          type: row.read<String>('type'),
+          content: row.readNullable<String>('content'),
+          createdAt:
+              Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
+          mediaName: row.readNullable<String>('mediaName'),
+          appId: row.readNullable<String>('appId'),
+          verified: row.readNullable<bool>('verified'),
+          ownerId: row.readNullable<String>('ownerId'),
+          groupIconUrl: row.readNullable<String>('groupIconUrl'),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          groupName: row.readNullable<String>('groupName'),
+          conversationId: row.read<String>('conversationId'),
+          ownerFullName: row.readNullable<String>('ownerFullName'),
+          ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
+        ));
   }
 
   Selectable<MiniMessageItem> miniMessageByIds(List<String> messageIds) {
@@ -289,12 +282,10 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         ],
         readsFrom: {
           messages,
-        }).map((QueryRow row) {
-      return MiniMessageItem(
-        conversationId: row.read<String>('conversationId'),
-        messageId: row.read<String>('messageId'),
-      );
-    });
+        }).map((QueryRow row) => MiniMessageItem(
+          conversationId: row.read<String>('conversationId'),
+          messageId: row.read<String>('messageId'),
+        ));
   }
 
   Selectable<SearchMessageDetailItem> _searchMessage(
@@ -324,30 +315,28 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           conversations,
           ...generatedwhere.watchedTables,
           ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt:
-            Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.readNullable<bool>('verified'),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$convertercategory
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      );
-    });
+        }).map((QueryRow row) => SearchMessageDetailItem(
+          messageId: row.read<String>('messageId'),
+          senderId: row.read<String>('senderId'),
+          senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
+          senderFullName: row.readNullable<String>('senderFullName'),
+          status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+          type: row.read<String>('type'),
+          content: row.readNullable<String>('content'),
+          createdAt:
+              Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
+          mediaName: row.readNullable<String>('mediaName'),
+          appId: row.readNullable<String>('appId'),
+          verified: row.readNullable<bool>('verified'),
+          ownerId: row.readNullable<String>('ownerId'),
+          groupIconUrl: row.readNullable<String>('groupIconUrl'),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          groupName: row.readNullable<String>('groupName'),
+          conversationId: row.read<String>('conversationId'),
+          ownerFullName: row.readNullable<String>('ownerFullName'),
+          ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
+        ));
   }
 
   Selectable<int> countMessages() {
@@ -376,13 +365,11 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         ],
         readsFrom: {
           messages,
-        }).map((QueryRow row) {
-      return QuoteMinimal(
-        rowid: row.read<int>('rowid'),
-        conversationId: row.read<String>('conversation_id'),
-        quoteMessageId: row.readNullable<String>('quote_message_id'),
-      );
-    });
+        }).map((QueryRow row) => QuoteMinimal(
+          rowid: row.read<int>('rowid'),
+          conversationId: row.read<String>('conversation_id'),
+          quoteMessageId: row.readNullable<String>('quote_message_id'),
+        ));
   }
 }
 

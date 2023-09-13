@@ -48,29 +48,27 @@ mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
         readsFrom: {
           chains,
           assets,
-        }).map((QueryRow row) {
-      return AssetItem(
-        assetId: row.read<String>('asset_id'),
-        symbol: row.read<String>('symbol'),
-        name: row.read<String>('name'),
-        iconUrl: row.read<String>('icon_url'),
-        balance: row.read<String>('balance'),
-        destination: row.read<String>('destination'),
-        tag: row.readNullable<String>('tag'),
-        priceBtc: row.read<String>('price_btc'),
-        priceUsd: row.read<String>('price_usd'),
-        chainId: row.read<String>('chain_id'),
-        changeUsd: row.read<String>('change_usd'),
-        changeBtc: row.read<String>('change_btc'),
-        confirmations: row.read<int>('confirmations'),
-        assetKey: row.readNullable<String>('asset_key'),
-        reserve: row.readNullable<String>('reserve'),
-        chainSymbol: row.readNullable<String>('chainSymbol'),
-        chainIconUrl: row.readNullable<String>('chainIconUrl'),
-        chainName: row.readNullable<String>('chainName'),
-        chainThreshold: row.readNullable<int>('chainThreshold'),
-      );
-    });
+        }).map((QueryRow row) => AssetItem(
+          assetId: row.read<String>('asset_id'),
+          symbol: row.read<String>('symbol'),
+          name: row.read<String>('name'),
+          iconUrl: row.read<String>('icon_url'),
+          balance: row.read<String>('balance'),
+          destination: row.read<String>('destination'),
+          tag: row.readNullable<String>('tag'),
+          priceBtc: row.read<String>('price_btc'),
+          priceUsd: row.read<String>('price_usd'),
+          chainId: row.read<String>('chain_id'),
+          changeUsd: row.read<String>('change_usd'),
+          changeBtc: row.read<String>('change_btc'),
+          confirmations: row.read<int>('confirmations'),
+          assetKey: row.readNullable<String>('asset_key'),
+          reserve: row.readNullable<String>('reserve'),
+          chainSymbol: row.readNullable<String>('chainSymbol'),
+          chainIconUrl: row.readNullable<String>('chainIconUrl'),
+          chainName: row.readNullable<String>('chainName'),
+          chainThreshold: row.readNullable<int>('chainThreshold'),
+        ));
   }
 
   Selectable<int> countAssets() {
