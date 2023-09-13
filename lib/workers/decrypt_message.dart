@@ -1255,19 +1255,20 @@ class DecryptMessage extends Injector {
       BlazeMessageData data, List<dynamic> list) async {
     final transcripts = list
         .map((e) {
-          // ignore: avoid_dynamic_calls
-          e['created_at'] = DateTime.tryParse(e['created_at'] as String? ?? '')
-              ?.millisecondsSinceEpoch;
-          // ignore: avoid_dynamic_calls
-          e['media_created_at'] =
-              // ignore: avoid_dynamic_calls
-              DateTime.tryParse(e['media_created_at'] as String? ?? '')
+          final json = e as Map<String, dynamic>;
+
+          json['created_at'] =
+              DateTime.tryParse(json['created_at'] as String? ?? '')
                   ?.millisecondsSinceEpoch;
-          // ignore: avoid_dynamic_calls
-          final mediaDuration = e['media_duration'];
-          // ignore: avoid_dynamic_calls
-          e['media_duration'] = mediaDuration != null ? '$mediaDuration' : null;
-          return TranscriptMessage.fromJson(e as Map<String, dynamic>);
+          json['media_created_at'] =
+              DateTime.tryParse(json['media_created_at'] as String? ?? '')
+                  ?.millisecondsSinceEpoch;
+          final mediaDuration = json['media_duration'];
+          json['media_duration'] =
+              mediaDuration != null ? '$mediaDuration' : null;
+          json.remove('media_status');
+
+          return TranscriptMessage.fromJson(json);
         })
         .where((transcript) => transcript.transcriptId == data.messageId)
         .whereNotNull()

@@ -8,10 +8,10 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
   Users get users => attachedDatabase.users;
   CircleConversations get circleConversations =>
       attachedDatabase.circleConversations;
-  MessageMentions get messageMentions => attachedDatabase.messageMentions;
   Messages get messages => attachedDatabase.messages;
   Snapshots get snapshots => attachedDatabase.snapshots;
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
+  MessageMentions get messageMentions => attachedDatabase.messageMentions;
   Participants get participants => attachedDatabase.participants;
   Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
@@ -122,54 +122,55 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
           ...generatedwhere.watchedTables,
           ...generatedorder.watchedTables,
           ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$convertercategory
-            .fromSql(row.readNullable<String>('category')),
-        draft: row.readNullable<String>('draft'),
-        groupName: row.readNullable<String>('groupName'),
-        status: Conversations.$converterstatus.fromSql(row.read<int>('status')),
-        lastReadMessageId: row.readNullable<String>('lastReadMessageId'),
-        unseenMessageCount: row.readNullable<int>('unseenMessageCount'),
-        ownerId: row.readNullable<String>('ownerId'),
-        pinTime: NullAwareTypeConverter.wrapFromSql(
-            Conversations.$converterpinTime, row.readNullable<int>('pinTime')),
-        muteUntil: NullAwareTypeConverter.wrapFromSql(
-            Conversations.$convertermuteUntil,
-            row.readNullable<int>('muteUntil')),
-        expireIn: row.readNullable<int>('expireIn'),
-        avatarUrl: row.readNullable<String>('avatarUrl'),
-        name: row.readNullable<String>('name'),
-        ownerVerified: row.readNullable<bool>('ownerVerified'),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
-            Users.$convertermuteUntil, row.readNullable<int>('ownerMuteUntil')),
-        appId: row.readNullable<String>('appId'),
-        content: row.readNullable<String>('content'),
-        contentType: row.readNullable<String>('contentType'),
-        createdAt: Conversations.$convertercreatedAt
-            .fromSql(row.read<int>('createdAt')),
-        lastMessageCreatedAt: NullAwareTypeConverter.wrapFromSql(
-            Messages.$convertercreatedAt,
-            row.readNullable<int>('lastMessageCreatedAt')),
-        mediaUrl: row.readNullable<String>('mediaUrl'),
-        senderId: row.readNullable<String>('senderId'),
-        actionName: row.readNullable<String>('actionName'),
-        messageStatus: NullAwareTypeConverter.wrapFromSql(
-            Messages.$converterstatus,
-            row.readNullable<String>('messageStatus')),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        snapshotType: row.readNullable<String>('SnapshotType'),
-        participantFullName: row.readNullable<String>('participantFullName'),
-        participantUserId: row.readNullable<String>('participantUserId'),
-        messageExpireIn: row.readNullable<int>('messageExpireIn'),
-        mentionCount: row.read<int>('mentionCount'),
-        relationship: Users.$converterrelationship
-            .fromSql(row.readNullable<String>('relationship')),
-      );
-    });
+        }).map((QueryRow row) => ConversationItem(
+          conversationId: row.read<String>('conversationId'),
+          groupIconUrl: row.readNullable<String>('groupIconUrl'),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          draft: row.readNullable<String>('draft'),
+          groupName: row.readNullable<String>('groupName'),
+          status:
+              Conversations.$converterstatus.fromSql(row.read<int>('status')),
+          lastReadMessageId: row.readNullable<String>('lastReadMessageId'),
+          unseenMessageCount: row.readNullable<int>('unseenMessageCount'),
+          ownerId: row.readNullable<String>('ownerId'),
+          pinTime: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$converterpinTime,
+              row.readNullable<int>('pinTime')),
+          muteUntil: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$convertermuteUntil,
+              row.readNullable<int>('muteUntil')),
+          expireIn: row.readNullable<int>('expireIn'),
+          avatarUrl: row.readNullable<String>('avatarUrl'),
+          name: row.readNullable<String>('name'),
+          ownerVerified: row.readNullable<bool>('ownerVerified'),
+          ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
+          ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
+              Users.$convertermuteUntil,
+              row.readNullable<int>('ownerMuteUntil')),
+          appId: row.readNullable<String>('appId'),
+          content: row.readNullable<String>('content'),
+          contentType: row.readNullable<String>('contentType'),
+          createdAt: Conversations.$convertercreatedAt
+              .fromSql(row.read<int>('createdAt')),
+          lastMessageCreatedAt: NullAwareTypeConverter.wrapFromSql(
+              Messages.$convertercreatedAt,
+              row.readNullable<int>('lastMessageCreatedAt')),
+          mediaUrl: row.readNullable<String>('mediaUrl'),
+          senderId: row.readNullable<String>('senderId'),
+          actionName: row.readNullable<String>('actionName'),
+          messageStatus: NullAwareTypeConverter.wrapFromSql(
+              Messages.$converterstatus,
+              row.readNullable<String>('messageStatus')),
+          senderFullName: row.readNullable<String>('senderFullName'),
+          snapshotType: row.readNullable<String>('SnapshotType'),
+          participantFullName: row.readNullable<String>('participantFullName'),
+          participantUserId: row.readNullable<String>('participantUserId'),
+          messageExpireIn: row.readNullable<int>('messageExpireIn'),
+          mentionCount: row.read<int>('mentionCount'),
+          relationship: Users.$converterrelationship
+              .fromSql(row.readNullable<String>('relationship')),
+        ));
   }
 
   Selectable<ConversationItem> _baseConversationItemsByCircleId(
@@ -235,54 +236,55 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
           ...generatedwhere.watchedTables,
           ...generatedorder.watchedTables,
           ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$convertercategory
-            .fromSql(row.readNullable<String>('category')),
-        draft: row.readNullable<String>('draft'),
-        groupName: row.readNullable<String>('groupName'),
-        status: Conversations.$converterstatus.fromSql(row.read<int>('status')),
-        lastReadMessageId: row.readNullable<String>('lastReadMessageId'),
-        unseenMessageCount: row.readNullable<int>('unseenMessageCount'),
-        ownerId: row.readNullable<String>('ownerId'),
-        pinTime: NullAwareTypeConverter.wrapFromSql(
-            Conversations.$converterpinTime, row.readNullable<int>('pinTime')),
-        muteUntil: NullAwareTypeConverter.wrapFromSql(
-            Conversations.$convertermuteUntil,
-            row.readNullable<int>('muteUntil')),
-        expireIn: row.readNullable<int>('expireIn'),
-        avatarUrl: row.readNullable<String>('avatarUrl'),
-        name: row.readNullable<String>('name'),
-        ownerVerified: row.readNullable<bool>('ownerVerified'),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
-            Users.$convertermuteUntil, row.readNullable<int>('ownerMuteUntil')),
-        appId: row.readNullable<String>('appId'),
-        content: row.readNullable<String>('content'),
-        contentType: row.readNullable<String>('contentType'),
-        createdAt: Conversations.$convertercreatedAt
-            .fromSql(row.read<int>('createdAt')),
-        lastMessageCreatedAt: NullAwareTypeConverter.wrapFromSql(
-            Messages.$convertercreatedAt,
-            row.readNullable<int>('lastMessageCreatedAt')),
-        mediaUrl: row.readNullable<String>('mediaUrl'),
-        senderId: row.readNullable<String>('senderId'),
-        actionName: row.readNullable<String>('actionName'),
-        messageStatus: NullAwareTypeConverter.wrapFromSql(
-            Messages.$converterstatus,
-            row.readNullable<String>('messageStatus')),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        snapshotType: row.readNullable<String>('SnapshotType'),
-        participantFullName: row.readNullable<String>('participantFullName'),
-        participantUserId: row.readNullable<String>('participantUserId'),
-        messageExpireIn: row.readNullable<int>('messageExpireIn'),
-        mentionCount: row.read<int>('mentionCount'),
-        relationship: Users.$converterrelationship
-            .fromSql(row.readNullable<String>('relationship')),
-      );
-    });
+        }).map((QueryRow row) => ConversationItem(
+          conversationId: row.read<String>('conversationId'),
+          groupIconUrl: row.readNullable<String>('groupIconUrl'),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          draft: row.readNullable<String>('draft'),
+          groupName: row.readNullable<String>('groupName'),
+          status:
+              Conversations.$converterstatus.fromSql(row.read<int>('status')),
+          lastReadMessageId: row.readNullable<String>('lastReadMessageId'),
+          unseenMessageCount: row.readNullable<int>('unseenMessageCount'),
+          ownerId: row.readNullable<String>('ownerId'),
+          pinTime: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$converterpinTime,
+              row.readNullable<int>('pinTime')),
+          muteUntil: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$convertermuteUntil,
+              row.readNullable<int>('muteUntil')),
+          expireIn: row.readNullable<int>('expireIn'),
+          avatarUrl: row.readNullable<String>('avatarUrl'),
+          name: row.readNullable<String>('name'),
+          ownerVerified: row.readNullable<bool>('ownerVerified'),
+          ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
+          ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
+              Users.$convertermuteUntil,
+              row.readNullable<int>('ownerMuteUntil')),
+          appId: row.readNullable<String>('appId'),
+          content: row.readNullable<String>('content'),
+          contentType: row.readNullable<String>('contentType'),
+          createdAt: Conversations.$convertercreatedAt
+              .fromSql(row.read<int>('createdAt')),
+          lastMessageCreatedAt: NullAwareTypeConverter.wrapFromSql(
+              Messages.$convertercreatedAt,
+              row.readNullable<int>('lastMessageCreatedAt')),
+          mediaUrl: row.readNullable<String>('mediaUrl'),
+          senderId: row.readNullable<String>('senderId'),
+          actionName: row.readNullable<String>('actionName'),
+          messageStatus: NullAwareTypeConverter.wrapFromSql(
+              Messages.$converterstatus,
+              row.readNullable<String>('messageStatus')),
+          senderFullName: row.readNullable<String>('senderFullName'),
+          snapshotType: row.readNullable<String>('SnapshotType'),
+          participantFullName: row.readNullable<String>('participantFullName'),
+          participantUserId: row.readNullable<String>('participantUserId'),
+          messageExpireIn: row.readNullable<int>('messageExpireIn'),
+          mentionCount: row.read<int>('mentionCount'),
+          relationship: Users.$converterrelationship
+              .fromSql(row.readNullable<String>('relationship')),
+        ));
   }
 
   Selectable<int> _baseUnseenMessageCount(BaseUnseenMessageCount$where where) {
@@ -326,13 +328,11 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
           conversations,
           users,
           ...generatedwhere.watchedTables,
-        }).map((QueryRow row) {
-      return BaseUnseenConversationCountResult(
-        unseenConversationCount: row.read<int>('unseen_conversation_count'),
-        unseenMutedConversationCount:
-            row.read<int>('unseen_muted_conversation_count'),
-      );
-    });
+        }).map((QueryRow row) => BaseUnseenConversationCountResult(
+          unseenConversationCount: row.read<int>('unseen_conversation_count'),
+          unseenMutedConversationCount:
+              row.read<int>('unseen_muted_conversation_count'),
+        ));
   }
 
   Selectable<SearchConversationItem> _fuzzySearchConversation(
@@ -373,38 +373,38 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
           messages,
           ...generatedwhere.watchedTables,
           ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return SearchConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$convertercategory
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        pinTime: NullAwareTypeConverter.wrapFromSql(
-            Conversations.$converterpinTime, row.readNullable<int>('pinTime')),
-        muteUntil: NullAwareTypeConverter.wrapFromSql(
-            Conversations.$convertermuteUntil,
-            row.readNullable<int>('muteUntil')),
-        ownerId: row.readNullable<String>('ownerId'),
-        ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
-            Users.$convertermuteUntil, row.readNullable<int>('ownerMuteUntil')),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        fullName: row.readNullable<String>('fullName'),
-        avatarUrl: row.readNullable<String>('avatarUrl'),
-        isVerified: row.readNullable<bool>('isVerified'),
-        appId: row.readNullable<String>('appId'),
-        messageStatus: NullAwareTypeConverter.wrapFromSql(
-            Messages.$converterstatus,
-            row.readNullable<String>('messageStatus')),
-        content: row.readNullable<String>('content'),
-        contentType: row.readNullable<String>('contentType'),
-        senderId: row.readNullable<String>('senderId'),
-        actionName: row.readNullable<String>('actionName'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        participantUserId: row.readNullable<String>('participantUserId'),
-        participantFullName: row.readNullable<String>('participantFullName'),
-      );
-    });
+        }).map((QueryRow row) => SearchConversationItem(
+          conversationId: row.read<String>('conversationId'),
+          groupIconUrl: row.readNullable<String>('groupIconUrl'),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          groupName: row.readNullable<String>('groupName'),
+          pinTime: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$converterpinTime,
+              row.readNullable<int>('pinTime')),
+          muteUntil: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$convertermuteUntil,
+              row.readNullable<int>('muteUntil')),
+          ownerId: row.readNullable<String>('ownerId'),
+          ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
+              Users.$convertermuteUntil,
+              row.readNullable<int>('ownerMuteUntil')),
+          ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
+          fullName: row.readNullable<String>('fullName'),
+          avatarUrl: row.readNullable<String>('avatarUrl'),
+          isVerified: row.readNullable<bool>('isVerified'),
+          appId: row.readNullable<String>('appId'),
+          messageStatus: NullAwareTypeConverter.wrapFromSql(
+              Messages.$converterstatus,
+              row.readNullable<String>('messageStatus')),
+          content: row.readNullable<String>('content'),
+          contentType: row.readNullable<String>('contentType'),
+          senderId: row.readNullable<String>('senderId'),
+          actionName: row.readNullable<String>('actionName'),
+          senderFullName: row.readNullable<String>('senderFullName'),
+          participantUserId: row.readNullable<String>('participantUserId'),
+          participantFullName: row.readNullable<String>('participantFullName'),
+        ));
   }
 
   Selectable<SearchConversationItem> _searchConversationItemByIn(
@@ -434,38 +434,38 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
           users,
           messages,
           ...generatedorder.watchedTables,
-        }).map((QueryRow row) {
-      return SearchConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$convertercategory
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        pinTime: NullAwareTypeConverter.wrapFromSql(
-            Conversations.$converterpinTime, row.readNullable<int>('pinTime')),
-        muteUntil: NullAwareTypeConverter.wrapFromSql(
-            Conversations.$convertermuteUntil,
-            row.readNullable<int>('muteUntil')),
-        ownerId: row.readNullable<String>('ownerId'),
-        ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
-            Users.$convertermuteUntil, row.readNullable<int>('ownerMuteUntil')),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        fullName: row.readNullable<String>('fullName'),
-        avatarUrl: row.readNullable<String>('avatarUrl'),
-        isVerified: row.readNullable<bool>('isVerified'),
-        appId: row.readNullable<String>('appId'),
-        messageStatus: NullAwareTypeConverter.wrapFromSql(
-            Messages.$converterstatus,
-            row.readNullable<String>('messageStatus')),
-        content: row.readNullable<String>('content'),
-        contentType: row.readNullable<String>('contentType'),
-        senderId: row.readNullable<String>('senderId'),
-        actionName: row.readNullable<String>('actionName'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        participantUserId: row.readNullable<String>('participantUserId'),
-        participantFullName: row.readNullable<String>('participantFullName'),
-      );
-    });
+        }).map((QueryRow row) => SearchConversationItem(
+          conversationId: row.read<String>('conversationId'),
+          groupIconUrl: row.readNullable<String>('groupIconUrl'),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          groupName: row.readNullable<String>('groupName'),
+          pinTime: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$converterpinTime,
+              row.readNullable<int>('pinTime')),
+          muteUntil: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$convertermuteUntil,
+              row.readNullable<int>('muteUntil')),
+          ownerId: row.readNullable<String>('ownerId'),
+          ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
+              Users.$convertermuteUntil,
+              row.readNullable<int>('ownerMuteUntil')),
+          ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
+          fullName: row.readNullable<String>('fullName'),
+          avatarUrl: row.readNullable<String>('avatarUrl'),
+          isVerified: row.readNullable<bool>('isVerified'),
+          appId: row.readNullable<String>('appId'),
+          messageStatus: NullAwareTypeConverter.wrapFromSql(
+              Messages.$converterstatus,
+              row.readNullable<String>('messageStatus')),
+          content: row.readNullable<String>('content'),
+          contentType: row.readNullable<String>('contentType'),
+          senderId: row.readNullable<String>('senderId'),
+          actionName: row.readNullable<String>('actionName'),
+          senderFullName: row.readNullable<String>('senderFullName'),
+          participantUserId: row.readNullable<String>('participantUserId'),
+          participantFullName: row.readNullable<String>('participantFullName'),
+        ));
   }
 
   Selectable<SearchConversationItem> _fuzzySearchConversationInCircle(
@@ -511,38 +511,38 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
           circleConversations,
           ...generatedwhere.watchedTables,
           ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return SearchConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$convertercategory
-            .fromSql(row.readNullable<String>('category')),
-        groupName: row.readNullable<String>('groupName'),
-        pinTime: NullAwareTypeConverter.wrapFromSql(
-            Conversations.$converterpinTime, row.readNullable<int>('pinTime')),
-        muteUntil: NullAwareTypeConverter.wrapFromSql(
-            Conversations.$convertermuteUntil,
-            row.readNullable<int>('muteUntil')),
-        ownerId: row.readNullable<String>('ownerId'),
-        ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
-            Users.$convertermuteUntil, row.readNullable<int>('ownerMuteUntil')),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        fullName: row.readNullable<String>('fullName'),
-        avatarUrl: row.readNullable<String>('avatarUrl'),
-        isVerified: row.readNullable<bool>('isVerified'),
-        appId: row.readNullable<String>('appId'),
-        messageStatus: NullAwareTypeConverter.wrapFromSql(
-            Messages.$converterstatus,
-            row.readNullable<String>('messageStatus')),
-        content: row.readNullable<String>('content'),
-        contentType: row.readNullable<String>('contentType'),
-        senderId: row.readNullable<String>('senderId'),
-        actionName: row.readNullable<String>('actionName'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        participantUserId: row.readNullable<String>('participantUserId'),
-        participantFullName: row.readNullable<String>('participantFullName'),
-      );
-    });
+        }).map((QueryRow row) => SearchConversationItem(
+          conversationId: row.read<String>('conversationId'),
+          groupIconUrl: row.readNullable<String>('groupIconUrl'),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          groupName: row.readNullable<String>('groupName'),
+          pinTime: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$converterpinTime,
+              row.readNullable<int>('pinTime')),
+          muteUntil: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$convertermuteUntil,
+              row.readNullable<int>('muteUntil')),
+          ownerId: row.readNullable<String>('ownerId'),
+          ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
+              Users.$convertermuteUntil,
+              row.readNullable<int>('ownerMuteUntil')),
+          ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
+          fullName: row.readNullable<String>('fullName'),
+          avatarUrl: row.readNullable<String>('avatarUrl'),
+          isVerified: row.readNullable<bool>('isVerified'),
+          appId: row.readNullable<String>('appId'),
+          messageStatus: NullAwareTypeConverter.wrapFromSql(
+              Messages.$converterstatus,
+              row.readNullable<String>('messageStatus')),
+          content: row.readNullable<String>('content'),
+          contentType: row.readNullable<String>('contentType'),
+          senderId: row.readNullable<String>('senderId'),
+          actionName: row.readNullable<String>('actionName'),
+          senderFullName: row.readNullable<String>('senderFullName'),
+          participantUserId: row.readNullable<String>('participantUserId'),
+          participantFullName: row.readNullable<String>('participantFullName'),
+        ));
   }
 
   Selectable<ConversationStorageUsage> conversationStorageUsage() {
@@ -552,20 +552,18 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
         readsFrom: {
           conversations,
           users,
-        }).map((QueryRow row) {
-      return ConversationStorageUsage(
-        conversationId: row.read<String>('conversation_id'),
-        ownerId: row.readNullable<String>('owner_id'),
-        category: Conversations.$convertercategory
-            .fromSql(row.readNullable<String>('category')),
-        iconUrl: row.readNullable<String>('icon_url'),
-        name: row.readNullable<String>('name'),
-        identityNumber: row.read<String>('identity_number'),
-        fullName: row.readNullable<String>('full_name'),
-        avatarUrl: row.readNullable<String>('avatar_url'),
-        isVerified: row.readNullable<bool>('is_verified'),
-      );
-    });
+        }).map((QueryRow row) => ConversationStorageUsage(
+          conversationId: row.read<String>('conversation_id'),
+          ownerId: row.readNullable<String>('owner_id'),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          iconUrl: row.readNullable<String>('icon_url'),
+          name: row.readNullable<String>('name'),
+          identityNumber: row.read<String>('identity_number'),
+          fullName: row.readNullable<String>('full_name'),
+          avatarUrl: row.readNullable<String>('avatar_url'),
+          isVerified: row.readNullable<bool>('is_verified'),
+        ));
   }
 
   Selectable<GroupMinimal> findSameConversations(String selfId, String userId) {
@@ -578,14 +576,12 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
         readsFrom: {
           conversations,
           participants,
-        }).map((QueryRow row) {
-      return GroupMinimal(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        groupName: row.readNullable<String>('groupName'),
-        memberCount: row.read<int>('memberCount'),
-      );
-    });
+        }).map((QueryRow row) => GroupMinimal(
+          conversationId: row.read<String>('conversationId'),
+          groupIconUrl: row.readNullable<String>('groupIconUrl'),
+          groupName: row.readNullable<String>('groupName'),
+          memberCount: row.read<int>('memberCount'),
+        ));
   }
 
   Selectable<int> countConversations() {
