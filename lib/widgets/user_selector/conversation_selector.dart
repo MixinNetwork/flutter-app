@@ -97,6 +97,7 @@ Future<List<ConversationSelector>?> showConversationSelector({
   required bool singleSelect,
   required String title,
   required bool onlyContact,
+  Iterable<String> filteredIds = const [],
   bool allowEmpty = false,
   List<ConversationSelector> initSelected = const [],
   String? confirmedText,
@@ -109,6 +110,7 @@ Future<List<ConversationSelector>?> showConversationSelector({
         singleSelect: singleSelect,
         onlyContact: onlyContact,
         initSelected: initSelected,
+        filteredIds: filteredIds,
         allowEmpty: allowEmpty,
         confirmedText: confirmedText,
         action: action,
@@ -148,6 +150,7 @@ class _ConversationSelector extends HookConsumerWidget {
     required this.title,
     required this.onlyContact,
     this.initSelected = const [],
+    this.filteredIds = const [],
     this.allowEmpty = false,
     this.confirmedText,
     this.action,
@@ -157,6 +160,7 @@ class _ConversationSelector extends HookConsumerWidget {
   final bool singleSelect;
   final bool onlyContact;
   final List<ConversationSelector> initSelected;
+  final Iterable<String> filteredIds;
   final bool allowEmpty;
   final String? confirmedText;
   final Widget? action;
@@ -174,8 +178,12 @@ class _ConversationSelector extends HookConsumerWidget {
       selector.emit(list);
     }
 
-    final conversationFilterCubit = useBloc(() => ConversationFilterCubit(
-            useContext().accountServer, onlyContact, (state) {
+    final conversationFilterCubit = useBloc(
+      () => ConversationFilterCubit(
+        useContext().accountServer,
+        onlyContact,
+        filteredIds,
+        (state) {
           state.recentConversations.forEach((element) {
             if (!initSelected
                 .map((e) => e.conversationId)
@@ -192,7 +200,11 @@ class _ConversationSelector extends HookConsumerWidget {
             if (!userIds.contains(element.userId)) return;
             selectItem(element);
           });
-        }));
+        },
+      ),
+      keys: [useContext().accountServer, onlyContact, filteredIds],
+    );
+
     final conversationFilterState =
         useBlocState<ConversationFilterCubit, ConversationFilterState>(
       bloc: conversationFilterCubit,

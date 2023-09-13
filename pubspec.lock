@@ -457,10 +457,10 @@ packages:
     dependency: "direct dev"
     description:
       name: drift_dev
-      sha256: e6b0705b118366d2202117734442701ac1521e8deed51b9fda2e817395b1bb96
+      sha256: "544f2d34635bb62887068a05348cc7a29ecc310d10aefefd4a9cf07242b4cd0a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.1"
+    version: "2.11.2"
   ecache:
     dependency: "direct main"
     description:
@@ -537,10 +537,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_selector
-      sha256: "59b35aa4af7988be7ec88f9ddaa6c71c5b54bf0f8b35009389d9343b10e9c3af"
+      sha256: "84eaf3e034d647859167d1f01cfe7b6352488f34c1b4932635012b202014c25b"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   file_selector_android:
     dependency: transitive
     description:
@@ -1082,14 +1082,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.32"
-  local_auth_ios:
+  local_auth_foundation:
     dependency: transitive
     description:
-      name: local_auth_ios
-      sha256: "26a8d1ad0b4ef6f861d29921be8383000fda952e323a5b6752cf82ca9cf9a7a9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.4"
+      path: "packages/local_auth/local_auth_foundation"
+      ref: "7ba9b32b9abdb4f5461c16354986418e83d81095"
+      resolved-ref: "7ba9b32b9abdb4f5461c16354986418e83d81095"
+      url: "https://github.com/YeungKC/packages"
+    source: git
+    version: "1.2.0"
   local_auth_platform_interface:
     dependency: transitive
     description:
@@ -1862,10 +1863,10 @@ packages:
     dependency: "direct main"
     description:
       name: url_launcher
-      sha256: "781bd58a1eb16069412365c98597726cd8810ae27435f04b3b4d3a470bacd61e"
+      sha256: "47e208a6711459d813ba18af120d9663c20bdf6985d6ad39fe165d2538378d27"
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.12"
+    version: "6.1.14"
   url_launcher_android:
     dependency: transitive
     description:
@@ -1966,10 +1967,10 @@ packages:
     dependency: "direct main"
     description:
       name: very_good_analysis
-      sha256: "5e4ea72d2a9188630f0dd8f120a541de730090ef8863243fedca8267a84508b8"
+      sha256: "9ae7f3a3bd5764fb021b335ca28a34f040cd0ab6eec00a1b213b445dae58a4b8"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.0+1"
+    version: "5.1.0"
   visibility_detector:
     dependency: "direct main"
     description:
@@ -2006,10 +2007,10 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter
-      sha256: "04a0782fb058b7c71f2048935583488f4d32e9147ca403abc4e58f1de9964629"
+      sha256: "82f6787d5df55907aa01e49bd9644f4ed1cc82af7a8257dd9947815959d2e755"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.3"
+    version: "4.2.4"
   webview_flutter_android:
     dependency: transitive
     description:

@@ -54,7 +54,7 @@ dependencies:
   emojis: ^0.9.9
   equatable: ^2.0.5
   file_picker: ^5.5.0
-  file_selector: ^1.0.0
+  file_selector: ^1.0.1
   file_selector_linux: ^0.9.0
   file_selector_macos: ^0.9.3
   file_selector_windows: ^0.9.3
@@ -145,13 +145,13 @@ dependencies:
       ref: 00654e51f51aa65cdc39784a3075c9abb8b9dd7c
       path: packages/ui_device
   ulid: ^2.0.0
-  url_launcher: ^6.1.12
+  url_launcher: ^6.1.14
   uuid: ^3.0.4
-  very_good_analysis: ^5.0.0+1
+  very_good_analysis: ^5.1.0
   visibility_detector: ^0.4.0+2
   watcher: ^1.1.0
   web_socket_channel: ^2.4.0
-  webview_flutter: ^4.2.3
+  webview_flutter: ^4.2.4
   win32: ^5.0.7
   win_toast: ^0.3.0
   window_manager: ^0.3.6
@@ -169,7 +169,7 @@ dev_dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 77f03330001941f0ac303de6276dd2380f5bcc7e
       path: packages/debug_info_collector
-  drift_dev: ^2.11.1
+  drift_dev: ^2.11.2
   flutter_test:
     sdk: flutter
   hive_generator: ^2.0.1

@@ -36,6 +36,7 @@ import '../../../widgets/message/item/quote_message.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
+import '../../../widgets/user_selector/conversation_selector.dart';
 import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
@@ -207,8 +208,7 @@ class _InputContainer extends HookConsumerWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    _FileButton(actionColor: context.theme.icon),
-                    const _ImagePickButton(),
+                    const _SendActionTypeButton(),
                     const SizedBox(width: 6),
                     _StickerButton(
                       textEditingController: textEditingController,
@@ -582,52 +582,116 @@ class _QuoteMessage extends HookConsumerWidget {
   }
 }
 
-enum _ImagePickType {
-  image,
-  video,
+enum _ActionType {
+  file,
+  contact,
+  imageForMobile,
+  videoForMobile,
+  imageOrVideoForDesktop,
 }
 
-class _ImagePickButton extends StatelessWidget {
-  const _ImagePickButton();
+class _SendActionTypeButton extends StatelessWidget {
+  const _SendActionTypeButton();
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
-      return const SizedBox();
-    }
+    final isDesktop =
+        Platform.isMacOS || Platform.isLinux || Platform.isWindows;
+
     return Padding(
       padding: const EdgeInsets.only(left: 6),
       child: PopupMenuPageButton(
         itemBuilder: (context) => [
           CustomPopupMenuButton(
-            icon: Resources.assetsImagesImageSvg,
-            title: context.l10n.image,
-            value: _ImagePickType.image,
+            icon: Resources.assetsImagesContactSvg,
+            title: context.l10n.contact,
+            value: _ActionType.contact,
           ),
           CustomPopupMenuButton(
-            icon: Resources.assetsImagesVideoSvg,
-            title: context.l10n.video,
-            value: _ImagePickType.video,
+            icon: Resources.assetsImagesFileSvg,
+            title: context.l10n.files,
+            value: _ActionType.file,
           ),
+          if (isDesktop)
+            CustomPopupMenuButton(
+              icon: Resources.assetsImagesFilePreviewImagesSvg,
+              title: '${context.l10n.image} & ${context.l10n.video}',
+              value: _ActionType.imageOrVideoForDesktop,
+            ),
+          if (!isDesktop)
+            CustomPopupMenuButton(
+              icon: Resources.assetsImagesImageSvg,
+              title: context.l10n.image,
+              value: _ActionType.imageForMobile,
+            ),
+          if (!isDesktop)
+            CustomPopupMenuButton(
+              icon: Resources.assetsImagesVideoSvg,
+              title: context.l10n.video,
+              value: _ActionType.videoForMobile,
+            ),
         ],
         onSelected: (value) async {
-          XFile? file;
-          if (value == _ImagePickType.image) {
-            file = await ImagePicker().pickImage(source: ImageSource.gallery);
-          } else if (value == _ImagePickType.video) {
-            file = await ImagePicker().pickVideo(source: ImageSource.gallery);
+          if (value == _ActionType.contact) {
+            final conversationState =
+                context.providerContainer.read(conversationProvider);
+
+            if (conversationState == null) return;
+
+            final result = await showConversationSelector(
+              context: context,
+              singleSelect: true,
+              onlyContact: true,
+              title: context.l10n.select,
+              filteredIds: [conversationState.userId].whereNotNull(),
+            );
+
+            if (result == null || result.isEmpty) return;
+            final userId = result.first.userId;
+            if (userId == null || userId.isEmpty) return;
+
+            await runWithToast(() async {
+              final user = await context.database.userDao
+                  .userById(userId)
+                  .getSingleOrNull();
+              if (user == null) throw Exception('User not found');
+
+              await context.accountServer.sendContactMessage(
+                userId,
+                user.fullName,
+                conversationState.encryptCategory,
+                conversationId: conversationState.conversationId,
+                recipientId: conversationState.userId,
+              );
+            });
+
+            return;
           }
 
-          if (file != null) {
-            // recreate the XFile to generate mimeType.
-            final xFile = File(file.path).xFile;
-            await showFilesPreviewDialog(context, [xFile]);
+          var files = <XFile?>[];
+          if (value == _ActionType.imageOrVideoForDesktop ||
+              value == _ActionType.file) {
+            files = await selectFiles();
+          } else if (value == _ActionType.imageForMobile) {
+            files = [
+              await ImagePicker().pickImage(source: ImageSource.gallery)
+            ];
+          } else if (value == _ActionType.videoForMobile) {
+            files = [
+              await ImagePicker().pickVideo(source: ImageSource.gallery)
+            ];
+          }
+
+          // recreate the XFile to generate mimeType.
+          files = files.whereNotNull().map((e) => File(e.path).xFile).toList();
+          if (files.isNotEmpty) {
+            await showFilesPreviewDialog(context, files.cast());
           }
         },
         icon: SvgPicture.asset(
-          Resources.assetsImagesFilePreviewImagesSvg,
-          height: 24,
-          width: 24,
+          Resources.assetsImagesIcAddSvg,
+          height: 32,
+          width: 32,
           colorFilter: ColorFilter.mode(
             context.theme.icon,
             BlendMode.srcIn,
@@ -636,25 +700,6 @@ class _ImagePickButton extends StatelessWidget {
       ),
     );
   }
-}
-
-class _FileButton extends StatelessWidget {
-  const _FileButton({
-    required this.actionColor,
-  });
-
-  final Color actionColor;
-
-  @override
-  Widget build(BuildContext context) => ActionButton(
-        name: Resources.assetsImagesIcFileSvg,
-        color: actionColor,
-        onTap: () async {
-          final files = await selectFiles();
-          if (files.isEmpty) return;
-          await showFilesPreviewDialog(context, files);
-        },
-      );
 }
 
 class _StickerButton extends HookConsumerWidget {

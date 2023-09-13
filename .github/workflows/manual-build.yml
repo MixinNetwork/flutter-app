@@ -225,7 +225,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: flutter_app.msix.zip
-          path: build\windows\runner\Release\flutter_app.msix
+          path: build\windows\x64\runner\Release\flutter_app.msix
 
       - name: collect debug info
         run: flutter pub run debug_info_collector

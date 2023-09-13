@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -196,6 +198,20 @@ Future<bool> runFutureWithToast(Future<dynamic> future) async {
   showToastLoading();
   try {
     await future;
+  } catch (error, s) {
+    e("runFutureWithToast's error: $error, $s");
+    showToastFailed(error);
+    return false;
+  }
+  showToastSuccessful();
+
+  return true;
+}
+
+Future<bool> runWithToast(FutureOr<void> Function() function) async {
+  showToastLoading();
+  try {
+    await function();
   } catch (error, s) {
     e("runFutureWithToast's error: $error, $s");
     showToastFailed(error);
