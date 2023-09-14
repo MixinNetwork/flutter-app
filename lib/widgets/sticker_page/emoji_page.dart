@@ -362,7 +362,12 @@ class _EmojiItem extends StatelessWidget {
           child: Center(
             child: Text(
               emoji,
-              style: const TextStyle(fontSize: 26, height: 1),
+              style: const TextStyle(
+                fontSize: 26,
+                height: 1,
+                fontFamily: 'OpenMoji',
+                inherit: false,
+              ),
               strutStyle: const StrutStyle(height: 1),
               textAlign: TextAlign.center,
             ),
