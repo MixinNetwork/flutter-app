@@ -11,6 +11,7 @@ enum ImageType { gif, jpeg }
 
 extension ImageTypeExtension on ImageType {
   String get mimeType => this == ImageType.gif ? 'image/gif' : 'image/jpeg';
+
   String get extension => this == ImageType.gif ? 'gif' : 'jpg';
 }
 
@@ -41,7 +42,6 @@ extension ImageTypeExtension on ImageType {
 
     image = copyResize(image, width: targetWidth, height: targetHeight);
   }
-
 
   return (
     JpegEncoder(quality: _kQuality).encode(image),
