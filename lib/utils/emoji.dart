@@ -1,7 +1,11 @@
 import 'package:emojis/emoji.dart';
 import 'package:flutter/cupertino.dart';
 
+import 'platform.dart';
+
 final _emojis = Map.fromEntries(Emoji.all().map((e) => MapEntry(e.char, e)));
+
+final kEmojiFontFamily = kPlatformIsDarwin ? 'Apple Color Emoji' : 'OpenMoji';
 
 List<String> extractEmoji(String text) {
   final characters = Characters(text);

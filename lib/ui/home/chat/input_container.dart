@@ -897,7 +897,7 @@ class HighlightTextEditingController extends TextEditingController {
           onEmoji: (emoji) {
             children.add(TextSpan(
               text: emoji,
-              style: style?.copyWith(fontFamily: 'OpenMoji'),
+              style: style?.copyWith(fontFamily: kEmojiFontFamily),
             ));
           },
           onText: (text) {

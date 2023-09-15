@@ -402,7 +402,11 @@ class _MessageContent extends HookConsumerWidget {
         return emojis.map(
           (e) => HighlightTextSpan(
             e,
-            style: const TextStyle(fontSize: 16, fontFamily: 'OpenMoji'),
+            style: TextStyle(
+              fontSize: 18,
+              fontFamily: kEmojiFontFamily,
+              height: 1,
+            ),
           ),
         );
       },

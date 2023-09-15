@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:emojis/emoji.dart';
@@ -9,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
+import '../../utils/emoji.dart';
 import '../../utils/extension/extension.dart';
 import '../interactive_decorated_box.dart';
 
@@ -24,9 +24,6 @@ const emojiGroups = [
   [EmojiGroup.symbols],
   [EmojiGroup.flags],
 ];
-
-// ignore: avoid-non-ascii-symbols
-const macOSIgnoreEmoji = {'☺️', '☹️'};
 
 class EmojiPage extends StatelessWidget {
   const EmojiPage({super.key});
@@ -81,8 +78,6 @@ class _EmojiPageBody extends HookConsumerWidget {
               ...emojiGroups.map(
                 (group) => group
                     .expand(Emoji.byGroup)
-                    .where((e) =>
-                        !Platform.isMacOS || !macOSIgnoreEmoji.contains(e.char))
                     .where((e) => !e.modifiable)
                     .map((emoji) => emoji.char)
                     .toList(),
@@ -362,10 +357,10 @@ class _EmojiItem extends StatelessWidget {
           child: Center(
             child: Text(
               emoji,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 26,
                 height: 1,
-                fontFamily: 'OpenMoji',
+                fontFamily: kEmojiFontFamily,
                 inherit: false,
               ),
               strutStyle: const StrutStyle(height: 1),

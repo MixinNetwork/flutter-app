@@ -148,7 +148,7 @@ class TextMessage extends HookConsumerWidget {
             e,
             style: TextStyle(
               fontSize: context.messageStyle.primaryFontSize + 4,
-              fontFamily: 'OpenMoji'
+              fontFamily: kEmojiFontFamily,
             ),
           ),
         );
