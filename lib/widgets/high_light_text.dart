@@ -66,7 +66,9 @@ List<InlineSpan> buildHighlightTextSpan(
           text: text,
           style: style?.merge(highlightTextSpan?.style) ??
               highlightTextSpan?.style,
-          recognizer: TapGestureRecognizer()..onTap = highlightTextSpan?.onTap,
+          recognizer: highlightTextSpan?.onTap == null
+              ? null
+              : (TapGestureRecognizer()..onTap = highlightTextSpan?.onTap),
         ),
       );
       return '';
@@ -127,6 +129,7 @@ class HighlightTextSpan extends Equatable {
   List<Object?> get props => [
         text,
         style,
+        onTap,
       ];
 }
 
