@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:cross_file/cross_file.dart';
 import 'package:drift/drift.dart';
-import 'package:flutter/rendering.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
@@ -26,6 +24,7 @@ import '../enum/media_status.dart';
 import '../enum/message_category.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
+import '../utils/image.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
@@ -134,11 +133,14 @@ class SendMessageHelper {
     bool cleanDraft = true,
   }) async {
     final messageId = const Uuid().v4();
-    final _bytes = bytes ?? await file!.readAsBytes();
-    final mimeType = file?.mimeType ??
-        lookupMimeType(file?.path ?? '',
-            headerBytes: _bytes.take(defaultMagicNumbersMaxLength).toList()) ??
-        'image/jpeg';
+    var _bytes = bytes ?? await file?.readAsBytes();
+    if (_bytes == null) throw Exception('file is null');
+    final result = await compressWithIsolate(_bytes);
+    if (result == null) throw Exception('compress failed');
+    final (_, type, imageWidth, imageHeight) = result;
+    _bytes = result.$1;
+
+    final mimeType = type.mimeType;
 
     var attachment = _attachmentUtil.getAttachmentFile(
       category,
@@ -148,13 +150,6 @@ class SendMessageHelper {
       mimeType: mimeType,
     );
 
-    // Only retrieve image bounds info.
-    final buffer = await ui.ImmutableBuffer.fromUint8List(_bytes);
-    final descriptor = await ui.ImageDescriptor.encoded(buffer);
-
-    final imageWidth = descriptor.width;
-    final imageHeight = descriptor.height;
-
     attachment = await attachment.create(recursive: true);
 
     await attachment.writeAsBytes(_bytes.toList());
@@ -163,7 +158,8 @@ class SendMessageHelper {
     final attachmentSize = await attachment.length();
     final quoteMessage =
         await _messageDao.findMessageItemByMessageId(quoteMessageId);
-    final fileName = file?.name ?? '$messageId.png';
+    final fileName =
+        '${file?.name.pathBasenameWithoutExtension ?? messageId}.${type.extension}';
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,
@@ -1212,8 +1208,6 @@ class SendMessageHelper {
   }) async {
     final messageId = const Uuid().v4();
     final defaultMimeType = defaultGifMimeType ? gifMimeType : jpegMimeType;
-    var _width = width;
-    var _height = height;
 
     Future<Message> insertMessage(
         int? width, int? height, String mimeType) async {
@@ -1237,29 +1231,28 @@ class SendMessageHelper {
       return message;
     }
 
-    final hasSize = width != null && height != null && defaultGifMimeType;
-    if (hasSize) await insertMessage(width, height, defaultMimeType);
+    if (width != null && height != null && defaultGifMimeType) {
+      await insertMessage(width, height, defaultMimeType);
+    }
 
-    Uint8List? sendImageBytes;
+    (Uint8List, ImageType, int, int)? result;
     try {
-      sendImageBytes = await downloadImage(url);
+      final data = await downloadImage(url);
+      if (data != null) {
+        result = await compressWithIsolate(data);
+      }
     } catch (error, stacktrace) {
       e('failed to download image: $error $stacktrace');
     }
-    if (sendImageBytes == null) {
+    if (result == null) {
       e('failed to get send image bytes. $url');
-      if (!hasSize) await insertMessage(width, height, defaultMimeType);
       await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
       return;
-    } else if (!hasSize) {
-      final image = await decodeImageFromList(sendImageBytes);
-      final mimeType = lookupMimeType(url,
-          headerBytes:
-              sendImageBytes.take(defaultMagicNumbersMaxLength).toList());
-      _width = image.width;
-      _height = image.height;
-      await insertMessage(_width, _height, mimeType ?? defaultMimeType);
     }
+
+    final (data, type, _width, _height) = result;
+
+    await insertMessage(_width, _height, type.mimeType);
 
     var attachment = _attachmentUtil.getAttachmentFile(
       category,
@@ -1269,7 +1262,7 @@ class SendMessageHelper {
       mimeType: defaultMimeType,
     );
     attachment = await attachment.create(recursive: true);
-    await attachment.writeAsBytes(sendImageBytes);
+    await attachment.writeAsBytes(data);
     final thumbImage = await attachment.encodeBlurHash();
     final mediaSize = await attachment.length();
     await _messageDao.updateGiphyMessage(

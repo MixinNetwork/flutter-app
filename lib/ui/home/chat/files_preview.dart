@@ -11,6 +11,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:image/image.dart' as img;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -39,7 +40,7 @@ Future<void> showFilesPreviewDialog(
     context: context,
     child: _FilesPreviewDialog(
       initialFiles: await Future.wait(files.map(
-        (e) async => _File(e, await e.length(), null),
+        (e) async => _File.createFromXFile(e),
       )),
     ),
   );
@@ -47,27 +48,35 @@ Future<void> showFilesPreviewDialog(
 
 /// We need this view object to keep the value of file#length.
 class _File {
-  _File(this.file, this.length, this.imageEditorSnapshot);
+  _File._(this.file, this.length, this.isImage, this.imageEditorSnapshot);
 
   static Future<_File> createFromPath(String path) {
     final file = File(path);
     return createFromFile(file);
   }
 
-  static Future<_File> createFromFile(File file) async =>
-      _File(file.xFile, await file.length(), null);
+  static Future<_File> createFromFile(File file,
+          [ImageEditorSnapshot? imageEditorSnapshot]) =>
+      _File.createFromXFile(file.xFile, imageEditorSnapshot);
+
+  static Future<_File> createFromXFile(XFile file,
+          [ImageEditorSnapshot? imageEditorSnapshot]) async =>
+      _File._(
+        file,
+        await file.length(),
+        img.findDecoderForData(await file.readAsBytes()) != null,
+        imageEditorSnapshot,
+      );
 
   final XFile file;
 
   final ImageEditorSnapshot? imageEditorSnapshot;
+  final bool isImage;
+  final int length;
 
   String get path => file.path;
 
   String? get mimeType => file.mimeType;
-
-  final int length;
-
-  bool get isImage => file.isImage;
 }
 
 typedef _ImageEditedCallback = void Function(_File, ImageEditorSnapshot);
@@ -232,8 +241,8 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                                       }
                                       final list = files.value.toList();
                                       final newFile = File(image.imagePath);
-                                      list[index] = _File(newFile.xFile,
-                                          await newFile.length(), image);
+                                      list[index] = await _File.createFromFile(
+                                          newFile, image);
                                       files.value = list;
                                     },
                                   )),
@@ -335,7 +344,7 @@ Future<void> _sendFile(
   final conversationItem = context.providerContainer.read(conversationProvider);
   if (conversationItem == null) return;
   final xFile = file.file;
-  if (xFile.isImage) {
+  if (file.isImage) {
     return context.accountServer.sendImageMessage(
       conversationItem.encryptCategory,
       file: xFile,
@@ -787,8 +796,7 @@ class _FileInputOverlay extends HookConsumerWidget {
             return;
           }
           onFileAdded(await Future.wait(
-            files.map((file) async =>
-                _File(file.withMineType(), await file.length(), null)),
+            files.map((file) async => _File.createFromXFile(file)),
           ));
         },
         child: Stack(
