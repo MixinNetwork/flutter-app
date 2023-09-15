@@ -34,6 +34,7 @@ import '../../utils/double_tap_util.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/file.dart';
 import '../../utils/hook.dart';
+import '../../utils/logger.dart';
 import '../../utils/platform.dart';
 import '../../utils/system/clipboard.dart';
 import '../avatar_view/avatar_view.dart';
@@ -590,8 +591,12 @@ class MessageContext extends HookConsumerWidget {
   }
 }
 
-Future<void> saveAs(BuildContext context, AccountServer accountServer,
-    MessageItem message, bool isTranscriptPage) async {
+Future<void> saveAs(
+  BuildContext context,
+  AccountServer accountServer,
+  MessageItem message,
+  bool isTranscriptPage,
+) async {
   final path =
       accountServer.convertMessageAbsolutePath(message, isTranscriptPage);
   if (Platform.isAndroid || Platform.isIOS) {
@@ -616,7 +621,8 @@ Future<void> saveAs(BuildContext context, AccountServer accountServer,
         suggestName: message.mediaName,
       );
       if (result) return showToastSuccessful();
-    } catch (error) {
+    } catch (error, s) {
+      d('save file error: $error, stack: $s');
       return showToastFailed(error);
     }
   }
