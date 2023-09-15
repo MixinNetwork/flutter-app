@@ -10,11 +10,13 @@ import '../../../bloc/paging/paging_bloc.dart';
 import '../../../constants/resources.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../enum/message_category.dart';
+import '../../../utils/emoji.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/verified_or_bot_widget.dart';
+import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/pin_message.dart';
 import '../../../widgets/message/item/system_message.dart';
@@ -391,6 +393,26 @@ class _MessageContent extends HookConsumerWidget {
           conversation.contentType,
         ]);
 
+    final emojiHighlightTextSpans = useMemoized(
+      () {
+        if (text == null) {
+          return <HighlightTextSpan>[];
+        }
+        final emojis = extractEmoji(text);
+        return emojis.map(
+          (e) => HighlightTextSpan(
+            e,
+            style: TextStyle(
+              fontSize: 18,
+              fontFamily: kEmojiFontFamily,
+              height: 1,
+            ),
+          ),
+        );
+      },
+      [text],
+    );
+
     if (conversation.contentType == null && !hasDraft) return const SizedBox();
 
     final dynamicColor = context.theme.secondaryText;
@@ -412,8 +434,9 @@ class _MessageContent extends HookConsumerWidget {
           ),
         if (text != null)
           Expanded(
-            child: Text(
+            child: HighlightText(
               text.overflow,
+              highlightTextSpans: [...emojiHighlightTextSpans],
               style: TextStyle(
                 color: dynamicColor,
                 fontSize: 14,

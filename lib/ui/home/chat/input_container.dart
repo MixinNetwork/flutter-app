@@ -19,6 +19,7 @@ import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/app_lifecycle.dart';
+import '../../../utils/emoji.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
@@ -722,7 +723,7 @@ class _StickerButton extends HookConsumerWidget {
     final presetStickerGroups = useMemoized(
       () => [
         PresetStickerGroup.store,
-        if (!Platform.isLinux) PresetStickerGroup.emoji,
+        PresetStickerGroup.emoji,
         PresetStickerGroup.recent,
         PresetStickerGroup.favorite,
         if (giphyApiKey.isNotEmpty) PresetStickerGroup.gif,
@@ -892,7 +893,20 @@ class HighlightTextEditingController extends TextEditingController {
         return text ?? '';
       },
       onNonMatch: (text) {
-        children.add(TextSpan(text: text, style: style));
+        text.splitEmoji(
+          onEmoji: (emoji) {
+            children.add(TextSpan(
+              text: emoji,
+              style: style?.copyWith(
+                fontFamily: kEmojiFontFamily,
+                fontSize: 16,
+              ),
+            ));
+          },
+          onText: (text) {
+            children.add(TextSpan(text: text, style: style));
+          },
+        );
         return text;
       },
     );

@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import '../../../../ui/home/chat/chat_page.dart';
 import '../../../../ui/provider/conversation_provider.dart';
 import '../../../../ui/provider/keyword_provider.dart';
+import '../../../../utils/emoji.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../../utils/logger.dart';
@@ -139,6 +140,22 @@ class TextMessage extends HookConsumerWidget {
               }).toList(),
         [keyword]);
 
+    final emojiHighlightTextSpans = useMemoized(
+      () {
+        final emojis = extractEmoji(content);
+        return emojis.map(
+          (e) => HighlightTextSpan(
+            e,
+            style: TextStyle(
+              fontSize: context.messageStyle.primaryFontSize + 4,
+              fontFamily: kEmojiFontFamily,
+            ),
+          ),
+        );
+      },
+      [content],
+    );
+
     final contentWidget = Builder(
       builder: (context) => MentionBuilder(
         content: content,
@@ -152,6 +169,7 @@ class TextMessage extends HookConsumerWidget {
             ),
             ...keywordHighlightTextSpans,
             ...mentionHighlightTextSpans,
+            ...emojiHighlightTextSpans,
           ],
           style: TextStyle(
             fontSize: context.messageStyle.primaryFontSize,
