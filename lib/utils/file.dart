@@ -39,7 +39,7 @@ Future<bool> saveFileToSystem(
   String file, {
   String? suggestName,
 }) async {
-  final targetName = suggestName ?? p.basename(file);
+  final targetName = (suggestName ?? file).pathBasenameWithoutExtension;
   final mineType = lookupMimeType(file);
   final extension = p.extension(targetName);
 
