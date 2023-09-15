@@ -1,11 +1,26 @@
+import 'dart:io';
+
 import 'package:emojis/emoji.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'platform.dart';
+import 'system/windows.dart';
 
 final _emojis = Map.fromEntries(Emoji.all().map((e) => MapEntry(e.char, e)));
 
-final kEmojiFontFamily = kPlatformIsDarwin ? 'Apple Color Emoji' : 'OpenMoji';
+final kEmojiFontFamily = () {
+  if (kPlatformIsDarwin) {
+    return 'Apple Color Emoji';
+  } else if (Platform.isWindows) {
+    if (isWindows10OrGreater()) {
+      return 'Segoe UI Emoji';
+    } else {
+      return 'OpenMoji';
+    }
+  } else {
+    return 'OpenMoji';
+  }
+}();
 
 List<String> extractEmoji(String text) {
   final characters = Characters(text);
