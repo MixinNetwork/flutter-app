@@ -39,8 +39,10 @@ abstract class AbstractResponsiveNavigatorStateNotifier
     extends DistinctStateNotifier<ResponsiveNavigatorState> {
   AbstractResponsiveNavigatorStateNotifier(super.initialState);
 
-  void updateRouteMode(bool routeMode) =>
-      Future(() => state = state.copyWith(routeMode: routeMode));
+  void updateRouteMode(bool routeMode) {
+    print('fuck update route mode');
+    Future(() => state = state.copyWith(routeMode: routeMode));
+  }
 
   void onPopPage() {
     final bool = state.pages.isNotEmpty;
