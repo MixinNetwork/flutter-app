@@ -11,6 +11,7 @@ import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/reg_exp_utils.dart';
+import '../../utils/rivepod.dart';
 import '../../widgets/mention_panel.dart';
 import '../home/bloc/subscriber_mixin.dart';
 import 'conversation_provider.dart';
@@ -43,7 +44,7 @@ class MentionState extends Equatable {
       );
 }
 
-class MentionStateNotifier extends StateNotifier<MentionState>
+class MentionStateNotifier extends DistinctStateNotifier<MentionState>
     with SubscriberMixin {
   MentionStateNotifier({
     required this.userDao,

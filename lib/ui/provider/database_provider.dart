@@ -4,6 +4,7 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../db/database.dart';
 import '../../db/fts_database.dart';
 import '../../db/mixin_database.dart';
+import '../../utils/rivepod.dart';
 import '../../utils/synchronized.dart';
 import 'multi_auth_provider.dart';
 import 'slide_category_provider.dart';
@@ -25,7 +26,7 @@ extension _DatabaseExt on MixinDatabase {
       conversationDao.conversationCountByCategory(SlideCategoryType.chats);
 }
 
-class DatabaseOpener extends StateNotifier<AsyncValue<Database>> {
+class DatabaseOpener extends DistinctStateNotifier<AsyncValue<Database>> {
   DatabaseOpener() : super(const AsyncValue.loading());
 
   DatabaseOpener.open(this.identityNumber) : super(const AsyncValue.loading()) {
