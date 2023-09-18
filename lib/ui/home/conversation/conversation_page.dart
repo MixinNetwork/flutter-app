@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:provider/provider.dart';
 
+import '../../../utils/system/text_input.dart';
 import '../../../widgets/search_bar.dart';
 import '../../provider/conversation_unseen_filter_enabled.dart';
 import '../../provider/keyword_provider.dart';
@@ -20,7 +21,7 @@ class ConversationPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hasKeyword = ref.watch(hasKeywordProvider);
 
-    final textEditingController = useTextEditingController();
+    final textEditingController = useMemoized(EmojiTextEditingController.new);
     final focusNode = useFocusNode();
 
     final slideCategoryState = ref.watch(slideCategoryStateProvider);

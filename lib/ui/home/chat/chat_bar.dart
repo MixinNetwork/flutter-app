@@ -12,6 +12,7 @@ import '../../../widgets/action_button.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/buttons.dart';
 import '../../../widgets/conversation/verified_or_bot_widget.dart';
+import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
 import '../../provider/abstract_responsive_navigator.dart';
@@ -250,7 +251,7 @@ class ConversationName extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(
-            child: SelectableText(
+            child: HighlightSelectableText(
               (overflow
                       ? conversationState.name?.overflow
                       : conversationState.name) ??

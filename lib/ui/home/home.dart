@@ -11,6 +11,7 @@ import '../../utils/device_transfer/device_transfer_widget.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
+import '../../utils/system/text_input.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
@@ -121,7 +122,7 @@ class _SetupNameWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final textEditingController = useTextEditingController();
+    final textEditingController = useMemoized(EmojiTextEditingController.new);
     final textEditingValue = useValueListenable(textEditingController);
     return Scaffold(
       backgroundColor: context.theme.background,

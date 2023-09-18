@@ -25,6 +25,7 @@ import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view
 import '../../../widgets/conversation/mute_dialog.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
+import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_bubble.dart';
@@ -862,7 +863,7 @@ class _PinMessagesBanner extends HookConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                       Expanded(
-                        child: Text(
+                        child: HighlightText(
                           (lastMessage ?? '').overflow,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../enum/message_action.dart';
 import '../../../generated/l10n.dart';
 import '../../../utils/extension/extension.dart';
+import '../../high_light_text.dart';
 import '../message.dart';
 import '../message_style.dart';
 
@@ -43,7 +44,7 @@ class SystemMessage extends HookConsumerWidget {
                 vertical: 5,
                 horizontal: 10,
               ),
-              child: Text(
+              child: HighlightText(
                 generateSystemText(
                   actionName: actionName,
                   participantUserId: participantUserId,

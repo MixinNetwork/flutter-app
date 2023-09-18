@@ -188,7 +188,7 @@ class ConversationItemWidget extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     Flexible(
-                                      child: Text(
+                                      child: HighlightText(
                                         conversation.validName,
                                         style: TextStyle(
                                           color: context.theme.text,
