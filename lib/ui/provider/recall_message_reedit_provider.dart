@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../utils/rivepod.dart';
 
 // Duration to keep reedit available after message recalled.
 const _kReeditOutdatedDuration = Duration(minutes: 6);
 
-class RecallMessageNotifier extends StateNotifier<Map<String, String>> {
+class RecallMessageNotifier extends DistinctStateNotifier<Map<String, String>> {
   RecallMessageNotifier(this._onReEditStreamController) : super({});
 
   final StreamController<String> _onReEditStreamController;

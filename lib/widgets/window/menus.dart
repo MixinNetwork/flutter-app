@@ -15,6 +15,7 @@ import '../../utils/device_transfer/device_transfer_dialog.dart';
 import '../../utils/event_bus.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/rivepod.dart';
 import '../../utils/uri_utils.dart';
 import '../actions/actions.dart';
 import '../auth.dart';
@@ -39,7 +40,8 @@ abstract class ConversationMenuHandle {
   void delete();
 }
 
-class MacMenuBarStateNotifier extends StateNotifier<ConversationMenuHandle?> {
+class MacMenuBarStateNotifier
+    extends DistinctStateNotifier<ConversationMenuHandle?> {
   MacMenuBarStateNotifier(super.state);
 
   void attach(ConversationMenuHandle handle) {

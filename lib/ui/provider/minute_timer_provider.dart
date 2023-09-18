@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../utils/extension/extension.dart';
+import '../../utils/rivepod.dart';
 
-class MinuteTimerNotifier extends StateNotifier<DateTime> {
+class MinuteTimerNotifier extends DistinctStateNotifier<DateTime> {
   MinuteTimerNotifier() : super(DateTime.now()) {
     timer = Timer.periodic(
       const Duration(minutes: 1),

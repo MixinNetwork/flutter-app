@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../account/account_server.dart';
 import '../../db/database.dart';
 import '../../utils/logger.dart';
+import '../../utils/rivepod.dart';
 import 'conversation_provider.dart';
 import 'database_provider.dart';
 import 'multi_auth_provider.dart';
@@ -11,7 +12,8 @@ import 'setting_provider.dart';
 
 typedef GetCurrentConversationId = String? Function();
 
-class AccountServerOpener extends StateNotifier<AsyncValue<AccountServer>> {
+class AccountServerOpener
+    extends DistinctStateNotifier<AsyncValue<AccountServer>> {
   AccountServerOpener() : super(const AsyncValue.loading());
 
   AccountServerOpener.open({
