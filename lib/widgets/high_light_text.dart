@@ -43,7 +43,12 @@ class HighlightText extends HookConsumerWidget {
   }
 }
 
-List<InlineSpan> _handleEmojiSpans(String text, {double? fontSize}) {
+List<InlineSpan> _handleEmojiSpans(
+  String text, {
+  double? fontSize,
+  GestureRecognizer? recognizer,
+  MouseCursor? mouseCursor,
+}) {
   final spans = <InlineSpan>[];
   text.splitEmoji(
     onEmoji: (emoji) {
@@ -53,10 +58,16 @@ List<InlineSpan> _handleEmojiSpans(String text, {double? fontSize}) {
           fontFamily: kEmojiFontFamily,
           fontSize: fontSize,
         ),
+        recognizer: recognizer,
+        mouseCursor: mouseCursor,
       ));
     },
     onText: (text) {
-      spans.add(TextSpan(text: text));
+      spans.add(TextSpan(
+        text: text,
+        recognizer: recognizer,
+        mouseCursor: mouseCursor,
+      ));
     },
   );
   return spans;
@@ -84,15 +95,20 @@ List<InlineSpan> buildHighlightTextSpan(
       final mouseCursor =
           highlightTextSpan?.onTap != null ? SystemMouseCursors.click : null;
       if (text != null) {
+        final recognizer = highlightTextSpan?.onTap == null
+            ? null
+            : (TapGestureRecognizer()..onTap = highlightTextSpan?.onTap);
         children.add(
           TextSpan(
             mouseCursor: mouseCursor,
-            children: _handleEmojiSpans(text),
+            children: _handleEmojiSpans(
+              text,
+              recognizer: recognizer,
+              mouseCursor: mouseCursor,
+            ),
             style: style?.merge(highlightTextSpan?.style) ??
                 highlightTextSpan?.style,
-            recognizer: highlightTextSpan?.onTap == null
-                ? null
-                : (TapGestureRecognizer()..onTap = highlightTextSpan?.onTap),
+            recognizer: recognizer,
           ),
         );
       }
