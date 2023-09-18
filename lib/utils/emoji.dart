@@ -15,10 +15,10 @@ final kEmojiFontFamily = () {
     if (isWindows10OrGreater()) {
       return 'Segoe UI Emoji';
     } else {
-      return 'OpenMoji';
+      return 'NotoColorEmoji';
     }
   } else {
-    return 'OpenMoji';
+    return 'NotoColorEmoji';
   }
 }();
 

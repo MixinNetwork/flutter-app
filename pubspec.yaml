@@ -200,9 +200,9 @@ flutter:
   # assets end
 
   fonts:
-    - family: OpenMoji
+    - family: NotoColorEmoji
       fonts:
-        - asset: fonts/OpenMoji-color-glyf_colr_0.ttf
+        - asset: fonts/Noto-COLRv1.ttf
 
 flutter_intl:
   enabled: true
