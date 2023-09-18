@@ -114,12 +114,14 @@ class HighlightSelectableText extends HookConsumerWidget {
     this.style,
     this.highlightTextSpans = const [],
     this.maxLines,
+    this.textAlign,
   });
 
   final String text;
   final TextStyle? style;
   final List<HighlightTextSpan> highlightTextSpans;
   final int? maxLines;
+  final TextAlign? textAlign;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -135,6 +137,7 @@ class HighlightSelectableText extends HookConsumerWidget {
       maxLines: maxLines,
       contextMenuBuilder: (context, editState) => const SizedBox.shrink(),
       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
+      textAlign: textAlign,
     );
   }
 }

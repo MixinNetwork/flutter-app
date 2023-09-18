@@ -13,9 +13,11 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/system/text_input.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
+import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/search_text_field.dart';
 import '../../provider/conversation_provider.dart';
@@ -57,7 +59,7 @@ class SearchMessagePage extends HookConsumerWidget {
     final selectedCategories = useState<List<String>?>(null);
 
     final focusNode = useFocusNode();
-    final editingController = useTextEditingController();
+    final editingController = useMemoized(EmojiTextEditingController.new);
     final userMode = useState(false);
     final selectedUser = useState<User?>(null);
 
@@ -419,7 +421,7 @@ class _SearchParticipantList extends HookConsumerWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: Text(
+                  child: HighlightText(
                     user.fullName ?? '',
                     style: TextStyle(
                       fontSize: 16,

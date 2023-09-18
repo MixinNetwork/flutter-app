@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../utils/color_utils.dart';
+import '../high_light_text.dart';
 import '../interactive_decorated_box.dart';
 import '../user/user_dialog.dart';
 import 'message_style.dart';
@@ -26,7 +27,7 @@ class MessageName extends StatelessWidget {
               left: 10,
               bottom: 2,
             ),
-            child: Text(
+            child: HighlightText(
               userName,
               style: TextStyle(
                 fontSize: context.messageStyle.secondaryFontSize,

@@ -11,6 +11,7 @@ import '../../../ui/provider/mention_cache_provider.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
+import '../../high_light_text.dart';
 import '../message.dart';
 import '../message_style.dart';
 
@@ -89,7 +90,7 @@ class PinMessageWidget extends HookConsumerWidget {
                 vertical: 5,
                 horizontal: 10,
               ),
-              child: Text(
+              child: HighlightText(
                 text,
                 style: TextStyle(
                   fontSize: context.messageStyle.secondaryFontSize,
