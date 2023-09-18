@@ -1,6 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../db/mixin_database.dart';
+import '../../utils/rivepod.dart';
 import 'conversation_provider.dart';
 
 final quoteMessageProvider = StateProvider.autoDispose<MessageItem?>((ref) {
@@ -17,7 +18,8 @@ final quoteMessageProvider = StateProvider.autoDispose<MessageItem?>((ref) {
 final quoteMessageIdProvider =
     quoteMessageProvider.select((message) => message?.messageId);
 
-class LastQuoteMessageStateNotifier extends StateNotifier<MessageItem?> {
+class LastQuoteMessageStateNotifier
+    extends DistinctStateNotifier<MessageItem?> {
   LastQuoteMessageStateNotifier(super.state);
 
   set _state(MessageItem? value) => super.state = value;

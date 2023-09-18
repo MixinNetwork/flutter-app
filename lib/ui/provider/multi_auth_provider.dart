@@ -10,6 +10,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../utils/hydrated_bloc.dart';
+import '../../utils/rivepod.dart';
 
 class AuthState extends Equatable {
   const AuthState({
@@ -68,7 +69,7 @@ class MultiAuthState extends Equatable {
   String toJson() => json.encode(toMap());
 }
 
-class MultiAuthStateNotifier extends StateNotifier<MultiAuthState> {
+class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
   MultiAuthStateNotifier(super.state);
 
   AuthState? get current => state.current;

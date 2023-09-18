@@ -1,8 +1,10 @@
 import 'dart:math';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../utils/rivepod.dart';
 
-class RecentConversationIDsNotifier extends StateNotifier<List<String>> {
+class RecentConversationIDsNotifier
+    extends DistinctStateNotifier<List<String>> {
   RecentConversationIDsNotifier() : super([]);
 
   void add(String conversationId) {

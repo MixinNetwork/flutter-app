@@ -4,6 +4,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../db/dao/conversation_dao.dart';
 import '../../db/database_event_bus.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/rivepod.dart';
 import 'conversation_provider.dart';
 import 'database_provider.dart';
 import 'slide_category_provider.dart';
@@ -38,7 +39,7 @@ extension _ConversationItemSort on List<ConversationItem> {
 }
 
 class UnseenConversationsStateNotifier
-    extends StateNotifier<List<ConversationItem>?> {
+    extends DistinctStateNotifier<List<ConversationItem>?> {
   UnseenConversationsStateNotifier(super.state);
 
   set _state(List<ConversationItem>? state) => super.state = state;

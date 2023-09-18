@@ -207,6 +207,9 @@ flutter:
     - family: iconfont
       fonts:
         - asset: assets/fonts/iconfont.ttf
+    - family: NotoColorEmoji
+      fonts:
+        - asset: fonts/Noto-COLRv1.ttf
 
 flutter_intl:
   enabled: true

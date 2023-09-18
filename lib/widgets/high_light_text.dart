@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../utils/emoji.dart';
+
 class HighlightText extends HookConsumerWidget {
   const HighlightText(
     this.text, {
@@ -41,6 +43,25 @@ class HighlightText extends HookConsumerWidget {
   }
 }
 
+List<InlineSpan> _handleEmojiSpans(String text, {double? fontSize}) {
+  final spans = <InlineSpan>[];
+  text.splitEmoji(
+    onEmoji: (emoji) {
+      spans.add(TextSpan(
+        text: emoji,
+        style: TextStyle(
+          fontFamily: kEmojiFontFamily,
+          fontSize: fontSize,
+        ),
+      ));
+    },
+    onText: (text) {
+      spans.add(TextSpan(text: text));
+    },
+  );
+  return spans;
+}
+
 List<InlineSpan> buildHighlightTextSpan(
     String text, List<HighlightTextSpan> highlightTextSpans,
     [TextStyle? style]) {
@@ -50,7 +71,9 @@ List<InlineSpan> buildHighlightTextSpan(
   );
   final pattern = "(${map.keys.map(RegExp.escape).join('|')})";
 
-  if (pattern == '()') return [TextSpan(text: text, style: style)];
+  if (pattern == '()') {
+    return [TextSpan(children: _handleEmojiSpans(text), style: style)];
+  }
 
   final children = <InlineSpan>[];
   text.splitMapJoin(
@@ -60,19 +83,23 @@ List<InlineSpan> buildHighlightTextSpan(
       final highlightTextSpan = map[text?.toLowerCase()];
       final mouseCursor =
           highlightTextSpan?.onTap != null ? SystemMouseCursors.click : null;
-      children.add(
-        TextSpan(
-          mouseCursor: mouseCursor,
-          text: text,
-          style: style?.merge(highlightTextSpan?.style) ??
-              highlightTextSpan?.style,
-          recognizer: TapGestureRecognizer()..onTap = highlightTextSpan?.onTap,
-        ),
-      );
+      if (text != null) {
+        children.add(
+          TextSpan(
+            mouseCursor: mouseCursor,
+            children: _handleEmojiSpans(text),
+            style: style?.merge(highlightTextSpan?.style) ??
+                highlightTextSpan?.style,
+            recognizer: highlightTextSpan?.onTap == null
+                ? null
+                : (TapGestureRecognizer()..onTap = highlightTextSpan?.onTap),
+          ),
+        );
+      }
       return '';
     },
     onNonMatch: (text) {
-      children.add(TextSpan(text: text, style: style));
+      children.add(TextSpan(children: _handleEmojiSpans(text), style: style));
       return '';
     },
   );
@@ -127,6 +154,7 @@ class HighlightTextSpan extends Equatable {
   List<Object?> get props => [
         text,
         style,
+        onTap,
       ];
 }
 

@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../utils/rivepod.dart';
+
 enum SlideCategoryType {
   chats,
   contacts,
@@ -26,7 +28,8 @@ class SlideCategoryState extends Equatable {
   List<Object?> get props => [type, id];
 }
 
-class SlideCategoryStateNotifier extends StateNotifier<SlideCategoryState> {
+class SlideCategoryStateNotifier
+    extends DistinctStateNotifier<SlideCategoryState> {
   SlideCategoryStateNotifier()
       : super(const SlideCategoryState(type: SlideCategoryType.chats));
 

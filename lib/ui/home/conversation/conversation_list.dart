@@ -15,6 +15,7 @@ import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/verified_or_bot_widget.dart';
+import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/pin_message.dart';
 import '../../../widgets/message/item/system_message.dart';
@@ -412,7 +413,7 @@ class _MessageContent extends HookConsumerWidget {
           ),
         if (text != null)
           Expanded(
-            child: Text(
+            child: HighlightText(
               text.overflow,
               style: TextStyle(
                 color: dynamicColor,

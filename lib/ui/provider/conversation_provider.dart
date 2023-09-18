@@ -16,6 +16,7 @@ import '../../enum/encrypt_category.dart';
 import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/local_notification_center.dart';
+import '../../utils/rivepod.dart';
 import '../../widgets/toast.dart';
 import '../home/bloc/conversation_list_bloc.dart';
 import '../home/bloc/subscriber_mixin.dart';
@@ -132,8 +133,8 @@ EncryptCategory _getEncryptCategory(App? app) {
   return EncryptCategory.signal;
 }
 
-class ConversationStateNotifier extends StateNotifier<ConversationState?>
-    with SubscriberMixin {
+class ConversationStateNotifier
+    extends DistinctStateNotifier<ConversationState?> with SubscriberMixin {
   ConversationStateNotifier({
     required AccountServer accountServer,
     required ResponsiveNavigatorStateNotifier responsiveNavigatorStateNotifier,
@@ -386,7 +387,8 @@ class ConversationStateNotifier extends StateNotifier<ConversationState?>
   }
 }
 
-class _LastConversationNotifier extends StateNotifier<ConversationState?> {
+class _LastConversationNotifier
+    extends DistinctStateNotifier<ConversationState?> {
   _LastConversationNotifier(super.state);
 
   set _state(ConversationState? value) => super.state = value;

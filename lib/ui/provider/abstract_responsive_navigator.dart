@@ -2,7 +2,8 @@ import 'dart:math';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import '../../utils/rivepod.dart';
 
 class ResponsiveNavigatorState extends Equatable {
   const ResponsiveNavigatorState({
@@ -35,7 +36,7 @@ class ResponsiveNavigatorState extends Equatable {
 }
 
 abstract class AbstractResponsiveNavigatorStateNotifier
-    extends StateNotifier<ResponsiveNavigatorState> {
+    extends DistinctStateNotifier<ResponsiveNavigatorState> {
   AbstractResponsiveNavigatorStateNotifier(super.initialState);
 
   void updateRouteMode(bool routeMode) =>
