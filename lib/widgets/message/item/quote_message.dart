@@ -22,6 +22,7 @@ import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../cache_image.dart';
+import '../../high_light_text.dart';
 import '../../image.dart';
 import '../../sticker_page/sticker_item.dart';
 import '../message.dart';
@@ -479,7 +480,7 @@ class _QuoteMessageBase extends StatelessWidget {
                             if (name != null)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
-                                child: Text(
+                                child: HighlightText(
                                   name!,
                                   style: TextStyle(
                                     fontSize:
@@ -499,7 +500,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                     child: icon,
                                   ),
                                 Flexible(
-                                  child: Text(
+                                  child: HighlightText(
                                     _description,
                                     style: TextStyle(
                                       fontSize:

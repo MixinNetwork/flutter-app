@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
+import '../utils/system/text_input.dart';
 import 'disable.dart';
 import 'interactive_decorated_box.dart';
 
@@ -315,6 +316,7 @@ class DialogTextField extends HookConsumerWidget {
               ),
             ),
             inputFormatters: inputFormatters,
+            selectionHeightStyle: BoxHeightStyle.includeLineSpacingMiddle,
           ),
           if (hintText.isNotEmpty && !hasText)
             IgnorePointer(
@@ -420,7 +422,9 @@ class EditDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final textEditingController = useTextEditingController(text: editText);
+    final textEditingController = useMemoized(
+      () => EmojiTextEditingController(text: editText),
+    );
     final textEditingValue = useValueListenable(textEditingController);
     return AlertDialogLayout(
       title: title,
