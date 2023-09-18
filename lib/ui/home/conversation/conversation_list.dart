@@ -414,7 +414,7 @@ class _MessageContent extends HookConsumerWidget {
         if (text != null)
           Expanded(
             child: HighlightText(
-              text,
+              text.overflow,
               style: TextStyle(
                 color: dynamicColor,
                 fontSize: 14,
