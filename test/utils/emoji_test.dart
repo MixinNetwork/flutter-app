@@ -19,6 +19,8 @@ void main() {
       '😙',
       '😚'
     ]);
+    final result2 = extractEmoji('👮👮‍♀️👮‍♂️');
+    expect(result2, ['👮', '👮‍♀️', '👮‍♂️']);
   });
 
   test('split emoji', () {

@@ -10,7 +10,6 @@ import '../../../bloc/paging/paging_bloc.dart';
 import '../../../constants/resources.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../enum/message_category.dart';
-import '../../../utils/emoji.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
@@ -393,26 +392,6 @@ class _MessageContent extends HookConsumerWidget {
           conversation.contentType,
         ]);
 
-    final emojiHighlightTextSpans = useMemoized(
-      () {
-        if (text == null) {
-          return <HighlightTextSpan>[];
-        }
-        final emojis = extractEmoji(text);
-        return emojis.map(
-          (e) => HighlightTextSpan(
-            e,
-            style: TextStyle(
-              fontSize: 18,
-              fontFamily: kEmojiFontFamily,
-              height: 1,
-            ),
-          ),
-        );
-      },
-      [text],
-    );
-
     if (conversation.contentType == null && !hasDraft) return const SizedBox();
 
     final dynamicColor = context.theme.secondaryText;
@@ -436,7 +415,6 @@ class _MessageContent extends HookConsumerWidget {
           Expanded(
             child: HighlightText(
               text.overflow,
-              highlightTextSpans: [...emojiHighlightTextSpans],
               style: TextStyle(
                 color: dynamicColor,
                 fontSize: 14,
