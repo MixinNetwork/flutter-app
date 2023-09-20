@@ -1,6 +1,9 @@
+import 'dart:math';
 import 'dart:ui' as ui show BoxHeightStyle;
 
+import 'package:emojis/emoji.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -80,6 +83,357 @@ List<InlineSpan> _handleEmojiSpans(
   return spans;
 }
 
+typedef InlineMatchBuilder = InlineSpan Function(
+  TextSpan originalSpan,
+  String displayString,
+  String linkString,
+);
+
+class TextMatcher {
+  TextMatcher.regExp({
+    required this.regExp,
+    required this.matchBuilder,
+  }) : textRangesFromText = null;
+
+  TextMatcher.textRangesFromText({
+    required this.textRangesFromText,
+    required this.matchBuilder,
+  }) : regExp = null;
+
+  final InlineMatchBuilder matchBuilder;
+
+  final RegExp? regExp;
+  final Iterable<TextRange> Function(String text)? textRangesFromText;
+
+  static Iterable<InlineSpan> matchSpans(
+      Iterable<InlineSpan> spans, Iterable<TextMatcher> textMatchers) {
+    final linkedSpans = _MatchedSpans(
+      spans: spans,
+      textMatchers: textMatchers,
+    );
+    return linkedSpans.linkedSpans;
+  }
+
+  static Iterable<InlineSpan> applyTextMatchers(
+          Iterable<InlineSpan> spans, Iterable<TextMatcher> textMatchers) =>
+      textMatchers.fold(
+        spans,
+        (previousValue, element) => matchSpans(previousValue, [element]),
+      );
+
+  static Iterable<TextRange> _textRangesFromText(String text, RegExp regExp) {
+    final matches = regExp.allMatches(text);
+    return matches.map((RegExpMatch match) => TextRange(
+          start: match.start,
+          end: match.end,
+        ));
+  }
+
+  Iterable<_TextMatch> _link(String text) {
+    final Iterable<TextRange> textRanges;
+    // textRangesFromText(text) ?? _textRangesFromText(text, regExp);
+    if (textRangesFromText != null) {
+      textRanges = textRangesFromText!(text);
+    } else if (regExp != null) {
+      textRanges = _textRangesFromText(text, regExp!);
+    } else {
+      throw ArgumentError('regExp or textRangesFromText must not be null');
+    }
+    return textRanges.map((TextRange textRange) => _TextMatch(
+          textRange: textRange,
+          linkBuilder: matchBuilder,
+          linkString: text.substring(textRange.start, textRange.end),
+        ));
+  }
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'TextLinker')}($regExp)';
+}
+
+class _TextMatch {
+  _TextMatch({
+    required this.textRange,
+    required this.linkBuilder,
+    required this.linkString,
+  }) : assert(textRange.end - textRange.start == linkString.length);
+
+  final InlineMatchBuilder linkBuilder;
+  final TextRange textRange;
+
+  final String linkString;
+
+  static List<_TextMatch> fromTextLinkers(
+          Iterable<TextMatcher> textMatchers, String text) =>
+      textMatchers.fold<List<_TextMatch>>(
+          <_TextMatch>[],
+          (List<_TextMatch> previousValue, TextMatcher value) =>
+              previousValue..addAll(value._link(text)));
+
+  @override
+  String toString() =>
+      '${objectRuntimeType(this, '_TextLinkerMatch')}($textRange, $linkBuilder, $linkString)';
+}
+
+class _TextCache {
+  factory _TextCache({
+    required InlineSpan span,
+  }) {
+    if (span is! TextSpan) {
+      return _TextCache._(
+        text: '',
+        lengths: <InlineSpan, int>{span: 0},
+      );
+    }
+
+    var childrenTextCache = _TextCache._empty();
+    for (final child in span.children ?? <InlineSpan>[]) {
+      final childTextCache = _TextCache(
+        span: child,
+      );
+      childrenTextCache = childrenTextCache._merge(childTextCache);
+    }
+
+    final text = (span.text ?? '') + childrenTextCache.text;
+    return _TextCache._(
+      text: text,
+      lengths: <InlineSpan, int>{
+        span: text.length,
+        ...childrenTextCache._lengths,
+      },
+    );
+  }
+
+  factory _TextCache.fromMany({
+    required Iterable<InlineSpan> spans,
+  }) {
+    var textCache = _TextCache._empty();
+    for (final span in spans) {
+      final spanTextCache = _TextCache(
+        span: span,
+      );
+      textCache = textCache._merge(spanTextCache);
+    }
+    return textCache;
+  }
+
+  _TextCache._empty()
+      : text = '',
+        _lengths = <InlineSpan, int>{};
+
+  const _TextCache._({
+    required this.text,
+    required Map<InlineSpan, int> lengths,
+  }) : _lengths = lengths;
+
+  final String text;
+
+  final Map<InlineSpan, int> _lengths;
+
+  _TextCache _merge(_TextCache other) => _TextCache._(
+        text: text + other.text,
+        lengths: Map<InlineSpan, int>.from(_lengths)..addAll(other._lengths),
+      );
+
+  int? getLength(InlineSpan span) => _lengths[span];
+
+  @override
+  String toString() =>
+      '${objectRuntimeType(this, '_TextCache')}($text, $_lengths)';
+}
+
+typedef _MatchSpanRecursion = (
+  InlineSpan linkedSpan,
+  Iterable<_TextMatch> unusedTextLinkerMatches,
+);
+
+typedef _MatchSpansRecursion = (
+  Iterable<InlineSpan> linkedSpans,
+  Iterable<_TextMatch> unusedTextLinkerMatches,
+);
+
+class _MatchedSpans {
+  factory _MatchedSpans({
+    required Iterable<InlineSpan> spans,
+    required Iterable<TextMatcher> textMatchers,
+  }) {
+    final textCache = _TextCache.fromMany(spans: spans);
+
+    final Iterable<_TextMatch> textMatcherMatches = _cleanTextLinkerMatches(
+      _TextMatch.fromTextLinkers(textMatchers, textCache.text),
+    );
+
+    final (Iterable<InlineSpan> linkedSpans, Iterable<_TextMatch> _) =
+        _linkSpansRecurse(
+      spans,
+      textCache,
+      textMatcherMatches,
+    );
+
+    return _MatchedSpans._(
+      linkedSpans: linkedSpans,
+    );
+  }
+
+  const _MatchedSpans._({
+    required this.linkedSpans,
+  });
+
+  final Iterable<InlineSpan> linkedSpans;
+
+  static List<_TextMatch> _cleanTextLinkerMatches(
+      Iterable<_TextMatch> textMatcherMatches) {
+    final nextTextLinkerMatches = textMatcherMatches.toList()
+      ..sort((_TextMatch a, _TextMatch b) =>
+          a.textRange.start.compareTo(b.textRange.start));
+
+    // Validate that there are no overlapping matches.
+    var lastEnd = 0;
+    for (final textMatcherMatch in nextTextLinkerMatches) {
+      if (textMatcherMatch.textRange.start < lastEnd) {
+        throw ArgumentError(
+            'Matches must not overlap. Overlapping text was "${textMatcherMatch.linkString}" located at ${textMatcherMatch.textRange.start}-${textMatcherMatch.textRange.end}.');
+      }
+      lastEnd = textMatcherMatch.textRange.end;
+    }
+
+    // Remove empty ranges.
+    nextTextLinkerMatches.removeWhere((_TextMatch textMatcherMatch) =>
+        textMatcherMatch.textRange.start == textMatcherMatch.textRange.end);
+
+    return nextTextLinkerMatches;
+  }
+
+  static _MatchSpansRecursion _linkSpansRecurse(Iterable<InlineSpan> spans,
+      _TextCache textCache, Iterable<_TextMatch> textMatcherMatches,
+      [int index = 0]) {
+    final output = <InlineSpan>[];
+    var nextTextLinkerMatches = textMatcherMatches;
+    var nextIndex = index;
+    for (final span in spans) {
+      final (
+        InlineSpan childSpan,
+        Iterable<_TextMatch> childTextLinkerMatches
+      ) = _linkSpanRecurse(
+        span,
+        textCache,
+        nextTextLinkerMatches,
+        nextIndex,
+      );
+      output.add(childSpan);
+      nextTextLinkerMatches = childTextLinkerMatches;
+      nextIndex += textCache.getLength(span)!;
+    }
+
+    return (output, nextTextLinkerMatches);
+  }
+
+  static _MatchSpanRecursion _linkSpanRecurse(InlineSpan span,
+      _TextCache textCache, Iterable<_TextMatch> textMatcherMatches,
+      [int index = 0]) {
+    if (span is! TextSpan) {
+      return (span, textMatcherMatches);
+    }
+
+    final nextChildren = <InlineSpan>[];
+    var nextTextLinkerMatches = <_TextMatch>[...textMatcherMatches];
+    var lastLinkEnd = index;
+    if (span.text?.isNotEmpty ?? false) {
+      final textEnd = index + span.text!.length;
+      for (final textMatcherMatch in textMatcherMatches) {
+        if (textMatcherMatch.textRange.start >= textEnd) {
+          // Because ranges is ordered, there are no more relevant ranges for this
+          // text.
+          break;
+        }
+        if (textMatcherMatch.textRange.end <= index) {
+          // This range ends before this span and is therefore irrelevant to it.
+          // It should have been removed from ranges.
+          assert(false, 'Invalid ranges.');
+          nextTextLinkerMatches.removeAt(0);
+          continue;
+        }
+        if (textMatcherMatch.textRange.start > index) {
+          // Add the unlinked text before the range.
+          nextChildren.add(TextSpan(
+            text: span.text!.substring(
+              lastLinkEnd - index,
+              textMatcherMatch.textRange.start - index,
+            ),
+            recognizer: span.recognizer,
+            mouseCursor: span.mouseCursor,
+            onEnter: span.onEnter,
+            onExit: span.onExit,
+            semanticsLabel: span.semanticsLabel,
+            locale: span.locale,
+            spellOut: span.spellOut,
+          ));
+        }
+        // Add the link itself.
+        final int linkStart = max(textMatcherMatch.textRange.start, index);
+        lastLinkEnd = min(textMatcherMatch.textRange.end, textEnd);
+        final nextChild = textMatcherMatch.linkBuilder(
+          span,
+          span.text!.substring(linkStart - index, lastLinkEnd - index),
+          textMatcherMatch.linkString,
+        );
+        nextChildren.add(nextChild);
+        if (textMatcherMatch.textRange.end > textEnd) {
+          // If we only partially used this range, keep it in nextRanges. Since
+          // overlapping ranges have been removed, this must be the last relevant
+          // range for this span.
+          break;
+        }
+        nextTextLinkerMatches.removeAt(0);
+      }
+
+      // Add any extra text after any ranges.
+      final remainingText = span.text!.substring(lastLinkEnd - index);
+      if (remainingText.isNotEmpty) {
+        nextChildren.add(TextSpan(
+          text: remainingText,
+          recognizer: span.recognizer,
+          mouseCursor: span.mouseCursor,
+          onEnter: span.onEnter,
+          onExit: span.onExit,
+          semanticsLabel: span.semanticsLabel,
+          locale: span.locale,
+          spellOut: span.spellOut,
+        ));
+      }
+    }
+
+    // Recurse on the children.
+    if (span.children?.isNotEmpty ?? false) {
+      final (
+        Iterable<InlineSpan> childrenSpans,
+        Iterable<_TextMatch> childrenTextLinkerMatches,
+      ) = _linkSpansRecurse(
+        span.children!,
+        textCache,
+        nextTextLinkerMatches,
+        index + (span.text?.length ?? 0),
+      );
+      nextTextLinkerMatches = childrenTextLinkerMatches.toList();
+      nextChildren.addAll(childrenSpans);
+    }
+
+    return (
+      TextSpan(
+        style: span.style,
+        children: nextChildren,
+        recognizer: span.recognizer,
+        mouseCursor: span.mouseCursor,
+        onEnter: span.onEnter,
+        onExit: span.onExit,
+        semanticsLabel: span.semanticsLabel,
+        locale: span.locale,
+        spellOut: span.spellOut,
+      ),
+      nextTextLinkerMatches,
+    );
+  }
+}
+
 List<InlineSpan> buildHighlightTextSpan(
     String text, List<HighlightTextSpan> highlightTextSpans,
     [TextStyle? style]) {
@@ -130,13 +484,14 @@ List<InlineSpan> buildHighlightTextSpan(
   return children;
 }
 
-class UrlTextLinker extends TextLinker {
+class UrlTextLinker extends TextMatcher {
   UrlTextLinker(BuildContext context)
-      : super(
+      : super.regExp(
           regExp: uriRegExp,
-          linkBuilder: (
-            String displayString,
-            String linkString,
+          matchBuilder: (
+            span,
+            displayString,
+            linkString,
           ) =>
               TextSpan(
             text: displayString,
@@ -150,13 +505,14 @@ class UrlTextLinker extends TextLinker {
         );
 }
 
-class MailTextLinker extends TextLinker {
+class MailTextLinker extends TextMatcher {
   MailTextLinker(BuildContext context)
-      : super(
+      : super.regExp(
           regExp: mailRegExp,
-          linkBuilder: (
-            String displayString,
-            String linkString,
+          matchBuilder: (
+            span,
+            displayString,
+            linkString,
           ) =>
               TextSpan(
             text: displayString,
@@ -168,29 +524,38 @@ class MailTextLinker extends TextLinker {
         );
 }
 
-class EmojiTextLinker extends TextLinker {
+class EmojiTextLinker extends TextMatcher {
   EmojiTextLinker()
-      : super(
-          regExp: emojiRegExp,
-          linkBuilder: (
-            String displayString,
-            String linkString,
+      : super.regExp(
+          regExp: emojiRegex,
+          matchBuilder: (
+            span,
+            displayString,
+            linkString,
           ) =>
               TextSpan(
             text: displayString,
             style: TextStyle(fontFamily: kEmojiFontFamily),
+            recognizer: span.recognizer,
+            mouseCursor: span.mouseCursor,
+            onEnter: span.onEnter,
+            onExit: span.onExit,
+            semanticsLabel: span.semanticsLabel,
+            locale: span.locale,
+            spellOut: span.spellOut,
           ),
         );
 }
 
-class KeyWordTextLinker extends TextLinker {
+class KeyWordTextLinker extends TextMatcher {
   KeyWordTextLinker(BuildContext context, String keyword,
       [bool caseSensitive = true])
-      : super(
+      : super.regExp(
           regExp: RegExp(RegExp.escape(keyword), caseSensitive: caseSensitive),
-          linkBuilder: (
-            String displayString,
-            String linkString,
+          matchBuilder: (
+            span,
+            displayString,
+            linkString,
           ) =>
               TextSpan(
             text: displayString,
@@ -198,17 +563,25 @@ class KeyWordTextLinker extends TextLinker {
               backgroundColor: context.theme.highlight,
               color: context.theme.text,
             ),
+            recognizer: span.recognizer,
+            mouseCursor: span.mouseCursor,
+            onEnter: span.onEnter,
+            onExit: span.onExit,
+            semanticsLabel: span.semanticsLabel,
+            locale: span.locale,
+            spellOut: span.spellOut,
           ),
         );
 }
 
-class BotNumberTextLinker extends TextLinker {
+class BotNumberTextLinker extends TextMatcher {
   BotNumberTextLinker(BuildContext context)
-      : super(
+      : super.regExp(
           regExp: botNumberRegExp,
-          linkBuilder: (
-            String displayString,
-            String linkString,
+          matchBuilder: (
+            span,
+            displayString,
+            linkString,
           ) =>
               TextSpan(
             text: displayString,
@@ -220,36 +593,31 @@ class BotNumberTextLinker extends TextLinker {
         );
 }
 
-class MentionTextLinker extends TextLinker {
+class MentionTextLinker extends TextMatcher {
   MentionTextLinker(BuildContext context, Map<String, MentionUser> map)
-      : super(
-          regExp: RegExp(
-              RegExp.escape('(${map.keys.map((e) => '@$e').join('|')})')),
-          linkBuilder: (
-            String displayString,
-            String linkString,
+      : super.regExp(
+          regExp: RegExp('(${map.keys.map((e) => '@$e').join('|')})'),
+          matchBuilder: (
+            span,
+            displayString,
+            linkString,
           ) {
             final mentionUser = map[linkString.substring(1)];
-            if (mentionUser == null) return TextSpan(text: linkString);
+            if (displayString != linkString || mentionUser == null) {
+              return TextSpan(text: linkString);
+            }
 
             return TextSpan(
               text: '@${mentionUser.fullName ?? mentionUser.identityNumber}',
               style: TextStyle(color: context.theme.accent),
               mouseCursor: SystemMouseCursors.click,
               recognizer: TapGestureRecognizer()
-                ..onTap = () => showUserDialog(context, null, mentionUser.identityNumber),
+                ..onTap = () =>
+                    showUserDialog(context, null, mentionUser.identityNumber),
             );
           },
         );
 }
-
-Iterable<InlineSpan> linkSpans(
-        Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) =>
-    textLinkers.fold(
-      spans,
-      (previousValue, element) =>
-          TextLinker.linkSpans(previousValue, [element]),
-    );
 
 class HighlightSelectableText extends HookConsumerWidget {
   const HighlightSelectableText(

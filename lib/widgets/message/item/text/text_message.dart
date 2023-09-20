@@ -54,15 +54,15 @@ class TextMessage extends HookConsumerWidget {
     ).requireData;
 
     final spans = useMemoized(
-      () => linkSpans(
+      () => TextMatcher.applyTextMatchers(
         [TextSpan(text: content)],
         [
-          EmojiTextLinker(),
-          KeyWordTextLinker(context, keyword),
           BotNumberTextLinker(context),
-          MentionTextLinker(context, mentionMap),
           UrlTextLinker(context),
           MailTextLinker(context),
+          MentionTextLinker(context, mentionMap),
+          EmojiTextLinker(),
+          KeyWordTextLinker(context, keyword),
         ],
       ).toList(),
       [content, keyword, mentionMap],

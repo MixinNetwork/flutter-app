@@ -7,7 +7,6 @@ import 'platform.dart';
 import 'system/windows.dart';
 
 final _emojis = Map.fromEntries(Emoji.all().map((e) => MapEntry(e.char, e)));
-final emojiRegExp = RegExp('(${_emojis.keys.map(RegExp.escape).join('|')})');
 
 final kEmojiFontFamily = () {
   if (kPlatformIsDarwin) {
