@@ -5,8 +5,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
+import '../db/dao/user_dao.dart';
+import '../ui/provider/conversation_provider.dart';
 import '../utils/emoji.dart';
+import '../utils/extension/extension.dart';
+import '../utils/reg_exp_utils.dart';
+import '../utils/uri_utils.dart';
+import 'user/user_dialog.dart';
 
 class HighlightText extends HookConsumerWidget {
   const HighlightText(
@@ -122,6 +129,127 @@ List<InlineSpan> buildHighlightTextSpan(
 
   return children;
 }
+
+class UrlTextLinker extends TextLinker {
+  UrlTextLinker(BuildContext context)
+      : super(
+          regExp: uriRegExp,
+          linkBuilder: (
+            String displayString,
+            String linkString,
+          ) =>
+              TextSpan(
+            text: displayString,
+            style: TextStyle(color: context.theme.accent),
+            mouseCursor: SystemMouseCursors.click,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => openUri(context, linkString,
+                  app: context.providerContainer.read(
+                      conversationProvider.select((value) => value?.app))),
+          ),
+        );
+}
+
+class MailTextLinker extends TextLinker {
+  MailTextLinker(BuildContext context)
+      : super(
+          regExp: mailRegExp,
+          linkBuilder: (
+            String displayString,
+            String linkString,
+          ) =>
+              TextSpan(
+            text: displayString,
+            style: TextStyle(color: context.theme.accent),
+            mouseCursor: SystemMouseCursors.click,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => launchUrlString(linkString),
+          ),
+        );
+}
+
+class EmojiTextLinker extends TextLinker {
+  EmojiTextLinker()
+      : super(
+          regExp: emojiRegExp,
+          linkBuilder: (
+            String displayString,
+            String linkString,
+          ) =>
+              TextSpan(
+            text: displayString,
+            style: TextStyle(fontFamily: kEmojiFontFamily),
+          ),
+        );
+}
+
+class KeyWordTextLinker extends TextLinker {
+  KeyWordTextLinker(BuildContext context, String keyword,
+      [bool caseSensitive = true])
+      : super(
+          regExp: RegExp(RegExp.escape(keyword), caseSensitive: caseSensitive),
+          linkBuilder: (
+            String displayString,
+            String linkString,
+          ) =>
+              TextSpan(
+            text: displayString,
+            style: TextStyle(
+              backgroundColor: context.theme.highlight,
+              color: context.theme.text,
+            ),
+          ),
+        );
+}
+
+class BotNumberTextLinker extends TextLinker {
+  BotNumberTextLinker(BuildContext context)
+      : super(
+          regExp: botNumberRegExp,
+          linkBuilder: (
+            String displayString,
+            String linkString,
+          ) =>
+              TextSpan(
+            text: displayString,
+            style: TextStyle(color: context.theme.accent),
+            mouseCursor: SystemMouseCursors.click,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => showUserDialog(context, null, linkString),
+          ),
+        );
+}
+
+class MentionTextLinker extends TextLinker {
+  MentionTextLinker(BuildContext context, Map<String, MentionUser> map)
+      : super(
+          regExp: RegExp(
+              RegExp.escape('(${map.keys.map((e) => '@$e').join('|')})')),
+          linkBuilder: (
+            String displayString,
+            String linkString,
+          ) {
+            final mentionUser = map[linkString.substring(1)];
+            if (mentionUser == null) return TextSpan(text: linkString);
+
+            return TextSpan(
+              text: '@${mentionUser.fullName ?? mentionUser.identityNumber}',
+              style: TextStyle(color: context.theme.accent),
+              mouseCursor: SystemMouseCursors.click,
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => showUserDialog(context, null, mentionUser.identityNumber),
+            );
+          },
+        );
+}
+
+Iterable<InlineSpan> linkSpans(
+        Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) =>
+    textLinkers.fold(
+      spans,
+      (previousValue, element) =>
+          TextLinker.linkSpans(previousValue, [element]),
+    );
 
 class HighlightSelectableText extends HookConsumerWidget {
   const HighlightSelectableText(
