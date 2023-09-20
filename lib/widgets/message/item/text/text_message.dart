@@ -1,7 +1,4 @@
-import 'dart:ui' as ui show BoxHeightStyle;
-
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../ui/home/chat/chat_page.dart';
@@ -53,32 +50,31 @@ class TextMessage extends HookConsumerWidget {
       keys: [content],
     ).requireData;
 
-    final spans = useMemoized(
-      () => TextMatcher.applyTextMatchers(
-        [TextSpan(text: content)],
-        [
-          BotNumberTextLinker(context),
-          UrlTextLinker(context),
-          MailTextLinker(context),
-          MentionTextLinker(context, mentionMap),
-          EmojiTextLinker(),
-          KeyWordTextLinker(context, keyword),
-        ],
-      ).toList(),
-      [content, keyword, mentionMap],
-    );
-
     return MessageBubble(
       child: MessageLayout(
         spacing: 6,
-        content: SelectableText.rich(
-          TextSpan(children: spans),
-          style: TextStyle(
-            fontSize: context.messageStyle.primaryFontSize,
-            color: context.theme.text,
+        content: SelectionArea(
+          child: CustomText(
+            content,
+            style: TextStyle(
+              fontSize: context.messageStyle.primaryFontSize,
+              color: context.theme.text,
+            ),
+            textMatchers: [
+              BotNumberTextMatcher(context),
+              UrlTextMatcher(context),
+              MailTextMatcher(context),
+              MentionTextMatcher(context, mentionMap),
+              EmojiTextMatcher(),
+              KeyWordTextMatcher(
+                keyword,
+                style: TextStyle(
+                  backgroundColor: context.theme.highlight,
+                  color: context.theme.text,
+                ),
+              ),
+            ],
           ),
-          contextMenuBuilder: (context, editState) => const SizedBox.shrink(),
-          selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
         ),
         dateAndStatus: const MessageDatetimeAndStatus(),
       ),

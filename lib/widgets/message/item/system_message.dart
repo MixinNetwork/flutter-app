@@ -44,7 +44,7 @@ class SystemMessage extends HookConsumerWidget {
                 vertical: 5,
                 horizontal: 10,
               ),
-              child: HighlightText(
+              child: CustomText(
                 generateSystemText(
                   actionName: actionName,
                   participantUserId: participantUserId,

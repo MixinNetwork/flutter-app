@@ -130,7 +130,7 @@ class _ParticipantList extends HookConsumerWidget {
   }
 }
 
-class _ParticipantTile extends StatelessWidget {
+class _ParticipantTile extends HookWidget {
   const _ParticipantTile({
     required this.participant,
     required this.currentUser,
@@ -159,19 +159,20 @@ class _ParticipantTile extends StatelessWidget {
           title: Row(
             children: [
               Flexible(
-                child: HighlightText(
+                child: CustomText(
                   participant.fullName ?? '?',
                   style: TextStyle(
                     color: context.theme.text,
                     fontSize: 16,
                   ),
-                  highlightTextSpans: [
-                    HighlightTextSpan(
+                  textMatchers: [
+                    EmojiTextMatcher(),
+                    KeyWordTextMatcher(
                       keyword,
                       style: TextStyle(
                         color: context.theme.accent,
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),

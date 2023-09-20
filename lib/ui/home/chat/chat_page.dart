@@ -863,7 +863,7 @@ class _PinMessagesBanner extends HookConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                       Expanded(
-                        child: HighlightText(
+                        child: CustomText(
                           (lastMessage ?? '').overflow,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

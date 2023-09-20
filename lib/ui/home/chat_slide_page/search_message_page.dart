@@ -421,7 +421,7 @@ class _SearchParticipantList extends HookConsumerWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: HighlightText(
+                  child: CustomText(
                     user.fullName ?? '',
                     style: TextStyle(
                       fontSize: 16,

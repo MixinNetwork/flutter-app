@@ -27,7 +27,7 @@ class MessageName extends StatelessWidget {
               left: 10,
               bottom: 2,
             ),
-            child: HighlightText(
+            child: CustomText(
               userName,
               style: TextStyle(
                 fontSize: context.messageStyle.secondaryFontSize,

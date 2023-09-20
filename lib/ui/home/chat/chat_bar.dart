@@ -251,19 +251,21 @@ class ConversationName extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(
-            child: HighlightSelectableText(
-              (overflow
-                      ? conversationState.name?.overflow
-                      : conversationState.name) ??
-                  '',
-              style: TextStyle(
-                color: context.theme.text,
-                fontSize: fontSize,
-                height: 1,
-                overflow: overflow ? TextOverflow.ellipsis : null,
+            child: SelectionArea(
+              child: CustomText(
+                (overflow
+                        ? conversationState.name?.overflow
+                        : conversationState.name) ??
+                    '',
+                style: TextStyle(
+                  color: context.theme.text,
+                  fontSize: fontSize,
+                  height: 1,
+                  overflow: overflow ? TextOverflow.ellipsis : null,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: overflow ? 1 : null,
               ),
-              textAlign: TextAlign.center,
-              maxLines: overflow ? 1 : null,
             ),
           ),
           VerifiedOrBotWidget(

@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:emojis/emoji.dart';
 import 'package:equatable/equatable.dart';
@@ -18,20 +17,32 @@ import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
 import 'user/user_dialog.dart';
 
-class HighlightText extends HookConsumerWidget {
-  const HighlightText(
-    this.text, {
+class CustomText extends HookConsumerWidget {
+  const CustomText(
+    String this.text, {
     super.key,
     this.style,
-    this.highlightTextSpans = const [],
+    this.textMatchers,
     this.maxLines,
     this.overflow,
     this.textAlign,
-  });
+  }) : textSpan = null;
 
-  final String text;
+  const CustomText.rich(
+    InlineSpan this.textSpan, {
+    super.key,
+    this.style,
+    this.textMatchers,
+    this.maxLines,
+    this.overflow,
+    this.textAlign,
+  }) : text = null;
+
+  final String? text;
+  final InlineSpan? textSpan;
+
   final TextStyle? style;
-  final List<HighlightTextSpan> highlightTextSpans;
+  final Iterable<TextMatcher>? textMatchers;
   final int? maxLines;
   final TextOverflow? overflow;
   final TextAlign? textAlign;
@@ -39,48 +50,20 @@ class HighlightText extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spans = useMemoized(
-      () => buildHighlightTextSpan(text, highlightTextSpans, style),
-      [text, highlightTextSpans, style],
+      () => TextMatcher.applyTextMatchers(
+              [textSpan ?? TextSpan(text: text, style: style)],
+              textMatchers ?? [EmojiTextMatcher()])
+          .toList(),
+      [text, style, textMatchers],
     );
     return Text.rich(
-      TextSpan(
-        children: spans,
-      ),
+      TextSpan(children: spans),
+      style: style,
       maxLines: maxLines,
       overflow: overflow,
       textAlign: textAlign,
     );
   }
-}
-
-List<InlineSpan> _handleEmojiSpans(
-  String text, {
-  double? fontSize,
-  GestureRecognizer? recognizer,
-  MouseCursor? mouseCursor,
-}) {
-  final spans = <InlineSpan>[];
-  text.splitEmoji(
-    onEmoji: (emoji) {
-      spans.add(TextSpan(
-        text: emoji,
-        style: TextStyle(
-          fontFamily: kEmojiFontFamily,
-          fontSize: fontSize,
-        ),
-        recognizer: recognizer,
-        mouseCursor: mouseCursor,
-      ));
-    },
-    onText: (text) {
-      spans.add(TextSpan(
-        text: text,
-        recognizer: recognizer,
-        mouseCursor: mouseCursor,
-      ));
-    },
-  );
-  return spans;
 }
 
 typedef InlineMatchBuilder = InlineSpan Function(
@@ -147,7 +130,7 @@ class TextMatcher {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TextLinker')}($regExp)';
+  String toString() => '${objectRuntimeType(this, 'TextMatcher')}($regExp)';
 }
 
 class _TextMatch {
@@ -162,7 +145,7 @@ class _TextMatch {
 
   final String linkString;
 
-  static List<_TextMatch> fromTextLinkers(
+  static List<_TextMatch> fromTextMatchers(
           Iterable<TextMatcher> textMatchers, String text) =>
       textMatchers.fold<List<_TextMatch>>(
           <_TextMatch>[],
@@ -171,7 +154,7 @@ class _TextMatch {
 
   @override
   String toString() =>
-      '${objectRuntimeType(this, '_TextLinkerMatch')}($textRange, $linkBuilder, $linkString)';
+      '${objectRuntimeType(this, '_TextMatcherMatch')}($textRange, $linkBuilder, $linkString)';
 }
 
 class _TextCache {
@@ -243,12 +226,12 @@ class _TextCache {
 
 typedef _MatchSpanRecursion = (
   InlineSpan linkedSpan,
-  Iterable<_TextMatch> unusedTextLinkerMatches,
+  Iterable<_TextMatch> unusedTextMatcherMatches,
 );
 
 typedef _MatchSpansRecursion = (
   Iterable<InlineSpan> linkedSpans,
-  Iterable<_TextMatch> unusedTextLinkerMatches,
+  Iterable<_TextMatch> unusedTextMatcherMatches,
 );
 
 class _MatchedSpans {
@@ -258,8 +241,8 @@ class _MatchedSpans {
   }) {
     final textCache = _TextCache.fromMany(spans: spans);
 
-    final Iterable<_TextMatch> textMatcherMatches = _cleanTextLinkerMatches(
-      _TextMatch.fromTextLinkers(textMatchers, textCache.text),
+    final Iterable<_TextMatch> textMatcherMatches = _cleanTextMatcherMatches(
+      _TextMatch.fromTextMatchers(textMatchers, textCache.text),
     );
 
     final (Iterable<InlineSpan> linkedSpans, Iterable<_TextMatch> _) =
@@ -280,15 +263,15 @@ class _MatchedSpans {
 
   final Iterable<InlineSpan> linkedSpans;
 
-  static List<_TextMatch> _cleanTextLinkerMatches(
+  static List<_TextMatch> _cleanTextMatcherMatches(
       Iterable<_TextMatch> textMatcherMatches) {
-    final nextTextLinkerMatches = textMatcherMatches.toList()
+    final nextTextMatcherMatches = textMatcherMatches.toList()
       ..sort((_TextMatch a, _TextMatch b) =>
           a.textRange.start.compareTo(b.textRange.start));
 
     // Validate that there are no overlapping matches.
     var lastEnd = 0;
-    for (final textMatcherMatch in nextTextLinkerMatches) {
+    for (final textMatcherMatch in nextTextMatcherMatches) {
       if (textMatcherMatch.textRange.start < lastEnd) {
         throw ArgumentError(
             'Matches must not overlap. Overlapping text was "${textMatcherMatch.linkString}" located at ${textMatcherMatch.textRange.start}-${textMatcherMatch.textRange.end}.');
@@ -297,34 +280,34 @@ class _MatchedSpans {
     }
 
     // Remove empty ranges.
-    nextTextLinkerMatches.removeWhere((_TextMatch textMatcherMatch) =>
+    nextTextMatcherMatches.removeWhere((_TextMatch textMatcherMatch) =>
         textMatcherMatch.textRange.start == textMatcherMatch.textRange.end);
 
-    return nextTextLinkerMatches;
+    return nextTextMatcherMatches;
   }
 
   static _MatchSpansRecursion _linkSpansRecurse(Iterable<InlineSpan> spans,
       _TextCache textCache, Iterable<_TextMatch> textMatcherMatches,
       [int index = 0]) {
     final output = <InlineSpan>[];
-    var nextTextLinkerMatches = textMatcherMatches;
+    var nextTextMatcherMatches = textMatcherMatches;
     var nextIndex = index;
     for (final span in spans) {
       final (
         InlineSpan childSpan,
-        Iterable<_TextMatch> childTextLinkerMatches
+        Iterable<_TextMatch> childTextMatcherMatches
       ) = _linkSpanRecurse(
         span,
         textCache,
-        nextTextLinkerMatches,
+        nextTextMatcherMatches,
         nextIndex,
       );
       output.add(childSpan);
-      nextTextLinkerMatches = childTextLinkerMatches;
+      nextTextMatcherMatches = childTextMatcherMatches;
       nextIndex += textCache.getLength(span)!;
     }
 
-    return (output, nextTextLinkerMatches);
+    return (output, nextTextMatcherMatches);
   }
 
   static _MatchSpanRecursion _linkSpanRecurse(InlineSpan span,
@@ -335,7 +318,7 @@ class _MatchedSpans {
     }
 
     final nextChildren = <InlineSpan>[];
-    var nextTextLinkerMatches = <_TextMatch>[...textMatcherMatches];
+    var nextTextMatcherMatches = <_TextMatch>[...textMatcherMatches];
     var lastLinkEnd = index;
     if (span.text?.isNotEmpty ?? false) {
       final textEnd = index + span.text!.length;
@@ -349,7 +332,7 @@ class _MatchedSpans {
           // This range ends before this span and is therefore irrelevant to it.
           // It should have been removed from ranges.
           assert(false, 'Invalid ranges.');
-          nextTextLinkerMatches.removeAt(0);
+          nextTextMatcherMatches.removeAt(0);
           continue;
         }
         if (textMatcherMatch.textRange.start > index) {
@@ -383,7 +366,7 @@ class _MatchedSpans {
           // range for this span.
           break;
         }
-        nextTextLinkerMatches.removeAt(0);
+        nextTextMatcherMatches.removeAt(0);
       }
 
       // Add any extra text after any ranges.
@@ -406,14 +389,14 @@ class _MatchedSpans {
     if (span.children?.isNotEmpty ?? false) {
       final (
         Iterable<InlineSpan> childrenSpans,
-        Iterable<_TextMatch> childrenTextLinkerMatches,
+        Iterable<_TextMatch> childrenTextMatcherMatches,
       ) = _linkSpansRecurse(
         span.children!,
         textCache,
-        nextTextLinkerMatches,
+        nextTextMatcherMatches,
         index + (span.text?.length ?? 0),
       );
-      nextTextLinkerMatches = childrenTextLinkerMatches.toList();
+      nextTextMatcherMatches = childrenTextMatcherMatches.toList();
       nextChildren.addAll(childrenSpans);
     }
 
@@ -429,63 +412,13 @@ class _MatchedSpans {
         locale: span.locale,
         spellOut: span.spellOut,
       ),
-      nextTextLinkerMatches,
+      nextTextMatcherMatches,
     );
   }
 }
 
-List<InlineSpan> buildHighlightTextSpan(
-    String text, List<HighlightTextSpan> highlightTextSpans,
-    [TextStyle? style]) {
-  final map = Map<String, HighlightTextSpan>.fromIterable(
-    highlightTextSpans.where((element) => element.text.isNotEmpty),
-    key: (item) => (item as HighlightTextSpan).text.toLowerCase(),
-  );
-  final pattern = "(${map.keys.map(RegExp.escape).join('|')})";
-
-  if (pattern == '()') {
-    return [TextSpan(children: _handleEmojiSpans(text), style: style)];
-  }
-
-  final children = <InlineSpan>[];
-  text.splitMapJoin(
-    RegExp(pattern, caseSensitive: false),
-    onMatch: (Match match) {
-      final text = match[0];
-      final highlightTextSpan = map[text?.toLowerCase()];
-      final mouseCursor =
-          highlightTextSpan?.onTap != null ? SystemMouseCursors.click : null;
-      if (text != null) {
-        final recognizer = highlightTextSpan?.onTap == null
-            ? null
-            : (TapGestureRecognizer()..onTap = highlightTextSpan?.onTap);
-        children.add(
-          TextSpan(
-            mouseCursor: mouseCursor,
-            children: _handleEmojiSpans(
-              text,
-              recognizer: recognizer,
-              mouseCursor: mouseCursor,
-            ),
-            style: style?.merge(highlightTextSpan?.style) ??
-                highlightTextSpan?.style,
-            recognizer: recognizer,
-          ),
-        );
-      }
-      return '';
-    },
-    onNonMatch: (text) {
-      children.add(TextSpan(children: _handleEmojiSpans(text), style: style));
-      return '';
-    },
-  );
-
-  return children;
-}
-
-class UrlTextLinker extends TextMatcher {
-  UrlTextLinker(BuildContext context)
+class UrlTextMatcher extends TextMatcher implements EquatableMixin {
+  UrlTextMatcher(BuildContext context)
       : super.regExp(
           regExp: uriRegExp,
           matchBuilder: (
@@ -503,10 +436,16 @@ class UrlTextLinker extends TextMatcher {
                       conversationProvider.select((value) => value?.app))),
           ),
         );
+
+  @override
+  List<Object?> get props => [];
+
+  @override
+  bool? get stringify => true;
 }
 
-class MailTextLinker extends TextMatcher {
-  MailTextLinker(BuildContext context)
+class MailTextMatcher extends TextMatcher implements EquatableMixin {
+  MailTextMatcher(BuildContext context)
       : super.regExp(
           regExp: mailRegExp,
           matchBuilder: (
@@ -522,10 +461,16 @@ class MailTextLinker extends TextMatcher {
               ..onTap = () => launchUrlString(linkString),
           ),
         );
+
+  @override
+  List<Object?> get props => [];
+
+  @override
+  bool? get stringify => true;
 }
 
-class EmojiTextLinker extends TextMatcher {
-  EmojiTextLinker()
+class EmojiTextMatcher extends TextMatcher implements EquatableMixin {
+  EmojiTextMatcher()
       : super.regExp(
           regExp: emojiRegex,
           matchBuilder: (
@@ -545,12 +490,20 @@ class EmojiTextLinker extends TextMatcher {
             spellOut: span.spellOut,
           ),
         );
+
+  @override
+  List<Object?> get props => [];
+
+  @override
+  bool? get stringify => true;
 }
 
-class KeyWordTextLinker extends TextMatcher {
-  KeyWordTextLinker(BuildContext context, String keyword,
-      [bool caseSensitive = true])
-      : super.regExp(
+class KeyWordTextMatcher extends TextMatcher implements EquatableMixin {
+  KeyWordTextMatcher(
+    this.keyword, {
+    this.style,
+    this.caseSensitive = true,
+  }) : super.regExp(
           regExp: RegExp(RegExp.escape(keyword), caseSensitive: caseSensitive),
           matchBuilder: (
             span,
@@ -559,10 +512,7 @@ class KeyWordTextLinker extends TextMatcher {
           ) =>
               TextSpan(
             text: displayString,
-            style: TextStyle(
-              backgroundColor: context.theme.highlight,
-              color: context.theme.text,
-            ),
+            style: style,
             recognizer: span.recognizer,
             mouseCursor: span.mouseCursor,
             onEnter: span.onEnter,
@@ -572,10 +522,20 @@ class KeyWordTextLinker extends TextMatcher {
             spellOut: span.spellOut,
           ),
         );
+
+  final String keyword;
+  final TextStyle? style;
+  final bool caseSensitive;
+
+  @override
+  List<Object?> get props => [keyword, caseSensitive];
+
+  @override
+  bool? get stringify => true;
 }
 
-class BotNumberTextLinker extends TextMatcher {
-  BotNumberTextLinker(BuildContext context)
+class BotNumberTextMatcher extends TextMatcher implements EquatableMixin {
+  BotNumberTextMatcher(BuildContext context)
       : super.regExp(
           regExp: botNumberRegExp,
           matchBuilder: (
@@ -591,10 +551,16 @@ class BotNumberTextLinker extends TextMatcher {
               ..onTap = () => showUserDialog(context, null, linkString),
           ),
         );
+
+  @override
+  List<Object?> get props => [];
+
+  @override
+  bool? get stringify => true;
 }
 
-class MentionTextLinker extends TextMatcher {
-  MentionTextLinker(BuildContext context, Map<String, MentionUser> map)
+class MentionTextMatcher extends TextMatcher implements EquatableMixin {
+  MentionTextMatcher(BuildContext context, this.map)
       : super.regExp(
           regExp: RegExp('(${map.keys.map((e) => '@$e').join('|')})'),
           matchBuilder: (
@@ -617,60 +583,14 @@ class MentionTextLinker extends TextMatcher {
             );
           },
         );
-}
 
-class HighlightSelectableText extends HookConsumerWidget {
-  const HighlightSelectableText(
-    this.text, {
-    super.key,
-    this.style,
-    this.highlightTextSpans = const [],
-    this.maxLines,
-    this.textAlign,
-  });
-
-  final String text;
-  final TextStyle? style;
-  final List<HighlightTextSpan> highlightTextSpans;
-  final int? maxLines;
-  final TextAlign? textAlign;
+  final Map<String, MentionUser> map;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final spans = useMemoized(
-      () => buildHighlightTextSpan(text, highlightTextSpans, style),
-      [text, highlightTextSpans, style],
-    );
-
-    return SelectableText.rich(
-      TextSpan(
-        children: spans,
-      ),
-      maxLines: maxLines,
-      contextMenuBuilder: (context, editState) => const SizedBox.shrink(),
-      selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
-      textAlign: textAlign,
-    );
-  }
-}
-
-class HighlightTextSpan extends Equatable {
-  const HighlightTextSpan(
-    this.text, {
-    this.onTap,
-    this.style,
-  });
-
-  final String text;
-  final VoidCallback? onTap;
-  final TextStyle? style;
+  List<Object?> get props => [map];
 
   @override
-  List<Object?> get props => [
-        text,
-        style,
-        onTap,
-      ];
+  bool? get stringify => true;
 }
 
 class HighlightStarLinkText extends HookConsumerWidget {
