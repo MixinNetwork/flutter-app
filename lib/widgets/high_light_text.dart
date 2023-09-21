@@ -562,7 +562,7 @@ class BotNumberTextMatcher extends TextMatcher implements EquatableMixin {
 class MentionTextMatcher extends TextMatcher implements EquatableMixin {
   MentionTextMatcher(BuildContext context, this.map)
       : super.regExp(
-          regExp: RegExp('(${map.keys.map((e) => '@$e').join('|')})'),
+          regExp: mentionNumberRegExp,
           matchBuilder: (
             span,
             displayString,

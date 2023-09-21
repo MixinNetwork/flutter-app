@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui show BoxHeightStyle;
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,7 +20,6 @@ import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/app_lifecycle.dart';
-import '../../../utils/emoji.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
@@ -28,6 +28,7 @@ import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/system/clipboard.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/actions/actions.dart';
+import '../../../widgets/high_light_text.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
@@ -104,7 +105,7 @@ class _InputContainer extends HookConsumerWidget {
       () {
         final draft = ref.read(
             conversationProvider.select((value) => value?.conversation?.draft));
-        return HighlightTextEditingController(
+        return _HighlightTextEditingController(
           initialText: draft,
           highlightTextStyle: TextStyle(color: context.theme.accent),
           mentionCache: ref.read(mentionCacheProvider),
@@ -818,23 +819,53 @@ class _StickerPagePositionedLayoutDelegate extends SingleChildLayoutDelegate {
       position != oldDelegate.position;
 }
 
-class HighlightTextEditingController extends TextEditingController {
-  HighlightTextEditingController({
+class MentionTextMatcher extends TextMatcher implements EquatableMixin {
+  MentionTextMatcher(this.mentionCache, this.highlightTextStyle)
+      : super.regExp(
+          regExp: mentionNumberRegExp,
+          matchBuilder: (
+            span,
+            displayString,
+            linkString,
+          ) {
+            if (displayString != linkString) return TextSpan(text: linkString);
+
+            final identityNumber = linkString.substring(1);
+            final user = mentionCache.identityNumberCache(identityNumber);
+            final valid = user != null;
+
+            if (displayString != linkString) return TextSpan(text: linkString);
+
+            return TextSpan(
+              text: displayString,
+              style: valid
+                  ? (span.style ?? const TextStyle()).merge(highlightTextStyle)
+                  : span.style,
+            );
+          },
+        );
+
+  final MentionCache mentionCache;
+  final TextStyle highlightTextStyle;
+
+  @override
+  List<Object?> get props => [mentionCache, highlightTextStyle];
+
+  @override
+  bool? get stringify => true;
+}
+
+class _HighlightTextEditingController extends TextEditingController {
+  _HighlightTextEditingController({
     required this.highlightTextStyle,
     String? initialText,
     required this.mentionCache,
   }) : super(text: initialText) {
     mentionsStreamController.stream
-        .map((event) => mentionNumberRegExp
-            .allMatches(event)
-            .map((e) => e[1])
-            .whereNotNull()
-            .where(
-                (element) => mentionCache.identityNumberCache(element) == null)
-            .toSet())
-        .where((event) => event.isNotEmpty)
-        .distinct(setEquals)
-        .asyncMap(mentionCache.checkIdentityNumbers)
+        .distinct()
+        .asyncBufferMap(
+            (event) => mentionCache.checkMentionCache(event.toSet()))
+        .distinct(mapEquals)
         .listen((event) => notifyListeners());
   }
 
@@ -871,50 +902,14 @@ class HighlightTextEditingController extends TextEditingController {
     ]);
   }
 
-  TextSpan _buildTextSpan(String text, TextStyle? style) {
-    final children = <InlineSpan>[];
-    text.splitMapJoin(
-      mentionNumberRegExp,
-      onMatch: (match) {
-        final text = match[0];
-        final identityNumber = match[1];
-
-        final bool valid;
-        if (identityNumber != null) {
-          final user = mentionCache.identityNumberCache(identityNumber);
-          valid = user != null;
-        } else {
-          valid = false;
-        }
-
-        children.add(TextSpan(
-            text: text,
-            style: valid ? style?.merge(highlightTextStyle) : style));
-        return text ?? '';
-      },
-      onNonMatch: (text) {
-        text.splitEmoji(
-          onEmoji: (emoji) {
-            children.add(TextSpan(
-              text: emoji,
-              style: style?.copyWith(
-                fontFamily: kEmojiFontFamily,
-                fontSize: 16,
-              ),
-            ));
-          },
-          onText: (text) {
-            children.add(TextSpan(text: text, style: style));
-          },
-        );
-        return text;
-      },
-    );
-    return TextSpan(
-      style: style,
-      children: children,
-    );
-  }
+  TextSpan _buildTextSpan(String text, TextStyle? style) => TextSpan(
+        children: TextMatcher.applyTextMatchers([
+          TextSpan(text: text, style: style)
+        ], [
+          MentionTextMatcher(mentionCache, highlightTextStyle),
+          EmojiTextMatcher(),
+        ]).toList(),
+      );
 }
 
 class _SendMessageIntent extends Intent {
