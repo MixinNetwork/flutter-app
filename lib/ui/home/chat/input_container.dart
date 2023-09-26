@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,6 +14,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart' hide Consumer;
 import 'package:rxdart/rxdart.dart';
+import 'package:simple_animations/simple_animations.dart';
 
 import '../../../constants/constants.dart';
 import '../../../constants/resources.dart';
@@ -581,15 +584,7 @@ class _QuoteMessage extends HookConsumerWidget {
   }
 }
 
-enum _ActionType {
-  file,
-  contact,
-  imageForMobile,
-  videoForMobile,
-  imageOrVideoForDesktop,
-}
-
-class _SendActionTypeButton extends StatelessWidget {
+class _SendActionTypeButton extends HookWidget {
   const _SendActionTypeButton();
 
   @override
@@ -597,104 +592,153 @@ class _SendActionTypeButton extends StatelessWidget {
     final isDesktop =
         Platform.isMacOS || Platform.isLinux || Platform.isWindows;
 
+    final menuDisplayed = useState(false);
+
     return Padding(
       padding: const EdgeInsets.only(left: 6),
-      child: PopupMenuPageButton(
-        itemBuilder: (context) => [
-          CustomPopupMenuButton(
+      child: ContextMenuPortalEntry(
+        interactive: false,
+        showedMenu: (value) => Future(() {
+          menuDisplayed.value = value;
+        }),
+        buildMenus: () => [
+          ContextMenu(
             icon: Resources.assetsImagesContactSvg,
             title: context.l10n.contact,
-            value: _ActionType.contact,
+            onTap: () async {
+              final conversationState =
+                  context.providerContainer.read(conversationProvider);
+
+              if (conversationState == null) return;
+
+              final result = await showConversationSelector(
+                context: context,
+                singleSelect: true,
+                onlyContact: true,
+                title: context.l10n.select,
+                filteredIds: [conversationState.userId].whereNotNull(),
+              );
+
+              if (result == null || result.isEmpty) return;
+              final userId = result.first.userId;
+              if (userId == null || userId.isEmpty) return;
+
+              await runWithToast(() async {
+                final user = await context.database.userDao
+                    .userById(userId)
+                    .getSingleOrNull();
+                if (user == null) throw Exception('User not found');
+
+                await context.accountServer.sendContactMessage(
+                  userId,
+                  user.fullName,
+                  conversationState.encryptCategory,
+                  conversationId: conversationState.conversationId,
+                  recipientId: conversationState.userId,
+                );
+              });
+            },
           ),
-          CustomPopupMenuButton(
+          ContextMenu(
             icon: Resources.assetsImagesFileSvg,
             title: context.l10n.files,
-            value: _ActionType.file,
+            onTap: () async {
+              final files = await selectFiles();
+              if (files.isNotEmpty) {
+                await showFilesPreviewDialog(context, files);
+              }
+            },
           ),
           if (isDesktop)
-            CustomPopupMenuButton(
+            ContextMenu(
               icon: Resources.assetsImagesFilePreviewImagesSvg,
               title: '${context.l10n.image} & ${context.l10n.video}',
-              value: _ActionType.imageOrVideoForDesktop,
+              onTap: () async {
+                final files = await selectFiles();
+                if (files.isNotEmpty) {
+                  await showFilesPreviewDialog(context, files);
+                }
+              },
             ),
           if (!isDesktop)
-            CustomPopupMenuButton(
+            ContextMenu(
               icon: Resources.assetsImagesImageSvg,
               title: context.l10n.image,
-              value: _ActionType.imageForMobile,
+              onTap: () async {
+                final image =
+                    await ImagePicker().pickImage(source: ImageSource.gallery);
+                if (image == null) return;
+                await showFilesPreviewDialog(context, [image.withMineType()]);
+              },
             ),
           if (!isDesktop)
-            CustomPopupMenuButton(
+            ContextMenu(
               icon: Resources.assetsImagesVideoSvg,
               title: context.l10n.video,
-              value: _ActionType.videoForMobile,
+              onTap: () async {
+                final video =
+                    await ImagePicker().pickVideo(source: ImageSource.gallery);
+                if (video == null) return;
+                await showFilesPreviewDialog(context, [video.withMineType()]);
+              },
             ),
         ],
-        onSelected: (value) async {
-          if (value == _ActionType.contact) {
-            final conversationState =
-                context.providerContainer.read(conversationProvider);
+        child: _AnimatedSendTypeButton(menuDisplayed: menuDisplayed.value),
+      ),
+    );
+  }
+}
 
-            if (conversationState == null) return;
+class _AnimatedSendTypeButton extends StatelessWidget {
+  const _AnimatedSendTypeButton({
+    required this.menuDisplayed,
+  });
 
-            final result = await showConversationSelector(
-              context: context,
-              singleSelect: true,
-              onlyContact: true,
-              title: context.l10n.select,
-              filteredIds: [conversationState.userId].whereNotNull(),
-            );
+  final bool menuDisplayed;
 
-            if (result == null || result.isEmpty) return;
-            final userId = result.first.userId;
-            if (userId == null || userId.isEmpty) return;
-
-            await runWithToast(() async {
-              final user = await context.database.userDao
-                  .userById(userId)
-                  .getSingleOrNull();
-              if (user == null) throw Exception('User not found');
-
-              await context.accountServer.sendContactMessage(
-                userId,
-                user.fullName,
-                conversationState.encryptCategory,
-                conversationId: conversationState.conversationId,
-                recipientId: conversationState.userId,
-              );
-            });
-
-            return;
-          }
-
-          var files = <XFile?>[];
-          if (value == _ActionType.imageOrVideoForDesktop ||
-              value == _ActionType.file) {
-            files = await selectFiles();
-          } else if (value == _ActionType.imageForMobile) {
-            files = [
-              await ImagePicker().pickImage(source: ImageSource.gallery)
-            ];
-          } else if (value == _ActionType.videoForMobile) {
-            files = [
-              await ImagePicker().pickVideo(source: ImageSource.gallery)
-            ];
-          }
-
-          // recreate the XFile to generate mimeType.
-          files = files.whereNotNull().map((e) => File(e.path).xFile).toList();
-          if (files.isNotEmpty) {
-            await showFilesPreviewDialog(context, files.cast());
+  @override
+  Widget build(BuildContext context) {
+    final tween = MovieTween()
+      ..scene(
+        duration: 200.milliseconds,
+        curve: Curves.easeInOut,
+      ).tween('rotate', Tween<double>(begin: 0, end: math.pi / 4))
+      ..scene(
+        duration: 100.milliseconds,
+        curve: Curves.easeIn,
+        end: 100.milliseconds,
+      ).tween('scale', Tween<double>(begin: 1, end: 0.8))
+      ..scene(
+        duration: 100.milliseconds,
+        curve: Curves.easeOut,
+        begin: 100.milliseconds,
+      ).tween('scale', Tween<double>(begin: 0.8, end: 1));
+    return CustomAnimationBuilder(
+      duration: 200.milliseconds,
+      tween: tween,
+      control: menuDisplayed ? Control.play : Control.playReverse,
+      curve: Curves.easeInOut,
+      child: ActionButton(
+        name: Resources.assetsImagesIcAddSvg,
+        size: 32,
+        padding: const EdgeInsets.all(4),
+        onTapUp: (details) {
+          final renderBox = context.findRenderObject() as RenderBox?;
+          if (renderBox != null) {
+            final position =
+                renderBox.localToGlobal(renderBox.paintBounds.topCenter);
+            context.sendMenuPosition(position);
+          } else {
+            context.sendMenuPosition(details.globalPosition);
           }
         },
-        icon: SvgPicture.asset(
-          Resources.assetsImagesIcAddSvg,
-          height: 32,
-          width: 32,
-          colorFilter: ColorFilter.mode(
-            context.theme.icon,
-            BlendMode.srcIn,
-          ),
+        color: context.theme.icon,
+      ),
+      builder: (context, value, child) => Transform.scale(
+        scale: value.get('scale'),
+        child: Transform.rotate(
+          angle: value.get('rotate'),
+          child: child,
         ),
       ),
     );
