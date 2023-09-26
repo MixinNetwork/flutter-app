@@ -100,6 +100,7 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
     this.showedMenu,
     this.enable = true,
     this.onTap,
+    this.interactive = true,
   });
 
   final Widget child;
@@ -107,6 +108,9 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
   final ValueChanged<bool>? showedMenu;
   final bool enable;
   final VoidCallback? onTap;
+
+  /// Whether right click or long press to show menu
+  final bool interactive;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -171,9 +175,16 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
             return const SizedBox();
           }),
           child: InteractiveDecoratedBox(
-            onRightClick: (PointerUpEvent pointerUpEvent) =>
-                offsetCubit.emit(pointerUpEvent.position),
+            onRightClick: (PointerUpEvent pointerUpEvent) {
+              if (!interactive) {
+                return;
+              }
+              offsetCubit.emit(pointerUpEvent.position);
+            },
             onLongPress: (details) {
+              if (!interactive) {
+                return;
+              }
               if (Platform.isAndroid || Platform.isIOS) {
                 offsetCubit.emit(details.globalPosition);
               }
