@@ -118,7 +118,7 @@ dependencies:
       ref: 52685ab7beaf8a9107904bdb8a1590924015d016
   pin_code_fields: ^8.0.1
   platform_device_id: ^1.0.1
-  pretty_qr_code: ^2.0.3
+  pretty_qr_code: ^3.0.0
   protocol_handler: ^0.1.5
   provider: ^6.0.4
   quick_breakpad:
