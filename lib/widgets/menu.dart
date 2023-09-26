@@ -7,12 +7,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
+import 'package:mixin_logger/mixin_logger.dart';
 import 'package:provider/provider.dart';
 
 import '../bloc/simple_cubit.dart';
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
+import 'action_button.dart';
 import 'hover_overlay.dart';
 import 'interactive_decorated_box.dart';
 import 'portal_providers.dart';
@@ -27,69 +29,77 @@ extension ContextMenuPortalEntrySender on BuildContext {
   void closeMenu() => read<_OffsetCubit>().emit(null);
 }
 
-class PopupMenuPageButton<T> extends HookConsumerWidget {
-  const PopupMenuPageButton({
+typedef CustomPopupMenuItemBuilder<T> = List<CustomPopupMenuItem<T>> Function(
+    BuildContext context);
+
+class CustomPopupMenuButton<T> extends HookConsumerWidget {
+  const CustomPopupMenuButton({
     super.key,
     required this.itemBuilder,
     this.onSelected,
     this.child,
     this.icon,
+    this.color,
+    this.alignment,
   });
 
-  final PopupMenuItemBuilder<T> itemBuilder;
-  final PopupMenuItemSelected<T>? onSelected;
+  final CustomPopupMenuItemBuilder<T> itemBuilder;
+  final PopupMenuItemSelected<T?>? onSelected;
+  final String? icon;
   final Widget? child;
-  final Widget? icon;
+  final Color? color;
+  final Alignment? alignment;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => PopupMenuButton(
-        color: context.theme.popUp,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(minWidth: 160),
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(11))),
-        itemBuilder: itemBuilder,
-        onSelected: onSelected,
-        icon: icon,
-        child: child,
+  Widget build(BuildContext context, WidgetRef ref) => ContextMenuPortalEntry(
+        interactive: false,
+        buildMenus: () => itemBuilder(context)
+            .map(
+              (e) => ContextMenu(
+                title: e.title,
+                onTap: () => onSelected?.call(e.value),
+                isDestructiveAction: e.isDestructiveAction,
+                icon: e.icon,
+              ),
+            )
+            .toList(),
+        child: Builder(
+            builder: (context) => ActionButton(
+                  name: icon,
+                  color: color,
+                  onTapUp: (details) {
+                    d('onTapUp: $alignment');
+                    if (alignment == null) {
+                      context.sendMenuPosition(details.globalPosition);
+                      return;
+                    }
+                    final renderBox = context.findRenderObject() as RenderBox?;
+                    if (renderBox != null) {
+                      var position =
+                          alignment!.withinRect(renderBox.paintBounds);
+                      position = renderBox.localToGlobal(position);
+                      context.sendMenuPosition(position);
+                    } else {
+                      context.sendMenuPosition(details.globalPosition);
+                    }
+                  },
+                  child: child,
+                )),
       );
 }
 
-class CustomPopupMenuButton<T> extends PopupMenuItem<T> {
-  CustomPopupMenuButton({
-    super.key,
-    super.value,
-    String? icon,
-    required String title,
-  }) : super(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Builder(
-            builder: (context) => Row(
-              children: [
-                if (icon != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: SvgPicture.asset(
-                      icon,
-                      colorFilter:
-                          ColorFilter.mode(context.theme.text, BlendMode.srcIn),
-                      width: 20,
-                      height: 20,
-                    ),
-                  ),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: context.theme.text,
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ),
-        );
+class CustomPopupMenuItem<T> {
+  CustomPopupMenuItem({
+    required this.title,
+    this.value,
+    this.isDestructiveAction = false,
+    this.icon,
+  });
+
+  final String title;
+  final T? value;
+  final bool isDestructiveAction;
+  final String? icon;
 }
 
 class ContextMenuPortalEntry extends HookConsumerWidget {
