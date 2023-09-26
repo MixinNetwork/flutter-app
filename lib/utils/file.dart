@@ -49,11 +49,12 @@ Future<bool> saveFileToSystem(
     confirmButtonText: context.l10n.save,
     suggestedName: targetName,
     acceptedTypeGroups: [
-      file_selector.XTypeGroup(
-        label: mineType,
-        extensions: [extension],
-        mimeTypes: [if (mineType != null) mineType],
-      ),
+      if (mineType != null && extension.isNotEmpty)
+        file_selector.XTypeGroup(
+          label: mineType,
+          extensions: [extension],
+          mimeTypes: [mineType],
+        ),
     ],
   ))
       ?.path;
