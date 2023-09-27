@@ -40,10 +40,7 @@ Future<bool> saveFileToSystem(
   String? suggestName,
 }) async {
   final targetName = (suggestName ?? file).pathBasename;
-  final mineType = lookupMimeType(file);
-  final extension = p.extension(targetName);
-
-  d('saveFileToSystem: $file, $targetName, $mineType, $extension');
+  d('saveFileToSystem: $file, $targetName');
 
   final path = (await file_selector.getSaveLocation(
     confirmButtonText: context.l10n.save,
