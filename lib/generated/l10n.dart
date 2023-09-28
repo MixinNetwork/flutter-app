@@ -540,6 +540,16 @@ class Localization {
     );
   }
 
+  /// `Chat`
+  String get chat {
+    return Intl.message(
+      'Chat',
+      name: 'chat',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Chat Backup`
   String get chatBackup {
     return Intl.message(
@@ -3913,6 +3923,16 @@ class Localization {
     return Intl.message(
       'Show avatar',
       name: 'showAvatar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show Identity Number`
+  String get showIdentityNumber {
+    return Intl.message(
+      'Show Identity Number',
+      name: 'showIdentityNumber',
       desc: '',
       args: [],
     );

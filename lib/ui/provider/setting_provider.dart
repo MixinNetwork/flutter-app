@@ -20,6 +20,7 @@ class _SettingState extends Equatable {
     bool? fileAutoDownload,
     bool? collapsedSidebar,
     double? chatFontSizeDelta,
+    bool? messageShowIdentityNumber,
   })  : _brightness = brightness,
         _messageShowAvatar = messageShowAvatar,
         _messagePreview = messagePreview,
@@ -27,7 +28,8 @@ class _SettingState extends Equatable {
         _videoAutoDownload = videoAutoDownload,
         _fileAutoDownload = fileAutoDownload,
         _collapsedSidebar = collapsedSidebar,
-        _chatFontSizeDelta = chatFontSizeDelta;
+        _chatFontSizeDelta = chatFontSizeDelta,
+        _messageShowIdentityNumber = messageShowIdentityNumber;
 
   factory _SettingState.fromMap(Map<String, dynamic> map) => _SettingState(
         brightness: map['brightness'] as int?,
@@ -38,6 +40,7 @@ class _SettingState extends Equatable {
         fileAutoDownload: map['fileAutoDownload'] as bool?,
         collapsedSidebar: map['collapsedSidebar'] as bool?,
         chatFontSizeDelta: map['chatFontSizeDelta'] as double?,
+        messageShowIdentityNumber: map['messageShowIdentityNumber'] as bool?,
       );
 
   final int? _brightness;
@@ -48,6 +51,7 @@ class _SettingState extends Equatable {
   final bool? _fileAutoDownload;
   final bool? _collapsedSidebar;
   final double? _chatFontSizeDelta;
+  final bool? _messageShowIdentityNumber;
 
   int get brightness => _brightness ?? 0;
 
@@ -65,6 +69,8 @@ class _SettingState extends Equatable {
 
   double get chatFontSizeDelta => _chatFontSizeDelta ?? 0;
 
+  bool get messageShowIdentityNumber => _messageShowIdentityNumber ?? false;
+
   @override
   List<Object?> get props => [
         _brightness,
@@ -75,6 +81,7 @@ class _SettingState extends Equatable {
         _fileAutoDownload,
         _collapsedSidebar,
         _chatFontSizeDelta,
+        _messageShowIdentityNumber,
       ];
 
   Map<String, dynamic> toMap() => {
@@ -86,6 +93,7 @@ class _SettingState extends Equatable {
         'fileAutoDownload': _fileAutoDownload,
         'collapsedSidebar': _collapsedSidebar,
         'chatFontSizeDelta': _chatFontSizeDelta,
+        'messageShowIdentityNumber': _messageShowIdentityNumber,
       };
 
   _SettingState copyWith({
@@ -97,6 +105,7 @@ class _SettingState extends Equatable {
     bool? fileAutoDownload,
     bool? collapsedSidebar,
     double? chatFontSizeDelta,
+    bool? messageShowIdentityNumber,
   }) =>
       _SettingState(
         brightness: brightness ?? _brightness,
@@ -107,6 +116,8 @@ class _SettingState extends Equatable {
         fileAutoDownload: fileAutoDownload ?? _fileAutoDownload,
         collapsedSidebar: collapsedSidebar ?? _collapsedSidebar,
         chatFontSizeDelta: chatFontSizeDelta ?? _chatFontSizeDelta,
+        messageShowIdentityNumber:
+            messageShowIdentityNumber ?? _messageShowIdentityNumber,
       );
 }
 
@@ -120,6 +131,7 @@ class SettingChangeNotifier extends ChangeNotifier {
     bool? fileAutoDownload,
     bool? collapsedSidebar,
     double? chatFontSizeDelta,
+    bool? messageShowIdentityNumber,
   })  : _brightness = brightness,
         _messageShowAvatar = messageShowAvatar,
         _messagePreview = messagePreview,
@@ -127,7 +139,8 @@ class SettingChangeNotifier extends ChangeNotifier {
         _videoAutoDownload = videoAutoDownload,
         _fileAutoDownload = fileAutoDownload,
         _collapsedSidebar = collapsedSidebar,
-        _chatFontSizeDelta = chatFontSizeDelta;
+        _chatFontSizeDelta = chatFontSizeDelta,
+        _messageShowIdentityNumber = messageShowIdentityNumber;
 
   /// The brightness of theme.
   /// 0 : follow system
@@ -141,6 +154,7 @@ class SettingChangeNotifier extends ChangeNotifier {
   /// https://github.com/hivedb/hive/issues/518
   int? _brightness;
   bool? _messageShowAvatar;
+  bool? _messageShowIdentityNumber;
   bool? _messagePreview;
   bool? _photoAutoDownload;
   bool? _videoAutoDownload;
@@ -198,6 +212,15 @@ class SettingChangeNotifier extends ChangeNotifier {
   }
 
   bool get messageShowAvatar => _messageShowAvatar ?? false;
+
+  set messageShowIdentityNumber(bool value) {
+    if (_messageShowIdentityNumber == value) return;
+
+    _messageShowIdentityNumber = value;
+    notifyListeners();
+  }
+
+  bool get messageShowIdentityNumber => _messageShowIdentityNumber ?? false;
 
   set messagePreview(bool value) {
     if (_messagePreview == value) return;
@@ -266,6 +289,7 @@ class SettingChangeNotifier extends ChangeNotifier {
           fileAutoDownload: _fileAutoDownload,
           collapsedSidebar: _collapsedSidebar,
           chatFontSizeDelta: _chatFontSizeDelta,
+          messageShowIdentityNumber: _messageShowIdentityNumber,
         ).toMap());
     super.notifyListeners();
   }
@@ -292,6 +316,7 @@ final settingProvider =
       fileAutoDownload: settingState.fileAutoDownload,
       collapsedSidebar: settingState.collapsedSidebar,
       chatFontSizeDelta: settingState.chatFontSizeDelta,
+      messageShowIdentityNumber: settingState.messageShowIdentityNumber,
     );
   }
 
