@@ -987,20 +987,36 @@ class _JumpMentionButton extends HookConsumerWidget {
               width: 40,
               alignment: Alignment.topCenter,
               child: Container(
+                constraints: const BoxConstraints(
+                  minWidth: 20,
+                  maxWidth: 40,
+                  maxHeight: 20,
+                  minHeight: 20,
+                ),
                 decoration: BoxDecoration(
                   color: context.theme.accent,
-                  shape: BoxShape.circle,
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
-                width: 20,
-                height: 20,
-                alignment: Alignment.center,
-                child: Text(
-                  '${messageMentions.length}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    height: 1,
-                    color: Colors.white,
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Column(
+                  children: [
+                    // Use column + spacer to vertical center the text.
+                    // since the width is not fixed, we can't use center widget.
+                    const Spacer(),
+                    Text(
+                      messageMentions.length > 99
+                          ? '99+'
+                          : '${messageMentions.length}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                    ),
+                    const Spacer(),
+                  ],
                 ),
               ),
             ),

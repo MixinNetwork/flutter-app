@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -154,18 +153,12 @@ class ChatInfoPage extends HookConsumerWidget {
                       singleSelect: true,
                       title: context.l10n.shareContact,
                       onlyContact: false,
-                      action: PopupMenuPageButton(
-                        icon: SvgPicture.asset(
-                          Resources.assetsImagesInviteShareSvg,
-                          height: 24,
-                          width: 24,
-                          colorFilter: ColorFilter.mode(
-                            context.theme.icon,
-                            BlendMode.srcIn,
-                          ),
-                        ),
+                      action: CustomPopupMenuButton(
+                        alignment: Alignment.bottomCenter,
+                        color: context.theme.icon,
+                        icon: Resources.assetsImagesInviteShareSvg,
                         itemBuilder: (context) => [
-                          CustomPopupMenuButton(
+                          CustomPopupMenuItem(
                             icon: Resources.assetsImagesContextMenuCopySvg,
                             title: context.l10n.copyLink,
                           ),
