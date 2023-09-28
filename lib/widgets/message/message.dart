@@ -696,6 +696,8 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
+    final userIdentityNumber =
+        useMessageConverter(converter: (m) => m.userIdentityNumber);
 
     final messageColumn = Column(
       mainAxisSize: MainAxisSize.min,
@@ -705,6 +707,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
           MessageName(
             userName: userName!,
             userId: userId!,
+            userIdentityNumber: userIdentityNumber,
           ),
         ContextMenuPortalEntry(
           buildMenus: buildMenus,
