@@ -158,31 +158,33 @@ class _TextMatch {
 }
 
 class _TextCache {
-  factory _TextCache({
-    required InlineSpan span,
-  }) {
-    if (span is! TextSpan) {
-      return _TextCache._(
-        text: '',
-        lengths: <InlineSpan, int>{span: 0},
-      );
+  factory _TextCache({required InlineSpan span}) {
+    final lengths = <InlineSpan, int>{span: 0};
+    final text = StringBuffer();
+
+    int visitSpan(InlineSpan span) {
+      if (span is! TextSpan) {
+        lengths[span] = 0;
+        return 0;
+      }
+      if (span.text != null) {
+        text.write(span.text);
+      }
+      var length = 0;
+      if (span.children != null) {
+        for (final child in span.children!) {
+          length += visitSpan(child);
+        }
+      }
+      length += span.text?.length ?? 0;
+      lengths[span] = length;
+      return length;
     }
 
-    var childrenTextCache = _TextCache._empty();
-    for (final child in span.children ?? <InlineSpan>[]) {
-      final childTextCache = _TextCache(
-        span: child,
-      );
-      childrenTextCache = childrenTextCache._merge(childTextCache);
-    }
-
-    final text = (span.text ?? '') + childrenTextCache.text;
+    lengths[span] = visitSpan(span);
     return _TextCache._(
-      text: text,
-      lengths: <InlineSpan, int>{
-        span: text.length,
-        ...childrenTextCache._lengths,
-      },
+      text: text.toString(),
+      lengths: lengths,
     );
   }
 
