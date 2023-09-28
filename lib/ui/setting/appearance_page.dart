@@ -110,6 +110,9 @@ class _MessageAvatarSetting extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final showAvatar =
         ref.watch(settingProvider.select((value) => value.messageShowAvatar));
+    final showIdentityNumber = ref.watch(
+      settingProvider.select((value) => value.messageShowIdentityNumber),
+    );
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +120,7 @@ class _MessageAvatarSetting extends HookConsumerWidget {
         Padding(
           padding: const EdgeInsets.only(left: 10, bottom: 14, top: 22),
           child: Text(
-            context.l10n.avatar,
+            context.l10n.chat,
             style: TextStyle(
               color: context.theme.secondaryText,
               fontSize: 14,
@@ -126,18 +129,35 @@ class _MessageAvatarSetting extends HookConsumerWidget {
         ),
         CellGroup(
           cellBackgroundColor: context.theme.settingCellBackgroundColor,
-          child: CellItem(
-            title: Text(context.l10n.showAvatar),
-            trailing: Transform.scale(
-                scale: 0.7,
-                child: CupertinoSwitch(
-                  activeColor: context.theme.accent,
-                  value: showAvatar,
-                  onChanged: (bool value) =>
-                      context.settingChangeNotifier.messageShowAvatar = value,
-                )),
+          child: Column(
+            children: [
+              CellItem(
+                title: Text(context.l10n.showAvatar),
+                trailing: Transform.scale(
+                  scale: 0.7,
+                  child: CupertinoSwitch(
+                    activeColor: context.theme.accent,
+                    value: showAvatar,
+                    onChanged: (bool value) =>
+                        context.settingChangeNotifier.messageShowAvatar = value,
+                  ),
+                ),
+              ),
+              CellItem(
+                title: Text(context.l10n.showIdentityNumber),
+                trailing: Transform.scale(
+                  scale: 0.7,
+                  child: CupertinoSwitch(
+                    activeColor: context.theme.accent,
+                    value: showIdentityNumber,
+                    onChanged: (bool value) => context.settingChangeNotifier
+                        .messageShowIdentityNumber = value,
+                  ),
+                ),
+              )
+            ],
           ),
-        )
+        ),
       ],
     );
   }

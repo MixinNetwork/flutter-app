@@ -191,6 +191,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeNumber": MessageLookupByLibrary.simpleMessage("修改手機號"),
         "changeNumberInstead": MessageLookupByLibrary.simpleMessage("僅修改手機號碼"),
         "changedDisappearingMessageSettings": m0,
+        "chat": MessageLookupByLibrary.simpleMessage("聊天"),
         "chatBackup": MessageLookupByLibrary.simpleMessage("聊天記錄備份"),
         "chatBotReceptionTitle":
             MessageLookupByLibrary.simpleMessage("點擊按鈕使用機器人"),
@@ -603,6 +604,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedMedia": MessageLookupByLibrary.simpleMessage("媒體內容"),
         "show": MessageLookupByLibrary.simpleMessage("顯示"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("顯示頭像"),
+        "showIdentityNumber": MessageLookupByLibrary.simpleMessage("顯示 ID"),
         "showMixin": MessageLookupByLibrary.simpleMessage("顯示 Mixin"),
         "signIn": MessageLookupByLibrary.simpleMessage("登錄"),
         "signOut": MessageLookupByLibrary.simpleMessage("登出"),
