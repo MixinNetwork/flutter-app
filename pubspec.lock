@@ -150,10 +150,10 @@ packages:
     dependency: transitive
     description:
       name: build_resolvers
-      sha256: db49b8609ef8c81cca2b310618c3017c00f03a92af44c04d310b907b2d692d95
+      sha256: "64e12b0521812d1684b1917bc80945625391cb9bdd4312536b1d69dcb6133ed8"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.4.1"
   build_runner:
     dependency: "direct dev"
     description:
@@ -238,10 +238,10 @@ packages:
     dependency: transitive
     description:
       name: collection
-      sha256: ee67cb0715911d28db6bf4af1026078bd6f0128b07a5f66fb2ed94ec6783c09a
+      sha256: f092b211a4319e98e5ff58223576de6c2803db36221657b46c82574721240687
       url: "https://pub.dev"
     source: hosted
-    version: "1.18.0"
+    version: "1.17.2"
   common_crypto:
     dependency: "direct main"
     description:
@@ -449,18 +449,18 @@ packages:
     dependency: "direct main"
     description:
       name: drift
-      sha256: "0acf8f1f584ebc9fe7462049736f65a699a2557eed9a2f77fc6465a84dd4a716"
+      sha256: c66df5f88616f5b1fb8d83266738d4f3671c692b2aa680fd8fe53e57a4e149be
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.1"
+    version: "2.12.1"
   drift_dev:
     dependency: "direct dev"
     description:
       name: drift_dev
-      sha256: "544f2d34635bb62887068a05348cc7a29ecc310d10aefefd4a9cf07242b4cd0a"
+      sha256: "8c9bb294a2f1a053f6d09890798ad5ac1fe436d527a4aa3254499105b7b93f96"
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.2"
+    version: "2.12.1"
   ecache:
     dependency: "direct main"
     description:
@@ -1167,10 +1167,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: a6e590c838b18133bb482a2745ad77c5bb7715fb0451209e1a7567d416678b8e
+      sha256: "3c74dbf8763d36539f114c799d8a2d87343b5067e9d796ca22b5eb8437090ee3"
       url: "https://pub.dev"
     source: hosted
-    version: "1.10.0"
+    version: "1.9.1"
   mime:
     dependency: "direct main"
     description:
@@ -1710,18 +1710,18 @@ packages:
     dependency: transitive
     description:
       name: sqlparser
-      sha256: b3062cc9ec1151348f57af44b88d67c91b81858db3be76395cfa5ec094c59ce8
+      sha256: d0a6c3ad33d530da1b1306edb33d9948a0d4bf1ce0681a3587bbe47e86d1c82b
       url: "https://pub.dev"
     source: hosted
-    version: "0.31.1"
+    version: "0.31.3"
   stack_trace:
     dependency: transitive
     description:
       name: stack_trace
-      sha256: "73713990125a6d93122541237550ee3352a2d84baad52d375a4cad2eb9b7ce0b"
+      sha256: c3c7d8edb15bee7f0f74debd4b9c5f3c2ea86766fe4178eb2a18eb30a0bdaed5
       url: "https://pub.dev"
     source: hosted
-    version: "1.11.1"
+    version: "1.11.0"
   state_notifier:
     dependency: transitive
     description:
@@ -1734,10 +1734,10 @@ packages:
     dependency: transitive
     description:
       name: stream_channel
-      sha256: ba2aa5d8cc609d96bbb2899c28934f9e1af5cddbd60a827822ea467161eb54e7
+      sha256: "83615bee9045c1d322bbbd1ba209b7a749c2cbcdcb3fdd1df8eb488b3279c1c8"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.2"
+    version: "2.1.1"
   stream_transform:
     dependency: "direct main"
     description:
@@ -1814,10 +1814,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "5c2f730018264d276c20e4f1503fd1308dfbbae39ec8ee63c5236311ac06954b"
+      sha256: "75760ffd7786fffdfb9597c35c5b27eaeec82be8edfb6d71d32651128ed7aab8"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.1"
+    version: "0.6.0"
   timezone:
     dependency: transitive
     description:
@@ -1991,10 +1991,10 @@ packages:
     dependency: transitive
     description:
       name: web
-      sha256: "14f1f70c51119012600c5f1f60ca68efda5a9b6077748163c6af2893ec5df8fc"
+      sha256: dc8ccd225a2005c1be616fe02951e2e342092edf968cf0844220383757ef8f10
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.1-beta"
+    version: "0.1.4-beta"
   web_socket_channel:
     dependency: "direct main"
     description:
