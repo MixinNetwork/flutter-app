@@ -47,7 +47,7 @@ dependencies:
   desktop_lifecycle: ^0.1.1
   desktop_webview_window: ^0.2.3
   device_info_plus: ^9.0.3
-  dio: ^5.3.2
+  dio: ^5.3.3
   dio_smart_retry: ^5.0.0
   drift: ^2.11.1
   ecache: ^2.0.2
