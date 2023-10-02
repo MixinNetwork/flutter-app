@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../utils/extension/extension.dart';
-import '../utils/reg_exp_utils.dart';
-import '../utils/uri_utils.dart';
 import 'high_light_text.dart';
 
 class MoreExtendedText extends HookConsumerWidget {
@@ -95,21 +93,15 @@ class _MoreExtendedText extends HookConsumerWidget {
           resultText = resultText.substring(0, endIndex);
         }
 
-        final highlightTextSpans = uriRegExp
-            .allMatchesAndSort(resultText)
-            .map(
-              (e) => HighlightTextSpan(
-                e[0]!,
-                style: TextStyle(
-                  color: context.theme.accent,
-                ),
-                onTap: () => openUri(context, e[0]!),
-              ),
-            )
-            .toList();
+        final spans = TextMatcher.applyTextMatchers([
+          TextSpan(text: resultText, style: style)
+        ], [
+          UrlTextMatcher(context),
+          EmojiTextMatcher(),
+        ]).toList();
+
         return TextSpan(
-          children:
-              buildHighlightTextSpan(resultText, highlightTextSpans, style),
+          children: spans,
         );
       },
       [text, style, endIndex],

@@ -467,7 +467,7 @@ class SearchItem extends StatelessWidget {
                           child: Row(
                             children: [
                               Flexible(
-                                child: HighlightText(
+                                child: CustomText(
                                   name,
                                   maxLines: maxLines ? null : 1,
                                   overflow:
@@ -476,14 +476,14 @@ class SearchItem extends StatelessWidget {
                                     color: context.theme.text,
                                     fontSize: nameFontSize,
                                   ),
-                                  highlightTextSpans: [
-                                    if (nameHighlight)
-                                      HighlightTextSpan(
-                                        keyword,
-                                        style: TextStyle(
-                                          color: context.theme.accent,
-                                        ),
+                                  textMatchers: [
+                                    EmojiTextMatcher(),
+                                    KeyWordTextMatcher(
+                                      keyword,
+                                      style: TextStyle(
+                                        color: context.theme.accent,
                                       ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -518,7 +518,7 @@ class SearchItem extends StatelessWidget {
                               ),
                             ),
                           Expanded(
-                            child: HighlightText(
+                            child: CustomText(
                               description!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -526,8 +526,9 @@ class SearchItem extends StatelessWidget {
                                 color: context.theme.secondaryText,
                                 fontSize: 14,
                               ),
-                              highlightTextSpans: [
-                                HighlightTextSpan(
+                              textMatchers: [
+                                EmojiTextMatcher(),
+                                KeyWordTextMatcher(
                                   keyword,
                                   style: TextStyle(
                                     color: context.theme.accent,

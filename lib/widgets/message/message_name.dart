@@ -26,7 +26,7 @@ class MessageName extends ConsumerWidget {
     final showIdentityNumber = ref.watch(
       settingProvider.select((value) => value.messageShowIdentityNumber),
     );
-    Widget widget = HighlightText(
+    Widget widget = CustomText(
       userName,
       style: TextStyle(
         fontSize: context.messageStyle.secondaryFontSize,
