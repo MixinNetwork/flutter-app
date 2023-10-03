@@ -31,6 +31,14 @@ Future<String?> _encodeBlurHash(String path) async {
 }
 
 extension XFileExtension on XFile {
+  bool get isImage => {
+        'image/jpeg',
+        'image/png',
+        'image/bmp',
+        'image/webp',
+        'image/gif',
+      }.contains(mimeType?.toLowerCase());
+
   bool get isVideo =>
       mimeType != null &&
       ([
@@ -56,6 +64,7 @@ extension FileRelativePath on File {
 
 extension StringPathRelativePath on String {
   String get pathBasename => basename(this);
+
   String get pathBasenameWithoutExtension => basenameWithoutExtension(this);
 
   String get fileExtension => extension(this);
