@@ -117,4 +117,9 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
       .customSelect('SELECT COUNT(1) as _result FROM message_mentions')
       .map((p0) => p0.read<int>('_result'))
       .getSingle();
+
+  Future<void> clearMessageMentionByConversationId(String conversationId) =>
+      (db.delete(db.messageMentions)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .go();
 }
