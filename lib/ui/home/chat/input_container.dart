@@ -947,6 +947,7 @@ class _HighlightTextEditingController extends TextEditingController {
   }
 
   TextSpan _buildTextSpan(String text, TextStyle? style) => TextSpan(
+        style: style,
         children: TextMatcher.applyTextMatchers([
           TextSpan(text: text, style: style)
         ], [
