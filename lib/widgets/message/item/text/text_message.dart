@@ -61,10 +61,10 @@ class TextMessage extends HookConsumerWidget {
               color: context.theme.text,
             ),
             textMatchers: [
-              BotNumberTextMatcher(context),
               UrlTextMatcher(context),
               MailTextMatcher(context),
               MentionTextMatcher(context, mentionMap),
+              BotNumberTextMatcher(context),
               EmojiTextMatcher(),
               KeyWordTextMatcher(
                 keyword,
