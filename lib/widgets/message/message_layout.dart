@@ -231,10 +231,9 @@ class _RenderMessageLayout extends RenderBox
 
     final statusX = widthLimit - statusChild.size.width - spacing;
 
-    final positionForOffset = renderParagraph.getPositionForOffset(Offset(
-      statusX,
-      contentChild.size.height,
-    ));
+    // Get the last text position.
+    final positionForOffset = renderParagraph
+        .getPositionForOffset(contentChild.paintBounds.bottomRight);
 
     final boxesForSelection =
         renderParagraph.getBoxesForSelection(TextSelection(
