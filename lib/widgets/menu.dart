@@ -26,7 +26,7 @@ class _OffsetCubit extends SimpleCubit<Offset?> {
 extension ContextMenuPortalEntrySender on BuildContext {
   void sendMenuPosition(Offset offset) => read<_OffsetCubit>().emit(offset);
 
-  void closeMenu() => read<_OffsetCubit>().emit(null);
+  void closeMenu() => read<_OffsetCubit?>()?.emit(null);
 }
 
 typedef CustomPopupMenuItemBuilder<T> = List<CustomPopupMenuItem<T>> Function(
@@ -177,7 +177,7 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
                 },
                 child: CustomSingleChildLayout(
                   delegate: PositionedLayoutDelegate(position: offset),
-                  child: _ContextMenuPage(menus: buildMenus()),
+                  child: ContextMenuPage(menus: buildMenus()),
                 ),
               );
             }
@@ -267,8 +267,9 @@ class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
       position != oldDelegate.position;
 }
 
-class _ContextMenuPage extends StatelessWidget {
-  const _ContextMenuPage({
+class ContextMenuPage extends StatelessWidget {
+  const ContextMenuPage({
+    super.key,
     required this.menus,
   });
 
@@ -436,7 +437,7 @@ class SubContextMenu extends StatelessWidget {
           target: Alignment.centerRight,
           offset: Offset(-8, 0),
         ),
-        portal: _ContextMenuPage(menus: menus),
+        portal: ContextMenuPage(menus: menus),
         child: ContextMenu._sub(
           icon: icon,
           title: title,

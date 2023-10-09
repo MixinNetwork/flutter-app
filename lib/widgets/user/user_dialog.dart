@@ -16,6 +16,7 @@ import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';
 import '../conversation/verified_or_bot_widget.dart';
 import '../dialog.dart';
+import '../high_light_text.dart';
 import '../menu.dart';
 import '../more_extended_text.dart';
 import '../toast.dart';
@@ -173,7 +174,7 @@ class _UserProfileBody extends StatelessWidget {
               children: [
                 Flexible(
                   child: SelectionArea(
-                    child: Text(
+                    child: CustomText(
                       user.fullName ?? '',
                       style: TextStyle(
                         color: context.theme.text,

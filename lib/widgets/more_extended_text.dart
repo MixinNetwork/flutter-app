@@ -2,8 +2,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_logger/mixin_logger.dart';
+
 import '../utils/extension/extension.dart';
 import 'high_light_text.dart';
+import 'menu.dart';
 
 class MoreExtendedText extends HookConsumerWidget {
   const MoreExtendedText(
@@ -111,6 +114,21 @@ class _MoreExtendedText extends HookConsumerWidget {
       TextSpan(
         children: [textSpan, if (endIndex != -1) overflowTextSpan],
       ),
+      contextMenuBuilder: (context, selectableState) {
+        i('selectableState.currentTextEditingValue:${selectableState.currentTextEditingValue}');
+        selectableState.textEditingValue;
+        return MixinSelectionToolbar(
+        anchor: selectableState.contextMenuAnchors.primaryAnchor,
+        menus: [
+          ContextMenu(
+            title: context.l10n.copy,
+            onTap: () {
+              selectableState.copySelection(SelectionChangedCause.toolbar);
+            },
+          ),
+        ],
+      );
+      },
       textAlign: TextAlign.center,
     );
   }

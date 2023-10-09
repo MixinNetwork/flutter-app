@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -15,6 +16,7 @@ import '../utils/emoji.dart';
 import '../utils/extension/extension.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
+import 'menu.dart';
 import 'user/user_dialog.dart';
 
 class CustomText extends HookConsumerWidget {
@@ -672,5 +674,105 @@ class HighlightStarLinkText extends HookConsumerWidget {
       overflow: overflow,
       style: style,
     );
+  }
+}
+
+class MixinSelectionToolbar extends StatelessWidget {
+  const MixinSelectionToolbar({
+    super.key,
+    required this.menus,
+    required this.anchor,
+  });
+
+  final List<Widget> menus;
+  final Offset anchor;
+
+  @override
+  Widget build(BuildContext context) => CustomSingleChildLayout(
+        delegate: PositionedLayoutDelegate(position: anchor),
+        child: ContextMenuPage(menus: menus),
+      );
+}
+
+class CustomSelectableRegion extends StatefulWidget {
+  const CustomSelectableRegion({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => CustomSelectableRegionState();
+}
+
+class CustomSelectableRegionState extends State<CustomSelectableRegion>
+    with TextSelectionDelegate
+    implements SelectionRegistrar {
+  final _focusNode = FocusNode();
+
+  @override
+  void add(Selectable selectable) {
+    // TODO: implement add
+  }
+
+  @override
+  void bringIntoView(TextPosition position) {
+    // TODO: implement bringIntoView
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    throw UnimplementedError();
+    // return Focus(
+    //   focusNode: _focusNode,
+    //   includeSemantics: false,
+    //   child: SelectionContainer(
+    //     registrar: this,
+    //     delegate: null,
+    //     child: widget.child,
+    //   ),
+    // );
+  }
+
+  @override
+  void copySelection(SelectionChangedCause cause) {
+    // TODO: implement copySelection
+  }
+
+  @override
+  void cutSelection(SelectionChangedCause cause) {
+    // TODO: implement cutSelection
+  }
+
+  @override
+  void hideToolbar([bool hideHandles = true]) {
+    // TODO: implement hideToolbar
+  }
+
+  @override
+  Future<void> pasteText(SelectionChangedCause cause) {
+    // TODO: implement pasteText
+    throw UnimplementedError();
+  }
+
+  @override
+  void remove(Selectable selectable) {
+    // TODO: implement remove
+  }
+
+  @override
+  void selectAll(SelectionChangedCause cause) {
+    // TODO: implement selectAll
+  }
+
+  @override
+  // TODO: implement textEditingValue
+  TextEditingValue get textEditingValue => throw UnimplementedError();
+
+  @override
+  void userUpdateTextEditingValue(
+      TextEditingValue value, SelectionChangedCause cause) {
+    // TODO: implement userUpdateTextEditingValue
   }
 }

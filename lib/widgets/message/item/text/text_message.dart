@@ -8,6 +8,7 @@ import '../../../../ui/provider/mention_cache_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../high_light_text.dart';
+import '../../../menu.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
@@ -54,6 +55,9 @@ class TextMessage extends HookConsumerWidget {
       child: MessageLayout(
         spacing: 6,
         content: SelectionArea(
+          // contextMenuBuilder: (context, state) {
+          //   context.sendMenuPosition(state.contextMenuAnchors.primaryAnchor);
+          // },
           child: CustomText(
             content,
             style: TextStyle(
