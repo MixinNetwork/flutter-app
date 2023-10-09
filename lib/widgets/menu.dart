@@ -185,11 +185,11 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
             return const SizedBox();
           }),
           child: InteractiveDecoratedBox(
-            onRightClick: (PointerUpEvent pointerUpEvent) {
+            onRightClick: (event) {
               if (!interactive) {
                 return;
               }
-              offsetCubit.emit(pointerUpEvent.position);
+              offsetCubit.emit(event.globalPosition);
             },
             onLongPress: (details) {
               if (!interactive) {
