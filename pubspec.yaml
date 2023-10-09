@@ -154,7 +154,7 @@ dependencies:
   webview_flutter: ^4.4.0
   win32: ^5.0.9
   win_toast: ^0.3.0
-  window_manager: ^0.3.6
+  window_manager: ^0.3.7
   window_size:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
