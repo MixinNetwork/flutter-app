@@ -15,6 +15,7 @@ import '../db/dao/user_dao.dart';
 import '../ui/provider/conversation_provider.dart';
 import '../utils/emoji.dart';
 import '../utils/extension/extension.dart';
+import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
 import 'menu.dart';
@@ -704,6 +705,54 @@ class HighlightStarLinkText extends HookConsumerWidget {
       overflow: overflow,
       style: style,
     );
+  }
+}
+
+class MixinAdaptiveSelectionToolbar extends StatelessWidget {
+  const MixinAdaptiveSelectionToolbar(
+      {super.key, required this.editableTextState});
+
+  final EditableTextState editableTextState;
+
+  @override
+  Widget build(BuildContext context) {
+    if (kPlatformIsDesktop) {
+      return MixinSelectionToolbar(
+        menus: [
+          if (editableTextState.copyEnabled)
+            ContextMenu(
+              title: MaterialLocalizations.of(context).copyButtonLabel,
+              onTap: () {
+                editableTextState.copySelection(SelectionChangedCause.toolbar);
+              },
+            ),
+          if (editableTextState.cutEnabled)
+            ContextMenu(
+              title: MaterialLocalizations.of(context).cutButtonLabel,
+              onTap: () {
+                editableTextState.cutSelection(SelectionChangedCause.toolbar);
+              },
+            ),
+          if (editableTextState.selectAllEnabled)
+            ContextMenu(
+              title: MaterialLocalizations.of(context).selectAllButtonLabel,
+              onTap: () {
+                editableTextState.selectAll(SelectionChangedCause.toolbar);
+              },
+            ),
+          if (editableTextState.pasteEnabled)
+            ContextMenu(
+              title: MaterialLocalizations.of(context).pasteButtonLabel,
+              onTap: () {
+                editableTextState.pasteText(SelectionChangedCause.toolbar);
+              },
+            ),
+        ],
+        anchor: editableTextState.contextMenuAnchors.primaryAnchor,
+      );
+    }
+    return AdaptiveTextSelectionToolbar.editableText(
+        editableTextState: editableTextState);
   }
 }
 

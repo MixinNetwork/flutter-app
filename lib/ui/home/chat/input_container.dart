@@ -500,6 +500,8 @@ class _SendTextField extends HookConsumerWidget {
                 ),
               ),
               selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
+              contextMenuBuilder: (context, state) =>
+                  MixinAdaptiveSelectionToolbar(editableTextState: state),
             ),
             if (!hasInputText)
               Positioned.fill(
