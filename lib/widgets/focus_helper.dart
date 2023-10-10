@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 import '../utils/app_lifecycle.dart';
 import '../utils/logger.dart';
 
@@ -71,8 +72,6 @@ void useEditableTextAutoCleanSelection() {
       if (!isAppActive) return;
 
       final primaryFocus = FocusManager.instance.primaryFocus;
-
-      i('previous focus: ${previousFocusRef.value} to $primaryFocus');
 
       if (previousFocusRef.value == primaryFocus) return;
 

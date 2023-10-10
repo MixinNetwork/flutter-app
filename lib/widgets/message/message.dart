@@ -42,7 +42,6 @@ import '../../utils/system/clipboard.dart';
 import '../avatar_view/avatar_view.dart';
 import '../interactive_decorated_box.dart';
 import '../menu.dart';
-import '../selectable.dart';
 import '../toast.dart';
 import '../user/user_dialog.dart';
 import '../user_selector/conversation_selector.dart';
@@ -60,6 +59,7 @@ import 'item/secret_message.dart';
 import 'item/sticker_message.dart';
 import 'item/stranger_message.dart';
 import 'item/system_message.dart';
+import 'item/text/selectable.dart';
 import 'item/text/text_message.dart';
 import 'item/transcript_message.dart';
 import 'item/transfer/transfer_message.dart';
@@ -171,6 +171,7 @@ Widget _buildTextCopyMenu({
         final selectableRegion = _findSelectableRegionState(context);
         final status = selectableRegion?.selectable?.value.status;
         final content = selectableRegion?.selectable?.getSelectedContent();
+        d('status: $status, content: $content');
         if (status == SelectionStatus.uncollapsed && content != null) {
           await Clipboard.setData(ClipboardData(text: content.plainText));
         } else {

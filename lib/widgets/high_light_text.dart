@@ -15,7 +15,6 @@ import '../db/dao/user_dao.dart';
 import '../ui/provider/conversation_provider.dart';
 import '../utils/emoji.dart';
 import '../utils/extension/extension.dart';
-import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
 import 'menu.dart';
@@ -60,66 +59,42 @@ class CustomText extends HookConsumerWidget {
           .toList(),
       [text, style, textMatchers],
     );
-    return Text.rich(
-      TextSpan(children: spans),
-      style: style,
-      maxLines: maxLines,
-      overflow: overflow,
-      textAlign: textAlign,
+
+    final defaultTextStyle = DefaultTextStyle.of(context);
+    var effectiveTextStyle = style;
+    if (style == null || style!.inherit) {
+      effectiveTextStyle = defaultTextStyle.style.merge(style);
+    }
+    if (MediaQuery.boldTextOf(context)) {
+      effectiveTextStyle = effectiveTextStyle!
+          .merge(const TextStyle(fontWeight: FontWeight.bold));
+    }
+    final registrar = SelectionContainer.maybeOf(context);
+    final textScaler = MediaQuery.textScalerOf(context);
+
+    Widget result = _CustomRichText(
+      text: TextSpan(children: spans, style: effectiveTextStyle),
+      textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+      softWrap: defaultTextStyle.softWrap,
+      overflow:
+          overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+      textScaler: textScaler,
+      maxLines: maxLines ?? defaultTextStyle.maxLines,
+      textWidthBasis: defaultTextStyle.textWidthBasis,
+      textHeightBehavior: defaultTextStyle.textHeightBehavior ??
+          DefaultTextHeightBehavior.maybeOf(context),
+      selectionRegistrar: registrar,
+      selectionColor: DefaultSelectionStyle.of(context).selectionColor ??
+          DefaultSelectionStyle.defaultColor,
     );
-  }
-}
-
-class CustomSelectableText extends HookWidget {
-  const CustomSelectableText(
-    String this.data, {
-    super.key,
-    this.style,
-    this.textMatchers,
-    this.maxLines,
-    this.textAlign,
-    this.selectionHeightStyle = ui.BoxHeightStyle.includeLineSpacingMiddle,
-    this.enableInteractiveSelection = true,
-  }) : textSpan = null;
-
-  const CustomSelectableText.rich(
-    InlineSpan this.textSpan, {
-    super.key,
-    this.style,
-    this.textMatchers,
-    this.maxLines,
-    this.textAlign,
-    this.selectionHeightStyle = ui.BoxHeightStyle.includeLineSpacingMiddle,
-    this.enableInteractiveSelection = true,
-  }) : data = null;
-
-  final String? data;
-  final InlineSpan? textSpan;
-
-  final TextStyle? style;
-  final Iterable<TextMatcher>? textMatchers;
-  final int? maxLines;
-  final TextAlign? textAlign;
-  final ui.BoxHeightStyle selectionHeightStyle;
-  final bool enableInteractiveSelection;
-
-  @override
-  Widget build(BuildContext context) {
-    final spans = useMemoized(
-      () => TextMatcher.applyTextMatchers(
-              [textSpan ?? TextSpan(text: data, style: style)],
-              textMatchers ?? [EmojiTextMatcher()])
-          .toList(),
-      [data, style, textMatchers],
-    );
-    return SelectableText.rich(
-      TextSpan(children: spans),
-      style: style,
-      maxLines: maxLines,
-      textAlign: textAlign,
-      selectionHeightStyle: selectionHeightStyle,
-      enableInteractiveSelection: enableInteractiveSelection,
-    );
+    if (registrar != null) {
+      result = MouseRegion(
+        cursor: DefaultSelectionStyle.of(context).mouseCursor ??
+            SystemMouseCursors.text,
+        child: result,
+      );
+    }
+    return result;
   }
 }
 
@@ -749,90 +724,65 @@ class MixinSelectionToolbar extends StatelessWidget {
       );
 }
 
-class CustomSelectableRegion extends StatefulWidget {
-  const CustomSelectableRegion({
-    super.key,
-    required this.child,
+class _CustomRichText extends RichText {
+  _CustomRichText({
+    required super.text,
+    super.textAlign = TextAlign.start,
+    super.softWrap = true,
+    super.overflow = TextOverflow.clip,
+    super.textScaler = TextScaler.noScaling,
+    super.maxLines,
+    super.textWidthBasis = TextWidthBasis.parent,
+    super.textHeightBehavior,
+    super.selectionRegistrar,
+    super.selectionColor,
   });
 
-  final Widget child;
-
   @override
-  State<StatefulWidget> createState() => CustomSelectableRegionState();
-}
-
-class CustomSelectableRegionState extends State<CustomSelectableRegion>
-    with TextSelectionDelegate
-    implements SelectionRegistrar {
-  final _focusNode = FocusNode();
-
-  final _selectionDelegate = MixinSelectionDelegate();
-
-  @override
-  void add(Selectable selectable) {
-    // TODO: implement add
-    i('$this add selectable $selectable');
-  }
-
-  @override
-  void bringIntoView(TextPosition position) {
-    // TODO: implement bringIntoView
-  }
-
-  @override
-  Widget build(BuildContext context) => Focus(
-        focusNode: _focusNode,
-        includeSemantics: false,
-        child: SelectionContainer(
-          registrar: this,
-          delegate: _selectionDelegate,
-          child: widget.child,
-        ),
+  RenderParagraph createRenderObject(BuildContext context) =>
+      _CustomRenderParagraph(
+        text,
+        textAlign: textAlign,
+        textDirection: textDirection ?? Directionality.of(context),
+        softWrap: softWrap,
+        overflow: overflow,
+        textScaler: textScaler,
+        maxLines: maxLines,
+        strutStyle: strutStyle,
+        textWidthBasis: textWidthBasis,
+        textHeightBehavior: textHeightBehavior,
+        locale: locale ?? Localizations.maybeLocaleOf(context),
+        registrar: selectionRegistrar,
+        selectionColor: selectionColor,
       );
-
-  @override
-  void copySelection(SelectionChangedCause cause) {
-    // TODO: implement copySelection
-  }
-
-  @override
-  void cutSelection(SelectionChangedCause cause) {
-    // TODO: implement cutSelection
-  }
-
-  @override
-  void hideToolbar([bool hideHandles = true]) {
-    // TODO: implement hideToolbar
-  }
-
-  @override
-  Future<void> pasteText(SelectionChangedCause cause) {
-    // TODO: implement pasteText
-    throw UnimplementedError();
-  }
-
-  @override
-  void remove(Selectable selectable) {
-    // TODO: implement remove
-  }
-
-  @override
-  void selectAll(SelectionChangedCause cause) {
-    // TODO: implement selectAll
-  }
-
-  @override
-  // TODO: implement textEditingValue
-  TextEditingValue get textEditingValue => throw UnimplementedError();
-
-  @override
-  void userUpdateTextEditingValue(
-      TextEditingValue value, SelectionChangedCause cause) {
-    // TODO: implement userUpdateTextEditingValue
-  }
 }
 
-class MixinSelectionDelegate extends MultiSelectableSelectionContainerDelegate {
+class _CustomRenderParagraph extends RenderParagraph {
+  _CustomRenderParagraph(
+    super.text, {
+    required super.textDirection,
+    super.softWrap = true,
+    super.textAlign,
+    super.overflow = TextOverflow.clip,
+    super.maxLines,
+    super.strutStyle,
+    super.textScaler,
+    super.textHeightBehavior,
+    super.textWidthBasis,
+    super.locale,
+    super.registrar,
+    super.selectionColor,
+  });
+
   @override
-  void ensureChildUpdated(Selectable selectable) {}
+  List<TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.max,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) =>
+      super.getBoxesForSelection(
+        selection,
+        boxHeightStyle: boxHeightStyle,
+        boxWidthStyle: boxWidthStyle,
+      );
 }

@@ -12,8 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import 'menu.dart';
-
 const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.touch,
   PointerDeviceKind.stylus,
@@ -229,16 +227,16 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   void _updateSelectionStatus() {
-    final TextSelection selection;
-    final geometry = _selectionDelegate.value;
-    switch (geometry.status) {
-      case SelectionStatus.uncollapsed:
-      case SelectionStatus.collapsed:
-        selection = const TextSelection(baseOffset: 0, extentOffset: 1);
-      case SelectionStatus.none:
-        selection = const TextSelection.collapsed(offset: 1);
-    }
-    textEditingValue = TextEditingValue(text: '__', selection: selection);
+    // final TextSelection selection;
+    // final geometry = _selectionDelegate.value;
+    // switch (geometry.status) {
+    //   case SelectionStatus.uncollapsed:
+    //   case SelectionStatus.collapsed:
+    //     selection = const TextSelection(baseOffset: 0, extentOffset: 1);
+    //   case SelectionStatus.none:
+    //     selection = const TextSelection.collapsed(offset: 1);
+    // }
+    // textEditingValue = TextEditingValue(text: '__', selection: selection);
     if (_hasSelectionOverlayGeometry) {
       _updateSelectionOverlay();
     } else {
@@ -428,57 +426,6 @@ class SelectableRegionState extends State<SelectableRegion>
       }
     }
     return false;
-  }
-
-  void _handleRightClickDown(TapDownDetails details) {
-    final previousSecondaryTapDownPosition = lastSecondaryTapDownPosition;
-    final toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
-    lastSecondaryTapDownPosition = details.globalPosition;
-    widget.focusNode.requestFocus();
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.windows:
-        // If lastSecondaryTapDownPosition is within the current selection then
-        // keep the current selection, if not then collapse it.
-        final lastSecondaryTapDownPositionWasOnActiveSelection =
-            _positionIsOnActiveSelection(
-                globalPosition: details.globalPosition);
-        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _collapseSelectionAt(offset: lastSecondaryTapDownPosition!);
-        }
-        _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
-      case TargetPlatform.iOS:
-        _selectWordAt(offset: lastSecondaryTapDownPosition!);
-        _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
-      case TargetPlatform.macOS:
-        if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition &&
-            toolbarIsVisible) {
-          hideToolbar();
-          return;
-        }
-        _selectWordAt(offset: lastSecondaryTapDownPosition!);
-        _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
-      case TargetPlatform.linux:
-        if (toolbarIsVisible) {
-          hideToolbar();
-          return;
-        }
-        // If lastSecondaryTapDownPosition is within the current selection then
-        // keep the current selection, if not then collapse it.
-        final lastSecondaryTapDownPositionWasOnActiveSelection =
-            _positionIsOnActiveSelection(
-                globalPosition: details.globalPosition);
-        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _collapseSelectionAt(offset: lastSecondaryTapDownPosition!);
-        }
-        _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
-    }
-    _updateSelectedContentIfNeeded();
   }
 
   // Selection update helper methods.
@@ -674,7 +621,7 @@ class SelectableRegionState extends State<SelectableRegion>
     }
     final start = _selectionDelegate.value.startSelectionPoint;
     final end = _selectionDelegate.value.endSelectionPoint;
-    _selectionOverlay = CustomSelectionOverlay(
+    _selectionOverlay = SelectionOverlay(
         context: context,
         debugRequiredFor: widget,
         startHandleType: start?.handleType ?? TextSelectionHandleType.left,
@@ -1481,40 +1428,5 @@ class _SelectableRegionContainerDelegate
     _hasReceivedStartEvent.removeWhere(
         (Selectable selectable) => !selectableSet.contains(selectable));
     super.didChangeSelectables();
-  }
-}
-
-class CustomSelectionOverlay extends SelectionOverlay {
-  CustomSelectionOverlay(
-      {required super.context,
-      required super.startHandleType,
-      required super.lineHeightAtStart,
-      required super.endHandleType,
-      required super.lineHeightAtEnd,
-      required super.selectionEndpoints,
-      required super.selectionControls,
-      required super.selectionDelegate,
-      required super.clipboardStatus,
-      required super.startHandleLayerLink,
-      required super.endHandleLayerLink,
-      required super.toolbarLayerLink,
-      super.debugRequiredFor,
-      super.startHandlesVisible,
-      super.onStartHandleDragStart,
-      super.onStartHandleDragUpdate,
-      super.onStartHandleDragEnd,
-      super.endHandlesVisible,
-      super.onEndHandleDragStart,
-      super.onEndHandleDragUpdate,
-      super.onEndHandleDragEnd,
-      super.toolbarVisible,
-      super.dragStartBehavior = DragStartBehavior.start,
-      super.onSelectionHandleTapped,
-      super.magnifierConfiguration});
-
-  @override
-  void showToolbar({BuildContext? context, WidgetBuilder? contextMenuBuilder}) {
-    // super.showToolbar(context: context, contextMenuBuilder: contextMenuBuilder);
-    context?.sendMenuPosition(Offset.zero);
   }
 }
