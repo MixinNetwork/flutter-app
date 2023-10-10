@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:emojis/emoji.dart';
 import 'package:equatable/equatable.dart';
@@ -14,6 +15,7 @@ import '../db/dao/user_dao.dart';
 import '../ui/provider/conversation_provider.dart';
 import '../utils/emoji.dart';
 import '../utils/extension/extension.dart';
+import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
 import 'menu.dart';
@@ -64,6 +66,59 @@ class CustomText extends HookConsumerWidget {
       maxLines: maxLines,
       overflow: overflow,
       textAlign: textAlign,
+    );
+  }
+}
+
+class CustomSelectableText extends HookWidget {
+  const CustomSelectableText(
+    String this.data, {
+    super.key,
+    this.style,
+    this.textMatchers,
+    this.maxLines,
+    this.textAlign,
+    this.selectionHeightStyle = ui.BoxHeightStyle.includeLineSpacingMiddle,
+    this.enableInteractiveSelection = true,
+  }) : textSpan = null;
+
+  const CustomSelectableText.rich(
+    InlineSpan this.textSpan, {
+    super.key,
+    this.style,
+    this.textMatchers,
+    this.maxLines,
+    this.textAlign,
+    this.selectionHeightStyle = ui.BoxHeightStyle.includeLineSpacingMiddle,
+    this.enableInteractiveSelection = true,
+  }) : data = null;
+
+  final String? data;
+  final InlineSpan? textSpan;
+
+  final TextStyle? style;
+  final Iterable<TextMatcher>? textMatchers;
+  final int? maxLines;
+  final TextAlign? textAlign;
+  final ui.BoxHeightStyle selectionHeightStyle;
+  final bool enableInteractiveSelection;
+
+  @override
+  Widget build(BuildContext context) {
+    final spans = useMemoized(
+      () => TextMatcher.applyTextMatchers(
+              [textSpan ?? TextSpan(text: data, style: style)],
+              textMatchers ?? [EmojiTextMatcher()])
+          .toList(),
+      [data, style, textMatchers],
+    );
+    return SelectableText.rich(
+      TextSpan(children: spans),
+      style: style,
+      maxLines: maxLines,
+      textAlign: textAlign,
+      selectionHeightStyle: selectionHeightStyle,
+      enableInteractiveSelection: enableInteractiveSelection,
     );
   }
 }
@@ -711,9 +766,12 @@ class CustomSelectableRegionState extends State<CustomSelectableRegion>
     implements SelectionRegistrar {
   final _focusNode = FocusNode();
 
+  final _selectionDelegate = MixinSelectionDelegate();
+
   @override
   void add(Selectable selectable) {
     // TODO: implement add
+    i('$this add selectable $selectable');
   }
 
   @override
@@ -722,18 +780,15 @@ class CustomSelectableRegionState extends State<CustomSelectableRegion>
   }
 
   @override
-  Widget build(BuildContext context) {
-    throw UnimplementedError();
-    // return Focus(
-    //   focusNode: _focusNode,
-    //   includeSemantics: false,
-    //   child: SelectionContainer(
-    //     registrar: this,
-    //     delegate: null,
-    //     child: widget.child,
-    //   ),
-    // );
-  }
+  Widget build(BuildContext context) => Focus(
+        focusNode: _focusNode,
+        includeSemantics: false,
+        child: SelectionContainer(
+          registrar: this,
+          delegate: _selectionDelegate,
+          child: widget.child,
+        ),
+      );
 
   @override
   void copySelection(SelectionChangedCause cause) {
@@ -775,4 +830,9 @@ class CustomSelectableRegionState extends State<CustomSelectableRegion>
       TextEditingValue value, SelectionChangedCause cause) {
     // TODO: implement userUpdateTextEditingValue
   }
+}
+
+class MixinSelectionDelegate extends MultiSelectableSelectionContainerDelegate {
+  @override
+  void ensureChildUpdated(Selectable selectable) {}
 }

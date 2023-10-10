@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide SelectableRegion;
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../ui/home/chat/chat_page.dart';
@@ -8,7 +9,7 @@ import '../../../../ui/provider/mention_cache_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../high_light_text.dart';
-import '../../../menu.dart';
+import '../../../selectable.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
@@ -51,14 +52,16 @@ class TextMessage extends HookConsumerWidget {
       keys: [content],
     ).requireData;
 
+    final focusNode = useFocusNode(debugLabel: 'text selection focus');
+
     return MessageBubble(
-      child: MessageLayout(
-        spacing: 6,
-        content: SelectionArea(
-          // contextMenuBuilder: (context, state) {
-          //   context.sendMenuPosition(state.contextMenuAnchors.primaryAnchor);
-          // },
-          child: CustomText(
+      child: SelectableRegion(
+        focusNode: focusNode,
+        contextMenuBuilder: (context, state) => const SizedBox(),
+        selectionControls: desktopTextSelectionHandleControls,
+        child: MessageLayout(
+          spacing: 6,
+          content: CustomText(
             content,
             style: TextStyle(
               fontSize: context.messageStyle.primaryFontSize,
@@ -79,8 +82,8 @@ class TextMessage extends HookConsumerWidget {
               ),
             ],
           ),
+          dateAndStatus: const MessageDatetimeAndStatus(),
         ),
-        dateAndStatus: const MessageDatetimeAndStatus(),
       ),
     );
   }

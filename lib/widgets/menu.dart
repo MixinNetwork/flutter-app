@@ -154,34 +154,14 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
         onClose: () => offsetCubit.emit(null),
         child: PortalTarget(
           visible: visible,
-          portalFollower: HookBuilder(builder: (context) {
-            final focusNode = useMemoized(FocusNode.new);
+          portalFollower: Builder(builder: (context) {
             final show = offset != null && visible;
-            useEffect(() {
-              if (!show) {
-                return;
-              }
-              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                focusNode.requestFocus();
-              });
-            }, [focusNode]);
             if (show) {
-              return Focus(
-                focusNode: focusNode,
-                onKeyEvent: (node, key) {
-                  if (key.logicalKey == LogicalKeyboardKey.escape) {
-                    offsetCubit.emit(null);
-                    return KeyEventResult.handled;
-                  }
-                  return KeyEventResult.ignored;
-                },
-                child: CustomSingleChildLayout(
-                  delegate: PositionedLayoutDelegate(position: offset),
-                  child: ContextMenuPage(menus: buildMenus()),
-                ),
+              return CustomSingleChildLayout(
+                delegate: PositionedLayoutDelegate(position: offset),
+                child: ContextMenuPage(menus: buildMenus()),
               );
             }
-
             return const SizedBox();
           }),
           child: InteractiveDecoratedBox(
@@ -200,7 +180,17 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
               }
             },
             onTap: onTap,
-            child: child,
+            child: Focus(
+              onKeyEvent: (node, key) {
+                final show = offset != null && visible;
+                if (show && key.logicalKey == LogicalKeyboardKey.escape) {
+                  offsetCubit.emit(null);
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: child,
+            ),
           ),
         ),
       ),

@@ -71,6 +71,9 @@ void useEditableTextAutoCleanSelection() {
       if (!isAppActive) return;
 
       final primaryFocus = FocusManager.instance.primaryFocus;
+
+      i('previous focus: ${previousFocusRef.value} to $primaryFocus');
+
       if (previousFocusRef.value == primaryFocus) return;
 
       _cleanSelection(previousFocusRef.value?.context);

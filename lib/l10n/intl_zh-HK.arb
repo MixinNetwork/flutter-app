@@ -91,6 +91,7 @@
 "copy" : "複製",
 "copyInvite" : "複製邀請鏈接",
 "copyLink" : "複製鏈接",
+"copySelectedText" : "複製已選擇的文本",
 "create" : "創建",
 "createCircle" : "新建圈子",
 "createConversation" : "新建會話",

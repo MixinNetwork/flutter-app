@@ -240,6 +240,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "copy": MessageLookupByLibrary.simpleMessage("复制"),
         "copyInvite": MessageLookupByLibrary.simpleMessage("复制邀请链接"),
         "copyLink": MessageLookupByLibrary.simpleMessage("复制链接"),
+        "copySelectedText": MessageLookupByLibrary.simpleMessage("复制已选择的文本"),
         "create": MessageLookupByLibrary.simpleMessage("创建"),
         "createCircle": MessageLookupByLibrary.simpleMessage("新建圈子"),
         "createConversation": MessageLookupByLibrary.simpleMessage("新建会话"),
