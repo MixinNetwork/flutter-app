@@ -607,6 +607,19 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
       updateKind: UpdateKind.update,
     );
   }
+
+  Selectable<bool> isBotGroup(String conversationId) {
+    return customSelect(
+        'SELECT (SELECT 1 FROM conversations INNER JOIN messages ON conversations.conversation_id = messages.conversation_id INNER JOIN users ON users.user_id = conversations.owner_id WHERE conversations.conversation_id = ?1 AND conversations.category = \'CONTACT\' AND users.app_id IS NOT NULL AND Length(users.app_id) > 0 AND messages.user_id != conversations.owner_id GROUP BY conversations.conversation_id HAVING Count(DISTINCT messages.user_id) >= 2) IS NOT NULL AS _c0',
+        variables: [
+          Variable<String>(conversationId)
+        ],
+        readsFrom: {
+          conversations,
+          messages,
+          users,
+        }).map((QueryRow row) => row.read<bool>('_c0'));
+  }
 }
 typedef BaseConversationItemCount$where = Expression<bool> Function(
     Conversations conversation,

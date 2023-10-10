@@ -33,9 +33,6 @@ class SlideCategoryStateNotifier
   SlideCategoryStateNotifier()
       : super(const SlideCategoryState(type: SlideCategoryType.chats));
 
-  @override
-  SlideCategoryState get state => super.state;
-
   void select(SlideCategoryType type, [String? id]) =>
       state = SlideCategoryState(type: type, id: id);
 

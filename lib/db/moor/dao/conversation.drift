@@ -252,3 +252,19 @@ UPDATE conversations SET unseen_message_count
     last_message_id = :lastMessageId,
     last_message_created_at = :lastMessageCreatedAt
     WHERE conversation_id = :conversationId;
+
+isBotGroup:
+SELECT (SELECT 1
+        FROM   conversations
+               INNER JOIN messages
+                       ON conversations.conversation_id =
+                          messages.conversation_id
+               INNER JOIN users
+                       ON users.user_id = conversations.owner_id
+        WHERE  conversations.conversation_id = :conversationId
+               AND conversations.category = 'CONTACT'
+               AND users.app_id IS NOT NULL
+               AND Length(users.app_id) > 0
+               AND messages.user_id != conversations.owner_id
+        GROUP  BY conversations.conversation_id
+        HAVING Count(DISTINCT messages.user_id) >= 2) IS NOT NULL;

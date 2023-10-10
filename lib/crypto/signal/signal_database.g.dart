@@ -31,9 +31,10 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   @override
   List<GeneratedColumn> get $columns => [groupId, senderId, record];
   @override
-  String get aliasedName => _alias ?? 'sender_keys';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'sender_keys';
+  String get actualTableName => $name;
+  static const String $name = 'sender_keys';
   @override
   VerificationContext validateIntegrity(Insertable<SenderKey> instance,
       {bool isInserting = false}) {
@@ -298,9 +299,10 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
         timestamp
       ];
   @override
-  String get aliasedName => _alias ?? 'identities';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'identities';
+  String get actualTableName => $name;
+  static const String $name = 'identities';
   @override
   VerificationContext validateIntegrity(Insertable<Identitie> instance,
       {bool isInserting = false}) {
@@ -652,9 +654,10 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   @override
   List<GeneratedColumn> get $columns => [id, prekeyId, record];
   @override
-  String get aliasedName => _alias ?? 'prekeys';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'prekeys';
+  String get actualTableName => $name;
+  static const String $name = 'prekeys';
   @override
   VerificationContext validateIntegrity(Insertable<Prekey> instance,
       {bool isInserting = false}) {
@@ -868,9 +871,10 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   @override
   List<GeneratedColumn> get $columns => [id, prekeyId, record, timestamp];
   @override
-  String get aliasedName => _alias ?? 'signed_prekeys';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'signed_prekeys';
+  String get actualTableName => $name;
+  static const String $name = 'signed_prekeys';
   @override
   VerificationContext validateIntegrity(Insertable<SignedPrekey> instance,
       {bool isInserting = false}) {
@@ -1126,9 +1130,10 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   List<GeneratedColumn> get $columns =>
       [id, address, device, record, timestamp];
   @override
-  String get aliasedName => _alias ?? 'sessions';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'sessions';
+  String get actualTableName => $name;
+  static const String $name = 'sessions';
   @override
   VerificationContext validateIntegrity(Insertable<Session> instance,
       {bool isInserting = false}) {
@@ -1419,9 +1424,10 @@ class RatchetSenderKeys extends Table
   List<GeneratedColumn> get $columns =>
       [groupId, senderId, status, messageId, createdAt];
   @override
-  String get aliasedName => _alias ?? 'ratchet_sender_keys';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'ratchet_sender_keys';
+  String get actualTableName => $name;
+  static const String $name = 'ratchet_sender_keys';
   @override
   VerificationContext validateIntegrity(Insertable<RatchetSenderKey> instance,
       {bool isInserting = false}) {
