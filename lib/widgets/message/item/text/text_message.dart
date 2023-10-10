@@ -36,10 +36,7 @@ class _MessageSelectionArea extends StatelessWidget {
         child: child,
       );
     }
-    return SelectionArea(
-      focusNode: focusNode,
-      child: child,
-    );
+    return child;
   }
 }
 
