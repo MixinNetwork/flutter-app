@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid-unused-parameters
+
 import 'dart:async';
 import 'dart:math';
 
@@ -1140,6 +1142,7 @@ class SelectableRegionState extends State<SelectableRegion>
 
   @override
   void dispose() {
+    widget.focusNode.removeListener(_handleFocusChanged);
     _selectable?.removeListener(_updateSelectionStatus);
     _selectable?.pushHandleLayers(null, null);
     _selectionDelegate.dispose();
