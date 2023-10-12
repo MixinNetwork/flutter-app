@@ -21,9 +21,10 @@ class MessagesFts extends Table
   @override
   List<GeneratedColumn> get $columns => [content];
   @override
-  String get aliasedName => _alias ?? 'messages_fts';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'messages_fts';
+  String get actualTableName => $name;
+  static const String $name = 'messages_fts';
   @override
   VerificationContext validateIntegrity(Insertable<MessagesFt> instance,
       {bool isInserting = false}) {
@@ -211,9 +212,10 @@ class MessagesMetas extends Table with TableInfo<MessagesMetas, MessagesMeta> {
   List<GeneratedColumn> get $columns =>
       [docId, messageId, conversationId, category, userId, createdAt];
   @override
-  String get aliasedName => _alias ?? 'messages_metas';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'messages_metas';
+  String get actualTableName => $name;
+  static const String $name = 'messages_metas';
   @override
   VerificationContext validateIntegrity(Insertable<MessagesMeta> instance,
       {bool isInserting = false}) {

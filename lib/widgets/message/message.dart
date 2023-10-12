@@ -25,6 +25,7 @@ import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/provider/conversation_provider.dart';
+import '../../ui/provider/is_bot_group_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
 import '../../ui/provider/quote_message_provider.dart';
 import '../../ui/provider/recall_message_reedit_provider.dart';
@@ -183,7 +184,8 @@ class MessageItemWidget extends HookConsumerWidget {
 
     final isGroupOrBotGroupConversation =
         message.conversionCategory == ConversationCategory.group ||
-            message.userId != message.conversationOwnerId;
+            message.userId != message.conversationOwnerId ||
+            ref.watch(isBotGroupProvider(message.conversationId));
 
     final enableShowAvatar =
         ref.watch(settingProvider.select((value) => value.messageShowAvatar));
