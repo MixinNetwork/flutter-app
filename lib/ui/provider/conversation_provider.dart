@@ -244,7 +244,6 @@ class ConversationStateNotifier
     bool sync = false,
     bool checkCurrentUserExist = false,
   }) async {
-
     context.providerContainer.read(isBotGroupProvider(conversationId));
 
     final accountServer = context.accountServer;
