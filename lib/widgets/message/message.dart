@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'
+    hide SelectableRegion, SelectableRegionState;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -58,6 +60,7 @@ import 'item/secret_message.dart';
 import 'item/sticker_message.dart';
 import 'item/stranger_message.dart';
 import 'item/system_message.dart';
+import 'item/text/selectable.dart';
 import 'item/text/text_message.dart';
 import 'item/transcript_message.dart';
 import 'item/transfer/transfer_message.dart';
@@ -142,6 +145,41 @@ void _quickReply(BuildContext context) {
         context.message;
   });
 }
+
+Widget _buildTextCopyMenu({
+  required MessageItem message,
+  required BuildContext context,
+}) =>
+    ContextMenu(
+      title: context.l10n.copy,
+      icon: Resources.assetsImagesContextMenuCopySvg,
+      onTap: () async {
+        SelectableRegionState? _findSelectableRegionState(
+            BuildContext context) {
+          if (context is! Element) {
+            return null;
+          }
+          if (context.widget is SelectableRegion) {
+            return (context as StatefulElement).state as SelectableRegionState;
+          }
+          SelectableRegionState? find;
+          context.visitChildren((element) {
+            find = _findSelectableRegionState(element);
+          });
+          return find;
+        }
+
+        final selectableRegion = _findSelectableRegionState(context);
+        final status = selectableRegion?.selectable?.value.status;
+        final content = selectableRegion?.selectable?.getSelectedContent();
+        d('status: $status, content: $content');
+        if (status == SelectionStatus.uncollapsed && content != null) {
+          await Clipboard.setData(ClipboardData(text: content.plainText));
+        } else {
+          await Clipboard.setData(ClipboardData(text: message.content ?? ''));
+        }
+      },
+    );
 
 class MessageItemWidget extends HookConsumerWidget {
   const MessageItemWidget({
@@ -314,9 +352,7 @@ class MessageItemWidget extends HookConsumerWidget {
                             .read(messageSelectionProvider)
                             .selectMessage(message),
                       ),
-                    if (message.type.isText ||
-                        message.type.isPost ||
-                        message.type.isImage)
+                    if (message.type.isPost || message.type.isImage)
                       ContextMenu(
                         icon: Resources.assetsImagesContextMenuCopySvg,
                         title: context.l10n.copy,
@@ -330,6 +366,11 @@ class MessageItemWidget extends HookConsumerWidget {
                           Clipboard.setData(
                               ClipboardData(text: message.content ?? ''));
                         },
+                      ),
+                    if (message.type.isText)
+                      _buildTextCopyMenu(
+                        message: message,
+                        context: context,
                       ),
                     if (kPlatformIsMobile &&
                         (message.type.isImage || message.type.isVideo))

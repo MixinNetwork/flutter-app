@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide SelectableRegion;
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../ui/home/chat/chat_page.dart';
@@ -7,12 +8,37 @@ import '../../../../ui/provider/keyword_provider.dart';
 import '../../../../ui/provider/mention_cache_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
+import '../../../../utils/platform.dart';
 import '../../../high_light_text.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import '../../message_layout.dart';
 import '../../message_style.dart';
+import 'selectable.dart';
+
+class _MessageSelectionArea extends StatelessWidget {
+  const _MessageSelectionArea({
+    required this.child,
+    required this.focusNode,
+  });
+
+  final Widget child;
+  final FocusNode focusNode;
+
+  @override
+  Widget build(BuildContext context) {
+    if (kPlatformIsDesktop) {
+      return SelectableRegion(
+        focusNode: focusNode,
+        contextMenuBuilder: (context, state) => const SizedBox(),
+        selectionControls: desktopTextSelectionHandleControls,
+        child: child,
+      );
+    }
+    return child;
+  }
+}
 
 class TextMessage extends HookConsumerWidget {
   const TextMessage({super.key});
@@ -50,11 +76,14 @@ class TextMessage extends HookConsumerWidget {
       keys: [content],
     ).requireData;
 
+    final focusNode = useFocusNode(debugLabel: 'text selection focus');
+
     return MessageBubble(
-      child: MessageLayout(
-        spacing: 6,
-        content: SelectionArea(
-          child: CustomText(
+      child: _MessageSelectionArea(
+        focusNode: focusNode,
+        child: MessageLayout(
+          spacing: 6,
+          content: CustomText(
             content,
             style: TextStyle(
               fontSize: context.messageStyle.primaryFontSize,
@@ -75,8 +104,8 @@ class TextMessage extends HookConsumerWidget {
               ),
             ],
           ),
+          dateAndStatus: const MessageDatetimeAndStatus(),
         ),
-        dateAndStatus: const MessageDatetimeAndStatus(),
       ),
     );
   }

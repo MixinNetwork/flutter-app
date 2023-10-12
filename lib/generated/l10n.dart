@@ -984,6 +984,16 @@ class Localization {
     );
   }
 
+  /// `Copy Selected Text`
+  String get copySelectedText {
+    return Intl.message(
+      'Copy Selected Text',
+      name: 'copySelectedText',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Create`
   String get create {
     return Intl.message(

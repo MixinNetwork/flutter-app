@@ -1,7 +1,10 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 import '../utils/extension/extension.dart';
 import 'high_light_text.dart';
 
@@ -111,7 +114,10 @@ class _MoreExtendedText extends HookConsumerWidget {
       TextSpan(
         children: [textSpan, if (endIndex != -1) overflowTextSpan],
       ),
+      contextMenuBuilder: (context, selectableState) =>
+          MixinAdaptiveSelectionToolbar(editableTextState: selectableState),
       textAlign: TextAlign.center,
+      selectionHeightStyle: ui.BoxHeightStyle.max,
     );
   }
 }

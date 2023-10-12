@@ -1,10 +1,12 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:emojis/emoji.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -13,8 +15,10 @@ import '../db/dao/user_dao.dart';
 import '../ui/provider/conversation_provider.dart';
 import '../utils/emoji.dart';
 import '../utils/extension/extension.dart';
+import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
+import 'menu.dart';
 import 'user/user_dialog.dart';
 
 class CustomText extends HookConsumerWidget {
@@ -56,13 +60,42 @@ class CustomText extends HookConsumerWidget {
           .toList(),
       [text, style, textMatchers],
     );
-    return Text.rich(
-      TextSpan(children: spans),
-      style: style,
-      maxLines: maxLines,
-      overflow: overflow,
-      textAlign: textAlign,
+
+    final defaultTextStyle = DefaultTextStyle.of(context);
+    var effectiveTextStyle = style;
+    if (style == null || style!.inherit) {
+      effectiveTextStyle = defaultTextStyle.style.merge(style);
+    }
+    if (MediaQuery.boldTextOf(context)) {
+      effectiveTextStyle = effectiveTextStyle!
+          .merge(const TextStyle(fontWeight: FontWeight.bold));
+    }
+    final registrar = SelectionContainer.maybeOf(context);
+    final textScaler = MediaQuery.textScalerOf(context);
+
+    Widget result = _CustomRichText(
+      text: TextSpan(children: spans, style: effectiveTextStyle),
+      textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+      softWrap: defaultTextStyle.softWrap,
+      overflow:
+          overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+      textScaler: textScaler,
+      maxLines: maxLines ?? defaultTextStyle.maxLines,
+      textWidthBasis: defaultTextStyle.textWidthBasis,
+      textHeightBehavior: defaultTextStyle.textHeightBehavior ??
+          DefaultTextHeightBehavior.maybeOf(context),
+      selectionRegistrar: registrar,
+      selectionColor: DefaultSelectionStyle.of(context).selectionColor ??
+          DefaultSelectionStyle.defaultColor,
     );
+    if (registrar != null) {
+      result = MouseRegion(
+        cursor: DefaultSelectionStyle.of(context).mouseCursor ??
+            SystemMouseCursors.text,
+        child: result,
+      );
+    }
+    return result;
   }
 }
 
@@ -673,4 +706,132 @@ class HighlightStarLinkText extends HookConsumerWidget {
       style: style,
     );
   }
+}
+
+class MixinAdaptiveSelectionToolbar extends StatelessWidget {
+  const MixinAdaptiveSelectionToolbar(
+      {super.key, required this.editableTextState});
+
+  final EditableTextState editableTextState;
+
+  @override
+  Widget build(BuildContext context) {
+    if (kPlatformIsDesktop) {
+      return MixinSelectionToolbar(
+        menus: [
+          if (editableTextState.copyEnabled)
+            ContextMenu(
+              title: MaterialLocalizations.of(context).copyButtonLabel,
+              onTap: () {
+                editableTextState.copySelection(SelectionChangedCause.toolbar);
+              },
+            ),
+          if (editableTextState.cutEnabled)
+            ContextMenu(
+              title: MaterialLocalizations.of(context).cutButtonLabel,
+              onTap: () {
+                editableTextState.cutSelection(SelectionChangedCause.toolbar);
+              },
+            ),
+          if (editableTextState.selectAllEnabled)
+            ContextMenu(
+              title: MaterialLocalizations.of(context).selectAllButtonLabel,
+              onTap: () {
+                editableTextState.selectAll(SelectionChangedCause.toolbar);
+              },
+            ),
+          if (editableTextState.pasteEnabled)
+            ContextMenu(
+              title: MaterialLocalizations.of(context).pasteButtonLabel,
+              onTap: () {
+                editableTextState.pasteText(SelectionChangedCause.toolbar);
+              },
+            ),
+        ],
+        anchor: editableTextState.contextMenuAnchors.primaryAnchor,
+      );
+    }
+    return AdaptiveTextSelectionToolbar.editableText(
+        editableTextState: editableTextState);
+  }
+}
+
+class MixinSelectionToolbar extends StatelessWidget {
+  const MixinSelectionToolbar({
+    super.key,
+    required this.menus,
+    required this.anchor,
+  });
+
+  final List<Widget> menus;
+  final Offset anchor;
+
+  @override
+  Widget build(BuildContext context) => CustomSingleChildLayout(
+        delegate: PositionedLayoutDelegate(position: anchor),
+        child: ContextMenuPage(menus: menus),
+      );
+}
+
+class _CustomRichText extends RichText {
+  _CustomRichText({
+    required super.text,
+    super.textAlign = TextAlign.start,
+    super.softWrap = true,
+    super.overflow = TextOverflow.clip,
+    super.textScaler = TextScaler.noScaling,
+    super.maxLines,
+    super.textWidthBasis = TextWidthBasis.parent,
+    super.textHeightBehavior,
+    super.selectionRegistrar,
+    super.selectionColor,
+  });
+
+  @override
+  RenderParagraph createRenderObject(BuildContext context) =>
+      _CustomRenderParagraph(
+        text,
+        textAlign: textAlign,
+        textDirection: textDirection ?? Directionality.of(context),
+        softWrap: softWrap,
+        overflow: overflow,
+        textScaler: textScaler,
+        maxLines: maxLines,
+        strutStyle: strutStyle,
+        textWidthBasis: textWidthBasis,
+        textHeightBehavior: textHeightBehavior,
+        locale: locale ?? Localizations.maybeLocaleOf(context),
+        registrar: selectionRegistrar,
+        selectionColor: selectionColor,
+      );
+}
+
+class _CustomRenderParagraph extends RenderParagraph {
+  _CustomRenderParagraph(
+    super.text, {
+    required super.textDirection,
+    super.softWrap = true,
+    super.textAlign,
+    super.overflow = TextOverflow.clip,
+    super.maxLines,
+    super.strutStyle,
+    super.textScaler,
+    super.textHeightBehavior,
+    super.textWidthBasis,
+    super.locale,
+    super.registrar,
+    super.selectionColor,
+  });
+
+  @override
+  List<TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.max,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) =>
+      super.getBoxesForSelection(
+        selection,
+        boxHeightStyle: boxHeightStyle,
+        boxWidthStyle: boxWidthStyle,
+      );
 }

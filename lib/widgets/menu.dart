@@ -26,7 +26,7 @@ class _OffsetCubit extends SimpleCubit<Offset?> {
 extension ContextMenuPortalEntrySender on BuildContext {
   void sendMenuPosition(Offset offset) => read<_OffsetCubit>().emit(offset);
 
-  void closeMenu() => read<_OffsetCubit>().emit(null);
+  void closeMenu() => read<_OffsetCubit?>()?.emit(null);
 }
 
 typedef CustomPopupMenuItemBuilder<T> = List<CustomPopupMenuItem<T>> Function(
@@ -154,42 +154,22 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
         onClose: () => offsetCubit.emit(null),
         child: PortalTarget(
           visible: visible,
-          portalFollower: HookBuilder(builder: (context) {
-            final focusNode = useMemoized(FocusNode.new);
+          portalFollower: Builder(builder: (context) {
             final show = offset != null && visible;
-            useEffect(() {
-              if (!show) {
-                return;
-              }
-              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                focusNode.requestFocus();
-              });
-            }, [focusNode]);
             if (show) {
-              return Focus(
-                focusNode: focusNode,
-                onKeyEvent: (node, key) {
-                  if (key.logicalKey == LogicalKeyboardKey.escape) {
-                    offsetCubit.emit(null);
-                    return KeyEventResult.handled;
-                  }
-                  return KeyEventResult.ignored;
-                },
-                child: CustomSingleChildLayout(
-                  delegate: PositionedLayoutDelegate(position: offset),
-                  child: _ContextMenuPage(menus: buildMenus()),
-                ),
+              return CustomSingleChildLayout(
+                delegate: PositionedLayoutDelegate(position: offset),
+                child: ContextMenuPage(menus: buildMenus()),
               );
             }
-
             return const SizedBox();
           }),
           child: InteractiveDecoratedBox(
-            onRightClick: (PointerUpEvent pointerUpEvent) {
+            onRightClick: (event) {
               if (!interactive) {
                 return;
               }
-              offsetCubit.emit(pointerUpEvent.position);
+              offsetCubit.emit(event.globalPosition);
             },
             onLongPress: (details) {
               if (!interactive) {
@@ -200,7 +180,17 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
               }
             },
             onTap: onTap,
-            child: child,
+            child: Focus(
+              onKeyEvent: (node, key) {
+                final show = offset != null && visible;
+                if (show && key.logicalKey == LogicalKeyboardKey.escape) {
+                  offsetCubit.emit(null);
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: child,
+            ),
           ),
         ),
       ),
@@ -267,8 +257,9 @@ class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
       position != oldDelegate.position;
 }
 
-class _ContextMenuPage extends StatelessWidget {
-  const _ContextMenuPage({
+class ContextMenuPage extends StatelessWidget {
+  const ContextMenuPage({
+    super.key,
     required this.menus,
   });
 
@@ -306,11 +297,14 @@ class _ContextMenuPage extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(11)),
-        child: IntrinsicWidth(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: menus,
+        child: Material(
+          color: Colors.transparent,
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: menus,
+            ),
           ),
         ),
       ),
@@ -436,7 +430,7 @@ class SubContextMenu extends StatelessWidget {
           target: Alignment.centerRight,
           offset: Offset(-8, 0),
         ),
-        portal: _ContextMenuPage(menus: menus),
+        portal: ContextMenuPage(menus: menus),
         child: ContextMenu._sub(
           icon: icon,
           title: title,
