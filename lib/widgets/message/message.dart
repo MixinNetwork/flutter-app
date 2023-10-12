@@ -154,8 +154,7 @@ Widget _buildTextCopyMenu({
       title: context.l10n.copy,
       icon: Resources.assetsImagesContextMenuCopySvg,
       onTap: () async {
-        SelectableRegionState? _findSelectableRegionState(
-            BuildContext context) {
+        SelectableRegionState? findSelectableRegionState(BuildContext context) {
           if (context is! Element) {
             return null;
           }
@@ -164,12 +163,18 @@ Widget _buildTextCopyMenu({
           }
           SelectableRegionState? find;
           context.visitChildren((element) {
-            find = _findSelectableRegionState(element);
+            if (find != null) {
+              return;
+            }
+            final result = findSelectableRegionState(element);
+            if (result != null) {
+              find = result;
+            }
           });
           return find;
         }
 
-        final selectableRegion = _findSelectableRegionState(context);
+        final selectableRegion = findSelectableRegionState(context);
         final status = selectableRegion?.selectable?.value.status;
         final content = selectableRegion?.selectable?.getSelectedContent();
         d('status: $status, content: $content');
