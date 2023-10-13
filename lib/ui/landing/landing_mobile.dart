@@ -10,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -150,7 +151,7 @@ class _CodeInputScene extends HookConsumerWidget {
       assert(code.length == 4, 'Invalid code length: $code');
       showToastLoading();
       try {
-        final registrationId = await SignalProtocol.initSignal(null);
+        final registrationId = generateRegistrationId(false);
 
         final sessionKey = ed.generateKey();
         final sessionSecret = base64Encode(sessionKey.publicKey.bytes);
@@ -174,9 +175,12 @@ class _CodeInputScene extends HookConsumerWidget {
           verification.value.id,
           accountRequest,
         );
-        final privateKey = base64Encode(sessionKey.privateKey.bytes);
 
         final identityNumber = response.data.identityNumber;
+        await SignalProtocol.initSignal(identityNumber, registrationId, null);
+
+        final privateKey = base64Encode(sessionKey.privateKey.bytes);
+
         await CryptoKeyValue.instance.init(identityNumber);
         CryptoKeyValue.instance.localRegistrationId = registrationId;
 

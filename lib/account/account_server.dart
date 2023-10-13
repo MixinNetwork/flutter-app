@@ -73,6 +73,7 @@ class AccountServer {
       AccountKeyValue.instance.primarySessionId == null;
   String? userAgent;
   String? deviceId;
+  SignalDatabase? signalDatabase;
 
   Future<void> initServer(
     String userId,
@@ -92,9 +93,14 @@ class AccountServer {
 
     await _initClient();
 
+    signalDatabase = await SignalDatabase.connect(
+      identityNumber: identityNumber,
+      openForLogin: false,
+      fromMainIsolate: true,
+    );
     checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
       i('refreshSignalKeys periodic');
-      checkSignalKey(client);
+      checkSignalKey(client, signalDatabase!);
     });
 
     try {
@@ -313,7 +319,8 @@ class AccountServer {
     await clearKeyValues();
 
     try {
-      await SignalDatabase.get.clear();
+      await signalDatabase?.clear();
+      await signalDatabase?.close();
     } catch (_) {
       // ignore closed database error
     }
@@ -744,9 +751,9 @@ class AccountServer {
   Future<void> checkSignalKeys() async {
     final hasPushSignalKeys = PrivacyKeyValue.instance.hasPushSignalKeys;
     if (hasPushSignalKeys) {
-      unawaited(checkSignalKey(client));
+      unawaited(checkSignalKey(client, signalDatabase!));
     } else {
-      await refreshSignalKeys(client);
+      await refreshSignalKeys(client, signalDatabase!);
       PrivacyKeyValue.instance.hasPushSignalKeys = true;
     }
   }

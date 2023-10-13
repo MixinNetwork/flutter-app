@@ -24,22 +24,32 @@ import 'storage/mixin_session_store.dart';
 import 'storage/mixin_signal_protocol_store.dart';
 
 class SignalProtocol {
-  SignalProtocol(this._accountId);
+  SignalProtocol(this._accountId, this.db);
 
   static const int defaultDeviceId = 1;
 
   final String _accountId;
 
-  late SignalDatabase db;
+  final SignalDatabase db;
 
   late MixinSignalProtocolStore mixinSignalProtocolStore;
   late MixinSenderKeyStore senderKeyStore;
 
-  static Future<int> initSignal(List<int>? private) =>
-      generateSignalDatabaseIdentityKeyPair(SignalDatabase.get, private);
+  static Future<void> initSignal(
+      String identityNumber, int registrationId, List<int>? private) async {
+    final db = await SignalDatabase.connect(
+      identityNumber: identityNumber,
+      openForLogin: true,
+      fromMainIsolate: true,
+    );
+    try {
+      await generateSignalDatabaseIdentityKeyPair(db, private, registrationId);
+    } finally {
+      await db.close();
+    }
+  }
 
   void init() {
-    db = SignalDatabase.get;
     final preKeyStore = MixinPreKeyStore(db);
     final signedPreKeyStore = MixinPreKeyStore(db);
     final identityKeyStore = MixinIdentityKeyStore(db, _accountId);

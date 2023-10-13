@@ -151,7 +151,13 @@ class _LoginFailed extends HookConsumerWidget {
                       .accountApi
                       .logout(LogoutRequest(authState.account.sessionId));
                   await clearKeyValues();
-                  await SignalDatabase.get.clear();
+                  final signalDb = await SignalDatabase.connect(
+                    identityNumber: authState.account.identityNumber,
+                    openForLogin: true,
+                    fromMainIsolate: true,
+                  );
+                  await signalDb.clear();
+                  await signalDb.close();
                   context.multiAuthChangeNotifier.signOut();
                 },
                 child: Text(context.l10n.retry),

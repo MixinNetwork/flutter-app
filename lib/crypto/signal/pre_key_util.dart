@@ -9,8 +9,8 @@ import 'storage/mixin_prekey_store.dart';
 
 const batchSize = 700;
 
-Future<List<PreKeyRecord>> generatePreKeys() async {
-  final preKeyStore = MixinPreKeyStore(SignalDatabase.get);
+Future<List<PreKeyRecord>> generatePreKeys(SignalDatabase database) async {
+  final preKeyStore = MixinPreKeyStore(database);
   final preKeyIdOffset = CryptoKeyValue.instance.nextPreKeyId;
   final records = helper.generatePreKeys(preKeyIdOffset, batchSize);
   final preKeys = <PrekeysCompanion>[];
@@ -23,9 +23,9 @@ Future<List<PreKeyRecord>> generatePreKeys() async {
   return records;
 }
 
-Future<SignedPreKeyRecord> generateSignedPreKey(
-    IdentityKeyPair identityKeyPair, bool active) async {
-  final signedPreKeyStore = MixinPreKeyStore(SignalDatabase.get);
+Future<SignedPreKeyRecord> generateSignedPreKey(IdentityKeyPair identityKeyPair,
+    bool active, SignalDatabase database) async {
+  final signedPreKeyStore = MixinPreKeyStore(database);
   final signedPreKeyId = CryptoKeyValue.instance.nextSignedPreKeyId;
   final record = helper.generateSignedPreKey(identityKeyPair, signedPreKeyId);
   await signedPreKeyStore.storeSignedPreKey(signedPreKeyId, record);

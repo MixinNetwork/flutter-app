@@ -14,6 +14,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../blaze/blaze.dart';
+import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../db/database.dart';
 import '../db/database_event_bus.dart';
@@ -145,6 +146,12 @@ class _MessageProcessRunner {
       await FtsDatabase.connect(identityNumber),
     );
 
+    final signalDb = await SignalDatabase.connect(
+      identityNumber: identityNumber,
+      openForLogin: false,
+      fromMainIsolate: false,
+    );
+
     client = createClient(
       userId: userId,
       sessionId: sessionId,
@@ -190,7 +197,7 @@ class _MessageProcessRunner {
           WorkerIsolateEventType.onBlazeConnectStateChanged, event);
     });
 
-    signalProtocol = SignalProtocol(userId)..init();
+    signalProtocol = SignalProtocol(userId, signalDb)..init();
 
     _sender = Sender(
       signalProtocol,
@@ -267,6 +274,7 @@ class _MessageProcessRunner {
       _updateStickerJob,
       _updateAssetJob,
       _deviceTransfer,
+      signalDb,
     );
     _floodJob.start();
   }

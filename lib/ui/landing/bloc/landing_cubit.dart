@@ -141,7 +141,7 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
 
     final edKeyPair = ed.generateKey();
     final private = base64.decode(msg['identity_key_private'] as String);
-    final registrationId = await SignalProtocol.initSignal(private);
+    final registrationId = signal.generateRegistrationId(false);
 
     final sessionId = msg['session_id'] as String;
     final info = await getPackageInfo();
@@ -160,6 +160,9 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
         platformVersion: platformVersion,
       ),
     );
+
+    await SignalProtocol.initSignal(
+        rsp.data.identityNumber, registrationId, private);
 
     final privateKey = base64Encode(edKeyPair.privateKey.bytes);
 

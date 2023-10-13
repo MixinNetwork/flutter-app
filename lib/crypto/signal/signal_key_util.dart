@@ -9,27 +9,29 @@ import 'signal_key_request.dart';
 
 const int preKeyMinNum = 500;
 
-Future checkSignalKey(Client client) async {
+Future checkSignalKey(Client client, SignalDatabase signalDatabase) async {
   final response = await client.accountApi.getSignalKeyCount();
   final availableKeyCount = response.data.preKeyCount;
   if (availableKeyCount > preKeyMinNum) {
     return;
   }
-  await refreshSignalKeys(client);
+  await refreshSignalKeys(client, signalDatabase);
 }
 
-Future<MixinResponse<void>> refreshSignalKeys(Client client) async {
-  final keys = await generateKeys();
+Future<MixinResponse<void>> refreshSignalKeys(
+    Client client, SignalDatabase signalDatabase) async {
+  final keys = await generateKeys(signalDatabase);
   return client.accountApi.pushSignalKeys(keys.toJson());
 }
 
-Future<SignalKeyRequest> generateKeys() async {
-  final identityKeyPair = await getIdentityKeyPair(SignalDatabase.get);
+Future<SignalKeyRequest> generateKeys(SignalDatabase signalDatabase) async {
+  final identityKeyPair = await getIdentityKeyPair(signalDatabase);
   if (identityKeyPair == null) {
     throw InvalidKeyException('Local identity key pair is null!');
   }
-  final oneTimePreKeys = await generatePreKeys();
-  final signedPreKeyRecord = await generateSignedPreKey(identityKeyPair, false);
+  final oneTimePreKeys = await generatePreKeys(signalDatabase);
+  final signedPreKeyRecord =
+      await generateSignedPreKey(identityKeyPair, false, signalDatabase);
   return SignalKeyRequest.from(
       identityKeyPair.getPublicKey(), signedPreKeyRecord,
       preKeyRecords: oneTimePreKeys);

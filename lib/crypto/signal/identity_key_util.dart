@@ -4,11 +4,11 @@ import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'identity_extension.dart';
 import 'signal_database.dart';
 
-Future<int> generateSignalDatabaseIdentityKeyPair(
+Future<void> generateSignalDatabaseIdentityKeyPair(
   SignalDatabase db,
   List<int>? privateKey,
+  int registrationId,
 ) async {
-  final registrationId = generateRegistrationId(false);
   final identityKeyPair = privateKey == null
       ? generateIdentityKeyPair()
       : generateIdentityKeyPairFromPrivate(privateKey);
@@ -19,7 +19,6 @@ Future<int> generateSignalDatabaseIdentityKeyPair(
       privateKey: Value(identityKeyPair.getPrivateKey().serialize()),
       timestamp: DateTime.now().millisecondsSinceEpoch);
   await db.identityDao.insert(identity);
-  return registrationId;
 }
 
 Future<IdentityKeyPair?> getIdentityKeyPair(SignalDatabase db) async =>

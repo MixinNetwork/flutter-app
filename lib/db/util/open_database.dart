@@ -66,6 +66,10 @@ Future<QueryExecutor> openQueryExecutor({
     return isolate.connect();
   }));
 
+  if (reads.isEmpty) {
+    return write;
+  }
+
   return MultiExecutor.withReadPool(
     reads: reads.map((e) => e.executor).toList(),
     write: write.executor,
