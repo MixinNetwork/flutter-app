@@ -102,7 +102,7 @@ dependencies:
       path: packages/mixin_logger
   native_dio_adapter: ^0.1.0
   network_info_plus: ^4.0.2
-  octo_image: ^1.0.2
+  octo_image: ^2.0.0
   ogg_opus_player: ^0.7.0
   open_file:
     git:
