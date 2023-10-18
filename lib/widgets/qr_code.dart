@@ -19,9 +19,11 @@ class QrCode extends StatelessWidget {
         height: dimension,
         color: Colors.white,
         padding: const EdgeInsets.all(8),
-        child: PrettyQr(
-          roundEdges: true,
-          image: image,
+        child: PrettyQrView.data(
+          decoration: PrettyQrDecoration(
+            image:
+                image == null ? null : PrettyQrDecorationImage(image: image!),
+          ),
           data: data,
         ),
       );
