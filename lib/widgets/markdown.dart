@@ -17,17 +17,19 @@ class MarkdownColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final widgets = MarkdownGenerator(
-      config: _createMarkdownConfig(
-        context: context,
-        darkMode: context.brightness == Brightness.dark,
-      ),
       textGenerator: (node, config, visitor) => CustomTextNode(
         node.textContent,
         config,
         visitor,
       ),
       generators: _kMixinGenerators,
-    ).buildWidgets(data);
+    ).buildWidgets(
+      data,
+      config: _createMarkdownConfig(
+        context: context,
+        darkMode: context.brightness == Brightness.dark,
+      ),
+    );
     return ClipRect(
       child: DefaultTextStyle.merge(
         style: TextStyle(color: context.theme.text),
@@ -63,7 +65,7 @@ class Markdown extends StatelessWidget {
             context: context,
             darkMode: context.brightness == Brightness.dark,
           ),
-          markdownGeneratorConfig: MarkdownGeneratorConfig(
+          markdownGenerator: MarkdownGenerator(
             textGenerator: (node, config, visitor) => CustomTextNode(
               node.textContent,
               config,
