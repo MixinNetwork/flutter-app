@@ -8,7 +8,6 @@
 
 #include <desktop_drop/desktop_drop_plugin.h>
 #include <desktop_keep_screen_on/desktop_keep_screen_on_plugin_c_api.h>
-#include <desktop_lifecycle/desktop_lifecycle_plugin.h>
 #include <desktop_webview_window/desktop_webview_window_plugin.h>
 #include <file_selector_windows/file_selector_windows.h>
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
@@ -31,8 +30,6 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("DesktopDropPlugin"));
   DesktopKeepScreenOnPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("DesktopKeepScreenOnPluginCApi"));
-  DesktopLifecyclePluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("DesktopLifecyclePlugin"));
   DesktopWebviewWindowPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("DesktopWebviewWindowPlugin"));
   FileSelectorWindowsRegisterWithRegistrar(
