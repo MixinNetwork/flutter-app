@@ -37,10 +37,10 @@ packages:
     dependency: "direct main"
     description:
       name: android_id
-      sha256: d039f7245534888548a992694a61246a9d6c52acbe9fdb9271e0efc8a50b17ed
+      sha256: "5c2d3a259afcd173dbe367ba452817bd530c4df75d251d652c69b8d3c8ac0d36"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.5"
+    version: "0.3.6"
   ansicolor:
     dependency: "direct main"
     description:
