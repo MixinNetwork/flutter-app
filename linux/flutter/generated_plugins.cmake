@@ -5,7 +5,6 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   bring_window_to_front
   desktop_drop
-  desktop_lifecycle
   desktop_webview_window
   file_selector_linux
   flutter_app_icon_badge
