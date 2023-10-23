@@ -16,8 +16,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart' hide Consumer;
 import 'package:rxdart/rxdart.dart';
 import 'package:simple_animations/simple_animations.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../constants/constants.dart';
+import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart' hide Offset;
@@ -298,18 +300,18 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
         if (sendScale >= 0.6)
           Transform.scale(
             scale: sendScale,
-            child: ContextMenuPortalEntry(
-              buildMenus: () => [
-                ContextMenu(
-                  icon: Resources.assetsImagesContextMenuMuteSvg,
+            child: ContextMenuWidget(
+              menuProvider: (_) => Menu(children: [
+                MenuAction(
+                  image: MenuImage.icon(IconFonts.mute),
                   title: context.l10n.sendWithoutSound,
-                  onTap: () => _sendMessage(
+                  callback: () => _sendMessage(
                     context,
                     textEditingController,
                     silent: true,
                   ),
                 ),
-              ],
+              ]),
               child: ActionButton(
                 name: Resources.assetsImagesIcSendSvg,
                 color: context.theme.icon,

@@ -328,6 +328,7 @@ class _UserProfileButtonBar extends StatelessWidget {
                 CustomPopupMenuItem(
                   icon: Resources.assetsImagesContextMenuCopySvg,
                   title: context.l10n.copyLink,
+                  value: null,
                 ),
               ],
               onSelected: (_) async {

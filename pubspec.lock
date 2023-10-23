@@ -1754,8 +1754,16 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.4"
+  super_context_menu:
+    dependency: "direct main"
+    description:
+      name: super_context_menu
+      sha256: "18736520541aee293720597b399ecfd18e7be16cc2dba72e7dee0edfa5925857"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.4"
   super_native_extensions:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: super_native_extensions
       sha256: "3bbb95899f848617b819eec1fa00c80a617f1bd469a480b1f0c4dd383da4c5ec"

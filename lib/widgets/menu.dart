@@ -9,6 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:provider/provider.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 import '../bloc/simple_cubit.dart';
 import '../constants/resources.dart';
@@ -18,6 +19,20 @@ import 'action_button.dart';
 import 'hover_overlay.dart';
 import 'interactive_decorated_box.dart';
 import 'portal_providers.dart';
+
+class MenusWithSeparator extends Menu {
+  MenusWithSeparator({
+    super.title,
+    super.image,
+    required List<List<MenuElement>> childrens,
+  }) : super(
+          children: childrens
+              .where((element) => element.isNotEmpty)
+              .joinList([MenuSeparator()])
+              .expand((element) => element.toList())
+              .toList(),
+        );
+}
 
 class _OffsetCubit extends SimpleCubit<Offset?> {
   _OffsetCubit(super.state);
@@ -44,7 +59,7 @@ class CustomPopupMenuButton<T> extends HookConsumerWidget {
   });
 
   final CustomPopupMenuItemBuilder<T> itemBuilder;
-  final PopupMenuItemSelected<T?>? onSelected;
+  final PopupMenuItemSelected<T>? onSelected;
   final String? icon;
   final Widget? child;
   final Color? color;
@@ -66,7 +81,7 @@ class CustomPopupMenuButton<T> extends HookConsumerWidget {
         child: Builder(
             builder: (context) => ActionButton(
                   name: icon,
-                  color: color,
+                  color: color ?? context.theme.icon,
                   onTapUp: (details) {
                     d('onTapUp: $alignment');
                     if (alignment == null) {
@@ -91,13 +106,13 @@ class CustomPopupMenuButton<T> extends HookConsumerWidget {
 class CustomPopupMenuItem<T> {
   CustomPopupMenuItem({
     required this.title,
-    this.value,
+    required this.value,
     this.isDestructiveAction = false,
     this.icon,
   });
 
   final String title;
-  final T? value;
+  final T value;
   final bool isDestructiveAction;
   final String? icon;
 }

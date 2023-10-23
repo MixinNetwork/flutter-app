@@ -15,7 +15,6 @@ import '../../../widgets/buttons.dart';
 import '../../../widgets/cell.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/high_light_text.dart';
-import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
 import '../../provider/conversation_provider.dart';
@@ -250,102 +249,99 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final inputController = useTextEditingController();
     final unit = useState(_CustomExpireTimeUnit.second);
-    return Material(
-      color: Colors.transparent,
-      child: SizedBox(
-        width: 320,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            MixinAppBar(
-              leading: const SizedBox(),
-              title: Text(context.l10n.customTime),
-              actions: const [MixinCloseButton()],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Spacer(),
-                SizedBox(
-                  width: 64,
-                  child: TextField(
-                    controller: inputController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    textAlign: TextAlign.center,
-                    maxLength: 2,
-                    style: TextStyle(
-                      color: context.theme.text,
+    return SizedBox(
+      width: 320,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          MixinAppBar(
+            leading: const SizedBox(),
+            title: Text(context.l10n.customTime),
+            actions: const [MixinCloseButton()],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              const Spacer(),
+              SizedBox(
+                width: 64,
+                child: TextField(
+                  controller: inputController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  textAlign: TextAlign.center,
+                  maxLength: 2,
+                  style: TextStyle(
+                    color: context.theme.text,
+                    fontSize: 16,
+                  ),
+                  buildCounter: (
+                    BuildContext context, {
+                    required int currentLength,
+                    required int? maxLength,
+                    required bool isFocused,
+                  }) =>
+                      null,
+                  decoration: InputDecoration(
+                    fillColor: context.theme.sidebarSelected,
+                    filled: true,
+                    hintStyle: TextStyle(
                       fontSize: 16,
+                      color: context.theme.secondaryText,
                     ),
-                    buildCounter: (
-                      BuildContext context, {
-                      required int currentLength,
-                      required int? maxLength,
-                      required bool isFocused,
-                    }) =>
-                        null,
-                    decoration: InputDecoration(
-                      fillColor: context.theme.sidebarSelected,
-                      filled: true,
-                      hintStyle: TextStyle(
-                        fontSize: 16,
-                        color: context.theme.secondaryText,
-                      ),
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                        borderSide: BorderSide.none,
-                      ),
-                      isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 17),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                      borderSide: BorderSide.none,
                     ),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 17),
                   ),
                 ),
-                const SizedBox(width: 16),
-                SizedBox(
-                  width: 160,
-                  child: _CustomExpireUnitSelection(unit: unit),
-                ),
-                const Spacer(),
-              ],
-            ),
-            const SizedBox(height: 28),
-            MixinButton(
-              child: Text(context.l10n.set),
-              onTap: () async {
-                if (inputController.text.isEmpty) {
-                  return;
-                }
-                final value = int.tryParse(inputController.text);
-                if (value == null) {
-                  return;
-                }
-                final duration = unit.value.toDuration(value);
-                if (duration.inSeconds <= 0) {
-                  return;
-                }
-                if (value > unit.value.maxValue) {
-                  showToastFailed(
-                    ToastError(context.l10n.disappearingCustomTimeMaxWarning(
-                        unit.value
-                            .toDuration(unit.value.maxValue)
-                            .formatAsConversationExpireIn(
-                                localization: context.l10n))),
-                  );
-                  return;
-                }
-                showToastLoading();
-                await _updateConversationExpireDuration(context,
-                    duration: duration, conversationId: conversationId);
-                Toast.dismiss();
-                await Navigator.of(context).maybePop();
-              },
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
+              ),
+              const SizedBox(width: 16),
+              SizedBox(
+                width: 160,
+                child: _CustomExpireUnitSelection(unit: unit),
+              ),
+              const Spacer(),
+            ],
+          ),
+          const SizedBox(height: 28),
+          MixinButton(
+            child: Text(context.l10n.set),
+            onTap: () async {
+              if (inputController.text.isEmpty) {
+                return;
+              }
+              final value = int.tryParse(inputController.text);
+              if (value == null) {
+                return;
+              }
+              final duration = unit.value.toDuration(value);
+              if (duration.inSeconds <= 0) {
+                return;
+              }
+              if (value > unit.value.maxValue) {
+                showToastFailed(
+                  ToastError(context.l10n.disappearingCustomTimeMaxWarning(unit
+                      .value
+                      .toDuration(unit.value.maxValue)
+                      .formatAsConversationExpireIn(
+                          localization: context.l10n))),
+                );
+                return;
+              }
+              showToastLoading();
+              await _updateConversationExpireDuration(context,
+                  duration: duration, conversationId: conversationId);
+              Toast.dismiss();
+              await Navigator.of(context).maybePop();
+            },
+          ),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }
@@ -378,68 +374,66 @@ class _CustomExpireUnitSelection extends StatelessWidget {
         text = context.l10n.unitWeek(1);
         break;
     }
-    return ContextMenuPortalEntry(
-      buildMenus: () => [
-        ContextMenu(
+    return CustomPopupMenuButton(
+      itemBuilder: (context) => [
+        CustomPopupMenuItem(
           title: context.l10n.unitSecond(1),
-          onTap: () => unit.value = _CustomExpireTimeUnit.second,
+          value: _CustomExpireTimeUnit.second,
         ),
-        ContextMenu(
+        CustomPopupMenuItem(
           title: context.l10n.unitMinute(1),
-          onTap: () => unit.value = _CustomExpireTimeUnit.minute,
+          value: _CustomExpireTimeUnit.minute,
         ),
-        ContextMenu(
+        CustomPopupMenuItem(
           title: context.l10n.unitHour(1),
-          onTap: () => unit.value = _CustomExpireTimeUnit.hour,
+          value: _CustomExpireTimeUnit.hour,
         ),
-        ContextMenu(
+        CustomPopupMenuItem(
           title: context.l10n.unitDay(1),
-          onTap: () => unit.value = _CustomExpireTimeUnit.day,
+          value: _CustomExpireTimeUnit.day,
         ),
-        ContextMenu(
+        CustomPopupMenuItem(
           title: context.l10n.unitWeek(1),
-          onTap: () => unit.value = _CustomExpireTimeUnit.week,
+          value: _CustomExpireTimeUnit.week,
         ),
       ],
+      onSelected: (value) => unit.value = value,
       child: Builder(
-          builder: (context) => Material(
-                color: context.theme.sidebarSelected,
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                child: InteractiveDecoratedBox.color(
-                  onTapUp: (details) =>
-                      context.sendMenuPosition(details.globalPosition),
-                  child: SizedBox(
-                    height: 46,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            text,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: context.theme.text,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        RotatedBox(
-                          quarterTurns: 9,
-                          child: SvgPicture.asset(
-                            Resources.assetsImagesIcArrowRightSvg,
-                            width: 30,
-                            height: 30,
-                            colorFilter: ColorFilter.mode(
-                              context.theme.secondaryText,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
+        builder: (context) => Material(
+          color: context.theme.sidebarSelected,
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          child: SizedBox(
+            height: 46,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: context.theme.text,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                RotatedBox(
+                  quarterTurns: 9,
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesIcArrowRightSvg,
+                    width: 30,
+                    height: 30,
+                    colorFilter: ColorFilter.mode(
+                      context.theme.secondaryText,
+                      BlendMode.srcIn,
                     ),
                   ),
                 ),
-              )),
+                const SizedBox(width: 8),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

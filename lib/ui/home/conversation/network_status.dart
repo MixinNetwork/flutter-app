@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../blaze/blaze.dart';
 import '../../../constants/resources.dart';
@@ -10,7 +11,6 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/uri_utils.dart';
-import '../../../widgets/menu.dart';
 
 class NetworkStatus extends HookConsumerWidget {
   const NetworkStatus({super.key});
@@ -32,13 +32,14 @@ class NetworkStatus extends HookConsumerWidget {
 
     return Column(
       children: [
-        ContextMenuPortalEntry(
-          buildMenus: () => [
-            ContextMenu(
+        ContextMenuWidget(
+          menuProvider: (request) => Menu(children: [
+            MenuAction(
               title: context.l10n.openLogDirectory,
-              onTap: () => openUri(context, mixinLogDirectory.uri.toString()),
+              callback: () =>
+                  openUri(context, mixinLogDirectory.uri.toString()),
             ),
-          ],
+          ]),
           child: _NetworkNotConnect(
             visible: connectedState != ConnectedState.connected &&
                 hasDisconnectedBefore.value,
