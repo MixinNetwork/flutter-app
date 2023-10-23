@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../constants/resources.dart';
@@ -17,6 +16,7 @@ import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';
 import '../conversation/verified_or_bot_widget.dart';
 import '../dialog.dart';
+import '../high_light_text.dart';
 import '../menu.dart';
 import '../more_extended_text.dart';
 import '../toast.dart';
@@ -174,7 +174,7 @@ class _UserProfileBody extends StatelessWidget {
               children: [
                 Flexible(
                   child: SelectionArea(
-                    child: Text(
+                    child: CustomText(
                       user.fullName ?? '',
                       style: TextStyle(
                         color: context.theme.text,
@@ -322,11 +322,13 @@ class _UserProfileButtonBar extends StatelessWidget {
             singleSelect: true,
             title: context.l10n.shareContact,
             onlyContact: false,
-            action: PopupMenuPageButton(
+            action: CustomPopupMenuButton(
+              alignment: Alignment.bottomCenter,
               itemBuilder: (context) => [
-                CustomPopupMenuButton(
+                CustomPopupMenuItem(
                   icon: Resources.assetsImagesContextMenuCopySvg,
                   title: context.l10n.copyLink,
+                  value: null,
                 ),
               ],
               onSelected: (_) async {
@@ -338,15 +340,8 @@ class _UserProfileButtonBar extends StatelessWidget {
                 i('share contact ${user.userId} $codeUrl');
                 await Clipboard.setData(ClipboardData(text: codeUrl));
               },
-              icon: SvgPicture.asset(
-                Resources.assetsImagesInviteShareSvg,
-                height: 24,
-                width: 24,
-                colorFilter: ColorFilter.mode(
-                  context.theme.icon,
-                  BlendMode.srcIn,
-                ),
-              ),
+              color: context.theme.icon,
+              icon: Resources.assetsImagesInviteShareSvg,
             ),
           );
 

@@ -191,6 +191,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeNumber": MessageLookupByLibrary.simpleMessage("修改手機號"),
         "changeNumberInstead": MessageLookupByLibrary.simpleMessage("僅修改手機號碼"),
         "changedDisappearingMessageSettings": m0,
+        "chat": MessageLookupByLibrary.simpleMessage("聊天"),
         "chatBackup": MessageLookupByLibrary.simpleMessage("聊天記錄備份"),
         "chatBotReceptionTitle":
             MessageLookupByLibrary.simpleMessage("點擊按鈕使用機器人"),
@@ -239,6 +240,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "copy": MessageLookupByLibrary.simpleMessage("複製"),
         "copyInvite": MessageLookupByLibrary.simpleMessage("複製邀請鏈接"),
         "copyLink": MessageLookupByLibrary.simpleMessage("複製鏈接"),
+        "copySelectedText": MessageLookupByLibrary.simpleMessage("複製已選擇的文本"),
         "create": MessageLookupByLibrary.simpleMessage("創建"),
         "createCircle": MessageLookupByLibrary.simpleMessage("新建圈子"),
         "createConversation": MessageLookupByLibrary.simpleMessage("新建會話"),
@@ -603,6 +605,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedMedia": MessageLookupByLibrary.simpleMessage("媒體內容"),
         "show": MessageLookupByLibrary.simpleMessage("顯示"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("顯示頭像"),
+        "showIdentityNumber": MessageLookupByLibrary.simpleMessage("顯示 ID"),
         "showMixin": MessageLookupByLibrary.simpleMessage("顯示 Mixin"),
         "signIn": MessageLookupByLibrary.simpleMessage("登錄"),
         "signOut": MessageLookupByLibrary.simpleMessage("登出"),

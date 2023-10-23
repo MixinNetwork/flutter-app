@@ -206,37 +206,41 @@ class _MentionItem extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  HighlightText(
+                  CustomText(
                     user.fullName ?? '',
                     style: TextStyle(
                       fontSize: 14,
                       color: context.theme.text,
                       height: 1,
                     ),
-                    highlightTextSpans: [
-                      HighlightTextSpan(
-                        keyword ?? '',
-                        style: TextStyle(
-                          color: context.theme.accent,
+                    textMatchers: [
+                      EmojiTextMatcher(),
+                      if (keyword != null)
+                        KeyWordTextMatcher(
+                          keyword!,
+                          style: TextStyle(
+                            color: context.theme.accent,
+                          ),
                         ),
-                      ),
                     ],
                     maxLines: 1,
                   ),
                   const SizedBox(height: 2),
-                  HighlightText(
+                  CustomText(
                     user.identityNumber,
                     style: TextStyle(
                       fontSize: 12,
                       color: context.theme.secondaryText,
                     ),
-                    highlightTextSpans: [
-                      HighlightTextSpan(
-                        keyword ?? '',
-                        style: TextStyle(
-                          color: context.theme.accent,
+                    textMatchers: [
+                      EmojiTextMatcher(),
+                      if (keyword != null)
+                        KeyWordTextMatcher(
+                          keyword!,
+                          style: TextStyle(
+                            color: context.theme.accent,
+                          ),
                         ),
-                      )
                     ],
                     maxLines: 1,
                   ),

@@ -1354,6 +1354,8 @@ class AccountServer {
             attachmentUtil.cancelProgressAttachmentJob(message.messageId));
 
     await database.messageDao.deleteMessagesByConversationId(conversationId);
+    await database.messageMentionDao
+        .clearMessageMentionByConversationId(conversationId);
     unawaited(database.ftsDatabase.deleteByConversationId(conversationId));
     unawaited(_deleteMessageAttachmentByConversationId(conversationId));
   }

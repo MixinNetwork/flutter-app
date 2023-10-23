@@ -374,25 +374,25 @@ class _CustomExpireUnitSelection extends StatelessWidget {
         text = context.l10n.unitWeek(1);
         break;
     }
-    return PopupMenuPageButton(
+    return CustomPopupMenuButton(
       itemBuilder: (context) => [
-        CustomPopupMenuButton(
+        CustomPopupMenuItem(
           title: context.l10n.unitSecond(1),
           value: _CustomExpireTimeUnit.second,
         ),
-        CustomPopupMenuButton(
+        CustomPopupMenuItem(
           title: context.l10n.unitMinute(1),
           value: _CustomExpireTimeUnit.minute,
         ),
-        CustomPopupMenuButton(
+        CustomPopupMenuItem(
           title: context.l10n.unitHour(1),
           value: _CustomExpireTimeUnit.hour,
         ),
-        CustomPopupMenuButton(
+        CustomPopupMenuItem(
           title: context.l10n.unitDay(1),
           value: _CustomExpireTimeUnit.day,
         ),
-        CustomPopupMenuButton(
+        CustomPopupMenuItem(
           title: context.l10n.unitWeek(1),
           value: _CustomExpireTimeUnit.week,
         ),

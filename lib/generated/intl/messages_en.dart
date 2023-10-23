@@ -213,6 +213,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeNumberInstead":
             MessageLookupByLibrary.simpleMessage("Change Number Instead"),
         "changedDisappearingMessageSettings": m0,
+        "chat": MessageLookupByLibrary.simpleMessage("Chat"),
         "chatBackup": MessageLookupByLibrary.simpleMessage("Chat Backup"),
         "chatBotReceptionTitle": MessageLookupByLibrary.simpleMessage(
             "Tap the button to interact with the bot"),
@@ -270,6 +271,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "copy": MessageLookupByLibrary.simpleMessage("Copy"),
         "copyInvite": MessageLookupByLibrary.simpleMessage("Copy Invite Link"),
         "copyLink": MessageLookupByLibrary.simpleMessage("Copy Link"),
+        "copySelectedText":
+            MessageLookupByLibrary.simpleMessage("Copy Selected Text"),
         "create": MessageLookupByLibrary.simpleMessage("Create"),
         "createCircle": MessageLookupByLibrary.simpleMessage("New Circle"),
         "createConversation":
@@ -695,6 +698,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
         "show": MessageLookupByLibrary.simpleMessage("Show"),
         "showAvatar": MessageLookupByLibrary.simpleMessage("Show avatar"),
+        "showIdentityNumber":
+            MessageLookupByLibrary.simpleMessage("Show Identity Number"),
         "showMixin": MessageLookupByLibrary.simpleMessage("Show Mixin"),
         "signIn": MessageLookupByLibrary.simpleMessage("Sign in"),
         "signOut": MessageLookupByLibrary.simpleMessage("Sign Out"),

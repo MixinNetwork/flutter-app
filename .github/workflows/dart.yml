@@ -47,7 +47,7 @@ jobs:
         run: dart format --set-exit-if-changed .
 
       - name: Analyze project source
-        run: dart analyze
+        run: dart analyze --fatal-infos
 
       # dart_code_metrics
       - name: Run dart_code_metrics

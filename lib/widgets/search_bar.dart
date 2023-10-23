@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../constants/constants.dart';
@@ -102,24 +101,24 @@ class SearchBar extends HookConsumerWidget {
               color: filterUnseen ? context.theme.accent : context.theme.icon,
             ),
             const SizedBox(width: 4),
-            PopupMenuPageButton(
+            CustomPopupMenuButton(
               itemBuilder: (context) => [
-                CustomPopupMenuButton(
+                CustomPopupMenuItem(
                   icon: Resources.assetsImagesContextMenuSearchUserSvg,
                   title: context.l10n.searchContact,
                   value: _ActionType.searchContact,
                 ),
-                CustomPopupMenuButton(
+                CustomPopupMenuItem(
                   icon: Resources.assetsImagesContextMenuCreateConversationSvg,
                   title: context.l10n.createConversation,
                   value: _ActionType.createConversation,
                 ),
-                CustomPopupMenuButton(
+                CustomPopupMenuItem(
                   icon: Resources.assetsImagesContextMenuCreateGroupSvg,
                   title: context.l10n.createGroup,
                   value: _ActionType.createGroup,
                 ),
-                CustomPopupMenuButton(
+                CustomPopupMenuItem(
                   icon: Resources.assetsImagesCircleSvg,
                   title: context.l10n.createCircle,
                   value: _ActionType.createCircle,
@@ -153,15 +152,7 @@ class SearchBar extends HookConsumerWidget {
                     break;
                 }
               },
-              icon: SvgPicture.asset(
-                Resources.assetsImagesIcAddSvg,
-                height: 24,
-                width: 24,
-                colorFilter: ColorFilter.mode(
-                  context.theme.icon,
-                  BlendMode.srcIn,
-                ),
-              ),
+              icon: Resources.assetsImagesIcAddSvg,
             ),
             const SizedBox(width: 12),
           ],

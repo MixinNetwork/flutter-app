@@ -2,28 +2,36 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:ansicolor/ansicolor.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/isolate.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
+import 'package:sqlite3/sqlite3.dart';
 
 import '../../utils/file.dart';
-import '../custom_vm_database_wrapper.dart';
+import '../custom_sqlite3_database.dart';
 
-QueryExecutor _openDatabase(File dbFile) => CustomVmDatabaseWrapper(
-      NativeDatabase(
-        dbFile,
-        setup: (rawDb) {
-          rawDb
-            ..execute('PRAGMA journal_mode=WAL;')
-            ..execute('PRAGMA foreign_keys=ON;')
-            ..execute('PRAGMA synchronous=NORMAL;');
-        },
-      ),
-      logStatements: true,
-      explain: kDebugMode,
-    );
+QueryExecutor _openDatabase(File file) {
+  // Create the parent directory if it doesn't exist. sqlite will emit
+  // confusing misuse warnings otherwise
+  final dir = file.parent;
+  if (!dir.existsSync()) {
+    dir.createSync(recursive: true);
+  }
+
+  final db = sqlite3.open(file.path);
+  return NativeDatabase.opened(
+    DatabaseProfiler(db, explain: kDebugMode),
+    setup: (rawDb) {
+      rawDb
+        ..execute('PRAGMA journal_mode=WAL;')
+        ..execute('PRAGMA foreign_keys=ON;')
+        ..execute('PRAGMA synchronous=NORMAL;');
+    },
+  );
+}
 
 /// Connect to the database.
 Future<QueryExecutor> openQueryExecutor({
@@ -42,6 +50,7 @@ Future<QueryExecutor> openQueryExecutor({
     portName: backgroundPortName,
     dbName: dbName,
     fromMainIsolate: fromMainIsolate,
+    debugName: 'isolate_drift_${dbName}_write',
   );
 
   final write = await writeIsolate.connect();
@@ -52,6 +61,7 @@ Future<QueryExecutor> openQueryExecutor({
       portName: '${foregroundPortName}_$i',
       dbName: dbName,
       fromMainIsolate: fromMainIsolate,
+      debugName: 'one_mixin_drift_read_$i',
     );
     return isolate.connect();
   }));
@@ -67,6 +77,7 @@ Future<DriftIsolate> _crateIsolate({
   required String portName,
   required String dbName,
   bool fromMainIsolate = false,
+  required String? debugName,
 }) async {
   if (fromMainIsolate) {
     // Remove port if it exists. to avoid port leak on hot reload.
@@ -83,6 +94,7 @@ Future<DriftIsolate> _crateIsolate({
     await Isolate.spawn(
       _startBackground,
       _IsolateStartRequest(receivePort.sendPort, dbFile),
+      debugName: debugName,
     );
     final isolate = await receivePort.first as DriftIsolate;
     IsolateNameServer.registerPortWithName(isolate.connectPort, portName);
@@ -93,6 +105,7 @@ Future<DriftIsolate> _crateIsolate({
 }
 
 void _startBackground(_IsolateStartRequest request) {
+  ansiColorDisabled = Platform.isIOS;
   final executor = _openDatabase(request.dbFile);
   final isolate = DriftIsolate.inCurrent(
     () => DatabaseConnection(executor),

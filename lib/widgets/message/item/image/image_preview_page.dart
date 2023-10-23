@@ -458,19 +458,19 @@ class _Action extends StatelessWidget {
       ),
     ];
 
-    final menu = PopupMenuPageButton(
+    final menu = CustomPopupMenuButton(
       itemBuilder: (context) => [
-        CustomPopupMenuButton(
+        CustomPopupMenuItem(
           icon: Resources.assetsImagesShareSvg,
           title: context.l10n.forward,
           value: _ActionType.share,
         ),
-        CustomPopupMenuButton(
+        CustomPopupMenuItem(
           icon: Resources.assetsImagesCopySvg,
           title: context.l10n.copy,
           value: _ActionType.copy,
         ),
-        CustomPopupMenuButton(
+        CustomPopupMenuItem(
           icon: Resources.assetsImagesAttachmentDownloadSvg,
           title: context.l10n.download,
           value: _ActionType.download,
@@ -489,15 +489,7 @@ class _Action extends StatelessWidget {
             break;
         }
       },
-      icon: SvgPicture.asset(
-        Resources.assetsImagesEllipsisSvg,
-        height: 24,
-        width: 24,
-        colorFilter: ColorFilter.mode(
-          context.theme.icon,
-          BlendMode.srcIn,
-        ),
-      ),
+      icon: Resources.assetsImagesEllipsisSvg,
     );
 
     return Expanded(

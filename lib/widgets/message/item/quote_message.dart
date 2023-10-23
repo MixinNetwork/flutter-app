@@ -480,7 +480,7 @@ class _QuoteMessageBase extends StatelessWidget {
                             if (name != null)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
-                                child: HighlightText(
+                                child: CustomText(
                                   name!,
                                   style: TextStyle(
                                     fontSize:
@@ -500,7 +500,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                     child: icon,
                                   ),
                                 Flexible(
-                                  child: HighlightText(
+                                  child: CustomText(
                                     _description,
                                     style: TextStyle(
                                       fontSize:

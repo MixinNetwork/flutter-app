@@ -7,7 +7,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image/image.dart' as img;
 
@@ -1453,19 +1452,20 @@ class _NormalOperationBar extends HookConsumerWidget {
               onTap: imageEditorBloc.flip,
             ),
             const SizedBox(width: 4),
-            PopupMenuPageButton<double>(
+            CustomPopupMenuButton<double>(
+              alignment: Alignment.topCenter,
               itemBuilder: (context) => [
-                CustomPopupMenuButton(
+                CustomPopupMenuItem(
                   title: context.l10n.originalImage,
                   value: 0,
                 ),
-                CustomPopupMenuButton(title: '1:1', value: 1),
-                CustomPopupMenuButton(title: '2:3', value: 2 / 3),
-                CustomPopupMenuButton(title: '3:2', value: 3 / 2),
-                CustomPopupMenuButton(title: '3:4', value: 3 / 4),
-                CustomPopupMenuButton(title: '4:3', value: 4 / 3),
-                CustomPopupMenuButton(title: '9:16', value: 9 / 16),
-                CustomPopupMenuButton(title: '16:9', value: 16 / 9),
+                CustomPopupMenuItem(title: '1:1', value: 1),
+                CustomPopupMenuItem(title: '2:3', value: 2 / 3),
+                CustomPopupMenuItem(title: '3:2', value: 3 / 2),
+                CustomPopupMenuItem(title: '3:4', value: 3 / 4),
+                CustomPopupMenuItem(title: '4:3', value: 4 / 3),
+                CustomPopupMenuItem(title: '9:16', value: 9 / 16),
+                CustomPopupMenuItem(title: '16:9', value: 16 / 9),
               ],
               onSelected: (value) {
                 if (value == 0) {
@@ -1474,15 +1474,8 @@ class _NormalOperationBar extends HookConsumerWidget {
                   imageEditorBloc.setCropRatio(value);
                 }
               },
-              icon: SvgPicture.asset(
-                Resources.assetsImagesEditImageClipSvg,
-                height: 24,
-                width: 24,
-                colorFilter: ColorFilter.mode(
-                  hasCrop ? context.theme.accent : context.theme.icon,
-                  BlendMode.srcIn,
-                ),
-              ),
+              color: hasCrop ? context.theme.accent : context.theme.icon,
+              icon: Resources.assetsImagesEditImageClipSvg,
             ),
             const SizedBox(width: 4),
             ActionButton(

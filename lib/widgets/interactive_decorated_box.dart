@@ -33,7 +33,7 @@ class InteractiveBuilder extends StatefulWidget {
   final VoidCallback? onDoubleTap;
   final ValueChanged<LongPressStartDetails>? onLongPress;
   final GestureTapUpCallback? onTapUp;
-  final ValueChanged<PointerUpEvent>? onRightClick;
+  final GestureTapUpCallback? onRightClick;
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
   final PointerHoverEventListener? onHover;
@@ -55,8 +55,6 @@ class _InteractiveBuilderState extends State<InteractiveBuilder> {
     if (hovering) return InteractiveStatus.hovering;
     return InteractiveStatus.interactive;
   }
-
-  int? lastPointerDown;
 
   @override
   Widget build(BuildContext context) {
@@ -99,19 +97,8 @@ class _InteractiveBuilderState extends State<InteractiveBuilder> {
         onTapUp: widget.onTapUp,
         onDoubleTap: widget.onDoubleTap,
         onLongPressStart: widget.onLongPress,
-        child: Listener(
-          onPointerUp: (PointerUpEvent event) {
-            if (event.pointer == lastPointerDown) {
-              widget.onRightClick?.call(event);
-            }
-          },
-          onPointerDown: (PointerDownEvent event) {
-            if (event.buttons == kSecondaryButton) {
-              lastPointerDown = event.pointer;
-            }
-          },
-          child: child,
-        ),
+        onSecondaryTapUp: widget.onRightClick,
+        child: child,
       ),
     );
   }
@@ -176,7 +163,7 @@ class InteractiveDecoratedBox extends StatelessWidget {
   final VoidCallback? onDoubleTap;
   final ValueChanged<LongPressStartDetails>? onLongPress;
   final GestureTapUpCallback? onTapUp;
-  final ValueChanged<PointerUpEvent>? onRightClick;
+  final GestureTapUpCallback? onRightClick;
 
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
@@ -237,6 +224,7 @@ class MouseRegionIgnoreTouch extends StatelessWidget {
     this.opaque = true,
     this.child,
   });
+
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
   final PointerHoverEventListener? onHover;

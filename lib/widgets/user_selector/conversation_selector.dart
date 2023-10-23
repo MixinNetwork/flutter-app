@@ -668,16 +668,19 @@ class _BaseItem extends StatelessWidget {
               child: Row(
                 children: [
                   Flexible(
-                    child: HighlightText(
+                    child: CustomText(
                       title.overflow,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      highlightTextSpans: [
+                      textMatchers: [
+                        EmojiTextMatcher(),
                         if (keyword != null)
-                          HighlightTextSpan(
+                          KeyWordTextMatcher(
                             keyword!.overflow,
-                            style: TextStyle(color: context.theme.accent),
-                          )
+                            style: TextStyle(
+                              color: context.theme.accent,
+                            ),
+                          ),
                       ],
                       style: TextStyle(
                         fontSize: 16,

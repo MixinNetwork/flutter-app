@@ -90,7 +90,7 @@ class PinMessageWidget extends HookConsumerWidget {
                 vertical: 5,
                 horizontal: 10,
               ),
-              child: HighlightText(
+              child: CustomText(
                 text,
                 style: TextStyle(
                   fontSize: context.messageStyle.secondaryFontSize,

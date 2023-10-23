@@ -46,55 +46,57 @@ class MessageDatetimeAndStatus extends HookConsumerWidget {
     final createdAt =
         useMessageConverter(converter: (state) => state.createdAt);
 
-    return SizedBox(
-      height: 12,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (pinned)
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: _ChatIcon(
-                color: color,
-                assetName: Resources.assetsImagesMessagePinSvg,
-              ),
-            ),
-          if (isSecret)
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: _ChatIcon(
-                color: color,
-                assetName: Resources.assetsImagesMessageSecretSvg,
-              ),
-            ),
-          if (isRepresentative)
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: _ChatIcon(
-                color: color,
-                assetName: Resources.assetsImagesMessageRepresentativeSvg,
-              ),
-            ),
-          _MessageDatetime(
-            dateTime: createdAt,
-            color: color,
-          ),
-          if (isCurrentUser &&
-              !isTranscriptPage &&
-              !isPinnedPage &&
-              !hideStatus)
-            HookBuilder(builder: (context) {
-              final status =
-                  useMessageConverter(converter: (state) => state.status);
-              return Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: MessageStatusIcon(
-                  status: status,
+    return SelectionContainer.disabled(
+      child: SizedBox(
+        height: 12,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (pinned)
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: _ChatIcon(
                   color: color,
+                  assetName: Resources.assetsImagesMessagePinSvg,
                 ),
-              );
-            }),
-        ],
+              ),
+            if (isSecret)
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: _ChatIcon(
+                  color: color,
+                  assetName: Resources.assetsImagesMessageSecretSvg,
+                ),
+              ),
+            if (isRepresentative)
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: _ChatIcon(
+                  color: color,
+                  assetName: Resources.assetsImagesMessageRepresentativeSvg,
+                ),
+              ),
+            _MessageDatetime(
+              dateTime: createdAt,
+              color: color,
+            ),
+            if (isCurrentUser &&
+                !isTranscriptPage &&
+                !isPinnedPage &&
+                !hideStatus)
+              HookBuilder(builder: (context) {
+                final status =
+                    useMessageConverter(converter: (state) => state.status);
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: MessageStatusIcon(
+                    status: status,
+                    color: color,
+                  ),
+                );
+              }),
+          ],
+        ),
       ),
     );
   }

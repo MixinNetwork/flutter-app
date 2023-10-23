@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'
+    hide SelectableRegion, SelectableRegionState;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -27,6 +29,7 @@ import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/provider/conversation_provider.dart';
+import '../../ui/provider/is_bot_group_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
 import '../../ui/provider/quote_message_provider.dart';
 import '../../ui/provider/recall_message_reedit_provider.dart';
@@ -59,6 +62,7 @@ import 'item/secret_message.dart';
 import 'item/sticker_message.dart';
 import 'item/stranger_message.dart';
 import 'item/system_message.dart';
+import 'item/text/selectable.dart';
 import 'item/text/text_message.dart';
 import 'item/transcript_message.dart';
 import 'item/transfer/transfer_message.dart';
@@ -144,6 +148,37 @@ void _quickReply(BuildContext context) {
   });
 }
 
+SelectedContent? _findSelectedContent(BuildContext context) {
+  SelectableRegionState? findSelectableRegionState(BuildContext context) {
+    if (context is! Element) {
+      return null;
+    }
+    if (context.widget is SelectableRegion) {
+      return (context as StatefulElement).state as SelectableRegionState;
+    }
+    SelectableRegionState? find;
+    context.visitChildren((element) {
+      if (find != null) {
+        return;
+      }
+      final result = findSelectableRegionState(element);
+      if (result != null) {
+        find = result;
+      }
+    });
+    return find;
+  }
+
+  final selectableRegion = findSelectableRegionState(context);
+  final status = selectableRegion?.selectable?.value.status;
+  final content = selectableRegion?.selectable?.getSelectedContent();
+  d('status: $status, content: $content');
+  if (status == SelectionStatus.uncollapsed && content != null) {
+    return content;
+  }
+  return null;
+}
+
 class MessageItemWidget extends HookConsumerWidget {
   const MessageItemWidget({
     super.key,
@@ -185,7 +220,8 @@ class MessageItemWidget extends HookConsumerWidget {
 
     final isGroupOrBotGroupConversation =
         message.conversionCategory == ConversationCategory.group ||
-            message.userId != message.conversationOwnerId;
+            message.userId != message.conversationOwnerId ||
+            ref.watch(isBotGroupProvider(message.conversationId));
 
     final enableShowAvatar =
         ref.watch(settingProvider.select((value) => value.messageShowAvatar));
@@ -207,6 +243,8 @@ class MessageItemWidget extends HookConsumerWidget {
     }
 
     final showedMenuCubit = useBloc(() => SimpleCubit(false));
+    final focusNode =
+        useFocusScopeNode(debugLabel: 'message_item_${message.messageId}');
 
     final blinkCubit = context.read<BlinkCubit>();
 
@@ -263,6 +301,7 @@ class MessageItemWidget extends HookConsumerWidget {
                   buildMenus: (request) {
                     request.onShowMenu.addListener(() {
                       showedMenuCubit.emit(true);
+                      focusNode.requestFocus();
                     });
                     request.onHideMenu.addListener(() {
                       showedMenuCubit.emit(false);
@@ -289,9 +328,6 @@ class MessageItemWidget extends HookConsumerWidget {
                     final enableForward =
                         !isTranscriptPage && message.canForward;
                     final enableSelect = !isTranscriptPage;
-                    final enableCopy = message.type.isText ||
-                        message.type.isPost ||
-                        message.type.isImage;
                     final enableSaveMobile = kPlatformIsMobile &&
                         (message.type.isImage || message.type.isVideo);
                     final enableSaveDesktop = kPlatformIsDesktop &&
@@ -388,23 +424,42 @@ class MessageItemWidget extends HookConsumerWidget {
                               .selectMessage(message),
                         ),
                     ];
-                    final copyActions = [
-                      if (enableCopy)
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.copy),
-                          title: context.l10n.copy,
-                          callback: () {
-                            if (message.type.isImage) {
-                              copyFile(context.accountServer
-                                  .convertMessageAbsolutePath(
-                                      message, isTranscriptPage));
-                              return;
-                            }
+
+                    final copyActions = <MenuAction>[];
+                    if (message.type.isPost || message.type.isImage) {
+                      copyActions.add(MenuAction(
+                        image: MenuImage.icon(IconFonts.copy),
+                        title: context.l10n.copy,
+                        callback: () {
+                          if (message.type.isImage) {
+                            copyFile(context.accountServer
+                                .convertMessageAbsolutePath(
+                                    message, isTranscriptPage));
+                            return;
+                          }
+                          Clipboard.setData(
+                              ClipboardData(text: message.content ?? ''));
+                        },
+                      ));
+                    } else if (message.type.isText) {
+                      final selectedContent = _findSelectedContent(context);
+                      copyActions.add(MenuAction(
+                        image: MenuImage.icon(IconFonts.copy),
+                        title: selectedContent == null
+                            ? context.l10n.copy
+                            : context.l10n.copySelectedText,
+                        callback: () {
+                          if (selectedContent != null) {
+                            Clipboard.setData(
+                                ClipboardData(text: selectedContent.plainText));
+                          } else {
                             Clipboard.setData(
                                 ClipboardData(text: message.content ?? ''));
-                          },
-                        ),
-                    ];
+                          }
+                        },
+                      ));
+                    }
+
                     final saveActions = [
                       if (enableSaveMobile)
                         MenuAction(
@@ -564,19 +619,23 @@ class MessageItemWidget extends HookConsumerWidget {
       );
     }
 
-    return MessageContext(
-      isTranscriptPage: isTranscriptPage,
-      isPinnedPage: isPinnedPage,
-      showNip: showNip,
-      isCurrentUser: isCurrentUser,
-      message: message,
-      child: Builder(
-        builder: (context) => GestureDetector(
-          onTap: () => _quickReply(context),
-          child: Padding(
-            padding:
-                sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
-            child: child,
+    return FocusScope(
+      node: focusNode,
+      child: MessageContext(
+        isTranscriptPage: isTranscriptPage,
+        isPinnedPage: isPinnedPage,
+        showNip: showNip,
+        isCurrentUser: isCurrentUser,
+        message: message,
+        child: Builder(
+          builder: (context) => GestureDetector(
+            onTap: () => _quickReply(context),
+            child: Padding(
+              padding: sameUserPrev
+                  ? EdgeInsets.zero
+                  : const EdgeInsets.only(top: 8),
+              child: child,
+            ),
           ),
         ),
       ),
@@ -728,6 +787,9 @@ class _MessageBubbleMargin extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final userIdentityNumber =
+        useMessageConverter(converter: (m) => m.userIdentityNumber);
+
     final messageColumn = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -736,6 +798,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
           MessageName(
             userName: userName!,
             userId: userId!,
+            userIdentityNumber: userIdentityNumber,
           ),
         ContextMenuWidget(
           hitTestBehavior: HitTestBehavior.translucent,

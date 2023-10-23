@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle;
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,6 +15,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart' hide Consumer;
 import 'package:rxdart/rxdart.dart';
+import 'package:simple_animations/simple_animations.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../constants/constants.dart';
@@ -21,7 +25,6 @@ import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/app_lifecycle.dart';
-import '../../../utils/emoji.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
@@ -30,6 +33,7 @@ import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/system/clipboard.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/actions/actions.dart';
+import '../../../widgets/high_light_text.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
@@ -106,7 +110,7 @@ class _InputContainer extends HookConsumerWidget {
       () {
         final draft = ref.read(
             conversationProvider.select((value) => value?.conversation?.draft));
-        return HighlightTextEditingController(
+        return _HighlightTextEditingController(
           initialText: draft,
           highlightTextStyle: TextStyle(color: context.theme.accent),
           mentionCache: ref.read(mentionCacheProvider),
@@ -498,6 +502,8 @@ class _SendTextField extends HookConsumerWidget {
                 ),
               ),
               selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
+              contextMenuBuilder: (context, state) =>
+                  MixinAdaptiveSelectionToolbar(editableTextState: state),
             ),
             if (!hasInputText)
               Positioned.fill(
@@ -583,15 +589,7 @@ class _QuoteMessage extends HookConsumerWidget {
   }
 }
 
-enum _ActionType {
-  file,
-  contact,
-  imageForMobile,
-  videoForMobile,
-  imageOrVideoForDesktop,
-}
-
-class _SendActionTypeButton extends StatelessWidget {
+class _SendActionTypeButton extends HookWidget {
   const _SendActionTypeButton();
 
   @override
@@ -599,104 +597,153 @@ class _SendActionTypeButton extends StatelessWidget {
     final isDesktop =
         Platform.isMacOS || Platform.isLinux || Platform.isWindows;
 
+    final menuDisplayed = useState(false);
+
     return Padding(
       padding: const EdgeInsets.only(left: 6),
-      child: PopupMenuPageButton(
-        itemBuilder: (context) => [
-          CustomPopupMenuButton(
+      child: ContextMenuPortalEntry(
+        interactive: false,
+        showedMenu: (value) => Future(() {
+          menuDisplayed.value = value;
+        }),
+        buildMenus: () => [
+          ContextMenu(
             icon: Resources.assetsImagesContactSvg,
             title: context.l10n.contact,
-            value: _ActionType.contact,
+            onTap: () async {
+              final conversationState =
+                  context.providerContainer.read(conversationProvider);
+
+              if (conversationState == null) return;
+
+              final result = await showConversationSelector(
+                context: context,
+                singleSelect: true,
+                onlyContact: true,
+                title: context.l10n.select,
+                filteredIds: [conversationState.userId].whereNotNull(),
+              );
+
+              if (result == null || result.isEmpty) return;
+              final userId = result.first.userId;
+              if (userId == null || userId.isEmpty) return;
+
+              await runWithToast(() async {
+                final user = await context.database.userDao
+                    .userById(userId)
+                    .getSingleOrNull();
+                if (user == null) throw Exception('User not found');
+
+                await context.accountServer.sendContactMessage(
+                  userId,
+                  user.fullName,
+                  conversationState.encryptCategory,
+                  conversationId: conversationState.conversationId,
+                  recipientId: conversationState.userId,
+                );
+              });
+            },
           ),
-          CustomPopupMenuButton(
+          ContextMenu(
             icon: Resources.assetsImagesFileSvg,
             title: context.l10n.files,
-            value: _ActionType.file,
+            onTap: () async {
+              final files = await selectFiles();
+              if (files.isNotEmpty) {
+                await showFilesPreviewDialog(context, files);
+              }
+            },
           ),
           if (isDesktop)
-            CustomPopupMenuButton(
+            ContextMenu(
               icon: Resources.assetsImagesFilePreviewImagesSvg,
               title: '${context.l10n.image} & ${context.l10n.video}',
-              value: _ActionType.imageOrVideoForDesktop,
+              onTap: () async {
+                final files = await selectFiles();
+                if (files.isNotEmpty) {
+                  await showFilesPreviewDialog(context, files);
+                }
+              },
             ),
           if (!isDesktop)
-            CustomPopupMenuButton(
+            ContextMenu(
               icon: Resources.assetsImagesImageSvg,
               title: context.l10n.image,
-              value: _ActionType.imageForMobile,
+              onTap: () async {
+                final image =
+                    await ImagePicker().pickImage(source: ImageSource.gallery);
+                if (image == null) return;
+                await showFilesPreviewDialog(context, [image.withMineType()]);
+              },
             ),
           if (!isDesktop)
-            CustomPopupMenuButton(
+            ContextMenu(
               icon: Resources.assetsImagesVideoSvg,
               title: context.l10n.video,
-              value: _ActionType.videoForMobile,
+              onTap: () async {
+                final video =
+                    await ImagePicker().pickVideo(source: ImageSource.gallery);
+                if (video == null) return;
+                await showFilesPreviewDialog(context, [video.withMineType()]);
+              },
             ),
         ],
-        onSelected: (value) async {
-          if (value == _ActionType.contact) {
-            final conversationState =
-                context.providerContainer.read(conversationProvider);
+        child: _AnimatedSendTypeButton(menuDisplayed: menuDisplayed.value),
+      ),
+    );
+  }
+}
 
-            if (conversationState == null) return;
+class _AnimatedSendTypeButton extends StatelessWidget {
+  const _AnimatedSendTypeButton({
+    required this.menuDisplayed,
+  });
 
-            final result = await showConversationSelector(
-              context: context,
-              singleSelect: true,
-              onlyContact: true,
-              title: context.l10n.select,
-              filteredIds: [conversationState.userId].whereNotNull(),
-            );
+  final bool menuDisplayed;
 
-            if (result == null || result.isEmpty) return;
-            final userId = result.first.userId;
-            if (userId == null || userId.isEmpty) return;
-
-            await runWithToast(() async {
-              final user = await context.database.userDao
-                  .userById(userId)
-                  .getSingleOrNull();
-              if (user == null) throw Exception('User not found');
-
-              await context.accountServer.sendContactMessage(
-                userId,
-                user.fullName,
-                conversationState.encryptCategory,
-                conversationId: conversationState.conversationId,
-                recipientId: conversationState.userId,
-              );
-            });
-
-            return;
-          }
-
-          var files = <XFile?>[];
-          if (value == _ActionType.imageOrVideoForDesktop ||
-              value == _ActionType.file) {
-            files = await selectFiles();
-          } else if (value == _ActionType.imageForMobile) {
-            files = [
-              await ImagePicker().pickImage(source: ImageSource.gallery)
-            ];
-          } else if (value == _ActionType.videoForMobile) {
-            files = [
-              await ImagePicker().pickVideo(source: ImageSource.gallery)
-            ];
-          }
-
-          // recreate the XFile to generate mimeType.
-          files = files.whereNotNull().map((e) => File(e.path).xFile).toList();
-          if (files.isNotEmpty) {
-            await showFilesPreviewDialog(context, files.cast());
+  @override
+  Widget build(BuildContext context) {
+    final tween = MovieTween()
+      ..scene(
+        duration: 200.milliseconds,
+        curve: Curves.easeInOut,
+      ).tween('rotate', Tween<double>(begin: 0, end: math.pi / 4))
+      ..scene(
+        duration: 100.milliseconds,
+        curve: Curves.easeIn,
+        end: 100.milliseconds,
+      ).tween('scale', Tween<double>(begin: 1, end: 0.8))
+      ..scene(
+        duration: 100.milliseconds,
+        curve: Curves.easeOut,
+        begin: 100.milliseconds,
+      ).tween('scale', Tween<double>(begin: 0.8, end: 1));
+    return CustomAnimationBuilder(
+      duration: 200.milliseconds,
+      tween: tween,
+      control: menuDisplayed ? Control.play : Control.playReverse,
+      curve: Curves.easeInOut,
+      child: ActionButton(
+        name: Resources.assetsImagesIcAddSvg,
+        size: 32,
+        padding: const EdgeInsets.all(4),
+        onTapUp: (details) {
+          final renderBox = context.findRenderObject() as RenderBox?;
+          if (renderBox != null) {
+            final position =
+                renderBox.localToGlobal(renderBox.paintBounds.topCenter);
+            context.sendMenuPosition(position);
+          } else {
+            context.sendMenuPosition(details.globalPosition);
           }
         },
-        icon: SvgPicture.asset(
-          Resources.assetsImagesIcAddSvg,
-          height: 32,
-          width: 32,
-          colorFilter: ColorFilter.mode(
-            context.theme.icon,
-            BlendMode.srcIn,
-          ),
+        color: context.theme.icon,
+      ),
+      builder: (context, value, child) => Transform.scale(
+        scale: value.get('scale'),
+        child: Transform.rotate(
+          angle: value.get('rotate'),
+          child: child,
         ),
       ),
     );
@@ -820,23 +867,53 @@ class _StickerPagePositionedLayoutDelegate extends SingleChildLayoutDelegate {
       position != oldDelegate.position;
 }
 
-class HighlightTextEditingController extends TextEditingController {
-  HighlightTextEditingController({
+class MentionTextMatcher extends TextMatcher implements EquatableMixin {
+  MentionTextMatcher(this.mentionCache, this.highlightTextStyle)
+      : super.regExp(
+          regExp: mentionNumberRegExp,
+          matchBuilder: (
+            span,
+            displayString,
+            linkString,
+          ) {
+            if (displayString != linkString) return TextSpan(text: linkString);
+
+            final identityNumber = linkString.substring(1);
+            final user = mentionCache.identityNumberCache(identityNumber);
+            final valid = user != null;
+
+            if (displayString != linkString) return TextSpan(text: linkString);
+
+            return TextSpan(
+              text: displayString,
+              style: valid
+                  ? (span.style ?? const TextStyle()).merge(highlightTextStyle)
+                  : span.style,
+            );
+          },
+        );
+
+  final MentionCache mentionCache;
+  final TextStyle highlightTextStyle;
+
+  @override
+  List<Object?> get props => [mentionCache, highlightTextStyle];
+
+  @override
+  bool? get stringify => true;
+}
+
+class _HighlightTextEditingController extends TextEditingController {
+  _HighlightTextEditingController({
     required this.highlightTextStyle,
     String? initialText,
     required this.mentionCache,
   }) : super(text: initialText) {
     mentionsStreamController.stream
-        .map((event) => mentionNumberRegExp
-            .allMatches(event)
-            .map((e) => e[1])
-            .whereNotNull()
-            .where(
-                (element) => mentionCache.identityNumberCache(element) == null)
-            .toSet())
-        .where((event) => event.isNotEmpty)
-        .distinct(setEquals)
-        .asyncMap(mentionCache.checkIdentityNumbers)
+        .distinct()
+        .asyncBufferMap(
+            (event) => mentionCache.checkMentionCache(event.toSet()))
+        .distinct(mapEquals)
         .listen((event) => notifyListeners());
   }
 
@@ -873,50 +950,15 @@ class HighlightTextEditingController extends TextEditingController {
     ]);
   }
 
-  TextSpan _buildTextSpan(String text, TextStyle? style) {
-    final children = <InlineSpan>[];
-    text.splitMapJoin(
-      mentionNumberRegExp,
-      onMatch: (match) {
-        final text = match[0];
-        final identityNumber = match[1];
-
-        final bool valid;
-        if (identityNumber != null) {
-          final user = mentionCache.identityNumberCache(identityNumber);
-          valid = user != null;
-        } else {
-          valid = false;
-        }
-
-        children.add(TextSpan(
-            text: text,
-            style: valid ? style?.merge(highlightTextStyle) : style));
-        return text ?? '';
-      },
-      onNonMatch: (text) {
-        text.splitEmoji(
-          onEmoji: (emoji) {
-            children.add(TextSpan(
-              text: emoji,
-              style: style?.copyWith(
-                fontFamily: kEmojiFontFamily,
-                fontSize: 16,
-              ),
-            ));
-          },
-          onText: (text) {
-            children.add(TextSpan(text: text, style: style));
-          },
-        );
-        return text;
-      },
-    );
-    return TextSpan(
-      style: style,
-      children: children,
-    );
-  }
+  TextSpan _buildTextSpan(String text, TextStyle? style) => TextSpan(
+        style: style,
+        children: TextMatcher.applyTextMatchers([
+          TextSpan(text: text, style: style)
+        ], [
+          MentionTextMatcher(mentionCache, highlightTextStyle),
+          EmojiTextMatcher(),
+        ]).toList(),
+      );
 }
 
 class _SendMessageIntent extends Intent {

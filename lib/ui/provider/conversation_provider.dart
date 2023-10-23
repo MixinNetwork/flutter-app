@@ -21,6 +21,7 @@ import '../../widgets/toast.dart';
 import '../home/bloc/conversation_list_bloc.dart';
 import '../home/bloc/subscriber_mixin.dart';
 import 'account_server_provider.dart';
+import 'is_bot_group_provider.dart';
 import 'recent_conversation_provider.dart';
 import 'responsive_navigator_provider.dart';
 
@@ -243,6 +244,8 @@ class ConversationStateNotifier
     bool sync = false,
     bool checkCurrentUserExist = false,
   }) async {
+    context.providerContainer.read(isBotGroupProvider(conversationId));
+
     final accountServer = context.accountServer;
     final database = context.database;
     final conversationNotifier =
@@ -334,6 +337,9 @@ class ConversationStateNotifier
         context.providerContainer.read(conversationProvider.notifier);
 
     final conversationId = generateConversationId(userId, accountServer.userId);
+
+    context.providerContainer.read(isBotGroupProvider(conversationId));
+
     final conversation = await _conversationItem(context, conversationId);
     if (conversation != null) {
       return selectConversation(

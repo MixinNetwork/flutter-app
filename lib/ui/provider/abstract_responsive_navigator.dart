@@ -88,7 +88,4 @@ abstract class AbstractResponsiveNavigatorStateNotifier
   }
 
   void clear() => state = state.copyWith(pages: []);
-
-  @override
-  ResponsiveNavigatorState get state => super.state;
 }

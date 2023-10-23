@@ -64,7 +64,7 @@ Future<void> main(List<String> args) async {
   )));
 
   scheduleMicrotask(() async {
-    await initLogger(mixinLogDirectory.path);
+    initLogger(mixinLogDirectory.path);
     await dumpAppAndSystemInfoToLogger();
   });
 

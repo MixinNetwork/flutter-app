@@ -11,7 +11,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:image/image.dart' as img;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -64,7 +63,7 @@ class _File {
       _File._(
         file,
         await file.length(),
-        img.findDecoderForData(await file.readAsBytes()) != null,
+        file.isImage,
         imageEditorSnapshot,
       );
 

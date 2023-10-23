@@ -188,7 +188,7 @@ class ConversationItemWidget extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     Flexible(
-                                      child: HighlightText(
+                                      child: CustomText(
                                         conversation.validName,
                                         style: TextStyle(
                                           color: context.theme.text,
@@ -413,7 +413,7 @@ class _MessageContent extends HookConsumerWidget {
           ),
         if (text != null)
           Expanded(
-            child: HighlightText(
+            child: CustomText(
               text.overflow,
               style: TextStyle(
                 color: dynamicColor,

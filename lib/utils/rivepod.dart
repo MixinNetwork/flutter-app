@@ -4,5 +4,8 @@ abstract class DistinctStateNotifier<T> extends StateNotifier<T> {
   DistinctStateNotifier(super.state);
 
   @override
+  T get state => super.state;
+
+  @override
   bool updateShouldNotify(T old, T current) => old != current;
 }
