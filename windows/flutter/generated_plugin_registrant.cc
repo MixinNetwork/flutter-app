@@ -11,6 +11,7 @@
 #include <desktop_webview_window/desktop_webview_window_plugin.h>
 #include <file_selector_windows/file_selector_windows.h>
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
+#include <flutter_webrtc/flutter_web_r_t_c_plugin.h>
 #include <irondash_engine_context/irondash_engine_context_plugin_c_api.h>
 #include <local_auth_windows/local_auth_plugin.h>
 #include <protocol_handler_windows/protocol_handler_windows_plugin_c_api.h>
@@ -35,6 +36,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FileSelectorWindows"));
   FlutterAppIconBadgePluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterAppIconBadgePlugin"));
+  FlutterWebRTCPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FlutterWebRTCPlugin"));
   IrondashEngineContextPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("IrondashEngineContextPluginCApi"));
   LocalAuthPluginRegisterWithRegistrar(

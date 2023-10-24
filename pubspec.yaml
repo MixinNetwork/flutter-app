@@ -166,6 +166,7 @@ dependencies:
       path: packages/data_detector
   envied: ^1.1.1
   sentry_flutter: ^9.1.0
+  flutter_webrtc: ^0.14.2
 
 dev_dependencies:
   build_runner: ^2.5.4

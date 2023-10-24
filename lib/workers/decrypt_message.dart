@@ -40,6 +40,7 @@ import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../widgets/message/send_message_dialog/attachment_extra.dart';
+import 'decrypt_call.dart';
 import 'device_transfer.dart';
 import 'injector.dart';
 import 'isolate_event.dart';
@@ -72,6 +73,7 @@ class DecryptMessage extends Injector {
     this._syncInscriptionJob,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
+    _decryptCall = DecryptCall(accountId, database, client, _ackJob);
   }
 
   final void Function(WorkerIsolateEventType event, [dynamic argument])
@@ -83,6 +85,7 @@ class DecryptMessage extends Injector {
   late final String _sessionId;
   late final ed.PrivateKey _privateKey;
   late EncryptedProtocol _encryptedProtocol;
+  late DecryptCall _decryptCall;
 
   final String identityNumber;
   final AckJob _ackJob;
@@ -100,16 +103,6 @@ class DecryptMessage extends Injector {
   }
 
   late MessageStatus _remoteStatus;
-
-  Future<bool> isExistMessage(String messageId) async {
-    final id = await database.messageDao.findMessageIdByMessageId(messageId);
-    if (id != null) {
-      return true;
-    }
-    final messageHistory = await database.messageHistoryDao
-        .findMessageHistoryById(messageId);
-    return messageHistory != null;
-  }
 
   Future<void> _insertMessage(Message message, BlazeMessageData data) async {
     await database.messageDao.insert(
@@ -131,12 +124,19 @@ class DecryptMessage extends Injector {
 
   Future<void> process(FloodMessage floodMessage) async {
     final data = BlazeMessageData.fromJson(
-      jsonDecode(floodMessage.data) as Map<String, dynamic>,
-    );
+        jsonDecode(floodMessage.data) as Map<String, dynamic>);
+    if (data.category.isCall) {
+      await _decryptCall.process(data);
+    } else {
+      await _processMessage(data);
+    }
+    await database.floodMessageDao.deleteFloodMessage(floodMessage);
+  }
+
+  Future<void> _processMessage(BlazeMessageData data) async {
     d('DecryptMessage process data: ${data.toJson()}');
     if (await isExistMessage(data.messageId)) {
       await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
-      await database.floodMessageDao.deleteFloodMessage(floodMessage);
       return;
     }
     try {
@@ -195,7 +195,7 @@ class DecryptMessage extends Injector {
       _remoteStatus = MessageStatus.delivered;
     }
 
-    final messageId = floodMessage.messageId;
+    final messageId = data.messageId;
     final pendingMessageStatus = pendingMessageStatusMap.remove(messageId);
     if (pendingMessageStatus != null &&
         pendingMessageStatus.index > _remoteStatus.index) {
@@ -203,8 +203,6 @@ class DecryptMessage extends Injector {
     }
 
     await _updateRemoteMessageStatus(messageId, _remoteStatus);
-
-    await database.floodMessageDao.deleteFloodMessage(floodMessage);
   }
 
   Future<void> _processSignalMessage(BlazeMessageData data) async {

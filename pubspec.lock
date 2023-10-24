@@ -339,6 +339,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0"
+  dart_webrtc:
+    dependency: transitive
+    description:
+      name: dart_webrtc
+      sha256: "5b76fd85ac95d6f5dee3e7d7de8d4b51bfbec1dc73804647c6aebb52d6297116"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.3+hotfix.2"
   data_detector:
     dependency: "direct main"
     description:
@@ -786,6 +794,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_webrtc:
+    dependency: "direct main"
+    description:
+      name: flutter_webrtc
+      sha256: "792aa1e5838a719f29ae52c0773dbb5dd781fc33b1bf87c321b274e55ab51ad1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.14.2"
   freezed_annotation:
     dependency: transitive
     description:
@@ -2299,6 +2315,14 @@ packages:
       url: "https://github.com/boyan01/webcrypto.dart.git"
     source: git
     version: "0.5.4"
+  webrtc_interface:
+    dependency: transitive
+    description:
+      name: webrtc_interface
+      sha256: "86fe3afc81a08481dfb25cf14a5a94e27062ecef25544783f352c914e0bbc1ca"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.2+hotfix.2"
   webview_flutter:
     dependency: "direct main"
     description:

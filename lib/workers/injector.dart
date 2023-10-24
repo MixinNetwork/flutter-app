@@ -282,4 +282,14 @@ class Injector {
       w('updateUserByIdentityNumber error $e, stack: $s');
     }
   }
+
+  Future<bool> isExistMessage(String messageId) async {
+    final id = await database.messageDao.findMessageIdByMessageId(messageId);
+    if (id != null) {
+      return true;
+    }
+    final messageHistory =
+        await database.messageHistoryDao.findMessageHistoryById(messageId);
+    return messageHistory != null;
+  }
 }

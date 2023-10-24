@@ -322,6 +322,7 @@ class Blaze {
       d('blazeMessage not a BlazeMessageData');
       return;
     }
+    i('blazeMessage action: ${blazeMessage.action}');
     if (blazeMessage.action == kAcknowledgeMessageReceipt) {
       await makeMessageStatus(data.messageId, data.status);
 
@@ -334,7 +335,9 @@ class Blaze {
           Offset(key: statusOffset, timestamp: timestamp),
         );
       }
-    } else if (blazeMessage.action == kCreateMessage) {
+    } else if (blazeMessage.action == kCreateMessage ||
+        blazeMessage.action == kCreateCall ||
+        blazeMessage.action == kCreateKraken) {
       if (data.userId == userId &&
           (data.category == null || data.conversationId.isEmpty)) {
         await makeMessageStatus(data.messageId, data.status);
@@ -347,15 +350,6 @@ class Blaze {
           ),
         );
       }
-    } else if (blazeMessage.action == kCreateCall ||
-        blazeMessage.action == kCreateKraken) {
-      await ackJob.add([
-        createAckJob(
-          kAcknowledgeMessageReceipts,
-          data.messageId,
-          MessageStatus.read,
-        ),
-      ]);
     } else {
       await ackJob.add([
         createAckJob(

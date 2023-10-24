@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   file_selector_linux
   flutter_app_icon_badge
+  flutter_webrtc
   irondash_engine_context
   open_file_linux
   screen_retriever_linux

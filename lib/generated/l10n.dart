@@ -4043,8 +4043,10 @@ class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
 
   @override
   bool isSupported(Locale locale) => _isSupported(locale);
+
   @override
   Future<Localization> load(Locale locale) => Localization.load(locale);
+
   @override
   bool shouldReload(AppLocalizationDelegate old) => false;
 
