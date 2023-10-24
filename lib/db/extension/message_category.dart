@@ -23,6 +23,8 @@ extension MessageCategoryExtension on String? {
 
   bool get isKraken => this?.startsWith('KRAKEN_') ?? false;
 
+  bool get isWebRtc => this?.startsWith('WEBRTC_') ?? false;
+
   bool get isRecall => this == MessageCategory.messageRecall;
 
   bool get isFtsMessage =>
