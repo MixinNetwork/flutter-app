@@ -411,41 +411,40 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
     if (centerMessageId == null) return recentMessages();
 
-    return database.transaction(() async {
-      final info = await messageDao.messageOrderInfo(centerMessageId);
-      if (info == null) {
-        return recentMessages();
-      }
-      final _limit = limit ~/ 2;
-      final bottomList = await messageDao
-          .afterMessagesByConversationId(info, conversationId, _limit)
-          .get();
-      var topList = (await messageDao
-              .beforeMessagesByConversationId(info, conversationId, _limit)
-              .get())
-          .reversed
-          .toList();
+    final info = await messageDao.messageOrderInfo(centerMessageId);
+    if (info == null) {
+      return recentMessages();
+    }
 
-      final isLatest = bottomList.length < _limit;
-      final isOldest = topList.length < _limit;
+    final _limit = limit ~/ 2;
+    final bottomList = await messageDao
+        .afterMessagesByConversationId(info, conversationId, _limit)
+        .get();
+    var topList = (await messageDao
+            .beforeMessagesByConversationId(info, conversationId, _limit)
+            .get())
+        .reversed
+        .toList();
 
-      var center = await messageDao
-          .messageItemByMessageId(centerMessageId)
-          .getSingleOrNull();
+    final isLatest = bottomList.length < _limit;
+    final isOldest = topList.length < _limit;
 
-      if (bottomList.isEmpty && center != null) {
-        topList = [...topList, center];
-        center = null;
-      }
+    var center = await messageDao
+        .messageItemByMessageId(centerMessageId)
+        .getSingleOrNull();
 
-      return MessageState(
-        top: topList,
-        center: center,
-        bottom: bottomList,
-        isLatest: isLatest,
-        isOldest: isOldest,
-      );
-    });
+    if (bottomList.isEmpty && center != null) {
+      topList = [...topList, center];
+      center = null;
+    }
+
+    return MessageState(
+      top: topList,
+      center: center,
+      bottom: bottomList,
+      isLatest: isLatest,
+      isOldest: isOldest,
+    );
   }
 
   MessageState? _insertOrReplace(
