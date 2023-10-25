@@ -20,11 +20,13 @@ MultiAuthState _$MultiAuthStateFromJson(Map<String, dynamic> json) =>
     MultiAuthState(
       auths: (json['auths'] as List<dynamic>?)
               ?.map((e) => AuthState.fromJson(e as Map<String, dynamic>))
-              .toSet() ??
-          const {},
+              .toList() ??
+          const [],
+      activeUserId: json['activeUserId'] as String?,
     );
 
 Map<String, dynamic> _$MultiAuthStateToJson(MultiAuthState instance) =>
     <String, dynamic>{
       'auths': instance.auths.map((e) => e.toJson()).toList(),
+      'activeUserId': instance.activeUserId,
     };
