@@ -181,7 +181,10 @@ class _DialogPage extends StatelessWidget {
           child: Material(
             color: backgroundColor ?? context.theme.popUp,
             borderRadius: const BorderRadius.all(Radius.circular(11)),
-            child: child,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(11)),
+              child: child,
+            ),
           ),
         ),
       ),

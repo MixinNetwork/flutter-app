@@ -22,6 +22,13 @@ import 'toast.dart';
 import 'user/user_dialog.dart';
 import 'window/move_window.dart';
 
+enum _ActionType {
+  searchContact,
+  createConversation,
+  createGroup,
+  createCircle,
+}
+
 class SearchBar extends HookConsumerWidget {
   const SearchBar({super.key});
 
@@ -94,57 +101,58 @@ class SearchBar extends HookConsumerWidget {
               color: filterUnseen ? context.theme.accent : context.theme.icon,
             ),
             const SizedBox(width: 4),
-            ContextMenuPortalEntry(
-              buildMenus: () => [
-                ContextMenu(
+            CustomPopupMenuButton(
+              itemBuilder: (context) => [
+                CustomPopupMenuItem(
                   icon: Resources.assetsImagesContextMenuSearchUserSvg,
                   title: context.l10n.searchContact,
-                  onTap: () => showMixinDialog<String>(
-                    context: context,
-                    child: const _SearchUserDialog(),
-                  ),
+                  value: _ActionType.searchContact,
                 ),
-                ContextMenu(
+                CustomPopupMenuItem(
                   icon: Resources.assetsImagesContextMenuCreateConversationSvg,
                   title: context.l10n.createConversation,
-                  onTap: () {
+                  value: _ActionType.createConversation,
+                ),
+                CustomPopupMenuItem(
+                  icon: Resources.assetsImagesContextMenuCreateGroupSvg,
+                  title: context.l10n.createGroup,
+                  value: _ActionType.createGroup,
+                ),
+                CustomPopupMenuItem(
+                  icon: Resources.assetsImagesCircleSvg,
+                  title: context.l10n.createCircle,
+                  value: _ActionType.createCircle,
+                ),
+              ],
+              onSelected: (type) {
+                switch (type) {
+                  case _ActionType.searchContact:
+                    showMixinDialog<String>(
+                      context: context,
+                      child: const _SearchUserDialog(),
+                    );
+                    break;
+                  case _ActionType.createConversation:
                     Actions.maybeInvoke(
                       context,
                       const CreateConversationIntent(),
                     );
-                  },
-                ),
-                ContextMenu(
-                  icon: Resources.assetsImagesContextMenuCreateGroupSvg,
-                  title: context.l10n.createGroup,
-                  onTap: () async {
+                    break;
+                  case _ActionType.createGroup:
                     Actions.maybeInvoke(
                       context,
                       const CreateGroupConversationIntent(),
                     );
-                  },
-                ),
-                ContextMenu(
-                  icon: Resources.assetsImagesCircleSvg,
-                  title: context.l10n.createCircle,
-                  onTap: () async {
+                    break;
+                  case _ActionType.createCircle:
                     Actions.maybeInvoke(
                       context,
                       const CreateCircleIntent(),
                     );
-                  },
-                ),
-              ],
-              child: Builder(
-                builder: (context) => MoveWindowBarrier(
-                  child: ActionButton(
-                    name: Resources.assetsImagesIcAddSvg,
-                    onTapUp: (event) =>
-                        context.sendMenuPosition(event.globalPosition),
-                    color: context.theme.icon,
-                  ),
-                ),
-              ),
+                    break;
+                }
+              },
+              icon: Resources.assetsImagesIcAddSvg,
             ),
             const SizedBox(width: 12),
           ],

@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
+import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
 import '../../../db/dao/participant_dao.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
-import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/verified_or_bot_widget.dart';
@@ -208,68 +209,70 @@ class _ParticipantMenuEntry extends HookConsumerWidget {
       return child;
     }
 
-    return ContextMenuPortalEntry(
-      buildMenus: () {
-        final menus = [
-          ContextMenu(
-            icon: Resources.assetsImagesContextMenuChatSvg,
+    return ContextMenuWidget(
+      menuProvider: (request) => MenusWithSeparator(childrens: [
+        [
+          MenuAction(
+            image: MenuImage.icon(IconFonts.chat),
             title:
                 context.l10n.groupPopMenuMessage(participant.fullName ?? '?'),
-            onTap: () {
+            callback: () {
               ConversationStateNotifier.selectUser(
                 context,
                 participant.userId,
               );
             },
           ),
-        ];
-        if (currentUser?.role == ParticipantRole.owner) {
-          if (participant.role != ParticipantRole.admin) {
-            menus.add(ContextMenu(
-              icon: Resources.assetsImagesContextMenuUserEditSvg,
-              title: context.l10n.makeGroupAdmin,
-              onTap: () {
+        ],
+        if (currentUser?.role == ParticipantRole.owner)
+          [
+            if (participant.role != ParticipantRole.admin)
+              MenuAction(
+                image: MenuImage.icon(IconFonts.manageUser),
+                title: context.l10n.makeGroupAdmin,
+                callback: () {
+                  final conversationId =
+                      ref.read(currentConversationIdProvider);
+                  if (conversationId == null) return;
+
+                  runFutureWithToast(
+                    context.accountServer.updateParticipantRole(conversationId,
+                        participant.userId, ParticipantRole.admin),
+                  );
+                },
+              )
+            else
+              MenuAction(
+                image: MenuImage.icon(IconFonts.stop),
+                title: context.l10n.dismissAsAdmin,
+                callback: () {
+                  final conversationId =
+                      ref.read(currentConversationIdProvider);
+                  if (conversationId == null) return;
+
+                  runFutureWithToast(context.accountServer
+                      .updateParticipantRole(
+                          conversationId, participant.userId, null));
+                },
+              )
+          ],
+        [
+          if (currentUser?.role != null && participant.role == null ||
+              currentUser?.role == ParticipantRole.owner)
+            MenuAction(
+              image: MenuImage.icon(IconFonts.delete),
+              title:
+                  context.l10n.groupPopMenuRemove(participant.fullName ?? '?'),
+              callback: () {
                 final conversationId = ref.read(currentConversationIdProvider);
                 if (conversationId == null) return;
 
-                runFutureWithToast(
-                  context.accountServer.updateParticipantRole(conversationId,
-                      participant.userId, ParticipantRole.admin),
-                );
+                runFutureWithToast(context.accountServer
+                    .removeParticipant(conversationId, participant.userId));
               },
-            ));
-          } else {
-            menus.add(ContextMenu(
-              icon: Resources.assetsImagesContextMenuStopSvg,
-              title: context.l10n.dismissAsAdmin,
-              onTap: () {
-                final conversationId = ref.read(currentConversationIdProvider);
-                if (conversationId == null) return;
-
-                runFutureWithToast(context.accountServer.updateParticipantRole(
-                    conversationId, participant.userId, null));
-              },
-            ));
-          }
-        }
-
-        if (currentUser?.role != null && participant.role == null ||
-            currentUser?.role == ParticipantRole.owner) {
-          menus.add(ContextMenu(
-            icon: Resources.assetsImagesContextMenuDeleteSvg,
-            isDestructiveAction: true,
-            title: context.l10n.groupPopMenuRemove(participant.fullName ?? '?'),
-            onTap: () {
-              final conversationId = ref.read(currentConversationIdProvider);
-              if (conversationId == null) return;
-
-              runFutureWithToast(context.accountServer
-                  .removeParticipant(conversationId, participant.userId));
-            },
-          ));
-        }
-        return menus;
-      },
+            )
+        ]
+      ]),
       child: child,
     );
   }
@@ -310,6 +313,11 @@ class _RoleLabel extends StatelessWidget {
       );
 }
 
+enum _ActionType {
+  addParticipants,
+  inviteByLink,
+}
+
 class _ActionAddParticipants extends HookConsumerWidget {
   const _ActionAddParticipants({
     required this.participants,
@@ -318,48 +326,52 @@ class _ActionAddParticipants extends HookConsumerWidget {
   final List<ParticipantUser> participants;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => ContextMenuPortalEntry(
-        buildMenus: () => [
-          ContextMenu(
+  Widget build(BuildContext context, WidgetRef ref) => CustomPopupMenuButton(
+        itemBuilder: (context) => [
+          CustomPopupMenuItem(
             icon: Resources.assetsImagesContextMenuSearchUserSvg,
             title: context.l10n.addParticipants,
-            onTap: () async {
-              final result = await showConversationSelector(
-                context: context,
-                singleSelect: false,
-                title: context.l10n.addParticipants,
-                onlyContact: true,
-              );
-              if (result == null || result.isEmpty) return;
-
-              final userIds =
-                  result.map((e) => e.userId).whereNotNull().toList();
-              final conversationId = ref.read(currentConversationIdProvider);
-              if (conversationId == null) return;
-
-              await runFutureWithToast(
-                context.accountServer.addParticipant(conversationId, userIds),
-              );
-            },
+            value: _ActionType.addParticipants,
           ),
-          ContextMenu(
+          CustomPopupMenuItem(
             icon: Resources.assetsImagesContextMenuLinkSvg,
             title: context.l10n.inviteToGroupViaLink,
-            onTap: () {
-              final conversationId = ref.read(currentConversationIdProvider);
-              if (conversationId == null) return;
-
-              showGroupInviteByLinkDialog(context,
-                  conversationId: conversationId);
-            },
+            value: _ActionType.inviteByLink,
           ),
         ],
-        child: Builder(
-            builder: (context) => ActionButton(
-                  name: Resources.assetsImagesIcAddSvg,
-                  color: context.theme.icon,
-                  onTapUp: (event) =>
-                      context.sendMenuPosition(event.globalPosition),
-                )),
+        onSelected: (action) async {
+          switch (action) {
+            case _ActionType.addParticipants:
+              {
+                final result = await showConversationSelector(
+                  context: context,
+                  singleSelect: false,
+                  title: context.l10n.addParticipants,
+                  onlyContact: true,
+                );
+                if (result == null || result.isEmpty) return;
+
+                final userIds =
+                    result.map((e) => e.userId).whereNotNull().toList();
+                final conversationId = ref.read(currentConversationIdProvider);
+                if (conversationId == null) return;
+
+                await runFutureWithToast(
+                  context.accountServer.addParticipant(conversationId, userIds),
+                );
+                break;
+              }
+            case _ActionType.inviteByLink:
+              {
+                final conversationId = ref.read(currentConversationIdProvider);
+                if (conversationId == null) return;
+
+                await showGroupInviteByLinkDialog(context,
+                    conversationId: conversationId);
+                break;
+              }
+          }
+        },
+        icon: Resources.assetsImagesIcAddSvg,
       );
 }

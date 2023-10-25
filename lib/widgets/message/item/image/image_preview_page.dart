@@ -364,6 +364,8 @@ class _Bar extends StatelessWidget {
       );
 }
 
+enum _ActionType { share, copy, download }
+
 class _Action extends StatelessWidget {
   const _Action({
     required this.controller,
@@ -456,32 +458,38 @@ class _Action extends StatelessWidget {
       ),
     ];
 
-    final menu = ContextMenuPortalEntry(
-      buildMenus: () => [
-        ContextMenu(
+    final menu = CustomPopupMenuButton(
+      itemBuilder: (context) => [
+        CustomPopupMenuItem(
           icon: Resources.assetsImagesShareSvg,
           title: context.l10n.forward,
-          onTap: share,
+          value: _ActionType.share,
         ),
-        ContextMenu(
+        CustomPopupMenuItem(
           icon: Resources.assetsImagesCopySvg,
           title: context.l10n.copy,
-          onTap: copy,
+          value: _ActionType.copy,
         ),
-        ContextMenu(
+        CustomPopupMenuItem(
           icon: Resources.assetsImagesAttachmentDownloadSvg,
           title: context.l10n.download,
-          onTap: download,
+          value: _ActionType.download,
         ),
       ],
-      child: Builder(
-        builder: (context) => ActionButton(
-          name: Resources.assetsImagesEllipsisSvg,
-          color: context.theme.icon,
-          size: 20,
-          onTapUp: (event) => context.sendMenuPosition(event.globalPosition),
-        ),
-      ),
+      onSelected: (type) {
+        switch (type) {
+          case _ActionType.share:
+            share();
+            break;
+          case _ActionType.copy:
+            copy();
+            break;
+          case _ActionType.download:
+            download();
+            break;
+        }
+      },
+      icon: Resources.assetsImagesEllipsisSvg,
     );
 
     return Expanded(

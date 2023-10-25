@@ -9,7 +9,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 
 import 'interactive_decorated_box.dart';
-import 'menu.dart';
 
 class _HoverOverlayForceHiddenTool {
   _HoverOverlayForceHiddenTool(this.hidden, this.duration);
@@ -130,13 +129,7 @@ class HoverOverlay extends HookConsumerWidget {
                 tapped.value = true;
               }
             },
-            child: NotificationListener<SubMenuClickedByTouchNotification>(
-              child: child,
-              onNotification: (notification) {
-                tapped.value = !tapped.value;
-                return true;
-              },
-            ),
+            child: child,
           ),
         );
 
