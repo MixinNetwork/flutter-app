@@ -67,7 +67,7 @@ class SignalDatabase extends _$SignalDatabase {
     }
     const dbFiles = ['signal.db', 'signal.db-shm', 'signal.db-wal'];
     final legacyFiles = dbFiles.map((e) => File(p.join(legacyDbFolder, e)));
-    bool hasError = false;
+    var hasError = false;
     for (final file in legacyFiles) {
       try {
         final newLocation = p.join(dbFolder, p.basename(file.path));
