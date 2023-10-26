@@ -86,20 +86,18 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
   }
 
   void updateAccount(Account account) {
-    var authState = state.auths
-        .cast<AuthState?>()
-        .firstWhere((element) => element?.account.userId == account.userId);
-    if (authState == null) {
+    final index =
+        state.auths.indexWhere((element) => element.userId == account.userId);
+    if (index == -1) {
       i('update account, but ${account.userId} auth state not found.');
       return;
     }
-    authState = AuthState(account: account, privateKey: authState.privateKey);
-    state = MultiAuthState(
-      auths: [
-        ...state.auths.where((element) => element.userId != authState?.userId),
-        authState,
-      ],
+    final auths = state.auths.toList();
+    auths[index] = AuthState(
+      account: account,
+      privateKey: state.auths[index].privateKey,
     );
+    state = MultiAuthState(auths: auths);
   }
 
   void signOut() {
@@ -115,6 +113,18 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
     final hydratedJson = toHydratedJson(state.toJson());
     HydratedBloc.storage.write(_kMultiAuthCubitKey, hydratedJson);
     super.state = value;
+  }
+
+  void active(String userId) {
+    final exist = state.auths.any((element) => element.userId == userId);
+    if (!exist) {
+      e('failed to active, no account exist for id: $userId');
+      return;
+    }
+    state = MultiAuthState(
+      auths: state.auths,
+      activeUserId: userId,
+    );
   }
 }
 
@@ -132,6 +142,7 @@ final multiAuthStateNotifierProvider =
       return MultiAuthStateNotifier(MultiAuthState());
     }
 
+    d('read multi auth state from storage: $multiAuthState');
     return MultiAuthStateNotifier(multiAuthState);
   }
 

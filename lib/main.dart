@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:ansicolor/ansicolor.dart';
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -83,7 +84,12 @@ Future<void> main(List<String> args) async {
     e('FlutterError: ${details.exception} ${details.stack}');
   };
   PlatformDispatcher.instance.onError = (error, stack) {
-    e('unhandled error: $error $stack');
+    e('unhandled error: $error');
+    if (error is DioException) {
+      e('stacktrace: ${error.stackTrace}');
+    } else {
+      e('stacktrace: $stack');
+    }
     return true;
   };
 

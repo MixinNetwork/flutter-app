@@ -105,8 +105,8 @@ class AccountServer {
 
     try {
       await checkSignalKeys();
-    } catch (e, s) {
-      w('$e, $s');
+    } catch (error, stacktrace) {
+      e('checkSignalKeys failed: $error $stacktrace');
       await signOutAndClear();
       multiAuthNotifier.signOut();
       rethrow;
@@ -312,7 +312,11 @@ class AccountServer {
 
   Future<void> signOutAndClear() async {
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
-    await client.accountApi.logout(LogoutRequest(sessionId));
+    try {
+      await client.accountApi.logout(LogoutRequest(sessionId));
+    } catch (error, stacktrace) {
+      e('signOutAndClear logout error: $error $stacktrace');
+    }
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
 

@@ -28,7 +28,9 @@ import 'landing_state.dart';
 class _QrCodeLoginNotifier extends StateNotifier<LandingState> {
   _QrCodeLoginNotifier(Ref ref)
       : multiAuth = ref.read(multiAuthStateNotifierProvider.notifier),
-        super(const LandingState(status: LandingStatus.provisioning));
+        super(const LandingState(status: LandingStatus.provisioning)) {
+    requestAuthUrl();
+  }
 
   final MultiAuthStateNotifier multiAuth;
   final client = createLandingClient();

@@ -222,7 +222,7 @@ class _MultiAccountPopupButton extends HookConsumerWidget {
   }
 }
 
-class _AccountMenuItem extends StatelessWidget {
+class _AccountMenuItem extends ConsumerWidget {
   const _AccountMenuItem({
     required this.account,
     required this.selected,
@@ -232,7 +232,13 @@ class _AccountMenuItem extends StatelessWidget {
   final bool selected;
 
   @override
-  Widget build(BuildContext context) => ContextMenuLayout(
+  Widget build(BuildContext context, WidgetRef ref) => ContextMenuLayout(
+        onTap: () {
+          ref
+              .read(multiAuthStateNotifierProvider.notifier)
+              .active(account.userId);
+          context.closeMenu();
+        },
         child: Row(
           children: [
             Padding(
