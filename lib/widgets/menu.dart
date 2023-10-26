@@ -327,6 +327,46 @@ class ContextMenuPage extends StatelessWidget {
   }
 }
 
+class ContextMenuLayout extends StatelessWidget {
+  const ContextMenuLayout({
+    super.key,
+    this.onTap,
+    this.onTapUp,
+    required this.child,
+  });
+
+  final VoidCallback? onTap;
+  final GestureTapUpCallback? onTapUp;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor = context.dynamicColor(
+      const Color.fromRGBO(255, 255, 255, 1),
+      darkColor: const Color.fromRGBO(62, 65, 72, 1),
+    );
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 160),
+      child: InteractiveDecoratedBox.color(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+        ),
+        tapDowningColor: Color.alphaBlend(
+          context.theme.listSelected,
+          backgroundColor,
+        ),
+        onTap: onTap,
+        onTapUp: onTapUp,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 class ContextMenu extends StatelessWidget {
   const ContextMenu({
     super.key,
@@ -351,71 +391,54 @@ class ContextMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = context.dynamicColor(
-      const Color.fromRGBO(255, 255, 255, 1),
-      darkColor: const Color.fromRGBO(62, 65, 72, 1),
-    );
     final color = isDestructiveAction
         ? context.theme.red
         : context.dynamicColor(
             const Color.fromRGBO(0, 0, 0, 1),
             darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
           );
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 160),
-      child: InteractiveDecoratedBox.color(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-        ),
-        tapDowningColor: Color.alphaBlend(
-          context.theme.listSelected,
-          backgroundColor,
-        ),
-        onTap: () {
-          onTap?.call();
-          if (!_subMenuMode) context.closeMenu();
-        },
-        onTapUp: (details) {
-          if (_subMenuMode && details.kind == PointerDeviceKind.touch) {
-            const SubMenuClickedByTouchNotification().dispatch(context);
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              if (icon != null)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: SvgPicture.asset(
-                    icon!,
-                    colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                    width: 20,
-                    height: 20,
-                  ),
-                ),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: color,
-                  ),
-                ),
+    return ContextMenuLayout(
+      onTap: () {
+        onTap?.call();
+        if (!_subMenuMode) context.closeMenu();
+      },
+      onTapUp: (details) {
+        if (_subMenuMode && details.kind == PointerDeviceKind.touch) {
+          const SubMenuClickedByTouchNotification().dispatch(context);
+        }
+      },
+      child: Row(
+        children: [
+          if (icon != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: SvgPicture.asset(
+                icon!,
+                colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                width: 20,
+                height: 20,
               ),
-              if (_subMenuMode)
-                SvgPicture.asset(
-                  Resources.assetsImagesIcArrowRightSvg,
-                  width: 20,
-                  height: 20,
-                  colorFilter: ColorFilter.mode(
-                    context.theme.secondaryText,
-                    BlendMode.srcIn,
-                  ),
-                ),
-            ],
+            ),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: color,
+              ),
+            ),
           ),
-        ),
+          if (_subMenuMode)
+            SvgPicture.asset(
+              Resources.assetsImagesIcArrowRightSvg,
+              width: 20,
+              height: 20,
+              colorFilter: ColorFilter.mode(
+                context.theme.secondaryText,
+                BlendMode.srcIn,
+              ),
+            ),
+        ],
       ),
     );
   }

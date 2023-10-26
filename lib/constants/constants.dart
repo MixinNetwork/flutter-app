@@ -68,3 +68,8 @@ const kRecaptchaKey = '';
 const hCaptchaKey = '';
 
 const kDbFileName = 'mixin';
+
+const kHttpLogLevel = String.fromEnvironment(
+  'MIXIN_HTTP_LOG_LEVEL',
+  defaultValue: 'all',
+);

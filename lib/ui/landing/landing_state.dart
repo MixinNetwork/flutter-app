@@ -4,13 +4,12 @@ enum LandingStatus {
   needReload,
   provisioning,
   ready,
-  init,
 }
 
 class LandingState extends Equatable {
   const LandingState({
     this.authUrl,
-    this.status = LandingStatus.init,
+    required this.status,
     this.errorMessage,
   });
 

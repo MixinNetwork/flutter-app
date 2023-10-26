@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -18,16 +17,13 @@ import '../provider/account_server_provider.dart';
 import 'landing_mobile.dart';
 import 'landing_qrcode.dart';
 
-enum LandingMode {
+enum _LandingMode {
   qrcode,
   mobile,
 }
 
-class LandingModeCubit extends Cubit<LandingMode> {
-  LandingModeCubit() : super(LandingMode.qrcode);
-
-  void changeMode(LandingMode mode) => emit(mode);
-}
+final _landingModeProvider =
+    StateProvider.autoDispose<_LandingMode>((ref) => _LandingMode.qrcode);
 
 class LandingPage extends HookConsumerWidget {
   const LandingPage({super.key});
@@ -36,26 +32,20 @@ class LandingPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final accountServerHasError =
         ref.watch(accountServerProvider.select((value) => value.hasError));
-
-    final modeCubit = useBloc(LandingModeCubit.new);
-    final mode = useBlocState<LandingModeCubit, LandingMode>(bloc: modeCubit);
-
+    final mode = ref.watch(_landingModeProvider);
     Widget child;
     switch (mode) {
-      case LandingMode.qrcode:
+      case _LandingMode.qrcode:
         child = const LandingQrCodeWidget();
         break;
-      case LandingMode.mobile:
+      case _LandingMode.mobile:
         child = const LoginWithMobileWidget();
         break;
     }
     if (accountServerHasError) {
       child = const _LoginFailed();
     }
-    return BlocProvider.value(
-      value: modeCubit,
-      child: LandingScaffold(child: child),
-    );
+    return LandingScaffold(child: child);
   }
 }
 
@@ -228,26 +218,24 @@ class LandingModeSwitchButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mode = useBlocState<LandingModeCubit, LandingMode>();
+    final mode = ref.watch(_landingModeProvider);
     final String buttonText;
     switch (mode) {
-      case LandingMode.qrcode:
+      case _LandingMode.qrcode:
         buttonText = context.l10n.signWithPhoneNumber;
         break;
-      case LandingMode.mobile:
+      case _LandingMode.mobile:
         buttonText = context.l10n.signWithQrcode;
         break;
     }
     return TextButton(
       onPressed: () {
-        final modeCubit = context.read<LandingModeCubit>();
+        final notifier = ref.read(_landingModeProvider.notifier);
         switch (mode) {
-          case LandingMode.qrcode:
-            modeCubit.changeMode(LandingMode.mobile);
-            break;
-          case LandingMode.mobile:
-            modeCubit.changeMode(LandingMode.qrcode);
-            break;
+          case _LandingMode.qrcode:
+            notifier.state = _LandingMode.mobile;
+          case _LandingMode.mobile:
+            notifier.state = _LandingMode.qrcode;
         }
       },
       child: Text(
