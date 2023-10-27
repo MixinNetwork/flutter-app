@@ -101,8 +101,16 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
   }
 
   void signOut() {
+    final currentUserId = state.activeUserId;
+    if (currentUserId == null) {
+      w('signOut: currentUserId is null');
+      state = MultiAuthState();
+      return;
+    }
+    i('sign out: $currentUserId');
     if (state.auths.isEmpty) return;
-    final auths = state.auths.toList()..remove(state.current);
+    final auths = state.auths.toList()
+      ..removeWhere((element) => element.userId == currentUserId);
     final activeUserId = auths.lastOrNull?.userId;
     state = MultiAuthState(auths: auths, activeUserId: activeUserId);
   }
@@ -110,7 +118,7 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
   @override
   @protected
   set state(MultiAuthState value) {
-    final hydratedJson = toHydratedJson(state.toJson());
+    final hydratedJson = toHydratedJson(value.toJson());
     HydratedBloc.storage.write(_kMultiAuthCubitKey, hydratedJson);
     super.state = value;
   }
@@ -131,10 +139,7 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
 const _kMultiAuthCubitKey = 'MultiAuthCubit';
 
 final multiAuthStateNotifierProvider =
-    StateNotifierProvider.autoDispose<MultiAuthStateNotifier, MultiAuthState>(
-        (ref) {
-  ref.keepAlive();
-
+    StateNotifierProvider<MultiAuthStateNotifier, MultiAuthState>((ref) {
   final oldJson = HydratedBloc.storage.read(_kMultiAuthCubitKey);
   if (oldJson != null) {
     final multiAuthState = fromHydratedJson(oldJson, MultiAuthState.fromJson);
@@ -142,7 +147,6 @@ final multiAuthStateNotifierProvider =
       return MultiAuthStateNotifier(MultiAuthState());
     }
 
-    d('read multi auth state from storage: $multiAuthState');
     return MultiAuthStateNotifier(multiAuthState);
   }
 

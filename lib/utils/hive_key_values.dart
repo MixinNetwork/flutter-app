@@ -3,22 +3,19 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 import 'package:path/path.dart' as p;
 
-import '../account/account_key_value.dart';
 import '../account/scam_warning_key_value.dart';
 import '../account/security_key_value.dart';
 import '../account/session_key_value.dart';
 import '../account/show_pin_message_key_value.dart';
-import '../crypto/crypto_key_value.dart';
 import '../crypto/privacy_key_value.dart';
 import 'attachment/download_key_value.dart';
 import 'file.dart';
 
 Future<void> initKeyValues(String identityNumber) => Future.wait([
       PrivacyKeyValue.instance.init(identityNumber),
-      CryptoKeyValue.instance.init(identityNumber),
-      AccountKeyValue.instance.init(identityNumber),
       ShowPinMessageKeyValue.instance.init(identityNumber),
       ScamWarningKeyValue.instance.init(identityNumber),
       DownloadKeyValue.instance.init(identityNumber),
@@ -28,13 +25,20 @@ Future<void> initKeyValues(String identityNumber) => Future.wait([
 
 Future<void> clearKeyValues() => Future.wait([
       PrivacyKeyValue.instance.delete(),
-      CryptoKeyValue.instance.delete(),
-      AccountKeyValue.instance.delete(),
       ShowPinMessageKeyValue.instance.delete(),
       ScamWarningKeyValue.instance.delete(),
       DownloadKeyValue.instance.delete(),
       SessionKeyValue.instance.delete(),
       SecurityKeyValue.instance.delete(),
+    ]);
+
+Future<void> disposeKeyValues() => Future.wait([
+      PrivacyKeyValue.instance.dispose(),
+      ShowPinMessageKeyValue.instance.dispose(),
+      ScamWarningKeyValue.instance.dispose(),
+      DownloadKeyValue.instance.dispose(),
+      SessionKeyValue.instance.dispose(),
+      SecurityKeyValue.instance.dispose(),
     ]);
 
 abstract class HiveKeyValue<E> {
@@ -43,6 +47,8 @@ abstract class HiveKeyValue<E> {
   final String _boxName;
   late Box<E> box;
   bool _hasInit = false;
+
+  String? _identityNumber;
 
   Future init(String identityNumber) async {
     if (_hasInit) {
@@ -65,7 +71,18 @@ abstract class HiveKeyValue<E> {
       Hive.init(directory.absolute.path);
     }
     box = await Hive.openBox<E>(_boxName);
+    i('HiveKeyValue: open $_boxName');
+    _identityNumber = identityNumber;
     _hasInit = true;
+  }
+
+  Future<void> dispose() async {
+    if (!_hasInit) {
+      return;
+    }
+    i('HiveKeyValue: dispose $_boxName $_identityNumber');
+    await box.close();
+    _hasInit = false;
   }
 
   Future delete() async {

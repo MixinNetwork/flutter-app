@@ -10,9 +10,7 @@ import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
-import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
-import '../../crypto/crypto_key_value.dart';
 import '../../crypto/signal/signal_protocol.dart';
 import '../../generated/l10n.dart';
 import '../../utils/extension/extension.dart';
@@ -20,13 +18,14 @@ import '../../utils/mixin_api_client.dart';
 import '../../utils/platform.dart';
 import '../../utils/system/package_info.dart';
 import '../../widgets/qr_code.dart';
+import '../provider/hive_key_value_provider.dart';
 import '../provider/multi_auth_provider.dart';
 import 'landing.dart';
 import 'landing_initialize.dart';
 import 'landing_state.dart';
 
 class _QrCodeLoginNotifier extends StateNotifier<LandingState> {
-  _QrCodeLoginNotifier(Ref ref)
+  _QrCodeLoginNotifier(this.ref)
       : multiAuth = ref.read(multiAuthStateNotifierProvider.notifier),
         super(const LandingState(status: LandingStatus.provisioning)) {
     requestAuthUrl();
@@ -34,6 +33,7 @@ class _QrCodeLoginNotifier extends StateNotifier<LandingState> {
 
   final MultiAuthStateNotifier multiAuth;
   final client = createLandingClient();
+  final Ref ref;
 
   final StreamController<(int, String, signal.ECKeyPair)>
       periodicStreamController =
@@ -137,15 +137,15 @@ class _QrCodeLoginNotifier extends StateNotifier<LandingState> {
       ),
     );
 
-    await SignalProtocol.initSignal(
-        rsp.data.identityNumber, registrationId, private);
+    final identityNumber = rsp.data.identityNumber;
+    await SignalProtocol.initSignal(identityNumber, registrationId, private);
 
     final privateKey = base64Encode(edKeyPair.privateKey.bytes);
 
-    await AccountKeyValue.instance.init(rsp.data.identityNumber);
-    AccountKeyValue.instance.primarySessionId = sessionId;
-    await CryptoKeyValue.instance.init(rsp.data.identityNumber);
-    CryptoKeyValue.instance.localRegistrationId = registrationId;
+    final accountKeyValue = await ref.read(accountKeyValueProvider(identityNumber).future);
+    accountKeyValue.primarySessionId = sessionId;
+    final cryptoKeyValue = await ref.read(cryptoKeyValueProvider(identityNumber).future);
+    cryptoKeyValue.localRegistrationId = registrationId;
 
     return (
       rsp.data,

@@ -10,12 +10,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide Provider, FutureProvider, Consumer;
 import 'package:provider/provider.dart';
 
-import 'account/account_key_value.dart';
 import 'account/notification_service.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
-
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
@@ -23,6 +21,7 @@ import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
 import 'ui/provider/account_server_provider.dart';
 import 'ui/provider/database_provider.dart';
+import 'ui/provider/hive_key_value_provider.dart';
 import 'ui/provider/mention_cache_provider.dart';
 import 'ui/provider/multi_auth_provider.dart';
 import 'ui/provider/setting_provider.dart';
@@ -233,10 +232,15 @@ class _Home extends HookConsumerWidget {
           final currentDeviceId = await getDeviceId();
           if (currentDeviceId == 'unknown') return;
 
-          final deviceId = AccountKeyValue.instance.deviceId;
-
+          final accountKeyValue =
+              await ref.read(currentAccountKeyValueProvider.future);
+          if (accountKeyValue == null) {
+            w('checkDeviceId error: accountKeyValue is null');
+            return;
+          }
+          final deviceId = accountKeyValue.deviceId;
           if (deviceId == null) {
-            await AccountKeyValue.instance.setDeviceId(currentDeviceId);
+            await accountKeyValue.setDeviceId(currentDeviceId);
             return;
           }
 

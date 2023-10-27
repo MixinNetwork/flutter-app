@@ -13,7 +13,6 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../account/session_key_value.dart';
 import '../../constants/resources.dart';
-import '../../crypto/crypto_key_value.dart';
 import '../../crypto/signal/signal_protocol.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
@@ -26,6 +25,7 @@ import '../../widgets/toast.dart';
 import '../../widgets/user/captcha_web_view_dialog.dart';
 import '../../widgets/user/phone_number_input.dart';
 import '../../widgets/user/verification_dialog.dart';
+import '../provider/hive_key_value_provider.dart';
 import '../provider/multi_auth_provider.dart';
 import 'landing.dart';
 
@@ -173,8 +173,9 @@ class _CodeInputScene extends HookConsumerWidget {
 
         final privateKey = base64Encode(sessionKey.privateKey.bytes);
 
-        await CryptoKeyValue.instance.init(identityNumber);
-        CryptoKeyValue.instance.localRegistrationId = registrationId;
+        final cryptoKeyValue =
+            await ref.read(cryptoKeyValueProvider(identityNumber).future);
+        cryptoKeyValue.localRegistrationId = registrationId;
 
         await SessionKeyValue.instance.init(identityNumber);
         SessionKeyValue.instance.pinToken = base64Encode(decryptPinToken(

@@ -19,6 +19,7 @@ import '../blaze/vo/system_conversation_message.dart';
 import '../blaze/vo/system_user_message.dart';
 import '../blaze/vo/transcript_minimal.dart';
 import '../constants/constants.dart';
+import '../crypto/crypto_key_value.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
 import '../crypto/signal/ratchet_status.dart';
 import '../crypto/signal/signal_database.dart';
@@ -1244,8 +1245,8 @@ class DecryptMessage extends Injector {
     if (count.preKeyCount >= preKeyMinNum) {
       return;
     }
-    final bm = createSyncSignalKeys(
-        createSyncSignalKeysParam(await generateKeys(_signalDatabase)));
+    final bm = createSyncSignalKeys(createSyncSignalKeysParam(
+        await generateKeys(_signalDatabase, CryptoKeyValue())));
     final result = await _sender.signalKeysChannel(bm);
     if (result == null) {
       i('Registering new pre keys...');

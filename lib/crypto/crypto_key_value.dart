@@ -5,11 +5,7 @@ import '../utils/crypto_util.dart';
 import '../utils/hive_key_values.dart';
 
 class CryptoKeyValue extends HiveKeyValue<int> {
-  CryptoKeyValue._() : super(_hiveCrypto);
-
-  static CryptoKeyValue? _instance;
-
-  static CryptoKeyValue get instance => _instance ??= CryptoKeyValue._();
+  CryptoKeyValue() : super(_hiveCrypto);
 
   static const _hiveCrypto = 'crypto_box';
   static const _localRegistrationId = 'local_registration_id';

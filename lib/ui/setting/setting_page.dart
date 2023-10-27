@@ -5,7 +5,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
@@ -78,7 +77,7 @@ class SettingPage extends HookConsumerWidget {
                         children: [
                           if (Platform.isIOS &&
                               userHasPin &&
-                              AccountKeyValue.instance.primarySessionId == null)
+                              context.accountServer.loginByPhoneNumber)
                             _Item(
                               leadingAssetName:
                                   Resources.assetsImagesAccountSvg,

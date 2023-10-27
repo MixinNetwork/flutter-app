@@ -1,66 +1,48 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../account/account_key_value.dart';
 import '../../account/account_server.dart';
+import '../../crypto/crypto_key_value.dart';
 import '../../db/database.dart';
-import '../../utils/logger.dart';
-import '../../utils/rivepod.dart';
 import 'conversation_provider.dart';
 import 'database_provider.dart';
+import 'hive_key_value_provider.dart';
 import 'multi_auth_provider.dart';
 import 'setting_provider.dart';
 
 typedef GetCurrentConversationId = String? Function();
 
-class AccountServerOpener
-    extends DistinctStateNotifier<AsyncValue<AccountServer>> {
-  AccountServerOpener() : super(const AsyncValue.loading());
+class AccountServerOpener extends AutoDisposeStreamNotifier<AccountServer> {
+  AccountServerOpener._();
 
-  AccountServerOpener.open({
-    required this.multiAuthChangeNotifier,
-    required this.settingChangeNotifier,
-    required this.database,
-    required this.userId,
-    required this.sessionId,
-    required this.identityNumber,
-    required this.privateKey,
-    required this.currentConversationId,
-  }) : super(const AsyncValue.loading()) {
-    _init();
-  }
-
-  late final MultiAuthStateNotifier multiAuthChangeNotifier;
-  late final SettingChangeNotifier settingChangeNotifier;
-  late final Database database;
-
-  late final String userId;
-  late final String sessionId;
-  late final String identityNumber;
-  late final String privateKey;
-  late final GetCurrentConversationId currentConversationId;
-
-  Future<void> _init() async {
+  @override
+  Stream<AccountServer> build() async* {
+    final args = await ref.watch(_argsProvider.future);
+    if (args == null) {
+      return;
+    }
     final accountServer = AccountServer(
-      multiAuthNotifier: multiAuthChangeNotifier,
-      settingChangeNotifier: settingChangeNotifier,
-      database: database,
-      currentConversationId: currentConversationId,
+      multiAuthNotifier: args.multiAuthChangeNotifier,
+      settingChangeNotifier: args.settingChangeNotifier,
+      database: args.database,
+      currentConversationId: args.currentConversationId,
+      ref: ref,
+      accountKeyValue: args.accountKeyValue,
+      cryptoKeyValue: args.cryptoKeyValue,
     );
 
     await accountServer.initServer(
-      userId,
-      sessionId,
-      identityNumber,
-      privateKey,
+      args.userId,
+      args.sessionId,
+      args.identityNumber,
+      args.privateKey,
     );
 
-    state = AsyncValue.data(accountServer);
-  }
-
-  @override
-  Future<void> dispose() async {
-    await state.valueOrNull?.stop();
-    super.dispose();
+    ref.onDispose(accountServer.stop);
+    yield accountServer;
   }
 }
 
@@ -75,16 +57,20 @@ class _Args extends Equatable {
     required this.multiAuthChangeNotifier,
     required this.settingChangeNotifier,
     required this.currentConversationId,
+    required this.accountKeyValue,
+    required this.cryptoKeyValue,
   });
 
-  final Database? database;
-  final String? userId;
-  final String? sessionId;
-  final String? identityNumber;
-  final String? privateKey;
+  final Database database;
+  final String userId;
+  final String sessionId;
+  final String identityNumber;
+  final String privateKey;
   final MultiAuthStateNotifier multiAuthChangeNotifier;
   final SettingChangeNotifier settingChangeNotifier;
   final GetCurrentConversationId currentConversationId;
+  final AccountKeyValue accountKeyValue;
+  final CryptoKeyValue cryptoKeyValue;
 
   @override
   List<Object?> get props => [
@@ -96,6 +82,8 @@ class _Args extends Equatable {
         multiAuthChangeNotifier,
         settingChangeNotifier,
         currentConversationId,
+        accountKeyValue,
+        cryptoKeyValue,
       ];
 }
 
@@ -104,9 +92,12 @@ final Provider<GetCurrentConversationId> _currentConversationIdProvider =
   (ref) => () => ref.read(currentConversationIdProvider),
 );
 
-final _argsProvider = Provider.autoDispose((ref) {
+final _argsProvider = FutureProvider.autoDispose((ref) async {
   final database =
       ref.watch(databaseProvider.select((value) => value.valueOrNull));
+  if (database == null) {
+    return null;
+  }
   final (userId, sessionId, identityNumber, privateKey) =
       ref.watch(authProvider.select((value) => (
             value?.account.userId,
@@ -114,10 +105,23 @@ final _argsProvider = Provider.autoDispose((ref) {
             value?.account.identityNumber,
             value?.privateKey,
           )));
+  if (userId == null ||
+      sessionId == null ||
+      identityNumber == null ||
+      privateKey == null) {
+    return null;
+  }
   final multiAuthChangeNotifier =
       ref.watch(multiAuthStateNotifierProvider.notifier);
   final settingChangeNotifier = ref.watch(settingProvider);
   final currentConversationId = ref.read(_currentConversationIdProvider);
+  final accountKeyValue =
+      await ref.watch(currentAccountKeyValueProvider.future);
+  final cryptoKeyValue =
+      await ref.watch(cryptoKeyValueProvider(identityNumber).future);
+  if (accountKeyValue == null) {
+    return null;
+  }
 
   return _Args(
     database: database,
@@ -128,30 +132,12 @@ final _argsProvider = Provider.autoDispose((ref) {
     multiAuthChangeNotifier: multiAuthChangeNotifier,
     settingChangeNotifier: settingChangeNotifier,
     currentConversationId: currentConversationId,
+    accountKeyValue: accountKeyValue,
+    cryptoKeyValue: cryptoKeyValue,
   );
 });
 
-final accountServerProvider = StateNotifierProvider.autoDispose<
-    AccountServerOpener, AsyncValue<AccountServer>>((ref) {
-  final args = ref.watch(_argsProvider);
-
-  if (args.database == null) return AccountServerOpener();
-  if (args.userId == null ||
-      args.sessionId == null ||
-      args.identityNumber == null ||
-      args.privateKey == null) {
-    w('[accountServerProvider] Account not ready');
-    return AccountServerOpener();
-  }
-
-  return AccountServerOpener.open(
-    multiAuthChangeNotifier: args.multiAuthChangeNotifier,
-    settingChangeNotifier: args.settingChangeNotifier,
-    database: args.database!,
-    userId: args.userId!,
-    sessionId: args.sessionId!,
-    identityNumber: args.identityNumber!,
-    privateKey: args.privateKey!,
-    currentConversationId: args.currentConversationId,
-  );
-});
+final accountServerProvider =
+    StreamNotifierProvider.autoDispose<AccountServerOpener, AccountServer>(
+  AccountServerOpener._,
+);

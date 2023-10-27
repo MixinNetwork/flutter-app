@@ -4,7 +4,6 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../account/account_key_value.dart';
 import '../../crypto/signal/signal_database.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hive_key_values.dart';
@@ -14,6 +13,7 @@ import '../../utils/system/package_info.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
 import '../provider/account_server_provider.dart';
+import '../provider/hive_key_value_provider.dart';
 import 'landing_mobile.dart';
 import 'landing_qrcode.dart';
 
@@ -131,12 +131,15 @@ class _LoginFailed extends HookConsumerWidget {
                   final authState = context.auth;
                   if (authState == null) return;
 
+                  final accountKeyValue =
+                      await ref.read(currentAccountKeyValueProvider.future);
+
                   await createClient(
                     userId: authState.account.userId,
                     sessionId: authState.account.sessionId,
                     privateKey: authState.privateKey,
                     loginByPhoneNumber:
-                        AccountKeyValue.instance.primarySessionId == null,
+                        accountKeyValue?.primarySessionId == null,
                   )
                       .accountApi
                       .logout(LogoutRequest(authState.account.sessionId));

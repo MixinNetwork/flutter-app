@@ -7,6 +7,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -15,6 +16,7 @@ import 'package:uuid/uuid.dart';
 import '../blaze/blaze.dart';
 import '../blaze/vo/pin_message_minimal.dart';
 import '../constants/constants.dart';
+import '../crypto/crypto_key_value.dart';
 import '../crypto/privacy_key_value.dart';
 import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
@@ -56,7 +58,12 @@ class AccountServer {
     required this.settingChangeNotifier,
     required this.database,
     required this.currentConversationId,
-  });
+    required this.ref,
+    required this.accountKeyValue,
+    required this.cryptoKeyValue,
+  }) {
+    i('AccountServer init');
+  }
 
   static String? sid;
 
@@ -67,13 +74,16 @@ class AccountServer {
   final SettingChangeNotifier settingChangeNotifier;
   final Database database;
   final GetCurrentConversationId currentConversationId;
+  final AccountKeyValue accountKeyValue;
+  final CryptoKeyValue cryptoKeyValue;
+
   Timer? checkSignalKeyTimer;
 
-  bool get _loginByPhoneNumber =>
-      AccountKeyValue.instance.primarySessionId == null;
+  bool get loginByPhoneNumber => accountKeyValue.primarySessionId == null;
   String? userAgent;
   String? deviceId;
   SignalDatabase? signalDatabase;
+  final Ref ref;
 
   Future<void> initServer(
     String userId,
@@ -98,9 +108,10 @@ class AccountServer {
       openForLogin: false,
       fromMainIsolate: true,
     );
-    checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
+    checkSignalKeyTimer =
+        Timer.periodic(const Duration(days: 1), (timer) async {
       i('refreshSignalKeys periodic');
-      checkSignalKey(client, signalDatabase!);
+      await checkSignalKey(client, signalDatabase!, cryptoKeyValue);
     });
 
     try {
@@ -150,7 +161,7 @@ class AccountServer {
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKey,
-      loginByPhoneNumber: _loginByPhoneNumber,
+      loginByPhoneNumber: loginByPhoneNumber,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -213,8 +224,8 @@ class AccountServer {
         sessionId: sessionId,
         privateKey: privateKey,
         mixinDocumentDirectory: mixinDocumentsDirectory.path,
-        primarySessionId: AccountKeyValue.instance.primarySessionId,
-        loginByPhoneNumber: _loginByPhoneNumber,
+        primarySessionId: accountKeyValue.primarySessionId,
+        loginByPhoneNumber: loginByPhoneNumber,
         rootIsolateToken: ServicesBinding.rootIsolateToken!,
       ),
       errorsAreFatal: false,
@@ -701,7 +712,7 @@ class AccountServer {
     List<String> messageIds,
     Map<String, int?> messageExpireAt,
   ) async {
-    final primarySessionId = AccountKeyValue.instance.primarySessionId;
+    final primarySessionId = accountKeyValue.primarySessionId;
     if (primarySessionId == null) {
       return;
     }
@@ -717,6 +728,7 @@ class AccountServer {
   }
 
   Future<void> stop() async {
+    i('stop account server');
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
@@ -755,16 +767,15 @@ class AccountServer {
   Future<void> checkSignalKeys() async {
     final hasPushSignalKeys = PrivacyKeyValue.instance.hasPushSignalKeys;
     if (hasPushSignalKeys) {
-      unawaited(checkSignalKey(client, signalDatabase!));
+      unawaited(checkSignalKey(client, signalDatabase!, cryptoKeyValue));
     } else {
-      await refreshSignalKeys(client, signalDatabase!);
+      await refreshSignalKeys(client, signalDatabase!, cryptoKeyValue);
       PrivacyKeyValue.instance.hasPushSignalKeys = true;
     }
   }
 
   Future<void> refreshSticker({bool force = false}) async {
-    final refreshStickerLastTime =
-        AccountKeyValue.instance.refreshStickerLastTime;
+    final refreshStickerLastTime = accountKeyValue.refreshStickerLastTime;
     final now = DateTime.now().millisecondsSinceEpoch;
     if (!force && now - refreshStickerLastTime < hours24) {
       return;
@@ -805,16 +816,16 @@ class AccountServer {
     }
 
     if (hasNewAlbum) {
-      AccountKeyValue.instance.hasNewAlbum = true;
+      accountKeyValue.hasNewAlbum = true;
     }
 
-    AccountKeyValue.instance.refreshStickerLastTime = now;
+    accountKeyValue.refreshStickerLastTime = now;
   }
 
   final refreshUserIdSet = <dynamic>{};
 
   Future<void> initCircles() async {
-    final hasSyncCircle = AccountKeyValue.instance.hasSyncCircle;
+    final hasSyncCircle = accountKeyValue.hasSyncCircle;
     if (hasSyncCircle) {
       return;
     }
@@ -829,16 +840,16 @@ class AccountServer {
       await handleCircle(circle);
     });
 
-    AccountKeyValue.instance.hasSyncCircle = true;
+    accountKeyValue.hasSyncCircle = true;
   }
 
   Future<void> _cleanupQuoteContent() async {
-    final clean = AccountKeyValue.instance.alreadyCleanupQuoteContent;
+    final clean = accountKeyValue.alreadyCleanupQuoteContent;
     if (clean) {
       return;
     }
     await database.jobDao.insert(createCleanupQuoteContentJob());
-    AccountKeyValue.instance.alreadyCleanupQuoteContent = true;
+    accountKeyValue.alreadyCleanupQuoteContent = true;
   }
 
   Future<void> checkMigration() async {

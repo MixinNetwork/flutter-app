@@ -4,12 +4,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../account/account_key_value.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/provider/conversation_provider.dart';
+import '../../ui/provider/hive_key_value_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../automatic_keep_alive_client_widget.dart';
@@ -299,7 +299,9 @@ class _StickerAlbumBar extends HookConsumerWidget {
         if (tabController.index != 0) return;
 
         HoverOverlay.forceHidden(context);
-        AccountKeyValue.instance.hasNewAlbum = false;
+        final accountKeyValue =
+            await ref.read(currentAccountKeyValueProvider.future);
+        accountKeyValue?.hasNewAlbum = false;
 
         setPreviousIndex();
         if (!(await showStickerStorePageDialog(context))) return;
@@ -361,13 +363,16 @@ class _StickerAlbumBarItem extends StatelessWidget {
           child: _StickerGroupIconHoverContainer(
             child: Center(
               child: Center(
-                child: Builder(
-                  builder: (context) {
+                child: Consumer(
+                  builder: (context, ref, child) {
                     final presetStickerAlbum = {
-                      PresetStickerGroup.store:
-                          AccountKeyValue.instance.hasNewAlbum
-                              ? Resources.assetsImagesStickerStoreRedDotSvg
-                              : Resources.assetsImagesStickerStoreSvg,
+                      PresetStickerGroup.store: ref
+                                  .watch(currentAccountKeyValueProvider)
+                                  .valueOrNull
+                                  ?.hasNewAlbum ??
+                              false
+                          ? Resources.assetsImagesStickerStoreRedDotSvg
+                          : Resources.assetsImagesStickerStoreSvg,
                       PresetStickerGroup.emoji:
                           Resources.assetsImagesEmojiStickerSvg,
                       PresetStickerGroup.recent:
