@@ -71,6 +71,7 @@ Client _createClient({
               'requestTimeStamp = ${requestTimeStamp?.outputFormat()} '
               'serverTimeStamp = ${serverTimeStamp?.outputFormat()} '
               'now = ${DateTime.now().outputFormat()}');
+          w('error: ${e.message} ${e.stackTrace}');
           handler.next(e);
         },
       ),

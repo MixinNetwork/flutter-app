@@ -9,7 +9,6 @@ import '../../blaze/blaze.dart';
 import '../../utils/audio_message_player/audio_message_service.dart';
 import '../../utils/device_transfer/device_transfer_widget.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../../utils/platform.dart';
 import '../../utils/system/text_input.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
@@ -17,13 +16,13 @@ import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
 import '../../widgets/protocol_handler.dart';
 import '../../widgets/toast.dart';
+import '../provider/account_server_provider.dart';
 import '../provider/conversation_provider.dart';
 import '../provider/multi_auth_provider.dart';
 import '../provider/responsive_navigator_provider.dart';
 import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
 import '../setting/setting_page.dart';
-
 import 'command_palette_wrapper.dart';
 import 'conversation/conversation_hotkey.dart';
 import 'conversation/conversation_page.dart';
@@ -48,12 +47,8 @@ class HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final localTimeError = useMemoizedStream(
-            () => context.accountServer.connectedStateStream
-                .map((event) => event == ConnectedState.hasLocalTimeError)
-                .distinct(),
-            keys: [context.accountServer]).data ??
-        false;
+    final localTimeError = ref.watch(blazeConnectedStateProvider
+        .select((value) => value.value == ConnectedState.hasLocalTimeError));
 
     final isEmptyUserName = ref.watch(authAccountProvider
         .select((value) => value?.fullName?.isEmpty ?? true));

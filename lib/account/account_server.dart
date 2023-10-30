@@ -231,6 +231,7 @@ class AccountServer {
       errorsAreFatal: false,
       onExit: exitReceivePort.sendPort,
       onError: errorReceivePort.sendPort,
+      debugName: 'message_process_isolate_$identityNumber',
     );
     jobSubscribers
       ..add(exitReceivePort.listen((message) {
@@ -259,6 +260,7 @@ class AccountServer {
         d('message process service ready');
         break;
       case WorkerIsolateEventType.onBlazeConnectStateChanged:
+        d('blaze connect state changed: ${event.argument}');
         _connectedStateBehaviorSubject.add(event.argument as ConnectedState);
         break;
       case WorkerIsolateEventType.onApiRequestedError:

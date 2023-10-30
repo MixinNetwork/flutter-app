@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../account/account_key_value.dart';
 import '../../account/account_server.dart';
+import '../../blaze/blaze.dart';
 import '../../crypto/crypto_key_value.dart';
 import '../../db/database.dart';
 import 'conversation_provider.dart';
@@ -141,3 +142,13 @@ final accountServerProvider =
     StreamNotifierProvider.autoDispose<AccountServerOpener, AccountServer>(
   AccountServerOpener._,
 );
+
+final blazeConnectedStateProvider =
+    StreamProvider.autoDispose<ConnectedState>((ref) {
+  final accountServer =
+      ref.watch(accountServerProvider.select((value) => value.valueOrNull));
+  if (accountServer == null) {
+    return const Stream.empty();
+  }
+  return accountServer.connectedStateStream;
+});
