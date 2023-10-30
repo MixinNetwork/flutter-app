@@ -32,10 +32,10 @@ import '../../../widgets/message/message_bubble.dart';
 import '../../../widgets/message/message_day_time.dart';
 import '../../../widgets/pin_bubble.dart';
 import '../../../widgets/toast.dart';
-import '../../../widgets/window/menus.dart';
 import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
+import '../../provider/menu_handle_provider.dart';
 import '../../provider/message_selection_provider.dart';
 import '../../provider/pending_jump_message_provider.dart';
 import '../bloc/blink_cubit.dart';
@@ -1112,12 +1112,12 @@ class _ChatMenuHandler extends HookConsumerWidget {
     final conversationId = ref.watch(currentConversationIdProvider);
 
     useEffect(() {
-      final cubit = ref.read(macMenuBarProvider.notifier);
+      final controller = ref.read(macMenuBarProvider.notifier);
       if (conversationId == null) return null;
 
       final handle = _ConversationHandle(context, conversationId);
-      Future(() => cubit.attach(handle));
-      return () => Future(() => cubit.unAttach(handle));
+      Future(() => controller.attach(handle));
+      return () => Future(() => controller.unAttach(handle));
     }, [conversationId]);
 
     return child;
