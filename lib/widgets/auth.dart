@@ -11,7 +11,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../account/security_key_value.dart';
 import '../constants/resources.dart';
-import '../ui/provider/account_server_provider.dart';
+import '../ui/provider/account/account_server_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/authentication.dart';
 import '../utils/event_bus.dart';

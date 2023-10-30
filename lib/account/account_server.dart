@@ -29,7 +29,7 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
-import '../ui/provider/account_server_provider.dart';
+import '../ui/provider/account/account_server_provider.dart';
 import '../ui/provider/multi_auth_provider.dart';
 import '../ui/provider/setting_provider.dart';
 import '../utils/app_lifecycle.dart';
@@ -61,14 +61,9 @@ class AccountServer {
     required this.ref,
     required this.accountKeyValue,
     required this.cryptoKeyValue,
-  }) {
-    i('AccountServer init: ${database.hashCode}');
-  }
+  });
 
   static String? sid;
-
-  set language(String language) =>
-      client.dio.options.headers['Accept-Language'] = language;
 
   final MultiAuthStateNotifier multiAuthNotifier;
   final SettingChangeNotifier settingChangeNotifier;
@@ -92,6 +87,9 @@ class AccountServer {
     String privateKey,
   ) async {
     if (sid == sessionId) return;
+
+    i('AccountServer init: $identityNumber ${database.hashCode}');
+
     sid = sessionId;
 
     this.userId = userId;

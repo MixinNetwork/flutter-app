@@ -19,7 +19,8 @@ import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
-import 'ui/provider/account_server_provider.dart';
+import 'ui/landing/landing_initialize.dart';
+import 'ui/provider/account/account_server_provider.dart';
 import 'ui/provider/database_provider.dart';
 import 'ui/provider/hive_key_value_provider.dart';
 import 'ui/provider/mention_cache_provider.dart';
@@ -55,7 +56,7 @@ class App extends HookConsumerWidget {
 
     Widget child;
     if (authState == null) {
-      child = const _App(home: LandingPage());
+      child = const _App(home: AppInitializingPage());
     } else {
       child = _LoginApp(authState: authState);
     }
@@ -72,9 +73,10 @@ class _LoginApp extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final database = ref.watch(databaseProvider);
+    final accountServer = ref.watch(accountServerProvider);
 
-    if (database.isLoading) {
-      return const _App(home: LandingPage());
+    if (database.isLoading || accountServer.isLoading) {
+      return const _App(home: AppInitializingPage());
     }
     if (database.hasError) {
       var error = database.error;
@@ -129,7 +131,11 @@ class _Providers extends HookConsumerWidget {
         ),
       ],
       child: Provider<NotificationService>(
-        create: (BuildContext context) => NotificationService(context: context),
+        create: (BuildContext context) => NotificationService(
+          context: context,
+          accountServer: accountServer,
+          ref: ref,
+        ),
         lazy: false,
         dispose: (_, notificationService) => notificationService.close(),
         child: PortalProviders(child: app),
@@ -177,10 +183,6 @@ class _App extends HookConsumerWidget {
             ).withFallbackFonts(),
             themeMode: ref.watch(settingProvider).themeMode,
             builder: (context, child) {
-              try {
-                context.accountServer.language =
-                    Localizations.localeOf(context).languageCode;
-              } catch (_) {}
               final mediaQueryData = MediaQuery.of(context);
               return BrightnessObserver(
                 lightThemeData: lightBrightnessThemeData,

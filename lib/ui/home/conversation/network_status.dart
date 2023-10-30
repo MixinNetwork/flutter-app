@@ -10,7 +10,7 @@ import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/uri_utils.dart';
-import '../../provider/account_server_provider.dart';
+import '../../provider/account/account_server_provider.dart';
 
 class NetworkStatus extends HookConsumerWidget {
   const NetworkStatus({super.key});

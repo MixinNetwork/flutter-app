@@ -12,7 +12,7 @@ import '../../utils/mixin_api_client.dart';
 import '../../utils/system/package_info.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
-import '../provider/account_server_provider.dart';
+import '../provider/account/account_server_provider.dart';
 import '../provider/hive_key_value_provider.dart';
 import 'landing_mobile.dart';
 import 'landing_qrcode.dart';

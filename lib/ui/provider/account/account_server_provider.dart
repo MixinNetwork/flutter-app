@@ -3,16 +3,16 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../account/account_key_value.dart';
-import '../../account/account_server.dart';
-import '../../blaze/blaze.dart';
-import '../../crypto/crypto_key_value.dart';
-import '../../db/database.dart';
-import 'conversation_provider.dart';
-import 'database_provider.dart';
-import 'hive_key_value_provider.dart';
-import 'multi_auth_provider.dart';
-import 'setting_provider.dart';
+import '../../../account/account_key_value.dart';
+import '../../../account/account_server.dart';
+import '../../../blaze/blaze.dart';
+import '../../../crypto/crypto_key_value.dart';
+import '../../../db/database.dart';
+import '../conversation_provider.dart';
+import '../database_provider.dart';
+import '../hive_key_value_provider.dart';
+import '../multi_auth_provider.dart';
+import '../setting_provider.dart';
 
 typedef GetCurrentConversationId = String? Function();
 

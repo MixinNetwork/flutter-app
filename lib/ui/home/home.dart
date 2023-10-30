@@ -16,7 +16,7 @@ import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
 import '../../widgets/protocol_handler.dart';
 import '../../widgets/toast.dart';
-import '../provider/account_server_provider.dart';
+import '../provider/account/account_server_provider.dart';
 import '../provider/conversation_provider.dart';
 import '../provider/multi_auth_provider.dart';
 import '../provider/responsive_navigator_provider.dart';
