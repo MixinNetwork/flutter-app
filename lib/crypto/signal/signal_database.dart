@@ -42,6 +42,7 @@ class SignalDatabase extends _$SignalDatabase {
     for (final file in files) {
       try {
         if (file.existsSync()) {
+          i('remove legacy signal database: ${file.path}');
           await file.delete();
         }
       } catch (error, stacktrace) {
@@ -79,6 +80,7 @@ class SignalDatabase extends _$SignalDatabase {
         if (file.existsSync()) {
           await file.copy(newLocation);
         }
+        i('migrate legacy signal database: ${file.path}');
       } catch (error, stacktrace) {
         e('_migrationLegacySignalDatabaseIfNecessary ${file.path} error: $error, stacktrace: $stacktrace');
         hasError = true;
@@ -101,6 +103,7 @@ class SignalDatabase extends _$SignalDatabase {
     required bool openForLogin,
     required bool fromMainIsolate,
   }) async {
+    i('connect to signal database: $identityNumber');
     if (openForLogin) {
       // delete old database file
       await _removeLegacySignalDatabase();

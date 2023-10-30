@@ -120,6 +120,7 @@ class _Providers extends HookConsumerWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
+          key: ValueKey(accountServer),
           create: (BuildContext context) => ConversationListBloc(
             ref.read(slideCategoryStateProvider.notifier),
             accountServer.database,

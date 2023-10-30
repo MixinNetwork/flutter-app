@@ -38,7 +38,7 @@ class DatabaseOpener extends DistinctStateNotifier<AsyncValue<Database>> {
   final Lock _lock = Lock();
 
   Future<void> open() => _lock.synchronized(() async {
-        i('connect to database: $identityNumber');
+        d('connect to database: $identityNumber');
         if (state.hasValue) {
           e('database already opened');
           return;

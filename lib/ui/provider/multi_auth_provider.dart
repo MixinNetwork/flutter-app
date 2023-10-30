@@ -97,7 +97,7 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
       account: account,
       privateKey: state.auths[index].privateKey,
     );
-    state = MultiAuthState(auths: auths);
+    state = MultiAuthState(auths: auths, activeUserId: state.activeUserId);
   }
 
   void signOut() {
@@ -129,6 +129,7 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
       e('failed to active, no account exist for id: $userId');
       return;
     }
+    i('active account: $userId');
     state = MultiAuthState(
       auths: state.auths,
       activeUserId: userId,

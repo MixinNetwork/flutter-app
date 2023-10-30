@@ -5,11 +5,11 @@ import '../../crypto/crypto_key_value.dart';
 import '../../utils/hive_key_values.dart';
 import 'multi_auth_provider.dart';
 
-AutoDisposeFutureProviderFamily<T, String>
+FutureProviderFamily<T, String>
     _createHiveKeyValueProvider<T extends HiveKeyValue>(
   T Function() create,
 ) =>
-        AutoDisposeFutureProviderFamily<T, String>(
+        FutureProviderFamily<T, String>(
           (ref, identityNumber) async {
             final keyValue = create();
             ref.onDispose(keyValue.dispose);

@@ -62,7 +62,7 @@ class AccountServer {
     required this.accountKeyValue,
     required this.cryptoKeyValue,
   }) {
-    i('AccountServer init');
+    i('AccountServer init: ${database.hashCode}');
   }
 
   static String? sid;
@@ -234,7 +234,7 @@ class AccountServer {
     );
     jobSubscribers
       ..add(exitReceivePort.listen((message) {
-        w('worker isolate service exited. $message');
+        w('worker isolate service exited($identityNumber). $message');
         _connectedStateBehaviorSubject.add(ConnectedState.disconnected);
       }))
       ..add(errorReceivePort.listen((error) {
@@ -336,8 +336,8 @@ class AccountServer {
     try {
       await signalDatabase?.clear();
       await signalDatabase?.close();
-    } catch (_) {
-      // ignore closed database error
+    } catch (error, stacktrace) {
+      e('signOutAndClear signalDatabase error: $error $stacktrace');
     }
 
     try {
