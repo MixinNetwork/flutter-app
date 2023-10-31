@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../utils/rivepod.dart';
-import 'multi_auth_provider.dart';
+import 'account/multi_auth_provider.dart';
 
 abstract class ConversationMenuHandle {
   Stream<bool> get isMuted;

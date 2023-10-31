@@ -3,7 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../constants/resources.dart';
-import '../ui/provider/responsive_navigator_provider.dart';
+import '../ui/provider/navigation/responsive_navigator_provider.dart';
 import '../utils/extension/extension.dart';
 import 'interactive_decorated_box.dart';
 

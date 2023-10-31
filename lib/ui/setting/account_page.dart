@@ -5,7 +5,7 @@ import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/user/change_number_dialog.dart';
-import '../provider/responsive_navigator_provider.dart';
+import '../provider/navigation/responsive_navigator_provider.dart';
 
 class AccountPage extends HookConsumerWidget {
   const AccountPage({super.key});

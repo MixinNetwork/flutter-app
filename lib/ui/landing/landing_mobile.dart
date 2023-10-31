@@ -25,8 +25,8 @@ import '../../widgets/toast.dart';
 import '../../widgets/user/captcha_web_view_dialog.dart';
 import '../../widgets/user/phone_number_input.dart';
 import '../../widgets/user/verification_dialog.dart';
+import '../provider/account/multi_auth_provider.dart';
 import '../provider/hive_key_value_provider.dart';
-import '../provider/multi_auth_provider.dart';
 import 'landing.dart';
 
 final _mobileClientProvider = Provider.autoDispose<Client>(

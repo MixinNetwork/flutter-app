@@ -11,8 +11,8 @@ import '../../../db/database.dart';
 import '../conversation_provider.dart';
 import '../database_provider.dart';
 import '../hive_key_value_provider.dart';
-import '../multi_auth_provider.dart';
 import '../setting_provider.dart';
+import 'multi_auth_provider.dart';
 
 typedef GetCurrentConversationId = String? Function();
 

@@ -30,7 +30,7 @@ import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../ui/provider/account/account_server_provider.dart';
-import '../ui/provider/multi_auth_provider.dart';
+import '../ui/provider/account/multi_auth_provider.dart';
 import '../ui/provider/setting_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';

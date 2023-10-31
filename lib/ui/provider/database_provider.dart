@@ -6,7 +6,7 @@ import '../../db/fts_database.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/rivepod.dart';
 import '../../utils/synchronized.dart';
-import 'multi_auth_provider.dart';
+import 'account/multi_auth_provider.dart';
 import 'slide_category_provider.dart';
 
 final databaseProvider =

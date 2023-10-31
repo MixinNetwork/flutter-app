@@ -11,7 +11,7 @@ import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
-import '../provider/responsive_navigator_provider.dart';
+import '../provider/navigation/responsive_navigator_provider.dart';
 
 class StorageUsageListPage extends HookConsumerWidget {
   const StorageUsageListPage({super.key});

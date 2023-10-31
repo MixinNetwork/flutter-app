@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
-import '../provider/responsive_navigator_provider.dart';
+import '../provider/navigation/responsive_navigator_provider.dart';
 import '../provider/setting_provider.dart';
 
 class StoragePage extends HookConsumerWidget {

@@ -6,9 +6,9 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
-import '../../utils/extension/extension.dart';
-import '../../utils/hydrated_bloc.dart';
-import '../../utils/rivepod.dart';
+import '../../../utils/extension/extension.dart';
+import '../../../utils/hydrated_bloc.dart';
+import '../../../utils/rivepod.dart';
 
 part 'multi_auth_provider.g.dart';
 

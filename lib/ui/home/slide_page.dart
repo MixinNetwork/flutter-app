@@ -25,7 +25,7 @@ import '../../widgets/toast.dart';
 import '../../widgets/user_selector/conversation_selector.dart';
 import '../../widgets/window/move_window.dart';
 import '../landing/landing.dart';
-import '../provider/multi_auth_provider.dart';
+import '../provider/account/multi_auth_provider.dart';
 import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
 

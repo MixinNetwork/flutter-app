@@ -3,7 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../provider/conversation_provider.dart';
-import '../../provider/responsive_navigator_provider.dart';
+import '../../provider/navigation/responsive_navigator_provider.dart';
 import '../../provider/unseen_conversations_provider.dart';
 import 'conversation_list.dart';
 import 'menu_wrapper.dart';

@@ -16,8 +16,8 @@ import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/toast.dart';
 import '../home/home.dart';
-import '../provider/multi_auth_provider.dart';
-import '../provider/responsive_navigator_provider.dart';
+import '../provider/account/multi_auth_provider.dart';
+import '../provider/navigation/responsive_navigator_provider.dart';
 
 class SettingPage extends HookConsumerWidget {
   const SettingPage({super.key});

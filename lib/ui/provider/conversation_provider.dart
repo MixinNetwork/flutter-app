@@ -22,8 +22,8 @@ import '../home/bloc/conversation_list_bloc.dart';
 import '../home/bloc/subscriber_mixin.dart';
 import 'account/account_server_provider.dart';
 import 'is_bot_group_provider.dart';
+import 'navigation/responsive_navigator_provider.dart';
 import 'recent_conversation_provider.dart';
-import 'responsive_navigator_provider.dart';
 
 class ConversationState extends Equatable {
   const ConversationState({

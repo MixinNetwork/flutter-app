@@ -3,7 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../account/account_key_value.dart';
 import '../../crypto/crypto_key_value.dart';
 import '../../utils/hive_key_values.dart';
-import 'multi_auth_provider.dart';
+import 'account/multi_auth_provider.dart';
 
 FutureProviderFamily<T, String>
     _createHiveKeyValueProvider<T extends HiveKeyValue>(

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../provider/abstract_responsive_navigator.dart';
-import '../../provider/responsive_navigator_provider.dart';
+import '../../provider/navigation/abstract_responsive_navigator.dart';
+import '../../provider/navigation/responsive_navigator_provider.dart';
 
 abstract class AbstractResponsiveNavigatorCubit
     extends Cubit<ResponsiveNavigatorState> {
