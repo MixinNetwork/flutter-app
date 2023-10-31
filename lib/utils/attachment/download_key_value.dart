@@ -1,11 +1,7 @@
 import '../hive_key_values.dart';
 
 class DownloadKeyValue extends HiveKeyValue<String> {
-  DownloadKeyValue._() : super(_hiveName);
-
-  static DownloadKeyValue? _instance;
-
-  static DownloadKeyValue get instance => _instance ??= DownloadKeyValue._();
+  DownloadKeyValue() : super(_hiveName);
 
   static const _hiveName = 'download_box';
 

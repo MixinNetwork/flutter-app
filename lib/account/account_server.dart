@@ -31,10 +31,10 @@ import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../ui/provider/account/account_server_provider.dart';
 import '../ui/provider/account/multi_auth_provider.dart';
+import '../ui/provider/hive_key_value_provider.dart';
 import '../ui/provider/setting_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
-import '../utils/attachment/download_key_value.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
@@ -48,7 +48,6 @@ import '../workers/isolate_event.dart';
 import '../workers/message_worker_isolate.dart';
 import 'account_key_value.dart';
 import 'send_message_helper.dart';
-import 'show_pin_message_key_value.dart';
 
 class AccountServer {
   AccountServer({
@@ -59,8 +58,7 @@ class AccountServer {
     required this.database,
     required this.currentConversationId,
     required this.ref,
-    required this.accountKeyValue,
-    required this.cryptoKeyValue,
+    required this.hiveKeyValues,
   });
 
   static String? sid;
@@ -69,8 +67,14 @@ class AccountServer {
   final SettingChangeNotifier settingChangeNotifier;
   final Database database;
   final GetCurrentConversationId currentConversationId;
-  final AccountKeyValue accountKeyValue;
-  final CryptoKeyValue cryptoKeyValue;
+
+  final HiveKeyValues hiveKeyValues;
+
+  CryptoKeyValue get cryptoKeyValue => hiveKeyValues.cryptoKeyValue;
+
+  PrivacyKeyValue get privacyKeyValue => hiveKeyValues.privacyKeyValue;
+
+  AccountKeyValue get accountKeyValue => hiveKeyValues.accountKeyValue;
 
   Timer? checkSignalKeyTimer;
 
@@ -123,7 +127,7 @@ class AccountServer {
 
     unawaited(_start());
 
-    DownloadKeyValue.instance.messageIds.forEach((messageId) {
+    hiveKeyValues.downloadKeyValue.messageIds.forEach((messageId) {
       attachmentUtil.downloadAttachment(messageId: messageId);
     });
     appActiveListener.addListener(onActive);
@@ -173,7 +177,8 @@ class AccountServer {
       ],
     )..configProxySetting(database.settingProperties);
 
-    attachmentUtil = AttachmentUtil.init(client, database, identityNumber);
+    attachmentUtil = AttachmentUtil.init(
+        client, database, identityNumber, hiveKeyValues.downloadKeyValue);
     _sendMessageHelper =
         SendMessageHelper(database, attachmentUtil, addSendingJob);
 
@@ -270,7 +275,7 @@ class AccountServer {
         break;
       case WorkerIsolateEventType.showPinMessage:
         final conversationId = event.argument as String;
-        unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
+        unawaited(hiveKeyValues.showPinMessageKeyValue.show(conversationId));
         break;
     }
   }
@@ -765,12 +770,12 @@ class AccountServer {
   }
 
   Future<void> checkSignalKeys() async {
-    final hasPushSignalKeys = PrivacyKeyValue.instance.hasPushSignalKeys;
+    final hasPushSignalKeys = privacyKeyValue.hasPushSignalKeys;
     if (hasPushSignalKeys) {
       unawaited(checkSignalKey(client, signalDatabase!, cryptoKeyValue));
     } else {
       await refreshSignalKeys(client, signalDatabase!, cryptoKeyValue);
-      PrivacyKeyValue.instance.hasPushSignalKeys = true;
+      privacyKeyValue.hasPushSignalKeys = true;
     }
   }
 
@@ -1405,13 +1410,15 @@ class AccountServer {
   Future<void> pinMessage({
     required String conversationId,
     required List<PinMessageMinimal> pinMessageMinimals,
-  }) =>
-      _sendMessageHelper.sendPinMessage(
-        conversationId: conversationId,
-        senderId: userId,
-        pinMessageMinimals: pinMessageMinimals,
-        pin: true,
-      );
+  }) async {
+    await _sendMessageHelper.sendPinMessage(
+      conversationId: conversationId,
+      senderId: userId,
+      pinMessageMinimals: pinMessageMinimals,
+      pin: true,
+    );
+    unawaited(hiveKeyValues.showPinMessageKeyValue.show(conversationId));
+  }
 
   Future<void> unpinMessage({
     required String conversationId,

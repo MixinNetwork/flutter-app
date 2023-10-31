@@ -28,7 +28,6 @@ import '../proxy.dart';
 import 'download_key_value.dart';
 
 part 'attachment_download_job.dart';
-
 part 'attachment_upload_job.dart';
 
 final _dio = (() {
@@ -143,6 +142,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     this._transcriptMessageDao,
     this._settingProperties,
     super.mediaPath,
+    this.downloadKeyValue,
   ) {
     final httpClientAdapter = _dio.httpClientAdapter;
     if (httpClientAdapter is IOHttpClientAdapter) {
@@ -159,6 +159,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   final TranscriptMessageDao _transcriptMessageDao;
   final Client _client;
   final SettingPropertyStorage _settingProperties;
+  final DownloadKeyValue downloadKeyValue;
 
   final _attachmentJob = <String, _AttachmentJobBase>{};
 
@@ -461,6 +462,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     Client client,
     Database database,
     String identityNumber,
+    DownloadKeyValue downloadKeyValue,
   ) {
     final documentDirectory = mixinDocumentsDirectory;
     final mediaDirectory =
@@ -471,6 +473,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       database.transcriptMessageDao,
       database.settingProperties,
       mediaDirectory.path,
+      downloadKeyValue,
     );
   }
 
@@ -483,12 +486,12 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   void _setAttachmentJob(String messageId, _AttachmentJobBase job) {
     _attachmentJob[messageId] = job;
     if (job is _AttachmentDownloadJob) {
-      DownloadKeyValue.instance.addMessageId(messageId);
+      downloadKeyValue.addMessageId(messageId);
     }
   }
 
   Future<void> removeAttachmentJob(String messageId) async {
-    await DownloadKeyValue.instance.removeMessageId(messageId);
+    await downloadKeyValue.removeMessageId(messageId);
     _attachmentJob[messageId]?.cancel();
     _attachmentJob.remove(messageId);
   }
@@ -496,7 +499,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   Future<bool> cancelProgressAttachmentJob(String messageId) async {
     if (!_hasAttachmentJob(messageId)) return false;
     await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
-    await DownloadKeyValue.instance.removeMessageId(messageId);
+    await downloadKeyValue.removeMessageId(messageId);
     _attachmentJob[messageId]?.cancel();
     _attachmentJob.remove(messageId);
     return true;

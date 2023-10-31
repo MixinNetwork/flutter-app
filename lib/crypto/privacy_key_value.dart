@@ -1,11 +1,7 @@
 import '../utils/hive_key_values.dart';
 
 class PrivacyKeyValue extends HiveKeyValue<bool> {
-  PrivacyKeyValue._() : super(_hivePrivacy);
-
-  static PrivacyKeyValue? _instance;
-
-  static PrivacyKeyValue get instance => _instance ??= PrivacyKeyValue._();
+  PrivacyKeyValue() : super(_hivePrivacy);
 
   static const _hivePrivacy = 'privacy_box';
   static const _hasSyncSession = 'has_sync_session';

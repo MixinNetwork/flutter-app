@@ -46,8 +46,10 @@ class _PinVerificationDialog extends StatelessWidget {
                 const SizedBox(height: 20),
                 PinInputLayout(
                   doVerify: (String pin) async {
+                    final sessionKeyValue =
+                        context.hiveKeyValues.sessionKeyValue;
                     await context.accountServer.client.accountApi
-                        .verifyPin(encryptPin(pin)!);
+                        .verifyPin(sessionKeyValue.encryptPin(pin)!);
                     Navigator.pop(context, pin);
                   },
                 ),

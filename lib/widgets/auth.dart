@@ -9,7 +9,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../account/security_key_value.dart';
 import '../constants/resources.dart';
 import '../ui/provider/account/account_server_provider.dart';
 import '../utils/app_lifecycle.dart';
@@ -51,17 +50,18 @@ class _AuthGuard extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final focusNode = useFocusNode();
     final textEditingController = useTextEditingController();
+    final securityKeyValue = context.hiveKeyValues.securityKeyValue;
 
     final hasPasscode =
-        useMemoizedStream(SecurityKeyValue.instance.watchHasPasscode).data ??
-            SecurityKeyValue.instance.hasPasscode;
+        useMemoizedStream(securityKeyValue.watchHasPasscode).data ??
+            securityKeyValue.hasPasscode;
 
     final enableBiometric =
-        useMemoizedStream(SecurityKeyValue.instance.watchBiometric).data ??
-            SecurityKeyValue.instance.biometric;
+        useMemoizedStream(securityKeyValue.watchBiometric).data ??
+            securityKeyValue.biometric;
 
     final hasError = useState(false);
-    final lock = useState(SecurityKeyValue.instance.hasPasscode);
+    final lock = useState(securityKeyValue.hasPasscode);
 
     useEffect(() {
       final listen =
@@ -84,8 +84,7 @@ class _AuthGuard extends HookConsumerWidget {
 
         final needLock = !isAppActive;
 
-        final lockDuration =
-            SecurityKeyValue.instance.lockDuration ?? _lockDuration;
+        final lockDuration = securityKeyValue.lockDuration ?? _lockDuration;
         if (needLock) {
           if (lockDuration.inMinutes > 0) {
             timer = Timer(lockDuration, () {
@@ -201,7 +200,7 @@ class _AuthGuard extends HookConsumerWidget {
                             showCursor: false,
                             onCompleted: (value) {
                               textEditingController.text = '';
-                              if (SecurityKeyValue.instance.passcode == value) {
+                              if (securityKeyValue.passcode == value) {
                                 lock.value = false;
                               } else {
                                 hasError.value = true;

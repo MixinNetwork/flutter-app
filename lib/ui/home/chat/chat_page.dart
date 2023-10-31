@@ -9,8 +9,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 
-import '../../../account/scam_warning_key_value.dart';
-import '../../../account/show_pin_message_key_value.dart';
 import '../../../bloc/simple_cubit.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../constants/resources.dart';
@@ -760,7 +758,7 @@ class _BottomBanner extends HookConsumerWidget {
     final showScamWarning = useMemoizedStream(
           () {
             if (userId == null || !isScam) return Stream.value(false);
-            return ScamWarningKeyValue.instance.watch(userId);
+            return context.hiveKeyValues.scamWarningKeyValue.watch(userId);
           },
           initialData: false,
           keys: [userId],
@@ -814,7 +812,7 @@ class _BottomBanner extends HookConsumerWidget {
               size: 20,
               onTap: () {
                 if (userId == null) return;
-                ScamWarningKeyValue.instance.dismiss(userId);
+                context.hiveKeyValues.scamWarningKeyValue.dismiss(userId);
               },
             ),
           ],
@@ -857,7 +855,7 @@ class _PinMessagesBanner extends HookConsumerWidget {
                           final conversationId =
                               ref.read(currentConversationIdProvider);
                           if (conversationId == null) return;
-                          ShowPinMessageKeyValue.instance
+                          context.hiveKeyValues.showPinMessageKeyValue
                               .dismiss(conversationId);
                         },
                       ),
@@ -1228,4 +1226,8 @@ class _ConversationHandle extends ConversationMenuHandle {
       ),
     );
   }
+
+  @override
+  Stream<bool> get hasPasscode =>
+      context.hiveKeyValues.securityKeyValue.watchHasPasscode();
 }

@@ -27,6 +27,7 @@ import '../../generated/l10n.dart';
 import '../../ui/provider/account/account_server_provider.dart';
 import '../../ui/provider/account/multi_auth_provider.dart';
 import '../../ui/provider/database_provider.dart';
+import '../../ui/provider/hive_key_value_provider.dart';
 import '../../ui/provider/setting_provider.dart';
 import '../../widgets/brightness_observer.dart';
 import '../audio_message_player/audio_message_service.dart';

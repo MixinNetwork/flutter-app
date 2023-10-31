@@ -17,6 +17,8 @@ extension ProviderExtension on BuildContext {
         return value.requireValue;
       }));
 
+  HiveKeyValues get hiveKeyValues => accountServer.hiveKeyValues;
+
   AudioMessagePlayService get audioMessageService =>
       read<AudioMessagePlayService>();
 

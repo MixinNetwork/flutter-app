@@ -5,7 +5,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
-import '../../account/security_key_value.dart';
 import '../../utils/authentication.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -46,15 +45,17 @@ class _Passcode extends HookConsumerWidget {
     final globalKey =
         useMemoized(GlobalKey<PopupMenuButtonState<Duration>>.new, []);
 
+    final securityKeyValue = context.hiveKeyValues.securityKeyValue;
+
     final hasPasscode =
-        useMemoizedStream(SecurityKeyValue.instance.watchHasPasscode).data ??
-            SecurityKeyValue.instance.hasPasscode;
+        useMemoizedStream(securityKeyValue.watchHasPasscode).data ??
+            securityKeyValue.hasPasscode;
 
     final enableBiometric =
-        useMemoizedStream(SecurityKeyValue.instance.watchBiometric).data ??
-            SecurityKeyValue.instance.biometric;
+        useMemoizedStream(securityKeyValue.watchBiometric).data ??
+            securityKeyValue.biometric;
 
-    final minutes = useStream(SecurityKeyValue.instance
+    final minutes = useStream(securityKeyValue
         .watchLockDuration()
         .map((event) => event.inMinutes)).data;
 
@@ -75,7 +76,7 @@ class _Passcode extends HookConsumerWidget {
                     value: hasPasscode,
                     onChanged: (value) {
                       if (!value) {
-                        SecurityKeyValue.instance.passcode = null;
+                        securityKeyValue.passcode = null;
                         return;
                       }
                       showMixinDialog(
@@ -124,8 +125,8 @@ class _Passcode extends HookConsumerWidget {
                           ),
                         )
                         .toList(),
-                    onSelected: (value) =>
-                        SecurityKeyValue.instance.lockDuration = value,
+                    onSelected: (value) => context
+                        .hiveKeyValues.securityKeyValue.lockDuration = value,
                     child: Text(
                       (minutes == null || minutes == 0)
                           ? context.l10n.disabled
@@ -156,7 +157,7 @@ class _Passcode extends HookConsumerWidget {
                       return;
                     }
 
-                    SecurityKeyValue.instance.biometric = value;
+                    securityKeyValue.biometric = value;
                   },
                 ),
               ),
@@ -206,7 +207,7 @@ class _InputPasscode extends HookConsumerWidget {
         return;
       }
 
-      SecurityKeyValue.instance.passcode = passcode.value;
+      context.hiveKeyValues.securityKeyValue.passcode = passcode.value;
       Navigator.maybePop(context);
     });
 

@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../../../account/show_pin_message_key_value.dart';
 import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
@@ -59,7 +58,7 @@ PinMessageState usePinMessageState(String? conversationId) {
   final showLastPinMessage = useMemoizedStream<bool>(
     () {
       if (conversationId == null) return Stream.value(false);
-      return ShowPinMessageKeyValue.instance.watch(conversationId);
+      return context.hiveKeyValues.showPinMessageKeyValue.watch(conversationId);
     },
     initialData: false,
     keys: [conversationId],

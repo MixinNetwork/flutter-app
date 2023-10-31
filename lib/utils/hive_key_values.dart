@@ -6,45 +6,18 @@ import 'package:hive/hive.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:path/path.dart' as p;
 
-import '../account/scam_warning_key_value.dart';
-import '../account/security_key_value.dart';
-import '../account/session_key_value.dart';
-import '../account/show_pin_message_key_value.dart';
-import '../crypto/privacy_key_value.dart';
-import 'attachment/download_key_value.dart';
 import 'file.dart';
 
-Future<void> initKeyValues(String identityNumber) => Future.wait([
-      PrivacyKeyValue.instance.init(identityNumber),
-      ShowPinMessageKeyValue.instance.init(identityNumber),
-      ScamWarningKeyValue.instance.init(identityNumber),
-      DownloadKeyValue.instance.init(identityNumber),
-      SessionKeyValue.instance.init(identityNumber),
-      SecurityKeyValue.instance.init(identityNumber),
-    ]);
+Future<void> initKeyValues(String identityNumber) => Future.wait([]);
 
-Future<void> clearKeyValues() => Future.wait([
-      PrivacyKeyValue.instance.delete(),
-      ShowPinMessageKeyValue.instance.delete(),
-      ScamWarningKeyValue.instance.delete(),
-      DownloadKeyValue.instance.delete(),
-      SessionKeyValue.instance.delete(),
-      SecurityKeyValue.instance.delete(),
-    ]);
+Future<void> clearKeyValues() => Future.wait([]);
 
-Future<void> disposeKeyValues() => Future.wait([
-      PrivacyKeyValue.instance.dispose(),
-      ShowPinMessageKeyValue.instance.dispose(),
-      ScamWarningKeyValue.instance.dispose(),
-      DownloadKeyValue.instance.dispose(),
-      SessionKeyValue.instance.dispose(),
-      SecurityKeyValue.instance.dispose(),
-    ]);
+Future<void> disposeKeyValues() => Future.wait([]);
 
 abstract class HiveKeyValue<E> {
-  HiveKeyValue(this._boxName);
+  HiveKeyValue(this.boxName);
 
-  final String _boxName;
+  final String boxName;
   late Box<E> box;
   bool _hasInit = false;
 
@@ -56,9 +29,8 @@ abstract class HiveKeyValue<E> {
     }
     final dbFolder = mixinDocumentsDirectory;
 
-    final legacyBoxDirectory = Directory(p.join(dbFolder.path, _boxName));
-    final directory =
-        Directory(p.join(dbFolder.path, identityNumber, _boxName));
+    final legacyBoxDirectory = Directory(p.join(dbFolder.path, boxName));
+    final directory = Directory(p.join(dbFolder.path, identityNumber, boxName));
 
     if (legacyBoxDirectory.existsSync()) {
       // copy legacy file to new file
@@ -70,8 +42,8 @@ abstract class HiveKeyValue<E> {
     if (!kIsWeb) {
       Hive.init(directory.absolute.path);
     }
-    box = await Hive.openBox<E>(_boxName);
-    i('HiveKeyValue: open $_boxName');
+    box = await Hive.openBox<E>(boxName);
+    i('HiveKeyValue: open $boxName');
     _identityNumber = identityNumber;
     _hasInit = true;
   }
@@ -80,7 +52,7 @@ abstract class HiveKeyValue<E> {
     if (!_hasInit) {
       return;
     }
-    i('HiveKeyValue: dispose $_boxName $_identityNumber');
+    i('HiveKeyValue: dispose $boxName $_identityNumber');
     await box.close();
     _hasInit = false;
   }
@@ -88,7 +60,7 @@ abstract class HiveKeyValue<E> {
   Future delete() async {
     if (!_hasInit) return;
     try {
-      await Hive.deleteBoxFromDisk(_boxName);
+      await Hive.deleteBoxFromDisk(boxName);
     } catch (_) {
       // ignore already deleted
     }

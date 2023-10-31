@@ -3,10 +3,8 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../account/account_key_value.dart';
 import '../../../account/account_server.dart';
 import '../../../blaze/blaze.dart';
-import '../../../crypto/crypto_key_value.dart';
 import '../../../db/database.dart';
 import '../conversation_provider.dart';
 import '../database_provider.dart';
@@ -31,8 +29,7 @@ class AccountServerOpener extends AutoDisposeStreamNotifier<AccountServer> {
       database: args.database,
       currentConversationId: args.currentConversationId,
       ref: ref,
-      accountKeyValue: args.accountKeyValue,
-      cryptoKeyValue: args.cryptoKeyValue,
+      hiveKeyValues: args.hiveKeyValues,
     );
 
     await accountServer.initServer(
@@ -58,8 +55,7 @@ class _Args extends Equatable {
     required this.multiAuthChangeNotifier,
     required this.settingChangeNotifier,
     required this.currentConversationId,
-    required this.accountKeyValue,
-    required this.cryptoKeyValue,
+    required this.hiveKeyValues,
   });
 
   final Database database;
@@ -70,8 +66,7 @@ class _Args extends Equatable {
   final MultiAuthStateNotifier multiAuthChangeNotifier;
   final SettingChangeNotifier settingChangeNotifier;
   final GetCurrentConversationId currentConversationId;
-  final AccountKeyValue accountKeyValue;
-  final CryptoKeyValue cryptoKeyValue;
+  final HiveKeyValues hiveKeyValues;
 
   @override
   List<Object?> get props => [
@@ -83,8 +78,7 @@ class _Args extends Equatable {
         multiAuthChangeNotifier,
         settingChangeNotifier,
         currentConversationId,
-        accountKeyValue,
-        cryptoKeyValue,
+        hiveKeyValues,
       ];
 }
 
@@ -116,13 +110,8 @@ final _argsProvider = FutureProvider.autoDispose((ref) async {
       ref.watch(multiAuthStateNotifierProvider.notifier);
   final settingChangeNotifier = ref.watch(settingProvider);
   final currentConversationId = ref.read(_currentConversationIdProvider);
-  final accountKeyValue =
-      await ref.watch(currentAccountKeyValueProvider.future);
-  final cryptoKeyValue =
-      await ref.watch(cryptoKeyValueProvider(identityNumber).future);
-  if (accountKeyValue == null) {
-    return null;
-  }
+  final hiveKeyValues =
+      await ref.watch(hiveKeyValueProvider(identityNumber).future);
 
   return _Args(
     database: database,
@@ -133,8 +122,7 @@ final _argsProvider = FutureProvider.autoDispose((ref) async {
     multiAuthChangeNotifier: multiAuthChangeNotifier,
     settingChangeNotifier: settingChangeNotifier,
     currentConversationId: currentConversationId,
-    accountKeyValue: accountKeyValue,
-    cryptoKeyValue: cryptoKeyValue,
+    hiveKeyValues: hiveKeyValues,
   );
 });
 

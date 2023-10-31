@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide encryptPin;
 
@@ -20,11 +21,11 @@ import '../../widgets/user/change_number_dialog.dart';
 import '../../widgets/user/pin_verification_dialog.dart';
 import '../../widgets/user/verification_dialog.dart';
 
-class AccountDeletePage extends StatelessWidget {
+class AccountDeletePage extends ConsumerWidget {
   const AccountDeletePage({super.key});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
         backgroundColor: context.theme.background,
         appBar: MixinAppBar(
           title: Text(context.l10n.deleteMyAccount),
@@ -43,7 +44,9 @@ class AccountDeletePage extends StatelessWidget {
                     title: Text(context.l10n.deleteMyAccount),
                     color: context.theme.red,
                     onTap: () async {
-                      if (!SessionKeyValue.instance.checkPinToken()) {
+                      final sessionKeyValue =
+                          context.hiveKeyValues.sessionKeyValue;
+                      if (!sessionKeyValue.checkPinToken()) {
                         showToastFailed(
                           ToastError(context.l10n.errorNoPinToken),
                         );
@@ -264,7 +267,10 @@ class _DeleteAccountPinDialog extends StatelessWidget {
                 PinInputLayout(
                   doVerify: (String pin) async {
                     await context.accountServer.client.accountApi.deactive(
-                      DeactivateRequest(encryptPin(pin)!, verificationId),
+                      DeactivateRequest(
+                        context.hiveKeyValues.sessionKeyValue.encryptPin(pin)!,
+                        verificationId,
+                      ),
                     );
                     Navigator.pop(context, true);
                   },

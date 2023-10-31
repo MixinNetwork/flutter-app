@@ -10,6 +10,8 @@ abstract class ConversationMenuHandle {
 
   Stream<bool> get isPinned;
 
+  Stream<bool> get hasPasscode;
+
   void mute();
 
   void unmute();

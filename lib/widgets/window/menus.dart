@@ -7,7 +7,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../account/security_key_value.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
 import '../../ui/provider/account/account_server_provider.dart';
 import '../../ui/provider/menu_handle_provider.dart';
@@ -61,10 +60,10 @@ class _Menus extends HookConsumerWidget {
         ).data ??
         false;
 
-    final hasPasscode = useMemoizedStream(signed
-                ? SecurityKeyValue.instance.watchHasPasscode
-                : () => Stream.value(false))
-            .data ??
+    final hasPasscode = useMemoizedStream(
+          () => handle?.hasPasscode ?? const Stream<bool>.empty(),
+          keys: [handle],
+        ).data ??
         false;
 
     PlatformMenu buildConversationMenu() => PlatformMenu(

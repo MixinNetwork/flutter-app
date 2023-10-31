@@ -4,11 +4,7 @@ import 'package:rxdart/rxdart.dart';
 import '../utils/hive_key_values.dart';
 
 class SecurityKeyValue extends HiveKeyValue {
-  SecurityKeyValue._() : super(_hiveSecurity);
-
-  static SecurityKeyValue? _instance;
-
-  static SecurityKeyValue get instance => _instance ??= SecurityKeyValue._();
+  SecurityKeyValue() : super(_hiveSecurity);
 
   static const _hiveSecurity = 'security_box';
   static const _passcode = 'passcode';

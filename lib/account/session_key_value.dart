@@ -9,11 +9,7 @@ import '../utils/hive_key_values.dart';
 import '../utils/logger.dart';
 
 class SessionKeyValue extends HiveKeyValue {
-  SessionKeyValue._() : super('session_box');
-
-  static SessionKeyValue? _instance;
-
-  static SessionKeyValue get instance => _instance ??= SessionKeyValue._();
+  SessionKeyValue() : super('session_box');
 
   static const _keyPinToken = 'pinToken';
   static const _keyPinIterator = 'pinIterator';
@@ -36,30 +32,30 @@ List<int> decryptPinToken(String serverPublicKey, ed.PrivateKey privateKey) {
   return calculateAgreement(bytes, private);
 }
 
-String? encryptPin(String code) {
-  assert(code.isNotEmpty, 'code is empty');
-  final iterator = SessionKeyValue.instance.pinIterator;
-  final pinToken = SessionKeyValue.instance.pinToken;
+extension EncryptPin on SessionKeyValue {
+  String? encryptPin(String code) {
+    assert(code.isNotEmpty, 'code is empty');
 
-  if (pinToken == null) {
-    e('pinToken is null');
-    return null;
+    if (pinToken == null) {
+      e('pinToken is null');
+      return null;
+    }
+
+    d('pinToken: $pinToken');
+
+    final pinBytes = Uint8List.fromList(utf8.encode(code));
+    final timeBytes = Uint8List(8);
+    final iteratorBytes = Uint8List(8);
+    final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    timeBytes.buffer.asByteData().setUint64(0, nowSec, Endian.little);
+    iteratorBytes.buffer.asByteData().setUint64(0, pinIterator, Endian.little);
+
+    // pin+time+iterator
+    final plaintext = Uint8List.fromList(pinBytes + timeBytes + iteratorBytes);
+    final ciphertext = aesEncrypt(base64Decode(pinToken!), plaintext);
+
+    pinIterator = pinIterator + 1;
+
+    return base64Encode(ciphertext);
   }
-
-  d('pinToken: $pinToken');
-
-  final pinBytes = Uint8List.fromList(utf8.encode(code));
-  final timeBytes = Uint8List(8);
-  final iteratorBytes = Uint8List(8);
-  final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-  timeBytes.buffer.asByteData().setUint64(0, nowSec, Endian.little);
-  iteratorBytes.buffer.asByteData().setUint64(0, iterator, Endian.little);
-
-  // pin+time+iterator
-  final plaintext = Uint8List.fromList(pinBytes + timeBytes + iteratorBytes);
-  final ciphertext = aesEncrypt(base64Decode(pinToken), plaintext);
-
-  SessionKeyValue.instance.pinIterator = iterator + 1;
-
-  return base64Encode(ciphertext);
 }

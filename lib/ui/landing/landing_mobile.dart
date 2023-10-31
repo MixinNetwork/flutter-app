@@ -177,8 +177,9 @@ class _CodeInputScene extends HookConsumerWidget {
             await ref.read(cryptoKeyValueProvider(identityNumber).future);
         cryptoKeyValue.localRegistrationId = registrationId;
 
-        await SessionKeyValue.instance.init(identityNumber);
-        SessionKeyValue.instance.pinToken = base64Encode(decryptPinToken(
+        final sessionKeyValue =
+            await ref.read(sessionKeyValueProvider(identityNumber).future);
+        sessionKeyValue.pinToken = base64Encode(decryptPinToken(
           response.data.pinToken,
           sessionKey.privateKey,
         ));
