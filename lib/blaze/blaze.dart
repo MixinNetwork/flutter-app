@@ -330,8 +330,8 @@ class Blaze {
       await client.accountApi.getMe();
       i('http ping');
       await connect();
-    } catch (e) {
-      w('ws ping error: $e');
+    } catch (e, s) {
+      w('ws ping error: $e $s');
       if (e is MixinApiError &&
           e.error != null &&
           e.error is MixinError &&

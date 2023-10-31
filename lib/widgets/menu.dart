@@ -126,6 +126,7 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
     this.enable = true,
     this.onTap,
     this.interactive = true,
+    this.autofocus = false,
   });
 
   final Widget child;
@@ -136,6 +137,8 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
 
   /// Whether right click or long press to show menu
   final bool interactive;
+
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -149,8 +152,13 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
       converter: (state) => state != null,
     );
 
+    final node = useFocusScopeNode();
+
     useEffect(() {
       showedMenu?.call(visible);
+      if (visible && autofocus && !node.hasFocus) {
+        node.requestFocus();
+      }
     }, [visible]);
 
     useEffect(() {
@@ -195,7 +203,8 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
               }
             },
             onTap: onTap,
-            child: Focus(
+            child: FocusScope(
+              node: node,
               onKeyEvent: (node, key) {
                 final show = offset != null && visible;
                 if (show && key.logicalKey == LogicalKeyboardKey.escape) {

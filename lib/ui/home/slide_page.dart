@@ -195,6 +195,7 @@ class _MultiAccountPopupButton extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mas = ref.watch(multiAuthStateNotifierProvider);
     return ContextMenuPortalEntry(
+      autofocus: true,
       buildMenus: () => [
         for (final account in mas.auths)
           _AccountMenuItem(

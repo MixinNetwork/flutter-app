@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../utils/rivepod.dart';
+import 'account/account_server_provider.dart';
 
 enum SlideCategoryType {
   chats,
@@ -42,6 +43,10 @@ class SlideCategoryStateNotifier
   }
 }
 
-final slideCategoryStateProvider =
-    StateNotifierProvider<SlideCategoryStateNotifier, SlideCategoryState>(
-        (ref) => SlideCategoryStateNotifier());
+final slideCategoryStateProvider = StateNotifierProvider.autoDispose<
+    SlideCategoryStateNotifier, SlideCategoryState>((ref) {
+  ref.listen(accountServerProvider, (previous, next) {
+    ref.notifier.switchToChatsIfSettings();
+  });
+  return SlideCategoryStateNotifier();
+});

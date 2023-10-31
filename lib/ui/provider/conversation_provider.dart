@@ -402,7 +402,7 @@ class _LastConversationNotifier
 
 final conversationProvider = StateNotifierProvider.autoDispose<
     ConversationStateNotifier, ConversationState?>((ref) {
-  final keepAlive = ref.keepAlive();
+  ref.keepAlive();
 
   final accountServerAsync = ref.watch(accountServerProvider);
 
@@ -413,10 +413,10 @@ final conversationProvider = StateNotifierProvider.autoDispose<
   final responsiveNavigatorNotifier =
       ref.watch(responsiveNavigatorProvider.notifier);
 
-  ref
-    ..listen(accountServerProvider, (previous, next) => keepAlive.close())
-    ..listen(responsiveNavigatorProvider.notifier,
-        (previous, next) => keepAlive.close());
+  ref.listen(
+    accountServerProvider,
+    (previous, next) => ref.notifier.unselected(),
+  );
 
   return ConversationStateNotifier(
     accountServer: accountServerAsync.requireValue,
