@@ -45,12 +45,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         final chunked = miniMessageItems.chunked(kMarkLimit);
         for (final miniMessageItems in chunked) {
           messages.addAll(await _baseMessageItems(
-              (message, _, __, ___, ____, _____, ______, _______, ________,
-                      _________, __________, ___________, em) =>
+              (message, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13,
+                      em) =>
                   message.messageId
                       .isIn(miniMessageItems.map((e) => e.messageId)),
-              (_, __, ___, ____, _____, ______, _______, ________, _________,
-                      __________, ___________, ____________, em) =>
+              (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
+                      em) =>
                   Limit(miniMessageItems.length, 0)).get());
         }
         return messages;
@@ -62,7 +62,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       Users sender,
       Users participant,
       Snapshots snapshot,
+      SafeSnapshots safeSnapshot,
       Assets asset,
+      Tokens token,
       Chains chain,
       Stickers sticker,
       Hyperlinks hyperlink,
@@ -77,7 +79,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       Users sender,
       Users participant,
       Snapshots snapshot,
+      SafeSnapshots safeSnapshot,
       Assets asset,
+      Tokens token,
       Chains chain,
       Stickers sticker,
       Hyperlinks hyperlink,
@@ -92,7 +96,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       Users sender,
       Users participant,
       Snapshots snapshot,
+      SafeSnapshots safeSnapshot,
       Assets asset,
+      Tokens token,
       Stickers sticker,
       Hyperlinks hyperlink,
       Users sharedUser,
@@ -104,14 +110,29 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }) =>
       db.baseMessageItems(
           where,
-          (message, sender, participant, snapshot, asset, _, sticker, hyperlink,
-                  sharedUser, conversation, messageMention, pinMessage, em) =>
+          (message,
+                  sender,
+                  participant,
+                  snapshot,
+                  ss,
+                  asset,
+                  t,
+                  _,
+                  sticker,
+                  hyperlink,
+                  sharedUser,
+                  conversation,
+                  messageMention,
+                  pinMessage,
+                  em) =>
               order?.call(
                   message,
                   sender,
                   participant,
                   snapshot,
+                  ss,
                   asset,
+                  t,
                   sticker,
                   hyperlink,
                   sharedUser,
@@ -578,11 +599,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int offset = 0,
   ]) =>
       _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________, em) =>
+          (message, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13,
+                  em) =>
               message.conversationId.equals(conversationId),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________, em) =>
+          (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, em) =>
               Limit(limit, offset));
 
   Selectable<int> messageCountByConversationId(String conversationId) {
@@ -851,29 +871,93 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Selectable<MessageItem> mediaMessages(
           String conversationId, int limit, int offset) =>
       _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________, em) =>
+          (message,
+                  _,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                  ___________,
+                  ____________,
+                  _____________,
+                  em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(_mediaMessageTypes),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________, em) =>
+          (_,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                  ___________,
+                  ____________,
+                  _____________,
+                  ______________,
+                  em) =>
               Limit(limit, offset));
 
   Selectable<MessageItem> mediaMessagesBefore(
           MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
-        (message, _, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, ____________) =>
+        (message,
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+                ___________,
+                ____________,
+                _____________,
+                ______________) =>
             message.conversationId.equals(conversationId) &
             message.category.isIn(_mediaMessageTypes) &
             (message.createdAt.isSmallerThanValue(anchor.createdAt) |
                 (message.createdAt.equals(anchor.createdAt) &
                     message.rowId.isSmallerThanValue(anchor.rowId))),
-        (_, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, ____________, _____________) =>
+        (_,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+                ___________,
+                ____________,
+                _____________,
+                ______________,
+                _______________) =>
             Limit(limit, 0),
-        order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                _________, __________, ___________) =>
+        order: (message,
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+                ___________,
+                _____________,
+                ______________) =>
             OrderBy([
           OrderingTerm.desc(message.createdAt),
           OrderingTerm.desc(message.rowId)
@@ -884,17 +968,42 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
         (message, _, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, em) =>
+                __________, ___________, ____________, _____________, em) =>
             message.conversationId.equals(conversationId) &
             message.category.isIn(_mediaMessageTypes) &
             (message.createdAt.isBiggerThanValue(anchor.createdAt) |
                 (message.createdAt.equals(anchor.createdAt) &
                     message.rowId.isBiggerThanValue(anchor.rowId))),
-        (_, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, ____________, _____________) =>
+        (_,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+                ___________,
+                ____________,
+                _____________,
+                ______________,
+                _______________) =>
             Limit(limit, 0),
-        order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                _________, __________, ___________) =>
+        order: (message,
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+                ___________,
+                ____________,
+                _____________) =>
             OrderBy([
           OrderingTerm.asc(message.createdAt),
           OrderingTerm.asc(message.rowId)
@@ -904,29 +1013,80 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Selectable<MessageItem> postMessages(
           String conversationId, int limit, int offset) =>
       _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________, em) =>
+          (message,
+                  _,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                  ___________,
+                  ____________,
+                  _____________,
+                  em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________, em) =>
+          (_,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                  ___________,
+                  ____________,
+                  _____________,
+                  ______________,
+                  em) =>
               Limit(limit, offset));
 
   Selectable<MessageItem> postMessagesBefore(
           MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
         (message, _, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, em) =>
+                __________, ___________, ____________, _____________, em) =>
             message.conversationId.equals(conversationId) &
             message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']) &
             (message.createdAt.isSmallerThanValue(anchor.createdAt) |
                 (message.createdAt.equals(anchor.createdAt) &
                     message.rowId.isSmallerThanValue(anchor.rowId))),
-        (_, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, ____________, em) =>
+        (_,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+                ___________,
+                ____________,
+                _____________,
+                ______________,
+                em) =>
             Limit(limit, 0),
-        order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                _________, __________, ___________) =>
+        order: (message,
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+                ___________,
+                ____________,
+                _____________) =>
             OrderBy([
           OrderingTerm.desc(message.createdAt),
           OrderingTerm.desc(message.rowId)
@@ -936,29 +1096,80 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Selectable<MessageItem> fileMessages(
           String conversationId, int limit, int offset) =>
       _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________, em) =>
+          (message,
+                  _,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                  ___________,
+                  ____________,
+                  _____________,
+                  em) =>
               message.conversationId.equals(conversationId) &
               message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________, em) =>
+          (_,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                  ___________,
+                  ____________,
+                  _____________,
+                  ______________,
+                  em) =>
               Limit(limit, offset));
 
   Selectable<MessageItem> fileMessagesBefore(
           MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
         (message, _, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, em) =>
+                __________, ___________, ____________, _____________, em) =>
             message.conversationId.equals(conversationId) &
             message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']) &
             (message.createdAt.isSmallerThanValue(anchor.createdAt) |
                 message.createdAt.equals(anchor.createdAt) &
                     message.rowId.isSmallerThanValue(anchor.rowId)),
-        (_, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, ____________, em) =>
+        (_,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+                ___________,
+                ____________,
+                _____________,
+                ______________,
+                em) =>
             Limit(limit, 0),
-        order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                _________, __________, ___________) =>
+        order: (message,
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+                ___________,
+                ____________,
+                _____________) =>
             OrderBy([
           OrderingTerm.desc(message.createdAt),
           OrderingTerm.desc(message.rowId)
@@ -968,36 +1179,75 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Selectable<MessageItem> beforeMessagesByConversationId(
           MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________, em) =>
+          (message,
+                  _,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                  ___________,
+                  ____________,
+                  _____________,
+                  em) =>
               message.conversationId.equals(conversationId) &
               (message.createdAt.isSmallerThanValue(anchor.createdAt) |
                   (message.createdAt.equals(anchor.createdAt) &
                       message.rowId.isSmallerThanValue(anchor.rowId))),
           order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, em) =>
+                  _________, __________, ___________, ____________, em) =>
               OrderBy([
                 OrderingTerm.desc(message.createdAt),
                 OrderingTerm.desc(message.rowId),
               ]),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________, em) =>
+          (_,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                  ___________,
+                  ____________,
+                  _____________,
+                  ______________,
+                  em) =>
               Limit(limit, 0));
 
   Selectable<MessageItem> afterMessagesByConversationId(
           MessageOrderInfo anchor, String conversationId, int limit) =>
       _baseMessageItems(
         (message, _, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, em) =>
+                __________, ___________, ____________, _____________, em) =>
             message.conversationId.equals(conversationId) &
             (message.createdAt.isBiggerThanValue(anchor.createdAt) |
                 (message.createdAt.equals(anchor.createdAt) &
                     message.rowId.isBiggerThanValue(anchor.rowId))),
-        (_, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, ____________, em) =>
+        (_,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+                ___________,
+                ____________,
+                _____________,
+                ______________,
+                em) =>
             Limit(limit, 0),
         order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                _________, __________, em) =>
+                _________, __________, ___________, ____________, em) =>
             OrderBy(
           [
             OrderingTerm.asc(message.createdAt),
@@ -1009,23 +1259,62 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Selectable<MessageItem> messageItemByMessageId(
           String messageId) =>
       _baseMessageItems(
-          (message, _, __, ___, ____, _____, ______, _______, ________,
-                  _________, __________, ___________, em) =>
+          (message,
+                  _,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                  ___________,
+                  ____________,
+                  _____________,
+                  em) =>
               message.messageId.equals(messageId),
-          (_, __, ___, ____, _____, ______, _______, ________, _________,
-                  __________, ___________, ____________, em) =>
+          (_,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                  ___________,
+                  ____________,
+                  _____________,
+                  ______________,
+                  em) =>
               Limit(1, 0));
 
   Selectable<MessageItem> messageItemByMessageIds(List<String> messageIds) =>
       _baseMessageItems(
         (message, _, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, em) =>
+                __________, ___________, ____________, _____________, em) =>
             message.messageId.isIn(messageIds),
-        (_, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________, ____________, em) =>
+        (_,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+                ___________,
+                ____________,
+                _____________,
+                ______________,
+                em) =>
             maxLimit,
         order: (message, _, __, ___, ____, _____, ______, _______, ________,
-                _________, __________, em) =>
+                _________, __________, ___________, ____________, em) =>
             OrderBy([OrderingTerm.asc(message.createdAt)]),
       );
 
@@ -1039,8 +1328,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       return null;
     }
     return _baseMessageItems(
-      (message, _, __, ___, ____, _____, ______, _______, ________,
-              conversation, _________, ___________, em) =>
+      (message, _, __, ___, ____, _____, ______, _______, ________, _________,
+              _____________, conversation, ___________, ____________, em) =>
           conversation.conversationId.equals(conversationId) &
           message.category.isIn([
             MessageCategory.signalAudio,
@@ -1050,11 +1339,24 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           (message.createdAt.isBiggerThanValue(info.createdAt) |
               (message.createdAt.equals(info.createdAt) &
                   message.rowId.isBiggerThanValue(info.rowId))),
-      (_, __, ___, ____, _____, ______, _______, ________, _________,
-              __________, ___________, ____________, em) =>
+      (_,
+              __,
+              ___,
+              ____,
+              _____,
+              ______,
+              _______,
+              ________,
+              _________,
+              __________,
+              ___________,
+              ____________,
+              _____________,
+              ______________,
+              em) =>
           Limit(1, 0),
       order: (message, _, __, ___, ____, _____, ______, _______, ________,
-              _________, __________, em) =>
+              _________, __________, ___________, ____________, em) =>
           OrderBy([
         OrderingTerm.asc(message.createdAt),
         OrderingTerm.asc(message.rowId)

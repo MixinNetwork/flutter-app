@@ -490,6 +490,7 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
     }
     if (createdAt.present) {
       final converter = MessagesMetas.$convertercreatedAt;
+
       map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
     }
     if (rowid.present) {

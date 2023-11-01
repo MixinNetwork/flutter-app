@@ -655,6 +655,14 @@ class AccountServer {
     );
   }
 
+  void addUpdateTokenJob(db.Job job) {
+    assert(job.action == kUpdateToken);
+    _sendEventToWorkerIsolate(
+      MainIsolateEventType.addUpdateTokenJob,
+      job,
+    );
+  }
+
   void addUpdateStickerJob(db.Job job) {
     assert(job.action == kUpdateSticker);
     _sendEventToWorkerIsolate(
@@ -1416,6 +1424,9 @@ class AccountServer {
 
   void updateAssetById({required String assetId}) =>
       addUpdateAssetJob(createUpdateAssetJob(assetId));
+
+  void updateTokenById({required String assetId}) =>
+      addUpdateAssetJob(createUpdateTokenJob(assetId));
 
   Future<AssetItem?> checkAsset(
       {required String assetId, bool force = false}) async {

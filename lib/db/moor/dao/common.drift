@@ -43,12 +43,13 @@ SELECT message.message_id AS messageId,
     sticker.asset_type AS assetType,
     participant.full_name AS participantFullName,
     participant.user_id AS participantUserId,
-    snapshot.snapshot_id AS snapshotId,
-    snapshot.type AS snapshotType,
-    snapshot.amount AS snapshotAmount,
-    snapshot.asset_id AS assetId,
-    asset.symbol AS assetSymbol,
-    asset.icon_url AS assetIcon,
+    COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId,
+    COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType,
+    COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount,
+    COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo,
+    COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId,
+    COALESCE(asset.symbol, token.symbol) AS assetSymbol,
+    COALESCE(asset.icon_url, token.icon_url) AS assetIcon,
     chain.icon_url AS chainIcon,
     hyperlink.site_name AS siteName,
     hyperlink.site_title AS siteTitle,
@@ -61,7 +62,9 @@ FROM messages message
          INNER JOIN users sender ON message.user_id = sender.user_id
          LEFT JOIN users participant ON message.participant_id = participant.user_id
          LEFT JOIN snapshots snapshot ON message.snapshot_id = snapshot.snapshot_id
+         LEFT JOIN safe_snapshots safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id
          LEFT JOIN assets asset ON snapshot.asset_id = asset.asset_id
+         LEFT JOIN tokens token ON safe_snapshot.asset_id = token.asset_id
          LEFT JOIN chains chain ON asset.chain_id = chain.chain_id
          LEFT JOIN stickers sticker ON sticker.sticker_id = message.sticker_id
          LEFT JOIN hyperlinks hyperlink ON message.hyperlink = hyperlink.hyperlink
@@ -118,12 +121,13 @@ SELECT message.message_id AS messageId,
     sticker.asset_type AS assetType,
     participant.full_name AS participantFullName,
     participant.user_id AS participantUserId,
-    snapshot.snapshot_id AS snapshotId,
-    snapshot.type AS snapshotType,
-    snapshot.amount AS snapshotAmount,
-    snapshot.asset_id AS assetId,
-    asset.symbol AS assetSymbol,
-    asset.icon_url AS assetIcon,
+    COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId,
+    COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType,
+    COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount,
+    COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo,
+    COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId,
+    COALESCE(asset.symbol, token.symbol) AS assetSymbol,
+    COALESCE(asset.icon_url, token.icon_url) AS assetIcon,
     chain.icon_url AS chainIcon,
     hyperlink.site_name AS siteName,
     hyperlink.site_title AS siteTitle,
@@ -137,7 +141,9 @@ FROM pin_messages pinMessage
          INNER JOIN users sender ON message.user_id = sender.user_id
          LEFT JOIN users participant ON message.participant_id = participant.user_id
          LEFT JOIN snapshots snapshot ON message.snapshot_id = snapshot.snapshot_id
+         LEFT JOIN safe_snapshots safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id
          LEFT JOIN assets asset ON snapshot.asset_id = asset.asset_id
+         LEFT JOIN tokens token ON safe_snapshot.asset_id = token.asset_id
          LEFT JOIN chains chain ON asset.chain_id = chain.chain_id
          LEFT JOIN stickers sticker ON sticker.sticker_id = message.sticker_id
          LEFT JOIN hyperlinks hyperlink ON message.hyperlink = hyperlink.hyperlink

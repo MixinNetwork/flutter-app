@@ -9,6 +9,7 @@ enum MainIsolateEventType {
   addSendingJob,
   addUpdateAssetJob,
   addUpdateStickerJob,
+  addUpdateTokenJob,
   exit,
 }
 

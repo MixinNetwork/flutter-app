@@ -359,6 +359,9 @@ class _MessageProcessRunner {
       case MainIsolateEventType.addUpdateAssetJob:
         _updateAssetJob.add(event.argument as Job);
         break;
+      case MainIsolateEventType.addUpdateTokenJob:
+        _updateTokenJob.add(event.argument as Job);
+        break;
       case MainIsolateEventType.addUpdateStickerJob:
         _updateStickerJob.add(event.argument as Job);
         break;

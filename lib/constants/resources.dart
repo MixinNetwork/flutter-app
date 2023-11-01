@@ -40,6 +40,10 @@ class Resources {
   /// {@macro assets_generator.assetsImagesAudioStopSvg.preview}
   static const String assetsImagesAudioStopSvg = 'assets/images/audio_stop.svg';
 
+  /// {@macro assets_generator.assetsImagesBgSnapshotSvg.preview}
+  static const String assetsImagesBgSnapshotSvg =
+      'assets/images/bg_snapshot.svg';
+
   /// {@macro assets_generator.assetsImagesBotSvg.preview}
   static const String assetsImagesBotSvg = 'assets/images/bot.svg';
 
