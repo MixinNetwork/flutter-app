@@ -39,6 +39,8 @@ mixin _$CircleDaoMixin on DatabaseAccessor<MixinDatabase> {
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Chains get chains => attachedDatabase.chains;
   Properties get properties => attachedDatabase.properties;
+  SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
+  Tokens get tokens => attachedDatabase.tokens;
   Selectable<ConversationCircleItem> allCircles() {
     return customSelect(
         'SELECT ci.circle_id, ci.name, ci.created_at, ci.ordered_at, COUNT(c.conversation_id) AS count, IFNULL(SUM(CASE WHEN IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END), 0) AS unseen_conversation_count, IFNULL(SUM(CASE WHEN(CASE WHEN c.category = \'GROUP\' THEN c.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END), 0) AS unseen_muted_conversation_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id LEFT JOIN users AS owner ON owner.user_id = c.owner_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',

@@ -27,6 +27,7 @@ enum _DatabaseEvent {
   updatePinMessage,
   updateTranscriptMessage,
   updateAsset,
+  updateToken,
   addJob,
 }
 
@@ -401,6 +402,19 @@ class DataBaseEventBus {
       return;
     }
     _send(_DatabaseEvent.updateAsset, newAssetIds.toList());
+  }
+
+  // Token
+  late Stream<List<String>> updateTokenStream =
+      _watch<List<String>>(_DatabaseEvent.updateToken);
+
+  void updateToken(Iterable<String> tokenIds) {
+    final newTokenIds = tokenIds.where((element) => element.trim().isNotEmpty);
+    if (newTokenIds.isEmpty) {
+      w('DatabaseEvent: updateToken tokenIds is empty');
+      return;
+    }
+    _send(_DatabaseEvent.updateToken, newTokenIds.toList());
   }
 
   // Job

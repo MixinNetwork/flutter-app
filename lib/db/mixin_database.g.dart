@@ -13189,6 +13189,1286 @@ class PropertiesCompanion extends UpdateCompanion<Propertie> {
   }
 }
 
+class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  SafeSnapshots(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _snapshotIdMeta =
+      const VerificationMeta('snapshotId');
+  late final GeneratedColumn<String> snapshotId = GeneratedColumn<String>(
+      'snapshot_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+      'type', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _assetIdMeta =
+      const VerificationMeta('assetId');
+  late final GeneratedColumn<String> assetId = GeneratedColumn<String>(
+      'asset_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  late final GeneratedColumn<String> amount = GeneratedColumn<String>(
+      'amount', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _opponentIdMeta =
+      const VerificationMeta('opponentId');
+  late final GeneratedColumn<String> opponentId = GeneratedColumn<String>(
+      'opponent_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _memoMeta = const VerificationMeta('memo');
+  late final GeneratedColumn<String> memo = GeneratedColumn<String>(
+      'memo', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _transactionHashMeta =
+      const VerificationMeta('transactionHash');
+  late final GeneratedColumn<String> transactionHash = GeneratedColumn<String>(
+      'transaction_hash', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _traceIdMeta =
+      const VerificationMeta('traceId');
+  late final GeneratedColumn<String> traceId = GeneratedColumn<String>(
+      'trace_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _confirmationsMeta =
+      const VerificationMeta('confirmations');
+  late final GeneratedColumn<int> confirmations = GeneratedColumn<int>(
+      'confirmations', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _openingBalanceMeta =
+      const VerificationMeta('openingBalance');
+  late final GeneratedColumn<String> openingBalance = GeneratedColumn<String>(
+      'opening_balance', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _closingBalanceMeta =
+      const VerificationMeta('closingBalance');
+  late final GeneratedColumn<String> closingBalance = GeneratedColumn<String>(
+      'closing_balance', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns => [
+        snapshotId,
+        type,
+        assetId,
+        amount,
+        userId,
+        opponentId,
+        memo,
+        transactionHash,
+        createdAt,
+        traceId,
+        confirmations,
+        openingBalance,
+        closingBalance
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'safe_snapshots';
+  @override
+  VerificationContext validateIntegrity(Insertable<SafeSnapshot> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('snapshot_id')) {
+      context.handle(
+          _snapshotIdMeta,
+          snapshotId.isAcceptableOrUnknown(
+              data['snapshot_id']!, _snapshotIdMeta));
+    } else if (isInserting) {
+      context.missing(_snapshotIdMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('asset_id')) {
+      context.handle(_assetIdMeta,
+          assetId.isAcceptableOrUnknown(data['asset_id']!, _assetIdMeta));
+    } else if (isInserting) {
+      context.missing(_assetIdMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('opponent_id')) {
+      context.handle(
+          _opponentIdMeta,
+          opponentId.isAcceptableOrUnknown(
+              data['opponent_id']!, _opponentIdMeta));
+    } else if (isInserting) {
+      context.missing(_opponentIdMeta);
+    }
+    if (data.containsKey('memo')) {
+      context.handle(
+          _memoMeta, memo.isAcceptableOrUnknown(data['memo']!, _memoMeta));
+    } else if (isInserting) {
+      context.missing(_memoMeta);
+    }
+    if (data.containsKey('transaction_hash')) {
+      context.handle(
+          _transactionHashMeta,
+          transactionHash.isAcceptableOrUnknown(
+              data['transaction_hash']!, _transactionHashMeta));
+    } else if (isInserting) {
+      context.missing(_transactionHashMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('trace_id')) {
+      context.handle(_traceIdMeta,
+          traceId.isAcceptableOrUnknown(data['trace_id']!, _traceIdMeta));
+    }
+    if (data.containsKey('confirmations')) {
+      context.handle(
+          _confirmationsMeta,
+          confirmations.isAcceptableOrUnknown(
+              data['confirmations']!, _confirmationsMeta));
+    }
+    if (data.containsKey('opening_balance')) {
+      context.handle(
+          _openingBalanceMeta,
+          openingBalance.isAcceptableOrUnknown(
+              data['opening_balance']!, _openingBalanceMeta));
+    }
+    if (data.containsKey('closing_balance')) {
+      context.handle(
+          _closingBalanceMeta,
+          closingBalance.isAcceptableOrUnknown(
+              data['closing_balance']!, _closingBalanceMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {snapshotId};
+  @override
+  SafeSnapshot map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SafeSnapshot(
+      snapshotId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}snapshot_id'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      assetId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}asset_id'])!,
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}amount'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      opponentId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}opponent_id'])!,
+      memo: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}memo'])!,
+      transactionHash: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}transaction_hash'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}created_at'])!,
+      traceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}trace_id']),
+      confirmations: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}confirmations']),
+      openingBalance: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}opening_balance']),
+      closingBalance: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}closing_balance']),
+    );
+  }
+
+  @override
+  SafeSnapshots createAlias(String alias) {
+    return SafeSnapshots(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(snapshot_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
+  final String snapshotId;
+  final String type;
+  final String assetId;
+  final String amount;
+  final String userId;
+  final String opponentId;
+  final String memo;
+  final String transactionHash;
+  final String createdAt;
+  final String? traceId;
+  final int? confirmations;
+  final String? openingBalance;
+  final String? closingBalance;
+  const SafeSnapshot(
+      {required this.snapshotId,
+      required this.type,
+      required this.assetId,
+      required this.amount,
+      required this.userId,
+      required this.opponentId,
+      required this.memo,
+      required this.transactionHash,
+      required this.createdAt,
+      this.traceId,
+      this.confirmations,
+      this.openingBalance,
+      this.closingBalance});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['snapshot_id'] = Variable<String>(snapshotId);
+    map['type'] = Variable<String>(type);
+    map['asset_id'] = Variable<String>(assetId);
+    map['amount'] = Variable<String>(amount);
+    map['user_id'] = Variable<String>(userId);
+    map['opponent_id'] = Variable<String>(opponentId);
+    map['memo'] = Variable<String>(memo);
+    map['transaction_hash'] = Variable<String>(transactionHash);
+    map['created_at'] = Variable<String>(createdAt);
+    if (!nullToAbsent || traceId != null) {
+      map['trace_id'] = Variable<String>(traceId);
+    }
+    if (!nullToAbsent || confirmations != null) {
+      map['confirmations'] = Variable<int>(confirmations);
+    }
+    if (!nullToAbsent || openingBalance != null) {
+      map['opening_balance'] = Variable<String>(openingBalance);
+    }
+    if (!nullToAbsent || closingBalance != null) {
+      map['closing_balance'] = Variable<String>(closingBalance);
+    }
+    return map;
+  }
+
+  SafeSnapshotsCompanion toCompanion(bool nullToAbsent) {
+    return SafeSnapshotsCompanion(
+      snapshotId: Value(snapshotId),
+      type: Value(type),
+      assetId: Value(assetId),
+      amount: Value(amount),
+      userId: Value(userId),
+      opponentId: Value(opponentId),
+      memo: Value(memo),
+      transactionHash: Value(transactionHash),
+      createdAt: Value(createdAt),
+      traceId: traceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(traceId),
+      confirmations: confirmations == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confirmations),
+      openingBalance: openingBalance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(openingBalance),
+      closingBalance: closingBalance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closingBalance),
+    );
+  }
+
+  factory SafeSnapshot.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SafeSnapshot(
+      snapshotId: serializer.fromJson<String>(json['snapshot_id']),
+      type: serializer.fromJson<String>(json['type']),
+      assetId: serializer.fromJson<String>(json['asset_id']),
+      amount: serializer.fromJson<String>(json['amount']),
+      userId: serializer.fromJson<String>(json['user_id']),
+      opponentId: serializer.fromJson<String>(json['opponent_id']),
+      memo: serializer.fromJson<String>(json['memo']),
+      transactionHash: serializer.fromJson<String>(json['transaction_hash']),
+      createdAt: serializer.fromJson<String>(json['created_at']),
+      traceId: serializer.fromJson<String?>(json['trace_id']),
+      confirmations: serializer.fromJson<int?>(json['confirmations']),
+      openingBalance: serializer.fromJson<String?>(json['opening_balance']),
+      closingBalance: serializer.fromJson<String?>(json['closing_balance']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'snapshot_id': serializer.toJson<String>(snapshotId),
+      'type': serializer.toJson<String>(type),
+      'asset_id': serializer.toJson<String>(assetId),
+      'amount': serializer.toJson<String>(amount),
+      'user_id': serializer.toJson<String>(userId),
+      'opponent_id': serializer.toJson<String>(opponentId),
+      'memo': serializer.toJson<String>(memo),
+      'transaction_hash': serializer.toJson<String>(transactionHash),
+      'created_at': serializer.toJson<String>(createdAt),
+      'trace_id': serializer.toJson<String?>(traceId),
+      'confirmations': serializer.toJson<int?>(confirmations),
+      'opening_balance': serializer.toJson<String?>(openingBalance),
+      'closing_balance': serializer.toJson<String?>(closingBalance),
+    };
+  }
+
+  SafeSnapshot copyWith(
+          {String? snapshotId,
+          String? type,
+          String? assetId,
+          String? amount,
+          String? userId,
+          String? opponentId,
+          String? memo,
+          String? transactionHash,
+          String? createdAt,
+          Value<String?> traceId = const Value.absent(),
+          Value<int?> confirmations = const Value.absent(),
+          Value<String?> openingBalance = const Value.absent(),
+          Value<String?> closingBalance = const Value.absent()}) =>
+      SafeSnapshot(
+        snapshotId: snapshotId ?? this.snapshotId,
+        type: type ?? this.type,
+        assetId: assetId ?? this.assetId,
+        amount: amount ?? this.amount,
+        userId: userId ?? this.userId,
+        opponentId: opponentId ?? this.opponentId,
+        memo: memo ?? this.memo,
+        transactionHash: transactionHash ?? this.transactionHash,
+        createdAt: createdAt ?? this.createdAt,
+        traceId: traceId.present ? traceId.value : this.traceId,
+        confirmations:
+            confirmations.present ? confirmations.value : this.confirmations,
+        openingBalance:
+            openingBalance.present ? openingBalance.value : this.openingBalance,
+        closingBalance:
+            closingBalance.present ? closingBalance.value : this.closingBalance,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('SafeSnapshot(')
+          ..write('snapshotId: $snapshotId, ')
+          ..write('type: $type, ')
+          ..write('assetId: $assetId, ')
+          ..write('amount: $amount, ')
+          ..write('userId: $userId, ')
+          ..write('opponentId: $opponentId, ')
+          ..write('memo: $memo, ')
+          ..write('transactionHash: $transactionHash, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('traceId: $traceId, ')
+          ..write('confirmations: $confirmations, ')
+          ..write('openingBalance: $openingBalance, ')
+          ..write('closingBalance: $closingBalance')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      snapshotId,
+      type,
+      assetId,
+      amount,
+      userId,
+      opponentId,
+      memo,
+      transactionHash,
+      createdAt,
+      traceId,
+      confirmations,
+      openingBalance,
+      closingBalance);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SafeSnapshot &&
+          other.snapshotId == this.snapshotId &&
+          other.type == this.type &&
+          other.assetId == this.assetId &&
+          other.amount == this.amount &&
+          other.userId == this.userId &&
+          other.opponentId == this.opponentId &&
+          other.memo == this.memo &&
+          other.transactionHash == this.transactionHash &&
+          other.createdAt == this.createdAt &&
+          other.traceId == this.traceId &&
+          other.confirmations == this.confirmations &&
+          other.openingBalance == this.openingBalance &&
+          other.closingBalance == this.closingBalance);
+}
+
+class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
+  final Value<String> snapshotId;
+  final Value<String> type;
+  final Value<String> assetId;
+  final Value<String> amount;
+  final Value<String> userId;
+  final Value<String> opponentId;
+  final Value<String> memo;
+  final Value<String> transactionHash;
+  final Value<String> createdAt;
+  final Value<String?> traceId;
+  final Value<int?> confirmations;
+  final Value<String?> openingBalance;
+  final Value<String?> closingBalance;
+  final Value<int> rowid;
+  const SafeSnapshotsCompanion({
+    this.snapshotId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.assetId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.opponentId = const Value.absent(),
+    this.memo = const Value.absent(),
+    this.transactionHash = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.traceId = const Value.absent(),
+    this.confirmations = const Value.absent(),
+    this.openingBalance = const Value.absent(),
+    this.closingBalance = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SafeSnapshotsCompanion.insert({
+    required String snapshotId,
+    required String type,
+    required String assetId,
+    required String amount,
+    required String userId,
+    required String opponentId,
+    required String memo,
+    required String transactionHash,
+    required String createdAt,
+    this.traceId = const Value.absent(),
+    this.confirmations = const Value.absent(),
+    this.openingBalance = const Value.absent(),
+    this.closingBalance = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : snapshotId = Value(snapshotId),
+        type = Value(type),
+        assetId = Value(assetId),
+        amount = Value(amount),
+        userId = Value(userId),
+        opponentId = Value(opponentId),
+        memo = Value(memo),
+        transactionHash = Value(transactionHash),
+        createdAt = Value(createdAt);
+  static Insertable<SafeSnapshot> custom({
+    Expression<String>? snapshotId,
+    Expression<String>? type,
+    Expression<String>? assetId,
+    Expression<String>? amount,
+    Expression<String>? userId,
+    Expression<String>? opponentId,
+    Expression<String>? memo,
+    Expression<String>? transactionHash,
+    Expression<String>? createdAt,
+    Expression<String>? traceId,
+    Expression<int>? confirmations,
+    Expression<String>? openingBalance,
+    Expression<String>? closingBalance,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (snapshotId != null) 'snapshot_id': snapshotId,
+      if (type != null) 'type': type,
+      if (assetId != null) 'asset_id': assetId,
+      if (amount != null) 'amount': amount,
+      if (userId != null) 'user_id': userId,
+      if (opponentId != null) 'opponent_id': opponentId,
+      if (memo != null) 'memo': memo,
+      if (transactionHash != null) 'transaction_hash': transactionHash,
+      if (createdAt != null) 'created_at': createdAt,
+      if (traceId != null) 'trace_id': traceId,
+      if (confirmations != null) 'confirmations': confirmations,
+      if (openingBalance != null) 'opening_balance': openingBalance,
+      if (closingBalance != null) 'closing_balance': closingBalance,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SafeSnapshotsCompanion copyWith(
+      {Value<String>? snapshotId,
+      Value<String>? type,
+      Value<String>? assetId,
+      Value<String>? amount,
+      Value<String>? userId,
+      Value<String>? opponentId,
+      Value<String>? memo,
+      Value<String>? transactionHash,
+      Value<String>? createdAt,
+      Value<String?>? traceId,
+      Value<int?>? confirmations,
+      Value<String?>? openingBalance,
+      Value<String?>? closingBalance,
+      Value<int>? rowid}) {
+    return SafeSnapshotsCompanion(
+      snapshotId: snapshotId ?? this.snapshotId,
+      type: type ?? this.type,
+      assetId: assetId ?? this.assetId,
+      amount: amount ?? this.amount,
+      userId: userId ?? this.userId,
+      opponentId: opponentId ?? this.opponentId,
+      memo: memo ?? this.memo,
+      transactionHash: transactionHash ?? this.transactionHash,
+      createdAt: createdAt ?? this.createdAt,
+      traceId: traceId ?? this.traceId,
+      confirmations: confirmations ?? this.confirmations,
+      openingBalance: openingBalance ?? this.openingBalance,
+      closingBalance: closingBalance ?? this.closingBalance,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (snapshotId.present) {
+      map['snapshot_id'] = Variable<String>(snapshotId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (assetId.present) {
+      map['asset_id'] = Variable<String>(assetId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<String>(amount.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (opponentId.present) {
+      map['opponent_id'] = Variable<String>(opponentId.value);
+    }
+    if (memo.present) {
+      map['memo'] = Variable<String>(memo.value);
+    }
+    if (transactionHash.present) {
+      map['transaction_hash'] = Variable<String>(transactionHash.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (traceId.present) {
+      map['trace_id'] = Variable<String>(traceId.value);
+    }
+    if (confirmations.present) {
+      map['confirmations'] = Variable<int>(confirmations.value);
+    }
+    if (openingBalance.present) {
+      map['opening_balance'] = Variable<String>(openingBalance.value);
+    }
+    if (closingBalance.present) {
+      map['closing_balance'] = Variable<String>(closingBalance.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SafeSnapshotsCompanion(')
+          ..write('snapshotId: $snapshotId, ')
+          ..write('type: $type, ')
+          ..write('assetId: $assetId, ')
+          ..write('amount: $amount, ')
+          ..write('userId: $userId, ')
+          ..write('opponentId: $opponentId, ')
+          ..write('memo: $memo, ')
+          ..write('transactionHash: $transactionHash, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('traceId: $traceId, ')
+          ..write('confirmations: $confirmations, ')
+          ..write('openingBalance: $openingBalance, ')
+          ..write('closingBalance: $closingBalance, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Tokens extends Table with TableInfo<Tokens, Token> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Tokens(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _assetIdMeta =
+      const VerificationMeta('assetId');
+  late final GeneratedColumn<String> assetId = GeneratedColumn<String>(
+      'asset_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _kernelAssetIdMeta =
+      const VerificationMeta('kernelAssetId');
+  late final GeneratedColumn<String> kernelAssetId = GeneratedColumn<String>(
+      'kernel_asset_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _symbolMeta = const VerificationMeta('symbol');
+  late final GeneratedColumn<String> symbol = GeneratedColumn<String>(
+      'symbol', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _iconUrlMeta =
+      const VerificationMeta('iconUrl');
+  late final GeneratedColumn<String> iconUrl = GeneratedColumn<String>(
+      'icon_url', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _priceBtcMeta =
+      const VerificationMeta('priceBtc');
+  late final GeneratedColumn<String> priceBtc = GeneratedColumn<String>(
+      'price_btc', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _priceUsdMeta =
+      const VerificationMeta('priceUsd');
+  late final GeneratedColumn<String> priceUsd = GeneratedColumn<String>(
+      'price_usd', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _chainIdMeta =
+      const VerificationMeta('chainId');
+  late final GeneratedColumn<String> chainId = GeneratedColumn<String>(
+      'chain_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _changeUsdMeta =
+      const VerificationMeta('changeUsd');
+  late final GeneratedColumn<String> changeUsd = GeneratedColumn<String>(
+      'change_usd', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _changeBtcMeta =
+      const VerificationMeta('changeBtc');
+  late final GeneratedColumn<String> changeBtc = GeneratedColumn<String>(
+      'change_btc', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _confirmationsMeta =
+      const VerificationMeta('confirmations');
+  late final GeneratedColumn<int> confirmations = GeneratedColumn<int>(
+      'confirmations', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _assetKeyMeta =
+      const VerificationMeta('assetKey');
+  late final GeneratedColumn<String> assetKey = GeneratedColumn<String>(
+      'asset_key', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _dustMeta = const VerificationMeta('dust');
+  late final GeneratedColumn<String> dust = GeneratedColumn<String>(
+      'dust', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  @override
+  List<GeneratedColumn> get $columns => [
+        assetId,
+        kernelAssetId,
+        symbol,
+        name,
+        iconUrl,
+        priceBtc,
+        priceUsd,
+        chainId,
+        changeUsd,
+        changeBtc,
+        confirmations,
+        assetKey,
+        dust
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tokens';
+  @override
+  VerificationContext validateIntegrity(Insertable<Token> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('asset_id')) {
+      context.handle(_assetIdMeta,
+          assetId.isAcceptableOrUnknown(data['asset_id']!, _assetIdMeta));
+    } else if (isInserting) {
+      context.missing(_assetIdMeta);
+    }
+    if (data.containsKey('kernel_asset_id')) {
+      context.handle(
+          _kernelAssetIdMeta,
+          kernelAssetId.isAcceptableOrUnknown(
+              data['kernel_asset_id']!, _kernelAssetIdMeta));
+    } else if (isInserting) {
+      context.missing(_kernelAssetIdMeta);
+    }
+    if (data.containsKey('symbol')) {
+      context.handle(_symbolMeta,
+          symbol.isAcceptableOrUnknown(data['symbol']!, _symbolMeta));
+    } else if (isInserting) {
+      context.missing(_symbolMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('icon_url')) {
+      context.handle(_iconUrlMeta,
+          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
+    } else if (isInserting) {
+      context.missing(_iconUrlMeta);
+    }
+    if (data.containsKey('price_btc')) {
+      context.handle(_priceBtcMeta,
+          priceBtc.isAcceptableOrUnknown(data['price_btc']!, _priceBtcMeta));
+    } else if (isInserting) {
+      context.missing(_priceBtcMeta);
+    }
+    if (data.containsKey('price_usd')) {
+      context.handle(_priceUsdMeta,
+          priceUsd.isAcceptableOrUnknown(data['price_usd']!, _priceUsdMeta));
+    } else if (isInserting) {
+      context.missing(_priceUsdMeta);
+    }
+    if (data.containsKey('chain_id')) {
+      context.handle(_chainIdMeta,
+          chainId.isAcceptableOrUnknown(data['chain_id']!, _chainIdMeta));
+    } else if (isInserting) {
+      context.missing(_chainIdMeta);
+    }
+    if (data.containsKey('change_usd')) {
+      context.handle(_changeUsdMeta,
+          changeUsd.isAcceptableOrUnknown(data['change_usd']!, _changeUsdMeta));
+    } else if (isInserting) {
+      context.missing(_changeUsdMeta);
+    }
+    if (data.containsKey('change_btc')) {
+      context.handle(_changeBtcMeta,
+          changeBtc.isAcceptableOrUnknown(data['change_btc']!, _changeBtcMeta));
+    } else if (isInserting) {
+      context.missing(_changeBtcMeta);
+    }
+    if (data.containsKey('confirmations')) {
+      context.handle(
+          _confirmationsMeta,
+          confirmations.isAcceptableOrUnknown(
+              data['confirmations']!, _confirmationsMeta));
+    } else if (isInserting) {
+      context.missing(_confirmationsMeta);
+    }
+    if (data.containsKey('asset_key')) {
+      context.handle(_assetKeyMeta,
+          assetKey.isAcceptableOrUnknown(data['asset_key']!, _assetKeyMeta));
+    } else if (isInserting) {
+      context.missing(_assetKeyMeta);
+    }
+    if (data.containsKey('dust')) {
+      context.handle(
+          _dustMeta, dust.isAcceptableOrUnknown(data['dust']!, _dustMeta));
+    } else if (isInserting) {
+      context.missing(_dustMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {assetId};
+  @override
+  Token map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Token(
+      assetId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}asset_id'])!,
+      kernelAssetId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}kernel_asset_id'])!,
+      symbol: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}symbol'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      iconUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}icon_url'])!,
+      priceBtc: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}price_btc'])!,
+      priceUsd: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}price_usd'])!,
+      chainId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}chain_id'])!,
+      changeUsd: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}change_usd'])!,
+      changeBtc: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}change_btc'])!,
+      confirmations: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}confirmations'])!,
+      assetKey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}asset_key'])!,
+      dust: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}dust'])!,
+    );
+  }
+
+  @override
+  Tokens createAlias(String alias) {
+    return Tokens(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(asset_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class Token extends DataClass implements Insertable<Token> {
+  final String assetId;
+  final String kernelAssetId;
+  final String symbol;
+  final String name;
+  final String iconUrl;
+  final String priceBtc;
+  final String priceUsd;
+  final String chainId;
+  final String changeUsd;
+  final String changeBtc;
+  final int confirmations;
+  final String assetKey;
+  final String dust;
+  const Token(
+      {required this.assetId,
+      required this.kernelAssetId,
+      required this.symbol,
+      required this.name,
+      required this.iconUrl,
+      required this.priceBtc,
+      required this.priceUsd,
+      required this.chainId,
+      required this.changeUsd,
+      required this.changeBtc,
+      required this.confirmations,
+      required this.assetKey,
+      required this.dust});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['asset_id'] = Variable<String>(assetId);
+    map['kernel_asset_id'] = Variable<String>(kernelAssetId);
+    map['symbol'] = Variable<String>(symbol);
+    map['name'] = Variable<String>(name);
+    map['icon_url'] = Variable<String>(iconUrl);
+    map['price_btc'] = Variable<String>(priceBtc);
+    map['price_usd'] = Variable<String>(priceUsd);
+    map['chain_id'] = Variable<String>(chainId);
+    map['change_usd'] = Variable<String>(changeUsd);
+    map['change_btc'] = Variable<String>(changeBtc);
+    map['confirmations'] = Variable<int>(confirmations);
+    map['asset_key'] = Variable<String>(assetKey);
+    map['dust'] = Variable<String>(dust);
+    return map;
+  }
+
+  TokensCompanion toCompanion(bool nullToAbsent) {
+    return TokensCompanion(
+      assetId: Value(assetId),
+      kernelAssetId: Value(kernelAssetId),
+      symbol: Value(symbol),
+      name: Value(name),
+      iconUrl: Value(iconUrl),
+      priceBtc: Value(priceBtc),
+      priceUsd: Value(priceUsd),
+      chainId: Value(chainId),
+      changeUsd: Value(changeUsd),
+      changeBtc: Value(changeBtc),
+      confirmations: Value(confirmations),
+      assetKey: Value(assetKey),
+      dust: Value(dust),
+    );
+  }
+
+  factory Token.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Token(
+      assetId: serializer.fromJson<String>(json['asset_id']),
+      kernelAssetId: serializer.fromJson<String>(json['kernel_asset_id']),
+      symbol: serializer.fromJson<String>(json['symbol']),
+      name: serializer.fromJson<String>(json['name']),
+      iconUrl: serializer.fromJson<String>(json['icon_url']),
+      priceBtc: serializer.fromJson<String>(json['price_btc']),
+      priceUsd: serializer.fromJson<String>(json['price_usd']),
+      chainId: serializer.fromJson<String>(json['chain_id']),
+      changeUsd: serializer.fromJson<String>(json['change_usd']),
+      changeBtc: serializer.fromJson<String>(json['change_btc']),
+      confirmations: serializer.fromJson<int>(json['confirmations']),
+      assetKey: serializer.fromJson<String>(json['asset_key']),
+      dust: serializer.fromJson<String>(json['dust']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'asset_id': serializer.toJson<String>(assetId),
+      'kernel_asset_id': serializer.toJson<String>(kernelAssetId),
+      'symbol': serializer.toJson<String>(symbol),
+      'name': serializer.toJson<String>(name),
+      'icon_url': serializer.toJson<String>(iconUrl),
+      'price_btc': serializer.toJson<String>(priceBtc),
+      'price_usd': serializer.toJson<String>(priceUsd),
+      'chain_id': serializer.toJson<String>(chainId),
+      'change_usd': serializer.toJson<String>(changeUsd),
+      'change_btc': serializer.toJson<String>(changeBtc),
+      'confirmations': serializer.toJson<int>(confirmations),
+      'asset_key': serializer.toJson<String>(assetKey),
+      'dust': serializer.toJson<String>(dust),
+    };
+  }
+
+  Token copyWith(
+          {String? assetId,
+          String? kernelAssetId,
+          String? symbol,
+          String? name,
+          String? iconUrl,
+          String? priceBtc,
+          String? priceUsd,
+          String? chainId,
+          String? changeUsd,
+          String? changeBtc,
+          int? confirmations,
+          String? assetKey,
+          String? dust}) =>
+      Token(
+        assetId: assetId ?? this.assetId,
+        kernelAssetId: kernelAssetId ?? this.kernelAssetId,
+        symbol: symbol ?? this.symbol,
+        name: name ?? this.name,
+        iconUrl: iconUrl ?? this.iconUrl,
+        priceBtc: priceBtc ?? this.priceBtc,
+        priceUsd: priceUsd ?? this.priceUsd,
+        chainId: chainId ?? this.chainId,
+        changeUsd: changeUsd ?? this.changeUsd,
+        changeBtc: changeBtc ?? this.changeBtc,
+        confirmations: confirmations ?? this.confirmations,
+        assetKey: assetKey ?? this.assetKey,
+        dust: dust ?? this.dust,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Token(')
+          ..write('assetId: $assetId, ')
+          ..write('kernelAssetId: $kernelAssetId, ')
+          ..write('symbol: $symbol, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('priceBtc: $priceBtc, ')
+          ..write('priceUsd: $priceUsd, ')
+          ..write('chainId: $chainId, ')
+          ..write('changeUsd: $changeUsd, ')
+          ..write('changeBtc: $changeBtc, ')
+          ..write('confirmations: $confirmations, ')
+          ..write('assetKey: $assetKey, ')
+          ..write('dust: $dust')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      assetId,
+      kernelAssetId,
+      symbol,
+      name,
+      iconUrl,
+      priceBtc,
+      priceUsd,
+      chainId,
+      changeUsd,
+      changeBtc,
+      confirmations,
+      assetKey,
+      dust);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Token &&
+          other.assetId == this.assetId &&
+          other.kernelAssetId == this.kernelAssetId &&
+          other.symbol == this.symbol &&
+          other.name == this.name &&
+          other.iconUrl == this.iconUrl &&
+          other.priceBtc == this.priceBtc &&
+          other.priceUsd == this.priceUsd &&
+          other.chainId == this.chainId &&
+          other.changeUsd == this.changeUsd &&
+          other.changeBtc == this.changeBtc &&
+          other.confirmations == this.confirmations &&
+          other.assetKey == this.assetKey &&
+          other.dust == this.dust);
+}
+
+class TokensCompanion extends UpdateCompanion<Token> {
+  final Value<String> assetId;
+  final Value<String> kernelAssetId;
+  final Value<String> symbol;
+  final Value<String> name;
+  final Value<String> iconUrl;
+  final Value<String> priceBtc;
+  final Value<String> priceUsd;
+  final Value<String> chainId;
+  final Value<String> changeUsd;
+  final Value<String> changeBtc;
+  final Value<int> confirmations;
+  final Value<String> assetKey;
+  final Value<String> dust;
+  final Value<int> rowid;
+  const TokensCompanion({
+    this.assetId = const Value.absent(),
+    this.kernelAssetId = const Value.absent(),
+    this.symbol = const Value.absent(),
+    this.name = const Value.absent(),
+    this.iconUrl = const Value.absent(),
+    this.priceBtc = const Value.absent(),
+    this.priceUsd = const Value.absent(),
+    this.chainId = const Value.absent(),
+    this.changeUsd = const Value.absent(),
+    this.changeBtc = const Value.absent(),
+    this.confirmations = const Value.absent(),
+    this.assetKey = const Value.absent(),
+    this.dust = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TokensCompanion.insert({
+    required String assetId,
+    required String kernelAssetId,
+    required String symbol,
+    required String name,
+    required String iconUrl,
+    required String priceBtc,
+    required String priceUsd,
+    required String chainId,
+    required String changeUsd,
+    required String changeBtc,
+    required int confirmations,
+    required String assetKey,
+    required String dust,
+    this.rowid = const Value.absent(),
+  })  : assetId = Value(assetId),
+        kernelAssetId = Value(kernelAssetId),
+        symbol = Value(symbol),
+        name = Value(name),
+        iconUrl = Value(iconUrl),
+        priceBtc = Value(priceBtc),
+        priceUsd = Value(priceUsd),
+        chainId = Value(chainId),
+        changeUsd = Value(changeUsd),
+        changeBtc = Value(changeBtc),
+        confirmations = Value(confirmations),
+        assetKey = Value(assetKey),
+        dust = Value(dust);
+  static Insertable<Token> custom({
+    Expression<String>? assetId,
+    Expression<String>? kernelAssetId,
+    Expression<String>? symbol,
+    Expression<String>? name,
+    Expression<String>? iconUrl,
+    Expression<String>? priceBtc,
+    Expression<String>? priceUsd,
+    Expression<String>? chainId,
+    Expression<String>? changeUsd,
+    Expression<String>? changeBtc,
+    Expression<int>? confirmations,
+    Expression<String>? assetKey,
+    Expression<String>? dust,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (assetId != null) 'asset_id': assetId,
+      if (kernelAssetId != null) 'kernel_asset_id': kernelAssetId,
+      if (symbol != null) 'symbol': symbol,
+      if (name != null) 'name': name,
+      if (iconUrl != null) 'icon_url': iconUrl,
+      if (priceBtc != null) 'price_btc': priceBtc,
+      if (priceUsd != null) 'price_usd': priceUsd,
+      if (chainId != null) 'chain_id': chainId,
+      if (changeUsd != null) 'change_usd': changeUsd,
+      if (changeBtc != null) 'change_btc': changeBtc,
+      if (confirmations != null) 'confirmations': confirmations,
+      if (assetKey != null) 'asset_key': assetKey,
+      if (dust != null) 'dust': dust,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TokensCompanion copyWith(
+      {Value<String>? assetId,
+      Value<String>? kernelAssetId,
+      Value<String>? symbol,
+      Value<String>? name,
+      Value<String>? iconUrl,
+      Value<String>? priceBtc,
+      Value<String>? priceUsd,
+      Value<String>? chainId,
+      Value<String>? changeUsd,
+      Value<String>? changeBtc,
+      Value<int>? confirmations,
+      Value<String>? assetKey,
+      Value<String>? dust,
+      Value<int>? rowid}) {
+    return TokensCompanion(
+      assetId: assetId ?? this.assetId,
+      kernelAssetId: kernelAssetId ?? this.kernelAssetId,
+      symbol: symbol ?? this.symbol,
+      name: name ?? this.name,
+      iconUrl: iconUrl ?? this.iconUrl,
+      priceBtc: priceBtc ?? this.priceBtc,
+      priceUsd: priceUsd ?? this.priceUsd,
+      chainId: chainId ?? this.chainId,
+      changeUsd: changeUsd ?? this.changeUsd,
+      changeBtc: changeBtc ?? this.changeBtc,
+      confirmations: confirmations ?? this.confirmations,
+      assetKey: assetKey ?? this.assetKey,
+      dust: dust ?? this.dust,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (assetId.present) {
+      map['asset_id'] = Variable<String>(assetId.value);
+    }
+    if (kernelAssetId.present) {
+      map['kernel_asset_id'] = Variable<String>(kernelAssetId.value);
+    }
+    if (symbol.present) {
+      map['symbol'] = Variable<String>(symbol.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (iconUrl.present) {
+      map['icon_url'] = Variable<String>(iconUrl.value);
+    }
+    if (priceBtc.present) {
+      map['price_btc'] = Variable<String>(priceBtc.value);
+    }
+    if (priceUsd.present) {
+      map['price_usd'] = Variable<String>(priceUsd.value);
+    }
+    if (chainId.present) {
+      map['chain_id'] = Variable<String>(chainId.value);
+    }
+    if (changeUsd.present) {
+      map['change_usd'] = Variable<String>(changeUsd.value);
+    }
+    if (changeBtc.present) {
+      map['change_btc'] = Variable<String>(changeBtc.value);
+    }
+    if (confirmations.present) {
+      map['confirmations'] = Variable<int>(confirmations.value);
+    }
+    if (assetKey.present) {
+      map['asset_key'] = Variable<String>(assetKey.value);
+    }
+    if (dust.present) {
+      map['dust'] = Variable<String>(dust.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TokensCompanion(')
+          ..write('assetId: $assetId, ')
+          ..write('kernelAssetId: $kernelAssetId, ')
+          ..write('symbol: $symbol, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('priceBtc: $priceBtc, ')
+          ..write('priceUsd: $priceUsd, ')
+          ..write('chainId: $chainId, ')
+          ..write('changeUsd: $changeUsd, ')
+          ..write('changeBtc: $changeBtc, ')
+          ..write('confirmations: $confirmations, ')
+          ..write('assetKey: $assetKey, ')
+          ..write('dust: $dust, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(e);
   late final Conversations conversations = Conversations(this);
@@ -13224,6 +14504,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Fiats fiats = Fiats(this);
   late final FavoriteApps favoriteApps = FavoriteApps(this);
   late final Properties properties = Properties(this);
+  late final SafeSnapshots safeSnapshots = SafeSnapshots(this);
+  late final Tokens tokens = Tokens(this);
   late final Index indexConversationsCategoryStatus = Index(
       'index_conversations_category_status',
       'CREATE INDEX IF NOT EXISTS index_conversations_category_status ON conversations (category, status)');
@@ -13262,6 +14544,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexMessagesConversationIdQuoteMessageId = Index(
       'index_messages_conversation_id_quote_message_id',
       'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages (conversation_id, quote_message_id)');
+  late final Index indexTokensKernelAssetId = Index(
+      'index_tokens_kernel_asset_id',
+      'CREATE INDEX IF NOT EXISTS index_tokens_kernel_asset_id ON tokens (kernel_asset_id)');
   late final AddressDao addressDao = AddressDao(this as MixinDatabase);
   late final AppDao appDao = AppDao(this as MixinDatabase);
   late final AssetDao assetDao = AssetDao(this as MixinDatabase);
@@ -13305,6 +14590,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final PropertyDao propertyDao = PropertyDao(this as MixinDatabase);
   late final TranscriptMessageDao transcriptMessageDao =
       TranscriptMessageDao(this as MixinDatabase);
+  late final SafeSnapshotDao safeSnapshotDao =
+      SafeSnapshotDao(this as MixinDatabase);
+  late final TokenDao tokenDao = TokenDao(this as MixinDatabase);
   Selectable<MessageItem> baseMessageItems(BaseMessageItems$where where,
       BaseMessageItems$order order, BaseMessageItems$limit limit) {
     var $arrayStartIndex = 1;
@@ -13612,6 +14900,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         fiats,
         favoriteApps,
         properties,
+        safeSnapshots,
+        tokens,
         indexConversationsCategoryStatus,
         indexConversationsMuteUntil,
         indexFloodMessagesCreatedAt,
@@ -13624,7 +14914,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         indexMessagesConversationIdCreatedAt,
         indexMessagesConversationIdCategoryCreatedAt,
         indexMessageConversationIdStatusUserId,
-        indexMessagesConversationIdQuoteMessageId
+        indexMessagesConversationIdQuoteMessageId,
+        indexTokensKernelAssetId
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(

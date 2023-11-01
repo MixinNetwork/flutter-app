@@ -39,6 +39,8 @@ mixin _$ExpiredMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
   Chains get chains => attachedDatabase.chains;
   Properties get properties => attachedDatabase.properties;
+  SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
+  Tokens get tokens => attachedDatabase.tokens;
   Selectable<ExpiredMessage> getExpiredMessages(int? currentTime) {
     return customSelect(
         'SELECT * FROM expired_messages WHERE expire_at <= ?1 ORDER BY expire_at ASC',

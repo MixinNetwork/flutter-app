@@ -39,6 +39,8 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Properties get properties => attachedDatabase.properties;
+  SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
+  Tokens get tokens => attachedDatabase.tokens;
   Selectable<SnapshotItem> snapshotItems(
       String currentFiat,
       SnapshotItems$where where,

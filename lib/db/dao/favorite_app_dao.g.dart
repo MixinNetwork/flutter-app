@@ -39,6 +39,8 @@ mixin _$FavoriteAppDaoMixin on DatabaseAccessor<MixinDatabase> {
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Chains get chains => attachedDatabase.chains;
   Properties get properties => attachedDatabase.properties;
+  SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
+  Tokens get tokens => attachedDatabase.tokens;
   Future<int> _deleteFavoriteAppByUserId(String userId) {
     return customUpdate(
       'DELETE FROM favorite_apps WHERE user_id = ?1',

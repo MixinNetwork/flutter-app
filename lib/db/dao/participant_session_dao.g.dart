@@ -39,6 +39,8 @@ mixin _$ParticipantSessionDaoMixin on DatabaseAccessor<MixinDatabase> {
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Chains get chains => attachedDatabase.chains;
   Properties get properties => attachedDatabase.properties;
+  SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
+  Tokens get tokens => attachedDatabase.tokens;
   Selectable<ParticipantSessionKey> participantSessionKeyWithoutSelf(
       String conversationId, String userId) {
     return customSelect(
