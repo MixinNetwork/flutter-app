@@ -112,7 +112,6 @@ abstract class TransferSocket {
     return _addTransferJson(wrapper);
   }
 
-
   Future<void> addSafeSnapshot(TransferDataSafeSnapshot snapshot) {
     final wrapper = JsonTransferData(
       data: snapshot.toJson(),
@@ -120,7 +119,6 @@ abstract class TransferSocket {
     );
     return _addTransferJson(wrapper);
   }
-
 
   Future<void> addCommand(TransferDataCommand command) async {
     d('send command to remote: $command');
