@@ -113,7 +113,13 @@ class _SnapshotLayout extends StatelessWidget {
                     if (assetIcon == null)
                       const SizedBox.square(dimension: 16)
                     else
-                      CacheImage(assetIcon!, width: 16, height: 16),
+                      ClipOval(
+                        child: CacheImage(
+                          assetIcon!,
+                          width: 16,
+                          height: 16,
+                        ),
+                      ),
                     const SizedBox(width: 4),
                     Text(
                       assetSymbol,
@@ -136,7 +142,7 @@ class _SnapshotLayout extends StatelessWidget {
                   ),
                 ),
                 if (memo.isNotEmpty) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   Text(
                     memo,
                     style: TextStyle(
@@ -146,7 +152,7 @@ class _SnapshotLayout extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                 ] else
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 6),
               ],
             ),
           ),

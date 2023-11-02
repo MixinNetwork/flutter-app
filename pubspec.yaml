@@ -93,7 +93,10 @@ dependencies:
   map: ^1.4.2
   markdown_widget: ^2.3.1
   mime: ^1.0.2
-  mixin_bot_sdk_dart: ^0.4.1
+  mixin_bot_sdk_dart:
+    git:
+      ref: 653f847bd5c8d32e482943fb570152001c80fa6b
+      url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
   mixin_logger: ^0.1.0
   native_dio_adapter: ^0.1.0
   network_info_plus: ^4.1.0
@@ -206,6 +209,9 @@ flutter:
     - family: NotoColorEmoji
       fonts:
         - asset: fonts/Noto-COLRv1.ttf
+    - family: MixinCondensed
+      fonts:
+        - asset: fonts/mixin_font.otf
 
 flutter_intl:
   enabled: true
