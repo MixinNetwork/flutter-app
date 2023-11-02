@@ -4,6 +4,7 @@ part of 'token_dao.dart';
 
 // ignore_for_file: type=lint
 mixin _$TokenDaoMixin on DatabaseAccessor<MixinDatabase> {
+  Tokens get tokens => attachedDatabase.tokens;
   Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
@@ -40,5 +41,11 @@ mixin _$TokenDaoMixin on DatabaseAccessor<MixinDatabase> {
   Chains get chains => attachedDatabase.chains;
   Properties get properties => attachedDatabase.properties;
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
-  Tokens get tokens => attachedDatabase.tokens;
+  Selectable<int> countAssets() {
+    return customSelect('SELECT COUNT(1) AS _c0 FROM tokens',
+        variables: [],
+        readsFrom: {
+          tokens,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
 }

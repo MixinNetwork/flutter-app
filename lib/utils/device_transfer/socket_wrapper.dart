@@ -17,8 +17,10 @@ import 'transfer_data_expired_message.dart';
 import 'transfer_data_message.dart';
 import 'transfer_data_participant.dart';
 import 'transfer_data_pin_message.dart';
+import 'transfer_data_safe_snapshot.dart';
 import 'transfer_data_snapshot.dart';
 import 'transfer_data_sticker.dart';
+import 'transfer_data_token.dart';
 import 'transfer_data_transcript_message.dart';
 import 'transfer_data_user.dart';
 import 'transfer_protocol.dart';
@@ -94,6 +96,14 @@ abstract class TransferSocket {
     return _addTransferJson(wrapper);
   }
 
+  Future<void> addToken(TransferDataToken asset) {
+    final wrapper = JsonTransferData(
+      data: asset.toJson(),
+      type: JsonTransferDataType.token,
+    );
+    return _addTransferJson(wrapper);
+  }
+
   Future<void> addSnapshot(TransferDataSnapshot snapshot) {
     final wrapper = JsonTransferData(
       data: snapshot.toJson(),
@@ -101,6 +111,16 @@ abstract class TransferSocket {
     );
     return _addTransferJson(wrapper);
   }
+
+
+  Future<void> addSafeSnapshot(TransferDataSafeSnapshot snapshot) {
+    final wrapper = JsonTransferData(
+      data: snapshot.toJson(),
+      type: JsonTransferDataType.safeSnapshot,
+    );
+    return _addTransferJson(wrapper);
+  }
+
 
   Future<void> addCommand(TransferDataCommand command) async {
     d('send command to remote: $command');

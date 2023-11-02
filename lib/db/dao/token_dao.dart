@@ -17,6 +17,8 @@ class TokenDao extends DatabaseAccessor<MixinDatabase> with _$TokenDaoMixin {
 
   Future<void> insertToken(Token token) =>
       into(db.tokens).insertOnConflictUpdate(token);
+
+  Future<List<Token>> getTokens() => select(db.tokens).get();
 }
 
 extension TokenConverter on sdk.Token {

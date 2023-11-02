@@ -56,4 +56,13 @@ class SafeSnapshotDao extends DatabaseAccessor<MixinDatabase>
         }
         return value;
       });
+
+  Future<List<SafeSnapshot>> getSnapshots({
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.safeSnapshots)
+            ..orderBy([(t) => OrderingTerm.asc(t.rowId)])
+            ..limit(limit, offset: offset))
+          .get();
 }

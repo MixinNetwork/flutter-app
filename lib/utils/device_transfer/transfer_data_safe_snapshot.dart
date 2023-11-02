@@ -22,6 +22,23 @@ class TransferDataSafeSnapshot {
     required this.closingBalance,
   });
 
+  factory TransferDataSafeSnapshot.fromDbSnapshot(db.SafeSnapshot snapshot) =>
+      TransferDataSafeSnapshot(
+        snapshotId: snapshot.snapshotId,
+        type: snapshot.type,
+        assetId: snapshot.assetId,
+        amount: snapshot.amount,
+        userId: snapshot.userId,
+        opponentId: snapshot.opponentId,
+        memo: snapshot.memo,
+        transactionHash: snapshot.transactionHash,
+        createdAt: snapshot.createdAt,
+        traceId: snapshot.traceId,
+        confirmations: snapshot.confirmations,
+        openingBalance: snapshot.openingBalance,
+        closingBalance: snapshot.closingBalance,
+      );
+
   factory TransferDataSafeSnapshot.fromJson(Map<String, dynamic> json) =>
       _$TransferDataSafeSnapshotFromJson(json);
 

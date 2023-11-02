@@ -105,6 +105,14 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
       updateKind: UpdateKind.delete,
     );
   }
+
+  Selectable<int> countSnapshots() {
+    return customSelect('SELECT COUNT(1) AS _c0 FROM safe_snapshots',
+        variables: [],
+        readsFrom: {
+          safeSnapshots,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
 }
 
 class SafeSnapshotItem {

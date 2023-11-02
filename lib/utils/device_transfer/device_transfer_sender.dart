@@ -20,8 +20,10 @@ import 'transfer_data_expired_message.dart';
 import 'transfer_data_message.dart';
 import 'transfer_data_participant.dart';
 import 'transfer_data_pin_message.dart';
+import 'transfer_data_safe_snapshot.dart';
 import 'transfer_data_snapshot.dart';
 import 'transfer_data_sticker.dart';
+import 'transfer_data_token.dart';
 import 'transfer_data_transcript_message.dart';
 import 'transfer_data_user.dart';
 import 'transfer_protocol.dart';
@@ -214,7 +216,9 @@ class DeviceTransferSender {
           await db.messageDao.countMessages().getSingle() +
           await db.stickerDao.countStickers().getSingle() +
           await db.assetDao.countAssets().getSingle() +
+          await db.tokenDao.countAssets().getSingle() +
           await db.snapshotDao.countSnapshots().getSingle() +
+          await db.safeSnapshotDao.countSnapshots().getSingle() +
           await db.userDao.countUsers().getSingle() +
           await db.conversationDao.countConversations().getSingle() +
           await db.participantDao.countParticipants().getSingle() +
@@ -240,7 +244,9 @@ class DeviceTransferSender {
     await runWithLog(_processTransferApp, 'app');
     await runWithLog(_processTransferSticker, 'sticker');
     await runWithLog(_processTransferAsset, 'asset');
+    await runWithLog(_processTransferToken, 'token');
     await runWithLog(_processTransferSnapshot, 'snapshot');
+    await runWithLog(_processTransferSafeSnapshot, 'safeSnapshot');
     await runWithLog(_processTransferTranscriptMessage, 'transcriptMessage');
     await runWithLog(_processTransferPinMessage, 'pinMessage');
     await runWithLog(_processTransferMessage, 'message');
@@ -361,6 +367,17 @@ class DeviceTransferSender {
     return assets.length;
   }
 
+  Future<int> _processTransferToken(TransferSocket socket) async {
+    final tokens = await database.tokenDao.getTokens();
+    for (final token in tokens) {
+      await socket.addToken(
+        TransferDataToken.fromDbToken(token),
+      );
+      await onPacketSend();
+    }
+    return tokens.length;
+  }
+
   Future<int> _processTransferSnapshot(TransferSocket socket) async {
     var offset = 0;
     while (true) {
@@ -372,6 +389,27 @@ class DeviceTransferSender {
       for (final snapshot in snapshots) {
         await socket.addSnapshot(
           TransferDataSnapshot.fromDbSnapshot(snapshot),
+        );
+        await onPacketSend();
+      }
+      if (snapshots.length < _kQueryLimit) {
+        break;
+      }
+    }
+    return offset;
+  }
+
+  Future<int> _processTransferSafeSnapshot(TransferSocket socket) async {
+    var offset = 0;
+    while (true) {
+      final snapshots = await database.safeSnapshotDao.getSnapshots(
+        limit: _kQueryLimit,
+        offset: offset,
+      );
+      offset += snapshots.length;
+      for (final snapshot in snapshots) {
+        await socket.addSafeSnapshot(
+          TransferDataSafeSnapshot.fromDbSnapshot(snapshot),
         );
         await onPacketSend();
       }

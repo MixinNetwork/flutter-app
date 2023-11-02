@@ -22,6 +22,22 @@ class TransferDataToken {
     required this.dust,
   });
 
+  factory TransferDataToken.fromDbToken(db.Token token) => TransferDataToken(
+        assetId: token.assetId,
+        asset: token.kernelAssetId,
+        symbol: token.symbol,
+        name: token.name,
+        iconUrl: token.iconUrl,
+        priceBtc: token.priceBtc,
+        priceUsd: token.priceUsd,
+        chainId: token.chainId,
+        changeUsd: token.changeUsd,
+        changeBtc: token.changeBtc,
+        confirmations: token.confirmations,
+        assetKey: token.assetKey,
+        dust: token.dust,
+      );
+
   factory TransferDataToken.fromJson(Map<String, dynamic> json) =>
       _$TransferDataTokenFromJson(json);
 
