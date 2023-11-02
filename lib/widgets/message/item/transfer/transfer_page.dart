@@ -4,11 +4,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    hide Snapshot, Asset, User;
+    hide Snapshot, Asset, User, Token;
 
 import '../../../../db/dao/snapshot_dao.dart';
 import '../../../../db/database_event_bus.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
+import '../../../../ui/provider/transfer_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../buttons.dart';
@@ -24,11 +25,6 @@ Future<void> showTransferDialog(
       child: _TransferPage(snapshotId),
     );
 
-Future<void> showSafeTransferDialog(BuildContext context, String snapshotId) =>
-    showMixinDialog(
-      context: context,
-      child: _SafeTransferDialog(snapshotId: snapshotId),
-    );
 
 class _TransferPage extends HookConsumerWidget {
   const _TransferPage(
@@ -106,12 +102,12 @@ class _TransferPage extends HookConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _SnapshotDetailHeader(snapshot: snapshotItem),
+                  SnapshotDetailHeader(snapshot: snapshotItem),
                   Container(
                     color: context.theme.divider,
                     height: 10,
                   ),
-                  _TransactionDetailInfo(
+                  TransactionDetailInfo(
                     snapshot: snapshotItem,
                     opponentFullName: opponentFullName,
                   ),
@@ -125,19 +121,9 @@ class _TransferPage extends HookConsumerWidget {
   }
 }
 
-class _SafeTransferDialog extends StatelessWidget {
-  const _SafeTransferDialog({required this.snapshotId});
 
-  final String snapshotId;
-
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-}
-
-class _SnapshotDetailHeader extends HookConsumerWidget {
-  const _SnapshotDetailHeader({
+class SnapshotDetailHeader extends HookConsumerWidget {
+  const SnapshotDetailHeader({
     required this.snapshot,
   });
 
@@ -269,8 +255,8 @@ class _ValuesDescription extends HookConsumerWidget {
   }
 }
 
-class _TransactionDetailInfo extends StatelessWidget {
-  const _TransactionDetailInfo({
+class TransactionDetailInfo extends StatelessWidget {
+  const TransactionDetailInfo({
     required this.snapshot,
     required this.opponentFullName,
   });

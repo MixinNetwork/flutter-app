@@ -1,38 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/widgets/message/item/transfer/safe_transfer_dialog.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../../../constants/resources.dart';
-import '../../../../db/database_event_bus.dart';
-import '../../../../db/mixin_database.dart';
-import '../../../../ui/provider/account_server_provider.dart';
+import '../../../../ui/provider/transfer_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../cache_image.dart';
 import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
-import 'transfer_page.dart';
-
-final _tokenProvider = StreamProvider.autoDispose.family<Token?, String?>(
-  (ref, assetId) {
-    if (assetId == null) {
-      return const Stream.empty();
-    }
-    final database = ref.read(accountServerProvider).requireValue.database;
-    final stream =
-        database.tokenDao.tokenById(assetId).watchSingleOrNullWithStream(
-      eventStreams: [
-        DataBaseEventBus.instance.updateTokenStream
-            .where((event) => event.contains(assetId)),
-      ],
-      duration: kDefaultThrottleDuration,
-    );
-    return stream;
-  },
-);
 
 class SafeTransferMessage extends HookConsumerWidget {
   const SafeTransferMessage({super.key});
@@ -50,7 +30,7 @@ class SafeTransferMessage extends HookConsumerWidget {
     final snapshotMemo =
         useMessageConverter(converter: (state) => state.snapshotMemo);
 
-    final token = ref.watch(_tokenProvider(assetId));
+    final token = ref.watch(tokenProvider(assetId));
 
     assetIcon = assetIcon ?? token.valueOrNull?.iconUrl;
     assetSymbol = assetSymbol ?? token.valueOrNull?.symbol;

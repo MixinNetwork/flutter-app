@@ -1415,6 +1415,11 @@ class AccountServer {
     await database.snapshotDao.insertSdkSnapshot(data.data);
   }
 
+  Future<void> updateSafeSnapshotById({required String snapshotId}) async {
+    final data = await client.tokenApi.getSnapshotById(snapshotId);
+    await database.safeSnapshotDao.insertSdkSnapshot(data.data);
+  }
+
   Future<Snapshot> updateSnapshotByTraceId({required String traceId}) async {
     final data = await client.snapshotApi.getSnapshotByTraceId(traceId);
     final snapshot = data.data;
