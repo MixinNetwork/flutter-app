@@ -24,6 +24,12 @@ Future<void> showTransferDialog(
       child: _TransferPage(snapshotId),
     );
 
+Future<void> showSafeTransferDialog(BuildContext context, String snapshotId) =>
+    showMixinDialog(
+      context: context,
+      child: _SafeTransferDialog(snapshotId: snapshotId),
+    );
+
 class _TransferPage extends HookConsumerWidget {
   const _TransferPage(
     this.snapshotId,
@@ -116,6 +122,17 @@ class _TransferPage extends HookConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+class _SafeTransferDialog extends StatelessWidget {
+  const _SafeTransferDialog({required this.snapshotId});
+
+  final String snapshotId;
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }
 

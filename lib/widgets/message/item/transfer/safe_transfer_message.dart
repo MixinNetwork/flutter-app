@@ -73,7 +73,7 @@ class SafeTransferMessage extends HookConsumerWidget {
         onTap: () {
           final snapshotId = context.message.snapshotId;
           if (snapshotId == null) return;
-          showTransferDialog(context, snapshotId);
+          showSafeTransferDialog(context, snapshotId);
         },
         child: SizedBox(
           width: 174,

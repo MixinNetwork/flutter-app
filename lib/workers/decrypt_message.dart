@@ -1018,7 +1018,7 @@ class DecryptMessage extends Injector {
       action: snapshot.type,
     );
     await _insertMessage(message, data);
-    await _updateTokenJob.add(createUpdateAssetJob(snapshot.assetId));
+    await _updateTokenJob.add(createUpdateTokenJob(snapshot.assetId));
     // TODO sync output
   }
 
