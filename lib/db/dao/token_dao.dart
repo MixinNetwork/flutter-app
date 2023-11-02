@@ -9,6 +9,9 @@ part 'token_dao.g.dart';
 class TokenDao extends DatabaseAccessor<MixinDatabase> with _$TokenDaoMixin {
   TokenDao(super.attachedDatabase);
 
+  Selectable<Token> tokenById(String id) =>
+      (select(db.tokens)..where((t) => t.assetId.equals(id)));
+
   Future<void> insertSdkToken(sdk.Token token) =>
       into(db.tokens).insertOnConflictUpdate(token.asTokensCompanion);
 

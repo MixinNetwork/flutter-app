@@ -1426,7 +1426,7 @@ class AccountServer {
       addUpdateAssetJob(createUpdateAssetJob(assetId));
 
   void updateTokenById({required String assetId}) =>
-      addUpdateAssetJob(createUpdateTokenJob(assetId));
+      addUpdateTokenJob(createUpdateTokenJob(assetId));
 
   Future<AssetItem?> checkAsset(
       {required String assetId, bool force = false}) async {
