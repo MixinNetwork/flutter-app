@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -117,15 +118,18 @@ class _SnapshotLayout extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text(
+                AutoSizeText(
                   snapshotAmount ?? '',
+                  maxFontSize: 36,
+                  minFontSize: 24,
                   style: TextStyle(
                     color: context.theme.text,
                     fontFamily: 'MixinCondensed',
                     fontSize: 36,
-                    fontWeight: FontWeight.w600,
                     height: 1,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 if (memo.isNotEmpty) ...[
                   const SizedBox(height: 10),
