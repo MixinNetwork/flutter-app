@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/widgets/message/item/transfer/safe_transfer_dialog.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,6 +12,7 @@ import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
+import 'safe_transfer_dialog.dart';
 
 class SafeTransferMessage extends HookConsumerWidget {
   const SafeTransferMessage({super.key});

@@ -9,7 +9,6 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
 import '../../../../db/dao/snapshot_dao.dart';
 import '../../../../db/database_event_bus.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
-import '../../../../ui/provider/transfer_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../buttons.dart';
@@ -24,7 +23,6 @@ Future<void> showTransferDialog(
       context: context,
       child: _TransferPage(snapshotId),
     );
-
 
 class _TransferPage extends HookConsumerWidget {
   const _TransferPage(
@@ -121,9 +119,9 @@ class _TransferPage extends HookConsumerWidget {
   }
 }
 
-
 class SnapshotDetailHeader extends HookConsumerWidget {
   const SnapshotDetailHeader({
+    super.key,
     required this.snapshot,
   });
 
@@ -150,6 +148,7 @@ class SnapshotDetailHeader extends HookConsumerWidget {
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w700,
+                      fontFamily: 'MixinCondensed',
                       color: snapshot.type == SnapshotType.pending
                           ? context.theme.text
                           : snapshot.isPositive
@@ -257,6 +256,7 @@ class _ValuesDescription extends HookConsumerWidget {
 
 class TransactionDetailInfo extends StatelessWidget {
   const TransactionDetailInfo({
+    super.key,
     required this.snapshot,
     required this.opponentFullName,
   });

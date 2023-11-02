@@ -42,3 +42,20 @@ final safeSnapshotProvider =
     return stream;
   },
 );
+
+final assetChainProvider = StreamProvider.autoDispose.family<Chain?, String?>(
+  (ref, assetId) {
+    if (assetId == null) {
+      return const Stream.empty();
+    }
+    final database = ref.read(accountServerProvider).requireValue.database;
+    final stream = database.chainDao.chain(assetId).watchSingleOrNullWithStream(
+      eventStreams: [
+        DataBaseEventBus.instance.updateAssetStream
+            .where((event) => event.contains(assetId)),
+      ],
+      duration: kDefaultThrottleDuration,
+    );
+    return stream;
+  },
+);
