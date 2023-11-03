@@ -13,6 +13,8 @@ import 'converter/message_status_type_converter.dart';
 import 'converter/millis_date_converter.dart';
 import 'converter/participant_role_converter.dart';
 import 'converter/property_group_converter.dart';
+import 'converter/safe_deposit_type_converter.dart';
+import 'converter/safe_withdrawal_type_converter.dart';
 import 'converter/user_relationship_converter.dart';
 import 'dao/address_dao.dart';
 import 'dao/app_dao.dart';
@@ -36,11 +38,13 @@ import 'dao/participant_session_dao.dart';
 import 'dao/pin_message_dao.dart';
 import 'dao/property_dao.dart';
 import 'dao/resend_session_message_dao.dart';
+import 'dao/safe_snapshot_dao.dart';
 import 'dao/sent_session_sender_key_dao.dart';
 import 'dao/snapshot_dao.dart';
 import 'dao/sticker_album_dao.dart';
 import 'dao/sticker_dao.dart';
 import 'dao/sticker_relationship_dao.dart';
+import 'dao/token_dao.dart';
 import 'dao/transcript_message_dao.dart';
 import 'dao/user_dao.dart';
 import 'database_event_bus.dart';
@@ -85,13 +89,15 @@ part 'mixin_database.g.dart';
     ChainDao,
     PropertyDao,
     TranscriptMessageDao,
+    SafeSnapshotDao,
+    TokenDao,
   ],
 )
 class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);
 
   @override
-  int get schemaVersion => 24;
+  int get schemaVersion => 25;
 
   final eventBus = DataBaseEventBus.instance;
 
@@ -227,6 +233,11 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 23) {
             await _addColumnIfNotExists(m, users, users.isDeactivated);
+          }
+          if (from <= 24) {
+            await m.createTable(safeSnapshots);
+            await m.createTable(tokens);
+            await m.createIndex(indexTokensKernelAssetId);
           }
         },
         beforeOpen: (details) async {

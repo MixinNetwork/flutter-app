@@ -1,0 +1,4 @@
+import '../mixin.drift';
+
+countAssets:
+SELECT COUNT(1) FROM tokens;

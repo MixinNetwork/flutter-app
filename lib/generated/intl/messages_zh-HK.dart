@@ -164,6 +164,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("分享了一個聯繫人"),
         "allChats": MessageLookupByLibrary.simpleMessage("全部聊天"),
         "animalsAndNature": MessageLookupByLibrary.simpleMessage("動物與自然"),
+        "anonymous": MessageLookupByLibrary.simpleMessage("匿名"),
         "anonymousNumber": MessageLookupByLibrary.simpleMessage("匿名號碼"),
         "appCardShareDisallow":
             MessageLookupByLibrary.simpleMessage("該鏈接已被設置為不允許分享"),
@@ -228,6 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("確認從手機端同步聊天記錄嗎？"),
         "confirmSyncChatsToPhone":
             MessageLookupByLibrary.simpleMessage("確認同步聊天記錄到手機端嗎？"),
+        "confirmations": MessageLookupByLibrary.simpleMessage("區塊確認數"),
         "contact": MessageLookupByLibrary.simpleMessage("聯繫人"),
         "contactMixinId": m10,
         "contactMuteTitle": MessageLookupByLibrary.simpleMessage("靜音通知"),
@@ -277,6 +279,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteMyAccount": MessageLookupByLibrary.simpleMessage("註銷賬户"),
         "deleteTheCircle": m14,
         "deposit": MessageLookupByLibrary.simpleMessage("充值"),
+        "depositHash": MessageLookupByLibrary.simpleMessage("充值哈希"),
         "developer": MessageLookupByLibrary.simpleMessage("開發者"),
         "disableDisappearingMessage": m15,
         "disabled": MessageLookupByLibrary.simpleMessage("禁用"),
@@ -629,6 +632,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "theme": MessageLookupByLibrary.simpleMessage("主題"),
         "thisMessageWasDeleted": MessageLookupByLibrary.simpleMessage("此消息已撤回"),
         "time": MessageLookupByLibrary.simpleMessage("時間"),
+        "to": MessageLookupByLibrary.simpleMessage("至"),
         "today": MessageLookupByLibrary.simpleMessage("今天"),
         "toggleChatInfo": MessageLookupByLibrary.simpleMessage("展開/關閉會話信息"),
         "transactionHash": MessageLookupByLibrary.simpleMessage("交易哈希"),
@@ -685,6 +689,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsYourName": MessageLookupByLibrary.simpleMessage("你的名字？"),
         "window": MessageLookupByLibrary.simpleMessage("窗口"),
         "withdrawal": MessageLookupByLibrary.simpleMessage("提現"),
+        "withdrawalHash": MessageLookupByLibrary.simpleMessage("提現哈希"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youDeletedThisMessage":
             MessageLookupByLibrary.simpleMessage("你撤回了一條消息"),

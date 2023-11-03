@@ -182,6 +182,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "allChats": MessageLookupByLibrary.simpleMessage("Chats"),
         "animalsAndNature":
             MessageLookupByLibrary.simpleMessage("Animals & Nature"),
+        "anonymous": MessageLookupByLibrary.simpleMessage("Anonymous"),
         "anonymousNumber":
             MessageLookupByLibrary.simpleMessage("Anonymous Number"),
         "appCardShareDisallow": MessageLookupByLibrary.simpleMessage(
@@ -257,6 +258,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Are you sure to sync the chat history from the phone?"),
         "confirmSyncChatsToPhone": MessageLookupByLibrary.simpleMessage(
             "Are you sure to sync the chat history to the phone?"),
+        "confirmations": MessageLookupByLibrary.simpleMessage("Confirmations"),
         "contact": MessageLookupByLibrary.simpleMessage("Contact"),
         "contactMixinId": m10,
         "contactMuteTitle":
@@ -314,6 +316,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete My Account"),
         "deleteTheCircle": m14,
         "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
+        "depositHash": MessageLookupByLibrary.simpleMessage("Deposit Hash"),
         "developer": MessageLookupByLibrary.simpleMessage("Developer"),
         "disableDisappearingMessage": m15,
         "disabled": MessageLookupByLibrary.simpleMessage("Disabled"),
@@ -730,6 +733,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisMessageWasDeleted":
             MessageLookupByLibrary.simpleMessage("This message was deleted"),
         "time": MessageLookupByLibrary.simpleMessage("Time"),
+        "to": MessageLookupByLibrary.simpleMessage("To"),
         "today": MessageLookupByLibrary.simpleMessage("Today"),
         "toggleChatInfo":
             MessageLookupByLibrary.simpleMessage("Toggle chat info"),
@@ -800,6 +804,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("What\'s your name?"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),
         "withdrawal": MessageLookupByLibrary.simpleMessage("Withdraw"),
+        "withdrawalHash":
+            MessageLookupByLibrary.simpleMessage("Withdrawal Hash"),
         "you": MessageLookupByLibrary.simpleMessage("You"),
         "youDeletedThisMessage":
             MessageLookupByLibrary.simpleMessage("You deleted this message"),

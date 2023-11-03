@@ -21,8 +21,10 @@ import 'transfer_data_expired_message.dart';
 import 'transfer_data_message.dart';
 import 'transfer_data_participant.dart';
 import 'transfer_data_pin_message.dart';
+import 'transfer_data_safe_snapshot.dart';
 import 'transfer_data_snapshot.dart';
 import 'transfer_data_sticker.dart';
+import 'transfer_data_token.dart';
 import 'transfer_data_transcript_message.dart';
 import 'transfer_data_user.dart';
 import 'transfer_protocol.dart';
@@ -242,6 +244,10 @@ class DeviceTransferReceiver {
           d('client: asset: $asset');
           await database.assetDao.insertAsset(asset.toDbAsset());
           break;
+        case JsonTransferDataType.token:
+          final token = TransferDataToken.fromJson(data.data);
+          d('client: token: $token');
+          await database.tokenDao.insertToken(token.toDbToken());
         case JsonTransferDataType.user:
           final user = TransferDataUser.fromJson(data.data);
           d('client: user: $user');
@@ -258,6 +264,12 @@ class DeviceTransferReceiver {
           d('client: snapshot: $snapshot');
           await database.snapshotDao
               .insert(snapshot.toDbSnapshot(), updateIfConflict: false);
+          break;
+        case JsonTransferDataType.safeSnapshot:
+          final safeSnapshot = TransferDataSafeSnapshot.fromJson(data.data);
+          d('client: safeSnapshot: $safeSnapshot');
+          await database.safeSnapshotDao
+              .insert(safeSnapshot.toDbSafeSnapshot(), updateIfConflict: false);
           break;
         case JsonTransferDataType.expiredMessage:
           final expiredMessage = TransferDataExpiredMessage.fromJson(data.data);

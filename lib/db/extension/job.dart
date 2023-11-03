@@ -87,6 +87,15 @@ Job createUpdateAssetJob(String assetId) => Job(
       blazeMessage: assetId,
     );
 
+Job createUpdateTokenJob(String assetId) => Job(
+      jobId: const Uuid().v4(),
+      action: kUpdateToken,
+      priority: 5,
+      runCount: 0,
+      createdAt: DateTime.now(),
+      blazeMessage: assetId,
+    );
+
 Job createMigrationFtsJob(int? messageRowId) => Job(
       jobId: const Uuid().v4(),
       action: kMigrateFts,

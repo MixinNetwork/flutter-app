@@ -28,7 +28,8 @@ String? messagePreviewOptimize(
     _content = Localization.current.messageNotSupport;
   } else if (messageCategory.isText) {
     _content = trimContent;
-  } else if (messageCategory == MessageCategory.systemAccountSnapshot) {
+  } else if (messageCategory == MessageCategory.systemAccountSnapshot ||
+      messageCategory == MessageCategory.systemSafeSnapshot) {
     _content = '[${Localization.current.transfer}]';
   } else if (messageCategory.isSticker) {
     _content = '[${Localization.current.sticker}]';
@@ -92,7 +93,8 @@ String? messagePreviewIcon(
 
   if (messageStatus == MessageStatus.failed) {
   } else if (messageCategory.isText) {
-  } else if (messageCategory == MessageCategory.systemAccountSnapshot) {
+  } else if (messageCategory == MessageCategory.systemAccountSnapshot ||
+      messageCategory == MessageCategory.systemSafeSnapshot) {
     icon = Resources.assetsImagesTransferSvg;
   } else if (messageCategory.isSticker) {
     icon = Resources.assetsImagesStickerSvg;

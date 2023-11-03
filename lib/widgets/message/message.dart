@@ -65,6 +65,7 @@ import 'item/system_message.dart';
 import 'item/text/selectable.dart';
 import 'item/text/text_message.dart';
 import 'item/transcript_message.dart';
+import 'item/transfer/safe_transfer_message.dart';
 import 'item/transfer/transfer_message.dart';
 import 'item/unknown_message.dart';
 import 'item/video_message.dart';
@@ -553,6 +554,10 @@ class MessageItemWidget extends HookConsumerWidget {
 
                     if (message.type == MessageCategory.systemAccountSnapshot) {
                       return const TransferMessage();
+                    }
+
+                    if (message.type == MessageCategory.systemSafeSnapshot) {
+                      return const SafeTransferMessage();
                     }
 
                     if (message.type.isContact) {

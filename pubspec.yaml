@@ -23,6 +23,7 @@ dependencies:
   archive: ^3.4.6
   async: ^2.8.1
   audio_session: ^0.1.16
+  auto_size_text: ^3.0.0
   bloc: ^8.1.2
   bloc_concurrency: ^0.2.2
   blurhash_dart: ^1.0.2
@@ -93,7 +94,7 @@ dependencies:
   map: ^1.4.2
   markdown_widget: ^2.3.1
   mime: ^1.0.2
-  mixin_bot_sdk_dart: ^0.4.1
+  mixin_bot_sdk_dart: ^0.4.3
   mixin_logger: ^0.1.0
   native_dio_adapter: ^0.1.0
   network_info_plus: ^4.1.0
@@ -206,6 +207,9 @@ flutter:
     - family: NotoColorEmoji
       fonts:
         - asset: fonts/Noto-COLRv1.ttf
+    - family: MixinCondensed
+      fonts:
+        - asset: fonts/mixin_font.otf
 
 flutter_intl:
   enabled: true
