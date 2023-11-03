@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../db/mixin_database.dart' as db;
 
@@ -20,6 +21,8 @@ class TransferDataSafeSnapshot {
     required this.confirmations,
     required this.openingBalance,
     required this.closingBalance,
+    this.withdrawal,
+    this.deposit,
   });
 
   factory TransferDataSafeSnapshot.fromDbSnapshot(db.SafeSnapshot snapshot) =>
@@ -37,6 +40,8 @@ class TransferDataSafeSnapshot {
         confirmations: snapshot.confirmations,
         openingBalance: snapshot.openingBalance,
         closingBalance: snapshot.closingBalance,
+        withdrawal: snapshot.withdrawal,
+        deposit: snapshot.deposit,
       );
 
   factory TransferDataSafeSnapshot.fromJson(Map<String, dynamic> json) =>
@@ -68,6 +73,10 @@ class TransferDataSafeSnapshot {
   final String? openingBalance;
   @JsonKey(name: 'closing_balance')
   final String? closingBalance;
+  @JsonKey(name: 'withdrawal')
+  final SafeWithdrawal? withdrawal;
+  @JsonKey(name: 'deposit')
+  final SafeDeposit? deposit;
 
   Map<String, dynamic> toJson() => _$TransferDataSafeSnapshotToJson(this);
 
@@ -85,5 +94,7 @@ class TransferDataSafeSnapshot {
         confirmations: confirmations,
         openingBalance: openingBalance,
         closingBalance: closingBalance,
+        withdrawal: withdrawal,
+        deposit: deposit,
       );
 }

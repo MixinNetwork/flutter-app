@@ -23,6 +23,8 @@ extension _SafeSnapshotConverter on sdk.SafeSnapshot {
         confirmations: Value(confirmations),
         openingBalance: Value(openingBalance),
         closingBalance: Value(closingBalance),
+        withdrawal: Value(withdrawal),
+        deposit: Value(deposit),
       );
 }
 

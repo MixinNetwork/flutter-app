@@ -94,7 +94,8 @@ dependencies:
   map: ^1.4.2
   markdown_widget: ^2.3.1
   mime: ^1.0.2
-  mixin_bot_sdk_dart: ^0.4.2
+  mixin_bot_sdk_dart:
+    path: ../mixin_bot_sdk_dart
   mixin_logger: ^0.1.0
   native_dio_adapter: ^0.1.0
   network_info_plus: ^4.1.0

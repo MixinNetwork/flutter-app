@@ -52,7 +52,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m14(arg0) => "確定刪除${arg0}圈子嗎？";
 
-  static String m15(arg0) => "${arg0}禁用了限時訊息";
+  static String m15(arg0) => "${arg0}停用了限時訊息";
 
   static String m16(arg0) => "最高設定 ${arg0}";
 
@@ -164,6 +164,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("分享了一個聯絡人"),
         "allChats": MessageLookupByLibrary.simpleMessage("全部聊天"),
         "animalsAndNature": MessageLookupByLibrary.simpleMessage("動物與自然"),
+        "anonymous": MessageLookupByLibrary.simpleMessage("匿名"),
         "anonymousNumber": MessageLookupByLibrary.simpleMessage("匿名號碼"),
         "appCardShareDisallow":
             MessageLookupByLibrary.simpleMessage("該連結已被設定為不允許分享"),
@@ -228,6 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("確認從手機端同步聊天記錄嗎？"),
         "confirmSyncChatsToPhone":
             MessageLookupByLibrary.simpleMessage("確認同步聊天記錄到手機端嗎？"),
+        "confirmations": MessageLookupByLibrary.simpleMessage("區塊確認數"),
         "contact": MessageLookupByLibrary.simpleMessage("聯絡人"),
         "contactMixinId": m10,
         "contactMuteTitle": MessageLookupByLibrary.simpleMessage("靜音通知"),
@@ -277,9 +279,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteMyAccount": MessageLookupByLibrary.simpleMessage("登出賬戶"),
         "deleteTheCircle": m14,
         "deposit": MessageLookupByLibrary.simpleMessage("充值"),
+        "depositHash": MessageLookupByLibrary.simpleMessage("充值雜湊"),
         "developer": MessageLookupByLibrary.simpleMessage("開發者"),
         "disableDisappearingMessage": m15,
-        "disabled": MessageLookupByLibrary.simpleMessage("禁用"),
+        "disabled": MessageLookupByLibrary.simpleMessage("停用"),
         "disappearingCustomTimeMaxWarning": m16,
         "disappearingMessage": MessageLookupByLibrary.simpleMessage("限時訊息"),
         "disappearingMessageHint": MessageLookupByLibrary.simpleMessage(
@@ -629,6 +632,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "theme": MessageLookupByLibrary.simpleMessage("主題"),
         "thisMessageWasDeleted": MessageLookupByLibrary.simpleMessage("此訊息已撤回"),
         "time": MessageLookupByLibrary.simpleMessage("時間"),
+        "to": MessageLookupByLibrary.simpleMessage("至"),
         "today": MessageLookupByLibrary.simpleMessage("今天"),
         "toggleChatInfo": MessageLookupByLibrary.simpleMessage("展開/關閉會話資訊"),
         "transactionHash": MessageLookupByLibrary.simpleMessage("交易雜湊"),
@@ -685,6 +689,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsYourName": MessageLookupByLibrary.simpleMessage("你的名字？"),
         "window": MessageLookupByLibrary.simpleMessage("視窗"),
         "withdrawal": MessageLookupByLibrary.simpleMessage("提現"),
+        "withdrawalHash": MessageLookupByLibrary.simpleMessage("提現雜湊"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youDeletedThisMessage":
             MessageLookupByLibrary.simpleMessage("你撤回了一條訊息"),

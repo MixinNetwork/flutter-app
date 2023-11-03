@@ -657,6 +657,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisMessageWasDeleted":
             MessageLookupByLibrary.simpleMessage("Это сообщение было удалено"),
         "time": MessageLookupByLibrary.simpleMessage("Время"),
+        "to": MessageLookupByLibrary.simpleMessage("В"),
         "today": MessageLookupByLibrary.simpleMessage("Сегодня"),
         "toggleChatInfo": MessageLookupByLibrary.simpleMessage(
             "Переключить информацию о чате"),

@@ -3905,6 +3905,22 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       $customConstraints: '');
+  static const VerificationMeta _withdrawalMeta =
+      const VerificationMeta('withdrawal');
+  late final GeneratedColumnWithTypeConverter<SafeWithdrawal?, String>
+      withdrawal = GeneratedColumn<String>('withdrawal', aliasedName, true,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<SafeWithdrawal?>(SafeSnapshots.$converterwithdrawal);
+  static const VerificationMeta _depositMeta =
+      const VerificationMeta('deposit');
+  late final GeneratedColumnWithTypeConverter<SafeDeposit?, String> deposit =
+      GeneratedColumn<String>('deposit', aliasedName, true,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<SafeDeposit?>(SafeSnapshots.$converterdeposit);
   @override
   List<GeneratedColumn> get $columns => [
         snapshotId,
@@ -3919,7 +3935,9 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
         traceId,
         confirmations,
         openingBalance,
-        closingBalance
+        closingBalance,
+        withdrawal,
+        deposit
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4013,6 +4031,8 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
           closingBalance.isAcceptableOrUnknown(
               data['closing_balance']!, _closingBalanceMeta));
     }
+    context.handle(_withdrawalMeta, const VerificationResult.success());
+    context.handle(_depositMeta, const VerificationResult.success());
     return context;
   }
 
@@ -4048,6 +4068,12 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
           .read(DriftSqlType.string, data['${effectivePrefix}opening_balance']),
       closingBalance: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}closing_balance']),
+      withdrawal: SafeSnapshots.$converterwithdrawal.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}withdrawal'])),
+      deposit: SafeSnapshots.$converterdeposit.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}deposit'])),
     );
   }
 
@@ -4056,6 +4082,10 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
     return SafeSnapshots(attachedDatabase, alias);
   }
 
+  static TypeConverter<SafeWithdrawal?, String?> $converterwithdrawal =
+      const SafeWithdrawalTypeConverter();
+  static TypeConverter<SafeDeposit?, String?> $converterdeposit =
+      const SafeDepositTypeConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(snapshot_id)'];
   @override
@@ -4076,6 +4106,8 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
   final int? confirmations;
   final String? openingBalance;
   final String? closingBalance;
+  final SafeWithdrawal? withdrawal;
+  final SafeDeposit? deposit;
   const SafeSnapshot(
       {required this.snapshotId,
       required this.type,
@@ -4089,7 +4121,9 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       this.traceId,
       this.confirmations,
       this.openingBalance,
-      this.closingBalance});
+      this.closingBalance,
+      this.withdrawal,
+      this.deposit});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -4113,6 +4147,14 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
     }
     if (!nullToAbsent || closingBalance != null) {
       map['closing_balance'] = Variable<String>(closingBalance);
+    }
+    if (!nullToAbsent || withdrawal != null) {
+      final converter = SafeSnapshots.$converterwithdrawal;
+      map['withdrawal'] = Variable<String>(converter.toSql(withdrawal));
+    }
+    if (!nullToAbsent || deposit != null) {
+      final converter = SafeSnapshots.$converterdeposit;
+      map['deposit'] = Variable<String>(converter.toSql(deposit));
     }
     return map;
   }
@@ -4140,6 +4182,12 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       closingBalance: closingBalance == null && nullToAbsent
           ? const Value.absent()
           : Value(closingBalance),
+      withdrawal: withdrawal == null && nullToAbsent
+          ? const Value.absent()
+          : Value(withdrawal),
+      deposit: deposit == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deposit),
     );
   }
 
@@ -4160,6 +4208,8 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       confirmations: serializer.fromJson<int?>(json['confirmations']),
       openingBalance: serializer.fromJson<String?>(json['opening_balance']),
       closingBalance: serializer.fromJson<String?>(json['closing_balance']),
+      withdrawal: serializer.fromJson<SafeWithdrawal?>(json['withdrawal']),
+      deposit: serializer.fromJson<SafeDeposit?>(json['deposit']),
     );
   }
   @override
@@ -4179,6 +4229,8 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       'confirmations': serializer.toJson<int?>(confirmations),
       'opening_balance': serializer.toJson<String?>(openingBalance),
       'closing_balance': serializer.toJson<String?>(closingBalance),
+      'withdrawal': serializer.toJson<SafeWithdrawal?>(withdrawal),
+      'deposit': serializer.toJson<SafeDeposit?>(deposit),
     };
   }
 
@@ -4195,7 +4247,9 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
           Value<String?> traceId = const Value.absent(),
           Value<int?> confirmations = const Value.absent(),
           Value<String?> openingBalance = const Value.absent(),
-          Value<String?> closingBalance = const Value.absent()}) =>
+          Value<String?> closingBalance = const Value.absent(),
+          Value<SafeWithdrawal?> withdrawal = const Value.absent(),
+          Value<SafeDeposit?> deposit = const Value.absent()}) =>
       SafeSnapshot(
         snapshotId: snapshotId ?? this.snapshotId,
         type: type ?? this.type,
@@ -4213,6 +4267,8 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
             openingBalance.present ? openingBalance.value : this.openingBalance,
         closingBalance:
             closingBalance.present ? closingBalance.value : this.closingBalance,
+        withdrawal: withdrawal.present ? withdrawal.value : this.withdrawal,
+        deposit: deposit.present ? deposit.value : this.deposit,
       );
   @override
   String toString() {
@@ -4229,7 +4285,9 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
           ..write('traceId: $traceId, ')
           ..write('confirmations: $confirmations, ')
           ..write('openingBalance: $openingBalance, ')
-          ..write('closingBalance: $closingBalance')
+          ..write('closingBalance: $closingBalance, ')
+          ..write('withdrawal: $withdrawal, ')
+          ..write('deposit: $deposit')
           ..write(')'))
         .toString();
   }
@@ -4248,7 +4306,9 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       traceId,
       confirmations,
       openingBalance,
-      closingBalance);
+      closingBalance,
+      withdrawal,
+      deposit);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4265,7 +4325,9 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
           other.traceId == this.traceId &&
           other.confirmations == this.confirmations &&
           other.openingBalance == this.openingBalance &&
-          other.closingBalance == this.closingBalance);
+          other.closingBalance == this.closingBalance &&
+          other.withdrawal == this.withdrawal &&
+          other.deposit == this.deposit);
 }
 
 class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
@@ -4282,6 +4344,8 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
   final Value<int?> confirmations;
   final Value<String?> openingBalance;
   final Value<String?> closingBalance;
+  final Value<SafeWithdrawal?> withdrawal;
+  final Value<SafeDeposit?> deposit;
   final Value<int> rowid;
   const SafeSnapshotsCompanion({
     this.snapshotId = const Value.absent(),
@@ -4297,6 +4361,8 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
     this.confirmations = const Value.absent(),
     this.openingBalance = const Value.absent(),
     this.closingBalance = const Value.absent(),
+    this.withdrawal = const Value.absent(),
+    this.deposit = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SafeSnapshotsCompanion.insert({
@@ -4313,6 +4379,8 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
     this.confirmations = const Value.absent(),
     this.openingBalance = const Value.absent(),
     this.closingBalance = const Value.absent(),
+    this.withdrawal = const Value.absent(),
+    this.deposit = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : snapshotId = Value(snapshotId),
         type = Value(type),
@@ -4337,6 +4405,8 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
     Expression<int>? confirmations,
     Expression<String>? openingBalance,
     Expression<String>? closingBalance,
+    Expression<String>? withdrawal,
+    Expression<String>? deposit,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4353,6 +4423,8 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
       if (confirmations != null) 'confirmations': confirmations,
       if (openingBalance != null) 'opening_balance': openingBalance,
       if (closingBalance != null) 'closing_balance': closingBalance,
+      if (withdrawal != null) 'withdrawal': withdrawal,
+      if (deposit != null) 'deposit': deposit,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4371,6 +4443,8 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
       Value<int?>? confirmations,
       Value<String?>? openingBalance,
       Value<String?>? closingBalance,
+      Value<SafeWithdrawal?>? withdrawal,
+      Value<SafeDeposit?>? deposit,
       Value<int>? rowid}) {
     return SafeSnapshotsCompanion(
       snapshotId: snapshotId ?? this.snapshotId,
@@ -4386,6 +4460,8 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
       confirmations: confirmations ?? this.confirmations,
       openingBalance: openingBalance ?? this.openingBalance,
       closingBalance: closingBalance ?? this.closingBalance,
+      withdrawal: withdrawal ?? this.withdrawal,
+      deposit: deposit ?? this.deposit,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4432,6 +4508,16 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
     if (closingBalance.present) {
       map['closing_balance'] = Variable<String>(closingBalance.value);
     }
+    if (withdrawal.present) {
+      final converter = SafeSnapshots.$converterwithdrawal;
+
+      map['withdrawal'] = Variable<String>(converter.toSql(withdrawal.value));
+    }
+    if (deposit.present) {
+      final converter = SafeSnapshots.$converterdeposit;
+
+      map['deposit'] = Variable<String>(converter.toSql(deposit.value));
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4454,6 +4540,8 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
           ..write('confirmations: $confirmations, ')
           ..write('openingBalance: $openingBalance, ')
           ..write('closingBalance: $closingBalance, ')
+          ..write('withdrawal: $withdrawal, ')
+          ..write('deposit: $deposit, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
