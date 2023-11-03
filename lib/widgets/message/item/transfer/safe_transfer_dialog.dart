@@ -188,7 +188,7 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
           if (type == SnapshotType.transfer) ...[
             TransactionInfoTile(
               title: Text(isPositive ? context.l10n.from : context.l10n.to),
-              subtitle: Text(
+              subtitle: SelectableText(
                 snapshot.opponentId.isNullOrBlank()
                     ? context.l10n.anonymous
                     : (ref
@@ -201,18 +201,18 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
             if (!snapshot.memo.isNullOrBlank())
               TransactionInfoTile(
                 title: Text(context.l10n.memo),
-                subtitle: Text(snapshot.memo),
+                subtitle: SelectableText(snapshot.memo),
               ),
           ] else if (type == SnapshotType.deposit &&
               snapshot.deposit != null) ...[
             TransactionInfoTile(
               title: Text(context.l10n.depositHash),
-              subtitle: Text(snapshot.deposit?.depositHash ?? ''),
+              subtitle: SelectableText(snapshot.deposit?.depositHash ?? ''),
             ),
           ] else if (type == SnapshotType.withdrawal) ...[
             TransactionInfoTile(
               title: Text(context.l10n.to),
-              subtitle: Text(snapshot.withdrawal?.receiver ?? ''),
+              subtitle: SelectableText(snapshot.withdrawal?.receiver ?? ''),
             ),
             // ignore: unnecessary_parenthesis
             if ((snapshot.withdrawal?.withdrawalHash).isNullOrBlank())
@@ -229,12 +229,13 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
             else
               TransactionInfoTile(
                 title: Text(context.l10n.withdrawalHash),
-                subtitle: Text(snapshot.withdrawal?.withdrawalHash ?? ''),
+                subtitle:
+                    SelectableText(snapshot.withdrawal?.withdrawalHash ?? ''),
               ),
           ],
           TransactionInfoTile(
             title: Text(context.l10n.time),
-            subtitle: SelectableText('${DateFormat.yMMMMd().format(createdAt)}'
+            subtitle: SelectableText('${DateFormat.yMMMMd().format(createdAt)} '
                 '${DateFormat.Hms().format(createdAt)}'),
           ),
         ],
