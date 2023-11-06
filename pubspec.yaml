@@ -69,7 +69,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_portal: ^1.1.4
-  flutter_svg: ^2.0.8
+  flutter_svg: ^2.0.9
   gallery_saver: ^2.3.2
   github: ^9.19.0
   hive: ^2.2.3
