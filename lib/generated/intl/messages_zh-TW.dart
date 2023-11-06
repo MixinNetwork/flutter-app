@@ -681,6 +681,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifyPin": MessageLookupByLibrary.simpleMessage("驗證 PIN"),
         "video": MessageLookupByLibrary.simpleMessage("影片"),
         "videos": MessageLookupByLibrary.simpleMessage("影片"),
+        "waitingForThisMessage":
+            MessageLookupByLibrary.simpleMessage("正在等待這條訊息。"),
         "webview2RuntimeInstallDescription":
             MessageLookupByLibrary.simpleMessage(
                 "該裝置暫未安裝 WebView2 元件，請先下載並安裝 WebView2 Runtime。"),
