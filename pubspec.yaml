@@ -23,6 +23,7 @@ dependencies:
   archive: ^3.4.6
   async: ^2.8.1
   audio_session: ^0.1.16
+  auto_size_text: ^3.0.0
   bloc: ^8.1.2
   bloc_concurrency: ^0.2.2
   blurhash_dart: ^1.0.2
@@ -48,11 +49,11 @@ dependencies:
   device_info_plus: ^9.0.3
   dio: ^5.3.3
   dio_smart_retry: ^5.0.0
-  drift: ^2.11.1
+  drift: ^2.13.0
   ecache: ^2.0.2
   emojis: ^0.9.9
   equatable: ^2.0.5
-  file_picker: ^5.5.0
+  file_picker: ^6.0.0
   file_selector: ^1.0.1
   file_selector_linux: ^0.9.0
   file_selector_macos: ^0.9.3
@@ -68,12 +69,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_portal: ^1.1.4
-  flutter_svg: ^2.0.7
+  flutter_svg: ^2.0.8
   gallery_saver: ^2.3.2
   github: ^9.19.0
   hive: ^2.2.3
   hive_flutter: ^1.0.0
-  hooks_riverpod: ^2.4.3
+  hooks_riverpod: ^2.4.5
   http: ^0.13.6
   http_client_helper: ^2.0.3
   hydrated_bloc: ^9.1.2
@@ -93,7 +94,7 @@ dependencies:
   map: ^1.4.2
   markdown_widget: ^2.3.1
   mime: ^1.0.2
-  mixin_bot_sdk_dart: ^0.4.1
+  mixin_bot_sdk_dart: ^0.4.3
   mixin_logger: ^0.1.0
   native_dio_adapter: ^0.1.0
   network_info_plus: ^4.1.0
@@ -166,7 +167,7 @@ dev_dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 77f03330001941f0ac303de6276dd2380f5bcc7e
       path: packages/debug_info_collector
-  drift_dev: ^2.12.1
+  drift_dev: ^2.13.1
   flutter_test:
     sdk: flutter
   hive_generator: ^2.0.1
@@ -206,6 +207,9 @@ flutter:
     - family: NotoColorEmoji
       fonts:
         - asset: fonts/Noto-COLRv1.ttf
+    - family: MixinCondensed
+      fonts:
+        - asset: fonts/mixin_font.otf
 
 flutter_intl:
   enabled: true

@@ -48,6 +48,7 @@ import 'job/ack_job.dart';
 import 'job/sending_job.dart';
 import 'job/update_asset_job.dart';
 import 'job/update_sticker_job.dart';
+import 'job/update_token_job.dart';
 import 'message_worker_isolate.dart';
 import 'sender.dart';
 
@@ -67,6 +68,7 @@ class DecryptMessage extends Injector {
     this._updateStickerJob,
     this._updateAssetJob,
     this._deviceTransfer,
+    this._updateTokenJob,
     this._signalDatabase,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
@@ -87,6 +89,7 @@ class DecryptMessage extends Injector {
   final SendingJob _sendingJob;
   final UpdateStickerJob _updateStickerJob;
   final UpdateAssetJob _updateAssetJob;
+  final UpdateTokenJob _updateTokenJob;
   final DeviceTransferIsolateController? _deviceTransfer;
   final SignalDatabase _signalDatabase;
 
@@ -387,6 +390,11 @@ class DecryptMessage extends Injector {
       final systemSnapshot = SnapshotMessage.fromJson(
           _jsonDecode(data.data) as Map<String, dynamic>);
       await _processSystemSnapshotMessage(data, systemSnapshot);
+    } else if (data.category == MessageCategory.systemSafeSnapshot) {
+      final json = _jsonDecode(data.data);
+      final systemSnapshot =
+          db.SafeSnapshot.fromJson(json as Map<String, dynamic>);
+      await _processSystemSafeSnapshotMessage(data, systemSnapshot);
     }
   }
 
@@ -988,6 +996,33 @@ class DecryptMessage extends Injector {
         status: status,
         createdAt: data.createdAt);
     await _insertMessage(message, data);
+  }
+
+  Future<void> _processSystemSafeSnapshotMessage(
+      BlazeMessageData data, db.SafeSnapshot snapshot) async {
+    if (snapshot.transactionHash.isNotEmpty) {
+      await database.safeSnapshotDao
+          .deletePendingSnapshotByHash(snapshot.transactionHash);
+    }
+    await database.safeSnapshotDao.insert(snapshot);
+    var status = data.status;
+    if (_conversationId == data.conversationId && data.userId != accountId) {
+      status = MessageStatus.read;
+    }
+    final message = Message(
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: data.senderId,
+      category: data.category!,
+      content: '',
+      snapshotId: snapshot.snapshotId,
+      status: status,
+      createdAt: data.createdAt,
+      action: snapshot.type,
+    );
+    await _insertMessage(message, data);
+    await _updateTokenJob.add(createUpdateTokenJob(snapshot.assetId));
+    // TODO sync output
   }
 
   Future<void> _updateRemoteMessageStatus(

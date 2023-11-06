@@ -39,6 +39,8 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Chains get chains => attachedDatabase.chains;
   Properties get properties => attachedDatabase.properties;
+  SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
+  Tokens get tokens => attachedDatabase.tokens;
   Selectable<User> _fuzzySearchBotGroupUser(String conversationId,
       DateTime createdAt, String id, String username, String identityNumber) {
     return customSelect(

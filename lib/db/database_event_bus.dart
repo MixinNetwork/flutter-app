@@ -27,6 +27,7 @@ enum _DatabaseEvent {
   updatePinMessage,
   updateTranscriptMessage,
   updateAsset,
+  updateToken,
   addJob,
 }
 
@@ -390,6 +391,20 @@ class DataBaseEventBus {
     _send(_DatabaseEvent.updateSnapshot, newSnapshotIds.toList());
   }
 
+  // Safe Snapshot
+  late Stream<List<String>> updateSafeSnapshotStream =
+      _watch<List<String>>(_DatabaseEvent.updateSnapshot);
+
+  void updateSafeSnapshot(Iterable<String> snapshotIds) {
+    final newSnapshotIds =
+        snapshotIds.where((element) => element.trim().isNotEmpty);
+    if (newSnapshotIds.isEmpty) {
+      w('DatabaseEvent: updateSafeSnapshot snapshotIds is empty');
+      return;
+    }
+    _send(_DatabaseEvent.updateSnapshot, newSnapshotIds.toList());
+  }
+
   // Asset
   late Stream<List<String>> updateAssetStream =
       _watch<List<String>>(_DatabaseEvent.updateAsset);
@@ -401,6 +416,19 @@ class DataBaseEventBus {
       return;
     }
     _send(_DatabaseEvent.updateAsset, newAssetIds.toList());
+  }
+
+  // Token
+  late Stream<List<String>> updateTokenStream =
+      _watch<List<String>>(_DatabaseEvent.updateToken);
+
+  void updateToken(Iterable<String> tokenIds) {
+    final newTokenIds = tokenIds.where((element) => element.trim().isNotEmpty);
+    if (newTokenIds.isEmpty) {
+      w('DatabaseEvent: updateToken tokenIds is empty');
+      return;
+    }
+    _send(_DatabaseEvent.updateToken, newTokenIds.toList());
   }
 
   // Job

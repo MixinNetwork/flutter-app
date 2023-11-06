@@ -587,6 +587,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisMessageWasDeleted":
             MessageLookupByLibrary.simpleMessage("このメッセージは削除されています"),
         "time": MessageLookupByLibrary.simpleMessage("日時"),
+        "to": MessageLookupByLibrary.simpleMessage("宛先"),
         "today": MessageLookupByLibrary.simpleMessage("今日"),
         "toggleChatInfo": MessageLookupByLibrary.simpleMessage("チャット情報のオン/オフ"),
         "trace": MessageLookupByLibrary.simpleMessage("記録情報"),

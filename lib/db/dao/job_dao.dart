@@ -107,6 +107,11 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
         row.action.equals(kUpdateAsset) & row.blazeMessage.isNotNull())
     ..limit(100);
 
+  SimpleSelectStatement<Jobs, Job> updateTokenJobs() => select(db.jobs)
+    ..where((Jobs row) =>
+        row.action.equals(kUpdateToken) & row.blazeMessage.isNotNull())
+    ..limit(100);
+
   SimpleSelectStatement<Jobs, Job> updateStickerJobs() => select(db.jobs)
     ..where((Jobs row) => row.action.equals(kUpdateSticker))
     ..limit(100);

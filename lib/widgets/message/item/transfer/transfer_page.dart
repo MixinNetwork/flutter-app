@@ -4,7 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    hide Snapshot, Asset, User;
+    hide Snapshot, Asset, User, Token;
 
 import '../../../../db/dao/snapshot_dao.dart';
 import '../../../../db/database_event_bus.dart';
@@ -100,12 +100,32 @@ class _TransferPage extends HookConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _SnapshotDetailHeader(snapshot: snapshotItem),
+                  SnapshotDetailHeader(
+                    symbolIconUrl: snapshotItem.symbolIconUrl ?? '',
+                    chainIconUrl: snapshotItem.chainIconUrl ?? '',
+                    amount: snapshotItem.amount,
+                    symbol: snapshotItem.symbol ?? '',
+                    snapshotType: snapshotItem.type,
+                  ),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    alignment: Alignment.topCenter,
+                    child: Builder(
+                      builder: (context) {
+                        if (snapshotItem.priceUsd != null &&
+                            snapshotItem.fiatRate != null) {
+                          return _ValuesDescription(snapshot: snapshotItem);
+                        }
+                        return const SizedBox();
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   Container(
                     color: context.theme.divider,
                     height: 10,
                   ),
-                  _TransactionDetailInfo(
+                  TransactionDetailInfo(
                     snapshot: snapshotItem,
                     opponentFullName: opponentFullName,
                   ),
@@ -119,12 +139,23 @@ class _TransferPage extends HookConsumerWidget {
   }
 }
 
-class _SnapshotDetailHeader extends HookConsumerWidget {
-  const _SnapshotDetailHeader({
-    required this.snapshot,
+bool _isPositive(String amount) => (double.tryParse(amount) ?? 0) > 0;
+
+class SnapshotDetailHeader extends HookConsumerWidget {
+  const SnapshotDetailHeader({
+    super.key,
+    required this.symbolIconUrl,
+    required this.chainIconUrl,
+    required this.amount,
+    required this.symbol,
+    required this.snapshotType,
   });
 
-  final SnapshotItem snapshot;
+  final String symbolIconUrl;
+  final String chainIconUrl;
+  final String amount;
+  final String symbol;
+  final String snapshotType;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Column(
@@ -132,8 +163,8 @@ class _SnapshotDetailHeader extends HookConsumerWidget {
         children: [
           const SizedBox(height: 20),
           SymbolIconWithBorder(
-            symbolUrl: snapshot.symbolIconUrl ?? '',
-            chainUrl: snapshot.chainIconUrl,
+            symbolUrl: symbolIconUrl,
+            chainUrl: chainIconUrl,
             size: 58,
             chainSize: 16,
           ),
@@ -143,19 +174,20 @@ class _SnapshotDetailHeader extends HookConsumerWidget {
             child: SelectableText.rich(
               TextSpan(children: [
                 TextSpan(
-                    text: snapshot.amount.numberFormat(),
+                    text: amount.numberFormat(),
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w700,
-                      color: snapshot.type == SnapshotType.pending
+                      fontFamily: 'MixinCondensed',
+                      color: snapshotType == SnapshotType.pending
                           ? context.theme.text
-                          : snapshot.isPositive
+                          : _isPositive(amount)
                               ? context.theme.green
                               : context.theme.red,
                     )),
                 const TextSpan(text: ' '),
                 TextSpan(
-                    text: snapshot.symbol?.overflow,
+                    text: symbol.overflow,
                     style: TextStyle(
                       fontSize: 14,
                       color: context.theme.text,
@@ -165,19 +197,6 @@ class _SnapshotDetailHeader extends HookConsumerWidget {
             ),
           ),
           const SizedBox(height: 4),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            alignment: Alignment.topCenter,
-            child: Builder(
-              builder: (context) {
-                if (snapshot.priceUsd != null && snapshot.fiatRate != null) {
-                  return _ValuesDescription(snapshot: snapshot);
-                }
-                return const SizedBox();
-              },
-            ),
-          ),
-          const SizedBox(height: 24),
         ],
       );
 }
@@ -252,8 +271,9 @@ class _ValuesDescription extends HookConsumerWidget {
   }
 }
 
-class _TransactionDetailInfo extends StatelessWidget {
-  const _TransactionDetailInfo({
+class TransactionDetailInfo extends StatelessWidget {
+  const TransactionDetailInfo({
+    super.key,
     required this.snapshot,
     required this.opponentFullName,
   });

@@ -682,6 +682,14 @@ class AccountServer {
     );
   }
 
+  void addUpdateTokenJob(db.Job job) {
+    assert(job.action == kUpdateToken);
+    _sendEventToWorkerIsolate(
+      MainIsolateEventType.addUpdateTokenJob,
+      job,
+    );
+  }
+
   void addUpdateStickerJob(db.Job job) {
     assert(job.action == kUpdateSticker);
     _sendEventToWorkerIsolate(
@@ -1436,6 +1444,11 @@ class AccountServer {
     await database.snapshotDao.insertSdkSnapshot(data.data);
   }
 
+  Future<void> updateSafeSnapshotById({required String snapshotId}) async {
+    final data = await client.tokenApi.getSnapshotById(snapshotId);
+    await database.safeSnapshotDao.insertSdkSnapshot(data.data);
+  }
+
   Future<Snapshot> updateSnapshotByTraceId({required String traceId}) async {
     final data = await client.snapshotApi.getSnapshotByTraceId(traceId);
     final snapshot = data.data;
@@ -1445,6 +1458,9 @@ class AccountServer {
 
   void updateAssetById({required String assetId}) =>
       addUpdateAssetJob(createUpdateAssetJob(assetId));
+
+  void updateTokenById({required String assetId}) =>
+      addUpdateTokenJob(createUpdateTokenJob(assetId));
 
   Future<AssetItem?> checkAsset(
       {required String assetId, bool force = false}) async {

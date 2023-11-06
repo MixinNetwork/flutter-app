@@ -700,6 +700,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisMessageWasDeleted": MessageLookupByLibrary.simpleMessage(
             "Este mensaje ha sido eliminado"),
         "time": MessageLookupByLibrary.simpleMessage("Tiempo"),
+        "to": MessageLookupByLibrary.simpleMessage("A"),
         "today": MessageLookupByLibrary.simpleMessage("Hoy"),
         "toggleChatInfo": MessageLookupByLibrary.simpleMessage(
             "Alternar información de chat"),

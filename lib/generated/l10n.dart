@@ -290,6 +290,16 @@ class Localization {
     );
   }
 
+  /// `Anonymous`
+  String get anonymous {
+    return Intl.message(
+      'Anonymous',
+      name: 'anonymous',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Anonymous Number`
   String get anonymousNumber {
     return Intl.message(
@@ -864,6 +874,16 @@ class Localization {
     );
   }
 
+  /// `Confirmations`
+  String get confirmations {
+    return Intl.message(
+      'Confirmations',
+      name: 'confirmations',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Contact`
   String get contact {
     return Intl.message(
@@ -1269,6 +1289,16 @@ class Localization {
     return Intl.message(
       'Deposit',
       name: 'deposit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deposit Hash`
+  String get depositHash {
+    return Intl.message(
+      'Deposit Hash',
+      name: 'depositHash',
       desc: '',
       args: [],
     );
@@ -4168,6 +4198,16 @@ class Localization {
     );
   }
 
+  /// `To`
+  String get to {
+    return Intl.message(
+      'To',
+      name: 'to',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Today`
   String get today {
     return Intl.message(
@@ -4663,6 +4703,16 @@ class Localization {
     return Intl.message(
       'Withdraw',
       name: 'withdrawal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Withdrawal Hash`
+  String get withdrawalHash {
+    return Intl.message(
+      'Withdrawal Hash',
+      name: 'withdrawalHash',
       desc: '',
       args: [],
     );

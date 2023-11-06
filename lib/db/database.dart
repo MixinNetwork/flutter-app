@@ -23,10 +23,12 @@ import 'dao/participant_dao.dart';
 import 'dao/participant_session_dao.dart';
 import 'dao/pin_message_dao.dart';
 import 'dao/resend_session_message_dao.dart';
+import 'dao/safe_snapshot_dao.dart';
 import 'dao/snapshot_dao.dart';
 import 'dao/sticker_album_dao.dart';
 import 'dao/sticker_dao.dart';
 import 'dao/sticker_relationship_dao.dart';
+import 'dao/token_dao.dart';
 import 'dao/transcript_message_dao.dart';
 import 'dao/user_dao.dart';
 import 'fts_database.dart';
@@ -46,6 +48,8 @@ class Database {
   AssetDao get assetDao => mixinDatabase.assetDao;
 
   ChainDao get chainDao => mixinDatabase.chainDao;
+
+  TokenDao get tokenDao => mixinDatabase.tokenDao;
 
   MessageDao get messageDao => mixinDatabase.messageDao;
 
@@ -75,6 +79,8 @@ class Database {
       mixinDatabase.resendSessionMessageDao;
 
   SnapshotDao get snapshotDao => mixinDatabase.snapshotDao;
+
+  SafeSnapshotDao get safeSnapshotDao => mixinDatabase.safeSnapshotDao;
 
   StickerDao get stickerDao => mixinDatabase.stickerDao;
 

@@ -143,6 +143,7 @@ extension MessageCategoryExtension on String? {
         MessageCategory.systemCircle,
         MessageCategory.systemSession,
         MessageCategory.systemAccountSnapshot,
+        MessageCategory.systemSafeSnapshot,
         MessageCategory.appButtonGroup,
         MessageCategory.appCard,
         MessageCategory.encryptedText,

@@ -28,6 +28,7 @@ const kUpdateAsset = 'LOCAL_UPDATE_ASSET';
 const kUpdateSticker = 'LOCAL_UPDATE_STICKER';
 const kMigrateFts = 'LOCAL_MIGRATE_FTS';
 const kCleanupQuoteContent = 'LOCAL_CLEANUP_QUOTE_CONTENT';
+const kUpdateToken = 'LOCAL_UPDATE_TOKEN';
 
 const kTeamMixinUserId = '773e5e77-4107-45c2-b648-8fc722ed77f5';
 

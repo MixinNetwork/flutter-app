@@ -7,6 +7,8 @@ import '../converter/user_relationship_converter.dart';
 import '../converter/participant_role_converter.dart';
 import '../converter/millis_date_converter.dart';
 import '../converter/property_group_converter.dart';
+import '../converter/safe_deposit_type_converter.dart';
+import '../converter/safe_withdrawal_type_converter.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../enum/message_action.dart';
@@ -70,6 +72,27 @@ CREATE TABLE chains (chain_id TEXT NOT NULL, name TEXT NOT NULL, symbol TEXT NOT
 
 CREATE TABLE properties ("key" TEXT NOT NULL, "group" TEXT NOT NULL MAPPED BY `const PropertyGroupConverter()`, "value" TEXT NOT NULL, PRIMARY KEY("key", "group"));
 
+CREATE TABLE safe_snapshots (
+    snapshot_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    asset_id TEXT NOT NULL,
+    amount TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    opponent_id TEXT NOT NULL,
+    memo TEXT NOT NULL,
+    transaction_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    trace_id TEXT,
+    confirmations INTEGER,
+    opening_balance TEXT,
+    closing_balance TEXT,
+    withdrawal TEXT MAPPED BY `const SafeWithdrawalTypeConverter()`,
+    deposit TEXT MAPPED BY `const SafeDepositTypeConverter()`,
+    PRIMARY KEY(snapshot_id)
+);
+
+CREATE TABLE tokens (asset_id TEXT NOT NULL, kernel_asset_id TEXT NOT NULL, symbol TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, price_btc TEXT NOT NULL, price_usd TEXT NOT NULL, chain_id TEXT NOT NULL, change_usd TEXT NOT NULL, change_btc TEXT NOT NULL, confirmations INTEGER NOT NULL, asset_key TEXT NOT NULL, dust TEXT NOT NULL, PRIMARY KEY(asset_id));
+
 CREATE INDEX IF NOT EXISTS index_conversations_category_status ON conversations(category, status);
 CREATE INDEX IF NOT EXISTS index_conversations_mute_until ON conversations(mute_until);
 CREATE INDEX IF NOT EXISTS index_flood_messages_created_at ON flood_messages(created_at);
@@ -83,3 +106,4 @@ CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category_created_at ON messages(conversation_id, category, created_at DESC);
 CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messages(conversation_id, status, user_id);
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages(conversation_id, quote_message_id);
+CREATE INDEX IF NOT EXISTS index_tokens_kernel_asset_id ON tokens(kernel_asset_id);

@@ -38,6 +38,7 @@ import 'job/sending_job.dart';
 import 'job/session_ack_job.dart';
 import 'job/update_asset_job.dart';
 import 'job/update_sticker_job.dart';
+import 'job/update_token_job.dart';
 import 'sender.dart';
 
 class IsolateInitParams {
@@ -132,6 +133,7 @@ class _MessageProcessRunner {
   late AckJob _ackJob;
   late UpdateAssetJob _updateAssetJob;
   late UpdateStickerJob _updateStickerJob;
+  late UpdateTokenJob _updateTokenJob;
   late SessionAckJob _sessionAckJob;
   late FloodJob _floodJob;
   DeviceTransferIsolateController? _deviceTransfer;
@@ -223,16 +225,10 @@ class _MessageProcessRunner {
       primarySessionId: primarySessionId,
       sender: _sender,
     );
+    _updateAssetJob = UpdateAssetJob(database: database, client: client);
+    _updateTokenJob = UpdateTokenJob(database: database, client: client);
 
-    _updateAssetJob = UpdateAssetJob(
-      database: database,
-      client: client,
-    );
-
-    _updateStickerJob = UpdateStickerJob(
-      database: database,
-      client: client,
-    );
+    _updateStickerJob = UpdateStickerJob(database: database, client: client);
 
     MigrateFtsJob(database: database);
     DeleteOldFtsRecordJob(database: database);
@@ -274,6 +270,7 @@ class _MessageProcessRunner {
       _updateStickerJob,
       _updateAssetJob,
       _deviceTransfer,
+      _updateTokenJob,
       signalDb,
     );
     _floodJob.start();
@@ -369,6 +366,9 @@ class _MessageProcessRunner {
         break;
       case MainIsolateEventType.addUpdateAssetJob:
         _updateAssetJob.add(event.argument as Job);
+        break;
+      case MainIsolateEventType.addUpdateTokenJob:
+        _updateTokenJob.add(event.argument as Job);
         break;
       case MainIsolateEventType.addUpdateStickerJob:
         _updateStickerJob.add(event.argument as Job);

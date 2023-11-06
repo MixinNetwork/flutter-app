@@ -352,6 +352,7 @@
 "theme" : "Тема",
 "thisMessageWasDeleted" : "Это сообщение было удалено",
 "time" : "Время",
+"to" : "В",
 "today" : "Сегодня",
 "toggleChatInfo" : "Переключить информацию о чате",
 "trace" : "След",
