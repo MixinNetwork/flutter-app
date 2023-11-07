@@ -3,7 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
-import 'account_server_provider.dart';
+import 'account/account_server_provider.dart';
 
 final tokenProvider = StreamProvider.autoDispose.family<Token?, String?>(
   (ref, assetId) {

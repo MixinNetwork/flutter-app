@@ -212,8 +212,9 @@ class _MultiAccountPopupButton extends HookConsumerWidget {
           title: 'Add Account',
           icon: Resources.assetsImagesIcAddSvg,
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const LandingPage()),
+            showDialog(
+              context: context,
+              builder: (context) => const LandingDialog(),
             );
           },
         ),

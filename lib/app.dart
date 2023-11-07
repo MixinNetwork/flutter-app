@@ -56,9 +56,9 @@ class App extends HookConsumerWidget {
 
     Widget child;
     if (authState == null) {
-      child = const _App(home: AppInitializingPage());
+      child = const _App(home: LandingPage());
     } else {
-      child = _LoginApp(authState: authState);
+      child = const _LoginApp();
     }
 
     return FocusHelper(child: child);
@@ -66,9 +66,7 @@ class App extends HookConsumerWidget {
 }
 
 class _LoginApp extends HookConsumerWidget {
-  const _LoginApp({required this.authState});
-
-  final AuthState authState;
+  const _LoginApp();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

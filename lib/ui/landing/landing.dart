@@ -10,6 +10,7 @@ import '../../utils/hive_key_values.dart';
 import '../../utils/hook.dart';
 import '../../utils/mixin_api_client.dart';
 import '../../utils/system/package_info.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
 import '../provider/account/account_server_provider.dart';
@@ -46,6 +47,60 @@ class LandingPage extends HookConsumerWidget {
       child = const _LoginFailed();
     }
     return LandingScaffold(child: child);
+  }
+}
+
+/// LandingDialog for add account
+class LandingDialog extends ConsumerWidget {
+  const LandingDialog({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(_landingModeProvider);
+    Widget child;
+    switch (mode) {
+      case _LandingMode.qrcode:
+        child = const LandingQrCodeWidget();
+        break;
+      case _LandingMode.mobile:
+        child = const LoginWithMobileWidget();
+        break;
+    }
+    return Portal(
+      child: Scaffold(
+        backgroundColor: context.dynamicColor(
+          const Color(0xFFE5E5E5),
+          darkColor: const Color.fromRGBO(35, 39, 43, 1),
+        ),
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          children: [
+            Center(
+              child: SizedBox(
+                width: 520,
+                height: 418,
+                child: Material(
+                  color: context.theme.popUp,
+                  borderRadius: const BorderRadius.all(Radius.circular(13)),
+                  elevation: 10,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(13)),
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
+            const Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: MixinCloseButton(),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
 
