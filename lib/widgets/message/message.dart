@@ -360,7 +360,7 @@ class MessageItemWidget extends HookConsumerWidget {
                         )
                     ];
 
-                    final messageActions = [
+                    final replayAction = [
                       if (enableReply)
                         MenuAction(
                           image: MenuImage.icon(IconFonts.reply),
@@ -369,33 +369,9 @@ class MessageItemWidget extends HookConsumerWidget {
                               .read(quoteMessageProvider.notifier)
                               .state = message,
                         ),
-                      if (pinEnabled)
-                        MenuAction(
-                          image: MenuImage.icon(
-                              message.pinned ? IconFonts.unPin : IconFonts.pin),
-                          title: message.pinned
-                              ? context.l10n.unpin
-                              : context.l10n.pinTitle,
-                          callback: () async {
-                            final pinMessageMinimal = PinMessageMinimal(
-                              messageId: message.messageId,
-                              type: message.type,
-                              content:
-                                  message.type.isText ? message.content : null,
-                            );
-                            if (message.pinned) {
-                              await context.accountServer.unpinMessage(
-                                conversationId: message.conversationId,
-                                pinMessageMinimals: [pinMessageMinimal],
-                              );
-                              return;
-                            }
-                            await context.accountServer.pinMessage(
-                              conversationId: message.conversationId,
-                              pinMessageMinimals: [pinMessageMinimal],
-                            );
-                          },
-                        ),
+                    ];
+
+                    final messageActions = [
                       if (enableForward)
                         MenuAction(
                           image: MenuImage.icon(IconFonts.forward),
@@ -423,6 +399,33 @@ class MessageItemWidget extends HookConsumerWidget {
                           callback: () => ref
                               .read(messageSelectionProvider)
                               .selectMessage(message),
+                        ),
+                      if (pinEnabled)
+                        MenuAction(
+                          image: MenuImage.icon(
+                              message.pinned ? IconFonts.unPin : IconFonts.pin),
+                          title: message.pinned
+                              ? context.l10n.unpin
+                              : context.l10n.pinTitle,
+                          callback: () async {
+                            final pinMessageMinimal = PinMessageMinimal(
+                              messageId: message.messageId,
+                              type: message.type,
+                              content:
+                                  message.type.isText ? message.content : null,
+                            );
+                            if (message.pinned) {
+                              await context.accountServer.unpinMessage(
+                                conversationId: message.conversationId,
+                                pinMessageMinimals: [pinMessageMinimal],
+                              );
+                              return;
+                            }
+                            await context.accountServer.pinMessage(
+                              conversationId: message.conversationId,
+                              pinMessageMinimals: [pinMessageMinimal],
+                            );
+                          },
                         ),
                     ];
 
@@ -520,11 +523,10 @@ class MessageItemWidget extends HookConsumerWidget {
                     return MenusWithSeparator(
                       childrens: [
                         addStickerMenuAction,
+                        replayAction,
+                        copyActions,
                         messageActions,
-                        [
-                          ...copyActions,
-                          ...saveActions,
-                        ],
+                        saveActions,
                         deleteActions,
                         devActions,
                       ],
