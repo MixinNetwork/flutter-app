@@ -298,10 +298,7 @@ class SettingChangeNotifier extends ChangeNotifier {
 @Deprecated('Use SettingChangeNotifier instead')
 const _kSettingCubitKey = 'SettingCubit';
 
-final settingProvider =
-    ChangeNotifierProvider.autoDispose<SettingChangeNotifier>((ref) {
-  ref.keepAlive();
-
+final settingProvider = ChangeNotifierProvider<SettingChangeNotifier>((ref) {
   //migrate
   final oldJson = HydratedBloc.storage.read(_kSettingCubitKey);
   if (oldJson != null) {

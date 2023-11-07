@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../../account/account_server.dart';
 import '../../../blaze/blaze.dart';
 import '../../../db/database.dart';
+import '../../../utils/rivepod.dart';
+import '../../../utils/synchronized.dart';
 import '../conversation_provider.dart';
 import '../database_provider.dart';
 import '../hive_key_value_provider.dart';
@@ -14,15 +17,40 @@ import 'multi_auth_provider.dart';
 
 typedef GetCurrentConversationId = String? Function();
 
-class AccountServerOpener extends AutoDisposeStreamNotifier<AccountServer> {
-  AccountServerOpener._();
+class AccountServerOpener
+    extends DistinctStateNotifier<AsyncValue<AccountServer>> {
+  AccountServerOpener._(this.ref) : super(const AsyncValue.loading()) {
+    _subscription = ref.listen<AsyncValue<_Args?>>(
+      _argsProvider,
+      (previous, next) {
+        _onNewArgs(next.valueOrNull);
+      },
+    );
+  }
 
-  @override
-  Stream<AccountServer> build() async* {
-    final args = await ref.watch(_argsProvider.future);
-    if (args == null) {
-      return;
-    }
+  final AutoDisposeRef ref;
+  ProviderSubscription? _subscription;
+
+  final _lock = Lock();
+
+  _Args? _previousArgs;
+
+  Future<void> _onNewArgs(_Args? args) => _lock.synchronized(() async {
+        if (_previousArgs == args) {
+          return;
+        }
+        _previousArgs = args;
+        if (args == null) {
+          state = const AsyncValue.loading();
+          return;
+        }
+        state = await AsyncValue.guard<AccountServer>(
+          () => _openAccountServer(args),
+        );
+      });
+
+  Future<AccountServer> _openAccountServer(_Args args) async {
+    d('create new account server');
     final accountServer = AccountServer(
       multiAuthNotifier: args.multiAuthChangeNotifier,
       settingChangeNotifier: args.settingChangeNotifier,
@@ -31,16 +59,19 @@ class AccountServerOpener extends AutoDisposeStreamNotifier<AccountServer> {
       ref: ref,
       hiveKeyValues: args.hiveKeyValues,
     );
-
     await accountServer.initServer(
       args.userId,
       args.sessionId,
       args.identityNumber,
       args.privateKey,
     );
+    return accountServer;
+  }
 
-    ref.onDispose(accountServer.stop);
-    yield accountServer;
+  @override
+  void dispose() {
+    _subscription?.close();
+    super.dispose();
   }
 }
 
@@ -126,8 +157,8 @@ final _argsProvider = FutureProvider.autoDispose((ref) async {
   );
 });
 
-final accountServerProvider =
-    StreamNotifierProvider.autoDispose<AccountServerOpener, AccountServer>(
+final accountServerProvider = StateNotifierProvider.autoDispose<
+    AccountServerOpener, AsyncValue<AccountServer>>(
   AccountServerOpener._,
 );
 
