@@ -21,14 +21,12 @@ Future<void> showSafeTransferDialog(BuildContext context, String snapshotId) =>
 
 final _snapshotTypeProvider =
     Provider.family.autoDispose<String, SafeSnapshot>((ref, snapshot) {
-  if (snapshot.opponentId.isNullOrBlank()) {
-    if (snapshot.type == SnapshotType.pending) {
-      return SnapshotType.pending;
-    } else {
-      final amount = double.tryParse(snapshot.amount);
-      final isPositive = amount != null && amount > 0;
-      return isPositive ? SnapshotType.deposit : SnapshotType.withdrawal;
-    }
+  if (snapshot.type == SnapshotType.pending) {
+    return SnapshotType.pending;
+  } else if (snapshot.withdrawal != null) {
+    return SnapshotType.withdrawal;
+  } else if (snapshot.deposit != null) {
+    return SnapshotType.deposit;
   } else {
     return SnapshotType.transfer;
   }
@@ -190,7 +188,7 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
               title: Text(isPositive ? context.l10n.from : context.l10n.to),
               subtitle: SelectableText(
                 snapshot.opponentId.isNullOrBlank()
-                    ? context.l10n.anonymous
+                    ? 'N/A'
                     : (ref
                             .watch(_userProvider(snapshot.opponentId))
                             .valueOrNull
