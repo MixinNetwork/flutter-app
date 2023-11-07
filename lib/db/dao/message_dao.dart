@@ -859,6 +859,18 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         )),
       );
 
+  Future<int> updateSafeSnapshotMessage(String messageId, String snapshotId) =>
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        (db.update(db.messages)
+              ..where((tbl) =>
+                  tbl.messageId.equals(messageId) &
+                  tbl.category.equals(MessageCategory.messageRecall).not()))
+            .write(MessagesCompanion(
+          snapshotId: Value(snapshotId),
+        )),
+      );
+
   static const _mediaMessageTypes = [
     MessageCategory.signalImage,
     MessageCategory.plainImage,
