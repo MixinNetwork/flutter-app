@@ -452,6 +452,7 @@
 "verifyPin" : "驗證 PIN",
 "video" : "影片",
 "videos" : "影片",
+"waitingForThisMessage" : "正在等待這條訊息。",
 "webview2RuntimeInstallDescription" : "該裝置暫未安裝 WebView2 元件，請先下載並安裝 WebView2 Runtime。",
 "webviewRuntimeUnavailable" : "WebView2 元件不可用",
 "whatsYourName" : "你的名字？",

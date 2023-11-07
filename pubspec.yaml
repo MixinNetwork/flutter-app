@@ -46,10 +46,10 @@ dependencies:
       path: packages/desktop_drop
   desktop_keep_screen_on: ^0.0.2
   desktop_webview_window: ^0.2.3
-  device_info_plus: ^9.0.3
+  device_info_plus: ^9.1.0
   dio: ^5.3.3
-  dio_smart_retry: ^5.0.0
-  drift: ^2.13.0
+  dio_smart_retry: ^6.0.0
+  drift: ^2.13.1
   ecache: ^2.0.2
   emojis: ^0.9.9
   equatable: ^2.0.5
@@ -69,7 +69,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_portal: ^1.1.4
-  flutter_svg: ^2.0.8
+  flutter_svg: ^2.0.9
   gallery_saver: ^2.3.2
   github: ^9.19.0
   hive: ^2.2.3
@@ -143,7 +143,7 @@ dependencies:
       ref: 00654e51f51aa65cdc39784a3075c9abb8b9dd7c
       path: packages/ui_device
   ulid: ^2.0.0
-  url_launcher: ^6.1.14
+  url_launcher: ^6.2.1
   uuid: ^3.0.4
   very_good_analysis: ^5.1.0
   visibility_detector: ^0.4.0+2
