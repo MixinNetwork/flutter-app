@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -6,6 +9,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../../../constants/resources.dart';
+import '../../../../db/extension/job.dart';
+import '../../../../db/mixin_database.dart';
 import '../../../../ui/provider/transfer_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../cache_image.dart';
@@ -13,6 +18,7 @@ import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
+import '../unknown_message.dart';
 import 'safe_transfer_dialog.dart';
 
 class SafeTransferMessage extends HookConsumerWidget {
@@ -47,6 +53,46 @@ class SafeTransferMessage extends HookConsumerWidget {
       }
     }, [token]);
 
+    final snapshotId =
+        useMessageConverter(converter: (state) => state.snapshotId);
+    useEffect(
+      () {
+        if (snapshotId != null) {
+          return;
+        }
+        // try to parse transfer message content from old version.
+        final content = context.message.content;
+        if (content == null) {
+          return;
+        }
+        final database = context.database;
+        final messageId = context.message.messageId;
+        scheduleMicrotask(() async {
+          try {
+            final snapshot = SafeSnapshot.fromJson(
+              jsonDecode(
+                utf8.decode(
+                  base64Decode(content),
+                  allowMalformed: true,
+                ),
+              ) as Map<String, dynamic>,
+            );
+            context.accountServer.addUpdateTokenJob(
+              createUpdateTokenJob(snapshot.assetId),
+            );
+            await database.safeSnapshotDao.insert(snapshot);
+            await database.messageDao
+                .updateSafeSnapshotMessage(messageId, snapshot.snapshotId);
+          } catch (error, stacktrace) {
+            e('handle old transfer message failed', error, stacktrace);
+          }
+        });
+      },
+      [snapshotId],
+    );
+    if (snapshotId == null) {
+      return const UnknownMessage();
+    }
     return MessageBubble(
       forceIsCurrentUserColor: false,
       outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
