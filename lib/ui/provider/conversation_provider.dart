@@ -402,21 +402,13 @@ class _LastConversationNotifier
 
 final conversationProvider = StateNotifierProvider.autoDispose<
     ConversationStateNotifier, ConversationState?>((ref) {
-  ref.keepAlive();
-
   final accountServerAsync = ref.watch(accountServerProvider);
-
   if (!accountServerAsync.hasValue) {
     throw Exception('accountServer is not ready');
   }
 
   final responsiveNavigatorNotifier =
       ref.watch(responsiveNavigatorProvider.notifier);
-
-  ref.listen(
-    accountServerProvider,
-    (previous, next) => ref.notifier.unselected(),
-  );
 
   return ConversationStateNotifier(
     accountServer: accountServerAsync.requireValue,

@@ -172,6 +172,7 @@ class _HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(conversationProvider); // keep alive
     final maxWidth = constraints.maxWidth;
     final clampSlideWidth = (maxWidth - kResponsiveNavigationMinWidth)
         .clamp(kSlidePageMinWidth, kSlidePageMaxWidth);
