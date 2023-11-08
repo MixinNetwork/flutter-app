@@ -103,7 +103,12 @@ class SafeTransferMessage extends HookConsumerWidget {
           showSafeTransferDialog(context, snapshotId);
         },
         child: SizedBox(
-          width: 174,
+          width: switch (snapshotAmount?.length ?? 0) {
+            < 10 => 174,
+            < 15 => 190,
+            < 25 => 216,
+            _ => 232,
+          },
           child: _SnapshotLayout(
             assetSymbol: assetSymbol ?? '',
             assetIcon: assetIcon,
