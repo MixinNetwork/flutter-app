@@ -165,7 +165,7 @@ class _SnapshotLayout extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 AutoSizeText(
-                  snapshotAmount ?? '',
+                  snapshotAmount?.numberFormat() ?? '',
                   maxFontSize: 36,
                   minFontSize: 24,
                   style: TextStyle(
