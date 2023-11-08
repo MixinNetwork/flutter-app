@@ -41,12 +41,15 @@ class AccountServerOpener
         }
         _previousArgs = args;
         if (args == null) {
+          unawaited(state.valueOrNull?.stop());
           state = const AsyncValue.loading();
           return;
         }
+        final before = state.valueOrNull;
         state = await AsyncValue.guard<AccountServer>(
           () => _openAccountServer(args),
         );
+        unawaited(before?.stop());
       });
 
   Future<AccountServer> _openAccountServer(_Args args) async {
@@ -71,6 +74,7 @@ class AccountServerOpener
   @override
   void dispose() {
     _subscription?.close();
+    state.valueOrNull?.stop();
     super.dispose();
   }
 }
