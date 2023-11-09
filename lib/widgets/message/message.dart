@@ -855,11 +855,11 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   }
 }
 
-class _UnreadMessageBar extends StatelessWidget {
+class _UnreadMessageBar extends ConsumerWidget {
   const _UnreadMessageBar();
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context, WidgetRef ref) => Container(
         color: context.theme.background,
         padding: const EdgeInsets.symmetric(vertical: 4),
         margin: const EdgeInsets.symmetric(vertical: 6),
@@ -868,7 +868,7 @@ class _UnreadMessageBar extends StatelessWidget {
           context.l10n.unreadMessages,
           style: TextStyle(
             color: context.theme.secondaryText,
-            fontSize: context.messageStyle.secondaryFontSize,
+            fontSize: ref.watch(messageStyleProvider).secondaryFontSize,
           ),
         ),
       );

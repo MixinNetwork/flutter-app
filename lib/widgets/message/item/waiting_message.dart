@@ -30,7 +30,7 @@ class WaitingMessage extends HookConsumerWidget {
               : userFullName!,
         ),
         style: TextStyle(
-          fontSize: context.messageStyle.primaryFontSize,
+          fontSize: ref.watch(messageStyleProvider).primaryFontSize,
           color: context.theme.text,
         ),
         children: [
@@ -38,7 +38,7 @@ class WaitingMessage extends HookConsumerWidget {
             mouseCursor: SystemMouseCursors.click,
             text: context.l10n.learnMore,
             style: TextStyle(
-              fontSize: context.messageStyle.primaryFontSize,
+              fontSize: ref.watch(messageStyleProvider).primaryFontSize,
               color: context.theme.accent,
             ),
             recognizer: TapGestureRecognizer()

@@ -131,7 +131,9 @@ class TranscriptMessageWidget extends HookConsumerWidget {
                             context.l10n.transcript,
                             style: TextStyle(
                               color: context.theme.text,
-                              fontSize: context.messageStyle.primaryFontSize,
+                              fontSize: ref
+                                  .watch(messageStyleProvider)
+                                  .primaryFontSize,
                             ),
                           ),
                           const Spacer(),
@@ -168,8 +170,9 @@ class TranscriptMessageWidget extends HookConsumerWidget {
                                 text,
                                 style: TextStyle(
                                   color: context.theme.secondaryText,
-                                  fontSize:
-                                      context.messageStyle.tertiaryFontSize,
+                                  fontSize: ref
+                                      .watch(messageStyleProvider)
+                                      .tertiaryFontSize,
                                 ),
                                 maxLines: 1,
                               ),

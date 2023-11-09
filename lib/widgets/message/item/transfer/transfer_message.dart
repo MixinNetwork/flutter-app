@@ -95,7 +95,9 @@ class TransferMessage extends HookConsumerWidget {
                           snapshotAmount!.numberFormat(),
                           style: TextStyle(
                             color: context.theme.text,
-                            fontSize: context.messageStyle.secondaryFontSize,
+                            fontSize: ref
+                                .watch(messageStyleProvider)
+                                .secondaryFontSize,
                           ),
                         );
                       }),
@@ -106,7 +108,7 @@ class TransferMessage extends HookConsumerWidget {
                   assetSymbol,
                   style: TextStyle(
                     color: context.theme.secondaryText,
-                    fontSize: context.messageStyle.tertiaryFontSize,
+                    fontSize: ref.watch(messageStyleProvider).tertiaryFontSize,
                   ),
                 ),
               ],

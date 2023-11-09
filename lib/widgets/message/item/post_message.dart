@@ -32,7 +32,8 @@ class PostMessage extends HookConsumerWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
         child: DefaultTextStyle.merge(
-          style: TextStyle(fontSize: context.messageStyle.primaryFontSize),
+          style: TextStyle(
+              fontSize: ref.watch(messageStyleProvider).primaryFontSize),
           child: MessagePost(showStatus: true, content: content),
         ),
       ),

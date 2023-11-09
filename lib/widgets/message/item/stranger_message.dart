@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/extension/extension.dart';
@@ -9,11 +10,11 @@ import '../../toast.dart';
 import '../message.dart';
 import '../message_style.dart';
 
-class StrangerMessage extends StatelessWidget {
+class StrangerMessage extends ConsumerWidget {
   const StrangerMessage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isBotConversation =
         useMessageConverter(converter: (state) => state.appId != null);
 
@@ -24,7 +25,7 @@ class StrangerMessage extends StatelessWidget {
               ? context.l10n.chatBotReceptionTitle
               : context.l10n.strangerHint,
           style: TextStyle(
-            fontSize: context.messageStyle.primaryFontSize,
+            fontSize: ref.watch(messageStyleProvider).primaryFontSize,
             color: context.theme.text,
           ),
         ),
@@ -73,7 +74,7 @@ class StrangerMessage extends StatelessWidget {
   }
 }
 
-class _StrangerButton extends StatelessWidget {
+class _StrangerButton extends ConsumerWidget {
   const _StrangerButton(
     this.text, {
     this.onTap,
@@ -83,7 +84,8 @@ class _StrangerButton extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => InteractiveDecoratedBox.color(
+  Widget build(BuildContext context, WidgetRef ref) =>
+      InteractiveDecoratedBox.color(
         onTap: onTap,
         decoration: BoxDecoration(
           color: context.theme.primary,
@@ -104,7 +106,7 @@ class _StrangerButton extends StatelessWidget {
               child: Text(
                 text,
                 style: TextStyle(
-                  fontSize: context.messageStyle.primaryFontSize,
+                  fontSize: ref.watch(messageStyleProvider).primaryFontSize,
                   color: context.theme.accent,
                 ),
               ),

@@ -144,7 +144,7 @@ class MessageFile extends HookConsumerWidget {
                 Text(
                   mediaName.overflow,
                   style: TextStyle(
-                    fontSize: context.messageStyle.secondaryFontSize,
+                    fontSize: ref.watch(messageStyleProvider).secondaryFontSize,
                     color: context.theme.text,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -153,7 +153,7 @@ class MessageFile extends HookConsumerWidget {
                 Text(
                   mediaSizeText,
                   style: TextStyle(
-                    fontSize: context.messageStyle.tertiaryFontSize,
+                    fontSize: ref.watch(messageStyleProvider).tertiaryFontSize,
                     color: context.theme.secondaryText,
                   ),
                   maxLines: 1,

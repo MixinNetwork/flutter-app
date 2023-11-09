@@ -55,7 +55,7 @@ class SystemMessage extends HookConsumerWidget {
                   expireIn: int.tryParse(content ?? '0'),
                 ),
                 style: TextStyle(
-                  fontSize: context.messageStyle.secondaryFontSize,
+                  fontSize: ref.watch(messageStyleProvider).secondaryFontSize,
                   color: context.dynamicColor(
                     const Color.fromRGBO(0, 0, 0, 1),
                   ),
