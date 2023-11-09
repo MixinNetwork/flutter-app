@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
+import 'package:hive/src/hive_impl.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
@@ -13,15 +15,19 @@ import '../../utils/attachment/download_key_value.dart';
 import '../../utils/hive_key_values.dart';
 import 'account/multi_auth_provider.dart';
 
+final hiveProvider =
+    Provider.family<HiveInterface, String>((ref, identityNumber) => HiveImpl());
+
 FutureProviderFamily<T, String>
     _createHiveKeyValueProvider<T extends HiveKeyValue>(
   T Function() create,
 ) =>
         FutureProviderFamily<T, String>(
           (ref, identityNumber) async {
+            final hive = ref.watch(hiveProvider(identityNumber));
             final keyValue = create();
             ref.onDispose(keyValue.dispose);
-            await keyValue.init(identityNumber);
+            await keyValue.init(hive, identityNumber);
             return keyValue;
           },
         );
@@ -75,6 +81,7 @@ final scamWarningKeyValueProvider =
 
 class HiveKeyValues with EquatableMixin {
   HiveKeyValues({
+    required this.identityNumber,
     required this.accountKeyValue,
     required this.cryptoKeyValue,
     required this.sessionKeyValue,
@@ -84,6 +91,8 @@ class HiveKeyValues with EquatableMixin {
     required this.showPinMessageKeyValue,
     required this.scamWarningKeyValue,
   });
+
+  final String identityNumber;
 
   final AccountKeyValue accountKeyValue;
   final CryptoKeyValue cryptoKeyValue;
@@ -96,6 +105,7 @@ class HiveKeyValues with EquatableMixin {
 
   @override
   List<Object?> get props => [
+        identityNumber,
         accountKeyValue,
         cryptoKeyValue,
         sessionKeyValue,
@@ -106,16 +116,19 @@ class HiveKeyValues with EquatableMixin {
         scamWarningKeyValue,
       ];
 
-  Future<void> clearAll() => Future.wait([
-        accountKeyValue.clear(),
-        cryptoKeyValue.clear(),
-        sessionKeyValue.clear(),
-        privacyKeyValue.clear(),
-        downloadKeyValue.clear(),
-        securityKeyValue.clear(),
-        showPinMessageKeyValue.clear(),
-        scamWarningKeyValue.clear(),
-      ]);
+  Future<void> clearAll() {
+    i('clear hive key values: $identityNumber');
+    return Future.wait([
+      accountKeyValue.clear(),
+      cryptoKeyValue.clear(),
+      sessionKeyValue.clear(),
+      privacyKeyValue.clear(),
+      downloadKeyValue.clear(),
+      securityKeyValue.clear(),
+      showPinMessageKeyValue.clear(),
+      scamWarningKeyValue.clear(),
+    ]);
+  }
 }
 
 final hiveKeyValueProvider =
@@ -144,6 +157,7 @@ final hiveKeyValueProvider =
     final scamWarningKeyValue =
         await ref.watch(scamWarningKeyValueProvider(identityNumber).future);
     return HiveKeyValues(
+      identityNumber: identityNumber,
       accountKeyValue: accountKeyValue,
       cryptoKeyValue: cryptoKeyValue,
       sessionKeyValue: sessionKeyValue,

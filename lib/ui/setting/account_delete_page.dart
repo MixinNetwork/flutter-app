@@ -115,7 +115,8 @@ class AccountDeletePage extends ConsumerWidget {
                         if (deleted) {
                           w('account deleted');
                           await context.accountServer.signOutAndClear();
-                          context.multiAuthChangeNotifier.signOut();
+                          context.multiAuthChangeNotifier
+                              .signOut(context.accountServer.userId);
                         }
                       } else {
                         e('delete account no pin');

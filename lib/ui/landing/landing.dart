@@ -7,6 +7,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../../crypto/signal/signal_database.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/logger.dart';
 import '../../utils/mixin_api_client.dart';
 import '../../utils/system/package_info.dart';
 import '../../widgets/buttons.dart';
@@ -209,7 +210,8 @@ class _LoginFailed extends HookConsumerWidget {
                   );
                   await signalDb.clear();
                   await signalDb.close();
-                  context.multiAuthChangeNotifier.signOut();
+                  context.multiAuthChangeNotifier
+                      .signOut(authState.account.userId);
                 },
                 child: Text(context.l10n.retry),
               ),
@@ -311,8 +313,15 @@ class LandingModeSwitchButton extends HookConsumerWidget {
   }
 }
 
-final landingIdentityNumberProvider =
-    StateProvider.autoDispose<String?>((ref) => null);
+final landingIdentityNumberProvider = StateProvider.autoDispose<String?>((ref) {
+  assert(() {
+    ref.onDispose(() {
+      w('landingIdentityNumberProvider dispose');
+    });
+    return true;
+  }());
+  return null;
+});
 
 final landingKeyValuesProvider = FutureProvider.autoDispose<HiveKeyValues?>(
   (ref) async {

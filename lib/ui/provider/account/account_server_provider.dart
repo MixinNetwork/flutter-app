@@ -36,6 +36,7 @@ class AccountServerOpener
   _Args? _previousArgs;
 
   Future<void> _onNewArgs(_Args? args) => _lock.synchronized(() async {
+        i('on new args: $args');
         if (_previousArgs == args) {
           return;
         }
@@ -53,7 +54,7 @@ class AccountServerOpener
       });
 
   Future<AccountServer> _openAccountServer(_Args args) async {
-    d('create new account server');
+    d('create new account server: $args');
     final accountServer = AccountServer(
       multiAuthNotifier: args.multiAuthChangeNotifier,
       settingChangeNotifier: args.settingChangeNotifier,
@@ -128,17 +129,8 @@ final _argsProvider = FutureProvider.autoDispose((ref) async {
   if (database == null) {
     return null;
   }
-  final (userId, sessionId, identityNumber, privateKey) =
-      ref.watch(authProvider.select((value) => (
-            value?.account.userId,
-            value?.account.sessionId,
-            value?.account.identityNumber,
-            value?.privateKey,
-          )));
-  if (userId == null ||
-      sessionId == null ||
-      identityNumber == null ||
-      privateKey == null) {
+  final auth = ref.watch(authProvider);
+  if (auth == null) {
     return null;
   }
   final multiAuthChangeNotifier =
@@ -146,14 +138,14 @@ final _argsProvider = FutureProvider.autoDispose((ref) async {
   final settingChangeNotifier = ref.watch(settingProvider);
   final currentConversationId = ref.read(_currentConversationIdProvider);
   final hiveKeyValues =
-      await ref.watch(hiveKeyValueProvider(identityNumber).future);
+      await ref.watch(hiveKeyValueProvider(auth.account.identityNumber).future);
 
   return _Args(
     database: database,
-    userId: userId,
-    sessionId: sessionId,
-    identityNumber: identityNumber,
-    privateKey: privateKey,
+    userId: auth.userId,
+    sessionId: auth.account.sessionId,
+    identityNumber: auth.account.identityNumber,
+    privateKey: auth.privateKey,
     multiAuthChangeNotifier: multiAuthChangeNotifier,
     settingChangeNotifier: settingChangeNotifier,
     currentConversationId: currentConversationId,

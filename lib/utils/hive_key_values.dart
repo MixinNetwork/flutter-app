@@ -17,7 +17,7 @@ abstract class HiveKeyValue<E> {
 
   String? _identityNumber;
 
-  Future init(String identityNumber) async {
+  Future init(HiveInterface hive, String identityNumber) async {
     if (_hasInit) {
       return;
     }
@@ -34,9 +34,9 @@ abstract class HiveKeyValue<E> {
 
     WidgetsFlutterBinding.ensureInitialized();
     if (!kIsWeb) {
-      Hive.init(directory.absolute.path);
+      hive.init(directory.absolute.path);
     }
-    box = await Hive.openBox<E>(boxName);
+    box = await hive.openBox<E>(boxName);
     i('HiveKeyValue: open $boxName');
     _identityNumber = identityNumber;
     _hasInit = true;
@@ -59,13 +59,7 @@ abstract class HiveKeyValue<E> {
     await box.clear();
   }
 
-  Future delete() async {
-    if (!_hasInit) return;
-    try {
-      await Hive.deleteBoxFromDisk(boxName);
-    } catch (_) {
-      // ignore already deleted
-    }
-    _hasInit = false;
-  }
+  @override
+  String toString() =>
+      'HiveKeyValue{boxName: $boxName, _hasInit: $_hasInit, _identityNumber: $_identityNumber}';
 }

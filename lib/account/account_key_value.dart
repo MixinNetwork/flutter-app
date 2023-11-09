@@ -61,10 +61,4 @@ class AccountKeyValue extends HiveKeyValue<dynamic> {
     }
     box.put(_keyRecentUsedEmoji, recentUsedEmoji);
   }
-
-  @override
-  Future delete() {
-    _recentUsedEmoji = null;
-    return super.delete();
-  }
 }

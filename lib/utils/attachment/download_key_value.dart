@@ -11,5 +11,4 @@ class DownloadKeyValue extends HiveKeyValue<String> {
 
   Future<void> removeMessageId(String messageId) => box.delete(messageId);
 
-  Future<int> clear() => box.clear();
 }

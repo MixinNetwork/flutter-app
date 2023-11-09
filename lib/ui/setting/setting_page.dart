@@ -153,7 +153,8 @@ class SettingPage extends HookConsumerWidget {
                         context.accountServer.signOutAndClear(),
                       );
                       if (!succeed) return;
-                      context.multiAuthChangeNotifier.signOut();
+                      context.multiAuthChangeNotifier
+                          .signOut(context.accountServer.userId);
                     },
                     color: context.theme.red,
                     trailing: const SizedBox(),

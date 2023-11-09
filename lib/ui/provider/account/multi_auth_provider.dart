@@ -100,18 +100,13 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
     state = MultiAuthState(auths: auths, activeUserId: state.activeUserId);
   }
 
-  void signOut() {
-    final currentUserId = state.activeUserId;
-    if (currentUserId == null) {
-      w('signOut: currentUserId is null');
-      state = MultiAuthState();
-      return;
-    }
-    i('sign out: $currentUserId');
+  void signOut(String userId) {
     if (state.auths.isEmpty) return;
     final auths = state.auths.toList()
-      ..removeWhere((element) => element.userId == currentUserId);
-    final activeUserId = auths.lastOrNull?.userId;
+      ..removeWhere((element) => element.userId == userId);
+    final activeUserId = state.activeUserId == userId
+        ? auths.lastOrNull?.userId
+        : state.activeUserId;
     state = MultiAuthState(auths: auths, activeUserId: activeUserId);
   }
 
@@ -121,6 +116,7 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
     final hydratedJson = toHydratedJson(value.toJson());
     HydratedBloc.storage.write(_kMultiAuthCubitKey, hydratedJson);
     super.state = value;
+    i('auth sate: $state');
   }
 
   void active(String userId) {

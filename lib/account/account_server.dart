@@ -91,7 +91,7 @@ class AccountServer {
   ) async {
     if (sid == sessionId) return;
 
-    i('AccountServer init: $identityNumber ${database.hashCode}');
+    i('AccountServer init: $identityNumber');
 
     sid = sessionId;
 
@@ -118,7 +118,7 @@ class AccountServer {
     } catch (error, stacktrace) {
       e('checkSignalKeys failed: $error $stacktrace');
       await signOutAndClear();
-      multiAuthNotifier.signOut();
+      multiAuthNotifier.signOut(userId);
       rethrow;
     }
 
@@ -145,7 +145,7 @@ class AccountServer {
         }
       }
       await signOutAndClear();
-      multiAuthNotifier.signOut();
+      multiAuthNotifier.signOut(userId);
     }
   }
 
