@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../account/account_key_value.dart';
 import '../../account/scam_warning_key_value.dart';
@@ -106,20 +107,26 @@ class HiveKeyValues with EquatableMixin {
       ];
 
   Future<void> clearAll() => Future.wait([
-        accountKeyValue.delete(),
-        cryptoKeyValue.delete(),
-        sessionKeyValue.delete(),
-        privacyKeyValue.delete(),
-        downloadKeyValue.delete(),
-        securityKeyValue.delete(),
-        showPinMessageKeyValue.delete(),
-        scamWarningKeyValue.delete(),
+        accountKeyValue.clear(),
+        cryptoKeyValue.clear(),
+        sessionKeyValue.clear(),
+        privacyKeyValue.clear(),
+        downloadKeyValue.clear(),
+        securityKeyValue.clear(),
+        showPinMessageKeyValue.clear(),
+        scamWarningKeyValue.clear(),
       ]);
 }
 
 final hiveKeyValueProvider =
     FutureProvider.autoDispose.family<HiveKeyValues, String>(
   (ref, identityNumber) async {
+    assert(() {
+      ref.onDispose(() {
+        w('hiveKeyValueProvider: dispose $identityNumber');
+      });
+      return true;
+    }());
     final accountKeyValue =
         await ref.watch(accountKeyValueProvider(identityNumber).future);
     final cryptoKeyValue =

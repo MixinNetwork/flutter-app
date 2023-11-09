@@ -6,7 +6,6 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../crypto/signal/signal_database.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hive_key_values.dart';
 import '../../utils/hook.dart';
 import '../../utils/mixin_api_client.dart';
 import '../../utils/system/package_info.dart';
@@ -31,6 +30,7 @@ class LandingPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(landingKeyValuesProvider);
     final accountServerHasError =
         ref.watch(accountServerProvider.select((value) => value.hasError));
     final mode = ref.watch(_landingModeProvider);
@@ -186,19 +186,22 @@ class _LoginFailed extends HookConsumerWidget {
                   final authState = context.auth;
                   if (authState == null) return;
 
-                  final accountKeyValue =
-                      await ref.read(currentAccountKeyValueProvider.future);
+                  final hiveKeyValues = await ref.read(hiveKeyValueProvider(
+                    authState.account.identityNumber,
+                  ).future);
+
+                  final accountKeyValue = hiveKeyValues.accountKeyValue;
 
                   await createClient(
                     userId: authState.account.userId,
                     sessionId: authState.account.sessionId,
                     privateKey: authState.privateKey,
                     loginByPhoneNumber:
-                        accountKeyValue?.primarySessionId == null,
+                        accountKeyValue.primarySessionId == null,
                   )
                       .accountApi
                       .logout(LogoutRequest(authState.account.sessionId));
-                  await clearKeyValues();
+                  await hiveKeyValues.clearAll();
                   final signalDb = await SignalDatabase.connect(
                     identityNumber: authState.account.identityNumber,
                     openForLogin: true,
@@ -307,3 +310,18 @@ class LandingModeSwitchButton extends HookConsumerWidget {
     );
   }
 }
+
+final landingIdentityNumberProvider =
+    StateProvider.autoDispose<String?>((ref) => null);
+
+final landingKeyValuesProvider = FutureProvider.autoDispose<HiveKeyValues?>(
+  (ref) async {
+    final identityNumber = ref.watch(landingIdentityNumberProvider);
+    if (identityNumber == null) {
+      return null;
+    }
+    final hiveKeyValues =
+        ref.watch(hiveKeyValueProvider(identityNumber).future);
+    return hiveKeyValues;
+  },
+);

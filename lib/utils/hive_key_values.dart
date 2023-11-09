@@ -8,8 +8,6 @@ import 'package:path/path.dart' as p;
 
 import 'file.dart';
 
-Future<void> clearKeyValues() => Future.wait([]);
-
 abstract class HiveKeyValue<E> {
   HiveKeyValue(this.boxName);
 
@@ -51,6 +49,14 @@ abstract class HiveKeyValue<E> {
     i('HiveKeyValue: dispose $boxName $_identityNumber');
     await box.close();
     _hasInit = false;
+  }
+
+  Future<void> clear() async {
+    if (!_hasInit) {
+      return;
+    }
+    i('HiveKeyValue: clear $boxName $_identityNumber');
+    await box.clear();
   }
 
   Future delete() async {

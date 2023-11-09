@@ -26,7 +26,6 @@ import '../../widgets/user/captcha_web_view_dialog.dart';
 import '../../widgets/user/phone_number_input.dart';
 import '../../widgets/user/verification_dialog.dart';
 import '../provider/account/multi_auth_provider.dart';
-import '../provider/hive_key_value_provider.dart';
 import 'landing.dart';
 
 final _mobileClientProvider = Provider.autoDispose<Client>(
@@ -170,16 +169,17 @@ class _CodeInputScene extends HookConsumerWidget {
 
         final identityNumber = response.data.identityNumber;
         await SignalProtocol.initSignal(identityNumber, registrationId, null);
+        ref.read(landingIdentityNumberProvider.notifier).state = identityNumber;
 
         final privateKey = base64Encode(sessionKey.privateKey.bytes);
 
-        final cryptoKeyValue =
-            await ref.read(cryptoKeyValueProvider(identityNumber).future);
-        cryptoKeyValue.localRegistrationId = registrationId;
+        final hiveKeyValues = await ref.read(landingKeyValuesProvider.future);
+        if (hiveKeyValues == null) {
+          throw Exception('hiveKeyValues is null');
+        }
 
-        final sessionKeyValue =
-            await ref.read(sessionKeyValueProvider(identityNumber).future);
-        sessionKeyValue.pinToken = base64Encode(decryptPinToken(
+        hiveKeyValues.cryptoKeyValue.localRegistrationId = registrationId;
+        hiveKeyValues.sessionKeyValue.pinToken = base64Encode(decryptPinToken(
           response.data.pinToken,
           sessionKey.privateKey,
         ));

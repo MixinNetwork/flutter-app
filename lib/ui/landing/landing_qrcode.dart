@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -19,149 +20,8 @@ import '../../utils/platform.dart';
 import '../../utils/system/package_info.dart';
 import '../../widgets/qr_code.dart';
 import '../provider/account/multi_auth_provider.dart';
-import '../provider/hive_key_value_provider.dart';
 import 'landing.dart';
 import 'landing_initialize.dart';
-import 'landing_state.dart';
-
-class _QrCodeLoginNotifier extends StateNotifier<LandingState> {
-  _QrCodeLoginNotifier(this.ref)
-      : multiAuth = ref.read(multiAuthStateNotifierProvider.notifier),
-        super(const LandingState(status: LandingStatus.provisioning)) {
-    requestAuthUrl();
-  }
-
-  final MultiAuthStateNotifier multiAuth;
-  final client = createLandingClient();
-  final Ref ref;
-
-  final StreamController<(int, String, signal.ECKeyPair)>
-      periodicStreamController =
-      StreamController<(int, String, signal.ECKeyPair)>();
-
-  StreamSubscription? _periodicSubscription;
-
-  void _cancelPeriodicSubscription() {
-    final periodicSubscription = _periodicSubscription;
-    _periodicSubscription = null;
-    unawaited(periodicSubscription?.cancel());
-  }
-
-  Future<void> requestAuthUrl() async {
-    _cancelPeriodicSubscription();
-    try {
-      final rsp = await client.provisioningApi
-          .getProvisioningId(Platform.operatingSystem);
-      final keyPair = signal.Curve.generateKeyPair();
-      final pubKey =
-          Uri.encodeComponent(base64Encode(keyPair.publicKey.serialize()));
-
-      state = state.copyWith(
-        authUrl: 'mixin://device/auth?id=${rsp.data.deviceId}&pub_key=$pubKey',
-        status: LandingStatus.ready,
-      );
-
-      _periodicSubscription = Stream.periodic(
-        const Duration(milliseconds: 1500),
-        (i) => i,
-      )
-          .asyncBufferMap(
-              (event) => _checkLanding(event.last, rsp.data.deviceId, keyPair))
-          .listen((event) {});
-    } catch (error, stack) {
-      e('requestAuthUrl failed: $error $stack');
-      state = state.needReload('Failed to request auth: $error');
-    }
-  }
-
-  Future<void> _checkLanding(
-    int count,
-    String deviceId,
-    signal.ECKeyPair keyPair,
-  ) async {
-    if (_periodicSubscription == null) return;
-
-    if (count > 40) {
-      _cancelPeriodicSubscription();
-      state = state.needReload(Localization.current.qrCodeExpiredDesc);
-      return;
-    }
-
-    String secret;
-    try {
-      secret =
-          (await client.provisioningApi.getProvisioning(deviceId)).data.secret;
-    } catch (e) {
-      return;
-    }
-    if (secret.isEmpty) return;
-
-    _cancelPeriodicSubscription();
-    state = state.copyWith(status: LandingStatus.provisioning);
-
-    try {
-      final (acount, privateKey) = await _verify(secret, keyPair);
-      multiAuth.signIn(AuthState(account: acount, privateKey: privateKey));
-    } catch (error, stack) {
-      state = state.needReload('Failed to verify: $error');
-      e('_verify: $error $stack');
-    }
-  }
-
-  FutureOr<(Account, String)> _verify(
-      String secret, signal.ECKeyPair keyPair) async {
-    final result =
-        signal.decrypt(base64Encode(keyPair.privateKey.serialize()), secret);
-    final msg =
-        json.decode(String.fromCharCodes(result)) as Map<String, dynamic>;
-
-    final edKeyPair = ed.generateKey();
-    final private = base64.decode(msg['identity_key_private'] as String);
-    final registrationId = signal.generateRegistrationId(false);
-
-    final sessionId = msg['session_id'] as String;
-    final info = await getPackageInfo();
-    final appVersion = '${info.version}(${info.buildNumber})';
-    final platformVersion = await getPlatformVersion();
-    final rsp = await client.provisioningApi.verifyProvisioning(
-      ProvisioningRequest(
-        code: msg['provisioning_code'] as String,
-        userId: msg['user_id'] as String,
-        sessionId: sessionId,
-        purpose: 'SESSION',
-        sessionSecret: base64Encode(edKeyPair.publicKey.bytes),
-        appVersion: appVersion,
-        registrationId: registrationId,
-        platform: 'Desktop',
-        platformVersion: platformVersion,
-      ),
-    );
-
-    final identityNumber = rsp.data.identityNumber;
-    await SignalProtocol.initSignal(identityNumber, registrationId, private);
-
-    final privateKey = base64Encode(edKeyPair.privateKey.bytes);
-
-    final accountKeyValue =
-        await ref.read(accountKeyValueProvider(identityNumber).future);
-    accountKeyValue.primarySessionId = sessionId;
-    final cryptoKeyValue =
-        await ref.read(cryptoKeyValueProvider(identityNumber).future);
-    cryptoKeyValue.localRegistrationId = registrationId;
-
-    return (
-      rsp.data,
-      privateKey,
-    );
-  }
-
-  @override
-  Future<void> dispose() async {
-    await _periodicSubscription?.cancel();
-    await periodicStreamController.close();
-    super.dispose();
-  }
-}
 
 final _qrCodeLoginProvider =
     StateNotifierProvider.autoDispose<_QrCodeLoginNotifier, LandingState>(
@@ -340,4 +200,181 @@ class _Retry extends StatelessWidget {
           ),
         ),
       );
+}
+
+enum LandingStatus {
+  needReload,
+  provisioning,
+  ready,
+}
+
+class LandingState extends Equatable {
+  const LandingState({
+    this.authUrl,
+    required this.status,
+    this.errorMessage,
+  });
+
+  final String? authUrl;
+  final LandingStatus status;
+
+  final String? errorMessage;
+
+  @override
+  List<Object?> get props => [authUrl, status, errorMessage];
+
+  LandingState needReload(String errorMessage) => LandingState(
+        status: LandingStatus.needReload,
+        errorMessage: errorMessage,
+        authUrl: authUrl,
+      );
+
+  LandingState copyWith({
+    String? authUrl,
+    LandingStatus? status,
+  }) =>
+      LandingState(
+        authUrl: authUrl ?? this.authUrl,
+        status: status ?? this.status,
+      );
+}
+
+class _QrCodeLoginNotifier extends StateNotifier<LandingState> {
+  _QrCodeLoginNotifier(this.ref)
+      : multiAuth = ref.read(multiAuthStateNotifierProvider.notifier),
+        super(const LandingState(status: LandingStatus.provisioning)) {
+    requestAuthUrl();
+  }
+
+  final MultiAuthStateNotifier multiAuth;
+  final client = createLandingClient();
+  final Ref ref;
+
+  final StreamController<(int, String, signal.ECKeyPair)>
+      periodicStreamController =
+      StreamController<(int, String, signal.ECKeyPair)>();
+
+  StreamSubscription? _periodicSubscription;
+
+  void _cancelPeriodicSubscription() {
+    final periodicSubscription = _periodicSubscription;
+    _periodicSubscription = null;
+    unawaited(periodicSubscription?.cancel());
+  }
+
+  Future<void> requestAuthUrl() async {
+    _cancelPeriodicSubscription();
+    try {
+      final rsp = await client.provisioningApi
+          .getProvisioningId(Platform.operatingSystem);
+      final keyPair = signal.Curve.generateKeyPair();
+      final pubKey =
+          Uri.encodeComponent(base64Encode(keyPair.publicKey.serialize()));
+
+      state = state.copyWith(
+        authUrl: 'mixin://device/auth?id=${rsp.data.deviceId}&pub_key=$pubKey',
+        status: LandingStatus.ready,
+      );
+
+      _periodicSubscription = Stream.periodic(
+        const Duration(milliseconds: 1500),
+        (i) => i,
+      )
+          .asyncBufferMap(
+              (event) => _checkLanding(event.last, rsp.data.deviceId, keyPair))
+          .listen((event) {});
+    } catch (error, stack) {
+      e('requestAuthUrl failed: $error $stack');
+      state = state.needReload('Failed to request auth: $error');
+    }
+  }
+
+  Future<void> _checkLanding(
+    int count,
+    String deviceId,
+    signal.ECKeyPair keyPair,
+  ) async {
+    if (_periodicSubscription == null) return;
+
+    if (count > 40) {
+      _cancelPeriodicSubscription();
+      state = state.needReload(Localization.current.qrCodeExpiredDesc);
+      return;
+    }
+
+    String secret;
+    try {
+      secret =
+          (await client.provisioningApi.getProvisioning(deviceId)).data.secret;
+    } catch (e) {
+      return;
+    }
+    if (secret.isEmpty) return;
+
+    _cancelPeriodicSubscription();
+    state = state.copyWith(status: LandingStatus.provisioning);
+
+    try {
+      final (acount, privateKey) = await _verify(secret, keyPair);
+      multiAuth.signIn(AuthState(account: acount, privateKey: privateKey));
+    } catch (error, stack) {
+      state = state.needReload('Failed to verify: $error');
+      e('_verify: $error $stack');
+    }
+  }
+
+  FutureOr<(Account, String)> _verify(
+      String secret, signal.ECKeyPair keyPair) async {
+    final result =
+        signal.decrypt(base64Encode(keyPair.privateKey.serialize()), secret);
+    final msg =
+        json.decode(String.fromCharCodes(result)) as Map<String, dynamic>;
+
+    final edKeyPair = ed.generateKey();
+    final private = base64.decode(msg['identity_key_private'] as String);
+    final registrationId = signal.generateRegistrationId(false);
+
+    final sessionId = msg['session_id'] as String;
+    final info = await getPackageInfo();
+    final appVersion = '${info.version}(${info.buildNumber})';
+    final platformVersion = await getPlatformVersion();
+    final rsp = await client.provisioningApi.verifyProvisioning(
+      ProvisioningRequest(
+        code: msg['provisioning_code'] as String,
+        userId: msg['user_id'] as String,
+        sessionId: sessionId,
+        purpose: 'SESSION',
+        sessionSecret: base64Encode(edKeyPair.publicKey.bytes),
+        appVersion: appVersion,
+        registrationId: registrationId,
+        platform: 'Desktop',
+        platformVersion: platformVersion,
+      ),
+    );
+
+    final identityNumber = rsp.data.identityNumber;
+    await SignalProtocol.initSignal(identityNumber, registrationId, private);
+    ref.read(landingIdentityNumberProvider.notifier).state = identityNumber;
+
+    final privateKey = base64Encode(edKeyPair.privateKey.bytes);
+
+    final hiveKeyValues = await ref.read(landingKeyValuesProvider.future);
+    if (hiveKeyValues == null) {
+      throw Exception('can not init hiveKeyValues');
+    }
+    hiveKeyValues.accountKeyValue.primarySessionId = sessionId;
+    hiveKeyValues.cryptoKeyValue.localRegistrationId = registrationId;
+
+    return (
+      rsp.data,
+      privateKey,
+    );
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _periodicSubscription?.cancel();
+    await periodicStreamController.close();
+    super.dispose();
+  }
 }
