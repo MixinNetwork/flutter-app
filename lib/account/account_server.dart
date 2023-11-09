@@ -37,7 +37,6 @@ import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
-import '../utils/hive_key_values.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/proxy.dart';
@@ -100,8 +99,6 @@ class AccountServer {
     this.sessionId = sessionId;
     this.identityNumber = identityNumber;
     this.privateKey = privateKey;
-
-    await initKeyValues(identityNumber);
 
     await _initClient();
 
@@ -336,7 +333,7 @@ class AccountServer {
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
 
-    await clearKeyValues();
+    await hiveKeyValues.clearAll();
 
     try {
       await signalDatabase?.clear();

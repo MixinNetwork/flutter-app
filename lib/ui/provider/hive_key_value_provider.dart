@@ -104,6 +104,17 @@ class HiveKeyValues with EquatableMixin {
         showPinMessageKeyValue,
         scamWarningKeyValue,
       ];
+
+  Future<void> clearAll() => Future.wait([
+        accountKeyValue.delete(),
+        cryptoKeyValue.delete(),
+        sessionKeyValue.delete(),
+        privacyKeyValue.delete(),
+        downloadKeyValue.delete(),
+        securityKeyValue.delete(),
+        showPinMessageKeyValue.delete(),
+        scamWarningKeyValue.delete(),
+      ]);
 }
 
 final hiveKeyValueProvider =

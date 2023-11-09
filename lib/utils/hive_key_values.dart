@@ -8,11 +8,7 @@ import 'package:path/path.dart' as p;
 
 import 'file.dart';
 
-Future<void> initKeyValues(String identityNumber) => Future.wait([]);
-
 Future<void> clearKeyValues() => Future.wait([]);
-
-Future<void> disposeKeyValues() => Future.wait([]);
 
 abstract class HiveKeyValue<E> {
   HiveKeyValue(this.boxName);
