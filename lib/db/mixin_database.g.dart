@@ -14375,12 +14375,12 @@ class Properties extends Table with TableInfo<Properties, Propertie> {
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   static const VerificationMeta _groupMeta = const VerificationMeta('group');
-  late final GeneratedColumnWithTypeConverter<PropertyGroup, String> group =
+  late final GeneratedColumnWithTypeConverter<UserPropertyGroup, String> group =
       GeneratedColumn<String>('group', aliasedName, false,
               type: DriftSqlType.string,
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
-          .withConverter<PropertyGroup>(Properties.$convertergroup);
+          .withConverter<UserPropertyGroup>(Properties.$convertergroup);
   static const VerificationMeta _valueMeta = const VerificationMeta('value');
   late final GeneratedColumn<String> value = GeneratedColumn<String>(
       'value', aliasedName, false,
@@ -14435,8 +14435,8 @@ class Properties extends Table with TableInfo<Properties, Propertie> {
     return Properties(attachedDatabase, alias);
   }
 
-  static TypeConverter<PropertyGroup, String> $convertergroup =
-      const PropertyGroupConverter();
+  static TypeConverter<UserPropertyGroup, String> $convertergroup =
+      const UserPropertyGroupConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY("key", "group")'];
   @override
@@ -14445,7 +14445,7 @@ class Properties extends Table with TableInfo<Properties, Propertie> {
 
 class Propertie extends DataClass implements Insertable<Propertie> {
   final String key;
-  final PropertyGroup group;
+  final UserPropertyGroup group;
   final String value;
   const Propertie(
       {required this.key, required this.group, required this.value});
@@ -14474,7 +14474,7 @@ class Propertie extends DataClass implements Insertable<Propertie> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Propertie(
       key: serializer.fromJson<String>(json['key']),
-      group: serializer.fromJson<PropertyGroup>(json['group']),
+      group: serializer.fromJson<UserPropertyGroup>(json['group']),
       value: serializer.fromJson<String>(json['value']),
     );
   }
@@ -14483,12 +14483,12 @@ class Propertie extends DataClass implements Insertable<Propertie> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'key': serializer.toJson<String>(key),
-      'group': serializer.toJson<PropertyGroup>(group),
+      'group': serializer.toJson<UserPropertyGroup>(group),
       'value': serializer.toJson<String>(value),
     };
   }
 
-  Propertie copyWith({String? key, PropertyGroup? group, String? value}) =>
+  Propertie copyWith({String? key, UserPropertyGroup? group, String? value}) =>
       Propertie(
         key: key ?? this.key,
         group: group ?? this.group,
@@ -14517,7 +14517,7 @@ class Propertie extends DataClass implements Insertable<Propertie> {
 
 class PropertiesCompanion extends UpdateCompanion<Propertie> {
   final Value<String> key;
-  final Value<PropertyGroup> group;
+  final Value<UserPropertyGroup> group;
   final Value<String> value;
   final Value<int> rowid;
   const PropertiesCompanion({
@@ -14528,7 +14528,7 @@ class PropertiesCompanion extends UpdateCompanion<Propertie> {
   });
   PropertiesCompanion.insert({
     required String key,
-    required PropertyGroup group,
+    required UserPropertyGroup group,
     required String value,
     this.rowid = const Value.absent(),
   })  : key = Value(key),
@@ -14550,7 +14550,7 @@ class PropertiesCompanion extends UpdateCompanion<Propertie> {
 
   PropertiesCompanion copyWith(
       {Value<String>? key,
-      Value<PropertyGroup>? group,
+      Value<UserPropertyGroup>? group,
       Value<String>? value,
       Value<int>? rowid}) {
     return PropertiesCompanion(

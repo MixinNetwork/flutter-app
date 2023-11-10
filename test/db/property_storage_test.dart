@@ -1,15 +1,15 @@
 @TestOn('linux || mac-os')
 import 'package:drift/native.dart';
 import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/db/util/property_storage.dart';
 import 'package:flutter_app/enum/property_group.dart';
+import 'package:flutter_app/utils/db/property_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('tet PropertyStorage', () async {
     final database = MixinDatabase(NativeDatabase.memory());
     final storage =
-        PropertyStorage(PropertyGroup.setting, database.propertyDao);
+        PropertyStorage(UserPropertyGroup.setting, database.propertyDao);
 
     expect(storage.get<bool>('test_empty'), null);
     storage.set('test_empty', false);

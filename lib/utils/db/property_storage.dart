@@ -3,15 +3,15 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import '../../db/dao/property_dao.dart';
 import '../../enum/property_group.dart';
-import '../../utils/event_bus.dart';
-import '../../utils/logger.dart';
-import '../dao/property_dao.dart';
+import '../event_bus.dart';
+import '../logger.dart';
 
 class _PropertyChangedEvent {
   _PropertyChangedEvent(this.group);
 
-  final PropertyGroup group;
+  final UserPropertyGroup group;
 }
 
 class PropertyStorage extends ChangeNotifier {
@@ -40,7 +40,7 @@ class PropertyStorage extends ChangeNotifier {
 
   final Map<String, String> _data = {};
 
-  final PropertyGroup group;
+  final UserPropertyGroup group;
 
   final PropertyDao dao;
 

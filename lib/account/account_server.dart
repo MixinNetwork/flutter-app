@@ -16,7 +16,6 @@ import 'package:uuid/uuid.dart';
 import '../blaze/blaze.dart';
 import '../blaze/vo/pin_message_minimal.dart';
 import '../constants/constants.dart';
-import '../crypto/crypto_key_value.dart';
 import '../crypto/privacy_key_value.dart';
 import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
@@ -69,8 +68,6 @@ class AccountServer {
 
   final HiveKeyValues hiveKeyValues;
 
-  CryptoKeyValue get cryptoKeyValue => hiveKeyValues.cryptoKeyValue;
-
   PrivacyKeyValue get privacyKeyValue => hiveKeyValues.privacyKeyValue;
 
   AccountKeyValue get accountKeyValue => hiveKeyValues.accountKeyValue;
@@ -110,7 +107,7 @@ class AccountServer {
     checkSignalKeyTimer =
         Timer.periodic(const Duration(days: 1), (timer) async {
       i('refreshSignalKeys periodic');
-      await checkSignalKey(client, signalDatabase!, cryptoKeyValue);
+      await checkSignalKey(client, signalDatabase!, database.cryptoKeyValue);
     });
 
     try {
@@ -334,6 +331,7 @@ class AccountServer {
     jobSubscribers.clear();
 
     await hiveKeyValues.clearAll();
+    await database.cryptoKeyValue.clear();
 
     try {
       await signalDatabase?.clear();
@@ -742,6 +740,7 @@ class AccountServer {
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
+
   }
 
   void release() {
@@ -777,9 +776,9 @@ class AccountServer {
   Future<void> checkSignalKeys() async {
     final hasPushSignalKeys = privacyKeyValue.hasPushSignalKeys;
     if (hasPushSignalKeys) {
-      unawaited(checkSignalKey(client, signalDatabase!, cryptoKeyValue));
+      unawaited(checkSignalKey(client, signalDatabase!, database.cryptoKeyValue));
     } else {
-      await refreshSignalKeys(client, signalDatabase!, cryptoKeyValue);
+      await refreshSignalKeys(client, signalDatabase!, database.cryptoKeyValue);
       privacyKeyValue.hasPushSignalKeys = true;
     }
   }

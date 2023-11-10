@@ -14,6 +14,7 @@ import '../../widgets/buttons.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
 import '../provider/account/account_server_provider.dart';
+import '../provider/database_provider.dart';
 import '../provider/hive_key_value_provider.dart';
 import 'landing_mobile.dart';
 import 'landing_qrcode.dart';
@@ -210,6 +211,10 @@ class _LoginFailed extends HookConsumerWidget {
                   );
                   await signalDb.clear();
                   await signalDb.close();
+                  final userDb = ref.read(databaseProvider).valueOrNull;
+                  if (userDb != null) {
+                    await userDb.cryptoKeyValue.clear();
+                  }
                   context.multiAuthChangeNotifier
                       .signOut(authState.account.userId);
                 },

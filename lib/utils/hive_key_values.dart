@@ -22,16 +22,7 @@ abstract class HiveKeyValue<E> {
       return;
     }
     final dbFolder = mixinDocumentsDirectory;
-
-    final legacyBoxDirectory = Directory(p.join(dbFolder.path, boxName));
     final directory = Directory(p.join(dbFolder.path, identityNumber, boxName));
-
-    if (legacyBoxDirectory.existsSync()) {
-      // copy legacy file to new file
-      if (directory.existsSync()) directory.deleteSync(recursive: true);
-      legacyBoxDirectory.renameSync(directory.path);
-    }
-
     WidgetsFlutterBinding.ensureInitialized();
     if (!kIsWeb) {
       hive.init(directory.absolute.path);

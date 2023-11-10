@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../db/dao/property_dao.dart';
-import '../../db/util/property_storage.dart';
 import '../../enum/property_group.dart';
+import '../db/property_storage.dart';
 import '../extension/extension.dart';
 import '../proxy.dart';
 
@@ -13,7 +13,7 @@ const _kSelectedProxyKey = 'selected_proxy';
 const _kProxyListKey = 'proxy_list';
 
 class SettingPropertyStorage extends PropertyStorage {
-  SettingPropertyStorage(PropertyDao dao) : super(PropertyGroup.setting, dao);
+  SettingPropertyStorage(PropertyDao dao) : super(UserPropertyGroup.setting, dao);
 
   bool get enableProxy => get(_kEnableProxyKey) ?? false;
 

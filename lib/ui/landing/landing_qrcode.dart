@@ -363,7 +363,6 @@ class _QrCodeLoginNotifier extends StateNotifier<LandingState> {
       throw Exception('can not init hiveKeyValues');
     }
     hiveKeyValues.accountKeyValue.primarySessionId = sessionId;
-    hiveKeyValues.cryptoKeyValue.localRegistrationId = registrationId;
 
     return (
       rsp.data,

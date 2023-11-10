@@ -1,3 +1,5 @@
+// ignore_for_file: implementation_imports
+
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 import 'package:hive/src/hive_impl.dart';
@@ -9,7 +11,6 @@ import '../../account/scam_warning_key_value.dart';
 import '../../account/security_key_value.dart';
 import '../../account/session_key_value.dart';
 import '../../account/show_pin_message_key_value.dart';
-import '../../crypto/crypto_key_value.dart';
 import '../../crypto/privacy_key_value.dart';
 import '../../utils/attachment/download_key_value.dart';
 import '../../utils/hive_key_values.dart';
@@ -31,8 +32,6 @@ FutureProviderFamily<T, String>
             return keyValue;
           },
         );
-
-final cryptoKeyValueProvider = _createHiveKeyValueProvider(CryptoKeyValue.new);
 
 final accountKeyValueProvider =
     _createHiveKeyValueProvider(AccountKeyValue.new);
@@ -83,7 +82,6 @@ class HiveKeyValues with EquatableMixin {
   HiveKeyValues({
     required this.identityNumber,
     required this.accountKeyValue,
-    required this.cryptoKeyValue,
     required this.sessionKeyValue,
     required this.privacyKeyValue,
     required this.downloadKeyValue,
@@ -95,7 +93,6 @@ class HiveKeyValues with EquatableMixin {
   final String identityNumber;
 
   final AccountKeyValue accountKeyValue;
-  final CryptoKeyValue cryptoKeyValue;
   final SessionKeyValue sessionKeyValue;
   final PrivacyKeyValue privacyKeyValue;
   final DownloadKeyValue downloadKeyValue;
@@ -107,7 +104,6 @@ class HiveKeyValues with EquatableMixin {
   List<Object?> get props => [
         identityNumber,
         accountKeyValue,
-        cryptoKeyValue,
         sessionKeyValue,
         privacyKeyValue,
         downloadKeyValue,
@@ -120,7 +116,6 @@ class HiveKeyValues with EquatableMixin {
     i('clear hive key values: $identityNumber');
     return Future.wait([
       accountKeyValue.clear(),
-      cryptoKeyValue.clear(),
       sessionKeyValue.clear(),
       privacyKeyValue.clear(),
       downloadKeyValue.clear(),
@@ -142,8 +137,6 @@ final hiveKeyValueProvider =
     }());
     final accountKeyValue =
         await ref.watch(accountKeyValueProvider(identityNumber).future);
-    final cryptoKeyValue =
-        await ref.watch(cryptoKeyValueProvider(identityNumber).future);
     final sessionKeyValue =
         await ref.watch(sessionKeyValueProvider(identityNumber).future);
     final privacyKeyValue =
@@ -159,7 +152,6 @@ final hiveKeyValueProvider =
     return HiveKeyValues(
       identityNumber: identityNumber,
       accountKeyValue: accountKeyValue,
-      cryptoKeyValue: cryptoKeyValue,
       sessionKeyValue: sessionKeyValue,
       privacyKeyValue: privacyKeyValue,
       downloadKeyValue: downloadKeyValue,

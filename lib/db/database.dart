@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../ui/provider/slide_category_provider.dart';
+import '../utils/db/user_crypto_key_value.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import '../utils/property/setting_property.dart';
@@ -35,7 +36,8 @@ import 'fts_database.dart';
 import 'mixin_database.dart';
 
 class Database {
-  Database(this.mixinDatabase, this.ftsDatabase) {
+  Database(this.mixinDatabase, this.ftsDatabase)
+      : cryptoKeyValue = UserCryptoKeyValue(mixinDatabase.propertyDao) {
     settingProperties = SettingPropertyStorage(mixinDatabase.propertyDao);
   }
 
@@ -103,6 +105,8 @@ class Database {
   ExpiredMessageDao get expiredMessageDao => mixinDatabase.expiredMessageDao;
 
   late final SettingPropertyStorage settingProperties;
+
+  final UserCryptoKeyValue cryptoKeyValue;
 
   Future<void> dispose() async {
     await mixinDatabase.close();

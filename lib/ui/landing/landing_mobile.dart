@@ -178,7 +178,6 @@ class _CodeInputScene extends HookConsumerWidget {
           throw Exception('hiveKeyValues is null');
         }
 
-        hiveKeyValues.cryptoKeyValue.localRegistrationId = registrationId;
         hiveKeyValues.sessionKeyValue.pinToken = base64Encode(decryptPinToken(
           response.data.pinToken,
           sessionKey.privateKey,
