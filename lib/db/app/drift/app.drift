@@ -1,0 +1,9 @@
+
+import '../converter/app_property_group_converter.dart';
+
+CREATE TABLE properties (
+  "key" TEXT NOT NULL,
+  "group" TEXT NOT NULL MAPPED BY `const AppPropertyGroupConverter()`,
+  "value" TEXT NOT NULL,
+  PRIMARY KEY("key", "group")
+);

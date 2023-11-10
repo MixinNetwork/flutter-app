@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../crypto/crypto_key_value.dart';
+import '../../db/app/app_database.dart';
 import '../../db/database.dart';
 import '../../db/fts_database.dart';
 import '../../db/mixin_database.dart';
@@ -10,6 +11,9 @@ import '../../utils/synchronized.dart';
 import 'account/multi_auth_provider.dart';
 import 'hive_key_value_provider.dart';
 import 'slide_category_provider.dart';
+
+final appDatabaseProvider =
+    Provider<AppDatabase>((ref) => throw UnimplementedError());
 
 final databaseProvider =
     StateNotifierProvider.autoDispose<DatabaseOpener, AsyncValue<Database>>(

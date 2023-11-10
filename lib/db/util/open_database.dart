@@ -45,23 +45,24 @@ Future<QueryExecutor> openQueryExecutor({
   final foregroundPortName =
       'one_mixin_drift_foreground_${identityNumber}_$dbName';
 
-  final writeIsolate = await _crateIsolate(
-    identityNumber: identityNumber,
+  final dbFile = File(
+    p.join(mixinDocumentsDirectory.path, identityNumber, '$dbName.db'),
+  );
+  final writeIsolate = await createOrConnectDriftIsolate(
     portName: backgroundPortName,
-    dbName: dbName,
+    dbFile: dbFile,
     fromMainIsolate: fromMainIsolate,
-    debugName: 'isolate_drift_${dbName}_write',
+    debugName: 'isolate_drift_write_${identityNumber}_$dbName',
   );
 
   final write = await writeIsolate.connect();
 
   final reads = await Future.wait(List.generate(readCount, (i) async {
-    final isolate = await _crateIsolate(
-      identityNumber: identityNumber,
+    final isolate = await createOrConnectDriftIsolate(
       portName: '${foregroundPortName}_$i',
-      dbName: dbName,
+      dbFile: dbFile,
       fromMainIsolate: fromMainIsolate,
-      debugName: 'one_mixin_drift_read_$i',
+      debugName: 'isolate_drift_read_${identityNumber}_${dbName}_$i',
     );
     return isolate.connect();
   }));
@@ -76,10 +77,9 @@ Future<QueryExecutor> openQueryExecutor({
   );
 }
 
-Future<DriftIsolate> _crateIsolate({
-  required String identityNumber,
+Future<DriftIsolate> createOrConnectDriftIsolate({
   required String portName,
-  required String dbName,
+  required File dbFile,
   bool fromMainIsolate = false,
   required String? debugName,
 }) async {
@@ -92,8 +92,6 @@ Future<DriftIsolate> _crateIsolate({
 
   if (existingIsolate == null) {
     assert(fromMainIsolate, 'Isolate should be created from main isolate');
-    final dbFile = File(
-        p.join(mixinDocumentsDirectory.path, identityNumber, '$dbName.db'));
     final receivePort = ReceivePort();
     await Isolate.spawn(
       _startBackground,
