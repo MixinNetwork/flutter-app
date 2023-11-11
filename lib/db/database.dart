@@ -4,7 +4,6 @@ import '../ui/provider/slide_category_provider.dart';
 import '../utils/db/user_crypto_key_value.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
-import '../utils/property/setting_property.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
 import 'dao/chain_dao.dart';
@@ -37,9 +36,7 @@ import 'mixin_database.dart';
 
 class Database {
   Database(this.mixinDatabase, this.ftsDatabase)
-      : cryptoKeyValue = UserCryptoKeyValue(mixinDatabase.propertyDao) {
-    settingProperties = SettingPropertyStorage(mixinDatabase.propertyDao);
-  }
+      : cryptoKeyValue = UserCryptoKeyValue(mixinDatabase.propertyDao);
 
   final MixinDatabase mixinDatabase;
 
@@ -103,8 +100,6 @@ class Database {
   FavoriteAppDao get favoriteAppDao => mixinDatabase.favoriteAppDao;
 
   ExpiredMessageDao get expiredMessageDao => mixinDatabase.expiredMessageDao;
-
-  late final SettingPropertyStorage settingProperties;
 
   final UserCryptoKeyValue cryptoKeyValue;
 

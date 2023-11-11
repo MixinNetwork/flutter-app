@@ -4,7 +4,7 @@ import '../../enum/property_group.dart';
 import '../crypto_util.dart';
 import 'lazy_db_key_value.dart';
 
-class UserCryptoKeyValue extends BaseUserKeyValue {
+class UserCryptoKeyValue extends BaseLazyUserKeyValue {
   UserCryptoKeyValue(KeyValueDao<UserPropertyGroup> dao)
       : super(group: UserPropertyGroup.crypto, dao: dao);
 

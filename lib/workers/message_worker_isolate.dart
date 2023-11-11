@@ -16,6 +16,7 @@ import 'package:stream_channel/isolate_channel.dart';
 import '../blaze/blaze.dart';
 import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_protocol.dart';
+import '../db/app/app_database.dart';
 import '../db/database.dart';
 import '../db/database_event_bus.dart';
 import '../db/fts_database.dart';
@@ -128,6 +129,7 @@ class _MessageProcessRunner {
   late Blaze blaze;
   late Sender _sender;
   late SignalProtocol signalProtocol;
+  late AppDatabase appDatabase;
 
   late SendingJob _sendingJob;
   late AckJob _ackJob;
@@ -143,6 +145,8 @@ class _MessageProcessRunner {
   Timer? _nextExpiredMessageRunner;
 
   Future<void> init(IsolateInitParams initParams) async {
+    appDatabase = await AppDatabase.connect();
+
     database = Database(
       await connectToDatabase(identityNumber, readCount: 4),
       await FtsDatabase.connect(identityNumber),
@@ -171,7 +175,7 @@ class _MessageProcessRunner {
         ),
       ],
       loginByPhoneNumber: initParams.loginByPhoneNumber,
-    )..configProxySetting(database.settingProperties);
+    )..configProxySetting(appDatabase.settingKeyValue);
 
     _ackJob = AckJob(
       database: database,
@@ -192,6 +196,7 @@ class _MessageProcessRunner {
       await generateUserAgent(),
       _ackJob,
       _floodJob,
+      appDatabase.settingKeyValue,
     );
 
     blaze.connectedStateStream.listen((event) {
@@ -382,6 +387,7 @@ class _MessageProcessRunner {
   void dispose() {
     blaze.dispose();
     database.dispose();
+    appDatabase.close();
     jobSubscribers.forEach((subscription) => subscription.cancel());
     _deviceTransfer?.dispose();
   }

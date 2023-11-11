@@ -30,6 +30,7 @@ import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../ui/provider/account/account_server_provider.dart';
 import '../ui/provider/account/multi_auth_provider.dart';
+import '../ui/provider/app_key_value_provider.dart';
 import '../ui/provider/hive_key_value_provider.dart';
 import '../ui/provider/setting_provider.dart';
 import '../utils/app_lifecycle.dart';
@@ -169,10 +170,15 @@ class AccountServer {
           },
         ),
       ],
-    )..configProxySetting(database.settingProperties);
+    )..configProxySetting(ref.read(settingKeyValueProvider));
 
     attachmentUtil = AttachmentUtil.init(
-        client, database, identityNumber, hiveKeyValues.downloadKeyValue);
+      client,
+      database,
+      identityNumber,
+      hiveKeyValues.downloadKeyValue,
+      ref.read(settingKeyValueProvider),
+    );
     _sendMessageHelper =
         SendMessageHelper(database, attachmentUtil, addSendingJob);
 
@@ -740,7 +746,6 @@ class AccountServer {
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
-
   }
 
   void release() {
@@ -776,7 +781,8 @@ class AccountServer {
   Future<void> checkSignalKeys() async {
     final hasPushSignalKeys = privacyKeyValue.hasPushSignalKeys;
     if (hasPushSignalKeys) {
-      unawaited(checkSignalKey(client, signalDatabase!, database.cryptoKeyValue));
+      unawaited(
+          checkSignalKey(client, signalDatabase!, database.cryptoKeyValue));
     } else {
       await refreshSignalKeys(client, signalDatabase!, database.cryptoKeyValue);
       privacyKeyValue.hasPushSignalKeys = true;

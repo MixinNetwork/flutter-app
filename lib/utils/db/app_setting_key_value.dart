@@ -1,20 +1,20 @@
-import 'dart:convert';
-
 import 'package:mixin_logger/mixin_logger.dart';
 
-import '../../db/dao/property_dao.dart';
 import '../../enum/property_group.dart';
-import '../db/property_storage.dart';
 import '../extension/extension.dart';
 import '../proxy.dart';
+import 'lazy_db_key_value.dart';
+
+class AppSettingKeyValue extends BaseAppKeyValue {
+  AppSettingKeyValue(KeyValueDao<AppPropertyGroup> dao)
+      : super(group: AppPropertyGroup.setting, dao: dao);
+}
 
 const _kEnableProxyKey = 'enable_proxy';
 const _kSelectedProxyKey = 'selected_proxy';
 const _kProxyListKey = 'proxy_list';
 
-class SettingPropertyStorage extends PropertyStorage {
-  SettingPropertyStorage(PropertyDao dao) : super(UserPropertyGroup.setting, dao);
-
+extension SettingProxy on AppSettingKeyValue {
   bool get enableProxy => get(_kEnableProxyKey) ?? false;
 
   set enableProxy(bool value) => set(_kEnableProxyKey, value);
@@ -24,16 +24,12 @@ class SettingPropertyStorage extends PropertyStorage {
   set selectedProxyId(String? value) => set(_kSelectedProxyKey, value);
 
   List<ProxyConfig> get proxyList {
-    final json = get<String>(_kProxyListKey);
-    if (json == null || json.isEmpty) {
+    final list = getList<Map<String, dynamic>>(_kProxyListKey);
+    if (list == null || list.isEmpty) {
       return [];
     }
     try {
-      final list = jsonDecode(json) as List;
-      return list
-          .cast<Map<String, dynamic>>()
-          .map(ProxyConfig.fromJson)
-          .toList();
+      return list.map(ProxyConfig.fromJson).toList();
     } catch (error, stacktrace) {
       e('load proxyList error: $error, $stacktrace');
     }
@@ -56,11 +52,11 @@ class SettingPropertyStorage extends PropertyStorage {
 
   void addProxy(ProxyConfig config) {
     final list = [...proxyList, config];
-    set(_kProxyListKey, jsonEncode(list));
+    set(_kProxyListKey, list);
   }
 
   void removeProxy(String id) {
     final list = proxyList.where((element) => element.id != id).toList();
-    set(_kProxyListKey, jsonEncode(list));
+    set(_kProxyListKey, list);
   }
 }

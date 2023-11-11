@@ -12,6 +12,7 @@ import '../constants/constants.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
+import '../utils/db/app_setting_key_value.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import '../utils/proxy.dart';
@@ -42,9 +43,10 @@ class Blaze {
     this.userAgent,
     this.ackJob,
     this.floodJob,
+    this.settingKeyValue,
   ) {
-    database.settingProperties.addListener(_onProxySettingChanged);
-    proxyConfig = database.settingProperties.activatedProxy;
+    settingKeyValue.addListener(_onProxySettingChanged);
+    proxyConfig = settingKeyValue.activatedProxy;
   }
 
   final String userId;
@@ -56,6 +58,7 @@ class Blaze {
   final FloodJob floodJob;
 
   final String? userAgent;
+  final AppSettingKeyValue settingKeyValue;
 
   ProxyConfig? proxyConfig;
 
@@ -347,7 +350,7 @@ class Blaze {
   }
 
   void _onProxySettingChanged() {
-    final url = database.settingProperties.activatedProxy;
+    final url = settingKeyValue.activatedProxy;
     if (url == proxyConfig) {
       return;
     }
@@ -357,7 +360,7 @@ class Blaze {
   }
 
   void dispose() {
-    database.settingProperties.removeListener(_onProxySettingChanged);
+    settingKeyValue.removeListener(_onProxySettingChanged);
     _disconnect();
     _connectedStateBehaviorSubject.close();
   }

@@ -102,4 +102,8 @@ class PropertyDao extends DatabaseAccessor<MixinDatabase>
         ..where((tbl) => tbl.group.equalsValue(group) & tbl.key.equals(key)))
       .watchSingleOrNull()
       .map((event) => event?.value);
+
+  @override
+  Stream<void> watchTableHasChanged(UserPropertyGroup group) =>
+      db.tableUpdates(TableUpdateQuery.onTable(db.properties));
 }

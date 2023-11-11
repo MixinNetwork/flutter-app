@@ -7,8 +7,8 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
+import 'db/app_setting_key_value.dart';
 import 'extension/extension.dart';
-import 'property/setting_property.dart';
 
 part 'proxy.g.dart';
 
@@ -67,10 +67,10 @@ extension DioProxyExt on Dio {
 }
 
 extension ClientExt on Client {
-  void configProxySetting(SettingPropertyStorage settingProperties) {
-    var proxyConfig = settingProperties.activatedProxy;
-    settingProperties.addListener(() {
-      final config = settingProperties.activatedProxy;
+  void configProxySetting(AppSettingKeyValue settingKeyValue) {
+    var proxyConfig = settingKeyValue.activatedProxy;
+    settingKeyValue.addListener(() {
+      final config = settingKeyValue.activatedProxy;
       if (config != proxyConfig) {
         proxyConfig = config;
         dio.applyProxy(config);

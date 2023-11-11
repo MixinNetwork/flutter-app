@@ -8,14 +8,16 @@ import 'package:uuid/uuid.dart';
 
 import '../../constants/constants.dart';
 import '../../constants/resources.dart';
+import '../../utils/db/app_setting_key_value.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../../utils/logger.dart';
 import '../../utils/proxy.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
+import '../provider/app_key_value_provider.dart';
+import '../provider/database_provider.dart';
 
 class ProxyPage extends StatelessWidget {
   const ProxyPage({super.key});
@@ -45,17 +47,11 @@ class _ProxySettingWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final enableProxy = useListenableConverter(
-          context.database.settingProperties,
-          converter: (settingProperties) => settingProperties.enableProxy,
-        ).data ??
-        false;
-    final hasProxyConfig = useListenableConverter(
-          context.database.settingProperties,
-          converter: (settingProperties) =>
-              settingProperties.proxyList.isNotEmpty,
-        ).data ??
-        false;
+    final enableProxy =
+        ref.watch(settingKeyValueProvider.select((value) => value.enableProxy));
+    final hasProxyConfig = ref.watch(settingKeyValueProvider.select(
+      (value) => value.proxyList.isNotEmpty,
+    ));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -70,8 +66,9 @@ class _ProxySettingWidget extends HookConsumerWidget {
                   value: hasProxyConfig && enableProxy,
                   onChanged: !hasProxyConfig
                       ? null
-                      : (bool value) => context
-                          .database.settingProperties.enableProxy = value,
+                      : (bool value) => ref
+                          .read(settingKeyValueProvider.notifier)
+                          .enableProxy = value,
                 )),
           ),
         ),
@@ -108,15 +105,10 @@ class _ProxyItemList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final proxyList = useListenableConverter(
-          context.database.settingProperties,
-          converter: (settingProperties) => settingProperties.proxyList,
-        ).data ??
-        const [];
-    final selectedProxyId = useListenableConverter(
-          context.database.settingProperties,
-          converter: (settingProperties) => settingProperties.selectedProxyId,
-        ).data ??
+    final proxyList =
+        ref.watch(settingKeyValueProvider.select((value) => value.proxyList));
+    final selectedProxyId = ref.watch(
+            settingKeyValueProvider.select((value) => value.selectedProxyId)) ??
         proxyList.firstOrNull?.id;
     return Column(
       children: proxyList
@@ -131,7 +123,7 @@ class _ProxyItemList extends HookConsumerWidget {
   }
 }
 
-class _ProxyItemWidget extends StatelessWidget {
+class _ProxyItemWidget extends ConsumerWidget {
   const _ProxyItemWidget({
     required this.proxy,
     required this.selected,
@@ -142,7 +134,7 @@ class _ProxyItemWidget extends StatelessWidget {
   final bool selected;
 
   @override
-  Widget build(BuildContext context) => Material(
+  Widget build(BuildContext context, WidgetRef ref) => Material(
         color: context.theme.settingCellBackgroundColor,
         child: ListTile(
           leading: SizedBox(
@@ -175,10 +167,12 @@ class _ProxyItemWidget extends StatelessWidget {
             name: Resources.assetsImagesDeleteSvg,
             color: context.theme.icon,
             onTap: () {
-              context.database.settingProperties.removeProxy(proxy.id);
+              final settingKeyValue = ref.read(settingKeyValueProvider.notifier)
+                ..removeProxy(proxy.id);
               if (selected) {
-                context.database.settingProperties.selectedProxyId = null;
-                context.database.settingProperties.enableProxy = false;
+                settingKeyValue
+                  ..selectedProxyId = null
+                  ..enableProxy = false;
               }
             },
           ),
@@ -186,7 +180,8 @@ class _ProxyItemWidget extends StatelessWidget {
             if (selected) {
               return;
             }
-            context.database.settingProperties.selectedProxyId = proxy.id;
+            ref.read(settingKeyValueProvider.notifier).selectedProxyId =
+                proxy.id;
           },
         ),
       );
@@ -278,7 +273,7 @@ class _ProxyAddDialog extends HookConsumerWidget {
               id: id,
             );
             i('add proxy config: ${config.type} ${config.host}:${config.port}');
-            context.database.settingProperties.addProxy(config);
+            ref.read(appDatabaseProvider).settingKeyValue.addProxy(config);
             Navigator.pop(context);
           },
           child: Text(context.l10n.add),

@@ -236,6 +236,8 @@ class PropertiesCompanion extends UpdateCompanion<Propertie> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   late final Properties properties = Properties(this);
+  late final AppKeyValueDao appKeyValueDao =
+      AppKeyValueDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
