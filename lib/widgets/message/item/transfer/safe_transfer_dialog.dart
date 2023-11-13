@@ -11,6 +11,8 @@ import '../../../../ui/provider/transfer_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../buttons.dart';
 import '../../../dialog.dart';
+import '../../../high_light_text.dart';
+import 'safe_transfer_message.dart';
 import 'transfer_page.dart';
 
 Future<void> showSafeTransferDialog(BuildContext context, String snapshotId) =>
@@ -21,14 +23,12 @@ Future<void> showSafeTransferDialog(BuildContext context, String snapshotId) =>
 
 final _snapshotTypeProvider =
     Provider.family.autoDispose<String, SafeSnapshot>((ref, snapshot) {
-  if (snapshot.opponentId.isNullOrBlank()) {
-    if (snapshot.type == SnapshotType.pending) {
-      return SnapshotType.pending;
-    } else {
-      final amount = double.tryParse(snapshot.amount);
-      final isPositive = amount != null && amount > 0;
-      return isPositive ? SnapshotType.deposit : SnapshotType.withdrawal;
-    }
+  if (snapshot.type == SnapshotType.pending) {
+    return SnapshotType.pending;
+  } else if (snapshot.withdrawal != null) {
+    return SnapshotType.withdrawal;
+  } else if (snapshot.deposit != null) {
+    return SnapshotType.deposit;
   } else {
     return SnapshotType.transfer;
   }
@@ -153,6 +153,7 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final createdAt = DateTime.parse(snapshot.createdAt).toLocal();
+    final memo = parseSafeSnapshotMemo(snapshot.memo);
     return Padding(
       padding: const EdgeInsets.only(left: 24, right: 24, top: 20),
       child: Column(
@@ -190,7 +191,7 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
               title: Text(isPositive ? context.l10n.from : context.l10n.to),
               subtitle: SelectableText(
                 snapshot.opponentId.isNullOrBlank()
-                    ? context.l10n.anonymous
+                    ? 'N/A'
                     : (ref
                             .watch(_userProvider(snapshot.opponentId))
                             .valueOrNull
@@ -198,10 +199,10 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
                         ''),
               ),
             ),
-            if (!snapshot.memo.isNullOrBlank())
+            if (!memo.isNullOrBlank())
               TransactionInfoTile(
                 title: Text(context.l10n.memo),
-                subtitle: SelectableText(snapshot.memo),
+                subtitle: SelectionArea(child: CustomText(memo)),
               ),
           ] else if (type == SnapshotType.deposit &&
               snapshot.deposit != null) ...[
