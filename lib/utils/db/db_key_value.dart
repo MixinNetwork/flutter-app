@@ -45,10 +45,13 @@ class _BaseLazyDbKeyValue<G> {
   Future<void> set<T>(String key, T? value) =>
       dao.set(group, key, convertToString(value));
 
-  Future<void> clear() => dao.clear(group);
+  Future<void> clear() {
+    i('clear key value: $group');
+    return dao.clear(group);
+  }
 }
 
-typedef BaseAppKeyValue = _BaseDbKeyValue<AppPropertyGroup>;
+typedef AppKeyValue = _BaseDbKeyValue<AppPropertyGroup>;
 
 class _BaseDbKeyValue<G> extends ChangeNotifier {
   _BaseDbKeyValue({required this.group, required KeyValueDao<G> dao})
@@ -91,6 +94,7 @@ class _BaseDbKeyValue<G> extends ChangeNotifier {
   }
 
   Future<void> clear() {
+    i('clear key value: $group');
     _data.clear();
     return _dao.clear(group);
   }

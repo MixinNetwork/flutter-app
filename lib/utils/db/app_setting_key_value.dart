@@ -5,7 +5,7 @@ import '../extension/extension.dart';
 import '../proxy.dart';
 import 'db_key_value.dart';
 
-class AppSettingKeyValue extends BaseAppKeyValue {
+class AppSettingKeyValue extends AppKeyValue {
   AppSettingKeyValue(KeyValueDao<AppPropertyGroup> dao)
       : super(group: AppPropertyGroup.setting, dao: dao);
 }

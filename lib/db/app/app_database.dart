@@ -22,17 +22,19 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
-  static Future<AppDatabase> connect({
+  factory AppDatabase.connect({
     bool fromMainIsolate = false,
-  }) async {
+  }) {
     final dbFilePath = p.join(mixinDocumentsDirectory.path, 'app.db');
-    final queryExecutor = await createOrConnectDriftIsolate(
-      portName: 'one_mixin_drift_app',
-      debugName: 'isolate_drift_app',
-      fromMainIsolate: fromMainIsolate,
-      dbFile: File(dbFilePath),
-    );
-    return AppDatabase(await queryExecutor.connect());
+    return AppDatabase(LazyDatabase(() async {
+      final queryExecutor = await createOrConnectDriftIsolate(
+        portName: 'one_mixin_drift_app',
+        debugName: 'isolate_drift_app',
+        fromMainIsolate: fromMainIsolate,
+        dbFile: File(dbFilePath),
+      );
+      return queryExecutor.connect();
+    }));
   }
 
   late final AppSettingKeyValue settingKeyValue =

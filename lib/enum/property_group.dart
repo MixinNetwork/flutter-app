@@ -6,4 +6,5 @@ enum UserPropertyGroup {
 
 enum AppPropertyGroup {
   setting,
+  auth,
 }

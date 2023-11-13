@@ -28,6 +28,7 @@ import 'ui/provider/mention_cache_provider.dart';
 import 'ui/provider/setting_provider.dart';
 import 'ui/provider/slide_category_provider.dart';
 import 'utils/extension/extension.dart';
+import 'utils/hook.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
@@ -51,6 +52,14 @@ class App extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     precacheImage(
         const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
+
+    final initialized = useMemoizedFuture(
+        () => ref.read(multiAuthStateNotifierProvider.notifier).initialized,
+        null);
+
+    if (initialized.connectionState == ConnectionState.waiting) {
+      return const _App(home: AppInitializingPage());
+    }
 
     final authState = ref.watch(authProvider);
 

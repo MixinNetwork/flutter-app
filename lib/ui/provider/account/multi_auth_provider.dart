@@ -1,14 +1,18 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
+import '../../../enum/property_group.dart';
+import '../../../utils/db/db_key_value.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hydrated_bloc.dart';
 import '../../../utils/rivepod.dart';
+import '../database_provider.dart';
 
 part 'multi_auth_provider.g.dart';
 
@@ -71,7 +75,32 @@ class MultiAuthState extends Equatable {
 }
 
 class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
-  MultiAuthStateNotifier(super.state);
+  MultiAuthStateNotifier(this._multiAuthKeyValue) : super(MultiAuthState()) {
+    _init().whenComplete(_initialized.complete);
+  }
+
+  final _initialized = Completer<void>();
+
+  Future<void> get initialized => _initialized.future;
+
+  Future<void> _init() async {
+    await _multiAuthKeyValue.initialized;
+    final auths = _multiAuthKeyValue.authList;
+    final activeUserId = _multiAuthKeyValue.activeUserId;
+    if (auths.isEmpty) {
+      // check if old auths exist.
+      final oldAuthState = _getLegacyMultiAuthState();
+      if (oldAuthState != null) {
+        i('migrate legacy auths');
+        state = oldAuthState;
+        return;
+      }
+    }
+    _removeLegacyMultiAuthState();
+    super.state = MultiAuthState(auths: auths, activeUserId: activeUserId);
+  }
+
+  final MultiAuthKeyValue _multiAuthKeyValue;
 
   AuthState? get current => state.current;
 
@@ -111,10 +140,10 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
   }
 
   @override
-  @protected
   set state(MultiAuthState value) {
-    final hydratedJson = toHydratedJson(value.toJson());
-    HydratedBloc.storage.write(_kMultiAuthCubitKey, hydratedJson);
+    _multiAuthKeyValue
+      ..setAuthList(value.auths)
+      ..setActiveUserId(value.activeUserId);
     super.state = value;
   }
 
@@ -134,22 +163,53 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
 
 const _kMultiAuthCubitKey = 'MultiAuthCubit';
 
+MultiAuthState? _getLegacyMultiAuthState() {
+  final oldJson = HydratedBloc.storage.read(_kMultiAuthCubitKey);
+  if (oldJson == null) {
+    return null;
+  }
+  final multiAuthState = fromHydratedJson(oldJson, MultiAuthState.fromJson);
+  return multiAuthState;
+}
+
+void _removeLegacyMultiAuthState() {
+  HydratedBloc.storage.delete(_kMultiAuthCubitKey);
+}
+
 final multiAuthStateNotifierProvider =
     StateNotifierProvider<MultiAuthStateNotifier, MultiAuthState>((ref) {
-  final oldJson = HydratedBloc.storage.read(_kMultiAuthCubitKey);
-  if (oldJson != null) {
-    final multiAuthState = fromHydratedJson(oldJson, MultiAuthState.fromJson);
-    if (multiAuthState == null) {
-      return MultiAuthStateNotifier(MultiAuthState());
-    }
-
-    return MultiAuthStateNotifier(multiAuthState);
-  }
-
-  return MultiAuthStateNotifier(MultiAuthState());
+  final multiAuthKeyValue = ref.watch(multiAuthKeyValueProvider);
+  return MultiAuthStateNotifier(multiAuthKeyValue);
 });
 
 final authProvider =
     multiAuthStateNotifierProvider.select((value) => value.current);
 
 final authAccountProvider = authProvider.select((value) => value?.account);
+
+const _keyAuths = 'auths';
+const _keyActiveUserId = 'active_user_id';
+
+final multiAuthKeyValueProvider = Provider<MultiAuthKeyValue>((ref) {
+  final dao = ref.watch(appDatabaseProvider).appKeyValueDao;
+  return MultiAuthKeyValue(dao: dao);
+});
+
+class MultiAuthKeyValue extends AppKeyValue {
+  MultiAuthKeyValue({required super.dao}) : super(group: AppPropertyGroup.auth);
+
+  List<AuthState> get authList {
+    final json = get<List<Map<String, dynamic>>>(_keyAuths);
+    if (json == null) {
+      return [];
+    }
+    return json.map(AuthState.fromJson).toList();
+  }
+
+  String? get activeUserId => get(_keyActiveUserId);
+
+  Future<void> setAuthList(List<AuthState> auths) =>
+      set(_keyAuths, auths.map((e) => e.toJson()).toList());
+
+  Future<void> setActiveUserId(String? userId) => set(_keyActiveUserId, userId);
+}

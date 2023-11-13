@@ -145,7 +145,7 @@ class _MessageProcessRunner {
   Timer? _nextExpiredMessageRunner;
 
   Future<void> init(IsolateInitParams initParams) async {
-    appDatabase = await AppDatabase.connect();
+    appDatabase = AppDatabase.connect();
 
     database = Database(
       await connectToDatabase(identityNumber, readCount: 4),

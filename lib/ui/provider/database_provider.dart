@@ -13,7 +13,7 @@ import 'hive_key_value_provider.dart';
 import 'slide_category_provider.dart';
 
 final appDatabaseProvider =
-    Provider<AppDatabase>((ref) => throw UnimplementedError());
+    Provider<AppDatabase>((ref) => AppDatabase.connect(fromMainIsolate: true));
 
 final databaseProvider =
     StateNotifierProvider.autoDispose<DatabaseOpener, AsyncValue<Database>>(

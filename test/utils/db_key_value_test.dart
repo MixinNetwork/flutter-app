@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('tet key value', () async {
     final database = AppDatabase(NativeDatabase.memory());
-    final storage = BaseAppKeyValue(
+    final storage = AppKeyValue(
       group: AppPropertyGroup.setting,
       dao: database.appKeyValueDao,
     );
