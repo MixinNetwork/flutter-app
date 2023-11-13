@@ -55,12 +55,12 @@ class ProxyConfig with EquatableMixin {
 extension DioProxyExt on Dio {
   void applyProxy(ProxyConfig? config) {
     if (config != null) {
-      i('apply client proxy $config');
+      i('with dio with client proxy $config');
       httpClientAdapter = IOHttpClientAdapter();
       (httpClientAdapter as IOHttpClientAdapter).createHttpClient =
           () => HttpClient()..setProxy(config);
     } else {
-      i('remove client proxy');
+      i('create dio without client proxy');
       httpClientAdapter = IOHttpClientAdapter();
     }
   }

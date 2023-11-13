@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../../account/account_server.dart';
 import '../../../blaze/blaze.dart';
@@ -35,7 +34,6 @@ class AccountServerOpener
   _Args? _previousArgs;
 
   Future<void> _onNewArgs(_Args? args) => _lock.synchronized(() async {
-        i('on new args: $args');
         if (_previousArgs == args) {
           return;
         }
@@ -53,7 +51,6 @@ class AccountServerOpener
       });
 
   Future<AccountServer> _openAccountServer(_Args args) async {
-    d('create new account server: $args');
     final accountServer = AccountServer(
       multiAuthNotifier: args.multiAuthChangeNotifier,
       database: args.database,

@@ -103,7 +103,6 @@ class SignalDatabase extends _$SignalDatabase {
     required bool openForLogin,
     required bool fromMainIsolate,
   }) async {
-    i('connect to signal database: $identityNumber');
     if (openForLogin) {
       // delete old database file
       await _removeLegacySignalDatabase();
