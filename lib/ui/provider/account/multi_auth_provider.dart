@@ -116,7 +116,6 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
     final hydratedJson = toHydratedJson(value.toJson());
     HydratedBloc.storage.write(_kMultiAuthCubitKey, hydratedJson);
     super.state = value;
-    i('auth sate: $state');
   }
 
   void active(String userId) {

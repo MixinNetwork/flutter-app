@@ -1,4 +1,5 @@
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/util/key_helper.dart' as helper;
 
