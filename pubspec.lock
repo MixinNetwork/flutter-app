@@ -77,10 +77,10 @@ packages:
     dependency: "direct main"
     description:
       name: audio_session
-      sha256: "8a2bc5e30520e18f3fb0e366793d78057fb64cd5287862c76af0c8771f2a52ad"
+      sha256: "768eadc8174b366b8b1b0b75e0518eea2bbd463d47a7938c54a2a0e6aa06946d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.16"
+    version: "0.1.17"
   auto_size_text:
     dependency: "direct main"
     description:
