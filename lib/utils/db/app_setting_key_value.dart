@@ -3,7 +3,7 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../enum/property_group.dart';
 import '../extension/extension.dart';
 import '../proxy.dart';
-import 'lazy_db_key_value.dart';
+import 'db_key_value.dart';
 
 class AppSettingKeyValue extends BaseAppKeyValue {
   AppSettingKeyValue(KeyValueDao<AppPropertyGroup> dao)
@@ -24,7 +24,7 @@ extension SettingProxy on AppSettingKeyValue {
   set selectedProxyId(String? value) => set(_kSelectedProxyKey, value);
 
   List<ProxyConfig> get proxyList {
-    final list = getList<Map<String, dynamic>>(_kProxyListKey);
+    final list = get<List<Map<String, dynamic>>>(_kProxyListKey);
     if (list == null || list.isEmpty) {
       return [];
     }

@@ -2,7 +2,7 @@ import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
 import '../../enum/property_group.dart';
 import '../crypto_util.dart';
-import 'lazy_db_key_value.dart';
+import 'db_key_value.dart';
 
 class UserCryptoKeyValue extends BaseLazyUserKeyValue {
   UserCryptoKeyValue(KeyValueDao<UserPropertyGroup> dao)

@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../enum/property_group.dart';
-import '../../../utils/db/lazy_db_key_value.dart';
+import '../../../utils/db/db_key_value.dart';
 import '../app_database.dart';
 
 part 'app_key_value_dao.g.dart';
