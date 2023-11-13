@@ -137,10 +137,9 @@ EncryptCategory _getEncryptCategory(App? app) {
 class ConversationStateNotifier
     extends DistinctStateNotifier<ConversationState?> with SubscriberMixin {
   ConversationStateNotifier({
-    required AccountServer accountServer,
+    required this.ref,
     required ResponsiveNavigatorStateNotifier responsiveNavigatorStateNotifier,
   })  : _responsiveNavigatorStateNotifier = responsiveNavigatorStateNotifier,
-        _accountServer = accountServer,
         super(null) {
     addSubscription(stream
         .map((event) => event?.conversationId)
@@ -211,7 +210,10 @@ class ConversationStateNotifier
     appActiveListener.addListener(onListen);
   }
 
-  final AccountServer _accountServer;
+  final Ref ref;
+
+  AccountServer get _accountServer =>
+      ref.read(accountServerProvider).valueOrNull!;
   final ResponsiveNavigatorStateNotifier _responsiveNavigatorStateNotifier;
   late final Database _database = _accountServer.database;
   late final String _currentUserId = _accountServer.userId;
@@ -402,16 +404,12 @@ class _LastConversationNotifier
 
 final conversationProvider = StateNotifierProvider.autoDispose<
     ConversationStateNotifier, ConversationState?>((ref) {
-  final accountServerAsync = ref.watch(accountServerProvider);
-  if (!accountServerAsync.hasValue) {
-    throw Exception('accountServer is not ready');
-  }
-
+  //  refresh when accountServerProvider changed
+  ref.watch(accountServerProvider);
   final responsiveNavigatorNotifier =
       ref.watch(responsiveNavigatorProvider.notifier);
-
   return ConversationStateNotifier(
-    accountServer: accountServerAsync.requireValue,
+    ref: ref,
     responsiveNavigatorStateNotifier: responsiveNavigatorNotifier,
   );
 });
