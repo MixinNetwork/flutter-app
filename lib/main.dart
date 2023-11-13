@@ -21,7 +21,9 @@ import 'package:window_size/window_size.dart';
 
 import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
+import 'db/app/app_database.dart';
 import 'ui/home/home.dart';
+import 'ui/provider/database_provider.dart';
 import 'utils/app_lifecycle.dart';
 import 'utils/event_bus.dart';
 import 'utils/file.dart';
@@ -102,7 +104,14 @@ Future<void> main(List<String> args) async {
     Bloc.observer = CustomBlocObserver();
   }
 
-  runApp(const ProviderScope(child: OverlaySupport.global(child: App())));
+  final appDatabase = AppDatabase.connect(fromMainIsolate: true);
+  await appDatabase.settingKeyValue.initialized;
+  runApp(ProviderScope(
+    overrides: [
+      appDatabaseProvider.overrideWithValue(appDatabase),
+    ],
+    child: const OverlaySupport.global(child: App()),
+  ));
 
   if (kPlatformIsDesktop) {
     Size? windowSize;

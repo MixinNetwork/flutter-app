@@ -82,6 +82,7 @@ class BrightnessObserver extends HookConsumerWidget {
         value: value,
         brightnessThemeData:
             BrightnessThemeData.lerp(lightThemeData, darkThemeData, value),
+        brightness: currentBrightness,
         child: child!,
       ),
       child: child,
@@ -95,15 +96,18 @@ class BrightnessData extends InheritedWidget {
     required super.child,
     super.key,
     required this.brightnessThemeData,
+    required this.brightness,
   });
 
   final double value;
   final BrightnessThemeData brightnessThemeData;
+  final Brightness brightness;
 
   @override
   bool updateShouldNotify(covariant BrightnessData oldWidget) =>
       value != oldWidget.value ||
-      brightnessThemeData != oldWidget.brightnessThemeData;
+      brightnessThemeData != oldWidget.brightnessThemeData ||
+      brightness != oldWidget.brightness;
 
   static double of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<BrightnessData>()!.value;
@@ -111,6 +115,9 @@ class BrightnessData extends InheritedWidget {
   static BrightnessThemeData themeOf(BuildContext context) => context
       .dependOnInheritedWidgetOfExactType<BrightnessData>()!
       .brightnessThemeData;
+
+  static Brightness brightnessOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<BrightnessData>()!.brightness;
 
   static Color dynamicColor(
     BuildContext context,

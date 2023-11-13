@@ -12,7 +12,6 @@ import '../../../utils/synchronized.dart';
 import '../conversation_provider.dart';
 import '../database_provider.dart';
 import '../hive_key_value_provider.dart';
-import '../setting_provider.dart';
 import 'multi_auth_provider.dart';
 
 typedef GetCurrentConversationId = String? Function();
@@ -57,7 +56,6 @@ class AccountServerOpener
     d('create new account server: $args');
     final accountServer = AccountServer(
       multiAuthNotifier: args.multiAuthChangeNotifier,
-      settingChangeNotifier: args.settingChangeNotifier,
       database: args.database,
       currentConversationId: args.currentConversationId,
       ref: ref,
@@ -89,7 +87,6 @@ class _Args extends Equatable {
     required this.identityNumber,
     required this.privateKey,
     required this.multiAuthChangeNotifier,
-    required this.settingChangeNotifier,
     required this.currentConversationId,
     required this.hiveKeyValues,
   });
@@ -100,7 +97,6 @@ class _Args extends Equatable {
   final String identityNumber;
   final String privateKey;
   final MultiAuthStateNotifier multiAuthChangeNotifier;
-  final SettingChangeNotifier settingChangeNotifier;
   final GetCurrentConversationId currentConversationId;
   final HiveKeyValues hiveKeyValues;
 
@@ -112,7 +108,6 @@ class _Args extends Equatable {
         identityNumber,
         privateKey,
         multiAuthChangeNotifier,
-        settingChangeNotifier,
         currentConversationId,
         hiveKeyValues,
       ];
@@ -135,7 +130,6 @@ final _argsProvider = FutureProvider.autoDispose((ref) async {
   }
   final multiAuthChangeNotifier =
       ref.watch(multiAuthStateNotifierProvider.notifier);
-  final settingChangeNotifier = ref.watch(settingProvider);
   final currentConversationId = ref.read(_currentConversationIdProvider);
   final hiveKeyValues =
       await ref.watch(hiveKeyValueProvider(auth.account.identityNumber).future);
@@ -147,7 +141,6 @@ final _argsProvider = FutureProvider.autoDispose((ref) async {
     identityNumber: auth.account.identityNumber,
     privateKey: auth.privateKey,
     multiAuthChangeNotifier: multiAuthChangeNotifier,
-    settingChangeNotifier: settingChangeNotifier,
     currentConversationId: currentConversationId,
     hiveKeyValues: hiveKeyValues,
   );

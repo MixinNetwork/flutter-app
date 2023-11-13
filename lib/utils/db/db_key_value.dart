@@ -34,10 +34,10 @@ class _BaseLazyDbKeyValue<G> {
   final G group;
   final KeyValueDao<G> dao;
 
-  Stream<T?> watch<T>(String key) =>
+  Stream<T?> watch<T extends Object>(String key) =>
       dao.watchByKey(group, key).map(convertToType);
 
-  Future<T?> get<T>(String key) async {
+  Future<T?> get<T extends Object>(String key) async {
     final value = await dao.getByKey(group, key);
     return convertToType<T>(value);
   }
@@ -81,7 +81,7 @@ class _BaseDbKeyValue<G> extends ChangeNotifier {
     notifyListeners();
   }
 
-  T? get<T>(String key) => convertToType<T>(_data[key]);
+  T? get<T extends Object>(String key) => convertToType<T>(_data[key]);
 
   Future<void> set<T>(String key, T? value) {
     final converted = convertToString(value);
@@ -107,7 +107,7 @@ class _BaseDbKeyValue<G> extends ChangeNotifier {
 }
 
 @visibleForTesting
-T? convertToType<T>(String? value) {
+T? convertToType<T extends Object>(String? value) {
   if (value == null) {
     return null;
   }

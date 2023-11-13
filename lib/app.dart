@@ -188,13 +188,15 @@ class _App extends HookConsumerWidget {
               ),
               useMaterial3: true,
             ).withFallbackFonts(),
-            themeMode: ref.watch(settingProvider).themeMode,
+            themeMode:
+                ref.watch(settingProvider.select((value) => value.themeMode)),
             builder: (context, child) {
               final mediaQueryData = MediaQuery.of(context);
               return BrightnessObserver(
                 lightThemeData: lightBrightnessThemeData,
                 darkThemeData: darkBrightnessThemeData,
-                forceBrightness: ref.watch(settingProvider).brightness,
+                forceBrightness: ref
+                    .watch(settingProvider.select((value) => value.brightness)),
                 child: MediaQuery(
                   data: mediaQueryData.copyWith(
                     // Different linux distro change the value, e.g. 1.2

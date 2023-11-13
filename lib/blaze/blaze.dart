@@ -12,7 +12,7 @@ import '../constants/constants.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
-import '../utils/db/app_setting_key_value.dart';
+import '../ui/provider/setting_provider.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import '../utils/proxy.dart';

@@ -118,7 +118,8 @@ class SlidePage extends StatelessWidget {
                             ),
                           ),
                           title: Text(context.l10n.collapse),
-                          onTap: () => context.settingChangeNotifier
+                          onTap: () => ref
+                              .read(settingProvider)
                               .collapsedSidebar = !collapse,
                         );
                       }),

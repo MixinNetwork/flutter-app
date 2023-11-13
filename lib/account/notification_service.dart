@@ -12,6 +12,7 @@ import '../enum/message_category.dart';
 import '../generated/l10n.dart';
 import '../ui/provider/conversation_provider.dart';
 import '../ui/provider/mention_cache_provider.dart';
+import '../ui/provider/setting_provider.dart';
 import '../ui/provider/slide_category_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/extension/extension.dart';
@@ -97,7 +98,7 @@ class NotificationService {
             );
 
             String? body;
-            if (context.settingChangeNotifier.messagePreview) {
+            if (ref.read(settingProvider).messagePreview) {
               final mentionCache = ref.read(mentionCacheProvider);
 
               if (event.type == MessageCategory.systemConversation) {

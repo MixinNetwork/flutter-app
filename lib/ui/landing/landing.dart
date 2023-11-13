@@ -334,8 +334,6 @@ final landingKeyValuesProvider = FutureProvider.autoDispose<HiveKeyValues?>(
     if (identityNumber == null) {
       return null;
     }
-    final hiveKeyValues =
-        ref.watch(hiveKeyValueProvider(identityNumber).future);
-    return hiveKeyValues;
+    return ref.watch(hiveKeyValueProvider(identityNumber).future);
   },
 );

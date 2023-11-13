@@ -12,8 +12,7 @@ import 'package:http_client_helper/http_client_helper.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../ui/provider/app_key_value_provider.dart';
-import '../utils/db/app_setting_key_value.dart';
+import '../ui/provider/setting_provider.dart';
 import '../utils/logger.dart';
 import '../utils/proxy.dart';
 
@@ -44,8 +43,8 @@ class CacheImage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final proxyUrl = ref
-        .watch(settingKeyValueProvider.select((value) => value.activatedProxy));
+    final proxyUrl =
+        ref.watch(settingProvider.select((value) => value.activatedProxy));
     return Image(
       image: MixinNetworkImageProvider(
         src,

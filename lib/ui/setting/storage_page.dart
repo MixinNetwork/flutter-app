@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
@@ -44,8 +43,8 @@ class StoragePage extends HookConsumerWidget {
                           child: CupertinoSwitch(
                             activeColor: context.theme.accent,
                             value: photoAutoDownload,
-                            onChanged: (bool value) => context
-                                .settingChangeNotifier
+                            onChanged: (bool value) => ref
+                                .read(settingProvider)
                                 .photoAutoDownload = value,
                           )),
                     ),
@@ -56,8 +55,8 @@ class StoragePage extends HookConsumerWidget {
                           child: CupertinoSwitch(
                             activeColor: context.theme.accent,
                             value: videoAutoDownload,
-                            onChanged: (bool value) => context
-                                .settingChangeNotifier
+                            onChanged: (bool value) => ref
+                                .read(settingProvider)
                                 .videoAutoDownload = value,
                           )),
                     ),
@@ -68,8 +67,9 @@ class StoragePage extends HookConsumerWidget {
                           child: CupertinoSwitch(
                             activeColor: context.theme.accent,
                             value: fileAutoDownload,
-                            onChanged: (bool value) => context
-                                .settingChangeNotifier.fileAutoDownload = value,
+                            onChanged: (bool value) => ref
+                                .read(settingProvider)
+                                .fileAutoDownload = value,
                           )),
                     ),
                   ],

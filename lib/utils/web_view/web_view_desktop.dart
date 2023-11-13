@@ -16,7 +16,6 @@ import '../extension/extension.dart';
 import '../file.dart';
 import '../system/package_info.dart';
 import '../uri_utils.dart';
-
 import 'web_view_interface.dart';
 
 class DesktopMixinWebView extends MixinWebView {
@@ -41,8 +40,7 @@ class DesktopMixinWebView extends MixinWebView {
   ) async {
     assert(context.auth != null);
 
-    final mode = context.settingChangeNotifier.brightness ??
-        MediaQuery.platformBrightnessOf(context);
+    final mode = context.brightness;
     final info = await getPackageInfo();
     debugPrint(
         'info: appName: ${info.appName} packageName: ${info.packageName} version: ${info.version} buildNumber: ${info.buildNumber} buildSignature: ${info.buildSignature} ');
@@ -74,7 +72,7 @@ class DesktopMixinWebView extends MixinWebView {
     App? app,
     AppCardData? appCardData,
   }) async {
-    final brightness = context.settingChangeNotifier.brightness;
+    final brightness = context.brightness;
     final packageInfo = await getPackageInfo();
     final webView = await WebviewWindow.create(
       configuration: CreateConfiguration(
@@ -110,6 +108,7 @@ bool runWebViewNavigationBar(List<String> args) => runWebViewTitleBarWidget(
       builder: (context) => const BrightnessData(
         brightnessThemeData: lightBrightnessThemeData,
         value: 1,
+        brightness: Brightness.light,
         child: WebViewNavigationBar(),
       ),
       backgroundColor: const Color(0xFFF0E7EA),

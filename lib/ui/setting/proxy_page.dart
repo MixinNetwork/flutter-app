@@ -8,7 +8,6 @@ import 'package:uuid/uuid.dart';
 
 import '../../constants/constants.dart';
 import '../../constants/resources.dart';
-import '../../utils/db/app_setting_key_value.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
 import '../../utils/proxy.dart';
@@ -16,8 +15,8 @@ import '../../widgets/action_button.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
-import '../provider/app_key_value_provider.dart';
 import '../provider/database_provider.dart';
+import '../provider/setting_provider.dart';
 
 class ProxyPage extends StatelessWidget {
   const ProxyPage({super.key});
@@ -48,8 +47,8 @@ class _ProxySettingWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final enableProxy =
-        ref.watch(settingKeyValueProvider.select((value) => value.enableProxy));
-    final hasProxyConfig = ref.watch(settingKeyValueProvider.select(
+        ref.watch(settingProvider.select((value) => value.enableProxy));
+    final hasProxyConfig = ref.watch(settingProvider.select(
       (value) => value.proxyList.isNotEmpty,
     ));
     return Column(
@@ -67,7 +66,7 @@ class _ProxySettingWidget extends HookConsumerWidget {
                   onChanged: !hasProxyConfig
                       ? null
                       : (bool value) => ref
-                          .read(settingKeyValueProvider.notifier)
+                          .read(settingProvider.notifier)
                           .enableProxy = value,
                 )),
           ),
@@ -106,10 +105,10 @@ class _ProxyItemList extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final proxyList =
-        ref.watch(settingKeyValueProvider.select((value) => value.proxyList));
-    final selectedProxyId = ref.watch(
-            settingKeyValueProvider.select((value) => value.selectedProxyId)) ??
-        proxyList.firstOrNull?.id;
+        ref.watch(settingProvider.select((value) => value.proxyList));
+    final selectedProxyId =
+        ref.watch(settingProvider.select((value) => value.selectedProxyId)) ??
+            proxyList.firstOrNull?.id;
     return Column(
       children: proxyList
           .map(
@@ -167,7 +166,7 @@ class _ProxyItemWidget extends ConsumerWidget {
             name: Resources.assetsImagesDeleteSvg,
             color: context.theme.icon,
             onTap: () {
-              final settingKeyValue = ref.read(settingKeyValueProvider.notifier)
+              final settingKeyValue = ref.read(settingProvider.notifier)
                 ..removeProxy(proxy.id);
               if (selected) {
                 settingKeyValue
@@ -180,8 +179,7 @@ class _ProxyItemWidget extends ConsumerWidget {
             if (selected) {
               return;
             }
-            ref.read(settingKeyValueProvider.notifier).selectedProxyId =
-                proxy.id;
+            ref.read(settingProvider.notifier).selectedProxyId = proxy.id;
           },
         ),
       );

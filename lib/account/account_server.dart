@@ -30,7 +30,6 @@ import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../ui/provider/account/account_server_provider.dart';
 import '../ui/provider/account/multi_auth_provider.dart';
-import '../ui/provider/app_key_value_provider.dart';
 import '../ui/provider/hive_key_value_provider.dart';
 import '../ui/provider/setting_provider.dart';
 import '../utils/app_lifecycle.dart';
@@ -53,7 +52,6 @@ class AccountServer {
     this.userAgent,
     this.deviceId,
     required this.multiAuthNotifier,
-    required this.settingChangeNotifier,
     required this.database,
     required this.currentConversationId,
     required this.ref,
@@ -63,7 +61,6 @@ class AccountServer {
   static String? sid;
 
   final MultiAuthStateNotifier multiAuthNotifier;
-  final SettingChangeNotifier settingChangeNotifier;
   final Database database;
   final GetCurrentConversationId currentConversationId;
 
@@ -170,14 +167,14 @@ class AccountServer {
           },
         ),
       ],
-    )..configProxySetting(ref.read(settingKeyValueProvider));
+    )..configProxySetting(ref.read(settingProvider));
 
     attachmentUtil = AttachmentUtil.init(
       client,
       database,
       identityNumber,
       hiveKeyValues.downloadKeyValue,
-      ref.read(settingKeyValueProvider),
+      ref.read(settingProvider),
     );
     _sendMessageHelper =
         SendMessageHelper(database, attachmentUtil, addSendingJob);
@@ -285,12 +282,13 @@ class AccountServer {
     AttachmentRequest request,
   ) async {
     bool needDownload(String category) {
+      final settings = ref.read(settingProvider);
       if (category.isImage) {
-        return settingChangeNotifier.photoAutoDownload;
+        return settings.photoAutoDownload;
       } else if (category.isVideo) {
-        return settingChangeNotifier.videoAutoDownload;
+        return settings.videoAutoDownload;
       } else if (category.isData) {
-        return settingChangeNotifier.fileAutoDownload;
+        return settings.fileAutoDownload;
       }
       return true;
     }

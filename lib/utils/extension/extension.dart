@@ -28,7 +28,6 @@ import '../../ui/provider/account/account_server_provider.dart';
 import '../../ui/provider/account/multi_auth_provider.dart';
 import '../../ui/provider/database_provider.dart';
 import '../../ui/provider/hive_key_value_provider.dart';
-import '../../ui/provider/setting_provider.dart';
 import '../../widgets/brightness_observer.dart';
 import '../audio_message_player/audio_message_service.dart';
 import '../platform.dart';
@@ -56,17 +55,29 @@ export 'src/file.dart';
 export 'src/platforms.dart';
 
 part 'src/db.dart';
+
 part 'src/duration.dart';
+
 part 'src/image.dart';
+
 part 'src/info.dart';
+
 part 'src/iterable.dart';
+
 part 'src/key_event.dart';
+
 part 'src/markdown.dart';
+
 part 'src/number.dart';
+
 part 'src/provider.dart';
+
 part 'src/regexp.dart';
+
 part 'src/stream.dart';
+
 part 'src/string.dart';
+
 part 'src/ui.dart';
 
 void importExtension() {}

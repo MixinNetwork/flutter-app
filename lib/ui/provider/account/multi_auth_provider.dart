@@ -168,8 +168,7 @@ MultiAuthState? _getLegacyMultiAuthState() {
   if (oldJson == null) {
     return null;
   }
-  final multiAuthState = fromHydratedJson(oldJson, MultiAuthState.fromJson);
-  return multiAuthState;
+  return fromHydratedJson(oldJson, MultiAuthState.fromJson);
 }
 
 void _removeLegacyMultiAuthState() {
