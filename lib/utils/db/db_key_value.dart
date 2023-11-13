@@ -130,6 +130,7 @@ T? convertToType<T extends Object>(String? value) {
       case const (List<Map<String, dynamic>>):
         return (jsonDecode(value) as List).cast<Map<String, dynamic>>() as T;
       case const (dynamic):
+      case const (Object):
         return value as T;
       default:
         throw UnsupportedError('unsupported type $T');

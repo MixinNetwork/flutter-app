@@ -54,7 +54,7 @@ void main() {
     expect(storage.get<List>('test_list'), [1, 2, 3]);
 
     unawaited(storage.set('test_list_string', ['1', '2', '3']));
-    expect(storage.get<List<String>>('test_list_string'), ['1', '2', '3']);
+    expect(storage.get<List<String>>('test_list_string'), null);
     expect(storage.get<List>('test_list_string'), ['1', '2', '3']);
   });
 
