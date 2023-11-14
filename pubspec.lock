@@ -53,10 +53,10 @@ packages:
     dependency: "direct main"
     description:
       name: archive
-      sha256: "7e0d52067d05f2e0324268097ba723b71cb41ac8a6a2b24d1edf9c536b987b03"
+      sha256: "7b875fd4a20b165a3084bd2d210439b22ebc653f21cea4842729c0c30c82596b"
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.6"
+    version: "3.4.9"
   args:
     dependency: transitive
     description:
@@ -77,10 +77,10 @@ packages:
     dependency: "direct main"
     description:
       name: audio_session
-      sha256: "8a2bc5e30520e18f3fb0e366793d78057fb64cd5287862c76af0c8771f2a52ad"
+      sha256: "768eadc8174b366b8b1b0b75e0518eea2bbd463d47a7938c54a2a0e6aa06946d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.16"
+    version: "0.1.17"
   auto_size_text:
     dependency: "direct main"
     description:
@@ -457,10 +457,10 @@ packages:
     dependency: "direct dev"
     description:
       name: drift_dev
-      sha256: f79281f13411abe4229d6b57956202f047cc49b2c4e0d26ffae7273d6e5e97b1
+      sha256: "369d2769d84e0c2d2cb4cd420e4fdb4f975852c83ebb934733c3b382c62961cd"
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.1"
+    version: "2.13.2"
   ecache:
     dependency: "direct main"
     description:
@@ -1207,10 +1207,10 @@ packages:
     dependency: "direct dev"
     description:
       name: msix
-      sha256: "6e76e2491d5c809d784ce2b68e6c3426097fb5c68e61fe121c8c3341ab89bf46"
+      sha256: "957d04eee260e4bd15bec1fdb988dfc73718285e201cf89d97ef01ef38e66d4c"
       url: "https://pub.dev"
     source: hosted
-    version: "3.16.4"
+    version: "3.16.6"
   native_dio_adapter:
     dependency: "direct main"
     description:
@@ -1709,10 +1709,10 @@ packages:
     dependency: "direct main"
     description:
       name: sqlite3_flutter_libs
-      sha256: "11a41f380fbcbda5bbba03ddcdbe0545e46094ab043783c46c70e8335831df03"
+      sha256: "3e3583b77cf888a68eae2e49ee4f025f66b86623ef0d83c297c8d903daa14871"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.17"
+    version: "0.5.18"
   sqlparser:
     dependency: transitive
     description:

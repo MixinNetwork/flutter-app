@@ -20,9 +20,9 @@ environment:
 dependencies:
   android_id: ^0.3.6
   ansicolor: ^2.0.2
-  archive: ^3.4.6
+  archive: ^3.4.9
   async: ^2.8.1
-  audio_session: ^0.1.16
+  audio_session: ^0.1.17
   auto_size_text: ^3.0.0
   bloc: ^8.1.2
   bloc_concurrency: ^0.2.2
@@ -124,7 +124,7 @@ dependencies:
   scrollable_positioned_list: ^0.3.5
   simple_animations: ^5.0.2
   sliver_tools: ^0.2.12
-  sqlite3_flutter_libs: ^0.5.17
+  sqlite3_flutter_libs: ^0.5.18
   stream_transform: ^2.1.0
   string_tokenizer:
     git:
@@ -167,13 +167,13 @@ dev_dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 77f03330001941f0ac303de6276dd2380f5bcc7e
       path: packages/debug_info_collector
-  drift_dev: ^2.13.1
+  drift_dev: ^2.13.2
   flutter_test:
     sdk: flutter
   hive_generator: ^2.0.1
   intl_utils: ^2.8.5
   json_serializable: ^6.7.1
-  msix: ^3.16.4
+  msix: ^3.16.6
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
