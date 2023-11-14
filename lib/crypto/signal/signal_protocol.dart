@@ -39,7 +39,6 @@ class SignalProtocol {
       String identityNumber, int registrationId, List<int>? private) async {
     final db = await SignalDatabase.connect(
       identityNumber: identityNumber,
-      openForLogin: true,
       fromMainIsolate: true,
     );
     try {

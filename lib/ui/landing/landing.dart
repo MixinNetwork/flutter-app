@@ -206,7 +206,6 @@ class _LoginFailed extends HookConsumerWidget {
                   await hiveKeyValues.clearAll();
                   final signalDb = await SignalDatabase.connect(
                     identityNumber: authState.account.identityNumber,
-                    openForLogin: true,
                     fromMainIsolate: true,
                   );
                   await signalDb.clear();

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -6,10 +7,12 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:path/path.dart' as p;
 
 import '../../../enum/property_group.dart';
 import '../../../utils/db/db_key_value.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/file.dart';
 import '../../../utils/hydrated_bloc.dart';
 import '../../../utils/rivepod.dart';
 import '../database_provider.dart';
@@ -86,18 +89,24 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
   Future<void> _init() async {
     await _multiAuthKeyValue.initialize;
     final auths = _multiAuthKeyValue.authList;
-    final activeUserId = _multiAuthKeyValue.activeUserId;
-    if (auths.isEmpty) {
+    var activeUserId = _multiAuthKeyValue.activeUserId;
+    if (auths.isEmpty && !_multiAuthKeyValue.authMigrated) {
+      await _multiAuthKeyValue.setAuthMigrated();
       // check if old auths exist.
-      final oldAuthState = _getLegacyMultiAuthState();
+      final oldAuthState = _getLegacyMultiAuthState()?.auths.lastOrNull;
       if (oldAuthState != null) {
         i('migrate legacy auths');
-        state = oldAuthState;
-        _removeLegacyMultiAuthState();
-        return;
+        final signalDbMigrated = await _migrationLegacySignalDatabase(
+            oldAuthState.account.identityNumber);
+        if (signalDbMigrated) {
+          auths.add(oldAuthState);
+          activeUserId = oldAuthState.userId;
+        } else {
+          w('migration legacy signal database failed, ignore legacy auths.');
+        }
       }
+      _removeLegacyMultiAuthState();
     }
-    _removeLegacyMultiAuthState();
     super.state = MultiAuthState(auths: auths, activeUserId: activeUserId);
   }
 
@@ -176,6 +185,70 @@ void _removeLegacyMultiAuthState() {
   HydratedBloc.storage.delete(_kMultiAuthCubitKey);
 }
 
+Future<void> _removeLegacySignalDatabase() async {
+  final dbFolder = mixinDocumentsDirectory.path;
+  const dbFiles = ['signal.db', 'signal.db-shm', 'signal.db-wal'];
+  final files = dbFiles.map((e) => File(p.join(dbFolder, e)));
+  for (final file in files) {
+    try {
+      if (file.existsSync()) {
+        i('remove legacy signal database: ${file.path}');
+        await file.delete();
+      }
+    } catch (error, stacktrace) {
+      e('_removeLegacySignalDatabase ${file.path} error: $error, stacktrace: $stacktrace');
+    }
+  }
+}
+
+Future<bool> _migrationLegacySignalDatabase(String identityNumber) async {
+  final dbFolder = p.join(mixinDocumentsDirectory.path, identityNumber);
+
+  final dbFile = File(p.join(dbFolder, 'signal.db'));
+  // migration only when new database file not exists.
+  if (dbFile.existsSync()) {
+    await _removeLegacySignalDatabase();
+    return false;
+  }
+
+  final legacyDbFolder = mixinDocumentsDirectory.path;
+  final legacyDbFile = File(p.join(legacyDbFolder, 'signal.db'));
+  if (!legacyDbFile.existsSync()) {
+    return false;
+  }
+  const dbFiles = ['signal.db', 'signal.db-shm', 'signal.db-wal'];
+  final legacyFiles = dbFiles.map((e) => File(p.join(legacyDbFolder, e)));
+  var hasError = false;
+  for (final file in legacyFiles) {
+    try {
+      final newLocation = p.join(dbFolder, p.basename(file.path));
+      // delete new location file if exists
+      final newFile = File(newLocation);
+      if (newFile.existsSync()) {
+        await newFile.delete();
+      }
+      if (file.existsSync()) {
+        await file.copy(newLocation);
+      }
+      i('migrate legacy signal database: ${file.path}');
+    } catch (error, stacktrace) {
+      e('_migrationLegacySignalDatabaseIfNecessary ${file.path} error: $error, stacktrace: $stacktrace');
+      hasError = true;
+    }
+  }
+  if (hasError) {
+    // migration error. remove copied database file.
+    for (final name in dbFiles) {
+      final file = File(p.join(dbFolder, name));
+      if (file.existsSync()) {
+        await file.delete();
+      }
+    }
+  }
+  await _removeLegacySignalDatabase();
+  return !hasError;
+}
+
 final multiAuthStateNotifierProvider =
     StateNotifierProvider<MultiAuthStateNotifier, MultiAuthState>((ref) {
   final multiAuthKeyValue = ref.watch(multiAuthKeyValueProvider);
@@ -189,6 +262,7 @@ final authAccountProvider = authProvider.select((value) => value?.account);
 
 const _keyAuths = 'auths';
 const _keyActiveUserId = 'active_user_id';
+const _keyAuthMigrated = 'auth_migrated_from_hive';
 
 final multiAuthKeyValueProvider = Provider<MultiAuthKeyValue>((ref) {
   final dao = ref.watch(appDatabaseProvider).appKeyValueDao;
@@ -212,4 +286,12 @@ class MultiAuthKeyValue extends AppKeyValue {
       set(_keyAuths, auths.map((e) => e.toJson()).toList());
 
   Future<void> setActiveUserId(String? userId) => set(_keyActiveUserId, userId);
+
+  Future<void> setAuthMigrated() => set(_keyAuthMigrated, true);
+
+  /// In old version, we use hive to store auths.
+  /// from the vision of support multi account feature we use db key value to store auths.
+  /// We only do one time migration from old version, because the signal database only
+  /// migrate once.
+  bool get authMigrated => get(_keyAuthMigrated) ?? false;
 }

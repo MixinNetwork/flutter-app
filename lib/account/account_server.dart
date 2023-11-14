@@ -99,7 +99,6 @@ class AccountServer {
 
     signalDatabase = await SignalDatabase.connect(
       identityNumber: identityNumber,
-      openForLogin: false,
       fromMainIsolate: true,
     );
     checkSignalKeyTimer =

@@ -154,7 +154,6 @@ class _MessageProcessRunner {
 
     final signalDb = await SignalDatabase.connect(
       identityNumber: identityNumber,
-      openForLogin: false,
       fromMainIsolate: false,
     );
 
