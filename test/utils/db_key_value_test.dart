@@ -15,7 +15,7 @@ void main() {
       dao: database.appKeyValueDao,
     );
 
-    await storage.initialized;
+    await storage.initialize;
 
     expect(storage.get<bool>('test_empty'), null);
     unawaited(storage.set('test_empty', false));

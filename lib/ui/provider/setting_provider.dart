@@ -182,7 +182,7 @@ extension SettingMigration on AppSettingKeyValue {
       set(_keySettingHasMigratedFromHive, value);
 
   Future<void> _migration() async {
-    await initialized;
+    await initialize;
     if (settingHasMigratedFromHive) {
       return;
     }

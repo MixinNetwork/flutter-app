@@ -105,7 +105,7 @@ Future<void> main(List<String> args) async {
   }
 
   final appDatabase = AppDatabase.connect(fromMainIsolate: true);
-  await appDatabase.settingKeyValue.initialized;
+  await appDatabase.settingKeyValue.initialize;
   runApp(ProviderScope(
     overrides: [
       appDatabaseProvider.overrideWithValue(appDatabase),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
@@ -30,6 +31,7 @@ import '../../../widgets/message/message_bubble.dart';
 import '../../../widgets/message/message_day_time.dart';
 import '../../../widgets/pin_bubble.dart';
 import '../../../widgets/toast.dart';
+import '../../provider/account/security_key_value_provider.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/menu_handle_provider.dart';
@@ -1113,9 +1115,12 @@ class _ChatMenuHandler extends HookConsumerWidget {
       final controller = ref.read(macMenuBarProvider.notifier);
       if (conversationId == null) return null;
 
-      final handle = _ConversationHandle(context, conversationId);
+      final handle = _ConversationHandle(context, conversationId, ref);
       Future(() => controller.attach(handle));
-      return () => Future(() => controller.unAttach(handle));
+      return () => Future(() {
+            controller.unAttach(handle);
+            handle.dispose();
+          });
     }, [conversationId]);
 
     return child;
@@ -1123,10 +1128,11 @@ class _ChatMenuHandler extends HookConsumerWidget {
 }
 
 class _ConversationHandle extends ConversationMenuHandle {
-  _ConversationHandle(this.context, this.conversationId);
+  _ConversationHandle(this.context, this.conversationId, this.ref);
 
   final BuildContext context;
   final String conversationId;
+  final WidgetRef ref;
 
   @override
   Future<void> delete() async {
@@ -1227,7 +1233,23 @@ class _ConversationHandle extends ConversationMenuHandle {
     );
   }
 
+  final _subscriptions = <ProviderSubscription>[];
+
   @override
-  Stream<bool> get hasPasscode =>
-      context.hiveKeyValues.securityKeyValue.watchHasPasscode();
+  Stream<bool> get hasPasscode {
+    final streamController = StreamController<bool>.broadcast();
+    final subscription = ref.listenManual(
+      securityKeyValueProvider,
+      (previous, next) {
+        streamController.add(next.hasPasscode);
+      },
+      fireImmediately: true,
+    );
+    _subscriptions.add(subscription);
+    return streamController.stream;
+  }
+
+  void dispose() {
+    _subscriptions.forEach((element) => element.close());
+  }
 }

@@ -71,7 +71,9 @@ class _BaseDbKeyValue<G> extends ChangeNotifier {
   final Completer<void> _initCompleter = Completer<void>();
   StreamSubscription? _subscription;
 
-  Future<void> get initialized => _initCompleter.future;
+  Future<void> get initialize => _initCompleter.future;
+
+  bool get initialized => _initCompleter.isCompleted;
 
   Future<void> _loadProperties() async {
     final properties = await _dao.getAll(group);

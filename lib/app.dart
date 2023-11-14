@@ -54,8 +54,9 @@ class App extends HookConsumerWidget {
         const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
 
     final initialized = useMemoizedFuture(
-        () => ref.read(multiAuthStateNotifierProvider.notifier).initialized,
-        null);
+      () => ref.read(multiAuthStateNotifierProvider.notifier).initialized,
+      null,
+    );
 
     if (initialized.connectionState == ConnectionState.waiting) {
       return const _App(home: AppInitializingPage());

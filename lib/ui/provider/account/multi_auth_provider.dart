@@ -84,7 +84,7 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
   Future<void> get initialized => _initialized.future;
 
   Future<void> _init() async {
-    await _multiAuthKeyValue.initialized;
+    await _multiAuthKeyValue.initialize;
     final auths = _multiAuthKeyValue.authList;
     final activeUserId = _multiAuthKeyValue.activeUserId;
     if (auths.isEmpty) {

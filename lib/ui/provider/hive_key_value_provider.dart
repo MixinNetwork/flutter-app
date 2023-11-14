@@ -8,7 +8,6 @@ import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../account/account_key_value.dart';
 import '../../account/scam_warning_key_value.dart';
-import '../../account/security_key_value.dart';
 import '../../account/session_key_value.dart';
 import '../../account/show_pin_message_key_value.dart';
 import '../../crypto/privacy_key_value.dart';
@@ -69,9 +68,6 @@ final currentSessionKeyValueProvider =
 final privacyKeyValueProvider =
     _createHiveKeyValueProvider(PrivacyKeyValue.new);
 
-final securityKeyValueProvider =
-    _createHiveKeyValueProvider(SecurityKeyValue.new);
-
 final showPinMessageKeyValueProvider =
     _createHiveKeyValueProvider(ShowPinMessageKeyValue.new);
 
@@ -85,7 +81,6 @@ class HiveKeyValues with EquatableMixin {
     required this.sessionKeyValue,
     required this.privacyKeyValue,
     required this.downloadKeyValue,
-    required this.securityKeyValue,
     required this.showPinMessageKeyValue,
     required this.scamWarningKeyValue,
   });
@@ -96,7 +91,6 @@ class HiveKeyValues with EquatableMixin {
   final SessionKeyValue sessionKeyValue;
   final PrivacyKeyValue privacyKeyValue;
   final DownloadKeyValue downloadKeyValue;
-  final SecurityKeyValue securityKeyValue;
   final ShowPinMessageKeyValue showPinMessageKeyValue;
   final ScamWarningKeyValue scamWarningKeyValue;
 
@@ -107,7 +101,6 @@ class HiveKeyValues with EquatableMixin {
         sessionKeyValue,
         privacyKeyValue,
         downloadKeyValue,
-        securityKeyValue,
         showPinMessageKeyValue,
         scamWarningKeyValue,
       ];
@@ -119,7 +112,6 @@ class HiveKeyValues with EquatableMixin {
       sessionKeyValue.clear(),
       privacyKeyValue.clear(),
       downloadKeyValue.clear(),
-      securityKeyValue.clear(),
       showPinMessageKeyValue.clear(),
       scamWarningKeyValue.clear(),
     ]);
@@ -143,8 +135,6 @@ final hiveKeyValueProvider =
         await ref.watch(privacyKeyValueProvider(identityNumber).future);
     final downloadKeyValue =
         await ref.watch(downloadKeyValueProvider(identityNumber).future);
-    final securityKeyValue =
-        await ref.watch(securityKeyValueProvider(identityNumber).future);
     final showPinMessageKeyValue =
         await ref.watch(showPinMessageKeyValueProvider(identityNumber).future);
     final scamWarningKeyValue =
@@ -155,7 +145,6 @@ final hiveKeyValueProvider =
       sessionKeyValue: sessionKeyValue,
       privacyKeyValue: privacyKeyValue,
       downloadKeyValue: downloadKeyValue,
-      securityKeyValue: securityKeyValue,
       showPinMessageKeyValue: showPinMessageKeyValue,
       scamWarningKeyValue: scamWarningKeyValue,
     );

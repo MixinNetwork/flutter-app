@@ -10,15 +10,13 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../constants/resources.dart';
-import '../ui/provider/account/account_server_provider.dart';
+import '../ui/provider/account/multi_auth_provider.dart';
+import '../ui/provider/account/security_key_value_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/authentication.dart';
 import '../utils/event_bus.dart';
 import '../utils/extension/extension.dart';
-import '../utils/hook.dart';
 import 'dialog.dart';
-
-const _lockDuration = Duration(minutes: 1);
 
 enum LockEvent { lock, unlock }
 
@@ -32,10 +30,13 @@ class AuthGuard extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final signed =
-        ref.watch(accountServerProvider.select((value) => value.hasValue));
+    final signed = ref.watch(authProvider) != null;
+    final securityKeyValueLoaded = ref
+        .watch(securityKeyValueProvider.select((value) => value.initialized));
 
-    if (signed) return _AuthGuard(child: child);
+    if (signed && securityKeyValueLoaded) {
+      return _AuthGuard(child: child);
+    }
 
     return child;
   }
@@ -50,18 +51,15 @@ class _AuthGuard extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final focusNode = useFocusNode();
     final textEditingController = useTextEditingController();
-    final securityKeyValue = context.hiveKeyValues.securityKeyValue;
 
-    final hasPasscode =
-        useMemoizedStream(securityKeyValue.watchHasPasscode).data ??
-            securityKeyValue.hasPasscode;
+    final hasPasscode = ref
+        .watch(securityKeyValueProvider.select((value) => value.hasPasscode));
 
     final enableBiometric =
-        useMemoizedStream(securityKeyValue.watchBiometric).data ??
-            securityKeyValue.biometric;
+        ref.watch(securityKeyValueProvider.select((value) => value.biometric));
 
     final hasError = useState(false);
-    final lock = useState(securityKeyValue.hasPasscode);
+    final lock = useState(hasPasscode);
 
     useEffect(() {
       final listen =
@@ -84,7 +82,8 @@ class _AuthGuard extends HookConsumerWidget {
 
         final needLock = !isAppActive;
 
-        final lockDuration = securityKeyValue.lockDuration ?? _lockDuration;
+        final lockDuration = ref.read(
+            securityKeyValueProvider.select((value) => value.lockDuration));
         if (needLock) {
           if (lockDuration.inMinutes > 0) {
             timer = Timer(lockDuration, () {
@@ -200,7 +199,8 @@ class _AuthGuard extends HookConsumerWidget {
                             showCursor: false,
                             onCompleted: (value) {
                               textEditingController.text = '';
-                              if (securityKeyValue.passcode == value) {
+                              if (ref.read(securityKeyValueProvider).passcode ==
+                                  value) {
                                 lock.value = false;
                               } else {
                                 hasError.value = true;
