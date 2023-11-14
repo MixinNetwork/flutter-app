@@ -31,7 +31,6 @@ import '../../../widgets/message/message_bubble.dart';
 import '../../../widgets/message/message_day_time.dart';
 import '../../../widgets/pin_bubble.dart';
 import '../../../widgets/toast.dart';
-import '../../provider/account/security_key_value_provider.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/menu_handle_provider.dart';
@@ -1115,12 +1114,9 @@ class _ChatMenuHandler extends HookConsumerWidget {
       final controller = ref.read(macMenuBarProvider.notifier);
       if (conversationId == null) return null;
 
-      final handle = _ConversationHandle(context, conversationId, ref);
+      final handle = _ConversationHandle(context, conversationId);
       Future(() => controller.attach(handle));
-      return () => Future(() {
-            controller.unAttach(handle);
-            handle.dispose();
-          });
+      return () => Future(() => controller.unAttach(handle));
     }, [conversationId]);
 
     return child;
@@ -1128,11 +1124,10 @@ class _ChatMenuHandler extends HookConsumerWidget {
 }
 
 class _ConversationHandle extends ConversationMenuHandle {
-  _ConversationHandle(this.context, this.conversationId, this.ref);
+  _ConversationHandle(this.context, this.conversationId);
 
   final BuildContext context;
   final String conversationId;
-  final WidgetRef ref;
 
   @override
   Future<void> delete() async {
@@ -1231,25 +1226,5 @@ class _ConversationHandle extends ConversationMenuHandle {
         userId: isGroup ? null : conversationState.conversation?.ownerId,
       ),
     );
-  }
-
-  final _subscriptions = <ProviderSubscription>[];
-
-  @override
-  Stream<bool> get hasPasscode {
-    final streamController = StreamController<bool>.broadcast();
-    final subscription = ref.listenManual(
-      securityKeyValueProvider,
-      (previous, next) {
-        streamController.add(next.hasPasscode);
-      },
-      fireImmediately: true,
-    );
-    _subscriptions.add(subscription);
-    return streamController.stream;
-  }
-
-  void dispose() {
-    _subscriptions.forEach((element) => element.close());
   }
 }

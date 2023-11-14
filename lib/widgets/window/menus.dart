@@ -9,10 +9,10 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../ui/home/conversation/conversation_hotkey.dart';
 import '../../ui/provider/account/account_server_provider.dart';
+import '../../ui/provider/account/security_key_value_provider.dart';
 import '../../ui/provider/menu_handle_provider.dart';
 import '../../ui/provider/slide_category_provider.dart';
 import '../../utils/device_transfer/device_transfer_dialog.dart';
-import '../../utils/event_bus.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
@@ -60,11 +60,8 @@ class _Menus extends HookConsumerWidget {
         ).data ??
         false;
 
-    final hasPasscode = useMemoizedStream(
-          () => handle?.hasPasscode ?? const Stream<bool>.empty(),
-          keys: [handle],
-        ).data ??
-        false;
+    final hasPasscode = ref
+        .watch(securityKeyValueProvider.select((value) => value.hasPasscode));
 
     PlatformMenu buildConversationMenu() => PlatformMenu(
           label: context.l10n.conversation,
@@ -141,8 +138,8 @@ class _Menus extends HookConsumerWidget {
                 meta: true,
                 shift: true,
               ),
-              onSelected: hasPasscode
-                  ? () => EventBus.instance.fire(LockEvent.lock)
+              onSelected: hasPasscode && signed
+                  ? () => ref.read(securityLockProvider.notifier).lock()
                   : null,
             ),
           ]),
