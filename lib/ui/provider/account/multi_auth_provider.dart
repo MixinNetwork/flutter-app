@@ -93,6 +93,7 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
       if (oldAuthState != null) {
         i('migrate legacy auths');
         state = oldAuthState;
+        _removeLegacyMultiAuthState();
         return;
       }
     }
