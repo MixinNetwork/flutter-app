@@ -7,18 +7,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../constants/resources.dart';
 import '../ui/provider/account/multi_auth_provider.dart';
 import '../ui/provider/account/security_key_value_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/authentication.dart';
-import '../utils/event_bus.dart';
 import '../utils/extension/extension.dart';
+import '../utils/logger.dart';
 import 'dialog.dart';
-
-enum LockEvent { lock, unlock }
 
 final securityLockProvider = StateNotifierProvider<LockStateNotifier, bool>(
   LockStateNotifier.new,
@@ -31,7 +28,6 @@ class LockStateNotifier extends StateNotifier<bool> {
 
   final Ref ref;
 
-  StreamSubscription? _subscription;
   Timer? _inactiveTimer;
 
   SecurityKeyValue get securityKeyValue => ref.read(securityKeyValueProvider);
@@ -43,13 +39,16 @@ class LockStateNotifier extends StateNotifier<bool> {
     if (securityKeyValue.hasPasscode && signed) {
       lock();
     }
-    _subscription = EventBus.instance.on.whereType<LockEvent>().listen((event) {
-      if (event == LockEvent.lock && signed) {
-        lock();
+    appActiveListener.addListener(_onAppActiveChanged);
+    ref.listen(multiAuthStateNotifierProvider, (previous, next) {
+      if (next.auths.isEmpty) {
+        unlock();
+        // remove passcode
+        securityKeyValue
+          ..passcode = null
+          ..lockDuration = null;
       }
     });
-
-    appActiveListener.addListener(_onAppActiveChanged);
   }
 
   void _onAppActiveChanged() {
@@ -71,6 +70,7 @@ class LockStateNotifier extends StateNotifier<bool> {
     }
     final lockDuration = securityKeyValue.lockDuration;
     if (lockDuration.inMinutes > 0) {
+      d('schedule lock after ${lockDuration.inMinutes} minutes');
       _inactiveTimer = Timer(lockDuration, () {
         if (securityKeyValue.hasPasscode && signed) {
           lock();
@@ -107,7 +107,6 @@ class LockStateNotifier extends StateNotifier<bool> {
   @override
   void dispose() {
     _inactiveTimer?.cancel();
-    _subscription?.cancel();
     appActiveListener.removeListener(_onAppActiveChanged);
     super.dispose();
   }
