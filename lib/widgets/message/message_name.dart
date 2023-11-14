@@ -36,6 +36,7 @@ class MessageName extends ConsumerWidget {
     if (showIdentityNumber && userIdentityNumber != '0') {
       widget = Row(
         crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
         children: [
           widget,
           const SizedBox(width: 2),
