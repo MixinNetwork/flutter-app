@@ -32,7 +32,6 @@ part 'signal_database.g.dart';
 class SignalDatabase extends _$SignalDatabase {
   SignalDatabase._(super.e);
 
-
   static Future<SignalDatabase> connect({
     required String identityNumber,
     required bool fromMainIsolate,
