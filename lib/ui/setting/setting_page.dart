@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -15,6 +16,7 @@ import '../../widgets/action_button.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
+import '../../widgets/high_light_text.dart';
 import '../../widgets/toast.dart';
 import '../home/home.dart';
 import '../provider/multi_auth_provider.dart';
@@ -206,7 +208,7 @@ class _Item extends HookConsumerWidget {
                       color ?? context.theme.text, BlendMode.srcIn),
                 )
               : null),
-      title: Text(title),
+      title: AutoSizeText(title, maxLines: 1),
       color: color ?? context.theme.text,
       selected: selected,
       onTap: () {
@@ -247,12 +249,17 @@ class _UserProfile extends HookConsumerWidget {
           );
         }),
         const SizedBox(height: 10),
-        Text(
-          fullName ?? '',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-            color: context.theme.text,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: CustomText(
+            fullName ?? '',
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              color: context.theme.text,
+            ),
           ),
         ),
         const SizedBox(height: 4),
