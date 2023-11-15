@@ -8,6 +8,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import 'extension/extension.dart';
+import 'mixin_api_client.dart';
 import 'property/setting_property.dart';
 
 part 'proxy.g.dart';
@@ -61,7 +62,7 @@ extension DioProxyExt on Dio {
           () => HttpClient()..setProxy(config);
     } else {
       i('remove client proxy');
-      httpClientAdapter = IOHttpClientAdapter();
+      userCustomAdapter();
     }
   }
 }
