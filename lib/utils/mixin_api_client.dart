@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:dio/dio.dart';
@@ -74,10 +73,14 @@ Client createClient({
       }),
     ],
   );
-  if (Platform.isIOS || Platform.isMacOS) {
-    client.dio.httpClientAdapter = NativeAdapter();
-  }
+  client.dio.userCustomAdapter();
   return client;
+}
+
+extension DioNativeAdapter on Dio {
+  void userCustomAdapter() {
+    httpClientAdapter = NativeAdapter();
+  }
 }
 
 final _formatter = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
