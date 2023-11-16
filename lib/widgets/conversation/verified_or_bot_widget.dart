@@ -5,9 +5,9 @@ import '../../../constants/resources.dart';
 
 class VerifiedOrBotWidget extends StatelessWidget {
   const VerifiedOrBotWidget({
-    super.key,
     required this.verified,
     required this.isBot,
+    super.key,
   });
   final bool? verified;
   final bool isBot;

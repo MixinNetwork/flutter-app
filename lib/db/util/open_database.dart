@@ -76,8 +76,8 @@ Future<DriftIsolate> _crateIsolate({
   required String identityNumber,
   required String portName,
   required String dbName,
-  bool fromMainIsolate = false,
   required String? debugName,
+  bool fromMainIsolate = false,
 }) async {
   if (fromMainIsolate) {
     // Remove port if it exists. to avoid port leak on hot reload.

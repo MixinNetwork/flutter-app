@@ -6,11 +6,11 @@ import '../utils/extension/extension.dart';
 
 class RadioItem<T> extends StatelessWidget {
   const RadioItem({
-    super.key,
     required this.title,
-    this.groupValue,
     required this.value,
     required this.onChanged,
+    super.key,
+    this.groupValue,
   });
 
   final Widget title;

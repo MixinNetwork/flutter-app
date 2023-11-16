@@ -374,11 +374,11 @@ Future<void> _sendFile(
 
 class _AnimatedFileTile extends HookConsumerWidget {
   const _AnimatedFileTile({
-    super.key,
     required this.file,
     required this.animation,
-    this.onDelete,
     required this.showBigImage,
+    super.key,
+    this.onDelete,
     this.onImageEdited,
   });
 

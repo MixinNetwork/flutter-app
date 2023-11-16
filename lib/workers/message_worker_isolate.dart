@@ -339,32 +339,23 @@ class _MessageProcessRunner {
       case MainIsolateEventType.updateSelectedConversation:
         final conversationId = event.argument as String?;
         _decryptMessage?.conversationId = conversationId;
-        break;
       case MainIsolateEventType.disconnectBlazeWithTime:
         blaze.waitSyncTime();
-        break;
       case MainIsolateEventType.reconnectBlaze:
         i('message worker isolate: reconnect blaze');
         blaze.reconnect();
-        break;
       case MainIsolateEventType.addAckJobs:
         _ackJob.add(event.argument as List<Job>);
-        break;
       case MainIsolateEventType.addSessionAckJobs:
         _sessionAckJob.add(event.argument as List<Job>);
-        break;
       case MainIsolateEventType.addSendingJob:
         _sendingJob.add(event.argument as Job);
-        break;
       case MainIsolateEventType.addUpdateAssetJob:
         _updateAssetJob.add(event.argument as Job);
-        break;
       case MainIsolateEventType.addUpdateTokenJob:
         _updateTokenJob.add(event.argument as Job);
-        break;
       case MainIsolateEventType.addUpdateStickerJob:
         _updateStickerJob.add(event.argument as Job);
-        break;
       case MainIsolateEventType.exit:
         dispose();
         Isolate.exit();

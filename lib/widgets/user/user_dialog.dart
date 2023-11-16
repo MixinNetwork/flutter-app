@@ -77,8 +77,8 @@ Future<void> showUserDialog(BuildContext context, String? userId,
 
 class UserDialog extends StatelessWidget {
   const UserDialog({
-    super.key,
     required this.userId,
+    super.key,
     this.refreshUser = true,
   });
 

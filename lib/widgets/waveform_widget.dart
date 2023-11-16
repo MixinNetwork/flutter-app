@@ -17,11 +17,11 @@ enum WaveBarAlignment {
 
 class WaveformWidget extends StatelessWidget {
   const WaveformWidget({
-    super.key,
     required this.value,
     required this.waveform,
     required this.backgroundColor,
     required this.foregroundColor,
+    super.key,
     this.maxBarCount = _maxBarCount,
     this.alignment = WaveBarAlignment.bottom,
   });
@@ -148,11 +148,9 @@ class _WaveformPainter extends CustomPainter with EquatableMixin {
           final barHeight = height - min(height - value * ratio, minTop);
           top = height / 2 - barHeight / 2;
           bottom = top + barHeight;
-          break;
         case WaveBarAlignment.bottom:
           top = min(height - value * ratio, minTop);
           bottom = height;
-          break;
       }
       final left = index * sampleX;
       final right = left + _barWidth;

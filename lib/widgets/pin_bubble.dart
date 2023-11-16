@@ -7,8 +7,8 @@ const _nipWidth = 7.0;
 
 class PinMessageBubble extends StatelessWidget {
   const PinMessageBubble({
-    super.key,
     required this.child,
+    super.key,
     this.padding = const EdgeInsets.symmetric(horizontal: 16),
   });
 

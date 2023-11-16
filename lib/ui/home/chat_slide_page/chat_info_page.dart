@@ -548,11 +548,11 @@ class ChatInfoPage extends HookConsumerWidget {
 
 class ConversationBio extends HookConsumerWidget {
   const ConversationBio({
-    super.key,
-    this.fontSize = 14,
     required this.conversationId,
     required this.userId,
     required this.isGroup,
+    super.key,
+    this.fontSize = 14,
   });
 
   final double fontSize;

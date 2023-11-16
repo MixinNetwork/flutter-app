@@ -71,7 +71,6 @@ final unseenConversationsProvider = StateNotifierProvider.autoDispose<
         eventStreams: [updateEvent],
         duration: kSlowThrottleDuration,
       );
-      break;
     case SlideCategoryType.circle:
       unseenConversations = database.conversationDao
           .unseenConversationsByCircleId(slideCategoryState.id!)
@@ -79,10 +78,8 @@ final unseenConversationsProvider = StateNotifierProvider.autoDispose<
         eventStreams: [updateEvent],
         duration: kSlowThrottleDuration,
       );
-      break;
     case SlideCategoryType.setting:
       unseenConversations = const Stream.empty();
-      break;
   }
 
   final subscription = unseenConversations.asyncListen((items) async {

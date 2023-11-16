@@ -12,9 +12,9 @@ import 'interactive_decorated_box.dart';
 
 class SearchTextField extends HookConsumerWidget {
   const SearchTextField({
+    required this.controller,
     super.key,
     this.focusNode,
-    required this.controller,
     this.onChanged,
     this.fontSize = 14,
     this.hintText,

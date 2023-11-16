@@ -312,8 +312,8 @@ class _SideRouter extends StatelessWidget {
   const _SideRouter({
     required this.chatSideCubit,
     required this.pages,
-    this.onPopPage,
     required this.constraints,
+    this.onPopPage,
   });
 
   final ChatSideCubit chatSideCubit;

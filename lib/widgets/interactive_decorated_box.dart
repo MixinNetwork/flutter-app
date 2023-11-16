@@ -10,8 +10,8 @@ enum InteractiveStatus {
 
 class InteractiveBuilder extends StatefulWidget {
   const InteractiveBuilder({
-    super.key,
     required this.builder,
+    super.key,
     this.child,
     this.onTap,
     this.onDoubleTap,
@@ -106,13 +106,13 @@ class _InteractiveBuilderState extends State<InteractiveBuilder> {
 
 class InteractiveDecoratedBox extends StatelessWidget {
   const InteractiveDecoratedBox({
+    required this.child,
     super.key,
     Decoration? decoration,
     this.hoveringDecoration,
     this.tapDowningDecoration,
     this.inDuration = const Duration(milliseconds: 120),
     this.outDuration = const Duration(milliseconds: 60),
-    required this.child,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
@@ -126,13 +126,13 @@ class InteractiveDecoratedBox extends StatelessWidget {
   }) : _decoration = decoration;
 
   InteractiveDecoratedBox.color({
+    required this.child,
     super.key,
     BoxDecoration? decoration,
     Color? hoveringColor,
     Color? tapDowningColor,
     this.inDuration = const Duration(milliseconds: 120),
     this.outDuration = const Duration(milliseconds: 60),
-    required this.child,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,

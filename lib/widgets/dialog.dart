@@ -12,11 +12,11 @@ import 'interactive_decorated_box.dart';
 
 Future<T?> _showDialog<T>({
   required BuildContext context,
+  required RoutePageBuilder pageBuilder,
   bool barrierDismissible = true,
   Color barrierColor = const Color(0x80000000),
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
-  required RoutePageBuilder pageBuilder,
 }) =>
     showGeneralDialog<T>(
       context: context,
@@ -42,8 +42,8 @@ Future<T?> _showDialog<T>({
 
 Future<T?> showMixinDialog<T>({
   required BuildContext context,
-  RouteSettings? routeSettings,
   required Widget child,
+  RouteSettings? routeSettings,
   EdgeInsets? padding = const EdgeInsets.all(32),
   BoxConstraints? constraints = const BoxConstraints(
     maxWidth: 600,
@@ -74,10 +74,10 @@ Future<T?> showMixinDialog<T>({
 
 class AlertDialogLayout extends StatelessWidget {
   const AlertDialogLayout({
+    required this.content,
     super.key,
     this.title,
     this.titleMarginBottom = 48,
-    required this.content,
     this.actions = const [],
     this.minWidth = 400,
     this.minHeight = 210,
@@ -207,10 +207,10 @@ abstract class DialogInteracterEntry<T> extends StatelessWidget {
 /// default onTap is Navigator.pop
 class MixinButton<T> extends DialogInteracterEntry<T> {
   const MixinButton({
+    required this.child,
     super.key,
     super.value,
     this.backgroundTransparent = false,
-    required this.child,
     this.onTap,
     this.padding = const EdgeInsets.symmetric(
       vertical: 8,
@@ -263,9 +263,9 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
 
 class DialogTextField extends HookConsumerWidget {
   const DialogTextField({
-    super.key,
     required this.textEditingController,
     required this.hintText,
+    super.key,
     this.inputFormatters,
     this.maxLines = 1,
     this.maxLength,
@@ -400,8 +400,8 @@ Future<DialogEvent?> showConfirmMixinDialog(
 
 class EditDialog extends HookConsumerWidget {
   const EditDialog({
-    super.key,
     required this.title,
+    super.key,
     this.editText = '',
     this.hintText = '',
     this.positiveAction,
@@ -451,9 +451,9 @@ class EditDialog extends HookConsumerWidget {
 
 class DialogAddOrJoinButton extends StatelessWidget {
   const DialogAddOrJoinButton({
-    super.key,
     required this.onTap,
     required this.title,
+    super.key,
   });
 
   final VoidCallback onTap;

@@ -4,9 +4,9 @@ class MiniNotificationMessage with EquatableMixin {
   MiniNotificationMessage({
     required this.conversationId,
     required this.messageId,
+    required this.type,
     this.senderId,
     this.createdAt,
-    required this.type,
   });
 
   final String conversationId;

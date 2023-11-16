@@ -16,10 +16,10 @@ import '../../provider/slide_category_provider.dart';
 
 class ConversationMenuWrapper extends HookConsumerWidget {
   const ConversationMenuWrapper({
+    required this.child,
     super.key,
     this.conversation,
     this.searchConversation,
-    required this.child,
     this.removeChatFromCircle = false,
   });
 

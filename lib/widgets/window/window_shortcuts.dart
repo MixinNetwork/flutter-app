@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WindowShortcuts extends StatelessWidget {
-  const WindowShortcuts({super.key, required this.child});
+  const WindowShortcuts({required this.child, super.key});
 
   final Widget child;
 

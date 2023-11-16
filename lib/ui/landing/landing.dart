@@ -44,10 +44,8 @@ class LandingPage extends HookConsumerWidget {
     switch (mode) {
       case LandingMode.qrcode:
         child = const LandingQrCodeWidget();
-        break;
       case LandingMode.mobile:
         child = const LoginWithMobileWidget();
-        break;
     }
     if (accountServerHasError) {
       child = const _LoginFailed();
@@ -166,8 +164,8 @@ class _LoginFailed extends HookConsumerWidget {
 
 class LandingScaffold extends HookConsumerWidget {
   const LandingScaffold({
-    super.key,
     required this.child,
+    super.key,
   });
 
   final Widget child;
@@ -227,10 +225,8 @@ class LandingModeSwitchButton extends HookConsumerWidget {
     switch (mode) {
       case LandingMode.qrcode:
         buttonText = context.l10n.signWithPhoneNumber;
-        break;
       case LandingMode.mobile:
         buttonText = context.l10n.signWithQrcode;
-        break;
     }
     return TextButton(
       onPressed: () {
@@ -238,10 +234,8 @@ class LandingModeSwitchButton extends HookConsumerWidget {
         switch (mode) {
           case LandingMode.qrcode:
             modeCubit.changeMode(LandingMode.mobile);
-            break;
           case LandingMode.mobile:
             modeCubit.changeMode(LandingMode.qrcode);
-            break;
         }
       },
       child: Text(

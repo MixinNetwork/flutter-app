@@ -29,7 +29,7 @@ Future<void> parseAppInitialArguments(List<String> args) async {
 }
 
 class AppProtocolHandler extends HookConsumerWidget {
-  const AppProtocolHandler({super.key, required this.child});
+  const AppProtocolHandler({required this.child, super.key});
 
   final Widget child;
 

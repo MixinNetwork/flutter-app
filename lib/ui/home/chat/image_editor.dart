@@ -746,29 +746,24 @@ class _CropRectWidget extends HookConsumerWidget {
                   currentCropRect.topLeft + delta,
                   currentCropRect.bottomRight,
                 ).ensureInside(imageRect);
-                break;
               case _ImageDragArea.topRight:
                 cropRect = Rect.fromPoints(
                   currentCropRect.bottomLeft,
                   currentCropRect.topRight + delta,
                 ).ensureInside(imageRect);
-                break;
               case _ImageDragArea.bottomLeft:
                 cropRect = Rect.fromPoints(
                   currentCropRect.bottomLeft + delta,
                   currentCropRect.topRight,
                 ).ensureInside(imageRect);
-                break;
               case _ImageDragArea.bottomRight:
                 cropRect = Rect.fromPoints(
                   currentCropRect.topLeft,
                   currentCropRect.bottomRight + delta,
                 ).ensureInside(imageRect);
-                break;
               case _ImageDragArea.center:
                 cropRect =
                     currentCropRect.shift(delta).ensureShiftInside(imageRect);
-                break;
             }
 
             if (cropRect.isEmpty) {

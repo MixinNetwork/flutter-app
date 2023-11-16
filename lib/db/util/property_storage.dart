@@ -91,15 +91,15 @@ class PropertyStorage extends ChangeNotifier {
     }
     try {
       switch (T) {
-        case String:
+        case const (String):
           return value as T?;
-        case int:
+        case const (int):
           return int.tryParse(value) as T?;
-        case double:
+        case const (double):
           return double.tryParse(value) as T?;
-        case bool:
+        case const (bool):
           return (value == 'true') as T?;
-        case dynamic:
+        case const (dynamic):
           return value as T?;
         default:
           e('getProperty unknown type: $T');

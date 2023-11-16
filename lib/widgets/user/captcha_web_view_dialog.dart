@@ -112,12 +112,10 @@ Future<void> _loadCaptcha(
       apiKey = kRecaptchaKey;
       src = 'https://www.recaptcha.net/recaptcha/api.js'
           '?onload=onGCaptchaLoad&render=explicit';
-      break;
     case CaptchaType.hCaptcha:
       apiKey = hCaptchaKey;
       src = 'https://hcaptcha.com/1/api.js'
           '?onload=onHCaptchaLoad&render=explicit';
-      break;
   }
   final htmlWithCaptcha =
       html.replaceAll('#src', src).replaceAll('#apiKey', apiKey);

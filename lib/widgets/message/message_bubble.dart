@@ -28,8 +28,8 @@ extension BubbleColor on BuildContext {
 
 class MessageBubble extends HookConsumerWidget {
   const MessageBubble({
-    super.key,
     required this.child,
+    super.key,
     this.showBubble = true,
     this.includeNip = false,
     this.clip = false,

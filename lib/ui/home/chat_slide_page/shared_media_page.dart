@@ -91,9 +91,9 @@ class SharedMediaPage extends HookConsumerWidget {
 
 class ShareMediaItemMenuWrapper extends StatelessWidget {
   const ShareMediaItemMenuWrapper({
-    super.key,
     required this.child,
     required this.messageId,
+    super.key,
   });
 
   final Widget child;

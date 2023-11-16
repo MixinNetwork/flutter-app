@@ -631,8 +631,8 @@ class MentionTextMatcher extends TextMatcher implements EquatableMixin {
 class HighlightStarLinkText extends HookConsumerWidget {
   const HighlightStarLinkText(
     this.text, {
-    super.key,
     required this.links,
+    super.key,
     this.style,
     this.highlightStyle,
     this.onLinkClick,
@@ -710,7 +710,7 @@ class HighlightStarLinkText extends HookConsumerWidget {
 
 class MixinAdaptiveSelectionToolbar extends StatelessWidget {
   const MixinAdaptiveSelectionToolbar(
-      {super.key, required this.editableTextState});
+      {required this.editableTextState, super.key});
 
   final EditableTextState editableTextState;
 
@@ -758,9 +758,9 @@ class MixinAdaptiveSelectionToolbar extends StatelessWidget {
 
 class MixinSelectionToolbar extends StatelessWidget {
   const MixinSelectionToolbar({
-    super.key,
     required this.menus,
     required this.anchor,
+    super.key,
   });
 
   final List<Widget> menus;

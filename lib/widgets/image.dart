@@ -83,8 +83,8 @@ class _ImageByBlurHash extends HookConsumerWidget {
 ///
 class ImageByBlurHashOrBase64 extends HookConsumerWidget {
   const ImageByBlurHashOrBase64({
-    super.key,
     required this.imageData,
+    super.key,
     this.fit = BoxFit.cover,
   });
 

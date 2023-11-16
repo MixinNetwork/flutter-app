@@ -25,8 +25,8 @@ enum LockEvent { lock, unlock }
 
 class AuthGuard extends HookConsumerWidget {
   const AuthGuard({
-    super.key,
     required this.child,
+    super.key,
   });
 
   final Widget child;

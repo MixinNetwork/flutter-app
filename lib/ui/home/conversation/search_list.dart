@@ -397,12 +397,12 @@ class SearchList extends HookConsumerWidget {
 
 class SearchItem extends StatelessWidget {
   const SearchItem(
-      {super.key,
-      this.avatar,
-      required this.name,
+      {required this.name,
       required this.keyword,
-      this.nameHighlight = true,
       required this.onTap,
+      super.key,
+      this.avatar,
+      this.nameHighlight = true,
       this.description,
       this.descriptionIcon,
       this.date,
@@ -681,10 +681,10 @@ Future Function() _searchMessageItemOnTap(
 
 class SearchMessageItem extends HookConsumerWidget {
   const SearchMessageItem({
-    super.key,
     required this.message,
     required this.keyword,
     required this.onTap,
+    super.key,
     this.showSender = false,
   });
 

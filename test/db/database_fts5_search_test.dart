@@ -1,4 +1,6 @@
 @TestOn('linux || mac-os')
+library;
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_app/db/fts_database.dart';

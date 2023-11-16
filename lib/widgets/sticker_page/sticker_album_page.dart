@@ -13,8 +13,8 @@ import 'sticker_store.dart';
 
 class StickerAlbumPage extends HookConsumerWidget {
   const StickerAlbumPage({
-    super.key,
     required this.albumId,
+    super.key,
     this.album,
     this.stickers,
   });
@@ -87,8 +87,8 @@ class _StickerAlbumHeader extends StatelessWidget {
 
 class _StickerAlbumDetail extends HookConsumerWidget {
   const _StickerAlbumDetail({
-    this.stickers,
     required this.album,
+    this.stickers,
   });
 
   final StickerAlbum album;

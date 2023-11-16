@@ -63,13 +63,10 @@ class SendingJob extends JobQueue<Job, List<Job>> {
         switch (job.action) {
           case kPinMessage:
             await _runPinJob(job);
-            break;
           case kRecallMessage:
             await _runRecallJob(job);
-            break;
           case kSendingMessage:
             await _runSendJob(job);
-            break;
         }
       } catch (e) {
         await Future.delayed(const Duration(seconds: 1));
@@ -268,9 +265,9 @@ class SendingJob extends JobQueue<Job, List<Job>> {
   BlazeMessage _createBlazeMessage(
     SendingMessage message,
     String data, {
+    required int expireIn,
     String? recipientId,
     bool silent = false,
-    required int expireIn,
   }) {
     final blazeParam = BlazeMessageParam(
       conversationId: message.conversationId,
@@ -356,8 +353,8 @@ class SendingJob extends JobQueue<Job, List<Job>> {
 
   Future<MessageResult> _sendEncryptedMessage(
     SendingMessage message, {
-    bool silent = false,
     required int expireIn,
+    bool silent = false,
   }) async {
     var participantSessionKey = await database.participantSessionDao
         .participantSessionKeyWithoutSelf(message.conversationId, userId)
@@ -410,8 +407,8 @@ class SendingJob extends JobQueue<Job, List<Job>> {
 
   Future<MessageResult?> _sendSignalMessage(
     SendingMessage message, {
-    bool silent = false,
     required int expireIn,
+    bool silent = false,
   }) async {
     MessageResult? result;
     if (message.resendStatus != null) {

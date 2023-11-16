@@ -142,10 +142,10 @@ class SafeTransferMessage extends HookConsumerWidget {
 
 class _SnapshotLayout extends StatelessWidget {
   const _SnapshotLayout({
-    this.assetIcon,
-    this.snapshotAmount,
     required this.assetSymbol,
     required this.memo,
+    this.assetIcon,
+    this.snapshotAmount,
   });
 
   final String? assetIcon;

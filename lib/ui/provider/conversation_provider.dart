@@ -28,6 +28,7 @@ import 'responsive_navigator_provider.dart';
 class ConversationState extends Equatable {
   const ConversationState({
     required this.conversationId,
+    required this.refreshKey,
     this.userId,
     this.initIndexMessageId,
     this.lastReadMessageId,
@@ -35,7 +36,6 @@ class ConversationState extends Equatable {
     this.user,
     this.app,
     this.participant,
-    required this.refreshKey,
     this.initialSidePage,
     this.keyword,
   });
