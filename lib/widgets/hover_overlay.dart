@@ -32,11 +32,11 @@ typedef PortalBuilder<T> = Widget Function(BuildContext context, T value,
 
 class HoverOverlay extends HookConsumerWidget {
   const HoverOverlay({
-    super.key,
     required this.closeDuration,
     required this.child,
     required this.portal,
     required this.duration,
+    super.key,
     this.anchor = const Filled(),
     this.portalCandidateLabels = const [PortalLabel.main],
     this.closeWaitDuration = Duration.zero,

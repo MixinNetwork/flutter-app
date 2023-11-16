@@ -84,16 +84,12 @@ class TransformImageController extends ChangeNotifier {
     switch (_imageRotate) {
       case _ImageRotate.rotate0:
         _imageRotate = _ImageRotate.rotate90;
-        break;
       case _ImageRotate.rotate90:
         _imageRotate = _ImageRotate.rotate180;
-        break;
       case _ImageRotate.rotate180:
         _imageRotate = _ImageRotate.rotate270;
-        break;
       case _ImageRotate.rotate270:
         _imageRotate = _ImageRotate.rotate0;
-        break;
     }
     // Reset translate when rotate.
     _translate = Offset.zero;
@@ -103,8 +99,8 @@ class TransformImageController extends ChangeNotifier {
 
 class ImagPreviewWidget extends StatefulWidget {
   const ImagPreviewWidget({
-    super.key,
     required this.image,
+    super.key,
     this.scale = 1,
     this.maxScale = 2.0,
     this.minScale = 0.5,
@@ -291,7 +287,6 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
         final computedOffset =
             _transformedChildRect.ensureEdgeNotInViewport(_viewport, offset);
         _transformationController.translate += computedOffset;
-        break;
       case _GestureType.scale:
         assert(_scaleStart != null);
         // details.scale gives us the amount to change the scale as of the
@@ -300,7 +295,6 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
         final desiredScale = _scaleStart! * details.scale;
         final scaleChange = desiredScale / scale;
         _applyScale(scaleChange, details.localFocalPoint);
-        break;
       case _GestureType.rotate:
         // ignore rotate action.
         break;

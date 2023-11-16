@@ -132,12 +132,12 @@ abstract class SearchMessageCubit extends Cubit<SearchMessageState> {
 
 class _ConversationSearchMessageCubit extends SearchMessageCubit {
   _ConversationSearchMessageCubit({
-    this.userId,
-    this.categories,
     required this.conversationId,
     required super.database,
     required super.keyword,
     required super.limit,
+    this.userId,
+    this.categories,
   });
 
   final String? userId;

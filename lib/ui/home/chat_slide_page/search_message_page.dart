@@ -261,9 +261,9 @@ class SearchMessagePage extends HookConsumerWidget {
 
 class _SearchMessageList extends HookConsumerWidget {
   const _SearchMessageList({
+    required this.conversationId,
     this.selectedUserId,
     this.categories,
-    required this.conversationId,
   });
 
   final String? selectedUserId;

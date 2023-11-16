@@ -11,10 +11,10 @@ import 'message_style.dart';
 
 class MessageName extends ConsumerWidget {
   const MessageName({
-    super.key,
     required this.userName,
     required this.userId,
     required this.userIdentityNumber,
+    super.key,
   });
 
   final String userName;

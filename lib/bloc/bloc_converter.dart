@@ -5,10 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BlocConverter<C extends BlocBase<S>, S, T> extends StatefulWidget {
   const BlocConverter({
+    required this.converter,
     super.key,
     this.cubit,
     this.when,
-    required this.converter,
     this.builder,
     this.child,
     this.listener,

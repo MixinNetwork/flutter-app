@@ -70,7 +70,6 @@ Future<bool> showSendDialog(
               await jsonDecodeWithIsolate(_data) as Map<String, dynamic>;
           result = SendImageData.fromJson(json);
         }
-        break;
       case _Category.contact:
         {
           final json =
@@ -80,7 +79,6 @@ Future<bool> showSendDialog(
           }
           result = json['user_id'];
         }
-        break;
       case _Category.sticker:
         {
           if (!Uuid.isValidUUID(fromString: _data)) {
@@ -89,14 +87,12 @@ Future<bool> showSendDialog(
           }
           result = _data;
         }
-        break;
       case _Category.app_card:
         {
           final json =
               await jsonDecodeWithIsolate(_data) as Map<String, dynamic>;
           result = AppCardData.fromJson(json);
         }
-        break;
       // ignore: no_default_cases
       default:
         result = _data;
@@ -130,22 +126,16 @@ class _SendPage extends HookConsumerWidget {
       switch (category) {
         case _Category.text:
           _category = context.l10n.text;
-          break;
         case _Category.image:
           _category = context.l10n.image;
-          break;
         case _Category.sticker:
           _category = context.l10n.sticker;
-          break;
         case _Category.contact:
           _category = context.l10n.contact;
-          break;
         case _Category.post:
           _category = context.l10n.post;
-          break;
         case _Category.app_card:
           _category = context.l10n.card;
-          break;
       }
       if (app != null) {
         return context.l10n.shareMessageDescription(

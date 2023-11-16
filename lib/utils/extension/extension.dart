@@ -39,7 +39,7 @@ export 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
 export 'package:provider/provider.dart' show ReadContext, WatchContext;
 
 export '../../crypto/attachment/crypto_attachment.dart'
-    show EncryptAttachmentStreamExtension, DecryptAttachmentStreamExtension;
+    show DecryptAttachmentStreamExtension, EncryptAttachmentStreamExtension;
 export '../../db/dao/transcript_message_dao.dart'
     show TranscriptMessageItemExtension;
 export '../../db/extension/conversation.dart' show ConversationItemExtension;

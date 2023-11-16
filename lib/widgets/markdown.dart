@@ -10,7 +10,7 @@ import '../utils/uri_utils.dart';
 import 'cache_image.dart';
 
 class MarkdownColumn extends StatelessWidget {
-  const MarkdownColumn({super.key, required this.data});
+  const MarkdownColumn({required this.data, super.key});
 
   final String data;
 
@@ -44,8 +44,8 @@ class MarkdownColumn extends StatelessWidget {
 
 class Markdown extends StatelessWidget {
   const Markdown({
-    super.key,
     required this.data,
+    super.key,
     this.padding = EdgeInsets.zero,
     this.physics,
   });

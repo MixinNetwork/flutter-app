@@ -89,14 +89,12 @@ String generateSystemText({
             ? Localization.current.you
             : participantFullName ?? '',
       );
-      break;
     case MessageAction.exit:
       text = Localization.current.chatGroupExit(
         participantIsCurrentUser
             ? Localization.current.you
             : participantFullName ?? '',
       );
-      break;
     case MessageAction.add:
       text = Localization.current.chatGroupAdd(
         senderIsCurrentUser ? Localization.current.you : senderFullName!,
@@ -104,7 +102,6 @@ String generateSystemText({
             ? Localization.current.you
             : participantFullName ?? '',
       );
-      break;
     case MessageAction.remove:
       text = Localization.current.chatGroupRemove(
         senderIsCurrentUser ? Localization.current.you : senderFullName!,
@@ -112,19 +109,16 @@ String generateSystemText({
             ? Localization.current.you
             : participantFullName ?? '',
       );
-      break;
     case MessageAction.create:
       text = Localization.current.createdThisGroup(
         senderIsCurrentUser ? Localization.current.you : senderFullName!,
       );
-      break;
     case MessageAction.role:
       text = Localization.current.nowAnAddmin(
         participantIsCurrentUser
             ? Localization.current.you
             : participantFullName!,
       );
-      break;
     case MessageAction.expire:
       final senderName =
           senderIsCurrentUser ? Localization.current.you : senderFullName!;
@@ -139,7 +133,6 @@ String generateSystemText({
           Duration(seconds: expireIn).formatAsConversationExpireIn(),
         );
       }
-      break;
     case MessageAction.update:
     default:
       text = Localization.current.messageNotSupport;

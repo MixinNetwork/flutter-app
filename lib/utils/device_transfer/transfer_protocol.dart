@@ -402,7 +402,6 @@ class TransferProtocolSink implements EventSink<Uint8List> {
                 json.decode(utf8.decode(bytes)) as Map<String, dynamic>,
               )),
             );
-            break;
           case kTypeJson:
             _builder = _TransferJsonPacketBuilder(
               bodyLength,
@@ -412,11 +411,9 @@ class TransferProtocolSink implements EventSink<Uint8List> {
                 json.decode(utf8.decode(bytes)) as Map<String, dynamic>,
               )),
             );
-            break;
           case kTypeFile:
             _builder = _TransferAttachmentPacketBuilder(
                 bodyLength, hMacKey, aesKey, folder);
-            break;
           default:
             _sink.addError('unknown type: $type', StackTrace.current);
             return;

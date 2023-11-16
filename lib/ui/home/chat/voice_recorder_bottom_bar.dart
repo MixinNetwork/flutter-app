@@ -31,8 +31,8 @@ enum RecorderState {
 
 class VoiceRecorderCubitState with EquatableMixin {
   const VoiceRecorderCubitState({
-    this.startTime,
     required this.state,
+    this.startTime,
     this.recodedData,
   });
 
@@ -175,9 +175,9 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
 
 class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
   const VoiceRecorderBarOverlayComposition({
-    super.key,
     required this.child,
     required this.layoutWidth,
+    super.key,
   });
 
   final Widget child;

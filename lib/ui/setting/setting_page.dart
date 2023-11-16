@@ -173,8 +173,8 @@ class SettingPage extends HookConsumerWidget {
 
 class _Item extends HookConsumerWidget {
   const _Item({
-    this.leadingAssetName,
     required this.title,
+    this.leadingAssetName,
     this.pageName,
     this.color,
     this.onTap,

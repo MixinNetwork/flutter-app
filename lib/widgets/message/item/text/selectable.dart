@@ -27,11 +27,11 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
 
 class SelectableRegion extends StatefulWidget {
   const SelectableRegion({
-    super.key,
-    this.contextMenuBuilder,
     required this.focusNode,
     required this.selectionControls,
     required this.child,
+    super.key,
+    this.contextMenuBuilder,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.onSelectionChanged,
   });

@@ -96,11 +96,9 @@ class _MainEventBus implements EventBus {
             d('register other isolate event bus. $uuid');
             final port = data[1] as SendPort;
             _ports[uuid] = port;
-            break;
           case _EventType.event:
             // event from other isolate will dispatch to all other isolate.
             fire(event.data);
-            break;
         }
       } else {
         assert(false, 'Invalid event type. $event');
@@ -142,10 +140,8 @@ class _OtherIsolateEventBus implements EventBus {
       switch (type) {
         case _EventType.register:
           assert(false, 'Invalid event type. $event');
-          break;
         case _EventType.event:
           _controller.add(event.data);
-          break;
       }
     });
     Isolate.current.addOnExitListener(

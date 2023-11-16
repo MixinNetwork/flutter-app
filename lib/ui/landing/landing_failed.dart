@@ -19,8 +19,8 @@ const _kSqliteNotADb = 26;
 
 class DatabaseOpenFailedPage extends StatelessWidget {
   const DatabaseOpenFailedPage({
-    super.key,
     required this.error,
+    super.key,
   });
 
   final SqliteException error;
@@ -124,10 +124,10 @@ class _Button extends StatelessWidget {
 
 class LandingFailedPage extends StatelessWidget {
   const LandingFailedPage({
-    super.key,
     required this.message,
     required this.actions,
     required this.title,
+    super.key,
   });
 
   final String title;

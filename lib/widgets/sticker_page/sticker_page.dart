@@ -33,9 +33,9 @@ enum PresetStickerGroup {
 class StickerPage extends StatelessWidget {
   const StickerPage({
     required this.tabLength,
-    super.key,
     required this.tabController,
     required this.presetStickerGroups,
+    super.key,
   });
 
   final TabController tabController;

@@ -8,8 +8,8 @@ import '../logger.dart';
 // remove this once https://github.com/flutter/flutter/issues/111113 is fixed.
 class TextInputActionHandler extends StatefulWidget {
   const TextInputActionHandler({
-    super.key,
     required this.child,
+    super.key,
   });
 
   final Widget child;
@@ -109,8 +109,8 @@ class EmojiTextEditingController extends TextEditingController {
   @override
   TextSpan buildTextSpan({
     required BuildContext context,
-    TextStyle? style,
     required bool withComposing,
+    TextStyle? style,
   }) {
     assert(!value.composing.isValid ||
         !withComposing ||

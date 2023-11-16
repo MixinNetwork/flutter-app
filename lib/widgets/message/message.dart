@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:gallery_saver/gallery_saver.dart';
+import 'package:gal/gal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:open_file/open_file.dart';
@@ -24,7 +24,7 @@ import '../../bloc/simple_cubit.dart';
 import '../../constants/icon_fonts.dart';
 import '../../constants/resources.dart';
 import '../../db/dao/sticker_dao.dart';
-import '../../db/mixin_database.dart' hide Offset, Message;
+import '../../db/mixin_database.dart' hide Message, Offset;
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
@@ -182,8 +182,8 @@ SelectedContent? _findSelectedContent(BuildContext context) {
 
 class MessageItemWidget extends HookConsumerWidget {
   const MessageItemWidget({
-    super.key,
     required this.message,
+    super.key,
     this.prev,
     this.next,
     this.lastReadMessageId,
@@ -685,19 +685,19 @@ class MessageItemWidget extends HookConsumerWidget {
 
 class MessageContext extends HookConsumerWidget {
   const MessageContext({
-    super.key,
     required this.isTranscriptPage,
     required this.isPinnedPage,
     required this.showNip,
     required this.isCurrentUser,
     required this.message,
     required this.child,
+    super.key,
   });
 
   MessageContext.fromMessageItem({
-    super.key,
     required this.message,
     required this.child,
+    super.key,
     this.isTranscriptPage = false,
     this.isPinnedPage = false,
     this.showNip = false,
@@ -744,14 +744,16 @@ Future<void> saveAs(
       accountServer.convertMessageAbsolutePath(message, isTranscriptPage);
   if (Platform.isAndroid || Platform.isIOS) {
     if (message.type.isImage || message.type.isVideo) {
-      final result = message.type.isImage
-          ? await GallerySaver.saveImage(path)
-          : await GallerySaver.saveVideo(path);
-      if (result != true) {
-        return showToastFailed(null);
-      } else {
+      try {
+        if (message.type.isImage) {
+          await Gal.putImage(path);
+        } else {
+          await Gal.putVideo(path);
+        }
         showToastSuccessful();
-        return;
+      } catch (error, s) {
+        d('save file error: $error, stack: $s');
+        return showToastFailed(error);
       }
     } else {
       await OpenFile.open(path);

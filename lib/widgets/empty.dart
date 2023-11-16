@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../utils/extension/extension.dart';
 
 class Empty extends StatelessWidget {
-  const Empty({super.key, required this.text});
+  const Empty({required this.text, super.key});
 
   final String text;
 

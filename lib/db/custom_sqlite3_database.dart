@@ -158,6 +158,9 @@ parameter: $parameters
 
     return result;
   }
+
+  @override
+  DatabaseConfig get config => database.config;
 }
 
 class _PreparedStatementWrapper implements PreparedStatement {

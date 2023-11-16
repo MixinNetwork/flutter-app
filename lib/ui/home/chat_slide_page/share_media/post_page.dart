@@ -19,9 +19,9 @@ import '../shared_media_page.dart';
 
 class PostPage extends HookConsumerWidget {
   const PostPage({
-    super.key,
     required this.maxHeight,
     required this.conversationId,
+    super.key,
   });
 
   final double maxHeight;

@@ -27,10 +27,10 @@ import 'preview_image_widget.dart';
 
 class ImagePreviewPage extends HookConsumerWidget {
   const ImagePreviewPage({
-    super.key,
     required this.conversationId,
     required this.messageId,
     required this.isTranscriptPage,
+    super.key,
   });
 
   final String conversationId;
@@ -480,13 +480,10 @@ class _Action extends StatelessWidget {
         switch (type) {
           case _ActionType.share:
             share();
-            break;
           case _ActionType.copy:
             copy();
-            break;
           case _ActionType.download:
             download();
-            break;
         }
       },
       icon: Resources.assetsImagesEllipsisSvg,

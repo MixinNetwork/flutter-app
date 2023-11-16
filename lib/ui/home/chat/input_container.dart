@@ -906,8 +906,8 @@ class MentionTextMatcher extends TextMatcher implements EquatableMixin {
 class _HighlightTextEditingController extends TextEditingController {
   _HighlightTextEditingController({
     required this.highlightTextStyle,
-    String? initialText,
     required this.mentionCache,
+    String? initialText,
   }) : super(text: initialText) {
     mentionsStreamController.stream
         .distinct()
@@ -930,8 +930,8 @@ class _HighlightTextEditingController extends TextEditingController {
   @override
   TextSpan buildTextSpan({
     required BuildContext context,
-    TextStyle? style,
     required bool withComposing,
+    TextStyle? style,
   }) {
     mentionsStreamController.add(text);
     if (!value.isComposingRangeValid || !withComposing) {

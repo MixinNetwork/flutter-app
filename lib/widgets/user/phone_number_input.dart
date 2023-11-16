@@ -25,8 +25,8 @@ import '../dialog.dart';
 
 class PhoneNumberInputLayout extends HookConsumerWidget {
   const PhoneNumberInputLayout({
-    super.key,
     required this.onNextStep,
+    super.key,
   });
 
   final void Function(String number) onNextStep;

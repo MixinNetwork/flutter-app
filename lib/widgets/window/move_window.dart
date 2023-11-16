@@ -7,8 +7,8 @@ import '../../utils/platform.dart';
 
 class MoveWindowBarrier extends StatelessWidget {
   const MoveWindowBarrier({
-    super.key,
     required this.child,
+    super.key,
     this.enable = true,
   });
 
@@ -86,7 +86,7 @@ class MoveWindow extends StatelessWidget {
 
 /// Global default window move action detector.
 class GlobalMoveWindow extends StatelessWidget {
-  const GlobalMoveWindow({super.key, required this.child});
+  const GlobalMoveWindow({required this.child, super.key});
 
   final Widget child;
 

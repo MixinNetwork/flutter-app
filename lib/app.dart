@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
-    hide Provider, FutureProvider, Consumer;
+    hide Consumer, FutureProvider, Provider;
 import 'package:provider/provider.dart';
 
 import 'account/account_key_value.dart';

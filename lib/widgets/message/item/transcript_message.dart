@@ -209,9 +209,9 @@ class TranscriptMessageWidget extends HookConsumerWidget {
 
 class TranscriptPage extends HookConsumerWidget {
   const TranscriptPage({
-    super.key,
     required this.vlcService,
     required this.transcriptMessage,
+    super.key,
   });
 
   final AudioMessagePlayService vlcService;

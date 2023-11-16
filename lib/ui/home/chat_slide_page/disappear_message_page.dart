@@ -360,19 +360,14 @@ class _CustomExpireUnitSelection extends StatelessWidget {
     switch (unit.value) {
       case _CustomExpireTimeUnit.second:
         text = context.l10n.unitSecond(1);
-        break;
       case _CustomExpireTimeUnit.minute:
         text = context.l10n.unitMinute(1);
-        break;
       case _CustomExpireTimeUnit.hour:
         text = context.l10n.unitHour(1);
-        break;
       case _CustomExpireTimeUnit.day:
         text = context.l10n.unitDay(1);
-        break;
       case _CustomExpireTimeUnit.week:
         text = context.l10n.unitWeek(1);
-        break;
     }
     return CustomPopupMenuButton(
       itemBuilder: (context) => [

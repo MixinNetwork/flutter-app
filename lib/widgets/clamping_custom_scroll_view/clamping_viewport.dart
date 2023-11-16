@@ -14,11 +14,11 @@ import 'package:flutter/widgets.dart';
 /// for more information.
 class ClampingViewport extends Viewport {
   ClampingViewport({
+    required super.offset,
     super.key,
     super.axisDirection,
     super.crossAxisDirection,
     double anchor = 0.0,
-    required super.offset,
     super.center,
     super.cacheExtent,
     super.slivers,
@@ -54,9 +54,9 @@ class ClampingViewport extends Viewport {
 class ClampingRenderViewport extends RenderViewport {
   /// Creates a viewport for [RenderSliver] objects.
   ClampingRenderViewport({
-    super.axisDirection,
     required super.crossAxisDirection,
     required super.offset,
+    super.axisDirection,
     double anchor = 0.0,
     super.children,
     super.center,
@@ -98,10 +98,8 @@ class ClampingRenderViewport extends RenderViewport {
     switch (axis) {
       case Axis.vertical:
         offset.applyViewportDimension(size.height);
-        break;
       case Axis.horizontal:
         offset.applyViewportDimension(size.width);
-        break;
     }
   }
 
@@ -152,11 +150,9 @@ class ClampingRenderViewport extends RenderViewport {
       case Axis.vertical:
         mainAxisExtent = size.height;
         crossAxisExtent = size.width;
-        break;
       case Axis.horizontal:
         mainAxisExtent = size.width;
         crossAxisExtent = size.height;
-        break;
     }
 
     final centerOffsetAdjustment = center!.centerOffsetAdjustment;
@@ -270,10 +266,8 @@ class ClampingRenderViewport extends RenderViewport {
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
         _calculatedCacheExtent = cacheExtent;
-        break;
       case CacheExtentStyle.viewport:
         _calculatedCacheExtent = mainAxisExtent * cacheExtent!;
-        break;
     }
 
     final fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent!;
@@ -331,10 +325,8 @@ class ClampingRenderViewport extends RenderViewport {
     switch (growthDirection) {
       case GrowthDirection.forward:
         _maxScrollExtent += childLayoutGeometry.scrollExtent;
-        break;
       case GrowthDirection.reverse:
         _minScrollExtent -= childLayoutGeometry.scrollExtent;
-        break;
     }
     if (childLayoutGeometry.hasVisualOverflow) _hasVisualOverflow = true;
   }

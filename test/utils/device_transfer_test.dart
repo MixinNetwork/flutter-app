@@ -1,6 +1,8 @@
-@Timeout(Duration(minutes: 1))
 @TestOn('linux || mac-os')
-import 'dart:async';
+@Timeout(Duration(minutes: 1))
+library;
+
+import 'dart:async' show Completer, Future;
 import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';

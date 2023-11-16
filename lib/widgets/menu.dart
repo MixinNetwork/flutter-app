@@ -22,9 +22,9 @@ import 'portal_providers.dart';
 
 class MenusWithSeparator extends Menu {
   MenusWithSeparator({
+    required List<List<MenuElement>> childrens,
     super.title,
     super.image,
-    required List<List<MenuElement>> childrens,
   }) : super(
           children: childrens
               .where((element) => element.isNotEmpty)
@@ -49,8 +49,8 @@ typedef CustomPopupMenuItemBuilder<T> = List<CustomPopupMenuItem<T>> Function(
 
 class CustomPopupMenuButton<T> extends HookConsumerWidget {
   const CustomPopupMenuButton({
-    super.key,
     required this.itemBuilder,
+    super.key,
     this.onSelected,
     this.child,
     this.icon,
@@ -119,9 +119,9 @@ class CustomPopupMenuItem<T> {
 
 class ContextMenuPortalEntry extends HookConsumerWidget {
   const ContextMenuPortalEntry({
-    super.key,
     required this.child,
     required this.buildMenus,
+    super.key,
     this.showedMenu,
     this.enable = true,
     this.onTap,
@@ -215,10 +215,10 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
 
 class Barrier extends StatelessWidget {
   const Barrier({
-    super.key,
     required this.onClose,
     required this.visible,
     required this.child,
+    super.key,
     this.duration,
   });
 
@@ -274,8 +274,8 @@ class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
 
 class ContextMenuPage extends StatelessWidget {
   const ContextMenuPage({
-    super.key,
     required this.menus,
+    super.key,
   });
 
   final List<Widget> menus;
@@ -329,8 +329,8 @@ class ContextMenuPage extends StatelessWidget {
 
 class ContextMenu extends StatelessWidget {
   const ContextMenu({
-    super.key,
     required this.title,
+    super.key,
     this.isDestructiveAction = false,
     this.onTap,
     this.icon,
@@ -423,9 +423,9 @@ class ContextMenu extends StatelessWidget {
 
 class SubContextMenu extends StatelessWidget {
   const SubContextMenu({
-    super.key,
     required this.title,
     required this.menus,
+    super.key,
     this.icon,
     this.isDestructiveAction = false,
   });

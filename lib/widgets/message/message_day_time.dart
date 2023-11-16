@@ -14,8 +14,8 @@ import 'message_style.dart';
 
 class MessageDayTime extends HookConsumerWidget {
   const MessageDayTime({
-    super.key,
     required this.dateTime,
+    super.key,
   });
 
   final DateTime dateTime;
@@ -115,13 +115,13 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
   });
 
   factory MessageDayTimeViewportWidget.chatPage({
-    Key? key,
     required Widget child,
     required ScrollController scrollController,
     required GlobalKey topKey,
     required GlobalKey bottomKey,
     required db.MessageItem? center,
     required GlobalKey? centerKey,
+    Key? key,
   }) =>
       MessageDayTimeViewportWidget._create(
         () {
@@ -148,10 +148,10 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
       );
 
   factory MessageDayTimeViewportWidget.singleList({
-    Key? key,
     required Widget child,
     required ScrollController scrollController,
     required GlobalKey listKey,
+    Key? key,
     Object? reTraversalKey,
     bool reverse = false,
   }) =>

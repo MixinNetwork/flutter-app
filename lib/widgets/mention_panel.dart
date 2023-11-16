@@ -22,11 +22,11 @@ const kMentionItemHeight = 50.0;
 
 class MentionPanelPortalEntry extends HookConsumerWidget {
   const MentionPanelPortalEntry({
-    super.key,
     required this.constraints,
     required this.textEditingController,
     required this.child,
     required this.mentionProviderInstance,
+    super.key,
   });
 
   final BoxConstraints constraints;

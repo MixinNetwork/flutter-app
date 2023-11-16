@@ -16,9 +16,9 @@ import '../../widgets/toast.dart';
 
 class StorageUsageDetailPage extends HookConsumerWidget {
   const StorageUsageDetailPage({
-    super.key,
     required this.name,
     required this.conversationId,
+    super.key,
   });
 
   final String name;

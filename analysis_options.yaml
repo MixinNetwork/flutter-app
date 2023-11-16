@@ -1,8 +1,6 @@
-include: package:very_good_analysis/analysis_options.3.1.0.yaml
+include: package:very_good_analysis/analysis_options.5.1.0.yaml
 
 analyzer:
-  plugins:
-    - dart_code_metrics
   language:
     strict-inference: false
     strict-raw-types: false
@@ -69,72 +67,5 @@ linter:
     depend_on_referenced_packages: false
     no_leading_underscores_for_local_identifiers: false
     use_if_null_to_convert_nulls_to_bools: false
+    sort_pub_dependencies: false
 
-dart_code_metrics:
-  rules:
-    - avoid-collection-methods-with-unrelated-types
-    - avoid-duplicate-exports
-    #    - avoid-dynamic
-    #    - avoid-global-state
-    #    - avoid-ignoring-return-values
-    #    - avoid-late-keyword
-    - avoid-missing-enum-constant-in-map
-    - avoid-nested-conditional-expressions:
-        acceptable-level: 2
-    - avoid-non-ascii-symbols:
-        exclude:
-          - test/**
-    #    - avoid-non-null-assertion
-    - avoid-throw-in-catch-block
-    - avoid-unnecessary-type-assertions
-    - avoid-unrelated-type-assertions
-    - avoid-unnecessary-type-casts
-    - avoid-unrelated-type-assertions
-    - avoid-unused-parameters
-    - binary-expression-operand-order
-    - double-literal-format
-    #    - format-comment
-    #    - member-ordering:
-    #        alphabetize: true
-    #    - member-ordering-extended
-    # do not use this
-    #    - newline-before-return
-    - no-boolean-literal-compare
-    #    - no-empty-block
-    # todo use
-    #    - no-equal-arguments
-    - no-equal-then-else
-    # todo use
-    #    - no-magic-number
-    #    - no-object-declaration
-    #    - prefer-async-await
-    # todo use
-    #    - prefer-commenting-analyzer-ignores
-    #    - prefer-conditional-expressions
-    # todo use
-    #    - prefer-correct-identifier-length
-    - prefer-correct-type-name
-    - prefer-enums-by-name
-    - prefer-first
-    - prefer-immediate-return
-    - prefer-last
-    # todo maybe use
-    #    - prefer-match-file-name
-    # todo maybe use
-    #    - prefer-trailing-comma:
-    #        break-on: 3
-    - tag-name
-    # Flutter specific
-    - always-remove-listener
-    #    - avoid-border-all
-    #    - avoid-returning-widgets
-    - avoid-unnecessary-setstate
-    #    - avoid-wrapping-in-padding
-    - prefer-const-border-radius
-    #    - prefer-extracting-callbacks
-    #    - prefer-single-widget-per-file
-    # Intl specific
-    - prefer-intl-name
-    - provide-correct-intl-args
-
-  anti-patterns:

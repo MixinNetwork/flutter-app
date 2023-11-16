@@ -168,20 +168,16 @@ class DeviceTransferSender {
                 _pendingVerificationSockets.clear();
                 close(debugReason: 'verify code failed');
               }
-              break;
             case kTransferCommandActionFinish:
               i('client finished. close connection');
               _finished = true;
               close();
-              break;
             case kTransferCommandActionClose:
               w('client closed. close connection');
               close();
-              break;
             case kTransferCommandActionProgress:
               final progress = command.progress!;
               _notifyProgressUpdate(progress);
-              break;
           }
         }
       }, onDone: () {

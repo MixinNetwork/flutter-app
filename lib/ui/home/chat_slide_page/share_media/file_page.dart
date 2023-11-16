@@ -19,9 +19,9 @@ import '../shared_media_page.dart';
 
 class FilePage extends HookConsumerWidget {
   const FilePage({
-    super.key,
     required this.maxHeight,
     required this.conversationId,
+    super.key,
   });
 
   final double maxHeight;

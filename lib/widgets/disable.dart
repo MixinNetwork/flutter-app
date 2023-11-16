@@ -2,9 +2,9 @@ import 'package:flutter/widgets.dart';
 
 class Disable extends StatelessWidget {
   const Disable({
+    required this.child,
     super.key,
     this.disable = true,
-    required this.child,
   });
 
   final bool disable;

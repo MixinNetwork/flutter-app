@@ -86,7 +86,7 @@ class _AppTile extends StatelessWidget {
 }
 
 class OverlappedAppIcons extends StatelessWidget {
-  OverlappedAppIcons({super.key, required this.apps}) : assert(apps.isNotEmpty);
+  OverlappedAppIcons({required this.apps, super.key}) : assert(apps.isNotEmpty);
 
   final List<App> apps;
 
