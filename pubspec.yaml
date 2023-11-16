@@ -70,7 +70,10 @@ dependencies:
     sdk: flutter
   flutter_portal: ^1.1.4
   flutter_svg: ^2.0.9
-  gal: ^2.1.3
+  gal:
+    git:
+      url: https://github.com/boyan01/gal.git
+      ref: d6bfb06b21affe4bd8f2032f168fbd63c83f16ab
   github: ^9.19.0
   hive: ^2.2.3
   hive_flutter: ^1.0.0

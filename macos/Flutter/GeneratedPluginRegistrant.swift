@@ -13,8 +13,8 @@ import device_info_plus
 import file_selector_macos
 import flutter_app_icon_badge
 import flutter_local_notifications
-import gal
 import irondash_engine_context
+import local_auth_foundation
 import network_info_plus
 import ogg_opus_player
 import package_info_plus
@@ -38,8 +38,8 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FileSelectorPlugin.register(with: registry.registrar(forPlugin: "FileSelectorPlugin"))
   FlutterAppIconBadgePlugin.register(with: registry.registrar(forPlugin: "FlutterAppIconBadgePlugin"))
   FlutterLocalNotificationsPlugin.register(with: registry.registrar(forPlugin: "FlutterLocalNotificationsPlugin"))
-  GalPlugin.register(with: registry.registrar(forPlugin: "GalPlugin"))
   IrondashEngineContextPlugin.register(with: registry.registrar(forPlugin: "IrondashEngineContextPlugin"))
+  LocalAuthPlugin.register(with: registry.registrar(forPlugin: "LocalAuthPlugin"))
   NetworkInfoPlusPlugin.register(with: registry.registrar(forPlugin: "NetworkInfoPlusPlugin"))
   OggOpusPlayerPlugin.register(with: registry.registrar(forPlugin: "OggOpusPlayerPlugin"))
   FPPPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FPPPackageInfoPlusPlugin"))
