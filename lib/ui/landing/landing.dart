@@ -61,10 +61,8 @@ class LandingDialog extends ConsumerWidget {
     switch (mode) {
       case _LandingMode.qrcode:
         child = const LandingQrCodeWidget();
-        break;
       case _LandingMode.mobile:
         child = const LoginWithMobileWidget();
-        break;
     }
     return Portal(
       child: Scaffold(

@@ -101,13 +101,10 @@ extension ApperenceSetting on AppSettingKeyValue {
     switch (value) {
       case Brightness.dark:
         _brightness = 1;
-        break;
       case Brightness.light:
         _brightness = 2;
-        break;
       case null:
         _brightness = 0;
-        break;
     }
   }
 

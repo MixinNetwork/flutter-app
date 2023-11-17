@@ -97,9 +97,9 @@ Client createClient({
   required String userId,
   required String sessionId,
   required String privateKey,
-  List<Interceptor> interceptors = const [],
   // Hive didn't support multi isolate.
   required bool loginByPhoneNumber,
+  List<Interceptor> interceptors = const [],
 }) =>
     _createClient(
       userId: userId,

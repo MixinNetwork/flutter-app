@@ -338,10 +338,10 @@ class ContextMenuPage extends StatelessWidget {
 
 class ContextMenuLayout extends StatelessWidget {
   const ContextMenuLayout({
+    required this.child,
     super.key,
     this.onTap,
     this.onTapUp,
-    required this.child,
   });
 
   final VoidCallback? onTap;

@@ -19,9 +19,9 @@ class AppInitializingPage extends StatelessWidget {
 
 class LoadingWidget extends StatelessWidget {
   const LoadingWidget({
-    super.key,
     required this.title,
     required this.message,
+    super.key,
   });
 
   final String title;

@@ -1,4 +1,6 @@
 @TestOn('linux || mac-os')
+library;
+
 import 'dart:io';
 
 import 'package:drift/native.dart';

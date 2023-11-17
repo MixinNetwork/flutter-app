@@ -210,8 +210,8 @@ enum LandingStatus {
 
 class LandingState extends Equatable {
   const LandingState({
-    this.authUrl,
     required this.status,
+    this.authUrl,
     this.errorMessage,
   });
 
