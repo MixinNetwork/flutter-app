@@ -255,6 +255,8 @@ class _CircleList extends HookConsumerWidget {
                         );
                       },
                       child: ContextMenuWidget(
+                        desktopMenuWidgetBuilder:
+                            CustomDesktopMenuWidgetBuilder(),
                         menuProvider: (request) =>
                             MenusWithSeparator(childrens: [
                           [

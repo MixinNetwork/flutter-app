@@ -210,6 +210,7 @@ class _ParticipantMenuEntry extends HookConsumerWidget {
     }
 
     return ContextMenuWidget(
+      desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
       menuProvider: (request) => MenusWithSeparator(childrens: [
         [
           MenuAction(
