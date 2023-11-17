@@ -77,6 +77,11 @@ Future<bool> openUri(
           uri.conversationIdOfSend, uri.dataOfSend, app);
     }
 
+    if (uri.isPay) {
+      await showUnknownMixinUrlDialog(context, uri);
+      return false;
+    }
+
     if (uri.appId != null) {
       if (uri.actionIsOpen) {
         App? app;
@@ -288,6 +293,8 @@ extension _MixinUriExtension on Uri {
   }
 
   bool get isSend => _isTypeScheme(MixinSchemeHost.send);
+
+  bool get isPay => _isTypeHost(MixinSchemeHost.pay);
 
   String? get categoryOfSend {
     if (!isSend) return null;
