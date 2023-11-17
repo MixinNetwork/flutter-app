@@ -174,9 +174,9 @@ class ChatBar extends HookConsumerWidget {
 
 class ConversationIDOrCount extends HookConsumerWidget {
   const ConversationIDOrCount({
+    required this.conversationState,
     super.key,
     this.fontSize = 14,
-    required this.conversationState,
   });
 
   final double fontSize;
@@ -236,9 +236,9 @@ class ConversationIDOrCount extends HookConsumerWidget {
 
 class ConversationName extends StatelessWidget {
   const ConversationName({
+    required this.conversationState,
     super.key,
     this.fontSize = 16,
-    required this.conversationState,
     this.overflow = true,
   });
 
@@ -278,9 +278,9 @@ class ConversationName extends StatelessWidget {
 
 class ConversationAvatar extends StatelessWidget {
   const ConversationAvatar({
+    required this.conversationState,
     super.key,
     this.size = 36,
-    required this.conversationState,
   });
 
   final double size;

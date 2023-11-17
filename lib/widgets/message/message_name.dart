@@ -11,10 +11,10 @@ import 'message_style.dart';
 
 class MessageName extends ConsumerWidget {
   const MessageName({
-    super.key,
     required this.userName,
     required this.userId,
     required this.userIdentityNumber,
+    super.key,
   });
 
   final String userName;
@@ -36,6 +36,7 @@ class MessageName extends ConsumerWidget {
     if (showIdentityNumber && userIdentityNumber != '0') {
       widget = Row(
         crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
         children: [
           widget,
           const SizedBox(width: 2),

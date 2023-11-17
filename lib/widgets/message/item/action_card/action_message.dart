@@ -60,7 +60,7 @@ class ActionCardMessage extends HookConsumerWidget {
 }
 
 class AppCardItem extends HookConsumerWidget {
-  const AppCardItem({super.key, required this.data});
+  const AppCardItem({required this.data, super.key});
 
   final AppCardData data;
 

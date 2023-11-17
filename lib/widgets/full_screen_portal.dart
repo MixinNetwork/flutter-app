@@ -13,9 +13,9 @@ class FullScreenVisibleCubit extends SimpleCubit<bool> {
 
 class FullScreenPortal extends HookConsumerWidget {
   const FullScreenPortal({
-    super.key,
     required this.builder,
     required this.portalBuilder,
+    super.key,
     this.duration = const Duration(milliseconds: 100),
     this.curve = Curves.easeOut,
   });

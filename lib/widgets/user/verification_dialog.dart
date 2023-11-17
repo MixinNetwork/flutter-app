@@ -130,11 +130,11 @@ Future<VerificationResponse> requestVerificationCode({
 
 class VerificationCodeInputLayout extends HookConsumerWidget {
   const VerificationCodeInputLayout({
-    super.key,
     required this.phoneNumber,
     required this.initialVerificationResponse,
     required this.reRequestVerification,
     required this.onVerification,
+    super.key,
   });
 
   final String phoneNumber;
@@ -221,7 +221,7 @@ class VerificationCodeInputLayout extends HookConsumerWidget {
 }
 
 class ResendCodeWidget extends HookConsumerWidget {
-  const ResendCodeWidget({super.key, required this.onResend});
+  const ResendCodeWidget({required this.onResend, super.key});
 
   final Future<bool> Function() onResend;
 

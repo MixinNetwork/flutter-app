@@ -8,13 +8,13 @@ import '../utils/system/system_utils.dart';
 
 class BrightnessObserver extends HookConsumerWidget {
   const BrightnessObserver({
+    required this.child,
+    required this.lightThemeData,
+    required this.darkThemeData,
     super.key,
     this.duration = const Duration(milliseconds: 200),
     this.curve = Curves.linear,
     this.onEnd,
-    required this.child,
-    required this.lightThemeData,
-    required this.darkThemeData,
     this.forceBrightness,
   });
 
@@ -94,9 +94,9 @@ class BrightnessData extends InheritedWidget {
   const BrightnessData({
     required this.value,
     required super.child,
-    super.key,
     required this.brightnessThemeData,
     required this.brightness,
+    super.key,
   });
 
   final double value;

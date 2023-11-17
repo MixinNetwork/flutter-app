@@ -76,11 +76,11 @@ S useBlocState<B extends BlocBase<S>, S>({
 }
 
 T useBlocStateConverter<B extends BlocBase<S>, S, T>({
+  required T Function(S) converter,
   B? bloc,
   List<Object?> keys = const <Object>[],
   bool preserveState = false,
   bool Function(T)? when,
-  required T Function(S) converter,
 }) {
   final (stream, initialData) = useMemoized(
     () {

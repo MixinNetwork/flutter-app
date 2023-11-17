@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    hide User, Conversation;
+    hide Conversation, User;
 
 import '../../enum/encrypt_category.dart';
 import '../../ui/provider/slide_category_provider.dart';
@@ -73,28 +73,23 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     switch (category) {
       case SlideCategoryType.chats:
         predicate = conversation.category.isIn(['CONTACT', 'GROUP']);
-        break;
       case SlideCategoryType.contacts:
         predicate =
             conversation.category.equalsValue(ConversationCategory.contact) &
                 owner.relationship.equalsValue(UserRelationship.friend) &
                 owner.appId.isNull();
-        break;
       case SlideCategoryType.groups:
         predicate =
             conversation.category.equalsValue(ConversationCategory.group);
-        break;
       case SlideCategoryType.bots:
         predicate =
             conversation.category.equalsValue(ConversationCategory.contact) &
                 owner.appId.isNotNull();
-        break;
       case SlideCategoryType.strangers:
         predicate =
             conversation.category.equalsValue(ConversationCategory.contact) &
                 owner.relationship.equalsValue(UserRelationship.stranger) &
                 owner.appId.isNull();
-        break;
       case SlideCategoryType.circle:
       case SlideCategoryType.setting:
         throw UnsupportedError('Unsupported category: $category');
@@ -300,12 +295,10 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         case SlideCategoryType.strangers:
           predicate = _conversationPredicateByCategory(
               category!.type, conversation, owner);
-          break;
 
         case SlideCategoryType.circle:
         case SlideCategoryType.setting:
           assert(false, 'Invalid category type: ${category!.type}');
-          break;
         case null:
         case SlideCategoryType.chats:
           break;

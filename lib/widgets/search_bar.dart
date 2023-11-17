@@ -131,25 +131,21 @@ class SearchBar extends HookConsumerWidget {
                       context: context,
                       child: const _SearchUserDialog(),
                     );
-                    break;
                   case _ActionType.createConversation:
                     Actions.maybeInvoke(
                       context,
                       const CreateConversationIntent(),
                     );
-                    break;
                   case _ActionType.createGroup:
                     Actions.maybeInvoke(
                       context,
                       const CreateGroupConversationIntent(),
                     );
-                    break;
                   case _ActionType.createCircle:
                     Actions.maybeInvoke(
                       context,
                       const CreateCircleIntent(),
                     );
-                    break;
                 }
               },
               icon: Resources.assetsImagesIcAddSvg,

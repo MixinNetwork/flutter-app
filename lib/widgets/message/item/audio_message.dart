@@ -6,7 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../../db/mixin_database.dart' hide Offset, Message;
+import '../../../db/mixin_database.dart' hide Message, Offset;
 import '../../../enum/media_status.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
@@ -69,7 +69,6 @@ class AudioMessage extends HookConsumerWidget {
                 return;
               }
               context.audioMessageService.playAudioMessage(message);
-              break;
             case MediaStatus.canceled:
               if (isMessageSentOut && message.mediaUrl?.isNotEmpty == true) {
                 if (isTranscriptPage) {
@@ -83,11 +82,9 @@ class AudioMessage extends HookConsumerWidget {
               } else {
                 context.accountServer.downloadAttachment(message.messageId);
               }
-              break;
             case MediaStatus.pending:
               context.accountServer
                   .cancelProgressAttachmentJob(message.messageId);
-              break;
             case MediaStatus.expired:
             case null:
               break;

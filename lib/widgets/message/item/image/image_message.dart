@@ -53,9 +53,9 @@ class ImageMessageWidget extends HookConsumerWidget {
 
 class MessageImage extends HookConsumerWidget {
   const MessageImage({
+    required this.showStatus,
     super.key,
     this.size,
-    required this.showStatus,
   });
 
   final Size? size;
@@ -110,7 +110,6 @@ class MessageImage extends HookConsumerWidget {
               messageId: message.messageId,
               isTranscriptPage: isTranscriptPage,
             );
-            break;
           case MediaStatus.canceled:
             if (message.mediaUrl?.isNotEmpty == true && isMessageSentOut) {
               if (isTranscriptPage) {
@@ -131,11 +130,9 @@ class MessageImage extends HookConsumerWidget {
             } else {
               context.accountServer.downloadAttachment(message.messageId);
             }
-            break;
           case MediaStatus.pending:
             context.accountServer
                 .cancelProgressAttachmentJob(message.messageId);
-            break;
           case null:
           case MediaStatus.expired:
           case MediaStatus.read:
@@ -218,10 +215,10 @@ typedef ImageLayoutBuilder = Widget Function(
 /// or too short.
 class ImageMessageLayout extends StatelessWidget {
   const ImageMessageLayout({
-    super.key,
     required this.builder,
     required this.imageWidthInPixel,
     required this.imageHeightInPixel,
+    super.key,
   })  : assert(imageHeightInPixel > 0),
         assert(imageWidthInPixel > 0);
 

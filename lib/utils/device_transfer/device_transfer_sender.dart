@@ -63,8 +63,8 @@ class DeviceTransferSender {
   final OnSendNetworkSpeedUpdate? onSenderNetworkSpeedUpdate;
   final String deviceId;
 
+  TransferSpeedController? _speedController;
   ServerSocket? _socket;
-
   TransferSocket? _clientSocket;
   final _speedCalculator = SpeedCalculator();
 
@@ -81,10 +81,24 @@ class DeviceTransferSender {
 
   @visibleForTesting
   @mustCallSuper
-  FutureOr<void> onPacketSend() {}
+  FutureOr<void> onPacketSend() {
+    assert(_speedController != null, 'speed controller is null');
+    if (_speedController != null) {
+      _speedController?.updateLocalProgress();
+
+      i('onPacketSend: ${_speedController!._localSendCount} ${_speedController!._remoteReceivedCount}');
+
+      while (!_speedController!.canSend()) {
+        i('sender speed control: wait for remote progress update.');
+        Future.delayed(const Duration(milliseconds: 100));
+      }
+    }
+  }
 
   void _notifyProgressUpdate(double progress) {
     onSenderProgressUpdate?.call(progress);
+    assert(_speedController != null, 'speed controller is null');
+    _speedController?.remoteProgress = progress / 100;
   }
 
   Future<(int port, TransferSecretKey key)> startServerSocket(
@@ -125,8 +139,6 @@ class DeviceTransferSender {
         socket,
         (sink) => TransferProtocolSink(sink, protocolTempFileDir, transferKey),
       ).asyncListen((event) {
-        d('receive data: $event');
-
         if (event is TransferCommandPacket) {
           final command = event.command;
           switch (command.action) {
@@ -156,21 +168,16 @@ class DeviceTransferSender {
                 _pendingVerificationSockets.clear();
                 close(debugReason: 'verify code failed');
               }
-              break;
             case kTransferCommandActionFinish:
               i('client finished. close connection');
               _finished = true;
               close();
-              break;
             case kTransferCommandActionClose:
               w('client closed. close connection');
               close();
-              break;
             case kTransferCommandActionProgress:
               final progress = command.progress!;
-              i('remote progress command: progress $progress');
               _notifyProgressUpdate(progress);
-              break;
           }
         }
       }, onDone: () {
@@ -233,6 +240,7 @@ class DeviceTransferSender {
         deviceId: deviceId,
         total: count,
       ));
+      _speedController = TransferSpeedController(transferTotalCount: count);
       return count;
     }, 'send_total_count');
 
@@ -589,5 +597,39 @@ class DeviceTransferSender {
     clientSocket?.destroy();
     await socket?.close();
     i('sender: transfer server closed');
+  }
+}
+
+class TransferSpeedController {
+  TransferSpeedController({
+    required this.transferTotalCount,
+    this.maxTransferCountDifference = 10000,
+    this.maxProgressDifference = 0.01,
+  });
+
+  int _localSendCount = 0;
+  double _remoteProgress = 0;
+
+  final int transferTotalCount;
+  final int maxTransferCountDifference;
+  final double maxProgressDifference;
+
+  void updateLocalProgress() {
+    _localSendCount++;
+  }
+
+  set remoteProgress(double progress) {
+    _remoteProgress = progress;
+  }
+
+  int get _remoteReceivedCount =>
+      (_remoteProgress * transferTotalCount).round();
+
+  bool canSend() {
+    final countDifference = _localSendCount - _remoteReceivedCount;
+    final progressDifference =
+        _localSendCount / transferTotalCount - _remoteProgress;
+    return countDifference < maxTransferCountDifference ||
+        progressDifference < maxProgressDifference;
   }
 }

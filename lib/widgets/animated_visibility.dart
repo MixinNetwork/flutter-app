@@ -2,9 +2,9 @@ import 'package:flutter/widgets.dart';
 
 class AnimatedVisibility extends StatelessWidget {
   const AnimatedVisibility({
-    super.key,
     required this.child,
     required this.visible,
+    super.key,
     this.maintainSize = true,
     this.alignment = Alignment.center,
     this.duration = const Duration(milliseconds: 200),

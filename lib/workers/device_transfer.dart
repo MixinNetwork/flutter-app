@@ -191,16 +191,12 @@ class DeviceTransfer {
       switch (event) {
         case DeviceTransferCommand.pullToRemote:
           await _sendPullToOtherSession();
-          break;
         case DeviceTransferCommand.pushToRemote:
           await _sendPushToOtherSession();
-          break;
         case DeviceTransferCommand.cancelRestore:
           receiver.close();
-          break;
         case DeviceTransferCommand.cancelBackup:
           await sender.close();
-          break;
         case DeviceTransferCommand.confirmRestore:
           final data = _remotePushData;
           if (data == null) {
@@ -210,20 +206,16 @@ class DeviceTransfer {
           _remotePushData = null;
           await receiver.connectToServer(
               data.ip, data.port, data.code, data.secretKey);
-          break;
         case DeviceTransferCommand.confirmBackup:
           await _sendPushToOtherSession();
-          break;
         case DeviceTransferCommand.cancelBackupRequest:
           await _sendCommandAsPlainJson(
             TransferDataCommand.cancel(deviceId: deviceId),
           );
-          break;
         case DeviceTransferCommand.cancelRestoreRequest:
           await _sendCommandAsPlainJson(
             TransferDataCommand.cancel(deviceId: deviceId),
           );
-          break;
       }
     }));
   }
@@ -434,11 +426,9 @@ class DeviceTransfer {
       case kTransferCommandActionPush:
         _handleRemotePushCommand(
             command.ip!, command.port!, command.code!, command.secretKey!);
-        break;
       case kTransferCommandActionPull:
         DeviceTransferEventBus.instance
             .fire(DeviceTransferCallbackType.onRestoreRequestReceived);
-        break;
       default:
         e('handleRemoteCommand: unknown action ${command.action}');
         return;

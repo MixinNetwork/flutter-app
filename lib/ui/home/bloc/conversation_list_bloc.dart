@@ -107,7 +107,6 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
           mentionCache,
           () => dao.conversationHasDataByCategory(state.type),
         );
-        break;
       case SlideCategoryType.circle:
         _map[state] ??= _ConversationListBloc(
           limit ?? kDefaultLimit,
@@ -122,7 +121,6 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
           () =>
               database.conversationDao.conversationHasDataByCircleId(state.id!),
         );
-        break;
       case SlideCategoryType.setting:
         return;
     }

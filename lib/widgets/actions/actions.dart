@@ -27,8 +27,8 @@ class ToggleCommandPaletteIntent extends Intent {
 
 class MixinAppActions extends StatelessWidget {
   const MixinAppActions({
-    super.key,
     required this.child,
+    super.key,
   });
 
   final Widget child;

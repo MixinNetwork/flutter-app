@@ -11,9 +11,9 @@ import '../cache_lottie.dart';
 
 class StickerItem extends HookConsumerWidget {
   const StickerItem({
-    super.key,
     required this.assetUrl,
     required this.assetType,
+    super.key,
     this.errorWidget,
     this.width,
     this.height,
@@ -98,9 +98,9 @@ class StickerItem extends HookConsumerWidget {
 
 class StickerGroupIcon extends StatelessWidget {
   const StickerGroupIcon({
-    super.key,
     required this.iconUrl,
     required this.size,
+    super.key,
   });
 
   final String iconUrl;

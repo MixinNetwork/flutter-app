@@ -189,17 +189,14 @@ class DeviceTransferReceiver {
         assert(_socket != null, 'socket is null');
         await _socket?.addCommand(TransferDataCommand.simple(
             deviceId: deviceId, action: kTransferCommandActionFinish));
-        break;
       case kTransferCommandActionClose:
         i('${command.action} command: close receiver socket');
         close();
-        break;
       case kTransferCommandActionStart:
         i('${command.action} command: start receiver');
         _total = command.total!;
         onReceiverStart?.call();
         onReceiverProgressUpdate?.call(0);
-        break;
     }
   }
 
@@ -218,7 +215,6 @@ class DeviceTransferReceiver {
           }
           await database.conversationDao
               .insert(conversation.toDbConversation());
-          break;
         case JsonTransferDataType.message:
           final message = TransferDataMessage.fromJson(data.data);
 
@@ -238,12 +234,10 @@ class DeviceTransferReceiver {
               message.toDbMessage().copyWith(status: MessageStatus.read);
           await database.messageDao.insert(dbMessage, userId);
           await database.ftsDatabase.insertFts(dbMessage);
-          break;
         case JsonTransferDataType.asset:
           final asset = TransferDataAsset.fromJson(data.data);
           d('client: asset: $asset');
           await database.assetDao.insertAsset(asset.toDbAsset());
-          break;
         case JsonTransferDataType.token:
           final token = TransferDataToken.fromJson(data.data);
           d('client: token: $token');
@@ -253,24 +247,20 @@ class DeviceTransferReceiver {
           d('client: user: $user');
           await database.userDao
               .insert(user.toDbUser(), updateIfConflict: false);
-          break;
         case JsonTransferDataType.sticker:
           final sticker = TransferDataSticker.fromJson(data.data);
           d('client: sticker: $sticker');
           await database.stickerDao.insertSticker(sticker.toDbSticker());
-          break;
         case JsonTransferDataType.snapshot:
           final snapshot = TransferDataSnapshot.fromJson(data.data);
           d('client: snapshot: $snapshot');
           await database.snapshotDao
               .insert(snapshot.toDbSnapshot(), updateIfConflict: false);
-          break;
         case JsonTransferDataType.safeSnapshot:
           final safeSnapshot = TransferDataSafeSnapshot.fromJson(data.data);
           d('client: safeSnapshot: $safeSnapshot');
           await database.safeSnapshotDao
               .insert(safeSnapshot.toDbSafeSnapshot(), updateIfConflict: false);
-          break;
         case JsonTransferDataType.expiredMessage:
           final expiredMessage = TransferDataExpiredMessage.fromJson(data.data);
           d('client: expiredMessage: $expiredMessage');
@@ -280,7 +270,6 @@ class DeviceTransferReceiver {
             expireAt: expiredMessage.expireAt,
             updateIfConflict: false,
           );
-          break;
         case JsonTransferDataType.transcriptMessage:
           final transcriptMessage =
               TransferDataTranscriptMessage.fromJson(data.data);
@@ -289,7 +278,6 @@ class DeviceTransferReceiver {
             [transcriptMessage.toDbTranscriptMessage()],
             mode: InsertMode.insertOrIgnore,
           );
-          break;
         case JsonTransferDataType.participant:
           final participant = TransferDataParticipant.fromJson(data.data);
           d('client: participant: $participant');
@@ -297,7 +285,6 @@ class DeviceTransferReceiver {
             participant.toDbParticipant(),
             updateIfConflict: false,
           );
-          break;
         case JsonTransferDataType.pinMessage:
           final pinMessage = TransferDataPinMessage.fromJson(data.data);
           d('client: pinMessage: $pinMessage');
@@ -305,7 +292,6 @@ class DeviceTransferReceiver {
             pinMessage.toDbPinMessage(),
             updateIfConflict: false,
           );
-          break;
         case JsonTransferDataType.messageMention:
           final messageMention = MessageMention.fromJson(data.data);
           d('client: messageMention: $messageMention');
@@ -313,7 +299,6 @@ class DeviceTransferReceiver {
             messageMention,
             updateIfConflict: false,
           );
-          break;
         case JsonTransferDataType.app:
           final app = TransferDataApp.fromJson(data.data);
           d('client: app: $app');
@@ -321,10 +306,8 @@ class DeviceTransferReceiver {
             app.toDbApp(),
             updateIfConflict: false,
           );
-          break;
         case JsonTransferDataType.unknown:
           i('unknown type: ${data.type}');
-          break;
       }
     } catch (error, stacktrace) {
       e('_processReceivedJsonPacket: ${data.data}');

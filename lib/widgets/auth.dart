@@ -114,8 +114,8 @@ class LockStateNotifier extends StateNotifier<bool> {
 
 class AuthGuard extends HookConsumerWidget {
   const AuthGuard({
-    super.key,
     required this.child,
+    super.key,
   });
 
   final Widget child;

@@ -46,10 +46,10 @@ class Toast {
 
 class ToastWidget extends StatelessWidget {
   const ToastWidget({
+    required this.text,
     super.key,
     this.barrierColor = const Color(0x80000000),
     this.icon,
-    required this.text,
     this.ignoring = true,
   });
 

@@ -4,7 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
-import '../../../db/mixin_database.dart' hide Offset, Message;
+import '../../../db/mixin_database.dart' hide Message, Offset;
 import '../../../utils/extension/extension.dart';
 import '../../app_bar.dart';
 import '../../buttons.dart';
@@ -43,11 +43,11 @@ class PostMessage extends HookConsumerWidget {
 
 class MessagePost extends StatelessWidget {
   const MessagePost({
+    required this.showStatus,
+    required this.content,
     super.key,
     this.padding,
     this.decoration,
-    required this.showStatus,
-    required this.content,
     this.clickable = true,
   });
 
@@ -124,8 +124,8 @@ class MessagePost extends StatelessWidget {
 
 class PostPreview extends StatelessWidget {
   const PostPreview({
-    super.key,
     required this.message,
+    super.key,
   });
 
   static Future<void> push(

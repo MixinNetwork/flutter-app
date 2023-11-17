@@ -11,9 +11,9 @@ class SelectItem extends HookConsumerWidget {
   const SelectItem({
     required this.title,
     required this.icon,
+    required this.onTap,
     this.count = 0,
     this.mutedCount = 0,
-    required this.onTap,
     this.selected = false,
     this.showTooltip = true,
     super.key,

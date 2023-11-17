@@ -12,8 +12,8 @@ import '../bloc/conversation_list_bloc.dart';
 
 class ConversationHotKey extends StatelessWidget {
   const ConversationHotKey({
-    super.key,
     required this.child,
+    super.key,
   });
 
   final Widget child;

@@ -70,7 +70,7 @@ class _PinVerificationDialog extends StatelessWidget {
 const _kPinCodeLength = 6;
 
 class PinInputLayout extends StatefulWidget {
-  const PinInputLayout({super.key, required this.doVerify});
+  const PinInputLayout({required this.doVerify, super.key});
 
   final Future<void> Function(String pinCode) doVerify;
 

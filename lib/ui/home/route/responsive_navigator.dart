@@ -70,10 +70,10 @@ abstract class AbstractResponsiveNavigatorCubit
 
 class ResponsiveNavigator extends HookConsumerWidget {
   const ResponsiveNavigator({
-    super.key,
     required this.leftPage,
     required this.rightEmptyPage,
     required this.switchWidth,
+    super.key,
   });
 
   final MaterialPage leftPage;

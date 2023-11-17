@@ -1,5 +1,5 @@
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart'
-    hide generateSignedPreKey, generatePreKeys;
+    hide generatePreKeys, generateSignedPreKey;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../utils/db/user_crypto_key_value.dart';

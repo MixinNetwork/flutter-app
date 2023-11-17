@@ -51,13 +51,13 @@ class ContactMessageWidget extends HookConsumerWidget {
 
 class ContactItem extends ConsumerWidget {
   const ContactItem({
-    super.key,
     required this.avatarUrl,
     required this.userId,
     required this.fullName,
     required this.isVerified,
     required this.appId,
     required this.identityNumber,
+    super.key,
   });
 
   final String? avatarUrl;

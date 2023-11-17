@@ -96,8 +96,8 @@ class DashPathBorder extends Border {
   });
 
   factory DashPathBorder.all({
-    BorderSide borderSide = const BorderSide(),
     required CircularIntervalList<double> dashArray,
+    BorderSide borderSide = const BorderSide(),
   }) =>
       DashPathBorder(
         dashArray: dashArray,
@@ -130,7 +130,6 @@ class DashPathBorder extends Border {
                 dashPath(Path()..addOval(rect), dashArray: dashArray),
                 top.toPaint(),
               );
-              break;
             case BoxShape.rectangle:
               if (borderRadius != null) {
                 final rrect =
@@ -145,8 +144,6 @@ class DashPathBorder extends Border {
                 dashPath(Path()..addRect(rect), dashArray: dashArray),
                 top.toPaint(),
               );
-
-              break;
           }
           return;
       }

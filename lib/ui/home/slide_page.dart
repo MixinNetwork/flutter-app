@@ -31,8 +31,8 @@ import '../provider/slide_category_provider.dart';
 
 class SlidePage extends StatelessWidget {
   const SlidePage({
-    super.key,
     required this.showCollapse,
+    super.key,
   });
 
   final bool showCollapse;

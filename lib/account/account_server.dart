@@ -49,8 +49,6 @@ import 'send_message_helper.dart';
 
 class AccountServer {
   AccountServer({
-    this.userAgent,
-    this.deviceId,
     required this.multiAuthNotifier,
     required this.database,
     required this.currentConversationId,
@@ -257,22 +255,17 @@ class AccountServer {
     switch (event.type) {
       case WorkerIsolateEventType.onIsolateReady:
         d('message process service ready');
-        break;
       case WorkerIsolateEventType.onBlazeConnectStateChanged:
         d('blaze connect state changed: ${event.argument}');
         _connectedStateBehaviorSubject.add(event.argument as ConnectedState);
-        break;
       case WorkerIsolateEventType.onApiRequestedError:
         _onClientRequestError(event.argument as DioException);
-        break;
       case WorkerIsolateEventType.requestDownloadAttachment:
         final request = event.argument as AttachmentRequest;
         _onAttachmentDownloadRequest(request);
-        break;
       case WorkerIsolateEventType.showPinMessage:
         final conversationId = event.argument as String;
         unawaited(hiveKeyValues.showPinMessageKeyValue.show(conversationId));
-        break;
     }
   }
 
@@ -531,9 +524,9 @@ class AccountServer {
   }
 
   Future<void> sendAppCardMessage({
+    required AppCardData data,
     String? conversationId,
     String? recipientId,
-    required AppCardData data,
   }) async =>
       _sendMessageHelper.sendAppCardMessage(
         await _initConversation(conversationId, recipientId),

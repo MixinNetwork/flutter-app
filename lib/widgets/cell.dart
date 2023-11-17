@@ -9,9 +9,9 @@ import 'interactive_decorated_box.dart';
 
 class CellGroup extends StatelessWidget {
   const CellGroup({
+    required this.child,
     super.key,
     this.borderRadius = const BorderRadius.all(Radius.circular(8)),
-    required this.child,
     this.padding = const EdgeInsets.only(right: 10, left: 10, bottom: 10),
     this.cellBackgroundColor,
   });
@@ -60,9 +60,9 @@ class _CellItemStyle extends InheritedWidget {
 
 class CellItem extends HookConsumerWidget {
   const CellItem({
+    required this.title,
     super.key,
     this.leading,
-    required this.title,
     this.color,
     this.onTap,
     this.selected = false,

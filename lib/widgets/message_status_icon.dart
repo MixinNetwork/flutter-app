@@ -14,8 +14,8 @@ import '../utils/hook.dart';
 
 class MessageStatusIcon extends StatelessWidget {
   const MessageStatusIcon({
-    super.key,
     required this.status,
+    super.key,
     this.color,
   });
 
@@ -30,14 +30,11 @@ class MessageStatusIcon extends StatelessWidget {
     switch (status) {
       case MessageStatus.sent:
         icon = Resources.assetsImagesSentSvg;
-        break;
       case MessageStatus.delivered:
         icon = Resources.assetsImagesDeliveredSvg;
-        break;
       case MessageStatus.read:
         icon = Resources.assetsImagesReadSvg;
         color = context.theme.accent;
-        break;
       case MessageStatus.sending:
       case MessageStatus.failed:
       case MessageStatus.unknown:

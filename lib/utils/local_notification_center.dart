@@ -33,11 +33,11 @@ abstract class _NotificationManager {
 
   Future<void> showNotification({
     required String title,
-    String? body,
     required Uri uri,
     required int id,
     required String conversationId,
     required String messageId,
+    String? body,
   });
 
   Future<void> dismissByConversationId(String conversationId);
@@ -89,11 +89,11 @@ class _LocalNotificationManager extends _NotificationManager {
   @override
   Future<void> showNotification({
     required String title,
-    String? body,
     required Uri uri,
     required int id,
     required String conversationId,
     required String messageId,
+    String? body,
   }) async {
     await requestPermission();
 
@@ -204,11 +204,11 @@ class _WindowsNotificationManager extends _NotificationManager {
   @override
   Future<void> showNotification({
     required String title,
-    String? body,
     required Uri uri,
     required int id,
     required String conversationId,
     required String messageId,
+    String? body,
   }) async {
     await WinToast.instance().showToast(
       toast: Toast(
@@ -291,10 +291,10 @@ int _incrementAndGetId() {
 
 Future<void> showNotification({
   required String title,
-  String? body,
   required Uri uri,
   required String conversationId,
   required String messageId,
+  String? body,
 }) async =>
     await _notificationManager?.showNotification(
       title: title,

@@ -291,11 +291,9 @@ class QuoteMessage extends HookConsumerWidget {
                 ?.map((e) => ActionData.fromJson(e as Map<String, dynamic>))
                 .map((e) => '[${e.label}]')
                 .join();
-            break;
           case MessageCategory.appCard:
             description =
                 AppCardData.fromJson(json as Map<String, dynamic>).title;
-            break;
           default:
             break;
         }
@@ -395,11 +393,11 @@ class _QuoteMessageBase extends ConsumerWidget {
     required this.messageId,
     required this.quoteMessageId,
     required this.userId,
-    this.name,
     required this.description,
+    required this.inputMode,
+    this.name,
     this.icon,
     this.image,
-    required this.inputMode,
     this.onTap,
   });
 

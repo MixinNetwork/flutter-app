@@ -49,10 +49,6 @@ jobs:
       - name: Analyze project source
         run: dart analyze --fatal-infos
 
-      # dart_code_metrics
-      - name: Run dart_code_metrics
-        run: flutter pub run dart_code_metrics:metrics analyze lib
-
       - run: flutter config --enable-linux-desktop
       # Your project will need to have tests in test/ and a dependency on
       # package:test for this step to succeed. Note that Flutter projects will

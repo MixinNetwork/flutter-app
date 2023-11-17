@@ -85,8 +85,8 @@ class AttachmentUtilBase {
   final String mediaPath;
 
   String convertAbsolutePath({
-    String? category,
     required String? fileName,
+    String? category,
     String? conversationId,
     String? messageId,
     bool isTranscript = false,

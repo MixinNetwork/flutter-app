@@ -80,8 +80,8 @@ Future<QueryExecutor> openQueryExecutor({
 Future<DriftIsolate> createOrConnectDriftIsolate({
   required String portName,
   required File dbFile,
-  bool fromMainIsolate = false,
   required String? debugName,
+  bool fromMainIsolate = false,
 }) async {
   if (fromMainIsolate) {
     // Remove port if it exists. to avoid port leak on hot reload.

@@ -104,8 +104,8 @@ class MessageDatetimeAndStatus extends HookConsumerWidget {
 
 class _ChatIcon extends StatelessWidget {
   const _ChatIcon({
-    this.color,
     required this.assetName,
+    this.color,
   });
 
   final Color? color;

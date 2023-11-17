@@ -123,9 +123,9 @@ class SendMessageHelper {
   Future<void> sendImageMessage({
     required String conversationId,
     required String senderId,
+    required String category,
     XFile? file,
     Uint8List? bytes,
-    required String category,
     String? quoteMessageId,
     AttachmentResult? attachmentResult,
     bool silent = false,

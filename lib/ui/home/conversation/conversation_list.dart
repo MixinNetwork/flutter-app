@@ -141,10 +141,10 @@ class _Empty extends StatelessWidget {
 
 class ConversationItemWidget extends StatelessWidget {
   const ConversationItemWidget({
-    super.key,
-    this.selected = false,
     required this.conversation,
     required this.onTap,
+    super.key,
+    this.selected = false,
   });
 
   final bool selected;

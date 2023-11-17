@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:dio/dio.dart';
@@ -84,10 +83,14 @@ Client _createClient({
       }),
     ],
   );
-  if (Platform.isIOS || Platform.isMacOS) {
-    client.dio.httpClientAdapter = NativeAdapter();
-  }
+  client.dio.userCustomAdapter();
   return client;
+}
+
+extension DioNativeAdapter on Dio {
+  void userCustomAdapter() {
+    httpClientAdapter = NativeAdapter();
+  }
 }
 
 Client createClient({

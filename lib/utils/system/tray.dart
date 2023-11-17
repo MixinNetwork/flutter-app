@@ -17,7 +17,7 @@ final SystemTray _systemTray = SystemTray();
 final _enableTray = Platform.isWindows;
 
 class SystemTrayWidget extends HookConsumerWidget {
-  const SystemTrayWidget({super.key, required this.child});
+  const SystemTrayWidget({required this.child, super.key});
 
   final Widget child;
 
@@ -92,10 +92,8 @@ Future<void> _initSystemTray() async {
     switch (eventName) {
       case 'leftMouseUp':
         windowManager.show();
-        break;
       case 'rightMouseUp':
         _systemTray.popUpContextMenu();
-        break;
       default:
         break;
     }

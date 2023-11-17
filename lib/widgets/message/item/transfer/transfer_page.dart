@@ -4,7 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    hide Snapshot, Asset, User, Token;
+    hide Asset, Snapshot, Token, User;
 
 import '../../../../db/dao/snapshot_dao.dart';
 import '../../../../db/database_event_bus.dart';
@@ -143,12 +143,12 @@ bool _isPositive(String amount) => (double.tryParse(amount) ?? 0) > 0;
 
 class SnapshotDetailHeader extends HookConsumerWidget {
   const SnapshotDetailHeader({
-    super.key,
     required this.symbolIconUrl,
     required this.chainIconUrl,
     required this.amount,
     required this.symbol,
     required this.snapshotType,
+    super.key,
   });
 
   final String symbolIconUrl;
@@ -273,9 +273,9 @@ class _ValuesDescription extends HookConsumerWidget {
 
 class TransactionDetailInfo extends StatelessWidget {
   const TransactionDetailInfo({
-    super.key,
     required this.snapshot,
     required this.opponentFullName,
+    super.key,
   });
 
   final SnapshotItem snapshot;
@@ -408,9 +408,9 @@ class TransactionDetailInfo extends StatelessWidget {
 
 class TransactionInfoTile extends StatelessWidget {
   const TransactionInfoTile({
-    super.key,
     required this.title,
     required this.subtitle,
+    super.key,
     this.subtitleColor,
   });
 
@@ -448,8 +448,8 @@ class TransactionInfoTile extends StatelessWidget {
 
 class SymbolIconWithBorder extends StatelessWidget {
   const SymbolIconWithBorder({
-    super.key,
     required this.symbolUrl,
+    super.key,
     this.chainUrl,
     this.size = 44,
     this.chainSize = 10,

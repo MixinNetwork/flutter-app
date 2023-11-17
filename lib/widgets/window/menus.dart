@@ -21,8 +21,8 @@ import '../auth.dart';
 
 class MacosMenuBar extends HookConsumerWidget {
   const MacosMenuBar({
-    super.key,
     required this.child,
+    super.key,
   });
 
   final Widget child;

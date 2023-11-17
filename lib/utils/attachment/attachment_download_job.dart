@@ -133,14 +133,14 @@ extension _AttachmentDownloadExtension on Dio {
   Future<Response> _download(
     String urlPath,
     String savePath, {
+    required Stream<List<int>> Function(Stream<Uint8List> stream, int total)
+        transformStream,
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
     bool deleteOnError = true,
     String lengthHeader = Headers.contentLengthHeader,
     data,
     Options? options,
-    required Stream<List<int>> Function(Stream<Uint8List> stream, int total)
-        transformStream,
   }) async {
     // We set the `responseType` to [ResponseType.STREAM] to retrieve the
     // response stream.

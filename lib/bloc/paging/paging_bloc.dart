@@ -96,11 +96,11 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
   PagingBloc({
     required this.itemPositionsListener,
     required this.limit,
+    required PagingState<T> initState,
     this.jumpTo,
     int offset = 0,
     int index = 0,
     double alignment = 0,
-    required PagingState<T> initState,
   }) : super(initState) {
     on<PagingUpdateEvent>(
       (event, emit) async {

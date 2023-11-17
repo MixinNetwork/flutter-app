@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   file_selector_windows
   flutter_app_icon_badge
+  gal
   irondash_engine_context
   local_auth_windows
   platform_device_id_windows
@@ -24,6 +25,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  jni
   mixin_logger
   ogg_opus_player
   system_clock

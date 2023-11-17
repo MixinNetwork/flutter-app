@@ -14,9 +14,9 @@ import '../cache_image.dart';
 
 class ConversationAvatarWidget extends HookConsumerWidget {
   const ConversationAvatarWidget({
+    required this.size,
     super.key,
     this.conversation,
-    required this.size,
     this.conversationId,
     this.userId,
     this.fullName,
@@ -150,12 +150,12 @@ class AvatarPuzzlesWidget extends HookConsumerWidget {
 
 class AvatarWidget extends StatelessWidget {
   const AvatarWidget({
-    super.key,
     required this.size,
-    this.clipOval = true,
     required this.avatarUrl,
     required this.userId,
     required this.name,
+    super.key,
+    this.clipOval = true,
   });
 
   final String? avatarUrl;

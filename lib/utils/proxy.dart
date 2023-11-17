@@ -9,6 +9,7 @@ import 'package:mixin_logger/mixin_logger.dart';
 
 import '../ui/provider/setting_provider.dart';
 import 'extension/extension.dart';
+import 'mixin_api_client.dart';
 
 part 'proxy.g.dart';
 
@@ -61,7 +62,7 @@ extension DioProxyExt on Dio {
           () => HttpClient()..setProxy(config);
     } else {
       i('create dio without client proxy');
-      httpClientAdapter = IOHttpClientAdapter();
+      userCustomAdapter();
     }
   }
 }
