@@ -11,6 +11,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/uri_utils.dart';
+import '../../../widgets/menu.dart';
 
 class NetworkStatus extends HookConsumerWidget {
   const NetworkStatus({super.key});
@@ -33,6 +34,7 @@ class NetworkStatus extends HookConsumerWidget {
     return Column(
       children: [
         ContextMenuWidget(
+          desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
           menuProvider: (request) => Menu(children: [
             MenuAction(
               title: context.l10n.openLogDirectory,
