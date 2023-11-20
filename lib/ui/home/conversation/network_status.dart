@@ -10,6 +10,7 @@ import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/uri_utils.dart';
+import '../../../widgets/menu.dart';
 import '../../provider/account/account_server_provider.dart';
 
 class NetworkStatus extends HookConsumerWidget {
@@ -30,6 +31,7 @@ class NetworkStatus extends HookConsumerWidget {
     return Column(
       children: [
         ContextMenuWidget(
+          desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
           menuProvider: (request) => Menu(children: [
             MenuAction(
               title: context.l10n.openLogDirectory,

@@ -812,6 +812,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
         ContextMenuWidget(
           hitTestBehavior: HitTestBehavior.translucent,
           menuProvider: buildMenus,
+          desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
           child: GestureDetector(
             onTap: () => _quickReply(context),
             child: Builder(builder: builder),

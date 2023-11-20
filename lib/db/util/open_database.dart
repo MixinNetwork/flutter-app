@@ -13,25 +13,24 @@ import 'package:sqlite3/sqlite3.dart';
 import '../../utils/file.dart';
 import '../custom_sqlite3_database.dart';
 
-QueryExecutor _openDatabase(File file) {
-  // Create the parent directory if it doesn't exist. sqlite will emit
-  // confusing misuse warnings otherwise
-  final dir = file.parent;
-  if (!dir.existsSync()) {
-    dir.createSync(recursive: true);
-  }
-
-  final db = sqlite3.open(file.path);
-  return NativeDatabase.opened(
-    DatabaseProfiler(db, explain: kDebugMode),
-    setup: (rawDb) {
-      rawDb
-        ..execute('PRAGMA journal_mode=WAL;')
-        ..execute('PRAGMA foreign_keys=ON;')
-        ..execute('PRAGMA synchronous=NORMAL;');
-    },
-  );
-}
+QueryExecutor _openDatabase(File file) => LazyDatabase(() {
+      // Create the parent directory if it doesn't exist. sqlite will emit
+      // confusing misuse warnings otherwise
+      final dir = file.parent;
+      if (!dir.existsSync()) {
+        dir.createSync(recursive: true);
+      }
+      final db = sqlite3.open(file.path);
+      return NativeDatabase.opened(
+        DatabaseProfiler(db, explain: kDebugMode),
+        setup: (rawDb) {
+          rawDb
+            ..execute('PRAGMA journal_mode=WAL;')
+            ..execute('PRAGMA foreign_keys=ON;')
+            ..execute('PRAGMA synchronous=NORMAL;');
+        },
+      );
+    });
 
 /// Connect to the database.
 Future<QueryExecutor> openQueryExecutor({

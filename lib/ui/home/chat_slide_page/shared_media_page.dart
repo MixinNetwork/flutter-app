@@ -5,6 +5,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/app_bar.dart';
+import '../../../widgets/menu.dart';
 import '../../provider/conversation_provider.dart';
 import '../bloc/blink_cubit.dart';
 
@@ -101,6 +102,7 @@ class ShareMediaItemMenuWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ContextMenuWidget(
+        desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
         menuProvider: (request) => Menu(children: [
           MenuAction(
             image: MenuImage.icon(IconFonts.positionToChat),
