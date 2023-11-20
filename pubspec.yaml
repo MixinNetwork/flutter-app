@@ -50,7 +50,7 @@ dependencies:
   dio: ^5.3.3
   dio_smart_retry: ^6.0.0
   drift: ^2.13.1
-  ecache: ^2.0.2
+  ecache: ^2.0.3
   emojis: ^0.9.9
   equatable: ^2.0.5
   file_picker: ^6.0.0
