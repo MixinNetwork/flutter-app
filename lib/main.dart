@@ -21,7 +21,6 @@ import 'package:window_size/window_size.dart';
 
 import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
-import 'db/app/app_database.dart';
 import 'ui/home/home.dart';
 import 'ui/provider/database_provider.dart';
 import 'utils/app_lifecycle.dart';
@@ -104,12 +103,15 @@ Future<void> main(List<String> args) async {
     Bloc.observer = CustomBlocObserver();
   }
 
-  final appDatabase = AppDatabase.connect(fromMainIsolate: true);
-  await appDatabase.settingKeyValue.initialize;
+  final container = ProviderContainer();
+  try {
+    await container.read(appDatabaseProvider).settingKeyValue.initialize;
+  } catch (error, stacktrace) {
+    e('failed to initialize setting key value: $error\n$stacktrace');
+    container.read(appDatabaseInitErrorProvider.notifier).state = error;
+  }
   runApp(ProviderScope(
-    overrides: [
-      appDatabaseProvider.overrideWithValue(appDatabase),
-    ],
+    parent: container,
     child: const OverlaySupport.global(child: App()),
   ));
 

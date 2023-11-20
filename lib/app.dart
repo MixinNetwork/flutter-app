@@ -8,10 +8,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide Consumer, FutureProvider, Provider;
+import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
 import 'account/notification_service.dart';
 import 'constants/brightness_theme_data.dart';
+import 'constants/constants.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
@@ -28,6 +30,7 @@ import 'ui/provider/mention_cache_provider.dart';
 import 'ui/provider/setting_provider.dart';
 import 'ui/provider/slide_category_provider.dart';
 import 'utils/extension/extension.dart';
+import 'utils/file.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
@@ -52,6 +55,38 @@ class App extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     precacheImage(
         const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
+
+    final appDatabaseInitError = ref.watch(appDatabaseInitErrorProvider);
+    if (appDatabaseInitError != null) {
+      var error = appDatabaseInitError;
+      if (error is DriftRemoteException) {
+        error = error.remoteCause;
+      }
+      if (error is SqliteException) {
+        return _App(
+          home: DatabaseOpenFailedPage(
+            error: error,
+            closeDatabaseCallback: () => ref.read(appDatabaseProvider).close(),
+            deleteDatabaseCallback: () => dropDatabaseFile(
+              mixinDocumentsDirectory.path,
+              kDbFileName,
+            ),
+            openDatabaseCallback: () async {
+              final db = ref.refresh(appDatabaseProvider);
+              try {
+                await db.settingKeyValue.initialize;
+                ref.read(appDatabaseInitErrorProvider.notifier).state = null;
+              } catch (e) {
+                w('reOpenDatabaseCallback error: $e');
+                ref.read(appDatabaseInitErrorProvider.notifier).state = e;
+              }
+            },
+          ),
+        );
+      } else {
+        return _App(home: OpenAppFailedPage(error: error));
+      }
+    }
 
     final initialized = useMemoizedFuture(
       () => ref.read(multiAuthStateNotifierProvider.notifier).initialized,
@@ -93,20 +128,24 @@ class _LoginApp extends HookConsumerWidget {
       }
       if (error is SqliteException) {
         return _App(
-          home: DatabaseOpenFailedPage(error: error),
+          home: DatabaseOpenFailedPage(
+            error: error,
+            openDatabaseCallback: () =>
+                ref.read(databaseProvider.notifier).open(),
+            closeDatabaseCallback: () =>
+                ref.read(databaseProvider.notifier).close(),
+            deleteDatabaseCallback: () async {
+              final identityNumber = context.account?.identityNumber;
+              if (identityNumber == null) return;
+              await dropDatabaseFile(
+                p.join(mixinDocumentsDirectory.path, identityNumber),
+                kDbFileName,
+              );
+            },
+          ),
         );
       } else {
-        return _App(
-          home: LandingFailedPage(
-              title: context.l10n.unknowError,
-              message: error.toString(),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {},
-                  child: Text(context.l10n.exit),
-                )
-              ]),
-        );
+        return _App(home: OpenAppFailedPage(error: error));
       }
     }
 

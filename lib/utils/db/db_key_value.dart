@@ -56,7 +56,7 @@ typedef AppKeyValue = _BaseDbKeyValue<AppPropertyGroup>;
 class _BaseDbKeyValue<G> extends ChangeNotifier {
   _BaseDbKeyValue({required this.group, required KeyValueDao<G> dao})
       : _dao = dao {
-    _loadProperties().whenComplete(_initCompleter.complete);
+    _initCompleter.complete(_loadProperties());
     _subscription = dao.watchTableHasChanged(group).listen((event) {
       _loadProperties();
     });
