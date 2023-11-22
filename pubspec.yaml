@@ -46,7 +46,7 @@ dependencies:
       path: packages/desktop_drop
   desktop_keep_screen_on: ^0.0.2
   desktop_webview_window: ^0.2.3
-  device_info_plus: ^9.1.0
+  device_info_plus: ^9.1.1
   dio: ^5.3.3
   dio_smart_retry: ^6.0.0
   drift: ^2.13.1
