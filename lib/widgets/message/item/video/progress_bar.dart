@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+
+import '../../../../utils/logger.dart';
 
 /// From project: https://github.com/fluttercommunity/chewie
 class CupertinoVideoProgressBar extends StatelessWidget {
@@ -125,11 +129,13 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
     super.deactivate();
   }
 
-  void _seekToRelativePosition(Offset globalPosition) {
-    controller.seekTo(context.calcRelativePosition(
+  Future<void> _seekToRelativePosition(Offset globalPosition) {
+    final position = context.calcRelativePosition(
       controller.value.duration,
       globalPosition,
-    ));
+    );
+    d('player seeking to $position');
+    return controller.seekTo(position);
   }
 
   @override
@@ -140,6 +146,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
       barHeight: widget.barHeight,
       handleHeight: widget.handleHeight,
       drawShadow: widget.drawShadow,
+      latestDraggableOffset: _latestDraggableOffset,
     );
 
     return GestureDetector(
@@ -164,19 +171,22 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 
         widget.onDragUpdate?.call();
       },
-      onHorizontalDragEnd: (DragEndDetails details) {
+      onHorizontalDragEnd: (DragEndDetails details) async {
         if (_controllerWasPlaying) {
-          controller.play();
+          unawaited(controller.play());
         }
 
         if (_latestDraggableOffset != null) {
-          _seekToRelativePosition(_latestDraggableOffset!);
-          _latestDraggableOffset = null;
+          try {
+            await _seekToRelativePosition(_latestDraggableOffset!);
+          } finally {
+            _latestDraggableOffset = null;
+          }
         }
 
         widget.onDragEnd?.call();
       },
-      onTapDown: (TapDownDetails details) {
+      onTapUp: (TapUpDetails details) {
         if (!controller.value.isInitialized) {
           return;
         }
