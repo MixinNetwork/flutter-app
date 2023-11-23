@@ -105,7 +105,12 @@ class MessageVideo extends HookConsumerWidget {
           final path = context.accountServer
               .convertMessageAbsolutePath(message, isTranscriptPage);
           if (kPlatformIsDarwin) {
-            showVideoPreviewPage(context, path);
+            showVideoPreviewPage(
+              context,
+              path,
+              message: message,
+              isTranscriptPage: isTranscriptPage,
+            );
           } else if (Platform.isIOS || Platform.isAndroid) {
             OpenFile.open(path);
           } else {
