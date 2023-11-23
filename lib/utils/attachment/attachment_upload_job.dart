@@ -78,7 +78,7 @@ class _AttachmentUploadJob extends _AttachmentJobBase {
           url: url,
           keys: keys,
           iv: iv,
-          sendPort: _receivePort!.sendPort,
+          sendPort: _receivePort.sendPort,
           proxy: proxy,
         ));
 
