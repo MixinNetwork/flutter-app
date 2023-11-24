@@ -16,6 +16,7 @@ import '../../db/database.dart';
 import '../../db/mixin_database.dart';
 import '../../db/util/util.dart';
 import '../../enum/media_status.dart';
+import '../../ui/provider/setting_provider.dart';
 import '../../widgets/message/send_message_dialog/attachment_extra.dart';
 import '../../widgets/toast.dart';
 import '../crypto_util.dart';
@@ -23,7 +24,6 @@ import '../extension/extension.dart';
 import '../file.dart';
 import '../load_balancer_utils.dart';
 import '../logger.dart';
-import '../property/setting_property.dart';
 import '../proxy.dart';
 import 'download_key_value.dart';
 
@@ -143,6 +143,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     this._transcriptMessageDao,
     this._settingProperties,
     super.mediaPath,
+    this.downloadKeyValue,
   ) {
     final httpClientAdapter = _dio.httpClientAdapter;
     if (httpClientAdapter is IOHttpClientAdapter) {
@@ -158,7 +159,8 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   final MessageDao _messageDao;
   final TranscriptMessageDao _transcriptMessageDao;
   final Client _client;
-  final SettingPropertyStorage _settingProperties;
+  final AppSettingKeyValue _settingProperties;
+  final DownloadKeyValue downloadKeyValue;
 
   final _attachmentJob = <String, _AttachmentJobBase>{};
 
@@ -461,6 +463,8 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     Client client,
     Database database,
     String identityNumber,
+    DownloadKeyValue downloadKeyValue,
+    AppSettingKeyValue settingKeyValue,
   ) {
     final documentDirectory = mixinDocumentsDirectory;
     final mediaDirectory =
@@ -469,8 +473,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       client,
       database.messageDao,
       database.transcriptMessageDao,
-      database.settingProperties,
+      settingKeyValue,
       mediaDirectory.path,
+      downloadKeyValue,
     );
   }
 
@@ -483,12 +488,12 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   void _setAttachmentJob(String messageId, _AttachmentJobBase job) {
     _attachmentJob[messageId] = job;
     if (job is _AttachmentDownloadJob) {
-      DownloadKeyValue.instance.addMessageId(messageId);
+      downloadKeyValue.addMessageId(messageId);
     }
   }
 
   Future<void> removeAttachmentJob(String messageId) async {
-    await DownloadKeyValue.instance.removeMessageId(messageId);
+    await downloadKeyValue.removeMessageId(messageId);
     _attachmentJob[messageId]?.cancel();
     _attachmentJob.remove(messageId);
   }
@@ -496,7 +501,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   Future<bool> cancelProgressAttachmentJob(String messageId) async {
     if (!_hasAttachmentJob(messageId)) return false;
     await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
-    await DownloadKeyValue.instance.removeMessageId(messageId);
+    await downloadKeyValue.removeMessageId(messageId);
     _attachmentJob[messageId]?.cancel();
     _attachmentJob.remove(messageId);
     return true;

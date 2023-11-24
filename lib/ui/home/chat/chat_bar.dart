@@ -15,10 +15,10 @@ import '../../../widgets/conversation/verified_or_bot_widget.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
-import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/message_selection_provider.dart';
-import '../../provider/responsive_navigator_provider.dart';
+import '../../provider/navigation/abstract_responsive_navigator.dart';
+import '../../provider/navigation/responsive_navigator_provider.dart';
 import 'chat_page.dart';
 
 class ChatBar extends HookConsumerWidget {

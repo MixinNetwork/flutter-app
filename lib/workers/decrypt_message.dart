@@ -68,6 +68,7 @@ class DecryptMessage extends Injector {
     this._updateAssetJob,
     this._deviceTransfer,
     this._updateTokenJob,
+    this._signalDatabase,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
@@ -89,6 +90,7 @@ class DecryptMessage extends Injector {
   final UpdateAssetJob _updateAssetJob;
   final UpdateTokenJob _updateTokenJob;
   final DeviceTransferIsolateController? _deviceTransfer;
+  final SignalDatabase _signalDatabase;
 
   final refreshKeyMap = <String, int?>{};
 
@@ -228,7 +230,7 @@ class DecryptMessage extends Injector {
         }
 
         final address = SignalProtocolAddress(data.senderId, deviceId);
-        final status = (await SignalDatabase.get.ratchetSenderKeyDao
+        final status = (await _signalDatabase.ratchetSenderKeyDao
                 .getRatchetSenderKey(data.conversationId, address.toString()))
             ?.status;
         if (status == RatchetStatus.requesting.name) {
@@ -240,13 +242,13 @@ class DecryptMessage extends Injector {
       i('decrypt failed ${data.messageId}, $e');
       await _refreshSignalKeys(data.conversationId);
       if (data.category == MessageCategory.signalKey) {
-        await SignalDatabase.get.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
+        await _signalDatabase.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
             data.conversationId,
             SignalProtocolAddress(data.senderId, deviceId).toString());
       } else {
         await _insertFailedMessage(data);
         final address = SignalProtocolAddress(data.senderId, deviceId);
-        final status = (await SignalDatabase.get.ratchetSenderKeyDao
+        final status = (await _signalDatabase.ratchetSenderKeyDao
                 .getRatchetSenderKey(data.conversationId, address.toString()))
             ?.status;
         if (status == null) {
@@ -1238,7 +1240,7 @@ class DecryptMessage extends Injector {
           senderId: address.toString(),
           status: RatchetStatus.requesting.name,
           createdAt: DateTime.now().millisecondsSinceEpoch.toString());
-      await SignalDatabase.get.ratchetSenderKeyDao.insertSenderKey(ratchet);
+      await _signalDatabase.ratchetSenderKeyDao.insertSenderKey(ratchet);
     }
   }
 
@@ -1256,7 +1258,7 @@ class DecryptMessage extends Injector {
         conversationId, userId, encoded,
         sessionId: sessionId));
     unawaited(_sender.deliver(bm));
-    await SignalDatabase.get.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
+    await _signalDatabase.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
         conversationId,
         SignalProtocolAddress(userId, sessionId.getDeviceId()).toString());
   }
@@ -1277,8 +1279,8 @@ class DecryptMessage extends Injector {
     if (count.preKeyCount >= preKeyMinNum) {
       return;
     }
-    final bm =
-        createSyncSignalKeys(createSyncSignalKeysParam(await generateKeys()));
+    final bm = createSyncSignalKeys(createSyncSignalKeysParam(
+        await generateKeys(_signalDatabase, database.cryptoKeyValue)));
     final result = await _sender.signalKeysChannel(bm);
     if (result == null) {
       i('Registering new pre keys...');

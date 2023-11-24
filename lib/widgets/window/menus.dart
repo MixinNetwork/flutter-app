@@ -7,58 +7,17 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../account/security_key_value.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
-import '../../ui/provider/account_server_provider.dart';
+import '../../ui/provider/account/account_server_provider.dart';
+import '../../ui/provider/account/security_key_value_provider.dart';
+import '../../ui/provider/menu_handle_provider.dart';
 import '../../ui/provider/slide_category_provider.dart';
 import '../../utils/device_transfer/device_transfer_dialog.dart';
-import '../../utils/event_bus.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../../utils/rivepod.dart';
 import '../../utils/uri_utils.dart';
 import '../actions/actions.dart';
 import '../auth.dart';
-
-abstract class ConversationMenuHandle {
-  Stream<bool> get isMuted;
-
-  Stream<bool> get isPinned;
-
-  void mute();
-
-  void unmute();
-
-  void showSearch();
-
-  void pin();
-
-  void unPin();
-
-  void toggleSideBar();
-
-  void delete();
-}
-
-class MacMenuBarStateNotifier
-    extends DistinctStateNotifier<ConversationMenuHandle?> {
-  MacMenuBarStateNotifier(super.state);
-
-  void attach(ConversationMenuHandle handle) {
-    if (!Platform.isMacOS) return;
-    Future(() => state = handle);
-  }
-
-  void unAttach(ConversationMenuHandle handle) {
-    if (!Platform.isMacOS) return;
-    if (state != handle) return;
-    state = null;
-  }
-}
-
-final macMenuBarProvider =
-    StateNotifierProvider<MacMenuBarStateNotifier, ConversationMenuHandle?>(
-        (ref) => MacMenuBarStateNotifier(null));
 
 class MacosMenuBar extends HookConsumerWidget {
   const MacosMenuBar({
@@ -101,11 +60,8 @@ class _Menus extends HookConsumerWidget {
         ).data ??
         false;
 
-    final hasPasscode = useMemoizedStream(signed
-                ? SecurityKeyValue.instance.watchHasPasscode
-                : () => Stream.value(false))
-            .data ??
-        false;
+    final hasPasscode = ref
+        .watch(securityKeyValueProvider.select((value) => value.hasPasscode));
 
     PlatformMenu buildConversationMenu() => PlatformMenu(
           label: context.l10n.conversation,
@@ -182,8 +138,8 @@ class _Menus extends HookConsumerWidget {
                 meta: true,
                 shift: true,
               ),
-              onSelected: hasPasscode
-                  ? () => EventBus.instance.fire(LockEvent.lock)
+              onSelected: hasPasscode && signed
+                  ? () => ref.read(securityLockProvider.notifier).lock()
                   : null,
             ),
           ]),

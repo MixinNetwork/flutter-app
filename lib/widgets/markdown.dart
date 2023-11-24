@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/dom.dart' as h;
 import 'package:html/dom_parsing.dart';
 import 'package:html/parser.dart';
@@ -42,7 +43,7 @@ class MarkdownColumn extends StatelessWidget {
   }
 }
 
-class Markdown extends StatelessWidget {
+class Markdown extends ConsumerWidget {
   const Markdown({
     required this.data,
     super.key,
@@ -55,7 +56,7 @@ class Markdown extends StatelessWidget {
   final ScrollPhysics? physics;
 
   @override
-  Widget build(BuildContext context) => DefaultTextStyle.merge(
+  Widget build(BuildContext context, WidgetRef ref) => DefaultTextStyle.merge(
         style: TextStyle(color: context.theme.text),
         child: MarkdownWidget(
           data: data,

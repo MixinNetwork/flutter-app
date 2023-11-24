@@ -3,78 +3,54 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 import 'package:path/path.dart' as p;
 
-import '../account/account_key_value.dart';
-import '../account/scam_warning_key_value.dart';
-import '../account/security_key_value.dart';
-import '../account/session_key_value.dart';
-import '../account/show_pin_message_key_value.dart';
-import '../crypto/crypto_key_value.dart';
-import '../crypto/privacy_key_value.dart';
-import 'attachment/download_key_value.dart';
 import 'file.dart';
 
-Future<void> initKeyValues(String identityNumber) => Future.wait([
-      PrivacyKeyValue.instance.init(identityNumber),
-      CryptoKeyValue.instance.init(identityNumber),
-      AccountKeyValue.instance.init(identityNumber),
-      ShowPinMessageKeyValue.instance.init(identityNumber),
-      ScamWarningKeyValue.instance.init(identityNumber),
-      DownloadKeyValue.instance.init(identityNumber),
-      SessionKeyValue.instance.init(identityNumber),
-      SecurityKeyValue.instance.init(identityNumber),
-    ]);
-
-Future<void> clearKeyValues() => Future.wait([
-      PrivacyKeyValue.instance.delete(),
-      CryptoKeyValue.instance.delete(),
-      AccountKeyValue.instance.delete(),
-      ShowPinMessageKeyValue.instance.delete(),
-      ScamWarningKeyValue.instance.delete(),
-      DownloadKeyValue.instance.delete(),
-      SessionKeyValue.instance.delete(),
-      SecurityKeyValue.instance.delete(),
-    ]);
-
 abstract class HiveKeyValue<E> {
-  HiveKeyValue(this._boxName);
+  HiveKeyValue(this.boxName);
 
-  final String _boxName;
+  final String boxName;
   late Box<E> box;
   bool _hasInit = false;
 
-  Future init(String identityNumber) async {
+  String? _identityNumber;
+
+  Future init(HiveInterface hive, String identityNumber) async {
     if (_hasInit) {
       return;
     }
     final dbFolder = mixinDocumentsDirectory;
-
-    final legacyBoxDirectory = Directory(p.join(dbFolder.path, _boxName));
-    final directory =
-        Directory(p.join(dbFolder.path, identityNumber, _boxName));
-
-    if (legacyBoxDirectory.existsSync()) {
-      // copy legacy file to new file
-      if (directory.existsSync()) directory.deleteSync(recursive: true);
-      legacyBoxDirectory.renameSync(directory.path);
-    }
-
+    final directory = Directory(p.join(dbFolder.path, identityNumber, boxName));
     WidgetsFlutterBinding.ensureInitialized();
     if (!kIsWeb) {
-      Hive.init(directory.absolute.path);
+      hive.init(directory.absolute.path);
     }
-    box = await Hive.openBox<E>(_boxName);
+    box = await hive.openBox<E>(boxName);
+    i('HiveKeyValue: open $boxName');
+    _identityNumber = identityNumber;
     _hasInit = true;
   }
 
-  Future delete() async {
-    if (!_hasInit) return;
-    try {
-      await Hive.deleteBoxFromDisk(_boxName);
-    } catch (_) {
-      // ignore already deleted
+  Future<void> dispose() async {
+    if (!_hasInit) {
+      return;
     }
+    i('HiveKeyValue: dispose $boxName $_identityNumber');
+    await box.close();
     _hasInit = false;
   }
+
+  Future<void> clear() async {
+    if (!_hasInit) {
+      return;
+    }
+    i('HiveKeyValue: clear $boxName $_identityNumber');
+    await box.clear();
+  }
+
+  @override
+  String toString() =>
+      'HiveKeyValue{boxName: $boxName, _hasInit: $_hasInit, _identityNumber: $_identityNumber}';
 }

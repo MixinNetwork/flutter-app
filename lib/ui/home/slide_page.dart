@@ -24,7 +24,8 @@ import '../../widgets/select_item.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/user_selector/conversation_selector.dart';
 import '../../widgets/window/move_window.dart';
-import '../provider/multi_auth_provider.dart';
+import '../landing/landing.dart';
+import '../provider/account/multi_auth_provider.dart';
 import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
 
@@ -117,7 +118,8 @@ class SlidePage extends StatelessWidget {
                             ),
                           ),
                           title: Text(context.l10n.collapse),
-                          onTap: () => context.settingChangeNotifier
+                          onTap: () => ref
+                              .read(settingProvider)
                               .collapsedSidebar = !collapse,
                         );
                       }),
@@ -142,45 +144,137 @@ class _CurrentUser extends HookConsumerWidget {
         .select((value) => value.type == SlideCategoryType.setting));
 
     return MoveWindowBarrier(
-      child: SelectItem(
-        icon: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: AvatarWidget(
-            avatarUrl: account?.avatarUrl,
-            size: 24,
-            name: account?.fullName,
-            userId: account?.userId,
-          ),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              account?.fullName ?? '',
-              style: const TextStyle(fontSize: 14),
+      child: _MultiAccountPopupButton(
+        child: SelectItem(
+          icon: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: AvatarWidget(
+              avatarUrl: account?.avatarUrl,
+              size: 24,
+              name: account?.fullName,
+              userId: account?.userId,
             ),
-            const SizedBox(height: 2),
-            Text(
-              '${account?.identityNumber}',
-              style:
-                  TextStyle(color: context.theme.secondaryText, fontSize: 12),
-            )
-          ],
-        ),
-        selected: selected,
-        onTap: () {
-          ref
-              .read(slideCategoryStateProvider.notifier)
-              .select(SlideCategoryType.setting);
+          ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                account?.fullName ?? '',
+                style: const TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${account?.identityNumber}',
+                style:
+                    TextStyle(color: context.theme.secondaryText, fontSize: 12),
+              )
+            ],
+          ),
+          selected: selected,
+          onTap: () {
+            ref
+                .read(slideCategoryStateProvider.notifier)
+                .select(SlideCategoryType.setting);
 
-          if (ModalRoute.of(context)?.canPop == true) {
-            Navigator.pop(context);
-          }
-        },
+            if (ModalRoute.of(context)?.canPop == true) {
+              Navigator.pop(context);
+            }
+          },
+        ),
       ),
     );
   }
+}
+
+class _MultiAccountPopupButton extends HookConsumerWidget {
+  const _MultiAccountPopupButton({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mas = ref.watch(multiAuthStateNotifierProvider);
+    return ContextMenuPortalEntry(
+      autofocus: true,
+      buildMenus: () => [
+        for (final account in mas.auths)
+          _AccountMenuItem(
+            account: account.account,
+            selected: account.userId == mas.activeUserId,
+          ),
+        Divider(
+          color: context.theme.divider,
+          height: 1,
+          indent: 8,
+          endIndent: 8,
+        ),
+        ContextMenu(
+          title: 'Add Account',
+          icon: Resources.assetsImagesIcAddSvg,
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (context) => const LandingDialog(),
+            );
+          },
+        ),
+      ],
+      child: child,
+    );
+  }
+}
+
+class _AccountMenuItem extends ConsumerWidget {
+  const _AccountMenuItem({
+    required this.account,
+    required this.selected,
+  });
+
+  final Account account;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => ContextMenuLayout(
+        onTap: () {
+          ref
+              .read(multiAuthStateNotifierProvider.notifier)
+              .active(account.userId);
+          context.closeMenu();
+        },
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: AvatarWidget(
+                avatarUrl: account.avatarUrl,
+                size: 24,
+                name: account.fullName,
+                userId: account.userId,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                account.fullName ?? '',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: context.theme.text,
+                ),
+              ),
+            ),
+            if (selected)
+              SvgPicture.asset(
+                Resources.assetsImagesCheckedSvg,
+                width: 24,
+                height: 24,
+                colorFilter: ColorFilter.mode(
+                  context.theme.secondaryText,
+                  BlendMode.srcIn,
+                ),
+              ),
+          ],
+        ),
+      );
 }
 
 class _CircleList extends HookConsumerWidget {

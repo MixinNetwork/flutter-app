@@ -7,6 +7,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -27,15 +28,14 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
-import '../ui/provider/account_server_provider.dart';
-import '../ui/provider/multi_auth_provider.dart';
+import '../ui/provider/account/account_server_provider.dart';
+import '../ui/provider/account/multi_auth_provider.dart';
+import '../ui/provider/hive_key_value_provider.dart';
 import '../ui/provider/setting_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
-import '../utils/attachment/download_key_value.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
-import '../utils/hive_key_values.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/proxy.dart';
@@ -46,33 +46,35 @@ import '../workers/isolate_event.dart';
 import '../workers/message_worker_isolate.dart';
 import 'account_key_value.dart';
 import 'send_message_helper.dart';
-import 'show_pin_message_key_value.dart';
 
 class AccountServer {
   AccountServer({
     required this.multiAuthNotifier,
-    required this.settingChangeNotifier,
     required this.database,
     required this.currentConversationId,
-    this.userAgent,
-    this.deviceId,
+    required this.ref,
+    required this.hiveKeyValues,
   });
 
   static String? sid;
 
-  set language(String language) =>
-      client.dio.options.headers['Accept-Language'] = language;
-
   final MultiAuthStateNotifier multiAuthNotifier;
-  final SettingChangeNotifier settingChangeNotifier;
   final Database database;
   final GetCurrentConversationId currentConversationId;
+
+  final HiveKeyValues hiveKeyValues;
+
+  PrivacyKeyValue get privacyKeyValue => hiveKeyValues.privacyKeyValue;
+
+  AccountKeyValue get accountKeyValue => hiveKeyValues.accountKeyValue;
+
   Timer? checkSignalKeyTimer;
 
-  bool get _loginByPhoneNumber =>
-      AccountKeyValue.instance.primarySessionId == null;
+  bool get loginByPhoneNumber => accountKeyValue.primarySessionId == null;
   String? userAgent;
   String? deviceId;
+  SignalDatabase? signalDatabase;
+  final Ref ref;
 
   Future<void> initServer(
     String userId,
@@ -81,6 +83,9 @@ class AccountServer {
     String privateKey,
   ) async {
     if (sid == sessionId) return;
+
+    i('AccountServer init: $identityNumber');
+
     sid = sessionId;
 
     this.userId = userId;
@@ -88,27 +93,30 @@ class AccountServer {
     this.identityNumber = identityNumber;
     this.privateKey = privateKey;
 
-    await initKeyValues(identityNumber);
-
     await _initClient();
 
-    checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
+    signalDatabase = await SignalDatabase.connect(
+      identityNumber: identityNumber,
+      fromMainIsolate: true,
+    );
+    checkSignalKeyTimer =
+        Timer.periodic(const Duration(days: 1), (timer) async {
       i('refreshSignalKeys periodic');
-      checkSignalKey(client);
+      await checkSignalKey(client, signalDatabase!, database.cryptoKeyValue);
     });
 
     try {
       await checkSignalKeys();
-    } catch (e, s) {
-      w('$e, $s');
+    } catch (error, stacktrace) {
+      e('checkSignalKeys failed: $error $stacktrace');
       await signOutAndClear();
-      multiAuthNotifier.signOut();
+      multiAuthNotifier.signOut(userId);
       rethrow;
     }
 
     unawaited(_start());
 
-    DownloadKeyValue.instance.messageIds.forEach((messageId) {
+    hiveKeyValues.downloadKeyValue.messageIds.forEach((messageId) {
       attachmentUtil.downloadAttachment(messageId: messageId);
     });
     appActiveListener.addListener(onActive);
@@ -129,7 +137,7 @@ class AccountServer {
         }
       }
       await signOutAndClear();
-      multiAuthNotifier.signOut();
+      multiAuthNotifier.signOut(userId);
     }
   }
 
@@ -144,7 +152,7 @@ class AccountServer {
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKey,
-      loginByPhoneNumber: _loginByPhoneNumber,
+      loginByPhoneNumber: loginByPhoneNumber,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -156,9 +164,15 @@ class AccountServer {
           },
         ),
       ],
-    )..configProxySetting(database.settingProperties);
+    )..configProxySetting(ref.read(settingProvider));
 
-    attachmentUtil = AttachmentUtil.init(client, database, identityNumber);
+    attachmentUtil = AttachmentUtil.init(
+      client,
+      database,
+      identityNumber,
+      hiveKeyValues.downloadKeyValue,
+      ref.read(settingProvider),
+    );
     _sendMessageHelper =
         SendMessageHelper(database, attachmentUtil, addSendingJob);
 
@@ -207,17 +221,18 @@ class AccountServer {
         sessionId: sessionId,
         privateKey: privateKey,
         mixinDocumentDirectory: mixinDocumentsDirectory.path,
-        primarySessionId: AccountKeyValue.instance.primarySessionId,
-        loginByPhoneNumber: _loginByPhoneNumber,
+        primarySessionId: accountKeyValue.primarySessionId,
+        loginByPhoneNumber: loginByPhoneNumber,
         rootIsolateToken: ServicesBinding.rootIsolateToken!,
       ),
       errorsAreFatal: false,
       onExit: exitReceivePort.sendPort,
       onError: errorReceivePort.sendPort,
+      debugName: 'message_process_isolate_$identityNumber',
     );
     jobSubscribers
       ..add(exitReceivePort.listen((message) {
-        w('worker isolate service exited. $message');
+        w('worker isolate service exited($identityNumber). $message');
         _connectedStateBehaviorSubject.add(ConnectedState.disconnected);
       }))
       ..add(errorReceivePort.listen((error) {
@@ -241,6 +256,7 @@ class AccountServer {
       case WorkerIsolateEventType.onIsolateReady:
         d('message process service ready');
       case WorkerIsolateEventType.onBlazeConnectStateChanged:
+        d('blaze connect state changed: ${event.argument}');
         _connectedStateBehaviorSubject.add(event.argument as ConnectedState);
       case WorkerIsolateEventType.onApiRequestedError:
         _onClientRequestError(event.argument as DioException);
@@ -249,7 +265,7 @@ class AccountServer {
         _onAttachmentDownloadRequest(request);
       case WorkerIsolateEventType.showPinMessage:
         final conversationId = event.argument as String;
-        unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
+        unawaited(hiveKeyValues.showPinMessageKeyValue.show(conversationId));
     }
   }
 
@@ -258,12 +274,13 @@ class AccountServer {
     AttachmentRequest request,
   ) async {
     bool needDownload(String category) {
+      final settings = ref.read(settingProvider);
       if (category.isImage) {
-        return settingChangeNotifier.photoAutoDownload;
+        return settings.photoAutoDownload;
       } else if (category.isVideo) {
-        return settingChangeNotifier.videoAutoDownload;
+        return settings.videoAutoDownload;
       } else if (category.isData) {
-        return settingChangeNotifier.fileAutoDownload;
+        return settings.fileAutoDownload;
       }
       return true;
     }
@@ -301,16 +318,22 @@ class AccountServer {
 
   Future<void> signOutAndClear() async {
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
-    await client.accountApi.logout(LogoutRequest(sessionId));
+    try {
+      await client.accountApi.logout(LogoutRequest(sessionId));
+    } catch (error, stacktrace) {
+      e('signOutAndClear logout error: $error $stacktrace');
+    }
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
 
-    await clearKeyValues();
+    await hiveKeyValues.clearAll();
+    await database.cryptoKeyValue.clear();
 
     try {
-      await SignalDatabase.get.clear();
-    } catch (_) {
-      // ignore closed database error
+      await signalDatabase?.clear();
+      await signalDatabase?.close();
+    } catch (error, stacktrace) {
+      e('signOutAndClear signalDatabase error: $error $stacktrace');
     }
 
     try {
@@ -693,7 +716,7 @@ class AccountServer {
     List<String> messageIds,
     Map<String, int?> messageExpireAt,
   ) async {
-    final primarySessionId = AccountKeyValue.instance.primarySessionId;
+    final primarySessionId = accountKeyValue.primarySessionId;
     if (primarySessionId == null) {
       return;
     }
@@ -709,6 +732,7 @@ class AccountServer {
   }
 
   Future<void> stop() async {
+    i('stop account server');
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
@@ -745,18 +769,18 @@ class AccountServer {
   }
 
   Future<void> checkSignalKeys() async {
-    final hasPushSignalKeys = PrivacyKeyValue.instance.hasPushSignalKeys;
+    final hasPushSignalKeys = privacyKeyValue.hasPushSignalKeys;
     if (hasPushSignalKeys) {
-      unawaited(checkSignalKey(client));
+      unawaited(
+          checkSignalKey(client, signalDatabase!, database.cryptoKeyValue));
     } else {
-      await refreshSignalKeys(client);
-      PrivacyKeyValue.instance.hasPushSignalKeys = true;
+      await refreshSignalKeys(client, signalDatabase!, database.cryptoKeyValue);
+      privacyKeyValue.hasPushSignalKeys = true;
     }
   }
 
   Future<void> refreshSticker({bool force = false}) async {
-    final refreshStickerLastTime =
-        AccountKeyValue.instance.refreshStickerLastTime;
+    final refreshStickerLastTime = accountKeyValue.refreshStickerLastTime;
     final now = DateTime.now().millisecondsSinceEpoch;
     if (!force && now - refreshStickerLastTime < hours24) {
       return;
@@ -797,16 +821,16 @@ class AccountServer {
     }
 
     if (hasNewAlbum) {
-      AccountKeyValue.instance.hasNewAlbum = true;
+      accountKeyValue.hasNewAlbum = true;
     }
 
-    AccountKeyValue.instance.refreshStickerLastTime = now;
+    accountKeyValue.refreshStickerLastTime = now;
   }
 
   final refreshUserIdSet = <dynamic>{};
 
   Future<void> initCircles() async {
-    final hasSyncCircle = AccountKeyValue.instance.hasSyncCircle;
+    final hasSyncCircle = accountKeyValue.hasSyncCircle;
     if (hasSyncCircle) {
       return;
     }
@@ -821,16 +845,16 @@ class AccountServer {
       await handleCircle(circle);
     });
 
-    AccountKeyValue.instance.hasSyncCircle = true;
+    accountKeyValue.hasSyncCircle = true;
   }
 
   Future<void> _cleanupQuoteContent() async {
-    final clean = AccountKeyValue.instance.alreadyCleanupQuoteContent;
+    final clean = accountKeyValue.alreadyCleanupQuoteContent;
     if (clean) {
       return;
     }
     await database.jobDao.insert(createCleanupQuoteContentJob());
-    AccountKeyValue.instance.alreadyCleanupQuoteContent = true;
+    accountKeyValue.alreadyCleanupQuoteContent = true;
   }
 
   Future<void> checkMigration() async {
@@ -1386,13 +1410,15 @@ class AccountServer {
   Future<void> pinMessage({
     required String conversationId,
     required List<PinMessageMinimal> pinMessageMinimals,
-  }) =>
-      _sendMessageHelper.sendPinMessage(
-        conversationId: conversationId,
-        senderId: userId,
-        pinMessageMinimals: pinMessageMinimals,
-        pin: true,
-      );
+  }) async {
+    await _sendMessageHelper.sendPinMessage(
+      conversationId: conversationId,
+      senderId: userId,
+      pinMessageMinimals: pinMessageMinimals,
+      pin: true,
+    );
+    unawaited(hiveKeyValues.showPinMessageKeyValue.show(conversationId));
+  }
 
   Future<void> unpinMessage({
     required String conversationId,

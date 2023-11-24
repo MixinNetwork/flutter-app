@@ -6,7 +6,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
@@ -19,8 +18,8 @@ import '../../widgets/cell.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/toast.dart';
 import '../home/home.dart';
-import '../provider/multi_auth_provider.dart';
-import '../provider/responsive_navigator_provider.dart';
+import '../provider/account/multi_auth_provider.dart';
+import '../provider/navigation/responsive_navigator_provider.dart';
 
 class SettingPage extends HookConsumerWidget {
   const SettingPage({super.key});
@@ -80,7 +79,7 @@ class SettingPage extends HookConsumerWidget {
                         children: [
                           if (Platform.isIOS &&
                               userHasPin &&
-                              AccountKeyValue.instance.primarySessionId == null)
+                              context.accountServer.loginByPhoneNumber)
                             _Item(
                               leadingAssetName:
                                   Resources.assetsImagesAccountSvg,
@@ -156,7 +155,8 @@ class SettingPage extends HookConsumerWidget {
                         context.accountServer.signOutAndClear(),
                       );
                       if (!succeed) return;
-                      context.multiAuthChangeNotifier.signOut();
+                      context.multiAuthChangeNotifier
+                          .signOut(context.accountServer.userId);
                     },
                     color: context.theme.red,
                     trailing: const SizedBox(),

@@ -49,7 +49,7 @@ class ContactMessageWidget extends HookConsumerWidget {
   }
 }
 
-class ContactItem extends StatelessWidget {
+class ContactItem extends ConsumerWidget {
   const ContactItem({
     required this.avatarUrl,
     required this.userId,
@@ -68,7 +68,7 @@ class ContactItem extends StatelessWidget {
   final String identityNumber;
 
   @override
-  Widget build(BuildContext context) => Row(
+  Widget build(BuildContext context, WidgetRef ref) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           AvatarWidget(
@@ -91,7 +91,8 @@ class ContactItem extends StatelessWidget {
                         fullName?.overflow ?? '',
                         style: TextStyle(
                           color: context.theme.text,
-                          fontSize: context.messageStyle.primaryFontSize,
+                          fontSize:
+                              ref.watch(messageStyleProvider).primaryFontSize,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -107,7 +108,7 @@ class ContactItem extends StatelessWidget {
                   identityNumber,
                   style: TextStyle(
                     color: context.theme.secondaryText,
-                    fontSize: context.messageStyle.secondaryFontSize,
+                    fontSize: ref.watch(messageStyleProvider).secondaryFontSize,
                   ),
                 ),
               ],

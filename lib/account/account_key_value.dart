@@ -1,12 +1,8 @@
 import '../utils/extension/extension.dart';
 import '../utils/hive_key_values.dart';
 
-class AccountKeyValue extends HiveKeyValue {
-  AccountKeyValue._() : super(_hiveAccount);
-
-  static AccountKeyValue? _instance;
-
-  static AccountKeyValue get instance => _instance ??= AccountKeyValue._();
+class AccountKeyValue extends HiveKeyValue<dynamic> {
+  AccountKeyValue() : super(_hiveAccount);
 
   static const _hiveAccount = 'account_box';
   static const _hasSyncCircle = 'has_sync_circle';
@@ -64,11 +60,5 @@ class AccountKeyValue extends HiveKeyValue {
       recentUsedEmoji.removeLast();
     }
     box.put(_keyRecentUsedEmoji, recentUsedEmoji);
-  }
-
-  @override
-  Future delete() {
-    _recentUsedEmoji = null;
-    return super.delete();
   }
 }

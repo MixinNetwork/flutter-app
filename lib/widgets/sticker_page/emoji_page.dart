@@ -6,8 +6,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
+import '../../ui/provider/hive_key_value_provider.dart';
 import '../../utils/emoji.dart';
 import '../../utils/extension/extension.dart';
 import '../interactive_decorated_box.dart';
@@ -69,8 +69,12 @@ class _EmojiPageBody extends HookConsumerWidget {
       }
     }, [layoutWidth]);
 
-    final recentUsedEmoji =
-        useMemoized(() => AccountKeyValue.instance.recentUsedEmoji);
+    final accountKeyValue =
+        ref.watch(currentAccountKeyValueProvider).valueOrNull;
+    final recentUsedEmoji = useMemoized(
+      () => accountKeyValue?.recentUsedEmoji ?? <String>[],
+      [accountKeyValue],
+    );
 
     final groupedEmojis = useMemoized(
         () => [
@@ -321,16 +325,16 @@ class _EmojiGroupTitle extends StatelessWidget {
       );
 }
 
-class _EmojiItem extends StatelessWidget {
+class _EmojiItem extends ConsumerWidget {
   const _EmojiItem({required this.emoji});
 
   final String emoji;
 
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context, WidgetRef ref) => Padding(
         padding: const EdgeInsets.all(2),
         child: InteractiveDecoratedBox(
-          onTap: () {
+          onTap: () async {
             final textController = context.read<TextEditingController>();
             final textEditingValue = textController.value;
             final selection = textEditingValue.selection;
@@ -345,7 +349,9 @@ class _EmojiItem extends StatelessWidget {
               textController.value =
                   collapsedTextEditingValue.replaced(selection, emoji);
             }
-            AccountKeyValue.instance.onEmojiUsed(emoji);
+            final accountKeyValue =
+                await ref.read(currentAccountKeyValueProvider.future);
+            accountKeyValue?.onEmojiUsed(emoji);
           },
           hoveringDecoration: BoxDecoration(
             color: context.dynamicColor(

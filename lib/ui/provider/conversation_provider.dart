@@ -20,10 +20,10 @@ import '../../utils/rivepod.dart';
 import '../../widgets/toast.dart';
 import '../home/bloc/conversation_list_bloc.dart';
 import '../home/bloc/subscriber_mixin.dart';
-import 'account_server_provider.dart';
+import 'account/account_server_provider.dart';
 import 'is_bot_group_provider.dart';
+import 'navigation/responsive_navigator_provider.dart';
 import 'recent_conversation_provider.dart';
-import 'responsive_navigator_provider.dart';
 
 class ConversationState extends Equatable {
   const ConversationState({
@@ -137,10 +137,9 @@ EncryptCategory _getEncryptCategory(App? app) {
 class ConversationStateNotifier
     extends DistinctStateNotifier<ConversationState?> with SubscriberMixin {
   ConversationStateNotifier({
-    required AccountServer accountServer,
+    required this.ref,
     required ResponsiveNavigatorStateNotifier responsiveNavigatorStateNotifier,
   })  : _responsiveNavigatorStateNotifier = responsiveNavigatorStateNotifier,
-        _accountServer = accountServer,
         super(null) {
     addSubscription(stream
         .map((event) => event?.conversationId)
@@ -211,7 +210,10 @@ class ConversationStateNotifier
     appActiveListener.addListener(onListen);
   }
 
-  final AccountServer _accountServer;
+  final Ref ref;
+
+  AccountServer get _accountServer =>
+      ref.read(accountServerProvider).valueOrNull!;
   final ResponsiveNavigatorStateNotifier _responsiveNavigatorStateNotifier;
   late final Database _database = _accountServer.database;
   late final String _currentUserId = _accountServer.userId;
@@ -402,24 +404,12 @@ class _LastConversationNotifier
 
 final conversationProvider = StateNotifierProvider.autoDispose<
     ConversationStateNotifier, ConversationState?>((ref) {
-  final keepAlive = ref.keepAlive();
-
-  final accountServerAsync = ref.watch(accountServerProvider);
-
-  if (!accountServerAsync.hasValue) {
-    throw Exception('accountServer is not ready');
-  }
-
+  //  refresh when accountServerProvider changed
+  ref.watch(accountServerProvider);
   final responsiveNavigatorNotifier =
       ref.watch(responsiveNavigatorProvider.notifier);
-
-  ref
-    ..listen(accountServerProvider, (previous, next) => keepAlive.close())
-    ..listen(responsiveNavigatorProvider.notifier,
-        (previous, next) => keepAlive.close());
-
   return ConversationStateNotifier(
-    accountServer: accountServerAsync.requireValue,
+    ref: ref,
     responsiveNavigatorStateNotifier: responsiveNavigatorNotifier,
   );
 });

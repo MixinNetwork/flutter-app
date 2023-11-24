@@ -3,7 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
-import 'account_server_provider.dart';
+import 'account/account_server_provider.dart';
 
 final tokenProvider = StreamProvider.autoDispose.family<Token?, String?>(
   (ref, assetId) {
@@ -11,15 +11,13 @@ final tokenProvider = StreamProvider.autoDispose.family<Token?, String?>(
       return const Stream.empty();
     }
     final database = ref.read(accountServerProvider).requireValue.database;
-    final stream =
-        database.tokenDao.tokenById(assetId).watchSingleOrNullWithStream(
+    return database.tokenDao.tokenById(assetId).watchSingleOrNullWithStream(
       eventStreams: [
         DataBaseEventBus.instance.updateTokenStream
             .where((event) => event.contains(assetId)),
       ],
       duration: kDefaultThrottleDuration,
     );
-    return stream;
   },
 );
 
@@ -30,7 +28,7 @@ final safeSnapshotProvider =
       return const Stream.empty();
     }
     final database = ref.read(accountServerProvider).requireValue.database;
-    final stream = database.safeSnapshotDao
+    return database.safeSnapshotDao
         .safeSnapshotById(snapshotId)
         .watchSingleOrNullWithStream(
       eventStreams: [
@@ -39,7 +37,6 @@ final safeSnapshotProvider =
       ],
       duration: kDefaultThrottleDuration,
     );
-    return stream;
   },
 );
 
@@ -49,13 +46,12 @@ final assetChainProvider = StreamProvider.autoDispose.family<Chain?, String?>(
       return const Stream.empty();
     }
     final database = ref.read(accountServerProvider).requireValue.database;
-    final stream = database.chainDao.chain(assetId).watchSingleOrNullWithStream(
+    return database.chainDao.chain(assetId).watchSingleOrNullWithStream(
       eventStreams: [
         DataBaseEventBus.instance.updateAssetStream
             .where((event) => event.contains(assetId)),
       ],
       duration: kDefaultThrottleDuration,
     );
-    return stream;
   },
 );

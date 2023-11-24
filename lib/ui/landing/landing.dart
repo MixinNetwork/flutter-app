@@ -1,58 +1,103 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../account/account_key_value.dart';
 import '../../crypto/signal/signal_database.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hive_key_values.dart';
 import '../../utils/hook.dart';
+import '../../utils/logger.dart';
 import '../../utils/mixin_api_client.dart';
 import '../../utils/system/package_info.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
-import '../provider/account_server_provider.dart';
+import '../provider/account/account_server_provider.dart';
+import '../provider/database_provider.dart';
+import '../provider/hive_key_value_provider.dart';
 import 'landing_mobile.dart';
 import 'landing_qrcode.dart';
 
-enum LandingMode {
+enum _LandingMode {
   qrcode,
   mobile,
 }
 
-class LandingModeCubit extends Cubit<LandingMode> {
-  LandingModeCubit() : super(LandingMode.qrcode);
-
-  void changeMode(LandingMode mode) => emit(mode);
-}
+final _landingModeProvider =
+    StateProvider.autoDispose<_LandingMode>((ref) => _LandingMode.qrcode);
 
 class LandingPage extends HookConsumerWidget {
   const LandingPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(landingKeyValuesProvider);
     final accountServerHasError =
         ref.watch(accountServerProvider.select((value) => value.hasError));
-
-    final modeCubit = useBloc(LandingModeCubit.new);
-    final mode = useBlocState<LandingModeCubit, LandingMode>(bloc: modeCubit);
-
+    final mode = ref.watch(_landingModeProvider);
     Widget child;
     switch (mode) {
-      case LandingMode.qrcode:
+      case _LandingMode.qrcode:
         child = const LandingQrCodeWidget();
-      case LandingMode.mobile:
+      case _LandingMode.mobile:
         child = const LoginWithMobileWidget();
     }
     if (accountServerHasError) {
       child = const _LoginFailed();
     }
-    return BlocProvider.value(
-      value: modeCubit,
-      child: LandingScaffold(child: child),
+    return LandingScaffold(child: child);
+  }
+}
+
+/// LandingDialog for add account
+class LandingDialog extends ConsumerWidget {
+  const LandingDialog({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(_landingModeProvider);
+    Widget child;
+    switch (mode) {
+      case _LandingMode.qrcode:
+        child = const LandingQrCodeWidget();
+      case _LandingMode.mobile:
+        child = const LoginWithMobileWidget();
+    }
+    return Portal(
+      child: Scaffold(
+        backgroundColor: context.dynamicColor(
+          const Color(0xFFE5E5E5),
+          darkColor: const Color.fromRGBO(35, 39, 43, 1),
+        ),
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          children: [
+            Center(
+              child: SizedBox(
+                width: 520,
+                height: 418,
+                child: Material(
+                  color: context.theme.popUp,
+                  borderRadius: const BorderRadius.all(Radius.circular(13)),
+                  elevation: 10,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(13)),
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
+            const Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: MixinCloseButton(),
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
@@ -139,18 +184,34 @@ class _LoginFailed extends HookConsumerWidget {
                   final authState = context.auth;
                   if (authState == null) return;
 
+                  final hiveKeyValues = await ref.read(hiveKeyValueProvider(
+                    authState.account.identityNumber,
+                  ).future);
+
+                  final accountKeyValue = hiveKeyValues.accountKeyValue;
+
                   await createClient(
                     userId: authState.account.userId,
                     sessionId: authState.account.sessionId,
                     privateKey: authState.privateKey,
                     loginByPhoneNumber:
-                        AccountKeyValue.instance.primarySessionId == null,
+                        accountKeyValue.primarySessionId == null,
                   )
                       .accountApi
                       .logout(LogoutRequest(authState.account.sessionId));
-                  await clearKeyValues();
-                  await SignalDatabase.get.clear();
-                  context.multiAuthChangeNotifier.signOut();
+                  await hiveKeyValues.clearAll();
+                  final signalDb = await SignalDatabase.connect(
+                    identityNumber: authState.account.identityNumber,
+                    fromMainIsolate: true,
+                  );
+                  await signalDb.clear();
+                  await signalDb.close();
+                  final userDb = ref.read(databaseProvider).valueOrNull;
+                  if (userDb != null) {
+                    await userDb.cryptoKeyValue.clear();
+                  }
+                  context.multiAuthChangeNotifier
+                      .signOut(authState.account.userId);
                 },
                 child: Text(context.l10n.retry),
               ),
@@ -220,22 +281,22 @@ class LandingModeSwitchButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mode = useBlocState<LandingModeCubit, LandingMode>();
+    final mode = ref.watch(_landingModeProvider);
     final String buttonText;
     switch (mode) {
-      case LandingMode.qrcode:
+      case _LandingMode.qrcode:
         buttonText = context.l10n.signWithPhoneNumber;
-      case LandingMode.mobile:
+      case _LandingMode.mobile:
         buttonText = context.l10n.signWithQrcode;
     }
     return TextButton(
       onPressed: () {
-        final modeCubit = context.read<LandingModeCubit>();
+        final notifier = ref.read(_landingModeProvider.notifier);
         switch (mode) {
-          case LandingMode.qrcode:
-            modeCubit.changeMode(LandingMode.mobile);
-          case LandingMode.mobile:
-            modeCubit.changeMode(LandingMode.qrcode);
+          case _LandingMode.qrcode:
+            notifier.state = _LandingMode.mobile;
+          case _LandingMode.mobile:
+            notifier.state = _LandingMode.qrcode;
         }
       },
       child: Text(
@@ -249,3 +310,23 @@ class LandingModeSwitchButton extends HookConsumerWidget {
     );
   }
 }
+
+final landingIdentityNumberProvider = StateProvider.autoDispose<String?>((ref) {
+  assert(() {
+    ref.onDispose(() {
+      w('landingIdentityNumberProvider dispose');
+    });
+    return true;
+  }());
+  return null;
+});
+
+final landingKeyValuesProvider = FutureProvider.autoDispose<HiveKeyValues?>(
+  (ref) async {
+    final identityNumber = ref.watch(landingIdentityNumberProvider);
+    if (identityNumber == null) {
+      return null;
+    }
+    return ref.watch(hiveKeyValueProvider(identityNumber).future);
+  },
+);

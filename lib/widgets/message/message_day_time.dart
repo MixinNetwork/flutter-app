@@ -61,7 +61,7 @@ class _MessageDayTimeWidget extends HookConsumerWidget {
             dateTimeString,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: context.messageStyle.secondaryFontSize,
+              fontSize: ref.watch(messageStyleProvider).secondaryFontSize,
               color: Colors.black,
             ),
           ),

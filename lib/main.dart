@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:ansicolor/ansicolor.dart';
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -20,7 +21,9 @@ import 'package:window_size/window_size.dart';
 
 import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
+import 'db/app/app_database.dart';
 import 'ui/home/home.dart';
+import 'ui/provider/database_provider.dart';
 import 'utils/app_lifecycle.dart';
 import 'utils/event_bus.dart';
 import 'utils/file.dart';
@@ -83,7 +86,12 @@ Future<void> main(List<String> args) async {
     e('FlutterError: ${details.exception} ${details.stack}');
   };
   PlatformDispatcher.instance.onError = (error, stack) {
-    e('unhandled error: $error $stack');
+    e('unhandled error: $error');
+    if (error is DioException) {
+      e('stacktrace: ${error.stackTrace}');
+    } else {
+      e('stacktrace: $stack');
+    }
     return true;
   };
 
@@ -96,7 +104,14 @@ Future<void> main(List<String> args) async {
     Bloc.observer = CustomBlocObserver();
   }
 
-  runApp(const ProviderScope(child: OverlaySupport.global(child: App())));
+  final appDatabase = AppDatabase.connect(fromMainIsolate: true);
+  await appDatabase.settingKeyValue.initialize;
+  runApp(ProviderScope(
+    overrides: [
+      appDatabaseProvider.overrideWithValue(appDatabase),
+    ],
+    child: const OverlaySupport.global(child: App()),
+  ));
 
   if (kPlatformIsDesktop) {
     Size? windowSize;

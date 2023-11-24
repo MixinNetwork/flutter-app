@@ -1,11 +1,7 @@
 import '../hive_key_values.dart';
 
 class DownloadKeyValue extends HiveKeyValue<String> {
-  DownloadKeyValue._() : super(_hiveName);
-
-  static DownloadKeyValue? _instance;
-
-  static DownloadKeyValue get instance => _instance ??= DownloadKeyValue._();
+  DownloadKeyValue() : super(_hiveName);
 
   static const _hiveName = 'download_box';
 
@@ -14,6 +10,4 @@ class DownloadKeyValue extends HiveKeyValue<String> {
   Future<void> addMessageId(String messageId) => box.put(messageId, messageId);
 
   Future<void> removeMessageId(String messageId) => box.delete(messageId);
-
-  Future<int> clear() => box.clear();
 }

@@ -14,9 +14,9 @@ import '../../utils/reg_exp_utils.dart';
 import '../../utils/rivepod.dart';
 import '../../widgets/mention_panel.dart';
 import '../home/bloc/subscriber_mixin.dart';
+import 'account/account_server_provider.dart';
+import 'account/multi_auth_provider.dart';
 import 'conversation_provider.dart';
-import 'database_provider.dart';
-import 'multi_auth_provider.dart';
 
 class MentionState extends Equatable {
   const MentionState({
@@ -209,8 +209,8 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
 final mentionProvider = StateNotifierProvider.autoDispose
     .family<MentionStateNotifier, MentionState, Stream<TextEditingValue>>(
   (ref, stream) {
-    final userDao = ref
-        .watch(databaseProvider.select((value) => value.requireValue.userDao));
+    final userDao = ref.watch(accountServerProvider
+        .select((value) => value.requireValue.database.userDao));
     final authStateNotifier =
         ref.watch(multiAuthStateNotifierProvider.notifier);
     final (conversationId, isGroup, isBot) = ref.watch(

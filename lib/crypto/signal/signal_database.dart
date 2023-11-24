@@ -1,10 +1,9 @@
-import 'dart:io';
+import 'dart:async';
 
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
 
-import '../../utils/file.dart';
+import '../../db/util/open_database.dart';
+import '../../utils/logger.dart';
 import 'dao/identity_dao.dart';
 import 'dao/pre_key_dao.dart';
 import 'dao/ratchet_sender_key_dao.dart';
@@ -31,11 +30,20 @@ part 'signal_database.g.dart';
   RatchetSenderKeyDao,
 ])
 class SignalDatabase extends _$SignalDatabase {
-  SignalDatabase._() : super(_openConnection());
+  SignalDatabase._(super.e);
 
-  static SignalDatabase? _instance;
-
-  static SignalDatabase get get => _instance ??= SignalDatabase._();
+  static Future<SignalDatabase> connect({
+    required String identityNumber,
+    required bool fromMainIsolate,
+  }) async {
+    final executor = await openQueryExecutor(
+      identityNumber: identityNumber,
+      dbName: 'signal',
+      fromMainIsolate: fromMainIsolate,
+      readCount: 0,
+    );
+    return SignalDatabase._(executor);
+  }
 
   @override
   int get schemaVersion => 1;
@@ -50,15 +58,10 @@ class SignalDatabase extends _$SignalDatabase {
       });
 
   Future<void> clear() => transaction(() async {
+        i('clear signal database');
         await customStatement('PRAGMA wal_checkpoint(FULL)');
         for (final table in allTables) {
           await delete(table).go();
         }
       });
 }
-
-LazyDatabase _openConnection() => LazyDatabase(() {
-      final dbFolder = mixinDocumentsDirectory;
-      final file = File(p.join(dbFolder.path, 'signal.db'));
-      return NativeDatabase(file);
-    });

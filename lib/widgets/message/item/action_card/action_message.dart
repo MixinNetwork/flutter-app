@@ -93,7 +93,7 @@ class AppCardItem extends HookConsumerWidget {
                 data.title,
                 style: TextStyle(
                   color: context.theme.text,
-                  fontSize: context.messageStyle.secondaryFontSize,
+                  fontSize: ref.watch(messageStyleProvider).secondaryFontSize,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -103,7 +103,7 @@ class AppCardItem extends HookConsumerWidget {
                 maxLines: 1,
                 style: TextStyle(
                   color: context.theme.secondaryText,
-                  fontSize: context.messageStyle.tertiaryFontSize,
+                  fontSize: ref.watch(messageStyleProvider).tertiaryFontSize,
                 ),
               ),
             ],

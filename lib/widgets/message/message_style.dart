@@ -1,11 +1,12 @@
-import 'package:flutter/cupertino.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../utils/extension/extension.dart';
+import '../../ui/provider/setting_provider.dart';
 
-extension MessageStyleExt on BuildContext {
-  MessageStyle get messageStyle =>
-      MessageStyle.defaultStyle + settingChangeNotifier.chatFontSizeDelta;
-}
+final messageStyleProvider = Provider<MessageStyle>((ref) {
+  final chatFontSizeDelta =
+      ref.watch(settingProvider.select((value) => value.chatFontSizeDelta));
+  return MessageStyle.defaultStyle + chatFontSizeDelta;
+});
 
 class MessageStyle {
   const MessageStyle({

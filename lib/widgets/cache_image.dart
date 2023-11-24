@@ -7,11 +7,12 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http_client_helper/http_client_helper.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../utils/extension/extension.dart';
+import '../ui/provider/setting_provider.dart';
 import '../utils/logger.dart';
 import '../utils/proxy.dart';
 
@@ -19,7 +20,7 @@ typedef PlaceholderWidgetBuilder = Widget Function();
 
 typedef LoadingErrorWidgetBuilder = Widget Function();
 
-class CacheImage extends StatelessWidget {
+class CacheImage extends ConsumerWidget {
   const CacheImage(
     this.src, {
     this.width,
@@ -41,8 +42,9 @@ class CacheImage extends StatelessWidget {
   final BoxFit fit;
 
   @override
-  Widget build(BuildContext context) {
-    final proxyUrl = context.database.settingProperties.activatedProxy;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final proxyUrl =
+        ref.watch(settingProvider.select((value) => value.activatedProxy));
     return Image(
       image: MixinNetworkImageProvider(
         src,

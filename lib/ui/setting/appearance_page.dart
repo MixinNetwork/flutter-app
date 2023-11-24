@@ -30,9 +30,13 @@ class AppearancePage extends StatelessWidget {
         appBar: MixinAppBar(
           title: Text(context.l10n.appearance),
         ),
-        body: const Align(
-          alignment: Alignment.topCenter,
-          child: _Body(),
+        body: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: double.infinity,
+          ),
+          child: const SingleChildScrollView(
+            child: _Body(),
+          ),
         ),
       );
 }
@@ -41,66 +45,68 @@ class _Body extends HookConsumerWidget {
   const _Body();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.only(top: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10, bottom: 14),
-                child: Text(
-                  context.l10n.theme,
-                  style: TextStyle(
-                    color: context.theme.secondaryText,
-                    fontSize: 14,
-                  ),
-                ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brightness =
+        ref.watch(settingProvider.select((value) => value.brightness));
+    return Container(
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 10, bottom: 14),
+            child: Text(
+              context.l10n.theme,
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: 14,
               ),
-              CellGroup(
-                cellBackgroundColor: context.theme.settingCellBackgroundColor,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CellItem(
-                      title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.followSystem),
-                        groupValue: ref.watch(settingProvider).brightness,
-                        onChanged: (value) =>
-                            context.settingChangeNotifier.brightness = value,
-                        value: null,
-                      ),
-                      trailing: null,
-                    ),
-                    CellItem(
-                      title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.light),
-                        groupValue: ref.watch(settingProvider).brightness,
-                        onChanged: (value) =>
-                            context.settingChangeNotifier.brightness = value,
-                        value: Brightness.light,
-                      ),
-                      trailing: null,
-                    ),
-                    CellItem(
-                      title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.dark),
-                        groupValue: ref.watch(settingProvider).brightness,
-                        onChanged: (value) =>
-                            context.settingChangeNotifier.brightness = value,
-                        value: Brightness.dark,
-                      ),
-                      trailing: null,
-                    ),
-                  ],
-                ),
-              ),
-              const _MessageAvatarSetting(),
-              const _ChatTextSizeSetting(),
-            ],
+            ),
           ),
-        ),
-      );
+          CellGroup(
+            cellBackgroundColor: context.theme.settingCellBackgroundColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CellItem(
+                  title: RadioItem<Brightness?>(
+                    title: Text(context.l10n.followSystem),
+                    groupValue: brightness,
+                    onChanged: (value) =>
+                        ref.read(settingProvider).brightness = value,
+                    value: null,
+                  ),
+                  trailing: null,
+                ),
+                CellItem(
+                  title: RadioItem<Brightness?>(
+                    title: Text(context.l10n.light),
+                    groupValue: brightness,
+                    onChanged: (value) =>
+                        ref.read(settingProvider).brightness = value,
+                    value: Brightness.light,
+                  ),
+                  trailing: null,
+                ),
+                CellItem(
+                  title: RadioItem<Brightness?>(
+                    title: Text(context.l10n.dark),
+                    groupValue: brightness,
+                    onChanged: (value) =>
+                        ref.read(settingProvider).brightness = value,
+                    value: Brightness.dark,
+                  ),
+                  trailing: null,
+                ),
+              ],
+            ),
+          ),
+          const _MessageAvatarSetting(),
+          const _ChatTextSizeSetting(),
+          const SizedBox(height: 36),
+        ],
+      ),
+    );
+  }
 }
 
 class _MessageAvatarSetting extends HookConsumerWidget {
@@ -139,7 +145,7 @@ class _MessageAvatarSetting extends HookConsumerWidget {
                     activeColor: context.theme.accent,
                     value: showAvatar,
                     onChanged: (bool value) =>
-                        context.settingChangeNotifier.messageShowAvatar = value,
+                        ref.read(settingProvider).messageShowAvatar = value,
                   ),
                 ),
               ),
@@ -150,7 +156,8 @@ class _MessageAvatarSetting extends HookConsumerWidget {
                   child: CupertinoSwitch(
                     activeColor: context.theme.accent,
                     value: showIdentityNumber,
-                    onChanged: (bool value) => context.settingChangeNotifier
+                    onChanged: (bool value) => ref
+                        .read(settingProvider)
                         .messageShowIdentityNumber = value,
                   ),
                 ),
@@ -216,7 +223,7 @@ class _ChatTextSizeSetting extends HookConsumerWidget {
                     max: 4,
                     onChanged: (value) {
                       debugPrint('fontSize: $value');
-                      context.settingChangeNotifier.chatFontSizeDelta = value;
+                      ref.read(settingProvider).chatFontSizeDelta = value;
                     },
                   ),
                 ),

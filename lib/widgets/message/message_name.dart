@@ -29,7 +29,7 @@ class MessageName extends ConsumerWidget {
     Widget widget = CustomText(
       userName,
       style: TextStyle(
-        fontSize: context.messageStyle.secondaryFontSize,
+        fontSize: ref.watch(messageStyleProvider).secondaryFontSize,
         color: getNameColorById(userId),
       ),
     );
@@ -45,7 +45,7 @@ class MessageName extends ConsumerWidget {
             child: Text(
               '@$userIdentityNumber',
               style: TextStyle(
-                fontSize: context.messageStyle.statusFontSize,
+                fontSize: ref.watch(messageStyleProvider).statusFontSize,
                 color: context.theme.text.withOpacity(0.5),
               ),
             ),

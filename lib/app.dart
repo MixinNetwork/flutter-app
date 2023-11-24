@@ -10,24 +10,25 @@ import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide Consumer, FutureProvider, Provider;
 import 'package:provider/provider.dart';
 
-import 'account/account_key_value.dart';
 import 'account/notification_service.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
-
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
-import 'ui/provider/account_server_provider.dart';
+import 'ui/landing/landing_initialize.dart';
+import 'ui/provider/account/account_server_provider.dart';
+import 'ui/provider/account/multi_auth_provider.dart';
 import 'ui/provider/database_provider.dart';
+import 'ui/provider/hive_key_value_provider.dart';
 import 'ui/provider/mention_cache_provider.dart';
-import 'ui/provider/multi_auth_provider.dart';
 import 'ui/provider/setting_provider.dart';
 import 'ui/provider/slide_category_provider.dart';
 import 'utils/extension/extension.dart';
+import 'utils/hook.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
@@ -52,13 +53,22 @@ class App extends HookConsumerWidget {
     precacheImage(
         const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
 
+    final initialized = useMemoizedFuture(
+      () => ref.read(multiAuthStateNotifierProvider.notifier).initialized,
+      null,
+    );
+
+    if (initialized.connectionState == ConnectionState.waiting) {
+      return const _App(home: AppInitializingPage());
+    }
+
     final authState = ref.watch(authProvider);
 
     Widget child;
     if (authState == null) {
       child = const _App(home: LandingPage());
     } else {
-      child = _LoginApp(authState: authState);
+      child = const _LoginApp();
     }
 
     return FocusHelper(child: child);
@@ -66,16 +76,15 @@ class App extends HookConsumerWidget {
 }
 
 class _LoginApp extends HookConsumerWidget {
-  const _LoginApp({required this.authState});
-
-  final AuthState authState;
+  const _LoginApp();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final database = ref.watch(databaseProvider);
+    final accountServer = ref.watch(accountServerProvider);
 
-    if (database.isLoading) {
-      return const _App(home: LandingPage());
+    if (database.isLoading || accountServer.isLoading) {
+      return const _App(home: AppInitializingPage());
     }
     if (database.hasError) {
       var error = database.error;
@@ -121,6 +130,7 @@ class _Providers extends HookConsumerWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
+          key: ValueKey(accountServer),
           create: (BuildContext context) => ConversationListBloc(
             ref.read(slideCategoryStateProvider.notifier),
             accountServer.database,
@@ -129,7 +139,11 @@ class _Providers extends HookConsumerWidget {
         ),
       ],
       child: Provider<NotificationService>(
-        create: (BuildContext context) => NotificationService(context: context),
+        create: (BuildContext context) => NotificationService(
+          context: context,
+          accountServer: accountServer,
+          ref: ref,
+        ),
         lazy: false,
         dispose: (_, notificationService) => notificationService.close(),
         child: PortalProviders(child: app),
@@ -175,17 +189,15 @@ class _App extends HookConsumerWidget {
               ),
               useMaterial3: true,
             ).withFallbackFonts(),
-            themeMode: ref.watch(settingProvider).themeMode,
+            themeMode:
+                ref.watch(settingProvider.select((value) => value.themeMode)),
             builder: (context, child) {
-              try {
-                context.accountServer.language =
-                    Localizations.localeOf(context).languageCode;
-              } catch (_) {}
               final mediaQueryData = MediaQuery.of(context);
               return BrightnessObserver(
                 lightThemeData: lightBrightnessThemeData,
                 darkThemeData: darkBrightnessThemeData,
-                forceBrightness: ref.watch(settingProvider).brightness,
+                forceBrightness: ref
+                    .watch(settingProvider.select((value) => value.brightness)),
                 child: MediaQuery(
                   data: mediaQueryData.copyWith(
                     // Different linux distro change the value, e.g. 1.2
@@ -233,17 +245,22 @@ class _Home extends HookConsumerWidget {
           final currentDeviceId = await getDeviceId();
           if (currentDeviceId == 'unknown') return;
 
-          final deviceId = AccountKeyValue.instance.deviceId;
-
+          final accountKeyValue =
+              await ref.read(currentAccountKeyValueProvider.future);
+          if (accountKeyValue == null) {
+            w('checkDeviceId error: accountKeyValue is null');
+            return;
+          }
+          final deviceId = accountKeyValue.deviceId;
           if (deviceId == null) {
-            await AccountKeyValue.instance.setDeviceId(currentDeviceId);
+            await accountKeyValue.setDeviceId(currentDeviceId);
             return;
           }
 
           if (deviceId.toLowerCase() != currentDeviceId.toLowerCase()) {
             final multiAuthCubit = context.multiAuthChangeNotifier;
             await accountServer.signOutAndClear();
-            multiAuthCubit.signOut();
+            multiAuthCubit.signOut(context.accountServer.userId);
           }
         } catch (e) {
           w('checkDeviceId error: $e');

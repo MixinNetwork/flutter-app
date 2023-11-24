@@ -1,47 +1,44 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../constants/resources.dart';
+import '../../crypto/signal/signal_protocol.dart';
+import '../../generated/l10n.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
+import '../../utils/mixin_api_client.dart';
 import '../../utils/platform.dart';
+import '../../utils/system/package_info.dart';
 import '../../widgets/qr_code.dart';
-import 'bloc/landing_cubit.dart';
-import 'bloc/landing_state.dart';
+import '../provider/account/multi_auth_provider.dart';
 import 'landing.dart';
+import 'landing_initialize.dart';
+
+final _qrCodeLoginProvider =
+    StateNotifierProvider.autoDispose<_QrCodeLoginNotifier, LandingState>(
+  _QrCodeLoginNotifier.new,
+);
 
 class LandingQrCodeWidget extends HookConsumerWidget {
   const LandingQrCodeWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = useMemoized(() => Localizations.localeOf(context));
-
-    final landingCubit = useBloc(() => LandingQrCodeCubit(
-          context.multiAuthChangeNotifier,
-          locale,
-        ));
-
     final status =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, LandingStatus>(
-      bloc: landingCubit,
-      converter: (state) => state.status,
-    );
-
+        ref.watch(_qrCodeLoginProvider.select((value) => value.status));
     final Widget child;
-    if (status == LandingStatus.init) {
+    if (status == LandingStatus.provisioning) {
       child = Center(
-        child: _Loading(
-          title: context.l10n.initializing,
-          message: context.l10n.chatHintE2e,
-        ),
-      );
-    } else if (status == LandingStatus.provisioning) {
-      child = Center(
-        child: _Loading(
+        child: LoadingWidget(
           title: context.l10n.loading,
           message: context.l10n.chatHintE2e,
         ),
@@ -68,10 +65,7 @@ class LandingQrCodeWidget extends HookConsumerWidget {
         ],
       );
     }
-    return BlocProvider.value(
-      value: landingCubit,
-      child: child,
-    );
+    return child;
   }
 }
 
@@ -81,17 +75,13 @@ class _QrCode extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final url =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, String?>(
-            converter: (state) => state.authUrl);
+        ref.watch(_qrCodeLoginProvider.select((value) => value.authUrl));
 
-    final visible =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, bool>(
-            converter: (state) => state.status == LandingStatus.needReload);
+    final visible = ref.watch(_qrCodeLoginProvider
+        .select((value) => value.status == LandingStatus.needReload));
 
     final errorMessage =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, String?>(
-      converter: (state) => state.errorMessage,
-    );
+        ref.watch(_qrCodeLoginProvider.select((value) => value.errorMessage));
 
     Widget? qrCode;
 
@@ -118,8 +108,9 @@ class _QrCode extends HookConsumerWidget {
                   visible: visible,
                   child: _Retry(
                     errorMessage: errorMessage,
-                    onTap: () =>
-                        context.read<LandingQrCodeCubit>().requestAuthUrl(),
+                    onTap: () => ref
+                        .read(_qrCodeLoginProvider.notifier)
+                        .requestAuthUrl(),
                   ),
                 ),
               ],
@@ -157,53 +148,6 @@ class _QrCode extends HookConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _Loading extends StatelessWidget {
-  const _Loading({
-    required this.title,
-    required this.message,
-  });
-
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final primaryColor = context.theme.text;
-    return SizedBox(
-      width: 375,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(primaryColor),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            title,
-            style: TextStyle(
-              color: primaryColor,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: context.dynamicColor(
-                const Color.fromRGBO(188, 190, 195, 1),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-              ),
-              fontSize: 16,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -256,4 +200,180 @@ class _Retry extends StatelessWidget {
           ),
         ),
       );
+}
+
+enum LandingStatus {
+  needReload,
+  provisioning,
+  ready,
+}
+
+class LandingState extends Equatable {
+  const LandingState({
+    required this.status,
+    this.authUrl,
+    this.errorMessage,
+  });
+
+  final String? authUrl;
+  final LandingStatus status;
+
+  final String? errorMessage;
+
+  @override
+  List<Object?> get props => [authUrl, status, errorMessage];
+
+  LandingState needReload(String errorMessage) => LandingState(
+        status: LandingStatus.needReload,
+        errorMessage: errorMessage,
+        authUrl: authUrl,
+      );
+
+  LandingState copyWith({
+    String? authUrl,
+    LandingStatus? status,
+  }) =>
+      LandingState(
+        authUrl: authUrl ?? this.authUrl,
+        status: status ?? this.status,
+      );
+}
+
+class _QrCodeLoginNotifier extends StateNotifier<LandingState> {
+  _QrCodeLoginNotifier(this.ref)
+      : multiAuth = ref.read(multiAuthStateNotifierProvider.notifier),
+        super(const LandingState(status: LandingStatus.provisioning)) {
+    requestAuthUrl();
+  }
+
+  final MultiAuthStateNotifier multiAuth;
+  final client = createLandingClient();
+  final Ref ref;
+
+  final StreamController<(int, String, signal.ECKeyPair)>
+      periodicStreamController =
+      StreamController<(int, String, signal.ECKeyPair)>();
+
+  StreamSubscription? _periodicSubscription;
+
+  void _cancelPeriodicSubscription() {
+    final periodicSubscription = _periodicSubscription;
+    _periodicSubscription = null;
+    unawaited(periodicSubscription?.cancel());
+  }
+
+  Future<void> requestAuthUrl() async {
+    _cancelPeriodicSubscription();
+    try {
+      final rsp = await client.provisioningApi
+          .getProvisioningId(Platform.operatingSystem);
+      final keyPair = signal.Curve.generateKeyPair();
+      final pubKey =
+          Uri.encodeComponent(base64Encode(keyPair.publicKey.serialize()));
+
+      state = state.copyWith(
+        authUrl: 'mixin://device/auth?id=${rsp.data.deviceId}&pub_key=$pubKey',
+        status: LandingStatus.ready,
+      );
+
+      _periodicSubscription = Stream.periodic(
+        const Duration(milliseconds: 1500),
+        (i) => i,
+      )
+          .asyncBufferMap(
+              (event) => _checkLanding(event.last, rsp.data.deviceId, keyPair))
+          .listen((event) {});
+    } catch (error, stack) {
+      e('requestAuthUrl failed: $error $stack');
+      state = state.needReload('Failed to request auth: $error');
+    }
+  }
+
+  Future<void> _checkLanding(
+    int count,
+    String deviceId,
+    signal.ECKeyPair keyPair,
+  ) async {
+    if (_periodicSubscription == null) return;
+
+    if (count > 40) {
+      _cancelPeriodicSubscription();
+      state = state.needReload(Localization.current.qrCodeExpiredDesc);
+      return;
+    }
+
+    String secret;
+    try {
+      secret =
+          (await client.provisioningApi.getProvisioning(deviceId)).data.secret;
+    } catch (e) {
+      return;
+    }
+    if (secret.isEmpty) return;
+
+    _cancelPeriodicSubscription();
+    state = state.copyWith(status: LandingStatus.provisioning);
+
+    try {
+      final (acount, privateKey) = await _verify(secret, keyPair);
+      multiAuth.signIn(AuthState(account: acount, privateKey: privateKey));
+    } catch (error, stack) {
+      state = state.needReload('Failed to verify: $error');
+      e('_verify: $error $stack');
+    }
+  }
+
+  FutureOr<(Account, String)> _verify(
+      String secret, signal.ECKeyPair keyPair) async {
+    final result =
+        signal.decrypt(base64Encode(keyPair.privateKey.serialize()), secret);
+    final msg =
+        json.decode(String.fromCharCodes(result)) as Map<String, dynamic>;
+
+    final edKeyPair = ed.generateKey();
+    final private = base64.decode(msg['identity_key_private'] as String);
+    final registrationId = signal.generateRegistrationId(false);
+
+    final sessionId = msg['session_id'] as String;
+    final info = await getPackageInfo();
+    final appVersion = '${info.version}(${info.buildNumber})';
+    final platformVersion = await getPlatformVersion();
+    final rsp = await client.provisioningApi.verifyProvisioning(
+      ProvisioningRequest(
+        code: msg['provisioning_code'] as String,
+        userId: msg['user_id'] as String,
+        sessionId: sessionId,
+        purpose: 'SESSION',
+        sessionSecret: base64Encode(edKeyPair.publicKey.bytes),
+        appVersion: appVersion,
+        registrationId: registrationId,
+        platform: 'Desktop',
+        platformVersion: platformVersion,
+      ),
+    );
+
+    final identityNumber = rsp.data.identityNumber;
+    await SignalProtocol.initSignal(identityNumber, registrationId, private);
+    ref.read(landingIdentityNumberProvider.notifier).state = identityNumber;
+
+    final privateKey = base64Encode(edKeyPair.privateKey.bytes);
+
+    final hiveKeyValues = await ref.read(landingKeyValuesProvider.future);
+    if (hiveKeyValues == null) {
+      throw Exception('can not init hiveKeyValues');
+    }
+    hiveKeyValues.accountKeyValue.primarySessionId = sessionId;
+
+    return (
+      rsp.data,
+      privateKey,
+    );
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _periodicSubscription?.cancel();
+    await periodicStreamController.close();
+    super.dispose();
+  }
 }

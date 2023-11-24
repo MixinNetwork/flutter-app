@@ -3,13 +3,8 @@ import 'package:rxdart/rxdart.dart';
 import '../utils/hive_key_values.dart';
 
 class ScamWarningKeyValue extends HiveKeyValue<DateTime?> {
-  ScamWarningKeyValue._() : super(_hiveName);
+  ScamWarningKeyValue() : super(_hiveName);
   static const _hiveName = 'scam_warning_key_value';
-
-  static ScamWarningKeyValue? _instance;
-
-  static ScamWarningKeyValue get instance =>
-      _instance ??= ScamWarningKeyValue._();
 
   bool _isShow(String userId) => box.get(userId, defaultValue: null).isShow;
 

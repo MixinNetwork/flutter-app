@@ -6,7 +6,7 @@ import '../converter/message_status_type_converter.dart';
 import '../converter/user_relationship_converter.dart';
 import '../converter/participant_role_converter.dart';
 import '../converter/millis_date_converter.dart';
-import '../converter/property_group_converter.dart';
+import '../converter/user_property_group_converter.dart';
 import '../converter/safe_deposit_type_converter.dart';
 import '../converter/safe_withdrawal_type_converter.dart';
 import '../../enum/media_status.dart';
@@ -70,7 +70,7 @@ CREATE TABLE expired_messages (message_id TEXT NOT NULL, expire_in INTEGER NOT N
 
 CREATE TABLE chains (chain_id TEXT NOT NULL, name TEXT NOT NULL, symbol TEXT NOT NULL, icon_url TEXT NOT NULL, threshold INTEGER NOT NULL, PRIMARY KEY(chain_id));
 
-CREATE TABLE properties ("key" TEXT NOT NULL, "group" TEXT NOT NULL MAPPED BY `const PropertyGroupConverter()`, "value" TEXT NOT NULL, PRIMARY KEY("key", "group"));
+CREATE TABLE properties ("key" TEXT NOT NULL, "group" TEXT NOT NULL MAPPED BY `const UserPropertyGroupConverter()`, "value" TEXT NOT NULL, PRIMARY KEY("key", "group"));
 
 CREATE TABLE safe_snapshots (
     snapshot_id TEXT NOT NULL,

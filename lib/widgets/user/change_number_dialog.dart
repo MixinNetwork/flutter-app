@@ -60,7 +60,8 @@ Future<void> showChangeNumberDialog(BuildContext context) async {
           platformVersion: platformVersion,
           appVersion: packageInfo.version,
           packageName: 'one.mixin.messenger',
-          pin: encryptPin(pinCode),
+          pin: context.accountServer.hiveKeyValues.sessionKeyValue
+              .encryptPin(pinCode),
           code: code,
         ),
       );

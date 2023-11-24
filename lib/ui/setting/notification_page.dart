@@ -50,7 +50,7 @@ class NotificationPage extends HookConsumerWidget {
                     activeColor: context.theme.accent,
                     value: currentMessagePreview,
                     onChanged: (bool value) =>
-                        context.settingChangeNotifier.messagePreview = value,
+                        ref.read(settingProvider).messagePreview = value,
                   ),
                 ),
               ),

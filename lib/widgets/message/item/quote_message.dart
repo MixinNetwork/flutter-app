@@ -388,7 +388,7 @@ class _QuoteImage extends HookWidget {
   }
 }
 
-class _QuoteMessageBase extends StatelessWidget {
+class _QuoteMessageBase extends ConsumerWidget {
   const _QuoteMessageBase({
     required this.messageId,
     required this.quoteMessageId,
@@ -412,7 +412,7 @@ class _QuoteMessageBase extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final iterator = LineSplitter.split(description).iterator;
     final _description =
         '${iterator.moveNext() ? iterator.current : ''}${iterator.moveNext() ? '...' : ''}';
@@ -481,8 +481,9 @@ class _QuoteMessageBase extends StatelessWidget {
                                 child: CustomText(
                                   name!,
                                   style: TextStyle(
-                                    fontSize:
-                                        context.messageStyle.secondaryFontSize,
+                                    fontSize: ref
+                                        .watch(messageStyleProvider)
+                                        .secondaryFontSize,
                                     color: color,
                                     height: 1,
                                   ),
@@ -501,8 +502,9 @@ class _QuoteMessageBase extends StatelessWidget {
                                   child: CustomText(
                                     _description,
                                     style: TextStyle(
-                                      fontSize:
-                                          context.messageStyle.tertiaryFontSize,
+                                      fontSize: ref
+                                          .watch(messageStyleProvider)
+                                          .tertiaryFontSize,
                                       color: context.theme.secondaryText,
                                     ),
                                     maxLines: 1,

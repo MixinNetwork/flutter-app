@@ -7,21 +7,110 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:rxdart/rxdart.dart';
 
-import '../account/security_key_value.dart';
 import '../constants/resources.dart';
-import '../ui/provider/account_server_provider.dart';
+import '../ui/provider/account/multi_auth_provider.dart';
+import '../ui/provider/account/security_key_value_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/authentication.dart';
-import '../utils/event_bus.dart';
 import '../utils/extension/extension.dart';
-import '../utils/hook.dart';
+import '../utils/logger.dart';
 import 'dialog.dart';
 
-const _lockDuration = Duration(minutes: 1);
+final securityLockProvider = StateNotifierProvider<LockStateNotifier, bool>(
+  LockStateNotifier.new,
+);
 
-enum LockEvent { lock, unlock }
+class LockStateNotifier extends StateNotifier<bool> {
+  LockStateNotifier(this.ref) : super(false) {
+    _initialize();
+  }
+
+  final Ref ref;
+
+  Timer? _inactiveTimer;
+
+  SecurityKeyValue get securityKeyValue => ref.read(securityKeyValueProvider);
+
+  bool get signed => ref.read(authProvider) != null;
+
+  Future<void> _initialize() async {
+    await securityKeyValue.initialize;
+    if (securityKeyValue.hasPasscode && signed) {
+      lock();
+    }
+    appActiveListener.addListener(_onAppActiveChanged);
+    ref.listen(multiAuthStateNotifierProvider, (previous, next) {
+      if (next.auths.isEmpty) {
+        unlock();
+        // remove passcode
+        securityKeyValue
+          ..passcode = null
+          ..lockDuration = null;
+      }
+    });
+  }
+
+  void _onAppActiveChanged() {
+    if (state) {
+      // already locked
+      return;
+    }
+
+    void clearTimer() {
+      _inactiveTimer?.cancel();
+      _inactiveTimer = null;
+    }
+
+    clearTimer();
+
+    final needLock = !isAppActive && securityKeyValue.hasPasscode && signed;
+    if (!needLock) {
+      return;
+    }
+    final lockDuration = securityKeyValue.lockDuration;
+    if (lockDuration.inMinutes > 0) {
+      d('schedule lock after ${lockDuration.inMinutes} minutes');
+      _inactiveTimer = Timer(lockDuration, () {
+        if (securityKeyValue.hasPasscode && signed) {
+          lock();
+          clearTimer();
+        }
+      });
+    }
+  }
+
+  void lock() {
+    if (!signed) {
+      throw Exception('not signed');
+    }
+    if (!securityKeyValue.hasPasscode) {
+      throw Exception('no passcode');
+    }
+    state = true;
+  }
+
+  // for unlock by biometric
+  void unlock() {
+    state = false;
+  }
+
+  bool unlockWithPin(String input) {
+    assert(securityKeyValue.hasPasscode, 'no passcode');
+    if (securityKeyValue.passcode == input) {
+      state = false;
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  void dispose() {
+    _inactiveTimer?.cancel();
+    appActiveListener.removeListener(_onAppActiveChanged);
+    super.dispose();
+  }
+}
 
 class AuthGuard extends HookConsumerWidget {
   const AuthGuard({
@@ -33,83 +122,14 @@ class AuthGuard extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final signed =
-        ref.watch(accountServerProvider.select((value) => value.hasValue));
-
-    if (signed) return _AuthGuard(child: child);
-
-    return child;
-  }
-}
-
-class _AuthGuard extends HookConsumerWidget {
-  const _AuthGuard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
     final focusNode = useFocusNode();
     final textEditingController = useTextEditingController();
 
-    final hasPasscode =
-        useMemoizedStream(SecurityKeyValue.instance.watchHasPasscode).data ??
-            SecurityKeyValue.instance.hasPasscode;
-
     final enableBiometric =
-        useMemoizedStream(SecurityKeyValue.instance.watchBiometric).data ??
-            SecurityKeyValue.instance.biometric;
+        ref.watch(securityKeyValueProvider.select((value) => value.biometric));
 
     final hasError = useState(false);
-    final lock = useState(SecurityKeyValue.instance.hasPasscode);
-
-    useEffect(() {
-      final listen =
-          EventBus.instance.on.whereType<LockEvent>().listen((event) {
-        lock.value = event == LockEvent.lock;
-      });
-
-      return listen.cancel;
-    }, []);
-
-    useEffect(() {
-      Timer? timer;
-      void dispose() {
-        timer?.cancel();
-        timer = null;
-      }
-
-      void listener() {
-        if (lock.value) return;
-
-        final needLock = !isAppActive;
-
-        final lockDuration =
-            SecurityKeyValue.instance.lockDuration ?? _lockDuration;
-        if (needLock) {
-          if (lockDuration.inMinutes > 0) {
-            timer = Timer(lockDuration, () {
-              if (!hasPasscode) {
-                lock.value = false;
-                return;
-              }
-
-              lock.value = !isAppActive;
-            });
-          }
-        } else {
-          dispose();
-          lock.value = needLock;
-        }
-      }
-
-      listener();
-      appActiveListener.addListener(listener);
-      return () {
-        dispose();
-        appActiveListener.removeListener(listener);
-      };
-    }, [hasPasscode]);
+    final lock = ref.watch(securityLockProvider);
 
     useEffect(() {
       focusNode.requestFocus();
@@ -131,12 +151,12 @@ class _AuthGuard extends HookConsumerWidget {
         FocusManager.instance.removeListener(listener);
         ServicesBinding.instance.keyboard.removeHandler(handler);
       };
-    }, [lock.value]);
+    }, [lock]);
 
     return Stack(
       children: [
         child,
-        if (lock.value)
+        if (lock)
           GestureDetector(
             onTap: focusNode.requestFocus,
             behavior: HitTestBehavior.translucent,
@@ -201,9 +221,9 @@ class _AuthGuard extends HookConsumerWidget {
                             showCursor: false,
                             onCompleted: (value) {
                               textEditingController.text = '';
-                              if (SecurityKeyValue.instance.passcode == value) {
-                                lock.value = false;
-                              } else {
+                              if (!ref
+                                  .read(securityLockProvider.notifier)
+                                  .unlockWithPin(value)) {
                                 hasError.value = true;
                               }
                             },
@@ -236,7 +256,9 @@ class _AuthGuard extends HookConsumerWidget {
                               padding: const EdgeInsets.all(24),
                               onTap: () async {
                                 if (await authenticate()) {
-                                  lock.value = false;
+                                  ref
+                                      .read(securityLockProvider.notifier)
+                                      .unlock();
                                   return;
                                 }
                               },

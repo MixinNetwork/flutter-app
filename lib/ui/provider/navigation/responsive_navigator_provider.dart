@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../home/chat/chat_page.dart';
-import '../setting/about_page.dart';
-import '../setting/account_delete_page.dart';
-import '../setting/account_page.dart';
-import '../setting/appearance_page.dart';
-import '../setting/backup_page.dart';
-import '../setting/edit_profile_page.dart';
-import '../setting/notification_page.dart';
-import '../setting/proxy_page.dart';
-import '../setting/security_page.dart';
-import '../setting/storage_page.dart';
-import '../setting/storage_usage_detail_page.dart';
-import '../setting/storage_usage_list_page.dart';
+import '../../home/chat/chat_page.dart';
+import '../../setting/about_page.dart';
+import '../../setting/account_delete_page.dart';
+import '../../setting/account_page.dart';
+import '../../setting/appearance_page.dart';
+import '../../setting/backup_page.dart';
+import '../../setting/edit_profile_page.dart';
+import '../../setting/notification_page.dart';
+import '../../setting/proxy_page.dart';
+import '../../setting/security_page.dart';
+import '../../setting/storage_page.dart';
+import '../../setting/storage_usage_detail_page.dart';
+import '../../setting/storage_usage_list_page.dart';
 import 'abstract_responsive_navigator.dart';
 
 class ResponsiveNavigatorStateNotifier

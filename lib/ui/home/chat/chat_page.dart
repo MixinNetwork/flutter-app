@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
@@ -9,8 +10,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 
-import '../../../account/scam_warning_key_value.dart';
-import '../../../account/show_pin_message_key_value.dart';
 import '../../../bloc/simple_cubit.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../constants/resources.dart';
@@ -32,11 +31,11 @@ import '../../../widgets/message/message_bubble.dart';
 import '../../../widgets/message/message_day_time.dart';
 import '../../../widgets/pin_bubble.dart';
 import '../../../widgets/toast.dart';
-import '../../../widgets/window/menus.dart';
-import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
+import '../../provider/menu_handle_provider.dart';
 import '../../provider/message_selection_provider.dart';
+import '../../provider/navigation/abstract_responsive_navigator.dart';
 import '../../provider/pending_jump_message_provider.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/message_bloc.dart';
@@ -760,7 +759,7 @@ class _BottomBanner extends HookConsumerWidget {
     final showScamWarning = useMemoizedStream(
           () {
             if (userId == null || !isScam) return Stream.value(false);
-            return ScamWarningKeyValue.instance.watch(userId);
+            return context.hiveKeyValues.scamWarningKeyValue.watch(userId);
           },
           initialData: false,
           keys: [userId],
@@ -814,7 +813,7 @@ class _BottomBanner extends HookConsumerWidget {
               size: 20,
               onTap: () {
                 if (userId == null) return;
-                ScamWarningKeyValue.instance.dismiss(userId);
+                context.hiveKeyValues.scamWarningKeyValue.dismiss(userId);
               },
             ),
           ],
@@ -857,7 +856,7 @@ class _PinMessagesBanner extends HookConsumerWidget {
                           final conversationId =
                               ref.read(currentConversationIdProvider);
                           if (conversationId == null) return;
-                          ShowPinMessageKeyValue.instance
+                          context.hiveKeyValues.showPinMessageKeyValue
                               .dismiss(conversationId);
                         },
                       ),
@@ -1112,12 +1111,12 @@ class _ChatMenuHandler extends HookConsumerWidget {
     final conversationId = ref.watch(currentConversationIdProvider);
 
     useEffect(() {
-      final cubit = ref.read(macMenuBarProvider.notifier);
+      final controller = ref.read(macMenuBarProvider.notifier);
       if (conversationId == null) return null;
 
       final handle = _ConversationHandle(context, conversationId);
-      Future(() => cubit.attach(handle));
-      return () => Future(() => cubit.unAttach(handle));
+      Future(() => controller.attach(handle));
+      return () => Future(() => controller.unAttach(handle));
     }, [conversationId]);
 
     return child;

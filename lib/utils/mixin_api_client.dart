@@ -18,26 +18,35 @@ const kRequestTimeStampKey = 'requestTimeStamp';
 Future<String?> _userAgent = generateUserAgent();
 Future<String?> _deviceId = getDeviceId();
 
-Client createClient({
-  required String userId,
-  required String sessionId,
-  required String privateKey,
-  // Hive didn't support multi isolate.
-  required bool loginByPhoneNumber,
+final _httpLogLevel = switch (kHttpLogLevel) {
+  'null' => null,
+  'none' => HttpLogLevel.none,
+  'headers' => HttpLogLevel.headers,
+  'body' => HttpLogLevel.body,
+  _ => HttpLogLevel.all,
+};
+
+Client createLandingClient() => _createClient();
+
+Client _createClient({
+  String? userId,
+  String? sessionId,
+  String? privateKey,
+  String? scp,
   List<Interceptor> interceptors = const [],
 }) {
   final client = Client(
     userId: userId,
     sessionId: sessionId,
     privateKey: privateKey,
-    scp: loginByPhoneNumber ? scpFull : scp,
+    scp: scp,
+    httpLogLevel: _httpLogLevel,
     dioOptions: BaseOptions(
       connectTimeout: tenSecond,
       receiveTimeout: tenSecond,
       sendTimeout: tenSecond,
       followRedirects: false,
     ),
-    // httpLogLevel: HttpLogLevel.none,
     jsonDecodeCallback: jsonDecode,
     interceptors: [
       ...interceptors,
@@ -61,6 +70,7 @@ Client createClient({
               'requestTimeStamp = ${requestTimeStamp?.outputFormat()} '
               'serverTimeStamp = ${serverTimeStamp?.outputFormat()} '
               'now = ${DateTime.now().outputFormat()}');
+          w('error: ${e.message} ${e.stackTrace}');
           handler.next(e);
         },
       ),
@@ -82,6 +92,22 @@ extension DioNativeAdapter on Dio {
     httpClientAdapter = NativeAdapter();
   }
 }
+
+Client createClient({
+  required String userId,
+  required String sessionId,
+  required String privateKey,
+  // Hive didn't support multi isolate.
+  required bool loginByPhoneNumber,
+  List<Interceptor> interceptors = const [],
+}) =>
+    _createClient(
+      userId: userId,
+      sessionId: sessionId,
+      privateKey: privateKey,
+      scp: loginByPhoneNumber ? scpFull : scp,
+      interceptors: interceptors,
+    );
 
 final _formatter = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
 

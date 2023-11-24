@@ -126,7 +126,8 @@ class AudioMessage extends HookConsumerWidget {
                   Text(
                     duration.asMinutesSeconds,
                     style: TextStyle(
-                      fontSize: context.messageStyle.tertiaryFontSize,
+                      fontSize:
+                          ref.watch(messageStyleProvider).tertiaryFontSize,
                       color: context.theme.secondaryText,
                     ),
                   ),

@@ -50,6 +50,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
         elevation: 0,
         centerTitle: true,
         backgroundColor: backgroundColor ?? context.theme.primary,
+        scrolledUnderElevation: 0,
         leading: MoveWindowBarrier(
           child: Builder(
             builder: (context) =>

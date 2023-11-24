@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:stream_transform/stream_transform.dart';
 
@@ -9,9 +10,9 @@ import '../db/database_event_bus.dart';
 import '../db/extension/conversation.dart';
 import '../enum/message_category.dart';
 import '../generated/l10n.dart';
-
 import '../ui/provider/conversation_provider.dart';
 import '../ui/provider/mention_cache_provider.dart';
+import '../ui/provider/setting_provider.dart';
 import '../ui/provider/slide_category_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/extension/extension.dart';
@@ -22,12 +23,15 @@ import '../utils/message_optimize.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/message/item/pin_message.dart';
 import '../widgets/message/item/system_message.dart';
+import 'account_server.dart';
 
 const _keyConversationId = 'conversationId';
 
 class NotificationService {
   NotificationService({
     required BuildContext context,
+    required AccountServer accountServer,
+    required WidgetRef ref,
   }) {
     streamSubscriptions
       ..add(DataBaseEventBus.instance.notificationMessageStream
@@ -41,31 +45,28 @@ class NotificationService {
       }))
       ..add(DataBaseEventBus.instance.notificationMessageStream
           .where((event) => event.type != MessageCategory.messageRecall)
-          .where((event) => event.senderId != context.accountServer.userId)
+          .where((event) => event.senderId != accountServer.userId)
           .where((event) =>
               event.createdAt != null &&
               event.createdAt!
                   .isAfter(DateTime.now().subtract(const Duration(minutes: 2))))
           .where((event) {
             if (isAppActive) {
-              final conversationState =
-                  context.providerContainer.read(conversationProvider);
+              final conversationState = ref.read(conversationProvider);
               return event.conversationId !=
                   (conversationState?.conversationId ??
                       conversationState?.conversation?.conversationId);
             }
             return true;
           })
-          .asyncMapBuffer((event) => context.database.messageDao
+          .asyncMapBuffer((event) => accountServer.database.messageDao
               .notificationMessage(event.map((e) => e.messageId).toList())
               .get())
           .expand((event) => event)
           .asyncWhere((event) async {
-            final account = context.account!;
-
             bool mentionedCurrentUser() => mentionNumberRegExp
                 .allMatchesAndSort(event.content ?? '')
-                .any((element) => element[1] == account.identityNumber);
+                .any((element) => element[1] == accountServer.identityNumber);
             // mention current user
             if (event.type.isText && mentionedCurrentUser()) return true;
 
@@ -75,7 +76,7 @@ class NotificationService {
                 final json =
                     await jsonDecodeWithIsolate(event.quoteContent ?? '') ?? {};
                 // ignore: avoid_dynamic_calls
-                return json['user_id'] == account.userId;
+                return json['user_id'] == accountServer.userId;
               } catch (_) {
                 // json decode failed
                 return false;
@@ -97,16 +98,15 @@ class NotificationService {
             );
 
             String? body;
-            if (context.settingChangeNotifier.messagePreview) {
-              final mentionCache =
-                  context.providerContainer.read(mentionCacheProvider);
+            if (ref.read(settingProvider).messagePreview) {
+              final mentionCache = ref.read(mentionCacheProvider);
 
               if (event.type == MessageCategory.systemConversation) {
                 body = generateSystemText(
                   actionName: event.actionName,
                   participantUserId: event.participantUserId,
                   senderId: event.senderId,
-                  currentUserId: context.accountServer.userId,
+                  currentUserId: accountServer.userId,
                   participantFullName: event.participantFullName,
                   senderFullName: event.senderFullName,
                   expireIn: int.tryParse(event.content ?? '0'),
@@ -174,7 +174,7 @@ class NotificationService {
           (event) {
             i('select notification $event');
 
-            context.providerContainer
+            ref
                 .read(slideCategoryStateProvider.notifier)
                 .switchToChatsIfSettings();
 

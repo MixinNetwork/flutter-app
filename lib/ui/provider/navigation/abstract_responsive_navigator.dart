@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-import '../../utils/rivepod.dart';
+import '../../../utils/rivepod.dart';
 
 class ResponsiveNavigatorState extends Equatable {
   const ResponsiveNavigatorState({

@@ -70,7 +70,8 @@ class ActionMessage extends HookConsumerWidget {
                         // ignore: avoid_dynamic_calls
                         e.label,
                         style: TextStyle(
-                          fontSize: context.messageStyle.primaryFontSize,
+                          fontSize:
+                              ref.watch(messageStyleProvider).primaryFontSize,
                           // ignore: avoid_dynamic_calls
                           color: colorHex(e.color) ?? Colors.black,
                           height: 1,

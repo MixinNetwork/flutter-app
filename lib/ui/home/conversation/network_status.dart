@@ -9,19 +9,16 @@ import '../../../blaze/blaze.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
-import '../../../utils/hook.dart';
 import '../../../utils/uri_utils.dart';
 import '../../../widgets/menu.dart';
+import '../../provider/account/account_server_provider.dart';
 
 class NetworkStatus extends HookConsumerWidget {
   const NetworkStatus({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final connectedState = useMemoizedStream(
-            () => context.accountServer.connectedStateStream.distinct(),
-            initialData: ConnectedState.connecting)
-        .requireData;
+    final connectedState = ref.watch(blazeConnectedStateProvider).value;
 
     final hasDisconnectedBefore = useRef(false);
 

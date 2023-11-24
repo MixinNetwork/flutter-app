@@ -86,7 +86,7 @@ class TextMessage extends HookConsumerWidget {
           content: CustomText(
             content,
             style: TextStyle(
-              fontSize: context.messageStyle.primaryFontSize,
+              fontSize: ref.watch(messageStyleProvider).primaryFontSize,
               color: context.theme.text,
             ),
             textMatchers: [

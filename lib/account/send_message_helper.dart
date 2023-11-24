@@ -30,7 +30,6 @@ import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/cache_image.dart';
 import '../widgets/message/send_message_dialog/attachment_extra.dart';
-import 'show_pin_message_key_value.dart';
 
 const jpegMimeType = 'image/jpeg';
 const gifMimeType = 'image/gif';
@@ -1187,7 +1186,6 @@ class SendMessageHelper {
           cleanDraft: false,
         );
       });
-      unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
     } else {
       await _pinMessageDao
           .deleteByIds(pinMessageMinimals.map((e) => e.messageId).toList());

@@ -144,7 +144,7 @@ class _MessageDatetime extends HookConsumerWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: context.messageStyle.statusFontSize,
+        fontSize: ref.watch(messageStyleProvider).statusFontSize,
         color: color ??
             context.dynamicColor(
               const Color.fromRGBO(131, 145, 158, 1),

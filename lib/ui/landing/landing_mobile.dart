@@ -1,25 +1,22 @@
-// ignore_for_file: implementation_imports
-
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../account/session_key_value.dart';
 import '../../constants/resources.dart';
-import '../../crypto/crypto_key_value.dart';
 import '../../crypto/signal/signal_protocol.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../../utils/logger.dart';
+import '../../utils/mixin_api_client.dart';
 import '../../utils/platform.dart';
 import '../../utils/system/package_info.dart';
 import '../../widgets/action_button.dart';
@@ -28,42 +25,36 @@ import '../../widgets/toast.dart';
 import '../../widgets/user/captcha_web_view_dialog.dart';
 import '../../widgets/user/phone_number_input.dart';
 import '../../widgets/user/verification_dialog.dart';
-import '../provider/multi_auth_provider.dart';
-import 'bloc/landing_cubit.dart';
+import '../provider/account/multi_auth_provider.dart';
 import 'landing.dart';
+
+final _mobileClientProvider = Provider.autoDispose<Client>(
+  (ref) => createLandingClient(),
+);
 
 class LoginWithMobileWidget extends HookConsumerWidget {
   const LoginWithMobileWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = useMemoized(() => Localizations.localeOf(context));
-    final userAgent = useMemoizedFuture(generateUserAgent, null).data;
-    final deviceId = useMemoizedFuture(getDeviceId, null).data;
-
-    if (userAgent == null || deviceId == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    return BlocProvider<LandingMobileCubit>(
-      create: (_) => LandingMobileCubit(context.multiAuthChangeNotifier, locale,
-          userAgent: userAgent, deviceId: deviceId),
-      child: Navigator(
-        onPopPage: (_, __) => true,
-        pages: const [
-          MaterialPage(
-            child: _PhoneNumberInputScene(),
-          ),
-        ],
-      ),
+    // keep client provider alive in mobile widget.
+    ref.watch(_mobileClientProvider);
+    return Navigator(
+      onPopPage: (_, __) => true,
+      pages: const [
+        MaterialPage(
+          child: _PhoneNumberInputScene(),
+        ),
+      ],
     );
   }
 }
 
-class _PhoneNumberInputScene extends StatelessWidget {
+class _PhoneNumberInputScene extends ConsumerWidget {
   const _PhoneNumberInputScene();
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context, WidgetRef ref) => Column(
         children: [
           const SizedBox(height: 56),
           Expanded(
@@ -79,6 +70,7 @@ class _PhoneNumberInputScene extends StatelessWidget {
                 final response = await _requestVerificationCode(
                   phone: phoneNumber,
                   context: context,
+                  client: ref.read(_mobileClientProvider),
                 );
                 Toast.dismiss();
                 if (response.deactivatedAt?.isNotEmpty ?? false) {
@@ -150,7 +142,7 @@ class _CodeInputScene extends HookConsumerWidget {
       assert(code.length == 4, 'Invalid code length: $code');
       showToastLoading();
       try {
-        final registrationId = await SignalProtocol.initSignal(null);
+        final registrationId = generateRegistrationId(false);
 
         final sessionKey = ed.generateKey();
         final sessionSecret = base64Encode(sessionKey.publicKey.bytes);
@@ -169,19 +161,24 @@ class _CodeInputScene extends HookConsumerWidget {
           sessionSecret: sessionSecret,
           pin: '',
         );
-        final client = context.read<LandingMobileCubit>().client;
+        final client = ref.read(_mobileClientProvider);
         final response = await client.accountApi.create(
           verification.value.id,
           accountRequest,
         );
-        final privateKey = base64Encode(sessionKey.privateKey.bytes);
 
         final identityNumber = response.data.identityNumber;
-        await CryptoKeyValue.instance.init(identityNumber);
-        CryptoKeyValue.instance.localRegistrationId = registrationId;
+        await SignalProtocol.initSignal(identityNumber, registrationId, null);
+        ref.read(landingIdentityNumberProvider.notifier).state = identityNumber;
 
-        await SessionKeyValue.instance.init(identityNumber);
-        SessionKeyValue.instance.pinToken = base64Encode(decryptPinToken(
+        final privateKey = base64Encode(sessionKey.privateKey.bytes);
+
+        final hiveKeyValues = await ref.read(landingKeyValuesProvider.future);
+        if (hiveKeyValues == null) {
+          throw Exception('hiveKeyValues is null');
+        }
+
+        hiveKeyValues.sessionKeyValue.pinToken = base64Encode(decryptPinToken(
           response.data.pinToken,
           sessionKey.privateKey,
         ));
@@ -269,6 +266,7 @@ class _CodeInputScene extends HookConsumerWidget {
                 final response = await _requestVerificationCode(
                   phone: phoneNumber,
                   context: context,
+                  client: ref.read(_mobileClientProvider),
                 );
                 Toast.dismiss();
                 verification.value = response;
@@ -307,6 +305,7 @@ class _CodeInputScene extends HookConsumerWidget {
 Future<VerificationResponse> _requestVerificationCode({
   required String phone,
   required BuildContext context,
+  required Client client,
   (CaptchaType, String)? captcha,
 }) async {
   final request = VerificationRequest(
@@ -318,8 +317,7 @@ Future<VerificationResponse> _requestVerificationCode({
     hCaptchaResponse: captcha?.$1 == CaptchaType.hCaptcha ? captcha?.$2 : null,
   );
   try {
-    final cubit = context.read<LandingMobileCubit>();
-    final response = await cubit.client.accountApi.verification(request);
+    final response = await client.accountApi.verification(request);
     return response.data;
   } on MixinApiError catch (error) {
     final mixinError = error.error! as MixinError;
@@ -334,6 +332,7 @@ Future<VerificationResponse> _requestVerificationCode({
         return _requestVerificationCode(
           phone: phone,
           context: context,
+          client: client,
           captcha: (type, token),
         );
       }

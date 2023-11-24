@@ -8,14 +8,13 @@ extension ProviderExtension on BuildContext {
 
   Account? get account => providerContainer.read(authAccountProvider);
 
-  SettingChangeNotifier get settingChangeNotifier =>
-      providerContainer.read(settingProvider);
-
   AccountServer get accountServer =>
       providerContainer.read(accountServerProvider.select((value) {
         if (!value.hasValue) throw Exception('AccountServerProvider not ready');
         return value.requireValue;
       }));
+
+  HiveKeyValues get hiveKeyValues => accountServer.hiveKeyValues;
 
   AudioMessagePlayService get audioMessageService =>
       read<AudioMessagePlayService>();
@@ -32,8 +31,7 @@ extension ProviderExtension on BuildContext {
 
   double get brightnessValue => BrightnessData.of(this);
 
-  Brightness get brightness =>
-      settingChangeNotifier.brightness ?? MediaQuery.platformBrightnessOf(this);
+  Brightness get brightness => BrightnessData.brightnessOf(this);
 
   Color dynamicColor(
     Color color, {

@@ -210,7 +210,8 @@ class _VideoMessageOverlayInfo extends HookConsumerWidget {
                   child: Text(
                     durationText,
                     style: TextStyle(
-                      fontSize: context.messageStyle.tertiaryFontSize,
+                      fontSize:
+                          ref.watch(messageStyleProvider).tertiaryFontSize,
                       color: Colors.white,
                     ),
                   ),
