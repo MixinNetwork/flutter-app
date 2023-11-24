@@ -90,8 +90,9 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
     await _multiAuthKeyValue.initialize;
     final auths = _multiAuthKeyValue.authList;
     var activeUserId = _multiAuthKeyValue.activeUserId;
-    if (auths.isEmpty && !_multiAuthKeyValue.authMigrated) {
-      await _multiAuthKeyValue.setAuthMigrated();
+    final migrated = _multiAuthKeyValue.authMigrated;
+    unawaited(_multiAuthKeyValue.setAuthMigrated());
+    if (auths.isEmpty && !migrated) {
       // check if old auths exist.
       final oldAuthState = _getLegacyMultiAuthState()?.auths.lastOrNull;
       if (oldAuthState != null) {
@@ -106,6 +107,7 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
         }
       }
       _removeLegacyMultiAuthState();
+      await _removeLegacySignalDatabase();
     }
     super.state = MultiAuthState(auths: auths, activeUserId: activeUserId);
   }
