@@ -132,7 +132,7 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
 
   void updateAccount(Account account) {
     final index =
-    state.auths.indexWhere((element) => element.userId == account.userId);
+        state.auths.indexWhere((element) => element.userId == account.userId);
     if (index == -1) {
       i('update account, but ${account.userId} auth state not found.');
       return;
@@ -202,8 +202,7 @@ Future<void> _removeLegacySignalDatabase() async {
         await file.delete();
       }
     } catch (error, stacktrace) {
-      e('_removeLegacySignalDatabase ${file
-          .path} error: $error, stacktrace: $stacktrace');
+      e('_removeLegacySignalDatabase ${file.path} error: $error, stacktrace: $stacktrace');
     }
   }
 }
@@ -239,8 +238,7 @@ Future<bool> _migrationLegacySignalDatabase(String identityNumber) async {
       }
       i('migrate legacy signal database: ${file.path}');
     } catch (error, stacktrace) {
-      e('_migrationLegacySignalDatabaseIfNecessary ${file
-          .path} error: $error, stacktrace: $stacktrace');
+      e('_migrationLegacySignalDatabaseIfNecessary ${file.path} error: $error, stacktrace: $stacktrace');
       hasError = true;
     }
   }
@@ -258,13 +256,13 @@ Future<bool> _migrationLegacySignalDatabase(String identityNumber) async {
 }
 
 final multiAuthStateNotifierProvider =
-StateNotifierProvider<MultiAuthStateNotifier, MultiAuthState>((ref) {
+    StateNotifierProvider<MultiAuthStateNotifier, MultiAuthState>((ref) {
   final multiAuthKeyValue = ref.watch(multiAuthKeyValueProvider);
   return MultiAuthStateNotifier(multiAuthKeyValue);
 });
 
 final authProvider =
-multiAuthStateNotifierProvider.select((value) => value.current);
+    multiAuthStateNotifierProvider.select((value) => value.current);
 
 final authAccountProvider = authProvider.select((value) => value?.account);
 
@@ -273,9 +271,7 @@ const _keyActiveUserId = 'active_user_id';
 const _keyAuthMigrated = 'auth_migrated_from_hive';
 
 final multiAuthKeyValueProvider = Provider<MultiAuthKeyValue>((ref) {
-  final dao = ref
-      .watch(appDatabaseProvider)
-      .appKeyValueDao;
+  final dao = ref.watch(appDatabaseProvider).appKeyValueDao;
   return MultiAuthKeyValue(dao: dao);
 });
 
