@@ -9,19 +9,21 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:open_file/open_file.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import '../../../constants/resources.dart';
-import '../../../enum/media_status.dart';
-import '../../../utils/extension/extension.dart';
-import '../../../utils/uri_utils.dart';
-import '../../cache_image.dart';
-import '../../image.dart';
-import '../../interactive_decorated_box.dart';
-import '../../status.dart';
-import '../message.dart';
-import '../message_bubble.dart';
-import '../message_datetime_and_status.dart';
-import '../message_style.dart';
-import 'transcript_message.dart';
+import '../../../../constants/resources.dart';
+import '../../../../enum/media_status.dart';
+import '../../../../utils/extension/extension.dart';
+import '../../../../utils/platform.dart';
+import '../../../../utils/uri_utils.dart';
+import '../../../cache_image.dart';
+import '../../../image.dart';
+import '../../../interactive_decorated_box.dart';
+import '../../../status.dart';
+import '../../message.dart';
+import '../../message_bubble.dart';
+import '../../message_datetime_and_status.dart';
+import '../../message_style.dart';
+import '../transcript_message.dart';
+import 'video_preview_page.dart';
 
 const _kDefaultVideoSize = 200;
 
@@ -102,7 +104,14 @@ class MessageVideo extends HookConsumerWidget {
             message.mediaUrl != null) {
           final path = context.accountServer
               .convertMessageAbsolutePath(message, isTranscriptPage);
-          if (Platform.isIOS || Platform.isAndroid) {
+          if (kPlatformIsDarwin) {
+            showVideoPreviewPage(
+              context,
+              path,
+              message: message,
+              isTranscriptPage: isTranscriptPage,
+            );
+          } else if (Platform.isIOS || Platform.isAndroid) {
             OpenFile.open(path);
           } else {
             openUri(context, Uri.file(path).toString());

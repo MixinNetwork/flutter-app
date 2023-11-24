@@ -14,7 +14,7 @@ import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../../widgets/message/item/image/image_message.dart';
-import '../../../../widgets/message/item/video_message.dart';
+import '../../../../widgets/message/item/video/video_message.dart';
 import '../../../../widgets/message/message.dart';
 import '../../chat/chat_page.dart';
 import '../shared_media_page.dart';

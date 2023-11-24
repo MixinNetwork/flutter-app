@@ -68,7 +68,7 @@ import 'item/transcript_message.dart';
 import 'item/transfer/safe_transfer_message.dart';
 import 'item/transfer/transfer_message.dart';
 import 'item/unknown_message.dart';
-import 'item/video_message.dart';
+import 'item/video/video_message.dart';
 import 'item/waiting_message.dart';
 import 'message_day_time.dart';
 import 'message_name.dart';
