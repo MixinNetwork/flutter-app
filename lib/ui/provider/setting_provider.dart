@@ -198,28 +198,28 @@ extension SettingMigration on AppSettingKeyValue {
       _brightness = settingState._brightness;
     }
     if (settingState._messageShowAvatar != null) {
-      messageShowAvatar = settingState._messageShowAvatar!;
+      messageShowAvatar = settingState._messageShowAvatar;
     }
     if (settingState._messagePreview != null) {
-      messagePreview = settingState._messagePreview!;
+      messagePreview = settingState._messagePreview;
     }
     if (settingState._photoAutoDownload != null) {
-      photoAutoDownload = settingState._photoAutoDownload!;
+      photoAutoDownload = settingState._photoAutoDownload;
     }
     if (settingState._videoAutoDownload != null) {
-      videoAutoDownload = settingState._videoAutoDownload!;
+      videoAutoDownload = settingState._videoAutoDownload;
     }
     if (settingState._fileAutoDownload != null) {
-      fileAutoDownload = settingState._fileAutoDownload!;
+      fileAutoDownload = settingState._fileAutoDownload;
     }
     if (settingState._collapsedSidebar != null) {
-      collapsedSidebar = settingState._collapsedSidebar!;
+      collapsedSidebar = settingState._collapsedSidebar;
     }
     if (settingState._chatFontSizeDelta != null) {
-      chatFontSizeDelta = settingState._chatFontSizeDelta!;
+      chatFontSizeDelta = settingState._chatFontSizeDelta;
     }
     if (settingState._messageShowIdentityNumber != null) {
-      messageShowIdentityNumber = settingState._messageShowIdentityNumber!;
+      messageShowIdentityNumber = settingState._messageShowIdentityNumber;
     }
   }
 }

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' show SnapshotType;
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
+    show SnapshotType, Ticker;
 
 import '../../../../db/database_event_bus.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../ui/provider/account/account_server_provider.dart';
+import '../../../../ui/provider/account/multi_auth_provider.dart';
 import '../../../../ui/provider/transfer_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../buttons.dart';
@@ -60,23 +62,28 @@ class _SafeTransferDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    useEffect(() {
+      context.accountServer.updateFiats();
+    }, []);
+
     final snapshot = ref.watch(safeSnapshotProvider(snapshotId));
     useEffect(() {
       context.accountServer.updateSafeSnapshotById(snapshotId: snapshotId);
     }, [snapshotId]);
 
     var token = const AsyncValue<Token?>.loading();
-    if (snapshot.valueOrNull != null) {
-      token = ref.watch(tokenProvider(snapshot.value!.assetId));
+    final tokenId = snapshot.valueOrNull?.assetId;
+    if (tokenId != null) {
+      token = ref.watch(tokenProvider(tokenId));
     }
     useEffect(
       () {
-        if (snapshot.hasValue && snapshot.value == null) {
-          context.accountServer
-              .updateTokenById(assetId: snapshot.value!.assetId);
+        if (tokenId == null) {
+          return;
         }
+        context.accountServer.updateTokenById(assetId: tokenId);
       },
-      [token],
+      [tokenId],
     );
 
     final snapshotValue = snapshot.valueOrNull;
@@ -89,6 +96,8 @@ class _SafeTransferDialog extends HookConsumerWidget {
 
     final isPositive = (double.tryParse(snapshotValue.amount) ?? 0) > 0;
     final type = ref.watch(_snapshotTypeProvider(snapshotValue));
+
+    final fiatRate = ref.watch(_fiatRateProvider).unwrapPrevious().valueOrNull;
 
     return SizedBox(
       width: 400,
@@ -116,6 +125,22 @@ class _SafeTransferDialog extends HookConsumerWidget {
                     symbol: tokenValue?.symbol ?? '',
                     snapshotType: type,
                   ),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    alignment: Alignment.topCenter,
+                    child: Builder(
+                      builder: (context) {
+                        if (tokenValue != null && fiatRate != null) {
+                          return _ValuesDescription(
+                            token: tokenValue,
+                            fiatRate: fiatRate,
+                            snapshot: snapshotValue,
+                          );
+                        }
+                        return const SizedBox();
+                      },
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   Container(
                     color: context.theme.divider,
@@ -131,6 +156,109 @@ class _SafeTransferDialog extends HookConsumerWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+final _fiatRateProvider = StreamProvider.autoDispose<double?>((ref) {
+  final accountServer = ref.watch(accountServerProvider).valueOrNull;
+  if (accountServer == null) {
+    return const Stream.empty();
+  }
+  final db = accountServer.database.mixinDatabase;
+  final fiatCurrency =
+      ref.watch(authAccountProvider.select((value) => value?.fiatCurrency));
+  if (fiatCurrency == null) {
+    return const Stream.empty();
+  }
+  return (db.select(db.fiats)..where((tbl) => tbl.code.equals(fiatCurrency)))
+      .map((e) => e.rate)
+      .watchSingle();
+});
+
+final _tickerProvider = FutureProvider.family
+    .autoDispose<Ticker?, (String tokenId, String snapshotCreatedAt)>(
+        (ref, snapshot) async {
+  final accountServer = ref.watch(accountServerProvider).valueOrNull;
+  if (accountServer == null) {
+    return null;
+  }
+  final (tokenId, createdAt) = snapshot;
+  final response = await accountServer.client.snapshotApi.getTicker(
+    tokenId,
+    offset: createdAt,
+  );
+  return response.data;
+});
+
+class _ValuesDescription extends HookConsumerWidget {
+  const _ValuesDescription({
+    required this.token,
+    required this.fiatRate,
+    required this.snapshot,
+  });
+
+  final Token token;
+  final SafeSnapshot snapshot;
+  final double fiatRate;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ticker = ref
+        .watch(_tickerProvider((snapshot.assetId, snapshot.createdAt)))
+        .valueOrNull;
+
+    final String? thatTimeValue;
+
+    final current = (snapshot.amount.asDecimal *
+            token.priceUsd.asDecimal *
+            fiatRate.asDecimal)
+        .abs();
+    final unitValue = context
+        .currencyFormat((current / snapshot.amount.asDecimal.abs()).toDouble());
+    final symbol = token.symbol.overflow;
+    final currentValue = '${context.l10n.valueNow(
+      context.currencyFormat(current),
+    )}($unitValue/$symbol)';
+
+    if (ticker == null) {
+      thatTimeValue = null;
+    } else if (ticker.priceUsd == '0') {
+      thatTimeValue = context.l10n.valueThen(context.l10n.na);
+    } else {
+      final past = (snapshot.amount.asDecimal *
+              ticker.priceUsd.asDecimal *
+              fiatRate.asDecimal)
+          .abs();
+      final unitValue = context
+          .currencyFormat((past / snapshot.amount.asDecimal.abs()).toDouble());
+      thatTimeValue = '${context.l10n.valueThen(
+        context.currencyFormat(past),
+      )}($unitValue/$symbol)';
+    }
+    return DefaultTextStyle.merge(
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        color: context.theme.secondaryText,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SelectableText(
+            currentValue,
+            enableInteractiveSelection: false,
+          ),
+          if (thatTimeValue != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: SelectableText(
+                thatTimeValue,
+                enableInteractiveSelection: false,
+              ),
+            ),
         ],
       ),
     );
