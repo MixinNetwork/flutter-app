@@ -108,7 +108,7 @@ dependencies:
       url: https://github.com/crazecoder/open_file.git
       ref: fbf68e4bb5cb3e262d8f8ebe10b2f8449ff8e030
   overlay_support: ^2.1.0
-  package_info_plus: ^4.2.0
+  package_info_plus: ^5.0.1
   path: ^1.8.0
   path_provider: ^2.1.1
   photo_view:
