@@ -98,7 +98,7 @@ dependencies:
   markdown_widget: ^2.3.1
   mime: ^1.0.2
   mixin_bot_sdk_dart: ^0.4.3
-  mixin_logger: ^0.1.0
+  mixin_logger: ^0.1.1
   native_dio_adapter: ^1.1.1
   network_info_plus: ^4.1.0
   octo_image: ^2.0.0
