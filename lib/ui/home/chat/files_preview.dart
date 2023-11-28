@@ -2,15 +2,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:filesize/filesize.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:image/image.dart' as image;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -22,11 +25,11 @@ import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/file.dart';
 import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/system/clipboard.dart';
+import '../../../utils/video.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/buttons.dart';
 import '../../../widgets/cache_image.dart';
@@ -119,16 +122,28 @@ class _VideoFile extends _File {
     _loadMetadata();
   }
 
-  final _metadataCompleter = Completer<_VideoMetadata>();
+  static Future<String?> _videoBlurHash(
+      (RootIsolateToken token, String videoPath) params) async {
+    final (token, videoPath) = params;
+    BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+    final bytes = await customVideoCompress.getByteThumbnail(videoPath);
+    final decodedImage = image.decodeImage(bytes!)!;
+    return BlurHash.encode(
+      image.copyResize(
+        decodedImage,
+        width: 100,
+        maintainAspect: true,
+      ),
+    ).hash;
+  }
 
-  // thumbnail file path
-  final _thumbnailCompleter = Completer<String>();
+  final _metadataCompleter = Completer<_VideoMetadata>();
 
   final _blurHashCompleter = Completer<String>();
 
   Future<void> _loadMetadata() async {
     try {
-      final mediaInfo = await VideoCompress.getMediaInfo(file.path);
+      final mediaInfo = await customVideoCompress.getMediaInfo(file.path);
       final duration = mediaInfo.duration ?? 0.0;
       _metadataCompleter.complete(
         _VideoMetadata(
@@ -143,22 +158,12 @@ class _VideoFile extends _File {
     }
 
     final stopwatch = Stopwatch()..start();
-
     try {
-      final thumbnailFile =
-          File(await generateTempFilePath(TempFileType.thumbnail));
-      final bytes = await VideoCompress.getByteThumbnail(
-        file.path,
-        quality: 50,
-      );
-      await thumbnailFile.create();
-      await thumbnailFile.writeAsBytes(bytes!);
-      _thumbnailCompleter.complete(thumbnailFile.path);
-      _blurHashCompleter
-          .complete(Future(() async => thumbnailFile.encodeBlurHash()));
+      final hash = await compute(
+          _videoBlurHash, (ServicesBinding.rootIsolateToken!, file.path));
+      _blurHashCompleter.complete(hash);
     } catch (error, stackTrace) {
       e('failed to load video thumbnail', error, stackTrace);
-      _thumbnailCompleter.completeError(error, stackTrace);
       _blurHashCompleter.completeError(error, stackTrace);
     }
 
@@ -433,10 +438,11 @@ Future<void> _sendFile(
 }) async {
   final conversationItem = context.providerContainer.read(conversationProvider);
   if (conversationItem == null) return;
+  final accountServer = context.accountServer;
   final xFile = file.file;
   switch (file) {
     case _ImageFile():
-      return context.accountServer.sendImageMessage(
+      return accountServer.sendImageMessage(
         conversationItem.encryptCategory,
         file: xFile,
         conversationId: conversationItem.conversationId,
@@ -445,7 +451,7 @@ Future<void> _sendFile(
         silent: silent,
       );
     case _NormalFile():
-      await context.accountServer.sendDataMessage(
+      await accountServer.sendDataMessage(
         xFile,
         conversationItem.encryptCategory,
         conversationId: conversationItem.conversationId,
@@ -456,7 +462,7 @@ Future<void> _sendFile(
     case _VideoFile():
       final metadata = await file._metadataCompleter.future;
       final blurHash = await file._blurHashCompleter.future;
-      await context.accountServer.sendVideoMessage(
+      await accountServer.sendVideoMessage(
         xFile,
         conversationItem.encryptCategory,
         conversationId: conversationItem.conversationId,
