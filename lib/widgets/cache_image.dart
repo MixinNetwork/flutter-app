@@ -483,12 +483,13 @@ class MixinNetworkImageProvider
       }
     }
 
-    //Failed to load
     if (result == null) {
-      // result = await ui.instantiateImageCodec(kTransparentImage);
+      // The image failed to load, so we should evict it from the cache.
+      scheduleMicrotask(() {
+        PaintingBinding.instance.imageCache.evict(key);
+      });
       return Future<ui.Codec>.error(StateError('Failed to load $url.'));
     }
-
     return result;
   }
 
