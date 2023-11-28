@@ -72,7 +72,7 @@ sealed class _File {
     }
     if (file.isImage) {
       return _ImageFile._(file: file);
-    } else if (file.isVideo) {
+    } else if (kPlatformIsDarwin && file.isVideo) {
       return _VideoFile._(file: file);
     } else {
       return _NormalFile._(file: file);
