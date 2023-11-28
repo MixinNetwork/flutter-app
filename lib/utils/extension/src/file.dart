@@ -16,10 +16,10 @@ extension FileExtension on File {
         name: basename(path),
       );
 
-  Future<String?> encodeBlurHash() async => _encodeBlurHash(path);
+  Future<String> encodeBlurHash() async => _encodeBlurHash(path);
 }
 
-Future<String?> _encodeBlurHash(String path) async {
+Future<String> _encodeBlurHash(String path) async {
   final fileImage = ResizeImage(FileImage(File(path)), width: 100, height: 100);
   final image = await fileImage.toImage();
   final data = Image.fromBytes(

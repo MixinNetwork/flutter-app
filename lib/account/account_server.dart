@@ -399,25 +399,32 @@ class AccountServer {
         silent: silent,
       );
 
-// NOTE: Send video as DataMessage, cause we can not retriever video metadata
-// from video file.
   Future<void> sendVideoMessage(
     XFile video,
     EncryptCategory encryptCategory, {
+    required int mediaWidth,
+    required int mediaHeight,
+    required String thumbImage,
+    required String mediaDuration,
     String? conversationId,
     String? recipientId,
     String? quoteMessageId,
     bool silent = false,
-  }) async =>
-      _sendMessageHelper.sendDataMessage(
-        await _initConversation(conversationId, recipientId),
-        userId,
-        video,
-        encryptCategory.toCategory(MessageCategory.plainData,
-            MessageCategory.signalData, MessageCategory.encryptedData),
-        quoteMessageId,
-        silent: silent,
-      );
+  }) async {
+    await _sendMessageHelper.sendVideoMessage(
+      await _initConversation(conversationId, recipientId),
+      userId,
+      video,
+      encryptCategory.toCategory(MessageCategory.plainVideo,
+          MessageCategory.signalVideo, MessageCategory.encryptedVideo),
+      quoteMessageId,
+      silent: silent,
+      mediaDuration: mediaDuration,
+      mediaHeight: mediaHeight,
+      mediaWidth: mediaWidth,
+      thumbImage: thumbImage,
+    );
+  }
 
   Future<void> sendAudioMessage(
     XFile audio,

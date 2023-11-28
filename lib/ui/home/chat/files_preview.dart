@@ -15,11 +15,14 @@ import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:video_compress/video_compress.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/file.dart';
 import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
@@ -29,6 +32,7 @@ import '../../../widgets/buttons.dart';
 import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
+import '../../../widgets/image.dart';
 import '../../../widgets/menu.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
@@ -39,44 +43,130 @@ Future<void> showFilesPreviewDialog(
   await showMixinDialog(
     context: context,
     child: _FilesPreviewDialog(
-      initialFiles: await Future.wait(files.map(
-        (e) async => _File.createFromXFile(e),
-      )),
+      initialFiles: files.map(_File.auto).toList(),
     ),
   );
 }
 
 /// We need this view object to keep the value of file#length.
-class _File {
-  _File._(this.file, this.length, this.isImage, this.imageEditorSnapshot);
+sealed class _File {
+  const _File({
+    required this.file,
+  });
 
-  static Future<_File> createFromPath(String path) {
-    final file = File(path);
-    return createFromFile(file);
-  }
+  factory _File.normal(String path) => _NormalFile._(file: File(path).xFile);
 
-  static Future<_File> createFromFile(File file,
-          [ImageEditorSnapshot? imageEditorSnapshot]) =>
-      _File.createFromXFile(file.xFile, imageEditorSnapshot);
-
-  static Future<_File> createFromXFile(XFile file,
-          [ImageEditorSnapshot? imageEditorSnapshot]) async =>
-      _File._(
-        file,
-        await file.length(),
-        file.isImage,
-        imageEditorSnapshot,
+  factory _File.image(File file, [ImageEditorSnapshot? snapshot]) =>
+      _ImageFile._(
+        file: file.xFile,
+        imageEditorSnapshot: snapshot,
       );
+
+  factory _File.auto(XFile file) {
+    if (file.mimeType == null) {
+      e('mimeType is null');
+      file = file.withMineType();
+    }
+    if (file.isImage) {
+      return _ImageFile._(file: file);
+    } else if (file.isVideo) {
+      return _VideoFile._(file: file);
+    } else {
+      return _NormalFile._(file: file);
+    }
+  }
 
   final XFile file;
 
-  final ImageEditorSnapshot? imageEditorSnapshot;
-  final bool isImage;
-  final int length;
+  bool get isImage => false;
+
+  bool get isVideo => false;
+
+  bool get isMedia => isImage || isVideo;
 
   String get path => file.path;
 
   String? get mimeType => file.mimeType;
+}
+
+class _NormalFile extends _File {
+  const _NormalFile._({required super.file});
+}
+
+class _ImageFile extends _File {
+  const _ImageFile._({required super.file, this.imageEditorSnapshot});
+
+  final ImageEditorSnapshot? imageEditorSnapshot;
+
+  @override
+  bool get isImage => true;
+}
+
+class _VideoMetadata {
+  _VideoMetadata({
+    required this.width,
+    required this.height,
+    required this.duration,
+  });
+
+  final int width;
+  final int height;
+  final int duration;
+}
+
+class _VideoFile extends _File {
+  _VideoFile._({required super.file}) {
+    _loadMetadata();
+  }
+
+  final _metadataCompleter = Completer<_VideoMetadata>();
+
+  // thumbnail file path
+  final _thumbnailCompleter = Completer<String>();
+
+  final _blurHashCompleter = Completer<String>();
+
+  Future<void> _loadMetadata() async {
+    try {
+      final mediaInfo = await VideoCompress.getMediaInfo(file.path);
+      final duration = mediaInfo.duration ?? 0.0;
+      _metadataCompleter.complete(
+        _VideoMetadata(
+          width: mediaInfo.width ?? 0,
+          height: mediaInfo.height ?? 0,
+          duration: duration.floor(),
+        ),
+      );
+    } catch (error, stackTrace) {
+      e('failed to load video metadata', error, stackTrace);
+      _metadataCompleter.completeError(error, stackTrace);
+    }
+
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      final thumbnailFile =
+          File(await generateTempFilePath(TempFileType.thumbnail));
+      final bytes = await VideoCompress.getByteThumbnail(
+        file.path,
+        quality: 50,
+      );
+      await thumbnailFile.create();
+      await thumbnailFile.writeAsBytes(bytes!);
+      _thumbnailCompleter.complete(thumbnailFile.path);
+      _blurHashCompleter
+          .complete(Future(() async => thumbnailFile.encodeBlurHash()));
+    } catch (error, stackTrace) {
+      e('failed to load video thumbnail', error, stackTrace);
+      _thumbnailCompleter.completeError(error, stackTrace);
+      _blurHashCompleter.completeError(error, stackTrace);
+    }
+
+    d('thumbnail cost: ${stopwatch.elapsedMilliseconds}ms');
+  }
+
+  @override
+  bool get isVideo => true;
 }
 
 typedef _ImageEditedCallback = void Function(_File, ImageEditorSnapshot);
@@ -97,8 +187,8 @@ class _FilesPreviewDialog extends HookConsumerWidget {
     final files = useState(initialFiles);
     final quoteMessageCubit = ref.watch(quoteMessageProvider.notifier);
 
-    final hasImage = useMemoized(
-      () => files.value.indexWhere((e) => e.isImage) != -1,
+    final hasMedia = useMemoized(
+      () => files.value.indexWhere((e) => e.isMedia) != -1,
       [identityHashCode(files.value)],
     );
 
@@ -121,22 +211,22 @@ class _FilesPreviewDialog extends HookConsumerWidget {
     final previousTab = usePrevious(currentTab.value);
 
     useEffect(() {
-      if (previousTab == null && hasImage) {
+      if (previousTab == null && hasMedia) {
         currentTab.value = _TabType.image;
-      } else if (previousTab == null && !hasImage) {
+      } else if (previousTab == null && !hasMedia) {
         currentTab.value = _TabType.files;
-      } else if (!hasImage && currentTab.value == _TabType.image) {
+      } else if (!hasMedia && currentTab.value == _TabType.image) {
         currentTab.value = _TabType.files;
       } else if (!showZipTab && currentTab.value == _TabType.zip) {
         currentTab.value = _TabType.files;
       }
-    }, [hasImage, showZipTab]);
+    }, [hasMedia, showZipTab]);
 
-    final showAsBigImage = useState(hasImage);
+    final showAsBigImage = useState(hasMedia);
 
     useEffect(() {
-      showAsBigImage.value = hasImage && currentTab.value == _TabType.image;
-    }, [hasImage, currentTab.value]);
+      showAsBigImage.value = hasMedia && currentTab.value == _TabType.image;
+    }, [hasMedia, currentTab.value]);
 
     Future<void> send(bool silent) async {
       if (currentTab.value != _TabType.zip) {
@@ -157,7 +247,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
         ]);
         unawaited(_sendFile(
           context,
-          await _File.createFromPath(zipFilePath),
+          _File.normal(zipFilePath),
           quoteMessageCubit.state?.messageId,
           silent: silent,
         ));
@@ -185,7 +275,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                         tooltip: context.l10n.sendQuickly,
                         onTap: () => currentTab.value = _TabType.image,
                         selected: currentTab.value == _TabType.image,
-                        show: hasImage,
+                        show: hasMedia,
                       ),
                       _Tab(
                         assetName: Resources.assetsImagesFilePreviewFilesSvg,
@@ -241,8 +331,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                                       }
                                       final list = files.value.toList();
                                       final newFile = File(image.imagePath);
-                                      list[index] = await _File.createFromFile(
-                                          newFile, image);
+                                      list[index] = _File.image(newFile, image);
                                       files.value = list;
                                     },
                                   )),
@@ -345,33 +434,41 @@ Future<void> _sendFile(
   final conversationItem = context.providerContainer.read(conversationProvider);
   if (conversationItem == null) return;
   final xFile = file.file;
-  if (file.isImage) {
-    return context.accountServer.sendImageMessage(
-      conversationItem.encryptCategory,
-      file: xFile,
-      conversationId: conversationItem.conversationId,
-      recipientId: conversationItem.userId,
-      quoteMessageId: quoteMessageId,
-      silent: silent,
-    );
-  } else if (xFile.isVideo) {
-    return context.accountServer.sendVideoMessage(
-      xFile,
-      conversationItem.encryptCategory,
-      conversationId: conversationItem.conversationId,
-      recipientId: conversationItem.userId,
-      quoteMessageId: quoteMessageId,
-      silent: silent,
-    );
+  switch (file) {
+    case _ImageFile():
+      return context.accountServer.sendImageMessage(
+        conversationItem.encryptCategory,
+        file: xFile,
+        conversationId: conversationItem.conversationId,
+        recipientId: conversationItem.userId,
+        quoteMessageId: quoteMessageId,
+        silent: silent,
+      );
+    case _NormalFile():
+      await context.accountServer.sendDataMessage(
+        xFile,
+        conversationItem.encryptCategory,
+        conversationId: conversationItem.conversationId,
+        recipientId: conversationItem.userId,
+        quoteMessageId: quoteMessageId,
+        silent: silent,
+      );
+    case _VideoFile():
+      final metadata = await file._metadataCompleter.future;
+      final blurHash = await file._blurHashCompleter.future;
+      await context.accountServer.sendVideoMessage(
+        xFile,
+        conversationItem.encryptCategory,
+        conversationId: conversationItem.conversationId,
+        recipientId: conversationItem.userId,
+        quoteMessageId: quoteMessageId,
+        silent: silent,
+        mediaHeight: metadata.height,
+        mediaWidth: metadata.width,
+        mediaDuration: metadata.duration.toString(),
+        thumbImage: blurHash,
+      );
   }
-  await context.accountServer.sendDataMessage(
-    xFile,
-    conversationItem.encryptCategory,
-    conversationId: conversationItem.conversationId,
-    recipientId: conversationItem.userId,
-    quoteMessageId: quoteMessageId,
-    silent: silent,
-  );
 }
 
 class _AnimatedFileTile extends HookConsumerWidget {
@@ -396,35 +493,49 @@ class _AnimatedFileTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final big = useValueListenable(showBigImage);
+
+    final normalItem = _TileNormalFile(
+      file: file,
+      onDelete: () => onDelete?.call(file),
+    );
+
+    final Widget child = switch (file) {
+      _ImageFile() => AnimatedCrossFade(
+          firstChild: _TileBigImage(
+            file: file as _ImageFile,
+            onDelete: () => onDelete?.call(file),
+            onEdited: (file, snapshot) => onImageEdited?.call(file, snapshot),
+          ),
+          secondChild: normalItem,
+          crossFadeState:
+              big ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+          firstCurve: Curves.easeInOut,
+          secondCurve: Curves.easeInOut,
+          sizeCurve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 300),
+        ),
+      _VideoFile() => AnimatedCrossFade(
+          firstChild: _TileBigVideo(
+            file: file as _VideoFile,
+            onDelete: () => onDelete?.call(file),
+          ),
+          secondChild: normalItem,
+          crossFadeState:
+              big ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+          firstCurve: Curves.easeInOut,
+          secondCurve: Curves.easeInOut,
+          sizeCurve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 300),
+        ),
+      _NormalFile() => normalItem,
+    };
     return SizeTransition(
       sizeFactor: animation,
       child: FadeTransition(
         opacity: animation,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 15),
-          child: file.isImage
-              ? AnimatedCrossFade(
-                  firstChild: _TileBigImage(
-                    file: file,
-                    onDelete: () => onDelete?.call(file),
-                    onEdited: (file, snapshot) =>
-                        onImageEdited?.call(file, snapshot),
-                  ),
-                  secondChild: _TileNormalFile(
-                    file: file,
-                    onDelete: () => onDelete?.call(file),
-                  ),
-                  crossFadeState: big
-                      ? CrossFadeState.showFirst
-                      : CrossFadeState.showSecond,
-                  firstCurve: Curves.easeInOut,
-                  secondCurve: Curves.easeInOut,
-                  sizeCurve: Curves.easeInOut,
-                  duration: const Duration(milliseconds: 300))
-              : _TileNormalFile(
-                  file: file,
-                  onDelete: () => onDelete?.call(file),
-                ),
+          child: child,
         ),
       ),
     );
@@ -577,6 +688,141 @@ class _AnimatedListBuilder extends HookConsumerWidget {
   }
 }
 
+final _videoControllerProvider = ChangeNotifierProvider.autoDispose
+    .family<VideoPlayerController, _VideoFile>(
+  (ref, file) => VideoPlayerController.file(File(file.path))
+    ..initialize()
+    ..setVolume(0)
+    ..setLooping(true),
+);
+
+final _videoBlurHashProvider =
+    FutureProvider.autoDispose.family<String, _VideoFile>(
+  (ref, file) => file._blurHashCompleter.future,
+);
+
+class _TileBigVideo extends HookConsumerWidget {
+  const _TileBigVideo({
+    required this.onDelete,
+    required this.file,
+  });
+
+  final VoidCallback onDelete;
+  final _VideoFile file;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller =
+        ref.watch(_videoControllerProvider(file).select((value) => value));
+    final blurHash = ref.watch(_videoBlurHashProvider(file)).valueOrNull;
+    useEffect(() {
+      Future(controller.play);
+      return () => Future(controller.pause);
+    }, [controller]);
+
+    useOnAppLifecycleStateChange((previous, current) {
+      if (current != AppLifecycleState.resumed) {
+        controller.pause();
+      } else {
+        controller.play();
+      }
+    });
+
+    final aspectRatio = ref.watch(_videoControllerProvider(file)
+        .select((value) => value.value.aspectRatio));
+    return SizedBox(
+      height: 200,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(6)),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              const ColoredBox(
+                color: Colors.black,
+                child: SizedBox.expand(),
+              ),
+              if (blurHash != null)
+                ImageByBlurHashOrBase64(imageData: blurHash),
+              Center(
+                child: AspectRatio(
+                  aspectRatio: aspectRatio,
+                  child: VideoPlayer(controller),
+                ),
+              ),
+              Positioned(
+                left: 6,
+                top: 6,
+                child: _VideoPositionText(file: file),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.28),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  )),
+                  child: Row(
+                    children: [
+                      const Spacer(),
+                      ActionButton(
+                        color: Colors.white,
+                        name: Resources.assetsImagesDeleteSvg,
+                        padding: const EdgeInsets.all(10),
+                        onTap: onDelete,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VideoPositionText extends ConsumerWidget {
+  const _VideoPositionText({required this.file});
+
+  final _VideoFile file;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final duration = ref.watch(_videoControllerProvider(file).select(
+      (value) => value.value.duration,
+    ));
+    final position = ref.watch(_videoControllerProvider(file).select(
+      (value) => value.value.position,
+    ));
+    final left = duration - position;
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: Color.fromRGBO(0, 0, 0, 0.3),
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Text(
+          left.asMinutesSeconds,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _TileBigImage extends HookConsumerWidget {
   const _TileBigImage({
     required this.file,
@@ -584,7 +830,7 @@ class _TileBigImage extends HookConsumerWidget {
     required this.onEdited,
   });
 
-  final _File file;
+  final _ImageFile file;
 
   final VoidCallback onDelete;
 
@@ -592,7 +838,6 @@ class _TileBigImage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(file.isImage);
     final viewport = context.findAncestorWidgetOfExactType<_FileListViewport>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -686,6 +931,10 @@ class _FileIcon extends StatelessWidget {
       );
 }
 
+final _fileSizeProvider = FutureProvider.autoDispose.family<int, XFile>(
+  (ref, file) => file.length(),
+);
+
 class _TileNormalFile extends HookConsumerWidget {
   const _TileNormalFile({
     required this.file,
@@ -729,7 +978,9 @@ class _TileNormalFile extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  filesize(file.length, 0),
+                  filesize(
+                      ref.watch(_fileSizeProvider(file.file)).valueOrNull ?? 0,
+                      0),
                   style: TextStyle(
                     color: context.theme.secondaryText,
                     fontSize: 14,
@@ -779,7 +1030,7 @@ class _FileInputOverlay extends HookConsumerWidget {
       actions: {
         _PasteFileOrImageIntent: CallbackAction<Intent>(onInvoke: (_) async {
           final files = await getClipboardFiles();
-          onFileAdded(await Future.wait(files.map(_File.createFromFile)));
+          onFileAdded(files.map((file) => _File.auto(file.xFile)).toList());
         }),
         _SendFilesIntent: CallbackAction<Intent>(onInvoke: (_) {
           onSend();
@@ -796,9 +1047,7 @@ class _FileInputOverlay extends HookConsumerWidget {
           if (files.isEmpty) {
             return;
           }
-          onFileAdded(await Future.wait(
-            files.map((file) async => _File.createFromXFile(file)),
-          ));
+          onFileAdded(files.map(_File.auto).toList());
         },
         child: Stack(
           children: [
