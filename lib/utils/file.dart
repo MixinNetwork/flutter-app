@@ -102,7 +102,9 @@ enum TempFileType {
   pasteboardImage('mixin_paste_board_image', '.png'),
   editImage('image_edit', '.png'),
   voiceRecord('voice_record', '.ogg'),
-  logZip('log', '.zip');
+  logZip('log', '.zip'),
+  // video thumbnail
+  thumbnail('thumbnail', '.png');
 
   const TempFileType(this.prefix, this.suffix);
 
