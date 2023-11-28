@@ -5,25 +5,34 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart' as p;
 
-import '../../constants/constants.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/file.dart';
 import '../../widgets/dialog.dart';
-import '../provider/database_provider.dart';
 import 'landing.dart';
 
 // https://sqlite.org/rescode.html
 const _kSqliteCorrupt = 11;
 const _kSqliteLocked = 6;
 const _kSqliteNotADb = 26;
+const _kSqliteBusy = 5;
+
+typedef DeleteDatabaseCallback = Future<void> Function();
+typedef OpenDatabaseCallback = Future<void> Function();
+typedef CloseDatabaseCallback = Future<void> Function();
 
 class DatabaseOpenFailedPage extends StatelessWidget {
   const DatabaseOpenFailedPage({
     required this.error,
+    required this.openDatabaseCallback,
+    required this.deleteDatabaseCallback,
+    required this.closeDatabaseCallback,
     super.key,
   });
 
   final SqliteException error;
+  final OpenDatabaseCallback openDatabaseCallback;
+  final DeleteDatabaseCallback deleteDatabaseCallback;
+  final CloseDatabaseCallback closeDatabaseCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +50,31 @@ class DatabaseOpenFailedPage extends StatelessWidget {
     final canDeleteDatabase =
         const {_kSqliteCorrupt, _kSqliteNotADb}.contains(error.resultCode);
 
+    final canRetry = error.resultCode == _kSqliteBusy;
+
     return LandingFailedPage(
       title: context.l10n.failedToOpenDatabase,
       message: message,
       actions: [
         if (canDeleteDatabase)
-          const Padding(
-            padding: EdgeInsets.only(bottom: 16),
-            child: _RecreateDatabaseButton(),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: _RecreateDatabaseButton(
+              openDatabaseCallback: openDatabaseCallback,
+              deleteDatabaseCallback: deleteDatabaseCallback,
+              closeDatabaseCallback: closeDatabaseCallback,
+            ),
+          ),
+        if (canRetry)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: _Button(
+              onTap: () async {
+                await closeDatabaseCallback();
+                await openDatabaseCallback();
+              },
+              text: context.l10n.retry,
+            ),
           ),
         _Button(
           onTap: () {
@@ -62,14 +88,19 @@ class DatabaseOpenFailedPage extends StatelessWidget {
 }
 
 class _RecreateDatabaseButton extends HookConsumerWidget {
-  const _RecreateDatabaseButton();
+  const _RecreateDatabaseButton({
+    required this.openDatabaseCallback,
+    required this.deleteDatabaseCallback,
+    required this.closeDatabaseCallback,
+  });
+
+  final OpenDatabaseCallback openDatabaseCallback;
+  final DeleteDatabaseCallback deleteDatabaseCallback;
+  final CloseDatabaseCallback closeDatabaseCallback;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => TextButton(
         onPressed: () async {
-          final identityNumber = context.account?.identityNumber;
-          if (identityNumber == null) return;
-
           final result = await showConfirmMixinDialog(
             context,
             context.l10n.databaseRecreateTips,
@@ -78,23 +109,9 @@ class _RecreateDatabaseButton extends HookConsumerWidget {
           if (result != DialogEvent.positive) {
             return;
           }
-          await ref.read(databaseProvider.notifier).close();
-          // Rename the old database file to a new name with timestamp.
-          final now = DateTime.now();
-          renameFileWithTime(
-              p.join(mixinDocumentsDirectory.path, identityNumber,
-                  '$kDbFileName.db'),
-              now);
-          await Future.forEach(
-            [
-              File(p.join(mixinDocumentsDirectory.path, identityNumber,
-                  '$kDbFileName.db-shm')),
-              File(p.join(mixinDocumentsDirectory.path, identityNumber,
-                  '$kDbFileName.db-wal'))
-            ].where((e) => e.existsSync()),
-            (element) => element.delete(),
-          );
-          await ref.read(databaseProvider.notifier).open();
+          await closeDatabaseCallback();
+          await deleteDatabaseCallback();
+          await openDatabaseCallback();
         },
         child: Text(
           context.l10n.continueText,
@@ -103,6 +120,19 @@ class _RecreateDatabaseButton extends HookConsumerWidget {
           ),
         ),
       );
+}
+
+Future<void> dropDatabaseFile(String dbDir, String dbName) async {
+  // Rename the old database file to a new name with timestamp.
+  final now = DateTime.now();
+  renameFileWithTime(p.join(dbDir, '$dbName.db'), now);
+  await Future.forEach(
+    [
+      File(p.join(dbDir, '$dbName.db-shm')),
+      File(p.join(dbDir, '$dbName.db-wal'))
+    ].where((e) => e.existsSync()),
+    (element) => renameFileWithTime(element.path, now),
+  );
 }
 
 class _Button extends StatelessWidget {
@@ -168,4 +198,27 @@ class LandingFailedPage extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// Failed to open app with an unknown error.
+class OpenAppFailedPage extends StatelessWidget {
+  const OpenAppFailedPage({
+    required this.error,
+    super.key,
+  });
+
+  final dynamic error;
+
+  @override
+  Widget build(BuildContext context) => LandingFailedPage(
+          title: context.l10n.unknowError,
+          message: error.toString(),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                exit(1);
+              },
+              child: Text(context.l10n.exit),
+            )
+          ]);
 }

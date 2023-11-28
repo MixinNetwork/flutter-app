@@ -12,8 +12,15 @@ import 'account/multi_auth_provider.dart';
 import 'hive_key_value_provider.dart';
 import 'slide_category_provider.dart';
 
-final appDatabaseProvider =
-    Provider<AppDatabase>((ref) => throw UnimplementedError());
+final appDatabaseProvider = StateProvider<AppDatabase>(
+  (ref) {
+    final db = AppDatabase.connect(fromMainIsolate: true);
+    ref.onDispose(db.close);
+    return db;
+  },
+);
+
+final appDatabaseInitErrorProvider = StateProvider<dynamic>((ref) => null);
 
 final databaseProvider =
     StateNotifierProvider.autoDispose<DatabaseOpener, AsyncValue<Database>>(
