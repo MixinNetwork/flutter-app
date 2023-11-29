@@ -104,7 +104,7 @@ class MessageVideo extends HookConsumerWidget {
             message.mediaUrl != null) {
           final path = context.accountServer
               .convertMessageAbsolutePath(message, isTranscriptPage);
-          if (kPlatformIsDarwin) {
+          if (kPlatformIsDarwin || Platform.isWindows) {
             showVideoPreviewPage(
               context,
               path,

@@ -19,6 +19,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   super_native_extensions
   system_tray
   url_launcher_windows
+  video_player_win
   win_toast
   window_manager
   window_size

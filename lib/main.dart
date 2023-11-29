@@ -15,6 +15,7 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:path/path.dart' as p;
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:quick_breakpad/quick_breakpad.dart';
+import 'package:video_player_win/video_player_win.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart';
 
@@ -67,6 +68,10 @@ Future<void> main(List<String> args) async {
     initLogger(mixinLogDirectory.path);
     await dumpAppAndSystemInfoToLogger();
   });
+
+  if (Platform.isWindows) {
+    WindowsVideoPlayer.registerWith();
+  }
 
   debugHighlightDeprecatedWidgets = true;
 
