@@ -166,7 +166,7 @@ dependencies:
   video_compress: ^3.1.2
 
 dev_dependencies:
-  build_runner: ^2.4.6
+  build_runner: ^2.4.7
   debug_info_collector:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
