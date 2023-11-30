@@ -8,9 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   file_selector_windows
   flutter_app_icon_badge
-  gal
   irondash_engine_context
-  local_auth_windows
   platform_device_id_windows
   protocol_handler
   quick_breakpad

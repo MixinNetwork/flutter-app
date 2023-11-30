@@ -73,7 +73,7 @@ dependencies:
   gal:
     git:
       url: https://github.com/boyan01/gal.git
-      ref: d6bfb06b21affe4bd8f2032f168fbd63c83f16ab
+      ref: b42e314284a09c9f0f9fe1e0e76e0c563402449e
   github: ^9.19.0
   hive: ^2.2.3
   hive_flutter: ^1.0.0
@@ -91,7 +91,7 @@ dependencies:
   local_auth:
     git:
       url: https://github.com/YeungKC/packages
-      ref: 69bab28cda3bd948f0db5ad7fc9831c29fdcf400
+      ref: ad4f3a8ed167438efb19f400d5c8da1f8fdf88de
       path: packages/local_auth/local_auth
   lottie: ^2.6.0
   map: ^1.4.2

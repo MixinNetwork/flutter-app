@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:local_auth/local_auth.dart';
@@ -8,6 +10,9 @@ import '../generated/l10n.dart';
 final _auth = LocalAuthentication();
 
 Future<bool> checkAuthenticateAvailable() async {
+  if (Platform.isWindows) {
+    return false;
+  }
   final canCheckBiometrics = await _auth.canCheckBiometrics;
   d('auth canCheckBiometrics: $canCheckBiometrics');
   if (!canCheckBiometrics) return false;
