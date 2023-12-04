@@ -1,7 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:common_crypto/common_crypto.dart' as cc;
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pointycastle/block/aes.dart';
 import 'package:pointycastle/block/modes/cbc.dart';
 import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
@@ -32,11 +30,10 @@ abstract class AesCipher {
     required bool encrypt,
   }) {
     final cipher = AesCipher(key: key, iv: iv, encrypt: encrypt);
-    final result = <int>[];
-    cipher
-      ..update(data, result.addAll)
-      ..finish(result.addAll);
-    return Uint8List.fromList(result);
+    return Uint8List.fromList([
+      ...cipher.update(data),
+      ...cipher.finish(),
+    ]);
   }
 
   static Uint8List encrypt({
@@ -53,9 +50,9 @@ abstract class AesCipher {
   }) =>
       _crypt(key: key, iv: iv, data: data, encrypt: false);
 
-  void update(Uint8List data, OnCipherCallback onCipher);
+  Uint8List update(Uint8List data);
 
-  void finish(OnCipherCallback onCipher);
+  Uint8List finish();
 }
 
 @visibleForTesting
@@ -71,22 +68,22 @@ class AesCipherCommonCryptoImpl implements AesCipher {
   var _disposed = false;
 
   @override
-  void update(Uint8List data, OnCipherCallback onCipher) {
+  Uint8List update(Uint8List data) {
     if (_disposed) {
       throw StateError('AesCipherCommonCryptoImpl has been disposed.');
     }
-    _aesCrypto.update(data, onCipher);
+    return _aesCrypto.update(data);
   }
 
   @override
-  void finish(OnCipherCallback onCipher) {
+  Uint8List finish() {
     if (_disposed) {
       throw StateError('AesCipherCommonCryptoImpl has been disposed.');
     }
-    _aesCrypto
-      ..finalize(onCipher)
-      ..dispose();
+    final bytes = _aesCrypto.finalize();
+    _aesCrypto.dispose();
     _disposed = true;
+    return bytes;
   }
 }
 
@@ -118,11 +115,11 @@ class AesCipherPointyCastleImpl implements AesCipher {
   List<int>? _preBytes;
 
   @override
-  void update(Uint8List bytes, OnCipherCallback onCipher) {
+  Uint8List update(Uint8List bytes) {
     final toProcess = _preBytes;
-    _preBytes = bytes;
+    _preBytes = Uint8List.fromList(bytes);
     if (toProcess == null) {
-      return;
+      return Uint8List(0);
     }
     final Uint8List data;
     if (_carry == null) {
@@ -142,18 +139,21 @@ class AesCipherPointyCastleImpl implements AesCipher {
     while (offset < length) {
       offset += _cipher.processBlock(data, offset, encryptedData, offset);
     }
-    onCipher(encryptedData);
+    return encryptedData;
   }
 
   @override
-  void finish(OnCipherCallback onCipher) {
+  Uint8List finish() {
     final Uint8List lastBlock;
     if (_carry == null) {
       lastBlock = Uint8List.fromList(_preBytes ?? []);
     } else {
       lastBlock = Uint8List.fromList(_carry! + _preBytes!);
     }
+    if (lastBlock.isEmpty) {
+      return Uint8List(0);
+    }
     final encryptedData = _cipher.process(lastBlock);
-    onCipher(encryptedData);
+    return encryptedData;
   }
 }

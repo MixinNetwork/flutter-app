@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:common_crypto/common_crypto.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:pointycastle/digests/sha256.dart';
 import 'package:pointycastle/macs/hmac.dart';
 import 'package:pointycastle/pointycastle.dart';
@@ -19,6 +20,14 @@ abstract class HMacCalculator {
     }
     return _HMacCalculatorPointyCastleImpl(key);
   }
+
+  @visibleForTesting
+  factory HMacCalculator.commonCrypto(Uint8List key) =>
+      _HMacCalculatorCommonCrypto(key);
+
+  @visibleForTesting
+  factory HMacCalculator.pointyCastle(Uint8List key) =>
+      _HMacCalculatorPointyCastleImpl(key);
 
   void addBytes(Uint8List data);
 

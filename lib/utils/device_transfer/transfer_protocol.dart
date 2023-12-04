@@ -169,23 +169,22 @@ class TransferAttachmentPacket extends TransferPacket {
     final fileStream = file.openRead();
 
     await for (final bytes in fileStream) {
-      aesCipher.update(Uint8List.fromList(bytes), (data) {
-        hMacCalculator.addBytes(data);
-        sink.add(data);
-        actualEncryptedLength += data.length;
-      });
+      final encrypted = aesCipher.update(Uint8List.fromList(bytes));
+      hMacCalculator.addBytes(encrypted);
+      actualEncryptedLength += encrypted.length;
+      sink.add(encrypted);
       await sink.flush();
     }
 
     // handle last block
-    aesCipher.finish((data) {
-      hMacCalculator.addBytes(data);
-      sink.add(data);
-      actualEncryptedLength += data.length;
-    });
+    final encrypted = aesCipher.finish();
+    hMacCalculator.addBytes(encrypted);
+    actualEncryptedLength += encrypted.length;
+    sink.add(encrypted);
     await sink.flush();
 
-    sink.add(hMacCalculator.result);
+    final hMacResult = hMacCalculator.result;
+    sink.add(hMacResult);
     if (actualEncryptedLength != encryptedDataLength) {
       e('actualEncryptedLength != encryptedDataLength, '
           '$actualEncryptedLength != $encryptedDataLength');
@@ -318,16 +317,14 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
   }
 
   void _processData(Uint8List encryptedData) {
-    _aesCipher!.update(encryptedData, (data) {
-      _file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
-    });
+    final data = _aesCipher!.update(encryptedData);
+    _file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
   }
 
   @override
   TransferAttachmentPacket build() {
-    _aesCipher!.finish((data) {
-      _file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
-    });
+    final data = _aesCipher!.finish();
+    _file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
 
     assert(_writeBodyLength == expectedBodyLength,
         'writeBodyLength != expectedBodyLength');
@@ -442,8 +439,9 @@ class TransferProtocolSink implements EventSink<Uint8List> {
           }
           // check hMAC
           final hMac = Uint8List.sublistView(data, offset, offset + 32);
-          if (!Uint8ListEquality.equals(hMac, builder.hMac)) {
-            e('hMac not match. expected ${base64Encode(hMac)}, actually ${base64Encode(builder.hMac)}');
+          final calculatedHMac = builder.hMac;
+          if (!Uint8ListEquality.equals(hMac, calculatedHMac)) {
+            e('hMac not match. expected ${base64Encode(hMac)}, actually ${base64Encode(calculatedHMac)}');
             _sink.addError('hMac check error', StackTrace.current);
             return;
           }
