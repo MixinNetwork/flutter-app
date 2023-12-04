@@ -1224,10 +1224,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_dio_adapter
-      sha256: a9af4430278dd5a86ded4c5857e58d80e5bc81097e6cc8a176725ac8a0ab39a6
+      sha256: "2bb78b5e20b012ae6a0b5ea6405a3583f2ea6c85be9f7d909decabcb1992c25d"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.2.0"
   nested:
     dependency: transitive
     description:
