@@ -22,6 +22,7 @@ import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../constants/brightness_theme_data.dart';
+import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
@@ -36,6 +37,7 @@ import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/image.dart';
+import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
@@ -233,6 +235,8 @@ class _FilesPreviewDialog extends HookConsumerWidget {
       showAsBigImage.value = hasMedia && currentTab.value == _TabType.image;
     }, [hasMedia, currentTab.value]);
 
+    final zipPasswordController = useTextEditingController();
+
     Future<void> send(bool silent) async {
       if (currentTab.value != _TabType.zip) {
         for (final file in files.value) {
@@ -246,10 +250,11 @@ class _FilesPreviewDialog extends HookConsumerWidget {
         quoteMessageCubit.state = null;
         Navigator.pop(context);
       } else {
-        final zipFilePath = await runLoadBalancer(_archiveFiles, [
+        final zipFilePath = await runLoadBalancer(_archiveFiles, (
           (await getTemporaryDirectory()).path,
-          ...files.value.map((e) => e.path),
-        ]);
+          zipPasswordController.text.trim(),
+          files.value.map((e) => e.path).toList(),
+        ));
         unawaited(_sendFile(
           context,
           _File.normal(zipFilePath),
@@ -301,23 +306,24 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                 const SizedBox(height: 4),
                 Expanded(
                   child: _FileListViewportProvider(
-                    child: _FileInputOverlay(
-                      onSend: () => send(false),
-                      onFileAdded: (fileAdded) {
-                        final currentFiles =
-                            files.value.map((e) => e.path).toSet();
-                        fileAdded
-                            .removeWhere((e) => currentFiles.contains(e.path));
-                        files.value = (files.value..addAll(fileAdded)).toList();
-                        for (var i = 0; i < fileAdded.length; i++) {
-                          onFileAddedStream.add(currentFiles.length + i);
-                        }
-                      },
-                      child: IndexedStack(
-                        sizing: StackFit.expand,
-                        index: currentTab.value == _TabType.zip ? 1 : 0,
-                        children: [
-                          _AnimatedListBuilder(
+                    child: IndexedStack(
+                      sizing: StackFit.expand,
+                      index: currentTab.value == _TabType.zip ? 1 : 0,
+                      children: [
+                        _FileInputOverlay(
+                          onSend: () => send(false),
+                          onFileAdded: (fileAdded) {
+                            final currentFiles =
+                                files.value.map((e) => e.path).toSet();
+                            fileAdded.removeWhere(
+                                (e) => currentFiles.contains(e.path));
+                            files.value =
+                                (files.value..addAll(fileAdded)).toList();
+                            for (var i = 0; i < fileAdded.length; i++) {
+                              onFileAddedStream.add(currentFiles.length + i);
+                            }
+                          },
+                          child: _AnimatedListBuilder(
                               files: files.value,
                               onFileAdded: onFileAddedStream.stream,
                               onFileDeleted: onFileRemovedStream.stream,
@@ -340,9 +346,9 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                                       files.value = list;
                                     },
                                   )),
-                          const _PageZip(),
-                        ],
-                      ),
+                        ),
+                        _PageZip(zipPasswordController),
+                      ],
                     ),
                   ),
                 ),
@@ -417,13 +423,15 @@ class _FileListViewport extends StatelessWidget {
   Widget build(BuildContext context) => child;
 }
 
-Future<String> _archiveFiles(List<String> paths) async {
-  assert(paths.length > 1, 'paths[0] should be temp file dir');
-  final outPath = path.join(paths.first,
+Future<String> _archiveFiles(
+    (String zipFileFolder, String password, List<String> files) params) async {
+  final (zipFileFolder, password, files) = params;
+  assert(files.isNotEmpty, 'files should not be empty');
+  final outPath = path.join(zipFileFolder,
       'mixin_archive_${DateTime.now().millisecondsSinceEpoch}.zip');
-  final encoder = ZipFileEncoder()..create(outPath);
-  paths.removeAt(0);
-  for (final filePath in paths) {
+  final encoder = ZipFileEncoder(password: password.isEmpty ? null : password)
+    ..create(outPath);
+  for (final filePath in files) {
     await encoder.addFile(File(filePath), path.basename(filePath));
   }
   encoder.close();
@@ -597,7 +605,9 @@ class _Tab extends StatelessWidget {
 }
 
 class _PageZip extends StatelessWidget {
-  const _PageZip();
+  const _PageZip(this.zipPasswordController);
+
+  final TextEditingController zipPasswordController;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -635,9 +645,115 @@ class _PageZip extends StatelessWidget {
               ),
               const SizedBox(width: 30),
             ],
-          )
+          ),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: SizedBox(
+              width: 300,
+              child: _ZipPasswordInputEditText(
+                controller: zipPasswordController,
+              ),
+            ),
+          ),
         ],
       );
+}
+
+class _ZipPasswordInputEditText extends HookWidget {
+  const _ZipPasswordInputEditText({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final focusNode = useFocusNode();
+
+    final hasText = useListenable(controller).text.isNotEmpty;
+
+    final obscureText = useState(true);
+
+    return InteractiveDecoratedBox(
+      decoration: ShapeDecoration(
+        color: context.dynamicColor(
+          const Color.fromRGBO(245, 247, 250, 1),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+        ),
+        shape: const StadiumBorder(),
+      ),
+      cursor: SystemMouseCursors.text,
+      onTap: focusNode.requestFocus,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SizedBox(
+          height: 36,
+          child: Row(
+            children: [
+              SvgPicture.asset(
+                Resources.assetsImagesLockSvg,
+                width: 18,
+                height: 18,
+                colorFilter: ColorFilter.mode(
+                  hasText ? context.theme.text : context.theme.secondaryText,
+                  BlendMode.srcIn,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  controller: controller,
+                  style: TextStyle(
+                    color: context.theme.text,
+                    fontSize: 14,
+                  ),
+                  obscureText: obscureText.value,
+                  scrollPadding: EdgeInsets.zero,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    filled: true,
+                    border: InputBorder.none,
+                    fillColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    contentPadding: EdgeInsets.zero,
+                    hintText: context.l10n.encryptZipFileWithPassword,
+                    hintStyle: TextStyle(
+                      color: context.theme.secondaryText,
+                      fontSize: 14,
+                    ),
+                  ),
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(
+                      kDefaultTextInputLimit,
+                    ),
+                  ],
+                ),
+              ),
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () {
+                    obscureText.value = !obscureText.value;
+                  },
+                  child: Icon(
+                    obscureText.value
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    size: 20,
+                    color: hasText
+                        ? context.theme.text
+                        : context.theme.secondaryText,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _AnimatedListBuilder extends HookConsumerWidget {

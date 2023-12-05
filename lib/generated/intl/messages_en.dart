@@ -351,6 +351,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "All changes will be lost. Are you sure you want to exit?"),
         "editName": MessageLookupByLibrary.simpleMessage("Edit Name"),
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
+        "encryptZipFileWithPassword": MessageLookupByLibrary.simpleMessage(
+            "Encrypt zip file with password"),
         "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
             "Enter your PIN to delete your account"),
         "enterToSend":
@@ -443,6 +445,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "errorWithdrawalMemoFormatIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "ERROR 20131: Withdrawal memo format incorrect."),
+        "errorWithdrawalSuspend": MessageLookupByLibrary.simpleMessage(
+            "ERROR 20137: Withdrawal suspend."),
         "exit": MessageLookupByLibrary.simpleMessage("Exit"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("Exit Group"),
         "failed": MessageLookupByLibrary.simpleMessage("Failed"),
@@ -468,8 +472,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "from": MessageLookupByLibrary.simpleMessage("From"),
         "fromWithColon": MessageLookupByLibrary.simpleMessage("From:"),
-        "groupAlreadyIn":
-            MessageLookupByLibrary.simpleMessage("You already in the group"),
+        "groupAlreadyIn": MessageLookupByLibrary.simpleMessage(
+            "You are already in the group."),
         "groupCantSend": MessageLookupByLibrary.simpleMessage(
             "You can\'t send messages to this group because you\'re no longer a participant."),
         "groupName": MessageLookupByLibrary.simpleMessage("Group Name"),
@@ -479,7 +483,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupPopMenuRemove": m25,
         "groups": MessageLookupByLibrary.simpleMessage("Groups"),
         "groupsInCommon":
-            MessageLookupByLibrary.simpleMessage("Groups In Common"),
+            MessageLookupByLibrary.simpleMessage("Groups in Common"),
         "help": MessageLookupByLibrary.simpleMessage("Help"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
         "hideMixin": MessageLookupByLibrary.simpleMessage("Hide Mixin"),
@@ -528,7 +532,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "media": MessageLookupByLibrary.simpleMessage("Media"),
         "memo": MessageLookupByLibrary.simpleMessage("Memo"),
         "messageE2ee": MessageLookupByLibrary.simpleMessage(
-            "Messages to this conversation are encrypted end-to-end, tap for more info."),
+            "Messages to this conversation are end-to-end encrypted, tap for more info."),
         "messageNotFound":
             MessageLookupByLibrary.simpleMessage("Message not found"),
         "messageNotSupport": MessageLookupByLibrary.simpleMessage(

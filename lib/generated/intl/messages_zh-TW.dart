@@ -306,6 +306,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("退出將會清除此次所有的改動。"),
         "editName": MessageLookupByLibrary.simpleMessage("修改暱稱"),
         "editProfile": MessageLookupByLibrary.simpleMessage("編輯資料"),
+        "encryptZipFileWithPassword":
+            MessageLookupByLibrary.simpleMessage("使用密碼來加密 zip 檔案"),
         "enterPinToDeleteAccount":
             MessageLookupByLibrary.simpleMessage("輸入你的 PIN 以登出你的賬戶"),
         "enterToSend": MessageLookupByLibrary.simpleMessage("按下回車 ⏎ 傳送"),
@@ -390,6 +392,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("使用者資料不合法"),
         "errorWithdrawalMemoFormatIncorrect":
             MessageLookupByLibrary.simpleMessage("錯誤 20131：提現備註格式不正確"),
+        "errorWithdrawalSuspend":
+            MessageLookupByLibrary.simpleMessage("錯誤 20137：提現暫停"),
         "exit": MessageLookupByLibrary.simpleMessage("退出"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("退出群組"),
         "failed": MessageLookupByLibrary.simpleMessage("失敗"),

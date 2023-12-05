@@ -1534,6 +1534,16 @@ class Localization {
     );
   }
 
+  /// `Encrypt zip file with password`
+  String get encryptZipFileWithPassword {
+    return Intl.message(
+      'Encrypt zip file with password',
+      name: 'encryptZipFileWithPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Enter your PIN to delete your account`
   String get enterPinToDeleteAccount {
     return Intl.message(
@@ -2018,6 +2028,16 @@ class Localization {
     );
   }
 
+  /// `ERROR 20137: Withdrawal suspend.`
+  String get errorWithdrawalSuspend {
+    return Intl.message(
+      'ERROR 20137: Withdrawal suspend.',
+      name: 'errorWithdrawalSuspend',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Exit`
   String get exit {
     return Intl.message(
@@ -2208,10 +2228,10 @@ class Localization {
     );
   }
 
-  /// `You already in the group`
+  /// `You are already in the group.`
   String get groupAlreadyIn {
     return Intl.message(
-      'You already in the group',
+      'You are already in the group.',
       name: 'groupAlreadyIn',
       desc: '',
       args: [],
@@ -2278,10 +2298,10 @@ class Localization {
     );
   }
 
-  /// `Groups In Common`
+  /// `Groups in Common`
   String get groupsInCommon {
     return Intl.message(
-      'Groups In Common',
+      'Groups in Common',
       name: 'groupsInCommon',
       desc: '',
       args: [],
@@ -2660,10 +2680,10 @@ class Localization {
     );
   }
 
-  /// `Messages to this conversation are encrypted end-to-end, tap for more info.`
+  /// `Messages to this conversation are end-to-end encrypted, tap for more info.`
   String get messageE2ee {
     return Intl.message(
-      'Messages to this conversation are encrypted end-to-end, tap for more info.',
+      'Messages to this conversation are end-to-end encrypted, tap for more info.',
       name: 'messageE2ee',
       desc: '',
       args: [],
