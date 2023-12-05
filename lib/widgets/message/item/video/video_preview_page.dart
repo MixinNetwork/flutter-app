@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -71,6 +72,35 @@ extension on BuildContext {
 
 final videoPlayerValueProvider =
     videoPlayerProvider.select((value) => value.value);
+
+final shouldShowVideoControlProvider =
+    StateNotifierProvider.autoDispose<_VideoControlShowHideNotifier, bool>(
+  (ref) => _VideoControlShowHideNotifier(true),
+);
+
+class _VideoControlShowHideNotifier extends StateNotifier<bool> {
+  _VideoControlShowHideNotifier(super.state) {
+    _autoHide();
+  }
+
+  Timer? _timer;
+
+  Future<void> _autoHide() async {
+    if (!state) {
+      return;
+    }
+    _timer = Timer(const Duration(seconds: 3), () {
+      state = false;
+    });
+  }
+
+  void shouldShow() {
+    state = true;
+    _timer?.cancel();
+    _timer = null;
+    _autoHide();
+  }
+}
 
 class _VideoPreviewPage extends HookConsumerWidget {
   const _VideoPreviewPage({
@@ -197,6 +227,7 @@ class _PlayerShortcuts extends HookConsumerWidget {
           } else {
             controller.play();
           }
+          ref.read(shouldShowVideoControlProvider.notifier).shouldShow();
         }),
         _ForwardIntent: CallbackAction<_ForwardIntent>(onInvoke: (intent) {
           final position =
@@ -386,11 +417,16 @@ class _Controls extends ConsumerWidget {
   final bool isTranscriptPage;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => SizedBox.expand(
-        child: MouseRegion(
-          onHover: (event) {},
-          child: Stack(
-            children: [
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showControl = ref.watch(shouldShowVideoControlProvider);
+    return SizedBox.expand(
+      child: MouseRegion(
+        onHover: (event) {
+          ref.read(shouldShowVideoControlProvider.notifier).shouldShow();
+        },
+        child: Stack(
+          children: [
+            if (showControl)
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
@@ -401,10 +437,11 @@ class _Controls extends ConsumerWidget {
                   ),
                 ),
               ),
-            ],
-          ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
 
 class _OperationBar extends ConsumerWidget {
