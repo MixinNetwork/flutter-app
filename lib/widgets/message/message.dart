@@ -338,16 +338,7 @@ class MessageItemWidget extends HookConsumerWidget {
                             message.type.isImage ||
                             message.type.isVideo ||
                             message.type.isAudio);
-                    final enableRecall = [
-                          MessageStatus.sent,
-                          MessageStatus.delivered,
-                          MessageStatus.read,
-                        ].contains(message.status) &&
-                        !isTranscriptPage &&
-                        isCurrentUser &&
-                        message.type.canRecall &&
-                        DateTime.now().isBefore(
-                            message.createdAt.add(const Duration(minutes: 60)));
+                    final enableRecall = !isTranscriptPage && message.canRecall;
 
                     final enableDelete = !isTranscriptPage;
 

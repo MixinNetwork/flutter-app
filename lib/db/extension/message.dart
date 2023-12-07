@@ -63,6 +63,16 @@ extension MessageItemExtension on MessageItem {
         type.isLocation ||
         (type.isTranscript && mediaStatus == MediaStatus.done);
   }
+
+  bool get canRecall =>
+      [
+        MessageStatus.sent,
+        MessageStatus.delivered,
+        MessageStatus.read,
+      ].contains(status) &&
+      relationship == UserRelationship.me &&
+      type.canRecall &&
+      DateTime.now().isBefore(createdAt.add(const Duration(minutes: 60)));
 }
 
 extension QuoteMessageItemExtension on QuoteMessageItem {

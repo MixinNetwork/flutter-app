@@ -115,15 +115,17 @@ class SelectionBottomBar extends HookConsumerWidget {
             label: context.l10n.delete,
             iconAssetName: Resources.assetsImagesContextMenuDeleteSvg,
             onTap: () async {
-              final cubit = ref.read(messageSelectionProvider);
-              final messagesToDelete = cubit.selectedMessageIds;
+              final selection = ref.read(messageSelectionProvider);
+              final messagesToDelete = selection.selectedMessageIds;
+
+              final canRecall = selection.canRecall;
 
               final confirm = await showConfirmMixinDialog(
                 context,
                 context.l10n.chatDeleteMessage(
                     messagesToDelete.length, messagesToDelete.length),
                 positiveText: context.l10n.delete,
-                neutralText: context.l10n.deleteForEveryone,
+                neutralText: canRecall ? context.l10n.deleteForEveryone : null,
               );
               if (confirm == null) return;
               d('messagesToDelete: $messagesToDelete');
@@ -142,7 +144,7 @@ class SelectionBottomBar extends HookConsumerWidget {
                   );
                 }
               });
-              cubit.clearSelection();
+              selection.clearSelection();
             },
           ),
         ],
