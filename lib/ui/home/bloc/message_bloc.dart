@@ -244,6 +244,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
     addSubscription(
       conversationNotifier.stream
+          .startWith(conversationNotifier.state)
           .map((event) => event?.conversationId)
           .distinct()
           .switchMap((conversationId) {
