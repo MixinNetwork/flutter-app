@@ -494,8 +494,11 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   }
 
   Future<bool> cancelProgressAttachmentJob(String messageId) async {
-    if (!_hasAttachmentJob(messageId)) return false;
     await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
+    if (!_hasAttachmentJob(messageId)) {
+      w('cancelProgressAttachmentJob: no job for $messageId');
+      return false;
+    }
     await DownloadKeyValue.instance.removeMessageId(messageId);
     _attachmentJob[messageId]?.cancel();
     _attachmentJob.remove(messageId);
