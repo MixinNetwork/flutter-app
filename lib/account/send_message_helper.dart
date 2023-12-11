@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:cross_file/cross_file.dart';
 import 'package:drift/drift.dart';
@@ -131,16 +132,40 @@ class SendMessageHelper {
     AttachmentResult? attachmentResult,
     bool silent = false,
     bool cleanDraft = true,
+    bool compress = false,
   }) async {
     final messageId = const Uuid().v4();
+
     var _bytes = bytes ?? await file?.readAsBytes();
     if (_bytes == null) throw Exception('file is null');
-    final result = await compressWithIsolate(_bytes);
-    if (result == null) throw Exception('compress failed');
-    final (_, type, imageWidth, imageHeight) = result;
-    _bytes = result.$1;
 
-    final mimeType = type.mimeType;
+    final int imageWidth;
+    final int imageHeight;
+    final String mimeType;
+    final String fileName;
+
+    if (compress) {
+      final result = await compressWithIsolate(_bytes);
+      if (result == null) throw Exception('compress failed');
+      final ImageType type;
+      (_bytes, type, imageWidth, imageHeight) = result;
+      mimeType = type.mimeType;
+      fileName =
+          '${file?.name.pathBasenameWithoutExtension ?? messageId}.${type.extension}';
+    } else {
+      mimeType = file?.mimeType ??
+          lookupMimeType(file?.path ?? '',
+              headerBytes:
+                  _bytes.take(defaultMagicNumbersMaxLength).toList()) ??
+          'image/jpeg';
+      // Only retrieve image bounds info.
+      final buffer = await ui.ImmutableBuffer.fromUint8List(_bytes);
+      final descriptor = await ui.ImageDescriptor.encoded(buffer);
+
+      imageWidth = descriptor.width;
+      imageHeight = descriptor.height;
+      fileName = file?.name ?? '$messageId.${extensionFromMime(mimeType)}';
+    }
 
     var attachment = _attachmentUtil.getAttachmentFile(
       category,
@@ -158,8 +183,7 @@ class SendMessageHelper {
     final attachmentSize = await attachment.length();
     final quoteMessage =
         await _messageDao.findMessageItemByMessageId(quoteMessageId);
-    final fileName =
-        '${file?.name.pathBasenameWithoutExtension ?? messageId}.${type.extension}';
+
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,

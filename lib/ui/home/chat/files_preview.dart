@@ -245,6 +245,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
             file,
             quoteMessageCubit.state?.messageId,
             silent: silent,
+            compress: currentTab.value == _TabType.image,
           ));
         }
         quoteMessageCubit.state = null;
@@ -260,6 +261,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
           _File.normal(zipFilePath),
           quoteMessageCubit.state?.messageId,
           silent: silent,
+          compress: false,
         ));
         quoteMessageCubit.state = null;
         Navigator.pop(context);
@@ -443,6 +445,7 @@ Future<void> _sendFile(
   _File file,
   String? quoteMessageId, {
   required bool silent,
+  required bool compress,
 }) async {
   final conversationItem = context.providerContainer.read(conversationProvider);
   if (conversationItem == null) return;
@@ -457,6 +460,7 @@ Future<void> _sendFile(
         recipientId: conversationItem.userId,
         quoteMessageId: quoteMessageId,
         silent: silent,
+        compress: compress,
       );
     case _NormalFile():
       await accountServer.sendDataMessage(
