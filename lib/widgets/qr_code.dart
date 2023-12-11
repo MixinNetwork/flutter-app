@@ -20,6 +20,7 @@ class QrCode extends StatelessWidget {
         color: Colors.white,
         padding: const EdgeInsets.all(8),
         child: PrettyQrView.data(
+          errorCorrectLevel: QrErrorCorrectLevel.Q,
           decoration: PrettyQrDecoration(
             image:
                 image == null ? null : PrettyQrDecorationImage(image: image!),
