@@ -23,17 +23,17 @@ void main() {
         base64Encode(result), 'rG0d+pIOti5pPCcTkRsFHmNkD3DJFcGHUqZgOyvIvDc=');
   });
 
-  test('calculate random hMac', () async {
-    final key = generateTransferKey();
-    final iv = generateTransferIv();
-
-    i('key: ${key.aesKey} ${key.hMacKey}');
-    i('iv: $iv');
-
+  test('calculate random hMac HMacCalculator.commonCrypto', () async {
     for (var i = 0; i < 100; i++) {
-      await _testCalculateRandomHMac();
+      await _testCalculateRandomHMac(HMacCalculator.commonCrypto);
     }
   }, testOn: 'mac-os');
+
+  test('calculate random hMac HMacCalculator.webCrypto', () async {
+    for (var i = 0; i < 100; i++) {
+      await _testCalculateRandomHMac(HMacCalculator.webCrypto);
+    }
+  }, testOn: 'linux');
 
   test('random encrypt test', () {
     final random = Random.secure();
@@ -69,21 +69,56 @@ void main() {
       expect(base64Encode(sourceResult), equals(base64Encode(targetResult)));
     }
   }, testOn: 'mac-os');
+
+  test('random encrypt test', () {
+    final random = Random.secure();
+    for (var start = 0; start < 100; start++) {
+      final key = generateTransferKey();
+      final iv = generateTransferIv();
+
+      final hMacKey = generateRandomBytes();
+
+      final encryptor =
+          AesCipherWebCryptoImpl(key: key.aesKey, iv: iv, encrypt: true);
+      final decryptor =
+          AesCipherWebCryptoImpl(key: key.aesKey, iv: iv, encrypt: false);
+
+      final sourceHMac = HMacCalculator(hMacKey);
+      final targetHMac = HMacCalculator(hMacKey);
+
+      for (var i = 0; i < 100; i++) {
+        final source = generateRandomBytes(random.nextInt(1024));
+        sourceHMac.addBytes(source);
+        final encrypted = encryptor.update(source);
+        targetHMac.addBytes(decryptor.update(encrypted));
+      }
+
+      targetHMac
+        ..addBytes(decryptor.update(encryptor.finish()))
+        ..addBytes(decryptor.finish());
+
+      final sourceResult = sourceHMac.result;
+      final targetResult = targetHMac.result;
+      i(' sourceResult: ${base64Encode(sourceResult)},'
+          ' targetResult: ${base64Encode(targetResult)}');
+      expect(base64Encode(sourceResult), equals(base64Encode(targetResult)));
+    }
+  }, testOn: 'linux');
 }
 
-Future<void> _testCalculateRandomHMac() async {
+Future<void> _testCalculateRandomHMac(
+    HMacCalculator Function(Uint8List key) creator) async {
   final key = generateTransferKey();
 
-  final commonCrypto = HMacCalculator.commonCrypto(key.hMacKey);
+  final calculator1 = creator(key.hMacKey);
   final pointyCastle = HMacCalculator.pointyCastle(key.hMacKey);
 
   final randomFileSize = math.Random().nextInt(1024 * 1024 * 5);
 
   final iv = generateTransferIv();
-  final aesCipher =
-      AesCipherCommonCryptoImpl(key: key.aesKey, iv: iv, encrypt: true);
+  final aesCipher = AesCipher(key: key.aesKey, iv: iv, encrypt: true);
 
-  commonCrypto.addBytes(iv);
+  calculator1.addBytes(iv);
   pointyCastle.addBytes(iv);
 
   i('randomFileSize: $randomFileSize');
@@ -91,15 +126,15 @@ Future<void> _testCalculateRandomHMac() async {
 
   await for (final bytes in fileStream) {
     final encrypted = aesCipher.update(Uint8List.fromList(bytes));
-    commonCrypto.addBytes(encrypted);
+    calculator1.addBytes(encrypted);
     pointyCastle.addBytes(encrypted);
   }
 
   final encrypted = aesCipher.finish();
-  commonCrypto.addBytes(encrypted);
+  calculator1.addBytes(encrypted);
   pointyCastle.addBytes(encrypted);
 
-  final commonCryptoResult = commonCrypto.result;
+  final commonCryptoResult = calculator1.result;
   final pointyCastleResult = pointyCastle.result;
 
   i('commonCryptoResult: ${base64Encode(commonCryptoResult)}, '
