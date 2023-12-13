@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
@@ -169,11 +170,18 @@ class TransferAttachmentPacket extends TransferPacket {
     final fileStream = file.openRead();
 
     await for (final bytes in fileStream) {
-      final encrypted = aesCipher.update(Uint8List.fromList(bytes));
-      hMacCalculator.addBytes(encrypted);
-      actualEncryptedLength += encrypted.length;
-      sink.add(encrypted);
-      await sink.flush();
+      final data = bytes is Uint8List ? bytes : Uint8List.fromList(bytes);
+      const maxSize = 64 * 1024;
+      var start = 0;
+      while (start < data.length) {
+        final end = math.min(start + maxSize, data.length);
+        final subData = Uint8List.sublistView(data, start, end);
+        final encrypted = aesCipher.update(subData);
+        hMacCalculator.addBytes(encrypted);
+        actualEncryptedLength += encrypted.length;
+        sink.add(encrypted);
+        start += maxSize;
+      }
     }
 
     // handle last block

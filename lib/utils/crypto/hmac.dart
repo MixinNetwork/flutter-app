@@ -22,7 +22,7 @@ abstract class HMacCalculator {
     if (kPlatformIsDarwin) {
       return _HMacCalculatorCommonCrypto(key);
     }
-    if (Platform.isLinux) {
+    if (Platform.isLinux || Platform.isWindows) {
       return HMacCalculator.webCrypto(key);
     }
     return _HMacCalculatorPointyCastleImpl(key);
@@ -93,9 +93,7 @@ class _HMacCalculatorCommonCrypto implements HMacCalculator {
   }
 }
 
-class _HMacCalculatorWebCrypto
-    with WebCryptoAlgorithm
-    implements HMacCalculator {
+class _HMacCalculatorWebCrypto implements HMacCalculator {
   _HMacCalculatorWebCrypto(Uint8List key) {
     _ctx = ssl.HMAC_CTX_new();
     final keyPtr = key.toNative();
@@ -123,20 +121,15 @@ class _HMacCalculatorWebCrypto
     if (_isDisposed) {
       throw StateError('HMacCalculator is disposed');
     }
-    final inBuf = data.toNative();
-    try {
-      var offset = 0;
-      while (offset < data.length) {
-        final len = data.length - offset;
-        final size = len > _bufferSize ? _bufferSize : len;
-        _inBuffer
-            .asTypedList(size)
-            .setAll(0, Uint8List.sublistView(data, offset, offset + size));
-        checkOpIsOne(ssl.HMAC_Update(_ctx, _inBuffer, size));
-        offset += size;
-      }
-    } finally {
-      malloc.free(inBuf);
+    var offset = 0;
+    while (offset < data.length) {
+      final len = data.length - offset;
+      final size = len > _bufferSize ? _bufferSize : len;
+      _inBuffer
+          .asTypedList(size)
+          .setAll(0, Uint8List.sublistView(data, offset, offset + size));
+      checkOpIsOne(ssl.HMAC_Update(_ctx, _inBuffer, size));
+      offset += size;
     }
   }
 

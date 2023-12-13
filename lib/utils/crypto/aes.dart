@@ -23,7 +23,7 @@ abstract class AesCipher {
   }) {
     if (kPlatformIsDarwin) {
       return AesCipherCommonCryptoImpl(key: key, iv: iv, encrypt: encrypt);
-    } else if (Platform.isLinux) {
+    } else if (Platform.isLinux || Platform.isWindows) {
       return AesCipherWebCryptoImpl(key: key, iv: iv, encrypt: encrypt);
     } else {
       return AesCipherPointyCastleImpl(key: key, iv: iv, encrypt: encrypt);
@@ -165,12 +165,20 @@ class AesCipherPointyCastleImpl implements AesCipher {
   }
 }
 
-class AesCipherWebCryptoImpl with WebCryptoAlgorithm implements AesCipher {
+class AesCipherWebCryptoImpl implements AesCipher {
   AesCipherWebCryptoImpl({
     required Uint8List key,
     required Uint8List iv,
     required bool encrypt,
-  }) : assert(key.length == 16 || key.length == 32, 'Invalid key length') {
+  }) : _ctx = _createCipher(key: key, iv: iv, encrypt: encrypt);
+
+  static bool isSupported = Platform.isLinux || Platform.isWindows;
+
+  static Pointer<evp_cipher_ctx_st> _createCipher({
+    required Uint8List key,
+    required Uint8List iv,
+    required bool encrypt,
+  }) {
     final cipher =
         key.length == 16 ? ssl.EVP_aes_128_cbc() : ssl.EVP_aes_256_cbc();
 
@@ -179,12 +187,12 @@ class AesCipherWebCryptoImpl with WebCryptoAlgorithm implements AesCipher {
       throw ArgumentError.value(iv, 'iv', 'must be $ivSize bytes');
     }
 
-    _ctx = ssl.EVP_CIPHER_CTX_new();
+    final ctx = ssl.EVP_CIPHER_CTX_new();
     final nativeKey = key.toNative();
     final nativeIv = iv.toNative();
     try {
       checkOpIsOne(ssl.EVP_CipherInit_ex(
-        _ctx,
+        ctx,
         cipher,
         nullptr,
         nativeKey,
@@ -196,9 +204,10 @@ class AesCipherWebCryptoImpl with WebCryptoAlgorithm implements AesCipher {
         ..free(nativeKey)
         ..free(nativeIv);
     }
+    return ctx;
   }
 
-  late Pointer<evp_cipher_ctx_st> _ctx;
+  final Pointer<evp_cipher_ctx_st> _ctx;
   var _disposed = false;
 
   @override

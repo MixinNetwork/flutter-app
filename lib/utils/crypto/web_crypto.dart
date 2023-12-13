@@ -18,7 +18,7 @@ extension NativeUint8List on Uint8List {
   }
 }
 
-class _SslAllocator with WebCryptoAlgorithm implements Allocator {
+class _SslAllocator implements Allocator {
   const _SslAllocator();
 
   /// Allocate [byteCount] bytes.
@@ -43,43 +43,39 @@ class _SslAllocator with WebCryptoAlgorithm implements Allocator {
 
 const _sslAlloc = _SslAllocator();
 
-mixin WebCryptoAlgorithm {
+BoringSsl get ssl => lookup.ssl;
 
+void checkOpIsOne(int retval, {String? message, String? fallback}) =>
+    checkOp(retval == 1, message: message, fallback: fallback);
 
-  BoringSsl get ssl => lookup.ssl;
-
-  void checkOpIsOne(int retval, {String? message, String? fallback}) =>
-      checkOp(retval == 1, message: message, fallback: fallback);
-
-  void checkOp(bool condition, {String? message, String? fallback}) {
-    if (!condition) {
-      // Always extract the error to ensure we clear the error queue.
-      final err = _extractError();
-      message ??= err ?? fallback ?? 'unknown error';
-      throw Exception(message);
-    }
+void checkOp(bool condition, {String? message, String? fallback}) {
+  if (!condition) {
+    // Always extract the error to ensure we clear the error queue.
+    final err = _extractError();
+    message ??= err ?? fallback ?? 'unknown error';
+    throw Exception(message);
   }
+}
 
-  String? _extractError() {
-    try {
-      // Get the error.
-      final err = ssl.ERR_get_error();
-      if (err == 0) {
-        return null;
-      }
-      const N = 4096; // Max error message size
-      final out = _sslAlloc<ffi.Char>(N);
-      try {
-        ssl.ERR_error_string_n(err, out, N);
-        final data = out.cast<ffi.Uint8>().asTypedList(N);
-        // Take everything until '\0'
-        return utf8.decode(data.takeWhile((i) => i != 0).toList());
-      } finally {
-        _sslAlloc.free(out);
-      }
-    } finally {
-      // Always clear error queue, so we continue
-      ssl.ERR_clear_error();
+String? _extractError() {
+  try {
+    // Get the error.
+    final err = ssl.ERR_get_error();
+    if (err == 0) {
+      return null;
     }
+    const N = 4096; // Max error message size
+    final out = _sslAlloc<ffi.Char>(N);
+    try {
+      ssl.ERR_error_string_n(err, out, N);
+      final data = out.cast<ffi.Uint8>().asTypedList(N);
+      // Take everything until '\0'
+      return utf8.decode(data.takeWhile((i) => i != 0).toList());
+    } finally {
+      _sslAlloc.free(out);
+    }
+  } finally {
+    // Always clear error queue, so we continue
+    ssl.ERR_clear_error();
   }
 }

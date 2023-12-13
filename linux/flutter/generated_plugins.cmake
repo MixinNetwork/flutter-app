@@ -14,7 +14,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   sqlite3_flutter_libs
   super_native_extensions
   url_launcher_linux
-  webcrypto
   window_manager
   window_size
 )
@@ -23,6 +22,7 @@ list(APPEND FLUTTER_FFI_PLUGIN_LIST
   jni
   mixin_logger
   ogg_opus_player
+  webcrypto
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

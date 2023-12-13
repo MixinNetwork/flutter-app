@@ -2071,8 +2071,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "68bc18fb835b5acaf5b1579c78d7be18c31483e3"
-      resolved-ref: "68bc18fb835b5acaf5b1579c78d7be18c31483e3"
+      ref: "25f20fd3da7702c930591dcad9d8a7d85feecfc6"
+      resolved-ref: "25f20fd3da7702c930591dcad9d8a7d85feecfc6"
       url: "https://github.com/boyan01/webcrypto.dart.git"
     source: git
     version: "0.5.4"
