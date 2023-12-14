@@ -22,6 +22,7 @@ target_include_directories(${PLUGIN_NAME}
 
 target_link_directories(${PLUGIN_NAME} PRIVATE
   $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/breakpad/${CMAKE_SYSTEM_PROCESSOR}/Debug>
+  $<$<CONFIG:Profile>:${CMAKE_CURRENT_SOURCE_DIR}/breakpad/${CMAKE_SYSTEM_PROCESSOR}/Release>
   $<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/breakpad/${CMAKE_SYSTEM_PROCESSOR}/Release>)
 
 target_link_libraries(${PLUGIN_NAME} PRIVATE exception_handler crash_generation_client common)
