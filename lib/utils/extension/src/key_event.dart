@@ -52,7 +52,6 @@ const numberKeys = [
   LogicalKeyboardKey.numpad9,
 ];
 
-
 extension KeyEventExtension on KeyEvent {
   bool get firstInputable {
     if (HardwareKeyboard.instance.logicalKeysPressed.hasModifierKey) {
