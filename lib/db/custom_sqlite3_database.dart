@@ -22,7 +22,8 @@ class DatabaseProfiler extends Database {
   int get userVersion => database.userVersion;
 
   @override
-  Stream<double> backup(Database toDatabase) => database.backup(toDatabase);
+  Stream<double> backup(Database toDatabase, {int nPage = 5}) =>
+      database.backup(toDatabase, nPage: nPage);
 
   @override
   void createAggregateFunction<V>({
@@ -74,6 +75,7 @@ class DatabaseProfiler extends Database {
       logWrapper(() => database.execute(sql, parameters), sql, parameters);
 
   @override
+  // ignore: deprecated_member_use
   int getUpdatedRows() => database.getUpdatedRows();
 
   @override
@@ -161,6 +163,9 @@ parameter: $parameters
 
   @override
   DatabaseConfig get config => database.config;
+
+  @override
+  int get updatedRows => database.updatedRows;
 }
 
 class _PreparedStatementWrapper implements PreparedStatement {

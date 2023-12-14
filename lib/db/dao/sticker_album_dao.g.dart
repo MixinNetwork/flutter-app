@@ -4,7 +4,7 @@ part of 'sticker_album_dao.dart';
 
 // ignore_for_file: type=lint
 mixin _$StickerAlbumDaoMixin on DatabaseAccessor<MixinDatabase> {
-  Addresses get addresses => attachedDatabase.addresses;
+  AddressesTable get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   CircleConversations get circleConversations =>

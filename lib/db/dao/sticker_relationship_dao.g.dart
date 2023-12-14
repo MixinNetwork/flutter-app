@@ -7,7 +7,7 @@ mixin _$StickerRelationshipDaoMixin on DatabaseAccessor<MixinDatabase> {
   StickerRelationships get stickerRelationships =>
       attachedDatabase.stickerRelationships;
   StickerAlbums get stickerAlbums => attachedDatabase.stickerAlbums;
-  Addresses get addresses => attachedDatabase.addresses;
+  AddressesTable get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   CircleConversations get circleConversations =>

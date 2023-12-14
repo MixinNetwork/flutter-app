@@ -149,29 +149,30 @@ class _InputContainer extends HookConsumerWidget {
     }, [conversationId, quoteMessageId]);
 
     useEffect(() {
-      void onListen(RawKeyEvent value) {
-        if (!isAppActive) return;
-        if (!value.firstInputable) return;
+      bool onListen(KeyEvent value) {
+        if (!isAppActive) return false;
+        if (!value.firstInputable) return false;
 
         final primaryFocus = FocusManager.instance.primaryFocus;
         final focusContext = primaryFocus?.context;
-        if (focusContext == null) return;
+        if (focusContext == null) return false;
         final focusWidget = focusContext.widget;
         final isEditableText = focusWidget is Focus &&
             focusWidget.child is Scrollable &&
             (focusWidget.child as Scrollable).restorationId == 'editable';
-        if (isEditableText) return;
+        if (isEditableText) return false;
 
-        if (ModalRoute.of(focusContext) != ModalRoute.of(context)) return;
+        if (ModalRoute.of(focusContext) != ModalRoute.of(context)) return false;
 
-        if (primaryFocus == focusNode) return;
+        if (primaryFocus == focusNode) return false;
 
         focusNode.requestFocus();
+        return true;
       }
 
-      RawKeyboard.instance.addListener(onListen);
+      HardwareKeyboard.instance.addHandler(onListen);
       return () {
-        RawKeyboard.instance.removeListener(onListen);
+        HardwareKeyboard.instance.removeHandler(onListen);
       };
     }, []);
 

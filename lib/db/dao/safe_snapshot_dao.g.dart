@@ -7,7 +7,7 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
   Users get users => attachedDatabase.users;
   Tokens get tokens => attachedDatabase.tokens;
-  Addresses get addresses => attachedDatabase.addresses;
+  AddressesTable get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   CircleConversations get circleConversations =>

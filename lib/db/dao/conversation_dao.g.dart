@@ -13,7 +13,7 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   MessageMentions get messageMentions => attachedDatabase.messageMentions;
   Participants get participants => attachedDatabase.participants;
-  Addresses get addresses => attachedDatabase.addresses;
+  AddressesTable get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   Circles get circles => attachedDatabase.circles;
@@ -602,8 +602,8 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
         Variable<String>(conversationId),
         Variable<String>(userId),
         Variable<String>(lastMessageId),
-        Variable<int>(NullAwareTypeConverter.wrapToSql(
-            Conversations.$converterlastMessageCreatedAt, lastMessageCreatedAt))
+        Variable<int>(Conversations.$converterlastMessageCreatedAtn
+            .toSql(lastMessageCreatedAt))
       ],
       updates: {conversations},
       updateKind: UpdateKind.update,

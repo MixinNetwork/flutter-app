@@ -315,8 +315,8 @@ class MessagesMeta extends DataClass implements Insertable<MessagesMeta> {
     map['category'] = Variable<String>(category);
     map['user_id'] = Variable<String>(userId);
     {
-      final converter = MessagesMetas.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(MessagesMetas.$convertercreatedAt.toSql(createdAt));
     }
     return map;
   }
@@ -489,9 +489,8 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (createdAt.present) {
-      final converter = MessagesMetas.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] = Variable<int>(
+          MessagesMetas.$convertercreatedAt.toSql(createdAt.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);

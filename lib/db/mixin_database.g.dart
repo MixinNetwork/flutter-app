@@ -367,8 +367,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       map['owner_id'] = Variable<String>(ownerId);
     }
     if (!nullToAbsent || category != null) {
-      final converter = Conversations.$convertercategory;
-      map['category'] = Variable<String>(converter.toSql(category));
+      map['category'] =
+          Variable<String>(Conversations.$convertercategory.toSql(category));
     }
     if (!nullToAbsent || name != null) {
       map['name'] = Variable<String>(name);
@@ -386,20 +386,20 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       map['pay_type'] = Variable<String>(payType);
     }
     {
-      final converter = Conversations.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(Conversations.$convertercreatedAt.toSql(createdAt));
     }
     if (!nullToAbsent || pinTime != null) {
-      final converter = Conversations.$converterpinTimen;
-      map['pin_time'] = Variable<int>(converter.toSql(pinTime));
+      map['pin_time'] =
+          Variable<int>(Conversations.$converterpinTimen.toSql(pinTime));
     }
     if (!nullToAbsent || lastMessageId != null) {
       map['last_message_id'] = Variable<String>(lastMessageId);
     }
     if (!nullToAbsent || lastMessageCreatedAt != null) {
-      final converter = Conversations.$converterlastMessageCreatedAtn;
-      map['last_message_created_at'] =
-          Variable<int>(converter.toSql(lastMessageCreatedAt));
+      map['last_message_created_at'] = Variable<int>(Conversations
+          .$converterlastMessageCreatedAtn
+          .toSql(lastMessageCreatedAt));
     }
     if (!nullToAbsent || lastReadMessageId != null) {
       map['last_read_message_id'] = Variable<String>(lastReadMessageId);
@@ -408,15 +408,15 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       map['unseen_message_count'] = Variable<int>(unseenMessageCount);
     }
     {
-      final converter = Conversations.$converterstatus;
-      map['status'] = Variable<int>(converter.toSql(status));
+      map['status'] =
+          Variable<int>(Conversations.$converterstatus.toSql(status));
     }
     if (!nullToAbsent || draft != null) {
       map['draft'] = Variable<String>(draft);
     }
     if (!nullToAbsent || muteUntil != null) {
-      final converter = Conversations.$convertermuteUntiln;
-      map['mute_until'] = Variable<int>(converter.toSql(muteUntil));
+      map['mute_until'] =
+          Variable<int>(Conversations.$convertermuteUntiln.toSql(muteUntil));
     }
     if (!nullToAbsent || expireIn != null) {
       map['expire_in'] = Variable<int>(expireIn);
@@ -806,9 +806,8 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       map['owner_id'] = Variable<String>(ownerId.value);
     }
     if (category.present) {
-      final converter = Conversations.$convertercategory;
-
-      map['category'] = Variable<String>(converter.toSql(category.value));
+      map['category'] = Variable<String>(
+          Conversations.$convertercategory.toSql(category.value));
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -826,23 +825,20 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       map['pay_type'] = Variable<String>(payType.value);
     }
     if (createdAt.present) {
-      final converter = Conversations.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] = Variable<int>(
+          Conversations.$convertercreatedAt.toSql(createdAt.value));
     }
     if (pinTime.present) {
-      final converter = Conversations.$converterpinTimen;
-
-      map['pin_time'] = Variable<int>(converter.toSql(pinTime.value));
+      map['pin_time'] =
+          Variable<int>(Conversations.$converterpinTimen.toSql(pinTime.value));
     }
     if (lastMessageId.present) {
       map['last_message_id'] = Variable<String>(lastMessageId.value);
     }
     if (lastMessageCreatedAt.present) {
-      final converter = Conversations.$converterlastMessageCreatedAtn;
-
-      map['last_message_created_at'] =
-          Variable<int>(converter.toSql(lastMessageCreatedAt.value));
+      map['last_message_created_at'] = Variable<int>(Conversations
+          .$converterlastMessageCreatedAtn
+          .toSql(lastMessageCreatedAt.value));
     }
     if (lastReadMessageId.present) {
       map['last_read_message_id'] = Variable<String>(lastReadMessageId.value);
@@ -851,17 +847,15 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       map['unseen_message_count'] = Variable<int>(unseenMessageCount.value);
     }
     if (status.present) {
-      final converter = Conversations.$converterstatus;
-
-      map['status'] = Variable<int>(converter.toSql(status.value));
+      map['status'] =
+          Variable<int>(Conversations.$converterstatus.toSql(status.value));
     }
     if (draft.present) {
       map['draft'] = Variable<String>(draft.value);
     }
     if (muteUntil.present) {
-      final converter = Conversations.$convertermuteUntiln;
-
-      map['mute_until'] = Variable<int>(converter.toSql(muteUntil.value));
+      map['mute_until'] = Variable<int>(
+          Conversations.$convertermuteUntiln.toSql(muteUntil.value));
     }
     if (expireIn.present) {
       map['expire_in'] = Variable<int>(expireIn.value);
@@ -1514,16 +1508,15 @@ class Message extends DataClass implements Insertable<Message> {
       map['media_digest'] = Variable<String>(mediaDigest);
     }
     if (!nullToAbsent || mediaStatus != null) {
-      final converter = Messages.$convertermediaStatus;
-      map['media_status'] = Variable<String>(converter.toSql(mediaStatus));
+      map['media_status'] =
+          Variable<String>(Messages.$convertermediaStatus.toSql(mediaStatus));
     }
     {
-      final converter = Messages.$converterstatus;
-      map['status'] = Variable<String>(converter.toSql(status));
+      map['status'] = Variable<String>(Messages.$converterstatus.toSql(status));
     }
     {
-      final converter = Messages.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(Messages.$convertercreatedAt.toSql(createdAt));
     }
     if (!nullToAbsent || action != null) {
       map['action'] = Variable<String>(action);
@@ -2200,20 +2193,16 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       map['media_digest'] = Variable<String>(mediaDigest.value);
     }
     if (mediaStatus.present) {
-      final converter = Messages.$convertermediaStatus;
-
-      map['media_status'] =
-          Variable<String>(converter.toSql(mediaStatus.value));
+      map['media_status'] = Variable<String>(
+          Messages.$convertermediaStatus.toSql(mediaStatus.value));
     }
     if (status.present) {
-      final converter = Messages.$converterstatus;
-
-      map['status'] = Variable<String>(converter.toSql(status.value));
+      map['status'] =
+          Variable<String>(Messages.$converterstatus.toSql(status.value));
     }
     if (createdAt.present) {
-      final converter = Messages.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] =
+          Variable<int>(Messages.$convertercreatedAt.toSql(createdAt.value));
     }
     if (action.present) {
       map['action'] = Variable<String>(action.value);
@@ -2614,8 +2603,8 @@ class User extends DataClass implements Insertable<User> {
     map['user_id'] = Variable<String>(userId);
     map['identity_number'] = Variable<String>(identityNumber);
     if (!nullToAbsent || relationship != null) {
-      final converter = Users.$converterrelationship;
-      map['relationship'] = Variable<String>(converter.toSql(relationship));
+      map['relationship'] =
+          Variable<String>(Users.$converterrelationship.toSql(relationship));
     }
     if (!nullToAbsent || fullName != null) {
       map['full_name'] = Variable<String>(fullName);
@@ -2630,12 +2619,12 @@ class User extends DataClass implements Insertable<User> {
       map['is_verified'] = Variable<bool>(isVerified);
     }
     if (!nullToAbsent || createdAt != null) {
-      final converter = Users.$convertercreatedAtn;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(Users.$convertercreatedAtn.toSql(createdAt));
     }
     if (!nullToAbsent || muteUntil != null) {
-      final converter = Users.$convertermuteUntiln;
-      map['mute_until'] = Variable<int>(converter.toSql(muteUntil));
+      map['mute_until'] =
+          Variable<int>(Users.$convertermuteUntiln.toSql(muteUntil));
     }
     if (!nullToAbsent || hasPin != null) {
       map['has_pin'] = Variable<int>(hasPin);
@@ -2997,10 +2986,8 @@ class UsersCompanion extends UpdateCompanion<User> {
       map['identity_number'] = Variable<String>(identityNumber.value);
     }
     if (relationship.present) {
-      final converter = Users.$converterrelationship;
-
-      map['relationship'] =
-          Variable<String>(converter.toSql(relationship.value));
+      map['relationship'] = Variable<String>(
+          Users.$converterrelationship.toSql(relationship.value));
     }
     if (fullName.present) {
       map['full_name'] = Variable<String>(fullName.value);
@@ -3015,14 +3002,12 @@ class UsersCompanion extends UpdateCompanion<User> {
       map['is_verified'] = Variable<bool>(isVerified.value);
     }
     if (createdAt.present) {
-      final converter = Users.$convertercreatedAtn;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] =
+          Variable<int>(Users.$convertercreatedAtn.toSql(createdAt.value));
     }
     if (muteUntil.present) {
-      final converter = Users.$convertermuteUntiln;
-
-      map['mute_until'] = Variable<int>(converter.toSql(muteUntil.value));
+      map['mute_until'] =
+          Variable<int>(Users.$convertermuteUntiln.toSql(muteUntil.value));
     }
     if (hasPin.present) {
       map['has_pin'] = Variable<int>(hasPin.value);
@@ -3389,8 +3374,8 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
     map['asset_id'] = Variable<String>(assetId);
     map['amount'] = Variable<String>(amount);
     {
-      final converter = Snapshots.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(Snapshots.$convertercreatedAt.toSql(createdAt));
     }
     if (!nullToAbsent || opponentId != null) {
       map['opponent_id'] = Variable<String>(opponentId);
@@ -3752,9 +3737,8 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
       map['amount'] = Variable<String>(amount.value);
     }
     if (createdAt.present) {
-      final converter = Snapshots.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] =
+          Variable<int>(Snapshots.$convertercreatedAt.toSql(createdAt.value));
     }
     if (opponentId.present) {
       map['opponent_id'] = Variable<String>(opponentId.value);
@@ -4149,12 +4133,12 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       map['closing_balance'] = Variable<String>(closingBalance);
     }
     if (!nullToAbsent || withdrawal != null) {
-      final converter = SafeSnapshots.$converterwithdrawal;
-      map['withdrawal'] = Variable<String>(converter.toSql(withdrawal));
+      map['withdrawal'] = Variable<String>(
+          SafeSnapshots.$converterwithdrawal.toSql(withdrawal));
     }
     if (!nullToAbsent || deposit != null) {
-      final converter = SafeSnapshots.$converterdeposit;
-      map['deposit'] = Variable<String>(converter.toSql(deposit));
+      map['deposit'] =
+          Variable<String>(SafeSnapshots.$converterdeposit.toSql(deposit));
     }
     return map;
   }
@@ -4509,14 +4493,12 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
       map['closing_balance'] = Variable<String>(closingBalance.value);
     }
     if (withdrawal.present) {
-      final converter = SafeSnapshots.$converterwithdrawal;
-
-      map['withdrawal'] = Variable<String>(converter.toSql(withdrawal.value));
+      map['withdrawal'] = Variable<String>(
+          SafeSnapshots.$converterwithdrawal.toSql(withdrawal.value));
     }
     if (deposit.present) {
-      final converter = SafeSnapshots.$converterdeposit;
-
-      map['deposit'] = Variable<String>(converter.toSql(deposit.value));
+      map['deposit'] = Variable<String>(
+          SafeSnapshots.$converterdeposit.toSql(deposit.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -6420,12 +6402,12 @@ class Sticker extends DataClass implements Insertable<Sticker> {
     map['asset_width'] = Variable<int>(assetWidth);
     map['asset_height'] = Variable<int>(assetHeight);
     {
-      final converter = Stickers.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(Stickers.$convertercreatedAt.toSql(createdAt));
     }
     if (!nullToAbsent || lastUseAt != null) {
-      final converter = Stickers.$converterlastUseAtn;
-      map['last_use_at'] = Variable<int>(converter.toSql(lastUseAt));
+      map['last_use_at'] =
+          Variable<int>(Stickers.$converterlastUseAtn.toSql(lastUseAt));
     }
     return map;
   }
@@ -6651,14 +6633,12 @@ class StickersCompanion extends UpdateCompanion<Sticker> {
       map['asset_height'] = Variable<int>(assetHeight.value);
     }
     if (createdAt.present) {
-      final converter = Stickers.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] =
+          Variable<int>(Stickers.$convertercreatedAt.toSql(createdAt.value));
     }
     if (lastUseAt.present) {
-      final converter = Stickers.$converterlastUseAtn;
-
-      map['last_use_at'] = Variable<int>(converter.toSql(lastUseAt.value));
+      map['last_use_at'] =
+          Variable<int>(Stickers.$converterlastUseAtn.toSql(lastUseAt.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -7338,8 +7318,8 @@ class PinMessage extends DataClass implements Insertable<PinMessage> {
     map['message_id'] = Variable<String>(messageId);
     map['conversation_id'] = Variable<String>(conversationId);
     {
-      final converter = PinMessages.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(PinMessages.$convertercreatedAt.toSql(createdAt));
     }
     return map;
   }
@@ -7455,9 +7435,8 @@ class PinMessagesCompanion extends UpdateCompanion<PinMessage> {
       map['conversation_id'] = Variable<String>(conversationId.value);
     }
     if (createdAt.present) {
-      final converter = PinMessages.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] =
+          Variable<int>(PinMessages.$convertercreatedAt.toSql(createdAt.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -7712,11 +7691,11 @@ class ExpiredMessagesCompanion extends UpdateCompanion<ExpiredMessage> {
   }
 }
 
-class Addresses extends Table with TableInfo<Addresses, Addresse> {
+class AddressesTable extends Table with TableInfo<AddressesTable, Addresses> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  Addresses(this.attachedDatabase, [this._alias]);
+  AddressesTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _addressIdMeta =
       const VerificationMeta('addressId');
   late final GeneratedColumn<String> addressId = GeneratedColumn<String>(
@@ -7757,7 +7736,7 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
               type: DriftSqlType.int,
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(Addresses.$converterupdatedAt);
+          .withConverter<DateTime>(AddressesTable.$converterupdatedAt);
   static const VerificationMeta _reserveMeta =
       const VerificationMeta('reserve');
   late final GeneratedColumn<String> reserve = GeneratedColumn<String>(
@@ -7802,7 +7781,7 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
   String get actualTableName => $name;
   static const String $name = 'addresses';
   @override
-  VerificationContext validateIntegrity(Insertable<Addresse> instance,
+  VerificationContext validateIntegrity(Insertable<Addresses> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -7865,9 +7844,9 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
   @override
   Set<GeneratedColumn> get $primaryKey => {addressId};
   @override
-  Addresse map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Addresses map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Addresse(
+    return Addresses(
       addressId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}address_id'])!,
       type: attachedDatabase.typeMapping
@@ -7878,7 +7857,7 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
           .read(DriftSqlType.string, data['${effectivePrefix}destination'])!,
       label: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}label'])!,
-      updatedAt: Addresses.$converterupdatedAt.fromSql(attachedDatabase
+      updatedAt: AddressesTable.$converterupdatedAt.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}updated_at'])!),
       reserve: attachedDatabase.typeMapping
@@ -7893,8 +7872,8 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
   }
 
   @override
-  Addresses createAlias(String alias) {
-    return Addresses(attachedDatabase, alias);
+  AddressesTable createAlias(String alias) {
+    return AddressesTable(attachedDatabase, alias);
   }
 
   static TypeConverter<DateTime, int> $converterupdatedAt =
@@ -7905,7 +7884,7 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
   bool get dontWriteConstraints => true;
 }
 
-class Addresse extends DataClass implements Insertable<Addresse> {
+class Addresses extends DataClass implements Insertable<Addresses> {
   final String addressId;
   final String type;
   final String assetId;
@@ -7916,7 +7895,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
   final String fee;
   final String? tag;
   final String? dust;
-  const Addresse(
+  const Addresses(
       {required this.addressId,
       required this.type,
       required this.assetId,
@@ -7936,8 +7915,8 @@ class Addresse extends DataClass implements Insertable<Addresse> {
     map['destination'] = Variable<String>(destination);
     map['label'] = Variable<String>(label);
     {
-      final converter = Addresses.$converterupdatedAt;
-      map['updated_at'] = Variable<int>(converter.toSql(updatedAt));
+      map['updated_at'] =
+          Variable<int>(AddressesTable.$converterupdatedAt.toSql(updatedAt));
     }
     map['reserve'] = Variable<String>(reserve);
     map['fee'] = Variable<String>(fee);
@@ -7965,10 +7944,10 @@ class Addresse extends DataClass implements Insertable<Addresse> {
     );
   }
 
-  factory Addresse.fromJson(Map<String, dynamic> json,
+  factory Addresses.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Addresse(
+    return Addresses(
       addressId: serializer.fromJson<String>(json['address_id']),
       type: serializer.fromJson<String>(json['type']),
       assetId: serializer.fromJson<String>(json['asset_id']),
@@ -7998,7 +7977,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
     };
   }
 
-  Addresse copyWith(
+  Addresses copyWith(
           {String? addressId,
           String? type,
           String? assetId,
@@ -8009,7 +7988,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
           String? fee,
           Value<String?> tag = const Value.absent(),
           Value<String?> dust = const Value.absent()}) =>
-      Addresse(
+      Addresses(
         addressId: addressId ?? this.addressId,
         type: type ?? this.type,
         assetId: assetId ?? this.assetId,
@@ -8023,7 +8002,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
       );
   @override
   String toString() {
-    return (StringBuffer('Addresse(')
+    return (StringBuffer('Addresses(')
           ..write('addressId: $addressId, ')
           ..write('type: $type, ')
           ..write('assetId: $assetId, ')
@@ -8044,7 +8023,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Addresse &&
+      (other is Addresses &&
           other.addressId == this.addressId &&
           other.type == this.type &&
           other.assetId == this.assetId &&
@@ -8057,7 +8036,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
           other.dust == this.dust);
 }
 
-class AddressesCompanion extends UpdateCompanion<Addresse> {
+class AddressesCompanion extends UpdateCompanion<Addresses> {
   final Value<String> addressId;
   final Value<String> type;
   final Value<String> assetId;
@@ -8102,7 +8081,7 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
         updatedAt = Value(updatedAt),
         reserve = Value(reserve),
         fee = Value(fee);
-  static Insertable<Addresse> custom({
+  static Insertable<Addresses> custom({
     Expression<String>? addressId,
     Expression<String>? type,
     Expression<String>? assetId,
@@ -8176,9 +8155,8 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
       map['label'] = Variable<String>(label.value);
     }
     if (updatedAt.present) {
-      final converter = Addresses.$converterupdatedAt;
-
-      map['updated_at'] = Variable<int>(converter.toSql(updatedAt.value));
+      map['updated_at'] = Variable<int>(
+          AddressesTable.$converterupdatedAt.toSql(updatedAt.value));
     }
     if (reserve.present) {
       map['reserve'] = Variable<String>(reserve.value);
@@ -8516,8 +8494,8 @@ class App extends DataClass implements Insertable<App> {
       map['resource_patterns'] = Variable<String>(resourcePatterns);
     }
     if (!nullToAbsent || updatedAt != null) {
-      final converter = Apps.$converterupdatedAtn;
-      map['updated_at'] = Variable<int>(converter.toSql(updatedAt));
+      map['updated_at'] =
+          Variable<int>(Apps.$converterupdatedAtn.toSql(updatedAt));
     }
     return map;
   }
@@ -8835,9 +8813,8 @@ class AppsCompanion extends UpdateCompanion<App> {
       map['resource_patterns'] = Variable<String>(resourcePatterns.value);
     }
     if (updatedAt.present) {
-      final converter = Apps.$converterupdatedAtn;
-
-      map['updated_at'] = Variable<int>(converter.toSql(updatedAt.value));
+      map['updated_at'] =
+          Variable<int>(Apps.$converterupdatedAtn.toSql(updatedAt.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -9006,12 +8983,12 @@ class CircleConversation extends DataClass
       map['user_id'] = Variable<String>(userId);
     }
     {
-      final converter = CircleConversations.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] = Variable<int>(
+          CircleConversations.$convertercreatedAt.toSql(createdAt));
     }
     if (!nullToAbsent || pinTime != null) {
-      final converter = CircleConversations.$converterpinTimen;
-      map['pin_time'] = Variable<int>(converter.toSql(pinTime));
+      map['pin_time'] =
+          Variable<int>(CircleConversations.$converterpinTimen.toSql(pinTime));
     }
     return map;
   }
@@ -9164,14 +9141,12 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (createdAt.present) {
-      final converter = CircleConversations.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] = Variable<int>(
+          CircleConversations.$convertercreatedAt.toSql(createdAt.value));
     }
     if (pinTime.present) {
-      final converter = CircleConversations.$converterpinTimen;
-
-      map['pin_time'] = Variable<int>(converter.toSql(pinTime.value));
+      map['pin_time'] = Variable<int>(
+          CircleConversations.$converterpinTimen.toSql(pinTime.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -9308,12 +9283,12 @@ class Circle extends DataClass implements Insertable<Circle> {
     map['circle_id'] = Variable<String>(circleId);
     map['name'] = Variable<String>(name);
     {
-      final converter = Circles.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(Circles.$convertercreatedAt.toSql(createdAt));
     }
     if (!nullToAbsent || orderedAt != null) {
-      final converter = Circles.$converterorderedAtn;
-      map['ordered_at'] = Variable<int>(converter.toSql(orderedAt));
+      map['ordered_at'] =
+          Variable<int>(Circles.$converterorderedAtn.toSql(orderedAt));
     }
     return map;
   }
@@ -9447,14 +9422,12 @@ class CirclesCompanion extends UpdateCompanion<Circle> {
       map['name'] = Variable<String>(name.value);
     }
     if (createdAt.present) {
-      final converter = Circles.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] =
+          Variable<int>(Circles.$convertercreatedAt.toSql(createdAt.value));
     }
     if (orderedAt.present) {
-      final converter = Circles.$converterorderedAtn;
-
-      map['ordered_at'] = Variable<int>(converter.toSql(orderedAt.value));
+      map['ordered_at'] =
+          Variable<int>(Circles.$converterorderedAtn.toSql(orderedAt.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -9570,8 +9543,8 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
     map['message_id'] = Variable<String>(messageId);
     map['data'] = Variable<String>(data);
     {
-      final converter = FloodMessages.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(FloodMessages.$convertercreatedAt.toSql(createdAt));
     }
     return map;
   }
@@ -9687,9 +9660,8 @@ class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
       map['data'] = Variable<String>(data.value);
     }
     if (createdAt.present) {
-      final converter = FloodMessages.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] = Variable<int>(
+          FloodMessages.$convertercreatedAt.toSql(createdAt.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -9929,8 +9901,8 @@ class Job extends DataClass implements Insertable<Job> {
     map['job_id'] = Variable<String>(jobId);
     map['action'] = Variable<String>(action);
     {
-      final converter = Jobs.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(Jobs.$convertercreatedAt.toSql(createdAt));
     }
     if (!nullToAbsent || orderId != null) {
       map['order_id'] = Variable<int>(orderId);
@@ -10179,9 +10151,8 @@ class JobsCompanion extends UpdateCompanion<Job> {
       map['action'] = Variable<String>(action.value);
     }
     if (createdAt.present) {
-      final converter = Jobs.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] =
+          Variable<int>(Jobs.$convertercreatedAt.toSql(createdAt.value));
     }
     if (orderId.present) {
       map['order_id'] = Variable<int>(orderId.value);
@@ -10737,8 +10708,8 @@ class ParticipantSessionData extends DataClass
       map['sent_to_server'] = Variable<int>(sentToServer);
     }
     if (!nullToAbsent || createdAt != null) {
-      final converter = ParticipantSession.$convertercreatedAtn;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] = Variable<int>(
+          ParticipantSession.$convertercreatedAtn.toSql(createdAt));
     }
     if (!nullToAbsent || publicKey != null) {
       map['public_key'] = Variable<String>(publicKey);
@@ -10916,9 +10887,8 @@ class ParticipantSessionCompanion
       map['sent_to_server'] = Variable<int>(sentToServer.value);
     }
     if (createdAt.present) {
-      final converter = ParticipantSession.$convertercreatedAtn;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] = Variable<int>(
+          ParticipantSession.$convertercreatedAtn.toSql(createdAt.value));
     }
     if (publicKey.present) {
       map['public_key'] = Variable<String>(publicKey.value);
@@ -11061,12 +11031,11 @@ class Participant extends DataClass implements Insertable<Participant> {
     map['conversation_id'] = Variable<String>(conversationId);
     map['user_id'] = Variable<String>(userId);
     if (!nullToAbsent || role != null) {
-      final converter = Participants.$converterrole;
-      map['role'] = Variable<String>(converter.toSql(role));
+      map['role'] = Variable<String>(Participants.$converterrole.toSql(role));
     }
     {
-      final converter = Participants.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(Participants.$convertercreatedAt.toSql(createdAt));
     }
     return map;
   }
@@ -11198,14 +11167,12 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (role.present) {
-      final converter = Participants.$converterrole;
-
-      map['role'] = Variable<String>(converter.toSql(role.value));
+      map['role'] =
+          Variable<String>(Participants.$converterrole.toSql(role.value));
     }
     if (createdAt.present) {
-      final converter = Participants.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] = Variable<int>(
+          Participants.$convertercreatedAt.toSql(createdAt.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -11363,8 +11330,8 @@ class ResendSessionMessage extends DataClass
     map['session_id'] = Variable<String>(sessionId);
     map['status'] = Variable<int>(status);
     {
-      final converter = ResendSessionMessages.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] = Variable<int>(
+          ResendSessionMessages.$convertercreatedAt.toSql(createdAt));
     }
     return map;
   }
@@ -11520,9 +11487,8 @@ class ResendSessionMessagesCompanion
       map['status'] = Variable<int>(status.value);
     }
     if (createdAt.present) {
-      final converter = ResendSessionMessages.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] = Variable<int>(
+          ResendSessionMessages.$convertercreatedAt.toSql(createdAt.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -11708,8 +11674,8 @@ class SentSessionSenderKey extends DataClass
       map['sender_key_id'] = Variable<int>(senderKeyId);
     }
     if (!nullToAbsent || createdAt != null) {
-      final converter = SentSessionSenderKeys.$convertercreatedAtn;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] = Variable<int>(
+          SentSessionSenderKeys.$convertercreatedAtn.toSql(createdAt));
     }
     return map;
   }
@@ -11885,9 +11851,8 @@ class SentSessionSenderKeysCompanion
       map['sender_key_id'] = Variable<int>(senderKeyId.value);
     }
     if (createdAt.present) {
-      final converter = SentSessionSenderKeys.$convertercreatedAtn;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] = Variable<int>(
+          SentSessionSenderKeys.$convertercreatedAtn.toSql(createdAt.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -12169,12 +12134,12 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
     map['name'] = Variable<String>(name);
     map['icon_url'] = Variable<String>(iconUrl);
     {
-      final converter = StickerAlbums.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(StickerAlbums.$convertercreatedAt.toSql(createdAt));
     }
     {
-      final converter = StickerAlbums.$converterupdateAt;
-      map['update_at'] = Variable<int>(converter.toSql(updateAt));
+      map['update_at'] =
+          Variable<int>(StickerAlbums.$converterupdateAt.toSql(updateAt));
     }
     map['ordered_at'] = Variable<int>(orderedAt);
     map['user_id'] = Variable<String>(userId);
@@ -12440,14 +12405,12 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       map['icon_url'] = Variable<String>(iconUrl.value);
     }
     if (createdAt.present) {
-      final converter = StickerAlbums.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] = Variable<int>(
+          StickerAlbums.$convertercreatedAt.toSql(createdAt.value));
     }
     if (updateAt.present) {
-      final converter = StickerAlbums.$converterupdateAt;
-
-      map['update_at'] = Variable<int>(converter.toSql(updateAt.value));
+      map['update_at'] =
+          Variable<int>(StickerAlbums.$converterupdateAt.toSql(updateAt.value));
     }
     if (orderedAt.present) {
       map['ordered_at'] = Variable<int>(orderedAt.value);
@@ -13219,8 +13182,8 @@ class TranscriptMessage extends DataClass
     }
     map['category'] = Variable<String>(category);
     {
-      final converter = TranscriptMessages.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] = Variable<int>(
+          TranscriptMessages.$convertercreatedAt.toSql(createdAt));
     }
     if (!nullToAbsent || content != null) {
       map['content'] = Variable<String>(content);
@@ -13247,8 +13210,8 @@ class TranscriptMessage extends DataClass
       map['media_duration'] = Variable<String>(mediaDuration);
     }
     if (!nullToAbsent || mediaStatus != null) {
-      final converter = TranscriptMessages.$convertermediaStatus;
-      map['media_status'] = Variable<String>(converter.toSql(mediaStatus));
+      map['media_status'] = Variable<String>(
+          TranscriptMessages.$convertermediaStatus.toSql(mediaStatus));
     }
     if (!nullToAbsent || mediaWaveform != null) {
       map['media_waveform'] = Variable<String>(mediaWaveform);
@@ -13266,8 +13229,8 @@ class TranscriptMessage extends DataClass
       map['media_digest'] = Variable<String>(mediaDigest);
     }
     if (!nullToAbsent || mediaCreatedAt != null) {
-      final converter = TranscriptMessages.$convertermediaCreatedAtn;
-      map['media_created_at'] = Variable<int>(converter.toSql(mediaCreatedAt));
+      map['media_created_at'] = Variable<int>(
+          TranscriptMessages.$convertermediaCreatedAtn.toSql(mediaCreatedAt));
     }
     if (!nullToAbsent || stickerId != null) {
       map['sticker_id'] = Variable<String>(stickerId);
@@ -13829,9 +13792,8 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
       map['category'] = Variable<String>(category.value);
     }
     if (createdAt.present) {
-      final converter = TranscriptMessages.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] = Variable<int>(
+          TranscriptMessages.$convertercreatedAt.toSql(createdAt.value));
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
@@ -13858,10 +13820,8 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
       map['media_duration'] = Variable<String>(mediaDuration.value);
     }
     if (mediaStatus.present) {
-      final converter = TranscriptMessages.$convertermediaStatus;
-
-      map['media_status'] =
-          Variable<String>(converter.toSql(mediaStatus.value));
+      map['media_status'] = Variable<String>(
+          TranscriptMessages.$convertermediaStatus.toSql(mediaStatus.value));
     }
     if (mediaWaveform.present) {
       map['media_waveform'] = Variable<String>(mediaWaveform.value);
@@ -13879,10 +13839,9 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
       map['media_digest'] = Variable<String>(mediaDigest.value);
     }
     if (mediaCreatedAt.present) {
-      final converter = TranscriptMessages.$convertermediaCreatedAtn;
-
-      map['media_created_at'] =
-          Variable<int>(converter.toSql(mediaCreatedAt.value));
+      map['media_created_at'] = Variable<int>(TranscriptMessages
+          .$convertermediaCreatedAtn
+          .toSql(mediaCreatedAt.value));
     }
     if (stickerId.present) {
       map['sticker_id'] = Variable<String>(stickerId.value);
@@ -14225,8 +14184,8 @@ class FavoriteApp extends DataClass implements Insertable<FavoriteApp> {
     map['app_id'] = Variable<String>(appId);
     map['user_id'] = Variable<String>(userId);
     {
-      final converter = FavoriteApps.$convertercreatedAt;
-      map['created_at'] = Variable<int>(converter.toSql(createdAt));
+      map['created_at'] =
+          Variable<int>(FavoriteApps.$convertercreatedAt.toSql(createdAt));
     }
     return map;
   }
@@ -14341,9 +14300,8 @@ class FavoriteAppsCompanion extends UpdateCompanion<FavoriteApp> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (createdAt.present) {
-      final converter = FavoriteApps.$convertercreatedAt;
-
-      map['created_at'] = Variable<int>(converter.toSql(createdAt.value));
+      map['created_at'] = Variable<int>(
+          FavoriteApps.$convertercreatedAt.toSql(createdAt.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -14363,7 +14321,7 @@ class FavoriteAppsCompanion extends UpdateCompanion<FavoriteApp> {
   }
 }
 
-class Properties extends Table with TableInfo<Properties, Propertie> {
+class Properties extends Table with TableInfo<Properties, Property> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -14395,7 +14353,7 @@ class Properties extends Table with TableInfo<Properties, Propertie> {
   String get actualTableName => $name;
   static const String $name = 'properties';
   @override
-  VerificationContext validateIntegrity(Insertable<Propertie> instance,
+  VerificationContext validateIntegrity(Insertable<Property> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -14418,9 +14376,9 @@ class Properties extends Table with TableInfo<Properties, Propertie> {
   @override
   Set<GeneratedColumn> get $primaryKey => {key, group};
   @override
-  Propertie map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Property map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Propertie(
+    return Property(
       key: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
       group: Properties.$convertergroup.fromSql(attachedDatabase.typeMapping
@@ -14443,19 +14401,17 @@ class Properties extends Table with TableInfo<Properties, Propertie> {
   bool get dontWriteConstraints => true;
 }
 
-class Propertie extends DataClass implements Insertable<Propertie> {
+class Property extends DataClass implements Insertable<Property> {
   final String key;
   final PropertyGroup group;
   final String value;
-  const Propertie(
-      {required this.key, required this.group, required this.value});
+  const Property({required this.key, required this.group, required this.value});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['key'] = Variable<String>(key);
     {
-      final converter = Properties.$convertergroup;
-      map['group'] = Variable<String>(converter.toSql(group));
+      map['group'] = Variable<String>(Properties.$convertergroup.toSql(group));
     }
     map['value'] = Variable<String>(value);
     return map;
@@ -14469,10 +14425,10 @@ class Propertie extends DataClass implements Insertable<Propertie> {
     );
   }
 
-  factory Propertie.fromJson(Map<String, dynamic> json,
+  factory Property.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Propertie(
+    return Property(
       key: serializer.fromJson<String>(json['key']),
       group: serializer.fromJson<PropertyGroup>(json['group']),
       value: serializer.fromJson<String>(json['value']),
@@ -14488,15 +14444,15 @@ class Propertie extends DataClass implements Insertable<Propertie> {
     };
   }
 
-  Propertie copyWith({String? key, PropertyGroup? group, String? value}) =>
-      Propertie(
+  Property copyWith({String? key, PropertyGroup? group, String? value}) =>
+      Property(
         key: key ?? this.key,
         group: group ?? this.group,
         value: value ?? this.value,
       );
   @override
   String toString() {
-    return (StringBuffer('Propertie(')
+    return (StringBuffer('Property(')
           ..write('key: $key, ')
           ..write('group: $group, ')
           ..write('value: $value')
@@ -14509,13 +14465,13 @@ class Propertie extends DataClass implements Insertable<Propertie> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Propertie &&
+      (other is Property &&
           other.key == this.key &&
           other.group == this.group &&
           other.value == this.value);
 }
 
-class PropertiesCompanion extends UpdateCompanion<Propertie> {
+class PropertiesCompanion extends UpdateCompanion<Property> {
   final Value<String> key;
   final Value<PropertyGroup> group;
   final Value<String> value;
@@ -14534,7 +14490,7 @@ class PropertiesCompanion extends UpdateCompanion<Propertie> {
   })  : key = Value(key),
         group = Value(group),
         value = Value(value);
-  static Insertable<Propertie> custom({
+  static Insertable<Property> custom({
     Expression<String>? key,
     Expression<String>? group,
     Expression<String>? value,
@@ -14568,9 +14524,8 @@ class PropertiesCompanion extends UpdateCompanion<Propertie> {
       map['key'] = Variable<String>(key.value);
     }
     if (group.present) {
-      final converter = Properties.$convertergroup;
-
-      map['group'] = Variable<String>(converter.toSql(group.value));
+      map['group'] =
+          Variable<String>(Properties.$convertergroup.toSql(group.value));
     }
     if (value.present) {
       map['value'] = Variable<String>(value.value);
@@ -14608,7 +14563,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final MessageMentions messageMentions = MessageMentions(this);
   late final PinMessages pinMessages = PinMessages(this);
   late final ExpiredMessages expiredMessages = ExpiredMessages(this);
-  late final Addresses addresses = Addresses(this);
+  late final AddressesTable addresses = AddressesTable(this);
   late final Apps apps = Apps(this);
   late final CircleConversations circleConversations =
       CircleConversations(this);

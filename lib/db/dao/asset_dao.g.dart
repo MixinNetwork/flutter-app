@@ -6,7 +6,7 @@ part of 'asset_dao.dart';
 mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
   Assets get assets => attachedDatabase.assets;
   Chains get chains => attachedDatabase.chains;
-  Addresses get addresses => attachedDatabase.addresses;
+  AddressesTable get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   CircleConversations get circleConversations =>
       attachedDatabase.circleConversations;
