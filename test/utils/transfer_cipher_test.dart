@@ -103,7 +103,7 @@ void main() {
           ' targetResult: ${base64Encode(targetResult)}');
       expect(base64Encode(sourceResult), equals(base64Encode(targetResult)));
     }
-  }, testOn: 'linux');
+  }, testOn: 'linux||windows');
 }
 
 Future<void> _testCalculateRandomHMac(
