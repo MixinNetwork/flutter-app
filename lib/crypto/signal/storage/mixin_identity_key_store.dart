@@ -76,7 +76,7 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
     return false;
   }
 
-  bool isTrustedForSending(IdentityKey identityKey, Identitie? identity) {
+  bool isTrustedForSending(IdentityKey identityKey, Identity? identity) {
     if (identity == null) {
       i('Nothing here, returning true...');
       return true;

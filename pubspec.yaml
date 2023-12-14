@@ -49,7 +49,7 @@ dependencies:
   device_info_plus: ^9.1.1
   dio: ^5.4.0
   dio_smart_retry: ^6.0.0
-  drift: ^2.14.0
+  drift: ^2.14.1
   ecache: ^2.0.3
   emojis: ^0.9.9
   equatable: ^2.0.5
@@ -172,7 +172,7 @@ dev_dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 77f03330001941f0ac303de6276dd2380f5bcc7e
       path: packages/debug_info_collector
-  drift_dev: ^2.14.0
+  drift_dev: ^2.14.1
   flutter_test:
     sdk: flutter
   hive_generator: ^2.0.1

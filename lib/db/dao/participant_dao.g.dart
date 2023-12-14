@@ -7,7 +7,7 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
   Conversations get conversations => attachedDatabase.conversations;
   Participants get participants => attachedDatabase.participants;
   Users get users => attachedDatabase.users;
-  Addresses get addresses => attachedDatabase.addresses;
+  AddressesTable get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   CircleConversations get circleConversations =>

@@ -52,11 +52,38 @@ const numberKeys = [
   LogicalKeyboardKey.numpad9,
 ];
 
-extension RawKeyEventExtension on RawKeyEvent {
+extension KeyEventExtension on KeyEvent {
   bool get firstInputable {
-    if (data.modifiersPressed.isNotEmpty) return false;
+    if (HardwareKeyboard.instance.logicalKeysPressed.hasModifierKey) {
+      return false;
+    }
     return letterKeys.contains(logicalKey) ||
         numberKeys.contains(logicalKey) ||
         LogicalKeyboardKey.space == logicalKey;
   }
+}
+
+final _modifierKeys = {
+  LogicalKeyboardKey.alt,
+  LogicalKeyboardKey.altLeft,
+  LogicalKeyboardKey.altRight,
+  LogicalKeyboardKey.control,
+  LogicalKeyboardKey.controlLeft,
+  LogicalKeyboardKey.controlRight,
+  LogicalKeyboardKey.meta,
+  LogicalKeyboardKey.metaLeft,
+  LogicalKeyboardKey.metaRight,
+  LogicalKeyboardKey.shift,
+  LogicalKeyboardKey.shiftLeft,
+  LogicalKeyboardKey.shiftRight,
+  LogicalKeyboardKey.capsLock,
+  LogicalKeyboardKey.numLock,
+  LogicalKeyboardKey.scrollLock,
+  LogicalKeyboardKey.symbol,
+  LogicalKeyboardKey.symbolLock,
+  LogicalKeyboardKey.fn,
+};
+
+extension SetExtension on Set<LogicalKeyboardKey> {
+  bool get hasModifierKey => any(_modifierKeys.contains);
 }

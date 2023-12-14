@@ -9,7 +9,7 @@ class IdentityDao extends DatabaseAccessor<SignalDatabase>
     with _$IdentityDaoMixin {
   IdentityDao(super.db);
 
-  Future<Identitie?> getIdentityByAddress(String address) async =>
+  Future<Identity?> getIdentityByAddress(String address) async =>
       (select(db.identities)..where((tbl) => tbl.address.equals(address)))
           .getSingleOrNull();
 
@@ -19,7 +19,7 @@ class IdentityDao extends DatabaseAccessor<SignalDatabase>
   Future<int> deleteByAddress(String address) =>
       (delete(db.identities)..where((tbl) => tbl.address.equals(address))).go();
 
-  Future<Identitie?> getLocalIdentity() async =>
+  Future<Identity?> getLocalIdentity() async =>
       (select(db.identities)..where((tbl) => tbl.address.equals('-1')))
           .getSingleOrNull();
 }
