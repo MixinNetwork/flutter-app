@@ -17,13 +17,14 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - name: switch to gcc-11 on linux
-        run: |
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-11
-          sudo update-alternatives --set gcc /usr/bin/gcc-11
+#      - name: switch to gcc-11 on linux
+#        run: |
+#          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-11
+#          sudo update-alternatives --set gcc /usr/bin/gcc-11
 
       - run: g++ --version
       - run: gcc --version
+      - run: sudo apt-get install libstdc++6
 
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
@@ -53,9 +54,6 @@ jobs:
       - run: flutter config --enable-linux-desktop
       - name: Run tests
         run: flutter test
-
-      - run: g++ --version
-      - run: gcc --version
 
       - name: Build APP
         run: flutter build linux
