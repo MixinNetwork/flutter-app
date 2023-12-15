@@ -622,7 +622,7 @@ class MixinNetworkImageProvider
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
