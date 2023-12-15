@@ -17,15 +17,17 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-#      - name: switch to gcc-11 on linux
-#        run: |
-#          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-11
-#          sudo update-alternatives --set gcc /usr/bin/gcc-11
+      # Work around https://github.com/actions/runner-images/issues/8659
+      - name: Remove GCC 13 from runner image
+        shell: bash
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/ubuntu-toolchain-r-ubuntu-test-jammy.list
+          sudo apt-get update
+          sudo apt-get install -y --allow-downgrades libc6=2.35-0ubuntu3.5 libc6-dev=2.35-0ubuntu3.5 libstdc++6=12.3.0-1ubuntu1~22.04 libgcc-s1=12.3.0-1ubuntu1~22.04
 
       - run: g++ --version
       - run: gcc --version
-      - run: sudo apt-get remove libstdc++6
-      - run: sudo apt-get install libstdc++6 -y
+      - run: sudo apt-get install libstdc++6
 
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
