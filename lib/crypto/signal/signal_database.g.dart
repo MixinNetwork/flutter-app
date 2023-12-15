@@ -234,7 +234,7 @@ class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
   }
 }
 
-class Identities extends Table with TableInfo<Identities, Identitie> {
+class Identities extends Table with TableInfo<Identities, Identity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -304,7 +304,7 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
   String get actualTableName => $name;
   static const String $name = 'identities';
   @override
-  VerificationContext validateIntegrity(Insertable<Identitie> instance,
+  VerificationContext validateIntegrity(Insertable<Identity> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -353,9 +353,9 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Identitie map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Identity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Identitie(
+    return Identity(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       address: attachedDatabase.typeMapping
@@ -382,7 +382,7 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
   bool get dontWriteConstraints => true;
 }
 
-class Identitie extends DataClass implements Insertable<Identitie> {
+class Identity extends DataClass implements Insertable<Identity> {
   final int id;
   final String address;
   final int? registrationId;
@@ -390,7 +390,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
   final Uint8List? privateKey;
   final int? nextPrekeyId;
   final int timestamp;
-  const Identitie(
+  const Identity(
       {required this.id,
       required this.address,
       this.registrationId,
@@ -435,10 +435,10 @@ class Identitie extends DataClass implements Insertable<Identitie> {
     );
   }
 
-  factory Identitie.fromJson(Map<String, dynamic> json,
+  factory Identity.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Identitie(
+    return Identity(
       id: serializer.fromJson<int>(json['id']),
       address: serializer.fromJson<String>(json['address']),
       registrationId: serializer.fromJson<int?>(json['registration_id']),
@@ -462,7 +462,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
     };
   }
 
-  Identitie copyWith(
+  Identity copyWith(
           {int? id,
           String? address,
           Value<int?> registrationId = const Value.absent(),
@@ -470,7 +470,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
           Value<Uint8List?> privateKey = const Value.absent(),
           Value<int?> nextPrekeyId = const Value.absent(),
           int? timestamp}) =>
-      Identitie(
+      Identity(
         id: id ?? this.id,
         address: address ?? this.address,
         registrationId:
@@ -483,7 +483,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
       );
   @override
   String toString() {
-    return (StringBuffer('Identitie(')
+    return (StringBuffer('Identity(')
           ..write('id: $id, ')
           ..write('address: $address, ')
           ..write('registrationId: $registrationId, ')
@@ -507,7 +507,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Identitie &&
+      (other is Identity &&
           other.id == this.id &&
           other.address == this.address &&
           other.registrationId == this.registrationId &&
@@ -517,7 +517,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
           other.timestamp == this.timestamp);
 }
 
-class IdentitiesCompanion extends UpdateCompanion<Identitie> {
+class IdentitiesCompanion extends UpdateCompanion<Identity> {
   final Value<int> id;
   final Value<String> address;
   final Value<int?> registrationId;
@@ -545,7 +545,7 @@ class IdentitiesCompanion extends UpdateCompanion<Identitie> {
   })  : address = Value(address),
         publicKey = Value(publicKey),
         timestamp = Value(timestamp);
-  static Insertable<Identitie> custom({
+  static Insertable<Identity> custom({
     Expression<int>? id,
     Expression<String>? address,
     Expression<int>? registrationId,

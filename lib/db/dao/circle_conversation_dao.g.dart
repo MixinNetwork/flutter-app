@@ -6,7 +6,7 @@ part of 'circle_conversation_dao.dart';
 mixin _$CircleConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
   CircleConversations get circleConversations =>
       attachedDatabase.circleConversations;
-  Addresses get addresses => attachedDatabase.addresses;
+  AddressesTable get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   Circles get circles => attachedDatabase.circles;

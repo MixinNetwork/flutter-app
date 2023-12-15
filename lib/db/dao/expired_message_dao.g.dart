@@ -5,7 +5,7 @@ part of 'expired_message_dao.dart';
 // ignore_for_file: type=lint
 mixin _$ExpiredMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
-  Addresses get addresses => attachedDatabase.addresses;
+  AddressesTable get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   CircleConversations get circleConversations =>
