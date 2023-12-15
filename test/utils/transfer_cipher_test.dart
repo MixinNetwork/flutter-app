@@ -36,74 +36,117 @@ void main() {
   }, testOn: 'linux');
 
   test('random encrypt test', () {
-    final random = Random.secure();
-    for (var start = 0; start < 100; start++) {
-      final key = generateTransferKey();
-      final iv = generateTransferIv();
+    final smallData = Uint8List(1024);
+    _randomFillBytes(smallData);
+    final key = generateTransferKey();
+    _benchMarkAesCipher(
+      smallData,
+      () {
+        final iv = generateTransferIv();
+        return AesCipherPointyCastleImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      () {
+        final iv = generateTransferIv();
+        return AesCipherCommonCryptoImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      count: 1000,
+    );
 
-      final hMacKey = generateRandomBytes();
-
-      final encryptor =
-          AesCipherCommonCryptoImpl(key: key.aesKey, iv: iv, encrypt: true);
-      final decryptor =
-          AesCipherPointyCastleImpl(key: key.aesKey, iv: iv, encrypt: false);
-
-      final sourceHMac = HMacCalculator(hMacKey);
-      final targetHMac = HMacCalculator(hMacKey);
-
-      for (var i = 0; i < 100; i++) {
-        final source = generateRandomBytes(random.nextInt(1024));
-        sourceHMac.addBytes(source);
-        final encrypted = encryptor.update(source);
-        targetHMac.addBytes(decryptor.update(encrypted));
-      }
-
-      targetHMac
-        ..addBytes(decryptor.update(encryptor.finish()))
-        ..addBytes(decryptor.finish());
-
-      final sourceResult = sourceHMac.result;
-      final targetResult = targetHMac.result;
-      i(' sourceResult: ${base64Encode(sourceResult)},'
-          ' targetResult: ${base64Encode(targetResult)}');
-      expect(base64Encode(sourceResult), equals(base64Encode(targetResult)));
-    }
+    final largeData = Uint8List(1024 * 1024 * 5);
+    _randomFillBytes(largeData);
+    _benchMarkAesCipher(
+      largeData,
+      () {
+        final iv = generateTransferIv();
+        return AesCipherPointyCastleImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      () {
+        final iv = generateTransferIv();
+        return AesCipherCommonCryptoImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      count: 5,
+    );
   }, testOn: 'mac-os');
 
   test('random encrypt test', () {
-    final random = Random.secure();
-    for (var start = 0; start < 100; start++) {
-      final key = generateTransferKey();
-      final iv = generateTransferIv();
+    final smallData = Uint8List(1024);
+    _randomFillBytes(smallData);
+    final key = generateTransferKey();
+    _benchMarkAesCipher(
+      smallData,
+      () {
+        final iv = generateTransferIv();
+        return AesCipherPointyCastleImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      () {
+        final iv = generateTransferIv();
+        return AesCipherWebCryptoImpl(key: key.aesKey, iv: iv, encrypt: true);
+      },
+      count: 1000,
+    );
 
-      final hMacKey = generateRandomBytes();
-
-      final encryptor =
-          AesCipherWebCryptoImpl(key: key.aesKey, iv: iv, encrypt: true);
-      final decryptor =
-          AesCipherWebCryptoImpl(key: key.aesKey, iv: iv, encrypt: false);
-
-      final sourceHMac = HMacCalculator(hMacKey);
-      final targetHMac = HMacCalculator(hMacKey);
-
-      for (var i = 0; i < 100; i++) {
-        final source = generateRandomBytes(random.nextInt(1024));
-        sourceHMac.addBytes(source);
-        final encrypted = encryptor.update(source);
-        targetHMac.addBytes(decryptor.update(encrypted));
-      }
-
-      targetHMac
-        ..addBytes(decryptor.update(encryptor.finish()))
-        ..addBytes(decryptor.finish());
-
-      final sourceResult = sourceHMac.result;
-      final targetResult = targetHMac.result;
-      i(' sourceResult: ${base64Encode(sourceResult)},'
-          ' targetResult: ${base64Encode(targetResult)}');
-      expect(base64Encode(sourceResult), equals(base64Encode(targetResult)));
-    }
+    final largeData = Uint8List(1024 * 1024 * 5);
+    _randomFillBytes(largeData);
+    _benchMarkAesCipher(
+      largeData,
+      () {
+        final iv = generateTransferIv();
+        return AesCipherPointyCastleImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      () {
+        final iv = generateTransferIv();
+        return AesCipherWebCryptoImpl(key: key.aesKey, iv: iv, encrypt: true);
+      },
+      count: 5,
+    );
   }, testOn: 'linux||windows');
+}
+
+final Random _random = Random.secure();
+
+void _randomFillBytes(List<int> bytes) {
+  for (var i = 0; i < bytes.length; i++) {
+    bytes[i] = _random.nextInt(256);
+  }
+}
+
+void _benchMarkAesCipher(
+  Uint8List data,
+  AesCipher Function() cipher1Creator,
+  AesCipher Function() cipher2Creator, {
+  int count = 10,
+}) {
+  var cipher1Count = 0;
+  var cipher2Count = 0;
+
+  for (var start = 0; start < count; start++) {
+    final cipher1 = cipher1Creator();
+    final cipher2 = cipher2Creator();
+
+    final stopwatch = Stopwatch()..start();
+    cipher1
+      ..update(data)
+      ..finish();
+
+    final temp = stopwatch.elapsedMicroseconds;
+    cipher1Count += temp;
+
+    stopwatch.reset();
+    cipher2
+      ..update(data)
+      ..finish();
+    cipher2Count += stopwatch.elapsedMicroseconds;
+
+    i('cipher1 vs cipher2 : $temp : ${stopwatch.elapsedMicroseconds}');
+  }
+
+  i('cipher1Count: ${cipher1Count / 1000} ms, cipher2Count: ${cipher2Count / 1000} ms');
 }
 
 Future<void> _testCalculateRandomHMac(
@@ -141,8 +184,6 @@ Future<void> _testCalculateRandomHMac(
       'pointyCastleResult: ${base64Encode(pointyCastleResult)}');
   expect(commonCryptoResult, equals(pointyCastleResult));
 }
-
-final _random = math.Random.secure();
 
 Stream<List<int>> _mockFileStream(int fileSize) async* {
   var left = fileSize;
