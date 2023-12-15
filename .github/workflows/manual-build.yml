@@ -10,8 +10,8 @@ on:
         required: true
         default: "master"
   push:
-#    tags:
-#      - 'v*'
+    tags:
+      - 'v*'
 
 jobs:
   build-linux:
@@ -102,7 +102,6 @@ jobs:
   build-linux-snap:
     needs: build-linux
     runs-on: ubuntu-latest
-    if: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -146,7 +145,6 @@ jobs:
   build-linux-appimage:
     needs: build-linux
     runs-on: ubuntu-latest
-    if: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -185,7 +183,6 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-    if: false
     steps:
       - uses: actions/checkout@v3
 
