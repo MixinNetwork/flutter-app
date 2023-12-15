@@ -15,12 +15,8 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - name: switch to gcc-11 on linux
-        run: |
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-11
-          sudo update-alternatives --set gcc /usr/bin/gcc-11
 
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
