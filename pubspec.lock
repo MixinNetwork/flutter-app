@@ -368,11 +368,11 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/desktop_drop"
-      ref: a8e2bab0447760eb09457eafbc49e8d7c8cbb99f
-      resolved-ref: a8e2bab0447760eb09457eafbc49e8d7c8cbb99f
+      ref: ceca9081fbdccb2e3a71e32f9bfcc7b3e9c2b360
+      resolved-ref: ceca9081fbdccb2e3a71e32f9bfcc7b3e9c2b360
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
-    version: "0.4.1"
+    version: "0.4.4"
   desktop_keep_screen_on:
     dependency: "direct main"
     description:
