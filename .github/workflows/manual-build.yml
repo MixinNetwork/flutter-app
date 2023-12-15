@@ -212,7 +212,7 @@ jobs:
       - uses: ilammy/setup-nasm@v1
 
       # setup webcrypto for unit test
-      - run: dart run webcrypto:setup
+      - run: flutter pub run webcrypto:setup
 
       - name: Run tests
         run: flutter test
