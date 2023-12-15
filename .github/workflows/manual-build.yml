@@ -54,6 +54,9 @@ jobs:
       - name: Run tests
         run: flutter test
 
+      - run: g++ --version
+      - run: gcc --version
+
       - name: Build APP
         run: flutter build linux
 
