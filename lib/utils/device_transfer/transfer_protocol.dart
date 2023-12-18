@@ -169,7 +169,8 @@ class TransferAttachmentPacket extends TransferPacket {
     final fileStream = file.openRead();
 
     await for (final bytes in fileStream) {
-      final encrypted = aesCipher.update(Uint8List.fromList(bytes));
+      final encrypted = aesCipher
+          .update(bytes is Uint8List ? bytes : Uint8List.fromList(bytes));
       hMacCalculator.addBytes(encrypted);
       actualEncryptedLength += encrypted.length;
       sink.add(encrypted);

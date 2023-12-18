@@ -23,67 +23,145 @@ void main() {
         base64Encode(result), 'rG0d+pIOti5pPCcTkRsFHmNkD3DJFcGHUqZgOyvIvDc=');
   });
 
-  test('calculate random hMac', () async {
-    final key = generateTransferKey();
-    final iv = generateTransferIv();
-
-    i('key: ${key.aesKey} ${key.hMacKey}');
-    i('iv: $iv');
-
+  test('calculate random hMac HMacCalculator.commonCrypto', () async {
     for (var i = 0; i < 100; i++) {
-      await _testCalculateRandomHMac();
+      await _testCalculateRandomHMac(HMacCalculator.commonCrypto);
     }
+  }, testOn: 'mac-os');
+
+  test('calculate random hMac HMacCalculator.webCrypto', () async {
+    for (var i = 0; i < 10; i++) {
+      await _testCalculateRandomHMac(HMacCalculator.webCrypto);
+    }
+  }, testOn: 'linux||windows');
+
+  test('random encrypt test', () {
+    final smallData = Uint8List(1024);
+    _randomFillBytes(smallData);
+    final key = generateTransferKey();
+    _benchMarkAesCipher(
+      smallData,
+      () {
+        final iv = generateTransferIv();
+        return AesCipherPointyCastleImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      () {
+        final iv = generateTransferIv();
+        return AesCipherCommonCryptoImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      count: 1000,
+    );
+
+    final largeData = Uint8List(1024 * 1024 * 5);
+    _randomFillBytes(largeData);
+    _benchMarkAesCipher(
+      largeData,
+      () {
+        final iv = generateTransferIv();
+        return AesCipherPointyCastleImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      () {
+        final iv = generateTransferIv();
+        return AesCipherCommonCryptoImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      count: 5,
+    );
   }, testOn: 'mac-os');
 
   test('random encrypt test', () {
-    final random = Random.secure();
-    for (var start = 0; start < 100; start++) {
-      final key = generateTransferKey();
-      final iv = generateTransferIv();
+    final smallData = Uint8List(1024);
+    _randomFillBytes(smallData);
+    final key = generateTransferKey();
+    _benchMarkAesCipher(
+      smallData,
+      () {
+        final iv = generateTransferIv();
+        return AesCipherPointyCastleImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      () {
+        final iv = generateTransferIv();
+        return AesCipherWebCryptoImpl(key: key.aesKey, iv: iv, encrypt: true);
+      },
+      count: 1000,
+    );
 
-      final hMacKey = generateRandomBytes();
-
-      final encryptor =
-          AesCipherCommonCryptoImpl(key: key.aesKey, iv: iv, encrypt: true);
-      final decryptor =
-          AesCipherPointyCastleImpl(key: key.aesKey, iv: iv, encrypt: false);
-
-      final sourceHMac = HMacCalculator(hMacKey);
-      final targetHMac = HMacCalculator(hMacKey);
-
-      for (var i = 0; i < 100; i++) {
-        final source = generateRandomBytes(random.nextInt(1024));
-        sourceHMac.addBytes(source);
-        final encrypted = encryptor.update(source);
-        targetHMac.addBytes(decryptor.update(encrypted));
-      }
-
-      targetHMac
-        ..addBytes(decryptor.update(encryptor.finish()))
-        ..addBytes(decryptor.finish());
-
-      final sourceResult = sourceHMac.result;
-      final targetResult = targetHMac.result;
-      i(' sourceResult: ${base64Encode(sourceResult)},'
-          ' targetResult: ${base64Encode(targetResult)}');
-      expect(base64Encode(sourceResult), equals(base64Encode(targetResult)));
-    }
-  }, testOn: 'mac-os');
+    final largeData = Uint8List(1024 * 1024 * 5);
+    _randomFillBytes(largeData);
+    _benchMarkAesCipher(
+      largeData,
+      () {
+        final iv = generateTransferIv();
+        return AesCipherPointyCastleImpl(
+            key: key.aesKey, iv: iv, encrypt: true);
+      },
+      () {
+        final iv = generateTransferIv();
+        return AesCipherWebCryptoImpl(key: key.aesKey, iv: iv, encrypt: true);
+      },
+      count: 5,
+    );
+  }, testOn: 'linux||windows');
 }
 
-Future<void> _testCalculateRandomHMac() async {
+final Random _random = Random.secure();
+
+void _randomFillBytes(List<int> bytes) {
+  for (var i = 0; i < bytes.length; i++) {
+    bytes[i] = _random.nextInt(256);
+  }
+}
+
+void _benchMarkAesCipher(
+  Uint8List data,
+  AesCipher Function() cipher1Creator,
+  AesCipher Function() cipher2Creator, {
+  int count = 10,
+}) {
+  var cipher1Count = 0;
+  var cipher2Count = 0;
+
+  for (var start = 0; start < count; start++) {
+    final cipher1 = cipher1Creator();
+    final cipher2 = cipher2Creator();
+
+    final stopwatch = Stopwatch()..start();
+    cipher1
+      ..update(data)
+      ..finish();
+
+    final temp = stopwatch.elapsedMicroseconds;
+    cipher1Count += temp;
+
+    stopwatch.reset();
+    cipher2
+      ..update(data)
+      ..finish();
+    cipher2Count += stopwatch.elapsedMicroseconds;
+
+    i('cipher1 vs cipher2 : $temp : ${stopwatch.elapsedMicroseconds}');
+  }
+
+  i('cipher1Count: ${cipher1Count / 1000} ms, cipher2Count: ${cipher2Count / 1000} ms');
+}
+
+Future<void> _testCalculateRandomHMac(
+    HMacCalculator Function(Uint8List key) creator) async {
   final key = generateTransferKey();
 
-  final commonCrypto = HMacCalculator.commonCrypto(key.hMacKey);
+  final calculator1 = creator(key.hMacKey);
   final pointyCastle = HMacCalculator.pointyCastle(key.hMacKey);
 
-  final randomFileSize = math.Random().nextInt(1024 * 1024 * 5);
+  final randomFileSize = math.Random().nextInt(1024 * 5);
 
   final iv = generateTransferIv();
-  final aesCipher =
-      AesCipherCommonCryptoImpl(key: key.aesKey, iv: iv, encrypt: true);
+  final aesCipher = AesCipher(key: key.aesKey, iv: iv, encrypt: true);
 
-  commonCrypto.addBytes(iv);
+  calculator1.addBytes(iv);
   pointyCastle.addBytes(iv);
 
   i('randomFileSize: $randomFileSize');
@@ -91,23 +169,21 @@ Future<void> _testCalculateRandomHMac() async {
 
   await for (final bytes in fileStream) {
     final encrypted = aesCipher.update(Uint8List.fromList(bytes));
-    commonCrypto.addBytes(encrypted);
+    calculator1.addBytes(encrypted);
     pointyCastle.addBytes(encrypted);
   }
 
   final encrypted = aesCipher.finish();
-  commonCrypto.addBytes(encrypted);
+  calculator1.addBytes(encrypted);
   pointyCastle.addBytes(encrypted);
 
-  final commonCryptoResult = commonCrypto.result;
+  final commonCryptoResult = calculator1.result;
   final pointyCastleResult = pointyCastle.result;
 
   i('commonCryptoResult: ${base64Encode(commonCryptoResult)}, '
       'pointyCastleResult: ${base64Encode(pointyCastleResult)}');
   expect(commonCryptoResult, equals(pointyCastleResult));
 }
-
-final _random = math.Random.secure();
 
 Stream<List<int>> _mockFileStream(int fileSize) async* {
   var left = fileSize;

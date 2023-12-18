@@ -2043,6 +2043,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
+  webcrypto:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "210839e1e9311bcddeb733297a565721692033ee"
+      resolved-ref: "210839e1e9311bcddeb733297a565721692033ee"
+      url: "https://github.com/boyan01/webcrypto.dart.git"
+    source: git
+    version: "0.5.4"
   webview_flutter:
     dependency: "direct main"
     description:
@@ -2150,4 +2159,4 @@ packages:
     version: "3.1.2"
 sdks:
   dart: ">=3.2.0 <4.0.0"
-  flutter: ">=3.13.0"
+  flutter: ">=3.16.0"

@@ -27,6 +27,7 @@ list(APPEND FLUTTER_FFI_PLUGIN_LIST
   mixin_logger
   ogg_opus_player
   system_clock
+  webcrypto
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

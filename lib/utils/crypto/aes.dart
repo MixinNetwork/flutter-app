@@ -1,4 +1,8 @@
+import 'dart:ffi';
+import 'dart:io';
+
 import 'package:common_crypto/common_crypto.dart' as cc;
+import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pointycastle/block/aes.dart';
 import 'package:pointycastle/block/modes/cbc.dart';
@@ -7,6 +11,7 @@ import 'package:pointycastle/paddings/pkcs7.dart';
 import 'package:pointycastle/pointycastle.dart';
 
 import '../platform.dart';
+import 'web_crypto.dart';
 
 typedef OnCipherCallback = void Function(Uint8List data);
 
@@ -18,6 +23,8 @@ abstract class AesCipher {
   }) {
     if (kPlatformIsDarwin) {
       return AesCipherCommonCryptoImpl(key: key, iv: iv, encrypt: encrypt);
+    } else if (Platform.isLinux || Platform.isWindows) {
+      return AesCipherWebCryptoImpl(key: key, iv: iv, encrypt: encrypt);
     } else {
       return AesCipherPointyCastleImpl(key: key, iv: iv, encrypt: encrypt);
     }
@@ -155,5 +162,83 @@ class AesCipherPointyCastleImpl implements AesCipher {
     }
     final encryptedData = _cipher.process(lastBlock);
     return encryptedData;
+  }
+}
+
+class AesCipherWebCryptoImpl implements AesCipher {
+  AesCipherWebCryptoImpl({
+    required Uint8List key,
+    required Uint8List iv,
+    required bool encrypt,
+  }) : _ctx = _createCipher(key: key, iv: iv, encrypt: encrypt);
+
+  static bool isSupported = Platform.isLinux || Platform.isWindows;
+
+  static Pointer<evp_cipher_ctx_st> _createCipher({
+    required Uint8List key,
+    required Uint8List iv,
+    required bool encrypt,
+  }) {
+    final cipher =
+        key.length == 16 ? ssl.EVP_aes_128_cbc() : ssl.EVP_aes_256_cbc();
+
+    final ivSize = ssl.EVP_CIPHER_iv_length(cipher);
+    if (iv.length != ivSize) {
+      throw ArgumentError.value(iv, 'iv', 'must be $ivSize bytes');
+    }
+
+    final ctx = ssl.EVP_CIPHER_CTX_new();
+    final nativeKey = key.toNative();
+    final nativeIv = iv.toNative();
+    try {
+      checkOpIsOne(ssl.EVP_CipherInit_ex(
+        ctx,
+        cipher,
+        nullptr,
+        nativeKey,
+        nativeIv,
+        encrypt ? 1 : 0,
+      ));
+    } finally {
+      malloc
+        ..free(nativeKey)
+        ..free(nativeIv);
+    }
+    return ctx;
+  }
+
+  final Pointer<evp_cipher_ctx_st> _ctx;
+  var _disposed = false;
+
+  @override
+  Uint8List update(Uint8List data) {
+    assert(!_disposed, 'AesCipherWebCryptoImpl has been disposed.');
+    final inBuf = data.toNative();
+    final outBuf = malloc<Uint8>(data.length + AES_BLOCK_SIZE);
+    final outLen = malloc<Int>();
+    try {
+      checkOpIsOne(
+          ssl.EVP_CipherUpdate(_ctx, outBuf, outLen, inBuf, data.length));
+      return outBuf.asTypedList(outLen.value, finalizer: malloc.nativeFree);
+    } finally {
+      malloc
+        ..free(inBuf)
+        ..free(outLen);
+    }
+  }
+
+  @override
+  Uint8List finish() {
+    assert(!_disposed, 'AesCipherWebCryptoImpl has been disposed.');
+    _disposed = true;
+    final outBuf = malloc<Uint8>(AES_BLOCK_SIZE);
+    final outLen = malloc<Int>();
+    try {
+      checkOpIsOne(ssl.EVP_CipherFinal_ex(_ctx, outBuf, outLen));
+      ssl.EVP_CIPHER_CTX_free(_ctx);
+      return outBuf.asTypedList(outLen.value, finalizer: malloc.nativeFree);
+    } finally {
+      malloc.free(outLen);
+    }
   }
 }
