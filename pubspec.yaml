@@ -25,7 +25,7 @@ dependencies:
   audio_session: ^0.1.18
   auto_size_text: ^3.0.0
   bloc: ^8.1.2
-  bloc_concurrency: ^0.2.2
+  bloc_concurrency: ^0.2.3
   blurhash_dart: ^1.0.2
   bring_window_to_front:
     git:
