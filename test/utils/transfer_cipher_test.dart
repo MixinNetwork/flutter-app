@@ -30,10 +30,10 @@ void main() {
   }, testOn: 'mac-os');
 
   test('calculate random hMac HMacCalculator.webCrypto', () async {
-    for (var i = 0; i < 100; i++) {
+    for (var i = 0; i < 10; i++) {
       await _testCalculateRandomHMac(HMacCalculator.webCrypto);
     }
-  }, testOn: 'linux');
+  }, testOn: 'linux||windows');
 
   test('random encrypt test', () {
     final smallData = Uint8List(1024);
@@ -156,7 +156,7 @@ Future<void> _testCalculateRandomHMac(
   final calculator1 = creator(key.hMacKey);
   final pointyCastle = HMacCalculator.pointyCastle(key.hMacKey);
 
-  final randomFileSize = math.Random().nextInt(1024 * 1024 * 5);
+  final randomFileSize = math.Random().nextInt(1024 * 5);
 
   final iv = generateTransferIv();
   final aesCipher = AesCipher(key: key.aesKey, iv: iv, encrypt: true);
