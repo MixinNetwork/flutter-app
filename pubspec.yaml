@@ -44,7 +44,7 @@ dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: ceca9081fbdccb2e3a71e32f9bfcc7b3e9c2b360
       path: packages/desktop_drop
-  desktop_keep_screen_on: ^0.0.2
+  desktop_keep_screen_on: ^0.0.3
   desktop_webview_window: ^0.2.3
   device_info_plus: ^9.1.1
   dio: ^5.4.0
