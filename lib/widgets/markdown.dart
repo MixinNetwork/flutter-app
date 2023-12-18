@@ -4,6 +4,7 @@ import 'package:html/dom_parsing.dart';
 import 'package:html/parser.dart';
 import 'package:markdown/markdown.dart' as m;
 import 'package:markdown_widget/markdown_widget.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 
 import '../utils/extension/extension.dart';
 import '../utils/uri_utils.dart';
@@ -264,17 +265,26 @@ final _kMixinGenerators = <SpanNodeGeneratorWithTag>[
   SpanNodeGeneratorWithTag(
     tag: MarkdownTag.pre.name,
     generator: (e, config, visitor) => _MixinCodeBlockNode(
-      e.textContent,
+      e,
       config.pre,
+      visitor,
     ),
   ),
 ];
 
 class _MixinCodeBlockNode extends CodeBlockNode {
-  _MixinCodeBlockNode(super.content, super.preConfig);
+  _MixinCodeBlockNode(super.content, super.preConfig, super.visitor);
 
   @override
   InlineSpan build() {
+    var language = preConfig.language;
+    try {
+      final languageValue =
+          (element.children!.first as m.Element).attributes['class']!;
+      language = languageValue.split('-').last;
+    } catch (e) {
+      i('get language error:$e');
+    }
     final splitContents = content.trim().split(RegExp(r'(\r?\n)|(\r?\t)|(\r)'));
     if (splitContents.last.isEmpty) splitContents.removeLast();
     final widget = Container(
@@ -286,19 +296,22 @@ class _MixinCodeBlockNode extends CodeBlockNode {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: List.generate(splitContents.length, (index) {
           final currentContent = splitContents[index];
-          return ProxyRichText(TextSpan(
-            children: highLightSpans(
-              currentContent,
-              language: preConfig.language,
-              theme: preConfig.theme,
-              textStyle: style,
-              styleNotMatched: preConfig.styleNotMatched,
+          return ProxyRichText(
+            TextSpan(
+              children: highLightSpans(
+                currentContent,
+                language: preConfig.language,
+                theme: preConfig.theme,
+                textStyle: style,
+                styleNotMatched: preConfig.styleNotMatched,
+              ),
             ),
-          ));
+            richTextBuilder: visitor.richTextBuilder,
+          );
         }),
       ),
     );
     return WidgetSpan(
-        child: preConfig.wrapper?.call(widget, content) ?? widget);
+        child: preConfig.wrapper?.call(widget, content, language) ?? widget);
   }
 }
