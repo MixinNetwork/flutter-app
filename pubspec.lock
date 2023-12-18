@@ -377,10 +377,10 @@ packages:
     dependency: "direct main"
     description:
       name: desktop_keep_screen_on
-      sha256: e431385ec46746a606728c4f36f40cb5cb2dd85e684ce924ae715deef5e8c506
+      sha256: c5f46888a5e2984d2662cbe26e0b99664ea998ddf0e22e89cb24b4a67e87bb49
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.2"
+    version: "0.0.3"
   desktop_webview_window:
     dependency: "direct main"
     description:
