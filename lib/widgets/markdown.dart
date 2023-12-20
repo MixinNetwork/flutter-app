@@ -9,6 +9,7 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../utils/extension/extension.dart';
 import '../utils/uri_utils.dart';
 import 'cache_image.dart';
+import 'high_light_text.dart';
 
 class MarkdownColumn extends StatelessWidget {
   const MarkdownColumn({required this.data, super.key});
@@ -24,6 +25,7 @@ class MarkdownColumn extends StatelessWidget {
         visitor,
       ),
       generators: _kMixinGenerators,
+      richTextBuilder: CustomText.rich,
     ).buildWidgets(
       data,
       config: _createMarkdownConfig(
@@ -73,6 +75,7 @@ class Markdown extends StatelessWidget {
               visitor,
             ),
             generators: _kMixinGenerators,
+            richTextBuilder: CustomText.rich,
           ),
         ),
       );
