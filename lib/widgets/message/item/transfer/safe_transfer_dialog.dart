@@ -247,14 +247,14 @@ class _ValuesDescription extends HookConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SelectableText(
+          CustomSelectableText(
             currentValue,
             enableInteractiveSelection: false,
           ),
           if (thatTimeValue != null)
             Padding(
               padding: const EdgeInsets.only(top: 2),
-              child: SelectableText(
+              child: CustomSelectableText(
                 thatTimeValue,
                 enableInteractiveSelection: false,
               ),
@@ -291,7 +291,7 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
           if (type == SnapshotType.pending) ...[
             TransactionInfoTile(
               title: Text(context.l10n.status),
-              subtitle: SelectableText(
+              subtitle: CustomSelectableText(
                 context.l10n.pendingConfirmation(
                   snapshot.confirmations ?? 0,
                   snapshot.confirmations ?? 0,
@@ -302,22 +302,22 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
             if (snapshot.deposit != null)
               TransactionInfoTile(
                 title: Text(context.l10n.depositHash),
-                subtitle: SelectableText(snapshot.deposit!.depositHash),
+                subtitle: CustomSelectableText(snapshot.deposit!.depositHash),
               ),
           ] else ...[
             TransactionInfoTile(
               title: Text(context.l10n.transactionId),
-              subtitle: SelectableText(snapshot.snapshotId),
+              subtitle: CustomSelectableText(snapshot.snapshotId),
             ),
             TransactionInfoTile(
               title: Text(context.l10n.transactionHash),
-              subtitle: SelectableText(snapshot.transactionHash),
+              subtitle: CustomSelectableText(snapshot.transactionHash),
             ),
           ],
           if (type == SnapshotType.transfer) ...[
             TransactionInfoTile(
               title: Text(isPositive ? context.l10n.from : context.l10n.to),
-              subtitle: SelectableText(
+              subtitle: CustomSelectableText(
                 snapshot.opponentId.isNullOrBlank()
                     ? 'N/A'
                     : (ref
@@ -330,18 +330,20 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
             if (!memo.isNullOrBlank())
               TransactionInfoTile(
                 title: Text(context.l10n.memo),
-                subtitle: SelectionArea(child: CustomText(memo)),
+                subtitle: CustomSelectableText(memo),
               ),
           ] else if (type == SnapshotType.deposit &&
               snapshot.deposit != null) ...[
             TransactionInfoTile(
               title: Text(context.l10n.depositHash),
-              subtitle: SelectableText(snapshot.deposit?.depositHash ?? ''),
+              subtitle:
+                  CustomSelectableText(snapshot.deposit?.depositHash ?? ''),
             ),
           ] else if (type == SnapshotType.withdrawal) ...[
             TransactionInfoTile(
               title: Text(context.l10n.to),
-              subtitle: SelectableText(snapshot.withdrawal?.receiver ?? ''),
+              subtitle:
+                  CustomSelectableText(snapshot.withdrawal?.receiver ?? ''),
             ),
             // ignore: unnecessary_parenthesis
             if ((snapshot.withdrawal?.withdrawalHash).isNullOrBlank())
@@ -358,14 +360,15 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
             else
               TransactionInfoTile(
                 title: Text(context.l10n.withdrawalHash),
-                subtitle:
-                    SelectableText(snapshot.withdrawal?.withdrawalHash ?? ''),
+                subtitle: CustomSelectableText(
+                    snapshot.withdrawal?.withdrawalHash ?? ''),
               ),
           ],
           TransactionInfoTile(
             title: Text(context.l10n.time),
-            subtitle: SelectableText('${DateFormat.yMMMMd().format(createdAt)} '
-                '${DateFormat.Hms().format(createdAt)}'),
+            subtitle:
+                CustomSelectableText('${DateFormat.yMMMMd().format(createdAt)} '
+                    '${DateFormat.Hms().format(createdAt)}'),
           ),
         ],
       ),

@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -95,29 +93,20 @@ class _MoreExtendedText extends HookConsumerWidget {
         if (endIndex != -1) {
           resultText = resultText.substring(0, endIndex);
         }
-
-        final spans = TextMatcher.applyTextMatchers([
-          TextSpan(text: resultText, style: style)
-        ], [
-          UrlTextMatcher(context),
-          EmojiTextMatcher(),
-        ]).toList();
-
-        return TextSpan(
-          children: spans,
-        );
+        return TextSpan(text: resultText, style: style);
       },
       [text, style, endIndex],
     );
 
-    return SelectableText.rich(
+    return CustomSelectableText.rich(
       TextSpan(
         children: [textSpan, if (endIndex != -1) overflowTextSpan],
       ),
-      contextMenuBuilder: (context, selectableState) =>
-          MixinAdaptiveSelectionToolbar(editableTextState: selectableState),
+      textMatchers: [
+        UrlTextMatcher(context),
+        EmojiTextMatcher(),
+      ],
       textAlign: TextAlign.center,
-      selectionHeightStyle: ui.BoxHeightStyle.max,
     );
   }
 }

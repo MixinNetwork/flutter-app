@@ -508,6 +508,8 @@ class _FilterTextField extends HookConsumerWidget {
               focusedBorder: InputBorder.none,
               enabledBorder: InputBorder.none,
             ),
+            contextMenuBuilder: (context, state) =>
+                MixinAdaptiveSelectionToolbar(editableTextState: state),
           ),
           if (isTextEmpty)
             IgnorePointer(

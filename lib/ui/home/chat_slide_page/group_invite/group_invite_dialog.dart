@@ -11,6 +11,7 @@ import '../../../../utils/hook.dart';
 import '../../../../widgets/avatar_view/avatar_view.dart';
 import '../../../../widgets/buttons.dart';
 import '../../../../widgets/dialog.dart';
+import '../../../../widgets/high_light_text.dart';
 import '../../../../widgets/interactive_decorated_box.dart';
 import '../../../../widgets/toast.dart';
 import '../../../../widgets/user_selector/conversation_selector.dart';
@@ -112,7 +113,7 @@ class _GroupInviteBody extends StatelessWidget {
           const SizedBox(height: 12),
           SizedBox(
             width: 320,
-            child: SelectableText(
+            child: CustomSelectableText(
               conversation.codeUrl ?? '',
               style: TextStyle(
                 fontSize: 14,

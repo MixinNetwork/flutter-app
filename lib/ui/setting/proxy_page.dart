@@ -16,6 +16,7 @@ import '../../widgets/action_button.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
+import '../../widgets/high_light_text.dart';
 
 class ProxyPage extends StatelessWidget {
   const ProxyPage({super.key});
@@ -368,6 +369,8 @@ class _ProxyInputWidget extends StatelessWidget {
               filled: true,
               fillColor: context.theme.listSelected,
             ),
+            contextMenuBuilder: (context, state) =>
+                MixinAdaptiveSelectionToolbar(editableTextState: state),
           ),
           Divider(height: 1, color: context.theme.divider),
           TextField(
@@ -399,6 +402,8 @@ class _ProxyInputWidget extends StatelessWidget {
               filled: true,
               fillColor: context.theme.listSelected,
             ),
+            contextMenuBuilder: (context, state) =>
+                MixinAdaptiveSelectionToolbar(editableTextState: state),
           ),
         ],
       );

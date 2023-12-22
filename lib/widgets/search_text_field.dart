@@ -8,6 +8,7 @@ import '../constants/constants.dart';
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
+import 'high_light_text.dart';
 import 'interactive_decorated_box.dart';
 
 class SearchTextField extends HookConsumerWidget {
@@ -114,6 +115,9 @@ class SearchTextField extends HookConsumerWidget {
                           kDefaultTextInputLimit,
                         ),
                       ],
+                      contextMenuBuilder: (context, state) =>
+                          MixinAdaptiveSelectionToolbar(
+                              editableTextState: state),
                     ),
                   ),
                   if (hintText != null && !hasText)

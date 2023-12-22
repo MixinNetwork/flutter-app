@@ -14,6 +14,7 @@ import '../../../../utils/hook.dart';
 import '../../../buttons.dart';
 import '../../../cache_image.dart';
 import '../../../dialog.dart';
+import '../../../high_light_text.dart';
 
 Future<void> showTransferDialog(
   BuildContext context,
@@ -171,7 +172,7 @@ class SnapshotDetailHeader extends HookConsumerWidget {
           const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: SelectableText.rich(
+            child: CustomSelectableText.rich(
               TextSpan(children: [
                 TextSpan(
                     text: amount.numberFormat(),
@@ -253,14 +254,14 @@ class _ValuesDescription extends HookConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SelectableText(
+          CustomSelectableText(
             currentValue,
             enableInteractiveSelection: false,
           ),
           if (thatTimeValue != null)
             Padding(
               padding: const EdgeInsets.only(top: 2),
-              child: SelectableText(
+              child: CustomSelectableText(
                 thatTimeValue,
                 enableInteractiveSelection: false,
               ),
@@ -292,34 +293,34 @@ class TransactionDetailInfo extends StatelessWidget {
         children: [
           TransactionInfoTile(
             title: Text(context.l10n.transactionId),
-            subtitle: SelectableText(snapshot.snapshotId),
+            subtitle: CustomSelectableText(snapshot.snapshotId),
           ),
           if (snapshot.snapshotHash?.isNotEmpty ?? false)
             TransactionInfoTile(
               title: Text(context.l10n.snapshotHash),
-              subtitle: SelectableText(snapshot.snapshotHash!),
+              subtitle: CustomSelectableText(snapshot.snapshotHash!),
             ),
           TransactionInfoTile(
             title: Text(context.l10n.assetType),
-            subtitle: SelectableText(snapshot.symbolName ?? ''),
+            subtitle: CustomSelectableText(snapshot.symbolName ?? ''),
           ),
           TransactionInfoTile(
             title: Text(context.l10n.transactionType),
-            subtitle: SelectableText(snapshot.l10nType(context)),
+            subtitle: CustomSelectableText(snapshot.l10nType(context)),
           ),
           if (snapshot.type == SnapshotType.deposit) ...[
             TransactionInfoTile(
               title: Text(context.l10n.from),
-              subtitle: SelectableText(snapshot.sender ?? ''),
+              subtitle: CustomSelectableText(snapshot.sender ?? ''),
             ),
             TransactionInfoTile(
               title: Text(context.l10n.transactionHash),
-              subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              subtitle: CustomSelectableText(snapshot.transactionHash ?? ''),
             ),
           ] else if (snapshot.type == SnapshotType.pending) ...[
             TransactionInfoTile(
               title: Text(context.l10n.status),
-              subtitle: SelectableText(
+              subtitle: CustomSelectableText(
                 context.l10n.pendingConfirmation(
                   snapshot.confirmations ?? 0,
                   snapshot.confirmations ?? 0,
@@ -329,23 +330,23 @@ class TransactionDetailInfo extends StatelessWidget {
             ),
             TransactionInfoTile(
               title: Text(context.l10n.from),
-              subtitle: SelectableText(snapshot.sender ?? ''),
+              subtitle: CustomSelectableText(snapshot.sender ?? ''),
             ),
             TransactionInfoTile(
               title: Text(context.l10n.transactionHash),
-              subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              subtitle: CustomSelectableText(snapshot.transactionHash ?? ''),
             ),
           ] else if (snapshot.type == SnapshotType.transfer) ...[
             TransactionInfoTile(
               title: Text(context.l10n.from),
-              subtitle: SelectableText((snapshot.isPositive
+              subtitle: CustomSelectableText((snapshot.isPositive
                       ? opponentFullName
                       : context.account?.fullName) ??
                   ''),
             ),
             TransactionInfoTile(
               title: Text(context.l10n.receiver),
-              subtitle: SelectableText((!snapshot.isPositive
+              subtitle: CustomSelectableText((!snapshot.isPositive
                       ? opponentFullName
                       : context.account?.fullName) ??
                   ''),
@@ -353,52 +354,53 @@ class TransactionDetailInfo extends StatelessWidget {
           ] else if (snapshot.tag?.isNotEmpty ?? false) ...[
             TransactionInfoTile(
               title: Text(context.l10n.transactionHash),
-              subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              subtitle: CustomSelectableText(snapshot.transactionHash ?? ''),
             ),
             TransactionInfoTile(
               title: Text(context.l10n.address),
-              subtitle: SelectableText(snapshot.receiver ?? ''),
+              subtitle: CustomSelectableText(snapshot.receiver ?? ''),
             ),
           ] else ...[
             TransactionInfoTile(
               title: Text(context.l10n.transactionHash),
-              subtitle: SelectableText(snapshot.transactionHash ?? ''),
+              subtitle: CustomSelectableText(snapshot.transactionHash ?? ''),
             ),
             TransactionInfoTile(
               title: Text(context.l10n.receiver),
-              subtitle: SelectableText(snapshot.receiver ?? ''),
+              subtitle: CustomSelectableText(snapshot.receiver ?? ''),
             ),
           ],
           if (snapshot.memo?.isNotEmpty ?? false)
             TransactionInfoTile(
               title: Text(context.l10n.memo),
-              subtitle: SelectableText(snapshot.memo!),
+              subtitle: CustomSelectableText(snapshot.memo!),
             ),
           if ((snapshot.openingBalance?.isNotEmpty ?? false) &&
               (snapshot.symbol?.isNotEmpty ?? false))
             TransactionInfoTile(
               title: Text(context.l10n.openingBalance),
-              subtitle: SelectableText(
+              subtitle: CustomSelectableText(
                   '${snapshot.openingBalance!} ${snapshot.symbol!}'),
             ),
           if ((snapshot.closingBalance?.isNotEmpty ?? false) &&
               (snapshot.symbol?.isNotEmpty ?? false))
             TransactionInfoTile(
               title: Text(context.l10n.closingBalance),
-              subtitle: SelectableText(
+              subtitle: CustomSelectableText(
                   '${snapshot.closingBalance ?? ''} ${snapshot.symbol ?? ''}'),
             ),
           TransactionInfoTile(
             title: Text(context.l10n.time),
-            subtitle: SelectableText('${DateFormat.yMMMMd().format(createdAt)}'
-                '${DateFormat.Hms().format(createdAt)}'),
+            subtitle:
+                CustomSelectableText('${DateFormat.yMMMMd().format(createdAt)}'
+                    '${DateFormat.Hms().format(createdAt)}'),
           ),
           if (snapshot.type == SnapshotType.transfer &&
               snapshot.traceId != null &&
               snapshot.traceId!.isNotEmpty)
             TransactionInfoTile(
               title: Text(context.l10n.trace),
-              subtitle: SelectableText(snapshot.traceId ?? ''),
+              subtitle: CustomSelectableText(snapshot.traceId ?? ''),
             ),
         ],
       ),

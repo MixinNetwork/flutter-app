@@ -10,6 +10,7 @@ import '../../constants/brightness_theme_data.dart';
 import '../../db/mixin_database.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/dialog.dart';
+import '../../widgets/high_light_text.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../../widgets/web_view_navigation_bar.dart';
 import '../extension/extension.dart';
@@ -136,7 +137,7 @@ class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
             children: [
               Text(context.l10n.webview2RuntimeInstallDescription),
               const SizedBox(height: 10),
-              SelectableText.rich(TextSpan(children: [
+              CustomSelectableText.rich(TextSpan(children: [
                 TextSpan(text: context.l10n.downloadLink),
                 TextSpan(
                   text: runtimeDownloadLink.overflow,

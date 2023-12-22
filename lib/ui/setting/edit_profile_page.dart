@@ -9,6 +9,7 @@ import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/dialog.dart';
+import '../../widgets/high_light_text.dart';
 import '../../widgets/toast.dart';
 import '../provider/multi_auth_provider.dart';
 
@@ -198,6 +199,8 @@ class _Item extends StatelessWidget {
                 color: context.theme.secondaryText,
               ),
             ),
+            contextMenuBuilder: (context, state) =>
+                MixinAdaptiveSelectionToolbar(editableTextState: state),
           ),
         ],
       ),

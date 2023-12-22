@@ -173,7 +173,7 @@ class _UserProfileBody extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Flexible(
-                  child: SelectionArea(
+                  child: CustomSelectableArea(
                     child: CustomText(
                       user.fullName ?? '',
                       style: TextStyle(
@@ -198,7 +198,7 @@ class _UserProfileBody extends StatelessWidget {
               if (!anonymous)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: SelectableText(
+                  child: CustomSelectableText(
                     context.l10n.contactMixinId(user.identityNumber),
                     style: TextStyle(
                       color: context.theme.secondaryText,
