@@ -116,7 +116,8 @@ class SearchTextField extends HookConsumerWidget {
                         ),
                       ],
                       contextMenuBuilder: (context, state) =>
-                          MixinAdaptiveSelectionToolbar(editableTextState: state),
+                          MixinAdaptiveSelectionToolbar(
+                              editableTextState: state),
                     ),
                   ),
                   if (hintText != null && !hasText)
