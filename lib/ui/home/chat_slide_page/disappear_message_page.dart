@@ -298,6 +298,8 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(vertical: 17),
                   ),
+                  contextMenuBuilder: (context, state) =>
+                      MixinAdaptiveSelectionToolbar(editableTextState: state),
                 ),
               ),
               const SizedBox(width: 16),

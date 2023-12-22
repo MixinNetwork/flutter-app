@@ -10,6 +10,7 @@ import '../../utils/extension/extension.dart';
 import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';
 import '../dialog.dart';
+import '../high_light_text.dart';
 import '../toast.dart';
 
 Future<void> showConversationDialog(BuildContext context,
@@ -111,7 +112,7 @@ class _ConversationInfo extends HookConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          SelectableText(
+          CustomSelectableText(
             conversationResponse.name,
             style: TextStyle(
               color: context.theme.text,
@@ -121,7 +122,7 @@ class _ConversationInfo extends HookConsumerWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-          SelectableText(
+          CustomSelectableText(
             context.l10n
                 .participantsCount(conversationResponse.participants.length),
             style: TextStyle(

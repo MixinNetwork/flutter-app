@@ -99,6 +99,59 @@ class CustomText extends HookConsumerWidget {
   }
 }
 
+class CustomSelectableText extends HookWidget {
+  const CustomSelectableText(
+    String this.text, {
+    this.enableInteractiveSelection = true,
+    super.key,
+    this.textAlign,
+    this.style,
+    this.textMatchers,
+    this.maxLines,
+  }) : textSpan = null;
+
+  const CustomSelectableText.rich(
+    TextSpan this.textSpan, {
+    this.enableInteractiveSelection = true,
+    super.key,
+    this.textAlign,
+    this.style,
+    this.textMatchers,
+    this.maxLines,
+  }) : text = null;
+
+  final String? text;
+  final InlineSpan? textSpan;
+
+  final TextStyle? style;
+  final Iterable<TextMatcher>? textMatchers;
+
+  final int? maxLines;
+  final TextAlign? textAlign;
+
+  final bool enableInteractiveSelection;
+
+  @override
+  Widget build(BuildContext context) {
+    final spans = useMemoized(
+      () => TextMatcher.applyTextMatchers(
+              [textSpan ?? TextSpan(text: text, style: style)],
+              textMatchers ?? [EmojiTextMatcher()])
+          .toList(),
+      [text, style, textMatchers],
+    );
+    return SelectableText.rich(
+      TextSpan(children: spans, style: style),
+      style: style,
+      textAlign: textAlign,
+      maxLines: maxLines,
+      selectionHeightStyle: ui.BoxHeightStyle.max,
+      contextMenuBuilder: (context, selectableState) =>
+          MixinAdaptiveSelectionToolbar(editableTextState: selectableState),
+    );
+  }
+}
+
 typedef InlineMatchBuilder = InlineSpan Function(
   TextSpan originalSpan,
   String displayString,
@@ -708,6 +761,52 @@ class HighlightStarLinkText extends HookConsumerWidget {
   }
 }
 
+class CustomSelectableArea extends StatelessWidget {
+  const CustomSelectableArea({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => SelectionArea(
+        child: child,
+        contextMenuBuilder: (context, state) =>
+            _SelectionAreaToolbar(state: state),
+      );
+}
+
+class _SelectionAreaToolbar extends StatelessWidget {
+  const _SelectionAreaToolbar({required this.state});
+
+  final SelectableRegionState state;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!kPlatformIsDesktop) {
+      return AdaptiveTextSelectionToolbar.selectableRegion(
+        selectableRegionState: state,
+      );
+    }
+    return _SelectionToolbar(
+      menus: [
+        if (state.copyEnabled)
+          ContextMenu(
+            title: MaterialLocalizations.of(context).copyButtonLabel,
+            onTap: () {
+              // ignore: deprecated_member_use
+              state.copySelection(SelectionChangedCause.toolbar);
+            },
+          ),
+        if (state.selectAllEnabled)
+          ContextMenu(
+            title: MaterialLocalizations.of(context).selectAllButtonLabel,
+            onTap: state.selectAll,
+          )
+      ],
+      anchor: state.contextMenuAnchors.primaryAnchor,
+    );
+  }
+}
+
 class MixinAdaptiveSelectionToolbar extends StatelessWidget {
   const MixinAdaptiveSelectionToolbar(
       {required this.editableTextState, super.key});
@@ -717,7 +816,7 @@ class MixinAdaptiveSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (kPlatformIsDesktop) {
-      return MixinSelectionToolbar(
+      return _SelectionToolbar(
         menus: [
           if (editableTextState.copyEnabled)
             ContextMenu(
@@ -756,11 +855,10 @@ class MixinAdaptiveSelectionToolbar extends StatelessWidget {
   }
 }
 
-class MixinSelectionToolbar extends StatelessWidget {
-  const MixinSelectionToolbar({
+class _SelectionToolbar extends StatelessWidget {
+  const _SelectionToolbar({
     required this.menus,
     required this.anchor,
-    super.key,
   });
 
   final List<Widget> menus;

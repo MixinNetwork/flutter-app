@@ -215,7 +215,7 @@ class ConversationIDOrCount extends HookConsumerWidget {
     );
 
     if (!isGroup) {
-      return SelectableText(
+      return CustomSelectableText(
         conversationState?.identityNumber ?? '',
         style: textStyle,
       );
@@ -225,7 +225,7 @@ class ConversationIDOrCount extends HookConsumerWidget {
       stream: countStream,
       builder: (context, snapshot) {
         final count = snapshot.data;
-        return SelectableText(
+        return CustomSelectableText(
           count != null ? context.l10n.participantsCount(count) : '',
           style: textStyle,
         );
@@ -251,7 +251,7 @@ class ConversationName extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(
-            child: SelectionArea(
+            child: CustomSelectableArea(
               child: CustomText(
                 (overflow
                         ? conversationState.name?.overflow

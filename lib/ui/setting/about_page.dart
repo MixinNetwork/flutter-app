@@ -14,6 +14,7 @@ import '../../utils/system/package_info.dart';
 import '../../utils/uri_utils.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
+import '../../widgets/high_light_text.dart';
 
 class AboutPage extends HookConsumerWidget {
   const AboutPage({super.key});
@@ -83,7 +84,7 @@ class AboutPage extends HookConsumerWidget {
 
               // SignalDatabase.get
               const SizedBox(height: 8),
-              SelectableText(
+              CustomSelectableText(
                 info?.versionAndBuildNumber ?? '',
                 style: TextStyle(
                   color: context.theme.secondaryText,

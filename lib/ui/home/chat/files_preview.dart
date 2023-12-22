@@ -36,6 +36,7 @@ import '../../../widgets/buttons.dart';
 import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
+import '../../../widgets/high_light_text.dart';
 import '../../../widgets/image.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
@@ -733,6 +734,8 @@ class _ZipPasswordInputEditText extends HookWidget {
                       kDefaultTextInputLimit,
                     ),
                   ],
+                  contextMenuBuilder: (context, state) =>
+                      MixinAdaptiveSelectionToolbar(editableTextState: state),
                 ),
               ),
               MouseRegion(
