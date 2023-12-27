@@ -12,7 +12,12 @@ import '../extension/extension.dart';
 import '../file.dart';
 
 Future<Iterable<File>> getClipboardFiles() async {
-  final reader = await ClipboardReader.readClipboard();
+  final reader = await SystemClipboard.instance?.read();
+
+  if (reader == null) {
+    w('clipboard reader is null');
+    return [];
+  }
 
   final fileReaders =
       reader.items.where((item) => item.canProvide(Formats.fileUri));
@@ -68,7 +73,11 @@ Future<void> copyFile(String? filePath) async {
     final dataWriterItem = DataWriterItem()
       ..add(Formats.fileUri(Uri.file(filePath)));
 
-    await ClipboardWriter.instance.write([dataWriterItem]);
+    final clipboard = SystemClipboard.instance;
+    if (clipboard == null) {
+      return showToastFailed(null);
+    }
+    await clipboard.write([dataWriterItem]);
   } catch (error, stackTrace) {
     e('copy file failed: $error\n$stackTrace');
     showToastFailed(error);
