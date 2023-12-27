@@ -134,9 +134,9 @@ dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       path: packages/string_tokenizer
       ref: 0334bbaa7293c72398eaf4571ba7ba2b5df2302d
-  super_clipboard: ^0.8.0
-  super_context_menu: ^0.8.0
-  super_native_extensions: ^0.8.0
+  super_clipboard: ^0.8.1
+  super_context_menu: ^0.8.1
+  super_native_extensions: ^0.8.1
   synchronized: ^3.0.1
   system_tray:
     path: third_party/system_tray
