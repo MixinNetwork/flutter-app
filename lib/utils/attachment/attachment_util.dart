@@ -28,7 +28,6 @@ import '../proxy.dart';
 import 'download_key_value.dart';
 
 part 'attachment_download_job.dart';
-
 part 'attachment_upload_job.dart';
 
 final _dio = (() {
