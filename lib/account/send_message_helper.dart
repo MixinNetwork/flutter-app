@@ -1009,7 +1009,7 @@ class SendMessageHelper {
         final newCategory = encryptCategory?.asCategory(category) ?? category;
         final attachmentResult = await _attachmentUtil.uploadAttachment(
           File(absolutePath),
-          messageId,
+          transcriptMessage.messageId,
           newCategory,
           transcriptId: transcriptMessage.transcriptId,
         );
@@ -1059,7 +1059,8 @@ class SendMessageHelper {
         message.messageId,
         message.conversationId,
       ));
-    } catch (_) {
+    } catch (error, stacktrace) {
+      e('reUploadTranscriptAttachment error: $error, stacktrace: $stacktrace');
       await _messageDao.updateMediaStatus(
         message.messageId,
         MediaStatus.canceled,
