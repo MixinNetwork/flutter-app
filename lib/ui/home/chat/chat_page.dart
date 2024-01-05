@@ -8,6 +8,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../account/scam_warning_key_value.dart';
 import '../../../account/show_pin_message_key_value.dart';
@@ -27,6 +28,7 @@ import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
+import '../../../widgets/menu.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_bubble.dart';
 import '../../../widgets/message/message_day_time.dart';
@@ -942,85 +944,104 @@ class _JumpMentionButton extends HookConsumerWidget {
 
     if (messageMentions.isEmpty) return const SizedBox();
 
-    return InteractiveDecoratedBox(
-      onTap: () {
-        if (messageMentions.isEmpty) return;
+    return ContextMenuWidget(
+      hitTestBehavior: HitTestBehavior.translucent,
+      desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
+      menuProvider: (MenuRequest request) => Menu(
+        children: [
+          MenuAction(
+            title: context.l10n.clear,
+            callback: () {
+              for (final mention in messageMentions) {
+                context.accountServer.markMentionRead(
+                  mention.messageId,
+                  mention.conversationId,
+                );
+              }
+            },
+          ),
+        ],
+      ),
+      child: InteractiveDecoratedBox(
+        onTap: () {
+          if (messageMentions.isEmpty) return;
 
-        final mention = messageMentions.first;
-        context.read<MessageBloc>().scrollTo(mention.messageId);
-        context.accountServer
-            .markMentionRead(mention.messageId, mention.conversationId);
-      },
-      child: SizedBox(
-        height: 52,
-        width: 40,
-        child: Stack(
-          children: [
-            Positioned(
-              top: 12,
-              child: Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: context.messageBubbleColor(false),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color.fromRGBO(0, 0, 0, 0.15),
-                      offset: Offset(0, 2),
-                      blurRadius: 10,
+          final mention = messageMentions.first;
+          context.read<MessageBloc>().scrollTo(mention.messageId);
+          context.accountServer
+              .markMentionRead(mention.messageId, mention.conversationId);
+        },
+        child: SizedBox(
+          height: 52,
+          width: 40,
+          child: Stack(
+            children: [
+              Positioned(
+                top: 12,
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: context.messageBubbleColor(false),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color.fromRGBO(0, 0, 0, 0.15),
+                        offset: Offset(0, 2),
+                        blurRadius: 10,
+                      ),
+                    ],
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '@',
+                    style: TextStyle(
+                      fontSize: 17,
+                      height: 1,
+                      color: context.theme.text,
                     ),
-                  ],
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '@',
-                  style: TextStyle(
-                    fontSize: 17,
-                    height: 1,
-                    color: context.theme.text,
                   ),
                 ),
               ),
-            ),
-            Container(
-              width: 40,
-              alignment: Alignment.topCenter,
-              child: Container(
-                constraints: const BoxConstraints(
-                  minWidth: 20,
-                  maxWidth: 40,
-                  maxHeight: 20,
-                  minHeight: 20,
-                ),
-                decoration: BoxDecoration(
-                  color: context.theme.accent,
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Column(
-                  children: [
-                    // Use column + spacer to vertical center the text.
-                    // since the width is not fixed, we can't use center widget.
-                    const Spacer(),
-                    Text(
-                      messageMentions.length > 99
-                          ? '99+'
-                          : '${messageMentions.length}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        height: 1,
-                        color: Colors.white,
+              Container(
+                width: 40,
+                alignment: Alignment.topCenter,
+                child: Container(
+                  constraints: const BoxConstraints(
+                    minWidth: 20,
+                    maxWidth: 40,
+                    maxHeight: 20,
+                    minHeight: 20,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.theme.accent,
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Column(
+                    children: [
+                      // Use column + spacer to vertical center the text.
+                      // since the width is not fixed, we can't use center widget.
+                      const Spacer(),
+                      Text(
+                        messageMentions.length > 99
+                            ? '99+'
+                            : '${messageMentions.length}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          height: 1,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
                       ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                    ),
-                    const Spacer(),
-                  ],
+                      const Spacer(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
