@@ -47,6 +47,7 @@ enum MixinSchemeHost {
   apps,
   snapshots,
   conversations,
+  multisigs,
 }
 
 const int hour1 = 1000 * 60 * 60;

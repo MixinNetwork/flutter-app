@@ -5,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/constants.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/mixin_database.dart' hide User;
-
 import '../ui/provider/conversation_provider.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
@@ -78,6 +77,11 @@ Future<bool> openUri(
     }
 
     if (uri.isPay) {
+      await showUnknownMixinUrlDialog(context, uri);
+      return false;
+    }
+
+    if (uri.isMultisigs) {
       await showUnknownMixinUrlDialog(context, uri);
       return false;
     }
@@ -295,6 +299,8 @@ extension _MixinUriExtension on Uri {
   bool get isSend => _isTypeScheme(MixinSchemeHost.send);
 
   bool get isPay => _isTypeHost(MixinSchemeHost.pay);
+
+  bool get isMultisigs => _isTypeHost(MixinSchemeHost.multisigs);
 
   String? get categoryOfSend {
     if (!isSend) return null;
