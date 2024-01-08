@@ -1751,26 +1751,26 @@ packages:
     dependency: "direct main"
     description:
       name: super_clipboard
-      sha256: "6281b19e4f4af4c4897c7b4117758164a21f63bbeee63da09c04d47823f8b228"
+      sha256: "158919981cfb9232b32869f999db094afe100e08f77832fcfcff37aeaa753140"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.1"
+    version: "0.8.2+1"
   super_context_menu:
     dependency: "direct main"
     description:
       name: super_context_menu
-      sha256: ba810d4f7bab3187d1583bb76879304520339dffafd2dc4694c9f1e671cd1582
+      sha256: "9a74755cec3931bd626e634be74bdf252cc1a4d0d4550ef0424fded23a535672"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.1"
+    version: "0.8.2+1"
   super_native_extensions:
     dependency: "direct main"
     description:
       name: super_native_extensions
-      sha256: d6d445a644856430cdca70c233213065c413bc3046a3b1e21858e19087d01645
+      sha256: "4e080671cacd1612df3ac52e86e925689c27283bcbdefb51a9b7bacb4bb0046c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.1"
+    version: "0.8.2+1"
   synchronized:
     dependency: "direct main"
     description:
