@@ -152,7 +152,7 @@ dependencies:
   watcher: ^1.1.0
   web_socket_channel: ^2.4.0
   webview_flutter: ^4.4.1
-  win32: ^5.1.1
+  win32: ^5.2.0
   win_toast: ^0.3.0
   window_manager: ^0.3.7
   window_size:
