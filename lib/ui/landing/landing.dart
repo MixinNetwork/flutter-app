@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../account/account_key_value.dart';
 import '../../crypto/signal/signal_database.dart';
@@ -139,15 +140,19 @@ class _LoginFailed extends HookConsumerWidget {
                   final authState = context.auth;
                   if (authState == null) return;
 
-                  await createClient(
-                    userId: authState.account.userId,
-                    sessionId: authState.account.sessionId,
-                    privateKey: authState.privateKey,
-                    loginByPhoneNumber:
-                        AccountKeyValue.instance.primarySessionId == null,
-                  )
-                      .accountApi
-                      .logout(LogoutRequest(authState.account.sessionId));
+                  try {
+                    await createClient(
+                      userId: authState.account.userId,
+                      sessionId: authState.account.sessionId,
+                      privateKey: authState.privateKey,
+                      loginByPhoneNumber:
+                          AccountKeyValue.instance.primarySessionId == null,
+                    )
+                        .accountApi
+                        .logout(LogoutRequest(authState.account.sessionId));
+                  } catch (err, stacktrace) {
+                    e('logout error: $err $stacktrace');
+                  }
                   await clearKeyValues();
                   await SignalDatabase.get.clear();
                   context.multiAuthChangeNotifier.signOut();
