@@ -301,7 +301,11 @@ class AccountServer {
 
   Future<void> signOutAndClear() async {
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
-    await client.accountApi.logout(LogoutRequest(sessionId));
+    try {
+      await client.accountApi.logout(LogoutRequest(sessionId));
+    } catch (error, stacktrace) {
+      e('logout api error: $error, $stacktrace');
+    }
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
 
