@@ -355,9 +355,9 @@ class _StickerAlbumBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox.fromSize(
-        size: const Size.square(50),
+        size: const Size.square(48),
         child: Padding(
-          padding: const EdgeInsets.all(5),
+          padding: const EdgeInsets.all(4),
           child: _StickerGroupIconHoverContainer(
             child: Center(
               child: Center(
