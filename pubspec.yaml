@@ -170,7 +170,7 @@ dependencies:
       ref: 210839e1e9311bcddeb733297a565721692033ee
 
 dev_dependencies:
-  build_runner: ^2.4.7
+  build_runner: ^2.4.8
   debug_info_collector:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
