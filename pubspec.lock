@@ -89,6 +89,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  base_x:
+    dependency: transitive
+    description:
+      name: base_x
+      sha256: "519abcdafd637d4b6bd7e72fabd8f9264935f804b9b9f6c5d8411c7d52cbf8fd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   bloc:
     dependency: "direct main"
     description:
@@ -469,6 +477,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.1"
+  edwards25519:
+    dependency: transitive
+    description:
+      name: edwards25519
+      sha256: "48e4678136e362bed9790dfb716ebe8e2f34f026bdb900b058214620672c6273"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
   emojis:
     dependency: "direct main"
     description:
@@ -1184,10 +1200,10 @@ packages:
     dependency: "direct main"
     description:
       name: mixin_bot_sdk_dart
-      sha256: "86ea58291c4a0c408de1c3fcec9fa69f9b055d807ccd66d338f0169340f5c6fb"
+      sha256: "58ab12882b85b2ca6ff86c7d23f9eee986d8583474fe030cc7ee4a28b67a25b0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.3"
+    version: "1.1.0"
   mixin_logger:
     dependency: "direct main"
     description:
@@ -1810,6 +1826,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.1"
+  thirds:
+    dependency: transitive
+    description:
+      name: thirds
+      sha256: c4b90a4e7f2deac52ebcf22dc7ebbc702578a063a739b3c31e4259a884abb951
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0-alpha.1"
   timezone:
     dependency: transitive
     description:
