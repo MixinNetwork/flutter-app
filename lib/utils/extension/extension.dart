@@ -34,8 +34,6 @@ import '../platform.dart';
 import '../synchronized.dart';
 
 export 'package:collection/collection.dart' show IterableNullableExtension;
-export 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    show UuidHashcodeExtension;
 export 'package:provider/provider.dart' show ReadContext, WatchContext;
 
 export '../../crypto/attachment/crypto_attachment.dart'

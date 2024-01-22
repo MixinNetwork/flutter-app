@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:drift/drift.dart';
-import 'package:ed25519_edwards/ed25519_edwards.dart';
+import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:uuid/uuid.dart';
@@ -39,7 +39,7 @@ class SendingJob extends JobQueue<Job, List<Job>> {
   final String userId;
   final Sender sender;
   final String sessionId;
-  final PrivateKey privateKey;
+  final ed.PrivateKey privateKey;
   late SignalProtocol signalProtocol;
 
   final EncryptedProtocol _encryptedProtocol = EncryptedProtocol();

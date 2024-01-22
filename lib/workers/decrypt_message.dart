@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
-import 'package:ed25519_edwards/ed25519_edwards.dart';
+import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
@@ -79,7 +79,7 @@ class DecryptMessage extends Injector {
   late final SignalProtocol _signalProtocol;
   late final Sender _sender;
   late final String _sessionId;
-  late final PrivateKey _privateKey;
+  late final ed.PrivateKey _privateKey;
   late EncryptedProtocol _encryptedProtocol;
 
   final String identityNumber;
