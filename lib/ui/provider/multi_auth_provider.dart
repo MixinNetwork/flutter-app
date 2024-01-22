@@ -18,10 +18,23 @@ class AuthState extends Equatable {
     required this.privateKey,
   });
 
-  factory AuthState.fromMap(Map<String, dynamic> map) => AuthState(
-        account: Account.fromJson(map['account'] as Map<String, dynamic>),
-        privateKey: map['privateKey'] as String,
-      );
+  factory AuthState.fromMap(Map<String, dynamic> map) {
+    final account = map['account'] as Map<String, dynamic>;
+    // migration from old version
+    if (account['has_safe'] == null) {
+      account['has_safe'] = false;
+    }
+    if (account['tip_counter'] == null) {
+      account['tip_counter'] = 0;
+    }
+    if (account['tip_key_base64'] == null) {
+      account['tip_key_base64'] = '';
+    }
+    return AuthState(
+      account: Account.fromJson(account),
+      privateKey: map['privateKey'] as String,
+    );
+  }
 
   final Account account;
   final String privateKey;

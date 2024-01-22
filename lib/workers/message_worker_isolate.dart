@@ -6,7 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:dio/dio.dart';
-import 'package:ed25519_edwards/ed25519_edwards.dart';
+import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:equatable/equatable.dart';
 import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -108,13 +108,13 @@ class _MessageProcessRunner {
     required this.primarySessionId,
     required this.eventSink,
     required this.sendPort,
-  }) : privateKey = PrivateKey(base64Decode(privateKeyStr));
+  }) : privateKey = ed.PrivateKey(base64Decode(privateKeyStr));
 
   final String identityNumber;
   final String userId;
   final String sessionId;
   final String privateKeyStr;
-  final PrivateKey privateKey;
+  final ed.PrivateKey privateKey;
   final String? primarySessionId;
   final SendPort sendPort;
 
