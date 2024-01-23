@@ -1,9 +1,9 @@
 // ignore_for_file: implementation_imports
 
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lottie/lottie.dart';
 import 'package:lottie/src/providers/load_image.dart';
@@ -25,25 +25,14 @@ class CachedNetworkLottie extends LottieProvider {
   final Map<String, String>? headers;
 
   @override
-  Future<LottieComposition> load() {
+  Future<LottieComposition> load({BuildContext? context}) {
     final key = 'network-$url';
     return sharedLottieCache.putIfAbsent(key, () async {
       final resolved = Uri.base.resolve(url);
+      final cacheDir = await _getCacheDir();
+      final composition = await compute(
+          _downloadAndParse, (resolved, headers, decoder, cacheDir.path));
 
-      final cacheKey = keyToMd5(url);
-
-      var bytes = await _loadCache(cacheKey);
-
-      if (bytes == null) {
-        bytes = await network.loadHttp(resolved, headers: headers);
-        await _saveCache(cacheKey, bytes);
-      }
-
-      final composition = await LottieComposition.fromBytes(
-        bytes,
-        name: p.url.basenameWithoutExtension(url),
-        imageProviderFactory: imageProviderFactory,
-      );
       for (final image in composition.images.values) {
         image.loadedImage ??= await _loadImage(resolved, composition, image);
       }
@@ -83,8 +72,8 @@ Future<Directory> _getCacheDir() async {
   return Directory(p.join(appTempDirectory.path, 'mixin', 'lottie_cache'));
 }
 
-Future<Uint8List?> _loadCache(String key) async {
-  final cacheDir = await _getCacheDir();
+Future<Uint8List?> _loadCache(String key, String cacheDirPath) async {
+  final cacheDir = Directory(cacheDirPath);
   Uint8List? data;
   if (cacheDir.existsSync()) {
     final file = File(p.join(cacheDir.path, key));
@@ -95,8 +84,25 @@ Future<Uint8List?> _loadCache(String key) async {
   return data;
 }
 
-Future<void> _saveCache(String cacheKey, Uint8List bytes) async {
-  final cacheDir = await _getCacheDir();
+Future<LottieComposition> _downloadAndParse(
+    (Uri, Map<String, String>?, LottieDecoder?, String) args) async {
+  final (uri, headers, decoder, cacheDir) = args;
+
+  final cacheKey = keyToMd5(uri.toString());
+
+  var bytes = await _loadCache(cacheKey, cacheDir);
+
+  if (bytes == null) {
+    bytes = await network.loadHttp(uri, headers: headers);
+    await _saveCache(cacheKey, cacheDir, bytes);
+  }
+
+  return LottieComposition.fromBytes(bytes, decoder: decoder);
+}
+
+Future<void> _saveCache(
+    String cacheKey, String cacheDirPath, Uint8List bytes) async {
+  final cacheDir = Directory(cacheDirPath);
   if (!cacheDir.existsSync()) {
     await cacheDir.create(recursive: true);
   }
