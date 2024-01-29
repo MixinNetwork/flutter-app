@@ -10,6 +10,7 @@ import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
+import '../../../utils/platform.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/cell.dart';
@@ -106,9 +107,21 @@ class ChatInfoPage extends HookConsumerWidget {
         child: Column(
           children: [
             const SizedBox(height: 8),
-            ConversationAvatar(
-              conversationState: conversationState,
-              size: 90,
+            GestureDetector(
+              onTap: () {
+                final copy = HardwareKeyboard.instance.logicalKeysPressed
+                    .contains(kPlatformIsDarwin
+                        ? LogicalKeyboardKey.metaLeft
+                        : LogicalKeyboardKey.controlLeft);
+                if (copy) {
+                  Clipboard.setData(ClipboardData(
+                      text: 'mixin://conversations/$conversationId'));
+                }
+              },
+              child: ConversationAvatar(
+                conversationState: conversationState,
+                size: 90,
+              ),
             ),
             const SizedBox(height: 10),
             ConversationName(
