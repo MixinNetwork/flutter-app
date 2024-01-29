@@ -106,9 +106,19 @@ class ChatInfoPage extends HookConsumerWidget {
         child: Column(
           children: [
             const SizedBox(height: 8),
-            ConversationAvatar(
-              conversationState: conversationState,
-              size: 90,
+            GestureDetector(
+              onLongPress: () {
+                final copy = HardwareKeyboard.instance.logicalKeysPressed
+                    .contains(LogicalKeyboardKey.altLeft);
+                if (copy) {
+                  Clipboard.setData(ClipboardData(
+                      text: 'mixin://conversations/$conversationId'));
+                }
+              },
+              child: ConversationAvatar(
+                conversationState: conversationState,
+                size: 90,
+              ),
             ),
             const SizedBox(height: 10),
             ConversationName(
