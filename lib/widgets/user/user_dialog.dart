@@ -164,9 +164,7 @@ class _UserProfileBody extends StatelessWidget {
           GestureDetector(
             onTap: () {
               final copy = HardwareKeyboard.instance.logicalKeysPressed
-                  .contains(kPlatformIsDarwin
-                      ? LogicalKeyboardKey.metaLeft
-                      : LogicalKeyboardKey.controlLeft);
+                  .contains(LogicalKeyboardKey.altLeft);
               if (copy) {
                 Clipboard.setData(
                     ClipboardData(text: 'mixin://users/${user.userId}'));

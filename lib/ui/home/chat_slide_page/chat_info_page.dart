@@ -108,11 +108,9 @@ class ChatInfoPage extends HookConsumerWidget {
           children: [
             const SizedBox(height: 8),
             GestureDetector(
-              onTap: () {
+              onLongPress: () {
                 final copy = HardwareKeyboard.instance.logicalKeysPressed
-                    .contains(kPlatformIsDarwin
-                        ? LogicalKeyboardKey.metaLeft
-                        : LogicalKeyboardKey.controlLeft);
+                    .contains(LogicalKeyboardKey.altLeft);
                 if (copy) {
                   Clipboard.setData(ClipboardData(
                       text: 'mixin://conversations/$conversationId'));
