@@ -11,7 +11,6 @@ import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
-import '../../utils/platform.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';

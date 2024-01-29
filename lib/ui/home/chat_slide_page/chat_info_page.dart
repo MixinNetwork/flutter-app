@@ -10,7 +10,6 @@ import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
-import '../../../utils/platform.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/cell.dart';
