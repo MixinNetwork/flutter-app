@@ -166,6 +166,9 @@ parameter: $parameters
 
   @override
   int get updatedRows => database.updatedRows;
+
+  @override
+  bool get autocommit => database.autocommit;
 }
 
 class _PreparedStatementWrapper implements PreparedStatement {
