@@ -16,6 +16,7 @@ import 'landing.dart';
 const _kSqliteCorrupt = 11;
 const _kSqliteLocked = 6;
 const _kSqliteNotADb = 26;
+const _kSqliteIOErr = 10;
 
 class DatabaseOpenFailedPage extends StatelessWidget {
   const DatabaseOpenFailedPage({
@@ -38,8 +39,11 @@ class DatabaseOpenFailedPage extends StatelessWidget {
       default:
         message = '${error.explanation}';
     }
-    final canDeleteDatabase =
-        const {_kSqliteCorrupt, _kSqliteNotADb}.contains(error.resultCode);
+    final canDeleteDatabase = const {
+      _kSqliteCorrupt,
+      _kSqliteNotADb,
+      _kSqliteIOErr,
+    }.contains(error.resultCode);
 
     return LandingFailedPage(
       title: context.l10n.failedToOpenDatabase,
