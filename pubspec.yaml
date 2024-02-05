@@ -118,7 +118,7 @@ dependencies:
   pin_code_fields: ^8.0.1
   platform_device_id: ^1.0.1
   pretty_qr_code: ^3.2.0
-  protocol_handler: ^0.1.6
+  protocol_handler: ^0.2.0
   provider: ^6.0.4
   quick_breakpad:
     path: third_party/quick_breakpad
