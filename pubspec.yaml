@@ -77,7 +77,7 @@ dependencies:
   github: ^9.22.0
   hive: ^2.2.3
   hive_flutter: ^1.0.0
-  hooks_riverpod: ^2.4.9
+  hooks_riverpod: ^2.4.10
   http: ^1.2.0
   http_client_helper: ^3.0.0
   hydrated_bloc: ^9.1.3
