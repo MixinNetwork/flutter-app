@@ -21,6 +21,7 @@ import 'package:window_size/window_size.dart';
 import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
 import 'ui/home/home.dart';
+import 'ui/setting/log_page.dart';
 import 'utils/app_lifecycle.dart';
 import 'utils/event_bus.dart';
 import 'utils/file.dart';
@@ -65,6 +66,7 @@ Future<void> main(List<String> args) async {
 
   scheduleMicrotask(() async {
     initLogger(mixinLogDirectory.path);
+    onWriteToFile = onWriteLogToFile;
     await dumpAppAndSystemInfoToLogger();
   });
 

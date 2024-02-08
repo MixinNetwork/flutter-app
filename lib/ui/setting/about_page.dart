@@ -13,8 +13,10 @@ import '../../utils/hook.dart';
 import '../../utils/system/package_info.dart';
 import '../../utils/uri_utils.dart';
 import '../../widgets/app_bar.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/high_light_text.dart';
+import 'log_page.dart';
 
 class AboutPage extends HookConsumerWidget {
   const AboutPage({super.key});
@@ -59,10 +61,14 @@ class AboutPage extends HookConsumerWidget {
           padding: const EdgeInsets.only(top: 40),
           child: Column(
             children: [
-              Image.asset(
-                Resources.assetsImagesAboutLogoPng,
-                width: 60,
-                height: 60,
+              NTapGestureDetector(
+                n: 5,
+                child: Image.asset(
+                  Resources.assetsImagesAboutLogoPng,
+                  width: 60,
+                  height: 60,
+                ),
+                onTap: () => showLogPage(context),
               ),
               const SizedBox(height: 24),
               GestureDetector(

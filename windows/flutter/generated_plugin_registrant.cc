@@ -13,7 +13,7 @@
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
 #include <irondash_engine_context/irondash_engine_context_plugin_c_api.h>
 #include <platform_device_id_windows/platform_device_id_windows_plugin.h>
-#include <protocol_handler/protocol_handler_plugin.h>
+#include <protocol_handler_windows/protocol_handler_windows_plugin_c_api.h>
 #include <quick_breakpad/quick_breakpad_plugin.h>
 #include <screen_retriever/screen_retriever_plugin.h>
 #include <sqlite3_flutter_libs/sqlite3_flutter_libs_plugin.h>
@@ -39,8 +39,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("IrondashEngineContextPluginCApi"));
   PlatformDeviceIdWindowsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("PlatformDeviceIdWindowsPlugin"));
-  ProtocolHandlerPluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("ProtocolHandlerPlugin"));
+  ProtocolHandlerWindowsPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("ProtocolHandlerWindowsPluginCApi"));
   QuickBreakpadPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("QuickBreakpadPlugin"));
   ScreenRetrieverPluginRegisterWithRegistrar(
