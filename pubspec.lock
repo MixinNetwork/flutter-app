@@ -1823,10 +1823,10 @@ packages:
     dependency: "direct main"
     description:
       name: super_context_menu
-      sha256: e4887211f8d14e25a5f472d1a6351798e13e887e986403d853e5df93b80f8939
+      sha256: a8e8d813ed109b6c76ea5ed37ed7d4ac371e2989825edb1b214a2296f0951df6
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.4"
+    version: "0.8.5"
   super_native_extensions:
     dependency: "direct main"
     description:
