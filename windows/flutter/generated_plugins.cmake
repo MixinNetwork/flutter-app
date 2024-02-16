@@ -10,7 +10,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_app_icon_badge
   irondash_engine_context
   platform_device_id_windows
-  protocol_handler
+  protocol_handler_windows
   quick_breakpad
   screen_retriever
   sqlite3_flutter_libs
