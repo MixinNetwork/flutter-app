@@ -94,7 +94,7 @@ dependencies:
       ref: ad4f3a8ed167438efb19f400d5c8da1f8fdf88de
       path: packages/local_auth/local_auth
   lottie: ^3.0.0
-  map: ^1.4.2
+  map: ^2.0.2
   markdown_widget: ^2.3.2+2
   mime: ^1.0.2
   mixin_bot_sdk_dart: ^1.1.0
