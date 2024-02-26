@@ -69,12 +69,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_portal: ^1.1.4
-  flutter_svg: ^2.0.9
+  flutter_svg: ^2.0.10+1
   gal:
     git:
       url: https://github.com/boyan01/gal.git
       ref: b42e314284a09c9f0f9fe1e0e76e0c563402449e
-  github: ^9.22.0
+  github: ^9.23.0
   hive: ^2.2.3
   hive_flutter: ^1.0.0
   hooks_riverpod: ^2.4.10
@@ -146,7 +146,7 @@ dependencies:
       ref: 00654e51f51aa65cdc39784a3075c9abb8b9dd7c
       path: packages/ui_device
   ulid: ^2.0.0
-  url_launcher: ^6.2.2
+  url_launcher: ^6.2.5
   uuid: ^4.3.3
   visibility_detector: ^0.4.0+2
   watcher: ^1.1.0
