@@ -59,7 +59,8 @@ class LocationMessageWidget extends HookConsumerWidget {
                   },
                 ),
                 controller: map.MapController(
-                  location: LatLng(location.latitude, location.longitude),
+                  location:
+                      LatLng.degree(location.latitude, location.longitude),
                 ),
               ),
               Center(
