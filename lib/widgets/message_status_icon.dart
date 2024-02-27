@@ -57,10 +57,9 @@ class _VisibilityAwareAnimatedSendingIcon extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final visible = useState(false);
     final key = useMemoized(UniqueKey.new);
-    final isMount = context.mounted;
     return VisibilityDetector(
       onVisibilityChanged: (info) {
-        if (!isMount) {
+        if (!context.mounted) {
           // onVisibilityChanged called by WidgetsBinding.postFrameCallback,
           // so it may be called after unmount.
           return;

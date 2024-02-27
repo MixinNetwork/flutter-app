@@ -5,6 +5,7 @@ import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 import '../utils/logger.dart';
 
 class _ImageByBase64 extends HookConsumerWidget {
@@ -53,7 +54,6 @@ class _ImageByBlurHash extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final image = useState<ui.Image?>(null);
-    final isMounted = context.mounted;
     useEffect(() {
       ui.decodeImageFromPixels(
         blurHash.toImage(width, height).getBytes(),
@@ -61,7 +61,7 @@ class _ImageByBlurHash extends HookConsumerWidget {
         height,
         ui.PixelFormat.rgba8888,
         (result) {
-          if (!isMounted) {
+          if (!context.mounted) {
             return;
           }
           image.value = result;
