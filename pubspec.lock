@@ -1054,10 +1054,10 @@ packages:
     dependency: transitive
     description:
       name: latlng
-      sha256: "8e462ded3f638f2f15f9b0de5f363540092b32aee3893d197fe301b4d865f92b"
+      sha256: a324c80073ef959d67ead88b57a717b7b87f182da1b980ccae92b3555ac82712
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.4"
+    version: "2.0.7"
   leak_tracker:
     dependency: transitive
     description:
@@ -1176,10 +1176,10 @@ packages:
     dependency: "direct main"
     description:
       name: map
-      sha256: dc1975a42304a91b4ab3fc7f064f554f18be0fbefb5bcd4ae95d1c087508a893
+      sha256: "1343b0168f62098525703cbd9ef8351acd2c87c7fa2b34f22d3d1b839e24769d"
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.2"
+    version: "2.0.2"
   markdown:
     dependency: transitive
     description:
