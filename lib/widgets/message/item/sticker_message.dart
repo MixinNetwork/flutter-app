@@ -204,7 +204,9 @@ Size _calculateSize(
 
   var size = Size(width, height) / devicePixelRatio;
   final isJson = assetType == 'json';
-  if (!isJson && scale > 2 && MediaQuery.of(context).devicePixelRatio <= 1.5) {
+  if (!isJson &&
+      scale <= 0.5 &&
+      MediaQuery.of(context).devicePixelRatio <= 1.5) {
     d('scale: $scale, devicePixelRatio: $devicePixelRatio');
     if (size.longestSide >= kMaxWidth) {
       // scale up max to 200px for less than 1.5x device. eg. Windows 1920 * 1080
