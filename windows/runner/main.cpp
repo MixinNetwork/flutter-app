@@ -5,7 +5,7 @@
 #include "flutter_window.h"
 #include "utils.h"
 
-#include <protocol_handler/protocol_handler_plugin.h>
+#include <protocol_handler_windows/protocol_handler_windows_plugin_c_api.h>
 
 class CSingleInstance {
  public:

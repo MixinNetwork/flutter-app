@@ -13,9 +13,11 @@ import '../../utils/hive_key_values.dart';
 import '../../utils/hook.dart';
 import '../../utils/mixin_api_client.dart';
 import '../../utils/system/package_info.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
 import '../provider/account_server_provider.dart';
+import '../setting/log_page.dart';
 import 'landing_mobile.dart';
 import 'landing_qrcode.dart';
 
@@ -205,11 +207,15 @@ class LandingScaffold extends HookConsumerWidget {
             Positioned(
               bottom: 16,
               right: 16,
-              child: Text(
-                info?.versionAndBuildNumber ?? '',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.theme.secondaryText,
+              child: NTapGestureDetector(
+                n: 5,
+                onTap: () => showLogPage(context),
+                child: Text(
+                  info?.versionAndBuildNumber ?? '',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: context.theme.secondaryText,
+                  ),
                 ),
               ),
             ),
