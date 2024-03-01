@@ -177,6 +177,7 @@ bool _shouldOpenDirectly(String mediaName) {
     '.gif',
     '.bmp',
     '.webp',
+    '.avif',
     // audio,video
     '.mp4',
     '.mp3',

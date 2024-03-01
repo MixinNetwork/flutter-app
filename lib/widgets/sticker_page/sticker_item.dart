@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 
 import '../../app.dart';
 import '../../utils/app_lifecycle.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../cache_image.dart';
 import '../cache_lottie.dart';
@@ -67,7 +68,10 @@ class StickerItem extends HookConsumerWidget {
 
     final child = isJson
         ? LottieBuilder(
-            lottie: CachedNetworkLottie(assetUrl),
+            lottie: CachedNetworkLottie(
+              assetUrl,
+              proxyConfig: context.database.settingProperties.activatedProxy,
+            ),
             controller: controller,
             height: height,
             width: width,
