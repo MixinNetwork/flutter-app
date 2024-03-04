@@ -29,7 +29,7 @@ Client createClient({
   final client = Client(
     userId: userId,
     sessionId: sessionId,
-    privateKey: privateKey,
+    sessionPrivateKey: Key.fromBase64(privateKey),
     scp: loginByPhoneNumber ? scpFull : scp,
     dioOptions: BaseOptions(
       connectTimeout: tenSecond,
