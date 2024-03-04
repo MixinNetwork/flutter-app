@@ -123,7 +123,7 @@ dependencies:
   platform_device_id: ^1.0.1
   pretty_qr_code: ^3.2.0
   protocol_handler: ^0.2.0
-  provider: ^6.0.4
+  provider: ^6.1.2
   quick_breakpad:
     path: third_party/quick_breakpad
   recase: ^4.1.0
