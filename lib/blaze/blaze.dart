@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Key;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:web_socket_channel/io.dart';
@@ -94,7 +94,7 @@ class Blaze {
     try {
       i('ws connect');
       _token ??= signAuthTokenWithEdDSA(
-          userId, sessionId, privateKey, scp, 'GET', '/', '');
+          userId, sessionId, Key.fromBase64(privateKey), scp, 'GET', '/', '');
       i('ws _token?.isNotEmpty == true: ${_token?.isNotEmpty == true}');
       i('ws _userAgent: $userAgent');
       _connect(_token!);
