@@ -228,4 +228,10 @@ class _PreparedStatementWrapper implements PreparedStatement {
   @override
   ResultSet selectMap(Map<String, Object?> parameters) =>
       selectWith(StatementParameters.named(parameters));
+
+  @override
+  bool get isExplain => throw UnimplementedError();
+
+  @override
+  bool get isReadOnly => throw UnimplementedError();
 }

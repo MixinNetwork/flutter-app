@@ -49,7 +49,7 @@ dependencies:
   device_info_plus: ^9.1.1
   dio: ^5.4.1
   dio_smart_retry: ^6.0.0
-  drift: ^2.14.1
+  drift: ^2.15.0
   ecache: ^2.0.3
   emojis: ^0.9.9
   equatable: ^2.0.5
