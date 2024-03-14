@@ -470,6 +470,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Incluir archivos"),
         "includeVideos": MessageLookupByLibrary.simpleMessage("Incluir vídeos"),
         "initializing": MessageLookupByLibrary.simpleMessage("Inicializando…"),
+        "invalidStickerFormat": MessageLookupByLibrary.simpleMessage(
+            "Formato de etiqueta inválido"),
         "inviteInfo": MessageLookupByLibrary.simpleMessage(
             "Cualquier persona con Mixin puede seguir este enlace para unirse a este grupo. Solo compártelo con personas en las que confíes."),
         "inviteToGroupViaLink": MessageLookupByLibrary.simpleMessage(
@@ -680,6 +682,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Emoticonos y personas"),
         "status": MessageLookupByLibrary.simpleMessage("Estado"),
         "sticker": MessageLookupByLibrary.simpleMessage("Pegatina"),
+        "stickerAddInvalidSize": MessageLookupByLibrary.simpleMessage(
+            "Requiere un tamaño de archivo de pegatinas de más de 1 KB y menos de 1 MB, ancho y alto entre 128 px y 1024 px."),
         "stickerAlbumDetail":
             MessageLookupByLibrary.simpleMessage("Detalle del álbum de cromos"),
         "stickerStore":

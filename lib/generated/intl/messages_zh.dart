@@ -281,6 +281,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deposit": MessageLookupByLibrary.simpleMessage("充值"),
         "depositHash": MessageLookupByLibrary.simpleMessage("充值哈希"),
         "developer": MessageLookupByLibrary.simpleMessage("开发者"),
+        "deviceTransferFailed": MessageLookupByLibrary.simpleMessage("同步失败"),
         "disableDisappearingMessage": m15,
         "disabled": MessageLookupByLibrary.simpleMessage("禁用"),
         "disappearingCustomTimeMaxWarning": m16,
@@ -437,6 +438,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "includeFiles": MessageLookupByLibrary.simpleMessage("包括文件"),
         "includeVideos": MessageLookupByLibrary.simpleMessage("包括视频"),
         "initializing": MessageLookupByLibrary.simpleMessage("初始化…"),
+        "invalidStickerFormat": MessageLookupByLibrary.simpleMessage("贴纸格式不支持"),
         "inviteInfo": MessageLookupByLibrary.simpleMessage(
             "Mixin 使用者可以使用此链接加入这个群组，请只跟您信任的人共享链接。"),
         "inviteToGroupViaLink": MessageLookupByLibrary.simpleMessage("群邀请链接"),
@@ -622,6 +624,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "snapshotHash": MessageLookupByLibrary.simpleMessage("快照哈希"),
         "status": MessageLookupByLibrary.simpleMessage("交易状态"),
         "sticker": MessageLookupByLibrary.simpleMessage("贴纸"),
+        "stickerAddInvalidSize": MessageLookupByLibrary.simpleMessage(
+            "贴纸要求大于 1KB 且小于 1MB，宽高大于 128 像素且小于 1024 像素。"),
         "stickerAlbumDetail": MessageLookupByLibrary.simpleMessage("表情详情"),
         "stickerStore": MessageLookupByLibrary.simpleMessage("表情商店"),
         "storageAutoDownloadDescription":
@@ -648,7 +652,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "transcript": MessageLookupByLibrary.simpleMessage("聊天记录"),
         "transfer": MessageLookupByLibrary.simpleMessage("转账"),
         "transferCompleted": MessageLookupByLibrary.simpleMessage("同步完成"),
-        "transferFailed": MessageLookupByLibrary.simpleMessage("同步失败"),
         "transferProtocolVersionNotMatched":
             MessageLookupByLibrary.simpleMessage("版本不匹配，无法同步数据，请先升级应用。"),
         "transferringChats": MessageLookupByLibrary.simpleMessage("同步聊天记录中"),

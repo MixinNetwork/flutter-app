@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-
 import 'package:overlay_support/overlay_support.dart';
 
 import '../constants/resources.dart';
@@ -102,7 +101,8 @@ class ToastWidget extends StatelessWidget {
       );
 }
 
-void showToastSuccessful() => Toast.createView(
+void showToastSuccessful({BuildContext? context}) => Toast.createView(
+      context: context,
       builder: (context) => ToastWidget(
         barrierColor: Colors.transparent,
         icon: const _Successful(),
@@ -152,14 +152,16 @@ void showToastFailed(Object? error, {BuildContext? context}) =>
       ),
     );
 
-void showToast(String message) => Toast.createView(
+void showToast(String message, {BuildContext? context}) => Toast.createView(
+      context: context,
       builder: (context) => ToastWidget(
         barrierColor: Colors.transparent,
         text: message,
       ),
     );
 
-void showToastLoading() => Toast.createView(
+void showToastLoading({BuildContext? context}) => Toast.createView(
+      context: context,
       builder: (context) => ToastWidget(
         icon: const _Loading(),
         text: context.l10n.loading,

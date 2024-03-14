@@ -263,6 +263,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "helpCenter": MessageLookupByLibrary.simpleMessage("Pusat bantuan"),
         "hour": m26,
         "initializing": MessageLookupByLibrary.simpleMessage("Memulakan…"),
+        "invalidStickerFormat":
+            MessageLookupByLibrary.simpleMessage("Format pelekat tidak sah"),
         "inviteInfo": MessageLookupByLibrary.simpleMessage(
             "Sesiapa sahaja yang mempunyai Mixin boleh mengikuti pautan ini untuk menyertai kumpulan ini. Kongsi sahaja dengan orang yang anda percayai."),
         "inviteToGroupViaLink": MessageLookupByLibrary.simpleMessage(
@@ -365,6 +367,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Log masuk dengan nombor telefon"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
         "sticker": MessageLookupByLibrary.simpleMessage("Pelekat"),
+        "stickerAddInvalidSize": MessageLookupByLibrary.simpleMessage(
+            "Memerlukan saiz fail pelekat lebih besar daripada 1KB dan kurang dari 1MB, lebar dan tinggi antara 128px dan 1024px."),
         "storageUsage":
             MessageLookupByLibrary.simpleMessage("Penggunaan Storan"),
         "successful": MessageLookupByLibrary.simpleMessage("Berjaya"),

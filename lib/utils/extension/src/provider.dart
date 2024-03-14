@@ -26,7 +26,7 @@ extension ProviderExtension on BuildContext {
         return value.requireValue;
       }));
 
-  Localization get l10n => Localization.of(this);
+  Localization get l10n => Localization.maybeOf(this) ?? Localization.current;
 
   BrightnessThemeData get theme => BrightnessData.themeOf(this);
 

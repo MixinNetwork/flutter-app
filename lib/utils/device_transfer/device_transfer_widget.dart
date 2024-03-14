@@ -241,7 +241,7 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
         message: context.l10n.transferCompleted,
       ),
       failedBuilder: (context) => _ConfirmDialog(
-        message: context.l10n.transferFailed,
+        message: context.l10n.deviceTransferFailed,
       ),
     );
     _useTransferStatus(
@@ -251,7 +251,7 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
         message: context.l10n.transferCompleted,
       ),
       failedBuilder: (context) => _ConfirmDialog(
-        message: context.l10n.transferFailed,
+        message: context.l10n.deviceTransferFailed,
       ),
     );
     useOnTransferEventType(
@@ -295,7 +295,7 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
           case ConnectionFailedReason.versionNotMatched:
             message = context.l10n.transferProtocolVersionNotMatched;
           case ConnectionFailedReason.unknown:
-            message = context.l10n.transferFailed;
+            message = context.l10n.deviceTransferFailed;
         }
         showMixinDialog(
           context: context,

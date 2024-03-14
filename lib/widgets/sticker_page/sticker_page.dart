@@ -3,9 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mixin_logger/mixin_logger.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../account/account_key_value.dart';
 import '../../bloc/bloc_converter.dart';
+import '../../constants/icon_fonts.dart';
 import '../../constants/resources.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
@@ -15,6 +19,8 @@ import '../../utils/hook.dart';
 import '../automatic_keep_alive_client_widget.dart';
 import '../hover_overlay.dart';
 import '../interactive_decorated_box.dart';
+import '../toast.dart';
+import 'add_sticker_dialog.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
 import 'bloc/cubit/sticker_cubit.dart';
 import 'emoji_page.dart';
@@ -101,7 +107,22 @@ class StickerPage extends StatelessWidget {
                                   ],
                                   duration: kVerySlowThrottleDuration,
                                 ),
-                                rightClickDelete: true,
+                                delete: (sticker) {
+                                  final ctx = Navigator.of(context).context;
+                                  showToastLoading(context: ctx);
+                                  try {
+                                    ctx.accountServer.client.accountApi
+                                        .removeSticker([sticker.stickerId]);
+                                    ctx.database.stickerDao
+                                        .deletePersonalSticker(
+                                            sticker.stickerId);
+                                    showToastSuccessful(context: ctx);
+                                  } catch (error, stacktrace) {
+                                    e('removeSticker error: $error, $stacktrace');
+                                    showToastFailed(error, context: ctx);
+                                  }
+                                },
+                                canAddSticker: true,
                               );
                             case PresetStickerGroup.gif:
                               return const AutomaticKeepAliveClientWidget(
@@ -147,13 +168,15 @@ class _StickerAlbumPage extends HookConsumerWidget {
   const _StickerAlbumPage({
     required this.getStickers,
     this.updateUsedAt = true,
-    this.rightClickDelete = false,
+    this.delete,
+    this.canAddSticker = false,
   });
 
   final Stream<List<Sticker>> Function() getStickers;
 
   final bool updateUsedAt;
-  final bool rightClickDelete;
+  final void Function(Sticker)? delete;
+  final bool canAddSticker;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -174,15 +197,58 @@ class _StickerAlbumPage extends HookConsumerWidget {
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
         ),
-        itemCount: itemCount,
-        itemBuilder: (BuildContext context, int index) => _StickerAlbumPageItem(
-          index: index,
-          updateUsedAt: updateUsedAt,
-          rightClickDelete: rightClickDelete,
-        ),
+        itemCount: canAddSticker ? itemCount + 1 : itemCount,
+        itemBuilder: (BuildContext context, int index) {
+          if (canAddSticker && index == 0) {
+            return const _AddStickerWidget();
+          }
+          return _StickerAlbumPageItem(
+            index: canAddSticker ? index - 1 : index,
+            updateUsedAt: updateUsedAt,
+            delete: delete,
+          );
+        },
       ),
     );
   }
+}
+
+class _AddStickerWidget extends StatelessWidget {
+  const _AddStickerWidget();
+
+  @override
+  Widget build(BuildContext context) => InteractiveDecoratedBox(
+        hoveringDecoration: BoxDecoration(
+          color: context.dynamicColor(
+            const Color.fromRGBO(229, 231, 235, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+        ),
+        onTap: () async {
+          try {
+            final ctx = Navigator.of(context).context;
+            final image =
+                await ImagePicker().pickImage(source: ImageSource.gallery);
+            if (image == null) {
+              return;
+            }
+            await showAddStickerDialog(ctx, filepath: image.path);
+          } catch (error, stacktrace) {
+            e('pickFiles error: $error, $stacktrace');
+            showToastFailed(error);
+          }
+        },
+        child: Center(
+          child: SvgPicture.asset(Resources.assetsImagesAddStickerSvg,
+              width: 78,
+              height: 78,
+              colorFilter: ColorFilter.mode(
+                context.theme.secondaryText,
+                BlendMode.srcIn,
+              )),
+        ),
+      );
 }
 
 class _StickerStoreEmptyPage extends StatelessWidget {
@@ -202,12 +268,12 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
   const _StickerAlbumPageItem({
     required this.index,
     required this.updateUsedAt,
-    this.rightClickDelete = false,
+    this.delete,
   });
 
   final int index;
   final bool updateUsedAt;
-  final bool rightClickDelete;
+  final void Function(Sticker)? delete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -216,7 +282,7 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
       keys: [index],
     );
 
-    return InteractiveDecoratedBox(
+    Widget widget = InteractiveDecoratedBox(
       onTap: () async {
         final accountServer = context.accountServer;
         final conversationItem = ref.read(conversationProvider);
@@ -239,10 +305,6 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
           ),
         ]);
       },
-      onRightClick: (pointerUpEvent) async {
-        if (!rightClickDelete) return;
-        // todo use native context menu.
-      },
       hoveringDecoration: BoxDecoration(
         color: context.dynamicColor(
           const Color.fromRGBO(229, 231, 235, 1),
@@ -262,6 +324,20 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
         ),
       ),
     );
+    if (delete != null) {
+      widget = ContextMenuWidget(
+        menuProvider: (request) => Menu(children: [
+          MenuAction(
+            title: context.l10n.delete,
+            image: MenuImage.icon(IconFonts.delete),
+            callback: () => delete?.call(sticker),
+          ),
+        ]),
+        child: widget,
+      );
+    }
+
+    return widget;
   }
 }
 

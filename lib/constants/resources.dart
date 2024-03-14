@@ -24,6 +24,10 @@ class Resources {
   /// {@macro assets_generator.assetsImagesAccountSvg.preview}
   static const String assetsImagesAccountSvg = 'assets/images/account.svg';
 
+  /// {@macro assets_generator.assetsImagesAddStickerSvg.preview}
+  static const String assetsImagesAddStickerSvg =
+      'assets/images/add_sticker.svg';
+
   /// {@macro assets_generator.assetsImagesAppButtonSvg.preview}
   static const String assetsImagesAppButtonSvg = 'assets/images/app_button.svg';
 
@@ -496,6 +500,10 @@ class Resources {
   /// {@macro assets_generator.assetsImagesSmallCloseSvg.preview}
   static const String assetsImagesSmallCloseSvg =
       'assets/images/small_close.svg';
+
+  /// {@macro assets_generator.assetsImagesSnapshotDoneSvg.preview}
+  static const String assetsImagesSnapshotDoneSvg =
+      'assets/images/snapshot_done.svg';
 
   /// {@macro assets_generator.assetsImagesStickerSvg.preview}
   static const String assetsImagesStickerSvg = 'assets/images/sticker.svg';
