@@ -65,7 +65,6 @@ class SearchList extends HookConsumerWidget {
                 .distinct()
                 .debounceTime(const Duration(milliseconds: 150));
           },
-          initialData: null,
         ).data ??
         '';
 

@@ -29,7 +29,6 @@ class StorageUsageDetailPage extends HookConsumerWidget {
     final watchEvent = useMemoizedStream(
       () =>
           File(context.accountServer.getMediaFilePath()).watch(recursive: true),
-      initialData: null,
     ).data;
 
     final photosSize = useMemoizedFuture(

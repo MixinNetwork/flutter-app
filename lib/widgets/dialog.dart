@@ -389,7 +389,7 @@ Future<DialogEvent?> showConfirmMixinDialog(
             ],
             MixinButton(
               backgroundTransparent: true,
-              onTap: () => Navigator.pop(context, null),
+              onTap: () => Navigator.pop(context),
               child: Text(negativeText ?? context.l10n.cancel),
             ),
             MixinButton(
