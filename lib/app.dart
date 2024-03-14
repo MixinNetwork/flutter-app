@@ -8,6 +8,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide Consumer, FutureProvider, Provider;
+import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 
 import 'account/account_key_value.dart';
@@ -61,7 +62,10 @@ class App extends HookConsumerWidget {
       child = _LoginApp(authState: authState);
     }
 
-    return FocusHelper(child: child);
+    return FocusHelper(
+        child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: OverlaySupport.local(child: child)));
   }
 }
 

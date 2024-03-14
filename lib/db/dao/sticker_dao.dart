@@ -20,6 +20,9 @@ extension StickerConverter on sdk.Sticker {
       );
 }
 
+const _kCategoryPersonal = 'PERSONAL';
+const _kCategorySystem = 'SYSTEM';
+
 @DriftAccessor(include: {'../moor/dao/sticker.drift'})
 class StickerDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerDaoMixin {
@@ -49,14 +52,21 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
         return value;
       });
 
-  Future<int> deleteSticker(Sticker sticker) =>
-      delete(db.stickers).delete(sticker).then((value) {
-        DataBaseEventBus.instance.updateSticker([
-          MiniSticker(stickerId: sticker.stickerId, albumId: sticker.albumId)
-        ]);
-
-        return value;
-      });
+  Future<void> deletePersonalSticker(String stickerId) async {
+    final albumId = await (select(stickerAlbums)
+          ..where((tbl) => tbl.category.equals(_kCategoryPersonal)))
+        .map((row) => row.albumId)
+        .getSingleOrNull();
+    if (albumId == null) {
+      return;
+    }
+    await (delete(db.stickerRelationships)
+          ..where((tbl) =>
+              tbl.stickerId.equals(stickerId) & tbl.albumId.equals(albumId)))
+        .go();
+    DataBaseEventBus.instance
+        .updateSticker([MiniSticker(stickerId: stickerId, albumId: albumId)]);
+  }
 
   SimpleSelectStatement<Stickers, Sticker> sticker(String stickerId) =>
       (select(db.stickers)
@@ -69,9 +79,10 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
       (t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)
     ]);
 
-  Selectable<Sticker> personalStickers() => _stickersByCategory('PERSONAL');
+  Selectable<Sticker> personalStickers() =>
+      _stickersByCategory(_kCategoryPersonal);
 
-  Selectable<Sticker> systemStickers() => _stickersByCategory('SYSTEM');
+  Selectable<Sticker> systemStickers() => _stickersByCategory(_kCategorySystem);
 
   Future<int> updateUsedAt(
           String? albumId, String stickerId, DateTime dateTime) =>
