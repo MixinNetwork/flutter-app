@@ -318,6 +318,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
         "depositHash": MessageLookupByLibrary.simpleMessage("Deposit Hash"),
         "developer": MessageLookupByLibrary.simpleMessage("Developer"),
+        "deviceTransferFailed":
+            MessageLookupByLibrary.simpleMessage("Transfer failed"),
         "disableDisappearingMessage": m15,
         "disabled": MessageLookupByLibrary.simpleMessage("Disabled"),
         "disappearingCustomTimeMaxWarning": m16,
@@ -497,6 +499,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "includeFiles": MessageLookupByLibrary.simpleMessage("Include Files"),
         "includeVideos": MessageLookupByLibrary.simpleMessage("Include Videos"),
         "initializing": MessageLookupByLibrary.simpleMessage("Initializing…"),
+        "invalidStickerFormat":
+            MessageLookupByLibrary.simpleMessage("Invalid sticker format"),
         "inviteInfo": MessageLookupByLibrary.simpleMessage(
             "Anyone with Mixin can follow this link to join this group. Only share it with people you trust."),
         "inviteToGroupViaLink":
@@ -719,6 +723,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "snapshotHash": MessageLookupByLibrary.simpleMessage("Snapshot Hash"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
         "sticker": MessageLookupByLibrary.simpleMessage("Sticker"),
+        "stickerAddInvalidSize": MessageLookupByLibrary.simpleMessage(
+            "Requires stickers file size larger than 1KB and less than 1MB, width and height between 128px and 1024px."),
         "stickerAlbumDetail":
             MessageLookupByLibrary.simpleMessage("Sticker album detail"),
         "stickerStore": MessageLookupByLibrary.simpleMessage("Sticker Store"),
@@ -754,8 +760,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
         "transferCompleted":
             MessageLookupByLibrary.simpleMessage("Transfer completed"),
-        "transferFailed":
-            MessageLookupByLibrary.simpleMessage("Transfer failed"),
         "transferProtocolVersionNotMatched": MessageLookupByLibrary.simpleMessage(
             "Protocol version does not match, transfer failed. Please upgrade the application first."),
         "transferringChats":

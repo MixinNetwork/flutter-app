@@ -395,6 +395,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "includeFiles": MessageLookupByLibrary.simpleMessage("ファイルが含まれています"),
         "includeVideos": MessageLookupByLibrary.simpleMessage("動画が含まれています"),
         "initializing": MessageLookupByLibrary.simpleMessage("初期化中…"),
+        "invalidStickerFormat":
+            MessageLookupByLibrary.simpleMessage("スタンプのフォーマットが無効です"),
         "inviteInfo": MessageLookupByLibrary.simpleMessage(
             "リンクを知っている人はだれでもグループに参加可能です、信頼できる人だけに共有してください"),
         "inviteToGroupViaLink":
@@ -571,6 +573,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "signWithQrcode": MessageLookupByLibrary.simpleMessage("QRコードでログイン"),
         "status": MessageLookupByLibrary.simpleMessage("ステータス"),
         "sticker": MessageLookupByLibrary.simpleMessage("スタンプ"),
+        "stickerAddInvalidSize": MessageLookupByLibrary.simpleMessage(
+            "スタンプのサイズは1KB以上1MB未満、 幅と高さは128ピクセルから1024ピクセルである必要があります"),
         "stickerAlbumDetail":
             MessageLookupByLibrary.simpleMessage("スタンプアルバム詳細"),
         "stickerStore": MessageLookupByLibrary.simpleMessage("スタンプストア"),

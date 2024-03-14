@@ -1314,6 +1314,16 @@ class Localization {
     );
   }
 
+  /// `Transfer failed`
+  String get deviceTransferFailed {
+    return Intl.message(
+      'Transfer failed',
+      name: 'deviceTransferFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{arg0} disabled disappearing message`
   String disableDisappearingMessage(Object arg0) {
     return Intl.message(
@@ -2425,6 +2435,16 @@ class Localization {
     return Intl.message(
       'Initializing…',
       name: 'initializing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid sticker format`
+  String get invalidStickerFormat {
+    return Intl.message(
+      'Invalid sticker format',
+      name: 'invalidStickerFormat',
       desc: '',
       args: [],
     );
@@ -4088,6 +4108,16 @@ class Localization {
     );
   }
 
+  /// `Requires stickers file size larger than 1KB and less than 1MB, width and height between 128px and 1024px.`
+  String get stickerAddInvalidSize {
+    return Intl.message(
+      'Requires stickers file size larger than 1KB and less than 1MB, width and height between 128px and 1024px.',
+      name: 'stickerAddInvalidSize',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Sticker album detail`
   String get stickerAlbumDetail {
     return Intl.message(
@@ -4333,16 +4363,6 @@ class Localization {
     return Intl.message(
       'Transfer completed',
       name: 'transferCompleted',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Transfer failed`
-  String get transferFailed {
-    return Intl.message(
-      'Transfer failed',
-      name: 'transferFailed',
       desc: '',
       args: [],
     );

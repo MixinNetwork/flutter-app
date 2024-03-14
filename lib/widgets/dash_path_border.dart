@@ -22,6 +22,7 @@ Path dashPath(
   for (final metric in source.computeMetrics()) {
     var distance = _dashOffset._calculate(metric.length);
     var draw = true;
+    dashArray.reset();
     while (distance < metric.length) {
       final len = dashArray.next;
       if (draw) {
@@ -77,6 +78,10 @@ class CircularIntervalList<T> {
 
   final List<T> _vals;
   int _idx = 0;
+
+  void reset() {
+    _idx = 0;
+  }
 
   T get next {
     if (_idx >= _vals.length) {

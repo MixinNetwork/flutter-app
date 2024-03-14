@@ -256,6 +256,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "helpCenter": MessageLookupByLibrary.simpleMessage("Pusat bantuan"),
         "hour": m26,
         "initializing": MessageLookupByLibrary.simpleMessage("Memulai..."),
+        "invalidStickerFormat":
+            MessageLookupByLibrary.simpleMessage("Format stiker tidak valid"),
         "inviteInfo": MessageLookupByLibrary.simpleMessage(
             "Siapapun yang memiliki Mixin dapat mengikuti tautan ini untuk bergabung dengan grup ini. Hanya bagikan dengan orang yang Anda percaya."),
         "inviteToGroupViaLink": MessageLookupByLibrary.simpleMessage(
@@ -360,6 +362,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Masuk dengan nomor telepon"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
         "sticker": MessageLookupByLibrary.simpleMessage("Stiker"),
+        "stickerAddInvalidSize": MessageLookupByLibrary.simpleMessage(
+            "Memerlukan ukuran file stiker yang lebih besar dari 1KB dan kurang dari 1MB, lebar dan tinggi antara 128px dan 1024px."),
         "storageUsage":
             MessageLookupByLibrary.simpleMessage("Penggunaan Penyimpanan"),
         "successful": MessageLookupByLibrary.simpleMessage("Berhasil"),

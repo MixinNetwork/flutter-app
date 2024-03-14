@@ -39,6 +39,8 @@ extension XFileExtension on XFile {
         'image/gif',
       }.contains(mimeType?.toLowerCase());
 
+  bool get isGif => mimeType?.toLowerCase() == 'image/gif';
+
   bool get isVideo =>
       mimeType != null &&
       ([
@@ -48,6 +50,13 @@ extension XFileExtension on XFile {
             'video/webm',
           ].contains(mimeType?.toLowerCase()) ||
           {'mkv', 'avi'}.contains(extensionFromMime(mimeType!)));
+
+  bool get isStickerSupport => {
+        'image/gif',
+        'image/png',
+        'image/webp',
+        'image/jpeg',
+      }.contains(mimeType?.toLowerCase());
 
   XFile withMineType() => XFile(
         path,

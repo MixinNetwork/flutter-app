@@ -444,6 +444,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "includeFiles": MessageLookupByLibrary.simpleMessage("Включить файлы"),
         "includeVideos": MessageLookupByLibrary.simpleMessage("Включить видео"),
         "initializing": MessageLookupByLibrary.simpleMessage("Инициализация…"),
+        "invalidStickerFormat":
+            MessageLookupByLibrary.simpleMessage("Неверный формат стикера"),
         "inviteInfo": MessageLookupByLibrary.simpleMessage(
             "Любой, у кого есть Mixin, может перейти по этой ссылке, чтобы присоединиться к этой группе. Делитесь ею только с теми, кому вы доверяете."),
         "inviteToGroupViaLink": MessageLookupByLibrary.simpleMessage(
@@ -639,6 +641,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Войти с QrCode"),
         "status": MessageLookupByLibrary.simpleMessage("Статус"),
         "sticker": MessageLookupByLibrary.simpleMessage("Наклейка"),
+        "stickerAddInvalidSize": MessageLookupByLibrary.simpleMessage(
+            "Требуется размер файла наклеек от 1 КБ до 1 МБ, ширина и высота от 128 до 1024 пикселей."),
         "stickerAlbumDetail":
             MessageLookupByLibrary.simpleMessage("Деталь альбома стикеров"),
         "stickerStore": MessageLookupByLibrary.simpleMessage("Магазин наклеек"),

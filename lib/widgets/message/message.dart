@@ -45,6 +45,7 @@ import '../../utils/system/clipboard.dart';
 import '../avatar_view/avatar_view.dart';
 import '../interactive_decorated_box.dart';
 import '../menu.dart';
+import '../sticker_page/add_sticker_dialog.dart';
 import '../toast.dart';
 import '../user/user_dialog.dart';
 import '../user_selector/conversation_selector.dart';
@@ -348,7 +349,13 @@ class MessageItemWidget extends HookConsumerWidget {
                           image: MenuImage.icon(IconFonts.sticker),
                           title: context.l10n.addSticker,
                           callback: () => _onAddSticker(context),
-                        )
+                        ),
+                      if (message.type.isImage && message.canForward)
+                        MenuAction(
+                          image: MenuImage.icon(IconFonts.sticker),
+                          title: context.l10n.addSticker,
+                          callback: () => _onAddImageAsSticker(context),
+                        ),
                     ];
 
                     final replayAction = [
@@ -636,6 +643,16 @@ class MessageItemWidget extends HookConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _onAddImageAsSticker(BuildContext context) async {
+    await showAddStickerDialog(
+      context,
+      filepath: context.accountServer.convertMessageAbsolutePath(
+        message,
+        isTranscriptPage,
       ),
     );
   }

@@ -102,6 +102,7 @@ class StickerPage extends StatelessWidget {
                                   duration: kVerySlowThrottleDuration,
                                 ),
                                 rightClickDelete: true,
+                                canAddSticker: true,
                               );
                             case PresetStickerGroup.gif:
                               return const AutomaticKeepAliveClientWidget(
@@ -148,12 +149,14 @@ class _StickerAlbumPage extends HookConsumerWidget {
     required this.getStickers,
     this.updateUsedAt = true,
     this.rightClickDelete = false,
+    this.canAddSticker = false,
   });
 
   final Stream<List<Sticker>> Function() getStickers;
 
   final bool updateUsedAt;
   final bool rightClickDelete;
+  final bool canAddSticker;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -174,15 +177,45 @@ class _StickerAlbumPage extends HookConsumerWidget {
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
         ),
-        itemCount: itemCount,
-        itemBuilder: (BuildContext context, int index) => _StickerAlbumPageItem(
-          index: index,
-          updateUsedAt: updateUsedAt,
-          rightClickDelete: rightClickDelete,
-        ),
+        itemCount: canAddSticker ? itemCount + 1 : itemCount,
+        itemBuilder: (BuildContext context, int index) {
+          if (canAddSticker && index == 0) {
+            return const _AddStickerWidget();
+          }
+          return _StickerAlbumPageItem(
+            index: canAddSticker ? index - 1 : index,
+            updateUsedAt: updateUsedAt,
+            rightClickDelete: rightClickDelete,
+          );
+        },
       ),
     );
   }
+}
+
+class _AddStickerWidget extends StatelessWidget {
+  const _AddStickerWidget();
+
+  @override
+  Widget build(BuildContext context) => InteractiveDecoratedBox(
+        hoveringDecoration: BoxDecoration(
+          color: context.dynamicColor(
+            const Color.fromRGBO(229, 231, 235, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+        ),
+        onTap: () {},
+        child: Center(
+          child: SvgPicture.asset(Resources.assetsImagesAddStickerSvg,
+              width: 78,
+              height: 78,
+              colorFilter: ColorFilter.mode(
+                context.theme.secondaryText,
+                BlendMode.srcIn,
+              )),
+        ),
+      );
 }
 
 class _StickerStoreEmptyPage extends StatelessWidget {
