@@ -591,11 +591,11 @@ class _QuoteMessage extends HookConsumerWidget {
   }
 }
 
-class _SendActionTypeButton extends HookWidget {
+class _SendActionTypeButton extends HookConsumerWidget {
   const _SendActionTypeButton();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDesktop =
         Platform.isMacOS || Platform.isLinux || Platform.isWindows;
 
@@ -636,13 +636,17 @@ class _SendActionTypeButton extends HookWidget {
                     .getSingleOrNull();
                 if (user == null) throw Exception('User not found');
 
+                final quoteMessage = ref.read(quoteMessageProvider.notifier);
+
                 await context.accountServer.sendContactMessage(
                   userId,
                   user.fullName,
                   conversationState.encryptCategory,
                   conversationId: conversationState.conversationId,
                   recipientId: conversationState.userId,
+                  quoteMessageId: quoteMessage.state?.messageId,
                 );
+                quoteMessage.state = null;
               });
             },
           ),
