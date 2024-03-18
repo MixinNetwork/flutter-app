@@ -124,14 +124,18 @@ MarkdownConfig _createMarkdownConfig({
             openUri(context, href);
           }),
       ListConfig(
-        marker: (bool isOrdered, int depth, int index) => getDefaultMarker(
-          isOrdered,
-          depth,
-          context.theme.text,
-          index,
-          8,
-          MarkdownConfig(),
-        ),
+        marker: (bool isOrdered, int depth, int index) {
+          final style = DefaultTextStyle.of(context).style;
+          final height = (style.fontSize ?? 16) * (style.height ?? 1.25);
+          return getDefaultMarker(
+            isOrdered,
+            depth,
+            context.theme.text,
+            index,
+            height / 2 + 1,
+            MarkdownConfig(),
+          );
+        },
       )
     ]);
 
