@@ -47,7 +47,7 @@ class ActionMessage extends HookConsumerWidget {
         children: actionDataList
             .map(
               (e) => InteractiveDecoratedBox.color(
-                cursor: MaterialStateMouseCursor.clickable,
+                cursor: WidgetStateMouseCursor.clickable,
                 onTap: () {
                   if (context.openAction(e.action)) return;
                   openUriWithWebView(
