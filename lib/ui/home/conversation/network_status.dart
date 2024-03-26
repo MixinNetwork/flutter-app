@@ -111,7 +111,7 @@ class _NetworkNotConnect extends StatelessWidget {
                       Text(context.l10n.networkConnectionFailed),
                       const Spacer(),
                       MouseRegion(
-                        cursor: MaterialStateMouseCursor.clickable,
+                        cursor: WidgetStateMouseCursor.clickable,
                         child: GestureDetector(
                           onTap: () {
                             i('ui: click reconnect');
