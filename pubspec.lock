@@ -886,10 +886,10 @@ packages:
     dependency: "direct main"
     description:
       name: hydrated_bloc
-      sha256: "00a2099680162e74b5a836b8a7f446e478520a9cae9f6032e028ad8129f4432d"
+      sha256: af35b357739fe41728df10bec03aad422cdc725a1e702e03af9d2a41ea05160c
       url: "https://pub.dev"
     source: hosted
-    version: "9.1.4"
+    version: "9.1.5"
   image:
     dependency: "direct main"
     description:
