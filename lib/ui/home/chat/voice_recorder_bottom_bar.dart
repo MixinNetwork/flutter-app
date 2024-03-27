@@ -17,7 +17,6 @@ import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/system/audio_session.dart';
 import '../../../widgets/action_button.dart';
-import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/waveform_widget.dart';
@@ -192,14 +191,12 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
       converter: (state) => state.state != RecorderState.idle,
     );
     final link = useMemoized(LayerLink.new);
-    final overlay = Overlay.of(context, rootOverlay: true);
+
+    final overlay = Navigator.of(context).overlay ?? Overlay.of(context);
 
     final recorderBottomBarEntry = useRef<OverlayEntry?>(null);
 
     final voiceRecorderCubit = context.read<VoiceRecorderCubit>();
-
-    final value = BrightnessData.of(context);
-    final theme = BrightnessData.themeOf(context);
 
     useEffect(
       () {
@@ -215,20 +212,16 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
                 value: voiceRecorderCubit,
               ),
             ],
-            child: BrightnessData(
-              value: value,
-              brightnessThemeData: theme,
-              child: _RecordingInterceptor(
-                child: UnconstrainedBox(
-                  child: CompositedTransformFollower(
-                    link: link,
-                    showWhenUnlinked: false,
-                    targetAnchor: Alignment.center,
-                    followerAnchor: Alignment.center,
-                    child: SizedBox(
-                      width: layoutWidth,
-                      child: const Material(child: VoiceRecorderBottomBar()),
-                    ),
+            child: _RecordingInterceptor(
+              child: UnconstrainedBox(
+                child: CompositedTransformFollower(
+                  link: link,
+                  showWhenUnlinked: false,
+                  targetAnchor: Alignment.center,
+                  followerAnchor: Alignment.center,
+                  child: SizedBox(
+                    width: layoutWidth,
+                    child: const Material(child: VoiceRecorderBottomBar()),
                   ),
                 ),
               ),

@@ -8,7 +8,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide Consumer, FutureProvider, Provider;
-import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 
 import 'account/account_key_value.dart';
@@ -16,7 +15,6 @@ import 'account/notification_service.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
-
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
@@ -61,11 +59,7 @@ class App extends HookConsumerWidget {
     } else {
       child = _LoginApp(authState: authState);
     }
-
-    return FocusHelper(
-        child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: OverlaySupport.local(child: child)));
+    return FocusHelper(child: child);
   }
 }
 
@@ -262,7 +256,7 @@ class _Home extends HookConsumerWidget {
         ..limit = MediaQuery.sizeOf(context).height ~/
             (ConversationPage.conversationItemHeight / 1.75)
         ..init();
-      return const HomePage();
+      return const PortalProviders(child: HomePage());
     }
     return const LandingPage();
   }
