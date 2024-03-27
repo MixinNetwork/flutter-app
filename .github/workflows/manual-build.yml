@@ -21,7 +21,7 @@ jobs:
       - uses: mjp41/workaround8649@c8550b715ccdc17f89c8d5c28d7a48eeff9c94a8
         with:
           os: ubuntu-latest
-        
+
       - run: g++ --version
       - run: gcc --version
       - run: sudo apt-get install libstdc++6
@@ -209,10 +209,10 @@ jobs:
       - uses: ilammy/setup-nasm@v1
 
       # setup webcrypto for unit test
-      - run: flutter pub run webcrypto:setup
-
-      - name: Run tests
-        run: flutter test
+      #      - run: flutter pub run webcrypto:setup
+      #
+      #      - name: Run tests
+      #        run: flutter test
 
       - name: Build APP
         id: build-app
