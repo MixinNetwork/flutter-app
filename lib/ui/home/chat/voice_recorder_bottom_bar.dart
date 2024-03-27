@@ -17,6 +17,7 @@ import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/system/audio_session.dart';
 import '../../../widgets/action_button.dart';
+import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/waveform_widget.dart';
@@ -197,6 +198,9 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
 
     final voiceRecorderCubit = context.read<VoiceRecorderCubit>();
 
+    final value = BrightnessData.of(context);
+    final theme = BrightnessData.themeOf(context);
+
     useEffect(
       () {
         recorderBottomBarEntry.value?.remove();
@@ -211,16 +215,20 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
                 value: voiceRecorderCubit,
               ),
             ],
-            child: _RecordingInterceptor(
-              child: UnconstrainedBox(
-                child: CompositedTransformFollower(
-                  link: link,
-                  showWhenUnlinked: false,
-                  targetAnchor: Alignment.center,
-                  followerAnchor: Alignment.center,
-                  child: SizedBox(
-                    width: layoutWidth,
-                    child: const Material(child: VoiceRecorderBottomBar()),
+            child: BrightnessData(
+              value: value,
+              brightnessThemeData: theme,
+              child: _RecordingInterceptor(
+                child: UnconstrainedBox(
+                  child: CompositedTransformFollower(
+                    link: link,
+                    showWhenUnlinked: false,
+                    targetAnchor: Alignment.center,
+                    followerAnchor: Alignment.center,
+                    child: SizedBox(
+                      width: layoutWidth,
+                      child: const Material(child: VoiceRecorderBottomBar()),
+                    ),
                   ),
                 ),
               ),
