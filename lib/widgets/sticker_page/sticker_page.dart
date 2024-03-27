@@ -408,6 +408,7 @@ class _StickerAlbumBar extends HookConsumerWidget {
         ),
         labelPadding: EdgeInsets.zero,
         indicatorPadding: const EdgeInsets.all(5),
+        dividerColor: Colors.transparent,
         tabs: List.generate(
           tabLength,
           (index) => _StickerAlbumBarItem(
