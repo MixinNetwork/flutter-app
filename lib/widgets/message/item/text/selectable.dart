@@ -1381,6 +1381,8 @@ class _SelectableRegionContainerDelegate
         _hasReceivedStartEvent.add(selectable);
         _hasReceivedEndEvent.add(selectable);
         ensureChildUpdated(selectable);
+      case SelectionEventType.selectParagraph:
+        break;
     }
     return super.dispatchSelectionEventToChild(selectable, event);
   }
