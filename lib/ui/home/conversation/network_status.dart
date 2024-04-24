@@ -33,7 +33,7 @@ class NetworkStatus extends HookConsumerWidget {
 
     return Column(
       children: [
-        ContextMenuWidget(
+        CustomContextMenuWidget(
           desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
           menuProvider: (request) => Menu(children: [
             MenuAction(

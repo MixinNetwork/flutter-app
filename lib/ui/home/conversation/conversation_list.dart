@@ -158,6 +158,7 @@ class ConversationItemWidget extends StatelessWidget {
       height: ConversationPage.conversationItemHeight,
       child: InteractiveDecoratedBox(
         onTap: onTap,
+        decoration: BoxDecoration(color: context.theme.primary),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: DecoratedBox(

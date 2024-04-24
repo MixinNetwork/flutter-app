@@ -101,7 +101,7 @@ class ShareMediaItemMenuWrapper extends StatelessWidget {
   final String messageId;
 
   @override
-  Widget build(BuildContext context) => ContextMenuWidget(
+  Widget build(BuildContext context) => CustomContextMenuWidget(
         desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
         menuProvider: (request) => Menu(children: [
           MenuAction(

@@ -817,7 +817,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
             userId: userId!,
             userIdentityNumber: userIdentityNumber,
           ),
-        ContextMenuWidget(
+        CustomContextMenuWidget(
           hitTestBehavior: HitTestBehavior.translucent,
           menuProvider: buildMenus,
           desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
