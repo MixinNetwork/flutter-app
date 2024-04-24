@@ -254,7 +254,7 @@ class _CircleList extends HookConsumerWidget {
                               }),
                         );
                       },
-                      child: ContextMenuWidget(
+                      child: CustomContextMenuWidget(
                         desktopMenuWidgetBuilder:
                             CustomDesktopMenuWidgetBuilder(),
                         menuProvider: (request) =>
@@ -367,32 +367,35 @@ class _CircleList extends HookConsumerWidget {
                             ),
                           ],
                         ]),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: SelectItem(
-                            icon: SvgPicture.asset(
-                              Resources.assetsImagesCircleSvg,
-                              width: 24,
-                              height: 24,
-                              colorFilter: ColorFilter.mode(
-                                getCircleColorById(circle.circleId),
-                                BlendMode.srcIn,
+                        child: Material(
+                          color: context.theme.primary,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: SelectItem(
+                              icon: SvgPicture.asset(
+                                Resources.assetsImagesCircleSvg,
+                                width: 24,
+                                height: 24,
+                                colorFilter: ColorFilter.mode(
+                                  getCircleColorById(circle.circleId),
+                                  BlendMode.srcIn,
+                                ),
                               ),
-                            ),
-                            title: Text(circle.name),
-                            onTap: () {
-                              ref
-                                  .read(slideCategoryStateProvider.notifier)
-                                  .select(SlideCategoryType.circle,
-                                      circle.circleId);
+                              title: Text(circle.name),
+                              onTap: () {
+                                ref
+                                    .read(slideCategoryStateProvider.notifier)
+                                    .select(SlideCategoryType.circle,
+                                        circle.circleId);
 
-                              if (ModalRoute.of(context)?.canPop == true) {
-                                Navigator.pop(context);
-                              }
-                            },
-                            selected: selected,
-                            count: circle.unseenConversationCount,
-                            mutedCount: circle.unseenMutedConversationCount,
+                                if (ModalRoute.of(context)?.canPop == true) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                              selected: selected,
+                              count: circle.unseenConversationCount,
+                              mutedCount: circle.unseenMutedConversationCount,
+                            ),
                           ),
                         ),
                       ),

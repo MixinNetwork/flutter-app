@@ -301,7 +301,7 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
         if (sendScale >= 0.6)
           Transform.scale(
             scale: sendScale,
-            child: ContextMenuWidget(
+            child: CustomContextMenuWidget(
               desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
               menuProvider: (_) => Menu(children: [
                 MenuAction(

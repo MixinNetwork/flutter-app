@@ -944,7 +944,7 @@ class _JumpMentionButton extends HookConsumerWidget {
 
     if (messageMentions.isEmpty) return const SizedBox();
 
-    return ContextMenuWidget(
+    return CustomContextMenuWidget(
       hitTestBehavior: HitTestBehavior.translucent,
       desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
       menuProvider: (MenuRequest request) => Menu(

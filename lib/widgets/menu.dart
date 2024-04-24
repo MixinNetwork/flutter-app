@@ -14,13 +14,18 @@ import 'package:mixin_logger/mixin_logger.dart';
 import 'package:provider/provider.dart';
 import 'package:super_context_menu/src/default_builder/desktop_menu_widget_builder.dart';
 import 'package:super_context_menu/src/default_builder/group_intrinsic_width.dart';
+import 'package:super_context_menu/src/default_builder/mobile_menu_widget_builder.dart';
+import 'package:super_context_menu/src/desktop.dart';
+import 'package:super_context_menu/src/mobile.dart';
 import 'package:super_context_menu/src/scaffold/desktop/menu_widget_builder.dart';
+import 'package:super_context_menu/src/scaffold/mobile/menu_widget_builder.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../bloc/simple_cubit.dart';
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
+import '../utils/platform.dart';
 import 'action_button.dart';
 import 'hover_overlay.dart';
 import 'interactive_decorated_box.dart';
@@ -680,3 +685,68 @@ extension on SingleActivator {
         trigger.keyLabel,
       ].join('+');
 }
+
+class CustomContextMenuWidget extends StatelessWidget {
+  CustomContextMenuWidget({
+    required this.child,
+    required this.menuProvider,
+    super.key,
+    this.liftBuilder,
+    this.previewBuilder,
+    this.deferredPreviewBuilder,
+    this.hitTestBehavior = HitTestBehavior.deferToChild,
+    this.iconTheme,
+    this.contextMenuIsAllowed = _defaultContextMenuIsAllowed,
+    MobileMenuWidgetBuilder? mobileMenuWidgetBuilder,
+    DesktopMenuWidgetBuilder? desktopMenuWidgetBuilder,
+  })  : assert(previewBuilder == null || deferredPreviewBuilder == null,
+            'Cannot use both previewBuilder and deferredPreviewBuilder'),
+        mobileMenuWidgetBuilder =
+            mobileMenuWidgetBuilder ?? DefaultMobileMenuWidgetBuilder(),
+        desktopMenuWidgetBuilder =
+            desktopMenuWidgetBuilder ?? DefaultDesktopMenuWidgetBuilder();
+
+  final Widget Function(BuildContext context, Widget child)? liftBuilder;
+  final Widget Function(BuildContext context, Widget child)? previewBuilder;
+  final DeferredMenuPreview Function(BuildContext context, Widget child,
+      CancellationToken cancellationToken)? deferredPreviewBuilder;
+
+  final HitTestBehavior hitTestBehavior;
+  final MenuProvider menuProvider;
+  final ContextMenuIsAllowed contextMenuIsAllowed;
+  final Widget child;
+  final MobileMenuWidgetBuilder mobileMenuWidgetBuilder;
+  final DesktopMenuWidgetBuilder desktopMenuWidgetBuilder;
+
+  /// Base icon theme for menu icons. The size will be overridden depending
+  /// on platform.
+  final IconThemeData? iconTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    if (kPlatformIsDesktop) {
+      return DesktopContextMenuWidget(
+        hitTestBehavior: hitTestBehavior,
+        menuProvider: menuProvider,
+        contextMenuIsAllowed: contextMenuIsAllowed,
+        iconTheme: iconTheme,
+        menuWidgetBuilder: desktopMenuWidgetBuilder,
+        child: child,
+      );
+    } else {
+      return MobileContextMenuWidget(
+        hitTestBehavior: hitTestBehavior,
+        menuProvider: menuProvider,
+        liftBuilder: liftBuilder,
+        previewBuilder: previewBuilder,
+        deferredPreviewBuilder: deferredPreviewBuilder,
+        iconTheme: iconTheme,
+        contextMenuIsAllowed: contextMenuIsAllowed,
+        menuWidgetBuilder: mobileMenuWidgetBuilder,
+        child: child,
+      );
+    }
+  }
+}
+
+bool _defaultContextMenuIsAllowed(Offset location) => true;

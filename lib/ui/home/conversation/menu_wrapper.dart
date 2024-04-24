@@ -40,7 +40,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
     final isGroupConversation = conversation?.isGroupConversation ??
         searchConversation!.isGroupConversation;
 
-    return ContextMenuWidget(
+    return CustomContextMenuWidget(
       desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
       menuProvider: (MenuRequest request) async {
         final circleId = ref.read(slideCategoryStateProvider.select((value) {
