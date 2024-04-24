@@ -519,7 +519,7 @@ class _StickerPage extends HookConsumerWidget {
               if (album != null && stickers.isNotEmpty)
                 TabBar(
                   isScrollable: true,
-                  overlayColor: WidgetStateProperty.all(Colors.transparent),
+                  overlayColor: MaterialStateProperty.all(Colors.transparent),
                   indicator: BoxDecoration(
                     color: context.dynamicColor(
                       const Color.fromRGBO(229, 231, 235, 1),
