@@ -7,14 +7,14 @@ PODS:
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
-  - DKImagePickerController/Core (4.3.4):
+  - DKImagePickerController/Core (4.3.8):
     - DKImagePickerController/ImageDataManager
     - DKImagePickerController/Resource
-  - DKImagePickerController/ImageDataManager (4.3.4)
-  - DKImagePickerController/PhotoGallery (4.3.4):
+  - DKImagePickerController/ImageDataManager (4.3.8)
+  - DKImagePickerController/PhotoGallery (4.3.8):
     - DKImagePickerController/Core
     - DKPhotoGallery
-  - DKImagePickerController/Resource (4.3.4)
+  - DKImagePickerController/Resource (4.3.8)
   - DKPhotoGallery (0.0.17):
     - DKPhotoGallery/Core (= 0.0.17)
     - DKPhotoGallery/Model (= 0.0.17)
@@ -74,38 +74,40 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - PhoneNumberKit (3.7.4):
-    - PhoneNumberKit/PhoneNumberKitCore (= 3.7.4)
-    - PhoneNumberKit/UIKit (= 3.7.4)
-  - PhoneNumberKit/PhoneNumberKitCore (3.7.4)
-  - PhoneNumberKit/UIKit (3.7.4):
+  - PhoneNumberKit (3.7.10):
+    - PhoneNumberKit/PhoneNumberKitCore (= 3.7.10)
+    - PhoneNumberKit/UIKit (= 3.7.10)
+  - PhoneNumberKit/PhoneNumberKitCore (3.7.10)
+  - PhoneNumberKit/UIKit (3.7.10):
     - PhoneNumberKit/PhoneNumberKitCore
   - platform_device_id (0.0.1):
     - Flutter
-  - protocol_handler (0.0.1):
+  - protocol_handler_ios (0.0.1):
     - Flutter
-  - SDWebImage (5.18.3):
-    - SDWebImage/Core (= 5.18.3)
-  - SDWebImage/Core (5.18.3)
-  - sqlite3 (3.44.0):
-    - sqlite3/common (= 3.44.0)
-  - sqlite3/common (3.44.0)
-  - sqlite3/fts5 (3.44.0):
+  - SDWebImage (5.19.1):
+    - SDWebImage/Core (= 5.19.1)
+  - SDWebImage/Core (5.19.1)
+  - "sqlite3 (3.45.3+1)":
+    - "sqlite3/common (= 3.45.3+1)"
+  - "sqlite3/common (3.45.3+1)"
+  - "sqlite3/fts5 (3.45.3+1)":
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.44.0):
+  - "sqlite3/perf-threadsafe (3.45.3+1)":
     - sqlite3/common
-  - sqlite3/rtree (3.44.0):
+  - "sqlite3/rtree (3.45.3+1)":
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
-    - sqlite3 (~> 3.44.0)
+    - sqlite3 (~> 3.45.1)
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
   - super_native_extensions (0.0.1):
     - Flutter
-  - SwiftyGif (5.4.4)
+  - SwiftyGif (5.4.5)
   - url_launcher_ios (0.0.1):
+    - Flutter
+  - video_compress (0.3.0):
     - Flutter
   - video_player_avfoundation (0.0.1):
     - Flutter
@@ -135,10 +137,11 @@ DEPENDENCIES:
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - platform_device_id (from `.symlinks/plugins/platform_device_id/ios`)
-  - protocol_handler (from `.symlinks/plugins/protocol_handler/ios`)
+  - protocol_handler_ios (from `.symlinks/plugins/protocol_handler_ios/ios`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
   - super_native_extensions (from `.symlinks/plugins/super_native_extensions/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - video_compress (from `.symlinks/plugins/video_compress/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
 
@@ -194,14 +197,16 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   platform_device_id:
     :path: ".symlinks/plugins/platform_device_id/ios"
-  protocol_handler:
-    :path: ".symlinks/plugins/protocol_handler/ios"
+  protocol_handler_ios:
+    :path: ".symlinks/plugins/protocol_handler_ios/ios"
   sqlite3_flutter_libs:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
   super_native_extensions:
     :path: ".symlinks/plugins/super_native_extensions/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
+  video_compress:
+    :path: ".symlinks/plugins/video_compress/ios"
   video_player_avfoundation:
     :path: ".symlinks/plugins/video_player_avfoundation/darwin"
   webview_flutter_wkwebview:
@@ -212,36 +217,37 @@ SPEC CHECKSUMS:
   cupertino_http: 5f8b1161107fe6c8d94a0c618735a033d93fa7db
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
-  DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
+  DKImagePickerController: a7836546cfdfe014171694f643a7d575bc8ace7f
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
   file_picker: 15fd9539e4eb735dc54bae8c0534a7a9511a03de
-  file_selector_ios: 8c25d700d625e1dcdd6599f2d927072f2254647b
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  file_selector_ios: b6a6c6667913d571590169ef946afbafe3b52688
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_app_icon_badge: 844847adbd7a1c6f325d6b41b942428981b839cc
-  flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
+  flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
   gal: 61e868295d28fe67ffa297fae6dacebf56fd53e1
-  image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
+  image_picker_ios: 99dfe1854b4fa34d0364e74a78448a0151025425
   irondash_engine_context: 3458bf979b90d616ffb8ae03a150bafe2e860cc9
-  libphonenumber_plugin: e8a7d64a6624a7c25f2c4ab0b7ead2a8e341e35e
+  libphonenumber_plugin: 48bf4078546377eedaab4aa54978cd0f6fa23072
   local_auth_foundation: 7d1835ccc3ff0cfcf081d7bae330db0911218412
   mixin_logger: 0a3c5fea7ff75f29e3295ad898ca24b71ba83651
   network_info_plus: 6d0c3eb8367b8164fa3fb0c19875e3f59d49697f
   ogg_opus_player: 01dc6eaa63d1e061f0065f41845a0a9ea76b9396
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
-  package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
-  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
-  PhoneNumberKit: e3c4dc9f65bc2036639898095c2ab1ef89348f64
+  package_info_plus: 58f0028419748fad15bf008b270aaa8e54380b1c
+  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
+  PhoneNumberKit: 3d9a20cfe8ee68f35c2a3ae9474093133f72a8a1
   platform_device_id: 81b3e2993881f87d0c82ef151dc274df4869aef5
-  protocol_handler: ae9efcf3b307f3fdffcd9d5252775b9f7d9f0d09
-  SDWebImage: 96e0c18ef14010b7485210e92fac888587ebb958
-  sqlite3: 6e2d4a4879854d0ec86b476bf3c3e30870bac273
-  sqlite3_flutter_libs: eb769059df0356dc52ddda040f09cacc9391a7cf
+  protocol_handler_ios: a5db8abc38526ee326988b808be621e5fd568990
+  SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
+  sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
+  sqlite3_flutter_libs: af0e8fe9bce48abddd1ffdbbf839db0302d72d80
   super_native_extensions: 4916b3c627a9c7fffdc48a23a9eca0b1ac228fa7
-  SwiftyGif: 93a1cc87bf3a51916001cf8f3d63835fb64c819f
-  url_launcher_ios: 68d46cc9766d0c41dbdc884310529557e3cd7a86
-  video_player_avfoundation: e9e6f9cae7d7a6d9b43519b0aab382bca60fcfd1
-  webview_flutter_wkwebview: 2e2d318f21a5e036e2c3f26171342e95908bd60a
+  SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
+  url_launcher_ios: 6116280ddcfe98ab8820085d8d76ae7449447586
+  video_compress: fce97e4fb1dfd88175aa07d2ffc8a2f297f87fbe
+  video_player_avfoundation: 02011213dab73ae3687df27ce441fbbcc82b5579
+  webview_flutter_wkwebview: be0f0d33777f1bfd0c9fdcb594786704dbf65f36
 
 PODFILE CHECKSUM: c7cf6cd0af5391000f485bb7f6561b845e054d60
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.15.2
