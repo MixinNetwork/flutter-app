@@ -19,6 +19,7 @@ import '../../utils/hook.dart';
 import '../automatic_keep_alive_client_widget.dart';
 import '../hover_overlay.dart';
 import '../interactive_decorated_box.dart';
+import '../menu.dart';
 import '../toast.dart';
 import 'add_sticker_dialog.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
@@ -325,7 +326,7 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
       ),
     );
     if (delete != null) {
-      widget = ContextMenuWidget(
+      widget = CustomContextMenuWidget(
         menuProvider: (request) => Menu(children: [
           MenuAction(
             title: context.l10n.delete,

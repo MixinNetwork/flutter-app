@@ -357,7 +357,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 32),
                 Align(
-                  child: ContextMenuWidget(
+                  child: CustomContextMenuWidget(
                     desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
                     menuProvider: (_) => Menu(children: [
                       MenuAction(

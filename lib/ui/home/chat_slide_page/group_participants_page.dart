@@ -148,45 +148,48 @@ class _ParticipantTile extends HookWidget {
   Widget build(BuildContext context) => _ParticipantMenuEntry(
         participant: participant,
         currentUser: currentUser,
-        child: ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-          leading: AvatarWidget(
-            size: 50,
-            avatarUrl: participant.avatarUrl,
-            userId: participant.userId,
-            name: participant.fullName,
-          ),
-          title: Row(
-            children: [
-              Flexible(
-                child: CustomText(
-                  participant.fullName ?? '?',
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 16,
-                  ),
-                  textMatchers: [
-                    EmojiTextMatcher(),
-                    KeyWordTextMatcher(
-                      keyword,
-                      style: TextStyle(
-                        color: context.theme.accent,
-                      ),
+        child: Material(
+          color: context.theme.primary,
+          child: ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+            leading: AvatarWidget(
+              size: 50,
+              avatarUrl: participant.avatarUrl,
+              userId: participant.userId,
+              name: participant.fullName,
+            ),
+            title: Row(
+              children: [
+                Flexible(
+                  child: CustomText(
+                    participant.fullName ?? '?',
+                    style: TextStyle(
+                      color: context.theme.text,
+                      fontSize: 16,
                     ),
-                  ],
+                    textMatchers: [
+                      EmojiTextMatcher(),
+                      KeyWordTextMatcher(
+                        keyword,
+                        style: TextStyle(
+                          color: context.theme.accent,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              VerifiedOrBotWidget(
-                isBot: participant.appId != null,
-                verified: participant.isVerified,
-              ),
-            ],
+                VerifiedOrBotWidget(
+                  isBot: participant.appId != null,
+                  verified: participant.isVerified,
+                ),
+              ],
+            ),
+            onTap: () {
+              showUserDialog(context, participant.userId);
+            },
+            trailing: _RoleWidget(role: participant.role),
           ),
-          onTap: () {
-            showUserDialog(context, participant.userId);
-          },
-          trailing: _RoleWidget(role: participant.role),
         ),
       );
 }
@@ -209,7 +212,7 @@ class _ParticipantMenuEntry extends HookConsumerWidget {
       return child;
     }
 
-    return ContextMenuWidget(
+    return CustomContextMenuWidget(
       desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
       menuProvider: (request) => MenusWithSeparator(childrens: [
         [
