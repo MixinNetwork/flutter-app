@@ -521,10 +521,10 @@ class MessageItemWidget extends HookConsumerWidget {
                     return MenusWithSeparator(
                       childrens: [
                         replayAction,
-                        addStickerMenuAction,
                         copyActions,
                         messageActions,
                         saveActions,
+                        addStickerMenuAction,
                         deleteActions,
                         devActions,
                       ],
