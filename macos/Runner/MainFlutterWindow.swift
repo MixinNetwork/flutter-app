@@ -2,9 +2,39 @@ import Cocoa
 import FlutterMacOS
 import window_manager
 
+extension utsname {
+    static var sMachine: String {
+        var utsname = utsname()
+        uname(&utsname)
+        return withUnsafePointer(to: &utsname.machine) {
+            $0.withMemoryRebound(to: CChar.self, capacity: Int(_SYS_NAMELEN)) {
+                String(cString: $0)
+            }
+        }
+    }
+    static var isAppleSilicon: Bool {
+        sMachine == "arm64"
+    }
+}
+
+class CustomFlutterDartProject : FlutterDartProject {
+    
+    @objc func enableImpeller() -> Bool {
+        let isAppleSilicon = utsname.isAppleSilicon
+        debugPrint("isAppleSilicon: \(isAppleSilicon)")
+        // only enable Impeller on apple silicon
+        return isAppleSilicon
+    }
+    
+}
+
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
-    let flutterViewController = FlutterViewController()
+      
+    let project = CustomFlutterDartProject()
+    let engine = FlutterEngine(name: "io.flutter", project: project)
+    let flutterViewController = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
+      
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
