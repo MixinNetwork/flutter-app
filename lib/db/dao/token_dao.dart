@@ -36,5 +36,6 @@ extension TokenConverter on sdk.Token {
         confirmations: confirmations,
         assetKey: assetKey,
         dust: dust,
+        collectionHash: Value(collectionHash),
       );
 }
