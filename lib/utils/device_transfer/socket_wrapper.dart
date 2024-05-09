@@ -120,6 +120,22 @@ abstract class TransferSocket {
     return _addTransferJson(wrapper);
   }
 
+  Future<void> addInscriptionItem(InscriptionItem inscription) {
+    final wrapper = JsonTransferData(
+      data: inscription.toJson(),
+      type: JsonTransferDataType.inscriptionItem,
+    );
+    return _addTransferJson(wrapper);
+  }
+
+  Future<void> addInscriptionCollection(InscriptionCollection collection) {
+    final wrapper = JsonTransferData(
+      data: collection.toJson(),
+      type: JsonTransferDataType.inscriptionCollection,
+    );
+    return _addTransferJson(wrapper);
+  }
+
   Future<void> addCommand(TransferDataCommand command) async {
     d('send command to remote: $command');
     await _writePacket(TransferCommandPacket(command));

@@ -20,6 +20,7 @@ class TransferDataToken {
     required this.confirmations,
     required this.assetKey,
     required this.dust,
+    this.collectionHash,
   });
 
   factory TransferDataToken.fromDbToken(db.Token token) => TransferDataToken(
@@ -36,6 +37,7 @@ class TransferDataToken {
         confirmations: token.confirmations,
         assetKey: token.assetKey,
         dust: token.dust,
+        collectionHash: token.collectionHash,
       );
 
   factory TransferDataToken.fromJson(Map<String, dynamic> json) =>
@@ -67,6 +69,8 @@ class TransferDataToken {
   final String assetKey;
   @JsonKey(name: 'dust')
   final String dust;
+  @JsonKey(name: 'collection_hash')
+  final String? collectionHash;
 
   Map<String, dynamic> toJson() => _$TransferDataTokenToJson(this);
 
@@ -84,5 +88,6 @@ class TransferDataToken {
         confirmations: confirmations,
         assetKey: assetKey,
         dust: dust,
+        collectionHash: collectionHash,
       );
 }

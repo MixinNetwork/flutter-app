@@ -255,6 +255,9 @@ class DeviceTransferSender {
     await runWithLog(_processTransferToken, 'token');
     await runWithLog(_processTransferSnapshot, 'snapshot');
     await runWithLog(_processTransferSafeSnapshot, 'safeSnapshot');
+    await runWithLog(
+        _processTransferInscriptionCollection, 'inscriptionCollection');
+    await runWithLog(_processTransferInscriptionItem, 'inscriptionItem');
     await runWithLog(_processTransferTranscriptMessage, 'transcriptMessage');
     await runWithLog(_processTransferPinMessage, 'pinMessage');
     await runWithLog(_processTransferMessage, 'message');
@@ -422,6 +425,46 @@ class DeviceTransferSender {
         await onPacketSend();
       }
       if (snapshots.length < _kQueryLimit) {
+        break;
+      }
+    }
+    return offset;
+  }
+
+  Future<int> _processTransferInscriptionItem(TransferSocket socket) async {
+    var offset = 0;
+    while (true) {
+      final items = await database.inscriptionItemDao.getInscriptionItems(
+        limit: _kQueryLimit,
+        offset: offset,
+      );
+      offset += items.length;
+      for (final item in items) {
+        await socket.addInscriptionItem(item);
+        await onPacketSend();
+      }
+      if (items.length < _kQueryLimit) {
+        break;
+      }
+    }
+    return offset;
+  }
+
+  Future<int> _processTransferInscriptionCollection(
+      TransferSocket socket) async {
+    var offset = 0;
+    while (true) {
+      final items =
+          await database.inscriptionCollectionDao.getInscriptionCollections(
+        limit: _kQueryLimit,
+        offset: offset,
+      );
+      offset += items.length;
+      for (final item in items) {
+        await socket.addInscriptionCollection(item);
+        await onPacketSend();
+      }
+      if (items.length < _kQueryLimit) {
         break;
       }
     }

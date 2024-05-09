@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
+import '../extension/db.dart';
 import '../mixin_database.dart';
 import '../vo/inscription.dart';
 
@@ -22,6 +23,24 @@ class InscriptionCollectionDao extends DatabaseAccessor<MixinDatabase>
     await into(inscriptionCollections).insert(item);
     return item;
   }
+
+  Future<void> insert(
+    InscriptionCollection collection, {
+    required bool updateIfConflict,
+  }) =>
+      into(db.inscriptionCollections).simpleInsert(
+        collection,
+        updateIfConflict: updateIfConflict,
+      );
+
+  Future<List<InscriptionCollection>> getInscriptionCollections({
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.inscriptionCollections)
+            ..orderBy([(t) => OrderingTerm.asc(t.rowId)])
+            ..limit(limit, offset: offset))
+          .get();
 }
 
 extension _InscriptionCollectionExt on sdk.InscriptionCollection {

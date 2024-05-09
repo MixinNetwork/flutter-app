@@ -23,6 +23,7 @@ class TransferDataSafeSnapshot {
     required this.closingBalance,
     this.withdrawal,
     this.deposit,
+    this.inscriptionHash,
   });
 
   factory TransferDataSafeSnapshot.fromDbSnapshot(db.SafeSnapshot snapshot) =>
@@ -42,6 +43,7 @@ class TransferDataSafeSnapshot {
         closingBalance: snapshot.closingBalance,
         withdrawal: snapshot.withdrawal,
         deposit: snapshot.deposit,
+        inscriptionHash: snapshot.inscriptionHash,
       );
 
   factory TransferDataSafeSnapshot.fromJson(Map<String, dynamic> json) =>
@@ -77,6 +79,8 @@ class TransferDataSafeSnapshot {
   final SafeWithdrawal? withdrawal;
   @JsonKey(name: 'deposit')
   final SafeDeposit? deposit;
+  @JsonKey(name: 'inscription_hash')
+  final String? inscriptionHash;
 
   Map<String, dynamic> toJson() => _$TransferDataSafeSnapshotToJson(this);
 
@@ -96,5 +100,6 @@ class TransferDataSafeSnapshot {
         closingBalance: closingBalance,
         withdrawal: withdrawal,
         deposit: deposit,
+        inscriptionHash: inscriptionHash,
       );
 }
